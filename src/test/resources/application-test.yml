@@ -1,0 +1,42 @@
+spring:
+  cloud:
+    feign:
+      enabled: false
+  datasource:
+    password: sa
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=Mysql;TRACE_LEVEL_SYSTEM_OUT=2;
+    username: sa
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration
+#开启h2控制台
+  h2:
+    console:
+      enabled: true
+  allowed:
+    resources: /h2-console/**
+  cache:
+    type: redis
+mybatis:
+  mapperLocations: classpath*:/mapper/*.xml
+  configuration:
+    mapUnderscoreToCamelCase: true
+logging:
+  level:
+    io.choerodon.agile.infra.mapper: info
+data:
+  dir: src/test/resources/
+eureka:
+  client:
+    enabled: false
+services:
+  attachment:
+    url: example.com
+choerodon:
+  event:
+    consumer:
+      enabled: false
+  saga:
+    consumer:
+      enabled: false
+testScanIgnore:
+  enabled: true

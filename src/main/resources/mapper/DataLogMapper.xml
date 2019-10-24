@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.DataLogMapper">
+
+    <select id="selectByIssueId" resultType="io.choerodon.agile.infra.dto.DataLogDTO">
+        SELECT
+            adl.*
+        FROM
+            agile_data_log adl
+        WHERE
+            adl.project_id = #{projectId}
+        AND adl.issue_id = #{issueId}
+        ORDER BY
+            adl.log_id DESC,
+            adl.created_by
+    </select>
+
+    <select id="selectLastWorkLogById" resultType="io.choerodon.agile.infra.dto.DataLogDTO">
+        SELECT
+            *
+        FROM
+            agile_data_log
+        WHERE
+            project_id = #{projectId}
+        AND issue_id = #{issueId}
+        AND field = #{field}
+        ORDER BY
+            log_id DESC
+        LIMIT 1
+    </select>
+
+    <insert id="batchCreateStatusLogByIssueDOS">
+        INSERT INTO agile_data_log(project_id,field,old_value,old_string,new_value,new_string,issue_id,created_by)
+        values
+        <choose>
+            <when test="completed !=null and completed">
+                <foreach collection="issueDTOS" item="issueDTO" index="index" separator=",">
+                    (#{projectId} , 'resolution' ,null ,null,#{statusMapVO.id} ,
+                    #{statusMapVO.name} ,#{issueDTO.issueId},#{userId})
+                </foreach>
+            </when>
+            <otherwise>
+                <foreach collection="issueDTOS" item="issueDTO" index="index" separator=",">
+                    (#{projectId} , 'resolution' ,#{statusMapVO.id} , #{statusMapVO.name},
+                    null ,null ,#{issueDTO.issueId},#{userId})
+                </foreach>
+            </otherwise>
+        </choose>
+    </insert>
+
+    <insert id="batchCreateChangeStatusLogByIssueDOS">
+        INSERT INTO agile_data_log(project_id,field,old_value,old_string,new_value,new_string,issue_id,created_by)
+        values
+        <foreach collection="issueDTOS" item="issueDTO" index="index" separator=",">
+            (#{projectId} , 'status' ,#{oldStatus.id} ,#{oldStatus.name},#{newStatus.id} ,
+            #{newStatus.name} ,#{issueDTO.issueId},#{userId})
+        </foreach>
+    </insert>
+
+    <insert id="batchCreateVersionDataLog">
+        INSERT INTO agile_data_log(project_id,field,old_value,old_string,new_value,new_string,issue_id,created_by)
+        values
+        <foreach collection="issueIds" item="issueId" index="index" separator=",">
+            (#{projectId} , 'Fix Version' ,null ,null,#{productVersionDTO.versionId} ,
+            #{productVersionDTO.name} ,#{issueId},#{userId})
+        </foreach>
+    </insert>
+
+    <delete id="batchDeleteErrorDataLog">
+        delete from agile_data_log where log_id in
+        <foreach collection="dataLogIds" item="logId"
+                 open="(" close=")" separator=",">
+            #{logId}
+        </foreach>
+    </delete>
+
+    <update id="batchUpdateErrorDataLog">
+        <foreach collection="dataLogStatusChangeDTOS" item="dataLogStatusChangeDTO" open="" close="" separator=";">
+            update agile_data_log set new_value = #{dataLogStatusChangeDTO.newValue} where log_id =
+            #{dataLogStatusChangeDTO.logId}
+        </foreach>
+    </update>
+
+    <insert id="batchCreateChangePriorityLogByIssueDOs">
+        INSERT INTO agile_data_log(project_id,field,old_value,old_string,new_value,new_string,issue_id,created_by)
+        values
+        <foreach collection="issueDTOS" item="issueDTO" index="index" separator=",">
+            (#{issueDTO.projectId} , 'priority' ,null ,#{oldPriorityName},null ,
+            #{newPriorityName} ,#{issueDTO.issueId},#{userId})
+        </foreach>
+    </insert>
+</mapper>

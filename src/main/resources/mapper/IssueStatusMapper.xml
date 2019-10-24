@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.choerodon.agile.infra.mapper.IssueStatusMapper">
+
+    <resultMap id="statusAndIssuesMap" type="io.choerodon.agile.infra.dto.StatusAndIssuesDTO">
+        <id property="id" column="ais_id"/>
+        <id property="projectId" column="ais_project_id"/>
+        <id property="statusId" column="ais_status_id"/>
+        <id property="completed" column="ais_completed"/>
+        <id property="objectVersionNumber" column="ais_object_version_number"/>
+        <collection property="issues" autoMapping="true" columnPrefix="ai_"
+                    ofType="io.choerodon.agile.infra.dto.IssueForBoardDO"/>
+    </resultMap>
+
+    <select id="queryUnCorrespondStatus" resultMap="statusAndIssuesMap">
+        SELECT
+            ais.id                    AS ais_id,
+            ais.project_id            AS ais_project_id,
+            ais.status_id             AS ais_status_id,
+            ais.is_completed          AS ais_completed,
+            ais.object_version_number AS ais_object_version_number,
+            ai.issue_id               AS ai_issue_id,
+            ai.summary                AS ai_summary,
+            ai.object_version_number  AS ai_object_version_number
+        FROM
+            agile_issue_status ais
+            LEFT JOIN agile_issue ai ON ai.status_id = ais.status_id and ai.project_id = #{projectId}
+        WHERE
+            ais.project_id = #{projectId}
+            and ais.status_id in
+            <foreach collection="realStatusIds" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            AND (
+                    SELECT COUNT(1) AS num
+                    FROM
+                        agile_board_column_status_rel abcsr, agile_board_column abc
+                    WHERE
+                        abc.board_id = #{boardId}
+                        AND abcsr.column_id = abc.column_id
+                        AND ais.status_id = abcsr.status_id
+                        and ais.project_id = #{projectId}
+                ) = 0
+    </select>
+
+    <select id="selectStatusIdIsNotNull" resultType="io.choerodon.agile.infra.dto.IssueStatusDTO">
+        select * from agile_issue_status ais where ais.status_id is not null
+    </select>
+
+    <update id="batchUpdateStatus">
+        <foreach collection="statuses" item="sta" open="" close="" separator=";">
+            update agile_issue_status set status_id = #{sta.statusId} where id = #{sta.id}
+        </foreach>
+    </update>
+
+    <update id="updateAllColumnStatusId">
+        update agile_board_column_status_rel abcsr set abcsr.status_id = IFNULL((select ais.status_id from agile_issue_status ais where abcsr.status_id = ais.id), 0)
+    </update>
+
+    <update id="updateAllStatusId">
+        update agile_issue ai set ai.status_id = IFNULL((select ais.status_id from agile_issue_status ais where ai.status_id = ais.id), 0)
+    </update>
+
+    <update id="updateDataLogStatusId">
+        update agile_data_log adl set adl.old_value = IFNULL((select ais.status_id from agile_issue_status ais where adl.old_value = ais.id ),0) where adl.field = 'status' and adl.old_value is not null;
+        update agile_data_log adl set adl.new_value = IFNULL((select ais.status_id from agile_issue_status ais where adl.new_value = ais.id ),0) where adl.field = 'status' and adl.new_value is not null;
+        update agile_data_log adl set adl.old_value = IFNULL((select ais.status_id from agile_issue_status ais where adl.old_value = ais.id ),0) where adl.field = 'resolution' and adl.old_value is not null;
+        update agile_data_log adl set adl.new_value = IFNULL((select ais.status_id from agile_issue_status ais where adl.new_value = ais.id ),0) where adl.field = 'resolution' and adl.new_value is not null;
+    </update>
+
+    <select id="selectByStatusId" resultType="io.choerodon.agile.infra.dto.IssueStatusDTO">
+        SELECT
+        ais.*,
+        ais.is_enable enable,
+        ais.is_completed completed
+        FROM agile_issue_status ais
+        WHERE ais.project_id = #{projectId} AND ais.status_id = #{statusId}
+    </select>
+
+    <insert id="batchCreateStatusByProjectIds">
+        <foreach collection="addStatusWithProjects" item="addStatusWithProject" separator=";">
+            INSERT ignore agile_issue_status(project_id,name,is_enable,category_code,created_by,is_completed,status_id)
+            values
+            <foreach collection="addStatusWithProject.addStatuses" item="status" index="index" separator=",">
+                (#{addStatusWithProject.projectId} , #{status.name} ,0 , #{status.type},#{userId},0, #{status.id})
+            </foreach>
+        </foreach>
+    </insert>
+
+</mapper>

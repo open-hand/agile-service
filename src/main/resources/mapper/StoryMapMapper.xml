@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.StoryMapMapper">
+
+    <select id="selectEpicIdsByProject" resultType="java.lang.Long">
+        select ai.issue_id
+        from agile_issue ai
+        where ai.project_id = #{projectId}
+        and ai.type_code = 'issue_epic'
+        order by ai.issue_id desc
+    </select>
+
+    <resultMap id="epicWithInfoListMap" type="io.choerodon.agile.infra.dto.EpicWithInfoDTO">
+        <id column="ai_issue_id" property="issueId"/>
+        <id column="ai_issue_num" property="issueNum"/>
+        <id column="ai_type_code" property="typeCode"/>
+        <id column="ai_summary" property="summary"/>
+        <id column="ai_epic_name" property="epicName"/>
+        <!--<id column="ai_program_id" property="programId"/>-->
+        <id column="ar_rank" property="epicRank"/>
+        <id column="ar_object_version_number" property="epicRankObjectVersionNumber"/>
+    </resultMap>
+
+    <select id="selectEpicList" resultMap="epicWithInfoListMap">
+        select
+            ai.issue_id as ai_issue_id,
+            IF(ai.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai.issue_num)) as ai_issue_num,
+            ai.type_code as ai_type_code,
+            ai.summary as ai_summary,
+            ai.epic_name as ai_epic_name,
+--             ai.program_id as ai_program_id,
+            ar.rank as ar_rank,
+            ar.object_version_number as ar_object_version_number
+        from agile_issue ai
+        LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
+        left join agile_rank ar on ar.project_id = #{projectId} and ai.issue_id = ar.issue_id and ar.type = 'epic'
+        where ai.issue_id in
+        <foreach collection="epicIds" item="epicId" open="(" separator=","
+                 close=")">
+            #{epicId}
+        </foreach>
+        order by ai.issue_id desc
+    </select>
+
+    <resultMap id="storyListMap" type="io.choerodon.agile.infra.dto.StoryMapStoryDTO">
+        <id column="ai_issue_id" property="issueId"/>
+        <id column="ai_issue_num" property="issueNum"/>
+        <id column="ai_summary" property="summary"/>
+        <id column="ai_epic_id" property="epicId"/>
+        <!--<id column="ai_feature_id" property="featureId"/>-->
+        <id column="ai_issue_type_id" property="issueTypeId"/>
+        <id column="ai_status_id" property="statusId"/>
+        <id column="ai_completed" property="completed"/>
+        <collection property="storyMapVersionDTOList" autoMapping="true" ofType="io.choerodon.agile.infra.dto.StoryMapVersionDTO">
+            <id property="versionId" column="version_version_id"/>
+            <id property="name" column="version_name"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectStoryList" resultMap="storyListMap">
+        select
+        ai.issue_id as ai_issue_id,
+        IF(ai.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai.issue_num)) as ai_issue_num,
+        ai.summary as ai_summary,
+        ai.epic_id as ai_epic_id,
+--         ai.feature_id as ai_feature_id,
+        version_info.version_id as version_version_id,
+        version_info.name as version_name
+        from agile_issue ai
+        LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
+        left join (
+            select avir.issue_id, apv.version_id, apv.name
+            from agile_version_issue_rel avir, agile_product_version apv
+            where avir.version_id = apv.version_id and avir.project_id = #{projectId}
+        ) version_info on ai.issue_id = version_info.issue_id
+        where ai.project_id = #{projectId} and ai.type_code = 'story'
+        and (
+           <if test="epicIds != null and epicIds.size > 0">
+               ai.epic_id in
+               <foreach collection="epicIds" item="epicId" open="(" separator=","
+                        close=")">
+                   #{epicId}
+               </foreach>
+           </if>
+        )
+        <if test='searchVO.advancedSearchArgs.versionList != null and searchVO.advancedSearchArgs.versionList.size > 0'>
+            and ai.issue_id in (
+                 select avir2.issue_id
+                 from agile_version_issue_rel avir2
+                 where avir2.version_id in
+                 <foreach collection="searchVO.advancedSearchArgs.versionList" item="versionId" open="(" separator=","
+                         close=")">
+                     #{versionId}
+                 </foreach>
+            )
+        </if>
+        <if test='searchVO.advancedSearchArgs.statusList != null and searchVO.advancedSearchArgs.statusList.size > 0'>
+            and ai.status_id in
+            <foreach collection="searchVO.advancedSearchArgs.statusList" item="statusId" open="(" separator=","
+                     close=")">
+                #{statusId}
+            </foreach>
+        </if>
+        order by ai.issue_id
+    </select>
+
+    <select id="selectDemandStoryList" resultMap="storyListMap">
+        select
+        ai.issue_id as ai_issue_id,
+        IF(ai.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai.issue_num)) as ai_issue_num,
+        ai.summary as ai_summary,
+        ai.issue_type_id as ai_issue_type_id,
+        ai.status_id as ai_status_id,
+        ais.is_completed AS ai_completed,
+        version_info.version_id as version_version_id,
+        version_info.name as version_name
+        from agile_issue ai
+        LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
+        LEFT JOIN agile_issue_status ais ON ai.status_id = ais.status_id and ais.project_id = #{projectId}
+        left join (
+            select avir.issue_id, apv.version_id, apv.name
+            from agile_version_issue_rel avir, agile_product_version apv
+            where avir.version_id = apv.version_id and avir.project_id = #{projectId}
+        ) version_info on ai.issue_id = version_info.issue_id
+        where ai.project_id = #{projectId} and ai.type_code = 'story'
+        and (ai.epic_id is null or ai.epic_id = 0)
+        <if test="searchVO.searchArgs != null">
+            <if test='searchVO.searchArgs.assigneeId != null and searchVO.searchArgs.assigneeId != "" '>
+                AND ai.assignee_id = #{searchVO.searchArgs.assigneeId}
+            </if>
+        </if>
+        <if test='searchVO.advancedSearchArgs.versionList != null and searchVO.advancedSearchArgs.versionList.size > 0'>
+            and ai.issue_id in (
+            select avir2.issue_id
+            from agile_version_issue_rel avir2
+            where avir2.version_id in
+            <foreach collection="searchVO.advancedSearchArgs.versionList" item="versionId" open="(" separator=","
+                     close=")">
+                #{versionId}
+            </foreach>
+            )
+        </if>
+        <if test='searchVO.advancedSearchArgs.statusList != null and searchVO.advancedSearchArgs.statusList.size > 0'>
+            and ai.status_id in
+            <foreach collection="searchVO.advancedSearchArgs.statusList" item="statusId" open="(" separator=","
+                     close=")">
+                #{statusId}
+            </foreach>
+        </if>
+        order by ai.issue_id desc
+    </select>
+
+</mapper>

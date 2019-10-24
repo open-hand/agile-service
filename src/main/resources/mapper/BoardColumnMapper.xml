@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.BoardColumnMapper">
+
+    <resultMap id="BoardColumnAndIssues" type="io.choerodon.agile.infra.dto.ColumnAndIssueDTO">
+        <id property="columnId" column="abc_column_id"/>
+        <id property="categoryCode" column="abc_category_code"/>
+        <id property="boardId" column="abc_board_id"/>
+        <id property="minNum" column="abc_min_num"/>
+        <id property="maxNum" column="abc_max_num"/>
+        <id property="name" column="abc_name"/>
+        <id property="sequence" column="abc_sequence"/>
+        <id property="color" column="abc_color"/>
+        <id property="objectVersionNumber" column="abc_object_version_number"/>
+        <collection property="subStatusDTOS" autoMapping="true" ofType="io.choerodon.agile.infra.dto.SubStatusDTO">
+            <id property="id" column="ais_id"/>
+            <id property="completed" column="ais_completed"/>
+            <id property="statusId" column="ais_status_id"/>
+            <id property="objectVersionNumber" column="ais_object_version_number"/>
+            <collection property="issues" autoMapping="true" columnPrefix="ai_"
+                        ofType="io.choerodon.agile.infra.dto.IssueForBoardDO"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectColumnsByBoardId" resultMap="BoardColumnAndIssues">
+        SELECT
+        abc.column_id AS abc_column_id,
+        abc.category_code AS abc_category_code,
+        abc.board_id AS abc_board_id,
+        abc.min_num AS abc_min_num,
+        abc.max_num AS abc_max_num,
+        abc.name AS abc_name,
+        abc.sequence AS abc_sequence,
+        alv1.name AS abc_color,
+        abc.object_version_number AS abc_object_version_number,
+        ais.id AS ais_id,
+        ais.is_completed AS ais_completed,
+        ais.status_id as ais_status_id,
+        ais.object_version_number AS ais_object_version_number,
+        ai.issue_id AS ai_issue_id,
+        IF(ai.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai.issue_num)) AS ai_issue_num,
+        ai.summary AS ai_summary,
+        ai.assignee_id AS ai_assignee_id,
+        ai.priority_id AS ai_priority_id,
+        ai.issue_type_id AS ai_issue_type_id,
+        ai.parent_issue_id AS ai_parent_issue_id,
+        ai.type_code AS ai_type_code,
+        ai.rank AS ai_rank,
+        ai.epic_id AS ai_epic_id,
+        ai.stay_date AS ai_stay_date,
+        ai.object_version_number AS ai_object_version_number,
+        ai.relate_issue_id AS ai_relate_issue_id
+        FROM
+        agile_board_column abc
+        LEFT JOIN agile_board_column_status_rel abcsr ON abc.column_id = abcsr.column_id
+        LEFT JOIN agile_issue_status ais ON abcsr.status_id = ais.status_id and ais.project_id = abc.project_id
+        LEFT JOIN (SELECT ai1.*
+        from agile_issue ai1, agile_issue_sprint_rel aisr
+        WHERE aisr.sprint_id = #{activeSprintId} AND ai1.issue_id = aisr.issue_id
+        AND ai1.type_code in ('story', 'task', 'bug', 'sub_task')
+        <if test='onlyStory != null and onlyStory == true'>
+            AND ai1.type_code = 'story'
+        </if>
+        <if test='assigneeId != null'>
+            AND ai1.assignee_id = #{assigneeId}
+        </if>
+        <if test='filterSql != null'>
+            AND ai1.issue_id IN (${filterSql})
+        </if>
+        <if test='assigneeFilterIds != null'>
+            AND ai1.assignee_id IN
+            <foreach collection="assigneeFilterIds" item="assigneeFilterId"
+                     open="(" close=")" separator=",">
+                #{assigneeFilterId}
+            </foreach>
+        </if>
+        ) ai ON ai.status_id = ais.status_id
+        LEFT JOIN agile_project_info api ON api.project_id = ai.project_id
+        LEFT JOIN lookup_value alv1 ON abc.color_code = alv1.value_code
+        WHERE
+        abc.project_id = #{projectId} AND abc.board_id = #{boardId}
+        ORDER BY abc.sequence
+    </select>
+
+    <select id="queryParentIssuesByIds" resultType="io.choerodon.agile.infra.dto.ParentIssueDTO">
+        select
+        ai.issue_id,
+        IF(ai.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai.issue_num)) AS issue_num,
+        ai.summary,
+        ai.status_id,
+        ai.issue_type_id,
+        ai.object_version_number
+        from agile_issue ai
+        left join agile_project_info api ON api.project_id = ai.project_id
+        where ai.project_id = #{projectId} and ai.issue_id in
+        <foreach collection="parentIds" item="parentId"
+                 open="(" close=")" separator=",">
+            #{parentId}
+        </foreach>
+    </select>
+
+
+    <select id="queryColumnsByIssueIds" resultMap="BoardColumnAndIssues">
+        SELECT
+        abc.column_id AS abc_column_id,
+        abc.category_code AS abc_category_code,
+        abc.board_id AS abc_board_id,
+        abc.min_num AS abc_min_num,
+        abc.max_num AS abc_max_num,
+        abc.name AS abc_name,
+        abc.sequence AS abc_sequence,
+        alv1.name AS abc_color,
+        abc.object_version_number AS abc_object_version_number,
+        ais.id AS ais_id,
+        ais.name AS ais_name,
+        ais.category_code AS ais_category_code,
+        ais.is_completed AS ais_completed,
+        ais.object_version_number AS ais_object_version_number,
+        ai.issue_id AS ai_issue_id,
+        IF(ai.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai.issue_num)) AS ai_issue_num,
+        ai.summary AS ai_summary,
+        ai.assignee_id AS ai_assignee_id,
+        alv.name AS ai_priority_name,
+        ai.parent_issue_id AS ai_parent_issue_id,
+        ai.type_code AS ai_type_code,
+        ai.object_version_number AS ai_object_version_number
+        FROM
+        agile_board_column abc
+        LEFT JOIN agile_board_column_status_rel abcsr ON abc.column_id = abcsr.column_id
+        LEFT JOIN agile_issue_status ais ON abcsr.status_id = ais.id
+        LEFT JOIN (SELECT ai1.*
+        from agile_issue ai1 WHERE
+        ai1.issue_id IN
+        <foreach collection="issueIds" item="issueId"
+                 open="(" close=")" separator=",">
+            #{issueId}
+        </foreach>
+        ) ai ON ai.status_id = ais.id
+        LEFT JOIN agile_project_info api ON api.project_id = ai.project_id
+        LEFT JOIN lookup_value alv ON ai.priority_code = alv.value_code
+        LEFT JOIN lookup_value alv1 ON abc.color_code = alv1.value_code
+        WHERE abc.board_id = #{boardId}
+        ORDER BY abc.sequence
+    </select>
+
+    <update id="columnSort">
+        UPDATE agile_board_column
+        SET sequence              = sequence + 1,
+            object_version_number = object_version_number + 1
+        WHERE board_id = #{boardId}
+              AND sequence &gt;= #{sequence} AND sequence &lt; #{originSequence}
+    </update>
+
+    <update id="columnSortDesc">
+        UPDATE agile_board_column
+        SET sequence              = sequence - 1,
+            object_version_number = object_version_number + 1
+        WHERE board_id = #{boardId}
+              AND sequence &gt; #{originSequence} AND sequence &lt;= #{sequence}
+    </update>
+
+    <update id="updateColumnCategory">
+        UPDATE agile_board_column
+        SET category_code = CASE
+                            WHEN sequence = 0
+                                THEN 'todo'
+                            WHEN sequence = #{columnNum} - 1
+                                THEN 'done'
+                            ELSE 'doing'
+                            END
+        WHERE board_id = #{boardId}
+    </update>
+
+    <update id="updateColumnColor">
+        UPDATE agile_board_column
+        SET color_code = CASE
+                         WHEN sequence = 0
+                             THEN 'column_color_todo'
+                         WHEN sequence = #{columnNum} - 1
+                             THEN 'column_color_done'
+                         ELSE 'column_color_doing'
+                         END
+        WHERE board_id = #{boardId}
+    </update>
+
+    <select id="queryColumnStatusRelByProjectId" resultType="io.choerodon.agile.infra.dto.ColumnWithStatusRelDTO">
+        SELECT
+            DISTINCT
+            (abcsr.status_id)
+        FROM
+            agile_board_column_status_rel abcsr
+        WHERE
+            abcsr.project_id = #{projectId} and abcsr.status_id != 0
+    </select>
+
+    <!--<select id="selectColumnByColumnId" resultType="io.choerodon.agile.infra.dtoolumnCheckDTOO">-->
+        <!--SELECT-->
+            <!--abc.name,-->
+            <!--abc.min_num,-->
+            <!--abc.max_num,-->
+            <!--COUNT(ai.issue_id) AS issue_count-->
+        <!--FROM-->
+            <!--agile_board_column abc-->
+            <!--LEFT JOIN agile_board_column_status_rel abcsr ON abc.column_id = abcsr.column_id-->
+            <!--LEFT JOIN agile_issue_status ais ON abcsr.status_id = ais.status_id and ais.project_id = #{projectId}-->
+            <!--LEFT JOIN (SELECT-->
+                           <!--ai1.issue_id,-->
+                           <!--ai1.status_id-->
+                       <!--FROM agile_issue ai1, agile_issue_sprint_rel aisr-->
+                       <!--WHERE aisr.sprint_id = #{activeSprintId} AND ai1.issue_id = aisr.issue_id-->
+                             <!--and ai1.type_code != 'issue_epic' and ai1.apply_type = 'agile'-->
+                      <!--) ai ON ai.status_id = ais.status_id and ais.project_id = #{projectId}-->
+        <!--WHERE-->
+            <!--abc.column_id = #{columnId}-->
+    <!--</select>-->
+
+    <!--<select id="selectColumnByColumnIdWithoutSub" resultType="io.choerodon.agile.infra.dtoolumnCheckDTOO">-->
+        <!--SELECT-->
+            <!--abc.min_num,-->
+            <!--abc.max_num,-->
+            <!--COUNT(ai.issue_id) AS issue_count-->
+        <!--FROM-->
+            <!--agile_board_column abc-->
+            <!--LEFT JOIN agile_board_column_status_rel abcsr ON abc.column_id = abcsr.column_id-->
+            <!--LEFT JOIN agile_issue_status ais ON abcsr.status_id = ais.status_id and ais.project_id = #{projectId}-->
+            <!--LEFT JOIN (SELECT-->
+                           <!--ai1.issue_id,-->
+                           <!--ai1.status_id-->
+                       <!--FROM agile_issue ai1, agile_issue_sprint_rel aisr-->
+                       <!--WHERE aisr.sprint_id = #{activeSprintId} AND ai1.issue_id = aisr.issue_id-->
+                             <!--and ai1.type_code != 'issue_epic' and ai1.type_code != 'sub_task' and ai1.apply_type = 'agile'-->
+                      <!--) ai ON ai.status_id = ais.status_id and ais.project_id = #{projectId}-->
+        <!--WHERE-->
+            <!--abc.column_id = #{columnId}-->
+    <!--</select>-->
+
+    <update id="updateMaxAndMinNum" parameterType="io.choerodon.agile.api.vo.ColumnWithMaxMinNumVO">
+        UPDATE agile_board_column
+        SET max_num               = #{columnInfo.maxNum},
+            min_num               = #{columnInfo.minNum},
+            object_version_number = object_version_number + 1
+        WHERE
+            project_id = #{columnInfo.projectId}
+            AND column_id = #{columnInfo.columnId}
+            AND object_version_number = #{columnInfo.objectVersionNumber}
+    </update>
+
+    <select id="selectByBoardIdOrderBySequence" resultType="io.choerodon.agile.infra.dto.BoardColumnDTO">
+        SELECT *
+        FROM
+            agile_board_column
+        WHERE
+            board_id = #{boardId}
+        ORDER BY sequence
+    </select>
+
+    <update id="updateSequenceWhenDelete">
+        UPDATE agile_board_column
+        SET sequence = sequence - 1
+        WHERE
+            board_id = #{boardId} AND sequence > #{sequence}
+    </update>
+
+    <select id="queryColumnByColumnIds" resultType="io.choerodon.agile.infra.dto.ColumnDTO">
+        SELECT abc.column_id ,abc.name,alv.name as color,abc.category_code
+        from agile_board_column abc left join lookup_value alv on
+        alv.type_code = 'column_color'
+        and alv.value_code = abc.color_code where abc.column_id in
+        <foreach collection="columnIds" item="columnId"
+                 open="(" close=")" separator=",">
+            #{columnId}
+        </foreach>
+        ORDER BY abc.sequence
+    </select>
+
+    <select id="selectEpicBatchByIds" resultType="io.choerodon.agile.infra.dto.EpicIdWithNameDTO">
+        SELECT
+        issue_id AS epic_id,
+        epic_name AS epic_name
+        FROM agile_issue WHERE issue_id IN
+        <foreach collection="epicIds" item="epicId"
+                 open="(" close=")" separator=",">
+            #{epicId}
+        </foreach>
+    </select>
+
+    <select id="queryColumnIdsByBoardId" resultType="java.lang.Long">
+        SELECT abc.column_id
+        FROM
+            agile_board_column abc
+        WHERE
+            abc.project_id = #{projectId} AND abc.board_id = #{boardId}
+        ORDER BY abc.sequence
+    </select>
+
+    <delete id="batchDeleteColumnAndStatusRel">
+        <foreach collection="removeStatusWithProjects" item="removeStatusWithProject" separator=";">
+            DELETE ais,abcsr
+            from agile_issue_status ais
+            left join agile_board_column_status_rel abcsr on ais.status_id = abcsr.status_id and ais.project_id =
+            abcsr.project_id
+            WHERE ais.status_id in
+            <foreach collection="removeStatusWithProject.deleteStatusIds" item="deleteStatusId"
+                     open="(" close=")" separator=",">
+                #{deleteStatusId}
+            </foreach>
+            and
+            ais.project_id = #{removeStatusWithProject.projectId}
+        </foreach>
+    </delete>
+
+    <select id="sortAndJudgeCompleted" resultType="java.lang.Long">
+        select ai.issue_id
+        from agile_issue ai, agile_issue_status ais
+        where ai.project_id = #{projectId}
+        and ai.status_id = ais.status_id and ais.project_id = #{projectId} and ais.is_completed = 1
+        and (
+        select count(ai2.issue_id)
+        from agile_issue ai2, agile_issue_status ais2
+        where ai2.project_id = #{projectId}
+        and ai2.parent_issue_id = ai.issue_id
+        and ai2.status_id = ais2.status_id and ais2.project_id = #{projectId} and ais2.is_completed = 0
+        ) = 0
+        and ai.issue_id in
+        <foreach collection="parentIds" item="parentId"
+                 open="(" close=")" separator=",">
+            #{parentId}
+        </foreach>
+        order by ai.issue_id
+    </select>
+
+    <select id="getAllColumnNum" resultType="io.choerodon.agile.infra.dto.ColumnIssueNumDTO">
+        select
+        abc.column_id,
+        COUNT(ai.issue_id) AS issue_count
+        from agile_board_column abc
+        left join agile_board_column_status_rel abcsr on abc.column_id = abcsr.column_id
+        left join agile_issue_status ais on abcsr.status_id = ais.status_id and ais.project_id = #{projectId}
+        LEFT JOIN (SELECT
+        ai1.issue_id,
+        ai1.status_id
+        FROM agile_issue ai1, agile_issue_sprint_rel aisr
+        WHERE aisr.sprint_id = #{activeSprintId} AND ai1.issue_id = aisr.issue_id
+        <if test="columnConstraint == 'issue'">
+            and ai1.type_code in ('story', 'task', 'bug', 'sub_task') and ai1.apply_type = 'agile'
+        </if>
+        <if test="columnConstraint == 'issue_without_sub_task'">
+            and ai1.type_code in ('story', 'task', 'bug') and ai1.apply_type = 'agile'
+        </if>
+        ) ai ON ai.status_id = ais.status_id and ais.project_id = #{projectId}
+        where abc.board_id = #{boardId}
+        group by abc.column_id
+    </select>
+
+
+    <!--<select id="selectBoardByProgram" resultMap="BoardColumnAndIssues">-->
+        <!--(SELECT-->
+            <!--abc.column_id AS abc_column_id,-->
+            <!--abc.category_code AS abc_category_code,-->
+            <!--abc.board_id AS abc_board_id,-->
+            <!--abc.min_num AS abc_min_num,-->
+            <!--abc.max_num AS abc_max_num,-->
+            <!--abc.name AS abc_name,-->
+            <!--abc.sequence AS abc_sequence,-->
+            <!--alv1.name AS abc_color,-->
+            <!--abc.object_version_number AS abc_object_version_number,-->
+            <!--ais.id AS ais_id,-->
+            <!--ais.is_completed AS ais_completed,-->
+            <!--ais.status_id as ais_status_id,-->
+            <!--ais.object_version_number AS ais_object_version_number,-->
+            <!--ai.issue_id AS ai_issue_id,-->
+            <!--IF(ai.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai.issue_num)) AS ai_issue_num,-->
+            <!--ai.summary AS ai_summary,-->
+            <!--ai.issue_type_id AS ai_issue_type_id,-->
+            <!--ai.type_code AS ai_type_code,-->
+            <!--ai.rank AS ai_rank,-->
+            <!--ai.object_version_number AS ai_object_version_number,-->
+            <!--ai.feature_type AS ai_feature_type,-->
+            <!--ai.epic_id AS ai_epic_id,-->
+            <!--pi_info.pi_id as ai_pi_id-->
+        <!--FROM agile_board_column abc-->
+        <!--LEFT JOIN agile_board_column_status_rel abcsr ON abc.column_id = abcsr.column_id-->
+        <!--LEFT JOIN agile_issue_status ais ON abcsr.status_id = ais.status_id AND ais.project_id = abc.project_id-->
+        <!--LEFT JOIN (SELECT-->
+            <!--ai1.issue_id,-->
+            <!--ai1.issue_num,-->
+            <!--ai1.summary,-->
+            <!--ai1.status_id,-->
+            <!--ai1.project_id,-->
+            <!--ai1.issue_type_id,-->
+            <!--ai1.type_code,-->
+            <!--ai1.rank,-->
+            <!--ai1.object_version_number,-->
+            <!--ai1.epic_id,-->
+            <!--af.feature_type-->
+            <!--FROM agile_issue ai1, agile_feature af-->
+            <!--WHERE ai1.type_code = 'feature'-->
+                  <!--AND ai1.issue_id = af.issue_id-->
+                  <!--AND ai1.program_id = #{projectId}-->
+            <!--<if test="searchVO.advancedSearchArgs.featureTypeList != null and searchVO.advancedSearchArgs.featureTypeList.size > 0">-->
+                  <!--AND ai1.issue_id in (-->
+                  <!--select af.issue_id from agile_feature af where af.program_id = #{projectId} and af.feature_type in-->
+                  <!--<foreach collection="searchVO.advancedSearchArgs.featureTypeList" item="featureType" open="("-->
+                           <!--separator=","-->
+                           <!--close=")">-->
+                      <!--#{featureType}-->
+                  <!--</foreach>-->
+                  <!--)-->
+            <!--</if>-->
+            <!--<if test="searchVO.advancedSearchArgs.completeList != null and searchVO.advancedSearchArgs.completeList.size > 0">-->
+                <!--AND ai1.status_id in (-->
+                    <!--select ais.status_id-->
+                    <!--from agile_issue_status ais-->
+                    <!--where ais.project_id = #{projectId} and ais.is_completed in (-->
+                    <!--<foreach collection="searchVO.advancedSearchArgs.completeList" item="complete" open="("-->
+                             <!--separator=","-->
+                             <!--close=")">-->
+                            <!--#{complete}-->
+                    <!--</foreach>-->
+                    <!--)-->
+                <!--)-->
+            <!--</if>-->
+        <!--) ai ON ai.status_id = ais.status_id-->
+        <!--left join (-->
+           <!--select-->
+              <!--apf.pi_id, apf.issue_id-->
+           <!--from agile_pi_feature apf, agile_pi ap-->
+           <!--where ap.program_id = #{projectId}-->
+           <!--and ap.status_code != 'done'-->
+           <!--and ap.id = apf.pi_id-->
+        <!--) pi_info on pi_info.issue_id = ai.issue_id-->
+        <!--LEFT JOIN agile_project_info api ON api.project_id = ai.project_id-->
+        <!--LEFT JOIN lookup_value alv1 ON abc.color_code = alv1.value_code-->
+        <!--WHERE-->
+          <!--abc.project_id = #{projectId} AND abc.board_id = #{boardId} AND abc.category_code in ('prepare', 'todo')-->
+        <!--)-->
+        <!--UNION ALL-->
+        <!--(SELECT-->
+            <!--abc.column_id AS abc_column_id,-->
+            <!--abc.category_code AS abc_category_code,-->
+            <!--abc.board_id AS abc_board_id,-->
+            <!--abc.min_num AS abc_min_num,-->
+            <!--abc.max_num AS abc_max_num,-->
+            <!--abc.name AS abc_name,-->
+            <!--abc.sequence AS abc_sequence,-->
+            <!--alv1.name AS abc_color,-->
+            <!--abc.object_version_number AS abc_object_version_number,-->
+            <!--ais.id AS ais_id,-->
+            <!--ais.is_completed AS ais_completed,-->
+            <!--ais.status_id as ais_status_id,-->
+            <!--ais.object_version_number AS ais_object_version_number,-->
+            <!--ai.issue_id AS ai_issue_id,-->
+            <!--IF(ai.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai.issue_num)) AS ai_issue_num,-->
+            <!--ai.summary AS ai_summary,-->
+            <!--ai.issue_type_id AS ai_issue_type_id,-->
+            <!--ai.type_code AS ai_type_code,-->
+            <!--ai.rank AS ai_rank,-->
+            <!--ai.object_version_number AS ai_object_version_number,-->
+            <!--ai.feature_type AS ai_feature_type,-->
+            <!--ai.epic_id AS ai_epic_id,-->
+            <!--pi_info.pi_id as ai_pi_id-->
+        <!--FROM agile_board_column abc-->
+        <!--LEFT JOIN agile_board_column_status_rel abcsr ON abc.column_id = abcsr.column_id-->
+        <!--LEFT JOIN agile_issue_status ais ON abcsr.status_id = ais.status_id AND ais.project_id = abc.project_id-->
+        <!--LEFT JOIN (SELECT-->
+            <!--ai1.issue_id,-->
+            <!--ai1.issue_num,-->
+            <!--ai1.summary,-->
+            <!--ai1.status_id,-->
+            <!--ai1.project_id,-->
+            <!--ai1.issue_type_id,-->
+            <!--ai1.type_code,-->
+            <!--ai1.rank,-->
+            <!--ai1.object_version_number,-->
+            <!--ai1.epic_id,-->
+            <!--af.feature_type-->
+            <!--FROM agile_issue ai1, agile_pi_feature apf, agile_feature af-->
+            <!--WHERE apf.pi_id = #{activePiId}-->
+                <!--AND ai1.issue_id = apf.issue_id-->
+                <!--AND ai1.type_code = 'feature'-->
+                <!--AND ai1.issue_id = af.issue_id-->
+                <!--AND ai1.program_id = #{projectId}-->
+            <!--<if test="searchVO.advancedSearchArgs.featureTypeList != null and searchVO.advancedSearchArgs.featureTypeList.size > 0">-->
+                <!--AND ai1.issue_id in (-->
+                <!--select af.issue_id from agile_feature af where af.program_id = #{projectId} and af.feature_type in-->
+                <!--<foreach collection="searchVO.advancedSearchArgs.featureTypeList" item="featureType" open="("-->
+                         <!--separator=","-->
+                         <!--close=")">-->
+                    <!--#{featureType}-->
+                <!--</foreach>-->
+                <!--)-->
+            <!--</if>-->
+            <!--<if test="searchVO.advancedSearchArgs.completeList != null and searchVO.advancedSearchArgs.completeList.size > 0">-->
+                <!--AND ai1.status_id in (-->
+                    <!--select ais.status_id-->
+                    <!--from agile_issue_status ais-->
+                    <!--where ais.project_id = #{projectId} and ais.is_completed in (-->
+                    <!--<foreach collection="searchVO.advancedSearchArgs.completeList" item="complete" open="("-->
+                             <!--separator=","-->
+                             <!--close=")">-->
+                        <!--#{complete}-->
+                    <!--</foreach>-->
+                    <!--)-->
+                <!--)-->
+            <!--</if>-->
+        <!--) ai ON ai.status_id = ais.status_id-->
+        <!--LEFT JOIN (-->
+           <!--select-->
+              <!--apf.pi_id, apf.issue_id-->
+           <!--from agile_pi_feature apf, agile_pi ap-->
+           <!--where ap.program_id = #{projectId}-->
+           <!--and ap.status_code != 'done'-->
+           <!--and ap.id = apf.pi_id-->
+        <!--) pi_info on pi_info.issue_id = ai.issue_id-->
+        <!--LEFT JOIN agile_project_info api ON api.project_id = ai.project_id-->
+        <!--LEFT JOIN lookup_value alv1 ON abc.color_code = alv1.value_code-->
+        <!--WHERE-->
+          <!--abc.project_id = #{projectId} AND abc.board_id = #{boardId} AND abc.category_code not in ('prepare', 'todo')-->
+        <!--)-->
+    <!--</select>-->
+
+    <select id="queryRelByColumnIds" resultType="io.choerodon.agile.infra.dto.BoardColumnStatusRelDTO">
+        select * from agile_board_column_status_rel abcsr
+        where abcsr.column_id IN
+        <foreach collection="columnIds" item="columnId"
+                 open="(" close=")" separator=",">
+            #{columnId}
+        </foreach>
+    </select>
+</mapper>

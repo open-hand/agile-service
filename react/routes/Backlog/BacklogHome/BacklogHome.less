@@ -1,0 +1,110 @@
+.c7n-backlogTools {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.14rem;
+  padding: 0.06rem 0.24rem 0.05rem;
+  border-bottom: 0.01rem solid #d3d3d3;
+  flex-shrink: 0;
+  align-items: center;
+
+  .c7n-backlogTools-left {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    flex-wrap: wrap;
+    overflow: hidden;
+  }
+
+  .c7n-backlogTools-right {
+    display: flex;
+  }
+}
+
+.c7n-backlog-page {
+  .page-breadcrumb {
+    margin-bottom: 29px !important;    
+  }
+}
+
+.c7n-backlog {
+  display: flex;
+  width: 100%;
+  border-top: 0.01rem solid #d3d3d3;
+  position: relative;
+
+  .c7n-spin-nested-loading {
+    overflow-x: hidden;
+    display: flex;
+    flex: 1;
+    width: 100%;
+
+    .c7n-spin-container {
+      overflow-x: hidden;
+      flex-direction: column;
+      display: flex;
+      flex: 1;
+      width: 100%;
+    }
+  }
+
+  p {
+    margin-bottom: 0;
+  }
+
+  .c7n-backlog-side {
+    width: 0.24rem;
+    border-right: 0.01rem solid #d3d3d3;
+
+    p {
+      cursor: pointer;
+      background: rgba(0, 0, 0, 0.08);
+      text-align: center;
+      color: rgba(0, 0, 0, 0.65);
+      padding: 10px 0;
+    }
+  }
+}
+
+.wrapSpin {
+  width: 100%;
+  display: flex;
+}
+
+.c7n-backlog-filter {
+  cursor: pointer;
+  padding: 0.03rem 0.08rem;
+  margin-right: 0.18rem;
+  border-radius: 0.02rem;
+  white-space: nowrap;
+}
+
+.c7n-quickfilter-more {
+  white-space: nowrap;
+  margin-left: 0.5rem;
+  cursor: pointer;
+}
+
+.c7n-agile-backlogTools-popover {
+  .c7n-checkbox-group-item {
+    margin-bottom: 0.05rem;
+  }
+}
+
+.c7n-backlog-content {
+  //position: absolute;
+  //left: 0.24rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  width: 100%;
+}
+
+.c7n-backlog-clearFilter {
+  margin-left: 0.18rem;
+  font-size: 0.13rem;
+  line-height: 0.2rem;
+  white-space: nowrap;
+  color: rgb(48, 63, 159);
+  cursor: pointer;
+}

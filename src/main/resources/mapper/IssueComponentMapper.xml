@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.IssueComponentMapper">
+
+    <select id="checkNameExist" resultType="java.lang.Boolean">
+        SELECT count(aic.component_id)
+        FROM
+            agile_issue_component aic
+        WHERE
+            aic.project_id = #{projectId}
+            AND aic.name = #{name}
+    </select>
+
+    <select id="queryComponentIdByNameAndProjectId" resultType="java.lang.Long">
+        SELECT aic.component_id
+        FROM
+            agile_issue_component aic
+        WHERE
+            aic.project_id = #{projectId}
+            AND aic.name = #{name}
+    </select>
+
+    <select id="queryComponentByOption" resultType="io.choerodon.agile.infra.dto.ComponentForListDTO">
+        select
+        aic.component_id,
+        aic.project_id,
+        aic.`name`,
+        aic.description,
+        aic.manager_id,
+        aic.default_assignee_role,
+        aic.object_version_number,
+        case when aa.issue_count is null then 0 else aa.issue_count end as issue_count
+        from agile_issue_component aic left join (
+        select acir.component_id,count(*) as issue_count from agile_component_issue_rel acir
+        LEFT JOIN agile_issue ai ON ai.issue_id = acir.issue_id
+        where acir.project_id = #{projectId}
+        <if test="noIssueTest">
+            AND ai.apply_type = 'agile'
+        </if>
+        GROUP BY
+        acir.component_id
+        )aa on aic.component_id = aa.component_id
+        where aic.project_id = #{projectId}
+        <if test="componentId != null">
+            AND aic.component_id != #{componentId}
+        </if>
+        <if test='searchArgs != null'>
+            <if test='searchArgs.name != null and searchArgs.name != "" '>
+                AND aic.name LIKE CONCAT(CONCAT('%' ,#{searchArgs.name}) ,'%')
+            </if>
+            <if test='searchArgs.description != null and searchArgs.description != ""'>
+                AND aic.description LIKE CONCAT(CONCAT('%' ,#{searchArgs.description}) ,'%')
+            </if>
+        </if>
+        <if test='advancedSearchArgs != null'>
+            <if test='advancedSearchArgs.defaultAssigneeRole != null and advancedSearchArgs.defaultAssigneeRole.size > 0'>
+                AND aic.default_assignee_role IN
+                <foreach collection="advancedSearchArgs.defaultAssigneeRole" item="defaultAssigneeRole" open="(" separator="," close=")">
+                    #{defaultAssigneeRole}
+                </foreach>
+            </if>
+            <if test='advancedSearchArgs.managerId != null and advancedSearchArgs.managerId.size > 0'>
+                AND aic.manager_id IN
+                <foreach collection="advancedSearchArgs.managerId" item="managerId" open="(" separator="," close=")">
+                    #{managerId}
+                </foreach>
+            </if>
+        </if>
+        <if test='contents != null and contents.size != 0'>
+            <foreach collection="contents" item="content" index="index">
+                AND (aic.name LIKE CONCAT(CONCAT('%', #{content}), '%') OR aic.description LIKE CONCAT(CONCAT('%',#{content}), '%'))
+            </foreach>
+        </if>
+    </select>
+
+    <select id="queryIssuesByComponentId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+        SELECT
+            *
+        FROM
+            agile_issue ai,
+            agile_component_issue_rel acir
+        WHERE
+            ai.issue_id = acir.issue_id
+        AND acir.component_id = #{componentId}
+    </select>
+
+    <select id="queryComponentWithIssueNum" resultType="io.choerodon.agile.infra.dto.ComponentForListDTO">
+        select
+        aic.component_id,
+        aic.project_id,
+        aic.`name`,
+        aic.description,
+        aic.manager_id,
+        aic.default_assignee_role,
+        aic.object_version_number,
+        case when aa.issue_count is null then 0 else aa.issue_count end as issue_count
+        from agile_issue_component aic left join (
+        select acir.component_id,count(*) as issue_count from agile_component_issue_rel acir
+        LEFT JOIN agile_issue ai ON ai.issue_id = acir.issue_id
+        where acir.project_id = #{projectId}
+        <if test="noIssueTest">
+            AND ai.apply_type = 'agile'
+        </if>
+        GROUP BY
+        acir.component_id
+        )aa on aic.component_id = aa.component_id
+        where project_id = #{projectId}
+        <if test="componentId != null">
+            AND  aic.component_id != #{componentId}
+        </if>
+        order by aic.component_id desc
+    </select>
+
+    <select id="selectByProjectId" resultType="io.choerodon.agile.infra.dto.IssueComponentDTO">
+        select
+        aic.component_id,
+        aic.name
+        from agile_issue_component aic
+        where aic.project_id = #{projectId}
+        order by aic.component_id desc
+    </select>
+
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.choerodon.agile.infra.mapper.VersionIssueRelMapper">
+
+    <delete id="deleteIncompleteIssueByVersionId">
+        DELETE FROM agile_version_issue_rel
+        WHERE EXISTS
+        (
+        SELECT 0 FROM agile_issue ai left join agile_issue_status ais on ai.status_id = ais.status_id and ai.project_id = ais.project_id
+        WHERE agile_version_issue_rel.issue_id = ai.issue_id
+        AND ais.is_completed != 1
+        )
+        AND agile_version_issue_rel.relation_type = 'fix' and
+        agile_version_issue_rel.version_id = #{versionId} AND agile_version_issue_rel.project_id = #{projectId}
+    </delete>
+
+    <!--<delete id="deleteByVersionIds">-->
+        <!--DELETE-->
+        <!--FROM agile_version_issue_rel-->
+        <!--WHERE project_id = #{projectId} AND version_id IN-->
+        <!--<foreach collection="versionIds" item="versionId" index="index"-->
+                 <!--open="(" close=")" separator=",">-->
+            <!--#{versionId}-->
+        <!--</foreach>-->
+    <!--</delete>-->
+
+    <delete id="batchDeleteByIssueIdAndTypeArchivedExceptInfluence">
+        DELETE avir
+        FROM
+            agile_version_issue_rel avir,
+            agile_product_version apv
+        WHERE
+            avir.issue_id = #{issueId}
+            AND apv.version_id = avir.version_id
+            AND avir.project_id = #{projectId}
+            AND avir.relation_type = #{versionType}
+        <if test='versionType == "fix"'>
+            and apv.status_code != 'archived'
+        </if>
+    </delete>
+
+    <select id="queryByIssueIdAndProjectIdNoArchivedExceptInfluence" resultType="java.lang.Long">
+        SELECT avir.version_id from
+        agile_version_issue_rel avir ,agile_product_version apv
+        where apv.version_id = avir.version_id
+        and avir.project_id = #{projectId} and avir.issue_id = #{issueId}
+        <if test='versionType == "fix"'>
+            and apv.status_code != 'archived'
+        </if>
+        and avir.relation_type = #{versionType}
+    </select>
+
+    <update id="updateDemoVersionIssueTime">
+        update agile_version_issue_rel
+        set creation_date = #{updateDate}, last_update_date = #{updateDate}
+        where project_id = #{projectId} and relation_type = 'fix'
+    </update>
+
+    <select id="queryVersionIdsByIssueId" resultType="java.lang.Long">
+        SELECT distinct avir.version_id from
+        agile_version_issue_rel avir
+        where avir.issue_id = #{issueId}
+        and avir.project_id = #{projectId}
+    </select>
+
+</mapper>

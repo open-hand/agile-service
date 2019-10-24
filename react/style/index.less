@@ -1,0 +1,320 @@
+@import './default.less';
+@import '~choerodon-ui/lib/style/themes/default';
+
+.hidden-label-mixin() {
+  border-color: @input-label-borderColor;
+
+  .c7n-input-label {
+    color: @input-label-color;
+    transform: none;
+  }
+
+  transform: none;
+
+}
+
+#agile {
+  --theme: #3F51B5; //这样可以在jsx中的style使用
+  height: 100%;
+
+  >div:first-child {
+    width: 100%;
+    height: 100%;
+  }
+
+  .text-overflow-hidden {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // 选择框的样式，支持单选和多选
+  .SelectTheme {
+    min-width: .8rem;
+    border-radius: .03rem;
+    margin-right: .15rem;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+
+    &:before {
+      border: none !important;
+    }
+
+    // Select 下划线
+    .c7n-select-underline {
+      display: none;
+    }
+
+    // DropDown 菜单容器
+    .c7n-spin-container,
+    .c7n-spin-nested-loading {
+      min-width: 1.7rem;
+    }
+
+    &:hover {
+      background-color: @select-hover-bgColor;
+    }
+
+    &:after {
+      content: "";
+      display: block;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      //设置径向渐变
+      background-image: radial-gradient(circle, #666 10%, @input-label-borderColor 10.01%);
+      background-repeat: no-repeat;
+      background-position: 50%;
+      transform: scale(10, 10);
+      opacity: 0;
+      transition: transform .3s, opacity .5s;
+    }
+
+    &:active:after {
+      transform: scale(0, 0);
+      opacity: .3;
+      transition: 0s;
+    }
+
+    &.primary {
+      .c7n-select-label {
+        color: @primary-color;
+      }
+    }
+
+
+
+    // antd Select 组件覆盖
+    .c7n-select-selection {
+
+      // cursor: pointer;
+      padding: 0 0 .05rem .05rem;
+
+      .c7n-select-label {
+        margin-top: -.02rem;
+      }
+
+      .c7n-select-search.c7n-select-search--inline {
+        display: none;
+      }
+
+      .c7n-select-selection__rendered {
+        height: .24rem;
+        display: flex;
+        align-items: center;
+        margin-bottom: 0;
+        margin-top: .04rem;
+        padding: 0 !important;
+
+        ul>li {
+          height: .23rem;
+          margin-bottom: -.01rem;
+        }
+
+        // 单选多选内容框
+        ul,
+        .c7n-select-selection-selected-value {
+          width: calc(~"100% - .16rem");
+          overflow: hidden;
+        }
+
+        .c7n-select-selection__placeholder {
+          white-space: nowrap;
+          flex: 1;
+          position: static !important;
+        }
+
+        .c7n-select-clear {
+          flex-shrink: 0;
+          position: static !important;
+          margin-right: 15px;
+          margin-left: 0;
+
+          .c7n-ripple-wrapper {
+            display: none;
+          }
+        }
+      }
+    }
+
+    .c7n-select-selection--single {
+      .c7n-select-selection__rendered {
+        min-height: unset;
+      }
+    }
+
+    &.c7n-select-multiple {
+      .c7n-select-selection__rendered {
+        min-height: .24rem;
+        height: auto;
+      }
+    }
+
+    &.c7n-select-allow-clear {
+      .c7n-select-selection__rendered {
+
+        ul,
+        .c7n-select-selection-selected-value {
+          width: calc(~"100% - .40rem") !important;
+        }
+      }
+    }
+
+    &.autoWidth {
+      .c7n-select-selection-selected-value {
+        width: auto !important;
+      }
+
+      .c7n-select-selection__rendered {
+        padding-right: 20px !important;
+      }
+    }
+  }
+
+  .RangePickerTheme {
+    .c7n-calendar-range-picker {
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+      }
+
+      &:before {
+        border: none;
+      }
+
+      .c7n-calendar-range-picker-separator {
+        display: none;
+      }
+
+      .c7n-calendar-range-picker-input:nth-of-type(1) {
+        width: calc(100% - 33px);
+        text-overflow: ellipsis;
+        text-align: left;
+      }
+
+      .c7n-calendar-range-picker-input:nth-of-type(2) {
+        display: none;
+      }
+    }
+  }
+
+  // 去掉搜索的文字上浮
+  .c7n-select-dropdown-filter-input {
+    .c7n-input-focused {
+      .c7n-input-label-wrapper {
+        border-color: @input-label-borderColor;
+
+        .c7n-input-label {
+          color: @input-label-color;
+          transform: none;
+        }
+
+        transform: none;
+      }
+    }
+  }
+
+  .hidden-length-info {
+    .c7n-input-length-info {
+      display: none;
+    }
+  }
+
+  .input-small {
+    height: 20px;
+    line-height: 20px;
+    padding: 0;
+  }
+
+  // 修改
+  .c7nagile-form {
+    padding-bottom: .02rem;
+
+    .c7n-form-item {
+      margin-bottom: .12rem;
+      // padding-top: .02rem;
+      padding-bottom: .07rem;
+    }
+  }
+
+  .c7n-input-focused {
+    .hidden-label+.c7n-input-label-wrapper {
+      .hidden-label-mixin;
+    }
+  }
+
+  .c7n-table-filter-bar {
+
+    // height: 0.33rem;
+    .c7n-select-selection__placeholder {
+      margin-top: 2px;
+    }
+
+    .c7n-select-clear {
+      margin-top: 8px;
+    }
+  }
+
+  .c7n-input-rendered-sm {
+    input {
+      height: 32px;
+    }
+  }
+
+  .c7n-agile-table-cell {
+    color: rgba(0, 0, 0, 0.65)
+  }
+
+  .c7n-agile-table-cell-click {
+    cursor: pointer;
+    vertical-align: top;
+
+    &:hover {
+      color: #3F51B5;
+      text-decoration: underline;
+    }
+  }
+
+  .primary {
+    color: #3F51B5;
+  }
+}
+
+.hidden-label {
+
+  // 去掉搜索的文字上浮
+  .c7n-select-dropdown-filter-input {
+    .c7n-input-focused {
+      .c7n-input-label-wrapper {
+        .hidden-label-mixin;
+      }
+    }
+  }
+}
+
+.c7nagile-switchRadio {
+  label {
+    border: none !important;
+  }
+
+  .c7n-radio-button-wrapper {
+    border: none;
+    box-shadow: none;
+    padding: 0 0.02rem;
+  }
+
+  .c7n-radio-button-wrapper:before {
+    display: none !important;
+  }
+}
+
+.c7n-modal-body {
+  height: calc(100% - 1.21rem) !important;
+}
+.c7n-calendar {
+  font-size: 16px !important;
+}

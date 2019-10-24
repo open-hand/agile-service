@@ -1,0 +1,73 @@
+# Default values for agile-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: registry.cn-hangzhou.aliyuncs.com/choerodon-agile/agile-service
+  pullPolicy: IfNotPresent
+deployment:
+  managementPort: 8379
+service:
+  enabled: false
+  type: ClusterIP
+  port: 8378
+
+preJob:
+  timeout: 300
+  image: registry.cn-hangzhou.aliyuncs.com/choerodon-tools/dbtool:0.6.4
+  preConfig:
+    enabled: true
+    configFile: application.yml
+    configType: k8s
+    registerHost: http://register-server.c7n-system:8000
+    datasource:
+      url: jdbc:mysql://localhost:3306/manager_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
+      username: username
+      password: password
+  preInitDB:
+    enabled: true
+    datasource:
+      url: jdbc:mysql://localhost:3306/agile_service?useUnicode=true&characterEncoding=utf-8&useSSL=false
+      username: username
+      password: password
+env:
+  open:
+    SPRING_CLOUD_CONFIG_ENABLED: true
+    SPRING_CLOUD_CONFIG_URI: http://register-server.c7n-system:8000
+    SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/agile_service?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowMultiQueries=true
+    SPRING_DATASOURCE_USERNAME: username
+    SPRING_DATASOURCE_PASSWORD: password
+    EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://register-server.c7n-system:8000/eureka/
+    # 清理permission表中的旧接口和role_permission表中角色和权限层级不匹配的脏数据
+    CHOERODON_CLEANPERMISSION: false
+    SPRING_REDIS_HOST: redis.tools
+    SPRING_REDIS_PORT: 6379
+    # minio地址
+    SERVICES_ATTACHMENT_URL: http://minio.example.choerodon.io
+    # skywalking 代理端配置
+#    SKYWALKING_OPTS: >-
+#      -javaagent:/agent/skywalking-agent.jar
+#      -Dskywalking.agent.application_code=iam-service
+#      -Dskywalking.agent.sample_n_per_3_secs=-1
+#      -Dskywalking.collector.backend_service=oap.skywalking:11800
+
+metrics:
+  path: /actuator/prometheus
+  group: spring-boot
+
+logs:
+  parser: spring-boot
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources,such as Minikube. If you do want to specify resources,uncomment the following
+  # lines,adjust them as necessary,and remove the curly braces after 'resources:'.
+  limits:
+    # cpu: 100m
+    memory: 3Gi
+  requests:
+    # cpu: 100m
+    memory: 2Gi

@@ -1,0 +1,77 @@
+.c7n-agile-reportBoard-priority {
+  height: 2.33rem;
+
+  .text-overflow-hidden {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .flex-shrink {
+    flex-shrink: 0;
+  }
+
+  .loading-wrap {
+    height: 2.35rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .lists {
+    padding-left: 0.04rem;
+    padding-right: 0.04rem;
+    padding-top: 0.02rem;
+    padding-bottom: 0.19rem;
+
+    .title {
+      font-size: 0.13rem;
+      line-height: 0.18rem;
+      color: rgba(0, 0, 0, 0.64);
+    }
+
+    .wrapper {
+      height: 1.85rem;
+      overflow-y: scroll;
+      padding-right: 0.05rem;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      margin-top: 0.09rem;
+      margin-bottom: 0.18rem;
+
+      .tip {
+        font-size: 0.13rem;
+        line-height: 0.18rem;
+        color: #000;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .body {
+        display: flex;
+
+        .progress {
+          margin-left: 0.19rem;
+          padding-top: 0.04rem;
+          flex: 1;
+          max-width: unset;
+          position: relative;
+
+          .progress-bg {
+            height: 0.12rem;
+          }
+
+          .progress-inner {
+            position: absolute;
+            height: 0.12rem;
+            top: 0.04rem;
+            left: 0;
+          }
+        }
+      }
+    }
+  }
+}

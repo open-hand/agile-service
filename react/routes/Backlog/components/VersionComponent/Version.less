@@ -1,0 +1,149 @@
+@import '~choerodon-ui/lib/style/themes/default';
+
+.c7n-backlog-version {
+  width: 2rem;
+  border-right: 0.01rem solid #d3d3d3;
+  // overflow: auto;
+  overflow-y: scroll;
+  overflow-x: hidden;
+
+  p {
+    margin-bottom: 0;
+  }
+
+  .c7n-backlog-versionContent {
+    padding: 0.08rem 0;
+
+    .c7n-backlog-versionTitle {
+      display: flex;
+      font-size: 0.13rem;
+      line-height: 0.2rem;
+      padding: 0 0.12rem 0 0.16rem;
+      justify-content: space-between;
+      flex-wrap: wrap;
+
+      .c7n-backlog-versionRight {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .c7n-backlog-versionChoice {
+      margin-top: 0.12rem;
+      font-size: 0.13rem;
+      line-height: 0.2rem;
+
+      .c7n-backlog-dragToVersion:hover {
+        border: 0.02rem dashed green;
+      }
+
+      .c7n-backlog-versionItems {
+        background: white;
+        padding: 0.08rem 0.05rem 0.08rem 0.16rem;
+        cursor: pointer;
+      }
+
+      .c7n-backlog-versionItems.onClickVersion {
+        background: rgba(140, 158, 255, 0.08) !important;
+      }
+
+      .c7n-backlog-versionItems:hover {
+        background: rgba(140, 158, 255, 0.08);
+      }
+
+      .c7n-backlog-versionItemTitle {
+        display: flex;
+        align-items: baseline;
+        cursor: move;
+
+        span {
+          font-size: 0.12rem;
+          margin-top: 0.03rem;
+        }
+
+        i {
+          cursor: pointer;
+        }
+      }
+
+      .c7n-backlog-ItemsHead {
+        word-break: break-all;
+        flex-grow: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+
+        .c7n-input-underline {
+          display: none;
+        }
+
+        i {
+          cursor: pointer;
+        }
+      }
+
+      .c7n-backlog-versionItemDes {
+        white-space: normal;
+        word-break: break-all;
+        word-wrap: break-word;
+        line-height: 0.13rem;
+        color: rgba(0, 0, 0, 0.65);
+        min-height: 0.2rem;
+      }
+
+      .c7n-backlog-versionItemDetail {
+        margin-top: 0.08rem;
+        color: @primary-color;
+        padding-bottom: 0.02rem;
+        border-bottom: 0.01rem solid #d3d3d3;
+      }
+
+      .c7n-backlog-versionItemParams {
+        .c7n-backlog-versionItemParam {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 0.1rem;
+
+          .c7n-backlog-versionItemParamKey {
+            color: rgba(0, 0, 0, 0.65);
+          }
+
+          .c7n-backlog-versionItemParamValue {
+            border-radius: 1rem;
+            background: rgba(0, 0, 0, 0.08);
+            color: rgba(0, 0, 0, 0.65);
+            min-width: 0.24rem;
+            height: 0.16rem;
+            text-align: center;
+            line-height: 0.16rem;
+          }
+
+          .c7n-backlog-versionItemNotStoryPoint {
+            min-width: 0.31rem;
+            text-align: center;
+            line-height: 0.16rem;
+            color: #5a5a5a;
+          }
+        }
+      }
+    }
+  }
+}
+
+.c7n-backlog-versionItemProgress {
+  width: 100%;
+  height: 0.05rem;
+  display: flex;
+  // margin-left: 0.18rem;
+
+  .c7n-backlog-versionItemDone {
+    background: rgb(77, 144, 254);
+    height: 100%;
+  }
+
+  .c7n-backlog-versionItemTodo {
+    background: #e5e5e5;
+    height: 100%;
+  }
+}

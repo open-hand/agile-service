@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.ProjectInfoMapper">
+
+    <select id="queryByProjectId" resultType="io.choerodon.agile.infra.dto.ProjectInfoDTO">
+        select *
+        from agile_project_info
+        where project_id = #{projectId}
+    </select>
+
+    <update id="updateIssueMaxNum">
+        UPDATE agile_project_info api
+        SET api.issue_max_num = #{issueMaxNum}
+        WHERE
+            api.project_id = #{projectId}
+            and #{issueMaxNum} > api.issue_max_num
+    </update>
+
+    <update id="updateProjectAndIssues">
+        update agile_project_info set creation_date = #{creationDate1}, last_update_date = #{creationDate1} where project_id = #{projectId};
+        update agile_issue set creation_date = #{creationDate2}, last_update_date = #{creationDate2} where project_id = #{projectId};
+    </update>
+
+    <select id="selectProjectCodeByProjectId" resultType="java.lang.String">
+        select project_code
+        from agile_project_info
+        where project_id = #{projectId}
+    </select>
+
+    <update id="updateFeedbackMaxNum">
+        update agile_project_info
+        set feedback_max_num = #{feedbackMaxNum}
+        where project_id = #{projectId}
+    </update>
+</mapper>

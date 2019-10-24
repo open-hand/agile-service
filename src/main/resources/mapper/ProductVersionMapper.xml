@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.ProductVersionMapper">
+
+    <select id="queryVersionIdsByProjectId" resultType="java.lang.Long">
+        SELECT version_id
+        FROM agile_product_version
+        WHERE project_id = #{projectId}
+        <if test='searchArgs != null'>
+            <if test='searchArgs.name != null and searchArgs.name != "" '>
+                AND name LIKE CONCAT(CONCAT('%' ,#{searchArgs.name}) ,'%')
+            </if>
+            <if test='searchArgs.description != null and searchArgs.description != ""'>
+                AND description LIKE CONCAT(CONCAT('%' ,#{searchArgs.description}) ,'%')
+            </if>
+        </if>
+        <if test='advancedSearchArgs != null'>
+            <if test='advancedSearchArgs.statusCodes != null and advancedSearchArgs.statusCodes.size > 0'>
+                AND status_code IN
+                <foreach collection="advancedSearchArgs.statusCodes" item="statusCode" open="(" separator="," close=")">
+                    #{statusCode}
+                </foreach>
+            </if>
+        </if>
+        <if test='contents != null and contents.size != 0'>
+            <foreach collection="contents" item="content" index="index">
+                AND (name LIKE CONCAT(CONCAT('%', #{content}), '%') OR description LIKE CONCAT(CONCAT('%',#{content}),
+                '%'))
+            </foreach>
+        </if>
+    </select>
+
+    <select id="queryVersionByIds" resultType="io.choerodon.agile.infra.dto.ProductVersionDTO">
+        SELECT
+        apv.version_id, apv.name,
+        apv.description, apv.start_date,
+        apv.expect_release_date,
+        apv.release_date, apv.status_code,
+        apv.project_id,
+        apv.object_version_number,
+        apv.sequence,
+        alv. NAME AS STATUS
+        FROM
+        agile_product_version apv
+        LEFT JOIN lookup_value alv ON alv.value_code = apv.status_code
+        WHERE apv.project_id = #{projectId} AND apv.version_id IN
+        <foreach collection="versionIds" item="versionId" index="index"
+                 open="(" close=")" separator=",">
+            #{versionId}
+        </foreach>
+        order by CASE apv.version_id
+        <foreach collection="versionIds" item="versionId" index="index">
+            when #{versionId} then #{index}
+        </foreach>
+        END
+    </select>
+
+    <select id="isRepeatName" resultType="java.lang.Boolean">
+        SELECT IF(COUNT(1) = 0, FALSE, TRUE)
+        FROM agile_product_version
+        WHERE project_id = #{projectId} AND name = #{name}
+    </select>
+
+    <select id="isNotReName" resultType="java.lang.Boolean">
+        SELECT IF(name = #{name}, TRUE, FALSE)
+        FROM agile_product_version
+        WHERE project_id = #{projectId} AND version_id = #{versionId}
+    </select>
+
+    <select id="queryVersionByProjectId" resultType="io.choerodon.agile.infra.dto.ProductVersionDataDTO">
+        SELECT
+            version_id,
+            name,
+            description,
+            start_date,
+            expect_release_date,
+            release_date,
+            status_code,
+            project_id,
+            sequence,
+            object_version_number
+        FROM agile_product_version
+        WHERE project_id = #{projectId} AND status_code = 'version_planning'
+        ORDER BY version_id DESC
+    </select>
+
+    <select id="queryIssueCount" resultType="io.choerodon.agile.infra.dto.IssueCountDTO">
+        SELECT
+        apv.version_id AS id, IFNULL(ic.issue_count, 0) AS issue_count
+        FROM agile_product_version apv
+        LEFT JOIN (
+        SELECT
+        avir.version_id AS version_id, COUNT(1) AS issue_count
+        FROM agile_version_issue_rel avir, agile_issue ai, agile_issue_status ais
+        WHERE ai.project_id = #{projectId} AND avir.issue_id = ai.issue_id AND avir.relation_type = 'fix'
+        AND ai.type_code in ('story', 'task', 'bug', 'issue_epic') AND ai.status_id = ais.status_id and ai.project_id = ais.project_id
+        <if test="statusIds!=null and statusIds.size> 0 ">
+            and ai.status_id in
+            <foreach collection="statusIds" item="statusId" index="index"
+                     open="(" close=")" separator=",">
+                #{statusId}
+            </foreach>
+        </if>
+        AND avir.version_id IN
+        <foreach collection="versionIds" item="versionId" index="index"
+                 open="(" close=")" separator=",">
+            #{versionId}
+        </foreach>
+        GROUP BY avir.version_id
+        ) ic ON ic.version_id = apv.version_id
+        WHERE apv.project_id = #{projectId} AND apv.version_id IN
+        <foreach collection="versionIds" item="versionId" index="index"
+                 open="(" close=")" separator=",">
+            #{versionId}
+        </foreach>
+    </select>
+
+    <select id="queryNotEstimate" resultType="io.choerodon.agile.infra.dto.IssueCountDTO">
+        SELECT
+        apv.version_id AS id, IFNULL(ic.issue_count, 0) AS issue_count
+        FROM agile_product_version apv
+        LEFT JOIN (
+        SELECT
+        avir.version_id AS version_id, COUNT(1) AS issue_count
+        FROM agile_version_issue_rel avir, agile_issue ai
+        WHERE ai.project_id = #{projectId} AND avir.issue_id = ai.issue_id AND avir.relation_type = 'fix'
+        AND ai.type_code = 'story' AND (ai.story_points IS NULL OR ai.story_points = 0)
+        AND avir.version_id IN
+        <foreach collection="versionIds" item="versionId" index="index"
+                 open="(" close=")" separator=",">
+            #{versionId}
+        </foreach>
+        GROUP BY avir.version_id
+        ) ic ON ic.version_id = apv.version_id
+        WHERE apv.project_id = #{projectId} AND apv.version_id IN
+        <foreach collection="versionIds" item="versionId" index="index"
+                 open="(" close=")" separator=",">
+            #{versionId}
+        </foreach>
+    </select>
+
+    <select id="queryTotalEstimate" resultType="io.choerodon.agile.infra.dto.IssueCountDTO">
+        SELECT
+        apv.version_id AS id, IFNULL(ic.issue_count, 0) AS issue_count
+        FROM agile_product_version apv
+        LEFT JOIN (
+        SELECT
+        avir.version_id AS version_id, SUM(ai.story_points) AS issue_count
+        FROM agile_version_issue_rel avir, agile_issue ai
+        WHERE ai.project_id = #{projectId} AND avir.issue_id = ai.issue_id
+        AND avir.relation_type = 'fix' AND ai.type_code = 'story'
+        AND avir.version_id IN
+        <foreach collection="versionIds" item="versionId" index="index"
+                 open="(" close=")" separator=",">
+            #{versionId}
+        </foreach>
+        GROUP BY avir.version_id
+        ) ic ON ic.version_id = apv.version_id
+        WHERE apv.project_id = #{projectId} AND apv.version_id IN
+        <foreach collection="versionIds" item="versionId" index="index"
+                 open="(" close=")" separator=",">
+            #{versionId}
+        </foreach>
+    </select>
+
+    <select id="queryVersionStatisticsByVersionId"
+            resultType="io.choerodon.agile.infra.dto.ProductVersionStatisticsDTO">
+        SELECT
+            apv.version_id,
+            apv.name,
+            apv.description,
+            apv.start_date,
+            apv.expect_release_date,
+            apv.release_date,
+            apv.status_code,
+            alv.name AS status_name,
+            apv.project_id
+        FROM agile_product_version apv
+            LEFT JOIN lookup_value alv ON alv.value_code = apv.status_code
+        WHERE apv.project_id = #{projectId} AND apv.version_id = #{versionId}
+    </select>
+
+    <resultMap id="versionDeatilMap" type="io.choerodon.agile.infra.dto.IssueDTO">
+        <id column="issue_id" property="issueId"/>
+        <id column="issue_num" property="issueNum"/>
+        <id column="type_code" property="typeCode"/>
+        <id column="status_id" property="statusId"/>
+        <id column="summary" property="summary"/>
+        <id column="priority_id" property="priorityId"/>
+        <id column="issue_type_id" property="issueTypeId"/>
+        <id column="assignee_id" property="assigneeId"/>
+        <id column="project_id" property="projectId"/>
+        <id column="project_id" property="projectId"/>
+        <collection property="issueComponentBriefDTOS" autoMapping="true" ofType="io.choerodon.agile.infra.dto.IssueComponentBriefDTO">
+            <id column="component_id" property="componentId"/>
+            <id column="name" property="name"/>
+        </collection>
+    </resultMap>
+
+    <select id="queryIssueByVersionIdAndStatusCode" resultMap="versionDeatilMap">
+        select search.* from (
+        SELECT
+        ai.issue_id,
+        CONCAT_WS('-', api.project_code, ai.issue_num) AS issue_num,
+        ai.type_code,
+        ai.status_id,
+        ai.summary,
+        ai.priority_id,
+        ai.issue_type_id,
+        ai.assignee_id,
+        ai.project_id,
+        acir.component_id,
+        aic.name
+        FROM agile_issue ai
+        left join agile_component_issue_rel acir on acir.project_id = #{projectId} and ai.issue_id = acir.issue_id
+        left join agile_issue_component aic on acir.component_id = aic.component_id
+        LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
+        , agile_version_issue_rel avir
+        WHERE ai.project_id = #{projectId} AND avir.version_id = #{versionId} AND avir.relation_type = 'fix'
+        AND ai.issue_id = avir.issue_id
+        AND ai.apply_type = 'agile'
+        <if test="statusCode != null">
+            AND ai.status_id in
+            <foreach collection="filterStatusIds" item="filterStatusId" index="index"
+                     open="(" close=")" separator=",">
+                #{filterStatusId}
+            </foreach>
+        </if>
+        <if test='searchVO.searchArgs != null'>
+            <if test='searchVO.searchArgs.summary != null and searchVO.searchArgs.summary != "" '>
+                AND ai.summary LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.summary}) ,'%')
+            </if>
+        </if>
+        <if test='searchVO.advancedSearchArgs != null'>
+            <if test='searchVO.advancedSearchArgs.issueTypeId != null and searchVO.advancedSearchArgs.issueTypeId.size > 0'>
+                AND ai.issue_type_id IN
+                <foreach collection="searchVO.advancedSearchArgs.issueTypeId" item="issueTypeId" open="(" separator=","
+                         close=")">
+                    #{issueTypeId}
+                </foreach>
+            </if>
+            <if test='searchVO.advancedSearchArgs.assigneeIds != null and searchVO.advancedSearchArgs.assigneeIds.size > 0'>
+                AND ai.assignee_id IN
+                <foreach collection="searchVO.advancedSearchArgs.assigneeIds" item="assigneeId" open="(" separator=","
+                         close=")">
+                    #{assigneeId}
+                </foreach>
+            </if>
+            <if test='searchVO.advancedSearchArgs.priorityId != null and searchVO.advancedSearchArgs.priorityId.size > 0'>
+                AND ai.priority_id IN
+                <foreach collection="searchVO.advancedSearchArgs.priorityId" item="priorityId" open="(" separator=","
+                         close=")">
+                    #{priorityId}
+                </foreach>
+            </if>
+            <if test='searchVO.advancedSearchArgs.statusId != null and searchVO.advancedSearchArgs.statusId.size > 0'>
+                and ai.status_id in
+                <foreach collection="searchVO.advancedSearchArgs.statusId" item="statusId" open="(" separator=","
+                         close=")">
+                    #{statusId}
+                </foreach>
+            </if>
+        </if>
+        )search
+        where 1=1
+        <if test='searchVO.searchArgs != null'>
+            <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                AND search.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+            </if>
+        </if>
+        <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+            <foreach collection="searchVO.contents" item="content" index="index">
+                AND (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE
+                CONCAT(CONCAT('%',
+                #{content}), '%'))
+            </foreach>
+        </if>
+    </select>
+
+    <select id="queryVersionIdByNameAndProjectId" resultType="java.lang.Long">
+        SELECT apv.version_id
+        FROM agile_product_version apv
+        WHERE apv.project_id = #{projectId} AND apv.name = #{name} and apv.status_code != 'archived'
+    </select>
+
+    <select id="queryNotDoneIssueCount" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM agile_version_issue_rel avir, agile_issue ai, agile_issue_status ais
+        WHERE avir.version_id = #{versionId} AND ai.project_id = #{projectId}
+              AND avir.issue_id = ai.issue_id AND avir.relation_type = 'fix' AND ai.status_id = ais.status_id and ai.project_id = ais.project_id
+              AND ais.is_completed != 1
+              AND ai.apply_type = 'agile'
+    </select>
+
+    <select id="queryPlanVersionNames" resultType="io.choerodon.agile.infra.dto.ProductVersionNameDTO">
+        SELECT
+            version_id,
+            name
+        FROM agile_product_version
+        WHERE project_id = #{projectId} AND version_id != #{versionId}
+              AND status_code = 'version_planning'
+    </select>
+
+    <insert id="issueToDestination">
+        INSERT IGNORE INTO agile_version_issue_rel
+        (version_id, issue_id, project_id, relation_type, creation_date, last_update_date, created_by, last_updated_by)
+        values
+        <foreach collection="versionIssues" item="versionIssue" index="index"
+                 separator=",">
+            (#{targetVersionId}, #{versionIssue.issueId}, #{projectId}, #{versionIssue.relationType}, #{date}, #{date},
+            #{userId}, #{userId})
+        </foreach>
+    </insert>
+
+    <select id="queryIncompleteIssues" resultType="io.choerodon.agile.infra.dto.VersionIssueDTO">
+        SELECT
+            ai.issue_id,
+            avir.relation_type
+        FROM agile_version_issue_rel avir, agile_issue ai, agile_issue_status ais
+        WHERE avir.version_id = #{versionId} AND ai.project_id = #{projectId}
+              AND avir.issue_id = ai.issue_id AND avir.relation_type = 'fix' AND ai.status_id = ais.status_id and ai.project_id = ais.project_id
+              AND ais.is_completed != 1
+    </select>
+
+    <select id="queryIssuesByRelationType" resultType="io.choerodon.agile.infra.dto.VersionIssueDTO">
+        SELECT
+            ai.issue_id,
+            avir.relation_type
+        FROM agile_version_issue_rel avir, agile_issue ai
+        WHERE avir.version_id = #{versionId} AND ai.project_id = #{projectId} AND avir.relation_type = #{relationType}
+              AND avir.issue_id = ai.issue_id
+    </select>
+
+    <select id="queryIssueByVersionIds" resultType="io.choerodon.agile.infra.dto.VersionIssueDTO">
+        SELECT DISTINCT(ai.issue_id), avir.relation_type
+        FROM agile_version_issue_rel avir, agile_issue ai
+        WHERE ai.project_id = #{projectId} AND avir.issue_id = ai.issue_id
+        AND avir.relation_type = 'fix'
+        AND avir.version_id IN
+        <foreach collection="versionIds" item="versionId" index="index"
+                 open="(" close=")" separator=",">
+            #{versionId}
+        </foreach>
+        AND ai.issue_id NOT IN
+        ( SELECT issue_id
+        FROM agile_version_issue_rel
+        WHERE project_id = #{projectId} AND version_id = #{targetVersionId}
+        )
+    </select>
+
+    <select id="queryIssueForLogByVersionIds" resultType="io.choerodon.agile.infra.dto.VersionIssueDTO">
+        SELECT avir.issue_id, avir.relation_type,apv.name,avir.version_id
+        FROM agile_version_issue_rel avir left join agile_product_version apv on apv.version_id = avir.version_id
+        WHERE avir.project_id = #{projectId}
+        AND avir.version_id IN
+        <foreach collection="versionIds" item="versionId" index="index"
+                 open="(" close=")" separator=",">
+            #{versionId}
+        </foreach>
+    </select>
+
+    <select id="queryInCompleteIssueByVersionId" resultType="io.choerodon.agile.infra.dto.VersionIssueDTO">
+        SELECT avir.issue_id, avir.relation_type,apv.name,avir.version_id
+        FROM agile_version_issue_rel avir left join agile_product_version apv on apv.version_id = avir.version_id
+        left join agile_issue ai on avir.issue_id = ai.issue_id left join agile_issue_status ais on ai.status_id = ais.status_id
+        and ais.project_id = ai.project_id
+        WHERE avir.project_id = #{projectId}
+        AND avir.version_id = #{versionId} and ais.is_completed != 1
+    </select>
+
+    <select id="queryVersionIssueByVersionId" resultType="io.choerodon.agile.infra.dto.VersionIssueDTO">
+        SELECT avir.issue_id, avir.relation_type,apv.name,avir.version_id
+        FROM agile_version_issue_rel avir left join agile_product_version apv on apv.version_id = avir.version_id
+        WHERE avir.project_id = #{projectId}
+        AND avir.version_id = #{versionId}
+    </select>
+
+    <select id="queryStatusIssueCount" resultType="java.lang.Integer">
+        SELECT
+        count(1)
+        FROM
+        agile_version_issue_rel avir,
+        agile_issue ai
+        WHERE
+        avir.project_id = #{projectId}
+        AND avir.issue_id = ai.issue_id
+        AND avir.version_id = #{versionId}
+        AND ai.status_id IN
+        <foreach collection="statusIds" item="statusId" index="index"
+                 open="(" close=")" separator=",">
+            #{statusId}
+        </foreach>
+        AND avir.relation_type = 'fix'
+        AND ai.apply_type = 'agile'
+    </select>
+
+
+    <delete id="deleteByVersionIds">
+        DELETE
+        FROM agile_product_version
+        WHERE project_id = #{projectId} AND version_id IN
+        <foreach collection="versionIds" item="versionId" index="index"
+                 open="(" close=")" separator=",">
+            #{versionId}
+        </foreach>
+    </delete>
+
+    <update id="releaseVersion">
+        UPDATE agile_product_version
+        SET status_code     = 'released',
+            release_date    = #{releaseDate},
+            old_status_code = 'version_planning'
+        WHERE project_id = #{projectId} AND version_id = #{versionId}
+    </update>
+
+    <select id="queryIssueCountByRelationType" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM agile_version_issue_rel avir, agile_issue ai
+        WHERE avir.version_id = #{versionId} AND avir.issue_id = ai.issue_id AND avir.relation_type = #{relationType}
+              AND ai.project_id = #{projectId}
+    </select>
+
+    <select id="queryIssueCountByApplyType" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM agile_issue ai
+        WHERE ai.project_id = #{projectId}
+        and ai.issue_id in (
+           SELECT ai.issue_id
+           FROM agile_version_issue_rel avir, agile_issue ai
+           WHERE avir.version_id = #{versionId}
+           AND avir.issue_id = ai.issue_id
+           AND ai.project_id = #{projectId}
+           and ai.apply_type = #{applyType}
+        )
+    </select>
+
+    <select id="queryVersionNames" resultType="io.choerodon.agile.infra.dto.ProductVersionNameDTO">
+        SELECT
+            version_id,
+            name
+        FROM agile_product_version
+        WHERE project_id = #{projectId} AND version_id != #{versionId}
+              AND status_code != 'archived'
+    </select>
+
+    <select id="queryNameByOptions" resultType="io.choerodon.agile.infra.dto.ProductVersionNameDTO">
+        SELECT version_id, name, status_code,release_date, expect_release_date
+        FROM agile_product_version
+        WHERE project_id = #{projectId}
+        <if test="statusCodes != null and statusCodes.size > 0">
+            AND status_code IN
+            <foreach collection="statusCodes" item="statusCode"
+                     open="(" close=")" separator=",">
+                #{statusCode}
+            </foreach>
+        </if>
+        ORDER BY version_id DESC
+    </select>
+
+    <select id="listByProjectId" resultType="io.choerodon.agile.infra.dto.ProductVersionCommonDTO">
+        SELECT
+            apv.*,
+            alv.`name` AS status_name
+        FROM
+            agile_product_version apv
+            LEFT JOIN lookup_value alv ON apv.status_code = alv.value_code
+        WHERE
+            apv.project_id = #{projectId}
+    </select>
+
+    <select id="selectVersionRelsByIssueId" resultType="io.choerodon.agile.infra.dto.ProductVersionDTO">
+        SELECT
+            avir.version_id AS version_id,
+            avir.issue_id   AS issue_id,
+            apv.`name`,
+            avir.relation_type
+        FROM
+            agile_version_issue_rel avir
+            LEFT JOIN agile_product_version apv ON avir.version_id = apv.version_id
+        WHERE avir.project_id = #{projectId}
+              AND avir.issue_id = #{issueId}
+    </select>
+
+    <select id="listIds" resultType="java.lang.Long">
+        SELECT version_id
+        FROM
+            agile_product_version
+        ORDER BY
+            version_id
+    </select>
+
+    <select id="queryVersionRelByIssueIdAndTypeArchivedExceptInfluence"
+            resultType="io.choerodon.agile.infra.dto.ProductVersionDTO">
+        SELECT
+        avir.version_id AS version_id,
+        avir.issue_id AS issue_id,
+        apv.`name`,
+        avir.relation_type,
+        avir.project_id
+        FROM
+        agile_version_issue_rel avir
+        LEFT JOIN agile_product_version apv ON avir.version_id = apv.version_id
+        WHERE avir.project_id = #{projectId}
+        AND avir.issue_id = #{issueId}
+        AND avir.relation_type = #{relationType}
+        <if test='relationType == "fix"'>
+            and apv.status_code != 'archived'
+        </if>
+    </select>
+
+    <update id="batchUpdateSequence">
+        UPDATE agile_product_version
+        SET sequence = (sequence + #{add})
+        WHERE sequence &gt;= #{sequence} AND project_id = #{projectId} and version_id != #{versionId}
+    </update>
+
+    <select id="queryMaxSequenceByProject" resultType="java.lang.Integer">
+        SELECT apv.sequence
+        FROM
+            agile_product_version apv
+        WHERE apv.project_id = #{projectId}
+        ORDER BY sequence DESC
+        LIMIT 1;
+    </select>
+
+    <select id="queryMaxAfterSequence" resultType="java.lang.Integer">
+        SELECT apv.sequence
+        FROM
+            agile_product_version apv
+        WHERE apv.project_id = #{projectId} AND apv.sequence &lt; #{sequence}
+        ORDER BY sequence DESC
+        LIMIT 1;
+    </select>
+
+    <select id="queryMinBeforeSequence" resultType="java.lang.Integer">
+        SELECT apv.sequence
+        FROM
+            agile_product_version apv
+        WHERE apv.project_id = #{projectId} AND apv.sequence &gt; #{sequence}
+        ORDER BY sequence ASC
+        LIMIT 1;
+    </select>
+
+</mapper>

@@ -1,0 +1,40 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+application-default.yml
+/src/main/resources/rebel.xml
+.DS_Store
+
+init-local-database-csn.sh
+init-local-database.sh
+
+# frontend
+lib
+node_modules
+package-lock.json
+yarn.lock
+**/lib/dist/
+**/lib/assets/
+**/lib/fonts/

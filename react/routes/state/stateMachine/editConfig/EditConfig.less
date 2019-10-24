@@ -1,0 +1,155 @@
+@import '~choerodon-ui/lib/style/themes/default';
+
+.issue-state-machine-config {
+  &-graph {
+    border: 0.01rem solid #E9E9E9;
+    margin-bottom: 0.1rem;
+  }
+
+  &-condition-guide {
+    margin-top: 0.1rem;
+    font-size: 0.14rem;
+    width: 5rem;
+    color: #000000;
+    margin-bottom: 0.1rem;
+  }
+
+  &-condition-des {
+    font-size: 0.14rem;
+    width: 5rem;
+    color: #000000;
+  }
+
+  &-header {
+    margin-bottom: 0.12rem;
+
+    &-name {
+      font-size: 0.18rem;
+      font-weight: 500;
+      line-height: 0.28rem;
+      margin-bottom: 0.1rem;
+
+      &-state {
+        background: #F5F5F5;
+        border: 0.01rem solid #9B9B9B;
+        border-radius: 0.02rem;
+        font-size: 0.14rem;
+        color: #9B9B9B;
+        padding: 0 0.1rem;
+        display: inline-block;
+        margin-left: 0.2rem;
+      }
+    }
+
+    &-des {
+      font-size: 0.13rem;
+      line-height: 0.2rem;
+      margin-bottom: 0.24rem;
+    }
+
+    &-tip {
+      position: relative;
+      margin-bottom: 0.2rem;
+
+      & .icon {
+        color: #FADB14;
+        vertical-align: top;
+        margin-right: 0.1rem;
+      }
+
+      &-text {
+        display: inline-block;
+        width: 5.2rem;
+        font-size: 0.14rem;
+        color: #000000;
+      }
+
+      &-action {
+        position: absolute;
+        right: 0;
+        top: 0;
+
+        & .delete {
+          font-size: 0.14rem;
+          color: @primary-color;
+          margin-left: 0.1rem;
+        }
+      }
+    }
+  }
+
+  &-tab-action-btn {
+    margin-bottom: 0.1rem;
+  }
+
+  &-state-create {
+    color: @primary-color;
+    cursor: pointer;
+    font-size: 0.14rem;
+  }
+
+  &-text {
+    &-node {
+      display: inline-block;
+      background: @primary-color;
+      border-radius: 0.02rem;
+      padding: 0.02rem 0.1rem;
+      color: #fff;
+      vertical-align: top;
+    }
+
+    &-transfer {
+      &-item:not(:last-child) {
+        margin-bottom: 0.05rem;
+      }
+    }
+  }
+
+  &-tab-list {
+    padding: 0.12rem 0.2rem;
+    position: relative;
+
+    &:not(:last-child) {
+      border: 0.01rem solid #E9E9E9;
+    }
+
+    & .action {
+      position: absolute;
+      right: 0.2rem;
+      top: 0.06rem;
+    }
+  }
+}
+
+.graph-card {
+  &-title {
+    font-size: 0.18rem;
+    color: rgba(0, 0, 0, 0.98);
+    text-align: left;
+    margin-bottom: 0.1rem;
+  }
+
+  &-des {
+    margin-bottom: 0.1rem;
+  }
+
+  &-btn {
+    color: @primary-color;
+  }
+}
+
+.graph-card-toolbar {
+  margin-top: 0.1rem;
+
+  & button:not(:last-child) {
+    margin-right: 0.05rem;
+  }
+}
+
+.c7n-card-type-inner .c7n-card-head-title {
+  padding: 0.1rem 0;
+}
+
+.c7n-card-type-inner .c7n-card-body {
+  padding: 0;
+}

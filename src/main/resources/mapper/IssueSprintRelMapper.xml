@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.choerodon.agile.infra.mapper.IssueSprintRelMapper">
+
+    <select id="selectNoClosed" resultType="io.choerodon.agile.infra.dto.IssueSprintRelDTO">
+        select *
+        from agile_issue_sprint_rel aisr, agile_sprint asp
+        where aisr.project_id = #{projectId}
+        and aisr.issue_id = #{issueId}
+        and aisr.sprint_id = asp.sprint_id
+        and asp.status_code != 'closed'
+    </select>
+
+</mapper>
