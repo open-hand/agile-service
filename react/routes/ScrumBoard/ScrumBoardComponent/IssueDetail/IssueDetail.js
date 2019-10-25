@@ -12,7 +12,7 @@ class IssueDetail extends Component {
     this.EditIssue = React.createRef();
     ScrumBoardStore.setEditRef(this.EditIssue);
   }
-  
+
   handleResetClicked = (data) => {
     // ScrumBoardStore.setIssue(data);
     if (ScrumBoardStore.getCurrentClickId !== data.issueId) {
@@ -33,6 +33,7 @@ class IssueDetail extends Component {
         onCancel={() => {
           ScrumBoardStore.resetClickedIssue();
         }}
+        onCurrentClicked={this.handleResetClicked}
         onDeleteIssue={() => {
           ScrumBoardStore.resetClickedIssue();
           refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));

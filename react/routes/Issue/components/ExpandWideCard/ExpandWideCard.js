@@ -43,7 +43,7 @@ class ExpandWideCard extends Component {
     // console.log('result', record);
     // dataSet.locate(1200);
   }
-  
+
   render() {
     const { onHideIssue } = this.props;
     return (
@@ -66,6 +66,7 @@ class ExpandWideCard extends Component {
           });
           this.handleIssueDelete();
         }}
+        onCurrentClicked={this.handleResetIssue}
         onUpdate={this.handleIssueUpdate}
         onIssueCopy={this.handleIssueCopy}
         onCopyAndTransformToSubIssue={this.handleIssueUpdate}
