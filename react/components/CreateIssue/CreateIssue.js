@@ -450,7 +450,7 @@ class CreateIssue extends Component {
                   cursor: 'pointer',
                 }}
               >
-                {'分派给我'}
+                分派给我
               </span>
             </div>
           </FormItem>
@@ -529,7 +529,7 @@ class CreateIssue extends Component {
         );
       case 'component':
         return (
-          !['sub_task'].includes(newIssueTypeCode) ? null : (
+          ['sub_task'].includes(newIssueTypeCode) ? null : (
             <FormItem label="模块">
               {getFieldDecorator('componentIssueRel', {
                 rules: [{ transform: value => (value ? value.toString() : value) }],

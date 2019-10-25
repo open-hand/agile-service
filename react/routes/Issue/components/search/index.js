@@ -7,7 +7,7 @@ import { withRouter } from 'react-router-dom';
 import {
   Input, Select, DatePicker, Icon, Tooltip,
 } from 'choerodon-ui';
-import { Button, Modal } from 'choerodon-ui/pro';
+import { Button } from 'choerodon-ui/pro';
 import {
   find, unionBy, pick, isEqual, remove, map,
 } from 'lodash';
@@ -23,7 +23,7 @@ import './index.less';
 
 const { Option, OptGroup } = Select;
 const { RangePicker } = DatePicker;
-const filterKeys = ['issueTypeId', 'assigneeId', 'statusId', 'createStartDate', 'createEndDate', 'contents'];
+const filterKeys = ['issueTypeId', 'assigneeId', 'reporterIds', 'statusId', 'sprint', 'createStartDate', 'createEndDate', 'contents'];
 /**
  * 对象扁平化 {a:{b:'v'}}  = >  {b:'v'}
  *
@@ -43,7 +43,8 @@ function flattenObject(object) {
 let users = [];
 let issueTypes = [];
 let issueStatus = [];
-const modalKey = Modal.key();
+let sprints = [];
+
 export default withRouter(observer(({
   urlFilter, onClear, history, location: { search }, 
 }) => {
@@ -178,7 +179,7 @@ export default withRouter(observer(({
           onPressEnter={handlePressEnter}
           className="hidden-label"
           prefix={<Icon type="search" style={{ color: 'rgba(0, 0, 0, 0.45)', marginLeft: 2 }} />}
-          style={{ width: 210, marginRight: 5 }}
+          style={{ width: 180, marginRight: 5 }}
           placeholder="请输入搜索内容"
           label={false}
         />
@@ -192,7 +193,7 @@ export default withRouter(observer(({
           maxTagCount={0}
           labelInValue
           maxTagPlaceholder={ommittedValues => `${ommittedValues.map(item => item.label).join(', ')}`}
-          style={{ width: 150, margin: '0 5px' }}
+          style={{ width: 120, margin: '0 5px' }}
           onSelect={handleSelect}
           onDeselect={handleDeselect}
           onClear={handleDeselect}
@@ -214,6 +215,47 @@ export default withRouter(observer(({
         </Select>
         <SelectFocusLoad
           {...configTheme({
+            list: issueTypes,
+            textField: 'name',
+            valueFiled: 'id',
+          })}
+          type="issue_type"
+          loadWhenMount
+          style={{ width: 120, margin: '0 5px' }}
+          mode="multiple"
+          showCheckAll={false}
+          allowClear
+          dropdownMatchSelectWidth={false}
+          placeholder="问题类型"
+          saveList={(v) => { issueTypes = unionBy(issueTypes, v, 'id'); }}
+          filter={false}
+          onChange={handleFilterChange('issueTypeId')}
+          value={getValue('issueTypeId')}
+          getPopupContainer={triggerNode => triggerNode.parentNode}
+        />
+
+        <SelectFocusLoad
+          {...configTheme({
+            list: issueStatus,
+            textField: 'name',
+            valueFiled: 'id',
+          })}
+          type="issue_status"
+          showCheckAll={false}
+          loadWhenMount
+          style={{ width: 82, margin: '0 5px' }}
+          mode="multiple"
+          allowClear
+          dropdownMatchSelectWidth={false}
+          placeholder="状态"
+          saveList={(v) => { issueStatus = unionBy(issueStatus, v, 'id'); }}
+          filter={false}
+          onChange={handleFilterChange('statusId')}
+          value={getValue('statusId')}
+          getPopupContainer={triggerNode => triggerNode.parentNode}
+        />
+        <SelectFocusLoad
+          {...configTheme({
             list: users.concat({ id: 0, realName: '未分配' }),
             textField: 'realName',
             valueFiled: 'id',
@@ -222,7 +264,7 @@ export default withRouter(observer(({
           type="user"
           loadWhenMount
           key="assigneeSelect"
-          style={{ width: 100, margin: '0 5px' }}
+          style={{ width: 96, margin: '0 5px' }}
           mode="multiple"
           showCheckAll={false}
           allowClear
@@ -239,42 +281,47 @@ export default withRouter(observer(({
         </SelectFocusLoad>
         <SelectFocusLoad
           {...configTheme({
-            list: issueTypes,
-            textField: 'name',
+            list: users,
+            textField: 'realName',
             valueFiled: 'id',
+            parseNumber: true,
           })}
-          type="issue_type"
+          type="user"
           loadWhenMount
-          style={{ width: 100, margin: '0 5px' }}
+          key="reporterSelect"
+          style={{ width: 96, margin: '0 5px' }}
           mode="multiple"
           showCheckAll={false}
           allowClear
           dropdownMatchSelectWidth={false}
-          placeholder="问题类型"
-          saveList={(v) => { issueTypes = unionBy(issueTypes, v, 'id'); }}
-          filter={false}
-          onChange={handleFilterChange('issueTypeId')}
-          value={getValue('issueTypeId')}
+          placeholder="报告人"
+          saveList={(v) => { users = unionBy(users, v, 'id'); }}
+          filter
+          onChange={handleFilterChange('reporterIds')}
+          value={getValue('reporterIds')}
           getPopupContainer={triggerNode => triggerNode.parentNode}
+          render={user => <Option value={user.id}>{user.realName || user.loginName}</Option>}
         />
         <SelectFocusLoad
           {...configTheme({
-            list: issueStatus,
-            textField: 'name',
-            valueFiled: 'id',
+            list: sprints,
+            textField: 'sprintName',
+            valueFiled: 'sprintId',
+            parseNumber: true,
           })}
-          type="issue_status"
-          showCheckAll={false}
+          type="sprint"
           loadWhenMount
-          style={{ width: 100, margin: '0 5px' }}
+          key="reporterSelect"
+          style={{ width: 82, margin: '0 5px' }}
           mode="multiple"
+          showCheckAll={false}
           allowClear
           dropdownMatchSelectWidth={false}
-          placeholder="状态"
-          saveList={(v) => { issueStatus = unionBy(issueStatus, v, 'id'); }}
-          filter={false}
-          onChange={handleFilterChange('statusId')}
-          value={getValue('statusId')}
+          placeholder="冲刺"
+          saveList={(v) => { sprints = unionBy(sprints, v, 'sprintId'); }}
+          filter
+          onChange={handleFilterChange('sprint')}
+          value={getValue('sprint')}
           getPopupContainer={triggerNode => triggerNode.parentNode}
         />
         {
@@ -285,7 +332,7 @@ export default withRouter(observer(({
                   format="YYYY-MM-DD"
                   value={getSelectedDate()}
                   className="RangePickerTheme"
-                  style={{ margin: '0 5px' }}
+                  style={{ margin: '0 5px', width: 130 }}
                   onChange={handleDateTimeChange}
                   allowClear
                   placeholder={['创建时间', '']}
@@ -297,7 +344,7 @@ export default withRouter(observer(({
               format="YYYY-MM-DD"
               value={getSelectedDate()}
               className="RangePickerTheme"
-              style={{ margin: '0 5px' }}
+              style={{ margin: '0 5px', width: 130 }}
               onChange={handleDateTimeChange}
               allowClear
               placeholder={['创建时间', '']}
