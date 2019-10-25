@@ -29,6 +29,21 @@ class ExpandWideCard extends Component {
     });
   }
 
+  /**
+   * 重置问题点击,解决问题跳转后可再次点击
+   */
+  handleResetIssue = (data) => {
+    const { issueId } = data;
+    const { dataSet } = this.props;
+    if (issueId.toString() !== dataSet.current.get('issueId')) {
+      dataSet.unSelect(dataSet.current);
+      IssueStore.setSelectedIssue(data);
+    }
+    // const record = dataSet.find(this.findCurrentIndex); unSelect
+    // console.log('result', record);
+    // dataSet.locate(1200);
+  }
+  
   render() {
     const { onHideIssue } = this.props;
     return (

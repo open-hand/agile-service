@@ -350,6 +350,7 @@ const Issue = withRouter(observer(() => {
         <ExpandWideCard
           onHideIssue={onHideIssue}
           issueRefresh={refresh}
+          dataSet={dataSet}
         />
         <ImportIssue ref={importRef} onFinish={refresh} />
       </Content>

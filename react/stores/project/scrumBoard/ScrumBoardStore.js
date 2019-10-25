@@ -522,8 +522,13 @@ class ScrumBoardStore {
     return this.clickIssueDetail;
   }
 
-  @action resetCurrentClick(parentIssueId) {
-    if (this.currentClickTarget) {
+  /**
+   * 
+   * @param {*} parentIssueId 
+   * @param {*} isSkipIssue  是否为跳转问题 
+   */
+  @action resetCurrentClick(parentIssueId, isSkipIssue = false) {
+    if (this.currentClickTarget && !isSkipIssue) {
       this.currentClickTarget.style.backgroundColor = '#fff';
     }
     this.currentClickTarget = null;
