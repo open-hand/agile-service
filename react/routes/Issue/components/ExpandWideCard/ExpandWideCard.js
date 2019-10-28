@@ -35,7 +35,7 @@ class ExpandWideCard extends Component {
   handleResetIssue = (data) => {
     const { issueId } = data;
     const { dataSet } = this.props;
-    if (issueId.toString() !== dataSet.current.get('issueId')) {
+    if (dataSet.totalCount && issueId.toString() !== dataSet.current.get('issueId')) {
       dataSet.unSelect(dataSet.current);
       IssueStore.setSelectedIssue(data);
     }
