@@ -33,6 +33,7 @@ class SaveFilterModal extends Component {
           reporterIds,
           sprint,
           createStartDate, createEndDate, contents,
+          component, version,
         } = dataSet.queryDataSet.current.toData();
         const searchDTO = { 
           advancedSearchArgs: {
@@ -44,6 +45,8 @@ class SaveFilterModal extends Component {
             issueIds,
             assigneeId,
             sprint,
+            component, 
+            version,
           },
           searchArgs: {
             createStartDate,
