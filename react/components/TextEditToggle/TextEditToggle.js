@@ -1,7 +1,7 @@
 /* eslint-disable react/no-find-dom-node, react/destructuring-assignment */
 import React, { Component, createRef } from 'react';
 import {
-  Form, Icon, Select, DatePicker, 
+  Form, Icon, Select, DatePicker,
 } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
 import classNames from 'classnames';
@@ -316,21 +316,28 @@ class TextEditToggle extends Component {
         )}
       </div>
     ) : (
-      <div
-        className={classNames({
-          'c7nagile-TextEditToggle-text': true,
-          'c7nagile-TextEditToggle-text-active': !simpleMode && !disabled,
-          [hoverType]: true,
-          noButton,
-        })}
-        ref={this.Edit}
-        onClick={this.enterEditing}
-        role="none"
-      >
-        {this.renderTextChild(children)}
-        {!simpleMode && <Icon type="arrow_drop_down" className="c7nagile-TextEditToggle-text-icon" />}
-      </div>
-    );
+        <div
+          className={classNames({
+            'c7nagile-TextEditToggle-text': true,
+            'c7nagile-TextEditToggle-text-active': !simpleMode && !disabled,
+            [hoverType]: true,
+            noButton,
+          })}
+          ref={this.Edit}
+          // onClick={this.enterEditing}
+          onMouseDown={() => { this.timer = Date.now(); }}
+          onMouseUp={(e) => {
+            // console.log(Date.now() - this.timer);
+            if (Date.now() - this.timer <= 200) {
+              this.enterEditing(e);
+            }
+          }}
+          role="none"
+        >
+          {this.renderTextChild(children)}
+          {!simpleMode && <Icon type="arrow_drop_down" className="c7nagile-TextEditToggle-text-icon" />}
+        </div>
+      );
   }
 
   render() {

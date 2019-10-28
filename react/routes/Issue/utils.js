@@ -11,7 +11,7 @@ export default function transform(data) {
     component,
     epic,
     label,
-    reporter,
+    reporterIds,
     sprint,
     summary,
     version,
@@ -19,8 +19,8 @@ export default function transform(data) {
   return {
     advancedSearchArgs: {
       issueTypeId,
-      // assigneeIds,
-      statusId,              
+      reporterIds,
+      statusId,
     },     
     otherArgs: {
       assigneeId,
@@ -28,7 +28,6 @@ export default function transform(data) {
       component,
       epic,
       label,
-      reporter,
       sprint,
       summary,
       version,

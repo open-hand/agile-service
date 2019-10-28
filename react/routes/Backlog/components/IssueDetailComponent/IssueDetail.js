@@ -30,6 +30,15 @@ class IssueDetail extends Component {
   }
 
   /**
+ * 重置点击
+ * @param {*} current 
+ */
+  handleResetClicked(current) {
+    // BacklogStore.clickedOnce(sprintId, current);
+    BacklogStore.setClickIssueDetail(current);
+  }
+
+  /**
    * 刷新issue详情的数据
    */
   refreshIssueDetail() {
@@ -51,6 +60,7 @@ class IssueDetail extends Component {
         programId={programId}
         disabled={programId}
         applyType={programId ? 'program' : 'agile'}
+        onCurrentClicked={this.handleResetClicked}
         onCancel={() => {
           BacklogStore.setClickIssueDetail({});
           BacklogStore.setIsLeaveSprint(false);
@@ -74,7 +84,7 @@ class IssueDetail extends Component {
         }}
         onUpdate={refresh}
       />
-    );      
+    );
   }
 }
 

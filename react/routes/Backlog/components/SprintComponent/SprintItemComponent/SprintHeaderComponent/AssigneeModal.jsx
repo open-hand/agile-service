@@ -113,7 +113,7 @@ class AssigneeModal extends Component {
         title="经办人工作量"
         visible={visible}
         onOk={onCancel.bind(this)}
-        okText="确定"
+        okText="关闭"
         okCancel={false}
       >
         {data.assigneeIssues && (

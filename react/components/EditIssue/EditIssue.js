@@ -20,6 +20,7 @@ import ChangeParent from '../ChangeParent';
 import IssueHeader from './IssueComponent/IssueHeader';
 import IssueBody from './IssueComponent/IssueBody/IssueBody';
 import EditIssueContext from './stores';
+
 const { AppState } = stores;
 
 let loginUserId;
@@ -32,6 +33,7 @@ const EditIssue = observer(() => {
   const [issueLoading, setIssueLoading] = useState(false);
   // 侧滑详情高度
   const {
+    onCurrentClicked, // 设置当前加载的问题详情信息
     store,
     forwardedRef,
     issueId: currentIssueId,
@@ -63,6 +65,11 @@ const EditIssue = observer(() => {
     const id = paramIssueId || currentIssueId;
     setIssueLoading(true);
     loadIssue(id).then((res) => {
+      // 刷新MOBX中详情信息，防止在列表界面再次点击父问题时无法跳转
+      if (onCurrentClicked) {
+        onCurrentClicked(res);
+      }
+
       const param = {
         schemeCode: 'agile_issue',
         context: res.typeCode,

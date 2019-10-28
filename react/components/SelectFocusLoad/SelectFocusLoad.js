@@ -120,8 +120,10 @@ const SelectFocusLoad = (props) => {
       dropdownClassName="hidden-text hidden-label"
     >
       {Options}
-      <Option style={{ display: canLoadMore ? 'block' : 'none', cursor: 'pointer' }} key="SelectFocusLoad-loadMore" className="SelectFocusLoad-loadMore" disabled>
-        <Button type="primary" style={{ textAlign: 'left', width: '100%', background: 'transparent' }} onClick={loadMore}>更多</Button>
+      <Option style={{ display: canLoadMore || Options.length === 0 ? 'block' : 'none', cursor: 'pointer' }} key="SelectFocusLoad-loadMore" className="SelectFocusLoad-loadMore" disabled>
+        {Options.length > 0 
+          ? <Button type="primary" style={{ textAlign: 'left', width: '100%', background: 'transparent' }} onClick={loadMore}>更多</Button>
+          : '无匹配结果'}
       </Option>
     </Select>
   );

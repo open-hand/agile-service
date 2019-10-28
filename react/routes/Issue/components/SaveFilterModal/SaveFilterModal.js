@@ -29,16 +29,24 @@ class SaveFilterModal extends Component {
     form.validateFields(['filterName'], (err, value) => {
       if (!err) {
         const {
-          issueTypeId, assigneeId, statusId, issueIds, quickFilterIds, createStartDate, createEndDate, contents,
+          issueTypeId, assigneeId, statusId, issueIds, quickFilterIds,
+          reporterIds,
+          sprint,
+          createStartDate, createEndDate, contents,
+          component, version,
         } = dataSet.queryDataSet.current.toData();
         const searchDTO = { 
           advancedSearchArgs: {
             issueTypeId,              
-            statusId,              
+            statusId,        
+            reporterIds,      
           },
           otherArgs: {
             issueIds,
             assigneeId,
+            sprint,
+            component, 
+            version,
           },
           searchArgs: {
             createStartDate,
