@@ -39,24 +39,24 @@ const IssueDes = ({ reloadIssue }) => {
   };
 
   const updateIssueDes = (value) => {
-    if (verifyDes(value || editDes)) {
-      const { issueId, objectVersionNumber } = store.getIssue;
-      const obj = {
-        issueId,
-        objectVersionNumber,
-      };
-      const newValue = value || editDes;
-      if (newValue) {
-        returnBeforeTextUpload(newValue, obj, updateIssue, 'description')
-          .then(() => {
-            if (reloadIssue) {
-              reloadIssue(issueId);
-            }
-          });
-      }
-      setEditDesShow(false);
-      setFullEdit(false);
+    // if (verifyDes(value || editDes)) {
+    const { issueId, objectVersionNumber } = store.getIssue;
+    const obj = {
+      issueId,
+      objectVersionNumber,
+    };
+    const newValue = value || editDes;
+    if (newValue) {
+      returnBeforeTextUpload(newValue, obj, updateIssue, 'description')
+        .then(() => {
+          if (reloadIssue) {
+            reloadIssue(issueId);
+          }
+        });
     }
+    setEditDesShow(false);
+    setFullEdit(false);
+    // }
   };
 
   const renderDes = () => {
