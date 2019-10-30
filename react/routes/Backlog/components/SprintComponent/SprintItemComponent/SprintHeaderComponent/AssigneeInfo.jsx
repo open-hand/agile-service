@@ -3,16 +3,18 @@ import { observer } from 'mobx-react';
 import {
   Tooltip, Icon,
 } from 'choerodon-ui';
+import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
 import UserHead from '../../../../../../components/UserHead';
 import AssigneeModal from './AssigneeModal';
-
+import './AssigneeInfo.less';
 
 @observer class AssigneeInfo extends Component {
   constructor(props) {
     super(props);
     this.state = {
       expand: false,
+      currentAssigneeId: undefined,
     };
   }
 
@@ -31,6 +33,7 @@ import AssigneeModal from './AssigneeModal';
   handleSearchAssignee = (assigneeFilterIds) => {
     const { handleSearchAssignee } = this.props;
     handleSearchAssignee(assigneeFilterIds);
+    this.setState({ currentAssigneeId: assigneeFilterIds[0] });
   };
 
   /**
@@ -40,12 +43,13 @@ import AssigneeModal from './AssigneeModal';
     const { handleSearchAssignee } = this.props;
     if (handleSearchAssignee) {
       handleSearchAssignee();
+      this.setState({ currentAssigneeId: undefined });
     }
   };
 
   render() {
     const { assigneeIssues, data, isVisibleClearBtn } = this.props;
-    const { expand } = this.state;
+    const { expand, currentAssigneeId } = this.state;
     return (
       <div className="c7n-backlog-sprintName">
         {assigneeIssues ? assigneeIssues
@@ -73,7 +77,14 @@ import AssigneeModal from './AssigneeModal';
               )}
             >
               <div style={{ display: 'none' }}>Magic</div>
-              <div role="none" onClick={() => this.handleSearchAssignee([existAssignee.assigneeId])}>
+              <div
+                role="none"
+                className={classnames({
+                  'sprint-head-assgnee-info': true,
+                  'sprint-head-assgnee-info-active': currentAssigneeId === existAssignee.assigneeId,
+                })}
+                onClick={() => this.handleSearchAssignee([existAssignee.assigneeId])}
+              >
                 <UserHead
                   tooltip={false}
                   hiddenText
@@ -106,7 +117,7 @@ import AssigneeModal from './AssigneeModal';
             onClick={this.expandMore}
           />
 
-          {isVisibleClearBtn && <Button funcType="flat" color="blue" onClick={this.handleClearAssignee}>清除筛选</Button>}
+          {isVisibleClearBtn && <Button className="sprint-head-assgnee-info-btn" funcType="flat" color="blue" onClick={this.handleClearAssignee}>清除筛选</Button>}
         </div>
         <AssigneeModal
           visible={expand}
