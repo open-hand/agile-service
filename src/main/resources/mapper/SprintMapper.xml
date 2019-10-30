@@ -71,6 +71,31 @@
         </collection>
     </resultMap>
 
+    <select id="queryAssigneeIdsByIssueIds" resultType="java.lang.Long">
+        SELECT
+        ai.assignee_id
+        FROM agile_issue ai
+        where ai.assignee_id is not null and ai.assignee_id != 0
+        AND ai.project_id = #{projectId}
+        AND ai.issue_id IN
+        <foreach collection="issueIds" item="issueId" open="("
+                 separator="," close=")">
+            #{issueId}
+        </foreach>
+        UNION ALL
+        SELECT
+        ai.assignee_id
+        FROM agile_issue ai
+        WHERE ai.assignee_id is not null and ai.assignee_id != 0
+        AND ai.project_id = #{projectId}
+        AND ai.type_code = 'sub_task'
+        AND ai.parent_issue_id IN
+        <foreach collection="issueIds" item="issueId" open="("
+                 separator="," close=")">
+            #{issueId}
+        </foreach>
+    </select>
+
     <select id="queryBacklogIssues" resultMap="issueSearch">
         SELECT
         ai.issue_id, CONCAT_WS('-', api.project_code, ai.issue_num) AS issue_num,
