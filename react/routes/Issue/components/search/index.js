@@ -309,7 +309,7 @@ export default withRouter(observer(({
             getPopupContainer={triggerNode => triggerNode.parentNode}
             render={user => <Option value={user.id}>{user.realName || user.loginName}</Option>}
           />
-          <Button funcType="flat" color="blue" style={{ marginLeft: 'auto' }} onClick={() => { setShowMore(!shouldShowMore); }}>{shouldShowMore ? '折叠' : '更多'}</Button>
+          <Button funcType="flat" color="blue" style={{ marginLeft: 'auto' }} onClick={() => { setShowMore(!shouldShowMore); }}>{shouldShowMore ? '收起' : '更多'}</Button>
         </div>
         <div className={`${prefixCls}-search-left-row ${shouldShowMore ? `${prefixCls}-search-left-row-more` : `${prefixCls}-search-left-row-hidden`}`}>
           <SelectFocusLoad
