@@ -761,7 +761,7 @@ class CreateIssue extends Component {
                     <Input label="父任务概要" value={parentSummary} disabled />
                   </FormItem>
                 )}
-                {fields && fields.filter(field => !hiddenFields.includes(field.fieldCode)).map(field => this.getFieldComponent(field))}
+                {fields && fields.filter(field => !hiddenFields.includes(field.fieldCode)).map(field => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
               </div>
               {mode !== 'feature' && newIssueTypeCode !== 'issue_epic' && <FieldIssueLinks form={form} />}
             </Form>
