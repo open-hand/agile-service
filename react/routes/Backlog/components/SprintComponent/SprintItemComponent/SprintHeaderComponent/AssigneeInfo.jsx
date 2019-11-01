@@ -1,17 +1,20 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Tooltip, Icon, 
+  Tooltip, Icon,
 } from 'choerodon-ui';
+import classnames from 'classnames';
+import { Button } from 'choerodon-ui/pro';
 import UserHead from '../../../../../../components/UserHead';
 import AssigneeModal from './AssigneeModal';
-
+import './AssigneeInfo.less';
 
 @observer class AssigneeInfo extends Component {
   constructor(props) {
     super(props);
     this.state = {
       expand: false,
+      currentAssigneeId: undefined,
     };
   }
 
@@ -27,9 +30,26 @@ import AssigneeModal from './AssigneeModal';
     });
   };
 
+  handleSearchAssignee = (assigneeFilterIds) => {
+    const { handleSearchAssignee } = this.props;
+    handleSearchAssignee(assigneeFilterIds);
+    this.setState({ currentAssigneeId: assigneeFilterIds[0] });
+  };
+
+  /**
+ * 清除经办人筛选
+ */
+  handleClearAssignee = () => {
+    const { handleSearchAssignee } = this.props;
+    if (handleSearchAssignee) {
+      handleSearchAssignee();
+      this.setState({ currentAssigneeId: undefined });
+    }
+  };
+
   render() {
-    const { assigneeIssues, data } = this.props;
-    const { expand } = this.state;
+    const { assigneeIssues, data, isVisibleClearBtn } = this.props;
+    const { expand, currentAssigneeId } = this.state;
     return (
       <div className="c7n-backlog-sprintName">
         {assigneeIssues ? assigneeIssues
@@ -57,21 +77,30 @@ import AssigneeModal from './AssigneeModal';
               )}
             >
               <div style={{ display: 'none' }}>Magic</div>
-              <UserHead
-                tooltip={false}
-                hiddenText
-                size={24}
-                style={{
-                  marginBottom: 6,
-                }}
-                user={{
-                  id: existAssignee.assigneeId,
-                  loginName: existAssignee.assigneeLoginName,
-                  realName: existAssignee.assigneeRealName,
-                  name: existAssignee.assigneeName,
-                  avatar: existAssignee.imageUrl,
-                }}
-              />
+              <div
+                role="none"
+                className={classnames({
+                  'sprint-head-assgnee-info': true,
+                  'sprint-head-assgnee-info-active': currentAssigneeId === existAssignee.assigneeId,
+                })}
+                onClick={() => this.handleSearchAssignee([existAssignee.assigneeId])}
+              >
+                <UserHead
+                  tooltip={false}
+                  hiddenText
+                  size={24}
+                  style={{
+                    marginBottom: 6,
+                  }}
+                  user={{
+                    id: existAssignee.assigneeId,
+                    loginName: existAssignee.assigneeLoginName,
+                    realName: existAssignee.assigneeRealName,
+                    name: existAssignee.assigneeName,
+                    avatar: existAssignee.imageUrl,
+                  }}
+                />
+              </div>
             </Tooltip>
           )) : null}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
@@ -87,6 +116,8 @@ import AssigneeModal from './AssigneeModal';
             role="none"
             onClick={this.expandMore}
           />
+
+          {isVisibleClearBtn && <Button className="sprint-head-assgnee-info-btn" funcType="flat" color="blue" onClick={this.handleClearAssignee}>清除筛选</Button>}
         </div>
         <AssigneeModal
           visible={expand}

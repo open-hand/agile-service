@@ -391,6 +391,7 @@ class BacklogHome extends Component {
                     display={display}
                     epicVisible={BacklogStore.getEpicVisible}
                     versionVisible={BacklogStore.getVersionVisible}
+                    onAssigneeChange={this.onAssigneeChange}
                     onRef={(ref) => {
                       this.sprintItemRef = ref;
                     }}

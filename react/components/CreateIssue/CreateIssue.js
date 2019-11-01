@@ -24,7 +24,7 @@ const { AppState } = stores;
 const { Sidebar } = Modal;
 const { Option } = Select;
 const FormItem = Form.Item;
-
+const bugDefaultDes = [{ attributes: { bold: true }, insert: '步骤' }, { insert: '\n' }, { attributes: { list: 'ordered' }, insert: '\n\n\n' }, { attributes: { bold: true }, insert: '结果' }, { insert: '\n\n' }, { attributes: { bold: true }, insert: '期望' }, { insert: '\n' }];
 const defaultProps = {
   mode: 'default',
   applyType: 'agile',
@@ -599,7 +599,9 @@ class CreateIssue extends Component {
         return (
           <Fragment>
             <FormItem label={fieldName} className="c7nagile-line">
-              {getFieldDecorator(fieldCode)(
+              {getFieldDecorator(fieldCode, {
+                initialValue: newIssueTypeCode === 'bug' ? bugDefaultDes : undefined,
+              })(
                 <WYSIWYGEditor
                   style={{ height: 200, width: '100%' }}
                 />,

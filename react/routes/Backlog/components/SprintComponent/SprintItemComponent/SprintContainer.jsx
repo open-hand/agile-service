@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
+import { Choerodon } from '@choerodon/boot';
 import classnames from 'classnames';
 import SprintHeader from './SprintHeader';
 import SprintBody from './SprintBody';
@@ -16,6 +17,7 @@ const shouldContainTypeCode = ['issue_epic', 'sub_task', 'feature'];
     super(props);
     this.state = {
       expand: true,
+      isVisibleClearBtn: false, // 是否显示清除经办人筛选按钮
     };
     this.strategyMap = new Map([
       ['sprint', this.renderSprint],
@@ -45,13 +47,14 @@ const shouldContainTypeCode = ['issue_epic', 'sub_task', 'feature'];
     const issueCount = BacklogStore.getIssueMap.get('0') ? BacklogStore.getIssueMap.get('0').length : 0;
     return (
       <div
+        // eslint-disable-next-line no-return-assign
         ref={e => this.ref = e}
         style={{
           // background: isCreated ? '#eee' : 'white',
           transition: 'all 2s',
           width: '100%',
         }}
-        // key={sprintItem.sprintId}
+      // key={sprintItem.sprintId}
       >
         <BacklogHeader
           issueCount={issueCount}
@@ -74,12 +77,30 @@ const shouldContainTypeCode = ['issue_epic', 'sub_task', 'feature'];
     );
   };
 
+  /**
+ * 经办人搜索
+ */
+  handleSearchAssignee = (filter) => {
+    // 设置经办人过滤条件函数
+    const { onAssigneeChange } = this.props;
+    if (onAssigneeChange && filter) {
+      onAssigneeChange(filter);
+      this.setState({ isVisibleClearBtn: true });
+    } else if (!filter) {
+      onAssigneeChange([]);
+      this.setState({ isVisibleClearBtn: false });
+    } else {
+      Choerodon.prompt('经办人筛选错误');
+    }
+  };
+
   renderSprint = (sprintItem) => {
     const { refresh, isCreated } = this.props;
-    const { expand } = this.state;
+    const { expand, isVisibleClearBtn } = this.state;
     const issueCount = BacklogStore.getIssueMap.get(sprintItem.sprintId.toString()) ? BacklogStore.getIssueMap.get(sprintItem.sprintId.toString()).length : 0;
     return (
       <div
+        // eslint-disable-next-line no-return-assign
         ref={e => this.ref = e}
         style={{
           background: isCreated ? '#eee' : 'white',
@@ -93,6 +114,8 @@ const shouldContainTypeCode = ['issue_epic', 'sub_task', 'feature'];
           issueCount={issueCount}
           data={sprintItem}
           expand={expand}
+          isVisibleClearBtn={isVisibleClearBtn}
+          handleSearchAssignee={this.handleSearchAssignee}
           sprintId={sprintItem.sprintId.toString()}
           toggleSprint={this.toggleSprint}
         />

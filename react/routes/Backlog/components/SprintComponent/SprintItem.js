@@ -56,7 +56,9 @@ class SprintItem extends Component {
   };
 
   render() {
-    const { refresh, display, first } = this.props;
+    const {
+      refresh, display, first, onAssigneeChange,
+    } = this.props;
     const arr = BacklogStore.getSprintData;
     const loading = BacklogStore.getSpinIf;
     // 冲刺按id正序，活跃冲刺排在最上面
@@ -98,6 +100,7 @@ class SprintItem extends Component {
               <SprintContainer
                 isCreated={sprintItem.isCreated}
                 refresh={refresh}
+                onAssigneeChange={onAssigneeChange}
                 key={sprintItem.sprintId}
                 data={sprintItem}
                 type="sprint"

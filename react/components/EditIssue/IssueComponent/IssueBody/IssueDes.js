@@ -13,12 +13,13 @@ import { updateIssue } from '../../../../api/NewIssueApi';
 import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
+const bugDefaultDes = [{ attributes: { bold: true }, insert: '步骤' }, { insert: '\n' }, { attributes: { list: 'ordered' }, insert: '\n\n\n' }, { attributes: { bold: true }, insert: '结果' }, { insert: '\n\n' }, { attributes: { bold: true }, insert: '期望' }, { insert: '\n' }];
 const IssueDes = ({ reloadIssue }) => {
   const [editDesShow, setEditDesShow] = useState(false);
   const [fullEdit, setFullEdit] = useState(false);
   const [editDes, setEditDes] = useState('');
   const { store, disabled } = useContext(EditIssueContext);
-  const { description } = store.getIssue;
+  const { description, typeCode } = store.getIssue;
   useEffect(() => {    
     setEditDes(description);
     setEditDesShow(false);
@@ -78,7 +79,7 @@ const IssueDes = ({ reloadIssue }) => {
               <WYSIWYGEditor
                 autoFocus
                 bottomBar
-                value={text2Delta(editDes)}
+                value={typeCode === 'bug' ? text2Delta(editDes) || bugDefaultDes : text2Delta(editDes)}
                 style={{
                   height: '100%', width: '100%',
                 }}
