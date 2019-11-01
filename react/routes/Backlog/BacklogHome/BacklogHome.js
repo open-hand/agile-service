@@ -175,10 +175,12 @@ class BacklogHome extends Component {
 
   onAssigneeChange = (data) => {
     const { BacklogStore } = this.props;
-    BacklogStore.setAssigneeFilterIds(data);
+    BacklogStore.setAssigneeAndSprintIdFilter(data);
     BacklogStore.axiosGetSprint()
       .then((res) => {
         BacklogStore.setSprintData(res);
+        BacklogStore.setSpinIf(false);
+
         this.setState({
           spinIf: false,
         });

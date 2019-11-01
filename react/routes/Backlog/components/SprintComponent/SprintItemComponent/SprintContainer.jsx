@@ -79,15 +79,19 @@ const shouldContainTypeCode = ['issue_epic', 'sub_task', 'feature'];
 
   /**
  * 经办人搜索
+  * filter 经办人ID
  */
-  handleSearchAssignee = (filter) => {
+  handleSearchAssignee = (sprintId, filter) => {
     // 设置经办人过滤条件函数
     const { onAssigneeChange } = this.props;
     if (onAssigneeChange && filter) {
-      onAssigneeChange(filter);
+      onAssigneeChange({
+        assigneeId: filter[0],
+        sprintId,
+      });
       this.setState({ isVisibleClearBtn: true });
     } else if (!filter) {
-      onAssigneeChange([]);
+      onAssigneeChange({});
       this.setState({ isVisibleClearBtn: false });
     } else {
       Choerodon.prompt('经办人筛选错误');
@@ -115,7 +119,7 @@ const shouldContainTypeCode = ['issue_epic', 'sub_task', 'feature'];
           data={sprintItem}
           expand={expand}
           isVisibleClearBtn={isVisibleClearBtn}
-          handleSearchAssignee={this.handleSearchAssignee}
+          handleSearchAssignee={this.handleSearchAssignee.bind(this, sprintItem.sprintId)}
           sprintId={sprintItem.sprintId.toString()}
           toggleSprint={this.toggleSprint}
         />

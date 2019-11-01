@@ -553,13 +553,44 @@ class BacklogStore {
       this.filterSelected = true;
     } else if (!this.Judge || (!this.Judge.onlyMeChecked && !this.Judge.moreChecked.length && (!this.Judge.onlyStoryChecked || this.whichVisible === 'feature'))) {
       this.filterSelected = false;
-    }    
+    }
+    this.assigneeFilterIds = data;
+  }
+
+  // 过滤选中冲刺中的经办人
+  @observable assigneeAndSprintIdFilter = {};
+
+  @computed get getAssigneeAndSprintIdFilter() {
+    return this.assigneeFilterIds;
+  }
+
+  @action setAssigneeAndSprintIdFilter(data) {
+    this.spinIf = true;
     this.assigneeFilterIds = data;
   }
 
   axiosGetSprint = () => {
     const orgId = AppState.currentMenuType.organizationId;
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/issues?organizationId=${orgId}&quickFilterIds=${this.quickFilters}${this.assigneeFilterIds.length > 0 ? `&assigneeFilterIds=${this.assigneeFilterIds}` : ''}`, this.filter);
+    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/issues?organizationId=${orgId}&quickFilterIds=${this.quickFilters}${this.assigneeFilterIds.length > 0 ? `&assigneeFilterIds=${this.assigneeFilterIds}` : ''}`, this.filter)
+      .then((data) => {
+        if (this.assigneeAndSprintIdFilter) {
+          return {
+            backlogData: data.backlogData,
+            sprintData: data.sprintData.map((i) => {
+              if (i.sprintId !== this.getAssigneeAndSprintIdFilter.sprintId) {
+                return i;
+              } else {
+                return {
+                  ...i,
+                  issueSearchVOList: i.issueSearchVOList.filter(issue => issue.assigneeId === this.getAssigneeAndSprintIdFilter.assigneeId),
+                };
+              }
+            }),
+          };
+        } else {
+          return data;
+        }
+      });
   }
 
 
@@ -892,7 +923,7 @@ class BacklogStore {
       objectVersionNumber: epicRankObjectVersionNumber, // 乐观锁     
       issueId,
       type: 'epic',
-      before,     
+      before,
       referenceIssueId,
     };
     sort(sortVO).then(
@@ -1008,7 +1039,7 @@ class BacklogStore {
       this.filter = { advancedSearchArgs: { onlyStory: 'true' } };
     } else {
       this.filter = { advancedSearchArgs: {} };
-    }   
+    }
     this.versionFilter = 'all';
     this.epicFilter = 'all';
     this.quickFilters = [];
@@ -1034,7 +1065,7 @@ class BacklogStore {
     }));
   }
 
-  @action setQuickFilters(onlyMeChecked, onlyStoryChecked, moreChecked = []) {   
+  @action setQuickFilters(onlyMeChecked, onlyStoryChecked, moreChecked = []) {
     this.spinIf = true;
     this.Judge = {
       onlyMeChecked, onlyStoryChecked, moreChecked,
@@ -1046,10 +1077,10 @@ class BacklogStore {
       delete this.filter.advancedSearchArgs.ownIssue;
     }
     if (onlyStoryChecked) {
-      this.filter.advancedSearchArgs.onlyStory = 'true';      
+      this.filter.advancedSearchArgs.onlyStory = 'true';
       if (this.whichVisible !== 'feature') {
         this.filterSelected = true;
-      }     
+      }
     } else {
       delete this.filter.advancedSearchArgs.onlyStory;
     }
