@@ -54,6 +54,8 @@ public interface SprintMapper extends Mapper<SprintDTO> {
 
     List<Long> queryIssueIds(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId);
 
+    Set<Long> queryAssigneeIdsByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+
     List<Long> queryAllRankIssueIds(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId);
 
     List<IssueSearchDTO> queryBacklogIssues(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);

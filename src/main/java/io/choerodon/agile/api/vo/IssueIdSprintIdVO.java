@@ -8,15 +8,6 @@ public class IssueIdSprintIdVO {
 
     private Long issueId;
     private Long sprintId;
-    private Long assigneeId;
-
-    public Long getAssigneeId() {
-        return assigneeId;
-    }
-
-    public void setAssigneeId(Long assigneeId) {
-        this.assigneeId = assigneeId;
-    }
 
     public Long getIssueId() {
         return issueId;
