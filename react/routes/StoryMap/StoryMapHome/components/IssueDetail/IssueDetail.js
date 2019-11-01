@@ -33,7 +33,7 @@ class IssueDetail extends Component {
   }
 
   render() {
-    const { refresh, isFullScreen } = this.props;
+    const { refresh, isFullScreen, onChangeWidth } = this.props;
     const { selectedIssueMap } = StoryMapStore;
     const visible = selectedIssueMap.size;
     const { programId, issueId } = selectedIssueMap.values().next().value || {};   
@@ -46,6 +46,7 @@ class IssueDetail extends Component {
         applyType={programId ? 'program' : 'agile'}
         forwardedRef={this.EditIssue}
         issueId={issueId}
+        onChangeWidth={onChangeWidth}
         onCancel={this.handleCancel}
         onDeleteIssue={this.handleDeleteIssue}
         onUpdate={refresh}

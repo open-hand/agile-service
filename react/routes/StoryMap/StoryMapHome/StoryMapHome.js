@@ -1,5 +1,7 @@
 /* eslint-disable no-nested-ternary */
-import React, { Fragment, useEffect, useRef } from 'react';
+import React, {
+  Fragment, useEffect, useRef,
+} from 'react';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
@@ -97,14 +99,34 @@ const StoryMapHome = observer(() => {
   const handleIssueRefresh = () => {
     handleRefresh();
   };
+  /**
+   * 问题宽度localStorage.getItem('agile.EditIssue.width')
+   * @param {*} width 
+   */
+  const setIssueWidth = (width) => {
+    if (ref.current) {
+      ref.current.source.style.width = `calc(100% - ${width || 400}px)`;
+    }
+  };
 
+  const { loading, selectedIssueMap } = StoryMapStore;
 
-  const { loading } = StoryMapStore;
+  /**
+   * 打开问题详情时设置样式 用以显示全部地图
+   */
+  useEffect(() => {
+    if (ref.current && selectedIssueMap.size) {
+      ref.current.source.style.width = `calc(100% - ${localStorage.getItem('agile.EditIssue.width')})`;
+    } else if (ref.current) {
+      ref.current.source.style.width = '';
+    }
+  }, [selectedIssueMap.size]);
+
   const isEmpty = StoryMapStore.getIsEmpty;
   const [isFullScreen, toggleFullScreen] = useFullScreen(document.getElementsByClassName('c7nagile-StoryMap')[0], onFullScreenChange);
   return (
     <Page
-      className="c7nagile-StoryMap"      
+      className="c7nagile-StoryMap"
     >
       <Header title="故事地图">
         {/* <Button
@@ -117,7 +139,7 @@ const StoryMapHome = observer(() => {
         {!StoryMapStore.isFullScreen && (
           <Button
             icon="view_module"
-            onClick={handleOpenIssueList}               
+            onClick={handleOpenIssueList}
           >
             需求池
           </Button>
@@ -142,22 +164,23 @@ const StoryMapHome = observer(() => {
           </Fragment>
         ) : (
           loading ? null : (
-            <Empty
-              style={{ background: 'white', height: 'calc(100% + 120px)', marginTop: -120 }}
-              pic={epicPic}
-              title="欢迎使用敏捷用户故事地图"
-              description={(              
-                <Fragment>
-                  用户故事地图是以史诗为基础，根据版本控制进行管理规划
-                </Fragment>
-              )}
-            />
+              // eslint-disable-next-line react/jsx-indent
+              <Empty
+                style={{ background: 'white', height: 'calc(100% + 120px)', marginTop: -120 }}
+                pic={epicPic}
+                title="欢迎使用敏捷用户故事地图"
+                description={(
+                  <Fragment>
+                    用户故事地图是以史诗为基础，根据版本控制进行管理规划
+                  </Fragment>
+                )}
+              />
           )
         )}
         <SideIssueList handleClickOutside={handleCloseIssueList} eventTypes={['click']} />
         <CreateVersion onOk={handleCreateVersion} />
         <CreateEpicModal onOk={handleCreateEpic} />
-        <IssueDetail refresh={handleIssueRefresh} isFullScreen={isFullScreen} />
+        <IssueDetail refresh={handleIssueRefresh} isFullScreen={isFullScreen} onChangeWidth={setIssueWidth} />
       </Content>
     </Page>
   );

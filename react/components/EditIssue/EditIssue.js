@@ -53,6 +53,7 @@ const EditIssue = observer(() => {
     issueStore,
     HeaderStore,
     isFullScreen,
+    onChangeWidth,
   } = useContext(EditIssueContext);
   const container = useRef();
   const loadIssueDetail = (paramIssueId) => {
@@ -171,6 +172,9 @@ const EditIssue = observer(() => {
 
   const handleResize = throttle(({ width }) => {
     setQuery(width);
+    if (onChangeWidth) {
+      onChangeWidth(width);// 设置宽度
+    }
   }, 150);
 
 
