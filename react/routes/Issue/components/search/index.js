@@ -271,7 +271,7 @@ export default withRouter(observer(({
             type="user"
             loadWhenMount
             key="assigneeSelect"
-            style={{ width: 96, margin: '0 5px' }}
+            style={{ width: 120, margin: '0 5px' }}
             mode="multiple"
             showCheckAll={false}
             allowClear
@@ -296,7 +296,7 @@ export default withRouter(observer(({
             type="user"
             loadWhenMount
             key="reporterSelect"
-            style={{ width: 96, margin: '0 5px' }}
+            style={{ width: 120, margin: '0 5px' }}
             mode="multiple"
             showCheckAll={false}
             allowClear
@@ -385,13 +385,12 @@ export default withRouter(observer(({
           />
           {
             getSelectedDate().length > 0 ? (
-              <Tooltip title={`创建问题时间范围为${getSelectedDate()[0].format('YYYY-MM-DD')} ~  ${getSelectedDate()[1].format('YYYY-MM-DD')}`}>
+              <Tooltip title={`创建问题时间范围为${getSelectedDate()[0].format('YYYY-MM-DD')} ~  ${getSelectedDate()[1].format('YYYY-MM-DD')}`} getPopupContainer={trigger => trigger.parentNode}>
                 <div>
                   <RangePicker
                     format="YYYY-MM-DD"
-                    value={getSelectedDate()}
-                    className="RangePickerTheme"
-                    style={{ margin: '0 5px', width: 205 }}
+                    value={getSelectedDate()}                   
+                    style={{ margin: '0 5px', width: 250 }}
                     onChange={handleDateTimeChange}
                     allowClear
                     placeholder={['创建时间', '']}
@@ -402,8 +401,8 @@ export default withRouter(observer(({
               <RangePicker
                 format="YYYY-MM-DD"
                 value={getSelectedDate()}
-                className="RangePickerTheme"
-                style={{ margin: '0 5px', width: 205 }}
+                className="c7nagile-RangePicker-empty"
+                style={{ margin: '0 5px', width: 250 }}
                 onChange={handleDateTimeChange}
                 allowClear
                 placeholder={['创建时间', '']}
