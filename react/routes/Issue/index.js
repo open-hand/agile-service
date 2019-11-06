@@ -286,7 +286,20 @@ const Issue = withRouter(observer(() => {
           name={field.code}
           header={field.title}
           className="c7n-agile-table-cell"
-          renderer={({ record }) => <span title={record.get('foundationFieldValue')[field.code] || ''}>{record.get('foundationFieldValue')[field.code] || ''}</span>}
+          renderer={({ record }) => {            
+            const { fieldType, code } = field;
+            const value = record.get('foundationFieldValue')[code];          
+            if (fieldType === 'member') {
+              return value && (
+                <div style={{ display: 'inline-flex' }}>
+                  <UserHead
+                    user={value}
+                  />
+                </div>
+              );
+            }
+            return <span>{value || ''}</span>;
+          }}
         />
       ))}
     </Table>

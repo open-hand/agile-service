@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-curly-brace-presence */
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Button, Icon, Progress, Input, Tooltip,
@@ -17,6 +17,7 @@ const { AppState } = stores;
 const SubTask = observer(({
   onDeleteSubIssue, reloadIssue, onUpdate, parentSummary,
 }) => {
+  const creatingRef = useRef(false);
   const { store, disabled } = useContext(EditIssueContext);
   const [expand, setExpand] = useState(false);
   const [summary, setSummary] = useState(false);
@@ -88,8 +89,12 @@ const SubTask = observer(({
   };
 
   const handleSave = () => {
+    if (creatingRef.current) {
+      return;
+    }
     const subIssueType = store.getIssueTypes && store.getIssueTypes.find(t => t.typeCode === 'sub_task');
     if (summary) {
+      creatingRef.current = true;
       const issue = {
         summary,
         priorityId,
@@ -111,6 +116,8 @@ const SubTask = observer(({
           handleCreateSubIssue();
         })
         .catch(() => {
+        }).finally(() => {
+          creatingRef.current = false;
         });
     } else {
       Choerodon.prompt('子任务概要不能为空！');

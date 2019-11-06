@@ -19,8 +19,11 @@ const UserHead = memo(({
   size,
   hiddenText,
   style,
+  className = '',
   type,
   tooltip = true,
+  title,
+  ...restProps
 }) => {
   const iconSize = size || 18;
   const {
@@ -28,6 +31,9 @@ const UserHead = memo(({
   } = user;
   const img = avatar || imageUrl;
   const renderTooltip = () => {
+    if (title) {
+      return title;
+    }
     if (name) {
       return name;
     } else {
@@ -37,12 +43,13 @@ const UserHead = memo(({
 
   const renderContent = () => (
     <div
-      className="c7n-userHead"
+      className={`c7n-userHead ${className}`}
       style={{        
         display: (id || loginName) ? 'flex' : 'none',
         maxWidth: 108,
         ...style,
       }}
+      {...restProps}
     >
       {
         type === 'datalog' ? (

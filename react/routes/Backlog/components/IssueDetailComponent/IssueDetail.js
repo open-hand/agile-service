@@ -1,4 +1,4 @@
-import React, { Component, createRef } from 'react';
+import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import EditIssue from '../../../../components/EditIssue';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
@@ -28,11 +28,11 @@ class IssueDetail extends Component {
     }).catch((error) => {
     });
   }
-
+  
   /**
- * 重置点击
- * @param {*} current 
- */
+   * 重置点击
+   * @param {*} current 
+   */
   handleResetClicked(current) {
     // BacklogStore.clickedOnce(sprintId, current);
     BacklogStore.setClickIssueDetail(current);
@@ -49,7 +49,7 @@ class IssueDetail extends Component {
 
   render() {
     // const { paramOpenIssueId } = this.state;
-    const { cancelCallback, refresh } = this.props;
+    const { refresh } = this.props;
     const visible = Object.keys(BacklogStore.getClickIssueDetail).length > 0;
     const { programId, issueId } = BacklogStore.getClickIssueDetail || {};
     return (
@@ -65,7 +65,6 @@ class IssueDetail extends Component {
           BacklogStore.setClickIssueDetail({});
           BacklogStore.setIsLeaveSprint(false);
           BacklogStore.clearMultiSelected();
-          cancelCallback();
         }}
         onDeleteIssue={() => {
           BacklogStore.setClickIssueDetail({});

@@ -142,7 +142,7 @@ const { confirm } = Modal;
 
   render() {
     const {
-      data, expand, toggleSprint, sprintId, issueCount, refresh, handleSearchAssignee, isVisibleClearBtn,
+      data, expand, toggleSprint, sprintId, issueCount, refresh,
     } = this.props;
     const { piId } = data;
     const {
@@ -185,10 +185,8 @@ const { confirm } = Modal;
           }}
         >
           <AssigneeInfo
-            data={data}
-            handleSearchAssignee={handleSearchAssignee}
-            assigneeIssues={data.assigneeIssues}
-            isVisibleClearBtn={isVisibleClearBtn}
+            data={data}  
+            assigneeIssues={data.assigneeIssues}       
           />
           <StoryPointContainer
             statusCode={data.statusCode}

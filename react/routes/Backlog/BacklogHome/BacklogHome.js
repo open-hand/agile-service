@@ -1,13 +1,11 @@
-/* eslint-disable react/no-unused-state */
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
-import { Link } from 'react-router-dom';
 import {
   TabPage as Page, Header, stores, Breadcrumb, Content,
 } from '@choerodon/boot';
 import { DragDropContext } from 'react-beautiful-dnd';
 import {
-  Button, Spin, Checkbox, Icon,
+  Button, Spin, Checkbox, Icon, Breadcrumb as Bread,
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import Version from '../components/VersionComponent/Version';
@@ -19,7 +17,6 @@ import SprintItem from '../components/SprintComponent/SprintItem';
 import CreateSprint from '../components/create-sprint';
 import Injecter from '../../../components/Injecter';
 
-const { AppState } = stores;
 const createSprintKey = Modal.key();
 @inject('HeaderStore')
 @observer
@@ -27,12 +24,8 @@ class BacklogHome extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      spinIf: false,
-      versionVisible: false,
-      epicVisible: false,
       display: false,
-      first: true,
-    };  
+    };
   }
 
   componentDidMount() {
@@ -55,9 +48,6 @@ class BacklogHome extends Component {
     BacklogStore.axiosGetDefaultPriority();
     Promise.all([BacklogStore.axiosGetQuickSearchList(), BacklogStore.axiosGetIssueTypes(), BacklogStore.axiosGetDefaultPriority(), BacklogStore.axiosGetSprint()]).then(([quickSearch, issueTypes, priorityArr, backlogData]) => {
       BacklogStore.initBacklogData(quickSearch, issueTypes, priorityArr, backlogData);
-      this.setState({
-        first: false,
-      });
     });
   };
 
@@ -121,13 +111,6 @@ class BacklogHome extends Component {
   };
 
   /**
-   * 加载快速搜索
-   */
-  loadQuickFilter = () => {
-
-  };
-
-  /**
    * 创建冲刺
    */
   handleCreateSprint = () => {
@@ -147,22 +130,6 @@ class BacklogHome extends Component {
     });
   };
 
-  resetSprintChose = () => {
-    this.resetMuilterChose();
-  };
-
-  /**
-   * issue详情回退关闭详情侧边栏
-   */
-  resetMuilterChose = () => {
-    this.setState({
-      selected: {
-        droppableId: '',
-        issueIds: [],
-      },
-    });
-  };
-
   onQuickSearchChange = (onlyMeChecked, onlyStoryChecked, moreChecked) => {
     const { BacklogStore } = this.props;
     BacklogStore.setQuickFilters(onlyMeChecked, onlyStoryChecked, moreChecked);
@@ -172,21 +139,6 @@ class BacklogHome extends Component {
       }).catch((error) => {
       });
   }
-
-  onAssigneeChange = (data) => {
-    const { BacklogStore } = this.props;
-    BacklogStore.setAssigneeAndSprintIdFilter(data);
-    BacklogStore.axiosGetSprint()
-      .then((res) => {
-        BacklogStore.setSprintData(res);
-        BacklogStore.setSpinIf(false);
-
-        this.setState({
-          spinIf: false,
-        });
-      }).catch((error) => {
-      });
-  };
 
   handleClickCBtn = () => {
     const { BacklogStore } = this.props;
@@ -209,6 +161,9 @@ class BacklogHome extends Component {
       BacklogStore.toggleVisible(null);
     } else {
       BacklogStore.toggleVisible(type);
+      if (type === 'feature') {
+        BacklogStore.clearMultiSelected();
+      }
     }
   };
 
@@ -222,9 +177,6 @@ class BacklogHome extends Component {
     const { BacklogStore } = this.props;
     const arr = BacklogStore.getSprintData;
     const { display } = this.state;
-    const {
-      name, type, id, organizationId: orgId,
-    } = AppState.currentMenuType;
     return (
       <Page
         service={[
@@ -247,18 +199,7 @@ class BacklogHome extends Component {
             <Icon type="playlist_add icon" />
             创建冲刺
           </Button>
-          {/* <Button
-            className="leftBtn2"
-            functyp="flat"
-            onClick={() => {
-              this.refresh();
-              this.loadQuickFilter();
-            }}
-          >
-            <Icon type="refresh" />
-            {'刷新'}
-          </Button> */}
-          {false && arr.length && arr.length > 1
+          {arr.length && arr.length > 1
             ? (
               <Checkbox
                 className="primary"
@@ -269,17 +210,6 @@ class BacklogHome extends Component {
               </Checkbox>
             ) : ''
           }
-          {/* <div style={{
-            height: '50%', width: 1, background: 'rgba(0,0,0,0.12', margin: '0 30px',
-          }}
-          />
-          <QuickSearch
-            hideQuickSearch={BacklogStore.getCurrentVisible === 'feature'}
-            onQuickSearchChange={this.onQuickSearchChange}
-            resetFilter={BacklogStore.getQuickSearchClean}
-            onAssigneeChange={this.onAssigneeChange}
-          /> */}
-          {/* <ClearFilter /> */}
         </Header>
         <Breadcrumb />
         {/* 盖住tab下面的边框 */}
@@ -381,7 +311,8 @@ class BacklogHome extends Component {
                     }
                   }}
                   onDragStart={(result) => {
-                    const { source } = result;
+                    // console.log('onDragStart', result);
+                    const { source, draggableId } = result;
                     const { droppableId: sourceId, index: sourceIndex } = source;
                     const item = BacklogStore.getIssueMap.get(sourceId)[sourceIndex];
                     BacklogStore.setIsDragging(item.issueId);
@@ -389,11 +320,9 @@ class BacklogHome extends Component {
                   }}
                 >
                   <SprintItem
-                    first={this.state.first}
                     display={display}
                     epicVisible={BacklogStore.getEpicVisible}
                     versionVisible={BacklogStore.getVersionVisible}
-                    onAssigneeChange={this.onAssigneeChange}
                     onRef={(ref) => {
                       this.sprintItemRef = ref;
                     }}
@@ -422,7 +351,6 @@ class BacklogHome extends Component {
               onRef={(ref) => {
                 this.IssueDetail = ref;
               }}
-              cancelCallback={this.resetSprintChose}
             />
           </div>
         </Content>

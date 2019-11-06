@@ -11,88 +11,6 @@ const { AppState } = stores;
 
 @store('BacklogStore')
 class BacklogStore {
-  // issue
-  @observable issue = {};
-
-  @action setIssue(data) {
-    this.issue = data;
-  }
-
-  @computed get getIssue() {
-    return this.issue;
-  }
-
-  // fields
-  @observable fields = [];
-
-  @action setIssueFields(issue, fields) {
-    this.fields = fields;
-    this.issue = issue;
-  }
-
-  @computed get getFields() {
-    return this.fields;
-  }
-
-  // issue attribute
-  @observable doc = {};
-
-  @observable workLogs = [];
-
-  @observable dataLogs = [];
-
-  @observable linkIssues = [];
-
-  @observable branches = {};
-
-  @action setDoc(data) {
-    this.doc = data;
-  }
-
-  @computed get getDoc() {
-    return this.doc;
-  }
-
-  @action setWorkLogs(data) {
-    this.workLogs = data;
-  }
-
-  @computed get getWorkLogs() {
-    return this.workLogs.slice();
-  }
-
-  @action setDataLogs(data) {
-    this.dataLogs = data;
-  }
-
-  @computed get getDataLogs() {
-    return this.dataLogs;
-  }
-
-  @action setLinkIssues(data) {
-    this.linkIssues = data;
-  }
-
-  @computed get getLinkIssues() {
-    return this.linkIssues;
-  }
-
-  @action setBranches(data) {
-    this.branches = data;
-  }
-
-  @computed get getBranches() {
-    return this.branches;
-  }
-
-  @action initIssueAttribute(doc, workLogs, dataLogs, linkIssues, branches) {
-    this.doc = doc;
-    this.workLogs = workLogs;
-    this.dataLogs = dataLogs;
-    this.linkIssues = linkIssues;
-    this.branches = branches;
-  }
-
   @observable createdSprint = '';
 
   @observable hasActiveSprint = false;
@@ -110,8 +28,6 @@ class BacklogStore {
   @observable epicList = [];
 
   @observable featureList = [];
-
-  @observable epicMap = observable.map();
 
   @observable selectedIssueId = [];
 
@@ -135,7 +51,7 @@ class BacklogStore {
 
   @observable whichVisible = '';
 
-  @observable sprintData = {};
+  @observable sprintData = [];
 
   @observable versionData = [];
 
@@ -192,6 +108,7 @@ class BacklogStore {
   @observable cleanQuickSearch = false;
 
   @observable newIssueVisible = false;
+
 
   @computed get getNewIssueVisible() {
     return this.newIssueVisible;
@@ -274,18 +191,6 @@ class BacklogStore {
 
   @computed get getAssigneeProps() {
     return this.assigneeProps;
-  }
-
-  @action hideQuickSearch() {
-    this.showRealQuickSearch = false;
-  }
-
-  @action showQuickSearch() {
-    this.showRealQuickSearch = true;
-  }
-
-  @computed get getShowRealQuickSearch() {
-    return this.showRealQuickSearch;
   }
 
   @action setAssigneeProps(data) {
@@ -558,39 +463,19 @@ class BacklogStore {
   }
 
   // 过滤选中冲刺中的经办人
-  @observable assigneeAndSprintIdFilter = {};
+  @observable filterSprintAssign = observable.map();
 
-  @computed get getAssigneeAndSprintIdFilter() {
-    return this.assigneeFilterIds;
+  @action setFilterSprintAssign(sprintId, assigneeId) {
+    this.filterSprintAssign.set(sprintId, assigneeId);
   }
 
-  @action setAssigneeAndSprintIdFilter(data) {
-    this.spinIf = true;
-    this.assigneeFilterIds = data;
+  @action clearFilterSprintAssign(sprintId) {
+    this.filterSprintAssign.delete(sprintId);
   }
 
   axiosGetSprint = () => {
     const orgId = AppState.currentMenuType.organizationId;
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/issues?organizationId=${orgId}&quickFilterIds=${this.quickFilters}${this.assigneeFilterIds.length > 0 ? `&assigneeFilterIds=${this.assigneeFilterIds}` : ''}`, this.filter)
-      .then((data) => {
-        if (this.assigneeAndSprintIdFilter) {
-          return {
-            backlogData: data.backlogData,
-            sprintData: data.sprintData.map((i) => {
-              if (i.sprintId !== this.getAssigneeAndSprintIdFilter.sprintId) {
-                return i;
-              } else {
-                return {
-                  ...i,
-                  issueSearchVOList: i.issueSearchVOList.filter(issue => issue.assigneeId === this.getAssigneeAndSprintIdFilter.assigneeId),
-                };
-              }
-            }),
-          };
-        } else {
-          return data;
-        }
-      });
+    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/issues?organizationId=${orgId}&quickFilterIds=${this.quickFilters}${this.assigneeFilterIds.length > 0 ? `&assigneeFilterIds=${this.assigneeFilterIds}` : ''}`, this.filter);
   }
 
 
@@ -696,7 +581,17 @@ class BacklogStore {
   }
 
   @computed get getSprintData() {
-    return this.sprintData;
+    return this.sprintData.map((sprint) => {
+      const filterAssignId = this.filterSprintAssign.get(sprint.sprintId);
+      if (filterAssignId) {
+        return {
+          ...sprint,
+          issueSearchVOList: sprint.issueSearchVOList.filter(issue => issue.assigneeId === filterAssignId),
+        };
+      } else {
+        return sprint;
+      }
+    });
   }
 
   @action toggleVisible(data) {
@@ -793,12 +688,22 @@ class BacklogStore {
     this.whichVisible = null;
     this.assigneeFilterIds = [];
     this.multiSelected = observable.map();
-    this.sprintData = {};
+    this.sprintData = [];
     this.clickIssueDetail = {};
   }
 
   @computed get getIssueMap() {
-    return this.issueMap;
+    const that = this;
+    return {
+      get(sprintId) {
+        const filterAssignId = that.filterSprintAssign.get(Number(sprintId));
+        if (filterAssignId) {
+          return that.issueMap.get(sprintId) ? that.issueMap.get(sprintId).filter(issue => issue.assigneeId === filterAssignId) : [];
+        } else {
+          return that.issueMap.get(sprintId);
+        }
+      },
+    };
   }
 
   getModifiedArr = (dragItem, type) => {

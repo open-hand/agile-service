@@ -17,7 +17,6 @@ const shouldContainTypeCode = ['issue_epic', 'sub_task', 'feature'];
     super(props);
     this.state = {
       expand: true,
-      isVisibleClearBtn: false, // 是否显示清除经办人筛选按钮
     };
     this.strategyMap = new Map([
       ['sprint', this.renderSprint],
@@ -77,30 +76,9 @@ const shouldContainTypeCode = ['issue_epic', 'sub_task', 'feature'];
     );
   };
 
-  /**
- * 经办人搜索
-  * filter 经办人ID
- */
-  handleSearchAssignee = (sprintId, filter) => {
-    // 设置经办人过滤条件函数
-    const { onAssigneeChange } = this.props;
-    if (onAssigneeChange && filter) {
-      onAssigneeChange({
-        assigneeId: filter[0],
-        sprintId,
-      });
-      this.setState({ isVisibleClearBtn: true });
-    } else if (!filter) {
-      onAssigneeChange({});
-      this.setState({ isVisibleClearBtn: false });
-    } else {
-      Choerodon.prompt('经办人筛选错误');
-    }
-  };
-
   renderSprint = (sprintItem) => {
     const { refresh, isCreated } = this.props;
-    const { expand, isVisibleClearBtn } = this.state;
+    const { expand } = this.state;
     const issueCount = BacklogStore.getIssueMap.get(sprintItem.sprintId.toString()) ? BacklogStore.getIssueMap.get(sprintItem.sprintId.toString()).length : 0;
     return (
       <div
@@ -118,8 +96,6 @@ const shouldContainTypeCode = ['issue_epic', 'sub_task', 'feature'];
           issueCount={issueCount}
           data={sprintItem}
           expand={expand}
-          isVisibleClearBtn={isVisibleClearBtn}
-          handleSearchAssignee={this.handleSearchAssignee.bind(this, sprintItem.sprintId)}
           sprintId={sprintItem.sprintId.toString()}
           toggleSprint={this.toggleSprint}
         />

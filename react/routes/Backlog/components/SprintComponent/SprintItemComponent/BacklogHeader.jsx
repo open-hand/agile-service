@@ -11,7 +11,7 @@ import BacklogStore from '../../../../../stores/project/backlog/BacklogStore';
     const {
       data, expand, toggleSprint, sprintId, issueCount,
     } = this.props;
-
+    
     return (
       <div className="c7n-backlog-sprintTop">
         <div className="c7n-backlog-springTitle">

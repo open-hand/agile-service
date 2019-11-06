@@ -57,7 +57,7 @@ class SprintItem extends Component {
 
   render() {
     const {
-      refresh, display, first, onAssigneeChange,
+      refresh, display, isInProgram, onAssigneeChange,
     } = this.props;
     const arr = BacklogStore.getSprintData;
     const loading = BacklogStore.getSpinIf;
@@ -68,14 +68,14 @@ class SprintItem extends Component {
       ...displayList.filter(item => item.statusCode === 'started'),
       ...displayList.filter(item => item.statusCode !== 'started'),
     ];
-    // if (!display && arr.length) {
-    //   const start = arr.filter(s => s.statusCode === 'started');
-    //   if (start.length === 0) {
-    //     displayList = [displayList[0]];
-    //   } else {
-    //     displayList = start;
-    //   }
-    // }
+    if (isInProgram && !display && arr.length) {
+      const start = arr.filter(s => s.statusCode === 'started');
+      if (start.length === 0) {
+        displayList = [displayList[0]];
+      } else {
+        displayList = start;
+      }
+    }
     const visible = Object.keys(BacklogStore.getClickIssueDetail).length > 0;
 
     return (
@@ -95,7 +95,7 @@ class SprintItem extends Component {
         }}
       >
         {
-          displayList.length === 0 && !first
+          displayList.length === 0 && !loading
             ? <NoneSprint /> : displayList.map(sprintItem => (
               <SprintContainer
                 isCreated={sprintItem.isCreated}
