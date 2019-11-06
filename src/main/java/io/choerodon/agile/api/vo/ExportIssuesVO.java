@@ -111,7 +111,7 @@ public class ExportIssuesVO {
     private String resolution;
 
     @ApiModelProperty(value = "自定义字段kv")
-    private Map<String, String> foundationFieldValue;
+    private Map<String, Object> foundationFieldValue;
 
     public String getAssigneeRealName() {
         return assigneeRealName;
@@ -377,11 +377,11 @@ public class ExportIssuesVO {
         this.labelName = labelName;
     }
 
-    public Map<String, String> getFoundationFieldValue() {
+    public Map<String, Object> getFoundationFieldValue() {
         return foundationFieldValue;
     }
 
-    public void setFoundationFieldValue(Map<String, String> foundationFieldValue) {
+    public void setFoundationFieldValue(Map<String, Object> foundationFieldValue) {
         this.foundationFieldValue = foundationFieldValue;
     }
 }

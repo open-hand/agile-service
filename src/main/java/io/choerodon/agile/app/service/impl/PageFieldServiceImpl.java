@@ -340,8 +340,8 @@ public class PageFieldServiceImpl implements PageFieldService {
     }
 
     @Override
-    public Map<Long, Map<String, String>> queryFieldValueWithIssueIdsForAgileExport(Long organizationId, Long projectId, List<Long> instanceIds) {
-        Map<Long, Map<String, String>> result = new HashMap<>();
+    public Map<Long, Map<String, Object>> queryFieldValueWithIssueIdsForAgileExport(Long organizationId, Long projectId, List<Long> instanceIds, Boolean isJustStr) {
+        Map<Long, Map<String, Object>> result = new HashMap<>();
         List<FieldValueVO> values = modelMapper.map(fieldValueMapper.queryList(projectId, null, null, null),
                 new TypeToken<List<FieldValueVO>>() {
                 }.getType());
@@ -352,7 +352,7 @@ public class PageFieldServiceImpl implements PageFieldService {
         Map<Long, List<FieldValueVO>> valuesMap = values.stream().collect(Collectors.groupingBy(FieldValueVO::getInstanceId));
         Map<Long, UserDTO> userMap = FieldValueUtil.handleUserMap(values.stream().filter(x -> x.getFieldType().equals(FieldType.MEMBER)).map(FieldValueVO::getOptionId).collect(Collectors.toList()));
         for (Long instanceId : instanceIds) {
-            Map<String, String> codeValueMap = new HashMap<>();
+            Map<String, Object> codeValueMap = new HashMap<>();
             List<FieldValueVO> instanceValues = valuesMap.get(instanceId);
             if (instanceValues != null) {
                 Map<Long, List<FieldValueVO>> valueGroup = values.stream().collect(Collectors.groupingBy(FieldValueVO::getFieldId));
@@ -360,8 +360,8 @@ public class PageFieldServiceImpl implements PageFieldService {
                     ObjectSchemeFieldDTO objectSchemeField = fieldMap.get(fieldId);
                     if (objectSchemeField != null) {
                         PageFieldViewVO view = new PageFieldViewVO();
-                        FieldValueUtil.handleDTO2Value(view, objectSchemeField.getFieldType(), fieldValueDTOList, userMap, true);
-                        codeValueMap.put(objectSchemeField.getCode(), view.getValueStr().toString());
+                        FieldValueUtil.handleDTO2Value(view, objectSchemeField.getFieldType(), fieldValueDTOList, userMap, isJustStr);
+                        codeValueMap.put(objectSchemeField.getCode(), view.getValueStr());
                     }
                 });
             }
