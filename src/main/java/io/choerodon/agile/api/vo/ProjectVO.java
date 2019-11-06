@@ -26,6 +26,10 @@ public class ProjectVO {
     private List<ProjectCategoryDTO> categories;
     @ApiModelProperty(value = "版本号")
     private Long objectVersionNumber;
+    @ApiModelProperty(value = "版本号")
+    private String category;
+    @ApiModelProperty("创建人")
+    private Long createdBy;
 
     public Long getId() {
         return id;
@@ -81,6 +85,22 @@ public class ProjectVO {
 
     public void setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
     }
 
     @Override
