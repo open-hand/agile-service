@@ -355,7 +355,7 @@ public class PageFieldServiceImpl implements PageFieldService {
             Map<String, Object> codeValueMap = new HashMap<>();
             List<FieldValueVO> instanceValues = valuesMap.get(instanceId);
             if (instanceValues != null) {
-                Map<Long, List<FieldValueVO>> valueGroup = values.stream().collect(Collectors.groupingBy(FieldValueVO::getFieldId));
+                Map<Long, List<FieldValueVO>> valueGroup = instanceValues.stream().collect(Collectors.groupingBy(FieldValueVO::getFieldId));
                 valueGroup.forEach((fieldId, fieldValueDTOList) -> {
                     ObjectSchemeFieldDTO objectSchemeField = fieldMap.get(fieldId);
                     if (objectSchemeField != null) {
