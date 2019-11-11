@@ -1,25 +1,21 @@
 package io.choerodon.agile.app.service.impl;
 
 
-import com.alibaba.fastjson.JSON;
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.api.vo.event.TransformInfo;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.IssueStatusDTO;
 import io.choerodon.agile.infra.dto.IssueTypeDTO;
 import io.choerodon.agile.infra.dto.ProjectConfigDTO;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.enums.SchemeType;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
+import io.choerodon.agile.infra.mapper.IssueStatusMapper;
 import io.choerodon.agile.infra.mapper.IssueTypeMapper;
 import io.choerodon.agile.infra.mapper.ProjectConfigMapper;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.ProjectUtil;
-import io.choerodon.asgard.saga.annotation.Saga;
-import io.choerodon.asgard.saga.dto.StartInstanceDTO;
-import io.choerodon.asgard.saga.feign.SagaClient;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.ResourceLevel;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +61,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     @Autowired
     private ProjectConfigService projectConfigService;
     @Autowired
-    private SagaClient sagaClient;
+    private IssueStatusMapper issueStatusMapper;
     @Autowired
     private StatusService statusService;
     @Autowired
@@ -358,7 +354,6 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         return result;
     }
 
-    @Saga(code = "agile-remove-status", description = "移除状态", inputSchemaClass = StatusPayload.class)
     @Override
     public void removeStatusForAgile(Long projectId, Long statusId, String applyType) {
         Map<String, Object> result = checkCreateStatusForAgile(projectId, applyType);
@@ -370,15 +365,10 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             if (statusId.equals(initStatusId)) {
                 throw new CommonException("error.initStatus.illegal");
             }
-            try {
-                statusService.removeStatusForAgile(organizationId, stateMachineId, statusId);
-                StatusPayload statusPayload = new StatusPayload();
-                statusPayload.setProjectId(projectId);
-                statusPayload.setStatusId(statusId);
-                sagaClient.startSaga("agile-remove-status", new StartInstanceDTO(JSON.toJSONString(statusPayload), "", "", ResourceLevel.PROJECT.value(), projectId));
-            } catch (Exception e) {
-                throw new RemoveStatusException("error.status.remove");
-            }
+            IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
+            issueStatusDTO.setProjectId(projectId);
+            issueStatusDTO.setStatusId(statusId);
+            issueStatusMapper.delete(issueStatusDTO);
         } else {
             throw new RemoveStatusException((String) result.get(MESSAGE));
         }
