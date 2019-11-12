@@ -130,7 +130,7 @@
             </if>
         </if>
         <if test='searchVO.advancedSearchArgs.versionList != null and searchVO.advancedSearchArgs.versionList.size > 0'>
-            and ai.issue_id in (
+            and (ai.issue_id in (
             select avir2.issue_id
             from agile_version_issue_rel avir2
             where avir2.version_id in
@@ -138,7 +138,9 @@
                      close=")">
                 #{versionId}
             </foreach>
-            )
+            )  <if test="searchVO.advancedSearchArgs.versionList.contains(0)">
+            or version_info.version_id is null
+             </if>)
         </if>
         <if test='searchVO.advancedSearchArgs.statusList != null and searchVO.advancedSearchArgs.statusList.size > 0'>
             and ai.status_id in
