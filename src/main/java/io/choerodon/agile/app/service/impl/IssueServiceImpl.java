@@ -623,7 +623,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
 
-    @Saga(code = "agile-delete-issue", description = "删除issue", inputSchemaClass = IssuePayload.class)
+//    @Saga(code = "agile-delete-issue", description = "删除issue", inputSchemaClass = IssuePayload.class)
     @Override
     public void deleteIssue(Long projectId, Long issueId) {
         IssueConvertDTO issueConvertDTO = queryIssueByProjectIdAndIssueId(projectId, issueId);
@@ -665,11 +665,11 @@ public class IssueServiceImpl implements IssueService {
         issueAccessDataService.delete(projectId, issueConvertDTO.getIssueId());
         //删除rank数据
         rankMapper.deleteRankByIssueId(issueId);
-        //删除issue发送消息
-        IssuePayload issuePayload = new IssuePayload();
-        issuePayload.setIssueId(issueId);
-        issuePayload.setProjectId(projectId);
-        sagaClient.startSaga("agile-delete-issue", new StartInstanceDTO(JSON.toJSONString(issuePayload), "", "", ResourceLevel.PROJECT.value(), projectId));
+//        //删除issue发送消息
+//        IssuePayload issuePayload = new IssuePayload();
+//        issuePayload.setIssueId(issueId);
+//        issuePayload.setProjectId(projectId);
+//        sagaClient.startSaga("agile-delete-issue", new StartInstanceDTO(JSON.toJSONString(issuePayload), "", "", ResourceLevel.PROJECT.value(), projectId));
         //delete cache
         dataLogRedisUtil.handleDeleteRedisByDeleteIssue(projectId);
     }
