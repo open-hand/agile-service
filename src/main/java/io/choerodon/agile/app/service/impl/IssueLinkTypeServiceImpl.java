@@ -11,7 +11,8 @@ import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.dto.IssueLinkDTO;
 import io.choerodon.agile.infra.dto.IssueLinkTypeDTO;
 import io.choerodon.agile.infra.mapper.IssueLinkMapper;
-import io.choerodon.base.domain.PageRequest;
+import io.choerodon.web.util.PageableHelper;
+import org.springframework.data.domain.Pageable;
 
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
@@ -53,8 +54,8 @@ public class IssueLinkTypeServiceImpl implements IssueLinkTypeService {
     }
 
     @Override
-    public PageInfo<IssueLinkTypeVO> listIssueLinkType(Long projectId, Long issueLinkTypeId, IssueLinkTypeSearchVO issueLinkTypeSearchVO, PageRequest pageRequest) {
-        return PageHelper.startPage(pageRequest.getPage(), pageRequest.getSize(), PageUtil.sortToSql(pageRequest.getSort())).
+    public PageInfo<IssueLinkTypeVO> listIssueLinkType(Long projectId, Long issueLinkTypeId, IssueLinkTypeSearchVO issueLinkTypeSearchVO, Pageable pageable) {
+        return PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(pageable.getSort())).
                 doSelectPageInfo(() -> issueLinkTypeMapper.queryIssueLinkTypeByProjectId(projectId, issueLinkTypeId, issueLinkTypeSearchVO.getLinkName(), issueLinkTypeSearchVO.getContents()));
     }
 

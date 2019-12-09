@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.utils;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -7,7 +8,7 @@ import java.util.Map;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
 
-import io.choerodon.base.domain.Sort;
+import org.springframework.data.domain.Sort;
 
 /**
  * Created by WangZhe@choerodon.io on 2019-06-13.
@@ -23,6 +24,7 @@ public class PageUtil {
     }
 
     public static Sort sortResetOrder(Sort sort, String mainTableAlias, Map<String, String> map) {
+        List<Sort.Order> orders = new ArrayList<>();
         if (sort != null) {
             Iterator<Sort.Order> iterator = sort.iterator();
             while (iterator.hasNext()) {
@@ -30,24 +32,18 @@ public class PageUtil {
                 Sort.Order order = iterator.next();
                 for (Map.Entry<String, String> entry : map.entrySet()) {
                     if (entry.getKey().equals(order.getProperty())) {
-                        order.setProperty(entry.getValue());
+                        order = Sort.Order.by(entry.getValue());
                         flag = true;
                     }
                 }
                 if (mainTableAlias != null && !flag) {
                     //驼峰转下划线
-                    order.setProperty(mainTableAlias + "." + tk.mybatis.mapper.util.StringUtil.camelhumpToUnderline(order.getProperty()));
+                    order = Sort.Order.by(mainTableAlias + "." + tk.mybatis.mapper.util.StringUtil.camelhumpToUnderline(order.getProperty()));
                 }
+                orders.add(order);
             }
         }
-        return sort;
+        return Sort.by(orders);
     }
 
-    public static String sortToSql(Sort sort) {
-        if (sort == null) {
-            return "";
-        } else {
-            return sort.toSql();
-        }
-    }
 }

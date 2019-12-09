@@ -1,7 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.base.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -75,8 +75,8 @@ public interface FieldValueService {
      *
      * @param organizationId
      * @param projectId
-     * @param pageRequest
+     * @param pageable
      * @return
      */
-    List<Long> sortIssueIdsByFieldValue(Long organizationId, Long projectId, PageRequest pageRequest);
+    List<Long> sortIssueIdsByFieldValue(Long organizationId, Long projectId, Pageable pageable);
 }

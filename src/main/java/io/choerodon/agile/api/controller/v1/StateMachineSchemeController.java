@@ -1,10 +1,10 @@
 package io.choerodon.agile.api.controller.v1;
 
 import com.github.pagehelper.PageInfo;
-import io.choerodon.base.annotation.Permission;
-import io.choerodon.base.domain.PageRequest;
-import io.choerodon.base.domain.Sort;
-import io.choerodon.base.enums.ResourceType;
+import io.choerodon.core.annotation.Permission;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import io.choerodon.core.enums.ResourceType;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.validator.StateMachineSchemeValidator;
 import io.choerodon.agile.api.vo.StateMachineSchemeConfigVO;
@@ -13,7 +13,7 @@ import io.choerodon.agile.api.vo.event.StateMachineSchemeChangeItem;
 import io.choerodon.agile.app.service.StateMachineSchemeConfigService;
 import io.choerodon.agile.app.service.StateMachineSchemeService;
 import io.choerodon.agile.infra.utils.ParamUtils;
-import io.choerodon.mybatis.annotation.SortDefault;
+import org.springframework.data.web.SortDefault;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ public class StateMachineSchemeController {
     @CustomPageRequest
     @GetMapping
     public ResponseEntity<PageInfo<StateMachineSchemeVO>> pagingQuery(@ApiIgnore
-                                                                   @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
+                                                                   @SortDefault(value = "id", direction = Sort.Direction.DESC) Pageable pageable,
                                                                       @PathVariable("organization_id") Long organizationId,
                                                                       @RequestParam(required = false) String name,
                                                                       @RequestParam(required = false) String description,
@@ -50,7 +50,7 @@ public class StateMachineSchemeController {
         schemeDTO.setOrganizationId(organizationId);
         schemeDTO.setName(name);
         schemeDTO.setDescription(description);
-        return new ResponseEntity<>(schemeService.pageQuery(organizationId, pageRequest, schemeDTO, ParamUtils.arrToStr(param)), HttpStatus.OK);
+        return new ResponseEntity<>(schemeService.pageQuery(organizationId, pageable, schemeDTO, ParamUtils.arrToStr(param)), HttpStatus.OK);
     }
 
     @Permission(type = ResourceType.ORGANIZATION)

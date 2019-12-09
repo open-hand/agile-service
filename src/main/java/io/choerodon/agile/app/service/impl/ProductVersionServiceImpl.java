@@ -18,7 +18,8 @@ import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.asgard.saga.annotation.Saga;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
-import io.choerodon.base.domain.PageRequest;
+import io.choerodon.web.util.PageableHelper;
+import org.springframework.data.domain.Pageable;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.core.oauth.CustomUserDetails;
@@ -215,10 +216,10 @@ public class ProductVersionServiceImpl implements ProductVersionService {
 
     @Override
     @SuppressWarnings("unchecked")
-    public PageInfo<ProductVersionPageVO> queryByProjectId(Long projectId, PageRequest pageRequest, SearchVO searchVO) {
+    public PageInfo<ProductVersionPageVO> queryByProjectId(Long projectId, Pageable pageable, SearchVO searchVO) {
         //过滤查询和排序
-        PageInfo<Long> versionIds = PageHelper.startPage(pageRequest.getPage(),
-                pageRequest.getSize(), PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() -> productVersionMapper.
+        PageInfo<Long> versionIds = PageHelper.startPage(pageable.getPageNumber(),
+                pageable.getPageSize(), PageableHelper.getSortSql(pageable.getSort())).doSelectPageInfo(() -> productVersionMapper.
                 queryVersionIdsByProjectId(projectId, searchVO.getSearchArgs(),
                         searchVO.getAdvancedSearchArgs(), searchVO.getContents()));
         if ((versionIds.getList() != null) && !versionIds.getList().isEmpty()) {

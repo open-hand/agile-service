@@ -17,7 +17,8 @@ import io.choerodon.agile.infra.mapper.StateMachineSchemeMapper;
 import io.choerodon.agile.infra.utils.ConvertUtils;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.ProjectUtil;
-import io.choerodon.base.domain.PageRequest;
+import io.choerodon.web.util.PageableHelper;
+import org.springframework.data.domain.Pageable;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.entity.Criteria;
 import org.modelmapper.ModelMapper;
@@ -59,7 +60,7 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
     private ModelMapper modelMapper;
 
     @Override
-    public PageInfo<StateMachineSchemeVO> pageQuery(Long organizationId, PageRequest pageRequest, StateMachineSchemeVO schemeVO, String params) {
+    public PageInfo<StateMachineSchemeVO> pageQuery(Long organizationId, Pageable pageable, StateMachineSchemeVO schemeVO, String params) {
         //查询出组织下的所有项目
         List<ProjectVO> projectVOS = baseFeignClient.listProjectsByOrgId(organizationId).getBody();
         Map<Long, ProjectVO> projectMap = projectVOS.stream().collect(Collectors.toMap(ProjectVO::getId, x -> x));
@@ -71,8 +72,8 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
         Map<Long, StateMachineVO> stateMachineVOMap = stateMachineVOS.stream().collect(Collectors.toMap(StateMachineVO::getId, x -> x));
 
         StateMachineSchemeDTO scheme = modelMapper.map(schemeVO, StateMachineSchemeDTO.class);
-        PageInfo<StateMachineSchemeDTO> page = PageHelper.startPage(pageRequest.getPage(),
-                pageRequest.getSize(), PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() -> schemeMapper.fulltextSearch(scheme, params));
+        PageInfo<StateMachineSchemeDTO> page = PageHelper.startPage(pageable.getPageNumber(),
+                pageable.getPageSize(), PageableHelper.getSortSql(pageable.getSort())).doSelectPageInfo(() -> schemeMapper.fulltextSearch(scheme, params));
 
         List<StateMachineSchemeDTO> schemes = page.getList();
         List<StateMachineSchemeDTO> schemesWithConfigs = new ArrayList<>();

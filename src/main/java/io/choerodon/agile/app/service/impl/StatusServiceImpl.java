@@ -18,7 +18,8 @@ import io.choerodon.agile.infra.exception.RemoveStatusException;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
-import io.choerodon.base.domain.PageRequest;
+import io.choerodon.web.util.PageableHelper;
+import org.springframework.data.domain.Pageable;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -52,8 +53,8 @@ public class StatusServiceImpl implements StatusService {
     private ModelMapper modelMapper;
 
     @Override
-    public PageInfo<StatusWithInfoVO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchVO statusSearchVO) {
-        PageInfo<Long> statusIdsPage = PageHelper.startPage(pageRequest.getPage(), pageRequest.getSize(), PageUtil.sortToSql(pageRequest.getSort()))
+    public PageInfo<StatusWithInfoVO> queryStatusList(Pageable pageable, Long organizationId, StatusSearchVO statusSearchVO) {
+        PageInfo<Long> statusIdsPage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(pageable.getSort()))
                 .doSelectPageInfo(() -> statusMapper.selectStatusIds(organizationId, statusSearchVO));
         List<StatusWithInfoVO> statusWithInfoVOList = new ArrayList<>();
         if (!statusIdsPage.getList().isEmpty()) {

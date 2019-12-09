@@ -16,8 +16,9 @@ import io.choerodon.agile.infra.mapper.FieldValueMapper;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.FieldValueUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
-import io.choerodon.base.domain.PageRequest;
-import io.choerodon.base.domain.Sort;
+import io.choerodon.web.util.PageableHelper;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -161,9 +162,9 @@ public class FieldValueServiceImpl implements FieldValueService {
     }
 
     @Override
-    public List<Long> sortIssueIdsByFieldValue(Long organizationId, Long projectId, PageRequest pageRequest) {
-        if (pageRequest.getSort() != null) {
-            Iterator<Sort.Order> iterator = pageRequest.getSort().iterator();
+    public List<Long> sortIssueIdsByFieldValue(Long organizationId, Long projectId, Pageable pageable) {
+        if (pageable.getSort() != null) {
+            Iterator<Sort.Order> iterator = pageable.getSort().iterator();
             String fieldCode = "";
             while (iterator.hasNext()) {
                 Sort.Order order = iterator.next();
@@ -171,8 +172,8 @@ public class FieldValueServiceImpl implements FieldValueService {
             }
             ObjectSchemeFieldDTO objectSchemeField = objectSchemeFieldService.queryByFieldCode(organizationId, projectId, fieldCode);
             String fieldType = objectSchemeField.getFieldType();
-            FieldValueUtil.handleAgileSortPageRequest(fieldCode, fieldType, pageRequest);
-            return fieldValueMapper.sortIssueIdsByFieldValue(organizationId, projectId, objectSchemeField.getId(), PageUtil.sortToSql(pageRequest.getSort()));
+            FieldValueUtil.handleAgileSortPageRequest(fieldCode, fieldType, pageable);
+            return fieldValueMapper.sortIssueIdsByFieldValue(organizationId, projectId, objectSchemeField.getId(), PageableHelper.getSortSql(pageable.getSort()));
         } else {
             return new ArrayList<>();
         }

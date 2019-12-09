@@ -6,7 +6,7 @@ import io.choerodon.agile.api.vo.IssueTypeSchemeVO;
 import io.choerodon.agile.api.vo.IssueTypeSchemeWithInfoVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.infra.dto.IssueTypeSchemeDTO;
-import io.choerodon.base.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Map;
@@ -100,5 +100,5 @@ public interface IssueTypeSchemeService {
 //     */
 //    void initByConsumeCreateProgram(Long projectId, String projectCode);
 
-    PageInfo<IssueTypeSchemeWithInfoVO> queryIssueTypeSchemeList(PageRequest pageRequest, Long organizationId, IssueTypeSchemeSearchVO issueTypeSchemeVO);
+    PageInfo<IssueTypeSchemeWithInfoVO> queryIssueTypeSchemeList(Pageable pageable, Long organizationId, IssueTypeSchemeSearchVO issueTypeSchemeVO);
 }

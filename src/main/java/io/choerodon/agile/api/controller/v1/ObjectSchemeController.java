@@ -1,16 +1,16 @@
 package io.choerodon.agile.api.controller.v1;
 
 import com.github.pagehelper.PageInfo;
-import io.choerodon.base.annotation.Permission;
-import io.choerodon.base.domain.PageRequest;
-import io.choerodon.base.domain.Sort;
-import io.choerodon.base.enums.ResourceType;
+import io.choerodon.core.annotation.Permission;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import io.choerodon.core.enums.ResourceType;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.agile.api.vo.ObjectSchemeSearchVO;
 import io.choerodon.agile.api.vo.ObjectSchemeVO;
 import io.choerodon.agile.app.service.ObjectSchemeService;
-import io.choerodon.mybatis.annotation.SortDefault;
+import org.springframework.data.web.SortDefault;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -36,11 +36,11 @@ public class ObjectSchemeController extends BaseController {
     @CustomPageRequest
     @PostMapping
     public ResponseEntity<PageInfo<ObjectSchemeVO>> pageQuery(@ApiIgnore
-                                                               @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
+                                                               @SortDefault(value = "id", direction = Sort.Direction.DESC) Pageable pageable,
                                                               @ApiParam(value = "组织id", required = true)
                                                                @PathVariable("organization_id") Long organizationId,
                                                               @ApiParam(value = "search dto", required = true)
                                                                @RequestBody(required = false) ObjectSchemeSearchVO searchDTO) {
-        return new ResponseEntity<>(objectSchemeService.pageQuery(organizationId, pageRequest, searchDTO), HttpStatus.OK);
+        return new ResponseEntity<>(objectSchemeService.pageQuery(organizationId, pageable, searchDTO), HttpStatus.OK);
     }
 }

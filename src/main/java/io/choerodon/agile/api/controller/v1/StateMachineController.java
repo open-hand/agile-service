@@ -6,12 +6,12 @@ import io.choerodon.agile.api.vo.StateMachineListVO;
 import io.choerodon.agile.api.vo.StateMachineVO;
 import io.choerodon.agile.app.service.StateMachineService;
 import io.choerodon.agile.infra.utils.ParamUtils;
-import io.choerodon.base.annotation.Permission;
-import io.choerodon.base.domain.PageRequest;
-import io.choerodon.base.domain.Sort;
-import io.choerodon.base.enums.ResourceType;
+import io.choerodon.core.annotation.Permission;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import io.choerodon.core.enums.ResourceType;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.mybatis.annotation.SortDefault;
+import org.springframework.data.web.SortDefault;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +38,11 @@ public class StateMachineController {
     @GetMapping
     public ResponseEntity<PageInfo<StateMachineListVO>> pagingQuery(@PathVariable("organization_id") Long organizationId,
                                                                     @ApiIgnore
-                                                                    @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
+                                                                    @SortDefault(value = "id", direction = Sort.Direction.DESC) Pageable pageable,
                                                                     @RequestParam(required = false) String name,
                                                                     @RequestParam(required = false) String description,
                                                                     @RequestParam(required = false) String[] param) {
-        return new ResponseEntity<>(stateMachineService.pageQuery(organizationId, pageRequest, name, description, ParamUtils.arrToStr(param)), HttpStatus.OK);
+        return new ResponseEntity<>(stateMachineService.pageQuery(organizationId, pageable, name, description, ParamUtils.arrToStr(param)), HttpStatus.OK);
     }
 
     @Permission(type = ResourceType.ORGANIZATION)

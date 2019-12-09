@@ -21,7 +21,8 @@ import io.choerodon.agile.infra.mapper.IssueComponentMapper;
 
 import com.github.pagehelper.PageHelper;
 
-import io.choerodon.base.domain.PageRequest;
+import io.choerodon.web.util.PageableHelper;
+import org.springframework.data.domain.Pageable;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -151,12 +152,12 @@ public class IssueComponentServiceImpl implements IssueComponentService {
 
     @Override
     @SuppressWarnings("unchecked")
-    public PageInfo<ComponentForListVO> queryComponentByProjectId(Long projectId, Long componentId, Boolean noIssueTest, SearchVO searchVO, PageRequest pageRequest) {
+    public PageInfo<ComponentForListVO> queryComponentByProjectId(Long projectId, Long componentId, Boolean noIssueTest, SearchVO searchVO, Pageable pageable) {
         //处理用户搜索
         Boolean condition = handleSearchUser(searchVO, projectId);
         if (condition) {
-            PageInfo<ComponentForListDTO> componentForListDTOPage = PageHelper.startPage(pageRequest.getPage(),
-                    pageRequest.getSize(), PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() ->
+            PageInfo<ComponentForListDTO> componentForListDTOPage = PageHelper.startPage(pageable.getPageNumber(),
+                    pageable.getPageSize(), PageableHelper.getSortSql(pageable.getSort())).doSelectPageInfo(() ->
                     issueComponentMapper.queryComponentByOption(projectId, noIssueTest, componentId, searchVO.getSearchArgs(),
                             searchVO.getAdvancedSearchArgs(), searchVO.getContents()));
             PageInfo<ComponentForListVO> componentForListVOPageInfo = modelMapper.map(componentForListDTOPage, new TypeToken<PageInfo>(){}.getType());

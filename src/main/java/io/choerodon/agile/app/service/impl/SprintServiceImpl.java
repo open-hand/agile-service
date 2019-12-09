@@ -15,7 +15,8 @@ import io.choerodon.agile.infra.utils.DateUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.agile.infra.utils.StringUtil;
-import io.choerodon.base.domain.PageRequest;
+import io.choerodon.web.util.PageableHelper;
+import org.springframework.data.domain.Pageable;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -23,6 +24,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -427,7 +429,7 @@ public class SprintServiceImpl implements SprintService {
     }
 
     @Override
-    public PageInfo<IssueListVO> queryIssueByOptions(Long projectId, Long sprintId, String status, PageRequest pageRequest, Long organizationId) {
+    public PageInfo<IssueListVO> queryIssueByOptions(Long projectId, Long sprintId, String status, Pageable pageable, Long organizationId) {
         SprintDTO sprintDTO = new SprintDTO();
         sprintDTO.setProjectId(projectId);
         sprintDTO.setSprintId(sprintId);
@@ -439,17 +441,17 @@ public class SprintServiceImpl implements SprintService {
         sprint.setActualEndDate(actualEndDate);
         Date startDate = sprint.getStartDate();
         PageInfo<Long> reportIssuePage = new PageInfo<>(new ArrayList<>());
-        pageRequest.setSort(PageUtil.sortResetOrder(pageRequest.getSort(), "ai", new HashMap<>()));
-        //pageRequest.resetOrder("ai", new HashMap<>());
+        Sort sort = PageUtil.sortResetOrder(pageable.getSort(), "ai", new HashMap<>());
+        //pageable.resetOrder("ai", new HashMap<>());
         switch (status) {
             case DONE:
-                reportIssuePage = PageHelper.startPage(pageRequest.getPage(), pageRequest.getSize(), PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() -> reportMapper.queryReportIssueIds(projectId, sprintId, startDate, actualEndDate, true));
+                reportIssuePage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> reportMapper.queryReportIssueIds(projectId, sprintId, startDate, actualEndDate, true));
                 break;
             case UNFINISHED:
-                reportIssuePage = PageHelper.startPage(pageRequest.getPage(), pageRequest.getSize(), PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() -> reportMapper.queryReportIssueIds(projectId, sprintId, startDate, actualEndDate, false));
+                reportIssuePage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> reportMapper.queryReportIssueIds(projectId, sprintId, startDate, actualEndDate, false));
                 break;
             case REMOVE:
-                reportIssuePage = PageHelper.startPage(pageRequest.getPage(), pageRequest.getSize(), PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() -> reportMapper.queryRemoveIssueIdsDuringSprintWithOutSubEpicIssue(sprint));
+                reportIssuePage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> reportMapper.queryRemoveIssueIdsDuringSprintWithOutSubEpicIssue(sprint));
                 break;
             default:
                 break;

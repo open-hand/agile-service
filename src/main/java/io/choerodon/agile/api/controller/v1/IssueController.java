@@ -3,8 +3,8 @@ package io.choerodon.agile.api.controller.v1;
 import com.alibaba.fastjson.JSONObject;
 
 import io.choerodon.agile.infra.dto.IssueNumDTO;
-import io.choerodon.base.annotation.Permission;
-import io.choerodon.base.enums.ResourceType;
+import io.choerodon.core.annotation.Permission;
+import io.choerodon.core.enums.ResourceType;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +22,9 @@ import io.choerodon.agile.infra.dto.IssueComponentDetailDTO;
 import com.github.pagehelper.PageInfo;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
-import io.choerodon.mybatis.annotation.SortDefault;
-import io.choerodon.base.domain.PageRequest;
-import io.choerodon.base.domain.Sort;
+import org.springframework.data.web.SortDefault;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -162,14 +162,14 @@ public class IssueController {
     public ResponseEntity<PageInfo<IssueListFieldKVVO>> listIssueWithSub(@ApiIgnore
                                                                @ApiParam(value = "分页信息", required = true)
                                                                @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
-                                                                       PageRequest pageRequest,
+                                                                       Pageable pageable,
                                                                          @ApiParam(value = "项目id", required = true)
                                                                @PathVariable(name = "project_id") Long projectId,
                                                                          @ApiParam(value = "查询参数", required = true)
                                                                @RequestBody(required = false) SearchVO searchVO,
                                                                          @ApiParam(value = "查询参数", required = true)
                                                                @RequestParam(required = false) Long organizationId) {
-        return Optional.ofNullable(issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId))
+        return Optional.ofNullable(issueService.listIssueWithSub(projectId, searchVO, pageable, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.listIssueWithSub"));
     }
@@ -181,7 +181,7 @@ public class IssueController {
     public ResponseEntity<PageInfo<IssueNumVO>> queryIssueByOption(@ApiIgnore
                                                                 @ApiParam(value = "分页信息", required = true)
                                                                 @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
-                                                                        PageRequest pageRequest,
+                                                                        Pageable pageable,
                                                                    @ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
                                                                    @ApiParam(value = "issueId")
@@ -194,7 +194,7 @@ public class IssueController {
                                                                 @RequestParam() Boolean self,
                                                                    @ApiParam(value = "搜索内容", required = false)
                                                                 @RequestParam(required = false) String content) {
-        return Optional.ofNullable(issueService.queryIssueByOption(projectId, issueId, issueNum, onlyActiveSprint, self, content, pageRequest))
+        return Optional.ofNullable(issueService.queryIssueByOption(projectId, issueId, issueNum, onlyActiveSprint, self, content, pageable))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.queryIssueByOption"));
     }
@@ -206,7 +206,7 @@ public class IssueController {
     public ResponseEntity<PageInfo<IssueNumVO>> queryIssueByOptionForAgile(@ApiIgnore
                                                                         @ApiParam(value = "分页信息", required = true)
                                                                         @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
-                                                                                PageRequest pageRequest,
+                                                                                Pageable pageable,
                                                                            @ApiParam(value = "项目id", required = true)
                                                                         @PathVariable(name = "project_id") Long projectId,
                                                                            @ApiParam(value = "issueId")
@@ -217,7 +217,7 @@ public class IssueController {
                                                                         @RequestParam() Boolean self,
                                                                            @ApiParam(value = "搜索内容")
                                                                         @RequestParam(required = false) String content) {
-        return Optional.ofNullable(issueService.queryIssueByOptionForAgile(projectId, issueId, issueNum, self, content, pageRequest))
+        return Optional.ofNullable(issueService.queryIssueByOptionForAgile(projectId, issueId, issueNum, self, content, pageable))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.queryIssueByOptionForAgile"));
     }
@@ -419,14 +419,14 @@ public class IssueController {
     public ResponseEntity<PageInfo<IssueListTestVO>> listIssueWithoutSubToTestComponent(@ApiIgnore
                                                                                      @ApiParam(value = "分页信息", required = true)
                                                                                      @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
-                                                                                             PageRequest pageRequest,
+                                                                                             Pageable pageable,
                                                                                         @ApiParam(value = "项目id", required = true)
                                                                                      @PathVariable(name = "project_id") Long projectId,
                                                                                         @ApiParam(value = "组织id", required = true)
                                                                                      @RequestParam Long organizationId,
                                                                                         @ApiParam(value = "查询参数", required = true)
                                                                                      @RequestBody(required = false) SearchVO searchVO) {
-        return Optional.ofNullable(issueService.listIssueWithoutSubToTestComponent(projectId, searchVO, pageRequest, organizationId))
+        return Optional.ofNullable(issueService.listIssueWithoutSubToTestComponent(projectId, searchVO, pageable, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.listIssueWithoutSubToTestComponent"));
     }
@@ -439,14 +439,14 @@ public class IssueController {
     public ResponseEntity<PageInfo<IssueListTestWithSprintVersionVO>> listIssueWithLinkedIssues(@ApiIgnore
                                                                                              @ApiParam(value = "分页信息", required = true)
                                                                                              @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
-                                                                                                     PageRequest pageRequest,
+                                                                                                     Pageable pageable,
                                                                                                 @ApiParam(value = "项目id", required = true)
                                                                                              @PathVariable(name = "project_id") Long projectId,
                                                                                                 @ApiParam(value = "组织id", required = true)
                                                                                              @RequestParam Long organizationId,
                                                                                                 @ApiParam(value = "查询参数", required = true)
                                                                                              @RequestBody(required = false) SearchVO searchVO) {
-        return Optional.ofNullable(issueService.listIssueWithLinkedIssues(projectId, searchVO, pageRequest, organizationId))
+        return Optional.ofNullable(issueService.listIssueWithLinkedIssues(projectId, searchVO, pageable, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.listIssueWithBlockedIssues"));
     }
@@ -498,12 +498,12 @@ public class IssueController {
     public ResponseEntity<PageInfo<IssueComponentDetailDTO>> listIssueWithoutSubDetail(@ApiIgnore
                                                                                    @ApiParam(value = "分页信息", required = true)
                                                                                    @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
-                                                                                           PageRequest pageRequest,
+                                                                                           Pageable pageable,
                                                                                        @ApiParam(value = "项目id", required = true)
                                                                                    @PathVariable(name = "project_id") Long projectId,
                                                                                        @ApiParam(value = "查询参数", required = true)
                                                                                    @RequestBody(required = false) SearchVO searchVO) {
-        return Optional.ofNullable(issueService.listIssueWithoutSubDetail(projectId, searchVO, pageRequest))
+        return Optional.ofNullable(issueService.listIssueWithoutSubDetail(projectId, searchVO, pageable))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.listIssueWithoutSubDetail"));
     }
@@ -549,8 +549,8 @@ public class IssueController {
     public ResponseEntity<PageInfo<UndistributedIssueVO>> queryUnDistributedIssues(@ApiParam(value = "项目id", required = true)
                                                                                 @PathVariable(name = "project_id") Long projectId,
                                                                                    @ApiParam(value = "分页信息", required = true)
-                                                                                @ApiIgnore PageRequest pageRequest) {
-        return Optional.ofNullable(issueService.queryUnDistributedIssues(projectId, pageRequest))
+                                                                                @ApiIgnore Pageable pageable) {
+        return Optional.ofNullable(issueService.queryUnDistributedIssues(projectId, pageable))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.UndistributedIssueList.get"));
     }
