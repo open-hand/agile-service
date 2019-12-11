@@ -50,12 +50,4 @@ public class NoticeController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
-    @ApiOperation("迁移agile_message_detail到框架")
-    @GetMapping("/migrate_message")
-    public ResponseEntity<List<MessageDetailDTO>> migrateMessageDetail(@ApiParam(value = "项目id", required = true)
-                                                                      @PathVariable(name = "project_id") Long projectId) {
-
-        return new ResponseEntity<>(noticeService.migrateMessageDetail(projectId),HttpStatus.OK);
-    }
 }
