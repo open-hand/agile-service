@@ -2,8 +2,8 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.LookupTypeWithValuesVO;
 import io.choerodon.agile.app.service.LookupValueService;
-import io.choerodon.base.annotation.Permission;
-import io.choerodon.base.enums.ResourceType;
+import io.choerodon.core.annotation.Permission;
+import io.choerodon.core.enums.ResourceType;
 import io.choerodon.core.exception.CommonException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;

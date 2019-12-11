@@ -1,10 +1,10 @@
 package io.choerodon.agile.api.controller.v1;
 
 import com.github.pagehelper.PageInfo;
-import io.choerodon.base.annotation.Permission;
-import io.choerodon.base.domain.PageRequest;
-import io.choerodon.base.domain.Sort;
-import io.choerodon.base.enums.ResourceType;
+import io.choerodon.core.annotation.Permission;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import io.choerodon.core.enums.ResourceType;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
@@ -12,7 +12,7 @@ import io.choerodon.agile.api.validator.StateValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusService;
-import io.choerodon.mybatis.annotation.SortDefault;
+import org.springframework.data.web.SortDefault;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -47,12 +47,12 @@ public class StatusController extends BaseController {
     @CustomPageRequest
     @PostMapping("/organizations/{organization_id}/status/list")
     public ResponseEntity<PageInfo<StatusWithInfoVO>> queryStatusList(@ApiIgnore
-                                                                      @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
+                                                                      @SortDefault(value = "id", direction = Sort.Direction.DESC) Pageable pageable,
                                                                       @ApiParam(value = "组织id", required = true)
                                                                       @PathVariable("organization_id") Long organizationId,
                                                                       @ApiParam(value = "status search dto", required = true)
                                                                       @RequestBody StatusSearchVO statusSearchVO) {
-        return Optional.ofNullable(statusService.queryStatusList(pageRequest, organizationId, statusSearchVO))
+        return Optional.ofNullable(statusService.queryStatusList(pageable, organizationId, statusSearchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.statusList.get"));
     }

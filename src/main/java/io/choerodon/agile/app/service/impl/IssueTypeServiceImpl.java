@@ -10,7 +10,8 @@ import io.choerodon.agile.infra.dto.IssueTypeDTO;
 import io.choerodon.agile.infra.enums.InitIssueType;
 import io.choerodon.agile.infra.mapper.IssueTypeMapper;
 import io.choerodon.agile.infra.utils.PageUtil;
-import io.choerodon.base.domain.PageRequest;
+import io.choerodon.web.util.PageableHelper;
+import org.springframework.data.domain.Pageable;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -107,8 +108,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public PageInfo<IssueTypeWithInfoVO> queryIssueTypeList(PageRequest pageRequest, Long organizationId, IssueTypeSearchVO issueTypeSearchVO) {
-        PageInfo<Long> issuetypeIdsPage = PageHelper.startPage(pageRequest.getPage(), pageRequest.getSize(), PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() -> issueTypeMapper.selectIssueTypeIds(organizationId, issueTypeSearchVO));
+    public PageInfo<IssueTypeWithInfoVO> queryIssueTypeList(Pageable pageable, Long organizationId, IssueTypeSearchVO issueTypeSearchVO) {
+        PageInfo<Long> issuetypeIdsPage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(pageable.getSort())).doSelectPageInfo(() -> issueTypeMapper.selectIssueTypeIds(organizationId, issueTypeSearchVO));
         List<IssueTypeWithInfoVO> issueTypeWithInfoVOList = new ArrayList<>(issuetypeIdsPage.getList().size());
         if (issuetypeIdsPage.getList() != null && !issuetypeIdsPage.getList().isEmpty()) {
             issueTypeWithInfoVOList.addAll(modelMapper.map(issueTypeMapper.queryIssueTypeList(organizationId, issuetypeIdsPage.getList()), new TypeToken<List<IssueTypeWithInfoVO>>() {

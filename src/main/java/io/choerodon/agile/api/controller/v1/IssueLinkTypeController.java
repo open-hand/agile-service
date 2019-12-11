@@ -6,12 +6,12 @@ import io.choerodon.agile.api.vo.IssueLinkTypeCreateVO;
 import io.choerodon.agile.api.vo.IssueLinkTypeSearchVO;
 import io.choerodon.agile.api.validator.IssueLinkTypeValidator;
 import io.choerodon.agile.api.vo.IssueLinkTypeVO;
-import io.choerodon.base.annotation.Permission;
-import io.choerodon.base.enums.ResourceType;
+import io.choerodon.core.annotation.Permission;
+import io.choerodon.core.enums.ResourceType;
 import com.github.pagehelper.PageInfo;
-import io.choerodon.mybatis.annotation.SortDefault;
-import io.choerodon.base.domain.PageRequest;
-import io.choerodon.base.domain.Sort;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.SortDefault;
+import org.springframework.data.domain.Pageable;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +48,8 @@ public class IssueLinkTypeController {
                                                                     @RequestBody IssueLinkTypeSearchVO issueLinkTypeSearchVO,
                                                                        @ApiParam(value = "分页信息", required = true)
                                                                     @SortDefault(value = "link_type_id", direction = Sort.Direction.DESC)
-                                                                    @ApiIgnore PageRequest pageRequest) {
-        return Optional.ofNullable(issueLinkTypeService.listIssueLinkType(projectId, issueLinkTypeId, issueLinkTypeSearchVO, pageRequest))
+                                                                    @ApiIgnore Pageable pageable) {
+        return Optional.ofNullable(issueLinkTypeService.listIssueLinkType(projectId, issueLinkTypeId, issueLinkTypeSearchVO, pageable))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueLinkType.listIssueLinkType"));
     }

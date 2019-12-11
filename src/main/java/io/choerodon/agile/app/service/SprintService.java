@@ -4,7 +4,7 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.SprintConvertDTO;
 import io.choerodon.agile.infra.dto.SprintDTO;
 import com.github.pagehelper.PageInfo;
-import io.choerodon.base.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Map;
@@ -36,7 +36,7 @@ public interface SprintService {
 
     SprintDetailVO querySprintById(Long projectId, Long sprintId);
 
-    PageInfo<IssueListVO> queryIssueByOptions(Long projectId, Long sprintId, String status, PageRequest pageRequest, Long organizationId);
+    PageInfo<IssueListVO> queryIssueByOptions(Long projectId, Long sprintId, String status, Pageable pageable, Long organizationId);
 
     String getQuickFilter(List<Long> quickFilterIds);
 
