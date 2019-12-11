@@ -32,13 +32,23 @@ public class PageUtil {
                 Sort.Order order = iterator.next();
                 for (Map.Entry<String, String> entry : map.entrySet()) {
                     if (entry.getKey().equals(order.getProperty())) {
-                        order = Sort.Order.by(entry.getValue());
+                        if(order.getDirection().isAscending()){
+                            order = Sort.Order.asc(entry.getValue());
+                        }
+                        else {
+                            order = Sort.Order.desc(entry.getValue());
+                        }
                         flag = true;
                     }
                 }
                 if (mainTableAlias != null && !flag) {
                     //驼峰转下划线
-                    order = Sort.Order.by(mainTableAlias + "." + tk.mybatis.mapper.util.StringUtil.camelhumpToUnderline(order.getProperty()));
+                    if(order.getDirection().isAscending()){
+                        order = Sort.Order.by(mainTableAlias + "." + tk.mybatis.mapper.util.StringUtil.camelhumpToUnderline(order.getProperty()));
+                    }
+                    else {
+                        order = Sort.Order.desc(mainTableAlias + "." + tk.mybatis.mapper.util.StringUtil.camelhumpToUnderline(order.getProperty()));
+                    }
                 }
                 orders.add(order);
             }
