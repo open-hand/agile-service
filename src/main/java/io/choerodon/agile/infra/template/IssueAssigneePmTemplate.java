@@ -1,9 +1,6 @@
 package io.choerodon.agile.infra.template;
 
-import io.choerodon.core.notify.Level;
-import io.choerodon.core.notify.NotifyBusinessType;
-import io.choerodon.core.notify.PmTemplate;
-import io.choerodon.core.notify.TargetUserType;
+import io.choerodon.core.notify.*;
 import org.springframework.stereotype.Component;
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/10/8.
@@ -15,6 +12,7 @@ import org.springframework.stereotype.Component;
         description = "问题分配，给相关用户发送通知",
         level = Level.PROJECT,
         categoryCode = "issue-status-change-notice",
+        notifyType = ServiceNotifyType.AGILE_NOTIFY,
         targetUserType = {TargetUserType.TARGET_USER_ASSIGNEE, TargetUserType.TARGET_USER_REPORTER})
 public class IssueAssigneePmTemplate implements PmTemplate {
 
