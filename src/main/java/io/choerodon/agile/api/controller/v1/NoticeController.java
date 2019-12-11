@@ -2,6 +2,7 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.MessageVO;
 import io.choerodon.agile.app.service.NoticeService;
+import io.choerodon.agile.infra.dto.MessageDetailDTO;
 import io.choerodon.core.annotation.Permission;
 import io.choerodon.core.enums.ResourceType;
 import io.choerodon.core.exception.CommonException;
@@ -49,4 +50,12 @@ public class NoticeController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
+    @ApiOperation("迁移agile_message_detail到框架")
+    @GetMapping("/migrate_message")
+    public ResponseEntity<List<MessageDetailDTO>> migrateMessageDetail(@ApiParam(value = "项目id", required = true)
+                                                                      @PathVariable(name = "project_id") Long projectId) {
+
+        return new ResponseEntity<>(noticeService.migrateMessageDetail(projectId),HttpStatus.OK);
+    }
 }

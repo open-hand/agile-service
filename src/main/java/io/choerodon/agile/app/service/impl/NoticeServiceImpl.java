@@ -12,6 +12,7 @@ import io.choerodon.agile.infra.mapper.NoticeMapper;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -177,5 +178,14 @@ public class NoticeServiceImpl implements NoticeService {
         addUsersByProjectOwner(projectId, res, result);
         addUsersByUsers(res, result, users);
         return result;
+    }
+
+    @Override
+    public List<MessageDetailDTO> migrateMessageDetail(Long projectId) {
+        List<MessageDetailDTO> messageDetailDTOS = noticeDetailMapper.selectAll();
+        if(CollectionUtils.isEmpty(messageDetailDTOS)){
+            return new ArrayList<>();
+        }
+        return messageDetailDTOS;
     }
 }
