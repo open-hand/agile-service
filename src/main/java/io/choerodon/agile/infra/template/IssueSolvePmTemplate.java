@@ -4,6 +4,7 @@ package io.choerodon.agile.infra.template;
 import io.choerodon.core.notify.Level;
 import io.choerodon.core.notify.NotifyBusinessType;
 import io.choerodon.core.notify.PmTemplate;
+import io.choerodon.core.notify.TargetUserType;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,7 +12,12 @@ import org.springframework.stereotype.Component;
  * Email: fuqianghuang01@gmail.com
  */
 @Component
-@NotifyBusinessType(code = "issueSolve", name = "问题已解决", description = "问题已解决，给相关用户发送通知", level = Level.PROJECT)
+@NotifyBusinessType(code = "issueSolve",
+        name = "问题已解决",
+        description = "问题已解决，给相关用户发送通知",
+        level = Level.PROJECT,
+        categoryCode = "issue-status-change-notice",
+        targetUserType = {TargetUserType.TARGET_USER_ASSIGNEE, TargetUserType.TARGET_USER_REPORTER})
 public class IssueSolvePmTemplate implements PmTemplate {
 
     @Override
