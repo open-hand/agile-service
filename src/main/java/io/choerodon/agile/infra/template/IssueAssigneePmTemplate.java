@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
         level = Level.PROJECT,
         categoryCode = "issue-status-change-notice",
         pmEnabledFlag = true,
+        proPmEnabledFlag = true,
         notifyType = ServiceNotifyType.AGILE_NOTIFY,
         targetUserType = {TargetUserType.TARGET_USER_ASSIGNEE, TargetUserType.TARGET_USER_REPORTER})
 public class IssueAssigneePmTemplate implements PmTemplate {
