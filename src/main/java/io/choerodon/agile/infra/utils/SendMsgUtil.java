@@ -73,7 +73,7 @@ public class SendMsgUtil {
     public void sendMsgByIssueCreate(Long projectId, IssueVO result) {
         //发送消息
         if (SchemeApplyType.AGILE.equals(result.getApplyType())) {
-            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "issue_created", result);
+            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "issueCreate", result);
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String userName = result.getReporterName();
             ProjectVO projectVO = userService.queryProject(projectId);
@@ -97,7 +97,7 @@ public class SendMsgUtil {
         if (SchemeApplyType.AGILE.equals(result.getApplyType())) {
             IssueVO issueVO = new IssueVO();
             issueVO.setReporterId(result.getReporterId());
-            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "issue_created", issueVO);
+            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "issueCreate", issueVO);
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String userName = result.getReporterName();
             ProjectVO projectVO = userService.queryProject(projectId);
@@ -118,7 +118,7 @@ public class SendMsgUtil {
     @Async
     public void sendMsgByIssueAssignee(Long projectId, List<String> fieldList, IssueVO result) {
         if (fieldList.contains("assigneeId") && result.getAssigneeId() != null && SchemeApplyType.AGILE.equals(result.getApplyType())) {
-            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "issue_assigneed", result);
+            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "issueAssignee", result);
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String userName = result.getAssigneeName();
             ProjectVO projectVO = userService.queryProject(projectId);
@@ -140,7 +140,7 @@ public class SendMsgUtil {
     public void sendMsgByIssueComplete(Long projectId, List<String> fieldList, IssueVO result) {
         Boolean completed = issueStatusMapper.selectByStatusId(projectId, result.getStatusId()).getCompleted();
         if (fieldList.contains(STATUS_ID) && completed != null && completed && result.getAssigneeId() != null && SchemeApplyType.AGILE.equals(result.getApplyType())) {
-            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "issue_solved", result);
+            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "issueSolve", result);
             ProjectVO projectVO = userService.queryProject(projectId);
             if (projectVO == null) {
                 throw new CommonException(ERROR_PROJECT_NOTEXIST);
@@ -166,7 +166,7 @@ public class SendMsgUtil {
         // 发送消息
         Boolean completed = issueStatusMapper.selectByStatusId(projectId, issueMoveVO.getStatusId()).getCompleted();
         if (completed != null && completed && issueDTO.getAssigneeId() != null && SchemeApplyType.AGILE.equals(issueDTO.getApplyType())) {
-            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "issue_solved", modelMapper.map(issueDTO, IssueVO.class));
+            List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "issueSolve", modelMapper.map(issueDTO, IssueVO.class));
             ProjectVO projectVO = userService.queryProject(projectId);
             if (projectVO == null) {
                 throw new CommonException("error.project.notExist");

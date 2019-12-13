@@ -7,15 +7,22 @@ import io.choerodon.agile.app.service.NoticeService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.MessageDTO;
 import io.choerodon.agile.infra.dto.MessageDetailDTO;
+import io.choerodon.agile.infra.feign.NotifyFeignClient;
+import io.choerodon.agile.infra.feign.vo.MessageSettingVO;
 import io.choerodon.agile.infra.mapper.NoticeDetailMapper;
 import io.choerodon.agile.infra.mapper.NoticeMapper;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/10/9.
@@ -37,6 +44,9 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Autowired
     private NoticeMessageAssembler noticeMessageAssembler;
+
+    @Autowired
+    private NotifyFeignClient notifyFeignClient;
 
     private void getIds(List<MessageDTO> result, List<Long> ids) {
         for (MessageDTO messageDTO : result) {
@@ -133,11 +143,11 @@ public class NoticeServiceImpl implements NoticeService {
         }
     }
 
-    private void addUsersByUsers (List<String> res, List<Long> result, String[] users) {
-        if (res.contains(USERS) && users != null && users.length != 0) {
-            for (String str : users) {
-                if (!result.contains(Long.parseLong(str))) {
-                    result.add(Long.parseLong(str));
+    private void addUsersByUsers (List<String> res, List<Long> result, Set<Long> users) {
+        if (res.contains(USERS) && users != null && users.size() != 0) {
+            for (Long userId : users) {
+                if (!result.contains(userId)) {
+                    result.add(userId);
                 }
             }
         }
@@ -154,27 +164,24 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     @Override
-    public List<Long> queryUserIdsByProjectId(Long projectId, String event, IssueVO issueVO) {
-        List<MessageDTO> originMessageList = noticeMapper.selectByEvent(event);
-        List<MessageDTO> changeMessageList = noticeMapper.selectByProjectIdAndEvent(projectId, event);
-        List<String> res = new ArrayList<>();
-        String[] users = null;
-        for (MessageDTO messageDTO : originMessageList) {
-            int flag = 0;
-            for (MessageDTO changeMessageDTO : changeMessageList) {
-                if (messageDTO.getEvent().equals(changeMessageDTO.getEvent()) && messageDTO.getNoticeType().equals(changeMessageDTO.getNoticeType())) {
-                    flag = 1;
-                    users = judgeUserType(changeMessageDTO, res);
-                    break;
-                }
-            }
-            if (flag == 0 && messageDTO.getEnable()) {
-                res.add(messageDTO.getNoticeType());
-            }
+    public List<Long> queryUserIdsByProjectId(Long projectId, String code, IssueVO issueVO) {
+        ResponseEntity<MessageSettingVO> messageSetting = notifyFeignClient.getMessageSetting(projectId,"agile", code,null,null);
+        MessageSettingVO messageVo = messageSetting.getBody();
+        if(ObjectUtils.isEmpty(messageVo)){
+            throw new CommonException("error.message.setting.is.null");
         }
+        Set<String> type = new HashSet<>();
+        Set<Long> users = new HashSet<>();
+        messageVo.getTargetUserDTOS().forEach(v -> {
+            type.add(v.getType());
+            if(ObjectUtils.isEmpty(v.getUserId())){
+                users.add(v.getUserId());
+            }
+        });
+        List<String> res = type.stream().collect(Collectors.toList());
         List<Long> result = new ArrayList<>();
         addUsersByReporter(res, result, issueVO);
-        addUsersByAssigneer(res, result, issueVO, event);
+        addUsersByAssigneer(res, result, issueVO, code);
         addUsersByProjectOwner(projectId, res, result);
         addUsersByUsers(res, result, users);
         return result;
