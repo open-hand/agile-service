@@ -5,7 +5,7 @@ import io.choerodon.agile.api.vo.IssueLinkTypeVO;
 import io.choerodon.agile.api.vo.IssueLinkTypeSearchVO;
 import com.github.pagehelper.PageInfo;
 import io.choerodon.agile.infra.dto.IssueLinkTypeDTO;
-import io.choerodon.base.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 /**
  * @author dinghuang123@gmail.com
@@ -19,10 +19,10 @@ public interface IssueLinkTypeService {
      * @param projectId              projectId
      * @param issueLinkTypeId        issueLinkTypeId不包含的id
      * @param issueLinkTypeSearchVO issueLinkTypeSearchVO
-     * @param pageRequest            pageRequest
+     * @param pageable            pageable
      * @return IssueLinkTypeVO
      */
-    PageInfo<IssueLinkTypeVO> listIssueLinkType(Long projectId, Long issueLinkTypeId, IssueLinkTypeSearchVO issueLinkTypeSearchVO, PageRequest pageRequest);
+    PageInfo<IssueLinkTypeVO> listIssueLinkType(Long projectId, Long issueLinkTypeId, IssueLinkTypeSearchVO issueLinkTypeSearchVO, Pageable pageable);
 
     /**
      * 创建issueLinkType

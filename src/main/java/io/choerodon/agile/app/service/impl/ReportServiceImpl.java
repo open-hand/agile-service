@@ -12,7 +12,8 @@ import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
-import io.choerodon.base.domain.PageRequest;
+import io.choerodon.web.util.PageableHelper;
+import org.springframework.data.domain.Pageable;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -21,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -374,7 +376,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public PageInfo<IssueListVO> queryIssueByOptions(Long projectId, Long versionId, String status, String type, PageRequest pageRequest, Long organizationId) {
+    public PageInfo<IssueListVO> queryIssueByOptions(Long projectId, Long versionId, String status, String type, Pageable pageable, Long organizationId) {
         ProductVersionDTO versionDO = new ProductVersionDTO();
         versionDO.setProjectId(projectId);
         versionDO.setVersionId(versionId);
@@ -382,10 +384,10 @@ public class ReportServiceImpl implements ReportService {
         if (versionDO == null || Objects.equals(versionDO.getStatusCode(), VERSION_ARCHIVED_CODE)) {
             throw new CommonException(VERSION_REPORT_ERROR);
         }
-        pageRequest.setSort(PageUtil.sortResetOrder(pageRequest.getSort(), "ai", new HashMap<>()));
-        //pageRequest.resetOrder("ai", new HashMap<>());
-        PageInfo<IssueDTO> reportIssuePage = PageHelper.startPage(pageRequest.getPage(), pageRequest.getSize(),
-                PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() -> reportMapper.
+        Sort sort = PageUtil.sortResetOrder(pageable.getSort(), "ai", new HashMap<>());
+        //pageable.resetOrder("ai", new HashMap<>());
+        PageInfo<IssueDTO> reportIssuePage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(),
+                PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> reportMapper.
                 queryReportIssues(projectId, versionId, status, type));
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);

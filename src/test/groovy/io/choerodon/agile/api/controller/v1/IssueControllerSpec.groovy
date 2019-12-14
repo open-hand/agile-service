@@ -12,7 +12,7 @@ import io.choerodon.agile.infra.dto.*
 import io.choerodon.agile.infra.mapper.*
 import com.github.pagehelper.PageInfo
 import io.choerodon.agile.app.service.UserService
-import io.choerodon.base.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.mockito.Matchers
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
@@ -993,9 +993,7 @@ class IssueControllerSpec extends Specification {
 
     def 'listIssueWithLinkedIssues'() {
         given:
-        PageRequest pageRequest = new PageRequest()
-        pageRequest.size = 10
-        pageRequest.page = 0
+        Pageable pageable = Pageable.of(1,10)
         SearchVO searchDTO = new SearchVO()
         Map<String, Object> searchArgsMap = new HashMap<>()
         searchDTO.searchArgs = searchArgsMap
@@ -1006,8 +1004,8 @@ class IssueControllerSpec extends Specification {
         searchDTO.advancedSearchArgs = advancedSearchArgsMap
 
         when:
-        def entity = restTemplate.postForEntity("/v1/projects/{project_id}/issues/test_component/filter_linked?pageRequest={pageRequest}&&organizationId={organizationId}",
-                searchDTO, PageInfo.class, projectId, pageRequest, organizationId)
+        def entity = restTemplate.postForEntity("/v1/projects/{project_id}/issues/test_component/filter_linked?pageable={pageable}&&organizationId={organizationId}",
+                searchDTO, PageInfo.class, projectId, pageable, organizationId)
 
         then:
         entity.statusCode.is2xxSuccessful()

@@ -25,8 +25,10 @@ import io.choerodon.agile.infra.utils.*;
 import io.choerodon.asgard.saga.annotation.Saga;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
-import io.choerodon.base.domain.PageRequest;
-import io.choerodon.base.domain.Sort;
+import io.choerodon.web.util.PageableHelper;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.core.oauth.CustomUserDetails;
@@ -338,7 +340,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public PageInfo<IssueListFieldKVVO> listIssueWithSub(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
+    public PageInfo<IssueListFieldKVVO> listIssueWithSub(Long projectId, SearchVO searchVO, Pageable pageable, Long organizationId) {
         if (organizationId == null) {
             organizationId = ConvertUtil.getOrganizationId(projectId);
         }
@@ -355,31 +357,31 @@ public class IssueServiceImpl implements IssueService {
             handleOtherArgs(searchVO);
             final String searchSql = filterSql;
 
-            if (!handleSortField(pageRequest).equals("")) {
-                String fieldCode = handleSortField(pageRequest);
+            if (!handleSortField(pageable).equals("")) {
+                String fieldCode = handleSortField(pageable);
                 Map<String, String> order = new HashMap<>(1);
                 String sortCode = fieldCode.split("\\.")[1];
                 order.put(fieldCode, sortCode);
-                PageUtil.sortResetOrder(pageRequest.getSort(), null, order);
+                PageUtil.sortResetOrder(pageable.getSort(), null, order);
                 List<Long> issueIdsWithSub = issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
-                List<Long> foundationIssueIds = fieldValueService.sortIssueIdsByFieldValue(organizationId, projectId, pageRequest);
+                List<Long> foundationIssueIds = fieldValueService.sortIssueIdsByFieldValue(organizationId, projectId, pageable);
 
                 List<Long> foundationIssueIdsWithSub = foundationIssueIds.stream().filter(issueIdsWithSub::contains).collect(Collectors.toList());
                 List<Long> issueIdsWithSubWithoutFoundation = issueIdsWithSub.stream().filter(t -> !foundationIssueIdsWithSub.contains(t)).collect(Collectors.toList());
 
-                Page page = new Page<>(pageRequest.getPage(), pageRequest.getSize());
+                Page page = new Page<>(pageable.getPageNumber(), pageable.getPageSize());
                 page.setTotal(issueIdsWithSub.size());
-                page.addAll(handleIssueLists(foundationIssueIdsWithSub, issueIdsWithSubWithoutFoundation, pageRequest)
-                        .subList((pageRequest.getPage() - 1) * pageRequest.getSize(), pageRequest.getPage() * pageRequest.getSize()));
+                page.addAll(handleIssueLists(foundationIssueIdsWithSub, issueIdsWithSubWithoutFoundation, pageable)
+                        .subList((pageable.getPageNumber() - 1) * pageable.getPageSize(), pageable.getPageNumber() * pageable.getPageSize()));
 
                 issueIdPage = page.toPageInfo();
             } else {
                 Map<String, String> order = new HashMap<>(1);
                 //处理表映射
                 order.put("issueId", "search.issue_issue_id");
-                pageRequest.setSort(PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, order));
-                issueIdPage = PageHelper.startPage(pageRequest.getPage(), pageRequest.getSize(),
-                        PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() -> issueMapper.queryIssueIdsListWithSub
+                Sort sort = PageUtil.sortResetOrder(pageable.getSort(), SEARCH, order);
+                issueIdPage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(),
+                        PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> issueMapper.queryIssueIdsListWithSub
                         (projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds()));
             }
 
@@ -401,9 +403,9 @@ public class IssueServiceImpl implements IssueService {
         }
     }
 
-    private List<Long> handleIssueLists(List<Long> foundationList, List<Long> agileList, PageRequest pageRequest) {
-        if (pageRequest.getSort() != null) {
-            Iterator<Sort.Order> iterator = pageRequest.getSort().iterator();
+    private List<Long> handleIssueLists(List<Long> foundationList, List<Long> agileList, Pageable pageable) {
+        if (pageable.getSort() != null) {
+            Iterator<Sort.Order> iterator = pageable.getSort().iterator();
             Sort.Direction direction = Sort.Direction.ASC;
             while (iterator.hasNext()) {
                 Sort.Order order = iterator.next();
@@ -419,9 +421,9 @@ public class IssueServiceImpl implements IssueService {
         } else return new ArrayList<>();
     }
 
-    private String handleSortField(PageRequest pageRequest) {
-        if (pageRequest.getSort() != null) {
-            Iterator<Sort.Order> iterator = pageRequest.getSort().iterator();
+    private String handleSortField(Pageable pageable) {
+        if (pageable.getSort() != null) {
+            Iterator<Sort.Order> iterator = pageable.getSort().iterator();
             String fieldCode = "";
             while (iterator.hasNext()) {
                 Sort.Order order = iterator.next();
@@ -429,7 +431,7 @@ public class IssueServiceImpl implements IssueService {
             }
             if (fieldCode.contains("foundation.")) {
                 return fieldCode;
-            } else return "";
+            } else  return "";
         } else return "";
     }
 
@@ -623,7 +625,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
 
-    @Saga(code = "agile-delete-issue", description = "删除issue", inputSchemaClass = IssuePayload.class)
+    //    @Saga(code = "agile-delete-issue", description = "删除issue", inputSchemaClass = IssuePayload.class)
     @Override
     public void deleteIssue(Long projectId, Long issueId) {
         IssueConvertDTO issueConvertDTO = queryIssueByProjectIdAndIssueId(projectId, issueId);
@@ -665,11 +667,11 @@ public class IssueServiceImpl implements IssueService {
         issueAccessDataService.delete(projectId, issueConvertDTO.getIssueId());
         //删除rank数据
         rankMapper.deleteRankByIssueId(issueId);
-        //删除issue发送消息
-        IssuePayload issuePayload = new IssuePayload();
-        issuePayload.setIssueId(issueId);
-        issuePayload.setProjectId(projectId);
-        sagaClient.startSaga("agile-delete-issue", new StartInstanceDTO(JSON.toJSONString(issuePayload), "", "", ResourceLevel.PROJECT.value(), projectId));
+//        //删除issue发送消息
+//        IssuePayload issuePayload = new IssuePayload();
+//        issuePayload.setIssueId(issueId);
+//        issuePayload.setProjectId(projectId);
+//        sagaClient.startSaga("agile-delete-issue", new StartInstanceDTO(JSON.toJSONString(issuePayload), "", "", ResourceLevel.PROJECT.value(), projectId));
         //delete cache
         dataLogRedisUtil.handleDeleteRedisByDeleteIssue(projectId);
     }
@@ -1221,20 +1223,21 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public PageInfo<IssueNumVO> queryIssueByOption(Long projectId, Long issueId, String issueNum, Boolean onlyActiveSprint, Boolean self, String content, PageRequest pageRequest) {
+    public PageInfo<IssueNumVO> queryIssueByOption(Long projectId, Long issueId, String issueNum, Boolean onlyActiveSprint, Boolean self, String content, Pageable pageable) {
         //连表查询需要设置主表别名
-        pageRequest.setSort(PageUtil.sortResetOrder(pageRequest.getSort(), "ai", new HashMap<>()));
-        //pageRequest.resetOrder("ai", new HashMap<>());
+        Sort sort = PageUtil.sortResetOrder(pageable.getSort(), "ai", new HashMap<>());
+        //pageable.resetOrder("ai", new HashMap<>());
         IssueNumDTO issueNumDTO = null;
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(),pageable.getPageSize());
         if (self) {
             issueNumDTO = issueMapper.queryIssueByIssueNumOrIssueId(projectId, issueId, issueNum);
             if (issueNumDTO != null) {
-                pageRequest.setSize(pageRequest.getSize() - 1);
+                pageRequest = PageRequest.of(pageable.getPageNumber(),pageable.getPageSize() - 1);
             }
         }
         Long activeSprintId = onlyActiveSprint ? getActiveSprintId(projectId) : null;
-        PageInfo<IssueNumDTO> issueDOPage = PageHelper.startPage(pageRequest.getPage(),
-                pageRequest.getSize(), PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() -> issueMapper.
+        PageInfo<IssueNumDTO> issueDOPage = PageHelper.startPage(pageable.getPageNumber(),
+                pageable.getPageSize(), PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> issueMapper.
                 queryIssueByOption(projectId, issueId, issueNum, activeSprintId, self, content));
         if (self && issueNumDTO != null) {
             issueDOPage.getList().add(0, issueNumDTO);
@@ -1654,12 +1657,12 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public PageInfo<IssueListTestVO> listIssueWithoutSubToTestComponent(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
+    public PageInfo<IssueListTestVO> listIssueWithoutSubToTestComponent(Long projectId, SearchVO searchVO, Pageable pageable, Long organizationId) {
         //连表查询需要设置主表别名
-        pageRequest.setSort(PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, new HashMap<>()));
-        //pageRequest.resetOrder(SEARCH, new HashMap<>());
-        PageInfo<IssueDTO> issueDOPage = PageHelper.startPage(pageRequest.getPage(), pageRequest.getSize(),
-                PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() -> issueMapper.listIssueWithoutSubToTestComponent(projectId, searchVO.getSearchArgs(),
+        Sort sort = PageUtil.sortResetOrder(pageable.getSort(), SEARCH, new HashMap<>());
+        //pageable.resetOrder(SEARCH, new HashMap<>());
+        PageInfo<IssueDTO> issueDOPage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(),
+                PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> issueMapper.listIssueWithoutSubToTestComponent(projectId, searchVO.getSearchArgs(),
                 searchVO.getAdvancedSearchArgs(), searchVO.getOtherArgs(), searchVO.getContents()));
         return handleIssueListTestDoToDto(issueDOPage, organizationId, projectId);
     }
@@ -1672,10 +1675,10 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public PageInfo<IssueListTestWithSprintVersionVO> listIssueWithLinkedIssues(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
-        pageRequest.setSort(PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, new HashMap<>()));
-        //pageRequest.resetOrder(SEARCH, new HashMap<>());
-        PageInfo<IssueDTO> issueDOPage = PageHelper.startPage(pageRequest.getPage(), pageRequest.getSize(), PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() ->
+    public PageInfo<IssueListTestWithSprintVersionVO> listIssueWithLinkedIssues(Long projectId, SearchVO searchVO, Pageable pageable, Long organizationId) {
+        Sort sort = PageUtil.sortResetOrder(pageable.getSort(), SEARCH, new HashMap<>());
+        //pageable.resetOrder(SEARCH, new HashMap<>());
+        PageInfo<IssueDTO> issueDOPage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(sort)).doSelectPageInfo(() ->
                 issueMapper.listIssueWithLinkedIssues(projectId, searchVO.getSearchArgs(),
                         searchVO.getAdvancedSearchArgs(), searchVO.getOtherArgs(), searchVO.getContents()));
         return handleILTDTOToILTWSVDTO(projectId, handleIssueListTestDoToDto(issueDOPage, organizationId, projectId));
@@ -1734,18 +1737,19 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public PageInfo<IssueNumVO> queryIssueByOptionForAgile(Long projectId, Long issueId, String issueNum, Boolean self, String content, PageRequest pageRequest) {
-        pageRequest.setSort(PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, new HashMap<>()));
-        //pageRequest.resetOrder("search", new HashMap<>());
+    public PageInfo<IssueNumVO> queryIssueByOptionForAgile(Long projectId, Long issueId, String issueNum, Boolean self, String content, Pageable pageable) {
+        Sort sort = PageUtil.sortResetOrder(pageable.getSort(), SEARCH, new HashMap<>());
+        //pageable.resetOrder("search", new HashMap<>());
         IssueNumDTO issueNumDTO = null;
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(),pageable.getPageSize());
         if (self) {
             issueNumDTO = issueMapper.queryIssueByIssueNumOrIssueId(projectId, issueId, issueNum);
             if (issueNumDTO != null) {
-                pageRequest.setSize(pageRequest.getSize() - 1);
+                pageRequest = PageRequest.of(pageRequest.getPageNumber(),pageable.getPageSize() - 1);
             }
         }
-        PageInfo<IssueNumDTO> issueDOPage = PageHelper.startPage(pageRequest.getPage(), pageRequest.getSize(),
-                PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() ->
+        PageInfo<IssueNumDTO> issueDOPage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(),
+                PageableHelper.getSortSql(sort)).doSelectPageInfo(() ->
                 issueMapper.queryIssueByOptionForAgile(projectId, issueId, issueNum, self, content));
         if (self && issueNumDTO != null) {
             issueDOPage.getList().add(0, issueNumDTO);
@@ -1784,12 +1788,12 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public PageInfo<IssueComponentDetailDTO> listIssueWithoutSubDetail(Long projectId, SearchVO searchVO, PageRequest pageRequest) {
+    public PageInfo<IssueComponentDetailDTO> listIssueWithoutSubDetail(Long projectId, SearchVO searchVO, Pageable pageable) {
         //连表查询需要设置主表别名
-        pageRequest.setSort(PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, new HashMap<>()));
-        //pageRequest.resetOrder(SEARCH, new HashMap<>());
-        PageInfo<Long> issueIds = PageHelper.startPage(pageRequest.getPage(), pageRequest.getSize(),
-                PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() -> issueMapper.listIssueIdsWithoutSubDetail(projectId, searchVO.getSearchArgs(),
+        Sort sort = PageUtil.sortResetOrder(pageable.getSort(), SEARCH, new HashMap<>());
+        //pageable.resetOrder(SEARCH, new HashMap<>());
+        PageInfo<Long> issueIds = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(),
+                PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> issueMapper.listIssueIdsWithoutSubDetail(projectId, searchVO.getSearchArgs(),
                 searchVO.getAdvancedSearchArgs(), searchVO.getOtherArgs(), searchVO.getContents()));
         List<IssueComponentDetailInfoDTO> issueComponentDetailInfoDTOS = new ArrayList<>(issueIds.getList().size());
         if (issueIds.getList() != null && !issueIds.getList().isEmpty()) {
@@ -1895,9 +1899,9 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public PageInfo<UndistributedIssueVO> queryUnDistributedIssues(Long projectId, PageRequest pageRequest) {
-        PageInfo<UndistributedIssueDTO> undistributedIssueDOPage = PageHelper.startPage(pageRequest.getPage(),
-                pageRequest.getSize()).doSelectPageInfo(() ->
+    public PageInfo<UndistributedIssueVO> queryUnDistributedIssues(Long projectId, Pageable pageable) {
+        PageInfo<UndistributedIssueDTO> undistributedIssueDOPage = PageHelper.startPage(pageable.getPageNumber(),
+                pageable.getPageSize()).doSelectPageInfo(() ->
                 issueMapper.queryUnDistributedIssues(projectId)
         );
         return PageUtil.buildPageInfoWithPageInfoList(undistributedIssueDOPage, issueAssembler.undistributedIssueDOToDto(undistributedIssueDOPage.getList(), projectId));

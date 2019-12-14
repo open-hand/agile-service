@@ -8,7 +8,7 @@ import io.choerodon.agile.api.vo.event.ChangeStatus;
 import io.choerodon.agile.api.vo.event.DeployStateMachinePayload;
 import io.choerodon.agile.api.vo.event.StateMachineSchemeDeployCheckIssue;
 import io.choerodon.agile.infra.dto.StateMachineDTO;
-import io.choerodon.base.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +28,7 @@ public interface StateMachineService {
      * @param param          模糊查询参数
      * @return 状态机列表
      */
-    PageInfo<StateMachineListVO> pageQuery(Long organizationId, PageRequest pageRequest, String name, String description, String param);
+    PageInfo<StateMachineListVO> pageQuery(Long organizationId, Pageable pageable, String name, String description, String param);
 
     /**
      * 创建状态机及配置

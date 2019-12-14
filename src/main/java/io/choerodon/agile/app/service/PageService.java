@@ -1,7 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import com.github.pagehelper.PageInfo;
-import io.choerodon.base.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import io.choerodon.agile.api.vo.PageSearchVO;
 import io.choerodon.agile.api.vo.PageVO;
 
@@ -10,5 +10,5 @@ import io.choerodon.agile.api.vo.PageVO;
  * @since 2019/4/1
  */
 public interface PageService {
-    PageInfo<PageVO> pageQuery(Long organizationId, PageRequest pageRequest, PageSearchVO searchDTO);
+    PageInfo<PageVO> pageQuery(Long organizationId, Pageable pageable, PageSearchVO searchDTO);
 }

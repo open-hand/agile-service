@@ -13,7 +13,7 @@ import io.choerodon.agile.infra.dto.IssueNumDTO;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import com.github.pagehelper.PageInfo;
-import io.choerodon.base.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 /**
  * 敏捷开发Issue
@@ -47,10 +47,10 @@ public interface IssueService {
      *
      * @param projectId   projectId
      * @param searchVO   searchVO
-     * @param pageRequest pageRequest
+     * @param pageable pageable
      * @return IssueListVO
      */
-    PageInfo<IssueListFieldKVVO> listIssueWithSub(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
+    PageInfo<IssueListFieldKVVO> listIssueWithSub(Long projectId, SearchVO searchVO, Pageable pageable, Long organizationId);
 
     List<EpicDataVO> listEpic(Long projectId);
 
@@ -143,7 +143,7 @@ public interface IssueService {
      */
     IssueConvertDTO queryIssueByProjectIdAndIssueId(Long projectId, Long issueId);
 
-    PageInfo<IssueNumVO> queryIssueByOption(Long projectId, Long issueId, String issueNum, Boolean onlyActiveSprint, Boolean self, String content, PageRequest pageRequest);
+    PageInfo<IssueNumVO> queryIssueByOption(Long projectId, Long issueId, String issueNum, Boolean onlyActiveSprint, Boolean self, String content, Pageable pageable);
 
     void exportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request, HttpServletResponse response, Long organizationId);
 
@@ -183,12 +183,12 @@ public interface IssueService {
      *
      * @param projectId   projectId
      * @param searchVO   searchVO
-     * @param pageRequest pageRequest
+     * @param pageable pageable
      * @return IssueListVO
      */
-    PageInfo<IssueListTestVO> listIssueWithoutSubToTestComponent(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
+    PageInfo<IssueListTestVO> listIssueWithoutSubToTestComponent(Long projectId, SearchVO searchVO, Pageable pageable, Long organizationId);
 
-    PageInfo<IssueListTestWithSprintVersionVO> listIssueWithLinkedIssues(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
+    PageInfo<IssueListTestWithSprintVersionVO> listIssueWithLinkedIssues(Long projectId, SearchVO searchVO, Pageable pageable, Long organizationId);
 
     List<IssueCreationNumVO> queryIssueNumByTimeSlot(Long projectId, String typeCode, Integer timeSlot);
 
@@ -200,11 +200,11 @@ public interface IssueService {
      * @param issueNum    issueNum
      * @param self        self
      * @param content     content
-     * @param pageRequest pageRequest
+     * @param pageable pageable
      * @return IssueNumVO
      */
     PageInfo<IssueNumVO> queryIssueByOptionForAgile(Long projectId, Long issueId, String issueNum,
-                                                    Boolean self, String content, PageRequest pageRequest);
+                                                    Boolean self, String content, Pageable pageable);
 
     /**
      * 拖动epic
@@ -230,10 +230,10 @@ public interface IssueService {
      *
      * @param projectId   projectId
      * @param searchVO   searchVO
-     * @param pageRequest pageRequest
+     * @param pageable pageable
      * @return IssueComponentDetailTO
      */
-    PageInfo<IssueComponentDetailDTO> listIssueWithoutSubDetail(Long projectId, SearchVO searchVO, PageRequest pageRequest);
+    PageInfo<IssueComponentDetailDTO> listIssueWithoutSubDetail(Long projectId, SearchVO searchVO, Pageable pageable);
 
     IssueVO issueParentIdUpdate(Long projectId, IssueUpdateParentIdVO issueUpdateParentIdVO);
 
@@ -241,7 +241,7 @@ public interface IssueService {
 
     List<Long> queryIssueIdsByOptions(Long projectId, SearchVO searchVO);
 
-    PageInfo<UndistributedIssueVO> queryUnDistributedIssues(Long projectId, PageRequest pageRequest);
+    PageInfo<UndistributedIssueVO> queryUnDistributedIssues(Long projectId, Pageable pageable);
 
     List<UnfinishedIssueVO> queryUnfinishedIssues(Long projectId, Long assigneeId);
 

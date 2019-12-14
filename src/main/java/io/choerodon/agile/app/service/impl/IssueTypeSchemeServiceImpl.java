@@ -2,7 +2,8 @@ package io.choerodon.agile.app.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import io.choerodon.base.domain.PageRequest;
+import io.choerodon.web.util.PageableHelper;
+import org.springframework.data.domain.Pageable;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.IssueTypeSchemeSearchVO;
 import io.choerodon.agile.api.vo.IssueTypeSchemeVO;
@@ -237,9 +238,9 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
     }
 
     @Override
-    public PageInfo<IssueTypeSchemeWithInfoVO> queryIssueTypeSchemeList(PageRequest pageRequest, Long organizationId, IssueTypeSchemeSearchVO issueTypeSchemeSearchVO) {
-        PageInfo<Long> issueTypeSchemeIdsPage = PageHelper.startPage(pageRequest.getPage(),
-                pageRequest.getSize(), PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() -> issueTypeSchemeMapper.selectIssueTypeSchemeIds(organizationId, issueTypeSchemeSearchVO));
+    public PageInfo<IssueTypeSchemeWithInfoVO> queryIssueTypeSchemeList(Pageable pageable, Long organizationId, IssueTypeSchemeSearchVO issueTypeSchemeSearchVO) {
+        PageInfo<Long> issueTypeSchemeIdsPage = PageHelper.startPage(pageable.getPageNumber(),
+                pageable.getPageSize(), PageableHelper.getSortSql(pageable.getSort())).doSelectPageInfo(() -> issueTypeSchemeMapper.selectIssueTypeSchemeIds(organizationId, issueTypeSchemeSearchVO));
         List<IssueTypeSchemeWithInfoVO> issueTypeSchemeWithInfoVOList = new ArrayList<>(issueTypeSchemeIdsPage.getList().size());
         if (issueTypeSchemeIdsPage.getList() != null && !issueTypeSchemeIdsPage.getList().isEmpty()) {
             List<IssueTypeSchemeWithInfoDTO> issueTypeSchemeWithInfoList = issueTypeSchemeMapper.queryIssueTypeSchemeList(organizationId, issueTypeSchemeIdsPage.getList());

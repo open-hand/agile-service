@@ -18,7 +18,8 @@ import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.asgard.saga.annotation.Saga;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
-import io.choerodon.base.domain.PageRequest;
+import io.choerodon.web.util.PageableHelper;
+import org.springframework.data.domain.Pageable;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.core.oauth.CustomUserDetails;
@@ -126,7 +127,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         this.sagaClient = sagaClient;
     }
 
-    @Saga(code = "agile-create-version", description = "创建版本", inputSchemaClass = VersionPayload.class)
+//    @Saga(code = "agile-create-version", description = "创建版本", inputSchemaClass = VersionPayload.class)
     @Override
     public synchronized ProductVersionDetailVO createVersion(Long projectId, ProductVersionCreateVO versionCreateVO) {
         try {
@@ -144,10 +145,10 @@ public class ProductVersionServiceImpl implements ProductVersionService {
             ProductVersionDetailVO result = new ProductVersionDetailVO();
             ProductVersionDTO query = createBase(productVersionDTO);
             BeanUtils.copyProperties(query, result);
-            VersionPayload versionPayload = new VersionPayload();
-            versionPayload.setVersionId(query.getVersionId());
-            versionPayload.setProjectId(query.getProjectId());
-            sagaClient.startSaga("agile-create-version", new StartInstanceDTO(JSON.toJSONString(versionPayload), "", "", ResourceLevel.PROJECT.value(), projectId));
+//            VersionPayload versionPayload = new VersionPayload();
+//            versionPayload.setVersionId(query.getVersionId());
+//            versionPayload.setProjectId(query.getProjectId());
+//            sagaClient.startSaga("agile-create-version", new StartInstanceDTO(JSON.toJSONString(versionPayload), "", "", ResourceLevel.PROJECT.value(), projectId));
             return result;
         } catch (Exception e) {
             throw new CommonException(e.getMessage());
@@ -173,7 +174,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         return simpleDeleteVersion(projectId, versionId);
     }
 
-    @Saga(code = "agile-delete-version", description = "删除版本", inputSchemaClass = VersionPayload.class)
+//    @Saga(code = "agile-delete-version", description = "删除版本", inputSchemaClass = VersionPayload.class)
     private Boolean simpleDeleteVersion(Long projectId, Long versionId) {
         try {
             ProductVersionDTO version = new ProductVersionDTO();
@@ -184,10 +185,10 @@ public class ProductVersionServiceImpl implements ProductVersionService {
                 throw new CommonException(NOT_FOUND);
             }
             Boolean deleteResult = iProductVersionService.delete(versionDTO);
-            VersionPayload versionPayload = new VersionPayload();
-            versionPayload.setVersionId(versionDTO.getVersionId());
-            versionPayload.setProjectId(versionDTO.getProjectId());
-            sagaClient.startSaga("agile-delete-version", new StartInstanceDTO(JSON.toJSONString(versionPayload), "", "", ResourceLevel.PROJECT.value(), projectId));
+//            VersionPayload versionPayload = new VersionPayload();
+//            versionPayload.setVersionId(versionDTO.getVersionId());
+//            versionPayload.setProjectId(versionDTO.getProjectId());
+//            sagaClient.startSaga("agile-delete-version", new StartInstanceDTO(JSON.toJSONString(versionPayload), "", "", ResourceLevel.PROJECT.value(), projectId));
             return deleteResult;
         } catch (Exception e) {
             throw new CommonException(e.getMessage());
@@ -215,10 +216,10 @@ public class ProductVersionServiceImpl implements ProductVersionService {
 
     @Override
     @SuppressWarnings("unchecked")
-    public PageInfo<ProductVersionPageVO> queryByProjectId(Long projectId, PageRequest pageRequest, SearchVO searchVO) {
+    public PageInfo<ProductVersionPageVO> queryByProjectId(Long projectId, Pageable pageable, SearchVO searchVO) {
         //过滤查询和排序
-        PageInfo<Long> versionIds = PageHelper.startPage(pageRequest.getPage(),
-                pageRequest.getSize(), PageUtil.sortToSql(pageRequest.getSort())).doSelectPageInfo(() -> productVersionMapper.
+        PageInfo<Long> versionIds = PageHelper.startPage(pageable.getPageNumber(),
+                pageable.getPageSize(), PageableHelper.getSortSql(pageable.getSort())).doSelectPageInfo(() -> productVersionMapper.
                 queryVersionIdsByProjectId(projectId, searchVO.getSearchArgs(),
                         searchVO.getAdvancedSearchArgs(), searchVO.getContents()));
         if ((versionIds.getList() != null) && !versionIds.getList().isEmpty()) {
