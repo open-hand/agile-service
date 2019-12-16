@@ -24,6 +24,7 @@ public class SiteMsgUtil {
     private static final String ASSIGNEENAME = "assigneeName";
     private static final String SUMMARY = "summary";
     private static final String URL = "url";
+    private static final String NOTIFY_TYPE = "agile";
 
     @Autowired
     private NotifyFeignClient notifyFeignClient;
@@ -31,6 +32,7 @@ public class SiteMsgUtil {
     public void issueCreate(List<Long> userIds,String userName, String summary, String url, Long reporterId, Long projectId) {
         NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
         noticeSendDTO.setCode("issueCreate");
+        noticeSendDTO.setNotifyType(NOTIFY_TYPE);
         Map<String, Object> params = new HashMap<>();
         params.put(ASSIGNEENAME, userName);
         params.put(SUMMARY, summary);
@@ -57,6 +59,7 @@ public class SiteMsgUtil {
     public void issueAssignee(List<Long> userIds, String userName, String summary, String url, Long assigneeId, Long projectId) {
         NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
         noticeSendDTO.setCode("issueAssignee");
+        noticeSendDTO.setNotifyType(NOTIFY_TYPE);
         Map<String, Object> params = new HashMap<>();
         params.put(ASSIGNEENAME, userName);
         params.put(SUMMARY, summary);
@@ -83,6 +86,7 @@ public class SiteMsgUtil {
     public void issueSolve(List<Long> userIds, String userName, String summary, String url, Long assigneeId, Long projectId) {
         NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
         noticeSendDTO.setCode("issueSolve");
+        noticeSendDTO.setNotifyType(NOTIFY_TYPE);
         Map<String, Object> params = new HashMap<>();
         params.put(ASSIGNEENAME, userName);
         params.put(SUMMARY, summary);
