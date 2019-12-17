@@ -29,4 +29,7 @@ public interface NotifyFeignClient {
                                                        @RequestParam(value = "env_id", required = false) Long envId,
                                                        @RequestParam(value = "event_name", required = false) String eventName);
 
+    @GetMapping("/v1/upgrade")
+    ResponseEntity<String> checkLog(@RequestParam(value = "version") String version,
+                                    @RequestParam(value = "type") String type);
 }

@@ -34,4 +34,9 @@ public class NotifyFeignClientFallback implements NotifyFeignClient {
     public ResponseEntity<MessageSettingVO> getMessageSetting(Long projectId, String notifyType, String code, Long envId, String eventName) {
         throw new CommonException(GET_MESSAGE);
     }
+
+    @Override
+    public ResponseEntity<String> checkLog(String version, String type) {
+        throw new CommonException("error.data.Miration");
+    }
 }
