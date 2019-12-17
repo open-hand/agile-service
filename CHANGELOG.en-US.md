@@ -1,6 +1,28 @@
 # Changelog
 All notable changes about agile-service will be documented in this file.
 
+## [0.20.0] - 2019-12-20
+
+### Added
+
+- Support filtering by clicking the assigneer on the backlog.
+- Story map supports filtering by no version in demand pool.
+
+### Changed
+
+- Subtask support association knowledge.
+- Kanban default swimlane configuration adjusted to assigneer.
+- Remove text at top of sidebar.
+- Unified field explanation icon and description style.
+- Uniform font color and size.
+
+### Fixed
+
+- Fix knowledge link jump problem in issue detail.
+- Fix missing priority field for issue list.
+- Fix the bug that issue details quickly create subtask will create repeatedly when multiple clicks. 
+
+
 ## [0.19.0] - 2019-10-18
 
 ### Added
