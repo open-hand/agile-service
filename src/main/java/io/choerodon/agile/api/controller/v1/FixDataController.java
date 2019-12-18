@@ -102,23 +102,6 @@ public class FixDataController {
     }
 
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
-    @ApiOperation("【0.20】迁移项目下issue对应的label")
-    @GetMapping("/migrate_issue_Label_rel/{project_id}")
-    public ResponseEntity<List<LabelIssueRelFixVO>> listIssueLabel(@ApiParam(value = "项目id", required = true)
-                                                                   @PathVariable(name = "project_id") Long projectId) {
-        return new ResponseEntity<>(labelIssueRelService.queryProjectLabelIssueRel(projectId), HttpStatus.OK);
-    }
-
-    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
-    @ApiOperation("【0.20】迁移项目下对应的标签")
-    @GetMapping("/migrate_issue_Label/{project_id}")
-    public ResponseEntity<List<LabelFixVO>> listAllLabel(@ApiParam(value = "项目id", required = true)
-                                                         @PathVariable(name = "project_id") Long projectId) {
-        return new ResponseEntity<>(issueLabelService.queryListByProjectId(projectId), HttpStatus.OK);
-
-    }
-
-    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("【0.20】迁移projectInfo")
     @GetMapping("/migrate_project_info")
     public ResponseEntity<List<ProjectInfoFixVO>> queryAllProjectInfo() {

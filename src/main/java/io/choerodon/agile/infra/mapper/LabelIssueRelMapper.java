@@ -14,5 +14,4 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface LabelIssueRelMapper extends Mapper<LabelIssueRelDTO> {
 
-    List<LabelIssueRelDTO> queryByIssueIds(@Param("projectId")Long projectId);
 }

@@ -2,7 +2,6 @@ package io.choerodon.agile.app.service;
 
 
 import io.choerodon.agile.api.vo.IssueLabelVO;
-import io.choerodon.agile.api.vo.LabelFixVO;
 import io.choerodon.agile.infra.dto.IssueLabelDTO;
 
 import java.util.List;
@@ -39,10 +38,4 @@ public interface IssueLabelService {
      */
     int labelGarbageCollection(Long projectId);
 
-
-    /**
-     * 查询所有标签，数据迁移使用
-     * @return
-     */
-    List<LabelFixVO> queryListByProjectId(Long projectId);
 }

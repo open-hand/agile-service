@@ -1,7 +1,5 @@
 package io.choerodon.agile.app.service;
 
-import java.util.List;
-import io.choerodon.agile.api.vo.LabelIssueRelFixVO;
 import io.choerodon.agile.infra.dto.LabelIssueRelDTO;
 
 
@@ -45,5 +43,4 @@ public interface LabelIssueRelService {
      */
     int delete(LabelIssueRelDTO labelIssueRelDTO);
 
-    List<LabelIssueRelFixVO> queryProjectLabelIssueRel(Long projectId);
 }

@@ -40,5 +40,5 @@ public interface IssueLabelMapper extends Mapper<IssueLabelDTO> {
      */
     Long queryLabelIdByLabelNameAndProjectId(@Param("labelName") String labelName, @Param("projectId") Long projectId);
 
-    List<IssueLabelDTO> selectLabelList(@Param("projectId") Long projectId);
+
 }

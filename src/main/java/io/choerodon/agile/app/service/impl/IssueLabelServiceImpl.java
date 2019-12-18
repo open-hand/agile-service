@@ -2,7 +2,6 @@ package io.choerodon.agile.app.service.impl;
 
 
 import io.choerodon.agile.api.vo.IssueLabelVO;
-import io.choerodon.agile.api.vo.LabelFixVO;
 import io.choerodon.agile.app.service.IssueLabelService;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.dto.IssueLabelDTO;
@@ -13,10 +12,8 @@ import org.modelmapper.TypeToken;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -67,15 +64,5 @@ public class IssueLabelServiceImpl implements IssueLabelService {
     public int labelGarbageCollection(Long projectId) {
         redisUtil.deleteRedisCache(new String[]{PIE_CHART + projectId + ':' + LABEL + "*"});
         return issueLabelMapper.labelGarbageCollection(projectId);
-    }
-
-    @Override
-    public List<LabelFixVO> queryListByProjectId(Long projectId) {
-        List<IssueLabelDTO> issueLabelDTOS = issueLabelMapper.selectLabelList(projectId);
-        if (CollectionUtils.isEmpty(issueLabelDTOS)) {
-            return new ArrayList<>();
-        }
-        return modelMapper.map(issueLabelDTOS, new TypeToken<List<LabelFixVO>>() {
-        }.getType());
     }
 }
