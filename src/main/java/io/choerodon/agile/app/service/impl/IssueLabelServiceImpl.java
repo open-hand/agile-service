@@ -68,14 +68,4 @@ public class IssueLabelServiceImpl implements IssueLabelService {
         redisUtil.deleteRedisCache(new String[]{PIE_CHART + projectId + ':' + LABEL + "*"});
         return issueLabelMapper.labelGarbageCollection(projectId);
     }
-
-    @Override
-    public List<LabelFixVO> queryListByProjectId(Long projectId) {
-        List<IssueLabelDTO> issueLabelDTOS = issueLabelMapper.selectLabelList(projectId);
-        if (CollectionUtils.isEmpty(issueLabelDTOS)) {
-            return new ArrayList<>();
-        }
-        return modelMapper.map(issueLabelDTOS, new TypeToken<List<LabelFixVO>>() {
-        }.getType());
-    }
 }

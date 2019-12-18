@@ -39,10 +39,4 @@ public interface IssueLabelService {
      */
     int labelGarbageCollection(Long projectId);
 
-
-    /**
-     * 查询所有标签，数据迁移使用
-     * @return
-     */
-    List<LabelFixVO> queryListByProjectId(Long projectId);
 }

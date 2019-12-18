@@ -45,5 +45,4 @@ public interface LabelIssueRelService {
      */
     int delete(LabelIssueRelDTO labelIssueRelDTO);
 
-    List<LabelIssueRelFixVO> queryProjectLabelIssueRel(Long projectId);
 }

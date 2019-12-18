@@ -65,15 +65,4 @@ public class LabelIssueRelServiceImpl implements LabelIssueRelService {
     public int delete(LabelIssueRelDTO labelIssueRelDTO) {
         return labelIssueRelMapper.delete(labelIssueRelDTO);
     }
-
-    @Override
-    public List<LabelIssueRelFixVO> queryProjectLabelIssueRel(Long projectId) {
-        List<LabelIssueRelDTO> labelIssueRelDTOS = labelIssueRelMapper.queryByIssueIds(projectId);
-        if(CollectionUtils.isEmpty(labelIssueRelDTOS)){
-              return new ArrayList<>();
-        }
-        List<LabelIssueRelFixVO> labelIssueRelFixVOS = modelMapper.map(labelIssueRelDTOS, new TypeToken<List<LabelIssueRelFixVO>>() {
-        }.getType());
-        return labelIssueRelFixVOS;
-    }
 }
