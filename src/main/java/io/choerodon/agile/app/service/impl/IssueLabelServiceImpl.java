@@ -13,8 +13,10 @@ import org.modelmapper.TypeToken;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -48,7 +50,8 @@ public class IssueLabelServiceImpl implements IssueLabelService {
     public List<IssueLabelVO> listIssueLabel(Long projectId) {
         IssueLabelDTO issueLabelDTO = new IssueLabelDTO();
         issueLabelDTO.setProjectId(projectId);
-        return modelMapper.map(issueLabelMapper.select(issueLabelDTO), new TypeToken<List<IssueLabelVO>>(){}.getType());
+        return modelMapper.map(issueLabelMapper.select(issueLabelDTO), new TypeToken<List<IssueLabelVO>>() {
+        }.getType());
     }
 
     @Override
@@ -68,7 +71,11 @@ public class IssueLabelServiceImpl implements IssueLabelService {
 
     @Override
     public List<LabelFixVO> queryListByProjectId(Long projectId) {
-        return modelMapper.map(issueLabelMapper.selectLabelList(projectId), new TypeToken<List<LabelFixVO>>() {
+        List<IssueLabelDTO> issueLabelDTOS = issueLabelMapper.selectLabelList(projectId);
+        if (CollectionUtils.isEmpty(issueLabelDTOS)) {
+            return new ArrayList<>();
+        }
+        return modelMapper.map(issueLabelDTOS, new TypeToken<List<LabelFixVO>>() {
         }.getType());
     }
 }
