@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.IssueAttachmentVO;
+import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -34,4 +35,6 @@ public interface IssueAttachmentService {
      * @param url       url
      */
     void dealIssue(Long projectId, Long issueId, String fileName, String url);
+
+    List<TestCaseAttachmentDTO> migrateIssueAttachment();
 }

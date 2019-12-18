@@ -123,4 +123,23 @@
         ORDER BY
         a.link_type_name
     </select>
+
+    <select id="listIssueLinkByIssueIds" resultType="io.choerodon.agile.infra.dto.IssueLinkDTO">
+      SELECT
+	    ail.*
+      FROM agile_issue_link ail
+      WHERE ail.issue_id IN (
+            SELECT
+                ai.issue_id
+            FROM
+                agile_issue ai
+            WHERE
+                ai.project_id = #{projectId}
+            AND ai.apply_type = 'test'
+            AND ai.type_code IN (
+                'issue_test',
+                'issue_auto_test'
+            )
+        )
+    </select>
 </mapper>

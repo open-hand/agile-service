@@ -19,6 +19,7 @@ import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.feign.TestFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.agile.infra.utils.*;
@@ -42,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -162,6 +164,8 @@ public class IssueServiceImpl implements IssueService {
     private StatusService statusService;
     @Autowired
     private InstanceService instanceService;
+    @Autowired
+    private TestFeignClient testFeignClient;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -431,7 +435,7 @@ public class IssueServiceImpl implements IssueService {
             }
             if (fieldCode.contains("foundation.")) {
                 return fieldCode;
-            } else  return "";
+            } else return "";
         } else return "";
     }
 
@@ -674,6 +678,7 @@ public class IssueServiceImpl implements IssueService {
 //        sagaClient.startSaga("agile-delete-issue", new StartInstanceDTO(JSON.toJSONString(issuePayload), "", "", ResourceLevel.PROJECT.value(), projectId));
         //delete cache
         dataLogRedisUtil.handleDeleteRedisByDeleteIssue(projectId);
+        testFeignClient.deleteTestRel(projectId, issueId);
     }
 
     @Override
@@ -1228,11 +1233,11 @@ public class IssueServiceImpl implements IssueService {
         Sort sort = PageUtil.sortResetOrder(pageable.getSort(), "ai", new HashMap<>());
         //pageable.resetOrder("ai", new HashMap<>());
         IssueNumDTO issueNumDTO = null;
-        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(),pageable.getPageSize());
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
         if (self) {
             issueNumDTO = issueMapper.queryIssueByIssueNumOrIssueId(projectId, issueId, issueNum);
             if (issueNumDTO != null) {
-                pageRequest = PageRequest.of(pageable.getPageNumber(),pageable.getPageSize() - 1);
+                pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize() - 1);
             }
         }
         Long activeSprintId = onlyActiveSprint ? getActiveSprintId(projectId) : null;
@@ -1741,11 +1746,11 @@ public class IssueServiceImpl implements IssueService {
         Sort sort = PageUtil.sortResetOrder(pageable.getSort(), SEARCH, new HashMap<>());
         //pageable.resetOrder("search", new HashMap<>());
         IssueNumDTO issueNumDTO = null;
-        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(),pageable.getPageSize());
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
         if (self) {
             issueNumDTO = issueMapper.queryIssueByIssueNumOrIssueId(projectId, issueId, issueNum);
             if (issueNumDTO != null) {
-                pageRequest = PageRequest.of(pageRequest.getPageNumber(),pageable.getPageSize() - 1);
+                pageRequest = PageRequest.of(pageRequest.getPageNumber(), pageable.getPageSize() - 1);
             }
         }
         PageInfo<IssueNumDTO> issueDOPage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(),
@@ -2038,5 +2043,29 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum) {
         return issueMapper.queryIssueByIssueNum(projectId, issueNum);
+    }
+
+    @Override
+    public List<TestCaseDTO> migrateTestCaseByProjectId(Long projectId) {
+        List<TestCaseDTO> testCaseDTOS = issueMapper.migrateTestCase(projectId);
+        if (CollectionUtils.isEmpty(testCaseDTOS)) {
+            return new ArrayList<>();
+        }
+        return testCaseDTOS;
+    }
+
+    @Override
+    public List<Long> queryProjectIds() {
+        List<Long> list = issueMapper.queryProjectIds();
+        if (CollectionUtils.isEmpty(list)) {
+            return new ArrayList<>();
+        }
+        return list;
+    }
+
+    @Override
+    public List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds) {
+
+        return issueAssembler.issueDTOTOVO(projectId, issueMapper.listIssueInfoByIssueIds(projectId, issueIds));
     }
 }

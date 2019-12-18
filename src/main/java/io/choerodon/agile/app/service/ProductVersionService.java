@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import io.choerodon.agile.infra.dto.ProductVersionDTO;
 import org.springframework.data.domain.Pageable;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -72,4 +73,6 @@ public interface ProductVersionService {
     int deleteByVersionIds(Long projectId, List<Long> versionIds);
 
     int batchUpdateSequence(Integer sequence, Long projectId, Integer add, Long versionId);
+
+    List<TestVersionFixVO> queryByVersionId();
 }

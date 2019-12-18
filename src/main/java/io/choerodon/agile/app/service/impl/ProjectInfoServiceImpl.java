@@ -1,10 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import com.github.pagehelper.PageInfo;
-import io.choerodon.agile.api.vo.ProjectInfoVO;
-import io.choerodon.agile.api.vo.ProjectRelationshipVO;
-import io.choerodon.agile.api.vo.RoleAssignmentSearchVO;
-import io.choerodon.agile.api.vo.UserWithRoleVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.ProjectInfoService;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -13,12 +10,14 @@ import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -97,6 +96,16 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
     @Override
     public void updateIssueMaxNum(Long projectId, String issueMaxNum) {
         projectInfoMapper.updateIssueMaxNum(projectId, issueMaxNum);
+    }
+
+    @Override
+    public List<ProjectInfoFixVO> queryAllProjectInfo() {
+        List<ProjectInfoDTO> projectInfoDTOList = projectInfoMapper.selectAll();
+        if (projectInfoDTOList != null && !projectInfoDTOList.isEmpty()) {
+            return modelMapper.map(projectInfoDTOList, new TypeToken<List<ProjectInfoFixVO>>(){}.getType());
+        } else {
+            return new ArrayList<>();
+        }
     }
 
 }

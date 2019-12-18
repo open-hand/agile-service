@@ -33,4 +33,32 @@
         WHERE project_id = #{projectId} AND label_name = #{labelName}
     </select>
 
+    <select id="selectLabelList" resultType="io.choerodon.agile.infra.dto.IssueLabelDTO">
+        SELECT
+            *
+        FROM
+            `agile_issue_label`
+        WHERE
+            label_id IN (
+		SELECT
+			label_id
+		FROM
+			`agile_label_issue_rel`
+		WHERE
+			issue_id IN (
+				SELECT
+					issue_id
+				FROM
+					agile_issue
+				WHERE
+					project_id = #{projectId}
+				AND type_code IN (
+					'issue_auto_test',
+					'issue_test'
+				)
+				AND apply_type = 'test'
+			)
+       )
+    </select>
+
 </mapper>

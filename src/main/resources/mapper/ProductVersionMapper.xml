@@ -394,6 +394,13 @@
         AND ai.apply_type = 'agile'
     </select>
 
+    <select id="queryByVersionId" resultType="io.choerodon.agile.api.vo.TestVersionFixVO">
+        SELECT
+            *
+        FROM
+            `agile_product_version`
+    </select>
+
 
     <delete id="deleteByVersionIds">
         DELETE

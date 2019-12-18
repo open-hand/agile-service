@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.app.service.IIssueAttachmentService;
 import io.choerodon.agile.infra.dto.IssueAttachmentDTO;
+import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.IssueAttachmentVO;
 import io.choerodon.agile.app.service.IssueAttachmentService;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -64,6 +66,15 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         issueAttachmentDTO.setUrl(url);
         issueAttachmentDTO.setCommentId(1L);
         iIssueAttachmentService.createBase(issueAttachmentDTO);
+    }
+
+    @Override
+    public List<TestCaseAttachmentDTO> migrateIssueAttachment() {
+        List<TestCaseAttachmentDTO> list = issueAttachmentMapper.listAttachmentDTO();
+        if (CollectionUtils.isEmpty(list)) {
+            return new ArrayList<>();
+        }
+        return list;
     }
 
 //    @DataLog(type = "createAttachment")
