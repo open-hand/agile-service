@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import io.choerodon.agile.api.vo.LabelIssueRelFixVO;
 import io.choerodon.agile.infra.dto.LabelIssueRelDTO;
@@ -12,6 +13,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.CollectionUtils;
 
 
 /**
@@ -67,6 +69,9 @@ public class LabelIssueRelServiceImpl implements LabelIssueRelService {
     @Override
     public List<LabelIssueRelFixVO> queryProjectLabelIssueRel(Long projectId) {
         List<LabelIssueRelDTO> labelIssueRelDTOS = labelIssueRelMapper.queryByIssueIds(projectId);
+        if(CollectionUtils.isEmpty(labelIssueRelDTOS)){
+              return new ArrayList<>();
+        }
         List<LabelIssueRelFixVO> labelIssueRelFixVOS = modelMapper.map(labelIssueRelDTOS, new TypeToken<List<LabelIssueRelFixVO>>() {
         }.getType());
         return labelIssueRelFixVOS;

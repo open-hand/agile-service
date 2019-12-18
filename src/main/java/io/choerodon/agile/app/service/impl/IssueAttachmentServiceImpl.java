@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -70,6 +71,9 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
     @Override
     public List<TestCaseAttachmentDTO> migrateIssueAttachment() {
         List<TestCaseAttachmentDTO> list = issueAttachmentMapper.listAttachmentDTO();
+        if (CollectionUtils.isEmpty(list)) {
+            return new ArrayList<>();
+        }
         return list;
     }
 
