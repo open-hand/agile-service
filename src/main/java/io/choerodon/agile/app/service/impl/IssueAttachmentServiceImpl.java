@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.app.service.IIssueAttachmentService;
 import io.choerodon.agile.infra.dto.IssueAttachmentDTO;
+import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.IssueAttachmentVO;
 import io.choerodon.agile.app.service.IssueAttachmentService;
@@ -64,6 +65,12 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         issueAttachmentDTO.setUrl(url);
         issueAttachmentDTO.setCommentId(1L);
         iIssueAttachmentService.createBase(issueAttachmentDTO);
+    }
+
+    @Override
+    public List<TestCaseAttachmentDTO> migrateIssueAttachment() {
+        List<TestCaseAttachmentDTO> list = issueAttachmentMapper.listAttachmentDTO();
+        return list;
     }
 
 //    @DataLog(type = "createAttachment")

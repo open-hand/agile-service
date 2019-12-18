@@ -1,9 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.DataLogCreateVO;
-import io.choerodon.agile.api.vo.DataLogVO;
-import io.choerodon.agile.api.vo.FieldDataLogVO;
-import io.choerodon.agile.api.vo.StatusVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.DataLogService;
 import io.choerodon.agile.app.service.FieldDataLogService;
 import io.choerodon.agile.app.service.UserService;
@@ -128,4 +125,13 @@ public class DataLogServiceImpl implements DataLogService {
         dataLogMapper.batchUpdateErrorDataLog(dataLogStatusChangeDTOS);
     }
 
+    @Override
+    public List<DataLogFixVO> queryListByProjectId(Long projectId) {
+        List<DataLogFixVO> dataLogDTOS = dataLogMapper.queryListByProjectId(projectId);
+        if (dataLogDTOS != null && !dataLogDTOS.isEmpty()) {
+            return dataLogDTOS;
+        } else {
+            return new ArrayList<>();
+        }
+    }
 }

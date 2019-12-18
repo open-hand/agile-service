@@ -89,4 +89,26 @@
             #{newPriorityName} ,#{issueDTO.issueId},#{userId})
         </foreach>
     </insert>
+
+    <select id="queryListByProjectId" resultType="io.choerodon.agile.api.vo.DataLogFixVO">
+        SELECT
+          adl.*
+        FROM
+          agile_data_log adl
+        WHERE adl.project_id = #{projectId}
+        AND adl.issue_id IN (
+            SELECT
+                ai.issue_id
+            FROM
+                agile_issue ai
+            WHERE
+                ai.project_id = #{projectId}
+            AND apply_type = 'test'
+            AND ai.type_code IN (
+                'issue_test',
+                'issue_auto_test'
+            )
+        )
+        AND adl.field IN ('summary', 'description', 'Attachment')
+    </select>
 </mapper>

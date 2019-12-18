@@ -1,9 +1,13 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.ProjectInfoFixVO;
 import io.choerodon.agile.api.vo.ProjectInfoVO;
 import io.choerodon.agile.api.vo.ProjectRelationshipVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
+import io.choerodon.agile.infra.dto.ProjectInfoDTO;
+import org.modelmapper.TypeToken;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -59,4 +63,6 @@ public interface ProjectInfoService {
      * @return int
      */
     void updateIssueMaxNum(Long projectId, String issueMaxNum);
+
+    List<ProjectInfoFixVO> queryAllProjectInfo();
 }

@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.IssueLinkCreateVO;
+import io.choerodon.agile.api.vo.IssueLinkFixVO;
 import io.choerodon.agile.api.vo.IssueLinkVO;
 import io.choerodon.agile.api.validator.IssueLinkValidator;
 import io.choerodon.agile.app.assembler.IssueLinkAssembler;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -91,4 +93,13 @@ public class IssueLinkServiceImpl implements IssueLinkService {
         return issueLinkMapper.deleteByPrimaryKey(issueLinkId);
     }
 
+    @Override
+    public List<IssueLinkFixVO> listIssueLinkByIssuedIds(Long projectId) {
+        List<IssueLinkDTO> issueLinkDTOList = issueLinkMapper.listIssueLinkByIssueIds(projectId);
+        if (issueLinkDTOList != null && !issueLinkDTOList.isEmpty()) {
+            return modelMapper.map(issueLinkDTOList, new TypeToken<List<IssueLinkFixVO>>() {}.getType());
+        } else {
+            return new ArrayList<>();
+        }
+    }
 }

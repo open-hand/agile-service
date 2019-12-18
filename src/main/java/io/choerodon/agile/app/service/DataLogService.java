@@ -1,10 +1,12 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.DataLogCreateVO;
+import io.choerodon.agile.api.vo.DataLogFixVO;
 import io.choerodon.agile.api.vo.DataLogVO;
 import io.choerodon.agile.infra.dto.DataLogDTO;
 import io.choerodon.agile.infra.dto.DataLogStatusChangeDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -35,4 +37,6 @@ public interface DataLogService {
      * @param dataLogStatusChangeDTOS dataLogStatusChangeDTOS
      */
     void batchUpdateErrorDataLog(Set<DataLogStatusChangeDTO> dataLogStatusChangeDTOS);
+
+    List<DataLogFixVO> queryListByProjectId(Long projectId);
 }

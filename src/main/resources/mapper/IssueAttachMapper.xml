@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.IssueAttachmentMapper">
+
+    <select id="listAttachmentDTO" resultType="io.choerodon.agile.infra.dto.TestCaseAttachmentDTO">
+          SELECT aia.issue_id AS caseId,
+                 aia.attachment_id,
+                 aia.url,
+                 aia.file_name,
+                 aia.project_id,
+                 aia.object_version_number,
+                 aia.created_by,
+                 aia.creation_date,
+                 aia.last_update_date,
+                 aia.last_updated_by
+          FROM agile_issue_attachment aia
+          WHERE aia.issue_id IN (
+              SELECT
+                ai.issue_id
+              FROM agile_issue ai
+              WHERE ai.type_code IN ('issue_test','issue_auto_test')
+              AND ai.apply_type = 'test'
+          )
+    </select>
+
+</mapper>

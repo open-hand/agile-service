@@ -19,6 +19,7 @@ import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.feign.TestFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.agile.infra.utils.*;
@@ -162,6 +163,8 @@ public class IssueServiceImpl implements IssueService {
     private StatusService statusService;
     @Autowired
     private InstanceService instanceService;
+    @Autowired
+    private TestFeignClient testFeignClient;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -674,6 +677,7 @@ public class IssueServiceImpl implements IssueService {
 //        sagaClient.startSaga("agile-delete-issue", new StartInstanceDTO(JSON.toJSONString(issuePayload), "", "", ResourceLevel.PROJECT.value(), projectId));
         //delete cache
         dataLogRedisUtil.handleDeleteRedisByDeleteIssue(projectId);
+        testFeignClient.deleteTestRel(projectId,issueId);
     }
 
     @Override
@@ -2038,5 +2042,21 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum) {
         return issueMapper.queryIssueByIssueNum(projectId, issueNum);
+    }
+
+    @Override
+    public List<TestCaseDTO> migrateTestCaseByProjectId(Long projectId) {
+        return issueMapper.migrateTestCase(projectId);
+    }
+
+    @Override
+    public List<Long> queryProjectIds() {
+        return issueMapper.queryProjectIds();
+    }
+
+    @Override
+    public List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds) {
+
+        return issueAssembler.issueDTOTOVO(projectId,issueMapper.listIssueInfoByIssueIds(projectId,issueIds));
     }
 }

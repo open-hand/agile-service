@@ -7,10 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.alibaba.fastjson.JSONObject;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.infra.dto.IssueConvertDTO;
-import io.choerodon.agile.infra.dto.IssueComponentDetailDTO;
-import io.choerodon.agile.infra.dto.IssueNumDTO;
-import io.choerodon.agile.infra.dto.ProjectInfoDTO;
+import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.data.domain.Pageable;
@@ -290,4 +287,16 @@ public interface IssueService {
     Boolean checkEpicName(Long projectId, String epicName);
 
     IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum);
+
+    /**
+     * 根据projectId按批次迁移数据
+     */
+    List<TestCaseDTO> migrateTestCaseByProjectId(Long projectId);
+
+    /**
+     * 查询issue中的projecid
+     */
+    List<Long> queryProjectIds();
+
+    List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds);
 }

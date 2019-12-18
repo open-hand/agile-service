@@ -26,11 +26,6 @@ public class NotifyFeignClientFallback implements NotifyFeignClient {
     }
 
     @Override
-    public void postEmail(NoticeSendDTO dto) {
-        throw new CommonException(FEIGN_ERROR);
-    }
-
-    @Override
     public ResponseEntity<MessageSettingVO> getMessageSetting(Long projectId, String notifyType, String code, Long envId, String eventName) {
         throw new CommonException(GET_MESSAGE);
     }

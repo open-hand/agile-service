@@ -2451,5 +2451,51 @@
         where project_id = #{projectId} and relate_issue_id = #{issueId}
     </update>
 
+    <select id="migrateTestCase" resultType="io.choerodon.agile.infra.dto.TestCaseDTO">
+        SELECT issue_id as caseId,
+               issue_num as caseNum,
+               summary,
+               description,
+               project_id,
+               object_version_number,
+               created_by,
+               creation_date,
+               last_updated_by,
+               last_update_date
+        FROM agile_issue
+        WHERE project_id = #{projectId}
+          AND type_code in ('issue_test', 'issue_auto_test')
+          AND apply_type = 'test'
+    </select>
+
+    <select id="queryProjectIds" resultType="long">
+        SELECT DISTINCT project_id
+        FROM agile_issue
+        WHERE type_code IN ('issue_test','issue_auto_test')
+        AND apply_type = 'test'
+    </select>
+
+    <select id="listIssueInfoByIssueIds" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+        SELECT
+        ai.issue_id as issue_id,
+        ai.summary,
+        CONCAT(api.project_code,'-', ai.issue_num) as issue_num,
+        ai.reporter_id,
+        ai.last_update_date,
+        ai.priority_id,
+        ai.assignee_id,
+        ai.issue_type_id,
+        ai.status_id,
+        ai.apply_type
+        FROM agile_issue ai
+        LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
+        WHERE
+        ai.project_id = #{projectId}
+        AND ai.issue_id IN
+        <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
+            #{issueId}
+        </foreach>
+
+    </select>
 
 </mapper>

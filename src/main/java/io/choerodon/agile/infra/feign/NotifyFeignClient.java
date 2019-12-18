@@ -8,19 +8,16 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(value = "notify-service", path = "/v1/notices", fallback = NotifyFeignClientFallback.class)
+@FeignClient(value = "notify-service", fallback = NotifyFeignClientFallback.class)
 public interface NotifyFeignClient {
 
-    @PostMapping("")
+    @PostMapping("/v1/notices")
     void postNotice(@RequestBody NoticeSendDTO dto);
 
-    @PostMapping("/ws/{code}/{id}")
+    @PostMapping("/v1/notices/ws/{code}/{id}")
     void postWebSocket(@PathVariable("code") String code,
                        @PathVariable("id") String id,
                        @RequestBody String message);
-
-    @PostMapping
-    void postEmail(@RequestBody NoticeSendDTO dto);
 
     @GetMapping("/v1/projects/{project_id}/message_settings/type/{notify_type}/code/{code}")
     ResponseEntity<MessageSettingVO> getMessageSetting(@PathVariable(value = "project_id") Long projectId,

@@ -614,4 +614,16 @@ public class IssueController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueNum"));
     }
+
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @ApiOperation("【测试专用】根据issueIds查询issue")
+    @PostMapping(value = "/query_issue_ids")
+    public ResponseEntity<List<IssueLinkVO>> queryIssues(@ApiParam(value = "项目id", required = true)
+                                                         @PathVariable(name = "project_id") Long projectId,
+                                                         @ApiParam(value = "issue编号", required = true)
+                                                         @RequestBody List<Long> issueIds) {
+        return Optional.ofNullable(issueService.queryIssueByIssueIds(projectId, issueIds))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueIds"));
+    }
 }

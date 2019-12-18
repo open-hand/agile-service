@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.IssueLinkCreateVO;
+import io.choerodon.agile.api.vo.IssueLinkFixVO;
 import io.choerodon.agile.api.vo.IssueLinkVO;
 import io.choerodon.agile.infra.dto.IssueLinkDTO;
 
@@ -47,4 +48,6 @@ public interface IssueLinkService {
     int deleteByIssueId(Long issueId);
 
     int delete(Long issueLinkId);
+
+    List<IssueLinkFixVO> listIssueLinkByIssuedIds(Long projectId);
 }

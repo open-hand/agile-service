@@ -1,7 +1,10 @@
 package io.choerodon.agile.api.controller.v1;
 
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.MessageDetailDTO;
+import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
+import io.choerodon.agile.infra.dto.TestCaseDTO;
 import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.core.annotation.Permission;
 import io.choerodon.core.enums.ResourceType;
@@ -32,11 +35,26 @@ public class FixDataController {
     private FixDataService fixDataService;
 
     @Autowired
-    private NoticeService noticeService;
+    private IssueService issueService;
 
     @Autowired
+    private IssueAttachmentService issueAttachmentService;
+    @Autowired
+    private IssueLinkService issueLinkService;
+    @Autowired
+    private LabelIssueRelService labelIssueRelService;
+    @Autowired
+    private IssueLabelService issueLabelService;
+    @Autowired
+    private ProjectInfoService projectInfoService;
+    @Autowired
+    private DataLogService dataLogService;
+    @Autowired
+    private ProductVersionService productVersionService;
+    @Autowired
+    private NoticeService noticeService;
+    @Autowired
     private NotifyFeignClient notifyFeignClient;
-
 
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("修复0.19创建项目产生的脏数据【全部】")
@@ -54,12 +72,80 @@ public class FixDataController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
+    @ApiOperation("【0.20】【迁移数据专用】查询测试用例的projectId")
+    @GetMapping(value = "/project_ids")
+    public ResponseEntity<List<Long>> queryProjectId(){
+        return new ResponseEntity<>(issueService.queryProjectIds(), HttpStatus.OK);
+    }
+
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
+    @ApiOperation("【0.20】【迁移数据专用】根据projectId分批次将测试用例数据传递给test_manager")
+    @GetMapping(value = "/migrate_issue/{project_id}")
+    public ResponseEntity<List<TestCaseDTO>> migrateIssue(@PathVariable("project_id")Long projectId){
+        return new ResponseEntity<>(issueService.migrateTestCaseByProjectId(projectId), HttpStatus.OK);
+    }
+
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
+    @ApiOperation("【0.20】【迁移数据专用，迁移测试用例的附件信息】")
+    @GetMapping(value = "/migrate_attachment")
+    public ResponseEntity<List<TestCaseAttachmentDTO>> migrateIssueAttachment(){
+        return new ResponseEntity<>(issueAttachmentService.migrateIssueAttachment(), HttpStatus.OK);
+    }
+
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
+    @ApiOperation("【0.20】迁移项目下link")
+    @GetMapping(value = "/migrate_issueLink/{project_id}")
+    public ResponseEntity<List<IssueLinkFixVO>> listIssueLinkByIssueIds(@ApiParam(value = "项目id", required = true)
+                                                                        @PathVariable(name = "project_id") Long projectId) {
+        return new ResponseEntity<>(issueLinkService.listIssueLinkByIssuedIds(projectId), HttpStatus.OK);
+    }
+
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
+    @ApiOperation("【0.20】迁移项目下issue对应的label")
+    @GetMapping("/migrate_issue_Label_rel/{project_id}")
+    public ResponseEntity<List<LabelIssueRelFixVO>> listIssueLabel(@ApiParam(value = "项目id", required = true)
+                                                                   @PathVariable(name = "project_id") Long projectId) {
+        return new ResponseEntity<>(labelIssueRelService.queryProjectLabelIssueRel(projectId), HttpStatus.OK);
+    }
+
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
+    @ApiOperation("【0.20】迁移项目下对应的标签")
+    @GetMapping("/migrate_issue_Label/{project_id}")
+    public ResponseEntity<List<LabelFixVO>> listAllLabel(@ApiParam(value = "项目id", required = true)
+                                                         @PathVariable(name = "project_id") Long projectId) {
+        return new ResponseEntity<>(issueLabelService.queryListByProjectId(projectId), HttpStatus.OK);
+
+    }
+
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
+    @ApiOperation("【0.20】迁移projectInfo")
+    @GetMapping("/migrate_project_info")
+    public ResponseEntity<List<ProjectInfoFixVO>> queryAllProjectInfo() {
+        return new ResponseEntity<>(projectInfoService.queryAllProjectInfo(), HttpStatus.OK);
+    }
+
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
+    @ApiOperation("【0.20】迁移日志")
+    @GetMapping("/migrate_data_log/{project_id}")
+    public ResponseEntity<List<DataLogFixVO>> migrateDataLog(@ApiParam(value = "项目id", required = true)
+                                                             @PathVariable(name = "project_id") Long projectId) {
+        return new ResponseEntity<>(dataLogService.queryListByProjectId(projectId), HttpStatus.OK);
+    }
+
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
+    @ApiOperation("【0.20】迁移版本")
+    @GetMapping("/migrate_version")
+    public ResponseEntity<List<TestVersionFixVO>> migrateVersion() {
+        return new ResponseEntity<>(productVersionService.queryByVersionId(), HttpStatus.OK);
+    }
+
     @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
     @ApiOperation("【0.20 BASE】迁移agile_message_detail到框架")
     @GetMapping("/migrate_message")
     public ResponseEntity<List<MessageDetailDTO>> migrateMessageDetail(@ApiParam(value = "项目id", required = true)
                                                                        @PathVariable(name = "project_id") Long projectId) {
-        return new ResponseEntity<>(noticeService.migrateMessageDetail(projectId),HttpStatus.OK);
+        return new ResponseEntity<>(noticeService.migrateMessageDetail(),HttpStatus.OK);
     }
 
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})

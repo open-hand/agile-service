@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 
 import io.choerodon.agile.api.vo.IssueLabelVO;
+import io.choerodon.agile.api.vo.LabelFixVO;
 import io.choerodon.agile.app.service.IssueLabelService;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.dto.IssueLabelDTO;
@@ -63,5 +64,11 @@ public class IssueLabelServiceImpl implements IssueLabelService {
     public int labelGarbageCollection(Long projectId) {
         redisUtil.deleteRedisCache(new String[]{PIE_CHART + projectId + ':' + LABEL + "*"});
         return issueLabelMapper.labelGarbageCollection(projectId);
+    }
+
+    @Override
+    public List<LabelFixVO> queryListByProjectId(Long projectId) {
+        return modelMapper.map(issueLabelMapper.selectLabelList(projectId), new TypeToken<List<LabelFixVO>>() {
+        }.getType());
     }
 }

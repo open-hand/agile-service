@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.DataLogFixVO;
 import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.infra.dto.DataLogDTO;
 import io.choerodon.agile.infra.dto.DataLogStatusChangeDTO;
@@ -77,4 +78,6 @@ public interface DataLogMapper extends Mapper<DataLogDTO> {
 
     void batchCreateChangePriorityLogByIssueDOs(@Param("issueDTOS") List<IssueDTO> issueDTOS, @Param("userId") Long userId,
                                                 @Param("oldPriorityName") String oldPriorityName, @Param("newPriorityName") String newPriorityName);
+
+    List<DataLogFixVO> queryListByProjectId(Long projectId);
 }

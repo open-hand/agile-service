@@ -480,5 +480,32 @@ public class IssueAssembler extends AbstractAssembler {
         return undistributedIssueVOS;
     }
 
-
+    public  List<IssueLinkVO> issueDTOTOVO(Long projectId, List<IssueDTO> issueDTOs){
+        List<io.choerodon.agile.api.vo.IssueLinkVO> issueLinkVOList = new ArrayList<>(issueDTOs.size());
+        if (!issueDTOs.isEmpty()) {
+            Map<Long, IssueTypeVO> testIssueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.TEST);
+            Map<Long, IssueTypeVO> agileIssueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
+            Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
+            Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
+            List<Long> assigneeIds = issueDTOs.stream().filter(issue -> issue.getAssigneeId() != null && !Objects.equals(issue.getAssigneeId(), 0L)).map(IssueDTO::getAssigneeId).distinct().collect(Collectors.toList());
+            Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
+            issueDTOs.forEach(issueLinkDO -> {
+                String assigneeName = usersMap.get(issueLinkDO.getAssigneeId()) != null ? usersMap.get(issueLinkDO.getAssigneeId()).getName() : null;
+                String imageUrl = assigneeName != null ? usersMap.get(issueLinkDO.getAssigneeId()).getImageUrl() : null;
+                io.choerodon.agile.api.vo.IssueLinkVO issueLinkVO = new io.choerodon.agile.api.vo.IssueLinkVO();
+                BeanUtils.copyProperties(issueLinkDO, issueLinkVO);
+                if (issueLinkDO.getApplyType().equals(SchemeApplyType.TEST)) {
+                    issueLinkVO.setIssueTypeVO(testIssueTypeDTOMap.get(issueLinkDO.getIssueTypeId()));
+                } else {
+                    issueLinkVO.setIssueTypeVO(agileIssueTypeDTOMap.get(issueLinkDO.getIssueTypeId()));
+                }
+                issueLinkVO.setStatusVO(statusMapDTOMap.get(issueLinkDO.getStatusId()));
+                issueLinkVO.setPriorityVO(priorityDTOMap.get(issueLinkDO.getPriorityId()));
+                issueLinkVO.setAssigneeName(assigneeName);
+                issueLinkVO.setImageUrl(imageUrl);
+                issueLinkVOList.add(issueLinkVO);
+            });
+        }
+        return  issueLinkVOList;
+    }
 }

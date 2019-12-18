@@ -188,7 +188,7 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     @Override
-    public List<MessageDetailDTO> migrateMessageDetail(Long projectId) {
+    public List<MessageDetailDTO> migrateMessageDetail() {
         List<MessageDetailDTO> messageDetailDTOS = noticeDetailMapper.selectAll();
         if(CollectionUtils.isEmpty(messageDetailDTOS)){
             return new ArrayList<>();

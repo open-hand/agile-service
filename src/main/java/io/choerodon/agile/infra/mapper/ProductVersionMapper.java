@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.TestVersionFixVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.mybatis.common.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -158,4 +159,6 @@ public interface ProductVersionMapper extends Mapper<ProductVersionDTO> {
      * @return Integer
      */
     Integer queryStatusIssueCount(@Param("statusIds") List<Long> statusIds, @Param("projectId") Long projectId, @Param("versionId") Long versionId);
+
+    List<TestVersionFixVO> queryByVersionId();
 }

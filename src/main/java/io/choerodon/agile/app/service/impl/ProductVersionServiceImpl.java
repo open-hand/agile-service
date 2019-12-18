@@ -541,4 +541,14 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     public int batchUpdateSequence(Integer sequence, Long projectId, Integer add, Long versionId) {
         return productVersionMapper.batchUpdateSequence(sequence, projectId, add, versionId);
     }
+
+    @Override
+    public List<TestVersionFixVO> queryByVersionId() {
+        List<TestVersionFixVO> testVersionFixVOList = productVersionMapper.queryByVersionId();
+        if (testVersionFixVOList != null && !testVersionFixVOList.isEmpty()) {
+            return testVersionFixVOList;
+        } else {
+            return new ArrayList<>();
+        }
+    }
 }

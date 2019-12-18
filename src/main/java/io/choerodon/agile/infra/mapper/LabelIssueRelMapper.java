@@ -1,7 +1,9 @@
 package io.choerodon.agile.infra.mapper;
 
+import java.util.List;
 import io.choerodon.mybatis.common.Mapper;
 import io.choerodon.agile.infra.dto.*;
+import org.apache.ibatis.annotations.Param;
 
 
 /**
@@ -12,4 +14,5 @@ import io.choerodon.agile.infra.dto.*;
  */
 public interface LabelIssueRelMapper extends Mapper<LabelIssueRelDTO> {
 
+    List<LabelIssueRelDTO> queryByIssueIds(@Param("projectId")Long projectId);
 }
