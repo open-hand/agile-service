@@ -1,10 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
-import java.util.List;
-import io.choerodon.agile.api.vo.DataLogFixVO;
-import io.choerodon.agile.api.vo.IssueLinkFixVO;
-import io.choerodon.agile.api.vo.ProjectInfoFixVO;
-import io.choerodon.agile.api.vo.TestVersionFixVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.MessageDetailDTO;
 import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
@@ -21,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/11/13.
@@ -57,7 +56,6 @@ public class FixDataController {
     @Autowired
     private NotifyFeignClient notifyFeignClient;
 
-
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("修复0.19创建项目产生的脏数据【全部】")
     @GetMapping(value = "/fix_create_project_0.19")
@@ -73,7 +71,6 @@ public class FixDataController {
         fixDataService.fixCreateProjectSingle(projectId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("【0.20】【迁移数据专用】查询测试用例的projectId")
@@ -126,20 +123,20 @@ public class FixDataController {
         return new ResponseEntity<>(productVersionService.queryByVersionId(), HttpStatus.OK);
     }
 
-    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
     @ApiOperation("【0.20 BASE】迁移agile_message_detail到框架")
     @GetMapping("/migrate_message")
-    public ResponseEntity<List<MessageDetailDTO>> migrateMessageDetail() {
+    public ResponseEntity<List<MessageDetailDTO>> migrateMessageDetail(@ApiParam(value = "项目id", required = true)
+                                                                       @PathVariable(name = "project_id") Long projectId) {
         return new ResponseEntity<>(noticeService.migrateMessageDetail(),HttpStatus.OK);
     }
 
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
-    @ApiOperation("【0.20 BASE】启动敏捷迁移到Base的task")
+    @ApiOperation("【0.20 BASE】启动敏捷迁移到Base服务task")
     @GetMapping("/migration_to_base")
     public ResponseEntity migrateToBase() {
         LOGGER.info("==============================>>>>>>>> AGILE Data Migrate Start In Controller <<<<<<<<=================================");
         notifyFeignClient.checkLog("0.20.0", "agile");
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }
