@@ -7,11 +7,13 @@ All notable changes about agile-service will be documented in this file.
 
 - Support filtering by clicking the assigneer on the backlog.
 - Story map supports filtering by no version in demand pool.
+- Filtering questions supports selection of historical version and historical sprint.
 
 ### Changed
 
 - Subtask support association knowledge.
 - Kanban default swimlane configuration adjusted to assigneer.
+- Optimized configuration Kanban can also be configured when there is no sprint.
 - Remove text at top of sidebar.
 - Unified field explanation icon and description style.
 - Uniform font color and size.
