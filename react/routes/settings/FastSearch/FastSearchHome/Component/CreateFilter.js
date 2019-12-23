@@ -549,7 +549,16 @@ const CreateFilter = (props) => {
       if (['=', '!='].indexOf(operation) > -1) {
         // return normal value
         return (
-          <SelectFocusLoad label="值" type="user" labelInValue />
+          <SelectFocusLoad
+            label="值"
+            type="user"
+            labelInValue
+            render={user => (
+              <Option key={user.id} value={user.id}>
+                {user.realName}
+              </Option>
+            )}
+          />
         );
       } else if (['is', 'isNot'].indexOf(operation) > -1) {
         // return value add empty
@@ -564,7 +573,7 @@ const CreateFilter = (props) => {
               .indexOf(input.toLowerCase()) >= 0}
           >
             <Option key="'null'" value="'null'">
-              {'空'}
+              空
             </Option>
           </Select>
         );
@@ -609,7 +618,7 @@ const CreateFilter = (props) => {
               .indexOf(input.toLowerCase()) >= 0}
           >
             <Option key="'null'" value="'null'">
-              {'空'}
+              空
             </Option>
           </Select>
         );
@@ -659,7 +668,7 @@ const CreateFilter = (props) => {
               .indexOf(input.toLowerCase()) >= 0}
           >
             <Option key="'null'" value="'null'">
-              {'空'}
+              空
             </Option>
           </Select>
         )

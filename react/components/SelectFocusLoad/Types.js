@@ -64,7 +64,7 @@ const issue_type_program = {
 };
 export default {
   user: {
-    request: ({ filter, page }) => new Promise(resolve => getUsers(filter, undefined, page).then((UserData) => { resolve({ ...UserData, list: UserData.list.filter(user => user.enabled) }); })),
+    request: ({ filter, page }) => getUsers(filter, undefined, page).then(UserData => ({ ...UserData, list: UserData.list.filter(user => user.enabled) })),
     render: user => (
       <Option key={user.id} value={user.id}>
         <div style={{
@@ -83,7 +83,7 @@ export default {
       const values = value instanceof Array ? value : [value];
       const requestQue = [];
       values.forEach((a) => {
-        if (a && !find(List, { id: a })) {
+        if (a && typeof a === 'number' && !find(List, { id: a })) {
           requestQue.push(getUser(a));
         }
       });
@@ -321,7 +321,7 @@ export default {
       filterOption: false,
       loadWhenMount: true,
     },
-    request: () => loadVersions(['version_planning']),
+    request: ({ filter, page }, statusList = ['version_planning']) => loadVersions(statusList),
     render: version => (
       <Option
         key={version.versionId}
@@ -337,7 +337,7 @@ export default {
       filterOption,
       loadWhenMount: true,
     },
-    request: () => loadSprints(['sprint_planning', 'started']),
+    request: ({ filter, page }, statusList = ['sprint_planning', 'started']) => loadSprints(statusList),
     render: sprint => (
       <Option key={sprint.sprintId} value={sprint.sprintId}>
         {sprint.sprintName}

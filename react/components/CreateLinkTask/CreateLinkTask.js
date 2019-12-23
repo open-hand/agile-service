@@ -22,10 +22,7 @@ class CreateLinkTask extends Component {
   }
 
   componentDidMount() {
-    this.getLinks();
-    setTimeout(() => {
-      this.Select.focus();
-    });
+    this.getLinks();   
   }
 
 

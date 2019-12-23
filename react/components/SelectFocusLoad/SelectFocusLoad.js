@@ -32,7 +32,7 @@ const SelectFocusLoad = (props) => {
   } = Type;
   const totalProps = { ...props, ...TypeProps };
   const {
-    loadWhenMount, afterLoad, value, saveList, children, defaultOpen, defaultOption,
+    loadWhenMount, afterLoad, value, saveList, children, defaultOpen, defaultOption, optionFilter, requestArgs,
   } = totalProps;
   const [loading, setLoading] = useState(false);
   const [List, setList] = useState(defaultOption ? [defaultOption] : []);
@@ -53,7 +53,7 @@ const SelectFocusLoad = (props) => {
   };
   const loadData = ({ filter = '', page = 1, isLoadMore = false } = {}) => new Promise((resolve) => {
     setLoading(true);
-    request({ filter, page }).then((data) => {
+    request({ filter, page }, requestArgs).then((data) => {
       const { list, hasNextPage } = dataConverter(data);
       const TotalList = isLoadMore ? [...List, ...list] : list;
       setPage(page);
@@ -100,12 +100,16 @@ const SelectFocusLoad = (props) => {
     loadData({ filter, page: page + 1, isLoadMore: true });
   };
 
-  const totalList = [...List, ...extraList];
+  let totalList = [...List, ...extraList];
   if (saveList) {
     saveList(totalList);
   }
+  if (optionFilter) {
+    totalList = totalList.filter(optionFilter);
+  }
   // 渲染去掉重复项
   const Options = uniqBy(totalList.map(render).concat(React.Children.toArray(children)), option => option.props.value);
+
   return (
     <Select
       filter
