@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Service
 public class NoticeServiceImpl implements NoticeService {
 
-    private static final String USERS = "users";
+    private static final String USERS = "specifier";
 
     @Autowired
     private NoticeMapper noticeMapper;
@@ -115,14 +115,14 @@ public class NoticeServiceImpl implements NoticeService {
         }
     }
 
-    private void addUsersByAssigneer(List<String> res, List<Long> result, IssueVO issueVO, String event) {
-        if (res.contains("assigneer") && issueVO.getAssigneeId() != null && !result.contains(issueVO.getAssigneeId()) && !"issue_created".equals(event)) {
+    private void addUsersByAssigneer(List<String> res, List<Long> result, IssueVO issueVO) {
+        if (res.contains("assignee") && issueVO.getAssigneeId() != null && !result.contains(issueVO.getAssigneeId())) {
             result.add(issueVO.getAssigneeId());
         }
     }
 
     private void addUsersByProjectOwner(Long projectId, List<String> res, List<Long> result) {
-        if (res.contains("project_owner")) {
+        if (res.contains("projectOwner")) {
             RoleAssignmentSearchVO roleAssignmentSearchVO = new RoleAssignmentSearchVO();
             Long roleId = null;
             List<RoleVO> roleVOS = userService.listRolesWithUserCountOnProjectLevel(projectId, roleAssignmentSearchVO);
@@ -174,14 +174,14 @@ public class NoticeServiceImpl implements NoticeService {
         Set<Long> users = new HashSet<>();
         messageVo.getTargetUserDTOS().forEach(v -> {
             type.add(v.getType());
-            if(ObjectUtils.isEmpty(v.getUserId())){
+            if (!ObjectUtils.isEmpty(v.getUserId()) && !v.getUserId().equals(0L)) {
                 users.add(v.getUserId());
             }
         });
         List<String> res = type.stream().collect(Collectors.toList());
         List<Long> result = new ArrayList<>();
         addUsersByReporter(res, result, issueVO);
-        addUsersByAssigneer(res, result, issueVO, code);
+        addUsersByAssigneer(res, result, issueVO);
         addUsersByProjectOwner(projectId, res, result);
         addUsersByUsers(res, result, users);
         return result;
