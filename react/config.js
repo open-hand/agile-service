@@ -4,7 +4,6 @@ const alias = require('../alias').webpack;
 const config = {
   local: true,
   // use for c7n start
-  server: 'http://api.staging.saas.hand-china.com',
   clientId: 'localhost', // 必须填入响应的客户端（本地开发）
   // port: 8080,
   master: './node_modules/@choerodon/master/lib/master.js',

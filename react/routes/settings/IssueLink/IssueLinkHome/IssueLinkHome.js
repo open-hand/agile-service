@@ -206,6 +206,7 @@ class IssueLink extends Component {
     return (
       <Page
         service={[
+          'agile-service.issue-link-type.listIssueLinkType',
           'agile-service.issue-link-type.updateIssueLinkType',
           'agile-service.issue-link-type.deleteIssueLinkType',
           'agile-service.issue-link-type.createIssueLinkType',

@@ -89,7 +89,14 @@ function PageHome(props) {
   }, []);
 
   return (
-    <Page className={`${prefixCls}-home`}>
+    <Page 
+      className={`${prefixCls}-home`}
+      service={AppState.currentMenuType.type === 'project' ? [
+        'agile-service.project-page.pageQuery',
+      ] : [
+        'agile-service.page.pageQuery',
+      ]}
+    >
       <Breadcrumb />
       <Content className={`${prefixCls}-home-content`}>
         <Spin spinning={loading}>

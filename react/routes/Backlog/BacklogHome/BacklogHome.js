@@ -180,9 +180,33 @@ class BacklogHome extends Component {
     return (
       <Page
         service={[
-          // 'agile-service.product-version.createVersion',
           'agile-service.issue.deleteIssue',
           'agile-service.sprint.queryByProjectId',
+          'agile-service.issue.listFeature',
+          'agile-service.product-version.queryVersionByProjectId',
+          'agile-service.sprint.queryByProjectId',
+          'agile-service.priority.queryDefaultByOrganizationId',
+          'agile-service.scheme.queryIssueTypesWithStateMachineIdByProjectId',
+          'agile-service.quick-filter.listByProjectId',
+          'base-service.organization-project.getGroupInfoByEnableProject',
+          'agile-service.issue.createIssue',
+          'agile-service.field-value.queryPageFieldViewList',
+          'agile-service.product-version.queryNameByOptions',
+          'agile-service.issue-component.queryComponentById',
+          'agile-service.scheme.queryByOrganizationIdList',
+          'agile-service.sprint.queryNameByOptions',
+          'agile-service.issue-label.listIssueLabel',
+          'base-service.organization.pagingQueryUsersOnOrganization',
+          'agile-service.issue.listEpicSelectData',
+          'agile-service.sprint.queryNameByOptions',
+          'agile-service.issue-link-type.listIssueLinkType',
+          'agile-service.issue.queryIssueByOptionForAgile',
+          'agile-service.sprint.queryCompleteMessageBySprintId',
+          'agile-service.sprint.completeSprint',
+          'base-service.time-zone-work-calendar-project.queryTimeZoneWorkCalendarDetail',
+          'agile-service.sprint.querySprintById',
+          'agile-service.sprint.startSprint',
+          'agile-service.product-version.updateVersion',
         ]}
         className="c7n-backlog-page"
       >

@@ -127,6 +127,18 @@ const StoryMapHome = observer(() => {
   return (
     <Page
       className="c7nagile-StoryMap"
+      service={[
+        'agile-service.scheme.queryIssueTypesWithStateMachineIdByProjectId',
+        'agile-service.product-version.queryNameByOptions',
+        'agile-service.scheme.queryByOrganizationIdList',
+        'agile-service.story-map.queryStoryMapDemand',
+        'agile-service.scheme.queryStatusByProjectId',
+        'agile-service.issue.checkEpicName',
+        'agile-service.issue.createIssue',
+        'agile-service.field-value.createFieldValuesWithQuickCreate',
+        'agile-service.story-map.storyMapMove',
+        'agile-service.story-map.queryStoryMap',
+      ]}
     >
       <Header title="故事地图">
         {/* <Button

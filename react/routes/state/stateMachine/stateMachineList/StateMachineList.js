@@ -8,7 +8,7 @@ import {
 } from 'choerodon-ui';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import {
-  Content, Header, TabPage as Page, Permission, stores, Breadcrumb, Choerodon
+  Content, Header, TabPage as Page, Permission, stores, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import './StateMachineList.less';
 import TableDropMenu from '../../../../common/TableDropMenu';
@@ -368,7 +368,13 @@ class StateMachineList extends Component {
       total,
     };
     return (
-      <Page>
+      <Page service={[
+        'agile-service.state-machine.pagingQuery',
+        'agile-service.state-machine.create',
+        'agile-service.state-machine.checkName',
+        'agile-service.state-machine.delete',
+      ]}
+      >
         <Header>
           {statesMachineList && statesMachineList.length === 0
             ? (

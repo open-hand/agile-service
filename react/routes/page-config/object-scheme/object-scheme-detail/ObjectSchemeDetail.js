@@ -9,7 +9,7 @@ import {
   Breadcrumb as Bread,
 } from 'choerodon-ui';
 import {
-  TabPage as Page, Header, Content, Breadcrumb, Choerodon
+  TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import TypeTag from '../../../../components/TypeTag';
 import Store from '../stores';
@@ -70,7 +70,7 @@ function ObjectSchemeDetail(props) {
   const [detailRecord, setDetailRecord] = useState({});
   const [addVisible, setAddVisible] = useState(false);
 
-  const [scrollHeight, setScrollHeight] = useState(3000);
+  // const [scrollHeight, setScrollHeight] = useState(3000);
 
   const initCurrentMenuType = () => {
     objectSchemeStore.initCurrentMenuType(AppState.currentMenuType);
@@ -246,9 +246,9 @@ function ObjectSchemeDetail(props) {
     });
   }, []);
 
-  useEffect(() => {
-    setScrollHeight(document.getElementsByClassName('page-content')[0].clientHeight - 70);
-  }, []);
+  // useEffect(() => {
+  //   setScrollHeight(document.getElementsByClassName('page-content')[0].clientHeight - 70);
+  // }, []);
 
   const render = () => {
     const menu = AppState.currentMenuType;
@@ -259,7 +259,27 @@ function ObjectSchemeDetail(props) {
     const { content = [] } = scheme;
     const { objectDetailItem } = contextPageConfig;
     return (
-      <Page>
+      <Page
+        service={AppState.currentMenuType.type === 'project' ? [
+          'agile-service.project-object-scheme-field.listQuery',
+          'agile-service.project-object-scheme-field.create',
+          'agile-service.project-object-scheme-field.checkCode',
+          'agile-service.project-object-scheme-field.checkName',
+          'agile-service.project-object-scheme-field.listQuery',
+          'agile-service.project-object-scheme-field.queryById',
+          'agile-service.project-object-scheme-field.update',
+          'agile-service.project-object-scheme-field.delete',
+        ] : [
+          'agile-service.object-scheme-field.listQuery',
+          'agile-service.object-scheme-field.create',
+          'agile-service.object-scheme-field.checkCode',
+          'agile-service.object-scheme-field.checkName',
+          'agile-service.object-scheme-field.listQuery',
+          'agile-service.object-scheme-field.queryById',
+          'agile-service.object-scheme-field.update',
+          'agile-service.object-scheme-field.delete',
+        ]}
+      >
         <Header>
           <Button
             funcType="flat"
@@ -280,7 +300,7 @@ function ObjectSchemeDetail(props) {
               columns={getColume()}
               dataSource={content}
               filterBar={false}
-              scroll={{ y: scrollHeight }}
+              // scroll={{ y: scrollHeight }}
             />
           </Spin>
           {updateVisible
