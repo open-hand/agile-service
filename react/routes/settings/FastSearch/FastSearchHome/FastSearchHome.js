@@ -227,7 +227,7 @@ class Search extends Component {
       {
         title: '名称',
         dataIndex: 'name',
-        width: '20%',
+        width: '3.5rem',
         render: (text, record) => (
           <TableDropMenu
             menu={this.renderMenu(record)}
@@ -236,6 +236,7 @@ class Search extends Component {
               <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={name}>
                 <p
                   style={{
+                    width: '3.5rem',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
