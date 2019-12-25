@@ -56,7 +56,7 @@ class IterationBoardHome extends Component {
     if (!loading && !sprintId) {
       return (
         <div>
-          {'当前项目下无冲刺'}
+          当前项目下无冲刺
         </div>
       );
     }
@@ -150,7 +150,21 @@ class IterationBoardHome extends Component {
 
   render() {
     return (
-      <Page className="c7n-agile-iterationBoard">
+      <Page 
+        className="c7n-agile-iterationBoard"
+        service={[
+          'agile-service.sprint.querySprintById',
+          'agile-service.iterative-worktable.querySprintInfo',
+          'agile-service.iterative-worktable.queryStatusCategoryDistribute',
+          'agile-service.sprint.queryNameByOptions',
+          'agile-service.iterative-worktable.queryIssueTypeDistribute',
+          'agile-service.iterative-worktable.queryPriorityDistribute',
+          'agile-service.iterative-worktable.queryAssigneeDistribute',
+          'agile-service.sprint.queryIssueByOptions',
+          'agile-service.sprint.queryNonWorkdays',
+          'agile-service.report.queryBurnDownCoordinate',
+        ]}
+      >
         <Header title="活跃冲刺" backPath={`/agile/scrumboard?type=project&id=${AppState.currentMenuType.id}&name=${encodeURIComponent(AppState.currentMenuType.name)}&organizationId=${AppState.currentMenuType.organizationId}&orgId=${AppState.currentMenuType.organizationId}`}>
           {this.renderSwitchMode()}
         </Header>

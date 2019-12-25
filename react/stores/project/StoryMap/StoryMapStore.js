@@ -559,7 +559,7 @@ class StoryMapStore {
 
   updateMiniMap() {
     setTimeout(() => {
-      this.miniMap.current.synchronize();
+      this.miniMap.current && this.miniMap.current.synchronize();
     });
   }
 

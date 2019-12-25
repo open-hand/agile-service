@@ -18,8 +18,8 @@ const TableAction = (props) => {
   );
   return (
     <div className={prefix}>
-      <span>
-        <a role="button" onClick={onEditClick} onKeyDown={null}>
+      <span style={{ display: 'flex', overflow: 'hidden' }}>
+        <a style={{ overflow: 'hidden' }} role="button" onClick={onEditClick} onKeyDown={null}>
           {text}
         </a>
       </span>

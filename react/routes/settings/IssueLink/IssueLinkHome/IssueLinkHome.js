@@ -112,7 +112,7 @@ class IssueLink extends Component {
       {
         title: '名称',
         dataIndex: 'linkName',
-        width: '25%',
+        width: '3rem',
         render: (linkName, record) => {
           const menus = (
             <Menu onClick={this.clickDeleteLink.bind(this, record)}>
@@ -136,6 +136,7 @@ class IssueLink extends Component {
                 <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={linkName}>
                   <p
                     style={{
+                      width: '3rem',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
@@ -206,6 +207,7 @@ class IssueLink extends Component {
     return (
       <Page
         service={[
+          'agile-service.issue-link-type.listIssueLinkType',
           'agile-service.issue-link-type.updateIssueLinkType',
           'agile-service.issue-link-type.deleteIssueLinkType',
           'agile-service.issue-link-type.createIssueLinkType',
