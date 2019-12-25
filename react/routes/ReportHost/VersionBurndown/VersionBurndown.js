@@ -583,7 +583,7 @@ class VersionBurndown extends Component {
                 onClick={() => {
                   const { history } = this.props;
                   const urlParams = AppState.currentMenuType;
-                  history.push(`/agile/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramUrl=reporthost/VersionBurndown`);
+                  history.push(`/agile/work-list/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramUrl=reporthost/VersionBurndown`);
                 }}
               >
                 {'待办事项'}
@@ -672,7 +672,7 @@ class VersionBurndown extends Component {
                             const { history } = this.props;
                             const urlParams = AppState.currentMenuType;
                             if (item.statusCode === 'started') {
-                              history.push(`/agile/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramUrl=reporthost/VersionBurndown`);
+                              history.push(`/agile/work-list/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramUrl=reporthost/VersionBurndown`);
                             } else {
                               history.push(`/agile/reporthost/sprintReport?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&sprintId=${item.sprintId}&paramUrl=reporthost/VersionBurndown`);
                             }
@@ -966,7 +966,7 @@ class VersionBurndown extends Component {
                         style={{ margin: '0 5px', cursor: 'pointer' }}
                         role="none"
                         onClick={() => {
-                          history.push(`/agile/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramUrl=reporthost/VersionBurndown`);
+                          history.push(`/agile/work-list/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramUrl=reporthost/VersionBurndown`);
                         }}
                       >
                         {'待办事项'}

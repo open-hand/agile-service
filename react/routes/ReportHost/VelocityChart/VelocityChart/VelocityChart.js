@@ -420,7 +420,7 @@ class VelocityChart extends Component {
                     role="none"
                     onClick={() => {
                       history.push(
-                        `/agile/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${
+                        `/agile/work-list/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${
                           encodeURIComponent(urlParams.name)
                         }&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`,
                       );

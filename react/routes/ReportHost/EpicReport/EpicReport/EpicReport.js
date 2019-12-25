@@ -758,7 +758,7 @@ class EpicReport extends Component {
                         style={{ margin: '0 5px', cursor: 'pointer' }}
                         role="none"
                         onClick={() => {
-                          history.push(`/agile/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`);
+                          history.push(`/agile/work-list/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`);
                         }}
                       >
                         待办事项
