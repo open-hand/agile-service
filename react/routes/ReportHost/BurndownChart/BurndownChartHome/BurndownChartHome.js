@@ -876,7 +876,7 @@ class BurndownChartHome extends Component {
                 />
               </div>
             ) : (
-                <NoDataComponent title="冲刺" links={[{ name: '待办事项', link: '/agile/backlog' }]} img={epicSvg} />
+                <NoDataComponent title="冲刺" links={[{ name: '待办事项', link: '/agile/work-list/backlog' }]} img={epicSvg} />
               )
           }
         </Content>
