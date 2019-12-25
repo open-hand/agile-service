@@ -18,6 +18,7 @@ const WorkList = asyncRouter(() => import('./routes/WorkList'));
 const StoryMap = asyncRouter(() => import('./routes/StoryMap'));
 const ReportHost = asyncRouter(() => import('./routes/ReportHost'));
 const PageConfig = asyncRouter(() => import('./routes/page-config'));
+const IssueTypeIndex = asyncRouter(() => import('./routes/issueType'));
 const settings = asyncRouter(() => import('./routes/settings'));
 const StateIndex = asyncRouter(() => import('./routes/state'));
 const PriorityIndex = asyncRouter(() => import('./routes/priority'));
@@ -51,6 +52,8 @@ class Index extends React.Component {
             <Route path={`${match.url}/reporthost`} component={ReportHost} />
             {/* 设置-页面 */}
             <Route path={`${match.url}/page`} component={PageConfig} />
+            {/* 页面类型 */}
+            <Route path={`${match.url}/issue-type`} component={IssueTypeIndex} />
             {/* 问题设置 */}
             <Route path={`${match.url}/settings`} component={settings} />
             {/* 管理中心-问题-状态机 */}
