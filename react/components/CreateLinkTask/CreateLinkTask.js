@@ -22,10 +22,7 @@ class CreateLinkTask extends Component {
   }
 
   componentDidMount() {
-    this.getLinks();
-    setTimeout(() => {
-      this.Select.focus();
-    });
+    this.getLinks();   
   }
 
 
@@ -100,7 +97,7 @@ class CreateLinkTask extends Component {
 
   render() {
     const {
-      form, visible, onCancel,
+      form, visible, onCancel, issueId,
     } = this.props;
     const { getFieldDecorator } = form;
     const {
@@ -150,6 +147,7 @@ class CreateLinkTask extends Component {
               <SelectFocusLoad
                 label="问题"
                 type="issues_in_link"
+                requestArgs={issueId}
                 getPopupContainer={() => document.body}
               />,
             )}

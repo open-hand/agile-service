@@ -87,13 +87,12 @@ class EditIssueStore {
     return this.branch;
   }
 
-  @action initIssueAttribute(doc, workLogs, dataLogs, linkIssues, branch, testExecutes) {
+  @action initIssueAttribute(doc, workLogs, dataLogs, linkIssues, branch) {
     this.doc = doc;
     this.workLogs = workLogs;
     this.dataLogs = dataLogs;
     this.linkIssues = linkIssues || [];
     this.branch = branch || {};
-    this.testExecutes = testExecutes || [];
   }
 
 

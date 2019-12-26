@@ -318,6 +318,8 @@ class ReleaseHome extends Component {
           'agile-service.product-version.createVersion',
           'agile-service.product-version.mergeVersion',
           'agile-service.product-version.listByProjectId',
+          'agile-service.product-version.queryVersionByProjectId',
+          'base-service.organization-project.getGroupInfoByEnableProject',
         ]}
       >
         <Header title="版本管理">

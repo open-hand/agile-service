@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Draggable } from 'react-beautiful-dnd';
 import {
   Radio, Icon, Tooltip, Modal,
 } from 'choerodon-ui';
+import { Button } from 'choerodon-ui/pro';
 import { stores, Permission } from '@choerodon/boot';
 import ScrumBoardStore from '../../../../stores/project/scrumBoard/ScrumBoardStore';
 import EditStatus from '../EditStatus/EditStatus';
@@ -159,20 +160,21 @@ class StatusCard extends Component {
               </Permission>
               {ScrumBoardStore.getCanAddStatus ? (
                 <Permission type={type} projectId={projectId} organizationId={orgId} service={['agile-service.issue-status.deleteStatus']}>
-                  <Icon
-                    style={{
+                  <Tooltip title={this.renderCloseDisplay() === 'none' ? '状态下含有用例，不可删除' : undefined}>
+                    <div style={{
                       position: 'absolute',
-                      top: 15,
-                      right: 12,
-                      display: this.renderCloseDisplay(),
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      // visibility: 'hidden',
+                      top: 9,
+                      right: 9,                      
                     }}
-                    role="none"
-                    onClick={this.handleDeleteClick}
-                    type="delete"
-                  />
+                    >                   
+                      <Button
+                        size="small"
+                        icon="delete"
+                        disabled={this.renderCloseDisplay() === 'none'}                                 
+                        onClick={this.handleDeleteClick}
+                      />
+                    </div>
+                  </Tooltip>    
                 </Permission>
               ) : ''}
               <EditStatus
@@ -230,7 +232,7 @@ class StatusCard extends Component {
                         });
                     }}
                   >
-                    {'设置已完成'}
+                    设置已完成
                     <Tooltip title="勾选后，卡片处于此状态的编号会显示为：#̶0̶0̶1̶，卡片状态视为已完成。" placement="topRight">
                       <Icon
                         type="help"

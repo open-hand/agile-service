@@ -42,10 +42,6 @@ public class FixDataController {
     @Autowired
     private IssueLinkService issueLinkService;
     @Autowired
-    private LabelIssueRelService labelIssueRelService;
-    @Autowired
-    private IssueLabelService issueLabelService;
-    @Autowired
     private ProjectInfoService projectInfoService;
     @Autowired
     private DataLogService dataLogService;

@@ -136,7 +136,7 @@ class Sprint extends Component {
           ))
             : <div style={{ height: 18, width: '100%' }} />
         }
-        {assigneeIssueVOList.length > 10 && <a role="none" onClick={() => { history.push(`/agile/backlog?type=project&id=${AppState.currentMenuType.id}&name=${encodeURIComponent(AppState.currentMenuType.name)}&organizationId=${AppState.currentMenuType.organizationId}&orgId=${AppState.currentMenuType.organizationId}`); }}>查看更多...</a>}
+        {assigneeIssueVOList.length > 10 && <a role="none" onClick={() => { history.push(`/agile/work-list/backlog?type=project&id=${AppState.currentMenuType.id}&name=${encodeURIComponent(AppState.currentMenuType.name)}&organizationId=${AppState.currentMenuType.organizationId}&orgId=${AppState.currentMenuType.organizationId}`); }}>查看更多...</a>}
       </div>
     );
   }

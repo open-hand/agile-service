@@ -24,6 +24,7 @@ const { AppState } = stores;
 const { Sidebar } = Modal;
 const { Option } = Select;
 const FormItem = Form.Item;
+
 const bugDefaultDes = [{ attributes: { bold: true }, insert: '步骤' }, { insert: '\n' }, { attributes: { list: 'ordered' }, insert: '\n\n\n' }, { attributes: { bold: true }, insert: '结果' }, { insert: '\n\n' }, { attributes: { bold: true }, insert: '期望' }, { insert: '\n' }];
 const defaultProps = {
   mode: 'default',
@@ -64,6 +65,7 @@ class CreateIssue extends Component {
       originIssueTypes: [],
       defaultTypeId: false,
       newIssueTypeCode: '',
+      fields: [],
     };
   }
 
@@ -167,22 +169,25 @@ class CreateIssue extends Component {
     });
   };
 
-  getIssueLinks = (linkTypes, linkIssues) => {
+  getIssueLinks = (keys, linkTypes, linkIssues) => {
     const issueLinkCreateVOList = [];
-    linkTypes.forEach((link, index) => {
-      if (link) {
+    if (keys) {
+      keys.forEach((key) => {
+        const link = linkTypes[`${key}]`];
+        const issues = linkIssues[`${key}]`];
         const [linkTypeId, isIn] = link.split('+');
-        if (linkIssues[index]) {
-          linkIssues[index].forEach((issueId) => {
+        
+        if (issues) {
+          issues.forEach((issueId) => {
             issueLinkCreateVOList.push({
               linkTypeId,
               linkedIssueId: issueId,
               in: isIn === 'true',
             });
           });
-        }
-      }
-    });
+        }  
+      });
+    }   
     return issueLinkCreateVOList;
   }
 
@@ -215,8 +220,10 @@ class CreateIssue extends Component {
           fixVersionIssueRel,
           linkTypes,
           linkIssues,
+          keys,
           fileList,
-        } = values;
+        } = values;   
+
         const { typeCode } = originIssueTypes.find(t => t.id === typeId);
         const exitComponents = originComponents;
         const componentIssueRelVOList = map(componentIssueRel
@@ -247,7 +254,7 @@ class CreateIssue extends Component {
           versionId,
           relationType: 'fix',
         }));
-        const issueLinkCreateVOList = this.getIssueLinks(linkTypes || [], linkIssues);
+        const issueLinkCreateVOList = this.getIssueLinks(keys, linkTypes, linkIssues);
 
         const extra = {
           programId: getProjectId(),
@@ -508,6 +515,7 @@ class CreateIssue extends Component {
               <SelectFocusLoad
                 label="版本"
                 mode="multiple"
+                loadWhenMount
                 type="version"
               />,
             )}
@@ -598,7 +606,7 @@ class CreateIssue extends Component {
       case 'description':
         return (
           <Fragment>
-            <FormItem label={fieldName} className="c7nagile-line">
+            <FormItem key={newIssueTypeCode} label={fieldName} className="c7nagile-line">
               {getFieldDecorator(fieldCode, {
                 initialValue: newIssueTypeCode === 'bug' ? bugDefaultDes : undefined,
               })(
@@ -755,7 +763,7 @@ class CreateIssue extends Component {
         <Content>
           <Spin spinning={loading}>
             <Form layout="vertical" style={{ width: 670 }} className="c7nagile-form">
-              <div className="c7nagile-createIssue-fields">
+              <div className="c7nagile-createIssue-fields" key={newIssueTypeCode}>
                 {['sub_task', 'sub_bug'].includes(mode) && (
                   <FormItem>
                     <Input label="父任务概要" value={parentSummary} disabled />

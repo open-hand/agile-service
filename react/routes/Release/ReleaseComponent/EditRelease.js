@@ -62,6 +62,8 @@ class EditRelease extends Component {
             loading: false,
           });
         });
+      } else if (!modify) {
+        onCancel();
       }
     });
   };

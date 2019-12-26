@@ -9,7 +9,7 @@ import { throttle } from 'lodash';
 import './EditIssue.less';
 import {
   loadBranchs, loadDatalogs, loadLinkIssues,
-  loadIssue, loadWorklogs, loadDocs, getFieldAndValue, loadIssueTypes, getTestExecute,
+  loadIssue, loadWorklogs, loadDocs, getFieldAndValue, loadIssueTypes,
 } from '../../api/NewIssueApi';
 import RelateStory from '../RelateStory';
 import CopyIssue from '../CopyIssue';
@@ -56,6 +56,7 @@ const EditIssue = observer(() => {
     onChangeWidth,
   } = useContext(EditIssueContext);
   const container = useRef();
+  const idRef = useRef();
   const loadIssueDetail = (paramIssueId) => {
     if (FieldVersionRef.current) {
       FieldVersionRef.current.loadIssueVersions();
@@ -64,8 +65,12 @@ const EditIssue = observer(() => {
       FieldFixVersionRef.current.loadIssueVersions();
     }
     const id = paramIssueId || currentIssueId;
+    idRef.current = id;
     setIssueLoading(true);
     loadIssue(id).then((res) => {
+      if (idRef.current !== id) {
+        return;
+      }
       // 刷新MOBX中详情信息，防止在列表界面再次点击父问题时无法跳转
       if (onCurrentClicked) {
         onCurrentClicked(res);
@@ -77,6 +82,9 @@ const EditIssue = observer(() => {
         pageCode: 'agile_issue_edit',
       };
       getFieldAndValue(id, param).then((fields) => {
+        if (idRef.current !== id) {
+          return;
+        }
         setIssueLoading(false);
         store.setIssueFields(res, fields);
       });
@@ -89,11 +97,13 @@ const EditIssue = observer(() => {
       loadWorklogs(id),
       loadDatalogs(id),
       loadLinkIssues(id),
-      loadBranchs(id),
-      getTestExecute(id),
+      loadBranchs(id),  
     ])
-      .then(axios.spread((doc, workLogs, dataLogs, linkIssues, branches, testExecutes) => {
-        store.initIssueAttribute(doc, workLogs, dataLogs, linkIssues, branches, testExecutes);
+      .then(axios.spread((doc, workLogs, dataLogs, linkIssues, branches) => {
+        if (idRef.current !== id) {
+          return;
+        }
+        store.initIssueAttribute(doc, workLogs, dataLogs, linkIssues, branches);
       }));
   };
   useImperativeHandle(forwardedRef, () => ({

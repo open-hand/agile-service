@@ -145,7 +145,12 @@ function IssueTypeList(props) {
 
   function render() {
     return (
-      <Page className="issue-region">
+      <Page
+        className="issue-region"
+        service={[
+          'agile-service.issue-type.queryIssueTypeList',
+        ]}
+      >
         <Breadcrumb />
         <Content>
           <Table
