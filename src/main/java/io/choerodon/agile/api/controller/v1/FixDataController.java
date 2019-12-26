@@ -119,16 +119,15 @@ public class FixDataController {
         return new ResponseEntity<>(productVersionService.queryByVersionId(), HttpStatus.OK);
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
+    @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
     @ApiOperation("【0.20 BASE】迁移agile_message_detail到框架")
     @GetMapping("/migrate_message")
-    public ResponseEntity<List<MessageDetailDTO>> migrateMessageDetail(@ApiParam(value = "项目id", required = true)
-                                                                       @PathVariable(name = "project_id") Long projectId) {
+    public ResponseEntity<List<MessageDetailDTO>> migrateMessageDetail() {
         return new ResponseEntity<>(noticeService.migrateMessageDetail(),HttpStatus.OK);
     }
 
     @Permission(type = ResourceType.SITE, roles = {InitRoleCode.SITE_ADMINISTRATOR, InitRoleCode.SITE_DEVELOPER})
-    @ApiOperation("【0.20 BASE】启动敏捷迁移到Base服务task")
+    @ApiOperation("【0.20 BASE】启动敏捷迁移到Base的task")
     @GetMapping("/migration_to_base")
     public ResponseEntity migrateToBase() {
         LOGGER.info("==============================>>>>>>>> AGILE Data Migrate Start In Controller <<<<<<<<=================================");
