@@ -122,8 +122,7 @@ public class FixDataController {
     @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
     @ApiOperation("【0.20 BASE】迁移agile_message_detail到框架")
     @GetMapping("/migrate_message")
-    public ResponseEntity<List<MessageDetailDTO>> migrateMessageDetail(@ApiParam(value = "项目id", required = true)
-                                                                       @PathVariable(name = "project_id") Long projectId) {
+    public ResponseEntity<List<MessageDetailDTO>> migrateMessageDetail() {
         return new ResponseEntity<>(noticeService.migrateMessageDetail(),HttpStatus.OK);
     }
 
