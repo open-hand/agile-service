@@ -335,7 +335,7 @@ class BacklogStore {
   }
 
   axiosUpdateIssuesToFeature(featureId, ids) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/to_feature/${featureId}`, ids);
+    return axios.post(`/agile-pro/v1/projects/${AppState.currentMenuType.id}/issues/to_feature/${featureId}`, ids);
   }
 
   @computed get getIsLeaveSprint() {
