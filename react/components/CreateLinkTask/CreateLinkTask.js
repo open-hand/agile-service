@@ -23,9 +23,6 @@ class CreateLinkTask extends Component {
 
   componentDidMount() {
     this.getLinks();
-    setTimeout(() => {
-      this.Select.focus();
-    });
   }
 
 
@@ -100,7 +97,7 @@ class CreateLinkTask extends Component {
 
   render() {
     const {
-      form, visible, onCancel,
+      form, visible, onCancel, issueId,
     } = this.props;
     const { getFieldDecorator } = form;
     const {
@@ -126,8 +123,7 @@ class CreateLinkTask extends Component {
                 { required: true, message: '请选择所要创建的关系' },
               ],
             })(
-              <Select
-                ref={(select) => { this.Select = select; }}
+              <Select           
                 defaultOpen
                 label="关系"
                 loading={selectLoading}
@@ -150,6 +146,7 @@ class CreateLinkTask extends Component {
               <SelectFocusLoad
                 label="问题"
                 type="issues_in_link"
+                requestArgs={issueId}
                 getPopupContainer={() => document.body}
               />,
             )}

@@ -65,6 +65,7 @@ class IssueTypeStore {
     sort = { field: 'id', order: 'desc' },
     param = {},
   ) => {
+    console.log(param);
     this.setIsLoading(true);
     return axios.post(
       `/agile/v1/organizations/${orgId}/issue_type/list?page=${page}&size=${pageSize}&sort=${sort.field},${sort.order}`,

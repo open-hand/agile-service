@@ -26,7 +26,6 @@ import SaveFilterModal from './components/SaveFilterModal';
 import ExportIssue from './components/ExportIssue';
 import ExpandWideCard from './components/ExpandWideCard';
 import ImportIssue from './components/ImportIssue';
-
 import './index.less';
 
 const { Column } = Table;
@@ -286,9 +285,9 @@ const Issue = withRouter(observer(() => {
           name={field.code}
           header={field.title}
           className="c7n-agile-table-cell"
-          renderer={({ record }) => {            
+          renderer={({ record }) => {
             const { fieldType, code } = field;
-            const value = record.get('foundationFieldValue')[code];          
+            const value = record.get('foundationFieldValue')[code];
             if (fieldType === 'member') {
               return value && (
                 <div style={{ display: 'inline-flex' }}>
@@ -315,7 +314,35 @@ const Issue = withRouter(observer(() => {
     IssueStore.setEditFilterInfo(map(editFilterInfo, item => Object.assign(item, { isEditing: false })));
   };
   return (
-    <Page className="c7nagile-issue">
+    <Page 
+      className="c7nagile-issue"
+      service={[
+        'agile-service.personal-filter.listByProjectId',
+        'agile-service.scheme.queryDefaultByOrganizationId',
+        'agile-service.issue.listFeature',
+        'agile-service.field-value.getIssueHeadForAgile',
+        'agile-service.issue.listIssueWithSub',
+        'agile-service.sprint.queryByProjectId',
+        'agile-service.sprint.queryNameByOptions',
+        'agile-service.product-version.queryNameByOptions',
+        'agile-service.product-version.queryVersionByProjectId',
+        'base-service.organization-project.getGroupInfoByEnableProject',
+        'agile-service.project-info.queryProjectInfoByProjectId',
+        'agile-service.quick-filter.listByProjectId',
+        'agile-service.issue-component.queryComponentById',
+        'agile-service.scheme.queryIssueTypesWithStateMachineIdByProjectId',
+        'agile-service.scheme.queryStatusByProjectId',
+        'base-service.project.list',
+        'agile-service.excel.download',
+        'agile-service.excel.queryLatestRecode',
+        'agile-service.excel.batchImport',
+        'agile-service.issue.exportIssues',
+        'agile-service.personal-filter.checkName',
+        'agile-service.personal-filter.create',
+        'agile-service.personal-filter.update',
+        'agile-service.personal-filter.deleteById',
+      ]}
+    >
       <Header
         title="问题管理"
         backPath={IssueStore.getBackUrl}

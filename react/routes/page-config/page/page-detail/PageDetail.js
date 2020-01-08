@@ -26,7 +26,7 @@ function PageDetail(props) {
     pageStore, AppState,
   } = context;
   const {
-    name, type, id, organizationId: orgId, 
+    name, type, id, organizationId: orgId,
   } = AppState.currentMenuType;
   const {
     pageDetailItem,
@@ -49,9 +49,6 @@ function PageDetail(props) {
     initCurrentMenuType();
     loadPageDetail();
   }, []);
-  useEffect(() => {
-    setHeight(document.getElementsByClassName('page-content')[0].clientHeight - 70);
-  });
   // componentWillUnmount
   useEffect(() => () => {
     pageStore.setPage([]);
@@ -126,7 +123,18 @@ function PageDetail(props) {
   const page = pageStore.getPageDetail;
   const { name: pageName, content = [] } = page;
   return (
-    <Page className="c7n-page-detail">
+    <Page
+      className="c7n-page-detail"
+      service={AppState.currentMenuType.type === 'project' ? [
+        'agile-service.project-page-field.listQuery',
+        'agile-service.project-page-field.adjustFieldOrder',
+        'agile-service.project-page-field.update',
+      ] : [
+        'agile-service.page-field.listQuery',
+        'agile-service.page-field.adjustFieldOrder',
+        'agile-service.page-field.update',
+      ]}
+    >
       <Breadcrumb custom>
         <Item>{name}</Item>
         <Item>

@@ -134,21 +134,21 @@ class Commits extends Component {
               content={(
                 <div>
                   {
-                    record.mergeRequests && record.mergeRequests.length ? (
-                      <ul>
-                        {
-                          record.mergeRequests.map(v => (
-                            <li style={{ listStyleType: 'none' }}>
-                              <span style={{ display: 'inline-block', width: 150 }}>{v.title}</span>
-                              <span style={{ display: 'inline-block', width: 50 }}>{['opened', 'merged', 'closed'].includes(v.state) ? STATUS_SHOW[v.state] : ''}</span>
-                            </li>
-                          ))
-                        }
-                      </ul>
-                    ) : <div>暂无相关合并请求</div>
-                  }
-                </div>
-              )}
+                  record.mergeRequests && record.mergeRequests.length ? (
+                    <ul>
+                      {
+                        record.mergeRequests.map(v => (
+                          <li style={{ listStyleType: 'none' }}>
+                            <span style={{ display: 'inline-block', width: 150 }}>{v.title}</span>
+                            <span style={{ display: 'inline-block', width: 50 }}>{['opened', 'merged', 'closed'].includes(v.state) ? STATUS_SHOW[v.state] : ''}</span>
+                          </li>
+                        ))
+                      }
+                    </ul>
+                  ) : <div>暂无相关合并请求</div>
+                }
+                                </div>
+)}
             >
               <p style={{
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, 

@@ -233,11 +233,11 @@ class QuickSearch extends Component {
             }
           </React.Fragment>
         ) : (
-          <React.Fragment>
-            {hideQuickSearch ? null : <Select className="SelectTheme primary" placeholder="快速搜索" />}
-            <Select className="SelectTheme primary" placeholder="经办人" />
-          </React.Fragment>
-        )}
+            <React.Fragment>
+              {hideQuickSearch ? null : <Select className="SelectTheme primary" placeholder="快速搜索" />}
+              <Select className="SelectTheme primary" placeholder="经办人" />
+            </React.Fragment>
+          )}
       </div>
     );
   }

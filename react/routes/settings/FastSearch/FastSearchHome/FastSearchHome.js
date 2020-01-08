@@ -227,7 +227,7 @@ class Search extends Component {
       {
         title: '名称',
         dataIndex: 'name',
-        width: '20%',
+        width: '3.5rem',
         render: (text, record) => (
           <TableDropMenu
             menu={this.renderMenu(record)}
@@ -236,6 +236,7 @@ class Search extends Component {
               <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={name}>
                 <p
                   style={{
+                    width: '3.5rem',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
@@ -253,7 +254,7 @@ class Search extends Component {
       {
         title: '筛选器',
         dataIndex: 'expressQuery',
-        width: '50%',
+        // width: '50%',
         render: expressQuery => (
           <div style={{
             maxWidth: '422px',
@@ -282,7 +283,7 @@ class Search extends Component {
       {
         title: '描述',
         dataIndex: 'description',
-        width: '25%',
+        // width: '25%',
         render: description => (
           <div style={{
             maxWidth: '288px',
@@ -310,7 +311,19 @@ class Search extends Component {
     ];
 
     return (
-      <Page className="c7n-fast-search">
+      <Page
+        className="c7n-fast-search"
+        service={[
+          'agile-service.quick-filter.listByProjectId',
+          'agile-service.quick-filter.queryById',
+          'agile-service.quick-filter.update',
+          'agile-service.quick-filter.create',
+          'agile-service.quick-filter.checkName',
+          'agile-service.quick-filter.dragFilter',
+          'agile-service.quick-filter.list',
+          'agile-service.quick-filter.deleteById',
+        ]}
+      >
         <Header title="快速筛选">
           <Button funcType="flat" onClick={this.openCreateModal}>
             <Icon type="playlist_add icon" />

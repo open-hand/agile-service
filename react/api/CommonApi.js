@@ -19,6 +19,18 @@ export function getUser(userId) {
   const projectId = AppState.currentMenuType.id;
   return axios.get(`base/v1/projects/${projectId}/users?id=${userId}`);
 }
+export async function checkPermissionProject(service) {
+  const { type } = AppState.currentMenuType;
+  const data = service.map(code => ({
+    code,
+    organizationId: getOrganizationId(),
+    projectId: getProjectId(),
+    resourceType: type,
+  }));
+  const result = await axios.post('/base/v1/permissions/checkPermission', data);
+  return result && result.some(permission => permission.approve);
+}
+
 export function getProjectsInProgram() {
   return axios.get(`base/v1/organizations/${getOrganizationId()}/projects/${getProjectId()}/program`);
 }

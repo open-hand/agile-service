@@ -96,7 +96,11 @@ class SideIssueList extends Component {
           </Select>
           <Select
             {...configTheme({
-              list: versionList, primary: true,
+              list: versionList.concat({
+                value: '0',
+                text: '无版本',
+              }),
+              primary: true,
             })}
             allowClear
             mode="multiple"
@@ -105,7 +109,10 @@ class SideIssueList extends Component {
             getPopupContainer={trigger => trigger.parentNode}
             placeholder="版本"
           >
-            {versionList.map(({ text, value }) => <Option value={value}>{text}</Option>)}
+            {versionList.concat({
+              value: '0',
+              text: '无版本',
+            }).map(({ text, value }) => <Option value={value}>{text}</Option>)}
           </Select>
 
         </div>

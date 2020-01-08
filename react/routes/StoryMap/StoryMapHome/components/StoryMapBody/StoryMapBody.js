@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { observer } from 'mobx-react';
 import EpicRow from './EpicRow';
+import FeatureRow from './FeatureRow';
 import StoryArea from './StoryArea';
+import IsInProgramStore from '../../../../../stores/common/program/IsInProgramStore';
 import './StoryMapBody.less';
 
 @observer
@@ -12,6 +15,8 @@ class StoryMapBody extends Component {
         <table>
           <tbody>
             <EpicRow />
+            {/* 在项目群下才显示 */}
+            {IsInProgramStore.isInProgram && <FeatureRow />}
             <StoryArea />
             {/* <tr style={{ visibility: 'hidden', height: 'auto' }} /> */}
           </tbody>

@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
 import {
-  Modal, Table, Tooltip, Popover, Button, Icon,
+ Modal, Table, Tooltip, Popover, Button, Icon 
 } from 'choerodon-ui';
 import {
-  stores, Content, axios, Choerodon,
+ stores, Content, axios, Choerodon 
 } from '@choerodon/boot';
 import TimeAgo from 'timeago-react';
 import UserHead from '../UserHead';
 
 const { AppState } = stores;
-const { Sidebar } = Modal;
+const {Sidebar} = Modal;
 const STATUS_SHOW = {
   opened: '开放',
   merged: '已合并',
@@ -56,8 +56,8 @@ class MergeRequest extends Component {
 
   render() {
     const {
-      issueId, issueNum, num, visible, onCancel,
-    } = this.props;
+ issueId, issueNum, num, visible, onCancel 
+} = this.props;
     const column = [
       {
         title: '编码',
@@ -67,12 +67,11 @@ class MergeRequest extends Component {
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={id}>
               <p style={{
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
-              }}
-              >
-                #
-                {' '}
-                {id}
+ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0 
+}}>
+                # 
+{' '}
+{id}
               </p>
             </Tooltip>
           </div>
@@ -86,9 +85,8 @@ class MergeRequest extends Component {
           <div style={{ width: '100%', overflow: 'hidden', flexShrink: 0 }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={title}>
               <p style={{
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0
-              }}
-              >
+ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0 
+}}>
                 {title}
               </p>
             </Tooltip>
@@ -111,9 +109,8 @@ class MergeRequest extends Component {
         width: '20%',
         render: (authorId, record) => (
           <div style={{
-            width: '100%', overflow: 'hidden', flexShrink: 0, justifyContent: 'flex-start'
-          }}
-          >
+ width: '100%', overflow: 'hidden', flexShrink: 0, justifyContent: 'flex-start' 
+}}>
             <UserHead
               user={{
                 id: authorId,

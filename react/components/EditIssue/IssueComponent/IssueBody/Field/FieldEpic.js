@@ -5,6 +5,8 @@ import { Select } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
 import TextEditToggle from '../../../../TextEditToggle';
 import { loadEpics, updateIssue } from '../../../../../api/NewIssueApi';
+import { getFeaturesByEpic } from '../../../../../api/FeatureApi';
+import IsInProgramStore from '../../../../../stores/common/program/IsInProgramStore';
 
 const { Option } = Select;
 const { Text, Edit } = TextEditToggle;
@@ -40,6 +42,12 @@ const { Text, Edit } = TextEditToggle;
         selectLoading: false,
       });
     });
+    getFeaturesByEpic().then((data) => {
+      this.setState({
+        originFeatures: data,
+        selectLoading: false,
+      });
+    });
   };
 
   updateIssueEpic = () => {
@@ -55,6 +63,13 @@ const { Text, Edit } = TextEditToggle;
       };
       updateIssue(obj)
         .then(() => {
+          if (IsInProgramStore.isInProgram) {
+            getFeaturesByEpic().then((data) => {
+              this.setState({
+                originFeatures: data,
+              });
+            });
+          }
           if (onUpdate) {
             onUpdate();
           }
@@ -100,6 +115,55 @@ const { Text, Edit } = TextEditToggle;
     } = issue;
     return (
       <React.Fragment>
+        {typeCode === 'story' && IsInProgramStore.isInProgram
+          ? (
+            <div className="line-start mt-10">
+              <div className="c7n-property-wrapper">
+                <span className="c7n-property">
+                  {'特性'}
+                </span>
+              </div>
+              <div className="c7n-value-wrapper">
+                <TextEditToggle
+                  disabled={disabled}
+                  formKey="feature"
+                  onSubmit={this.updateIssueFeature}
+                  originData={featureId || []}
+                >
+                  <Text>
+                    {featureName ? (
+                      <div
+                        className="primary"
+                        style={{ wordBreak: 'break-word' }}
+                      >
+                        {featureName}
+                      </div>
+                    ) : (
+                      <div>
+                        {'无'}
+                      </div>
+                    )
+                    }
+                  </Text>
+                  <Edit>
+                    <Select
+                      getPopupContainer={() => document.getElementById('detail')}
+                      allowClear
+                      loading={selectLoading}
+                      onChange={(value) => {
+                        this.setState({
+                          newFeatureId: value,
+                        });
+                      }}
+                    >
+                      {originFeatures.map(feature => <Option key={`${feature.issueId}`} value={feature.issueId}>{feature.summary}</Option>)}
+                    </Select>
+                  </Edit>
+                </TextEditToggle>
+              </div>
+            </div>
+          ) : ''
+        }
         <div className="line-start mt-10">
           <div className="c7n-property-wrapper">
             <span className="c7n-property">

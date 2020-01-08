@@ -82,7 +82,6 @@ const SubBug = observer(({
             visible={createSubBugShow}
             onCancel={() => store.setCreateSubBugShow(false)}
             onOk={handleCreateSubIssue}
-            store={store}
           />
         ) : null
       }

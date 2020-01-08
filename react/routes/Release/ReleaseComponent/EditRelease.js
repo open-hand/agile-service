@@ -125,6 +125,7 @@ class EditRelease extends Component {
                   <DatePicker
                     style={{ width: '100%' }}
                     label="开始日期"
+                    placeholder="请选择开始日期"
                     disabledDate={expectReleaseDate
                       ? current => current > moment(expectReleaseDate) : () => false}
                     onChange={(date) => {
@@ -141,7 +142,8 @@ class EditRelease extends Component {
                 })(
                   <DatePicker
                     style={{ width: '100%' }}
-                    label="预计发布时间"
+                    label="预计发布日期"
+                    placeholder="请选择预计发布日期"
                     disabledDate={startDate
                       ? current => current < moment(startDate) : () => false}
                     onChange={(date) => {

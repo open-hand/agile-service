@@ -117,40 +117,6 @@ let sign = false;
     }
   }
 
-  /**
-   * 获取必选字段默认值字符串
-   * @param {*} field 
-   */
-  getDefaultStr(field) {
-    const {
-      fieldType, valueStr, required, defaultValue, fieldOptions,
-    } = field;
-    if (valueStr !== null) {
-      return valueStr;// fieldType === 'radio'
-    } else if (required && defaultValue !== null) {
-      if (fieldType === 'radio' || fieldType === 'checkbox' || fieldType === 'single' || field.fieldType === 'multiple') {
-        const defaultArr = [...defaultValue];
-        if (defaultArr.length === 0) {
-          defaultArr.push(defaultValue);
-        }
-        const newValueStr = [...fieldOptions].filter(i => defaultArr.some(d => d === i.id))
-          .map(i => i.value).join();
-        return newValueStr;
-      } else if (fieldType === 'time') {
-        return defaultValue.substring(defaultValue.indexOf(' '));
-      } else if (fieldType === 'datetime') {
-        return defaultValue;
-      } else if (fieldType === 'date') {
-        return defaultValue.substring(0, defaultValue.indexOf(' '));
-      } else if (fieldType === 'number') {
-        return defaultValue;
-      } else if (fieldType === 'text' || fieldType === 'input') {
-        return defaultValue;
-      }
-    }
-    return false;
-  }
-
   renderField = () => {
     const { selectLoading, originUsers } = this.state;
     const { field } = this.props;
@@ -317,7 +283,7 @@ let sign = false;
           filterOption={false}
           defaultOption={field.valueStr || undefined}
           defaultOpen
-          allowClear
+          allowClear          
           onChange={e => this.handleChange(e)}
         />
       );
@@ -346,7 +312,7 @@ let sign = false;
   render() {
     const { field, disabled } = this.props;
     const {
-      fieldCode, fieldName, value, fieldType, valueStr, defaultValueObj, required, defaultValue,
+      fieldCode, fieldName, value, fieldType, valueStr, required,
     } = field;
 
     return (
@@ -358,22 +324,22 @@ let sign = false;
         </div>
         <div className="c7n-value-wrapper" style={{ width: 'auto' }}>
           <TextEditToggle
-            disabled={disabled}
+            disabled={disabled}            
             formKey={fieldCode}
             onSubmit={this.updateIssueField}
-            originData={this.transform(fieldType, value == null ? defaultValue : value)}
+            originData={this.transform(fieldType, value)}
             required={required}
             fieldType={fieldType}
             fieldName={fieldName}
           >
             <Text key="text">
               <div style={{ maxWidth: 200, wordBreak: 'break-all', whiteSpace: 'pre-line' }}>
-                {fieldType === 'member' && (valueStr || (required && defaultValue))
+                {fieldType === 'member' && valueStr
                   ? (
                     <UserHead
-                      user={valueStr || defaultValueObj}
+                      user={valueStr}
                     />
-                  ) : ((this.getDefaultStr(field)) || '无')}
+                  ) : (valueStr || '无')}
               </div>
             </Text>
             <Edit key="edit">

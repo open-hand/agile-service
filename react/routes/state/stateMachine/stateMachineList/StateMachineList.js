@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
-import { withRouter, Link } from 'react-router-dom';
+import { observer } from 'mobx-react';
+import { withRouter } from 'react-router-dom';
 import {
-  Table, Button, Modal, Form, Select,
+  Table, Button, Modal, Form,
   Input, Tooltip, message, Icon, Menu,
-  Breadcrumb as Bread,
 } from 'choerodon-ui';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import {
-  Content, Header, TabPage as Page, Permission, stores, Breadcrumb, Choerodon
+  Content, Header, TabPage as Page, stores, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import './StateMachineList.less';
 import TableDropMenu from '../../../../common/TableDropMenu';
@@ -16,19 +15,8 @@ import TableDropMenu from '../../../../common/TableDropMenu';
 const { AppState } = stores;
 const { Sidebar } = Modal;
 const FormItem = Form.Item;
-const { TextArea } = Input;
-const { Item } = Bread;
 const prefixCls = 'issue-state-machine';
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 100 },
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 26 },
-  },
-};
+
 
 @observer
 class StateMachineList extends Component {
@@ -170,7 +158,6 @@ class StateMachineList extends Component {
   };
 
   tableChange = (pagination, filters, sorter, param) => {
-    const orgId = AppState.currentMenuType.organizationId;
     const sort = {};
     if (sorter.column) {
       const { field, order } = sorter;
@@ -317,11 +304,6 @@ class StateMachineList extends Component {
       name: StateName,
     } = this.state;
     const { getFieldDecorator } = this.props.form;
-    const { singleData } = StateMachineStore;
-    const menu = AppState.currentMenuType;
-    const {
-      type, id, organizationId: orgId, name,
-    } = menu;
     const formContent = (
       <div className="issue-region">
         <Form layout="vertical" className="issue-sidebar-form">
@@ -338,27 +320,12 @@ class StateMachineList extends Component {
                   validator: this.checkName,
                 }],
               })(
-                <Input
-                  // style={{ width: 520 }}
+                <Input 
                   autoFocus
                   label={<FormattedMessage id="stateMachine.name" />}
-                // size="default"
                 />,
             )}
           </FormItem>
-          {/* <FormItem
-            {...formItemLayout}
-            className="issue-sidebar-form"
-          >
-            {getFieldDecorator('description', {
-              initialValue: singleData ? singleData.name : '',
-            })(
-              <TextArea
-                style={{ width: 520 }}
-                label={<FormattedMessage id="stateMachine.des" />}
-              />,
-            )}
-          </FormItem> */}
         </Form>
       </div>
     );
@@ -368,7 +335,14 @@ class StateMachineList extends Component {
       total,
     };
     return (
-      <Page>
+      <Page
+        service={[
+          'agile-service.state-machine.pagingQuery',
+          'agile-service.state-machine.create',
+          'agile-service.state-machine.checkName',
+          'agile-service.state-machine.delete',
+        ]}
+      >
         <Header>
           {statesMachineList && statesMachineList.length === 0
             ? (

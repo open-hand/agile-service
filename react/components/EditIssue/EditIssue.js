@@ -11,6 +11,11 @@ import {
   loadBranchs, loadDatalogs, loadLinkIssues,
   loadIssue, loadWorklogs, loadDocs, getFieldAndValue, loadIssueTypes, getTestExecute,
 } from '../../api/NewIssueApi';
+import {
+  loadDatalogs as loadDatalogsProgram,
+  loadIssue as loadIssueProgram,
+  getFieldAndValue as getFieldAndValueProgram,
+} from '../../api/QueryProgramApi';
 import RelateStory from '../RelateStory';
 import CopyIssue from '../CopyIssue';
 import ResizeAble from '../ResizeAble';
@@ -20,7 +25,8 @@ import ChangeParent from '../ChangeParent';
 import IssueHeader from './IssueComponent/IssueHeader';
 import IssueBody from './IssueComponent/IssueBody/IssueBody';
 import EditIssueContext from './stores';
-
+import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
+// 项目加入群之后，不关联自己的史诗和特性，只能关联项目群的，不能改关联的史诗
 const { AppState } = stores;
 
 let loginUserId;
@@ -32,12 +38,14 @@ const defaultProps = {
 const EditIssue = observer(() => {
   const [issueLoading, setIssueLoading] = useState(false);
   // 侧滑详情高度
+  const [isHasBanner, setIsHasBanner] = useState(false);
   const {
     onCurrentClicked, // 设置当前加载的问题详情信息
     store,
     forwardedRef,
     issueId: currentIssueId,
     applyType,
+    programId,
     onUpdate,
     onIssueCopy,
     backUrl,
@@ -56,6 +64,7 @@ const EditIssue = observer(() => {
     onChangeWidth,
   } = useContext(EditIssueContext);
   const container = useRef();
+  const idRef = useRef();
   const loadIssueDetail = (paramIssueId) => {
     if (FieldVersionRef.current) {
       FieldVersionRef.current.loadIssueVersions();
@@ -64,8 +73,12 @@ const EditIssue = observer(() => {
       FieldFixVersionRef.current.loadIssueVersions();
     }
     const id = paramIssueId || currentIssueId;
+    idRef.current = id;
     setIssueLoading(true);
-    loadIssue(id).then((res) => {
+    (programId ? loadIssueProgram(id, programId) : loadIssue(id)).then((res) => {
+      if (idRef.current !== id) {
+        return;
+      }
       // 刷新MOBX中详情信息，防止在列表界面再次点击父问题时无法跳转
       if (onCurrentClicked) {
         onCurrentClicked(res);
@@ -76,7 +89,7 @@ const EditIssue = observer(() => {
         context: res.typeCode,
         pageCode: 'agile_issue_edit',
       };
-      getFieldAndValue(id, param).then((fields) => {
+      (programId ? getFieldAndValueProgram(id, param, programId) : getFieldAndValue(id, param)).then((fields) => {
         setIssueLoading(false);
         store.setIssueFields(res, fields);
       });
@@ -84,21 +97,35 @@ const EditIssue = observer(() => {
         issueStore.setSelectedIssue(res);
       }
     });
-    axios.all([
-      loadDocs(id),
-      loadWorklogs(id),
-      loadDatalogs(id),
-      loadLinkIssues(id),
-      loadBranchs(id),
-      getTestExecute(id),
-    ])
-      .then(axios.spread((doc, workLogs, dataLogs, linkIssues, branches, testExecutes) => {
-        store.initIssueAttribute(doc, workLogs, dataLogs, linkIssues, branches, testExecutes);
+    if (programId || applyType === 'program') {
+      axios.all([
+        loadDocs(id),
+        programId ? loadDatalogsProgram(id, programId) : loadDatalogs(id),
+      ]).then(axios.spread((doc, dataLogs) => {
+        if (idRef.current !== id) {
+          return;
+        }
+        store.initIssueAttribute(doc, [], dataLogs, [], {}, []);
       }));
+    } else {
+      axios.all([
+        loadDocs(id),
+        loadWorklogs(id),
+        loadDatalogs(id),
+        loadLinkIssues(id),
+        loadBranchs(id),
+        // getTestExecute(id),
+      ])
+        .then(axios.spread((doc, workLogs, dataLogs, linkIssues, branches) => {          
+          if (idRef.current !== id) {
+            return;
+          }
+          store.initIssueAttribute(doc, workLogs, dataLogs, linkIssues, branches, []);
+        }));
+    }
   };
-  useImperativeHandle(forwardedRef, () => ({
-    loadIssueDetail,
-  }));
+
+
   const setQuery = (width = container.current.clientWidth) => {
     if (width <= 600) {
       container.current.setAttribute('max-width', '600px');
@@ -106,28 +133,30 @@ const EditIssue = observer(() => {
       container.current.removeAttribute('max-width');
     }
   };
-  useEffect(() => {
+  useEffect(() => {    
     loadIssueDetail(currentIssueId);
-    axios.all([
-      axios.get('/base/v1/users/self'),
-      axios.post('/base/v1/permissions/checkPermission', [{
-        code: 'agile-service.project-info.updateProjectInfo',
-        organizationId: AppState.currentMenuType.organizationId,
-        projectId: AppState.currentMenuType.id,
-        resourceType: 'project',
-      }, {
-        code: 'agile-service.notice.queryByProjectId',
-        organizationId: AppState.currentMenuType.organizationId,
-        projectId: AppState.currentMenuType.id,
-        resourceType: 'project',
-      }]),
-      loadIssueTypes(applyType),
-    ])
-      .then(axios.spread((users, permission, issueTypes) => {
-        loginUserId = users.id;
-        hasPermission = permission[0].approve || permission[1].approve;
-        store.setIssueTypes(issueTypes);
-      }));
+    if (!programId) {
+      axios.all([
+        axios.get('/base/v1/users/self'),
+        axios.post('/base/v1/permissions/checkPermission', [{
+          code: 'agile-service.project-info.updateProjectInfo',
+          organizationId: AppState.currentMenuType.organizationId,
+          projectId: AppState.currentMenuType.id,
+          resourceType: 'project',
+        }, {
+          code: 'agile-service.notice.queryByProjectId',
+          organizationId: AppState.currentMenuType.organizationId,
+          projectId: AppState.currentMenuType.id,
+          resourceType: 'project',
+        }]),
+        loadIssueTypes(applyType),
+      ])
+        .then(axios.spread((users, permission, issueTypes) => {
+          loginUserId = users.id;
+          hasPermission = permission[0].approve || permission[1].approve;
+          store.setIssueTypes(issueTypes);
+        }));
+    }
     setQuery();
   }, [currentIssueId]);
 
@@ -169,6 +198,9 @@ const EditIssue = observer(() => {
     localStorage.setItem('agile.EditIssue.width', `${width}px`);
   };
 
+  useImperativeHandle(forwardedRef, () => ({
+    loadIssueDetail,
+  }));
 
   const handleResize = throttle(({ width }) => {
     setQuery(width);
@@ -193,7 +225,7 @@ const EditIssue = observer(() => {
     getTransformFromSubIssueShow: transformFromSubIssueShow,
     getRelateStoryShow: relateStoryShow,
   } = store;
-  const rightDisabled = disabled;
+  const rightDisabled = disabled || (IsInProgramStore.isInProgram && typeCode === 'issue_epic');
   const HasPermission = (hasPermission || createdBy === AppState.userInfo.id);
   return (
     <div style={{

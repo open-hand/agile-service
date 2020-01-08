@@ -4,10 +4,9 @@ import querystring from 'query-string';
 
 @store('StateMachineStore')
 class StateMachineStore {
+
   @observable isLoading = false;
-
   @observable stateMachine = {};
-
   @observable configType = 'config_condition';
 
   @computed get getIsLoading() {

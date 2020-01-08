@@ -745,12 +745,7 @@ function CreateField(props) {
                           <Option key={user.id} value={user.id}>
                             <div style={{ display: 'inline-flex', alignItems: 'center', padding: 2 }}>
                               <UserHead
-                                user={{
-                                  id: user.id,
-                                  loginName: user.loginName,
-                                  realName: user.realName,
-                                  avatar: user.imageUrl,
-                                }}
+                                user={user}
                               />
                             </div>
                           </Option>

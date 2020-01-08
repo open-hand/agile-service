@@ -316,28 +316,28 @@ class TextEditToggle extends Component {
         )}
       </div>
     ) : (
-        <div
-          className={classNames({
-            'c7nagile-TextEditToggle-text': true,
-            'c7nagile-TextEditToggle-text-active': !simpleMode && !disabled,
-            [hoverType]: true,
-            noButton,
-          })}
-          ref={this.Edit}
+      <div
+        className={classNames({
+          'c7nagile-TextEditToggle-text': true,
+          'c7nagile-TextEditToggle-text-active': !simpleMode && !disabled,
+          [hoverType]: true,
+          noButton,
+        })}
+        ref={this.Edit}
           // onClick={this.enterEditing}
-          onMouseDown={() => { this.timer = Date.now(); }}
-          onMouseUp={(e) => {
-            // console.log(Date.now() - this.timer);
-            if (Date.now() - this.timer <= 200) {
-              this.enterEditing(e);
-            }
-          }}
-          role="none"
-        >
-          {this.renderTextChild(children)}
-          {!simpleMode && <Icon type="arrow_drop_down" className="c7nagile-TextEditToggle-text-icon" />}
-        </div>
-      );
+        onMouseDown={() => { this.timer = Date.now(); }}
+        onMouseUp={(e) => {
+          // console.log(Date.now() - this.timer);
+          if (Date.now() - this.timer <= 200) {
+            this.enterEditing(e);
+          }
+        }}
+        role="none"
+      >
+        {this.renderTextChild(children)}
+        {!simpleMode && <Icon type="arrow_drop_down" className="c7nagile-TextEditToggle-text-icon" />}
+      </div>
+    );
   }
 
   render() {

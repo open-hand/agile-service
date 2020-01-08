@@ -78,8 +78,8 @@ class StoryMapStore {
   getStoryMap = () => {
     this.setLoading(true);
     Promise.all([getStoryMap(this.searchVO), loadIssueTypes(), loadVersions(), loadPriorities()]).then(([storyMapData, issueTypes, versionList, prioritys]) => {
-      let { epics: epicWithFeature } = storyMapData;
-      const { featureWithoutEpic = [] } = storyMapData;
+      let { epicWithFeature } = storyMapData;
+      const { featureWithoutEpic } = storyMapData;
       epicWithFeature = sortBy(epicWithFeature, 'epicRank');
       const newStoryMapData = {
         ...storyMapData,
@@ -143,6 +143,10 @@ class StoryMapStore {
 
   @action setCreateEpicModalVisible(createEpicModalVisible) {
     this.createEpicModalVisible = createEpicModalVisible;
+  }
+
+  @action setCreateFeatureModalVisible(createFeatureModalVisible) {
+    this.createFeatureModalVisible = createFeatureModalVisible;
   }
 
   @action toggleSideIssueListVisible(visible) {
@@ -231,8 +235,7 @@ class StoryMapStore {
         } : {},
       };
       const targetFeature = storyData[epicId].feature;
-      // eslint-disable-next-line no-unused-expressions
-      epic.featureCommonDTOList && epic.featureCommonDTOList.forEach((feature) => {
+      epic.featureCommonDTOList.forEach((feature) => {
         if (!targetFeature[feature.issueId]) {
           const featureWithWidth = find(storyMapWidth, { issueId: feature.issueId, type: 'feature' });
           targetFeature[feature.issueId] = {
@@ -569,9 +572,9 @@ class StoryMapStore {
   }
 
   @computed get getIsEmpty() {
-    const { epicWithFeature } = this.storyMapData;
-    if (epicWithFeature) {
-      return epicWithFeature.filter(epic => epic.issueId).length === 0;
+    const { epicWithFeature, featureWithoutEpic } = this.storyMapData;
+    if (epicWithFeature && featureWithoutEpic) {
+      return featureWithoutEpic.length === 0 && epicWithFeature.filter(epic => epic.issueId).length === 0;
     }
     return true;
   }

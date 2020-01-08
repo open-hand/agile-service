@@ -271,7 +271,7 @@ export default withRouter(observer(({
             type="user"
             loadWhenMount
             key="assigneeSelect"
-            style={{ width: 120, margin: '0 5px' }}
+            style={{ width: 96, margin: '0 5px' }}
             mode="multiple"
             showCheckAll={false}
             allowClear
@@ -296,7 +296,7 @@ export default withRouter(observer(({
             type="user"
             loadWhenMount
             key="reporterSelect"
-            style={{ width: 120, margin: '0 5px' }}
+            style={{ width: 96, margin: '0 5px' }}
             mode="multiple"
             showCheckAll={false}
             allowClear
@@ -332,7 +332,8 @@ export default withRouter(observer(({
             filter
             onChange={handleFilterChange('sprint')}
             value={getValue('sprint')}
-            getPopupContainer={triggerNode => triggerNode.parentNode}
+            getPopupContainer={triggerNode => triggerNode.parentNode}    
+            requestArgs={[]}        
           />
           <SelectFocusLoad
             {...configTheme({
@@ -382,30 +383,30 @@ export default withRouter(observer(({
             onChange={handleFilterChange('version')}
             value={getValue('version')}
             getPopupContainer={triggerNode => triggerNode.parentNode}
+            requestArgs={[]}
           />
           {
             getSelectedDate().length > 0 ? (
-              <Tooltip title={`创建问题时间范围为${getSelectedDate()[0].format('YYYY-MM-DD')} ~  ${getSelectedDate()[1].format('YYYY-MM-DD')}`} getPopupContainer={trigger => trigger.parentNode}>
+              <Tooltip title={`创建问题时间范围为${getSelectedDate()[0].format('YYYY-MM-DD')} ~  ${getSelectedDate()[1].format('YYYY-MM-DD')}`}>
                 <div>
                   <RangePicker
                     format="YYYY-MM-DD"
-                    value={getSelectedDate()}                   
-                    style={{ margin: '0 5px', width: 250 }}
+                    value={getSelectedDate()}                  
+                    style={{ margin: '0 5px', width: 205 }}
                     onChange={handleDateTimeChange}
                     allowClear
-                    placeholder={['创建时间', '']}
+                    placeholder={['开始时间', '结束时间']}
                   />
                 </div>
               </Tooltip>
             ) : (
               <RangePicker
                 format="YYYY-MM-DD"
-                value={getSelectedDate()}
-                className="c7nagile-RangePicker-empty"
-                style={{ margin: '0 5px', width: 250 }}
+                value={getSelectedDate()}                
+                style={{ margin: '0 5px', width: 205 }}
                 onChange={handleDateTimeChange}
                 allowClear
-                placeholder={['创建时间', '']}
+                placeholder={['开始时间', '结束时间']}
               />
             )
           }

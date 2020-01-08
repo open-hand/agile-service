@@ -12,10 +12,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import BurndownChartStore from '../../../../stores/project/burndownChart/BurndownChartStore';
 import './BurndownChartHome.less';
-import restSvg from '../../../../assets/image/rest.svg';
-import hopeSvg from '../../../../assets/image/hope.svg';
 import NoDataComponent from '../../Component/noData';
-// import epicSvg from '../../Home/style/pics/no_sprint.svg';
 import epicSvg from '../../../../assets/image/emptyChart.svg';
 import SwithChart from '../../Component/switchChart';
 
@@ -876,7 +873,7 @@ class BurndownChartHome extends Component {
                 />
               </div>
             ) : (
-                <NoDataComponent title="冲刺" links={[{ name: '待办事项', link: '/agile/backlog' }]} img={epicSvg} />
+                <NoDataComponent title="冲刺" links={[{ name: '待办事项', link: '/agile/work-list/backlog' }]} img={epicSvg} />
               )
           }
         </Content>

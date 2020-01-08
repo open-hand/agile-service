@@ -4,7 +4,6 @@ import { PageWrap, PageTab } from '@choerodon/boot';
 import ComponentIndex from './Component/ComponentHome';
 import FastSearchIndex from './FastSearch/FastSearchHome/FastSearchHome';
 import IssueLinkIndex from './IssueLink/IssueLinkHome/IssueLinkHome';
-import MessageNotification from './MessageNotification';
 import './style/index.less';
 
 
@@ -26,7 +25,6 @@ class SettingsIndex extends React.Component {
         <PageWrap noHeader={['choerodon.code.setting.issue.notification']} cache>
           <PageTab title="模块管理" tabKey="choerodon.code.setting.issue.component" component={withRouter(ComponentIndex)} />
           <PageTab title="快速筛选" tabKey="choerodon.code.setting.issue.fastSearch" component={withRouter(FastSearchIndex)} />
-          <PageTab title="通知设置" tabKey="choerodon.code.setting.issue.notification" component={withRouter(MessageNotification)} />
           <PageTab title="问题链接" tabKey="choerodon.code.setting.issue.issueLink" component={withRouter(IssueLinkIndex)} />
         </PageWrap>
       </div>

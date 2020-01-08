@@ -521,7 +521,7 @@ class ScrumBoardStore {
   @computed get getClickIssueDetail() {
     return this.clickIssueDetail;
   }
-
+  
   /**
    * 
    * @param {*} parentIssueId 
@@ -905,6 +905,14 @@ class ScrumBoardStore {
   checkBoardNameRepeat = (proId, name) => axios.get(
     `/agile/v1/projects/${proId}/board/check_name?boardName=${name}`,
   );
+
+  // @action async scrumBoardInit(AppState, url) {
+  //   try {
+  //     const boardData = await this.axiosGetBoardList;
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // };
 
   @action setSpinIf(data) {
     // this.currentSprintExist = false;

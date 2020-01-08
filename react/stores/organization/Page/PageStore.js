@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { observable, action, computed } from 'mobx';
-import { store, Choerodon } from '@choerodon/boot';
+import { store,  Choerodon } from '@choerodon/boot';
 
 @store('PageStore')
 class PageStore {
