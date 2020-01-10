@@ -78,8 +78,8 @@ class StoryMapStore {
   getStoryMap = () => {
     this.setLoading(true);
     Promise.all([getStoryMap(this.searchVO), loadIssueTypes(), loadVersions(), loadPriorities()]).then(([storyMapData, issueTypes, versionList, prioritys]) => {
-      let { epicWithFeature } = storyMapData;
-      const { featureWithoutEpic } = storyMapData;
+      let { epics: epicWithFeature } = storyMapData;
+      const { featureWithoutEpic = [] } = storyMapData;
       epicWithFeature = sortBy(epicWithFeature, 'epicRank');
       const newStoryMapData = {
         ...storyMapData,
@@ -235,7 +235,8 @@ class StoryMapStore {
         } : {},
       };
       const targetFeature = storyData[epicId].feature;
-      epic.featureCommonDTOList.forEach((feature) => {
+      // eslint-disable-next-line no-unused-expressions
+      epic.featureCommonDTOList && epic.featureCommonDTOList.forEach((feature) => {
         if (!targetFeature[feature.issueId]) {
           const featureWithWidth = find(storyMapWidth, { issueId: feature.issueId, type: 'feature' });
           targetFeature[feature.issueId] = {
