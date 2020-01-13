@@ -5,33 +5,44 @@ import {
 } from 'react-router-dom';
 import { ModalContainer } from 'choerodon-ui/pro';
 import {
-  asyncRouter, asyncLocaleProvider, stores, nomatch,
+  asyncRouter, asyncLocaleProvider, stores, nomatch, Choerodon,
 } from '@choerodon/boot';
 import 'moment/locale/zh-cn';
 import 'moment/locale/en-nz';
 import moment from 'moment';
+import IsInProgramStore from './stores/common/program/IsInProgramStore';
+import RunWhenProjectChange from './common/RunWhenProjectChange';
 import './style/index.less';
 
 const ScrumBoard = asyncRouter(() => import('./routes/ScrumBoard'));
+const ReportHost = asyncRouter(() => import('./routes/ReportHost'));
+const StoryMap = asyncRouter(() => import('./routes/StoryMap'));
 const IterationBoard = asyncRouter(() => import('./routes/IterationBoard'));
 const WorkList = asyncRouter(() => import('./routes/WorkList'));
-const StoryMap = asyncRouter(() => import('./routes/StoryMap'));
-const ReportHost = asyncRouter(() => import('./routes/ReportHost'));
-const PageConfig = asyncRouter(() => import('./routes/page-config'));
 const IssueTypeIndex = asyncRouter(() => import('./routes/issueType'));
-const settings = asyncRouter(() => import('./routes/settings'));
-const StateIndex = asyncRouter(() => import('./routes/state'));
 const PriorityIndex = asyncRouter(() => import('./routes/priority'));
+const StateIndex = asyncRouter(() => import('./routes/state'));
+const PageConfig = asyncRouter(() => import('./routes/page-config'));
+// 敏捷设置
+const settings = asyncRouter(() => import('./routes/settings'));
 
 const { AppState } = stores;
 class Index extends React.Component {
   componentDidCatch(error, info) {
-    // Choerodon.prompt(error.message);
+    Choerodon.prompt(error.message);
+  }
+
+  componentDidMount() {
+    if (AppState.currentMenuType.category !== 'PROGRAM') {
+      // 切换项目查是否在项目群中
+      RunWhenProjectChange(IsInProgramStore.refresh);
+      IsInProgramStore.refresh();
+    }
   }
 
   render() {
     const { match } = this.props;
-    const language = AppState.currentLanguage; 
+    const language = AppState.currentLanguage;
     if (language === 'zh_CN') {
       moment.locale('zh-cn');
     }
@@ -40,25 +51,20 @@ class Index extends React.Component {
       <div id="agile">
         <IntlProviderAsync>
           <Switch>
-            {/* 协作-迭代计划 */}
-            <Route path={`${match.url}/scrumboard`} component={ScrumBoard} />
-            {/* 协作-迭代计划-迭代工作台 */}
-            <Route path={`${match.url}/iterationBoard/:id`} component={IterationBoard} />
-            {/* 协作-工作列表 */}
+            {/* 协作 */}
             <Route path={`${match.url}/work-list`} component={WorkList} />
-            {/* 协作-故事地图 */}
             <Route path={`${match.url}/storyMap`} component={StoryMap} />
-            {/* 运营-图表 */}
+            {/* 开发-迭代计划 */}
+            <Route path={`${match.url}/scrumboard`} component={ScrumBoard} />
+            <Route path={`${match.url}/iterationBoard/:id`} component={IterationBoard} />
+            {/* 运营 */}
             <Route path={`${match.url}/reporthost`} component={ReportHost} />
-            {/* 设置-页面 */}
+            {/* 设置页面 */}
             <Route path={`${match.url}/page`} component={PageConfig} />
             {/* 页面类型 */}
             <Route path={`${match.url}/issue-type`} component={IssueTypeIndex} />
-            {/* 问题设置 */}
-            <Route path={`${match.url}/settings`} component={settings} />
-            {/* 管理中心-问题-状态机 */}
+            <Route path={`${match.url}/settings`} component={settings} />            
             <Route path={`${match.url}/states`} component={StateIndex} />
-            {/* 管理中心-问题-优先级 */}
             <Route path={`${match.url}/priorities`} component={PriorityIndex} />
             <Route path="*" component={nomatch} />
           </Switch>

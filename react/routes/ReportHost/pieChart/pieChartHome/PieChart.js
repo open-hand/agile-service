@@ -15,17 +15,34 @@ import {
 import {
   Button, Select, Icon, Spin, Tooltip, DatePicker,
 } from 'choerodon-ui';
+import _ from 'lodash';
 import './pie.less';
 import { reduce } from 'zrender/lib/core/util';
+import util from 'util';
+import moment from 'moment';
 import SwitchChart from '../../Component/switchChart';
 import VersionReportStore from '../../../../stores/project/versionReport/VersionReport';
 import NoDataComponent from '../../Component/noData';
 import pic from '../../../../assets/image/emptyChart.svg';
+import ReleaseStore from '../../../../stores/project/release/ReleaseStore';
+import { loadSprints, loadVersions } from '../../../../api/NewIssueApi';
 
 const { Option } = Select;
 const { AppState } = stores;
 const { RangePicker } = DatePicker;
 let backUrl;
+// const chooseDimension = [
+//   {
+//     key: 'sprint',
+//     name: '迭代冲刺',
+//   }, {
+//     key: 'version',
+//     name: '版本',
+//   }, {
+//     key: 'timeRange',
+//     name: '时间',
+//   },
+// ];
 
 @observer
 class ReleaseDetail extends Component {
@@ -440,7 +457,6 @@ class ReleaseDetail extends Component {
           }
         </Select>
       </div>
-
     );
   }
 

@@ -4,7 +4,7 @@ import {
   Modal, Form, Input, Select, Icon,
 } from 'choerodon-ui';
 import {
-  stores, Content, axios, Choerodon,
+ stores, Content, axios, Choerodon 
 } from '@choerodon/boot';
 import './CreateBranch.less';
 import './commom.less';

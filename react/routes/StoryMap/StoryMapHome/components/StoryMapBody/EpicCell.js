@@ -1,17 +1,21 @@
 /* eslint-disable no-nested-ternary */
 import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
 import { Icon } from 'choerodon-ui';
 import { observer } from 'mobx-react';
 import { DropTarget } from 'react-dnd';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 import Column from './Column';
 import EpicCard from './EpicCard';
 import Cell from './Cell';
 import AddCard from './AddCard';
 import CreateEpic from './CreateEpic';
+import EpicDrag from './EpicDrag';
 import { ColumnWidth, CellPadding } from '../../Constants';
 import AutoScroll from '../../../../../common/AutoScroll';
 import EpicDragCollapse from './EpicDragCollapse';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
+import IsInProgramStore from '../../../../../stores/common/program/IsInProgramStore';
 
 @observer
 class EpicCell extends Component {
@@ -148,6 +152,7 @@ class EpicCell extends Component {
     } = this.props;
     const { resizing } = this.state;
     const { collapse, storys, feature } = otherData || {};
+    const { isInProgram } = IsInProgramStore;
     const {
       // featureCommonDTOList,
       issueId,
@@ -231,7 +236,7 @@ class EpicCell extends Component {
                     ? <CreateEpic index={index} onCreate={this.handleCreateEpic} />
                     : <EpicCard epic={epic} subIssueNum={subIssueNum} index={index} onMouseDown={this.handleDragMouseDown} />}
                 </Column>
-                {issueId && !StoryMapStore.isFullScreen ? (!adding && <AddCard style={{ height: 64 }} onClick={this.handleAddEpicClick} />) : null}
+                {issueId && !StoryMapStore.isFullScreen ? (!adding && !isInProgram && <AddCard style={{ height: 64 }} onClick={this.handleAddEpicClick} />) : null}
                 {resizing && (
                 <div style={{
                   position: 'fixed',
@@ -244,7 +249,7 @@ class EpicCell extends Component {
                 }}
                 />
                 )}
-                {issueId ? (
+                {!isInProgram && issueId ? (
                   <div
                     className="c7nagile-StoryMap-FeatureColumn-Resize"
                     style={{

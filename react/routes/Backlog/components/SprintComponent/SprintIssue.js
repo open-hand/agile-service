@@ -7,6 +7,7 @@ import UserHead from '../../../../components/UserHead';
 import StatusTag from '../../../../components/StatusTag';
 import PriorityTag from '../../../../components/PriorityTag';
 import './SprintIssue.less';
+import IsInProgramStore from '../../../../stores/common/program/IsInProgramStore';
 
 @observer
 class SprintIssue extends Component {
@@ -19,6 +20,7 @@ class SprintIssue extends Component {
 
   render() {
     const { item } = this.props;
+    const { isInProgram } = IsInProgramStore;
     return (
       <div className={classnames('c7n-backlog-IssueCard')}>
         <div
@@ -48,7 +50,7 @@ class SprintIssue extends Component {
                 </span>
               </Tooltip>
             ) : ''}
-            {item.epicName ? (
+            {!isInProgram && item.epicName ? (
               <Tooltip title={`史诗: ${item.epicName}`}>
                 <span
                   label="sprintIssue"
@@ -62,6 +64,21 @@ class SprintIssue extends Component {
                 </span>
               </Tooltip>
             ) : ''}
+            {isInProgram && item.featureName ? (
+              <Tooltip title={`特性: ${item.featureName}`}>
+                <span
+                  label="sprintIssue"
+                  className="c7n-backlog-IssueCard-right-epic container"
+                  style={{
+                    color: '#4A4A4A',
+                    border: '1px solid #4A4A4A',
+                  }}
+                >
+                  {item.featureName}
+                </span>
+              </Tooltip>
+            ) : ''}
+
           </div>
           <div className={classnames('line-two-right')}>
             {item.assigneeId && (

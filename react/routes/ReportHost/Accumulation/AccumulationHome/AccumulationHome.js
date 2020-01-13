@@ -483,9 +483,6 @@ class AccumulationHome extends Component {
         </Header>
         <Breadcrumb title="累积流量图" />
         <Content
-          // title="累积流量图"
-          // description="显示状态的问题。这有助于您识别潜在的瓶颈, 需要对此进行调查。"
-          // link="https://v0-16.choerodon.io/zh/docs/user-guide/report/agile-report/cumulative-flow/"
           style={{
             display: 'flex',
             flexDirection: 'column',

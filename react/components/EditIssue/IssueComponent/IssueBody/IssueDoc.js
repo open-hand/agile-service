@@ -68,7 +68,7 @@ const IssueDoc = observer(({ reloadIssue }) => {
             visible={addDocShow}
             onCancel={() => setAddDocShow(false)}
             onOk={onDocCreate}
-            checkIds={docs ? docs.knowledgeRelationList.map(doc => doc.spaceId) : []}
+            checkIds={docs && docs.knowledgeRelationList ? docs.knowledgeRelationList.map(doc => doc.spaceId) : []}
           />
         ) : null
       }

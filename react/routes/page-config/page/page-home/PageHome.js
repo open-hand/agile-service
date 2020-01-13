@@ -89,7 +89,7 @@ function PageHome(props) {
   }, []);
 
   return (
-    <Page 
+    <Page
       className={`${prefixCls}-home`}
       service={AppState.currentMenuType.type === 'project' ? [
         'agile-service.project-page.pageQuery',

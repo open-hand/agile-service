@@ -33,7 +33,7 @@ class Doc extends Component {
     this.setState({
       loading: true,
     });
-    const newData = await axios.get(`/knowledge/v1/projects/${proId}/work_space?organizationId=${getOrganizationId()}&orgId=${getOrganizationId()}`);
+    const newData = await axios.get(`/knowledge/v1/projects/${proId}/work_space/all_space?organizationId=${getOrganizationId()}&orgId=${getOrganizationId()}`);
     if (newData && !newData.failed) {
       this.setState({
         data: newData,

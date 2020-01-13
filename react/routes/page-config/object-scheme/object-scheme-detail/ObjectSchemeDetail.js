@@ -246,9 +246,9 @@ function ObjectSchemeDetail(props) {
     });
   }, []);
 
-  // useEffect(() => {
-  //   setScrollHeight(document.getElementsByClassName('page-content')[0].clientHeight - 70);
-  // }, []);
+  useEffect(() => {
+    // setScrollHeight(document.getElementsByClassName('page-content') && document.getElementsByClassName('page-content')[0].clientHeight - 70);
+  }, []);
 
   const render = () => {
     const menu = AppState.currentMenuType;

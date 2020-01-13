@@ -37,7 +37,7 @@ class StoryCell extends Component {
       epic, otherData, storyCollapse, isLastRow, isLastColumn, epicIndex, lastCollapse,
     } = this.props;
     const { storyData, swimLine } = StoryMapStore;
-    const { issueId: epicId, featureCommonDTOList = [], adding } = epic;
+    const { issueId: epicId, featureCommonDTOList, adding } = epic;
     const targetEpic = storyData[epicId] || {};
     const { collapse } = otherData || {};
     // let epicStorys = [];

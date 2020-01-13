@@ -145,6 +145,10 @@ class StoryMapStore {
     this.createEpicModalVisible = createEpicModalVisible;
   }
 
+  @action setCreateFeatureModalVisible(createFeatureModalVisible) {
+    this.createFeatureModalVisible = createFeatureModalVisible;
+  }
+
   @action toggleSideIssueListVisible(visible) {
     // 关闭Issue详情侧边
     if (!visible) {
@@ -569,9 +573,9 @@ class StoryMapStore {
   }
 
   @computed get getIsEmpty() {
-    const { epicWithFeature } = this.storyMapData;
-    if (epicWithFeature) {
-      return epicWithFeature.filter(epic => epic.issueId).length === 0;
+    const { epicWithFeature, featureWithoutEpic } = this.storyMapData;
+    if (epicWithFeature && featureWithoutEpic) {
+      return featureWithoutEpic.length === 0 && epicWithFeature.filter(epic => epic.issueId).length === 0;
     }
     return true;
   }

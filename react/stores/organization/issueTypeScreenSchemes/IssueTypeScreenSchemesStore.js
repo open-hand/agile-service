@@ -1,5 +1,5 @@
 import {
-  observable, computed, action,
+  observable, computed, action, runInAction,
 } from 'mobx';
 import { axios, store } from '@choerodon/boot';
 import querystring from 'query-string';

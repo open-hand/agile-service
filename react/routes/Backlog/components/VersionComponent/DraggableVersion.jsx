@@ -210,8 +210,8 @@ class VersionItem extends Component {
                   maxLength={15}
                 />
               ) : (
-                <p>{item.name}</p>
-              )}
+                  <p>{item.name}</p>
+                )}
 
               <Permission type={type} projectId={projectId} organizationId={orgId} service={['agile-service.product-version.createVersion']}>
                 <Dropdown onClick={e => e.stopPropagation()} overlay={this.getmenu()} trigger={['click']}>

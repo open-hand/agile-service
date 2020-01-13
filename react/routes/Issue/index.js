@@ -26,7 +26,6 @@ import SaveFilterModal from './components/SaveFilterModal';
 import ExportIssue from './components/ExportIssue';
 import ExpandWideCard from './components/ExpandWideCard';
 import ImportIssue from './components/ImportIssue';
-
 import './index.less';
 
 const { Column } = Table;
@@ -286,9 +285,9 @@ const Issue = withRouter(observer(() => {
           name={field.code}
           header={field.title}
           className="c7n-agile-table-cell"
-          renderer={({ record }) => {            
+          renderer={({ record }) => {
             const { fieldType, code } = field;
-            const value = record.get('foundationFieldValue')[code];          
+            const value = record.get('foundationFieldValue')[code];
             if (fieldType === 'member') {
               return value && (
                 <div style={{ display: 'inline-flex' }}>
@@ -340,6 +339,8 @@ const Issue = withRouter(observer(() => {
         'agile-service.issue.exportIssues',
         'agile-service.personal-filter.checkName',
         'agile-service.personal-filter.create',
+        'agile-service.personal-filter.update',
+        'agile-service.personal-filter.deleteById',
       ]}
     >
       <Header

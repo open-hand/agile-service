@@ -70,7 +70,7 @@ const IssueBody = observer((props) => {
           <IssueDetail {...props} />
           <IssueDes {...props} />
           <IssueAttachment {...props} />
-          {issueTypeVO.typeCode && ['sub_task', 'feature'].indexOf(issueTypeVO.typeCode) === -1
+          {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueDoc {...props} /> : ''
           }
 

@@ -13,4 +13,18 @@
       align-items: flex-end;
     }
   }
+
+  .c7n-table-thead {
+    .c7n-table-selection-column {
+      * {
+        visibility: hidden;
+        pointer-events: none;
+      }
+    }
+  }
+
+  .c7n-table-row-level-0 > .c7n-table-selection-column * {
+    visibility: hidden;
+    pointer-events: none;
+  }
 }

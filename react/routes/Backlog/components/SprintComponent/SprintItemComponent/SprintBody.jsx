@@ -5,6 +5,7 @@ import BacklogStore from '../../../../../stores/project/backlog/BacklogStore';
 import QuickCreateIssue from './QuickCreateIssue';
 import IssueList from './IssueList';
 import { deBounce } from '../Utils';
+import { getFeaturesInProject } from '../../../../../api/FeatureApi';
 import { createIssueField } from '../../../../../api/NewIssueApi';
 
 const debounceCallback = deBounce(500);
@@ -36,6 +37,15 @@ const loadEpic = () => {
   });
 };
 
+/**
+   * 加载特性
+   */
+const loadFeature = () => {
+  getFeaturesInProject().then((data) => {
+    BacklogStore.setFeatureData(data);
+  }).catch(() => {
+  });
+};
 @inject('AppState')
 @observer class SprintBody extends Component {
   handleCreateIssue(currentType, inputValue) {
@@ -81,6 +91,8 @@ const loadEpic = () => {
         //   loadVersion();
         // } else if (BacklogStore.getCurrentVisible === 'epic') {
         //   loadEpic();
+        // } else if (BacklogStore.getCurrentVisible === 'feature') {
+        //   loadFeature();
         // }
         BacklogStore.createIssue({
           ...res,

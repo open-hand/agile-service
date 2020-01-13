@@ -5,10 +5,12 @@ import {
   Select, Form, Input, Button, Modal, Spin,
 } from 'choerodon-ui';
 import moment from 'moment';
+import reactComponentDebounce from '@/components/DebounceComponent';
 import { UploadButton } from '../CommonComponent';
 import {
   handleFileUpload, beforeTextUpload, validateFile, normFile, getProjectName, getProjectId,
 } from '../../common/utils';
+import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 import {
   createIssue, getFields, createFieldValue, loadIssue, loadIssueTypes,
 } from '../../api/NewIssueApi';
@@ -19,6 +21,15 @@ import './CreateIssue.less';
 import SelectFocusLoad from '../SelectFocusLoad';
 import renderField from './renderField';
 import FieldIssueLinks from './FieldIssueLinks';
+
+const DebounceInput = reactComponentDebounce({
+  valuePropName: 'value',
+  triggerMs: 250,
+})(Input);
+const DebounceEditor = reactComponentDebounce({
+  valuePropName: 'value',
+  triggerMs: 250,
+})(WYSIWYGEditor);
 
 const { AppState } = stores;
 const { Sidebar } = Modal;
@@ -327,10 +338,10 @@ class CreateIssue extends Component {
     const issueTypes = applyFilter(originIssueTypes, [
       filterSubType, {
         filter: filterEpic,
-        apply: false,
+        apply: IsInProgramStore.isInProgram || mode === 'feature', // 在项目群下的子项目和创建feature时，把epic过滤掉
       }, {
         filter: filterFeature,
-        apply: true,
+        apply: mode !== 'program', // 在项目群中创建issue时不过滤feature类型
       }]);
     return issueTypes;
   }
@@ -559,7 +570,7 @@ class CreateIssue extends Component {
             {getFieldDecorator('summary', {
               rules: [{ required: true, message: '概要为必输项', whitespace: true }],
             })(
-              <Input autoFocus={newIssueTypeCode !== 'issue_epic'} label="概要" maxLength={44} />,
+              <DebounceInput autoFocus={newIssueTypeCode !== 'issue_epic'} label="概要" maxLength={44} />,
             )}
           </FormItem>
         );
@@ -572,7 +583,7 @@ class CreateIssue extends Component {
                   validator: this.checkEpicNameRepeat,
                 }],
               })(
-                <Input autoFocus label="史诗名称" maxLength={20} />,
+                <DebounceInput autoFocus label="史诗名称" maxLength={20} />,
               )}
             </FormItem>
           )
@@ -610,7 +621,7 @@ class CreateIssue extends Component {
               {getFieldDecorator(fieldCode, {
                 initialValue: newIssueTypeCode === 'bug' ? bugDefaultDes : undefined,
               })(
-                <WYSIWYGEditor
+                <DebounceEditor
                   style={{ height: 200, width: '100%' }}
                 />,
               )}
@@ -633,7 +644,7 @@ class CreateIssue extends Component {
           <FormItem key={field.id}>
             {getFieldDecorator('benfitHypothesis', {
             })(
-              <Input label="特性价值" placeholder="请输入特性价值" maxLength={100} />,
+              <DebounceInput label="特性价值" placeholder="请输入特性价值" maxLength={100} />,
             )}
           </FormItem>
         );
@@ -642,7 +653,7 @@ class CreateIssue extends Component {
           <FormItem key={field.id}>
             {getFieldDecorator('acceptanceCritera', {
             })(
-              <Input label="验收标准" placeholder="请输入验收标准" maxLength={100} />,
+              <DebounceInput label="验收标准" placeholder="请输入验收标准" maxLength={100} />,
             )}
           </FormItem>
         );

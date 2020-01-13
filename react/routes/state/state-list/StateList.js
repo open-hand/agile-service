@@ -458,7 +458,7 @@ function StateList(props) {
         'agile-service.status.create',
         'agile-service.status.checkName',
         'agile-service.status.delete',
-      ]} 
+      ]}
       >
         <Header title={<FormattedMessage id="state.title" />}>
           {!initialTotal

@@ -8,12 +8,13 @@ import {
   loadEpics, loadProgramEpics, loadIssueTypes, loadPriorities,
   loadComponents, loadLabels, loadVersions,
   loadStatusList, loadIssuesInLink, loadSprints,
+
 } from '../../api/NewIssueApi';
 import IssueLinkType from '../../api/IssueLinkType';
 import TypeTag from '../TypeTag';
 import StatusTag from '../StatusTag';
 
-// 避免选项中 加载更多 影响 typeof
+// 增加 typeof 避免选项中 加载更多 影响 
 const filterOption = (input, option) => option.props.children && typeof (option.props.children) === 'string' && option.props.children.toLowerCase().indexOf(
   input.toLowerCase(),
 ) >= 0;

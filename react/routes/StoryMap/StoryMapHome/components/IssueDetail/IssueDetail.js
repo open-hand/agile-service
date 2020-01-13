@@ -8,10 +8,8 @@ import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore'
 class IssueDetail extends Component {
   constructor(props) {
     super(props);
-
     this.EditIssue = React.createRef();
   }
-
 
   /**
    * 刷新issue详情的数据
@@ -22,11 +20,11 @@ class IssueDetail extends Component {
     }
   }
 
-  handleCancel=() => {
+  handleCancel = () => {
     StoryMapStore.setClickIssue(null);
   }
 
-  handleDeleteIssue=() => {
+  handleDeleteIssue = () => {
     StoryMapStore.setClickIssue(null);
     const { refresh } = this.props;
     refresh();
@@ -36,11 +34,11 @@ class IssueDetail extends Component {
     const { refresh, isFullScreen, onChangeWidth } = this.props;
     const { selectedIssueMap } = StoryMapStore;
     const visible = selectedIssueMap.size;
-    const { programId, issueId } = selectedIssueMap.values().next().value || {};   
+    const { programId, issueId } = selectedIssueMap.values().next().value || {};
     return (
-      <EditIssue  
-        visible={visible}       
-        programId={programId}       
+      <EditIssue
+        visible={visible}
+        programId={programId}
         isFullScreen={isFullScreen}
         disabled={isFullScreen || programId}
         applyType={programId ? 'program' : 'agile'}
@@ -51,7 +49,7 @@ class IssueDetail extends Component {
         onDeleteIssue={this.handleDeleteIssue}
         onUpdate={refresh}
       />
-    );      
+    );
   }
 }
 

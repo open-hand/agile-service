@@ -192,10 +192,6 @@ export function delta2Html(description) {
     return text;
   }
 }
-
-export function escape(str) {
-  return str.replace(/<\/script/g, '<\\/script').replace(/<!--/g, '<\\!--');
-}
 // eslint-disable-next-line no-restricted-globals
 export function getParams(url = location.href) {
   const theRequest = {};
@@ -296,35 +292,6 @@ export function commonLink(link) {
 
   return encodeURI(`/agile${link}?type=${type}&id=${projectId}&organizationId=${organizationId}&orgId=${organizationId}&name=${name}`);
 }
-export function editArtLink(artId) {
-  return commonLink(`/art/edit/${artId}`);
-}
-export function artListLink() {
-  return commonLink('/art');
-}
-
-export function PIDetailLink(id) {
-  return commonLink(`/pi/detail/${id}`);
-}
-export function PICalendarLink(id, ArtName) {
-  const menu = AppState.currentMenuType;
-  const {
-    type, id: projectId, name, organizationId,
-  } = menu;
-  return encodeURI(`/agile/art/calendar/${id}?type=${type}&id=${projectId}&organizationId=${organizationId}&name=${name}&ArtName=${ArtName}&orgId=${organizationId}`);
-}
-export function PIListLink() {
-  return commonLink('/pi');
-}
-export function ProgramBoardLink() {
-  return commonLink('/kanban');
-}
-export function ProgramBoardSettingLink() {
-  return commonLink('/kanban/setting');
-}
-export function ProgramFeatureListLink() {
-  return commonLink('/feature');
-}
 export function issueLink(issueId, typeCode, issueName = null) {
   const menu = AppState.currentMenuType;
   const {
@@ -343,7 +310,7 @@ export function programIssueLink(issueId, issueName, projectId) {
   const {
     type, id, name, organizationId,
   } = menu;
-  return encodeURI(`/agile/feature?type=${type}&id=${projectId || id}&name=${name}&organizationId=${organizationId}&paramIssueId=${issueId}&paramName=${issueName}&orgId=${organizationId}`);
+  return encodeURI(`/program/feature?type=${type}&id=${projectId || id}&name=${name}&organizationId=${organizationId}&paramIssueId=${issueId}&paramName=${issueName}&orgId=${organizationId}`);
 }
 export function testExecuteLink(executeId) {
   const menu = AppState.currentMenuType;
@@ -406,31 +373,6 @@ export function normFile(e) {
     return e;
   }
   return e && e.fileList;
-}
-
-/**
- * 根据key从sessionStorage取值
- * @param key
- */
-export function getSessionStorage(key) {
-  return JSON.parse(sessionStorage.getItem(key));
-}
-
-/**
- * 设置或更新sessionStorage
- * @param key
- * @param item
- */
-export function setSessionStorage(key, item) {
-  return sessionStorage.setItem(key, JSON.stringify(item));
-}
-
-/**
- * 根据key从sessionStorage删除
- * @param key
- */
-export function removeSessionStorage(key) {
-  return sessionStorage.removeItem(key);
 }
 
 /**
@@ -542,174 +484,4 @@ export function getStageMap() {
 // 获取文件名后缀
 export function getFileSuffix(fileName) {
   return fileName.replace(/.+\./, '').toLowerCase();
-}
-
-// 转换url的param
-export function paramConverter(url) {
-  const reg = /[^?&]([^=&#]+)=([^&#]*)/g;
-  const retObj = {};
-  url.match(reg).forEach((item) => {
-    const [tempKey, paramValue] = item.split('=');
-    const paramKey = tempKey[0] !== '&' ? tempKey : tempKey.substring(1);
-    Object.assign(retObj, {
-      [paramKey]: paramValue,
-    });
-  });
-  return retObj;
-}
-
-/*
- * 获取IE浏览器版本
- */
-function getIeVersion() {
-  const IEMode = document.documentMode;
-  const rMsie = /(msie\s|trident.*rv:)([\w.]+)/;
-  const ma = window.navigator.userAgent.toLowerCase();
-  const match = rMsie.exec(ma);
-  try {
-    return match[2];
-  } catch (e) {
-    return IEMode;
-  }
-}
-
-/*
- * 获取oper浏览器版本
- */
-function getOperaVersion(userAgent) {
-  try {
-    if (window.opera) {
-      return userAgent.match(/opera.([\d.]+)/)[1];
-    } else if (userAgent.indexOf('opr') > 0) {
-      return userAgent.match(/opr\/([\d.]+)/)[1];
-    }
-  } catch (e) {
-    return 0;
-  }
-  return '';
-}
-
-/*
- * 判断是否为360浏览器
- */
-function validate360(option, value) {
-  const { mimeTypes } = window.navigator;
-  for (const mt in mimeTypes) {
-    if (mimeTypes[mt][option] === value) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/* eslint-disable */
-function isIE() { // 支持IE11
-  if (!!window.ActiveXObject || 'ActiveXObject' in window) {
-    return true;
-  } else {
-    return false;
-  }
-}
-/*
-* 获取浏览器类型和版本信息
-*/
-export function getBrowerInfo() {
-  const userAgent = window.navigator.userAgent.toLowerCase();
-  let browserType = '';
-  let browserVersion = '';
-  // 浏览器类型-IE
-  // if (userAgent.match(/msie/) != null || userAgent.match(/trident/) != null) { // 这个方法对于IE11已经无效了
-  if (isIE()) {
-    browserType = 'IE';
-    browserVersion = getIeVersion();
-  }
-  // Opero
-  else if (window.opera || (userAgent.indexOf('opr') > 0)) {
-    browserType = 'opero';
-    browserVersion = getOperaVersion(userAgent);
-  }
-  // 百度 
-  else if (userAgent.indexOf('bidubrowser') > 0) {
-    browserType = '百度';
-    browserVersion = userAgent.match(/bidubrowser\/([\d.]+)/)[1];
-  }
-  // UC
-  else if (userAgent.indexOf('ubrowser') > 0) {
-    browserType = 'UC';
-    browserVersion = userAgent.match(/ubrowser\/([\d.]+)/)[1];
-  }
-  // 搜狗
-  else if (userAgent.indexOf('metasr') > 0 || userAgent.indexOf('se 2.x') > 0) {
-    browserType = '搜狗';
-  }
-  // QQ
-  else if (userAgent.indexOf('tencenttraveler') > 0) {
-    browserType = 'QQ';
-    browserVersion = userAgent.match(/tencenttraveler\/([\d.]+)/)[1];
-  }
-  // QQ
-  else if (userAgent.indexOf('qqbrowser') > 0) {
-    browserType = 'QQ';
-    browserVersion = userAgent.match(/qqbrowser\/([\d.]+)/)[1];
-  }
-  // 遨游
-  else if (userAgent.indexOf('maxthon') > 0) {
-    browserType = '遨游';
-    browserVersion = userAgent.match(/maxthon\/([\d.]+)/)[1];
-  }
-  // 火狐
-  else if (userAgent.indexOf('firefox') > 0) {
-    browserType = 'firefox';
-    browserVersion = userAgent.match(/firefox\/([\d.]+)/)[1];
-  }
-  // edge
-  else if (userAgent.indexOf('edge') > 0) {
-    browserType = 'Edge';
-    browserVersion = userAgent.match(/edge\/([\d.]+)/)[1];
-  }
-  // 谷歌/360
-  else if (userAgent.indexOf('chrome') > 0) {
-    if (validate360('type', 'application/vnd.chromium.remoting-viewer')) {
-      browserType = '360';
-    } else {
-      browserType = 'Chrome';
-      browserVersion = userAgent.match(/chrome\/([\d.]+)/)[1];
-    }
-  }
-  // 苹果
-  else if (userAgent.indexOf('safari') > -1) {
-    browserType = 'Safari';
-    browserVersion = userAgent.match(/safari\/([\d.]+)/)[1];
-  }
-  return `${browserType}${browserVersion ? '/' : ''}${browserVersion}`;
-}
-/* eslint-enable */
-
-export function toCanvas(selector) {
-  const shotContent = document.querySelector(selector);
-  shotContent.style.width = `${document.querySelector(selector).scrollWidth}px`;
-  shotContent.style.height = `${document.querySelector(selector).scrollHeight}px`;
-
-  const scaleBy = 2;
-  const canvas = document.createElement('canvas');
-  canvas.style.width = `${_.parseInt(_.trim(shotContent.style.width, 'px')) * scaleBy}px`;
-  canvas.style.height = `${_.parseInt(_.trim(shotContent.style.height, 'px')) * scaleBy}px`;
-  const ctx = canvas.getContext('2d');
-  ctx.mozImageSmoothingEnabled = false;
-  ctx.webkitImageSmoothingEnabled = false;
-  ctx.msImageSmoothingEnabled = false;
-  ctx.imageSmoothingEnabled = false;
-
-  ctx.scale(scaleBy, scaleBy);
-
-  const opts = {
-    useCORS: true, // 【重要】开启跨域配置
-    dpi: window.devicePixelRatio,
-    canvas,
-    scale: scaleBy,
-    width: _.parseInt(_.trim(shotContent.style.width, 'px')),
-    height: _.parseInt(_.trim(shotContent.style.height, 'px')),
-  };
-
-  return { shotContent, opts };
 }

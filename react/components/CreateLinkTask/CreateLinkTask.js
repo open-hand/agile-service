@@ -22,7 +22,7 @@ class CreateLinkTask extends Component {
   }
 
   componentDidMount() {
-    this.getLinks();   
+    this.getLinks();
   }
 
 
@@ -123,8 +123,7 @@ class CreateLinkTask extends Component {
                 { required: true, message: '请选择所要创建的关系' },
               ],
             })(
-              <Select
-                ref={(select) => { this.Select = select; }}
+              <Select           
                 defaultOpen
                 label="关系"
                 loading={selectLoading}

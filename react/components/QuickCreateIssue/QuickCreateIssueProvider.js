@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { loadIssueTypes, getDefaultPriority } from '../../api/NewIssueApi';
+import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 
 class QuickCreateIssueProvider extends Component {
   state={
@@ -28,7 +29,7 @@ class QuickCreateIssueProvider extends Component {
     const { issueTypes } = this.state;
     issueTypes.forEach((type) => {
       const { typeCode } = type;
-      if (['sub_task'].includes(typeCode)) {
+      if ((IsInProgramStore.isInProgram && ['issue_epic', 'feature'].includes(typeCode)) || ['sub_task'].includes(typeCode)) {
         return;
       }
       createTypes.push(type); 

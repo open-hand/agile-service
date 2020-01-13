@@ -1,7 +1,6 @@
 // CSS 黑魔法，请勿滥用
 import React, { Component } from 'react';
 import { Choerodon } from '@choerodon/boot';
-
 export default WrappedComponent => class CSSBlackMagic extends Component {
   constructor(props) {
     super(props);

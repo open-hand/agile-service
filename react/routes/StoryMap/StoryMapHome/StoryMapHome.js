@@ -131,13 +131,14 @@ const StoryMapHome = observer(() => {
         'agile-service.scheme.queryIssueTypesWithStateMachineIdByProjectId',
         'agile-service.product-version.queryNameByOptions',
         'agile-service.scheme.queryByOrganizationIdList',
-        'agile-service.story-map.queryStoryMapDemand',
         'agile-service.scheme.queryStatusByProjectId',
-        'agile-service.issue.checkEpicName',
+        'agile-service.story-map.queryStoryMapDemand',
         'agile-service.issue.createIssue',
         'agile-service.field-value.createFieldValuesWithQuickCreate',
         'agile-service.story-map.storyMapMove',
         'agile-service.story-map.queryStoryMap',
+        'agile-service.scheme.queryIssueTypesWithStateMachineIdByProjectId',
+        'agile-service.scheme.queryByOrganizationIdList',
       ]}
     >
       <Header title="故事地图">

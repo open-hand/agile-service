@@ -10,12 +10,15 @@ import {
 import { Modal } from 'choerodon-ui/pro';
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
+import Feature from '../components/FeatureComponent/Feature';
 import IssueDetail from '../components/IssueDetailComponent/IssueDetail';
 import CreateIssue from '../../../components/CreateIssue';
 import './BacklogHome.less';
 import SprintItem from '../components/SprintComponent/SprintItem';
 import CreateSprint from '../components/create-sprint';
 import Injecter from '../../../components/Injecter';
+import IsInProgramStore from '../../../stores/common/program/IsInProgramStore';
+import { getFeaturesInProject } from '../../../api/FeatureApi';
 
 const createSprintKey = Modal.key();
 @inject('HeaderStore')
@@ -81,6 +84,18 @@ class BacklogHome extends Component {
     });
   };
 
+  /**
+   * 加载特性
+   */
+  loadFeature = () => {
+    const { BacklogStore } = this.props;
+
+    getFeaturesInProject().then((data) => {
+      BacklogStore.setFeatureData(data);
+    }).catch(() => {
+    });
+  };
+
   paramConverter = (url) => {
     const reg = /[^?&]([^=&#]+)=([^&#]*)/g;
     const retObj = {};
@@ -107,6 +122,8 @@ class BacklogHome extends Component {
       this.loadVersion();
     } else if (BacklogStore.getCurrentVisible === 'epic') {
       this.loadEpic();
+    } else if (BacklogStore.getCurrentVisible === 'feature') {
+      this.loadFeature();
     }
   };
 
@@ -139,7 +156,7 @@ class BacklogHome extends Component {
       }).catch((error) => {
       });
   }
-
+  
   handleClickCBtn = () => {
     const { BacklogStore } = this.props;
     BacklogStore.setNewIssueVisible(true);
@@ -177,6 +194,7 @@ class BacklogHome extends Component {
     const { BacklogStore } = this.props;
     const arr = BacklogStore.getSprintData;
     const { display } = this.state;
+    const { isInProgram } = IsInProgramStore;    
     return (
       <Page
         service={[
@@ -219,11 +237,13 @@ class BacklogHome extends Component {
             <Icon type="playlist_add icon" />
             <span>创建问题</span>
           </Button>
-          <Button className="leftBtn" functyp="flat" onClick={this.handleCreateSprint}>
-            <Icon type="playlist_add icon" />
-            创建冲刺
-          </Button>
-          {arr.length && arr.length > 1
+          {!isInProgram && (
+            <Button className="leftBtn" functyp="flat" onClick={this.handleCreateSprint}>
+              <Icon type="playlist_add icon" />
+              创建冲刺
+            </Button>
+          )}
+          {isInProgram && arr.length && arr.length > 1
             ? (
               <Checkbox
                 className="primary"
@@ -267,17 +287,32 @@ class BacklogHome extends Component {
               >
                 版本
               </p>
-              <p
-                style={{
-                  marginTop: 12,
-                }}
-                role="none"
-                onClick={() => {
-                  this.toggleCurrentVisible('epic');
-                }}
-              >
-                史诗
-              </p>
+              {!isInProgram && (
+                <p
+                  style={{
+                    marginTop: 12,
+                  }}
+                  role="none"
+                  onClick={() => {
+                    this.toggleCurrentVisible('epic');
+                  }}
+                >
+                  史诗
+                </p>
+              )}
+              {isInProgram && (
+                <p
+                  style={{
+                    marginTop: 12,
+                  }}
+                  role="none"
+                  onClick={() => {
+                    this.toggleCurrentVisible('feature');
+                  }}
+                >
+                  特性
+                </p>
+              )}
             </div>
             <Version
               store={BacklogStore}
@@ -287,8 +322,18 @@ class BacklogHome extends Component {
                 this.IssueDetail.refreshIssueDetail();
               }}
             />
-            <Epic
+            {!isInProgram && (
+              <Epic
+                refresh={this.refresh}
+                visible={BacklogStore.getCurrentVisible}
+                issueRefresh={() => {
+                  this.IssueDetail.refreshIssueDetail();
+                }}
+              />
+            )}
+            <Feature
               refresh={this.refresh}
+              isInProgram={isInProgram}
               visible={BacklogStore.getCurrentVisible}
               issueRefresh={() => {
                 this.IssueDetail.refreshIssueDetail();
@@ -345,8 +390,9 @@ class BacklogHome extends Component {
                 >
                   <SprintItem
                     display={display}
+                    isInProgram={isInProgram}
                     epicVisible={BacklogStore.getEpicVisible}
-                    versionVisible={BacklogStore.getVersionVisible}
+                    versionVisible={BacklogStore.getVersionVisible}                  
                     onRef={(ref) => {
                       this.sprintItemRef = ref;
                     }}
@@ -374,7 +420,7 @@ class BacklogHome extends Component {
               refresh={() => this.refresh(false)}
               onRef={(ref) => {
                 this.IssueDetail = ref;
-              }}
+              }}       
             />
           </div>
         </Content>

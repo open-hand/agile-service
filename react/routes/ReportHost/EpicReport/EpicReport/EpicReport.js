@@ -722,8 +722,8 @@ class EpicReport extends Component {
                         </div>
                       ) : (
                         <div style={{ padding: '30px 0 20px', textAlign: 'center' }}>
-                            {ES.tableData.length ? '当前单位下问题均未预估，切换单位或从下方问题列表进行预估。' : '当前史诗下没有问题。'}
-                          </div>
+                          {ES.tableData.length ? '当前单位下问题均未预估，切换单位或从下方问题列表进行预估。' : '当前史诗下没有问题。'}
+                        </div>
                       )
                     }
                   </div>
@@ -746,38 +746,38 @@ class EpicReport extends Component {
               </div>
             ) : (
               <EmptyBlock
-                  style={{ marginTop: 40 }}
-                  textWidth="auto"
-                  pic={pic}
-                  title="当前项目无可用史诗"
-                  des={(
-                    <div>
-                      <span>请在</span>
-                      <span
-                        className="primary"
-                        style={{ margin: '0 5px', cursor: 'pointer' }}
-                        role="none"
-                        onClick={() => {
-                          history.push(`/agile/work-list/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`);
-                        }}
-                      >
-                        待办事项
-                      </span>
-                      <span>或</span>
-                      <span
-                        className="primary"
-                        style={{ margin: '0 5px', cursor: 'pointer' }}
-                        role="none"
-                        onClick={() => {
-                          history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`);
-                        }}
-                      >
-                        问题管理
-                      </span>
-                      <span>中创建一个史诗</span>
-                    </div>
-                  )}
-                />
+                style={{ marginTop: 40 }}
+                textWidth="auto"
+                pic={pic}
+                title="当前项目无可用史诗"
+                des={(
+                  <div>
+                    <span>请在</span>
+                    <span
+                      className="primary"
+                      style={{ margin: '0 5px', cursor: 'pointer' }}
+                      role="none"
+                      onClick={() => {
+                        history.push(`/agile/work-list/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`);
+                      }}
+                    >
+                      待办事项
+                    </span>
+                    <span>或</span>
+                    <span
+                      className="primary"
+                      style={{ margin: '0 5px', cursor: 'pointer' }}
+                      role="none"
+                      onClick={() => {
+                        history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`);
+                      }}
+                    >
+                      问题管理
+                    </span>
+                    <span>中创建一个史诗</span>
+                  </div>
+                )}
+              />
             )
           }
         </Content>

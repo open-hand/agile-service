@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   loadIssueTypes, loadStatusList, loadPriorities, loadLabels, loadComponents, loadVersions, loadEpics, loadSprints,
 } from '../../api/NewIssueApi';

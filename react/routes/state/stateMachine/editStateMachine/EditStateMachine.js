@@ -1499,7 +1499,16 @@ class EditStateMachine extends Component {
     }
     const { headerBtnVisible } = this.state;
     return (
-      <Page>
+      <Page
+      service={[
+        'agile-service.state-machine.queryStateMachineWithConfigDraftById',
+        'agile-service.state-machine-transform.checkName',
+        'agile-service.status.queryAllStatus',
+        'agile-service.status.create',
+        'agile-service.status.checkName',
+        
+      ]}
+      >
         <Header
           title={<FormattedMessage id={status === 'state_machine_active' ? 'stateMachine.edit.avtive' : 'stateMachine.edit'} />}
           // backPath={`/agile/states/${status === 'state_machine_draft' ? `state-machine/edit/${stateMachineData.id}/state_machine_active` : 'machine'}?type=${type}&id=${projectId}&name=${encodeURIComponent(name)}&organizationId=${orgId}`}

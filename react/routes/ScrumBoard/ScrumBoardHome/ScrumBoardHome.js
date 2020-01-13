@@ -4,7 +4,7 @@ import {
   Page, Header, Content, stores, Breadcrumb, Choerodon, Permission,
 } from '@choerodon/boot';
 import {
-  Button, Select, Spin, Icon, Modal, Input, Form, Tooltip, Radio,
+  Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
 } from 'choerodon-ui';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import ScrumBoardDataController from './ScrumBoardDataController';
@@ -23,8 +23,6 @@ import HaederLine from '../../../common/Headerline';
 import CreateBoard from '../ScrumBoardComponent/CreateBoard';
 
 const { Option } = Select;
-const { Sidebar } = Modal;
-const FormItem = Form.Item;
 const { AppState } = stores;
 
 const RadioGroup = Radio.Group;
@@ -207,7 +205,7 @@ class ScrumBoardHome extends Component {
         ['swimlane_epic', this.dataConverter.getEpicData],
         ['assignee', this.dataConverter.getAssigneeData],
         ['swimlane_none', this.dataConverter.getAllData],
-        ['undefined', this.dataConverter.getAllData],
+        ['undefined', this.dataConverter.getAssigneeData],
       ]);
       const renderData = renderDataMap.get(defaultBoard.userDefaultBoard)();
       const canDragOn = this.dataConverter.getCanDragOn();
@@ -353,15 +351,7 @@ class ScrumBoardHome extends Component {
           'devops-service.devops-git.createBranch',
         ]}
       >
-        <Header title="活跃冲刺">
-          <Permission
-            type={type}
-            projectId={projectId}
-            organizationId={orgId}
-            service={['agile-service.board.createScrumBoard']}
-          >
-            <span />
-          </Permission>
+        <Header title="活跃冲刺">         
           <Select
             ref={(SelectBoard) => { this.SelectBoard = SelectBoard; }}
             className="SelectTheme primary autoWidth"
@@ -403,24 +393,23 @@ class ScrumBoardHome extends Component {
                 ))
               }
           </Select>
+          <HaederLine />
+          <Button
+            funcType="flat"
+            icon="settings"
+            style={{
+              marginRight: 15,
+            }}
+            onClick={() => {
+              const urlParams = AppState.currentMenuType;
+              history.push(`/agile/scrumboard/setting?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&boardId=${ScrumBoardStore.getSelectedBoard}`);
+            }}
+          >
+              配置看板
+          </Button>
           {
             ScrumBoardStore.didCurrentSprintExist && (
-            <Fragment>
-              
-              <HaederLine />
-              <Button
-                funcType="flat"
-                icon="settings"
-                style={{
-                  marginRight: 15,
-                }}
-                onClick={() => {
-                  const urlParams = AppState.currentMenuType;
-                  history.push(`/agile/scrumboard/setting?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&boardId=${ScrumBoardStore.getSelectedBoard}`);
-                }}
-              >
-              配置看板
-              </Button>
+            <Fragment>             
               {this.renderRemainDate()}
               <Button
                 style={{

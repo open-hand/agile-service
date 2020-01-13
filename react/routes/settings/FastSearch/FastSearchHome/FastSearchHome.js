@@ -254,7 +254,7 @@ class Search extends Component {
       {
         title: '筛选器',
         dataIndex: 'expressQuery',
-        width: '50%',
+        // width: '50%',
         render: expressQuery => (
           <div style={{
             maxWidth: '422px',
@@ -283,7 +283,7 @@ class Search extends Component {
       {
         title: '描述',
         dataIndex: 'description',
-        width: '25%',
+        // width: '25%',
         render: description => (
           <div style={{
             maxWidth: '288px',
@@ -311,7 +311,7 @@ class Search extends Component {
     ];
 
     return (
-      <Page 
+      <Page
         className="c7n-fast-search"
         service={[
           'agile-service.quick-filter.listByProjectId',

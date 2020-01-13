@@ -150,7 +150,7 @@ class IterationBoardHome extends Component {
 
   render() {
     return (
-      <Page 
+      <Page
         className="c7n-agile-iterationBoard"
         service={[
           'agile-service.sprint.querySprintById',
