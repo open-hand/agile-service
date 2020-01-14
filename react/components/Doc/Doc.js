@@ -3,9 +3,9 @@ import { stores, axios, Choerodon } from '@choerodon/boot';
 import {
   Modal,
   Table,
-  message,
 } from 'choerodon-ui';
 import './Doc.less';
+import { produce } from 'immer';
 import { getOrganizationId } from '../../common/utils';
 
 const { AppState } = stores;
@@ -20,6 +20,7 @@ class Doc extends Component {
       selectedRows: [],
       selectedRowKeys: props.checkIds || [],
       loading: false,
+      filter: '',
     };
   }
 
@@ -109,6 +110,23 @@ class Doc extends Component {
     }
   };
 
+  handleChange=(pagination, filters, sorter, content) => {  
+    const keyWord = content[0] || '';
+    this.setState({
+      filter: keyWord,
+    });
+  }
+
+  getFilteredData() {
+    const { data, filter } = this.state;
+    return produce(data, (draft) => {
+      draft.forEach((base) => {
+        // eslint-disable-next-line no-param-reassign
+        base.children = base.children.filter(doc => doc.name.indexOf(filter) + 1);
+      });
+    });
+  }
+
   render() {
     const {
       onCancel,
@@ -116,11 +134,9 @@ class Doc extends Component {
     } = this.props;
     const {
       createLoading,
-      selectedRowKeys,
-      data,
+      selectedRowKeys,      
       loading,
     } = this.state;
-
     const { name } = AppState.currentMenuType;
 
     const rowSelection = {
@@ -128,7 +144,6 @@ class Doc extends Component {
       onChange: this.onSelectChange,
       getCheckboxProps: this.getCheckboxProps,
     };
-
     return (
       <Sidebar
         className="c7n-agile-doc"
@@ -144,13 +159,15 @@ class Doc extends Component {
         <div>
           <p>{`你当前项目为"${name}"，知识文档的内容所属为当前项目。`}</p>
           <Table
-            dataSource={data}
+            dataSource={this.getFilteredData()}
             columns={this.getColumn()}
             rowSelection={rowSelection}
+            onChange={this.handleChange}
             // onExpand={this.onExpand}
             rowKey={record => record.id}
             pagination={false}
             loading={loading}
+            noFilter
           />
         </div>
       </Sidebar>
