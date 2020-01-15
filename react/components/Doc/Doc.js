@@ -124,7 +124,7 @@ class Doc extends Component {
         // eslint-disable-next-line no-param-reassign
         base.children = base.children.filter(doc => doc.name.indexOf(filter) + 1);
       });
-    });
+    }).filter(base => base.children.length);
   }
 
   render() {
