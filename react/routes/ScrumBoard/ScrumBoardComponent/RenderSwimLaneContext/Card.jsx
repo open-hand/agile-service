@@ -3,10 +3,11 @@ import { Draggable } from 'react-beautiful-dnd';
 import {
   CardTypeTag, IssueNum, StayDay, StatusName, Priority, Assignee, Summary,
 } from './CardComponent/index';
+import TypeTag from '@/components/TypeTag';
 import ScrumBoardStore from '../../../../stores/project/scrumBoard/ScrumBoardStore';
 import './StatusIssue.less';
 
-export default class CardProvider extends Component {
+export default class Card extends Component {
   constructor(props) {
     super(props);
     this.ref = {};
@@ -35,7 +36,7 @@ export default class CardProvider extends Component {
     return (
       <Draggable draggableId={draggableId} index={index} key={draggableId}>
         {(provided, snapshot) => {
-          const onMouseDown = (() => {
+          const onMouseDown = () => {
             if (!provided.dragHandleProps) {
               return onMouseDown;
             }
@@ -44,7 +45,7 @@ export default class CardProvider extends Component {
               provided.dragHandleProps.onMouseDown(event);
               this.myOnMouseDown(issue);
             };
-          })();
+          };
           return (
             <div
               key={issue.issueId}
@@ -54,6 +55,7 @@ export default class CardProvider extends Component {
               {...provided.draggableProps}
               {...provided.dragHandleProps}
               onMouseDown={onMouseDown}
+              onClick={e => this.handleClick(e)}
             >
               <div
                 className="c7n-scrumboard-issue"
@@ -66,37 +68,20 @@ export default class CardProvider extends Component {
                 <div style={{ flexGrow: 1 }}>
                   <div
                     className="c7n-scrumboard-issueTop"
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                    }}
                   >
                     <div
-                      style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        justifyContent: 'space-between',
-                        flex: 1,
-                        alignItems: 'center',
-                      }}
+                      className="c7n-scrumboard-issueTop-left" 
                     >
                       <div
-                        style={{
-                          display: 'flex',
-                          flexGrow: '7',
-                          marginBottom: 4,
-                        }}
+                        className="c7n-scrumboard-issueTop-left-type"                         
                       >
-                        <CardTypeTag issueTypeVO={issue.issueTypeVO} />
+                        <TypeTag data={issue.issueTypeVO} />
+                        {/* <CardTypeTag issueTypeVO={issue.issueTypeVO} /> */}
                         <IssueNum issueNum={issue.issueNum} completed={completed} />
                         <StayDay stayDay={issue.stayDay} completed={completed} />
                       </div>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        flexGrow: '1',
-                        marginBottom: 4,
-                      }}
+                      <div
+                        className="c7n-scrumboard-issueTop-left-middle"
                       >
                         <StatusName
                           categoryCode={categoryCode}
@@ -123,7 +108,7 @@ export default class CardProvider extends Component {
               {provided.placeholder}
             </div>
           );
-        }}
+        } }
       </Draggable>
     );
   }

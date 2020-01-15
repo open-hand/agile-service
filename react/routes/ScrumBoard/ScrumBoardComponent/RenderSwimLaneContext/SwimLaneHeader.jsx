@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import {
-  Icon, Button, Avatar, Collapse,
-} from 'choerodon-ui';
+import { Button } from 'choerodon-ui';
 import { observer } from 'mobx-react';
 import './SwimLaneHeader.less';
 import TypeTag from '../../../../components/TypeTag';
@@ -171,7 +169,7 @@ export default class SwimLaneHeader extends Component {
                   ScrumBoardStore.setTransFromData(parentIssue, parentIssue.issueId);
                 }}
               >
-                {'移动到done'}
+                移动到done
               </Button>
             ) : null
           }

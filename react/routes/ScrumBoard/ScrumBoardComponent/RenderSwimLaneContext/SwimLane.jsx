@@ -2,7 +2,7 @@
  * 列状态
  */
 import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import './SwimLane.less';
 import RenderSwimLaneContext from './index';
@@ -12,7 +12,6 @@ import CardProvider from './CardProvider';
 import ScrumBoardStore from '../../../../stores/project/scrumBoard/ScrumBoardStore';
 import EpicRenderHeader from './EpicRenderHeader';
 
-@inject('AppState')
 @observer
 class SwimLane extends Component {
   renderEpicLane = mode => (

@@ -31,6 +31,30 @@
   }
 
   .c7n-scrumboard-issueTop {
+    display: flex;
+    justify-content: space-between;
+
+    &-left {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      flex: 1;
+      align-items: center;
+
+      &-type {
+        display: flex;
+        flex-grow: 7;
+        margin-bottom: 4;
+      }
+
+      &-middle {
+        display: flex;
+        align-items: center;
+        flex-grow: 1;
+        margin-bottom: 4;
+      }
+    }
+
     div.c7n-scrumboard-issueIcon {
       width: 0.2rem;
       height: 0.2rem;
