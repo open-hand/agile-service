@@ -26,11 +26,11 @@ class DocItem extends Component {
     return `${origin}#/knowledge/project?spaceId=${id}&type=project&id=${params.id}&name=${params.name}&category=${params.category}&organizationId=${params.organizationId}&orgId=${params.organizationId}`;
   };
 
-  handleDocClick = (id) => {
+  handleDocClick = ({ id, baseId }) => {
     const { location, history } = this.props;
     const { search } = location;
     const params = this.paramConverter(search);
-    history.push(`/knowledge/project?spaceId=${id}&type=project&id=${params.id}&name=${params.name}&category=${params.category}&organizationId=${params.organizationId}&orgId=${params.organizationId}`);
+    history.push(`/knowledge/project/doc/${baseId}?spaceId=${id}&type=project&id=${params.id}&name=${params.name}&category=${params.category}&organizationId=${params.organizationId}&orgId=${params.organizationId}`);
   };
 
   render() {
@@ -45,9 +45,9 @@ class DocItem extends Component {
         {doc.workSpaceVO
           ? (
             <a
+              role="none"
               className={`c7n-docItem-text c7n-docItem-${type}`}
-              // href={this.getUrl(doc.workSpaceVO.id)}
-              onClick={this.handleDocClick.bind(this, doc.workSpaceVO.id)}    
+              onClick={this.handleDocClick.bind(this, doc.workSpaceVO)}    
               rel="noopener noreferrer"
             >
               {doc.workSpaceVO.name}
