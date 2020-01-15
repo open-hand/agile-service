@@ -6,6 +6,8 @@ public class WorkSpaceVO {
 
     private String name;
 
+    private Long baseId;
+
     public Long getId() {
         return id;
     }
@@ -20,5 +22,13 @@ public class WorkSpaceVO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Long getBaseId() {
+        return baseId;
+    }
+
+    public void setBaseId(Long baseId) {
+        this.baseId = baseId;
     }
 }
