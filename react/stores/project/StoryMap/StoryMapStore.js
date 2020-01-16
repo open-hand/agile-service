@@ -78,7 +78,7 @@ class StoryMapStore {
   getStoryMap = () => {
     this.setLoading(true);
     Promise.all([getStoryMap(this.searchVO), loadIssueTypes(), loadVersions(), loadPriorities()]).then(([storyMapData, issueTypes, versionList, prioritys]) => {
-      let { epics: epicWithFeature } = storyMapData;
+      let epicWithFeature = storyMapData.epics || storyMapData.epicWithFeature;
       const { featureWithoutEpic = [] } = storyMapData;
       epicWithFeature = sortBy(epicWithFeature, 'epicRank');
       const newStoryMapData = {
@@ -563,6 +563,7 @@ class StoryMapStore {
 
   updateMiniMap() {
     setTimeout(() => {
+      // eslint-disable-next-line no-unused-expressions
       this.miniMap.current && this.miniMap.current.synchronize();
     });
   }
