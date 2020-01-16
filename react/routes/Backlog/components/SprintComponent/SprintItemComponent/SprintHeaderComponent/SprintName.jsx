@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Icon, Input } from 'choerodon-ui';
 import { checkSprintName } from '@/api/NewIssueApi';
 import TextEditToggle from '@/components/TextEditToggle';
-import { SPRINT_MAX_LENGTH } from '@/common/Constant';
+import { MAX_LENGTH_SPRINT } from '@/constants/MAX_LENGTH';
 
 const { Text, Edit } = TextEditToggle;
 
@@ -48,7 +48,7 @@ class SprintName extends Component {
             {sprintName}
           </Text>
           <Edit>
-            {({ width }) => <Input size="small" style={{ width: Math.max(width, 200), fontSize: 13 }} autoFocus maxLength={SPRINT_MAX_LENGTH} showLengthInfo={false} />}
+            {({ width }) => <Input size="small" style={{ width: Math.max(width, 200), fontSize: 13 }} autoFocus maxLength={MAX_LENGTH_SPRINT} showLengthInfo={false} />}
           </Edit>
         </TextEditToggle>        
       </div>

@@ -4,7 +4,7 @@ import {
   CardTypeTag, IssueNum, StayDay, StatusName, Priority, Assignee, Summary,
 } from './CardComponent/index';
 import TypeTag from '@/components/TypeTag';
-import ScrumBoardStore from '../../../../stores/project/scrumBoard/ScrumBoardStore';
+import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import './StatusIssue.less';
 
 export default class Card extends Component {

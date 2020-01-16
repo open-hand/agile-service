@@ -1,16 +1,14 @@
 import React, { Component } from 'react';
 import {
-  stores, axios, Page, Header, Content, Permission, Choerodon
+  stores, axios, Content, Choerodon, 
 } from '@choerodon/boot';
 import { withRouter } from 'react-router-dom';
-import _ from 'lodash';
 import {
-  Form, Input, Button, Icon, Select, Radio, Spin, message,
+  Form, Input, Button, Spin,
 } from 'choerodon-ui';
-import ScrumBoardStore from '../../../../stores/project/scrumBoard/ScrumBoardStore';
+import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 
 const { AppState } = stores;
-const { Option } = Select;
 const FormItem = Form.Item;
 
 class EditBoardName extends Component {
@@ -89,7 +87,7 @@ class EditBoardName extends Component {
   render() {
     const { form: { getFieldDecorator, setFieldsValue } } = this.props;
     const {
-      initialBoardName, loading, boardName, lastBoardName,
+      initialBoardName, loading, lastBoardName,
     } = this.state;
     const { editBoardNameDisabled } = this.props;
     return (
@@ -110,49 +108,49 @@ class EditBoardName extends Component {
                 disabled={editBoardNameDisabled}
               />
             ) : (
-                <div>
-                  <Form layout="vertical">
-                    <FormItem label="boardName" style={{ width: 512 }}>
-                      {getFieldDecorator('boardName', {
-                        rules: [{ required: true, message: '看板名称必填' }, {
-                          validator: this.checkBoardNameRepeat,
-                        }],
-                        initialValue: initialBoardName,
-                      })(
-                        <Input
-                          label="看板名称"
-                          ref={(ref) => { this.boardName = ref; }}
-                          maxLength={10}
-                        />,
-                      )}
-                    </FormItem>
-                  </Form>
-                  <div style={{ padding: '12px 0', borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}>
-                    <Button
-                      type="primary"
-                      funcType="raised"
-                      loading={loading}
-                      onClick={this.handleUpdateBoardName}
-                    >
-                      {'保存'}
-                    </Button>
-                    <Button
-                      funcType="raised"
-                      style={{ marginLeft: 12 }}
-                      onClick={() => {
-                        setFieldsValue({
-                          boardName: lastBoardName,
-                        });
-                        this.setState({
-                          boardName: initialBoardName,
-                        });
-                      }}
-                    >
-                      {'取消'}
-                    </Button>
-                  </div>
+              <div>
+                <Form layout="vertical">
+                  <FormItem label="boardName" style={{ width: 512 }}>
+                    {getFieldDecorator('boardName', {
+                      rules: [{ required: true, message: '看板名称必填' }, {
+                        validator: this.checkBoardNameRepeat,
+                      }],
+                      initialValue: initialBoardName,
+                    })(
+                      <Input
+                        label="看板名称"
+                        ref={(ref) => { this.boardName = ref; }}
+                        maxLength={10}
+                      />,
+                    )}
+                  </FormItem>
+                </Form>
+                <div style={{ padding: '12px 0', borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}>
+                  <Button
+                    type="primary"
+                    funcType="raised"
+                    loading={loading}
+                    onClick={this.handleUpdateBoardName}
+                  >
+                      保存
+                  </Button>
+                  <Button
+                    funcType="raised"
+                    style={{ marginLeft: 12 }}
+                    onClick={() => {
+                      setFieldsValue({
+                        boardName: lastBoardName,
+                      });
+                      this.setState({
+                        boardName: initialBoardName,
+                      });
+                    }}
+                  >
+                      取消
+                  </Button>
                 </div>
-              )
+              </div>
+            )
           }
 
         </Spin>

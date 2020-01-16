@@ -1,13 +1,9 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { Content, stores, Choerodon } from '@choerodon/boot';
-import {
-  Button, Select, Icon, message,
-} from 'choerodon-ui';
-import _ from 'lodash';
-import ScrumBoardStore from '../../../../stores/project/scrumBoard/ScrumBoardStore';
+import { Content, Choerodon } from '@choerodon/boot';
+import { Select } from 'choerodon-ui';
+import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 
-const { AppState } = stores;
 const { Option } = Select;
 
 @observer

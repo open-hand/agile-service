@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import {
   Page, Header, Content, stores, axios, Permission, Breadcrumb,
 } from '@choerodon/boot';
@@ -8,19 +8,21 @@ import {
   Button, Spin, Modal, Tabs, Tooltip, Icon,
 } from 'choerodon-ui';
 import { withRouter } from 'react-router-dom';
-import './ScrumBoardSetting.less';
+import './Setting.less';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
-import ColumnPage from '../ScrumBoardSettingComponent/ColumnPage/ColumnPage';
-import SwimLanePage from '../ScrumBoardSettingComponent/SwimLanePage/SwimLanePage';
-import WorkcalendarPage from '../ScrumBoardSettingComponent/WorkCalendarPage/WorkCalendarPage';
-import EditBoardName from '../ScrumBoardSettingComponent/EditBoardName/EditBoardName';
+import SettingColumn from './components/setting-column';
+import SwimLanePage from './components/SwimLanePage/SwimLanePage';
+import WorkcalendarPage from './components/WorkCalendarPage/WorkCalendarPage';
+import EditBoardName from './components/EditBoardName/EditBoardName';
+import CreateStatus from './components/create-status';
+import CreateColumn from './components/create-column';
 
 const { TabPane } = Tabs;
 const { confirm } = Modal;
 const { AppState } = stores;
 
 @observer
-class ScrumBoardSetting extends Component {
+class Setting extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -49,7 +51,7 @@ class ScrumBoardSetting extends Component {
     });
   }
 
-  refresh() {
+  refresh=() => {
     this.setState({
       loading: true,
     });
@@ -63,7 +65,7 @@ class ScrumBoardSetting extends Component {
       ScrumBoardStore.axiosGetBoardDataBySetting(boardId).then((data) => {
         ScrumBoardStore.axiosGetUnsetData(boardId).then((data2) => {
           const unsetColumn = {
-            columnId: 'unset',
+            columnId: 0,
             name: '未对应的状态',
             subStatusDTOS: data2,
           };
@@ -126,6 +128,21 @@ class ScrumBoardSetting extends Component {
     });
   }
 
+  handleCreateStatusClick=() => {
+    CreateStatus.open({
+      onCreate: this.refresh,
+    });
+  }
+
+  handleCreateColumnClick=() => {
+    CreateColumn.open({
+      onCreate: this.refresh,
+      statusList: ScrumBoardStore.getStatusList,
+      sequence: ScrumBoardStore.getBoardData.length - 1,
+      boardId: ScrumBoardStore.getSelectedBoard,
+    });
+  }
+  
   render() {
     const { loading, activeKey } = this.state;
     const menu = AppState.currentMenuType;
@@ -149,7 +166,6 @@ class ScrumBoardSetting extends Component {
           'agile-service.board.updateUserSettingBoard',
           'agile-service.board.updateScrumBoard',
           'agile-service.issue-status.moveStatusToColumn',
-          'agile-service.issue-status.updateStatus',
           'agile-service.board-column.deleteBoardColumn',
           'agile-service.scheme.checkRemoveStatusForAgile',
           'agile-service.issue-status.deleteStatus',
@@ -165,13 +181,11 @@ class ScrumBoardSetting extends Component {
               {
               ScrumBoardStore.getCanAddStatus ? (
                 <Permission type={type} projectId={projectId} organizationId={orgId} service={['agile-service.issue-status.createStatus']}>
-                  <Button
-                    funcType="flat"
-                    type="primary"
-                    onClick={() => { this.ColumnPage.handleAddStatus(); }}
+                  <Button                    
+                    icon="playlist_add"
+                    onClick={this.handleCreateStatusClick}
                   >
-                    <Icon type="playlist_add" />
-                    <span>添加状态</span>
+                    添加状态
                   </Button>
                 </Permission>
               ) : (
@@ -193,12 +207,10 @@ class ScrumBoardSetting extends Component {
             }
               <Permission type={type} projectId={projectId} organizationId={orgId} service={['agile-service.board-column.createBoardColumn']}>
                 <Button
-                  funcType="flat"
-                  type="primary"
-                  onClick={() => { this.ColumnPage.handleAddColumn(); }}
+                  icon="playlist_add"
+                  onClick={this.handleCreateColumnClick}
                 >
-                  <Icon type="playlist_add" />
-                  <span>添加列</span>
+                  添加列
                 </Button>
               </Permission>
             </Fragment>
@@ -221,8 +233,7 @@ class ScrumBoardSetting extends Component {
           >
             <TabPane tab="列配置" key="1">
               <Spin spinning={loading}>
-                <ColumnPage
-                  forwardRef={(ref) => { this.ColumnPage = ref; }}
+                <SettingColumn                  
                   refresh={this.refresh.bind(this)}
                 />
               </Spin>
@@ -252,4 +263,4 @@ class ScrumBoardSetting extends Component {
   }
 }
 
-export default withRouter(ScrumBoardSetting);
+export default withRouter(Setting);
