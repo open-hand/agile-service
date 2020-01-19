@@ -22,11 +22,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/16.
@@ -139,9 +144,11 @@ public class IssueStatusServiceImpl implements IssueStatusService {
 
     @Override
     public IssueStatusVO moveStatusToColumn(Long projectId, Long statusId, StatusMoveVO statusMoveVO) {
-        if (!checkColumnStatusRelExist(projectId, statusId, statusMoveVO.getOriginColumnId())) {
-            deleteColumnStatusRel(projectId, statusId, statusMoveVO.getOriginColumnId());
-        }
+        // 判断是否在同一列中操作，更新列中position
+        Boolean sameRow = statusMoveVO.getColumnId() != statusMoveVO.getOriginColumnId();
+        updateColumnPosition(projectId, statusId, statusMoveVO,sameRow);
+
+        deleteColumnStatusRel(projectId, statusId, statusMoveVO.getOriginColumnId());
         createColumnStatusRel(projectId, statusId, statusMoveVO);
         return modelMapper.map(issueStatusMapper.selectByStatusId(projectId, statusId), IssueStatusVO.class);
     }
@@ -256,4 +263,51 @@ public class IssueStatusServiceImpl implements IssueStatusService {
         issueStatusMapper.batchCreateStatusByProjectIds(addStatusWithProjects, userId);
     }
 
+    private void updateColumnPosition(Long projectId, Long statusId, StatusMoveVO statusMoveVO,Boolean sameRow) {
+        ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
+        columnStatusRelDTO.setProjectId(projectId);
+        columnStatusRelDTO.setColumnId(statusMoveVO.getColumnId());
+        List<ColumnStatusRelDTO> collect = columnStatusRelMapper.select(columnStatusRelDTO);
+        if (CollectionUtils.isEmpty(collect)) {
+            return;
+        }
+        Map<Integer, ColumnStatusRelDTO> map;
+        Boolean isUp = false;
+        // 同一列中改变位置要判断放入的方向是向上还是向下
+        if (Boolean.TRUE.equals(sameRow)) {
+            List<ColumnStatusRelDTO> collect1 = collect.stream().filter(v -> statusId.equals(v.getStatusId())).collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(collect1)) {
+                ColumnStatusRelDTO columnStatusRelDTO1 = collect1.get(0);
+                if (columnStatusRelDTO1.getPosition() < statusMoveVO.getPosition()) {
+                    // 相同类改变位置,向上则向上查找,position相同以及位置靠前的数据依次减一
+                    isUp = true;
+                }
+            }
+            map = collect.stream().filter(v -> !statusId.equals(v.getStatusId())).collect(Collectors.toMap(ColumnStatusRelDTO::getPosition, Function.identity()));
+        } else {
+            // 不同列默认是向下,position相同以及以后的数据依次加一
+            map = collect.stream().collect(Collectors.toMap(ColumnStatusRelDTO::getPosition, Function.identity()));
+        }
+        cycleUpdate(statusMoveVO.getPosition(), map, isUp);
+    }
+
+    private void cycleUpdate(Integer position, Map<Integer, ColumnStatusRelDTO> map,Boolean isUp) {
+        if (position < 0) {
+            return;
+        }
+        ColumnStatusRelDTO columnStatusRelDTO = map.get(position);
+        if (!ObjectUtils.isEmpty(columnStatusRelDTO)) {
+            int nextPosition;
+            if (isUp) {
+                nextPosition = position - 1;
+                columnStatusRelDTO.setPosition(nextPosition);
+            } else {
+                nextPosition = position + 1;
+                columnStatusRelDTO.setPosition(nextPosition);
+            }
+            deleteColumnStatusRel(columnStatusRelDTO.getProjectId(), columnStatusRelDTO.getStatusId(), columnStatusRelDTO.getColumnId());
+            createColumnStatusRel(columnStatusRelDTO.getProjectId(), columnStatusRelDTO.getStatusId(), modelMapper.map(columnStatusRelDTO, StatusMoveVO.class));
+            cycleUpdate(nextPosition, map, isUp);
+        }
+    }
 }
