@@ -16,4 +16,6 @@ public interface WikiRelationService {
     JSONObject queryByIssueId(Long projectId, Long issueId);
 
     void deleteById(Long projectId, Long id);
+
+    void deleteByWorkSpaceId(Long projectId, Long workSpaceId);
 }
