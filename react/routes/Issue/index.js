@@ -231,6 +231,7 @@ const Issue = withRouter(observer(() => {
         className="c7n-agile-table-cell"
         renderer={({ record }) => (
           <div style={{ display: 'inline-flex' }}>
+            {record.get('reporterId') && (
             <UserHead
               user={{
                 id: record.get('reporterId'),
@@ -240,6 +241,7 @@ const Issue = withRouter(observer(() => {
                 avatar: record.get('reporterImageUrl'),
               }}
             />
+            )}
           </div>
         )}
       />
