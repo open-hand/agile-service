@@ -231,16 +231,16 @@ const Issue = withRouter(observer(() => {
         className="c7n-agile-table-cell"
         renderer={({ record }) => (
           <div style={{ display: 'inline-flex' }}>
-            {record.get('reporterId') && (
-            <UserHead
-              user={{
-                id: record.get('reporterId'),
-                name: record.get('reporterName'),
-                loginName: record.get('reporterLoginName'),
-                realName: record.get('reporterRealName'),
-                avatar: record.get('reporterImageUrl'),
-              }}
-            />
+            {record.get('reporterId') && record.get('reporterId') !== '0' && (
+              <UserHead
+                user={{
+                  id: record.get('reporterId'),
+                  name: record.get('reporterName'),
+                  loginName: record.get('reporterLoginName'),
+                  realName: record.get('reporterRealName'),
+                  avatar: record.get('reporterImageUrl'),
+                }}
+              />
             )}
           </div>
         )}
@@ -262,15 +262,20 @@ const Issue = withRouter(observer(() => {
         name="assigneeId"
         renderer={({ record }) => (
           <div style={{ display: 'inline-flex' }}>
-            <UserHead
-              user={{
-                id: record.get('assigneeId'),
-                name: record.get('assigneeName'),
-                loginName: record.get('assigneeLoginName'),
-                realName: record.get('assigneeRealName'),
-                avatar: record.get('assigneeImageUrl'),
-              }}
-            />
+            {
+              record.get('assigneeId') && record.get('assigneeId') !== '0' && (
+              <UserHead
+                user={{
+                  id: record.get('assigneeId'),
+                  name: record.get('assigneeName'),
+                  loginName: record.get('assigneeLoginName'),
+                  realName: record.get('assigneeRealName'),
+                  avatar: record.get('assigneeImageUrl'),
+                }}
+              />
+              )
+            }
+
           </div>
         )}
       />
@@ -316,7 +321,7 @@ const Issue = withRouter(observer(() => {
     IssueStore.setEditFilterInfo(map(editFilterInfo, item => Object.assign(item, { isEditing: false })));
   };
   return (
-    <Page 
+    <Page
       className="c7nagile-issue"
       service={[
         'agile-service.personal-filter.listByProjectId',
