@@ -96,6 +96,13 @@ public class WikiRelationServiceImpl implements WikiRelationService {
     }
 
     @Override
+    public void deleteByWorkSpaceId(Long projectId, Long workSpaceId) {
+        WikiRelationDTO wikiRelationDTO = new WikiRelationDTO();
+        wikiRelationDTO.setSpaceId(workSpaceId);
+        iWikiRelationService.deleteBase(wikiRelationDTO);
+    }
+
+    @Override
     @DataLog(type = "knowledgeRelationDelete")
     public void deleteById(Long projectId, Long id) {
         WikiRelationDTO wikiRelationDTO = new WikiRelationDTO();

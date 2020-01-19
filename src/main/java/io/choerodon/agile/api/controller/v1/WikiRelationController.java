@@ -62,4 +62,16 @@ public class WikiRelationController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @ApiOperation("根据workSpaceId删除knowledge relation")
+    @DeleteMapping("/delete/{space_id}")
+    public ResponseEntity deleteByworkSpaceId(@ApiParam(value = "项目id", required = true)
+                                              @PathVariable(name = "project_id") Long projectId,
+                                              @ApiParam(value = "workSpaceId", required = true)
+                                              @PathVariable(name = "space_id") Long spaceId) {
+        wikiRelationService.deleteByWorkSpaceId(projectId, spaceId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+
 }
