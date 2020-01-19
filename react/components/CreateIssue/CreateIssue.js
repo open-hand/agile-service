@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { stores, Content } from '@choerodon/boot';
+import { stores, Content, axios } from '@choerodon/boot';
 import { map, find } from 'lodash';
 import {
   Select, Form, Input, Button, Modal, Spin,
@@ -352,6 +352,21 @@ class CreateIssue extends Component {
       [field]: defaultValue,
     });
   }
+
+  checkEpicNameRepeat = (rule, value, callback) => {
+    if (value && value.trim()) {
+      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/check_epic_name?epicName=${value.trim()}`)
+        .then((res) => {
+          if (res) {
+            callback('史诗名称重复');
+          } else {
+            callback();
+          }
+        });
+    } else {
+      callback();
+    }
+  };
 
   getFieldComponent = (field) => {
     const { form, mode, hiddenIssueType } = this.props;

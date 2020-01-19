@@ -53,6 +53,9 @@
   },
   "author": "",
   "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  },
   "lint-staged": {
     "react/**/*.{js,jsx}": [
       "npm run lint-staged:es"
