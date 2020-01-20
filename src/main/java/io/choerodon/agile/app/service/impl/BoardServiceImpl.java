@@ -1,5 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
+import static java.util.Comparator.*;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.validator.BoardValidator;
@@ -25,9 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
-
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/14.
@@ -374,21 +373,25 @@ public class BoardServiceImpl implements BoardService {
         jsonObject.put("allColumnNum", getAllColumnNum(projectId, boardId, activeSprintId));
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
         Comparator<IssueForBoardDO> comparator = Comparator.comparing(IssueForBoardDO::getRank, nullsFirst(naturalOrder()));
-        columns.forEach(columnAndIssueDTO -> columnAndIssueDTO.getSubStatusDTOS().forEach(subStatusDTO -> {
-                    subStatusDTO.getIssues().forEach(issueForBoardDO -> {
-                        UserMessageDTO userMessageDTO = usersMap.get(issueForBoardDO.getAssigneeId());
-                        String assigneeName = userMessageDTO != null ? userMessageDTO.getName() : null;
-                        String assigneeLoginName = userMessageDTO != null ? userMessageDTO.getLoginName() : null;
-                        String assigneeRealName = userMessageDTO != null ? userMessageDTO.getRealName() : null;
-                        String imageUrl = userMessageDTO != null ? userMessageDTO.getImageUrl() : null;
-                        issueForBoardDO.setAssigneeName(assigneeName);
-                        issueForBoardDO.setAssigneeLoginName(assigneeLoginName);
-                        issueForBoardDO.setAssigneeRealName(assigneeRealName);
-                        issueForBoardDO.setImageUrl(imageUrl);
-                    });
-                    subStatusDTO.getIssues().sort(comparator);
-                }
-        ));
+        Comparator<SubStatusDTO> subComparator = Comparator.comparing(SubStatusDTO::getPosition, nullsFirst(naturalOrder()));
+        columns.forEach(columnAndIssueDTO ->
+        {
+            columnAndIssueDTO.getSubStatusDTOS().forEach(subStatusDTO -> {
+                subStatusDTO.getIssues().forEach(issueForBoardDO -> {
+                    UserMessageDTO userMessageDTO = usersMap.get(issueForBoardDO.getAssigneeId());
+                    String assigneeName = userMessageDTO != null ? userMessageDTO.getName() : null;
+                    String assigneeLoginName = userMessageDTO != null ? userMessageDTO.getLoginName() : null;
+                    String assigneeRealName = userMessageDTO != null ? userMessageDTO.getRealName() : null;
+                    String imageUrl = userMessageDTO != null ? userMessageDTO.getImageUrl() : null;
+                    issueForBoardDO.setAssigneeName(assigneeName);
+                    issueForBoardDO.setAssigneeLoginName(assigneeLoginName);
+                    issueForBoardDO.setAssigneeRealName(assigneeRealName);
+                    issueForBoardDO.setImageUrl(imageUrl);
+                });
+                subStatusDTO.getIssues().sort(comparator);
+            });
+            columnAndIssueDTO.getSubStatusDTOS().sort(subComparator);
+        });
         jsonObject.put("columnsData", putColumnData(columns));
         jsonObject.put("currentSprint", putCurrentSprint(activeSprint, organizationId));
         //处理用户默认看板设置，保存最近一次的浏览
