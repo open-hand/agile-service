@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Icon, Input } from 'choerodon-ui';
-import { checkSprintName } from '@/api/NewIssueApi';
+import SprintApi from '@/api/SprintApi';
 import TextEditToggle from '@/components/TextEditToggle';
 import { MAX_LENGTH_SPRINT } from '@/constants/MAX_LENGTH';
 
@@ -12,7 +12,7 @@ class SprintName extends Component {
     if (value === sprintName) {
       callback();
     } else {
-      const hasSame = await checkSprintName(value);
+      const hasSame = await SprintApi.validate(value);
       if (hasSame) {
         callback('');
       } else {

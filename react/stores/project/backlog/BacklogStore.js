@@ -530,10 +530,6 @@ class BacklogStore {
     return axios.get(`/agile/v1/projects/${proId}/priority/default`);
   }
 
-  checkSprintName(proId, name) {
-    return axios.get(`/agile/v1/projects/${proId}/sprint/check_name?sprintName=${name}`);
-  }
-
   @action setSpinIf(data) {
     this.loadCompleted = false;
     this.spinIf = data;

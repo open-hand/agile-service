@@ -16,7 +16,9 @@ function create(data) {
  * @returns
  */
 function validate(name) {
-  return axios.get(`/agile/v1/projects/${getProjectId()}/sprint/check_name?sprintName=${name}`);
+  return axios.post(`/agile/v1/projects/${getProjectId()}/sprint/check_name`, {
+    sprintName: name,
+  });
 }
 
 export default {
