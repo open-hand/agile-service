@@ -222,7 +222,7 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
 //        initScheme(projectId, organizationId, projectCode + "默认类型方案【项目群】", issueTypeMap.get(InitIssueType.FEATURE.getTypeCode()).getId(), SchemeApplyType.PROGRAM, issueTypeMap);
 //    }
 
-    private List<IssueTypeDTO> initOrganizationIssueType(Long organizationId, List<IssueTypeDTO> issueTypes) {
+    protected List<IssueTypeDTO> initOrganizationIssueType(Long organizationId, List<IssueTypeDTO> issueTypes) {
         if (issueTypes == null || issueTypes.isEmpty()) {
             //注册组织初始化问题类型
             issueTypeService.initIssueTypeByConsumeCreateOrganization(organizationId);
@@ -266,7 +266,7 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
      * @param schemeApplyType
      * @param issueTypeMap
      */
-    private void initScheme(Long projectId, Long organizationId, String name, Long defaultIssueTypeId, String schemeApplyType, Map<String, IssueTypeDTO> issueTypeMap) {
+    protected void initScheme(Long projectId, Long organizationId, String name, Long defaultIssueTypeId, String schemeApplyType, Map<String, IssueTypeDTO> issueTypeMap) {
         //初始化敏捷问题类型方案
         IssueTypeSchemeDTO issueTypeScheme = new IssueTypeSchemeDTO();
         issueTypeScheme.setName(name);

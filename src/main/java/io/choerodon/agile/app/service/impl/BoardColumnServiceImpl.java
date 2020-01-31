@@ -263,7 +263,7 @@ public class BoardColumnServiceImpl implements BoardColumnService {
         return modelMapper.map(boardColumnMapper.selectOne(boardColumnDTO), BoardColumnVO.class);
     }
 
-    private void initColumnWithStatus(Long projectId, Long boardId, String name, String categoryCode, Long statusId, Integer sequence) {
+    protected void initColumnWithStatus(Long projectId, Long boardId, String name, String categoryCode, Long statusId, Integer sequence) {
         BoardColumnDTO column = new BoardColumnDTO();
         column.setBoardId(boardId);
         column.setName(name);

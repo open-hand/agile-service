@@ -119,7 +119,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         rankMapper.batchInsertRank(projectId, type, rankDTOList);
     }
 
-    private void initRank(IssueCreateVO issueCreateVO, Long issueId, String type) {
+    protected void initRank(IssueCreateVO issueCreateVO, Long issueId, String type) {
         if (issueCreateVO.getProjectId() != null) {
             insertRank(issueCreateVO.getProjectId(), issueId, type, issueCreateVO.getRankVO());
         }

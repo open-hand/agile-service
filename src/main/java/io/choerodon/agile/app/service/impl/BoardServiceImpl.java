@@ -428,7 +428,7 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
-    private BoardDTO createBoard(Long projectId, String boardName) {
+    protected BoardDTO createBoard(Long projectId, String boardName) {
         BoardDTO boardDTO = new BoardDTO();
         boardDTO.setProjectId(projectId);
         boardDTO.setColumnConstraint(CONTRAINT_NONE);

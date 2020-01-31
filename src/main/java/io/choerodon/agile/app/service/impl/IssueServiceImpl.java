@@ -285,7 +285,7 @@ public class IssueServiceImpl implements IssueService {
         issueValidator.verifyStoryPoints(issueConvertDTO);
     }
 
-    private void calculationMapRank(IssueConvertDTO issueConvertDTO) {
+    protected void calculationMapRank(IssueConvertDTO issueConvertDTO) {
         String maxRank = issueMapper.selectMaxRankByProjectId(issueConvertDTO.getProjectId());
         if (maxRank == null) {
             issueConvertDTO.setMapRank(RankUtil.mid());
@@ -294,7 +294,7 @@ public class IssueServiceImpl implements IssueService {
         }
     }
 
-    private void calculationRank(Long projectId, IssueConvertDTO issueConvertDTO) {
+    protected void calculationRank(Long projectId, IssueConvertDTO issueConvertDTO) {
         if (sprintValidator.hasIssue(projectId, issueConvertDTO.getSprintId())) {
             String rank = sprintMapper.queryMaxRank(projectId, issueConvertDTO.getSprintId());
             issueConvertDTO.setRank(RankUtil.genNext(rank));
