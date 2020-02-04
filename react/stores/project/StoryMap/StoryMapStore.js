@@ -83,17 +83,17 @@ class StoryMapStore {
       epicWithFeature = sortBy(epicWithFeature, 'epicRank');
       const newStoryMapData = {
         ...storyMapData,
-        epicWithFeature: featureWithoutEpic.length > 0 ? epicWithFeature.concat({
+        epicWithFeature: featureWithoutEpic.length > 0 ? epicWithFeature.map(epic => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] })).concat({
           issueId: 0,
           featureCommonDTOList: featureWithoutEpic,
-        }) : epicWithFeature,
+        }) : epicWithFeature.map(epic => ({ ...epic, featureCommonDTOList: epic.featureCommonDTOList || [] })),
       };
       this.issueTypes = issueTypes;
       this.prioritys = prioritys;
       this.initVersionList(versionList);
       this.initStoryData(newStoryMapData);
       this.setLoading(false);
-    }).catch((error) => {
+    }).catch((error) => {  
       Choerodon.prompt(error);
       this.setLoading(false);
     });
@@ -578,7 +578,7 @@ class StoryMapStore {
     if (epicWithFeature && featureWithoutEpic) {
       return featureWithoutEpic.length === 0 && epicWithFeature.filter(epic => epic.issueId).length === 0;
     }
-    return true;
+    return false;
   }
 
   @computed get getEpicType() {

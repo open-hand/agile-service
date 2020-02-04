@@ -9,6 +9,7 @@ import { Button } from 'choerodon-ui';
 import { DragDropContextProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { observer } from 'mobx-react-lite';
+import HeaderLine from '@/common/Headerline';
 import Minimap from '../../../components/MiniMap';
 import Empty from '../../../components/Empty';
 import epicPic from '../../../assets/image/emptyStory.svg';
@@ -21,7 +22,6 @@ import CreateEpicModal from './components/CreateEpicModal';
 import IssueDetail from './components/IssueDetail';
 import StoryMapStore from '../../../stores/project/StoryMap/StoryMapStore';
 import useFullScreen from './useFullScreen';
-import HeaderLine from '@/common/Headerline';
 import './StoryMapHome.less';
 
 const HEX = {
