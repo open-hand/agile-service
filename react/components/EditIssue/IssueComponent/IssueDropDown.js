@@ -16,6 +16,7 @@ const IssueDropDown = ({
   const {
     issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, 
   } = issue;
+
   const handleDeleteIssue = () => {
     confirm({
       width: 560,
@@ -90,7 +91,7 @@ const IssueDropDown = ({
     <Menu onClick={handleClickMenu}>
       {!['feature'].includes(typeCode) && (
         <Menu.Item key="0">
-          {'登记工作日志'}
+          登记工作日志
         </Menu.Item>
       )}
       {
@@ -98,65 +99,65 @@ const IssueDropDown = ({
           key="1"
           disabled={loginUserId !== createdBy && !hasPermission}
         >
-          {'删除'}
+          删除
         </Menu.Item>
       }
       {
-        ['sub_task', 'feature'].indexOf(typeCode) === -1 && (
+        ['sub_task', 'feature', 'issue_epic'].indexOf(typeCode) === -1 && (
           <Menu.Item key="2">
-            {'创建子任务'}
+            创建子任务
           </Menu.Item>
         )
       }
       {
         ['story', 'task'].indexOf(typeCode) !== -1 && (
           <Menu.Item key="9">
-            {'创建缺陷'}
+            创建缺陷
           </Menu.Item>
         )
       }
       <Menu.Item key="3">
-        {'复制问题'}
+        复制问题
       </Menu.Item>
       {
-        ['sub_task', 'feature'].indexOf(typeCode) === -1 && subIssueVOList.length === 0 && (
+        ['sub_task', 'feature', 'issue_epic'].indexOf(typeCode) === -1 && subIssueVOList.length === 0 && (
           <Menu.Item key="4">
-            {'转化为子任务'}
+            转化为子任务
           </Menu.Item>
         )
       }
       {
         typeCode === 'sub_task' && (
           <Menu.Item key="5">
-            {'类型转换'}
+            类型转换
           </Menu.Item>
         )
       }
       {
         typeCode !== 'feature' && (
           <Menu.Item key="6">
-            {'创建分支'}
+            创建分支
           </Menu.Item>
         )
       }
       {
         typeCode !== 'feature' && (
           <Menu.Item key="7">
-            {'分配问题'}
+            分配问题
           </Menu.Item>
         )
       }
       {
         typeCode === 'sub_task' && (
           <Menu.Item key="8">
-            {'修改父级'}
+            修改父级
           </Menu.Item>
         )
       }
       {
         typeCode === 'bug' && (
           <Menu.Item key="10">
-            {'关联问题'}
+            关联问题
           </Menu.Item>
         )
       }
