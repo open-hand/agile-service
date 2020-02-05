@@ -535,11 +535,11 @@ public class BoardServiceImpl implements BoardService {
             userSetting.setUserId(DetailsHelper.getUserDetails().getUserId());
             userSetting.setSwimlaneBasedCode("swimlane_none");
             userSetting.setDefaultBoard(false);
-            int insert = userSettingMapper.insert(userSettingDTO);
+            int insert = userSettingMapper.insert(userSetting);
             if (insert != 1) {
                 throw new CommonException("error.userSetting.create");
             }
-            return modelMapper.map(userSettingMapper.selectByPrimaryKey(userSettingDTO.getSettingId()), UserSettingVO.class);
+            return modelMapper.map(userSettingMapper.selectByPrimaryKey(userSetting.getSettingId()), UserSettingVO.class);
         } else {
             return modelMapper.map(userSettingDTO, UserSettingVO.class);
         }
