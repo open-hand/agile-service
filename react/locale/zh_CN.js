@@ -40,6 +40,9 @@ const zh_CN = {
   deleteFailed: '删除失败',
   disable: '停用',
   enable: '启用',
+  system:'系统',
+  project:'项目',
+  organization:'组织',
 
   "issue.detail": '详情',
   "issue.des": '描述',
@@ -92,6 +95,7 @@ const zh_CN = {
   'field.required': '必填项',
   'field.delete.title':'删除自定义字段：{name}',
   'field.delete.msg':'注意：将会从所有使用的问题中删除此字段，并且字段数据会清空。你确定要删除此字段吗？',
+  'field.required':'必填字段请设置默认值！',
 
   'dragList.invalid': '禁用',
   'dragList.active': '启用',

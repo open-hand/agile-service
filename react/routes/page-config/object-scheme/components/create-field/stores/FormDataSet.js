@@ -2,6 +2,7 @@
 /* eslint-disable default-case */
 
 import moment from 'moment';
+import { remove } from 'lodash';
 
 
 function getLookupConfig(code) {
@@ -12,6 +13,9 @@ function getLookupConfig(code) {
       try {
         const data = JSON.parse(response);
         if (data && data.lookupValues) {
+          if (code === 'object_scheme_field_context') {
+            remove(data.lookupValues, item => item.valueCode === 'global');
+          }
           return data.lookupValues;
         } else {
           return data;
@@ -22,9 +26,10 @@ function getLookupConfig(code) {
     },
   };
 }
+const dateList = ['time', 'datetime', 'date'];
 
 export default ({
-  formatMessage, type, store, schemeCode, id, isEdit,
+  formatMessage, type, store, schemeCode, id, isEdit, oldRecord, userOptionDataSet,
 }) => {
   const regex = /^[0-9a-zA-Z_]+$/;
 
@@ -38,7 +43,6 @@ export default ({
     } else {
       const prefix = type === 'project' ? 'pro_' : 'org_';
       try {
-        // error:此接口一直返回false
         const data = await store.checkCode(`${prefix}${value}`, schemeCode);
         if (data) {
           return formatMessage({ id: 'field.code.exist' });
@@ -50,6 +54,7 @@ export default ({
   }
   // eslint-disable-next-line consistent-return
   async function checkName(value) {
+    if (isEdit && value === oldRecord.get('name')) return;
     if (!value) {
       return '';
     } else {
@@ -57,6 +62,19 @@ export default ({
       if (data) {
         return formatMessage({ id: 'field.name.exist' });
       }
+    }
+  }
+
+
+  function handleUpdate({ record, name, value }) {
+    if (name === 'check' && value) {
+      const fieldType = record.get('fieldType');
+      if (dateList.indexOf(fieldType) !== -1) {
+        record.set('defaultValue', moment());
+      }
+    } else if (value && name === 'fieldType') {
+      record.set('defaultValue', null);
+      record.set('check', false);
     }
   }
 
@@ -109,51 +127,10 @@ export default ({
         valueField: 'id',
         textField: 'realName',
         dynamicProps: {
-          type: ({ dataSet, record, name }) => {
-            const fieldType = record.get('fieldType');
-            switch (fieldType) {
-              case 'time':
-                return 'time';
-              case 'datetime':
-                return 'dateTime';
-              case 'date':
-                return 'date';
-              case 'input':
-                return 'string';
-              case 'text':
-                return 'string';
-              case 'url':
-                return 'string';
-            }
-          },
-          defaultValue: ({ record }) => {
-            const fieldType = record.get('fieldType');
-            switch (fieldType) {
-              case 'time':
-                return moment('00:00:00', 'HH:mm:ss');
-              case 'datetime':
-                return moment('00:00:00', 'HH:mm:ss');
-            }
-          },
-          lookupAxiosConfig: ({ record }) => {
+          options: ({ record }) => {
             const fieldType = record.get('fieldType');
             if (fieldType === 'member') {
-              return {
-                url: `/base/v1/${type}s/${id}/users`,
-                method: 'get',
-                transformResponse: (response) => {
-                  try {
-                    const data = JSON.parse(response);
-                    if (data && data.list) {
-                      return data.list;
-                    } else {
-                      return data;
-                    }
-                  } catch (error) {
-                    return response;
-                  }
-                },
-              };
+              return userOptionDataSet;
             }
           },
         },
@@ -164,5 +141,8 @@ export default ({
         type: 'boolean',
       },
     ],
+    events: {
+      update: handleUpdate,
+    },
   };
 };

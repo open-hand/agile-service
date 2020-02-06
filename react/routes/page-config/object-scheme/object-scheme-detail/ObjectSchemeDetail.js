@@ -100,7 +100,7 @@ export default observer(() => {
       return;
     }
     if (!required && defaultValue) {
-      Choerodon.prompt('必填字段请设置默认值！');
+      Choerodon.prompt(formatMessage({ id: 'field.required' }));
     }
     const field = {
       required: !required,
@@ -128,7 +128,6 @@ export default observer(() => {
       style: createModelStyle,
       okText: formatMessage({ id: 'save' }),
       cancelText: formatMessage({ id: 'cancel' }),
-      afterClose: handleRefresh,
     });
   }
 
@@ -150,7 +149,6 @@ export default observer(() => {
       style: createModelStyle,
       okText: formatMessage({ id: 'save' }),
       cancelText: formatMessage({ id: 'cancel' }),
-      afterClose: handleRefresh,
     });
   }
 
@@ -163,7 +161,7 @@ export default observer(() => {
     const menu = (
       <Menu onClick={handleRemove}>
         <Menu.Item key="del">
-          <span>删除</span>
+          <span>{formatMessage({ id: 'delete' })}</span>
         </Menu.Item>
       </Menu>
 
@@ -171,7 +169,6 @@ export default observer(() => {
     return (
       <TableDropMenu
         menu={menu}
-        // onClickEdit={editField.bind(this, record)}
         onClickEdit={openEditFieldModal}
         text={text}
         isHasMenu={!(system || (AppState.currentMenuType.type === 'project' && !projectId))}
@@ -191,11 +188,11 @@ export default observer(() => {
     const system = record.get('system');
     const projectId = record.get('projectId');
     if (system) {
-      return <Tag style={{ color: 'rgba(0,0,0,0.65)', borderColor: '#d9d9d9', background: '#fafafa' }}>系统</Tag>;
+      return <Tag style={{ color: 'rgba(0,0,0,0.65)', borderColor: '#d9d9d9', background: '#fafafa' }}>{formatMessage({ id: 'system' })}</Tag>;
     } else {
       return projectId
-        ? <Tag color="orange">项目</Tag>
-        : <Tag color="geekblue">组织</Tag>;
+        ? <Tag color="orange">{formatMessage({ id: 'project' })}</Tag>
+        : <Tag color="geekblue">{formatMessage({ id: 'organization' })}</Tag>;
     }
   };
 
@@ -246,7 +243,7 @@ export default observer(() => {
           onClick={openCreateFieldModal}
         >
           <Icon type="playlist_add icon" />
-          <span>创建字段</span>
+          <span>{formatMessage({ id: 'field.create' })}</span>
         </Button>
       </Header>
       <Breadcrumb />

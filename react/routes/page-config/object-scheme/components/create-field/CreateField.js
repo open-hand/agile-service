@@ -1,16 +1,18 @@
 import React, {
-  Fragment, useState, useContext,
+  Fragment, useState, useContext, useEffect, useMemo,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Form, TextField, Select, DatePicker, TimePicker, DateTimePicker, CheckBox, NumberField, TextArea, UrlField,
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
+import { debounce } from 'lodash';
 
 
 import Store from './stores';
 import DragList from '../drag-list';
 import { randomString } from '../../../../../common/utils';
+import UserInfo from '../../../../../components/UserInfo';
 
 import './CreateField.less';
 import * as images from '../../images';
@@ -22,9 +24,15 @@ const multipleList = ['checkbox', 'multiple'];
 
 export default observer(() => {
   const {
-    createFormDataSet, formatMessage, modal, AppState: { currentMenuType: { type, id, organizationId } }, schemeCode, isEdit,
+    formDataSet, formatMessage, modal, AppState: { currentMenuType: { type, id, organizationId } }, schemeCode, isEdit, handleRefresh, userOptionDataSet,
   } = useContext(Store);
   const [fieldOptions, setFieldOptions] = useState([]);
+
+  useEffect(() => {
+    if (isEdit && formDataSet.status === 'ready') {
+      setFieldOptions(formDataSet.current.get('fieldOptions'));
+    }
+  }, [formDataSet.status]);
 
   const fieldTypeOptionRender = ({ text, value }) => (
     <Fragment>
@@ -36,17 +44,16 @@ export default observer(() => {
   );
 
   const contextOptionSetter = ({ record }) => {
-    const contextValue = createFormDataSet.current.get('context');
+    const contextValue = formDataSet.current.get('context');
     const currentValue = record.get('valueCode');
     return {
       disabled: currentValue === 'global' ? contextValue.length > 0 && contextValue.indexOf('global') < 0 : contextValue.indexOf('global') >= 0,
     };
   };
-  
 
-  // 创建
+  // 创建或者编辑的提交操作
   async function handleOk() {
-    const { current } = createFormDataSet;
+    const { current } = formDataSet;
     const obj = {
       fieldType: current.get('fieldType'),
       defaultValue: current.get('defaultValue'),
@@ -76,15 +83,24 @@ export default observer(() => {
           return { ...o, isDefault: false };
         }
       });
+      if (obj.defaultValue.length) {
+        obj.defaultValue = obj.defaultValue.join(',');
+      }
     }
+
+
     const url = isEdit ? `/agile/v1/${type}s/${id}/object_scheme_field/${current.get('id')}?organizationId=${organizationId}` : `/agile/v1/${type}s/${id}/object_scheme_field?organizationId=${organizationId}`;
     const method = isEdit ? 'put' : 'post';
-    createFormDataSet.transport[isEdit ? 'update' : 'create'] = ({ data: [data] }) => ({
+    formDataSet.transport[isEdit ? 'update' : 'create'] = ({ data: [data] }) => ({
       url,
       method,
       transformRequest: () => {
         const prefix = type === 'project' ? 'pro_' : 'org_';
-        const { context, name, check } = data;
+        const { name, check } = data;
+        let { context } = data;
+        if (context && context.length === formDataSet.getField('context').options.length) {
+          context = ['global'];
+        }
         const postData = {
           context,
           code: `${prefix}${data.code}`,
@@ -99,9 +115,11 @@ export default observer(() => {
         return JSON.stringify(postData);
       },
     });
+
+
     try {
-      if ((await createFormDataSet.submit()) !== false) {
-        // handleRefresh();
+      if ((await formDataSet.submit()) !== false) {
+        handleRefresh();
         return true;
       } else {
         return false;
@@ -127,42 +145,85 @@ export default observer(() => {
   };
 
   const onTreeDelete = (tempKey) => {
-    const { current } = createFormDataSet;
+    const { current } = formDataSet;
     const newDefaultValue = current.get('defaultValue');
+    const fieldType = current.get('fieldType');
 
-    if (multipleList.indexOf(type) !== -1) {
+    if (multipleList.indexOf(fieldType) !== -1) {
       const newValue = newDefaultValue.filter(v => v !== String(tempKey));
       current.set('defaultValue', newValue);
-    } else if (singleList.indexOf(type) !== -1) {
+    } else if (singleList.indexOf(fieldType) !== -1) {
       if (newDefaultValue === tempKey) {
         current.set('defaultValue', '');
       }
     }
   };
 
+  function memberOptionRender({ record }) {
+    return <UserInfo name={record.get('realName') || ''} id={record.get('loginName')} avatar={record.get('imageUrl')} />;
+  }
+
+  function loadUserData(value) {
+    const userId = formDataSet.current.get('defaultValue');
+    userOptionDataSet.setQueryParameter('param', value);
+    userOptionDataSet.setQueryParameter('userId', userId);
+    userOptionDataSet.query();
+  }
+
+  const searchData = useMemo(() => debounce((value) => {
+    loadUserData(value);
+  }, 500), []);
+
 
   function getAttachFields() {
-    const { current } = createFormDataSet;
+    const { current } = formDataSet;
     const isCheck = current.get('check');
-    // const type = 'date';
-    switch (type) {
+    const fieldType = current.get('fieldType');
+    switch (fieldType) {
       case 'time':
         return (
-          <TimePicker
-            name="defaultValue"
-          />
+          <Fragment>
+            <TimePicker
+              name="defaultValue"
+              disabled={isCheck}
+              className="form-field-full-row"
+            />
+            <CheckBox
+              name="check"
+            >
+              {formatMessage({ id: 'field.useCurrentTime' })}
+            </CheckBox>
+          </Fragment>
         );
       case 'datetime':
         return (
-          <DateTimePicker
-            name="defaultValue"
-          />
+          <Fragment>
+            <DateTimePicker
+              name="defaultValue"
+              disabled={isCheck}
+              className="form-field-full-row"
+            />
+            <CheckBox
+              name="check"
+            >
+              {formatMessage({ id: 'field.useCurrentDate' })}
+            </CheckBox>
+          </Fragment>
         );
       case 'date':
         return (
-          <DatePicker
-            name="defaultValue"
-          />
+          <Fragment>
+            <DatePicker
+              name="defaultValue"
+              disabled={isCheck}
+              className="form-field-full-row"
+            />
+            <CheckBox
+              name="check"
+            >
+              {formatMessage({ id: 'field.useCurrentDate' })}
+            </CheckBox>
+          </Fragment>
         );
       case 'number':
         return (
@@ -170,7 +231,7 @@ export default observer(() => {
             <NumberField
               name="defaultValue"
               step={isCheck ? 0.1 : 1}
-              style={{ width: '100%' }}
+              className="form-field-full-row"
             />
             <CheckBox
               name="check"
@@ -206,7 +267,7 @@ export default observer(() => {
             <Select
               name="defaultValue" 
               style={{ width: '100%', marginBottom: '20px' }}
-              multiple={!(singleList.indexOf(type) !== -1)}
+              multiple={!(singleList.indexOf(fieldType) !== -1)}
             > 
               {fieldOptions 
                 && fieldOptions.length > 0
@@ -225,7 +286,7 @@ export default observer(() => {
                 })}
             </Select>
             <DragList
-              title={formatMessage({ id: `field.${type}` })}
+              title={formatMessage({ id: `field.${fieldType}` })}
               data={fieldOptions}
               tips={formatMessage({ id: 'field.dragList.tips' })}
               formatMessage={formatMessage}
@@ -240,17 +301,21 @@ export default observer(() => {
         return (
           <Select
             name="defaultValue"
+            searchable
+            searchMatcher={() => true}
+            onBlur={(e) => { e.persist(); loadUserData(''); }}
+            onInput={(e) => { e.persist(); searchData(e.target.value); }}
+            optionRenderer={memberOptionRender}
           /> 
         );
       default:
         return null;
     }
   }
-  
   return (
     <div className="create-field-form-wrap">
       <Form
-        dataSet={createFormDataSet}
+        dataSet={formDataSet}
       >
         {isEdit ? null
           : (
