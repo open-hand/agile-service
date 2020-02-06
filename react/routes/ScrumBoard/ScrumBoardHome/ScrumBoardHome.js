@@ -405,7 +405,7 @@ class ScrumBoardHome extends Component {
               history.push(`/agile/scrumboard/setting?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&boardId=${ScrumBoardStore.getSelectedBoard}`);
             }}
           >
-              配置看板
+            配置看板
           </Button>
           {
             ScrumBoardStore.didCurrentSprintExist && (
@@ -418,7 +418,7 @@ class ScrumBoardHome extends Component {
                 icon="alarm_on"
                 onClick={this.handleFinishSprint}
               >
-              完成冲刺
+                完成冲刺
   
               </Button>
               {this.renderSwitchMode()}
