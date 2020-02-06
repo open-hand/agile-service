@@ -137,7 +137,7 @@ class QuickCreateIssue extends Component {
       >
         {
           create ? (
-            <Form onSubmit={this.handleCreate} style={{ width: '100%' }}>
+            <Form style={{ width: '100%' }}>
               <div style={{ display: 'block', width: '100%' }}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <Dropdown overlay={typeList} trigger={['click']}>
@@ -158,6 +158,7 @@ class QuickCreateIssue extends Component {
                       <Input
                         className="hidden-label"
                         autoFocus
+                        onPressEnter={this.handleCreate}
                         maxLength={44}
                         placeholder="请输入问题概要"
                       />,
@@ -166,11 +167,12 @@ class QuickCreateIssue extends Component {
                   <Button
                     funcType="raised"
                     type="primary"
-                    htmlType="submit"
+                    // htmlType="submit"
+                    onClick={this.handleCreate}
                     style={{ margin: '0 10px' }}
                     loading={loading}                   
                   >
-                    {'确定'}
+                    确定
                   </Button>
                   <Button
                     funcType="raised"
@@ -180,7 +182,7 @@ class QuickCreateIssue extends Component {
                       });
                     }}
                   >
-                  取消
+                    取消
                   </Button>
                 </div>
               </div>
@@ -195,7 +197,7 @@ class QuickCreateIssue extends Component {
                 });
               }}
             >
-                创建问题
+              创建问题
             </Button>
           )
         }
