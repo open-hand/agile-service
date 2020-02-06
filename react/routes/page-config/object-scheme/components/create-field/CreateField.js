@@ -9,12 +9,12 @@ import { Choerodon } from '@choerodon/boot';
 import { debounce } from 'lodash';
 
 
+import UserInfo from '@/components/UserInfo';
+import { randomString } from '@/common/utils';
 import Store from './stores';
 import DragList from '../drag-list';
-import { randomString } from '../../../../../common/utils';
-import UserInfo from '../../../../../components/UserInfo';
 
-import './CreateField.less';
+import './index.less';
 import * as images from '../../images';
 
 const { Option } = Select;
@@ -22,18 +22,19 @@ const singleList = ['radio', 'single'];
 const multipleList = ['checkbox', 'multiple'];
 
 
-export default observer(() => {
+function CreateField() {
+  const ctx = useContext(Store);
   const {
     formDataSet, formatMessage, modal, AppState: { currentMenuType: { type, id, organizationId } }, schemeCode, isEdit, handleRefresh, userOptionDataSet,
-  } = useContext(Store);
+  } = ctx;
   const [fieldOptions, setFieldOptions] = useState([]);
-
+  
   useEffect(() => {
     if (isEdit && formDataSet.status === 'ready') {
       setFieldOptions(formDataSet.current.get('fieldOptions'));
     }
-  }, [formDataSet.status]);
-
+  }, [formDataSet && formDataSet.status]);
+  
   const fieldTypeOptionRender = ({ text, value }) => (
     <Fragment>
       <img src={images[value]} alt="" className="issue-field-img" />
@@ -42,7 +43,7 @@ export default observer(() => {
       </span>
     </Fragment>
   );
-
+  
   const contextOptionSetter = ({ record }) => {
     const contextValue = formDataSet.current.get('context');
     const currentValue = record.get('valueCode');
@@ -50,7 +51,7 @@ export default observer(() => {
       disabled: currentValue === 'global' ? contextValue.length > 0 && contextValue.indexOf('global') < 0 : contextValue.indexOf('global') >= 0,
     };
   };
-
+  
   // 创建或者编辑的提交操作
   async function handleOk() {
     const { current } = formDataSet;
@@ -77,7 +78,7 @@ export default observer(() => {
       }
       obj.fieldOptions = fieldOptions.map((o) => {
         if (obj.defaultValue.indexOf(String(o.tempKey)) !== -1
-          || obj.defaultValue.indexOf(String(o.id)) !== -1) {
+            || obj.defaultValue.indexOf(String(o.id)) !== -1) {
           return { ...o, isDefault: true };
         } else {
           return { ...o, isDefault: false };
@@ -87,8 +88,8 @@ export default observer(() => {
         obj.defaultValue = obj.defaultValue.join(',');
       }
     }
-
-
+  
+  
     const url = isEdit ? `/agile/v1/${type}s/${id}/object_scheme_field/${current.get('id')}?organizationId=${organizationId}` : `/agile/v1/${type}s/${id}/object_scheme_field?organizationId=${organizationId}`;
     const method = isEdit ? 'put' : 'post';
     formDataSet.transport[isEdit ? 'update' : 'create'] = ({ data: [data] }) => ({
@@ -115,8 +116,8 @@ export default observer(() => {
         return JSON.stringify(postData);
       },
     });
-
-
+  
+  
     try {
       if ((await formDataSet.submit()) !== false) {
         handleRefresh();
@@ -129,11 +130,11 @@ export default observer(() => {
     }
   }
   modal.handleOk(handleOk);
-
+  
   const onTreeChange = (newFieldOptions) => {
     setFieldOptions(newFieldOptions);
   };
-
+  
   const onTreeCreate = (code, value) => {
     setFieldOptions([...fieldOptions, {
       enabled: true,
@@ -143,12 +144,12 @@ export default observer(() => {
       tempKey: randomString(5),
     }]);
   };
-
+  
   const onTreeDelete = (tempKey) => {
     const { current } = formDataSet;
     const newDefaultValue = current.get('defaultValue');
     const fieldType = current.get('fieldType');
-
+  
     if (multipleList.indexOf(fieldType) !== -1) {
       const newValue = newDefaultValue.filter(v => v !== String(tempKey));
       current.set('defaultValue', newValue);
@@ -158,23 +159,23 @@ export default observer(() => {
       }
     }
   };
-
+  
   function memberOptionRender({ record }) {
     return <UserInfo name={record.get('realName') || ''} id={record.get('loginName')} avatar={record.get('imageUrl')} />;
   }
-
+  
   function loadUserData(value) {
     const userId = formDataSet.current.get('defaultValue');
     userOptionDataSet.setQueryParameter('param', value);
     userOptionDataSet.setQueryParameter('userId', userId);
     userOptionDataSet.query();
   }
-
+  
   const searchData = useMemo(() => debounce((value) => {
     loadUserData(value);
   }, 500), []);
-
-
+  
+  
   function getAttachFields() {
     const { current } = formDataSet;
     const isCheck = current.get('check');
@@ -270,20 +271,20 @@ export default observer(() => {
               multiple={!(singleList.indexOf(fieldType) !== -1)}
             > 
               {fieldOptions 
-                && fieldOptions.length > 0
-                && fieldOptions.map((item) => {
-                  if (item.enabled) {
-                    return (
-                      <Option
-                        value={item.tempKey || item.id}
-                        key={item.tempKey || item.id}
-                      >
-                        {item.value}
-                      </Option>
-                    );
-                  }
-                  return [];
-                })}
+                  && fieldOptions.length > 0
+                  && fieldOptions.map((item) => {
+                    if (item.enabled) {
+                      return (
+                        <Option
+                          value={item.tempKey || item.id}
+                          key={item.tempKey || item.id}
+                        >
+                          {item.value}
+                        </Option>
+                      );
+                    }
+                    return [];
+                  })}
             </Select>
             <DragList
               title={formatMessage({ id: `field.${fieldType}` })}
@@ -323,7 +324,7 @@ export default observer(() => {
               name="code"
             />
           )
-        }
+          }
         <TextField
           name="name"
         />
@@ -340,4 +341,6 @@ export default observer(() => {
       </Form>
     </div> 
   );
-});
+}
+
+export default observer(CreateField);

@@ -3,7 +3,7 @@ import { withRouter } from 'react-router-dom';
 import { PageWrap, PageTab, stores } from '@choerodon/boot';
 import PageHome from './page/page-home';
 import PageDetail from './page/page-detail';
-import ObjectSchemeDetail from './object-scheme/object-scheme-detail';
+import ObjectScheme from './object-scheme';
 
 import './pageConfig.less';
 import Store from './stores';
@@ -20,7 +20,7 @@ function PageConfig() {
         ? <PageDetail />
         : (
           <PageWrap cache noHeader={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.scheme`}>
-            <PageTab title="字段列表" tabKey={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.field`} component={withRouter(ObjectSchemeDetail)} />
+            <PageTab title="字段列表" tabKey={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.field`} component={withRouter(ObjectScheme)} />
             <PageTab title="页面管理" tabKey={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.scheme`} component={withRouter(PageHome)} />
           </PageWrap>
         )}

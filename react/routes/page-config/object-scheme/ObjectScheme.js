@@ -10,12 +10,12 @@ import {
   TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 
-import Store from '../stores';
-import TableDropMenu from '../../../../common/TableDropMenu';
-import TypeTag from '../../../../components/TypeTag';
-import CreateField from '../components/create-field';
+import Store from './stores';
+import TableDropMenu from '../../../common/TableDropMenu';
+import TypeTag from '../../../components/TypeTag';
+import CreateField from './components/create-field';
 
-import './ObjectSchemeDetail.less';
+import './ObjectScheme.less';
 
 const { Column } = Table;
 
@@ -65,11 +65,10 @@ const createModelStyle = {
   width: 740,
 };
 
-
-export default observer(() => {
+function ObjectScheme() {
   const context = useContext(Store);
   const {
-    AppState, objectSchemeStore, prefixCls, schemeTableDataSet,
+    AppState, prefixCls, schemeTableDataSet,
     intl: { formatMessage },
     schemeCode,
     store,
@@ -116,7 +115,6 @@ export default observer(() => {
   function openCreateFieldModal() {
     const values = {
       formatMessage,
-      objectSchemeStore,
       schemeCode,
       handleRefresh,
     };
@@ -136,7 +134,6 @@ export default observer(() => {
     const record = schemeTableDataSet.current;
     const values = {
       formatMessage,
-      objectSchemeStore,
       schemeCode,
       handleRefresh,
       record,
@@ -167,16 +164,18 @@ export default observer(() => {
 
     );
     return (
-      <TableDropMenu
-        menu={menu}
-        onClickEdit={openEditFieldModal}
-        text={text}
-        isHasMenu={!(system || (AppState.currentMenuType.type === 'project' && !projectId))}
-      />
+      <div className="c7n-table-cell-drop-menu">
+        <TableDropMenu
+          menu={menu}
+          onClickEdit={openEditFieldModal}
+          text={text}
+          isHasMenu={!(system || (AppState.currentMenuType.type === 'project' && !projectId))}
+        />
+      </div>
     );
   };
 
-  const rendderContextName = ({ text }) => (
+  const renderContextName = ({ text }) => (
     <Fragment>
       {text.split(',').map(name => (
         showIcons[name] ? <div><TypeTag data={showIcons[name]} showName /></div> : name
@@ -250,7 +249,7 @@ export default observer(() => {
       <Content className={`${prefixCls}-detail-content`}>
         <Table dataSet={schemeTableDataSet} queryBar="none" className={`${prefixCls}-detail-content-table`}>
           <Column name="name" renderer={renderDropDown} />
-          <Column name="contextName" renderer={rendderContextName} />
+          <Column name="contextName" renderer={renderContextName} />
           <Column name="fieldOrigin" renderer={renderFieldOrigin} />
           <Column name="fieldTypeName" />
           <Column name="required" renderer={renderRequired} />
@@ -258,4 +257,7 @@ export default observer(() => {
       </Content>
     </Page>
   );
-});
+}
+
+
+export default observer(ObjectScheme);
