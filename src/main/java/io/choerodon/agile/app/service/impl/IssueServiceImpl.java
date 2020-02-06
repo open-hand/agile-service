@@ -621,7 +621,7 @@ public class IssueServiceImpl implements IssueService {
         return epicDataList;
     }
 
-    private void dataLogDeleteByIssueId(Long projectId, Long issueId) {
+    protected void dataLogDeleteByIssueId(Long projectId, Long issueId) {
         DataLogDTO dataLogDTO = new DataLogDTO();
         dataLogDTO.setProjectId(projectId);
         dataLogDTO.setIssueId(issueId);
