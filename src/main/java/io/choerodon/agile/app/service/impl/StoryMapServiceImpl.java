@@ -56,7 +56,7 @@ public class StoryMapServiceImpl implements StoryMapService {
     }
 
 
-    private List<StoryMapWidthVO> setStoryMapWidth(Long projectId) {
+    protected List<StoryMapWidthVO> setStoryMapWidth(Long projectId) {
         List<StoryMapWidthDTO> storyMapWidthDTOList = storyMapWidthMapper.selectByProjectId(projectId);
         if (storyMapWidthDTOList != null && !storyMapWidthDTOList.isEmpty()) {
             return modelMapper.map(storyMapWidthDTOList, new TypeToken<List<StoryMapWidthVO>>(){}.getType());
@@ -95,7 +95,7 @@ public class StoryMapServiceImpl implements StoryMapService {
         return result;
     }
 
-    private void dragToEpic(Long projectId, Long epicId, StoryMapDragVO storyMapDragVO) {
+    protected void dragToEpic(Long projectId, Long epicId, StoryMapDragVO storyMapDragVO) {
         storyMapValidator.checkEpicExist(epicId);
         List<Long> issueIds = storyMapDragVO.getEpicIssueIds();
         if (issueIds != null && !issueIds.isEmpty()) {
@@ -103,7 +103,7 @@ public class StoryMapServiceImpl implements StoryMapService {
         }
     }
 
-    private void dragToVersion(Long projectId, Long versionId, StoryMapDragVO storyMapDragVO) {
+    protected void dragToVersion(Long projectId, Long versionId, StoryMapDragVO storyMapDragVO) {
         List<VersionIssueRelVO> versionIssueRelVOList = storyMapDragVO.getVersionIssueRelVOList();
         if (versionIssueRelVOList != null && !versionIssueRelVOList.isEmpty()) {
             for (VersionIssueRelVO versionIssueRelVO : versionIssueRelVOList) {
