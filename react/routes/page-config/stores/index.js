@@ -13,7 +13,6 @@ export const PageConfigProvider = injectIntl(inject('AppState')(
     const [objectDetailItem, setObjectDetailItem] = useState({
       schemeCode: 'agile_issue',
     });
-    const [addObVisible, setAddObVisible] = useState(true);
     const value = {
       pageDetailItem,
       setPageDetailItem,
@@ -21,8 +20,6 @@ export const PageConfigProvider = injectIntl(inject('AppState')(
       setPageDetailVisible,
       objectDetailItem,
       setObjectDetailItem,
-      addObVisible,
-      setAddObVisible,
       reLoad,
       setReLoad,
     };

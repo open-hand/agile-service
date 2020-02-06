@@ -85,6 +85,13 @@ const zh_CN = {
   'field.useCurrentTime': '使用当前时间为默认值',
   'field.dragList.tips': '请为该字段添加值，你可以通过上下 拖拽 改变显示顺序。',
   'field.value.null': '请先设置字段值列表',
+  'field': '字段',
+  'field.origin': '字段来源',
+  'field.range': '字段范围',
+  'field.type': '字段类型',
+  'field.required': '必填项',
+  'field.delete.title':'删除自定义字段：{name}',
+  'field.delete.msg':'注意：将会从所有使用的问题中删除此字段，并且字段数据会清空。你确定要删除此字段吗？',
 
   'dragList.invalid': '禁用',
   'dragList.active': '启用',

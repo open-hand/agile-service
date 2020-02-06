@@ -5,7 +5,7 @@ import { Choerodon } from '@choerodon/boot';
 import {
   Card, Tooltip, Button, Input, Popconfirm,
 } from 'choerodon-ui';
-import { injectIntl, FormattedMessage } from 'react-intl';
+import { injectIntl } from 'react-intl';
 import './DragList.less';
 
 class DragList extends Component {
@@ -247,8 +247,14 @@ class DragList extends Component {
 
   render() {
     const {
-      data, tips, intl,
+      data, tips, formatMessage,
     } = this.props;
+    let {
+      intl,
+    } = this.props;
+    if (formatMessage) {
+      intl = { formatMessage };
+    }
     const { addItemVisible, tempKey, saveDisabled } = this.state;
 
     return (
@@ -325,14 +331,14 @@ class DragList extends Component {
                                     funcType="raised"
                                     className="issue-dragList-add"
                                   >
-                                    <FormattedMessage id="save" />
+                                    {formatMessage({ id: 'save' })}
                                   </Button>
                                   <Button
                                     size="small"
                                     onClick={this.cancel}
                                     funcType="raised"
                                   >
-                                    <FormattedMessage id="cancel" />
+                                    {formatMessage({ id: 'cancel' })}
                                   </Button>
                                 </Fragment>
                               )
@@ -343,7 +349,7 @@ class DragList extends Component {
                                   <div className="issue-dragList-operate">
                                     <Tooltip
                                       placement="bottom"
-                                      title={<FormattedMessage id="edit" />}
+                                      title={formatMessage({ id: 'edit' })}
                                     >
                                       <Button
                                         size="small"
@@ -358,7 +364,7 @@ class DragList extends Component {
                                         ? (
                                           <Tooltip
                                             placement="bottom"
-                                            title={<FormattedMessage id="dragList.invalid" />}
+                                            title={formatMessage({ id: 'dragList.invalid' })}
                                           >
                                             <Button size="small" shape="circle" onClick={() => this.invalid(item.tempKey || item.id)}>
                                               <i className="icon icon-block" />
@@ -368,7 +374,7 @@ class DragList extends Component {
                                         : (
                                           <Tooltip
                                             placement="bottom"
-                                            title={<FormattedMessage id="dragList.active" />}
+                                            title={formatMessage({ id: 'dragList.active' })}
                                           >
                                             <Button size="small" shape="circle" onClick={() => this.active(item.tempKey || item.id)}>
                                               <i className="icon icon-playlist_add_check" />
@@ -378,7 +384,7 @@ class DragList extends Component {
                                     }
                                     <Tooltip
                                       placement="bottom"
-                                      title={<FormattedMessage id="delete" />}
+                                      title={formatMessage({ id: 'delete' })}
                                     >
                                       <Popconfirm
                                         placement="top"
@@ -432,14 +438,14 @@ class DragList extends Component {
                               className="issue-dragList-add"
                               disabled={saveDisabled}
                             >
-                              <FormattedMessage id="save" />
+                              {formatMessage({ id: 'save' })}
                             </Button>
                             <Button
                               size="small"
                               onClick={this.cancel}
                               funcType="raised"
                             >
-                              <FormattedMessage id="cancel" />
+                              {formatMessage({ id: 'cancel' })}
                             </Button>
                           </div>
                         </div>
@@ -456,7 +462,7 @@ class DragList extends Component {
                 className="issue-dragList-addBtn"
               >
                 <i className="icon-playlist_add icon" />
-                <FormattedMessage id="add" />
+                {formatMessage({ id: 'add' })}
               </Button>
             </Card>
           </div>
