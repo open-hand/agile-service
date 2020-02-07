@@ -1,5 +1,7 @@
 package io.choerodon.agile.infra.utils;
 
+import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.core.notify.NoticeSendDTO;
 import org.slf4j.Logger;
@@ -25,11 +27,15 @@ public class SiteMsgUtil {
     private static final String SUMMARY = "summary";
     private static final String URL = "url";
     private static final String NOTIFY_TYPE = "agile";
+    private static final String PROJECT_NAME = "projectName";
 
     @Autowired
     private NotifyFeignClient notifyFeignClient;
+    @Autowired
+    private BaseFeignClient baseFeignClient;
 
     public void issueCreate(List<Long> userIds,String userName, String summary, String url, Long reporterId, Long projectId) {
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
         noticeSendDTO.setCode("issueCreate");
         noticeSendDTO.setNotifyType(NOTIFY_TYPE);
@@ -37,6 +43,7 @@ public class SiteMsgUtil {
         params.put(ASSIGNEENAME, userName);
         params.put(SUMMARY, summary);
         params.put(URL, url);
+        params.put(PROJECT_NAME, projectVO.getName());
         noticeSendDTO.setParams(params);
         List<NoticeSendDTO.User> userList = new ArrayList<>();
         for (Long id : userIds) {
@@ -57,6 +64,7 @@ public class SiteMsgUtil {
     }
 
     public void issueAssignee(List<Long> userIds, String userName, String summary, String url, Long assigneeId, Long projectId) {
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
         noticeSendDTO.setCode("issueAssignee");
         noticeSendDTO.setNotifyType(NOTIFY_TYPE);
@@ -64,6 +72,7 @@ public class SiteMsgUtil {
         params.put(ASSIGNEENAME, userName);
         params.put(SUMMARY, summary);
         params.put(URL, url);
+        params.put(PROJECT_NAME, projectVO.getName());
         noticeSendDTO.setParams(params);
         List<NoticeSendDTO.User> userList = new ArrayList<>();
         for (Long id : userIds) {
@@ -84,6 +93,7 @@ public class SiteMsgUtil {
     }
 
     public void issueSolve(List<Long> userIds, String userName, String summary, String url, Long assigneeId, Long projectId) {
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
         noticeSendDTO.setCode("issueSolve");
         noticeSendDTO.setNotifyType(NOTIFY_TYPE);
@@ -91,6 +101,7 @@ public class SiteMsgUtil {
         params.put(ASSIGNEENAME, userName);
         params.put(SUMMARY, summary);
         params.put(URL, url);
+        params.put(PROJECT_NAME, projectVO.getName());
         noticeSendDTO.setParams(params);
         List<NoticeSendDTO.User> userList = new ArrayList<>();
         for (Long id : userIds) {
