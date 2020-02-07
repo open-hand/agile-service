@@ -1,5 +1,5 @@
 import React from 'react';
-import { StoreProvider } from '../../stores';
+import { StoreProvider } from './stores';
 import CreateField from './CreateField';
 
 export default function Index(props) {
