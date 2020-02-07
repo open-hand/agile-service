@@ -60,6 +60,18 @@ const zh_CN = {
   "issue.commit.create": '添加评论',
   "issue.log.create": '登记工作',
 
+  "issue_link.create": '创建链接',
+  "issue_link.create.issue_link": '创建问题链接',
+  "issue_link.edit.issue_link": '修改问题链接',
+  "issue_link.name": '名称',
+  "issue_link.outWard": '链出描述',
+  "issue_link.inWard": '链入描述',
+  "issue_link.checkName.repet":'问题链接名称重复',
+  "issue_link.delete.only":'删除链接{name}',
+  "issue_link.delete.link.other":'删除链接，相关问题关联到其他链接',
+  "issue_link.other":'其他链接',
+  "issue_link.msg":'将会从所有相关的任务中删除此链接，相关的问题可以选择关联到其他链接，或者不关联。',
+
   'field.create': '创建字段',
   'field.edit': '编辑自定义字段',
   'field.context': '问题类型',
