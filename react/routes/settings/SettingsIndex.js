@@ -3,7 +3,7 @@ import { withRouter } from 'react-router-dom';
 import { PageWrap, PageTab } from '@choerodon/boot';
 import ComponentIndex from './Component/ComponentHome';
 import FastSearchIndex from './FastSearch/FastSearchHome/FastSearchHome';
-import IssueLinkIndex from './IssueLink/IssueLinkHome/IssueLinkHome';
+import IssueLinkIndex from './IssueLinkHome';
 import './style/index.less';
 
 
