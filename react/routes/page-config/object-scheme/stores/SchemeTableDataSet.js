@@ -16,6 +16,11 @@ export default ({
   ],
   fields: [
     {
+      name: 'name',
+      type: 'string',
+      label: formatMessage({ id: 'field' }),
+    },
+    {
       name: 'contextName',
       type: 'string',
       label: formatMessage({ id: 'field.range' }),

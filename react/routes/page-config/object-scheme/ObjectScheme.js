@@ -99,7 +99,7 @@ function ObjectScheme() {
       return;
     }
     if (!required && defaultValue) {
-      Choerodon.prompt(formatMessage({ id: 'field.required' }));
+      Choerodon.prompt(formatMessage({ id: 'field.required.msg' }));
     }
     const field = {
       required: !required,
@@ -250,7 +250,7 @@ function ObjectScheme() {
         <Table dataSet={schemeTableDataSet} queryBar="none" className={`${prefixCls}-detail-content-table`}>
           <Column name="name" renderer={renderDropDown} />
           <Column name="contextName" renderer={renderContextName} />
-          <Column name="fieldOrigin" renderer={renderFieldOrigin} />
+          <Column name="fieldOrigin" renderer={renderFieldOrigin} header={formatMessage({ id: 'field.origin' })} />
           <Column name="fieldTypeName" />
           <Column name="required" renderer={renderRequired} />
         </Table>
