@@ -509,17 +509,7 @@ class BacklogStore {
   }
 
   @computed get getSprintData() {
-    return this.sprintData.map((sprint) => {
-      const filterAssignId = this.filterSprintAssign.get(sprint.sprintId);
-      if (filterAssignId) {
-        return {
-          ...sprint,
-          issueSearchVOList: sprint.issueSearchVOList.filter(issue => issue.assigneeId === filterAssignId),
-        };
-      } else {
-        return sprint;
-      }
-    });
+    return this.sprintData;
   }
 
   @action toggleVisible(data) {
@@ -1163,7 +1153,9 @@ class BacklogStore {
   }
 
   getIssueListBySprintId(sprintId) {
-    return this.issueMap.get(String(sprintId));
+    const issueList = this.issueMap.get(String(sprintId));
+    const filterAssignId = this.filterSprintAssign.get(sprintId);
+    return filterAssignId ? issueList.filter(issue => issue.assigneeId === filterAssignId) : issueList;
   }
 
   // shouldIncreaseHeight(snapshot, sprintId, issueId) {
