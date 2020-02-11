@@ -1,12 +1,14 @@
+import React from 'react';
 import axios from 'axios';
 import {
-  observable, action, computed, toJS, reaction,
+  observable, action, computed, toJS, reaction, set,
 } from 'mobx';
-import { sortBy } from 'lodash';
+import { sortBy, find } from 'lodash';
 import { store, stores } from '@choerodon/boot';
-import { getFeaturesInProject } from '../../../api/FeatureApi';
-import { sort } from '../../../api/StoryMapApi';
-import { getProjectId } from '../../../common/utils';
+import { Modal } from 'choerodon-ui';
+import { getFeaturesInProject } from '@/api/FeatureApi';
+import { sort } from '@/api/StoryMapApi';
+import { getProjectId } from '@/common/utils';
 
 const { AppState } = stores;
 
@@ -46,8 +48,6 @@ class BacklogStore {
 
   @observable prevClickedIssue = null;
 
-  @observable loadCompleted = false;
-
   @observable spinIf = false;
 
   @observable whichVisible = '';
@@ -76,10 +76,6 @@ class BacklogStore {
 
   @observable clickIssueId = null;
 
-  @observable sprintCompleteMessage = {};
-
-  @observable openSprintDetail = {};
-
   @observable sprintWidth;
 
   @observable colorLookupValue = [];
@@ -91,16 +87,6 @@ class BacklogStore {
   @observable quickSearchList = [];
 
   @observable selectIssues = [];
-
-  @observable more = false;
-
-  @observable workSetting = {
-    saturdayWork: false,
-    sundayWork: false,
-    useHoliday: false,
-    timeZoneWorkCalendarDTOS: [],
-    workHolidayCalendarDTOS: [],
-  };
 
   @observable issueTypes = [];
 
@@ -131,8 +117,6 @@ class BacklogStore {
       isDragging: this.isDragging,
       isLeaveSprint: this.isLeaveSprint,
       clickIssueDetail: this.clickIssueDetail,
-      sprintCompleteMessage: this.sprintCompleteMessage,
-      openSprintDetail: this.openSprintDetail,
       sprintWidth: this.sprintWidth,
       colorLookupValue: this.colorLookupValue,
       quickFilters: this.quickFilters,
@@ -140,20 +124,6 @@ class BacklogStore {
       quickSearchList: this.quickSearchList,
       selectIssues: this.selectIssues,
     };
-  }
-
-  saveHandler = reaction(
-    // 观察在 JSON 中使用了的任何东西:
-    () => this.asJson,
-    // 如何 autoSave 为 true, 把 json 发送到服务端
-    (json, reactions) => {
-      reactions.dispose();
-    },
-  );
-
-  dispose() {
-    // 清理观察者
-    this.saveHandler();
   }
 
   @computed get getSelectIssue() {
@@ -254,13 +224,6 @@ class BacklogStore {
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/${issueId}${orgId ? `?organizationId=${orgId}` : ''}`);
   }
 
-  @computed get getOpenSprintDetail() {
-    return toJS(this.openSprintDetail);
-  }
-
-  @action setOpenSprintDetail(data) {
-    this.openSprintDetail = data;
-  }
 
   axiosGetOpenSprintDetail(sprintId) {
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${sprintId}`);
@@ -272,14 +235,6 @@ class BacklogStore {
 
   axiosCloseSprint(data) {
     return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/complete`, data);
-  }
-
-  @computed get getSprintCompleteMessage() {
-    return toJS(this.sprintCompleteMessage);
-  }
-
-  @action setSprintCompleteMessage(data) {
-    this.sprintCompleteMessage = data;
   }
 
   axiosGetSprintCompleteMessage(sprintId) {
@@ -308,6 +263,11 @@ class BacklogStore {
 
   axiosUpdateSprint(data) {
     return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint`, data);
+  }
+
+  @action updateSprint(sprintId, newData) {
+    const sprint = find(this.sprintData, { sprintId });
+    Object.assign(sprint, newData);
   }
 
   axiosUpdateVerison(versionId, data) {
@@ -422,14 +382,23 @@ class BacklogStore {
   }
 
   @action setSprintData({ backlogData, sprintData }) {
-    this.spinIf = false;
-    // this.multiSelected = observable.map();
-    this.issueMap.set('0', backlogData.backLogIssue);
-    this.backlogData = backlogData;
-    sprintData.forEach((sprint) => {
+    this.issueMap.set('0', backlogData.backLogIssue ? backlogData.backLogIssue : []);
+    const { backLogIssue, backlogIssueCount } = backlogData;
+    this.sprintData = sprintData.map((sprint) => {
       this.issueMap.set(sprint.sprintId.toString(), sprint.issueSearchVOList);
+      return {
+        ...sprint,
+        type: 'sprint',
+        expand: true,
+      };
+    }).concat({
+      type: 'backlog',
+      sprintId: 0,
+      sprintName: '待办事项',
+      expand: true,
+      issueCount: backlogIssueCount,
+      issueSearchVOList: backLogIssue,
     });
-    this.sprintData = sprintData;
   }
 
   @computed get getQuickSearchList() {
@@ -482,30 +451,10 @@ class BacklogStore {
 
   handleVersionDrap = data => axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/drag`, data);
 
-  @action setWorkSetting(data) {
-    this.workSetting = data;
-  }
-
-  @computed get getWorkSetting() {
-    return this.workSetting;
-  }
-
   axiosGetWorkSetting(year) {
     const proId = AppState.currentMenuType.id;
     const orgId = AppState.currentMenuType.organizationId;
-    axios.get(`/base/v1/projects/${proId}/time_zone_work_calendars/time_zone_detail/${orgId}?year=${year}`).then((data) => {
-      if (data) {
-        this.setWorkSetting(data);
-      }
-    });
-  }
-
-  @computed get getMore() {
-    return this.more;
-  }
-
-  @action setMore() {
-    this.more = !this.more;
+    return axios.get(`/base/v1/projects/${proId}/time_zone_work_calendars/time_zone_detail/${orgId}?year=${year}`);
   }
 
   @computed get getIssueTypes() {
@@ -531,7 +480,6 @@ class BacklogStore {
   }
 
   @action setSpinIf(data) {
-    this.loadCompleted = false;
     this.spinIf = data;
   }
 
@@ -550,31 +498,14 @@ class BacklogStore {
     if (priorityArrData && !priorityArrData.failed) {
       this.defaultPriority = priorityArrData;
     }
-    this.issueMap.set('0', backlogData.backLogIssue ? backlogData.backLogIssue : []);
-    this.backlogData = backlogData;
-    sprintData.forEach((sprint, index) => {
-      if (sprint.sprintId === this.createdSprint) {
-        // eslint-disable-next-line no-param-reassign
-        sprintData[index].isCreated = true;
-      }
-      this.issueMap.set(sprint.sprintId.toString(), sprint.issueSearchVOList);
-    });
-    this.sprintData = sprintData;
+    this.setSprintData({ backlogData, sprintData });
+
     this.hasActiveSprint = Boolean(sprintData.find(element => element.statusCode === 'started'));
-    this.loadCompleted = true;
     this.spinIf = false;
   }
 
   @computed get getHasActiveSprint() {
     return this.hasActiveSprint;
-  }
-
-  @computed get getLoadCompleted() {
-    return this.loadCompleted;
-  }
-
-  @computed get getBacklogData() {
-    return this.backlogData;
   }
 
   @computed get getSprintData() {
@@ -770,6 +701,7 @@ class BacklogStore {
       rankIndex: destinationId * 1 === 0 || (destinationId === sourceId && destinationId !== 0),
     }).then(this.axiosGetSprint).then((res) => {
       this.setSprintData(res);
+      this.spinIf = false;
     });
   }
 
@@ -782,12 +714,11 @@ class BacklogStore {
   }
 
   @action createIssue(issue, sprintId) {
-    // this.clickIssueDetail = issue;
-    // if (this.clickIssueDetail) {
-    //   this.clickIssueId = issue.issueId;
-    // }
-    const modifiedArr = [...this.issueMap.get(sprintId), issue];
-    this.issueMap.set(sprintId, modifiedArr);
+    const issueList = this.issueMap.get(sprintId);
+    if (issueList) {
+      const modifiedArr = [...issueList, issue];
+      this.issueMap.set(sprintId, modifiedArr);
+    }
   }
 
   @action addEpic(data) {
@@ -993,6 +924,7 @@ class BacklogStore {
     this.resetFilter();
     this.axiosGetSprint().then(action('fetchSuccess', (res) => {
       this.setSprintData(res);
+      this.spinIf = false;
     }));
   }
 
@@ -1048,6 +980,198 @@ class BacklogStore {
   @action setCreatedSprint(data) {
     this.createdSprint = data;
   }
+
+  @action expandSprint(sprintId, expand) {
+    const sprint = find(this.sprintData, { sprintId });
+    sprint.expand = expand;
+  }
+
+  /**
+   * 加载选择快速搜索的冲刺数据
+   */
+  getSprint = () => {
+    this.axiosGetIssueTypes();
+    this.axiosGetDefaultPriority();
+    Promise.all([this.axiosGetQuickSearchList(), this.axiosGetIssueTypes(), this.axiosGetDefaultPriority(), this.axiosGetSprint()]).then(([quickSearch, issueTypes, priorityArr, backlogData]) => {
+      this.initBacklogData(quickSearch, issueTypes, priorityArr, backlogData);
+    });
+  };
+
+  /**
+   * 加载版本数据
+   */
+  loadVersion = () => {
+    this.axiosGetVersion().then((data2) => {
+      const newVersion = [...data2];
+      for (let index = 0, len = newVersion.length; index < len; index += 1) {
+        newVersion[index].expand = false;
+      }
+      this.setVersionData(newVersion);
+    }).catch((error) => {
+    });
+  };
+
+  /**
+   * 加载史诗
+   */
+  loadEpic = () => {
+    this.axiosGetEpic().then((data3) => {
+      const newEpic = [...data3];
+      for (let index = 0, len = newEpic.length; index < len; index += 1) {
+        newEpic[index].expand = false;
+      }
+      this.setEpicData(newEpic);
+    }).catch((error3) => {
+    });
+  };
+
+  /**
+   * 加载特性
+   */
+  loadFeature = () => {
+    getFeaturesInProject().then((data) => {
+      this.setFeatureData(data);
+    }).catch(() => {
+    });
+  };
+
+  refresh = (spinIf = true) => {
+    // if (this.IssueDetail) {
+    //   this.IssueDetail.refreshIssueDetail();
+    // }
+    if (spinIf) {
+      this.setSpinIf(true);
+    }
+    this.getSprint();
+    if (this.getCurrentVisible === 'version') {
+      this.loadVersion();
+    } else if (this.getCurrentVisible === 'epic') {
+      this.loadEpic();
+    } else if (this.getCurrentVisible === 'feature') {
+      this.loadFeature();
+    }
+  };
+
+  handleDeleteSprint = (data) => {
+    if (data.issueSearchVOList && data.issueSearchVOList.length > 0) {
+      Modal.confirm({
+        width: 560,
+        wrapClassName: 'deleteConfirm',
+        title: `删除冲刺${data.sprintName}`,
+        content: (
+          <div>
+            <p style={{ marginBottom: 10 }}>请确认您要删除这个冲刺。</p>
+            <p style={{ marginBottom: 10 }}>这个冲刺将会被彻底删除，冲刺中的任务将会被移动到待办事项中。</p>
+          </div>
+        ),
+        onOk() {
+          return this.axiosDeleteSprint(data.sprintId).then((res) => {
+            this.refresh();
+          }).catch((error) => {
+          });
+        },
+        onCancel() { },
+        okText: '删除',
+        okType: 'danger',
+      });
+    } else {
+      this.axiosDeleteSprint(data.sprintId).then((res) => {
+        this.refresh();
+      }).catch((error) => {
+      });
+    }
+  };
+
+  handleCreateIssue(res, sprintId) {
+    this.createIssue({
+      ...res,
+      imageUrl: res.assigneeImageUrl,
+      versionIds: res.versionIssueRelVOList.length ? [res.versionIssueRelVOList[0].versionId] : [],
+      versionNames: res.versionIssueRelVOList.length ? [res.versionIssueRelVOList[0].name] : [],
+    }, sprintId);
+  }
+
+  handleIssueClick(e, item, sprintId) {
+    e.stopPropagation();
+    if (!(e.shiftKey && (e.ctrlKey || e.metaKey))) {
+      if (e.shiftKey) {
+        this.dealWithMultiSelect(sprintId, item, 'shift');
+      } else if (e.ctrlKey || e.metaKey) {
+        this.dealWithMultiSelect(sprintId, item, 'ctrl');
+      } else {
+        this.clickedOnce(sprintId, item);
+      }
+    }
+  }
+
+  onDragEnd = (result) => {
+    this.setIsDragging(null);
+    const { destination, source, draggableId } = result;
+    if (destination) {
+      const { droppableId: destinationId, index: destinationIndex } = destination;
+      const { droppableId: sourceId, index: sourceIndex } = source;
+      if (destinationId === sourceId && destinationIndex === sourceIndex) {
+        return;
+      }
+      if (result.reason !== 'CANCEL') {
+        const item = this.getIssueMap.get(sourceId)[sourceIndex];
+        const destinationArr = this.getIssueMap.get(destinationId);
+        let destinationItem;
+        if (destinationIndex === 0) {
+          destinationItem = null;
+        } else if (destinationIndex === this.getIssueMap.get(destinationId).length) {
+          destinationItem = destinationArr[destinationIndex - 1];
+        } else {
+          destinationItem = destinationArr[destinationIndex];
+        }
+        if (this.getMultiSelected.size > 1 && !this.getMultiSelected.has(destinationItem)) {
+          this.moveSingleIssue(destinationId, destinationIndex, sourceId, sourceIndex, draggableId, item, 'multi').then(() => {
+            if (this.IssueDetail) {
+              this.IssueDetail.refreshIssueDetail();
+            }
+          });
+        } else {
+          this.moveSingleIssue(destinationId, destinationIndex, sourceId, sourceIndex, draggableId, item, 'single').then(() => {
+            if (this.IssueDetail) {
+              this.IssueDetail.refreshIssueDetail();
+            }
+          });
+        }
+      }
+    }
+  }
+
+  onDragStart = (result) => {
+    // console.log('onDragStart', result);
+    const { source, draggableId } = result;
+    const { droppableId: sourceId, index: sourceIndex } = source;
+    const item = this.getIssueMap.get(sourceId)[sourceIndex];
+    this.setIsDragging(item.issueId);
+    this.setIssueWithEpicOrVersion(item);
+  }
+
+  @observable startSprintVisible = false;
+
+  @observable closeSprintVisible = false;
+  
+  @action setStartSprintVisible(startSprintVisible) {
+    this.startSprintVisible = startSprintVisible;
+  }
+
+  @action setCloseSprintVisible(closeSprintVisible) {
+    this.closeSprintVisible = closeSprintVisible;
+  }
+
+  getIssueListBySprintId(sprintId) {
+    return this.issueMap.get(String(sprintId));
+  }
+
+  // shouldIncreaseHeight(snapshot, sprintId, issueId) {
+  //   if (!snapshot.isUsingPlaceholder) {
+  //     return false;
+  //   }
+  //   this.issueMap.get(sprintId);
+  // }
 }
 
 const backlogStore = new BacklogStore();

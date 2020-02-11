@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
-import { Form, Modal, Select } from 'choerodon-ui';
+import { observer } from 'mobx-react';
+import { Modal, Select } from 'choerodon-ui';
 import { Content, stores } from '@choerodon/boot';
 import _ from 'lodash';
-import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 
 const { Sidebar } = Modal;
 const { AppState } = stores;
@@ -66,12 +65,12 @@ class CloseSprint extends Component {
             <p className="c7n-closeSprint-message">
               <span>{!_.isNull(completeMessage) ? completeMessage.partiallyCompleteIssues : ''}</span>
               {' '}
-个问题 已经完成
+              个问题 已经完成
             </p>
             <p style={{ marginTop: 24 }} className="c7n-closeSprint-message">
               <span>{!_.isNull(completeMessage) ? completeMessage.incompleteIssues : ''}</span>
               {' '}
-个问题 未完成
+              个问题 未完成
             </p>
             <p style={{ marginTop: 19, color: 'rgba(0,0,0,0.65)' }}>{`其中有${completeMessage ? completeMessage.parentsDoneUnfinishedSubtasks.length : 0}个问题包含子任务，父级任务移动后与之相关的子任务也会被移动`}</p>
             <p style={{ fontSize: 14, marginTop: 36 }}>选择该冲刺未完成的问题：</p>

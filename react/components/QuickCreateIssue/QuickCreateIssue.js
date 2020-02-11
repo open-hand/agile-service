@@ -34,7 +34,9 @@ class QuickCreateIssue extends Component {
 
   handleCreate = () => {
     const { currentTypeCode } = this.state;
-    const { form, issueTypes } = this.props;
+    const {
+      form, issueTypes, sprintId, epicId, versionIssueRelVOList,
+    } = this.props;
     form.validateFields((err, values) => {
       const { summary } = values;
       if (summary && summary.trim()) {
@@ -50,20 +52,20 @@ class QuickCreateIssue extends Component {
                 priorityId: defaultPriority.id,
                 projectId: getProjectId(),
                 programId: getProjectId(),          
-                epicId: 0,
+                epicId: epicId || 0,
                 summary: summary.trim(),
                 issueTypeId: currentType.id,
                 typeCode: currentType.typeCode,
                 parentIssueId: 0,       
                 relateIssueId: 0,   
                 featureVO: {},
-                sprintId: 0,      
+                sprintId: sprintId || 0,      
                 epicName: currentTypeCode === 'issue_epic' ? summary.trim() : undefined,    
                 componentIssueRelVOList: [],
                 description: '',
                 issueLinkCreateVOList: [],
                 labelIssueRelVOList: [],
-                versionIssueRelVOList: [],
+                versionIssueRelVOList: versionIssueRelVOList || [],
               };
               this.setState({
                 loading: true,

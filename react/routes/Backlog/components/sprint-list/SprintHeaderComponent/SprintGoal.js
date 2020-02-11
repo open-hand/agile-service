@@ -1,15 +1,30 @@
 import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Input } from 'choerodon-ui';
 import TextEditToggle from '@/components/TextEditToggle';
+import { getProjectId } from '@/common/utils';
+import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
 const { Text, Edit } = TextEditToggle;
 
-@inject('AppState', 'HeaderStore')
+
 @observer class SprintGoal extends Component {
   handler = (value) => {
-    const { handleChangeGoal } = this.props;
-    handleChangeGoal(value);
+    const { data } = this.props;
+    const { objectVersionNumber, sprintId } = data;
+    const req = {
+      objectVersionNumber,
+      projectId: getProjectId(),
+      sprintId,
+      sprintGoal: value,
+    };
+    BacklogStore.axiosUpdateSprint(req).then((res) => {
+      BacklogStore.updateSprint(sprintId, {
+        objectVersionNumber: res.objectVersionNumber,
+        sprintGoal: res.sprintGoal,
+      });   
+    }).catch((error) => {
+    });
   };
 
   render() {
@@ -26,7 +41,7 @@ const { Text, Edit } = TextEditToggle;
         <p
           style={{ whiteSpace: 'nowrap' }}
         >
-          {'冲刺目标：'}
+          冲刺目标：
         </p>
         <TextEditToggle
           formKey="goal"
