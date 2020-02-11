@@ -28,7 +28,7 @@ const { Text, Edit } = TextEditToggle;
   };
 
   render() {
-    const { sprintGoal } = this.props;
+    const { data: { sprintGoal } } = this.props;
     return (
       <div
         style={{

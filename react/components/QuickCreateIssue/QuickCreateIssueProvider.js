@@ -29,7 +29,7 @@ class QuickCreateIssueProvider extends Component {
     const { issueTypes } = this.state;
     issueTypes.forEach((type) => {
       const { typeCode } = type;
-      if ((IsInProgramStore.isInProgram && ['issue_epic', 'feature'].includes(typeCode)) || ['sub_task'].includes(typeCode)) {
+      if ((IsInProgramStore.isInProgram && ['issue_epic', 'feature'].includes(typeCode)) || ['issue_epic', 'sub_task'].includes(typeCode)) {
         return;
       }
       createTypes.push(type); 

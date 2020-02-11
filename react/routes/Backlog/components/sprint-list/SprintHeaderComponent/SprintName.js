@@ -14,7 +14,7 @@ const { Text, Edit } = TextEditToggle;
 @observer
 class SprintName extends Component {
   validateSprintName = async (rule, value, callback) => {
-    const { sprintName } = this.props;
+    const { data: { sprintName } } = this.props;
     if (value === sprintName) {
       callback();
     } else {
