@@ -62,6 +62,7 @@ class StartSprint extends Component {
         });
       }
     });
+    return false;
   };
 
   showWorkCalendar = () => {

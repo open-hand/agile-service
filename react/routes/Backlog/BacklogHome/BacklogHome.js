@@ -1,11 +1,9 @@
 import React, { Component, Fragment } from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import {
   TabPage as Page, Header, Breadcrumb, Content,
 } from '@choerodon/boot';
-import {
-  Button, Spin, Checkbox, Icon,
-} from 'choerodon-ui';
+import { Button, Spin, Icon } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import Version from '../components/VersionComponent/Version';
@@ -15,19 +13,13 @@ import IssueDetail from '../components/issue-detail';
 import CreateIssue from '../components/create-issue';
 import CreateSprint from '../components/create-sprint';
 import SprintList from '../components/sprint-list';
+import ShowPlanSprint from '../components/show-plan-sprint';
 import './BacklogHome.less';
 
 const createSprintKey = Modal.key();
-@inject('HeaderStore')
-@observer
-class BacklogHome extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      display: false,
-    };
-  }
 
+@observer
+class BacklogHome extends Component { 
   componentDidMount() {
     const { BacklogStore } = this.props;
     BacklogStore.refresh();
@@ -106,16 +98,9 @@ class BacklogHome extends Component {
     }
   };
 
-  onCheckChange = (e) => {
-    this.setState({
-      display: e.target.checked,
-    });
-  };
-
   render() {
     const { BacklogStore } = this.props;
     const arr = BacklogStore.getSprintData;
-    const { display } = this.state;
     const { isInProgram } = IsInProgramStore;
     return (
       <Fragment>
@@ -135,15 +120,7 @@ class BacklogHome extends Component {
             </Button>
           )}
           {isInProgram && arr.length && arr.length > 1
-            ? (
-              <Checkbox
-                className="primary"
-                style={{ marginLeft: 20 }}
-                onChange={this.onCheckChange}
-              >
-                显示未开始冲刺
-              </Checkbox>
-            ) : ''
+            ? <ShowPlanSprint /> : null
           }
         </Header>
         <Breadcrumb />

@@ -105,27 +105,6 @@ class BacklogStore {
     this.newIssueVisible = data;
   }
 
-  @computed get asJson() {
-    return {
-      sprintData: this.sprintData,
-      versionData: this.versionData,
-      epicData: this.epicData,
-      chosenVersion: this.chosenVersion,
-      chosenEpic: this.chosenEpic,
-      onlyMe: this.onlyMe,
-      recent: this.recent,
-      isDragging: this.isDragging,
-      isLeaveSprint: this.isLeaveSprint,
-      clickIssueDetail: this.clickIssueDetail,
-      sprintWidth: this.sprintWidth,
-      colorLookupValue: this.colorLookupValue,
-      quickFilters: this.quickFilters,
-      projectInfo: this.projectInfo,
-      quickSearchList: this.quickSearchList,
-      selectIssues: this.selectIssues,
-    };
-  }
-
   @computed get getSelectIssue() {
     return this.selectIssues;
   }
@@ -381,15 +360,18 @@ class BacklogStore {
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version`);
   }
 
-  @action setSprintData({ backlogData, sprintData }) {
+  @action setSprintData({ backlogData, sprintData }) {    
     this.issueMap.set('0', backlogData.backLogIssue ? backlogData.backLogIssue : []);
     const { backLogIssue, backlogIssueCount } = backlogData;
     this.sprintData = sprintData.map((sprint) => {
-      this.issueMap.set(sprint.sprintId.toString(), sprint.issueSearchVOList);
+      const { issueSearchVOList } = sprint;
+      this.issueMap.set(sprint.sprintId.toString(), issueSearchVOList);
+      // 这里只保留几个字段，省内存
       return {
         ...sprint,
+        issueSearchVOList: null,        
         type: 'sprint',
-        expand: true,
+        expand: true,    
       };
     }).concat({
       type: 'backlog',
@@ -602,12 +584,12 @@ class BacklogStore {
 
   @action resetData() {
     this.createdSprint = '';
-    this.issueMap = observable.map();
     this.whichVisible = null;
     this.assigneeFilterIds = [];
     this.multiSelected = observable.map();
     this.sprintData = [];
     this.clickIssueDetail = {};
+    this.issueMap.clear();
   }
 
   @computed get getIssueMap() {
@@ -1143,7 +1125,7 @@ class BacklogStore {
   @observable startSprintVisible = false;
 
   @observable closeSprintVisible = false;
-  
+
   @action setStartSprintVisible(startSprintVisible) {
     this.startSprintVisible = startSprintVisible;
   }
@@ -1158,12 +1140,11 @@ class BacklogStore {
     return filterAssignId ? issueList.filter(issue => issue.assigneeId === filterAssignId) : issueList;
   }
 
-  // shouldIncreaseHeight(snapshot, sprintId, issueId) {
-  //   if (!snapshot.isUsingPlaceholder) {
-  //     return false;
-  //   }
-  //   this.issueMap.get(sprintId);
-  // }
+  @observable showPlanSprint = true;
+
+  @action setShowPlanSprint(showPlanSprint) {
+    this.showPlanSprint = showPlanSprint;
+  }
 }
 
 const backlogStore = new BacklogStore();
