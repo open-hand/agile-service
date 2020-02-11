@@ -1,22 +1,17 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Form, Icon } from 'choerodon-ui';
-import { stores } from '@choerodon/boot';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 import VersionItem from './VersionItem';
 import './Version.less';
-
-const { AppState } = stores;
 
 @observer
 class Version extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      draggableIds: [],
-      hoverBlockButton: false,
-      addRelease: false,
+      draggableIds: [],      
     };
   }
 
@@ -49,9 +44,8 @@ class Version extends Component {
       issueRefresh,
       refresh,
     } = this.props;
-    const { hoverBlockButton, draggableIds, addRelease } = this.state;
-    const menu = AppState.currentMenuType;
-    const { type, id: projectId, organizationId: orgId } = menu;
+    const { draggableIds } = this.state;
+
     return BacklogStore.getCurrentVisible === 'version' ? (
       <div className="c7n-backlog-version">
         <div className="c7n-backlog-versionContent">
@@ -83,7 +77,7 @@ class Version extends Component {
                 this.handleClickVersion('all');
               }}
             >
-              {'所有问题'}
+              所有问题
             </div>
             <DragDropContext
               onDragEnd={(result) => {
@@ -136,7 +130,7 @@ class Version extends Component {
                 }
               }}
             >
-              {'未指定版本的问题'}
+              未指定版本的问题
             </div>
           </div>
         </div>

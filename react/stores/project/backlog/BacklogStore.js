@@ -381,6 +381,7 @@ class BacklogStore {
       issueCount: backlogIssueCount,
       issueSearchVOList: backLogIssue,
     });
+    this.spinIf = false;
   }
 
   @computed get getQuickSearchList() {
