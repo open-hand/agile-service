@@ -1,22 +1,21 @@
 import React, { createContext, useMemo } from 'react';
-// import { store, stores } from '@choerodon/boot';
 import { inject } from 'mobx-react';
+import { DataSet } from 'choerodon-ui/pro';
 import { injectIntl } from 'react-intl';
-import IssueTypeStore from './IssueTypeStore';
+import IssueTypeDataSet from './IssueTypeDataSet';
 
 const Store = createContext();
 export default Store;
 
 export const StoreProvider = injectIntl(inject('AppState')(
   (props) => {
-    // const { AppState } = props;
-    // const { children } = props;
-    const issueTypeStore = useMemo(() => new IssueTypeStore(), []);
+    const { AppState: { currentMenuType: { organizationId } }, intl: { formatMessage } } = props;
+    const issueTypeDataSet = useMemo(() => new DataSet(IssueTypeDataSet(formatMessage, organizationId)));
     const value = {
       ...props,
-      prefixCls: 'issue-type',
+      prefixCls: 'agile-issue-type',
       intlPrefix: 'issue-type',
-      issueTypeStore,
+      issueTypeDataSet,
     };
     return (
       <Store.Provider value={value}>
