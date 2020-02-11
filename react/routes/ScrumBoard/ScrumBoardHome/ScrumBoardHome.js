@@ -13,7 +13,7 @@ import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
 import './ScrumBoardHome.less';
 import IssueDetail from '../ScrumBoardComponent/IssueDetail/IssueDetail';
 import BacklogStore from '../../../stores/project/backlog/BacklogStore';
-import CloseSprint from '../../Backlog/components/SprintComponent/CloseSprint';
+import CloseSprint from '../ScrumBoardComponent/CloseSprint';
 import QuickSearch, { QuickSearchEvent } from '../../../components/QuickSearch';
 import NoneSprint from '../ScrumBoardComponent/NoneSprint/NoneSprint';
 import '../ScrumBoardComponent/RenderSwimLaneContext/RenderSwimLaneContext.less';

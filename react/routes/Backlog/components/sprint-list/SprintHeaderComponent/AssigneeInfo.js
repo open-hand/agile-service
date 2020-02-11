@@ -5,7 +5,7 @@ import {
 } from 'choerodon-ui';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
-import UserHead from '../../../../../../components/UserHead';
+import UserHead from '@/components/UserHead';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
 import AssigneeModal from './AssigneeModal';
@@ -50,7 +50,8 @@ import './AssigneeInfo.less';
   };
 
   render() {
-    const { assigneeIssues, data } = this.props;
+    const { data } = this.props;
+    const { assigneeIssues } = data;
     const { expand } = this.state;
     const filterSprintAssignId = BacklogStore.filterSprintAssign.get(data.sprintId);
     return (

@@ -28,9 +28,9 @@ const settings = asyncRouter(() => import('./routes/settings'));
 
 const { AppState } = stores;
 class Index extends React.Component {
-  componentDidCatch(error, info) {
-    Choerodon.prompt(error.message);
-  }
+  // componentDidCatch(error, info) {
+  //   Choerodon.prompt(error.message);
+  // }
 
   componentDidMount() {
     if (AppState.currentMenuType.category !== 'PROGRAM') {
