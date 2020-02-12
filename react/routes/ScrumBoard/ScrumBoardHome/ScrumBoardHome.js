@@ -1,19 +1,18 @@
 import React, { Component, Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
 import {
-  Page, Header, Content, stores, Breadcrumb, Choerodon, Permission,
+  Page, Header, Content, stores, Breadcrumb, Choerodon, Permission, axios,
 } from '@choerodon/boot';
 import {
   Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
 } from 'choerodon-ui';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
+import CloseSprint from '@/components/close-sprint';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
 import './ScrumBoardHome.less';
 import IssueDetail from '../ScrumBoardComponent/IssueDetail/IssueDetail';
-import BacklogStore from '../../../stores/project/backlog/BacklogStore';
-import CloseSprint from '../ScrumBoardComponent/CloseSprint';
 import QuickSearch, { QuickSearchEvent } from '../../../components/QuickSearch';
 import NoneSprint from '../ScrumBoardComponent/NoneSprint/NoneSprint';
 import '../ScrumBoardComponent/RenderSwimLaneContext/RenderSwimLaneContext.less';
@@ -52,7 +51,6 @@ class ScrumBoardHome extends Component {
     this.dataConverter = new ScrumBoardDataController();
     this.ref = null;
     this.state = {
-      closeSprintVisible: false,
       updateParentStatus: null,
     };
   }
@@ -113,16 +111,15 @@ class ScrumBoardHome extends Component {
    *
    * @memberof ScrumBoardHome
    */
-  handleFinishSprint = () => {
-    BacklogStore.axiosGetSprintCompleteMessage(
-      ScrumBoardStore.getSprintId,
-    ).then((res) => {
-      BacklogStore.setSprintCompleteMessage(res);
-      // this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
-      this.setState({
-        closeSprintVisible: true,
-      });
-    }).catch((error) => {
+  handleFinishSprint = async () => {
+    const sprintId = ScrumBoardStore.getSprintId;    
+    const completeMessage = await axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${sprintId}/names`);
+    CloseSprint({
+      completeMessage,
+      sprintId,
+      afterClose: () => {
+        this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
+      },
     });
   };
 
@@ -283,7 +280,6 @@ class ScrumBoardHome extends Component {
   render() {
     const { history, HeaderStore } = this.props;
     const {
-      closeSprintVisible,
       updateParentStatus,
     } = this.state;
     const menu = AppState.currentMenuType;
@@ -406,23 +402,7 @@ class ScrumBoardHome extends Component {
               />
             </div>
           </Spin>
-        </Content>
-        <CloseSprint
-          store={BacklogStore}
-          visible={closeSprintVisible}
-          onCancel={() => {
-            this.setState({
-              closeSprintVisible: false,
-            });
-          }}
-          refresh={() => {
-            this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
-          }}
-          data={{
-            sprintId: ScrumBoardStore.getSprintId,
-            sprintName: ScrumBoardStore.getSprintName,
-          }}
-        />
+        </Content>        
         {
           ScrumBoardStore.getUpdateParent ? (
             <Modal

@@ -4,8 +4,8 @@ import { Icon, Dropdown, Menu } from 'choerodon-ui';
 import moment from 'moment';
 import classnames from 'classnames';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
+import CloseSprint from '@/components/close-sprint';
 import StartSprint from '../../start-sprint';
-import CloseSprint from '../../close-sprint';
 import './SprintButton.less';
 
 const prefix = 'c7n-backlog-SprintButton';
@@ -33,7 +33,10 @@ function SprintButton({
     const completeMessage = await BacklogStore.axiosGetSprintCompleteMessage(sprintId);
     CloseSprint({
       completeMessage,
-      data,
+      sprintId,
+      afterClose: () => {
+        BacklogStore.refresh();
+      },
     });
   };
   const menu = (

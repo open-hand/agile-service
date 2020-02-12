@@ -6,6 +6,7 @@ import { WindowScroller, List, AutoSizer } from 'react-virtualized';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import IssueItem from './IssueItem';
+import NoneIssue from './NoneIssue';
 
 function IssueList({ data, sprintId }) {
   const issueMap = useMemo(() => new Map(data.map(issue => [String(issue.issueId), true])), [data.length]);
@@ -48,29 +49,33 @@ function IssueList({ data, sprintId }) {
           <div
             ref={provided.innerRef}            
           >
-            <WindowScroller scrollElement={document.getElementsByClassName('c7n-backlog-content')[0]}>
-              {({ height, scrollTop, registerChild }) => (
-                <AutoSizer disableHeight>
-                  {({ width }) => (
-                    <div ref={el => registerChild(el)} style={{ width: '100%' }}>
-                      <List
-                        autoHeight
-                        height={height}
-                        rowCount={rowCount}
-                        rowHeight={48}
-                        rowRenderer={renderIssueItem}
-                        scrollTop={scrollTop}
-                        width={width}
-                        style={{     
-                          background: snapshot.isDraggingOver ? '#e9e9e9' : 'inherit',             
-                          transition: 'background-color 0.2s ease', 
-                        }}
-                      />
-                    </div>
+            {rowCount === 0 || (rowCount === 1 && snapshot.isUsingPlaceholder) > 0 
+              ? <NoneIssue />
+              : (
+                <WindowScroller scrollElement={document.getElementsByClassName('c7n-backlog-content')[0]}>
+                  {({ height, scrollTop, registerChild }) => (
+                    <AutoSizer disableHeight>
+                      {({ width }) => (
+                        <div ref={el => registerChild(el)} style={{ width: '100%' }}>
+                          <List
+                            autoHeight
+                            height={height}
+                            rowCount={rowCount}
+                            rowHeight={48}
+                            rowRenderer={renderIssueItem}
+                            scrollTop={scrollTop}
+                            width={width}
+                            style={{     
+                              background: snapshot.isDraggingOver ? '#e9e9e9' : 'inherit',             
+                              transition: 'background-color 0.2s ease', 
+                            }}
+                          />
+                        </div>
+                      )}
+                    </AutoSizer>
                   )}
-                </AutoSizer>
-              )}
-            </WindowScroller>     
+                </WindowScroller>
+              )}  
             <div style={{ padding: '10px 0px 10px 33px', borderBottom: '0.01rem solid rgba(0, 0, 0, 0.12)' }}>
               <QuickCreateIssue
                 epicId={!isNaN(BacklogStore.getChosenEpic) ? BacklogStore.getChosenEpic : undefined}
