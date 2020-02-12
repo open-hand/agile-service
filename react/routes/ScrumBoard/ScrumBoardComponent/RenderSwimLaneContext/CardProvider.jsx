@@ -1,26 +1,82 @@
 import React from 'react';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
+import { find } from 'lodash';
+import { Draggable } from 'react-beautiful-dnd';
+import { WindowScroller, List, AutoSizer } from 'react-virtualized';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import Card from './Card';
 
 @observer
-export default class CardProvider extends React.Component {
-  render() {
+class CardProvider extends React.Component {
+  shouldIncreaseHeight = () => {
+    const {
+      keyId, id, snapshot,
+    } = this.props;
+    const data = ScrumBoardStore.getSwimLaneData[keyId][id];
+    const { isUsingPlaceholder, draggingOverWith, draggingFromThisWith } = snapshot;
+    const draggableId = draggingFromThisWith || draggingOverWith;
+    const issueId = draggableId ? draggableId.split('/')[1] : undefined;
+    return isUsingPlaceholder && !find(data, { issueId: Number(issueId) });
+  };
+
+  renderIssueItem = (data, { index, style }) => {
     const {
       keyId, id, completed, statusName, categoryCode,
     } = this.props;
-    return ScrumBoardStore.getSwimLaneData[keyId][id].map(
-      (issueObj, index) => issueObj && (
-        <Card
-          key={issueObj.issueId}
-          draggableId={`${keyId}/${issueObj.issueId}`}
-          index={index}
-          issue={issueObj}
-          completed={completed}
-          statusName={statusName}
-          categoryCode={categoryCode}
-        />
-      ),
+    const issueObj = data[index];
+    if (!issueObj) {
+      return null;
+    }
+    const draggableId = `${keyId}/${issueObj.issueId}`;
+    return (
+      <Draggable draggableId={draggableId} index={index} key={draggableId}>
+        {provided => (
+          <Card
+            provided={provided}
+            key={issueObj.issueId}            
+            index={index}
+            issue={issueObj}
+            completed={completed}
+            statusName={statusName}
+            categoryCode={categoryCode}
+            style={style}
+          />
+        )}
+      </Draggable>
+      
     );
+  };
+
+  render() {
+    const {
+      keyId, id, snapshot,
+    } = this.props;
+    const data = ScrumBoardStore.getSwimLaneData[keyId][id];
+    const rowCount = this.shouldIncreaseHeight(snapshot)
+      ? data.length + 1
+      : data.length;
+    return (
+      <WindowScroller scrollElement={document.getElementsByClassName('c7n-scrumboard')[0]}>
+        {({ height, scrollTop, registerChild }) => (         
+          <AutoSizer disableHeight>
+            {({ width }) => (
+              <div ref={el => registerChild(el)} style={{ width: '100%' }}>
+                <List
+                  autoHeight
+                  width={width}
+                  height={height}
+                  rowCount={rowCount}
+                  rowHeight={120}
+                  rowRenderer={this.renderIssueItem.bind(this, data)}
+                  scrollTop={scrollTop}
+                />
+              </div>
+            )}
+          </AutoSizer>
+        )}
+      </WindowScroller>
+    ); 
   }
 }
+export default CardProvider;

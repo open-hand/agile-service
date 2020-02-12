@@ -4,7 +4,7 @@ import classnames from 'classnames';
 import { Droppable } from 'react-beautiful-dnd';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import StatusCouldDragOn from './StatusCouldDragOn';
-
+import Card from './Card';
 @observer
 export default class StatusProvider extends Component {
   getStatus({
@@ -19,8 +19,27 @@ export default class StatusProvider extends Component {
         role="none"
       >
         <Droppable
+          mode="virtual"
           droppableId={`${statusId}/${columnId}`}
           isDropDisabled={ScrumBoardStore.getCanDragOn.get(statusId)}
+          renderClone={(provided, snapshot, rubric) => {
+            const { index } = rubric.source;
+            const data = ScrumBoardStore.getSwimLaneData[keyId][statusId];
+            const issueObj = data[index];
+            return (
+              <Card
+                isDragging={snapshot.isDragging}
+                provided={provided}
+                key={issueObj.issueId}            
+                index={index}
+                issue={issueObj}
+                completed={completed}
+                statusName={statusName}
+                categoryCode={categoryCode}      
+                style={{ margin: 0 }}
+              />
+            );
+          }}
         >
           {(provided, snapshot) => (
             <React.Fragment>
@@ -41,8 +60,7 @@ export default class StatusProvider extends Component {
                 >
                   {statusName}
                 </span>
-                {children(keyId, statusId, completed, statusName, categoryCode)}
-                {provided.placeholder}
+                {children(keyId, statusId, completed, statusName, categoryCode, snapshot)}
               </div>
             </React.Fragment>
           )}
