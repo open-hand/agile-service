@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Modal } from 'choerodon-ui/pro';
 import { Select } from 'choerodon-ui';
-import { stores } from '@choerodon/boot';
+import { stores, axios } from '@choerodon/boot';
 import _ from 'lodash';
-import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
 const { AppState } = stores;
 const { Option } = Select;
@@ -31,16 +30,18 @@ class CloseSprint extends Component {
   handleCloseSprint=() => {
     const { selectChose } = this.state;
     const {
-      data: propData, modal,
+      sprintId, modal, afterClose,
     } = this.props;
     const data = {
       incompleteIssuesDestination: parseInt(selectChose, 10),
       projectId: parseInt(AppState.currentMenuType.id, 10),
-      sprintId: propData.sprintId,
+      sprintId,
     };
-    BacklogStore.axiosCloseSprint(data).then((res) => {
+    axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/complete`, data).then((res) => {
       modal.close();
-      BacklogStore.refresh();
+      if (afterClose) {
+        afterClose();
+      } 
     }).catch((error) => {
     });
   }
