@@ -42,6 +42,7 @@ const style = swimLaneId => `
   } 
 `;
 
+@Form.create()
 @CSSBlackMagic
 @inject('AppState', 'HeaderStore')
 @observer
@@ -288,69 +289,7 @@ class ScrumBoardHome extends Component {
     const menu = AppState.currentMenuType;
     const { type, id: projectId, organizationId: orgId } = menu;
     return (
-      <Page
-        className="c7n-scrumboard-page"
-        service={[
-          'agile-service.quick-filter.listByProjectId',
-          'base-service.project.list',
-          'agile-service.board.queryByProjectId',
-          'agile-service.board.checkName',
-          'agile-service.board.createScrumBoard',
-          'agile-service.board.move',
-          'agile-service.scheme.queryIssueTypesWithStateMachineIdByProjectId',
-          'agile-service.scheme.queryTransformsMapByProjectId',
-          'agile-service.board.queryByOptions',
-          'agile-service.issue.listEpic',
-          'agile-service.sprint.completeSprint',
-          // 详情侧边接口
-          'base-service.user.querySelf',
-          'base-service.permission.checkPermission',        
-          'agile-service.wiki-relation.queryByIssueId',
-          'agile-service.wiki-relation.create',
-          'agile-service.wiki-relation.deleteById',
-          'agile-service.data-log.listByIssueId',
-          'agile-service.issue-link.listIssueLinkByIssueId',
-          'test-service.test-cycle-case-defect-rel.queryByBug',
-          'agile-service.scheme.queryIssueTypesWithStateMachineIdByProjectId',
-          'agile-service.scheme.queryStatusByIssueTypeId',
-          'agile-service.scheme.queryByOrganizationIdList',
-          'agile-service.scheme.queryTransformsByProjectId',
-          'agile-service.field-value.queryPageFieldViewListWithInstanceId',
-          'agile-service.sprint.queryNameByOptions',
-          'agile-service.product-version.queryNameByOptions',        
-          'agile-service.issue-label.listIssueLabel',
-          'agile-service.issue-component.listByProjectId',
-          'agile-service.issue-attachment.uploadForAddress',
-          'agile-service.issue-attachment.uploadAttachment',
-          'agile-service.issue-attachment.deleteAttachment',
-          'agile-service.issue.queryIssue',
-          'agile-service.issue.listEpicSelectData',
-          'agile-service.issue.createSubIssue',
-          'agile-service.issue.createIssue',
-          'agile-service.issue.updateIssue',
-          'agile-service.issue.updateIssueStatus',
-          'agile-service.issue.cloneIssueByIssueId',
-          'agile-service.issue.deleteIssue',
-          'agile-service.issue.queryIssueByOptionForAgile',
-          'agile-service.issue.transformedSubTask',
-          'agile-service.issue.updateIssueParentId',
-          'agile-service.issue.updateIssueTypeCode',
-          'agile-service.issue-comment.createIssueComment',
-          'agile-service.issue-comment.updateIssueComment',
-          'agile-service.issue-comment.deleteIssueComment',
-          'agile-service.issue-comment.queryIssueCommentList',
-          'agile-service.work-log.createWorkLog',
-          'agile-service.work-log.queryWorkLogListByIssueId',
-          'agile-service.work-log.deleteWorkLog',
-          'agile-service.work-log.updateWorkLog',
-          'agile-service.scheme.queryStatusByIssueTypeId',
-          'devops-service.issue.countCommitAndMergeRequest',
-          'devops-service.app-service.listByActive',
-          'devops-service.devops-git.pageBranchByOptions',
-          'devops-service.devops-git.pageTagsByOptions',
-          'devops-service.devops-git.createBranch',
-        ]}
-      >
+      <Fragment>
         <Header title="活跃冲刺">         
           <Select
             ref={(SelectBoard) => { this.SelectBoard = SelectBoard; }}
@@ -542,9 +481,74 @@ class ScrumBoardHome extends Component {
             </Modal>
           ) : null
         }
-      </Page>
+      </Fragment>
     );
   }
 }
-
-export default Form.create()(ScrumBoardHome);
+export default props => (
+  <Page
+    className="c7n-scrumboard-page"
+    service={[
+      'agile-service.quick-filter.listByProjectId',
+      'base-service.project.list',
+      'agile-service.board.queryByProjectId',
+      'agile-service.board.checkName',
+      'agile-service.board.createScrumBoard',
+      'agile-service.board.move',
+      'agile-service.scheme.queryIssueTypesWithStateMachineIdByProjectId',
+      'agile-service.scheme.queryTransformsMapByProjectId',
+      'agile-service.board.queryByOptions',
+      'agile-service.issue.listEpic',
+      'agile-service.sprint.completeSprint',
+      // 详情侧边接口
+      'base-service.user.querySelf',
+      'base-service.permission.checkPermission',        
+      'agile-service.wiki-relation.queryByIssueId',
+      'agile-service.wiki-relation.create',
+      'agile-service.wiki-relation.deleteById',
+      'agile-service.data-log.listByIssueId',
+      'agile-service.issue-link.listIssueLinkByIssueId',
+      'test-service.test-cycle-case-defect-rel.queryByBug',
+      'agile-service.scheme.queryIssueTypesWithStateMachineIdByProjectId',
+      'agile-service.scheme.queryStatusByIssueTypeId',
+      'agile-service.scheme.queryByOrganizationIdList',
+      'agile-service.scheme.queryTransformsByProjectId',
+      'agile-service.field-value.queryPageFieldViewListWithInstanceId',
+      'agile-service.sprint.queryNameByOptions',
+      'agile-service.product-version.queryNameByOptions',        
+      'agile-service.issue-label.listIssueLabel',
+      'agile-service.issue-component.listByProjectId',
+      'agile-service.issue-attachment.uploadForAddress',
+      'agile-service.issue-attachment.uploadAttachment',
+      'agile-service.issue-attachment.deleteAttachment',
+      'agile-service.issue.queryIssue',
+      'agile-service.issue.listEpicSelectData',
+      'agile-service.issue.createSubIssue',
+      'agile-service.issue.createIssue',
+      'agile-service.issue.updateIssue',
+      'agile-service.issue.updateIssueStatus',
+      'agile-service.issue.cloneIssueByIssueId',
+      'agile-service.issue.deleteIssue',
+      'agile-service.issue.queryIssueByOptionForAgile',
+      'agile-service.issue.transformedSubTask',
+      'agile-service.issue.updateIssueParentId',
+      'agile-service.issue.updateIssueTypeCode',
+      'agile-service.issue-comment.createIssueComment',
+      'agile-service.issue-comment.updateIssueComment',
+      'agile-service.issue-comment.deleteIssueComment',
+      'agile-service.issue-comment.queryIssueCommentList',
+      'agile-service.work-log.createWorkLog',
+      'agile-service.work-log.queryWorkLogListByIssueId',
+      'agile-service.work-log.deleteWorkLog',
+      'agile-service.work-log.updateWorkLog',
+      'agile-service.scheme.queryStatusByIssueTypeId',
+      'devops-service.issue.countCommitAndMergeRequest',
+      'devops-service.app-service.listByActive',
+      'devops-service.devops-git.pageBranchByOptions',
+      'devops-service.devops-git.pageTagsByOptions',
+      'devops-service.devops-git.createBranch',
+    ]}
+  >
+    <ScrumBoardHome {...props} />
+  </Page>
+);
