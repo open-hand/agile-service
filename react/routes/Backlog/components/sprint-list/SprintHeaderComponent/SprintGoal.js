@@ -36,6 +36,7 @@ const { Text, Edit } = TextEditToggle;
           alignItems: 'center',
           minWidth: '100px',
           justifyContent: 'flex-end',
+          marginLeft: 'auto',
         }}
       >
         <p
