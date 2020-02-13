@@ -164,7 +164,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
 
-    protected IssueTypeDTO createIssueType(IssueTypeDTO issueType) {
+    @Override
+    public IssueTypeDTO createIssueType(IssueTypeDTO issueType) {
         //保证幂等性
         List<IssueTypeDTO> issueTypes = issueTypeMapper.select(issueType);
         if (!issueTypes.isEmpty()) {

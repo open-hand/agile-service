@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import com.github.pagehelper.PageInfo;
+import io.choerodon.agile.infra.dto.IssueTypeDTO;
 import org.springframework.data.domain.Pageable;
 import io.choerodon.agile.api.vo.IssueTypeSearchVO;
 import io.choerodon.agile.api.vo.IssueTypeVO;
@@ -50,4 +51,6 @@ public interface IssueTypeService {
     Map<Long, IssueTypeVO> listIssueTypeMap(Long organizationId);
 
     Map<Long, Map<String, Long>> initIssueTypeData(Long organizationId, List<Long> orgIds);
+
+    IssueTypeDTO createIssueType(IssueTypeDTO issueType);
 }
