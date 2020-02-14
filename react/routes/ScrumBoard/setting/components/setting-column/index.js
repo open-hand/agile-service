@@ -4,9 +4,9 @@ import { Content, stores, Permission } from '@choerodon/boot';
 import { Select } from 'choerodon-ui';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { last, cloneDeep, find } from 'lodash';
+import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import Column from './Column';
 import UnSetColumn from './UnSetColumn';
-import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import './index.less';
 
 const { AppState } = stores;
@@ -86,7 +86,7 @@ class SettingColumn extends Component {
     ScrumBoardStore.setBoardData(newState);
 
     request(statusCode, {
-      columnId: destinationColumnId,
+      columnId: destinationType === 'unset' ? sourceColumnId : destinationColumnId,
       position: destinationIndex,
       statusObjectVersionNumber,
       originColumnId: sourceColumnId,
