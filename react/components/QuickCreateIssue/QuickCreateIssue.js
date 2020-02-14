@@ -34,7 +34,9 @@ class QuickCreateIssue extends Component {
 
   handleCreate = () => {
     const { currentTypeCode } = this.state;
-    const { form, issueTypes } = this.props;
+    const {
+      form, issueTypes, sprintId, epicId, versionIssueRelVOList,
+    } = this.props;
     form.validateFields((err, values) => {
       const { summary } = values;
       if (summary && summary.trim()) {
@@ -48,22 +50,20 @@ class QuickCreateIssue extends Component {
               const issue = {
                 priorityCode: `priority-${defaultPriority.id}`,
                 priorityId: defaultPriority.id,
-                projectId: getProjectId(),
-                programId: getProjectId(),          
-                epicId: 0,
+                projectId: getProjectId(),                        
+                epicId: epicId || 0,
                 summary: summary.trim(),
                 issueTypeId: currentType.id,
                 typeCode: currentType.typeCode,
                 parentIssueId: 0,       
                 relateIssueId: 0,   
-                featureVO: {},
-                sprintId: 0,      
+                sprintId: sprintId || 0,      
                 epicName: currentTypeCode === 'issue_epic' ? summary.trim() : undefined,    
                 componentIssueRelVOList: [],
                 description: '',
                 issueLinkCreateVOList: [],
                 labelIssueRelVOList: [],
-                versionIssueRelVOList: [],
+                versionIssueRelVOList: versionIssueRelVOList || [],
               };
               this.setState({
                 loading: true,
@@ -137,7 +137,7 @@ class QuickCreateIssue extends Component {
       >
         {
           create ? (
-            <Form onSubmit={this.handleCreate} style={{ width: '100%' }}>
+            <Form style={{ width: '100%' }}>
               <div style={{ display: 'block', width: '100%' }}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <Dropdown overlay={typeList} trigger={['click']}>
@@ -158,6 +158,7 @@ class QuickCreateIssue extends Component {
                       <Input
                         className="hidden-label"
                         autoFocus
+                        onPressEnter={this.handleCreate}
                         maxLength={44}
                         placeholder="请输入问题概要"
                       />,
@@ -166,11 +167,12 @@ class QuickCreateIssue extends Component {
                   <Button
                     funcType="raised"
                     type="primary"
-                    htmlType="submit"
+                    // htmlType="submit"
+                    onClick={this.handleCreate}
                     style={{ margin: '0 10px' }}
                     loading={loading}                   
                   >
-                    {'确定'}
+                    确定
                   </Button>
                   <Button
                     funcType="raised"
@@ -180,7 +182,7 @@ class QuickCreateIssue extends Component {
                       });
                     }}
                   >
-                  取消
+                    取消
                   </Button>
                 </div>
               </div>
@@ -195,7 +197,7 @@ class QuickCreateIssue extends Component {
                 });
               }}
             >
-                创建问题
+              创建问题
             </Button>
           )
         }

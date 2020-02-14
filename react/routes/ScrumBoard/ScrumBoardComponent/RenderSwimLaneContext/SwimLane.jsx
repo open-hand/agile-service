@@ -2,17 +2,16 @@
  * 列状态
  */
 import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import './SwimLane.less';
+import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import RenderSwimLaneContext from './index';
 import ColumnProvider from './ColumnProvider';
 import StatusProvider from './StatusProvider';
 import CardProvider from './CardProvider';
-import ScrumBoardStore from '../../../../stores/project/scrumBoard/ScrumBoardStore';
 import EpicRenderHeader from './EpicRenderHeader';
 
-@inject('AppState')
 @observer
 class SwimLane extends Component {
   renderEpicLane = mode => (
@@ -63,7 +62,7 @@ class SwimLane extends Component {
               columnId={columnId}
               keyId={key}
             >
-              {(keyId, id, completed, statusName, categoryCode) => <CardProvider keyId={keyId} id={id} completed={completed} statusName={statusName} categoryCode={categoryCode} />}
+              {(keyId, id, completed, statusName, categoryCode, snapshot) => <CardProvider keyId={keyId} id={id} completed={completed} statusName={statusName} categoryCode={categoryCode} snapshot={snapshot} />}
             </StatusProvider>
           )}
         </ColumnProvider>

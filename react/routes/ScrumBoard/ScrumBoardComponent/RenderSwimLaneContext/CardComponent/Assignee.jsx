@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import UserHead from '../../../../../components/UserHead/UserHead';
+import React, { memo } from 'react';
+import UserHead from '@/components/UserHead/UserHead';
 
 /**
  * 任务经办人呈现
@@ -8,20 +8,13 @@ import UserHead from '../../../../../components/UserHead/UserHead';
  * @param assigneeId
  * @param imageUrl
  */
-export default class Assignee extends Component {
-  shouldComponentUpdate(nextProps) {
-    const { assigneeName, assigneeId, imageUrl } = this.props;
-    return nextProps.assigneeName !== assigneeName || nextProps.assigneeId !== assigneeId || nextProps.imageUrl !== imageUrl;
-  }
-
-  render() {
-    const {
-      assigneeId, imageUrl, assigneeName,
-      assigneeRealName, assigneeLoginName,
-    } = this.props;
-    return (
-      <div>
-        {
+function Assignee({
+  assigneeId, imageUrl, assigneeName,
+  assigneeRealName, assigneeLoginName, 
+}) {
+  return (
+    <div>
+      {
           assigneeId ? (
             <UserHead
               hiddenText
@@ -46,7 +39,7 @@ export default class Assignee extends Component {
             />
           )
         }
-      </div>
-    );
-  }
+    </div>
+  );
 }
+export default memo(Assignee);

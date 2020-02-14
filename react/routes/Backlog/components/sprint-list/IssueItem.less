@@ -1,0 +1,81 @@
+@base: #000000;
+
+.c7n-backlog-issue {
+  display: flex;
+  align-items: center;
+  border-bottom: .01rem solid rgba(0, 0, 0, .12);
+  padding: 0 20px;
+  background: white;
+
+  &-selected {
+    background: #eff2f9;
+  }
+
+  &-left {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 3rem;
+  }
+
+  &-right {
+    display: flex;
+    justify-content: flex-end;
+    margin-left: auto;
+    margin-top: 0.05rem;
+  }
+
+  &-issueNum {
+    white-space: nowrap;
+    margin: 0 0.04rem;
+  }
+
+  &-summary {
+    white-space: nowrap;
+    overflow: hidden;
+    -ms-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+  }
+
+  &-version {
+    border: 0.01rem solid fade(@base, 36%);
+    margin: 0 5px;
+  }
+
+  &-epic {
+    border: 0.01rem solid #f953ba;
+    margin-right: 0.12rem;
+  }
+
+  &-feature {
+    margin-right: 0.12rem;
+    color: #4A4A4A;
+    border: 1px solid #4A4A4A;
+  }
+
+  &-status {
+    margin-left: 0.12rem;
+    margin-right: 0.08rem;
+  }
+
+  &-storyPoint {
+    // 以后要用到的话，可以把这边直接提取出来
+    visibility: hidden;
+    padding: 0 0.02rem;
+    min-width: 0.2rem;
+    height: 0.2rem;
+    border-radius: 1rem;
+    background: fade(@base, 8%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: fade(@base, 65%);
+    margin-left: 0.12rem;
+  }
+
+  .visible {
+    visibility: visible !important;
+  }
+
+
+}

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import classnames from 'classnames';
 import { Collapse } from 'choerodon-ui';
 import './RenderSwimLaneContext.less';
@@ -7,7 +7,7 @@ import SwimLaneHeader from './SwimLaneHeader';
 
 const { Panel } = Collapse;
 
-@inject('AppState')
+
 @observer
 class SwimLaneContext extends React.Component {
   constructor(props) {
@@ -17,11 +17,11 @@ class SwimLaneContext extends React.Component {
     };
   }
 
-  componentWillReceiveProps(nextProps, nextState) {
-    this.setState({
-      activeKey: this.getDefaultExpanded(nextProps.mode, [...nextProps.parentIssueArr.values(), nextProps.otherIssueWithoutParent]),
-    });
-  }
+  // componentWillReceiveProps(nextProps, nextState) {
+  //   this.setState({
+  //     activeKey: this.getDefaultExpanded(nextProps.mode, [...nextProps.parentIssueArr.values(), nextProps.otherIssueWithoutParent]),
+  //   });
+  // }
 
   getPanelKey = (mode, issue) => {
     const modeMap = new Map([

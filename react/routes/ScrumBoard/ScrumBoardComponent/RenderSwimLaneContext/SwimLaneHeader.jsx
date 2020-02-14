@@ -1,13 +1,11 @@
 import React, { Component } from 'react';
-import {
-  Icon, Button, Avatar, Collapse,
-} from 'choerodon-ui';
+import { Button } from 'choerodon-ui';
 import { observer } from 'mobx-react';
 import './SwimLaneHeader.less';
-import TypeTag from '../../../../components/TypeTag';
-import StatusTag from '../../../../components/StatusTag';
-import ScrumBoardStore from '../../../../stores/project/scrumBoard/ScrumBoardStore';
-import UserHead from '../../../../components/UserHead';
+import TypeTag from '@/components/TypeTag';
+import StatusTag from '@/components/StatusTag';
+import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
+import UserHead from '@/components/UserHead';
 
 @observer
 export default class SwimLaneHeader extends Component {
@@ -171,7 +169,7 @@ export default class SwimLaneHeader extends Component {
                   ScrumBoardStore.setTransFromData(parentIssue, parentIssue.issueId);
                 }}
               >
-                {'移动到done'}
+                移动到done
               </Button>
             ) : null
           }

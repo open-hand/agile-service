@@ -1,19 +1,18 @@
 import React, { Component, Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
 import {
-  Page, Header, Content, stores, Breadcrumb, Choerodon, Permission,
+  Page, Header, Content, stores, Breadcrumb, Choerodon, Permission, axios,
 } from '@choerodon/boot';
 import {
-  Button, Select, Spin, Icon, Modal, Input, Form, Tooltip, Radio,
+  Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
 } from 'choerodon-ui';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
+import CloseSprint from '@/components/close-sprint';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
 import './ScrumBoardHome.less';
 import IssueDetail from '../ScrumBoardComponent/IssueDetail/IssueDetail';
-import BacklogStore from '../../../stores/project/backlog/BacklogStore';
-import CloseSprint from '../../Backlog/components/SprintComponent/CloseSprint';
 import QuickSearch, { QuickSearchEvent } from '../../../components/QuickSearch';
 import NoneSprint from '../ScrumBoardComponent/NoneSprint/NoneSprint';
 import '../ScrumBoardComponent/RenderSwimLaneContext/RenderSwimLaneContext.less';
@@ -23,8 +22,6 @@ import HaederLine from '../../../common/Headerline';
 import CreateBoard from '../ScrumBoardComponent/CreateBoard';
 
 const { Option } = Select;
-const { Sidebar } = Modal;
-const FormItem = Form.Item;
 const { AppState } = stores;
 
 const RadioGroup = Radio.Group;
@@ -44,6 +41,7 @@ const style = swimLaneId => `
   } 
 `;
 
+@Form.create()
 @CSSBlackMagic
 @inject('AppState', 'HeaderStore')
 @observer
@@ -53,7 +51,6 @@ class ScrumBoardHome extends Component {
     this.dataConverter = new ScrumBoardDataController();
     this.ref = null;
     this.state = {
-      closeSprintVisible: false,
       updateParentStatus: null,
     };
   }
@@ -114,16 +111,15 @@ class ScrumBoardHome extends Component {
    *
    * @memberof ScrumBoardHome
    */
-  handleFinishSprint = () => {
-    BacklogStore.axiosGetSprintCompleteMessage(
-      ScrumBoardStore.getSprintId,
-    ).then((res) => {
-      BacklogStore.setSprintCompleteMessage(res);
-      // this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
-      this.setState({
-        closeSprintVisible: true,
-      });
-    }).catch((error) => {
+  handleFinishSprint = async () => {
+    const sprintId = ScrumBoardStore.getSprintId;    
+    const completeMessage = await axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${sprintId}/names`);
+    CloseSprint({
+      completeMessage,
+      sprintId,
+      afterClose: () => {
+        this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
+      },
     });
   };
 
@@ -207,7 +203,7 @@ class ScrumBoardHome extends Component {
         ['swimlane_epic', this.dataConverter.getEpicData],
         ['assignee', this.dataConverter.getAssigneeData],
         ['swimlane_none', this.dataConverter.getAllData],
-        ['undefined', this.dataConverter.getAllData],
+        ['undefined', this.dataConverter.getAssigneeData],
       ]);
       const renderData = renderDataMap.get(defaultBoard.userDefaultBoard)();
       const canDragOn = this.dataConverter.getCanDragOn();
@@ -284,84 +280,13 @@ class ScrumBoardHome extends Component {
   render() {
     const { history, HeaderStore } = this.props;
     const {
-      closeSprintVisible,
       updateParentStatus,
     } = this.state;
     const menu = AppState.currentMenuType;
     const { type, id: projectId, organizationId: orgId } = menu;
     return (
-      <Page
-        className="c7n-scrumboard-page"
-        service={[
-          'agile-service.quick-filter.listByProjectId',
-          'base-service.project.list',
-          'agile-service.board.queryByProjectId',
-          'agile-service.board.checkName',
-          'agile-service.board.createScrumBoard',
-          'agile-service.board.move',
-          'agile-service.scheme.queryIssueTypesWithStateMachineIdByProjectId',
-          'agile-service.scheme.queryTransformsMapByProjectId',
-          'agile-service.board.queryByOptions',
-          'agile-service.issue.listEpic',
-          'agile-service.sprint.completeSprint',
-          // 详情侧边接口
-          'base-service.user.querySelf',
-          'base-service.permission.checkPermission',        
-          'agile-service.wiki-relation.queryByIssueId',
-          'agile-service.wiki-relation.create',
-          'agile-service.wiki-relation.deleteById',
-          'agile-service.data-log.listByIssueId',
-          'agile-service.issue-link.listIssueLinkByIssueId',
-          'test-service.test-cycle-case-defect-rel.queryByBug',
-          'agile-service.scheme.queryIssueTypesWithStateMachineIdByProjectId',
-          'agile-service.scheme.queryStatusByIssueTypeId',
-          'agile-service.scheme.queryByOrganizationIdList',
-          'agile-service.scheme.queryTransformsByProjectId',
-          'agile-service.field-value.queryPageFieldViewListWithInstanceId',
-          'agile-service.sprint.queryNameByOptions',
-          'agile-service.product-version.queryNameByOptions',        
-          'agile-service.issue-label.listIssueLabel',
-          'agile-service.issue-component.listByProjectId',
-          'agile-service.issue-attachment.uploadForAddress',
-          'agile-service.issue-attachment.uploadAttachment',
-          'agile-service.issue-attachment.deleteAttachment',
-          'agile-service.issue.queryIssue',
-          'agile-service.issue.listEpicSelectData',
-          'agile-service.issue.createSubIssue',
-          'agile-service.issue.createIssue',
-          'agile-service.issue.updateIssue',
-          'agile-service.issue.updateIssueStatus',
-          'agile-service.issue.cloneIssueByIssueId',
-          'agile-service.issue.deleteIssue',
-          'agile-service.issue.queryIssueByOptionForAgile',
-          'agile-service.issue.transformedSubTask',
-          'agile-service.issue.updateIssueParentId',
-          'agile-service.issue.updateIssueTypeCode',
-          'agile-service.issue-comment.createIssueComment',
-          'agile-service.issue-comment.updateIssueComment',
-          'agile-service.issue-comment.deleteIssueComment',
-          'agile-service.issue-comment.queryIssueCommentList',
-          'agile-service.work-log.createWorkLog',
-          'agile-service.work-log.queryWorkLogListByIssueId',
-          'agile-service.work-log.deleteWorkLog',
-          'agile-service.work-log.updateWorkLog',
-          'agile-service.scheme.queryStatusByIssueTypeId',
-          'devops-service.issue.countCommitAndMergeRequest',
-          'devops-service.app-service.listByActive',
-          'devops-service.devops-git.pageBranchByOptions',
-          'devops-service.devops-git.pageTagsByOptions',
-          'devops-service.devops-git.createBranch',
-        ]}
-      >
-        <Header title="活跃冲刺">
-          <Permission
-            type={type}
-            projectId={projectId}
-            organizationId={orgId}
-            service={['agile-service.board.createScrumBoard']}
-          >
-            <span />
-          </Permission>
+      <Fragment>
+        <Header title="活跃冲刺">         
           <Select
             ref={(SelectBoard) => { this.SelectBoard = SelectBoard; }}
             className="SelectTheme primary autoWidth"
@@ -403,24 +328,23 @@ class ScrumBoardHome extends Component {
                 ))
               }
           </Select>
+          <HaederLine />
+          <Button
+            funcType="flat"
+            icon="settings"
+            style={{
+              marginRight: 15,
+            }}
+            onClick={() => {
+              const urlParams = AppState.currentMenuType;
+              history.push(`/agile/scrumboard/setting?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&boardId=${ScrumBoardStore.getSelectedBoard}`);
+            }}
+          >
+            配置看板
+          </Button>
           {
             ScrumBoardStore.didCurrentSprintExist && (
-            <Fragment>
-              
-              <HaederLine />
-              <Button
-                funcType="flat"
-                icon="settings"
-                style={{
-                  marginRight: 15,
-                }}
-                onClick={() => {
-                  const urlParams = AppState.currentMenuType;
-                  history.push(`/agile/scrumboard/setting?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&boardId=${ScrumBoardStore.getSelectedBoard}`);
-                }}
-              >
-              配置看板
-              </Button>
+            <Fragment>             
               {this.renderRemainDate()}
               <Button
                 style={{
@@ -429,7 +353,7 @@ class ScrumBoardHome extends Component {
                 icon="alarm_on"
                 onClick={this.handleFinishSprint}
               >
-              完成冲刺
+                完成冲刺
   
               </Button>
               {this.renderSwitchMode()}
@@ -478,23 +402,7 @@ class ScrumBoardHome extends Component {
               />
             </div>
           </Spin>
-        </Content>
-        <CloseSprint
-          store={BacklogStore}
-          visible={closeSprintVisible}
-          onCancel={() => {
-            this.setState({
-              closeSprintVisible: false,
-            });
-          }}
-          refresh={() => {
-            this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
-          }}
-          data={{
-            sprintId: ScrumBoardStore.getSprintId,
-            sprintName: ScrumBoardStore.getSprintName,
-          }}
-        />
+        </Content>        
         {
           ScrumBoardStore.getUpdateParent ? (
             <Modal
@@ -553,9 +461,74 @@ class ScrumBoardHome extends Component {
             </Modal>
           ) : null
         }
-      </Page>
+      </Fragment>
     );
   }
 }
-
-export default Form.create()(ScrumBoardHome);
+export default props => (
+  <Page
+    className="c7n-scrumboard-page"
+    service={[
+      'agile-service.quick-filter.listByProjectId',
+      'base-service.project.list',
+      'agile-service.board.queryByProjectId',
+      'agile-service.board.checkName',
+      'agile-service.board.createScrumBoard',
+      'agile-service.board.move',
+      'agile-service.scheme.queryIssueTypesWithStateMachineIdByProjectId',
+      'agile-service.scheme.queryTransformsMapByProjectId',
+      'agile-service.board.queryByOptions',
+      'agile-service.issue.listEpic',
+      'agile-service.sprint.completeSprint',
+      // 详情侧边接口
+      'base-service.user.querySelf',
+      'base-service.permission.checkPermission',        
+      'agile-service.wiki-relation.queryByIssueId',
+      'agile-service.wiki-relation.create',
+      'agile-service.wiki-relation.deleteById',
+      'agile-service.data-log.listByIssueId',
+      'agile-service.issue-link.listIssueLinkByIssueId',
+      'test-service.test-cycle-case-defect-rel.queryByBug',
+      'agile-service.scheme.queryIssueTypesWithStateMachineIdByProjectId',
+      'agile-service.scheme.queryStatusByIssueTypeId',
+      'agile-service.scheme.queryByOrganizationIdList',
+      'agile-service.scheme.queryTransformsByProjectId',
+      'agile-service.field-value.queryPageFieldViewListWithInstanceId',
+      'agile-service.sprint.queryNameByOptions',
+      'agile-service.product-version.queryNameByOptions',        
+      'agile-service.issue-label.listIssueLabel',
+      'agile-service.issue-component.listByProjectId',
+      'agile-service.issue-attachment.uploadForAddress',
+      'agile-service.issue-attachment.uploadAttachment',
+      'agile-service.issue-attachment.deleteAttachment',
+      'agile-service.issue.queryIssue',
+      'agile-service.issue.listEpicSelectData',
+      'agile-service.issue.createSubIssue',
+      'agile-service.issue.createIssue',
+      'agile-service.issue.updateIssue',
+      'agile-service.issue.updateIssueStatus',
+      'agile-service.issue.cloneIssueByIssueId',
+      'agile-service.issue.deleteIssue',
+      'agile-service.issue.queryIssueByOptionForAgile',
+      'agile-service.issue.transformedSubTask',
+      'agile-service.issue.updateIssueParentId',
+      'agile-service.issue.updateIssueTypeCode',
+      'agile-service.issue-comment.createIssueComment',
+      'agile-service.issue-comment.updateIssueComment',
+      'agile-service.issue-comment.deleteIssueComment',
+      'agile-service.issue-comment.queryIssueCommentList',
+      'agile-service.work-log.createWorkLog',
+      'agile-service.work-log.queryWorkLogListByIssueId',
+      'agile-service.work-log.deleteWorkLog',
+      'agile-service.work-log.updateWorkLog',
+      'agile-service.scheme.queryStatusByIssueTypeId',
+      'devops-service.issue.countCommitAndMergeRequest',
+      'devops-service.app-service.listByActive',
+      'devops-service.devops-git.pageBranchByOptions',
+      'devops-service.devops-git.pageTagsByOptions',
+      'devops-service.devops-git.createBranch',
+    ]}
+  >
+    <ScrumBoardHome {...props} />
+  </Page>
+);

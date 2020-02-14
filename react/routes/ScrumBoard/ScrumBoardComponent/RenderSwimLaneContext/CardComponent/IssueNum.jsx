@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { memo } from 'react';
 
 /**
  * 任务类型呈现
@@ -6,21 +6,14 @@ import React, { Component } from 'react';
  * @param issueNum
  * @param completed
  */
-export default class IssueNum extends Component {
-  shouldComponentUpdate(nextProps, nextState, nextContext) {
-    const { issueNum, completed } = this.props;
-    return nextProps.issueNum !== issueNum || nextProps.completed !== completed;
-  }
-
-  render() {
-    const { issueNum, completed } = this.props;
-    return (
-      <p
-        style={{ marginLeft: 5, marginTop: 2, textDecoration: completed ? 'line-through' : '' }}
-        className="textDisplayOneColumn"
-      >
-        {issueNum}
-      </p>
-    );
-  }
+function IssueNum({ issueNum, completed }) {  
+  return (
+    <p
+      style={{ marginLeft: 5, marginTop: 2, textDecoration: completed ? 'line-through' : '' }}
+      className="textDisplayOneColumn"
+    >
+      {issueNum}
+    </p>
+  );
 }
+export default memo(IssueNum);

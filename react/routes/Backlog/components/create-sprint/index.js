@@ -4,6 +4,7 @@ import {
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import SprintApi from '@/api/SprintApi';
+import { MAX_LENGTH_SPRINT } from '@/constants/MAX_LENGTH';
 
 export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
   async function sprintNameValidator(value, name, record) {
@@ -47,8 +48,7 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
 
   return (
     <Form dataSet={dataSet}>
-      <TextField name="sprintName" required />
-
+      <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} />
       <DateTimePicker name="startDate" />
       <DateTimePicker name="endDate" />
       <TextArea
