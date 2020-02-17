@@ -496,7 +496,7 @@ public class IssueServiceImpl implements IssueService {
         return true;
     }
 
-    private Boolean checkEpicNameUpdate(Long projectId, Long issueId, String epicName) {
+    protected Boolean checkEpicNameUpdate(Long projectId, Long issueId, String epicName) {
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         if (epicName.equals(issueDTO.getEpicName())) {
             return false;
