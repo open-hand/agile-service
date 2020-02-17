@@ -70,7 +70,11 @@ class StatusCard extends Component {
       if (data.issues.length === 0) {
         if (this.getStatusNumber() <= 1) {
           return [true, '应至少剩余一个状态'];
+        } else {
+          return [false];
         }
+      } else {
+        return [true, '状态下有问题'];
       }
     }
     return [true, '在普通列中'];
