@@ -2,15 +2,16 @@
 import React from 'react';
 import { Select } from 'choerodon-ui';
 import { find } from 'lodash';
-import UserHead from '../UserHead';
-import { getUsers, getUser } from '../../api/CommonApi';
+import { getPISelect } from '@/api/PIApi';
+import { getUsers, getUser } from '@/api/CommonApi';
 import {
   loadEpics, loadProgramEpics, loadIssueTypes, loadPriorities,
   loadComponents, loadLabels, loadVersions,
   loadStatusList, loadIssuesInLink, loadSprints,
 
-} from '../../api/NewIssueApi';
-import IssueLinkType from '../../api/IssueLinkType';
+} from '@/api/NewIssueApi';
+import IssueLinkType from '@/api/IssueLinkType';
+import UserHead from '../UserHead';
 import TypeTag from '../TypeTag';
 import StatusTag from '../StatusTag';
 
@@ -342,6 +343,19 @@ export default {
     render: sprint => (
       <Option key={sprint.sprintId} value={sprint.sprintId}>
         {sprint.sprintName}
+      </Option>
+    ),
+  },
+  pi: {
+    props: {
+      getPopupContainer: triggerNode => triggerNode.parentNode,
+      filterOption,
+      loadWhenMount: true,
+    },
+    request: getPISelect,
+    render: pi => (
+      <Option key={pi.id} value={pi.id}>
+        {`${pi.code}-${pi.name}`}
       </Option>
     ),
   },
