@@ -50,7 +50,7 @@ function IssueList({ data, sprintId }) {
             ref={provided.innerRef}            
           >
             {rowCount === 0 || (rowCount === 1 && snapshot.isUsingPlaceholder) > 0 
-              ? <NoneIssue />
+              ? <NoneIssue type={sprintId === 0 ? 'backlog' : 'sprint'} />
               : (
                 <WindowScroller scrollElement={document.getElementsByClassName('c7n-backlog-content')[0]}>
                   {({ height, scrollTop, registerChild }) => (
