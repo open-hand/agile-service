@@ -1,25 +1,15 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import {
-  Icon,
-} from 'choerodon-ui';
+import { Icon } from 'choerodon-ui';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 import { QuickSearchEvent } from '../../../../components/QuickSearch';
 import FeatureItem from './FeatureItem';
 import { getFeaturesInProject } from '../../../../api/FeatureApi';
-import CreateFeature from './CreateFeature';
 import './Feature.less';
 
 @observer
 class Feature extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      addFeature: false,
-    };
-  }
-
   componentDidMount() {
     this.featureRefresh();
   }
@@ -45,9 +35,8 @@ class Feature extends Component {
     });
   };
 
-  render() {
-    const { draggableIds, addFeature } = this.state;
-    const { refresh, issueRefresh, isInProgram } = this.props;
+  render() { 
+    const { refresh, issueRefresh } = this.props;
     return BacklogStore.getCurrentVisible === 'feature' ? (
       <div className="c7n-backlog-epic">
         <div className="c7n-backlog-epicContent">
@@ -102,8 +91,7 @@ class Feature extends Component {
                     }}
                   >
                     <FeatureItem
-                      clickFeature={this.handleClickFeature}
-                      draggableIds={draggableIds}
+                      clickFeature={this.handleClickFeature}             
                       refresh={refresh}
                       issueRefresh={issueRefresh}
                     />
@@ -151,17 +139,7 @@ class Feature extends Component {
             >
               未指定特性的问题
             </div>
-          </div>
-          <CreateFeature
-            store={BacklogStore}
-            visible={addFeature}
-            onCancel={() => {
-              this.setState({
-                addFeature: false,
-              });
-            }}
-            refresh={this.featureRefresh}
-          />
+          </div>          
         </div>
       </div>
     ) : null;

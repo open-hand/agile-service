@@ -747,6 +747,9 @@ class BacklogStore {
   }
 
   @action moveFeature(sourceIndex, destinationIndex) {
+    if (sourceIndex === destinationIndex) {
+      return;
+    }
     const movedItem = this.featureList[sourceIndex];
     const { issueId, featureRankObjectVersionNumber } = movedItem;
     this.featureList.splice(sourceIndex, 1);
