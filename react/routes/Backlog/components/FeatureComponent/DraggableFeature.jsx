@@ -1,16 +1,12 @@
 import React, { Component } from 'react';
 import { stores, axios, Choerodon } from '@choerodon/boot';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import classnames from 'classnames';
-import { Droppable, Draggable } from 'react-beautiful-dnd';
-import {
-  Dropdown, Menu, Input, Icon, message,
-} from 'choerodon-ui';
-import _ from 'lodash';
-import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
+import { Menu, Icon } from 'choerodon-ui';
+import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
 const { AppState } = stores;
-// @inject('AppState')
+
 @observer
 class DraggableFeature extends Component {
   constructor(props) {
@@ -56,7 +52,7 @@ class DraggableFeature extends Component {
     return (
       <Menu onClick={this.clickMenu.bind(this)}>
         <div style={{ padding: '5px 12px' }}>
-          {'颜色'}
+          颜色
           <div className="c7n-backlog-epicColor">
             {BacklogStore.getColorLookupValue.map(color => (
               <div
@@ -159,37 +155,7 @@ class DraggableFeature extends Component {
             onClick={this.toggleExpand}
           />
           <div style={{ width: '100%' }}>
-            <div className="c7n-backlog-epicItemsHead">
-              {/* {editName ? (
-                <Input
-                  className="editFeatureName"
-                  autoFocus
-                  defaultValue={item.epicName}
-                  onPressEnter={this.handleSave}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  onBlur={this.handleSave}
-                  maxLength={10}
-                />
-              ) : (
-                <p>{item.epicName}</p>
-              )} */}
-              {/* <Dropdown onClick={e => e.stopPropagation()} overlay={this.getmenu()} trigger={['click']}>
-                <Icon
-                  style={{
-                    width: 12,
-                    height: 12,
-                    background: item.color,
-                    color: 'white',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    borderRadius: 2,
-                  }}
-                  type="arrow_drop_down"
-                />
-              </Dropdown> */}
+            <div className="c7n-backlog-epicItemsHead">              
               <p>{item.summary}</p>
             </div>
             <div

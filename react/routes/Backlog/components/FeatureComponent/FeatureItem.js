@@ -1,16 +1,9 @@
 import React, { Component } from 'react';
-import { stores, axios, store } from '@choerodon/boot';
-import { observer, inject } from 'mobx-react';
-import { Droppable, Draggable, DragDropContext } from 'react-beautiful-dnd';
-import {
-  Dropdown, Menu, Input, Icon, message,
-} from 'choerodon-ui';
-import _ from 'lodash';
+import { observer } from 'mobx-react';
+import { Draggable } from 'react-beautiful-dnd';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 import DraggableFeature from './DraggableFeature';
 
-const { AppState } = stores;
-// @inject('AppState')
 @observer
 class FeatureItem extends Component {
   /**
@@ -29,6 +22,7 @@ class FeatureItem extends Component {
     return (
       BacklogStore.getFeatureData.map((item, index) => (
         <div
+          key={item.issueId}
           role="none"
           onMouseEnter={(e) => {
             if (BacklogStore.isDragging) {
@@ -61,7 +55,7 @@ class FeatureItem extends Component {
             this.handleClickFeature(item.issueId);
           }}
         >
-          <Draggable draggableId={item.issueId} key={item.issueId} index={index}>
+          <Draggable draggableId={String(item.issueId)} key={item.issueId} index={index}>
             {(draggableProvided, draggableSnapshot) => (
               <DraggableFeature
                 item={item}
