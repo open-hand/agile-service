@@ -62,7 +62,7 @@ class ScrumBoardHome extends Component {
 
   componentWillUnmount() {
     this.dataConverter = null;
-    ScrumBoardStore.resetDataBeforeUnmount();
+    // ScrumBoardStore.resetDataBeforeUnmount();
   }
 
   getBoard = async () => {
