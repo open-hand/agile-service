@@ -329,7 +329,7 @@ public class IssueServiceImpl implements IssueService {
         return issueAssembler.issueDetailDTOToVO(issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
     }
 
-    private IssueVO queryIssueByUpdate(Long projectId, Long issueId, List<String> fieldList) {
+    protected IssueVO queryIssueByUpdate(Long projectId, Long issueId, List<String> fieldList) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + issueAttachmentDO.getUrl()));
@@ -496,7 +496,7 @@ public class IssueServiceImpl implements IssueService {
         return true;
     }
 
-    private Boolean checkEpicNameUpdate(Long projectId, Long issueId, String epicName) {
+    protected Boolean checkEpicNameUpdate(Long projectId, Long issueId, String epicName) {
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         if (epicName.equals(issueDTO.getEpicName())) {
             return false;
@@ -1103,7 +1103,7 @@ public class IssueServiceImpl implements IssueService {
         }
     }
 
-    private void handleUpdateLabelIssue(List<LabelIssueRelVO> labelIssueRelVOList, Long issueId, Long projectId) {
+    protected void handleUpdateLabelIssue(List<LabelIssueRelVO> labelIssueRelVOList, Long issueId, Long projectId) {
         if (labelIssueRelVOList != null) {
             if (!labelIssueRelVOList.isEmpty()) {
                 LabelIssueRelDTO labelIssueRelDTO = new LabelIssueRelDTO();
@@ -1140,7 +1140,7 @@ public class IssueServiceImpl implements IssueService {
 
     }
 
-    private void handleUpdateVersionIssueRel(List<VersionIssueRelVO> versionIssueRelVOList, Long projectId, Long issueId, String versionType) {
+    protected void handleUpdateVersionIssueRel(List<VersionIssueRelVO> versionIssueRelVOList, Long projectId, Long issueId, String versionType) {
         if (versionIssueRelVOList != null && versionType != null) {
             if (!versionIssueRelVOList.isEmpty()) {
                 //归档状态的版本之间的关联不删除
@@ -1175,7 +1175,7 @@ public class IssueServiceImpl implements IssueService {
         return componentIssueRelMapper.selectByProjectIdAndIssueId(projectId, issueId);
     }
 
-    private void handleUpdateComponentIssueRel(List<ComponentIssueRelVO> componentIssueRelVOList, Long projectId, Long issueId) {
+    protected void handleUpdateComponentIssueRel(List<ComponentIssueRelVO> componentIssueRelVOList, Long projectId, Long issueId) {
         if (componentIssueRelVOList != null) {
             if (!componentIssueRelVOList.isEmpty()) {
                 List<ComponentIssueRelDTO> componentIssueRelDTOList = modelMapper.map(componentIssueRelVOList, new TypeToken<List<ComponentIssueRelDTO>>() {
