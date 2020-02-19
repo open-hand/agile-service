@@ -17,3 +17,15 @@ export function getFeaturesByEpic(epicId) {
 export function exportFeatures(search) {
   return axios.post(`/zuul/agile/v1/projects/${getProjectId()}/issues/program/export?organizationId=${getOrganizationId()}`, search, { responseType: 'arraybuffer' });
 }
+export function checkFeatureName(summary, epicId) {
+  return axios.post(`/agile/v1/projects/${getProjectId()}/issues/check_feature_summary`, {
+    epicId,
+    summary,
+  });
+}
+export function checkFeatureNameById(featureId, epicId) {
+  return axios.post(`/agile/v1/projects/${getProjectId()}/issues/check_feature_summary`, {
+    epicId,
+    featureIds: [featureId],
+  });
+}

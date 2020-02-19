@@ -1,11 +1,14 @@
 import React, { Component, Fragment } from 'react';
-import { stores, Content, axios } from '@choerodon/boot';
+import {
+  stores, Content, axios, Choerodon, 
+} from '@choerodon/boot';
 import { map, find } from 'lodash';
 import {
   Select, Form, Input, Button, Modal, Spin,
 } from 'choerodon-ui';
 import moment from 'moment';
 import reactComponentDebounce from '@/components/DebounceComponent';
+import { checkFeatureName } from '@/api/FeatureApi';
 import { UploadButton } from '../CommonComponent';
 import {
   handleFileUpload, beforeTextUpload, validateFile, normFile, getProjectName, getProjectId,
@@ -209,7 +212,7 @@ class CreateIssue extends Component {
       originLabels,
       originIssueTypes,
     } = this.state;
-    form.validateFieldsAndScroll((err, values) => {
+    form.validateFieldsAndScroll(async (err, values) => {
       if (!err) {
         const {
           typeId,
@@ -236,6 +239,13 @@ class CreateIssue extends Component {
         } = values;   
 
         const { typeCode } = originIssueTypes.find(t => t.id === typeId);
+        if (typeCode === 'feature' && epicId) {
+          const hasSame = await checkFeatureName(summary, epicId);
+          if (hasSame) {
+            Choerodon.prompt('史诗下已含有同名特性');
+            return;
+          }
+        }
         const exitComponents = originComponents;
         const componentIssueRelVOList = map(componentIssueRel
           && componentIssueRel.filter(v => v && v.trim()), (component) => {
