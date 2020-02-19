@@ -12,7 +12,7 @@
     "echarts": "^4.1.0",
     "echarts-for-react": "^2.0.14",
     "eslint-config-airbnb": "^17.1.1",
-    "file-saver": "^1.3.8",
+    "file-saver": "^1.3.8",   
     "immer": "^5.2.1",
     "immutability-helper": "^2.8.1",
     "mobx-react-lite": "^1.4.1",
@@ -42,11 +42,13 @@
     "babel-preset-env": "^1.7.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^7.0.1",
+    "gulp-watch": "^5.0.1",
     "through2": "^2.0.3"
   },
   "scripts": {
     "start": "node --max_old_space_size=4096 node_modules/@choerodon/boot/bin/choerodon-front-boot-start --config ./react/config.js",
     "dist": "choerodon-front-boot dist --config ./react/config.js",
+    "watch": "gulp watch",
     "compile": "choerodon-front-boot compile",
     "analyze": "node --max_old_space_size=4096 node_modules/@choerodon/boot/bin/choerodon-front-boot-analyze --config ./react/config.js",
     "lint-staged": "lint-staged",
