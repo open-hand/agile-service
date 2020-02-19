@@ -97,7 +97,7 @@ class CreateLinkTask extends Component {
 
   render() {
     const {
-      form, visible, onCancel, issueId,
+      form, visible, onCancel, issueId, issueType,
     } = this.props;
     const { getFieldDecorator } = form;
     const {
@@ -137,15 +137,15 @@ class CreateLinkTask extends Component {
             )}
           </FormItem>
 
-          <FormItem label="问题">
+          <FormItem label={issueType === 'feature' ? '特性' : '问题'}>
             {getFieldDecorator('issues', {
               rules: [
-                { required: true, message: '请选择所要关联的问题' },
+                { required: true, message: `请选择所要关联的${issueType === 'feature' ? '特性' : '问题'}` },
               ],
             })(
               <SelectFocusLoad
-                label="问题"
-                type="issues_in_link"
+                label={issueType === 'feature' ? '特性' : '问题'}
+                type={issueType === 'feature' ? 'features_in_link' : 'issues_in_link'}
                 requestArgs={issueId}
                 getPopupContainer={() => document.body}
               />,

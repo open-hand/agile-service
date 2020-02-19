@@ -101,11 +101,12 @@ const EditIssue = observer(() => {
       axios.all([
         loadDocs(id),
         programId ? loadDatalogsProgram(id, programId) : loadDatalogs(id),
-      ]).then(axios.spread((doc, dataLogs) => {
+        loadLinkIssues(id),
+      ]).then(axios.spread((doc, dataLogs, linkIssues) => {
         if (idRef.current !== id) {
           return;
         }
-        store.initIssueAttribute(doc, [], dataLogs, [], {}, []);
+        store.initIssueAttribute(doc, [], dataLogs, linkIssues, {}, []);
       }));
     } else {
       axios.all([

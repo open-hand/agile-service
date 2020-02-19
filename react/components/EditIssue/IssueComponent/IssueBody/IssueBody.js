@@ -18,6 +18,7 @@ import IssueDropDown from '../IssueDropDown';
 import { FieldStoryPoint, FieldSummary } from './Field';
 import CreateBranch from '../../../CreateBranch';
 import DailyLog from '../../../DailyLog';
+import IssueWSJF from './IssueWSJF';
 import EditIssueContext from '../../stores';
 import './IssueBody.less';
 
@@ -70,6 +71,11 @@ const IssueBody = observer((props) => {
           <IssueDetail {...props} />
           <IssueDes {...props} />
           <IssueAttachment {...props} />
+          {
+            issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature' && (
+              <IssueWSJF {...props} />
+            )
+          }
           {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueDoc {...props} /> : ''
           }
@@ -84,13 +90,16 @@ const IssueBody = observer((props) => {
           {issueTypeVO.typeCode && ['feature', 'sub_task'].indexOf(issueTypeVO.typeCode) === -1
             ? <TestLink {...props} /> : ''
           }
-          {issueTypeVO.typeCode && ['feature', 'sub_task'].indexOf(issueTypeVO.typeCode) === -1
+          {issueTypeVO.typeCode && ['sub_task'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''
           }
           { store.testExecutes.length > 0 ? <IssueTestExecute {...props} /> : null}
         </TabPane>
         <TabPane tab="评论" key="2">
           <IssueCommit {...props} />
+        </TabPane>
+        <TabPane tab="拆分的Story" key="5">
+          {/* <IssueCommit {...props} /> */}
         </TabPane>
         <TabPane tab="记录" key="3">
           {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
