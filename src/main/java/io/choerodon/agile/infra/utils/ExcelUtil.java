@@ -21,9 +21,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author dinghuang123@gmail.com
@@ -42,6 +40,41 @@ public class ExcelUtil {
         public String getValue() {
             return this.value;
         }
+    }
+
+    public static class GuideSheet {
+
+        private int rowNum;
+
+        private String fieldName;
+
+        private String requestStr;
+
+        private Boolean hasStyle;
+
+        public GuideSheet(int rowNum, String fieldName, String requestStr, Boolean hasStyle) {
+            this.rowNum = rowNum;
+            this.fieldName = fieldName;
+            this.requestStr = requestStr;
+            this.hasStyle = hasStyle;
+        }
+
+        public int rowNum() {
+            return this.rowNum;
+        }
+
+        public String fieldName() {
+            return this.fieldName;
+        }
+
+        public String requestStr() {
+            return this.requestStr;
+        }
+
+        public Boolean hasStyle() {
+            return this.hasStyle;
+        }
+
     }
 
     private ExcelUtil() {
@@ -79,20 +112,32 @@ public class ExcelUtil {
         cell.setCellStyle(ztStyle);
     }
 
-    public static void createGuideSheet(Workbook wb) {
+    public static List<GuideSheet> initGuideSheet() {
+        GuideSheet[] guideSheets = {
+                new GuideSheet(0, "概要", "必输项，限制44个字符", true),
+                new GuideSheet(1, "描述", "非必输", false),
+                new GuideSheet(2, "优先级", "必输项", true),
+                new GuideSheet(3, "问题类型", "必输项", true),
+                new GuideSheet(4, "故事点", "非必输，仅支持3位整数或者0.5", false),
+                new GuideSheet(5, "剩余时间", "非必输，仅支持3位整数或者0.5", false),
+                new GuideSheet(6, "修复版本", "非必输", false),
+                new GuideSheet(7, "史诗名称", "如果问题类型选择史诗，此项必填, 限制10个字符", true),
+                new GuideSheet(8, "模块", "非必输", false),
+                new GuideSheet(9, "冲刺", "非必输", false),
+        };
+        return Arrays.asList(guideSheets);
+    }
+
+    public static void createGuideSheet(Workbook wb, List<GuideSheet> guideSheets) {
         Sheet sheet = wb.createSheet("要求");
         sheet.setColumnWidth(0, 5000);
         sheet.setColumnWidth(1, 15000);
-        initGuideSheetByRow(wb, sheet, 0, "概要", "必输项，限制44个字符", true);
-        initGuideSheetByRow(wb, sheet, 1, "描述", "非必输", false);
-        initGuideSheetByRow(wb, sheet, 2, "优先级", "必输项", true);
-        initGuideSheetByRow(wb, sheet, 3, "问题类型", "必输项", true);
-        initGuideSheetByRow(wb, sheet, 4, "故事点", "非必输，仅支持3位整数或者0.5", false);
-        initGuideSheetByRow(wb, sheet, 5, "剩余时间", "非必输，仅支持3位整数或者0.5", false);
-        initGuideSheetByRow(wb, sheet, 6, "修复版本", "非必输", false);
-        initGuideSheetByRow(wb, sheet, 7, "史诗名称", "如果问题类型选择史诗，此项必填, 限制10个字符", true);
-        initGuideSheetByRow(wb, sheet, 8, "模块", "非必输", false);
-        initGuideSheetByRow(wb, sheet, 9, "冲刺", "非必输", false);
+
+        for (GuideSheet guideSheet : guideSheets) {
+            initGuideSheetByRow(wb, sheet, guideSheet.rowNum(),
+                    guideSheet.fieldName(), guideSheet.requestStr(), guideSheet.hasStyle());
+        }
+
         sheet.setColumnWidth(2, 3000);
         initGuideSheetRemind(wb, sheet, "请至下一页，填写信息");
     }
@@ -100,7 +145,7 @@ public class ExcelUtil {
     public static Workbook generateExcelAwesome(Workbook generateExcel, List<Integer> errorRows, Map<Integer, List<Integer>> errorMapList, String[] FIELDS_NAME, List<String> priorityList, List<String> issueTypeList, List<String> versionList, String sheetName, List<String> componentList, List<String> sprintList) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         // create guide sheet
-        createGuideSheet(workbook);
+        createGuideSheet(workbook, initGuideSheet());
         Sheet resultSheet = workbook.createSheet(sheetName);
         for (int i = 0; i < 10; i++) {
             resultSheet.setColumnWidth(i, 3500);

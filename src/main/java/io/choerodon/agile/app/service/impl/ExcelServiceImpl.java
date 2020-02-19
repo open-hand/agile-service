@@ -39,33 +39,33 @@ import java.util.*;
 @Service
 public class ExcelServiceImpl implements ExcelService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExcelServiceImpl.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(ExcelServiceImpl.class);
 
-    private static final String[] FIELDS_NAME = {"概要", "描述", "优先级", "问题类型", "故事点", "剩余时间", "修复版本", "史诗名称", "模块", "冲刺"};
-    private static final String[] FIELDS = {"summary", "description", "priorityName", "typeName", "storyPoints", "remainTime", "version", "epicName", "component", "sprint"};
-    private static final String BACKETNAME = "agile-service";
-    private static final String SUB_TASK = "sub_task";
-    private static final String UPLOAD_FILE = "upload_file";
-    private static final String APPLY_TYPE_AGILE = "agile";
-    private static final String CANCELED = "canceled";
-    private static final String DOING = "doing";
-    private static final String SUCCESS = "success";
-    private static final String FAILED = "failed";
-    private static final String WEBSOCKET_IMPORT_CODE = "agile-import-issues";
-    private static final String STORY = "story";
-    private static final String ISSUE_EPIC = "issue_epic";
-    private static final String FEATURE = "feature";
-    private static final String FILE_NAME = "error.xlsx";
-    private static final String MULTIPART_NAME = "file";
-    private static final String ORIGINAL_FILE_NAME = ".xlsx";
-    private static final String VERSION_PLANNING = "version_planning";
-    private static final String HIDDEN_PRIORITY = "hidden_priority";
-    private static final String HIDDEN_ISSUE_TYPE = "hidden_issue_type";
-    private static final String HIDDEN_FIX_VERSION = "hidden_fix_version";
-    private static final String HIDDEN_COMPONENT = "hidden_component";
-    private static final String HIDDEN_SPRINT = "hidden_sprint";
-    private static final String RELATION_TYPE_FIX = "fix";
-    private static final String IMPORT_TEMPLATE_NAME = "导入模板";
+    protected static final String[] FIELDS_NAME = {"概要", "描述", "优先级", "问题类型", "故事点", "剩余时间", "修复版本", "史诗名称", "模块", "冲刺"};
+    protected static final String[] FIELDS = {"summary", "description", "priorityName", "typeName", "storyPoints", "remainTime", "version", "epicName", "component", "sprint"};
+    protected static final String BACKETNAME = "agile-service";
+    protected static final String SUB_TASK = "sub_task";
+    protected static final String UPLOAD_FILE = "upload_file";
+    protected static final String APPLY_TYPE_AGILE = "agile";
+    protected static final String CANCELED = "canceled";
+    protected static final String DOING = "doing";
+    protected static final String SUCCESS = "success";
+    protected static final String FAILED = "failed";
+    protected static final String WEBSOCKET_IMPORT_CODE = "agile-import-issues";
+    protected static final String STORY = "story";
+    protected static final String ISSUE_EPIC = "issue_epic";
+    protected static final String FEATURE = "feature";
+    protected static final String FILE_NAME = "error.xlsx";
+    protected static final String MULTIPART_NAME = "file";
+    protected static final String ORIGINAL_FILE_NAME = ".xlsx";
+    protected static final String VERSION_PLANNING = "version_planning";
+    protected static final String HIDDEN_PRIORITY = "hidden_priority";
+    protected static final String HIDDEN_ISSUE_TYPE = "hidden_issue_type";
+    protected static final String HIDDEN_FIX_VERSION = "hidden_fix_version";
+    protected static final String HIDDEN_COMPONENT = "hidden_component";
+    protected static final String HIDDEN_SPRINT = "hidden_sprint";
+    protected static final String RELATION_TYPE_FIX = "fix";
+    protected static final String IMPORT_TEMPLATE_NAME = "导入模板";
 
     @Autowired
     private StateMachineClientService stateMachineClientService;
@@ -107,6 +107,46 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Override
     public void download(Long projectId, Long organizationId, HttpServletRequest request, HttpServletResponse response) {
+        List<Predefined> predefinedList = getPredefinedList(organizationId, projectId);
+
+        Workbook wb = new XSSFWorkbook();
+        // create guide sheet
+        ExcelUtil.createGuideSheet(wb, ExcelUtil.initGuideSheet());
+        Sheet sheet = wb.createSheet(IMPORT_TEMPLATE_NAME);
+        Row row = sheet.createRow(0);
+        CellStyle style = CatalogExcelUtil.getHeadStyle(wb);
+        for (int i = 0; i < 10; i++) {
+            sheet.setColumnWidth(i, 3500);
+        }
+        generateHeaders(row, style, Arrays.asList(FIELDS_NAME));
+
+        try {
+            //填充预定义值
+            fillInPredefinedValues(wb, sheet, predefinedList);
+            wb.write(response.getOutputStream());
+        } catch (Exception e) {
+            LOGGER.info(e.getMessage());
+        }
+    }
+
+    protected void fillInPredefinedValues(Workbook wb, Sheet sheet, List<Predefined> predefinedList) {
+        for (Predefined predefined : predefinedList) {
+            wb = ExcelUtil
+                    .dropDownList2007(
+                            wb,
+                            sheet,
+                            predefined.values,
+                            predefined.startRow(),
+                            predefined.endRow(),
+                            predefined.startCol(),
+                            predefined.endCol(),
+                            predefined.hidden(),
+                            predefined.hiddenSheetIndex());
+        }
+    }
+
+    protected List<Predefined> getPredefinedList(Long organizationId, Long projectId) {
+        List<Predefined> predefinedList = new ArrayList<>();
         List<PriorityVO> priorityVOList = priorityService.queryByOrganizationIdList(organizationId);
         List<IssueTypeVO> issueTypeVOList = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE);
         List<ProductVersionCommonDTO> productVersionCommonDTOList = productVersionMapper.listByProjectId(projectId);
@@ -118,56 +158,42 @@ public class ExcelServiceImpl implements ExcelService {
                 priorityList.add(priorityVO.getName());
             }
         }
+        predefinedList.add(new Predefined(priorityList, 1, 500, 2, 2, HIDDEN_PRIORITY, 2));
+
         List<String> issueTypeList = new ArrayList<>();
         for (IssueTypeVO issueTypeVO : issueTypeVOList) {
             if (!SUB_TASK.equals(issueTypeVO.getTypeCode()) && !FEATURE.equals(issueTypeVO.getTypeCode())) {
                 issueTypeList.add(issueTypeVO.getName());
             }
         }
+        predefinedList.add(new Predefined(issueTypeList, 1, 500, 3, 3, HIDDEN_ISSUE_TYPE, 3));
+
         List<String> versionList = new ArrayList<>();
         for (ProductVersionCommonDTO productVersionCommonDTO : productVersionCommonDTOList) {
             if (VERSION_PLANNING.equals(productVersionCommonDTO.getStatusCode())) {
                 versionList.add(productVersionCommonDTO.getName());
             }
         }
+        predefinedList.add(new Predefined(versionList, 1, 500, 6, 6, HIDDEN_FIX_VERSION, 4));
+
         List<String> componentList = new ArrayList<>();
         for (IssueComponentDTO issueComponentDTO : issueComponentDTOList) {
             componentList.add(issueComponentDTO.getName());
         }
+        predefinedList.add(new Predefined(componentList, 1, 500, 8, 8, HIDDEN_COMPONENT, 5));
+
         List<String> sprintList = new ArrayList<>();
         for (SprintDTO sprintDTO : sprintDTOList) {
             sprintList.add(sprintDTO.getSprintName());
         }
-        Workbook wb = new XSSFWorkbook();
-        // create guide sheet
-        ExcelUtil.createGuideSheet(wb);
-        Sheet sheet = wb.createSheet(IMPORT_TEMPLATE_NAME);
-        Row row = sheet.createRow(0);
-        CellStyle style = CatalogExcelUtil.getHeadStyle(wb);
-        for (int i = 0; i < 10; i++) {
-            sheet.setColumnWidth(i, 3500);
-        }
+        predefinedList.add(new Predefined(sprintList, 1, 500, 9, 9, HIDDEN_SPRINT, 6));
 
-        CatalogExcelUtil.initCell(row.createCell(0), style, FIELDS_NAME[0]);
-        CatalogExcelUtil.initCell(row.createCell(1), style, FIELDS_NAME[1]);
-        CatalogExcelUtil.initCell(row.createCell(2), style, FIELDS_NAME[2]);
-        CatalogExcelUtil.initCell(row.createCell(3), style, FIELDS_NAME[3]);
-        CatalogExcelUtil.initCell(row.createCell(4), style, FIELDS_NAME[4]);
-        CatalogExcelUtil.initCell(row.createCell(5), style, FIELDS_NAME[5]);
-        CatalogExcelUtil.initCell(row.createCell(6), style, FIELDS_NAME[6]);
-        CatalogExcelUtil.initCell(row.createCell(7), style, FIELDS_NAME[7]);
-        CatalogExcelUtil.initCell(row.createCell(8), style, FIELDS_NAME[8]);
-        CatalogExcelUtil.initCell(row.createCell(9), style, FIELDS_NAME[9]);
+        return predefinedList;
+    }
 
-        try {
-            wb = ExcelUtil.dropDownList2007(wb, sheet, priorityList, 1, 500, 2, 2, HIDDEN_PRIORITY, 2);
-            wb = ExcelUtil.dropDownList2007(wb, sheet, issueTypeList, 1, 500, 3, 3, HIDDEN_ISSUE_TYPE, 3);
-            wb = ExcelUtil.dropDownList2007(wb, sheet, versionList, 1, 500, 6, 6, HIDDEN_FIX_VERSION, 4);
-            wb = ExcelUtil.dropDownList2007(wb, sheet, componentList, 1, 500, 8, 8, HIDDEN_COMPONENT, 5);
-            wb = ExcelUtil.dropDownList2007(wb, sheet, sprintList, 1, 500, 9, 9, HIDDEN_SPRINT, 6);
-            wb.write(response.getOutputStream());
-        } catch (Exception e) {
-            LOGGER.info(e.getMessage());
+    protected void generateHeaders(Row row, CellStyle style, List<String> headers) {
+        for (int i = 0; i < headers.size(); i++) {
+            CatalogExcelUtil.initCell(row.createCell(i), style, headers.get(i));
         }
     }
 
@@ -594,6 +620,67 @@ public class ExcelServiceImpl implements ExcelService {
         Long userId = DetailsHelper.getUserDetails().getUserId();
         FileOperationHistoryDTO result = fileOperationHistoryMapper.queryLatestRecode(projectId, userId);
         return result == null ? new FileOperationHistoryVO() : modelMapper.map(result, FileOperationHistoryVO.class);
+    }
+
+    /**
+     * excel模版中预定义值
+     */
+    protected class Predefined {
+
+        private List<String> values;
+
+        private int startRow;
+
+        private int endRow;
+
+        private int startCol;
+
+        private int endCol;
+
+        private String hidden;
+
+        private int hiddenSheetIndex;
+
+        public Predefined(List<String> values, int startRow, int endRow,
+                          int startCol, int endCol, String hidden, int hiddenSheetIndex) {
+            this.values = values;
+            this.startRow = startRow;
+            this.endRow = endRow;
+            this.startCol = startCol;
+            this.endCol = endCol;
+            this.hidden = hidden;
+            this.hiddenSheetIndex = hiddenSheetIndex;
+        }
+
+        public List<String> values() {
+            return this.values;
+        }
+
+        public int startRow() {
+            return this.startRow;
+        }
+
+        public int endRow() {
+            return this.endRow;
+        }
+
+        public int startCol() {
+            return this.startCol;
+        }
+
+        public int endCol() {
+            return this.endCol;
+        }
+
+        public String hidden() {
+            return this.hidden;
+        }
+
+        public int hiddenSheetIndex() {
+            return this.hiddenSheetIndex;
+        }
+
+
     }
 
 
