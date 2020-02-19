@@ -1,5 +1,7 @@
 const path = require('path');
 const gulp = require('gulp');
+var watch = require('gulp-watch');
+const { exec } = require('child_process')
 const rimraf = require('rimraf');
 const babel = require('gulp-babel');
 const through2 = require('through2');
@@ -93,3 +95,24 @@ function compile() {
 gulp.task('compile', () => {
   compile();
 });
+function updateFile() {
+  let timer;
+  return function () {
+    if (timer) {
+      clearTimeout(timer)
+    }
+    timer = setTimeout(() => {
+      console.log('content update')
+      exec('yalc publish --push')
+    }, 1500);
+  }
+}
+const updateFileTask = updateFile()
+gulp.task('watch', () => {
+  const source = [
+    'react/**/*.js',
+    'react/**/*.jsx',
+  ];
+  babelify(gulp.src(source).pipe(watch(source))).on('data', updateFileTask);
+  gulp.src(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)']).pipe(watch(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)'])).pipe(gulp.dest(libDir)).on('data', updateFileTask)
+})
