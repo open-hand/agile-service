@@ -6,6 +6,7 @@ import {
 } from 'choerodon-ui';
 import moment from 'moment';
 import reactComponentDebounce from '@/components/DebounceComponent';
+import { checkFeatureName } from '@/api/FeatureApi';
 import { UploadButton } from '../CommonComponent';
 import {
   handleFileUpload, beforeTextUpload, validateFile, normFile, getProjectName, getProjectId,
@@ -187,7 +188,7 @@ class CreateIssue extends Component {
         const link = linkTypes[`${key}]`];
         const issues = linkIssues[`${key}]`];
         const [linkTypeId, isIn] = link.split('+');
-        
+
         if (issues) {
           issues.forEach((issueId) => {
             issueLinkCreateVOList.push({
@@ -196,9 +197,9 @@ class CreateIssue extends Component {
               in: isIn === 'true',
             });
           });
-        }  
+        }
       });
-    }   
+    }
     return issueLinkCreateVOList;
   }
 
@@ -209,7 +210,7 @@ class CreateIssue extends Component {
       originLabels,
       originIssueTypes,
     } = this.state;
-    form.validateFieldsAndScroll((err, values) => {
+    form.validateFieldsAndScroll(async (err, values) => {
       if (!err) {
         const {
           typeId,
@@ -233,9 +234,14 @@ class CreateIssue extends Component {
           linkIssues,
           keys,
           fileList,
-        } = values;   
-
+        } = values;
         const { typeCode } = originIssueTypes.find(t => t.id === typeId);
+        if (typeCode === 'feature' && epicId) {
+          const hasSame = await checkFeatureName(summary, epicId);
+          if (hasSame) {
+            return;
+          }
+        }
         const exitComponents = originComponents;
         const componentIssueRelVOList = map(componentIssueRel
           && componentIssueRel.filter(v => v && v.trim()), (component) => {
