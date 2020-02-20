@@ -10,10 +10,7 @@ import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.ModelMapper;
@@ -68,7 +65,7 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String IMPORT_TEMPLATE_NAME = "导入模板";
 
     @Autowired
-    private StateMachineClientService stateMachineClientService;
+    protected StateMachineClientService stateMachineClientService;
 
     @Autowired
     private NotifyFeignClient notifyFeignClient;
@@ -80,7 +77,7 @@ public class ExcelServiceImpl implements ExcelService {
     private FileFeignClient fileFeignClient;
 
     @Autowired
-    private ProductVersionMapper productVersionMapper;
+    protected ProductVersionMapper productVersionMapper;
 
     @Autowired
     private IssueService issueService;
@@ -89,10 +86,10 @@ public class ExcelServiceImpl implements ExcelService {
     private IssueMapper issueMapper;
 
     @Autowired
-    private IssueComponentMapper issueComponentMapper;
+    protected IssueComponentMapper issueComponentMapper;
 
     @Autowired
-    private SprintMapper sprintMapper;
+    protected SprintMapper sprintMapper;
     @Autowired
     private ProjectConfigService projectConfigService;
     @Autowired
@@ -197,7 +194,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private Boolean setIssueCreateInfo(IssueCreateVO issueCreateVO, Long projectId, Row row, Map<String, IssueTypeVO> issueTypeMap, Map<String, Long> priorityMap, Map<String, Long> versionMap, Long userId, Map<String, Long> componentMap, Map<String, Long> sprintMap) {
+    protected Boolean setIssueCreateInfo(IssueCreateVO issueCreateVO, Long projectId, Row row, Map<String, IssueTypeVO> issueTypeMap, Map<String, Long> priorityMap, Map<String, Long> versionMap, Long userId, Map<String, Long> componentMap, Map<String, Long> sprintMap) {
         String summary = row.getCell(0).toString();
         if (summary == null) {
             throw new CommonException("error.summary.null");
@@ -282,7 +279,7 @@ public class ExcelServiceImpl implements ExcelService {
         return true;
     }
 
-    private void updateFinalRecode(FileOperationHistoryDTO fileOperationHistoryDTO, Long successcount, Long failCount, String status) {
+    protected void updateFinalRecode(FileOperationHistoryDTO fileOperationHistoryDTO, Long successcount, Long failCount, String status) {
         FileOperationHistoryDTO update = new FileOperationHistoryDTO();
         update.setId(fileOperationHistoryDTO.getId());
         update.setSuccessCount(successcount);
@@ -297,7 +294,7 @@ public class ExcelServiceImpl implements ExcelService {
         sendProcess(result, result.getUserId(), 1.0);
     }
 
-    private void setIssueTypeAndPriorityMap(Long organizationId, Long projectId, Map<String, IssueTypeVO> issueTypeMap, Map<String, Long> priorityMap, List<String> issueTypeList, List<String> priorityList) {
+    protected void setIssueTypeAndPriorityMap(Long organizationId, Long projectId, Map<String, IssueTypeVO> issueTypeMap, Map<String, Long> priorityMap, List<String> issueTypeList, List<String> priorityList) {
         List<PriorityVO> priorityVOList = priorityService.queryByOrganizationIdList(organizationId);
         List<IssueTypeVO> issueTypeVOList = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE);
         for (PriorityVO priorityVO : priorityVOList) {
@@ -314,12 +311,12 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process) {
+    protected void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process) {
         fileOperationHistoryDTO.setProcess(process);
         notifyFeignClient.postWebSocket(WEBSOCKET_IMPORT_CODE, userId.toString(), JSON.toJSONString(fileOperationHistoryDTO));
     }
 
-    private String uploadErrorExcel(Workbook errorWorkbook) {
+    protected String uploadErrorExcel(Workbook errorWorkbook) {
         // 上传错误的excel
         ResponseEntity<String> response = fileFeignClient.uploadFile(BACKETNAME, FILE_NAME, new MultipartExcelUtil(MULTIPART_NAME, ORIGINAL_FILE_NAME, errorWorkbook));
         if (response == null || response.getStatusCode() != HttpStatus.OK) {
@@ -336,7 +333,7 @@ public class ExcelServiceImpl implements ExcelService {
         return issueDTOList == null || issueDTOList.isEmpty();
     }
 
-    private Map<Integer, String> checkRule(Long projectId, Row row, List<String> issueTypeList, List<String> priorityList, List<String> versionList, Map<String, IssueTypeVO> issueTypeMap, List<String> componentList, List<String> sprintList) {
+    protected Map<Integer, String> checkRule(Long projectId, Row row, List<String> issueTypeList, List<String> priorityList, List<String> versionList, Map<String, IssueTypeVO> issueTypeMap, List<String> componentList, List<String> sprintList) {
         Map<Integer, String> errorMessage = new HashMap<>();
         // check summary
         if (row.getCell(0) == null || row.getCell(0).toString().equals("") || row.getCell(0).getCellType() == XSSFCell.CELL_TYPE_BLANK) {
@@ -430,7 +427,7 @@ public class ExcelServiceImpl implements ExcelService {
         return errorMessage;
     }
 
-    private Boolean checkCanceled(Long projectId, Long fileOperationHistoryId, List<Long> importedIssueIds) {
+    protected Boolean checkCanceled(Long projectId, Long fileOperationHistoryId, List<Long> importedIssueIds) {
         FileOperationHistoryDTO checkCanceledDO = fileOperationHistoryMapper.selectByPrimaryKey(fileOperationHistoryId);
         if (UPLOAD_FILE.equals(checkCanceledDO.getAction()) && CANCELED.equals(checkCanceledDO.getStatus())) {
             if (!importedIssueIds.isEmpty()) {
@@ -442,20 +439,17 @@ public class ExcelServiceImpl implements ExcelService {
         return false;
     }
 
-    private Integer getRealRowCount(Sheet sheet) {
+    /**
+     * @param sheet
+     * @param columnNum 数据页总共有多少列数据
+     * @return
+     */
+    protected Integer getRealRowCount(Sheet sheet, int columnNum) {
         Integer count = 0;
         for (int r = 1; r <= sheet.getPhysicalNumberOfRows(); r++) {
             Row row = sheet.getRow(r);
-            if (row == null || (((row.getCell(0) == null || row.getCell(0).toString().equals("") || row.getCell(0).getCellType() == XSSFCell.CELL_TYPE_BLANK)) &&
-                    (row.getCell(1) == null || row.getCell(1).toString().equals("") || row.getCell(1).getCellType() == XSSFCell.CELL_TYPE_BLANK) &&
-                    (row.getCell(2) == null || row.getCell(2).toString().equals("") || row.getCell(2).getCellType() == XSSFCell.CELL_TYPE_BLANK) &&
-                    (row.getCell(3) == null || row.getCell(3).toString().equals("") || row.getCell(3).getCellType() == XSSFCell.CELL_TYPE_BLANK) &&
-                    (row.getCell(4) == null || row.getCell(4).toString().equals("") || row.getCell(4).getCellType() == XSSFCell.CELL_TYPE_BLANK) &&
-                    (row.getCell(5) == null || row.getCell(5).toString().equals("") || row.getCell(5).getCellType() == XSSFCell.CELL_TYPE_BLANK) &&
-                    (row.getCell(6) == null || row.getCell(6).toString().equals("") || row.getCell(6).getCellType() == XSSFCell.CELL_TYPE_BLANK) &&
-                    (row.getCell(7) == null || row.getCell(7).toString().equals("") || row.getCell(7).getCellType() == XSSFCell.CELL_TYPE_BLANK) &&
-                    (row.getCell(8) == null || row.getCell(8).toString().equals("") || row.getCell(8).getCellType() == XSSFCell.CELL_TYPE_BLANK) &&
-                    (row.getCell(9) == null || row.getCell(9).toString().equals("") || row.getCell(9).getCellType() == XSSFCell.CELL_TYPE_BLANK))) {
+            //row为空跳过
+            if (isSkip(row, columnNum)) {
                 continue;
             }
             count++;
@@ -463,30 +457,35 @@ public class ExcelServiceImpl implements ExcelService {
         return count;
     }
 
+    protected boolean isSkip(Row row, int columnNum) {
+        if (row == null) {
+            return true;
+        }
+        for (int i = 0; i < columnNum; i++) {
+            Cell cell = row.getCell(i);
+            //有一列为空则跳过
+            if (isCellEmpty(cell)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected boolean isCellEmpty(Cell cell) {
+        return cell == null || cell.toString().equals("") || cell.getCellType() == XSSFCell.CELL_TYPE_BLANK;
+    }
+
     @Async
     @Override
     public void batchImport(Long projectId, Long organizationId, Long userId, Workbook workbook) {
         String status = DOING;
-        FileOperationHistoryDTO fileOperationHistoryDTO = new FileOperationHistoryDTO(projectId, userId, UPLOAD_FILE, 0L, 0L, status);
-        if (fileOperationHistoryMapper.insert(fileOperationHistoryDTO) != 1) {
-            throw new CommonException("error.FileOperationHistoryDTO.insert");
-        }
-        FileOperationHistoryDTO res = fileOperationHistoryMapper.selectByPrimaryKey(fileOperationHistoryDTO.getId());
-        sendProcess(res, userId, 0.0);
-        if (workbook.getActiveSheetIndex() < 1
-                || workbook.getSheetAt(1) == null
-                || workbook.getSheetAt(1).getSheetName() == null
-                || !IMPORT_TEMPLATE_NAME.equals(workbook.getSheetAt(1).getSheetName())) {
-            if (fileOperationHistoryMapper.updateByPrimaryKeySelective(new FileOperationHistoryDTO(projectId, res.getId(), UPLOAD_FILE, "template_error", res.getObjectVersionNumber())) != 1) {
-                throw new CommonException("error.FileOperationHistoryDTO.update");
-            }
-            FileOperationHistoryDTO errorImport = fileOperationHistoryMapper.selectByPrimaryKey(res.getId());
-            sendProcess(errorImport, userId, 0.0);
-            throw new CommonException("error.sheet.import");
-        }
+        FileOperationHistoryDTO res = initFileOperationHistory(projectId, userId, status);
+        validateWorkbook(projectId, userId, workbook, res);
+
         Sheet sheet = workbook.getSheetAt(1);
         // 获取所有非空行
-        Integer allRowCount = getRealRowCount(sheet);
+        int columnNum = 10;
+        Integer allRowCount = getRealRowCount(sheet, columnNum);
         // 查询组织下的优先级与问题类型
         Map<String, IssueTypeVO> issueTypeMap = new HashMap<>();
         Map<String, Long> priorityMap = new HashMap<>();
@@ -494,7 +493,7 @@ public class ExcelServiceImpl implements ExcelService {
         List<String> priorityList = new ArrayList<>();
         setIssueTypeAndPriorityMap(organizationId, projectId, issueTypeMap, priorityMap, issueTypeList, priorityList);
         Long failCount = 0L;
-        Long successcount = 0L;
+        Long successCount = 0L;
         Integer processNum = 0;
         List<Integer> errorRows = new ArrayList<>();
         Map<Integer, List<Integer>> errorMapList = new HashMap<>();
@@ -522,21 +521,14 @@ public class ExcelServiceImpl implements ExcelService {
             sprintMap.put(sprintDTO.getSprintName(), sprintDTO.getSprintId());
         }
         List<Long> importedIssueIds = new ArrayList<>();
+
+
         for (int r = 1; r <= allRowCount; r++) {
             if (checkCanceled(projectId, res.getId(), importedIssueIds)) {
                 return;
             }
             Row row = sheet.getRow(r);
-            if (row == null || (((row.getCell(0) == null || row.getCell(0).toString().equals("") || row.getCell(0).getCellType() == XSSFCell.CELL_TYPE_BLANK)) &&
-                    (row.getCell(1) == null || row.getCell(1).toString().equals("") || row.getCell(1).getCellType() == XSSFCell.CELL_TYPE_BLANK) &&
-                    (row.getCell(2) == null || row.getCell(2).toString().equals("") || row.getCell(2).getCellType() == XSSFCell.CELL_TYPE_BLANK) &&
-                    (row.getCell(3) == null || row.getCell(3).toString().equals("") || row.getCell(3).getCellType() == XSSFCell.CELL_TYPE_BLANK) &&
-                    (row.getCell(4) == null || row.getCell(4).toString().equals("") || row.getCell(4).getCellType() == XSSFCell.CELL_TYPE_BLANK) &&
-                    (row.getCell(5) == null || row.getCell(5).toString().equals("") || row.getCell(5).getCellType() == XSSFCell.CELL_TYPE_BLANK) &&
-                    (row.getCell(6) == null || row.getCell(6).toString().equals("") || row.getCell(6).getCellType() == XSSFCell.CELL_TYPE_BLANK) &&
-                    (row.getCell(7) == null || row.getCell(7).toString().equals("") || row.getCell(7).getCellType() == XSSFCell.CELL_TYPE_BLANK) &&
-                    (row.getCell(8) == null || row.getCell(8).toString().equals("") || row.getCell(8).getCellType() == XSSFCell.CELL_TYPE_BLANK) &&
-                    (row.getCell(9) == null || row.getCell(9).toString().equals("") || row.getCell(9).getCellType() == XSSFCell.CELL_TYPE_BLANK))) {
+            if (isSkip(row, columnNum)) {
                 continue;
             }
             for (int w = 0; w < FIELDS.length; w++) {
@@ -544,35 +536,16 @@ public class ExcelServiceImpl implements ExcelService {
                     row.getCell(w).setCellType(XSSFCell.CELL_TYPE_STRING);
                 }
             }
-            Map errorMap = checkRule(projectId, row, issueTypeList, priorityList, versionList, issueTypeMap, componentList, sprintList);
+            Map<Integer, String> errorMap = checkRule(projectId, row, issueTypeList, priorityList, versionList, issueTypeMap, componentList, sprintList);
             if (!errorMap.isEmpty()) {
                 failCount++;
-                Iterator<Map.Entry<Integer, String>> entries = errorMap.entrySet().iterator();
-                while (entries.hasNext()) {
-                    Map.Entry<Integer, String> entry = entries.next();
-                    Integer key = entry.getKey();
-                    String value = entry.getValue();
-                    if (row.getCell(key) == null) {
-                        row.createCell(key).setCellValue("(" + value + ")");
-                    } else {
-                        row.getCell(key).setCellValue(row.getCell(key).toString() + " (" + value + ")");
-                    }
-
-                    List<Integer> cList = errorMapList.get(r);
-                    if (cList == null) {
-                        cList = new ArrayList<>();
-                    }
-                    cList.add(key);
-                    errorMapList.put(r, cList);
-                }
-                errorRows.add(row.getRowNum());
+                processErrorMap(errorMapList, r, row, errorMap, errorRows);
                 res.setFailCount(failCount);
                 processNum++;
                 sendProcess(res, userId, processNum * 1.0 / allRowCount);
                 continue;
             }
             IssueCreateVO issueCreateVO = new IssueCreateVO();
-
             Boolean ok = setIssueCreateInfo(issueCreateVO, projectId, row, issueTypeMap, priorityMap, versionMap, userId, componentMap, sprintMap);
             IssueVO result = null;
             if (ok) {
@@ -583,11 +556,11 @@ public class ExcelServiceImpl implements ExcelService {
                 errorRows.add(row.getRowNum());
             } else {
                 importedIssueIds.add(result.getIssueId());
-                successcount++;
+                successCount++;
             }
             processNum++;
             res.setFailCount(failCount);
-            res.setSuccessCount(successcount);
+            res.setSuccessCount(successCount);
             sendProcess(res, userId, processNum * 1.0 / allRowCount);
         }
         if (!errorRows.isEmpty()) {
@@ -599,7 +572,55 @@ public class ExcelServiceImpl implements ExcelService {
         } else {
             status = SUCCESS;
         }
-        updateFinalRecode(res, successcount, failCount, status);
+        updateFinalRecode(res, successCount, failCount, status);
+    }
+
+    protected void processErrorMap(Map<Integer, List<Integer>> errorMapList,
+                                   int r, Row row, Map<Integer, String> errorMap,
+                                   List<Integer> errorRows) {
+        Iterator<Map.Entry<Integer, String>> entries = errorMap.entrySet().iterator();
+        while (entries.hasNext()) {
+            Map.Entry<Integer, String> entry = entries.next();
+            Integer key = entry.getKey();
+            String value = entry.getValue();
+            if (row.getCell(key) == null) {
+                row.createCell(key).setCellValue("(" + value + ")");
+            } else {
+                row.getCell(key).setCellValue(row.getCell(key).toString() + " (" + value + ")");
+            }
+
+            List<Integer> cList = errorMapList.get(r);
+            if (cList == null) {
+                cList = new ArrayList<>();
+            }
+            cList.add(key);
+            errorMapList.put(r, cList);
+        }
+        errorRows.add(row.getRowNum());
+    }
+
+    protected void validateWorkbook(Long projectId, Long userId, Workbook workbook, FileOperationHistoryDTO res) {
+        if (workbook.getActiveSheetIndex() < 1
+                || workbook.getSheetAt(1) == null
+                || workbook.getSheetAt(1).getSheetName() == null
+                || !IMPORT_TEMPLATE_NAME.equals(workbook.getSheetAt(1).getSheetName())) {
+            if (fileOperationHistoryMapper.updateByPrimaryKeySelective(new FileOperationHistoryDTO(projectId, res.getId(), UPLOAD_FILE, "template_error", res.getObjectVersionNumber())) != 1) {
+                throw new CommonException("error.FileOperationHistoryDTO.update");
+            }
+            FileOperationHistoryDTO errorImport = fileOperationHistoryMapper.selectByPrimaryKey(res.getId());
+            sendProcess(errorImport, userId, 0.0);
+            throw new CommonException("error.sheet.import");
+        }
+    }
+
+    protected FileOperationHistoryDTO initFileOperationHistory(Long projectId, Long userId, String status) {
+        FileOperationHistoryDTO fileOperationHistoryDTO = new FileOperationHistoryDTO(projectId, userId, UPLOAD_FILE, 0L, 0L, status);
+        if (fileOperationHistoryMapper.insert(fileOperationHistoryDTO) != 1) {
+            throw new CommonException("error.FileOperationHistoryDTO.insert");
+        }
+        FileOperationHistoryDTO res = fileOperationHistoryMapper.selectByPrimaryKey(fileOperationHistoryDTO.getId());
+        sendProcess(res, userId, 0.0);
+        return res;
     }
 
 

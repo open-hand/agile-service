@@ -142,7 +142,7 @@ public class ExcelUtil {
         initGuideSheetRemind(wb, sheet, "请至下一页，填写信息");
     }
 
-    public static Workbook generateExcelAwesome(Workbook generateExcel, List<Integer> errorRows, Map<Integer, List<Integer>> errorMapList, String[] FIELDS_NAME, List<String> priorityList, List<String> issueTypeList, List<String> versionList, String sheetName, List<String> componentList, List<String> sprintList) {
+    public static Workbook generateExcelAwesome(Workbook generateExcel, List<Integer> errorRows, Map<Integer, List<Integer>> errorMapList, String[] fieldsName, List<String> priorityList, List<String> issueTypeList, List<String> versionList, String sheetName, List<String> componentList, List<String> sprintList) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         // create guide sheet
         createGuideSheet(workbook, initGuideSheet());
@@ -152,16 +152,16 @@ public class ExcelUtil {
         }
         Row titleRow = resultSheet.createRow(0);
         CellStyle style = CatalogExcelUtil.getHeadStyle(workbook);
-        CatalogExcelUtil.initCell(titleRow.createCell(0), style, FIELDS_NAME[0]);
-        CatalogExcelUtil.initCell(titleRow.createCell(1), style, FIELDS_NAME[1]);
-        CatalogExcelUtil.initCell(titleRow.createCell(2), style, FIELDS_NAME[2]);
-        CatalogExcelUtil.initCell(titleRow.createCell(3), style, FIELDS_NAME[3]);
-        CatalogExcelUtil.initCell(titleRow.createCell(4), style, FIELDS_NAME[4]);
-        CatalogExcelUtil.initCell(titleRow.createCell(5), style, FIELDS_NAME[5]);
-        CatalogExcelUtil.initCell(titleRow.createCell(6), style, FIELDS_NAME[6]);
-        CatalogExcelUtil.initCell(titleRow.createCell(7), style, FIELDS_NAME[7]);
-        CatalogExcelUtil.initCell(titleRow.createCell(8), style, FIELDS_NAME[8]);
-        CatalogExcelUtil.initCell(titleRow.createCell(9), style, FIELDS_NAME[9]);
+        CatalogExcelUtil.initCell(titleRow.createCell(0), style, fieldsName[0]);
+        CatalogExcelUtil.initCell(titleRow.createCell(1), style, fieldsName[1]);
+        CatalogExcelUtil.initCell(titleRow.createCell(2), style, fieldsName[2]);
+        CatalogExcelUtil.initCell(titleRow.createCell(3), style, fieldsName[3]);
+        CatalogExcelUtil.initCell(titleRow.createCell(4), style, fieldsName[4]);
+        CatalogExcelUtil.initCell(titleRow.createCell(5), style, fieldsName[5]);
+        CatalogExcelUtil.initCell(titleRow.createCell(6), style, fieldsName[6]);
+        CatalogExcelUtil.initCell(titleRow.createCell(7), style, fieldsName[7]);
+        CatalogExcelUtil.initCell(titleRow.createCell(8), style, fieldsName[8]);
+        CatalogExcelUtil.initCell(titleRow.createCell(9), style, fieldsName[9]);
 
         workbook = dropDownList2007(workbook, resultSheet, priorityList, 1, 500, 2, 2, "hidden_priority", 2);
         workbook = dropDownList2007(workbook, resultSheet, issueTypeList, 1, 500, 3, 3, "hidden_issue_type", 3);
@@ -185,7 +185,7 @@ public class ExcelUtil {
             if (errorRows.contains(i)) {
                 Row row = sheet.getRow(i);
                 Row newRow = resultSheet.createRow(index++);
-                for (int j = 0; j < FIELDS_NAME.length; j++) {
+                for (int j = 0; j < fieldsName.length; j++) {
                     Cell cell = newRow.createCell(j);
                     if (row.getCell(j) != null) {
                         cell.setCellValue(row.getCell(j).toString());
