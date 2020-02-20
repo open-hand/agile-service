@@ -6,7 +6,6 @@ import {
 } from 'choerodon-ui';
 import moment from 'moment';
 import reactComponentDebounce from '@/components/DebounceComponent';
-import { checkFeatureName } from '@/api/FeatureApi';
 import { UploadButton } from '../CommonComponent';
 import {
   handleFileUpload, beforeTextUpload, validateFile, normFile, getProjectName, getProjectId,
@@ -22,6 +21,7 @@ import './CreateIssue.less';
 import SelectFocusLoad from '../SelectFocusLoad';
 import renderField from './renderField';
 import FieldIssueLinks from './FieldIssueLinks';
+import WSJF from './WSJF';
 
 const DebounceInput = reactComponentDebounce({
   valuePropName: 'value',
@@ -234,14 +234,12 @@ class CreateIssue extends Component {
           linkIssues,
           keys,
           fileList,
+          userBusinessValue,
+          timeCriticality,
+          rrOeValue,
+          jobSize,
         } = values;
         const { typeCode } = originIssueTypes.find(t => t.id === typeId);
-        if (typeCode === 'feature' && epicId) {
-          const hasSame = await checkFeatureName(summary, epicId);
-          if (hasSame) {
-            return;
-          }
-        }
         const exitComponents = originComponents;
         const componentIssueRelVOList = map(componentIssueRel
           && componentIssueRel.filter(v => v && v.trim()), (component) => {
@@ -298,6 +296,12 @@ class CreateIssue extends Component {
             benfitHypothesis,
             acceptanceCritera,
             featureType,
+          },
+          wsjfVO: {
+            userBusinessValue,
+            timeCriticality,
+            rrOeValue,
+            jobSize,
           },
         };
         this.setState({ createLoading: true });
@@ -665,7 +669,7 @@ class CreateIssue extends Component {
           <FormItem key={field.id}>
             {getFieldDecorator('benfitHypothesis', {
             })(
-              <DebounceInput label="特性价值" placeholder="请输入特性价值" maxLength={100} />,
+              <DebounceInput label="特性价值" maxLength={100} />,
             )}
           </FormItem>
         );
@@ -674,7 +678,7 @@ class CreateIssue extends Component {
           <FormItem key={field.id}>
             {getFieldDecorator('acceptanceCritera', {
             })(
-              <DebounceInput label="验收标准" placeholder="请输入验收标准" maxLength={100} />,
+              <DebounceInput label="验收标准" maxLength={100} />,
             )}
           </FormItem>
         );
@@ -802,8 +806,9 @@ class CreateIssue extends Component {
                   </FormItem>
                 )}
                 {fields && fields.filter(field => !hiddenFields.includes(field.fieldCode)).map(field => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
+                {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}
               </div>
-              {mode !== 'feature' && newIssueTypeCode !== 'issue_epic' && <FieldIssueLinks form={form} />}
+              {mode !== 'feature' && newIssueTypeCode !== 'issue_epic' && <FieldIssueLinks form={form} />}              
             </Form>
           </Spin>
         </Content>
