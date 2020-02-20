@@ -38,7 +38,8 @@ const { Text, Edit } = TextEditToggle;
     const { store, field, disabled } = this.props;
     const issue = store.getIssue;
     const { fieldCode, fieldName } = field;
-    const { wsjf: { [fieldCode]: value } } = issue;
+    const { wsjf } = issue || {};
+    const { [fieldCode]: value } = wsjf || {};
 
     return (
       <div className="line-start mt-10">
