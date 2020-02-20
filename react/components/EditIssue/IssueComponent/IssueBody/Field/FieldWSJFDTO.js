@@ -57,7 +57,7 @@ const { Text, Edit } = TextEditToggle;
           >
             <Text>
               <div style={{ whiteSpace: 'nowrap' }}>
-                {value || '无'}
+                {(value || value === 0) ? value : '无'}
               </div>
             </Text>
             <Edit>
