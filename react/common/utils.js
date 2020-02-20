@@ -485,3 +485,14 @@ export function getStageMap() {
 export function getFileSuffix(fileName) {
   return fileName.replace(/.+\./, '').toLowerCase();
 }
+
+export function rgbToRgba(hex, opacity) {
+  const rgb = hex.split('(')[1].split(')')[0].split(',');
+  return `rgba(${rgb[0].trim()},${rgb[1].trim()},${rgb[2].trim()},${opacity})`;
+}
+
+export function hexToRgba(hex, opacity) {
+  // eslint-disable-next-line radix
+  const RGBA = `rgba(${parseInt(`0x${hex.slice(1, 3)}`)},${parseInt(`0x${hex.slice(3, 5)}`)},${parseInt(`0x${hex.slice(5, 7)}`)},${opacity})`;
+  return RGBA;
+}

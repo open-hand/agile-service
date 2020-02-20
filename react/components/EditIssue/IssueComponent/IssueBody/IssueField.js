@@ -10,6 +10,9 @@ import {
 import EditIssueContext from '../../stores';
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
+
+const TEAMSCOLOR = ['#4D90FE', '#303F9F', '#FFB100', '#FF7043', '#F44336', '#F953BA'];
+
 const IssueField = observer((props) => {
   const {
     store, applyType, saveFieldVersionRef, saveFieldFixVersionRef,
@@ -68,9 +71,9 @@ const IssueField = observer((props) => {
       case 'storyPoints':
         return (<FieldStoryPoint {...props} field={field} />);
       case 'teams': 
-        return (<FieldTeams {...props} field={field} />);
+        return (<FieldTeams {...props} field={field} TEAMSCOLOR={TEAMSCOLOR} />);
       case 'teamSprint':
-        return (<FieldTeamSprint {...props} field={field} />);
+        return (<FieldTeamSprint {...props} field={field} TEAMSCOLOR={TEAMSCOLOR} />);
       default:
         return (<Field {...props} field={field} />);
     }
