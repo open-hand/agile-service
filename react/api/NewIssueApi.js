@@ -159,6 +159,10 @@ export function updateIssue(data, projectId = AppState.currentMenuType.id) {
   return axios.put(`/agile/v1/projects/${projectId}/issues`, data);
 }
 
+export function updateIssueWSJFDTO(data, projectId = AppState.currentMenuType.id) {
+  return axios.post(`/agile/v1/projects/${projectId}/wsjf`, data);
+}
+
 export function updateStatus(transformId, issueId, objVerNum, applyType = 'agile', proId = AppState.currentMenuType.id) {
   return axios.put(`/agile/v1/projects/${proId}/issues/update_status?applyType=${applyType}&transformId=${transformId}&issueId=${issueId}&objectVersionNumber=${objVerNum}`);
 }
@@ -245,6 +249,19 @@ export function loadIssuesInLink(page = 1, size = 10, issueId, content) {
     return axios.get(`/agile/v1/projects/${projectId}/issues/agile/summary?self=false&content=${content}&page=${page}&size=${size}`);
   } else {
     return axios.get(`/agile/v1/projects/${projectId}/issues/agile/summary?self=false&page=${page}&size=${size}`);
+  }
+}
+
+export function loadFeaturesInLink(page = 1, size = 10, issueId, content) {
+  const projectId = AppState.currentMenuType.id;
+  if (issueId && content) {
+    return axios.get(`/agile/v1/projects/${projectId}/issues/agile/feature?issueId=${issueId}&self=false&content=${content}&page=${page}&size=${size}`);
+  } else if (issueId && !content) {
+    return axios.get(`/agile/v1/projects/${projectId}/issues/agile/feature?issueId=${issueId}&self=false&page=${page}&size=${size}`);
+  } else if (!issueId && content) {
+    return axios.get(`/agile/v1/projects/${projectId}/issues/agile/feature?self=false&content=${content}&page=${page}&size=${size}`);
+  } else {
+    return axios.get(`/agile/v1/projects/${projectId}/issues/agile/feature?self=false&page=${page}&size=${size}`);
   }
 }
 

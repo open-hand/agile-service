@@ -7,7 +7,7 @@ import { getUsers, getUser } from '@/api/CommonApi';
 import {
   loadEpics, loadProgramEpics, loadIssueTypes, loadPriorities,
   loadComponents, loadLabels, loadVersions,
-  loadStatusList, loadIssuesInLink, loadSprints,
+  loadStatusList, loadIssuesInLink, loadFeaturesInLink, loadSprints,
 
 } from '@/api/NewIssueApi';
 import IssueLinkType from '@/api/IssueLinkType';
@@ -233,6 +233,48 @@ export default {
       getPopupContainer: triggerNode => triggerNode.parentNode,
     },
     request: ({ filter, page }, issueId) => loadIssuesInLink(page, 20, issueId, filter),
+    render: issue => (
+      <Option
+        key={issue.issueId}
+        value={issue.issueId}
+        showName={issue.issueNum}
+      >
+        <div style={{
+          display: 'inline-flex',
+          flex: 1,
+          width: 'calc(100% - 30px)',
+          alignItems: 'center',
+          verticalAlign: 'middle',
+        }}
+        >
+          <TypeTag
+            data={issue.issueTypeVO}
+          />
+          <span style={{
+            paddingLeft: 12, paddingRight: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}
+          >
+            {issue.issueNum}
+          </span>
+          <div style={{ overflow: 'hidden', flex: 1 }}>
+            <p style={{
+              paddingRight: '25px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, maxWidth: 'unset',
+            }}
+            >
+              {issue.summary}
+            </p>
+          </div>
+        </div>
+      </Option>
+    ),
+  },
+  features_in_link: {
+    props: {
+      mode: 'multiple',
+      optionLabelProp: 'showName',
+      getPopupContainer: triggerNode => triggerNode.parentNode,
+    },
+    request: ({ filter, page }, issueId) => loadFeaturesInLink(page, 20, issueId, filter),
     render: issue => (
       <Option
         key={issue.issueId}

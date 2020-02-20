@@ -24,6 +24,14 @@ class LinkList extends Component {
       issue, i, showAssignee,
       canDelete = true, onOpen, type,
     } = this.props;
+
+    let deleteTipTitle = '确认要删除该问题链接吗？';
+    if (type === 'test') {
+      deleteTipTitle = '确认要删除该测试用例吗?';
+    } else {
+      deleteTipTitle = '确认要删除该特性关联关系吗?';
+    }
+
     return (
       <div
         style={{
@@ -113,7 +121,7 @@ class LinkList extends Component {
               }}
             >
               <Popconfirm
-                title={type === 'test' ? '确认要删除该测试用例吗?' : '确认要删除该问题链接吗?'}
+                title={deleteTipTitle}
                 placement="left"
                 onConfirm={this.confirm.bind(this, issue.linkId)}
                 onCancel={this.cancel}
