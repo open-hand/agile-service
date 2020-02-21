@@ -42,7 +42,7 @@ const IssueField = observer((props) => {
         return (<FieldLabel {...props} />);
       case 'fixVersion':
         return (<FieldFixVersion {...props} saveRef={saveFieldFixVersionRef} />);
-      case 'epic':
+      case 'epic': // 包含 feature 当有子项目时 只有特性
         // 子任务、史诗不显示史诗
         if (['issue_epic', 'sub_task'].indexOf(typeCode) === -1) {
           return (<FieldEpic {...props} />);
@@ -70,7 +70,7 @@ const IssueField = observer((props) => {
       case 'remainingTime':
       case 'storyPoints':
         return (<FieldStoryPoint {...props} field={field} />);
-      case 'teams': 
+      case 'teams':
         return (<FieldTeams {...props} field={field} TEAMSCOLOR={TEAMSCOLOR} />);
       case 'teamSprint':
         return (<FieldTeamSprint {...props} field={field} TEAMSCOLOR={TEAMSCOLOR} />);

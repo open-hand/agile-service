@@ -7,7 +7,7 @@ import { getUsers, getUser } from '@/api/CommonApi';
 import {
   loadEpics, loadProgramEpics, loadIssueTypes, loadPriorities,
   loadComponents, loadLabels, loadVersions,
-  loadStatusList, loadIssuesInLink, loadFeaturesInLink, loadSprints,
+  loadStatusList, loadIssuesInLink, loadFeaturesInLink, loadSprints, getFeaturesByEpic,
 
 } from '@/api/NewIssueApi';
 import IssueLinkType from '@/api/IssueLinkType';
@@ -401,4 +401,10 @@ export default {
       </Option>
     ),
   },
+  feature: {
+    request: () => getFeaturesByEpic(),
+    render: item => (
+      <Option key={`${item.issueId}`} value={item.issueId}>{item.summary}</Option>
+    ),
+  }, // 特性列表
 };
