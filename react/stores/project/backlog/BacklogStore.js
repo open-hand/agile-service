@@ -517,7 +517,7 @@ class BacklogStore {
         this.dealWithCtrl(data, currentIndex, currentClick);
       }
     } else {
-      this.clickedOnce(currentClick, currentIndex);
+      this.clickedOnce(sprintId, currentClick, true);
     }
   }
 
@@ -553,7 +553,7 @@ class BacklogStore {
     };
   }
 
-  @action clickedOnce(sprintId, currentClick) {
+  @action clickedOnce(sprintId, currentClick, hasExtraKey) {
     const index = this.issueMap.get(sprintId).findIndex(issue => issue.issueId === currentClick.issueId);
     this.multiSelected = observable.map();
     this.multiSelected.set(currentClick.issueId, currentClick);
@@ -561,7 +561,9 @@ class BacklogStore {
       ...currentClick,
       index,
     };
-    this.setClickIssueDetail(currentClick);
+    if (!hasExtraKey) {
+      this.setClickIssueDetail(currentClick);
+    }
   }
 
   @action setClickIssueDetail(data) {
@@ -1075,7 +1077,7 @@ class BacklogStore {
       } else if (e.ctrlKey || e.metaKey) {
         this.dealWithMultiSelect(sprintId, item, 'ctrl');
       } else {
-        this.clickedOnce(sprintId, item);
+        this.clickedOnce(sprintId, item, e.shiftKey || e.ctrlKey || e.metaKey);
       }
     }
   }
