@@ -90,7 +90,7 @@ const IssueBody = observer((props) => {
           {issueTypeVO.typeCode && ['feature', 'sub_task'].indexOf(issueTypeVO.typeCode) === -1
             ? <TestLink {...props} /> : ''
           }
-          {issueTypeVO.typeCode && ['sub_task'].indexOf(issueTypeVO.typeCode) === -1
+          {issueTypeVO.typeCode && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''
           }
           { store.testExecutes.length > 0 ? <IssueTestExecute {...props} /> : null}

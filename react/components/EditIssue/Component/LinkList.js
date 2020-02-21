@@ -21,9 +21,11 @@ class LinkList extends Component {
 
   render() {
     const {
-      issue, i, showAssignee,
+      issue, i, showAssignee, showProject,
       canDelete = true, onOpen, type,
     } = this.props;
+
+    const { typeCode } = issue;
 
     let deleteTipTitle = '确认要删除该问题链接吗？';
     if (type === 'test') {
@@ -69,15 +71,19 @@ class LinkList extends Component {
             </p>
           </div>
         </Tooltip>
-        <div style={{ marginRight: '8px', overflow: 'hidden' }}>
-          <Tooltip mouseEnterDelay={0.5} title={`优先级： ${issue.priorityVO.name}`}>
-            <div>
-              <PriorityTag
-                priority={issue.priorityVO}
-              />
-            </div>
-          </Tooltip>
-        </div>
+        {
+          typeCode !== 'feature' && (
+          <div style={{ marginRight: '8px', overflow: 'hidden' }}>
+            <Tooltip mouseEnterDelay={0.5} title={`优先级： ${issue.priorityVO.name}`}>
+              <div>
+                <PriorityTag
+                  priority={issue.priorityVO}
+                />
+              </div>
+            </Tooltip>
+          </div>
+          )
+        }
         {
           showAssignee ? (
             <Tooltip mouseEnterDelay={0.5} title={`经办人： ${issue.assigneeName}`}>
@@ -99,6 +105,11 @@ class LinkList extends Component {
             </Tooltip>
           ) : null
         }
+        {/* {
+          showProject && (
+            <ProjectHead project={projects} hiddenText />
+          )
+        } */}
         <div style={{
           width: '48px', marginRight: '8px', display: 'flex', justifyContent: 'flex-end', 
         }}
