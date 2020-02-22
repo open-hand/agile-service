@@ -34,3 +34,7 @@ export async function checkPermissionProject(service) {
 export function getProjectsInProgram() {
   return axios.get(`base/v1/organizations/${getOrganizationId()}/projects/${getProjectId()}/program`);
 }
+
+export function getProjectIsShowFeature() { // /v1/projects/1551/art/isArtDoding
+  return axios.get(`agile/v1/projects/${getProjectId()}/art/isArtDoding`);
+}

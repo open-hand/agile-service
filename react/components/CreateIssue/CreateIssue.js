@@ -83,6 +83,7 @@ class CreateIssue extends Component {
 
   componentDidMount() {
     this.loadIssueTypes();
+    IsInProgramStore.loadIsShowFeature();
   }
 
   /**
@@ -572,19 +573,8 @@ class CreateIssue extends Component {
           </FormItem>
         );
       case 'epic':
-        if (IsInProgramStore.isInProgram) {
-          return (
-            <FormItem label="特性">
-              {getFieldDecorator('feature', {})(
-                <SelectFocusLoad
-                  label="特性"
-                  allowClear
-                  type="feature"
-                />,
-              )}
-            </FormItem>
-          );
-        } else {
+        // 如果在项目群中则不显示史诗
+        if (!IsInProgramStore.isInProgram) {
           return (
             ['issue_epic', 'sub_task'].includes(newIssueTypeCode) ? null : (
               <FormItem label="史诗">
@@ -597,7 +587,21 @@ class CreateIssue extends Component {
                 )}
               </FormItem>
             )
-          ); 
+          );
+        } else if (IsInProgramStore.isShowFeature) {
+          return (
+            <FormItem label="特性">
+              {getFieldDecorator('feature', {})(
+                <SelectFocusLoad
+                  label="特性"
+                  allowClear
+                  type="feature"
+                />,
+              )}
+            </FormItem>
+          );
+        } else {
+          return '';
         }
       case 'component':
         return (
