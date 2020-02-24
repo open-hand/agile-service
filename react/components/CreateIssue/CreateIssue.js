@@ -47,7 +47,7 @@ const defaultProps = {
   contentTitle: `在项目“${getProjectName()}”中创建问题`,
   contentDescription: '请在下面输入问题的详细信息，包含详细描述、人员信息、版本信息、进度预估、优先级等等。您可以通过丰富的任务描述帮助相关人员更快更全面的理解任务，同时更好的把控问题进度。',
   contentLink: 'http://v0-16.choerodon.io/zh/docs/user-guide/agile/agile/create-agile/',
-  hiddenFields: ['benfitHypothesis', 'acceptanceCritera', 'pi'],
+  hiddenFields: ['pi'],
 };
 function applyFilter(array, filters) {
   const Filters = [];
