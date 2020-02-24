@@ -83,6 +83,7 @@ class CreateIssue extends Component {
 
   componentDidMount() {
     this.loadIssueTypes();
+    IsInProgramStore.loadIsShowFeature();
   }
 
   /**
@@ -238,6 +239,7 @@ class CreateIssue extends Component {
           timeCriticality,
           rrOeValue,
           jobSize,
+          feature,
         } = values;
         const { typeCode } = originIssueTypes.find(t => t.id === typeId);
         const exitComponents = originComponents;
@@ -303,6 +305,7 @@ class CreateIssue extends Component {
             rrOeValue,
             jobSize,
           },
+          feature, // 特性字段
         };
         this.setState({ createLoading: true });
         const deltaOps = description;
@@ -542,6 +545,18 @@ class CreateIssue extends Component {
             )}
           </FormItem>
         );
+      case 'feature':
+        return (
+          <FormItem label="特性">
+            {getFieldDecorator('feature', {})(
+              <SelectFocusLoad
+                label="特性"
+                allowClear
+                type="feature"
+              />,
+            )}
+          </FormItem>
+        );
       case 'fixVersion':
         return (
           <FormItem label="版本">
@@ -558,19 +573,36 @@ class CreateIssue extends Component {
           </FormItem>
         );
       case 'epic':
-        return (
-          ['issue_epic', 'sub_task'].includes(newIssueTypeCode) ? null : (
-            <FormItem label="史诗">
-              {getFieldDecorator('epicId', {})(
+        // 如果在项目群中则不显示史诗
+        if (!IsInProgramStore.isInProgram) {
+          return (
+            ['issue_epic', 'sub_task'].includes(newIssueTypeCode) ? null : (
+              <FormItem label="史诗">
+                {getFieldDecorator('epicId', {})(
+                  <SelectFocusLoad
+                    label="史诗"
+                    allowClear
+                    type="epic"
+                  />,
+                )}
+              </FormItem>
+            )
+          );
+        } else if (IsInProgramStore.isShowFeature) {
+          return (
+            <FormItem label="特性">
+              {getFieldDecorator('feature', {})(
                 <SelectFocusLoad
-                  label="史诗"
+                  label="特性"
                   allowClear
-                  type="epic"
+                  type="feature"
                 />,
               )}
             </FormItem>
-          )
-        );
+          );
+        } else {
+          return '';
+        }
       case 'component':
         return (
           ['sub_task'].includes(newIssueTypeCode) ? null : (
@@ -808,7 +840,7 @@ class CreateIssue extends Component {
                 {fields && fields.filter(field => !hiddenFields.includes(field.fieldCode)).map(field => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
                 {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}
               </div>
-              {mode !== 'feature' && newIssueTypeCode !== 'issue_epic' && <FieldIssueLinks form={form} />}              
+              {mode !== 'feature' && newIssueTypeCode !== 'issue_epic' && <FieldIssueLinks form={form} />}
             </Form>
           </Spin>
         </Content>

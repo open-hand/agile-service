@@ -48,6 +48,7 @@ const { Text, Edit } = TextEditToggle;
         selectLoading: false,
       });
     });
+    IsInProgramStore.loadIsShowFeature();
   };
 
   updateIssueEpic = () => {
@@ -115,12 +116,12 @@ const { Text, Edit } = TextEditToggle;
     } = issue;
     return (
       <React.Fragment>
-        {typeCode === 'story' && IsInProgramStore.isInProgram
+        {typeCode === 'story' && IsInProgramStore.isShowFeature
           ? (
             <div className="line-start mt-10">
               <div className="c7n-property-wrapper">
                 <span className="c7n-property">
-                  {'特性'}
+                  特性
                 </span>
               </div>
               <div className="c7n-value-wrapper">
@@ -140,7 +141,7 @@ const { Text, Edit } = TextEditToggle;
                       </div>
                     ) : (
                       <div>
-                        {'无'}
+                        无
                       </div>
                     )
                     }
@@ -164,63 +165,67 @@ const { Text, Edit } = TextEditToggle;
             </div>
           ) : ''
         }
-        <div className="line-start mt-10">
-          <div className="c7n-property-wrapper">
-            <span className="c7n-property">
-              {'史诗'}
-            </span>
+        {!IsInProgramStore.isShowFeature
+          && (
+          <div className="line-start mt-10">
+            <div className="c7n-property-wrapper">
+              <span className="c7n-property">
+                史诗
+              </span>
+            </div>
+            <div className="c7n-value-wrapper">
+              <TextEditToggle
+                disabled={featureId || disabled}
+                formKey="epic"
+                onSubmit={this.updateIssueEpic}
+                originData={epicId || []}
+              >
+                <Text>
+                  {
+                    epicId ? (
+                      <div
+                        style={{
+                          color: epicColor,
+                          borderWidth: '1px',
+                          borderStyle: 'solid',
+                          borderColor: epicColor,
+                          borderRadius: '2px',
+                          fontSize: '13px',
+                          lineHeight: '20px',
+                          padding: '0 8px',
+                          display: 'inline-block',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {issueEpicName}
+                      </div>
+                    ) : (
+                      <div>
+                        无
+                      </div>
+                    )
+                  }
+                </Text>
+                <Edit>
+                  <Select
+                    getPopupContainer={() => document.getElementById('detail')}
+                    allowClear
+                    loading={selectLoading}
+                    onChange={(value) => {
+                      this.setState({
+                        newEpicId: value,
+                      });
+                    }}
+                  >
+                    {originEpics.map(epic => <Option key={`${epic.issueId}`} value={epic.issueId}>{epic.epicName}</Option>)}
+                  </Select>
+                </Edit>
+              </TextEditToggle>
+            </div>
           </div>
-          <div className="c7n-value-wrapper">
-            <TextEditToggle
-              disabled={featureId || disabled}
-              formKey="epic"
-              onSubmit={this.updateIssueEpic}
-              originData={epicId || []}
-            >
-              <Text>
-                {
-                  epicId ? (
-                    <div
-                      style={{
-                        color: epicColor,
-                        borderWidth: '1px',
-                        borderStyle: 'solid',
-                        borderColor: epicColor,
-                        borderRadius: '2px',
-                        fontSize: '13px',
-                        lineHeight: '20px',
-                        padding: '0 8px',
-                        display: 'inline-block',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {issueEpicName}
-                    </div>
-                  ) : (
-                    <div>
-                      {'无'}
-                    </div>
-                  )
-                }
-              </Text>
-              <Edit>
-                <Select
-                  getPopupContainer={() => document.getElementById('detail')}
-                  allowClear
-                  loading={selectLoading}
-                  onChange={(value) => {
-                    this.setState({
-                      newEpicId: value,
-                    });
-                  }}
-                >
-                  {originEpics.map(epic => <Option key={`${epic.issueId}`} value={epic.issueId}>{epic.epicName}</Option>)}
-                </Select>
-              </Edit>
-            </TextEditToggle>
-          </div>
-        </div>
+          )
+        }
       </React.Fragment>
     );
   }
