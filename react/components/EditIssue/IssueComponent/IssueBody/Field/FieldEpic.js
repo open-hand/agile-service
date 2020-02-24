@@ -48,6 +48,7 @@ const { Text, Edit } = TextEditToggle;
         selectLoading: false,
       });
     });
+    IsInProgramStore.loadIsShowFeature();
   };
 
   updateIssueEpic = () => {
@@ -115,7 +116,7 @@ const { Text, Edit } = TextEditToggle;
     } = issue;
     return (
       <React.Fragment>
-        {typeCode === 'story' && IsInProgramStore.isInProgram
+        {typeCode === 'story' && IsInProgramStore.isShowFeature
           ? (
             <div className="line-start mt-10">
               <div className="c7n-property-wrapper">
@@ -164,7 +165,7 @@ const { Text, Edit } = TextEditToggle;
             </div>
           ) : ''
         }
-        {!IsInProgramStore.isInProgram
+        {!IsInProgramStore.isShowFeature
           && (
           <div className="line-start mt-10">
             <div className="c7n-property-wrapper">
