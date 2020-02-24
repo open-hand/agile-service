@@ -339,7 +339,9 @@ public class IssueConvertDTO {
      */
     public void initializationIssue(Long statusId, ProjectInfoDTO projectInfoDTO) {
         this.statusId = statusId;
-        this.parentIssueId = 0L;
+        if (this.parentIssueId == null || this.parentIssueId < 0) {
+            this.parentIssueId = 0L;
+        }
         if (this.epicId == null) {
             this.epicId = 0L;
         }

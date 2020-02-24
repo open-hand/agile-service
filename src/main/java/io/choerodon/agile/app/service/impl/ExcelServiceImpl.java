@@ -2,6 +2,8 @@ package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.app.domain.IssueType;
+import io.choerodon.agile.app.domain.Predefined;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.feign.FileFeignClient;
@@ -22,6 +24,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.util.ObjectUtils;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -95,6 +102,9 @@ public class ExcelServiceImpl implements ExcelService {
     @Autowired
     private PriorityService priorityService;
 
+    @Autowired
+    protected PlatformTransactionManager transactionManager;
+
     private ModelMapper modelMapper = new ModelMapper();
 
     @PostConstruct
@@ -132,7 +142,7 @@ public class ExcelServiceImpl implements ExcelService {
                     .dropDownList2007(
                             wb,
                             sheet,
-                            predefined.values,
+                            predefined.values(),
                             predefined.startRow(),
                             predefined.endRow(),
                             predefined.startCol(),
@@ -163,6 +173,8 @@ public class ExcelServiceImpl implements ExcelService {
                 issueTypeList.add(issueTypeVO.getName());
             }
         }
+        String[] issueType = {"子任务", "子缺陷"};
+        issueTypeList.addAll(Arrays.asList(issueType));
         predefinedList.add(new Predefined(issueTypeList, 1, 500, 3, 3, HIDDEN_ISSUE_TYPE, 3));
 
         List<String> versionList = new ArrayList<>();
@@ -306,9 +318,12 @@ public class ExcelServiceImpl implements ExcelService {
         for (IssueTypeVO issueTypeVO : issueTypeVOList) {
             if (!SUB_TASK.equals(issueTypeVO.getTypeCode()) && !FEATURE.equals(issueTypeVO.getTypeCode())) {
                 issueTypeMap.put(issueTypeVO.getName(), issueTypeVO);
-                issueTypeList.add(issueTypeVO.getName());
             }
         }
+        //添加子任务/子缺陷
+        issueTypeMap.put("子任务", issueTypeMap.get("任务"));
+        issueTypeMap.put("子缺陷", issueTypeMap.get("缺陷"));
+        issueTypeList.addAll(issueTypeMap.keySet());
     }
 
     protected void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process) {
@@ -325,7 +340,7 @@ public class ExcelServiceImpl implements ExcelService {
         return response.getBody();
     }
 
-    private Boolean checkEpicNameExist(Long projectId, String epicName) {
+    protected Boolean checkEpicNameExist(Long projectId, String epicName) {
         IssueDTO issueDTO = new IssueDTO();
         issueDTO.setProjectId(projectId);
         issueDTO.setEpicName(epicName);
@@ -333,7 +348,11 @@ public class ExcelServiceImpl implements ExcelService {
         return issueDTOList == null || issueDTOList.isEmpty();
     }
 
-    protected Map<Integer, String> checkRule(Long projectId, Row row, List<String> issueTypeList, List<String> priorityList, List<String> versionList, Map<String, IssueTypeVO> issueTypeMap, List<String> componentList, List<String> sprintList) {
+    protected Map<Integer, String> checkRule(Long projectId, Sheet sheet, List<String> issueTypeList,
+                                             List<String> priorityList, List<String> versionList,
+                                             Map<String, IssueTypeVO> issueTypeMap, List<String> componentList,
+                                             List<String> sprintList, int rowNum, Set<Integer> illegalRow) {
+        Row row = sheet.getRow(rowNum);
         Map<Integer, String> errorMessage = new HashMap<>();
         // check summary
         if (row.getCell(0) == null || row.getCell(0).toString().equals("") || row.getCell(0).getCellType() == XSSFCell.CELL_TYPE_BLANK) {
@@ -348,7 +367,9 @@ public class ExcelServiceImpl implements ExcelService {
             errorMessage.put(2, "优先级输入错误");
         }
         // check issue type
-        if (row.getCell(3) == null || row.getCell(3).toString().equals("") || row.getCell(3).getCellType() == XSSFCell.CELL_TYPE_BLANK) {
+        if (illegalRow.contains(rowNum)) {
+            errorMessage.put(3, "子任务/子缺陷必须有父节点");
+        } else if (row.getCell(3) == null || row.getCell(3).toString().equals("") || row.getCell(3).getCellType() == XSSFCell.CELL_TYPE_BLANK) {
             errorMessage.put(3, "问题类型不能为空");
         } else if (!issueTypeList.contains(row.getCell(3).toString())) {
             errorMessage.put(3, "问题类型输入错误");
@@ -522,6 +543,12 @@ public class ExcelServiceImpl implements ExcelService {
         }
         List<Long> importedIssueIds = new ArrayList<>();
 
+        Map<Integer, String> allIssueType = new LinkedHashMap<>();
+        List<IssueType> issueTypes = getAllIssueType(allRowCount, sheet, columnNum, allIssueType);
+        Map<Integer, Set<Integer>> parentSonMap = getParentSonMap(issueTypes);
+        Map<Integer, Integer> sonParentMap = getSonParentMap(parentSonMap);
+        //获取无父节点的子任务/子缺陷
+        Set<Integer> illegalRow = getIllegalRow(allIssueType, sonParentMap);
 
         for (int r = 1; r <= allRowCount; r++) {
             if (checkCanceled(projectId, res.getId(), importedIssueIds)) {
@@ -536,33 +563,74 @@ public class ExcelServiceImpl implements ExcelService {
                     row.getCell(w).setCellType(XSSFCell.CELL_TYPE_STRING);
                 }
             }
-            Map<Integer, String> errorMap = checkRule(projectId, row, issueTypeList, priorityList, versionList, issueTypeMap, componentList, sprintList);
-            if (!errorMap.isEmpty()) {
-                failCount++;
-                processErrorMap(errorMapList, r, row, errorMap, errorRows);
-                res.setFailCount(failCount);
-                processNum++;
-                sendProcess(res, userId, processNum * 1.0 / allRowCount);
-                continue;
-            }
-            IssueCreateVO issueCreateVO = new IssueCreateVO();
-            Boolean ok = setIssueCreateInfo(issueCreateVO, projectId, row, issueTypeMap, priorityMap, versionMap, userId, componentMap, sprintMap);
-            IssueVO result = null;
-            if (ok) {
-                result = stateMachineClientService.createIssue(issueCreateVO, APPLY_TYPE_AGILE);
-            }
-            if (result == null) {
-                failCount++;
-                errorRows.add(row.getRowNum());
+            String typeName = row.getCell(3).toString();
+            //有子节点的故事和任务，要和子节点一块校验，有一个不合法，则全为错误的
+            Set<Integer> set = parentSonMap.get(r);
+            Boolean hasSonNodes = (set != null && !set.isEmpty());
+            if (("故事".equals(typeName) || "任务".equals(typeName)) && hasSonNodes) {
+                Map<String, Object> returnMap = batchCheck(projectId, sheet, issueTypeList, priorityList,
+                        versionList, issueTypeMap, componentList, sprintList, r, illegalRow, set, columnNum);
+                Map<Integer, Map<Integer, String>> errorMaps = (Map<Integer, Map<Integer, String>>) returnMap.get("errorMap");
+                set = (Set<Integer>) returnMap.get("sonSet");
+                if (!errorMaps.isEmpty()) {
+                    int size = errorMaps.size();
+                    failCount = failCount + size;
+                    for (Map.Entry<Integer, Map<Integer, String>> entry : errorMaps.entrySet()) {
+                        int rowNum = entry.getKey();
+                        Map<Integer, String> errorMap = entry.getValue();
+                        processErrorMap(errorMapList, rowNum, sheet.getRow(rowNum), errorMap, errorRows);
+                    }
+                    res.setFailCount(failCount);
+                    processNum = processNum + size;
+                    sendProcess(res, userId, processNum * 1.0 / allRowCount);
+                    //设置for循环的指针为子节点的最大行数
+                    r = Collections.max(set);
+                    continue;
+                }
+
+                Set<Long> insertIds = batchInsert(projectId, row, issueTypeMap, priorityMap, versionMap, userId, componentMap, sprintMap, sheet, set);
+                if (insertIds.isEmpty()) {
+                    failCount = failCount + set.size() + 1;
+                    errorRows.add(r);
+                    errorRows.addAll(set);
+                } else {
+                    importedIssueIds.addAll(insertIds);
+                    successCount = successCount + insertIds.size();
+                }
+                r = Collections.max(set);
             } else {
-                importedIssueIds.add(result.getIssueId());
-                successCount++;
+                Map<Integer, String> errorMap = checkRule(projectId, sheet, issueTypeList, priorityList,
+                        versionList, issueTypeMap, componentList, sprintList, r, illegalRow);
+                if (!errorMap.isEmpty()) {
+                    failCount++;
+                    processErrorMap(errorMapList, r, row, errorMap, errorRows);
+                    res.setFailCount(failCount);
+                    processNum++;
+                    sendProcess(res, userId, processNum * 1.0 / allRowCount);
+                    continue;
+                }
+                IssueCreateVO issueCreateVO = new IssueCreateVO();
+                Boolean ok = setIssueCreateInfo(issueCreateVO, projectId, row, issueTypeMap, priorityMap, versionMap, userId, componentMap, sprintMap);
+
+                IssueVO result = null;
+                if (ok) {
+                    result = stateMachineClientService.createIssue(issueCreateVO, APPLY_TYPE_AGILE);
+                }
+                if (result == null) {
+                    failCount++;
+                    errorRows.add(row.getRowNum());
+                } else {
+                    importedIssueIds.add(result.getIssueId());
+                    successCount++;
+                }
             }
             processNum++;
             res.setFailCount(failCount);
             res.setSuccessCount(successCount);
             sendProcess(res, userId, processNum * 1.0 / allRowCount);
         }
+
+
         if (!errorRows.isEmpty()) {
             LOGGER.info("导入数据有误");
             Workbook result = ExcelUtil.generateExcelAwesome(workbook, errorRows, errorMapList, FIELDS_NAME, priorityList, issueTypeList, versionList, IMPORT_TEMPLATE_NAME, componentList, sprintList);
@@ -573,6 +641,211 @@ public class ExcelServiceImpl implements ExcelService {
             status = SUCCESS;
         }
         updateFinalRecode(res, successCount, failCount, status);
+    }
+
+    protected Set<Long> batchInsert(Long projectId, Row row, Map<String, IssueTypeVO> issueTypeMap,
+                                  Map<String, Long> priorityMap, Map<String, Long> versionMap,
+                                  Long userId, Map<String, Long> componentMap, Map<String, Long> sprintMap,
+                                  Sheet sheet, Set<Integer> set) {
+        Set<Long> issueIds = new HashSet<>();
+        //批量插入
+        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        // explicitly setting the transaction name is something that can only be done programmatically
+        def.setName("batchCommit");
+        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+        TransactionStatus txStatus = transactionManager.getTransaction(def);
+        //插入父节点
+        IssueCreateVO issueCreateVO = new IssueCreateVO();
+        Boolean ok = setIssueCreateInfo(issueCreateVO, projectId, row, issueTypeMap, priorityMap, versionMap, userId, componentMap, sprintMap);
+        IssueVO parent = null;
+        if (ok) {
+            parent = stateMachineClientService.createIssue(issueCreateVO, APPLY_TYPE_AGILE);
+        }
+        if (parent == null) {
+            //回滚
+            transactionManager.rollback(txStatus);
+            return issueIds;
+        }
+        Long parentId = parent.getIssueId();
+        issueIds.add(parentId);
+        //处理子节点
+        set.forEach(s -> {
+            Row r = sheet.getRow(s);
+            IssueCreateVO issueCreate = new IssueCreateVO();
+            Boolean success = setIssueCreateInfo(issueCreate, projectId, r, issueTypeMap, priorityMap, versionMap, userId, componentMap, sprintMap);
+            if (success) {
+                String typeCode = issueCreate.getTypeCode();
+                if (issueTypeMap.get("任务").getTypeCode().equals(typeCode)) {
+                    issueCreate.setParentIssueId(parentId);
+                }
+                if (issueTypeMap.get("缺陷").getTypeCode().equals(typeCode)) {
+                    issueCreate.setRelateIssueId(parentId);
+                }
+                IssueVO result = stateMachineClientService.createIssue(issueCreate, APPLY_TYPE_AGILE);
+                if (result != null) {
+                    issueIds.add(result.getIssueId());
+                }
+            }
+        });
+        if (set.size() + 1 == issueIds.size()) {
+            transactionManager.commit(txStatus);
+            return issueIds;
+        } else {
+            //有失败的数据，所有的都标记为失败，回滚数据
+            transactionManager.rollback(txStatus);
+            return new HashSet<>();
+        }
+    }
+
+    protected Map<String, Object> batchCheck(Long projectId, Sheet sheet, List<String> issueTypeList,
+                                           List<String> priorityList, List<String> versionList, Map<String, IssueTypeVO> issueTypeMap,
+                                           List<String> componentList, List<String> sprintList, int rowNum,
+                                           Set<Integer> illegalRow, Set<Integer> sonSet, int columnNum) {
+        //key为row,value为错误信息
+        Map<Integer, Map<Integer, String>> map = new HashMap<>();
+        //key为列，value为错误详情
+        Map<Integer, String> errorMap = checkRule(projectId, sheet, issueTypeList, priorityList,
+                versionList, issueTypeMap, componentList, sprintList, rowNum, illegalRow);
+        if (!errorMap.isEmpty()) {
+            map.put(rowNum, errorMap);
+        }
+        Set<Integer> newSet = new HashSet<>();
+        sonSet.forEach(r -> {
+            Row row = sheet.getRow(r);
+            if (isSkip(row, columnNum)) {
+                return;
+            }
+            for (int w = 0; w < FIELDS.length; w++) {
+                if (row.getCell(w) != null) {
+                    row.getCell(w).setCellType(XSSFCell.CELL_TYPE_STRING);
+                }
+            }
+            newSet.add(r);
+            Map<Integer, String> error = checkRule(projectId, sheet, issueTypeList, priorityList,
+                    versionList, issueTypeMap, componentList, sprintList, r, illegalRow);
+            if (!error.isEmpty()) {
+                map.put(r, error);
+            }
+        });
+        //如果有一行有问题，全部置为失败
+        if (!map.isEmpty()) {
+            fillInErrorMap(map, rowNum);
+            newSet.forEach(n -> fillInErrorMap(map, n));
+        }
+        Map<String, Object> result = new HashMap<>();
+        result.put("errorMap", map);
+        result.put("sonSet", newSet);
+
+        return result;
+    }
+
+    protected void fillInErrorMap(Map<Integer, Map<Integer, String>> map, int rowNum) {
+        Map<Integer, String> error = map.get(rowNum);
+        if (ObjectUtils.isEmpty(error)) {
+            error = new HashMap<>();
+        }
+        error.put(3, "父子结构中有错误数据");
+    }
+
+    protected Set<Integer> getIllegalRow(Map<Integer, String> allIssueType, Map<Integer, Integer> sonParentMap) {
+        Set<Integer> set = new HashSet<>();
+        for (Map.Entry<Integer, String> entry : allIssueType.entrySet()) {
+            Integer key = entry.getKey();
+            String value = entry.getValue();
+            if ("子任务".equals(value) || "子缺陷".equals(value)) {
+                //无父节点
+                if (sonParentMap.get(key) == null) {
+                    set.add(key);
+                }
+            }
+        }
+        return set;
+    }
+
+    protected Map<Integer, Integer> getSonParentMap(Map<Integer, Set<Integer>> parentSonMap) {
+        Map<Integer, Integer> map = new HashMap<>();
+        for (Map.Entry<Integer, Set<Integer>> entry : parentSonMap.entrySet()) {
+            Integer key = entry.getKey();
+            Set<Integer> value = entry.getValue();
+            value.forEach(i -> map.put(i, key));
+        }
+        return map;
+    }
+
+    protected Map<Integer, Set<Integer>> getParentSonMap(List<IssueType> issueTypes) {
+        Map<Integer, Set<Integer>> map = new HashMap<>();
+        for (IssueType issueType : issueTypes) {
+            Integer row = issueType.getRow();
+            String type = issueType.getType();
+            //故事下只有子缺陷和子任务
+            if ("故事".equals(type)) {
+                storyRecursive(map, issueType, row);
+            }
+            //任务下只能有子任务
+            if ("任务".equals(type)) {
+                taskRecursive(map, issueType, row);
+            }
+        }
+        return map;
+    }
+
+    private void taskRecursive(Map<Integer, Set<Integer>> map, IssueType issueType, Integer row) {
+        if (issueType.hasNext()) {
+            IssueType next = issueType.getNext();
+            String nextType = next.getType();
+            Integer nextRow = next.getRow();
+            if ("子任务".equals(nextType)) {
+                processSonRow(map, row, nextRow);
+                taskRecursive(map, next, row);
+            }
+        }
+    }
+
+    private void processSonRow(Map<Integer, Set<Integer>> map, Integer row, Integer nextRow) {
+        Set<Integer> set = map.get(row);
+        if (set == null) {
+            set = new HashSet<>();
+            set.add(nextRow);
+            map.put(row, set);
+        } else {
+            set.add(nextRow);
+        }
+    }
+
+    private void storyRecursive(Map<Integer, Set<Integer>> map, IssueType issueType,
+                                Integer row) {
+        if (issueType.hasNext()) {
+            IssueType next = issueType.getNext();
+            String nextType = next.getType();
+            Integer nextRow = next.getRow();
+            if ("子缺陷".equals(nextType) || "子任务".equals(nextType)) {
+                processSonRow(map, row, nextRow);
+                storyRecursive(map, next, row);
+            }
+        }
+    }
+
+    protected List<IssueType> getAllIssueType(Integer allRowCount, Sheet sheet, int columnNum, Map<Integer, String> allIssueType) {
+        List<IssueType> issueTypes = new ArrayList<>();
+        for (int i = 1; i <= allRowCount; i++) {
+            int size = issueTypes.size();
+            IssueType lastIssueType = null;
+            if (size > 0) {
+                lastIssueType = issueTypes.get(size - 1);
+            }
+            Row row = sheet.getRow(i);
+            if (isSkip(row, columnNum)) {
+                continue;
+            }
+            String type = row.getCell(3).toString();
+            IssueType issueType = new IssueType(i, type);
+            issueTypes.add(issueType);
+            if (lastIssueType != null) {
+                lastIssueType.setNext(issueType);
+            }
+            allIssueType.put(i, type);
+        }
+        return issueTypes;
     }
 
     protected void processErrorMap(Map<Integer, List<Integer>> errorMapList,
@@ -642,67 +915,4 @@ public class ExcelServiceImpl implements ExcelService {
         FileOperationHistoryDTO result = fileOperationHistoryMapper.queryLatestRecode(projectId, userId);
         return result == null ? new FileOperationHistoryVO() : modelMapper.map(result, FileOperationHistoryVO.class);
     }
-
-    /**
-     * excel模版中预定义值
-     */
-    protected class Predefined {
-
-        private List<String> values;
-
-        private int startRow;
-
-        private int endRow;
-
-        private int startCol;
-
-        private int endCol;
-
-        private String hidden;
-
-        private int hiddenSheetIndex;
-
-        public Predefined(List<String> values, int startRow, int endRow,
-                          int startCol, int endCol, String hidden, int hiddenSheetIndex) {
-            this.values = values;
-            this.startRow = startRow;
-            this.endRow = endRow;
-            this.startCol = startCol;
-            this.endCol = endCol;
-            this.hidden = hidden;
-            this.hiddenSheetIndex = hiddenSheetIndex;
-        }
-
-        public List<String> values() {
-            return this.values;
-        }
-
-        public int startRow() {
-            return this.startRow;
-        }
-
-        public int endRow() {
-            return this.endRow;
-        }
-
-        public int startCol() {
-            return this.startCol;
-        }
-
-        public int endCol() {
-            return this.endCol;
-        }
-
-        public String hidden() {
-            return this.hidden;
-        }
-
-        public int hiddenSheetIndex() {
-            return this.hiddenSheetIndex;
-        }
-
-
-    }
-
-
 }

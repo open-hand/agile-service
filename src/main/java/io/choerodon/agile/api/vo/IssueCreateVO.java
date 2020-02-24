@@ -4,7 +4,6 @@ import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -70,6 +69,8 @@ public class IssueCreateVO {
     private BigDecimal storyPoints;
 
     private Long relateIssueId;
+
+    private Long parentIssueId;
 
     private RankVO rankVO;
 
@@ -239,6 +240,14 @@ public class IssueCreateVO {
 
     public RankVO getRankVO() {
         return rankVO;
+    }
+
+    public Long getParentIssueId() {
+        return parentIssueId;
+    }
+
+    public void setParentIssueId(Long parentIssueId) {
+        this.parentIssueId = parentIssueId;
     }
 
     @Override
