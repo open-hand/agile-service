@@ -164,13 +164,13 @@ class DraggableFeature extends Component {
               <div
                 className="c7n-backlog-epicItemDone"
                 style={{
-                  flex: item.storyCompletedCount,
+                  flex: item.successStoryPoints,
                 }}
               />
               <div
                 className="c7n-backlog-epicItemTodo"
                 style={{
-                  flex: item.storyCount ? item.storyCount - item.storyCompletedCount : 1,
+                  flex: item.totalStoryPoints ? item.totalStoryPoints - item.successStoryPoints : 1,
                 }}
               />
             </div>
