@@ -396,6 +396,7 @@ class StartSprint extends Component {
 const FormStartSprint = Form.create()(StartSprint);
 export default function (props) {
   Modal.open({
+    key: 'sprint',
     title: '开启冲刺',
     okText: '开启',
     cancelText: '取消',
