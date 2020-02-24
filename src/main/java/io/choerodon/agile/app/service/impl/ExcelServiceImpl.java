@@ -482,14 +482,14 @@ public class ExcelServiceImpl implements ExcelService {
         if (row == null) {
             return true;
         }
+        //所有列都为空才跳过
+        boolean skip = true;
         for (int i = 0; i < columnNum; i++) {
             Cell cell = row.getCell(i);
-            //有一列为空则跳过
-            if (isCellEmpty(cell)) {
-                return true;
-            }
+            skip = skip && isCellEmpty(cell);
+
         }
-        return false;
+        return skip;
     }
 
     protected boolean isCellEmpty(Cell cell) {
@@ -644,9 +644,9 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected Set<Long> batchInsert(Long projectId, Row row, Map<String, IssueTypeVO> issueTypeMap,
-                                  Map<String, Long> priorityMap, Map<String, Long> versionMap,
-                                  Long userId, Map<String, Long> componentMap, Map<String, Long> sprintMap,
-                                  Sheet sheet, Set<Integer> set) {
+                                    Map<String, Long> priorityMap, Map<String, Long> versionMap,
+                                    Long userId, Map<String, Long> componentMap, Map<String, Long> sprintMap,
+                                    Sheet sheet, Set<Integer> set) {
         Set<Long> issueIds = new HashSet<>();
         //批量插入
         DefaultTransactionDefinition def = new DefaultTransactionDefinition();
@@ -698,9 +698,9 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected Map<String, Object> batchCheck(Long projectId, Sheet sheet, List<String> issueTypeList,
-                                           List<String> priorityList, List<String> versionList, Map<String, IssueTypeVO> issueTypeMap,
-                                           List<String> componentList, List<String> sprintList, int rowNum,
-                                           Set<Integer> illegalRow, Set<Integer> sonSet, int columnNum) {
+                                             List<String> priorityList, List<String> versionList, Map<String, IssueTypeVO> issueTypeMap,
+                                             List<String> componentList, List<String> sprintList, int rowNum,
+                                             Set<Integer> illegalRow, Set<Integer> sonSet, int columnNum) {
         //key为row,value为错误信息
         Map<Integer, Map<Integer, String>> map = new HashMap<>();
         //key为列，value为错误详情
