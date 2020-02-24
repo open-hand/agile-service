@@ -1,11 +1,12 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Form } from 'choerodon-ui';
 import SelectNumber from '@/components/SelectNumber';
 
 const FormItem = Form.Item;
 function WSJF({ getFieldDecorator }) {
   return (
-    <Fragment>
+    <div>
+      <h3 style={{ marginLeft: 10 }}>WSJF:</h3>      
       <FormItem key="userBusinessValue">
         {getFieldDecorator('userBusinessValue', {
         })(
@@ -30,7 +31,7 @@ function WSJF({ getFieldDecorator }) {
           <SelectNumber label="工作规模" selectNumbers={['1', '2', '3', '5', '8', '13', '20']} />,
         )}
       </FormItem>
-    </Fragment>
+    </div>
   );
 }
 
