@@ -1,9 +1,6 @@
 package io.choerodon.agile.infra.utils;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
@@ -54,6 +51,31 @@ public class PageUtil {
             }
         }
         return Sort.by(orders);
+    }
+
+    public static int getBegin(int page, int size) {
+        page = page <= 1 ? 1 : page;
+        return (page - 1) * size;
+    }
+
+    public static PageInfo emptyPageInfo(int page, int size) {
+        Page result = new Page(page, size);
+        try {
+            return result.toPageInfo();
+        } finally {
+            result.close();
+        }
+    }
+
+    public static PageInfo getPageInfo(int page, int size, int total, Collection list) {
+        Page result = new Page(page, size);
+        try {
+            result.setTotal(total);
+            result.addAll(list);
+            return result.toPageInfo();
+        } finally {
+            result.close();
+        }
     }
 
 }

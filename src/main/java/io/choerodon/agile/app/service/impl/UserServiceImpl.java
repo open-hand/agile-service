@@ -65,7 +65,14 @@ public class UserServiceImpl implements UserService {
                 userDTOS.forEach(userDO -> {
                     String ldapName = userDO.getRealName() + "（" + userDO.getLoginName() + "）";
                     String noLdapName = userDO.getRealName() + "（" + userDO.getEmail() + "）";
-                    userMessageMap.put(userDO.getId(), new UserMessageDTO(userDO.getLdap() ? ldapName : noLdapName , userDO.getLoginName(), userDO.getRealName(), userDO.getImageUrl(), userDO.getEmail(), userDO.getLdap()));
+                    userMessageMap.put(userDO.getId(),
+                            new UserMessageDTO(userDO.getLdap() ? ldapName : noLdapName,
+                                    userDO.getLoginName(),
+                                    userDO.getRealName(),
+                                    userDO.getImageUrl(),
+                                    userDO.getEmail(),
+                                    userDO.getLdap(),
+                                    userDO.getId()));
                 });
             } else {
                 userDTOS.forEach(userDO -> userMessageMap.put(userDO.getId(), new UserMessageDTO(userDO.getRealName(), userDO.getLoginName(), userDO.getRealName(), userDO.getImageUrl(), userDO.getEmail(), userDO.getLdap())));
