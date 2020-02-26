@@ -5,7 +5,7 @@ import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 import { QuickSearchEvent } from '../../../../components/QuickSearch';
 import FeatureItem from './FeatureItem';
-import { getFeaturesInProject } from '../../../../api/FeatureApi';
+import { getFeaturesInProject, getFeaturesColor } from '../../../../api/FeatureApi';
 import './Feature.less';
 
 @observer
@@ -15,10 +15,10 @@ class Feature extends Component {
   }
 
   featureRefresh = () => {
-    getFeaturesInProject().then((data) => {
-      BacklogStore.setFeatureData(data);
-    }).catch((error3) => {
-    });
+    Promise.all([getFeaturesInProject(), getFeaturesColor()]).then(([featureData, featureColor]) => {
+      BacklogStore.setFeatureData(featureData);
+      BacklogStore.setColorLookupValue(featureColor);
+    }).catch((error3) => { });
   };
 
   /**
@@ -35,14 +35,14 @@ class Feature extends Component {
     });
   };
 
-  render() { 
+  render() {
     const { refresh, issueRefresh } = this.props;
     return BacklogStore.getCurrentVisible === 'feature' ? (
       <div className="c7n-backlog-epic">
         <div className="c7n-backlog-epicContent">
           <div className="c7n-backlog-epicTitle">
             <p style={{ fontWeight: 'bold' }}>特性</p>
-            <div className="c7n-backlog-epicRight">              
+            <div className="c7n-backlog-epicRight">
               <Icon
                 type="first_page"
                 role="none"
@@ -91,7 +91,7 @@ class Feature extends Component {
                     }}
                   >
                     <FeatureItem
-                      clickFeature={this.handleClickFeature}             
+                      clickFeature={this.handleClickFeature}
                       refresh={refresh}
                       issueRefresh={issueRefresh}
                     />
@@ -139,7 +139,7 @@ class Feature extends Component {
             >
               未指定特性的问题
             </div>
-          </div>          
+          </div>
         </div>
       </div>
     ) : null;

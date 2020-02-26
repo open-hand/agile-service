@@ -17,6 +17,7 @@ class FeatureItem extends Component {
     clickFeature(type);
   };
 
+
   render() {
     const { issueRefresh, refresh } = this.props;
     return (
@@ -30,13 +31,13 @@ class FeatureItem extends Component {
               e.currentTarget.style.border = '2px dashed green';
             }
           }}
-          onMouseLeave={(e) => {        
+          onMouseLeave={(e) => {
             if (BacklogStore.isDragging) {
               BacklogStore.toggleIssueDrag(false);
               e.currentTarget.style.border = 'none';
             }
           }}
-          onMouseUp={(e) => {            
+          onMouseUp={(e) => {
             if (BacklogStore.getIsDragging) {
               BacklogStore.toggleIssueDrag(false);
               e.currentTarget.style.border = 'none';

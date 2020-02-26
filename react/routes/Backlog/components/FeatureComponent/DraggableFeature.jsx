@@ -42,7 +42,7 @@ class DraggableFeature extends Component {
   }
 
   /**
-   *每个epic 右侧下拉选择项的menu
+   *每个feature 右侧下拉选择项的menu
    *
    * @returns
    * @memberof FeatureItem
