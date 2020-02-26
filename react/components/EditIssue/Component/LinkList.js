@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Icon, Popconfirm, Tooltip } from 'choerodon-ui';
 import UserHead from '../../UserHead';
-import { deleteLink } from '../../../api/NewIssueApi';
+import { deleteLink, deleteFeatureLink } from '../../../api/NewIssueApi';
 import PriorityTag from '../../PriorityTag';
 import StatusTag from '../../StatusTag';
 import TypeTag from '../../TypeTag';
@@ -12,11 +12,19 @@ class LinkList extends Component {
   }
 
   handleDeleteIssue(linkId) {
-    const { onRefresh } = this.props;
-    deleteLink(linkId)
-      .then(() => {
-        onRefresh();
-      });
+    const { onRefresh, issue } = this.props;
+    const { typeCode } = issue;
+    if (typeCode !== 'feature') {
+      deleteLink(linkId)
+        .then(() => {
+          onRefresh();
+        });
+    } else {
+      deleteFeatureLink(linkId)
+        .then(() => {
+          onRefresh();
+        });
+    }
   }
 
   render() {
@@ -134,7 +142,7 @@ class LinkList extends Component {
               <Popconfirm
                 title={deleteTipTitle}
                 placement="left"
-                onConfirm={this.confirm.bind(this, issue.linkId)}
+                onConfirm={this.confirm.bind(this, typeCode === 'feature' ? issue.featureDependId : issue.linkId)}
                 onCancel={this.cancel}
                 okText="删除"
                 cancelText="取消"

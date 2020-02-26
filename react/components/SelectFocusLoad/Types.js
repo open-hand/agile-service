@@ -277,8 +277,8 @@ export default {
     request: ({ filter, page }, issueId) => loadFeaturesInLink(page, 20, issueId, filter),
     render: issue => (
       <Option
-        key={issue.issueId}
-        value={issue.issueId}
+        key={issue.featureId}
+        value={issue.featureId}
         showName={issue.issueNum}
       >
         <div style={{
