@@ -19,7 +19,7 @@ import './BacklogHome.less';
 const createSprintKey = Modal.key();
 
 @observer
-class BacklogHome extends Component { 
+class BacklogHome extends Component {
   componentDidMount() {
     const { BacklogStore } = this.props;
     BacklogStore.refresh();
@@ -101,7 +101,7 @@ class BacklogHome extends Component {
   render() {
     const { BacklogStore } = this.props;
     const arr = BacklogStore.getSprintData;
-    const { isInProgram } = IsInProgramStore;
+    const { isInProgram, isShowFeature } = IsInProgramStore;
     return (
       <Fragment>
         <Header title="待办事项">
@@ -155,7 +155,7 @@ class BacklogHome extends Component {
               >
                 版本
               </p>
-              {!isInProgram && (
+              {!isShowFeature && (
                 <p
                   style={{
                     marginTop: 12,
@@ -168,7 +168,7 @@ class BacklogHome extends Component {
                   史诗
                 </p>
               )}
-              {isInProgram && (
+              {isShowFeature && (
                 <p
                   style={{
                     marginTop: 12,
@@ -190,7 +190,7 @@ class BacklogHome extends Component {
                 this.IssueDetail.refreshIssueDetail();
               }}
             />
-            {!isInProgram && (
+            {!isShowFeature && (
               <Epic
                 refresh={this.refresh}
                 visible={BacklogStore.getCurrentVisible}
@@ -199,21 +199,23 @@ class BacklogHome extends Component {
                 }}
               />
             )}
-            <Feature
-              refresh={this.refresh}
-              isInProgram={isInProgram}
-              visible={BacklogStore.getCurrentVisible}
-              issueRefresh={() => {
-                this.IssueDetail.refreshIssueDetail();
-              }}
-            />
+            {isShowFeature ? (
+              <Feature
+                refresh={this.refresh}
+                isInProgram={isShowFeature}
+                visible={BacklogStore.getCurrentVisible}
+                issueRefresh={() => {
+                  this.IssueDetail.refreshIssueDetail();
+                }}
+              />
+            ) : null}
             <Spin spinning={BacklogStore.getSpinIf}>
               <div className="c7n-backlog-content">
-                <SprintList />                
+                <SprintList />
               </div>
             </Spin>
-            <CreateIssue />            
-            <IssueDetail             
+            <CreateIssue />
+            <IssueDetail
               refresh={() => this.refresh(false)}
               onRef={(ref) => {
                 this.IssueDetail = ref;

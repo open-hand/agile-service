@@ -239,7 +239,7 @@ class CreateIssue extends Component {
           timeCriticality,
           rrOeValue,
           jobSize,
-          feature,
+          featureId,
         } = values;
         const { typeCode } = originIssueTypes.find(t => t.id === typeId);
         const exitComponents = originComponents;
@@ -305,7 +305,7 @@ class CreateIssue extends Component {
             rrOeValue,
             jobSize,
           },
-          feature, // 特性字段
+          featureId, // 特性字段
         };
         this.setState({ createLoading: true });
         const deltaOps = description;
@@ -546,6 +546,7 @@ class CreateIssue extends Component {
           </FormItem>
         );
       case 'feature':
+        // 如果在项目群中则不显示史诗 目前 工作列表这边创建问题 不调用这个case
         return (
           <FormItem label="特性">
             {getFieldDecorator('feature', {})(
@@ -591,7 +592,7 @@ class CreateIssue extends Component {
         } else if (IsInProgramStore.isShowFeature) {
           return (
             <FormItem label="特性">
-              {getFieldDecorator('feature', {})(
+              {getFieldDecorator('featureId', {})(
                 <SelectFocusLoad
                   label="特性"
                   allowClear
