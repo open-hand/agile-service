@@ -44,31 +44,6 @@
                 ) = 0
     </select>
 
-    <select id="selectStatusIdIsNotNull" resultType="io.choerodon.agile.infra.dto.IssueStatusDTO">
-        select * from agile_issue_status ais where ais.status_id is not null
-    </select>
-
-    <update id="batchUpdateStatus">
-        <foreach collection="statuses" item="sta" open="" close="" separator=";">
-            update agile_issue_status set status_id = #{sta.statusId} where id = #{sta.id}
-        </foreach>
-    </update>
-
-    <update id="updateAllColumnStatusId">
-        update agile_board_column_status_rel abcsr set abcsr.status_id = IFNULL((select ais.status_id from agile_issue_status ais where abcsr.status_id = ais.id), 0)
-    </update>
-
-    <update id="updateAllStatusId">
-        update agile_issue ai set ai.status_id = IFNULL((select ais.status_id from agile_issue_status ais where ai.status_id = ais.id), 0)
-    </update>
-
-    <update id="updateDataLogStatusId">
-        update agile_data_log adl set adl.old_value = IFNULL((select ais.status_id from agile_issue_status ais where adl.old_value = ais.id ),0) where adl.field = 'status' and adl.old_value is not null;
-        update agile_data_log adl set adl.new_value = IFNULL((select ais.status_id from agile_issue_status ais where adl.new_value = ais.id ),0) where adl.field = 'status' and adl.new_value is not null;
-        update agile_data_log adl set adl.old_value = IFNULL((select ais.status_id from agile_issue_status ais where adl.old_value = ais.id ),0) where adl.field = 'resolution' and adl.old_value is not null;
-        update agile_data_log adl set adl.new_value = IFNULL((select ais.status_id from agile_issue_status ais where adl.new_value = ais.id ),0) where adl.field = 'resolution' and adl.new_value is not null;
-    </update>
-
     <select id="selectByStatusId" resultType="io.choerodon.agile.infra.dto.IssueStatusDTO">
         SELECT
         ais.*,

@@ -15,16 +15,6 @@ public interface IssueStatusMapper extends Mapper<IssueStatusDTO> {
 
     List queryUnCorrespondStatus(@Param("projectId") Long projectId, @Param("boardId") Long boardId, @Param("realStatusIds") List<Long> realStatusIds);
 
-    List<IssueStatusDTO> selectStatusIdIsNotNull();
-
-    void batchUpdateStatus(@Param("statuses") List<IssueStatusDTO> statuses);
-
-    void updateAllStatusId();
-
-    void updateAllColumnStatusId();
-
-    void updateDataLogStatusId();
-
     IssueStatusDTO selectByStatusId(@Param("projectId") Long projectId, @Param("statusId") Long statusId);
 
     /**
