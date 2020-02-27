@@ -10,7 +10,7 @@ import { DragDropContextProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { observer } from 'mobx-react-lite';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
-import HeaderLine from '@/common/Headerline';
+import HeaderLine from '@/components/HeaderLine';
 import Minimap from '../../../components/MiniMap';
 import Empty from '../../../components/Empty';
 import epicPic from '../../../assets/image/emptyStory.svg';
