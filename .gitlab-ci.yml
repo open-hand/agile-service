@@ -19,7 +19,7 @@ build front:
       - src/**/*
       - docker/**/*
       - chart/**/*
-      - init-database.sh
+      - init-mysql-database.sh
       - .circleci/**/*
       - .gitignore
       - .github/**/*
