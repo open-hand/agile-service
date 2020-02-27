@@ -1,11 +1,13 @@
 package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.github.pagehelper.PageInfo;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.domain.IssueType;
 import io.choerodon.agile.app.domain.Predefined;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.FileFeignClient;
 import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.mapper.*;
@@ -45,8 +47,17 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(ExcelServiceImpl.class);
 
-    protected static final String[] FIELDS_NAME = {"概要", "描述", "优先级", "问题类型", "故事点", "剩余时间", "修复版本", "史诗名称", "模块", "冲刺"};
-    protected static final String[] FIELDS = {"summary", "description", "priorityName", "typeName", "storyPoints", "remainTime", "version", "epicName", "component", "sprint"};
+    protected static final String[] FIELDS_NAME =
+            {"问题类型*", "所属史诗", "模块", "冲刺", "概述*", "子任务概述(仅子任务生效)", "经办人",
+                    "优先级", "预估时间(小时)", "版本", "史诗名称(仅问题类型为史诗时生效)", "故事点"};
+    protected static final String[] FIELDS =
+            {"typeName", "belongsEpic", "component", "sprint", "summary", "subTaskSummary",
+                    "manager", "priorityName", "remainTime", "version", "epicName", "storyPoints"};
+
+    //    protected static final String[] FIELDS_NAME = {"概要", "描述", "优先级", "问题类型", "故事点", "剩余时间", "修复版本", "史诗名称", "模块", "冲刺"};
+//
+//
+//    protected static final String[] FIELDS = {"summary", "description", "priorityName", "typeName", "storyPoints", "remainTime", "version", "epicName", "component", "sprint"};
     protected static final String BACKETNAME = "agile-service";
     protected static final String SUB_TASK = "sub_task";
     protected static final String UPLOAD_FILE = "upload_file";
@@ -105,6 +116,9 @@ public class ExcelServiceImpl implements ExcelService {
     @Autowired
     protected PlatformTransactionManager transactionManager;
 
+    @Autowired
+    protected BaseFeignClient baseFeignClient;
+
     private ModelMapper modelMapper = new ModelMapper();
 
     @PostConstruct
@@ -115,6 +129,8 @@ public class ExcelServiceImpl implements ExcelService {
     @Override
     public void download(Long projectId, Long organizationId, HttpServletRequest request, HttpServletResponse response) {
         List<Predefined> predefinedList = getPredefinedList(organizationId, projectId);
+        //所属史诗预定义值
+        predefinedList.add(getEpicPredefined(projectId));
 
         Workbook wb = new XSSFWorkbook();
         // create guide sheet
@@ -122,8 +138,14 @@ public class ExcelServiceImpl implements ExcelService {
         Sheet sheet = wb.createSheet(IMPORT_TEMPLATE_NAME);
         Row row = sheet.createRow(0);
         CellStyle style = CatalogExcelUtil.getHeadStyle(wb);
-        for (int i = 0; i < 10; i++) {
-            sheet.setColumnWidth(i, 3500);
+        int columnNum = FIELDS_NAME.length;
+        for (int i = 0; i < columnNum; i++) {
+            int width = 3500;
+            //子任务名称和史诗名称两列加宽
+            if (i == 5 || i == 10) {
+                width = 8000;
+            }
+            sheet.setColumnWidth(i, width);
         }
         generateHeaders(row, style, Arrays.asList(FIELDS_NAME));
 
@@ -134,6 +156,17 @@ public class ExcelServiceImpl implements ExcelService {
         } catch (Exception e) {
             LOGGER.info(e.getMessage());
         }
+    }
+
+    private Predefined getEpicPredefined(Long projectId) {
+        List<EpicDataVO> epics = issueService.listEpic(projectId);
+        List<String> values = new ArrayList<>();
+        epics.forEach(e -> {
+            Long id = e.getIssueId();
+            String summary = e.getSummary();
+            values.add(id + ":" + summary);
+        });
+        return new Predefined(values, 1, 500, 1, 1, "hidden_epic", 8);
     }
 
     protected void fillInPredefinedValues(Workbook wb, Sheet sheet, List<Predefined> predefinedList) {
@@ -165,7 +198,7 @@ public class ExcelServiceImpl implements ExcelService {
                 priorityList.add(priorityVO.getName());
             }
         }
-        predefinedList.add(new Predefined(priorityList, 1, 500, 2, 2, HIDDEN_PRIORITY, 2));
+        predefinedList.add(new Predefined(priorityList, 1, 500, 7, 7, HIDDEN_PRIORITY, 2));
 
         List<String> issueTypeList = new ArrayList<>();
         for (IssueTypeVO issueTypeVO : issueTypeVOList) {
@@ -173,9 +206,7 @@ public class ExcelServiceImpl implements ExcelService {
                 issueTypeList.add(issueTypeVO.getName());
             }
         }
-        String[] issueType = {"子任务", "子缺陷"};
-        issueTypeList.addAll(Arrays.asList(issueType));
-        predefinedList.add(new Predefined(issueTypeList, 1, 500, 3, 3, HIDDEN_ISSUE_TYPE, 3));
+        predefinedList.add(new Predefined(issueTypeList, 1, 500, 0, 0, HIDDEN_ISSUE_TYPE, 3));
 
         List<String> versionList = new ArrayList<>();
         for (ProductVersionCommonDTO productVersionCommonDTO : productVersionCommonDTOList) {
@@ -183,20 +214,29 @@ public class ExcelServiceImpl implements ExcelService {
                 versionList.add(productVersionCommonDTO.getName());
             }
         }
-        predefinedList.add(new Predefined(versionList, 1, 500, 6, 6, HIDDEN_FIX_VERSION, 4));
+        predefinedList.add(new Predefined(versionList, 1, 500, 9, 9, HIDDEN_FIX_VERSION, 4));
 
         List<String> componentList = new ArrayList<>();
         for (IssueComponentDTO issueComponentDTO : issueComponentDTOList) {
             componentList.add(issueComponentDTO.getName());
         }
-        predefinedList.add(new Predefined(componentList, 1, 500, 8, 8, HIDDEN_COMPONENT, 5));
+        predefinedList.add(new Predefined(componentList, 1, 500, 2, 2, HIDDEN_COMPONENT, 5));
 
         List<String> sprintList = new ArrayList<>();
         for (SprintDTO sprintDTO : sprintDTOList) {
             sprintList.add(sprintDTO.getSprintName());
         }
-        predefinedList.add(new Predefined(sprintList, 1, 500, 9, 9, HIDDEN_SPRINT, 6));
+        predefinedList.add(new Predefined(sprintList, 1, 500, 3, 3, HIDDEN_SPRINT, 6));
 
+        ResponseEntity<PageInfo<UserDTO>> response = baseFeignClient.listUsersByProjectId(projectId, 1, 0);
+        List<UserDTO> users = response.getBody().getList();
+        List<String> managers = new ArrayList<>();
+        users.forEach(u -> {
+            String realName = u.getRealName();
+            String loginName = u.getLoginName();
+            managers.add(realName + "(" + loginName + ")");
+        });
+        predefinedList.add(new Predefined(managers, 1, 500, 6, 6, "hidden_manager", 7));
         return predefinedList;
     }
 
