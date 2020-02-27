@@ -19,5 +19,5 @@ export function exportFeatures(search) {
 } 
 
 export function getFeaturesColor() {
-  return axios.post('/agile/v1/lookup_values/feature_color');
+  return axios.get('/agile/v1/lookup_values/feature_color');
 } 
