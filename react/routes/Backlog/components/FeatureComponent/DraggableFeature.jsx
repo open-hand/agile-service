@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { stores, axios, Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react';
 import classnames from 'classnames';
-import { Menu, Icon } from 'choerodon-ui';
+import { Menu, Icon, Dropdown } from 'choerodon-ui';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
 const { AppState } = stores;
@@ -42,7 +42,7 @@ class DraggableFeature extends Component {
   }
 
   /**
-   *每个epic 右侧下拉选择项的menu
+   *每个feature 右侧下拉选择项的menu
    *
    * @returns
    * @memberof FeatureItem
@@ -67,7 +67,7 @@ class DraggableFeature extends Component {
                     issueId: item.issueId,
                     objectVersionNumber: item.objectVersionNumber,
                   };
-                  BacklogStore.axiosUpdateIssue(inputData).then((res) => {
+                  BacklogStore.axiosUpdateFeatureColor(inputData).then((res) => {
                     BacklogStore.updateFeature(res);
                     refresh();
                   }).catch((error) => {
@@ -77,50 +77,10 @@ class DraggableFeature extends Component {
             ))}
           </div>
         </div>
-        <Menu.Divider />
-        <Menu.Item key="1">编辑名称</Menu.Item>
-        <Menu.Item key="2">查看史诗详情</Menu.Item>
       </Menu>
     );
   }
 
-  /**
-   *epic名称保存事件
-   *
-   * @param {*} e
-   * @memberof FeatureItem
-   */
-  handleSave = (e) => {
-    const { item, index, refresh } = this.props;
-    e.stopPropagation();
-    const { value } = e.target;
-    if (item && item.epicName === value) {
-      this.setState({
-        editName: false,
-      });
-    } else {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/check_epic_name?epicName=${value}`)
-        .then((checkRes) => {
-          if (checkRes) {
-            Choerodon.prompt('史诗名称重复');
-          } else {
-            this.setState({
-              editName: false,
-            });
-            const req = {
-              objectVersionNumber: item.objectVersionNumber,
-              issueId: item.issueId,
-              epicName: value,
-            };
-            BacklogStore.axiosUpdateIssue(req).then((res) => {
-              BacklogStore.updateFeature(res);
-              refresh();
-            }).catch((error) => {
-            });
-          }
-        });
-    }
-  }
 
   toggleExpand = (e) => {
     e.stopPropagation();
@@ -154,10 +114,27 @@ class DraggableFeature extends Component {
             role="none"
             onClick={this.toggleExpand}
           />
+      
           <div style={{ width: '100%' }}>
             <div className="c7n-backlog-epicItemsHead">              
               <p>{item.summary}</p>
+              <Dropdown onClick={e => e.stopPropagation()} overlay={this.getmenu()} trigger={['click']}>
+                <Icon
+                  style={{
+                    width: 12,
+                    height: 12,
+                    background: item.color || '#f953ba',
+                    color: 'white',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    borderRadius: 2,
+                  }}
+                  type="arrow_drop_down"
+                />
+              </Dropdown>
             </div>
+         
             <div
               className="c7n-backlog-epicItemProgress"
             >

@@ -179,6 +179,10 @@ export function deleteLink(issueLinkId, projectId = AppState.currentMenuType.id)
   return axios.delete(`/agile/v1/projects/${projectId}/issue_links/${issueLinkId}`);
 }
 
+export function deleteFeatureLink(featureDependId, projectId = AppState.currentMenuType.id) {
+  return axios.delete(`/agile/v1/projects/${projectId}/board_depend/${featureDependId}`);
+}
+
 export function createWorklog(data, projectId = AppState.currentMenuType.id) {
   return axios.post(`/agile/v1/projects/${projectId}/work_log`, data);
 }
@@ -270,9 +274,19 @@ export function createLink(issueId, issueLinkCreateVOList) {
   return axios.post(`/agile/v1/projects/${projectId}/issue_links/${issueId}`, issueLinkCreateVOList);
 }
 
-export function loadLinkIssues(issueId) {
+export function createFeatureLink(data) {
   const projectId = AppState.currentMenuType.id;
-  return axios.get(`/agile/v1/projects/${projectId}/issue_links/${issueId}`);
+  return axios.put(`/agile/v1/projects/${projectId}/board_depend/batch_create_depend`, data);
+}
+
+export function loadLinkIssues(issueId, applyType = 'project') {
+  const projectId = AppState.currentMenuType.id;
+  // eslint-disable-next-line no-cond-assign
+  if (applyType === 'project') {
+    return axios.get(`/agile/v1/projects/${projectId}/issue_links/${issueId}`);
+  } else {
+    return axios.get(`/agile/v1/projects/${projectId}/board_depend/feature_depend/${issueId}`);
+  }
 }
 
 /**

@@ -95,6 +95,7 @@ import Divider from './Divider';
         {
           createLinkTaskShow ? (
             <CreateLinkTask
+              issue={issue}
               issueId={issueId}
               issueType={typeCode}
               visible={createLinkTaskShow}

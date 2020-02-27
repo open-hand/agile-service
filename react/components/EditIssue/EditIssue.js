@@ -103,7 +103,7 @@ const EditIssue = observer(() => {
       axios.all([
         loadDocs(id),
         programId ? loadDatalogsProgram(id, programId) : loadDatalogs(id),
-        loadLinkIssues(id),
+        loadLinkIssues(id, 'program'),
       ]).then(axios.spread((doc, dataLogs, linkIssues) => {
         if (idRef.current !== id) {
           return;

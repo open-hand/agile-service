@@ -305,6 +305,11 @@ class BacklogStore {
     return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issues`, data);
   }
 
+  // 更新特性颜色
+  axiosUpdateFeatureColor(data) {
+    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/update_feature`, data);
+  }
+
   @computed get getChosenVersion() {
     return this.chosenVersion;
   }
@@ -360,7 +365,7 @@ class BacklogStore {
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version`);
   }
 
-  @action setSprintData({ backlogData, sprintData }) {    
+  @action setSprintData({ backlogData, sprintData }) {
     this.issueMap.set('0', backlogData.backLogIssue ? backlogData.backLogIssue : []);
     const { backLogIssue, backlogIssueCount } = backlogData;
     this.sprintData = sprintData.map((sprint) => {
@@ -369,9 +374,9 @@ class BacklogStore {
       // 这里只保留几个字段，省内存
       return {
         ...sprint,
-        issueSearchVOList: null,        
+        issueSearchVOList: null,
         type: 'sprint',
-        expand: true,    
+        expand: true,
       };
     }).concat({
       type: 'backlog',
@@ -715,6 +720,12 @@ class BacklogStore {
     const updateIndex = this.epicList.findIndex(item => epic.issueId === item.issueId);
     this.epicList[updateIndex].name = epic.name;
     this.epicList[updateIndex].objectVersionNumber = epic.objectVersionNumber;
+  }
+
+  @action updateFeature(feature) {
+    const updateIndex = this.featureList.findIndex(item => feature.issueId === item.issueId);
+    this.featureList[updateIndex].name = feature.name;
+    this.featureList[updateIndex].objectVersionNumber = feature.objectVersionNumber;
   }
 
   @action moveEpic(sourceIndex, destinationIndex) {

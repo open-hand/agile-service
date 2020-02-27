@@ -16,4 +16,8 @@ export function getFeaturesByEpic(epicId) {
 }
 export function exportFeatures(search) {
   return axios.post(`/zuul/agile/v1/projects/${getProjectId()}/issues/program/export?organizationId=${getOrganizationId()}`, search, { responseType: 'arraybuffer' });
-}
+} 
+
+export function getFeaturesColor() {
+  return axios.get('/agile/v1/lookup_values/feature_color');
+} 
