@@ -39,7 +39,7 @@ function getStyle({ draggableStyle, virtualStyle, isDragging }) {
   return combined;
 }
 const Item = memo(({ issue }) => {
-  const { isInProgram } = IsInProgramStore;
+  const { isShowFeature } = IsInProgramStore; // 由后端判断是否显示特性
   return (
     <Fragment>
       <div
@@ -67,7 +67,7 @@ const Item = memo(({ issue }) => {
             </span>
           </Tooltip>
         ) : ''}
-        {!isInProgram && issue.epicName ? (
+        {!isShowFeature && issue.epicName ? (
           <Tooltip title={`史诗: ${issue.epicName}`}>
             <span 
               className={`${prefix}-epic`}
@@ -80,10 +80,14 @@ const Item = memo(({ issue }) => {
             </span>
           </Tooltip>
         ) : ''}
-        {isInProgram && issue.featureName ? (
+        {isShowFeature && issue.featureName ? (
           <Tooltip title={`特性: ${issue.featureName}`}>
             <span     
-              className={`${prefix}-feature`}             
+              className={`${prefix}-feature`}   
+              style={{
+                color: issue.color || issue.featureColor,
+                border: `1px solid ${issue.color || issue.featureColor}`,
+              }}          
             >
               {issue.featureName}
             </span>
