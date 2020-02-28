@@ -145,11 +145,9 @@ public class IssueStatusServiceImpl implements IssueStatusService {
     @Override
     public IssueStatusVO moveStatusToColumn(Long projectId, Long statusId, StatusMoveVO statusMoveVO) {
         // 判断是否在同一列中操作，更新列中position
-        Boolean sameRow = statusMoveVO.getColumnId() != statusMoveVO.getOriginColumnId();
-        updateColumnPosition(projectId, statusId, statusMoveVO,sameRow);
-
+        Boolean sameRow = statusMoveVO.getColumnId() == statusMoveVO.getOriginColumnId();
         deleteColumnStatusRel(projectId, statusId, statusMoveVO.getOriginColumnId());
-        createColumnStatusRel(projectId, statusId, statusMoveVO);
+        updateColumnPosition(projectId, statusId, statusMoveVO,sameRow);
         return modelMapper.map(issueStatusMapper.selectByStatusId(projectId, statusId), IssueStatusVO.class);
     }
 
@@ -264,50 +262,62 @@ public class IssueStatusServiceImpl implements IssueStatusService {
     }
 
     private void updateColumnPosition(Long projectId, Long statusId, StatusMoveVO statusMoveVO,Boolean sameRow) {
-        ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
-        columnStatusRelDTO.setProjectId(projectId);
-        columnStatusRelDTO.setColumnId(statusMoveVO.getColumnId());
-        List<ColumnStatusRelDTO> collect = columnStatusRelMapper.select(columnStatusRelDTO);
+        //查询移动到目的列的已有的所有状态
+        List<ColumnStatusRelDTO> collect = columnStatusRelMapper.selectStatusRel(projectId,statusMoveVO.getColumnId(),statusId);
+        // 如果不是移动到同一个列，对原列中的状态重新改变position
+        if(Boolean.FALSE.equals(sameRow)){
+            updateOlderColumn(projectId,statusId,statusMoveVO);
+        }
+        // 拥有的所有状态为空，直接接创建一个
         if (CollectionUtils.isEmpty(collect)) {
+            createColumnStatusRel(projectId,statusId,statusMoveVO);
             return;
         }
-        Map<Integer, ColumnStatusRelDTO> map;
-        Boolean isUp = false;
-        // 同一列中改变位置要判断放入的方向是向上还是向下
-        if (Boolean.TRUE.equals(sameRow)) {
-            List<ColumnStatusRelDTO> collect1 = collect.stream().filter(v -> statusId.equals(v.getStatusId())).collect(Collectors.toList());
-            if (!CollectionUtils.isEmpty(collect1)) {
-                ColumnStatusRelDTO columnStatusRelDTO1 = collect1.get(0);
-                if (columnStatusRelDTO1.getPosition() < statusMoveVO.getPosition()) {
-                    // 相同类改变位置,向上则向上查找,position相同以及位置靠前的数据依次减一
-                    isUp = true;
-                }
-            }
-            map = collect.stream().filter(v -> !statusId.equals(v.getStatusId())).collect(Collectors.toMap(ColumnStatusRelDTO::getPosition, Function.identity()));
-        } else {
-            // 不同列默认是向下,position相同以及以后的数据依次加一
-            map = collect.stream().collect(Collectors.toMap(ColumnStatusRelDTO::getPosition, Function.identity()));
-        }
-        cycleUpdate(statusMoveVO.getPosition(), map, isUp);
+        int size = collect.size() + 1;
+        // 对指定列进行排序，新增传过来的状态
+        cycleUpdate(projectId,statusId,size,statusMoveVO,collect);
     }
 
-    private void cycleUpdate(Integer position, Map<Integer, ColumnStatusRelDTO> map,Boolean isUp) {
-        if (position < 0) {
+    private void updateOlderColumn(Long projectId,Long statusId,StatusMoveVO statusMoveVO){
+        // 查询当前列中的状态，按position升序排列
+        List<ColumnStatusRelDTO> columnStatusRelDTOS = columnStatusRelMapper.selectStatusRel(projectId, statusMoveVO.getOriginColumnId(), statusId);
+        if(!CollectionUtils.isEmpty(columnStatusRelDTOS)){
+            for (int i=0;i<columnStatusRelDTOS.size();i++){
+                ColumnStatusRelDTO columnStatusRelDTO = columnStatusRelDTOS.get(i);
+                columnStatusRelDTO.setPosition(i);
+                baseUpdatePosition(columnStatusRelDTO);
+            }
+        }
+    }
+
+    private void cycleUpdate(Long projectId,Long statusId,int size,StatusMoveVO statusMoveVO,List<ColumnStatusRelDTO> columnStatusRelDTOS){
+        if(CollectionUtils.isEmpty(columnStatusRelDTOS)){
             return;
         }
-        ColumnStatusRelDTO columnStatusRelDTO = map.get(position);
-        if (!ObjectUtils.isEmpty(columnStatusRelDTO)) {
-            int nextPosition;
-            if (isUp) {
-                nextPosition = position - 1;
-                columnStatusRelDTO.setPosition(nextPosition);
-            } else {
-                nextPosition = position + 1;
-                columnStatusRelDTO.setPosition(nextPosition);
+        boolean isInsert = false;
+        for(int i= 0; i<size;i++){
+            if(statusMoveVO.getPosition() == i){
+                isInsert = true;
+                createColumnStatusRel(projectId,statusId,statusMoveVO);
             }
-            deleteColumnStatusRel(columnStatusRelDTO.getProjectId(), columnStatusRelDTO.getStatusId(), columnStatusRelDTO.getColumnId());
-            createColumnStatusRel(columnStatusRelDTO.getProjectId(), columnStatusRelDTO.getStatusId(), modelMapper.map(columnStatusRelDTO, StatusMoveVO.class));
-            cycleUpdate(nextPosition, map, isUp);
+            else {
+                int position = i;
+                if(Boolean.TRUE.equals(isInsert)){
+                    position = position -1;
+                }
+                ColumnStatusRelDTO columnStatusRelDTO = columnStatusRelDTOS.get(position);
+                if(ObjectUtils.isEmpty(columnStatusRelDTO)){
+                    break;
+                }
+                columnStatusRelDTO.setPosition(i);
+                baseUpdatePosition(columnStatusRelDTO);
+            }
+        }
+    }
+
+    public void baseUpdatePosition(ColumnStatusRelDTO columnStatusRelDTO){
+        if(columnStatusRelMapper.updatePosition(columnStatusRelDTO) != 1){
+            throw new CommonException("error.update.position");
         }
     }
 }
