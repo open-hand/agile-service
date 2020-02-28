@@ -93,7 +93,7 @@ class LinkList extends Component {
           )
         }
         {
-          showAssignee ? (
+          typeCode !== 'feature' && showAssignee ? (
             <Tooltip mouseEnterDelay={0.5} title={`经办人： ${issue.assigneeName}`}>
               <div style={{
                 marginRight: 29, display: 'flex', justifyContent: 'flex-end', 
@@ -122,10 +122,10 @@ class LinkList extends Component {
           width: '48px', marginRight: '8px', display: 'flex', justifyContent: 'flex-end', 
         }}
         >
-          <Tooltip mouseEnterDelay={0.5} title={`任务状态： ${issue.statusVO.name}`}>
+          <Tooltip mouseEnterDelay={0.5} title={`任务状态： ${typeCode !== 'feature' ? (issue.statusVO && issue.statusVO.name) : (issue.statusMapVO && issue.statusMapVO.name)}`}>
             <div>
               <StatusTag
-                data={issue.statusVO}
+                data={typeCode !== 'feature' ? issue.statusVO : issue.statusMapVO}
               />
             </div>
           </Tooltip>
