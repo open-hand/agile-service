@@ -53,6 +53,7 @@ class IssueList extends Component {
     const {
       issue, i, showAssignee, onOpen,
     } = this.props;
+    const { typeCode } = issue;
     const menu = AppState.currentMenuType;
     const { type, id: projectId, organizationId: orgId } = menu;
     const issueTypeName = this.getIssueTypeName(issue.typeCode);
@@ -67,7 +68,8 @@ class IssueList extends Component {
           borderTop: !i ? '1px solid rgba(0, 0, 0, 0.12)' : '',
         }}
       >
-        <Tooltip mouseEnterDelay={0.5} title={`任务类型: ${issueTypeName}`}>
+        <div>关联问题</div>
+        {/* <Tooltip mouseEnterDelay={0.5} title={`任务类型: ${issueTypeName}`}>
           <div>
             <TypeTag
               data={issue.issueTypeVO}
@@ -90,17 +92,21 @@ class IssueList extends Component {
             </p>
           </div>
         </Tooltip>
-        <div style={{ marginRight: '8px', overflow: 'hidden' }}>
-          <Tooltip mouseEnterDelay={0.5} title={`优先级： ${issue.priorityVO.name}`}>
-            <div>
-              <PriorityTag
-                priority={issue.priorityVO}
-              />
-            </div>
-          </Tooltip>
-        </div>
         {
-          showAssignee ? (
+          typeCode !== 'feature' && (
+          <div style={{ marginRight: '8px', overflow: 'hidden' }}>
+            <Tooltip mouseEnterDelay={0.5} title={`优先级： ${issue.priorityVO.name}`}>
+              <div>
+                <PriorityTag
+                  priority={issue.priorityVO}
+                />
+              </div>
+            </Tooltip>
+          </div>
+          )
+        }
+        {
+          typeCode !== 'feature' && showAssignee ? (
             <div style={{ marginRight: 10, display: 'flex', justifyContent: 'flex-end' }}>
               <div>
                 <UserHead
@@ -121,10 +127,10 @@ class IssueList extends Component {
           marginRight: '8px', display: 'flex', justifyContent: 'flex-end',
         }}
         >
-          <Tooltip mouseEnterDelay={0.5} title={`任务状态： ${issue.statusVO && issue.statusVO.name}`}>
+          <Tooltip mouseEnterDelay={0.5} title={`任务状态： ${typeCode !== 'feature' ? (issue.statusVO && issue.statusVO.name) : (issue.statusMapVO && issue.statusMapVO.name)}`}>
             <div>
               <StatusTag
-                data={issue.statusVO}
+                data={typeCode !== 'feature' ? issue.statusVO : issue.statusMapVO}
               />
             </div>
           </Tooltip>
@@ -150,6 +156,7 @@ class IssueList extends Component {
             </Popconfirm>
           </div>
         </Permission>
+       */}
       </div>
     );
   }

@@ -126,7 +126,7 @@ class CreateLinkTask extends Component {
           const { linkTypeId, issues } = values;
           const postData = {
             piId: issueObj.activePi && issueObj.activePi.id,
-            boardFeatureId: issueId,
+            boardFeatureId: issueObj.featureVO.id,
             dependBoardFeatureIds: _.map(issues, Number),
             type: linkTypeId.split('+')[0],
             forward: linkTypeId.split('+')[1],

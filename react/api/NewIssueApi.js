@@ -276,7 +276,7 @@ export function createLink(issueId, issueLinkCreateVOList) {
 
 export function createFeatureLink(data) {
   const projectId = AppState.currentMenuType.id;
-  return axios.put(`/agile/v1/projects/${projectId}/board_depend/batch_create_depend`, data);
+  return axios.post(`/agile/v1/projects/${projectId}/board_depend/batch_create_depend`, data);
 }
 
 export function loadLinkIssues(issueId, applyType = 'project') {
