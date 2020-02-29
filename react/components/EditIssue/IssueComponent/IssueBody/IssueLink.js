@@ -49,9 +49,11 @@ import Divider from './Divider';
 
   renderLinkIssues() {
     const { store } = this.props;
+    const issue = store.getIssue;
+    const { typeCode } = issue;
     const linkIssues = store.getLinkIssues;
     // const group = _.groupBy(linkIssues.filter(i => i.applyType === 'agile'), 'ward');
-    const group = _.groupBy(linkIssues, 'ward');
+    const group = typeCode !== 'feature' ? _.groupBy(linkIssues, 'ward') : _.groupBy(linkIssues, 'relationName');
     return (
       <div className="c7n-tasks">
         {
@@ -59,8 +61,8 @@ import Divider from './Divider';
             <div key={k}>
               <div style={{ margin: '7px auto' }}>{k}</div>
               {
-                _.map(v, (linkIssue, i) => this.renderLinkList(linkIssue, i))
-              }
+                  _.map(v, (linkIssue, i) => this.renderLinkList(linkIssue, i))
+                }
             </div>
           ))
         }

@@ -93,6 +93,27 @@ class LinkList extends Component {
           )
         }
         {
+          typeCode === 'feature' && (
+          <div style={{ marginRight: '8px', overflow: 'hidden' }}>
+            <Tooltip mouseEnterDelay={0.5} title={`wsjf：${issue.wsjf}`}>
+              <span style={{
+                width: '30px',
+                height: '20px',
+                backgroundColor: '#EBEBEB',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '2px',
+                color: 'rgba(0, 0, 0, 0.85)',
+              }}
+              >
+                {(issue.wsjf || issue.wsjf === 0) ? issue.wsjf : '无'}
+              </span>
+            </Tooltip>
+          </div>
+          )
+        }
+        {
           typeCode !== 'feature' && showAssignee ? (
             <Tooltip mouseEnterDelay={0.5} title={`经办人： ${issue.assigneeName}`}>
               <div style={{
