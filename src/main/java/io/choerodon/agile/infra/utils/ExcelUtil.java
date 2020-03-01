@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.utils;
 
+import io.choerodon.agile.app.domain.Predefined;
 import io.choerodon.core.exception.CommonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -142,38 +143,48 @@ public class ExcelUtil {
         initGuideSheetRemind(wb, sheet, "请至下一页，填写信息");
     }
 
-    public static Workbook generateExcelAwesome(Workbook generateExcel, List<Integer> errorRows, Map<Integer, List<Integer>> errorMapList, String[] fieldsName, List<String> priorityList, List<String> issueTypeList, List<String> versionList, String sheetName, List<String> componentList, List<String> sprintList) {
+    public static Workbook generateExcelAwesome(Workbook generateExcel,
+                                                List<Integer> errorRows,
+                                                Map<Integer, List<Integer>> errorMapList,
+                                                String[] fieldsName,
+                                                List<String> priorityList,
+                                                List<String> issueTypeList,
+                                                List<String> versionList,
+                                                String sheetName,
+                                                List<String> componentList,
+                                                List<String> sprintList,
+                                                List<String> users,
+                                                Predefined theSecondColumnPredefined) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         // create guide sheet
         createGuideSheet(workbook, initGuideSheet());
         Sheet resultSheet = workbook.createSheet(sheetName);
-        for (int i = 0; i < 10; i++) {
-            resultSheet.setColumnWidth(i, 3500);
-        }
-        Row titleRow = resultSheet.createRow(0);
         CellStyle style = CatalogExcelUtil.getHeadStyle(workbook);
-        CatalogExcelUtil.initCell(titleRow.createCell(0), style, fieldsName[0]);
-        CatalogExcelUtil.initCell(titleRow.createCell(1), style, fieldsName[1]);
-        CatalogExcelUtil.initCell(titleRow.createCell(2), style, fieldsName[2]);
-        CatalogExcelUtil.initCell(titleRow.createCell(3), style, fieldsName[3]);
-        CatalogExcelUtil.initCell(titleRow.createCell(4), style, fieldsName[4]);
-        CatalogExcelUtil.initCell(titleRow.createCell(5), style, fieldsName[5]);
-        CatalogExcelUtil.initCell(titleRow.createCell(6), style, fieldsName[6]);
-        CatalogExcelUtil.initCell(titleRow.createCell(7), style, fieldsName[7]);
-        CatalogExcelUtil.initCell(titleRow.createCell(8), style, fieldsName[8]);
-        CatalogExcelUtil.initCell(titleRow.createCell(9), style, fieldsName[9]);
+        generateHeaders(resultSheet, style, Arrays.asList(fieldsName));
 
-        workbook = dropDownList2007(workbook, resultSheet, priorityList, 1, 500, 2, 2, "hidden_priority", 2);
-        workbook = dropDownList2007(workbook, resultSheet, issueTypeList, 1, 500, 3, 3, "hidden_issue_type", 3);
-//        if (!versionList.isEmpty()) {
-        workbook = dropDownList2007(workbook, resultSheet, versionList, 1, 500, 6, 6, "hidden_fix_version", 4);
-//        }
-//        if (!componentList.isEmpty()) {
-        workbook = dropDownList2007(workbook, resultSheet, componentList, 1, 500, 8, 8, "hidden_component", 5);
-//        }
-//        if (!sprintList.isEmpty()) {
-        workbook = dropDownList2007(workbook, resultSheet, sprintList, 1, 500, 9, 9, "hidden_sprint", 6);
-//        }
+        List<Predefined> predefinedList = new ArrayList<>();
+        predefinedList.add(new Predefined(priorityList, 1, 500, 7, 7, "hidden_priority", 2));
+        predefinedList.add(new Predefined(issueTypeList, 1, 500, 0, 0, "hidden_issue_type", 3));
+        predefinedList.add(new Predefined(versionList, 1, 500, 9, 9, "hidden_fix_version", 4));
+        predefinedList.add(new Predefined(componentList, 1, 500, 2, 2, "hidden_component", 5));
+        predefinedList.add(new Predefined(sprintList, 1, 500, 3, 3, "hidden_sprint", 6));
+        predefinedList.add(new Predefined(users, 1, 500, 6, 6, "hidden_manager", 7));
+        predefinedList.add(theSecondColumnPredefined);
+
+        for (Predefined predefined : predefinedList) {
+            workbook =
+                    dropDownList2007(
+                            workbook,
+                            resultSheet,
+                            predefined.values(),
+                            predefined.startRow(),
+                            predefined.endRow(),
+                            predefined.startCol(),
+                            predefined.endCol(),
+                            predefined.hidden(),
+                            predefined.hiddenSheetIndex());
+        }
+
         Sheet sheet = generateExcel.getSheetAt(1);
         int size = sheet.getPhysicalNumberOfRows();
         XSSFCellStyle ztStyle = workbook.createCellStyle();
@@ -201,6 +212,24 @@ public class ExcelUtil {
         }
         return workbook;
     }
+
+    public static void generateHeaders(Sheet sheet, CellStyle style, List<String> headers) {
+        Row row = sheet.createRow(0);
+        int columnNum = headers.size();
+        for (int i = 0; i < columnNum; i++) {
+            int width = 3500;
+            //子任务名称和史诗名称两列加宽
+            if (i == 5 || i == 10) {
+                width = 8000;
+            }
+            sheet.setColumnWidth(i, width);
+        }
+
+        for (int i = 0; i < headers.size(); i++) {
+            CatalogExcelUtil.initCell(row.createCell(i), style, headers.get(i));
+        }
+    }
+
 
     public static <T> SXSSFWorkbook generateExcel(List<T> list, Class<T> clazz, String[] fieldsName, String[] fields, String sheetName) {
         //1、创建工作簿
