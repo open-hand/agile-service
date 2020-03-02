@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 import javax.validation.Valid;
 import java.util.List;
 
-//import io.choerodon.agile.infra.dto.ApplicationDTO;
-
 /**
  * @author dinghuang123@gmail.com
  * @since 2018/5/24
@@ -36,6 +34,11 @@ public class BaseFeignClientFallback implements BaseFeignClient {
 
     @Override
     public ResponseEntity<ProjectVO> queryProject(Long id) {
+        throw new CommonException(QUERY_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<PageInfo<UserDTO>> listUsersByProjectId(Long id, int page, int size) {
         throw new CommonException(QUERY_ERROR);
     }
 

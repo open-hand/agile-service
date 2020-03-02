@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-//import io.choerodon.agile.infra.dto.ApplicationDTO;
-
 /**
  * @author dinghuang123@gmail.com
  * @since 2018/5/24
@@ -47,6 +45,11 @@ public interface BaseFeignClient {
      */
     @GetMapping(value = "/v1/projects/{id}")
     ResponseEntity<ProjectVO> queryProject(@PathVariable("id") Long id);
+
+    @GetMapping(value = "/v1/projects/{id}/users")
+    ResponseEntity<PageInfo<UserDTO>> listUsersByProjectId(@PathVariable("id") Long id,
+                                                 @RequestParam("page") int page,
+                                                 @RequestParam("size") int size);
 
     /**
      * 根据projectId和param模糊查询loginName和realName两列
