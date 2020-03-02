@@ -98,9 +98,14 @@ const IssueBody = observer((props) => {
         <TabPane tab="评论" key="2">
           <IssueCommit {...props} />
         </TabPane>
-        <TabPane tab="拆分的Story" key="5">
-          {/* <IssueCommit {...props} /> */}
-        </TabPane>
+        {
+          issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
+            ? (
+              <TabPane tab="拆分的Story" key="5">
+                {/* <IssueCommit {...props} /> */}
+              </TabPane>
+            ) : ''
+        }
         <TabPane tab="记录" key="3">
           {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueWorkLog {...props} /> : ''
