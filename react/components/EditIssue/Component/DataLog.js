@@ -19,8 +19,6 @@ const PROP = {
   assignee: '经办人',
   reporter: '报告人',
   Pi: 'PI',
-};
-const PROP_SIMPLE = {
   Component: '模块',
   'Fix Version': '版本',
   'Epic Child': '史诗关联任务',
@@ -41,7 +39,9 @@ const PROP_SIMPLE = {
   Comment: '评论',
   'Feature Link': '特性',
   'Knowledge Relation': '知识文档',
+  SubTeam: '负责的子团队'
 };
+
 
 class DataLog extends Component {
   getMode1(datalog) {
@@ -50,7 +50,7 @@ class DataLog extends Component {
     } = datalog;
     if ((!oldValue && oldValue !== 0) && (newValue || newValue === 0)) {
       // null -> xxx
-      if (['Knowledge Relation', 'Feature Link', 'labels', 'Component', 'Fix Version', 'Epic Child', 'WorklogId', 'Feature Child', 'issue_epic', 'story', 'bug', 'task', 'sub_task', 'feature'].includes(field)) {
+      if (['Knowledge Relation', 'Feature Link', 'labels', 'Component', 'Fix Version', 'Epic Child', 'WorklogId', 'Feature Child', 'issue_epic', 'story', 'bug', 'task', 'sub_task', 'feature', 'SubTeam'].includes(field)) {
         return '添加';
       }
       if (['Attachment'].includes(field)) {
@@ -59,7 +59,7 @@ class DataLog extends Component {
       return '更新';
     } else if ((oldValue || oldValue === 0) && (newValue || newValue === 0)) {
       // xxx -> yyy
-      if (['Feature Link', 'Epic Link', 'issuetype', 'Sprint', 'Pi', 'Story Points', 'timeestimate', 'summary', 'Epic Name', 'priority', 'assignee', 'reporter'].includes(field)) {
+      if (['Feature Link', 'Epic Link', 'issuetype', 'Sprint', 'Pi', 'Story Points', 'timeestimate', 'summary', 'Epic Name', 'priority', 'assignee', 'reporter', 'SubTeam'].includes(field)) {
         return '将';
       }
       if (['description', 'WorklogId', 'Comment', 'timespent'].includes(field)) {
@@ -85,7 +85,7 @@ class DataLog extends Component {
       }
     } else if ((oldValue || oldValue === 0) && (!newValue && newValue !== 0)) {
       // yyy -> null
-      if (['Knowledge Relation', 'Feature Link', 'Epic Link', 'Sprint', 'Pi', 'assignee', 'reporter', 'labels', 'Component', 'Fix Version', 'Epic Child', 'Feature Child', 'resolution'].includes(field)) {
+      if (['Knowledge Relation', 'Feature Link', 'Epic Link', 'Sprint', 'Pi', 'assignee', 'reporter', 'labels', 'Component', 'Fix Version', 'Epic Child', 'Feature Child', 'resolution', 'SubTeam'].includes(field)) {
         return '移除';
       }
       if (['Story Points', 'timeestimate'].includes(field)) {
@@ -157,7 +157,7 @@ class DataLog extends Component {
     if (field === 'status') {
       return '';
     }
-    return ` 【${PROP[field] || PROP_SIMPLE[field]}】 `;
+    return ` 【${PROP[field]}】 `;
   }
 
   // ['由', '']
@@ -174,7 +174,7 @@ class DataLog extends Component {
       if (isCusLog) {
         return '由';
       }
-      if (['Feature Link', 'Epic Link', 'issuetype', 'Sprint', 'Pi', 'Story Points', 'timeestimate', 'summary', 'Epic Name', 'priority', 'assignee', 'reporter'].includes(field)) {
+      if (['Feature Link', 'Epic Link', 'issuetype', 'Sprint', 'Pi', 'Story Points', 'timeestimate', 'summary', 'Epic Name', 'priority', 'assignee', 'reporter', 'SubTeam'].includes(field)) {
         return '由';
       } else {
         return '';
@@ -210,7 +210,7 @@ class DataLog extends Component {
       return '';
     } else if ((oldValue || oldValue === 0) && (newValue || newValue === 0)) {
       // xxx -> yyy
-      if (['Feature Link', 'Epic Link', 'issuetype', 'Sprint', 'Pi', 'Story Points', 'timeestimate', 'summary', 'Epic Name', 'priority', 'assignee', 'reporter'].includes(field)) {
+      if (['Feature Link', 'Epic Link', 'issuetype', 'Sprint', 'Pi', 'Story Points', 'timeestimate', 'summary', 'Epic Name', 'priority', 'assignee', 'reporter', 'subTeam'].includes(field)) {
         return ` 【${oldString}】 `;
       }
       if (['description', 'WorklogId', 'Rank', 'Comment'].includes(field)) {
@@ -276,7 +276,7 @@ class DataLog extends Component {
       return '';
     } else if ((oldValue || oldValue === 0) && (newValue || newValue === 0)) {
       // xxx -> yyy
-      if (['Feature Link', 'Epic Link', 'issuetype', 'Sprint', 'Pi', 'Story Points', 'timeestimate', 'summary', 'Epic Name', 'priority', 'assignee', 'reporter'].includes(field)) {
+      if (['Feature Link', 'Epic Link', 'issuetype', 'Sprint', 'Pi', 'Story Points', 'timeestimate', 'summary', 'Epic Name', 'priority', 'assignee', 'reporter', 'SubTeam'].includes(field)) {
         return '改变为';
       }
       // 自定义字段
@@ -310,6 +310,7 @@ class DataLog extends Component {
       task: '任务',
       sub_task: '子任务',
     };
+    debugger;
     if ((!oldValue && oldValue !== 0) && (newValue || newValue === 0)) {
       // null -> xxx
       if (['Knowledge Relation', 'Feature Link', 'Epic Link', 'Sprint', 'Pi', 'Story Points', 'timeestimate', 'summary', 'Epic Name', 'assignee', 'reporter'].includes(field)) {
@@ -334,7 +335,7 @@ class DataLog extends Component {
       }
     } else if ((oldValue || oldValue === 0) && (newValue || newValue === 0)) {
       // xxx -> yyy
-      if (['Feature Link', 'Epic Link', 'issuetype', 'Sprint', 'Pi', 'Story Points', 'timeestimate', 'summary', 'Epic Name', 'priority', 'assignee', 'reporter', 'labels', 'Component', 'Fix Version', 'Epic Child', 'Feature Child'].includes(field)) {
+      if (['Feature Link', 'Epic Link', 'issuetype', 'Sprint', 'Pi', 'Story Points', 'timeestimate', 'summary', 'Epic Name', 'priority', 'assignee', 'reporter', 'labels', 'Component', 'Fix Version', 'Epic Child', 'Feature Child', 'subTeam'].includes(field)) {
         return ` 【${newString}】 `;
       }
       if (['description', 'Attachment', 'WorklogId', 'Rank', 'Comment', 'timespent'].includes(field)) {
