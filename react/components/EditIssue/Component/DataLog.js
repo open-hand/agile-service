@@ -70,6 +70,9 @@ class DataLog extends Component {
         return '将';
       }
       if (field === 'status') {
+        if (categoryCode === 'prepare') {
+          return '正在准备';
+        }
         if (categoryCode === 'doing') {
           return '开始处理';
         }
