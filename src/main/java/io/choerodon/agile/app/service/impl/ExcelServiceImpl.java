@@ -349,10 +349,13 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void setManager(IssueCreateVO issueCreateVO, Map<String, Long> managerMap, Row row) {
-        String manager = row.getCell(6).toString();
-        if (StringUtils.hasText(manager)) {
-            Long assigneeId = managerMap.get(manager);
-            issueCreateVO.setAssigneeId(assigneeId);
+        Cell cell = row.getCell(6);
+        if (!isCellEmpty(cell)) {
+            String manager = cell.toString();
+            if (StringUtils.hasText(manager)) {
+                Long assigneeId = managerMap.get(manager);
+                issueCreateVO.setAssigneeId(assigneeId);
+            }
         }
     }
 
@@ -379,10 +382,13 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void setBelongsEpic(IssueCreateVO issueCreateVO, Row row) {
-        String belongsEpic = row.getCell(1).toString();
-        if (StringUtils.hasText(belongsEpic)) {
-            Long belongsEpicId = Long.valueOf(belongsEpic.split(":")[0]);
-            issueCreateVO.setEpicId(belongsEpicId);
+        Cell cell = row.getCell(1);
+        if (!isCellEmpty(cell)) {
+            String belongsEpic = cell.toString();
+            if (StringUtils.hasText(belongsEpic)) {
+                Long belongsEpicId = Long.valueOf(belongsEpic.split(":")[0]);
+                issueCreateVO.setEpicId(belongsEpicId);
+            }
         }
     }
 
