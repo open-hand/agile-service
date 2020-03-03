@@ -26,10 +26,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -105,8 +101,8 @@ public class ExcelServiceImpl implements ExcelService {
     @Autowired
     private PriorityService priorityService;
 
-    @Autowired
-    protected PlatformTransactionManager transactionManager;
+//    @Autowired
+//    protected PlatformTransactionManager transactionManager;
 
     @Autowired
     protected BaseFeignClient baseFeignClient;
@@ -827,11 +823,11 @@ public class ExcelServiceImpl implements ExcelService {
                                     Map<Integer, Integer> sonParentMap) {
         Set<Long> issueIds = new HashSet<>();
         //批量插入
-        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+//        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         // explicitly setting the transaction name is something that can only be done programmatically
-        def.setName("batchCommit");
-        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-        TransactionStatus txStatus = transactionManager.getTransaction(def);
+//        def.setName("batchCommit");
+//        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+//        TransactionStatus txStatus = transactionManager.getTransaction(def);
         //插入父节点
         IssueCreateVO issueCreateVO = new IssueCreateVO();
 
@@ -843,7 +839,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
         if (parent == null) {
             //回滚
-            transactionManager.rollback(txStatus);
+//            transactionManager.rollback(txStatus);
             return issueIds;
         }
         Long parentId = parent.getIssueId();
@@ -868,11 +864,11 @@ public class ExcelServiceImpl implements ExcelService {
             }
         });
         if (set.size() + 1 == issueIds.size()) {
-            transactionManager.commit(txStatus);
+//            transactionManager.commit(txStatus);
             return issueIds;
         } else {
             //有失败的数据，所有的都标记为失败，回滚数据
-            transactionManager.rollback(txStatus);
+//            transactionManager.rollback(txStatus);
             return new HashSet<>();
         }
     }
