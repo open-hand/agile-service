@@ -304,7 +304,7 @@ public class ExcelServiceImpl implements ExcelService {
             } else {
                 if ("故事".equals(typeName)) {
                     Cell storyPointCell = row.getCell(11);
-                    if (!isCellEmpty(storyPointCell)){
+                    if (!isCellEmpty(storyPointCell)) {
                         issueCreateVO.setStoryPoints(new BigDecimal(storyPointCell.toString()));
                     }
                 }
@@ -659,7 +659,7 @@ public class ExcelServiceImpl implements ExcelService {
     public void batchImport(Long projectId, Long organizationId, Long userId, Workbook workbook) {
         String status = DOING;
         FileOperationHistoryDTO res = initFileOperationHistory(projectId, userId, status);
-        validateWorkbook(projectId, userId, workbook, res);
+        validateWorkbook(projectId, userId, workbook, res, FIELDS_NAME);
 
         Sheet sheet = workbook.getSheetAt(1);
         // 获取所有非空行
@@ -1065,12 +1065,13 @@ public class ExcelServiceImpl implements ExcelService {
         errorRows.add(row.getRowNum());
     }
 
-    protected void validateWorkbook(Long projectId, Long userId, Workbook workbook, FileOperationHistoryDTO res) {
+    protected void validateWorkbook(Long projectId, Long userId, Workbook workbook, FileOperationHistoryDTO res,
+                                    String[] headers) {
         if (workbook.getActiveSheetIndex() < 1
                 || workbook.getSheetAt(1) == null
                 || workbook.getSheetAt(1).getSheetName() == null
                 || !IMPORT_TEMPLATE_NAME.equals(workbook.getSheetAt(1).getSheetName())
-                || isOldExcel(workbook)) {
+                || isOldExcel(workbook, headers)) {
             if (fileOperationHistoryMapper.updateByPrimaryKeySelective(new FileOperationHistoryDTO(projectId, res.getId(), UPLOAD_FILE, "template_error", res.getObjectVersionNumber())) != 1) {
                 throw new CommonException("error.FileOperationHistoryDTO.update");
             }
@@ -1080,15 +1081,15 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private boolean isOldExcel(Workbook workbook) {
+    private boolean isOldExcel(Workbook workbook, String[] headers) {
         //判断是否为旧模版
         Sheet sheet = workbook.getSheetAt(1);
         Row headerRow = sheet.getRow(0);
         if (headerRow == null) {
             return true;
         }
-        for (int i = 0; i < FIELDS_NAME.length; i++) {
-            String header = FIELDS_NAME[i];
+        for (int i = 0; i < headers.length; i++) {
+            String header = headers[i];
             Cell cell = headerRow.getCell(i);
             if (isCellEmpty(cell)) {
                 return true;
