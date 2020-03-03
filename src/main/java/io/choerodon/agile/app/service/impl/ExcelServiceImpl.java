@@ -1064,13 +1064,11 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void validateWorkbook(Long projectId, Long userId, Workbook workbook, FileOperationHistoryDTO res) {
-        if (isOldExcel(workbook)) {
-            throw new CommonException("error.excel.template");
-        }
         if (workbook.getActiveSheetIndex() < 1
                 || workbook.getSheetAt(1) == null
                 || workbook.getSheetAt(1).getSheetName() == null
-                || !IMPORT_TEMPLATE_NAME.equals(workbook.getSheetAt(1).getSheetName())) {
+                || !IMPORT_TEMPLATE_NAME.equals(workbook.getSheetAt(1).getSheetName())
+                || isOldExcel(workbook)) {
             if (fileOperationHistoryMapper.updateByPrimaryKeySelective(new FileOperationHistoryDTO(projectId, res.getId(), UPLOAD_FILE, "template_error", res.getObjectVersionNumber())) != 1) {
                 throw new CommonException("error.FileOperationHistoryDTO.update");
             }
