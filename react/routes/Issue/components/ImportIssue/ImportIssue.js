@@ -201,9 +201,9 @@ class ImportIssue extends Component {
           <span className="c7n-importIssue-text">
             导入失败 
             <span style={{ color: '#FF0000' }}>{failCount}</span>
-             问题
+            问题
             <a href={fileUrl}>
-               点击下载失败详情
+              点击下载失败详情
             </a>
           </span>
         </div>
@@ -223,7 +223,7 @@ class ImportIssue extends Component {
           <span className="c7n-importIssue-text">
             导入成功 
             <span style={{ color: '#0000FF' }}>{successCount}</span>
-             问题
+            问题
           </span>
         </div>
       );
@@ -277,13 +277,13 @@ class ImportIssue extends Component {
                       <span style={{ color: '#F44336' }}>
                         {failCount}
                       </span>
-                       问题，
+                      问题，
                     </span>
                   ) : ''
                 }
                 {fileUrl && (
                   <a href={fileUrl}>
-                     点击下载失败详情
+                    点击下载失败详情
                   </a>
                 )}
               </div>
