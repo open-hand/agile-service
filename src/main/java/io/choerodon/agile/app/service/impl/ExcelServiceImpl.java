@@ -304,7 +304,9 @@ public class ExcelServiceImpl implements ExcelService {
             } else {
                 if ("故事".equals(typeName)) {
                     Cell storyPointCell = row.getCell(11);
-                    issueCreateVO.setStoryPoints(new BigDecimal(storyPointCell.toString()));
+                    if (!isCellEmpty(storyPointCell)){
+                        issueCreateVO.setStoryPoints(new BigDecimal(storyPointCell.toString()));
+                    }
                 }
                 setBelongsEpic(issueCreateVO, row);
             }
