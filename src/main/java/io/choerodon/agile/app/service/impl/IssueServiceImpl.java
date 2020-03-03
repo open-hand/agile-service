@@ -1448,7 +1448,7 @@ public class IssueServiceImpl implements IssueService {
         }
     }
 
-    private void copyStoryPointAndRemainingTimeData(IssueDetailDTO issueDetailDTO, Long projectId, Long issueId, Long objectVersionNumber) {
+    protected void copyStoryPointAndRemainingTimeData(IssueDetailDTO issueDetailDTO, Long projectId, Long issueId, Long objectVersionNumber) {
         if (issueDetailDTO.getStoryPoints() == null && issueDetailDTO.getEstimateTime() == null) {
             return;
         }
@@ -1481,13 +1481,13 @@ public class IssueServiceImpl implements IssueService {
         }
     }
 
-    private void handleCreateCopyIssueSprintRel(Boolean sprintValues, IssueDetailDTO issueDetailDTO, Long newIssueId) {
+    protected void handleCreateCopyIssueSprintRel(Boolean sprintValues, IssueDetailDTO issueDetailDTO, Long newIssueId) {
         if (sprintValues && issueDetailDTO.getActiveSprint() != null) {
             handleCreateSprintRel(issueDetailDTO.getActiveSprint().getSprintId(), issueDetailDTO.getProjectId(), newIssueId);
         }
     }
 
-    private void batchCreateCopyIssueLink(Boolean condition, Long issueId, Long newIssueId, Long projectId) {
+    protected void batchCreateCopyIssueLink(Boolean condition, Long issueId, Long newIssueId, Long projectId) {
         if (condition) {
             List<IssueLinkDTO> issueLinkDTOList = modelMapper.map(issueLinkMapper.queryIssueLinkByIssueId(issueId, projectId, false), new TypeToken<List<IssueLinkDTO>>() {
             }.getType());
@@ -1510,7 +1510,7 @@ public class IssueServiceImpl implements IssueService {
         }
     }
 
-    private void createCopyIssueLink(Long issueId, Long newIssueId, Long projectId) {
+    protected void createCopyIssueLink(Long issueId, Long newIssueId, Long projectId) {
         IssueLinkTypeDTO query = new IssueLinkTypeDTO();
         query.setProjectId(projectId);
         query.setOutWard("复制");
