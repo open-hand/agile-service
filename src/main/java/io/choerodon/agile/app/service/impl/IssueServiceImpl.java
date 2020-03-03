@@ -1467,7 +1467,7 @@ public class IssueServiceImpl implements IssueService {
         updateIssue(projectId, issueUpdateVO, fieldList);
     }
 
-    private void copySubIssue(IssueDTO issueDTO, Long newIssueId, Long projectId) {
+    protected void copySubIssue(IssueDTO issueDTO, Long newIssueId, Long projectId) {
         IssueDetailDTO subIssueDetailDTO = issueMapper.queryIssueDetail(issueDTO.getProjectId(), issueDTO.getIssueId());
         IssueSubCreateVO issueSubCreateVO = issueAssembler.issueDtoToSubIssueCreateDto(subIssueDetailDTO, newIssueId);
         IssueSubVO newSubIssue = stateMachineClientService.createSubIssue(issueSubCreateVO);
