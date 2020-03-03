@@ -19,6 +19,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -99,7 +101,10 @@ public class WikiRelationServiceImpl implements WikiRelationService {
     public void deleteByWorkSpaceId(Long projectId, Long workSpaceId) {
         WikiRelationDTO wikiRelationDTO = new WikiRelationDTO();
         wikiRelationDTO.setSpaceId(workSpaceId);
-        iWikiRelationService.deleteBase(wikiRelationDTO);
+        List<WikiRelationDTO> wikiRelationDTOS = wikiRelationMapper.select(wikiRelationDTO);
+        if(!CollectionUtils.isEmpty(wikiRelationDTOS)){
+            wikiRelationDTOS.forEach(v -> iWikiRelationService.deleteBase(wikiRelationDTO));
+        }
     }
 
     @Override
