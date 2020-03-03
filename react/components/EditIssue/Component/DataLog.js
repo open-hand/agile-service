@@ -210,7 +210,7 @@ class DataLog extends Component {
       return '';
     } else if ((oldValue || oldValue === 0) && (newValue || newValue === 0)) {
       // xxx -> yyy
-      if (['Feature Link', 'Epic Link', 'issuetype', 'Sprint', 'Pi', 'Story Points', 'timeestimate', 'summary', 'Epic Name', 'priority', 'assignee', 'reporter', 'subTeam'].includes(field)) {
+      if (['Feature Link', 'Epic Link', 'issuetype', 'Sprint', 'Pi', 'Story Points', 'timeestimate', 'summary', 'Epic Name', 'priority', 'assignee', 'reporter', 'SubTeam'].includes(field)) {
         return ` 【${oldString}】 `;
       }
       if (['description', 'WorklogId', 'Rank', 'Comment'].includes(field)) {
@@ -335,7 +335,7 @@ class DataLog extends Component {
       }
     } else if ((oldValue || oldValue === 0) && (newValue || newValue === 0)) {
       // xxx -> yyy
-      if (['Feature Link', 'Epic Link', 'issuetype', 'Sprint', 'Pi', 'Story Points', 'timeestimate', 'summary', 'Epic Name', 'priority', 'assignee', 'reporter', 'labels', 'Component', 'Fix Version', 'Epic Child', 'Feature Child', 'subTeam'].includes(field)) {
+      if (['Feature Link', 'Epic Link', 'issuetype', 'Sprint', 'Pi', 'Story Points', 'timeestimate', 'summary', 'Epic Name', 'priority', 'assignee', 'reporter', 'labels', 'Component', 'Fix Version', 'Epic Child', 'Feature Child', 'SubTeam'].includes(field)) {
         return ` 【${newString}】 `;
       }
       if (['description', 'Attachment', 'WorklogId', 'Rank', 'Comment', 'timespent'].includes(field)) {
