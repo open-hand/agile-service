@@ -66,6 +66,10 @@ class StatusCard extends Component {
 
   getDisabled = () => {
     const { columnId, data } = this.props;
+    // 待处理状态 不可删除 一直处于禁止删除状态
+    if (data.statusId === 4) {
+      return [true, '初始化状态'];
+    }
     if (columnId === 0) {
       if (data.issues.length === 0) {
         if (this.getStatusNumber() <= 1) {
@@ -158,7 +162,7 @@ class StatusCard extends Component {
                 <Tooltip title="勾选后，卡片处于此状态的编号会显示为：#̶0̶0̶1̶，卡片状态视为已完成。" placement="topRight">
                   <Icon
                     type="help"
-                    className={`${prefix}-set-complete-icon`}                    
+                    className={`${prefix}-set-complete-icon`}
                   />
                 </Tooltip>
               </Radio>
