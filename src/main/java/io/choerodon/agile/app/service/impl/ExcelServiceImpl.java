@@ -242,7 +242,8 @@ public class ExcelServiceImpl implements ExcelService {
                                          Map<String, Long> managerMap,
                                          Integer rowNum,
                                          Sheet sheet,
-                                         Map<Integer, Integer> sonParentMap) {
+                                         Map<Integer, Integer> sonParentMap,
+                                         IssueTypeVO subTask) {
         issueCreateVO.setProjectId(projectId);
         issueCreateVO.setReporterId(userId);
         Row row = sheet.getRow(rowNum);
@@ -271,9 +272,8 @@ public class ExcelServiceImpl implements ExcelService {
                 throw new CommonException("error.summary.null");
             }
             issueCreateVO.setSummary(summary);
-            IssueTypeVO issueType = issueTypeMap.get("任务");
-            issueCreateVO.setTypeCode(issueType.getTypeCode());
-            issueCreateVO.setIssueTypeId(issueType.getId());
+            issueCreateVO.setTypeCode(subTask.getTypeCode());
+            issueCreateVO.setIssueTypeId(subTask.getId());
             //子任务的所属史诗模块和冲刺，保持与父节点统一
             Row parentRow = sheet.getRow(sonParentMap.get(rowNum));
             setBelongsEpic(issueCreateVO, parentRow);
@@ -403,7 +403,8 @@ public class ExcelServiceImpl implements ExcelService {
         sendProcess(result, result.getUserId(), 1.0);
     }
 
-    protected void setIssueTypeAndPriorityMap(Long organizationId, Long projectId, Map<String, IssueTypeVO> issueTypeMap, Map<String, Long> priorityMap, List<String> issueTypeList, List<String> priorityList) {
+    protected IssueTypeVO setIssueTypeAndPriorityMap(Long organizationId, Long projectId, Map<String, IssueTypeVO> issueTypeMap, Map<String, Long> priorityMap, List<String> issueTypeList, List<String> priorityList) {
+        IssueTypeVO subTask = null;
         List<PriorityVO> priorityVOList = priorityService.queryByOrganizationIdList(organizationId);
         List<IssueTypeVO> issueTypeVOList = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE);
         for (PriorityVO priorityVO : priorityVOList) {
@@ -413,11 +414,15 @@ public class ExcelServiceImpl implements ExcelService {
             }
         }
         for (IssueTypeVO issueTypeVO : issueTypeVOList) {
+            if (SUB_TASK.equals(issueTypeVO.getTypeCode())) {
+                subTask = issueTypeVO;
+            }
             if (!SUB_TASK.equals(issueTypeVO.getTypeCode()) && !FEATURE.equals(issueTypeVO.getTypeCode())) {
                 issueTypeMap.put(issueTypeVO.getName(), issueTypeVO);
             }
         }
         issueTypeList.addAll(issueTypeMap.keySet());
+        return subTask;
     }
 
     protected void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process) {
@@ -672,7 +677,7 @@ public class ExcelServiceImpl implements ExcelService {
         Map<String, Long> priorityMap = new HashMap<>();
         List<String> issueTypeList = new ArrayList<>();
         List<String> priorityList = new ArrayList<>();
-        setIssueTypeAndPriorityMap(organizationId, projectId, issueTypeMap, priorityMap, issueTypeList, priorityList);
+        IssueTypeVO subTask = setIssueTypeAndPriorityMap(organizationId, projectId, issueTypeMap, priorityMap, issueTypeList, priorityList);
         Long failCount = 0L;
         Long successCount = 0L;
         Integer processNum = 0;
@@ -757,7 +762,7 @@ public class ExcelServiceImpl implements ExcelService {
                 }
 
                 Set<Long> insertIds = batchInsert(projectId, r, issueTypeMap, priorityMap, versionMap,
-                        userId, componentMap, sprintMap, sheet, set, managerMap, sonParentMap);
+                        userId, componentMap, sprintMap, sheet, set, managerMap, sonParentMap, subTask);
                 if (insertIds.isEmpty()) {
                     failCount = failCount + set.size() + 1;
                     errorRows.add(r);
@@ -780,7 +785,7 @@ public class ExcelServiceImpl implements ExcelService {
                 }
                 IssueCreateVO issueCreateVO = new IssueCreateVO();
                 Boolean ok = setIssueCreateInfo(issueCreateVO, projectId, issueTypeMap, priorityMap,
-                        versionMap, userId, componentMap, sprintMap, managerMap, r, sheet, sonParentMap);
+                        versionMap, userId, componentMap, sprintMap, managerMap, r, sheet, sonParentMap, subTask);
 
                 IssueVO result = null;
                 if (ok) {
@@ -820,7 +825,7 @@ public class ExcelServiceImpl implements ExcelService {
                                     Map<String, Long> priorityMap, Map<String, Long> versionMap,
                                     Long userId, Map<String, Long> componentMap, Map<String, Long> sprintMap,
                                     Sheet sheet, Set<Integer> set, Map<String, Long> managerMap,
-                                    Map<Integer, Integer> sonParentMap) {
+                                    Map<Integer, Integer> sonParentMap, IssueTypeVO subTask) {
         Set<Long> issueIds = new HashSet<>();
         //批量插入
 //        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
@@ -832,7 +837,7 @@ public class ExcelServiceImpl implements ExcelService {
         IssueCreateVO issueCreateVO = new IssueCreateVO();
 
         Boolean ok = setIssueCreateInfo(issueCreateVO, projectId, issueTypeMap, priorityMap,
-                versionMap, userId, componentMap, sprintMap, managerMap, rowNum, sheet, sonParentMap);
+                versionMap, userId, componentMap, sprintMap, managerMap, rowNum, sheet, sonParentMap, subTask);
         IssueVO parent = null;
         if (ok) {
             parent = stateMachineClientService.createIssue(issueCreateVO, APPLY_TYPE_AGILE);
@@ -848,7 +853,7 @@ public class ExcelServiceImpl implements ExcelService {
         set.forEach(s -> {
             IssueCreateVO issueCreate = new IssueCreateVO();
             Boolean success = setIssueCreateInfo(issueCreate, projectId, issueTypeMap, priorityMap,
-                    versionMap, userId, componentMap, sprintMap, managerMap, s, sheet, sonParentMap);
+                    versionMap, userId, componentMap, sprintMap, managerMap, s, sheet, sonParentMap, subTask);
             if (success) {
                 String typeCode = issueCreate.getTypeCode();
                 if (issueTypeMap.get("任务").getTypeCode().equals(typeCode)) {
