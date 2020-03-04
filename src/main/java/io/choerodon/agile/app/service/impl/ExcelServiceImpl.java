@@ -856,7 +856,7 @@ public class ExcelServiceImpl implements ExcelService {
                     versionMap, userId, componentMap, sprintMap, managerMap, s, sheet, sonParentMap, subTask);
             if (success) {
                 String typeCode = issueCreate.getTypeCode();
-                if (issueTypeMap.get("任务").getTypeCode().equals(typeCode)) {
+                if (SUB_TASK.equals(typeCode)) {
                     issueCreate.setParentIssueId(parentId);
                 }
                 if (issueTypeMap.get("缺陷").getTypeCode().equals(typeCode)) {
