@@ -122,7 +122,7 @@ public class ExcelServiceImpl implements ExcelService {
 
         Workbook wb = new XSSFWorkbook();
         // create guide sheet
-        ExcelUtil.createGuideSheet(wb, ExcelUtil.initGuideSheet());
+        ExcelUtil.createGuideSheet(wb, ExcelUtil.initGuideSheet(), false);
         Sheet sheet = wb.createSheet(IMPORT_TEMPLATE_NAME);
         CellStyle style = CatalogExcelUtil.getHeadStyle(wb);
         ExcelUtil.generateHeaders(sheet, style, Arrays.asList(FIELDS_NAME));
@@ -811,7 +811,8 @@ public class ExcelServiceImpl implements ExcelService {
             Predefined theSecondColumnPredefined = getEpicPredefined(projectId);
             Workbook result = ExcelUtil.generateExcelAwesome(workbook, errorRows,
                     errorMapList, FIELDS_NAME, priorityList, issueTypeList, versionList,
-                    IMPORT_TEMPLATE_NAME, componentList, sprintList, managers, theSecondColumnPredefined);
+                    IMPORT_TEMPLATE_NAME, componentList, sprintList, managers,
+                    theSecondColumnPredefined, false);
             String errorWorkBookUrl = uploadErrorExcel(result);
             res.setFileUrl(errorWorkBookUrl);
             status = FAILED;
