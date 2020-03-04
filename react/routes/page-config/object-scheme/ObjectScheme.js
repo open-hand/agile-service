@@ -73,12 +73,12 @@ function ObjectScheme() {
     schemeCode,
     store,
   } = context;
-  
+
 
   function handleRefresh() {
     schemeTableDataSet.query();
   }
-  
+
   function handleRemove() {
     const record = schemeTableDataSet.current;
     const modalProps = {
@@ -109,7 +109,7 @@ function ObjectScheme() {
       handleRefresh();
     });
   }
-  
+
 
   // 打开创建模态框
   function openCreateFieldModal() {
@@ -190,8 +190,8 @@ function ObjectScheme() {
       return <Tag style={{ color: 'rgba(0,0,0,0.65)', borderColor: '#d9d9d9', background: '#fafafa' }}>{formatMessage({ id: 'system' })}</Tag>;
     } else {
       return projectId
-        ? <Tag color="orange"><span style={{ color: 'rgba(255,255,255,0.9' }}>{formatMessage({ id: 'project' })}</span></Tag>
-        : <Tag color="geekblue"><span style={{ color: 'rgba(255,255,255,0.9' }}>{formatMessage({ id: 'organization' })}</span></Tag>;
+        ? <Tag color="orange"><span>{formatMessage({ id: 'project' })}</span></Tag>
+        : <Tag color="geekblue"><span>{formatMessage({ id: 'organization' })}</span></Tag>;
     }
   };
 
@@ -210,7 +210,7 @@ function ObjectScheme() {
       </div>
     );
   };
-  
+
 
   const service = AppState.currentMenuType.type === 'project' ? [
     'agile-service.project-object-scheme-field.listQuery',
