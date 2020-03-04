@@ -85,8 +85,8 @@ const Item = memo(({ issue }) => {
             <span     
               className={`${prefix}-feature`}   
               style={{
-                color: issue.color || issue.featureColor,
-                border: `1px solid ${issue.color || issue.featureColor}`,
+                color: issue.featureColor || issue.color,
+                border: `1px solid ${issue.featureColor || issue.color}`,
               }}          
             >
               {issue.featureName}
