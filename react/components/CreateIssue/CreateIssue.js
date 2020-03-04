@@ -807,7 +807,7 @@ class CreateIssue extends Component {
                 )}
                 {fields && fields.filter(field => !hiddenFields.includes(field.fieldCode)).map(field => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
               </div>
-              {mode !== 'feature' && newIssueTypeCode !== 'issue_epic' && <FieldIssueLinks form={form} />}
+              {mode !== 'feature' && !['issue_epic', 'feature'].includes(newIssueTypeCode) && <FieldIssueLinks form={form} />}
             </Form>
           </Spin>
         </Content>
