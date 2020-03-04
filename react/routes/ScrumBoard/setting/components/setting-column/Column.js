@@ -112,10 +112,6 @@ class Column extends Component {
     );
   }
 
-  renderMaxNum = () => {
-
-  }
-
   render() {
     const menu = AppState.currentMenuType;
     const {

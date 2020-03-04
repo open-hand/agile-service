@@ -5,7 +5,7 @@ import {
   Radio, Icon, Tooltip, Modal,
 } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
-import { stores, Permission } from '@choerodon/boot';
+import { stores, Permission, Choerodon } from '@choerodon/boot';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import { STATUS } from '@/common/Constant';
 import './StatusCard.less';
@@ -82,7 +82,7 @@ class StatusCard extends Component {
 
   handleSetComplete = () => {
     const {
-      data, refresh,
+      data, columnId,
     } = this.props;
     const clickData = {
       id: data.id,
@@ -95,8 +95,9 @@ class StatusCard extends Component {
     ScrumBoardStore.axiosUpdateIssueStatus(
       data.id, clickData,
     ).then((res) => {
-      refresh();
+      ScrumBoardStore.updateStatusLocal(columnId, data, res);
     }).catch((error) => {
+      Choerodon.prompt(error.message, 'error');
     });
   }
 

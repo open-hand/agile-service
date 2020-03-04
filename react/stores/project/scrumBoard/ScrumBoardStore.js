@@ -1,6 +1,7 @@
 import {
-  observable, action, computed, toJS,
+  observable, action, computed, toJS, 
 } from 'mobx';
+import { find } from 'lodash';
 import axios from 'axios';
 import { store, stores, Choerodon } from '@choerodon/boot';
 
@@ -493,6 +494,19 @@ class ScrumBoardStore {
 
   axiosUpdateIssueStatus(id, data) {
     return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issue_status/${id}`, data);
+  }
+
+  @action updateStatusLocal(columnId, data, res) {
+    const status = this.findStatusById(columnId, data.id);
+    status.completed = res.completed;
+    status.objectVersionNumber = res.objectVersionNumber;
+  }
+
+  findStatusById(columnId, statusId) {
+    const data = this.boardData;       
+    const column = find(data, { columnId });
+    const status = find(column.subStatusDTOS, { id: statusId });
+    return status;
   }
 
   axiosCheckRepeatName(name) {
