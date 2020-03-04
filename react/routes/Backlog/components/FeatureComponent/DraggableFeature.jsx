@@ -168,11 +168,7 @@ class DraggableFeature extends Component {
               <div className="c7n-backlog-epicItemParam">
                 <p className="c7n-backlog-epicItemParamKey">已完成故事数</p>
                 <p className="c7n-backlog-epicItemNotStoryPoint">{item.storyCompletedCount}</p>
-              </div>
-              <div className="c7n-backlog-epicItemParam">
-                <p className="c7n-backlog-epicItemParamKey">未预估故事数</p>
-                <p className="c7n-backlog-epicItemNotStoryPoint">{item.unEstimateStoryCount}</p>
-              </div>
+              </div>              
               <div className="c7n-backlog-epicItemParam">
                 <p className="c7n-backlog-epicItemParamKey">总故事点数</p>
                 <p
@@ -190,6 +186,10 @@ class DraggableFeature extends Component {
                 >
                   {item.successStoryPoints}
                 </p>
+              </div>
+              <div className="c7n-backlog-epicItemParam">
+                <p className="c7n-backlog-epicItemParamKey">未预估故事数</p>
+                <p className="c7n-backlog-epicItemNotStoryPoint">{item.unEstimateStoryCount}</p>
               </div>
             </div>
           </div>
