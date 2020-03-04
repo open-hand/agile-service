@@ -4,12 +4,11 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.TransformInfo;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.IssueStatusDTO;
-import io.choerodon.agile.infra.dto.IssueTypeDTO;
-import io.choerodon.agile.infra.dto.ProjectConfigDTO;
+import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.enums.SchemeType;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
+import io.choerodon.agile.infra.mapper.ColumnStatusRelMapper;
 import io.choerodon.agile.infra.mapper.IssueStatusMapper;
 import io.choerodon.agile.infra.mapper.IssueTypeMapper;
 import io.choerodon.agile.infra.mapper.ProjectConfigMapper;
@@ -68,6 +67,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private InstanceService instanceService;
     @Autowired
     private StateMachineTransformService transformService;
+    @Autowired
+    private ColumnStatusRelMapper columnStatusRelMapper;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -365,6 +366,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             if (statusId.equals(initStatusId)) {
                 throw new CommonException("error.initStatus.illegal");
             }
+            if (!checkStatusInBoardColumn(projectId, statusId)) {
+                throw new CommonException("error.status.inBoardColumn");
+            }
             statusService.removeStatusForAgile(organizationId, stateMachineId, statusId);
             IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
             issueStatusDTO.setProjectId(projectId);
@@ -372,6 +376,18 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             issueStatusMapper.delete(issueStatusDTO);
         } else {
             throw new RemoveStatusException((String) result.get(MESSAGE));
+        }
+    }
+
+    private Boolean checkStatusInBoardColumn(Long projectId, Long statusId) {
+        ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
+        columnStatusRelDTO.setProjectId(projectId);
+        columnStatusRelDTO.setStatusId(statusId);
+        List<ColumnStatusRelDTO> columnStatusRelDTOList = columnStatusRelMapper.select(columnStatusRelDTO);
+        if (columnStatusRelDTOList != null && !columnStatusRelDTOList.isEmpty()) {
+            return false;
+        } else {
+            return true;
         }
     }
 
@@ -383,7 +399,11 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             Long stateMachineId = (Long) result.get(STATEMACHINEID);
             Long organizationId = projectUtil.getOrganizationId(projectId);
             Long initStatusId = instanceService.queryInitStatusId(organizationId, stateMachineId);
-            return !statusId.equals(initStatusId);
+            if (!statusId.equals(initStatusId)) {
+                return checkStatusInBoardColumn(projectId, statusId);
+            } else {
+                return false;
+            }
         } else {
             throw new RemoveStatusException((String) result.get(MESSAGE));
         }
