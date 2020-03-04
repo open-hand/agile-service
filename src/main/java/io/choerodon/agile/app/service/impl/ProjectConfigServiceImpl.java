@@ -365,6 +365,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             if (statusId.equals(initStatusId)) {
                 throw new CommonException("error.initStatus.illegal");
             }
+            statusService.removeStatusForAgile(organizationId, stateMachineId, statusId);
             IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
             issueStatusDTO.setProjectId(projectId);
             issueStatusDTO.setStatusId(statusId);
