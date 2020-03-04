@@ -116,24 +116,27 @@ public class ExcelUtil {
     public static List<GuideSheet> initGuideSheet() {
         GuideSheet[] guideSheets = {
                 new GuideSheet(0, "问题类型", "必选项", true),
-                new GuideSheet(1, "所属史诗", "非必选项，普通应用项目未加入项目群ART且问题类型为故事可选，否则不可选", false),
-                new GuideSheet(2, "所属特性", "非必须项，普通应用项目加入项目群后且问题类型为故事可选，否则不可选", true),
-                new GuideSheet(3, "模块", "非必输项", false),
-                new GuideSheet(4, "冲刺", "非必输项，任务/故事下的子任务冲刺默认和父级一致", false),
-                new GuideSheet(5, "概要", "必输项，限制44个字符以内", true),
-                new GuideSheet(6, "子任务概述", "非必输项，故事、任务类型下可创建子任务", false),
-                new GuideSheet(7, "经办人", "非必选项", false),
-                new GuideSheet(8, "优先级", "必选项", true),
-                new GuideSheet(9, "预估时间", "非必输项，仅支持3位整数或者0.5，预估时间以小时为单位", false),
-                new GuideSheet(10, "版本", "非必选项", false),
-                new GuideSheet(11, "史诗名称", "如果问题类型选择史诗，此项必填, 限制10个字符", true),
-                new GuideSheet(12, "故事点", "非必输，仅支持3位整数或者0.5，仅故事类型须填写，否则不生效", false),
-                new GuideSheet(13, "描述", "非必输，仅支持填写纯文本", false),
+                new GuideSheet(1, "所属史诗", "非必选项，普通应用项目未加入项目群ART且问题类型为故事可选，否则不可选", true),
+                new GuideSheet(2, "模块", "非必输项", false),
+                new GuideSheet(3, "冲刺", "非必输项，任务/故事下的子任务冲刺默认和父级一致", false),
+                new GuideSheet(4, "概要", "必输项，限制44个字符以内", true),
+                new GuideSheet(5, "子任务概述", "非必输项，故事、任务类型下可创建子任务", false),
+                new GuideSheet(6, "经办人", "非必选项", false),
+                new GuideSheet(7, "优先级", "必选项", true),
+                new GuideSheet(8, "预估时间", "非必输项，仅支持3位整数或者0.5，预估时间以小时为单位", false),
+                new GuideSheet(9, "版本", "非必选项", false),
+                new GuideSheet(10, "史诗名称", "如果问题类型选择史诗，此项必填, 限制10个字符", true),
+                new GuideSheet(11, "故事点", "非必输，仅支持3位整数或者0.5，仅故事类型须填写，否则不生效", false),
+                new GuideSheet(12, "描述", "非必输，仅支持填写纯文本", false),
         };
         return Arrays.asList(guideSheets);
     }
 
-    public static void createGuideSheet(Workbook wb, List<GuideSheet> guideSheets) {
+    public static void createGuideSheet(Workbook wb, List<GuideSheet> guideSheets, boolean withFeature) {
+        if (withFeature) {
+            GuideSheet guideSheet = new GuideSheet(1, "所属特性", "非必须项，普通应用项目加入项目群后且问题类型为故事可选，否则不可选", true);
+            guideSheets.set(1, guideSheet);
+        }
         Sheet sheet = wb.createSheet("要求");
         sheet.setColumnWidth(0, 5000);
         sheet.setColumnWidth(1, 17000);
@@ -146,10 +149,10 @@ public class ExcelUtil {
         sheet.setColumnWidth(2, 3000);
         initGuideSheetRemind(wb, sheet, "请至下一页，填写信息");
 
-        initExample(wb, sheet);
+        initExample(wb, sheet, withFeature);
     }
 
-    private static void initExample(Workbook wb, Sheet sheet) {
+    private static void initExample(Workbook wb, Sheet sheet, boolean withFeature) {
         sheet.setColumnWidth(4, 8000);
         sheet.setColumnWidth(5, 6000);
         sheet.setColumnWidth(8, 6000);
@@ -170,6 +173,11 @@ public class ExcelUtil {
         String[] data1 = {"问题类型*", "所属史诗", "模块", "冲刺", "概述*",
                 "子任务概述(仅子任务生效)", "经办人", "优先级*", "预估时间(小时)",
                 "版本", "史诗名称(仅问题类型为史诗时生效)", "故事点", "描述"};
+        String secondColumnValue = "可以选择史诗";
+        if (withFeature) {
+            data1[1] = "所属特性";
+            secondColumnValue = "可以选择特性";
+        }
         int count = 19;
         createRow(sheet, count++, data1, blueBackground);
 
@@ -177,7 +185,7 @@ public class ExcelUtil {
                 "", "", "高", "", "", "导入问题", "", "请输入导入史诗类型的问题的描述信息"};
         createRow(sheet, count++, data2, null);
 
-        String[] data3 = {"故事", "可以选择史诗", "敏捷管理", "sprint-1", "这里输入故事的概述：故事1",
+        String[] data3 = {"故事", secondColumnValue, "敏捷管理", "sprint-1", "这里输入故事的概述：故事1",
                 "", "张三", "中", "8", "0.1", "", "2", "导入故事并且导入故事下的子任务"};
         createRow(sheet, count++, data3, coralBackground);
 
@@ -190,7 +198,7 @@ public class ExcelUtil {
         String[] data6 = {"", "", "", "", "", "故事1的子任务3的概述……", "陈七", "低", "2", "", "", "", "请输入子任务3的描述信息"};
         createRow(sheet, count++, data6, coralBackground);
 
-        String[] data7 = {"任务", "可以选择史诗", "敏捷管理", "sprint-1", "请在此处输入任务的概述：任务1", "", "王五", "中", "5", "0.2", "", "", "请输入任务2的描述信息"};
+        String[] data7 = {"任务", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入任务的概述：任务1", "", "王五", "中", "5", "0.2", "", "", "请输入任务2的描述信息"};
         createRow(sheet, count++, data7, null);
 
         String[] data8 = {"", "", "", "", "", "任务1的子任务4的概述", "小六", "中", "2", "0.2", "", "", "请输入子任务4的描述信息"};
@@ -200,13 +208,13 @@ public class ExcelUtil {
         createRow(sheet, count++, data9, null);
 
 
-        String[] data10 = {"故事", "可以选择史诗", "敏捷管理", "sprint-1", "这里输入故事的概述：故事2", "", "张三", "中", "8", "0.1", "", "2", "仅导入故事"};
+        String[] data10 = {"故事", secondColumnValue, "敏捷管理", "sprint-1", "这里输入故事的概述：故事2", "", "张三", "中", "8", "0.1", "", "2", "仅导入故事"};
         createRow(sheet, count++, data10, coralBackground);
 
-        String[] data11 = {"任务", "可以选择史诗", "敏捷管理", "sprint-1", "请在此处输入任务的概述：任务2", "", "张三", "中", "8", "0.1", "", "", "请输入任务2的描述信息"};
+        String[] data11 = {"任务", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入任务的概述：任务2", "", "张三", "中", "8", "0.1", "", "", "请输入任务2的描述信息"};
         createRow(sheet, count++, data11, null);
 
-        String[] data12 = {"缺陷", "可以选择史诗", "敏捷管理", "sprint-1", "请在此处输入缺陷的概述：缺陷1", "", "李四", "低", "0.5", "0.1", "", "", "请输入缺陷2的描述信息"};
+        String[] data12 = {"缺陷", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入缺陷的概述：缺陷1", "", "李四", "低", "0.5", "0.1", "", "", "请输入缺陷2的描述信息"};
         createRow(sheet, count++, data12, coralBackground);
     }
 
@@ -232,10 +240,11 @@ public class ExcelUtil {
                                                 List<String> componentList,
                                                 List<String> sprintList,
                                                 List<String> users,
-                                                Predefined theSecondColumnPredefined) {
+                                                Predefined theSecondColumnPredefined,
+                                                boolean withFeature) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         // create guide sheet
-        createGuideSheet(workbook, initGuideSheet());
+        createGuideSheet(workbook, initGuideSheet(), withFeature);
         Sheet resultSheet = workbook.createSheet(sheetName);
         CellStyle style = CatalogExcelUtil.getHeadStyle(workbook);
         generateHeaders(resultSheet, style, Arrays.asList(fieldsName));
