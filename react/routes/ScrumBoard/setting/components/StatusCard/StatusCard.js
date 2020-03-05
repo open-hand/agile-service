@@ -5,6 +5,7 @@ import {
   Radio, Icon, Tooltip, Modal,
 } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
+import { find } from 'lodash';
 import { stores, Permission, Choerodon } from '@choerodon/boot';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import { STATUS } from '@/common/Constant';
@@ -64,10 +65,20 @@ class StatusCard extends Component {
     refresh();
   }
 
+  /**
+   * 搜索状态code
+   * @param {*} statusId 
+   */
+  findStatusCodeByStatusId(statusId) {
+    const statusList = ScrumBoardStore.getStatusList;
+    return find(statusList, { id: statusId }).code;
+  }
+
   getDisabled = () => {
     const { columnId, data } = this.props;
-    // 待处理状态 不可删除 一直处于禁止删除状态
-    if (data.statusId === 4) {
+    // 待处理状态 不可删除 一直处于禁止删除状态 
+    // 根据状态code 是否为create 为create则如下
+    if (this.findStatusCodeByStatusId(data.statusId) === 'create') {
       return [true, '初始化状态'];
     }
     if (columnId === 0) {
