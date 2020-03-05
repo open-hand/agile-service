@@ -88,8 +88,8 @@ function CreateField() {
         obj.defaultValue = obj.defaultValue.join(',');
       }
     }
-
-
+    // 防止使用dataSet提交时 忽略filedOptions
+    formDataSet.current.set('updateFieldOptions', obj.fieldOptions);
     const url = isEdit ? `/agile/v1/${type}s/${id}/object_scheme_field/${current.get('id')}?organizationId=${organizationId}` : `/agile/v1/${type}s/${id}/object_scheme_field?organizationId=${organizationId}`;
     const method = isEdit ? 'put' : 'post';
     formDataSet.transport[isEdit ? 'update' : 'create'] = ({ data: [data] }) => ({
@@ -117,7 +117,7 @@ function CreateField() {
       },
     });
 
-
+    // return false;
     try {
       if ((await formDataSet.submit()) !== false) {
         handleRefresh();
