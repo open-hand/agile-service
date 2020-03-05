@@ -30,17 +30,17 @@ class SprintDetails extends Component {
     };
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.sprintId !== this.props.sprintId) {
-      const { sprintId } = nextProps;
-      this.setState({
-        sprintId,
-        done: false,
-        undo: false,
-        undoAndNotEstimated: false,
-      });
-      this.loadDoneIssues(sprintId);
-    }
+  componentDidMount() {
+    const { sprintId } = this.props;
+    this.setState({
+      sprintId,
+      done: false,
+      undo: false,
+      undoAndNotEstimated: false,
+    });
+    this.loadDoneIssues(sprintId);
+    this.loadUndoIssues(sprintId);
+    this.loadUndoAndNotEstimatedIssues(sprintId);
   }
 
   getPagination = (pagination, res) => { // 注意：pagination

@@ -18,16 +18,14 @@ class IssueType extends Component {
     };
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.sprintId !== this.state.sprintId) {
-      this.setState({
-        sprintId: nextProps.sprintId,
-      });
-    }
-    if (nextProps.sprintId != undefined) {
-      this.loadIssueTypeData(nextProps.sprintId);
-    }
+  componentDidMount() {
+    const { sprintId } = this.props;
+    this.setState({
+      sprintId,
+    });
+    this.loadIssueTypeData(sprintId);
   }
+
 
   getCategoryCount(code) {
     const { issueTypeInfo } = this.state;
