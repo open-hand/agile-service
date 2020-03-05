@@ -18,6 +18,7 @@ import UserHead from '@/components/UserHead';
 import CreateIssue from '@/components/CreateIssue';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import PriorityTag from '@/components/PriorityTag';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import IssueStore from '../../stores/project/sprint/IssueStore/IssueStore';
 import Store, { StoreProvider } from './stores';
 import Search from './components/search';
@@ -34,7 +35,7 @@ const Issue = withRouter(observer(() => {
   const [urlFilter, setUrlFilter] = useState(null);
   const importRef = useRef();
   const tableRef = useRef();
-
+  const { isShowFeature } = IsInProgramStore;
   /**
    * 默认此次操作不是删除操作
    * 防止删除此页一条数据时页时停留当前页时出现无数据清空
@@ -146,9 +147,9 @@ const Issue = withRouter(observer(() => {
     }
     return null;
   };
-  function renderEpic({ record }) {
-    const color = record.get('epicColor');
-    const name = record.get('epicName');
+  function renderEpicOrFeature({ record, name: fieldName }) {
+    const color = fieldName === 'epic' ? record.get('epicColor') : record.get('featureColor');
+    const name = fieldName === 'epic' ? record.get('epicName') : record.get('featureName');
     const style = {
       color,
       borderWidth: '1px',
@@ -264,15 +265,15 @@ const Issue = withRouter(observer(() => {
           <div style={{ display: 'inline-flex' }}>
             {
               record.get('assigneeId') && record.get('assigneeId') !== '0' && (
-              <UserHead
-                user={{
-                  id: record.get('assigneeId'),
-                  name: record.get('assigneeName'),
-                  loginName: record.get('assigneeLoginName'),
-                  realName: record.get('assigneeRealName'),
-                  avatar: record.get('assigneeImageUrl'),
-                }}
-              />
+                <UserHead
+                  user={{
+                    id: record.get('assigneeId'),
+                    name: record.get('assigneeName'),
+                    loginName: record.get('assigneeLoginName'),
+                    realName: record.get('assigneeRealName'),
+                    avatar: record.get('assigneeImageUrl'),
+                  }}
+                />
               )
             }
 
@@ -284,7 +285,8 @@ const Issue = withRouter(observer(() => {
       <Column hidden name="component" className="c7n-agile-table-cell" renderer={renderTag('issueComponentBriefVOS', 'name')} />
       <Column hidden name="storyPoints" className="c7n-agile-table-cell" renderer={({ text }) => text || '-'} />
       <Column hidden name="version" className="c7n-agile-table-cell" renderer={renderTag('versionIssueRelVOS', 'name')} />
-      <Column hidden name="epic" className="c7n-agile-table-cell" renderer={renderEpic} />
+      <Column hidden name="epic" className="c7n-agile-table-cell" renderer={renderEpicOrFeature} />
+      <Column hidden name="feature" className="c7n-agile-table-cell" renderer={renderEpicOrFeature} />
       <Column name="issueSprintVOS" renderer={renderTag('issueSprintVOS', 'sprintName')} />
       {fields.map(field => (
         <Column
