@@ -1,6 +1,33 @@
 # Changelog
 All notable changes about agile-service will be documented in this file.
 
+## [0.21.0] - 2020-03-06
+
+### Added
+
+- Configure Kanban to support deletion status.
+- Import problem supports importing parent-child relationship. Users can import sub tasks at the same time when importing stories or tasks.
+- Agile message notification supports email mode.  
+
+### Changed
+
+- Optimize agile Kanban performance.
+- Optimize work list performance.
+- Optimization configuration Kanban status set to finished saving does not take effect.
+- Optimize the configuration of Kanban custom state order.
+- Optimize to-do mass drag problem quantity display.
+- Optimize the issue link page style.
+- Optimize custom field page styles.  
+
+### Fixed
+
+- Fix problem with story map full screen menu bar.
+- Fix the problem of no data after the iteration planning workbench is refreshed.
+- Fix issue details remaining estimated time names showing incorrect problems.
+- Fixed a problem where the story map epic could not view comments in certain situations.
+- Fix the problem of setting up the agile module owner to display undefined.
+  
+  
 ## [0.20.0] - 2019-12-20
 
 ### Added
