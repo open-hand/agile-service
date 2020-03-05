@@ -23,7 +23,7 @@ import './IssueBody.less';
 
 const { TabPane } = Tabs;
 
-const IssueBody = observer((props) => {
+function IssueBody(props) {
   const { prefixCls, disabled, store } = useContext(EditIssueContext);
   const issue = store.getIssue;
   const {
@@ -87,7 +87,7 @@ const IssueBody = observer((props) => {
           {issueTypeVO.typeCode && ['feature', 'sub_task'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''
           }
-          { store.testExecutes.length > 0 ? <IssueTestExecute {...props} /> : null}
+          {store.testExecutes.length > 0 ? <IssueTestExecute {...props} /> : null}
         </TabPane>
         <TabPane tab="评论" key="2">
           <IssueCommit {...props} />
@@ -135,6 +135,6 @@ const IssueBody = observer((props) => {
       }
     </section>
   );
-});
+}
 
-export default IssueBody;
+export default observer(IssueBody);
