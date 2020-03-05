@@ -59,7 +59,7 @@ const IssueBody = observer((props) => {
         {
           issueId && ['issue_epic', 'feature'].indexOf(typeCode) === -1 ? (
             <div style={{ display: 'flex' }}>
-              <FieldStoryPoint {...props} field={{ fieldCode: 'remainingTime', fieldName: '预估时间' }} />
+              <FieldStoryPoint {...props} field={{ fieldCode: 'remainingTime', fieldName: '剩余预估时间' }} />
             </div>
           ) : null
         }

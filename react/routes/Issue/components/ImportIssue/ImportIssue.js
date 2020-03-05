@@ -125,7 +125,11 @@ class ImportIssue extends Component {
   finish = () => {
     const { onFinish } = this.props;
     if (onFinish) {
-      onFinish();
+      onFinish().then(() => {
+        Choerodon.prompt('上传成功');
+      }).catch(() => {
+        Choerodon.prompt('上传失败');
+      });
     }
     this.setState({
       visible: false,

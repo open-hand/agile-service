@@ -138,7 +138,7 @@ export default ({
             const fieldType = record.get('fieldType');
             if (fieldType === 'member') {
               return userOptionDataSet;
-            }
+            } 
           },
         },
       },
