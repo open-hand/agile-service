@@ -35,7 +35,7 @@ const Issue = withRouter(observer(() => {
   const [urlFilter, setUrlFilter] = useState(null);
   const importRef = useRef();
   const tableRef = useRef();
-  const { isShowFeature } = IsInProgramStore;
+  const { isInProgram } = IsInProgramStore;
   /**
    * 默认此次操作不是删除操作
    * 防止删除此页一条数据时页时停留当前页时出现无数据清空
@@ -286,7 +286,7 @@ const Issue = withRouter(observer(() => {
       <Column hidden name="storyPoints" className="c7n-agile-table-cell" renderer={({ text }) => text || '-'} />
       <Column hidden name="version" className="c7n-agile-table-cell" renderer={renderTag('versionIssueRelVOS', 'name')} />
       <Column hidden name="epic" className="c7n-agile-table-cell" renderer={renderEpicOrFeature} />
-      <Column hidden name="feature" className="c7n-agile-table-cell" renderer={renderEpicOrFeature} />
+      { isInProgram && <Column hidden name="feature" className="c7n-agile-table-cell" renderer={renderEpicOrFeature} />}      
       <Column name="issueSprintVOS" renderer={renderTag('issueSprintVOS', 'sprintName')} />
       {fields.map(field => (
         <Column
