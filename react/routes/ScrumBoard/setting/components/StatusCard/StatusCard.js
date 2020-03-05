@@ -39,7 +39,7 @@ class StatusCard extends Component {
     } else {
       warning({
         title: '移除状态',
-        content: `无法移除初始状态 ${data.name}，如要移除请联系组织管理员。`,
+        content: `状态 ${data.name}已在其他看板的列中，不可删除。`,
       });
     }
   };
@@ -49,14 +49,14 @@ class StatusCard extends Component {
     const originData = JSON.parse(JSON.stringify(ScrumBoardStore.getBoardData));
     const data = JSON.parse(JSON.stringify(ScrumBoardStore.getBoardData));
     const deleteCode = propData.statusId;
-    let deleteIndex = '';
+    let deleteIndex = '';    
     for (let index = 0, len = data[data.length - 1].subStatusDTOS.length; index < len; index += 1) {
-      if (String(data[data.length - 1].subStatusDTOS[index].id) === String(deleteCode)) {
+      if (String(data[data.length - 1].subStatusDTOS[index].statusId) === String(deleteCode)) {
         deleteIndex = index;
       }
     }
     data[data.length - 1].subStatusDTOS.splice(deleteIndex, 1);
-    ScrumBoardStore.setBoardData(data);
+    ScrumBoardStore.setBoardData(data);    
     try {
       await ScrumBoardStore.axiosDeleteStatus(deleteCode);
     } catch (err) {

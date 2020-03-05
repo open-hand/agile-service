@@ -497,7 +497,7 @@ class ScrumBoardStore {
   }
 
   @action updateStatusLocal(columnId, data, res) {
-    const status = this.findStatusById(columnId, data.id);
+    const status = this.findStatusById(columnId, data.statusId);
     status.completed = res.completed;
     status.objectVersionNumber = res.objectVersionNumber;
   }
@@ -505,7 +505,7 @@ class ScrumBoardStore {
   findStatusById(columnId, statusId) {
     const data = this.boardData;       
     const column = find(data, { columnId });
-    const status = find(column.subStatusDTOS, { id: statusId });
+    const status = find(column.subStatusDTOS, { statusId });
     return status;
   }
 
