@@ -35,7 +35,7 @@ export default ({
 
   // eslint-disable-next-line consistent-return
   async function checkCode(value) {
-    if (isEdit) return; 
+    if (isEdit) return;
     if (!value) {
       return '';
     } else if (!regex.test(value)) {
@@ -82,7 +82,7 @@ export default ({
     autoCreate: true,
     autoQuery: false,
     transport: {
-      
+
     },
     fields: [
       {
@@ -109,6 +109,13 @@ export default ({
         lookupAxiosConfig: getLookupConfig('field_type'),
         valueField: 'valueCode',
         textField: 'name',
+      },
+      // 用于提交更新使用
+      {
+        name: 'updateFieldOptions',
+        type: 'object',
+        required: false,
+        // ignore: 'always',
       },
       {
         name: 'context',
