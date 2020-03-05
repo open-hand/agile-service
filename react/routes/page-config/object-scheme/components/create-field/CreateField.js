@@ -77,14 +77,14 @@ function CreateField() {
         return false;
       }
       obj.fieldOptions = fieldOptions.map((o) => {
-        if (obj.defaultValue.indexOf(String(o.tempKey)) !== -1
-          || obj.defaultValue.indexOf(String(o.id)) !== -1) {
+        if (obj.defaultValue && (obj.defaultValue.indexOf(String(o.tempKey)) !== -1
+          || obj.defaultValue.indexOf(String(o.id)) !== -1)) {
           return { ...o, isDefault: true };
         } else {
           return { ...o, isDefault: false };
         }
       });
-      if (obj.defaultValue.length) {
+      if (obj.defaultValue && obj.defaultValue.length) {
         obj.defaultValue = obj.defaultValue.join(',');
       }
     }

@@ -567,6 +567,7 @@ class ScrumBoardStore {
       assigneeFilterIds: [],
     };
     this.currentSprintExist = false;
+    this.calanderCouldUse = false;
   }
 
   @computed get getDayRemain() {
