@@ -544,12 +544,12 @@ class CreateIssue extends Component {
         );
       case 'fixVersion':
         return (
-          <FormItem label="版本">
+          <FormItem label="修复的版本">
             {getFieldDecorator('fixVersionIssueRel', {
               rules: [{ transform: value => (value ? value.toString() : value) }],
             })(
               <SelectFocusLoad
-                label="版本"
+                label="修复的版本"
                 mode="multiple"
                 loadWhenMount
                 type="version"
