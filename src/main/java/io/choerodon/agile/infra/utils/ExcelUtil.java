@@ -184,6 +184,10 @@ public class ExcelUtil {
 
         String[] data2 = {"史诗", "", "敏捷管理", "", "请输入史诗的概述",
                 "", "", "高", "", "", "", "请输入导入史诗类型的问题的描述信息", "导入问题"};
+        if (withFeature) {
+            data2[0] = "特性";
+            data2[4] = "请输入特性的概述";
+        }
         createRow(sheet, count++, subArray(data2, withFeature), null);
 
         String[] data3 = {"故事", secondColumnValue, "敏捷管理", "sprint-1", "这里输入故事的概述：故事1",
