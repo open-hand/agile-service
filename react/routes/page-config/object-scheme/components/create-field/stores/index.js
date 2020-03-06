@@ -36,7 +36,7 @@ export const StoreProvider = inject('AppState')(
           const dateFormat = 'YYYY-MM-DD HH:mm:ss';
           if (dateList.indexOf(data.fieldType) !== -1) {
             // 格式化日期类型
-            formDataSet.current.set('defaultValue', moment(data.defaultValue).format(dateFormat));
+            formDataSet.current.set('defaultValue', data.defaultValue ? moment(data.defaultValue).format(dateFormat) : undefined);
             // 变换数据，从extraConfig -> check
             formDataSet.current.set('check', data.extraConfig);
           }
