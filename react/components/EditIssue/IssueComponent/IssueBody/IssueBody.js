@@ -20,6 +20,8 @@ import { FieldStoryPoint, FieldSummary } from './Field';
 import CreateBranch from '../../../CreateBranch';
 import DailyLog from '../../../DailyLog';
 import EditIssueContext from '../../stores';
+import IsInProgramStore from '../../../../stores/common/program/IsInProgramStore';
+
 import './IssueBody.less';
 
 const { TabPane } = Tabs;
@@ -73,7 +75,7 @@ function IssueBody(props) {
           <IssueDetail {...props} />
           <IssueDes {...props} />
           <IssueAttachment {...props} />
-          {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
+          {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1 && !IsInProgramStore.isInProgram
             ? <IssueDoc {...props} /> : ''
           }
 
