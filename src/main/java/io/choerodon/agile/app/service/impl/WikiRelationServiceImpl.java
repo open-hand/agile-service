@@ -108,7 +108,6 @@ public class WikiRelationServiceImpl implements WikiRelationService {
     }
 
     @Override
-    @DataLog(type = "knowledgeRelationDelete")
     public void deleteById(Long projectId, Long id) {
         WikiRelationDTO wikiRelationDTO = new WikiRelationDTO();
         wikiRelationDTO.setProjectId(projectId);
