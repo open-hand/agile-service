@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import React, { useContext } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
@@ -24,7 +25,9 @@ import './IssueBody.less';
 const { TabPane } = Tabs;
 
 function IssueBody(props) {
-  const { prefixCls, disabled, store } = useContext(EditIssueContext);
+  const {
+    prefixCls, disabled, store, applyType, 
+  } = useContext(EditIssueContext);
   const issue = store.getIssue;
   const {
     issueId, issueNum, typeCode, issueTypeVO = {},
@@ -85,7 +88,7 @@ function IssueBody(props) {
             ? <TestLink {...props} /> : ''
           }
           {issueTypeVO.typeCode && ['feature', 'sub_task'].indexOf(issueTypeVO.typeCode) === -1
-            ? <IssueLink {...props} /> : ''
+            ? (applyType === 'program' && issueTypeVO.typeCode === 'issue_epic' ? null : <IssueLink {...props} />) : ''
           }
           {store.testExecutes.length > 0 ? <IssueTestExecute {...props} /> : null}
         </TabPane>
