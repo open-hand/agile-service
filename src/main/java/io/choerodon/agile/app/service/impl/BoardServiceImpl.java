@@ -549,7 +549,7 @@ public class BoardServiceImpl implements BoardService {
     public UserSettingVO updateUserSettingBoard(Long projectId, Long boardId, String swimlaneBasedCode) {
         CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
         Long userId = customUserDetails.getUserId();
-        UserSettingDTO userSettingDTO = modelMapper.map(queryUserSettingBoardByBoardId(projectId, boardId, userId), UserSettingDTO.class);
+        UserSettingDTO userSettingDTO = queryUserSettingBoardByBoardId(projectId, boardId, userId);
         if (userSettingDTO == null) {
             userSettingDTO = new UserSettingDTO();
             userSettingDTO.setDefaultBoard(false);
