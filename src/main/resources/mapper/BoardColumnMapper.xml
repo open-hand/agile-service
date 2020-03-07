@@ -16,7 +16,6 @@
             <id property="id" column="ais_id"/>
             <id property="completed" column="ais_completed"/>
             <id property="statusId" column="ais_status_id"/>
-            <id property="position" column="ais_position"/>
             <id property="objectVersionNumber" column="ais_object_version_number"/>
             <collection property="issues" autoMapping="true" columnPrefix="ai_"
                         ofType="io.choerodon.agile.infra.dto.IssueForBoardDO"/>
@@ -36,7 +35,6 @@
         abc.object_version_number AS abc_object_version_number,
         ais.id AS ais_id,
         ais.is_completed AS ais_completed,
-        abcsr.position as ais_position,
         ais.status_id as ais_status_id,
         ais.object_version_number AS ais_object_version_number,
         ai.issue_id AS ai_issue_id,
