@@ -373,7 +373,6 @@ public class BoardServiceImpl implements BoardService {
         jsonObject.put("allColumnNum", getAllColumnNum(projectId, boardId, activeSprintId));
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
         Comparator<IssueForBoardDO> comparator = Comparator.comparing(IssueForBoardDO::getRank, nullsFirst(naturalOrder()));
-        Comparator<SubStatusDTO> subComparator = Comparator.comparing(SubStatusDTO::getPosition, nullsFirst(naturalOrder()));
         columns.forEach(columnAndIssueDTO ->
         {
             columnAndIssueDTO.getSubStatusDTOS().forEach(subStatusDTO -> {
@@ -390,7 +389,6 @@ public class BoardServiceImpl implements BoardService {
                 });
                 subStatusDTO.getIssues().sort(comparator);
             });
-            columnAndIssueDTO.getSubStatusDTOS().sort(subComparator);
         });
         jsonObject.put("columnsData", putColumnData(columns));
         jsonObject.put("currentSprint", putCurrentSprint(activeSprint, organizationId));
