@@ -356,7 +356,7 @@ public class StateMachineServiceImpl implements StateMachineService {
             String applyType = projectConfig.getApplyType();
             count = count + issueMapper.querySizeByApplyTypeAndStatusId(projectId, applyType, statusId);
         }
-        if (count.equals(0L) && checkStatusInBoardColumn(projectConfigs, statusId)) {
+        if (count.equals(0L) && checkStatusInBoardColumnBySm(projectConfigs, statusId)) {
             result.put("canDelete", true);
         } else {
             result.put("canDelete", false);
@@ -365,7 +365,7 @@ public class StateMachineServiceImpl implements StateMachineService {
         return result;
     }
 
-    private Boolean checkStatusInBoardColumn(List<ProjectConfigDTO> projectConfigs, Long statusId) {
+    private Boolean checkStatusInBoardColumnBySm(List<ProjectConfigDTO> projectConfigs, Long statusId) {
         if (projectConfigs != null && !projectConfigs.isEmpty()) {
             for (ProjectConfigDTO projectConfigDTO : projectConfigs) {
                 ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
