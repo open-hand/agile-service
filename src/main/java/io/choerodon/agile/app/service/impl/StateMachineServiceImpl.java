@@ -80,6 +80,8 @@ public class StateMachineServiceImpl implements StateMachineService {
     private BoardColumnService boardColumnService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private ColumnStatusRelMapper columnStatusRelMapper;
 
     @Override
     public PageInfo<StateMachineListVO> pageQuery(Long organizationId, Pageable pageable, String name, String description, String param) {
@@ -354,13 +356,28 @@ public class StateMachineServiceImpl implements StateMachineService {
             String applyType = projectConfig.getApplyType();
             count = count + issueMapper.querySizeByApplyTypeAndStatusId(projectId, applyType, statusId);
         }
-        if (count.equals(0L)) {
+        if (count.equals(0L) && checkStatusInBoardColumn(projectConfigs, statusId)) {
             result.put("canDelete", true);
         } else {
             result.put("canDelete", false);
             result.put("count", count);
         }
         return result;
+    }
+
+    private Boolean checkStatusInBoardColumn(List<ProjectConfigDTO> projectConfigs, Long statusId) {
+        if (projectConfigs != null && !projectConfigs.isEmpty()) {
+            for (ProjectConfigDTO projectConfigDTO : projectConfigs) {
+                ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
+                columnStatusRelDTO.setProjectId(projectConfigDTO.getProjectId());
+                columnStatusRelDTO.setStatusId(statusId);
+                List<ColumnStatusRelDTO> columnStatusRelDTOList = columnStatusRelMapper.select(columnStatusRelDTO);
+                if (columnStatusRelDTOList != null && !columnStatusRelDTOList.isEmpty()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     @Override
