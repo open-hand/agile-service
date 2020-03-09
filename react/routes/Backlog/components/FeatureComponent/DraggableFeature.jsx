@@ -4,10 +4,7 @@ import classnames from 'classnames';
 import { Menu, Icon, Dropdown } from 'choerodon-ui';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
-function randomItem(array) {  
-  const index = Math.floor(Math.random() * (array.length - 1));  
-  return array[index];  
-} 
+
 @observer
 class DraggableFeature extends Component {
   constructor(props) {
@@ -96,7 +93,6 @@ class DraggableFeature extends Component {
       draggableProvided, item,
     } = this.props;
     const { expand, editName } = this.state;
-    const colors = BacklogStore.getColorLookupValue.map(c => c.name);
     return (
       <div
         ref={draggableProvided.innerRef}
@@ -124,7 +120,7 @@ class DraggableFeature extends Component {
                   style={{
                     width: 12,
                     height: 12,
-                    background: item.color || randomItem(colors),
+                    background: item.color || BacklogStore.randomFeatureColor[item.summary],
                     color: 'white',
                     display: 'flex',
                     justifyContent: 'center',

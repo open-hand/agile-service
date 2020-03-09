@@ -18,6 +18,7 @@ class Feature extends Component {
     Promise.all([getFeaturesInProject(), getFeaturesColor()]).then(([featureData, featureColor]) => {
       BacklogStore.setFeatureData(featureData);
       BacklogStore.setColorLookupValue(featureColor.lookupValues);
+      BacklogStore.setRandomFeatureColor(featureData, featureColor.lookupValues);
     }).catch((error3) => { });
   };
 

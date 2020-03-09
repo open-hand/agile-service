@@ -11,7 +11,10 @@ import { sort } from '@/api/StoryMapApi';
 import { getProjectId } from '@/common/utils';
 
 const { AppState } = stores;
-
+function randomItem(array) {
+  const index = Math.floor(Math.random() * (array.length - 1));
+  return array[index];
+}
 @store('BacklogStore')
 class BacklogStore {
   @observable createdSprint = '';
@@ -188,6 +191,16 @@ class BacklogStore {
 
   @action setColorLookupValue(data) {
     this.colorLookupValue = data;
+  }
+
+  @observable randomFeatureColor = {};
+
+  @action setRandomFeatureColor(featureList, colorLookupValue) {
+    featureList.forEach((feature) => {
+      if (!feature.color) {
+        this.randomFeatureColor[feature.summary] = randomItem(colorLookupValue.map(c => c.name));
+      }
+    });
   }
 
   @computed get getSprintWidth() {

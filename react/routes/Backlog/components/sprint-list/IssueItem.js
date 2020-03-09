@@ -86,7 +86,7 @@ const Item = memo(({ issue }) => {
               className={`${prefix}-feature`}   
               style={{
                 color: issue.featureColor || issue.color,
-                border: `1px solid ${issue.featureColor || issue.color}`,
+                border: `1px solid ${issue.featureColor || issue.color || BacklogStore.randomFeatureColor[issue.featureName]}`,
               }}          
             >
               {issue.featureName}
