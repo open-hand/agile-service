@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {
-  Button, Select, Checkbox, Menu, Dropdown, Icon,
+  Button, Menu, Dropdown, Icon,
 } from 'choerodon-ui';
 import { observer } from 'mobx-react';
-import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
+import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 
 @observer
 class SwitchSwimLine extends Component {
@@ -29,14 +28,13 @@ class SwitchSwimLine extends Component {
         placement="bottomCenter"
         getPopupContainer={triggerNode => triggerNode}
       >
-        <Button>
+        <Button style={{ color: 'black' }}>
           {swimLine === 'none' && '无泳道'}
           {swimLine === 'version' && '版本泳道'}
           {swimLine === 'sprint' && '冲刺泳道'}
           <Icon type="arrow_drop_down" />
         </Button>
-      </Dropdown>
- 
+      </Dropdown> 
     );
   }
 }
