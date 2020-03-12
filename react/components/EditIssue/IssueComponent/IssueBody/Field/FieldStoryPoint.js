@@ -9,7 +9,7 @@ import SelectNumber from '../../../../SelectNumber';
 const { Text, Edit } = TextEditToggle;
 @inject('AppState')
 @observer class FieldStoryPoint extends Component {
-  updateIssueField = (value) => {  
+  updateIssueField = (value) => {
     const {
       store, onUpdate, reloadIssue, field,
     } = this.props;
@@ -22,7 +22,7 @@ const { Text, Edit } = TextEditToggle;
     const obj = {
       issueId,
       objectVersionNumber,
-      [fieldCode]: value === '' ? null : value,
+      [fieldCode === 'remainingTime' ? 'estimateTime' : fieldCode]: value === '' ? null : value,
     };
     updateIssue(obj)
       .then(() => {
