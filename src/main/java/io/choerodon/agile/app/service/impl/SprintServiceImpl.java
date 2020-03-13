@@ -363,7 +363,7 @@ public class SprintServiceImpl implements SprintService {
         return true;
     }
 
-    private void moveNotDoneIssueToTargetSprint(Long projectId, SprintCompleteVO sprintCompleteVO) {
+    protected void moveNotDoneIssueToTargetSprint(Long projectId, SprintCompleteVO sprintCompleteVO) {
         CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
         List<MoveIssueDTO> moveIssueDTOS = new ArrayList<>();
         Long targetSprintId = sprintCompleteVO.getIncompleteIssuesDestination();
