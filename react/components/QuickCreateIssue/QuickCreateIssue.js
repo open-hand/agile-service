@@ -160,6 +160,7 @@ class QuickCreateIssue extends Component {
                       <Input
                         className="hidden-label"
                         autoFocus
+                        autoComplete="on"
                         onPressEnter={this.handleCreate}
                         maxLength={44}
                         placeholder="请输入问题概要"
