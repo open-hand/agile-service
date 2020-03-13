@@ -1,5 +1,14 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.LookupTypeWithValuesDTO;
@@ -17,14 +26,6 @@ import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.FieldValueUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.entity.Criteria;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author shinan.chen
@@ -195,18 +196,24 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         fieldDetailDTO.setContext(field.getContext().split(","));
         //获取字段选项，并设置默认值
         List<FieldOptionVO> fieldOptions = fieldOptionService.queryByFieldId(organizationId, fieldId);
-        if (!fieldOptions.isEmpty() && field.getDefaultValue() != null) {
-            List<String> defaultIds = Arrays.asList(field.getDefaultValue().split(","));
-            fieldOptions.forEach(fieldOption -> {
-                if (defaultIds.contains(fieldOption.getId().toString())) {
-                    fieldOption.setIsDefault(true);
-                } else {
+        if (!fieldOptions.isEmpty()) {
+            if (field.getDefaultValue() != null) {
+                List<String> defaultIds = Arrays.asList(field.getDefaultValue().split(","));
+                fieldOptions.forEach(fieldOption -> {
+                    if (defaultIds.contains(fieldOption.getId().toString())) {
+                        fieldOption.setIsDefault(true);
+                    } else {
+                        fieldOption.setIsDefault(false);
+                    }
+                });
+            } else {
+                fieldOptions.forEach(fieldOption -> {
                     fieldOption.setIsDefault(false);
-                }
-            });
+                });
+            }
             fieldDetailDTO.setFieldOptions(fieldOptions);
+            FieldValueUtil.handleDefaultValue(fieldDetailDTO);
         }
-        FieldValueUtil.handleDefaultValue(fieldDetailDTO);
         return fieldDetailDTO;
     }
 

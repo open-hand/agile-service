@@ -20,16 +20,14 @@ class Assignee extends Component {
     };
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentDidMount() {
     const { sprintId } = this.props;
-    if (nextProps.sprintId !== sprintId) {
-      const newSprintId = nextProps.sprintId;
-      this.setState({
-        sprintId: newSprintId,
-      });
-      this.loadAssignee(newSprintId);
-    }
+    this.setState({
+      sprintId,
+    });
+    this.loadAssignee(sprintId);
   }
+
 
   getOption() {
     const { assigneeInfo } = this.state;

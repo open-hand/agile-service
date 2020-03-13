@@ -46,7 +46,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected static final String[] FIELDS_NAME =
             {"问题类型*", "所属史诗", "模块", "冲刺", "概述*", "子任务概述(仅子任务生效)", "经办人",
-                    "优先级*", "预估时间(小时)", "版本", "史诗名称(仅问题类型为史诗时生效)", "故事点", "描述"};
+                    "优先级*", "预估时间(小时)", "版本", "故事点", "描述", "史诗名称(仅问题类型为史诗时生效)"};
 
     protected static final String BACKETNAME = "agile-service";
     protected static final String SUB_TASK = "sub_task";
@@ -116,7 +116,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Override
     public void download(Long projectId, Long organizationId, HttpServletRequest request, HttpServletResponse response) {
-        List<Predefined> predefinedList = getPredefinedList(organizationId, projectId);
+        List<Predefined> predefinedList = getPredefinedList(organizationId, projectId, false);
         //所属史诗预定义值
         predefinedList.add(getEpicPredefined(projectId));
 
@@ -168,7 +168,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    protected List<Predefined> getPredefinedList(Long organizationId, Long projectId) {
+    protected List<Predefined> getPredefinedList(Long organizationId, Long projectId, boolean withFeature) {
         List<Predefined> predefinedList = new ArrayList<>();
         List<PriorityVO> priorityVOList = priorityService.queryByOrganizationIdList(organizationId);
         List<IssueTypeVO> issueTypeVOList = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE);
@@ -185,7 +185,11 @@ public class ExcelServiceImpl implements ExcelService {
 
         List<String> issueTypeList = new ArrayList<>();
         for (IssueTypeVO issueTypeVO : issueTypeVOList) {
-            if (!SUB_TASK.equals(issueTypeVO.getTypeCode()) && !FEATURE.equals(issueTypeVO.getTypeCode())) {
+            String typeCode = issueTypeVO.getTypeCode();
+            if (withFeature && "issue_epic".equals(typeCode)) {
+                continue;
+            }
+            if (!SUB_TASK.equals(typeCode) && !FEATURE.equals(typeCode)) {
                 issueTypeList.add(issueTypeVO.getName());
             }
         }
@@ -294,12 +298,12 @@ public class ExcelServiceImpl implements ExcelService {
             issueCreateVO.setIssueTypeId(issueType.getId());
             if ("史诗".equals(typeName)) {
                 //默认名称和概要相同
-                String epicName = row.getCell(10).toString();
+                String epicName = row.getCell(12).toString();
                 issueCreateVO.setSummary(epicName);
                 issueCreateVO.setEpicName(epicName);
             } else {
                 if ("故事".equals(typeName)) {
-                    Cell storyPointCell = row.getCell(11);
+                    Cell storyPointCell = row.getCell(10);
                     if (!isCellEmpty(storyPointCell)) {
                         issueCreateVO.setStoryPoints(new BigDecimal(storyPointCell.toString()));
                     }
@@ -313,7 +317,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void setDescription(IssueCreateVO issueCreateVO, Row row) {
-        Cell descriptionCell = row.getCell(12);
+        Cell descriptionCell = row.getCell(11);
         if (!isCellEmpty(descriptionCell)) {
             String description = descriptionCell.toString();
             if (StringUtils.hasText(description)) {
@@ -403,7 +407,13 @@ public class ExcelServiceImpl implements ExcelService {
         sendProcess(result, result.getUserId(), 1.0);
     }
 
-    protected IssueTypeVO setIssueTypeAndPriorityMap(Long organizationId, Long projectId, Map<String, IssueTypeVO> issueTypeMap, Map<String, Long> priorityMap, List<String> issueTypeList, List<String> priorityList) {
+    protected IssueTypeVO setIssueTypeAndPriorityMap(Long organizationId,
+                                                     Long projectId,
+                                                     Map<String, IssueTypeVO> issueTypeMap,
+                                                     Map<String, Long> priorityMap,
+                                                     List<String> issueTypeList,
+                                                     List<String> priorityList,
+                                                     boolean withFeature) {
         IssueTypeVO subTask = null;
         List<PriorityVO> priorityVOList = priorityService.queryByOrganizationIdList(organizationId);
         List<IssueTypeVO> issueTypeVOList = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE);
@@ -416,6 +426,10 @@ public class ExcelServiceImpl implements ExcelService {
         for (IssueTypeVO issueTypeVO : issueTypeVOList) {
             if (SUB_TASK.equals(issueTypeVO.getTypeCode())) {
                 subTask = issueTypeVO;
+            }
+            //有特性列跳过史诗类型
+            if (withFeature && "issue_epic".equals(issueTypeVO.getTypeCode())) {
+                continue;
             }
             if (!SUB_TASK.equals(issueTypeVO.getTypeCode()) && !FEATURE.equals(issueTypeVO.getTypeCode())) {
                 issueTypeMap.put(issueTypeVO.getName(), issueTypeVO);
@@ -488,15 +502,15 @@ public class ExcelServiceImpl implements ExcelService {
             }
             //如果是史诗的话，判断是否重复和字段长度
             if ("史诗".equals(issueTypeCell.toString())) {
-                Cell epicNameCell = row.getCell(10);
+                Cell epicNameCell = row.getCell(12);
                 if (isCellEmpty(epicNameCell)) {
-                    errorMessage.put(10, "史诗名称不能为空");
+                    errorMessage.put(12, "史诗名称不能为空");
                 } else {
                     String epicName = epicNameCell.toString().trim();
                     if (epicName.length() > 10) {
-                        errorMessage.put(10, "史诗名称过长");
+                        errorMessage.put(12, "史诗名称过长");
                     } else if (!checkEpicNameExist(projectId, epicName)) {
-                        errorMessage.put(10, "史诗名称重复");
+                        errorMessage.put(12, "史诗名称重复");
                     }
                 }
             }
@@ -538,22 +552,22 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void checkStoryPoint(Row row, Map<Integer, String> errorMessage) {
-        Cell storyPointCell = row.getCell(11);
+        Cell storyPointCell = row.getCell(10);
         if (!isCellEmpty(storyPointCell)) {
             String storyPointStr = storyPointCell.toString().trim();
             if (storyPointStr.length() > 3) {
-                errorMessage.put(11, "请输入正确的位数");
+                errorMessage.put(10, "请输入正确的位数");
             } else if (!NumberUtil.isNumeric(storyPointStr)) {
-                errorMessage.put(11, "请输入数字");
+                errorMessage.put(10, "请输入数字");
             } else {
                 if (NumberUtil.isInteger(storyPointStr) || NumberUtil.canParseInteger(storyPointStr)) {
                     if (storyPointStr.trim().length() > 3) {
-                        errorMessage.put(11, "最大支持3位整数");
+                        errorMessage.put(10, "最大支持3位整数");
                     } else if (storyPointStr.trim().length() > 1 && "0".equals(storyPointStr.trim().substring(0, 0))) {
-                        errorMessage.put(11, "请输入正确的整数");
+                        errorMessage.put(10, "请输入正确的整数");
                     }
                 } else if (!"0.5".equals(storyPointStr)) {
-                    errorMessage.put(11, "小数只支持0.5");
+                    errorMessage.put(10, "小数只支持0.5");
                 }
             }
         }
@@ -677,7 +691,7 @@ public class ExcelServiceImpl implements ExcelService {
         Map<String, Long> priorityMap = new HashMap<>();
         List<String> issueTypeList = new ArrayList<>();
         List<String> priorityList = new ArrayList<>();
-        IssueTypeVO subTask = setIssueTypeAndPriorityMap(organizationId, projectId, issueTypeMap, priorityMap, issueTypeList, priorityList);
+        IssueTypeVO subTask = setIssueTypeAndPriorityMap(organizationId, projectId, issueTypeMap, priorityMap, issueTypeList, priorityList, false);
         Long failCount = 0L;
         Long successCount = 0L;
         Integer processNum = 0;

@@ -123,7 +123,7 @@ const StoryMapHome = observer(() => {
   }, [selectedIssueMap.size]);
 
   const isEmpty = StoryMapStore.getIsEmpty;
-  const [isFullScreen, toggleFullScreen] = useFullScreen(document.getElementsByClassName('c7nagile-StoryMap')[0], onFullScreenChange);
+  const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.getElementsByClassName('c7nagile-StoryMap')[0], onFullScreenChange);
   return (
     <Page
       className="c7nagile-StoryMap"

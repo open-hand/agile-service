@@ -12,7 +12,7 @@ import pic from '../EmptyPics/no_sprint.svg';
 import lineLegend from './Line.svg';
 import './BurnDown.less';
 
-/* eslint-disable */
+
 const { AppState } = stores;
 
 class BurnDown extends Component {
@@ -30,18 +30,16 @@ class BurnDown extends Component {
     };
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentDidMount() {
     const { sprintId } = this.props;
-    if (nextProps.sprintId !== sprintId) {
-      const newSprintId = nextProps.sprintId;
-      const unit = this.getUnitFromLocalStorage();
-      this.setState({
-        unit,
-        sprintId: newSprintId,
-      });
-      this.loadSprints(newSprintId, unit);
-    }
+    const unit = this.getUnitFromLocalStorage();
+    this.setState({
+      unit,
+      sprintId,
+    });
+    this.loadSprints(sprintId, unit);
   }
+
 
   getUnitFromLocalStorage() {
     if (!window.localStorage) {
@@ -147,6 +145,7 @@ class BurnDown extends Component {
         },
         axisLabel: {
           show: true,
+          // eslint-disable-next-line radix
           interval: parseInt(xAxis.length / 7) ? parseInt(xAxis.length / 7) - 1 : 0,
           textStyle: {
             color: 'rgba(0, 0, 0, 0.65)',
@@ -299,7 +298,7 @@ class BurnDown extends Component {
     axios.get(`/agile/v1/projects/${projectId}/sprint/query_non_workdays/${sprintId}/${orgId}`).then((res) => {
       if (res) {
         this.setState({
-          restDays: res.map((date) => moment(date).format('YYYY-MM-DD')),
+          restDays: res.map(date => moment(date).format('YYYY-MM-DD')),
         }, () => {
           this.loadChartData(sprintId, unit);
         });
@@ -334,7 +333,7 @@ class BurnDown extends Component {
           rest = result.rest;
         }
         const xData = allDate;
-        let markAreaData = [];
+        const markAreaData = [];
         let exportAxisData = [res.expectCount];
         const { restDayShow } = this.state;
 
@@ -367,7 +366,7 @@ class BurnDown extends Component {
                 },
                 {
                   xAxis: allDate[index].split(' ')[0].slice(5).replace('-', '/'),
-                }
+                },
               ]);
               exportAxisData[index + 1] = exportAxisData[index];
             } else {
@@ -450,7 +449,7 @@ class BurnDown extends Component {
         <div className="switch" style={{ display: !loading && !sprintId ? 'none' : 'block' }}>
           <Dropdown overlay={menu} trigger={['click']} getPopupContainer={triggerNode => triggerNode.parentNode}>
             <div className="c7n-dropdown-link c7n-agile-dashboard-burndown-select">
-              {'单位选择'}
+              单位选择
               <Icon type="arrow_drop_down" />
             </div>
           </Dropdown>

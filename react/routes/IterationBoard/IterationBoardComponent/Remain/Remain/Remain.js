@@ -14,12 +14,9 @@ class Remain extends Component {
     };
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentDidMount() {
     const { sprintId } = this.props;
-    if (nextProps.sprintId !== sprintId) {
-      const newSprintId = nextProps.sprintId;
-      this.loadSprintInfo(newSprintId);
-    }
+    this.loadSprintInfo(sprintId);
   }
 
   getPercent() {

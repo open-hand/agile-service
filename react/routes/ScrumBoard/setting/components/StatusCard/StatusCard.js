@@ -5,6 +5,7 @@ import {
   Radio, Icon, Tooltip, Modal,
 } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
+import { find } from 'lodash';
 import { stores, Permission, Choerodon } from '@choerodon/boot';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import { STATUS } from '@/common/Constant';
@@ -38,7 +39,7 @@ class StatusCard extends Component {
     } else {
       warning({
         title: '移除状态',
-        content: `无法移除初始状态 ${data.name}，如要移除请联系组织管理员。`,
+        content: `状态 ${data.name}已在其他看板的列中，不可删除。`,
       });
     }
   };
@@ -48,14 +49,14 @@ class StatusCard extends Component {
     const originData = JSON.parse(JSON.stringify(ScrumBoardStore.getBoardData));
     const data = JSON.parse(JSON.stringify(ScrumBoardStore.getBoardData));
     const deleteCode = propData.statusId;
-    let deleteIndex = '';
+    let deleteIndex = '';    
     for (let index = 0, len = data[data.length - 1].subStatusDTOS.length; index < len; index += 1) {
-      if (String(data[data.length - 1].subStatusDTOS[index].id) === String(deleteCode)) {
+      if (String(data[data.length - 1].subStatusDTOS[index].statusId) === String(deleteCode)) {
         deleteIndex = index;
       }
     }
     data[data.length - 1].subStatusDTOS.splice(deleteIndex, 1);
-    ScrumBoardStore.setBoardData(data);
+    ScrumBoardStore.setBoardData(data);    
     try {
       await ScrumBoardStore.axiosDeleteStatus(deleteCode);
     } catch (err) {
@@ -64,10 +65,20 @@ class StatusCard extends Component {
     refresh();
   }
 
+  /**
+   * 搜索状态code
+   * @param {*} statusId 
+   */
+  findStatusCodeByStatusId(statusId) {
+    const statusList = ScrumBoardStore.getStatusList;
+    return find(statusList, { id: statusId }).code;
+  }
+
   getDisabled = () => {
     const { columnId, data } = this.props;
-    // 待处理状态 不可删除 一直处于禁止删除状态
-    if (data.statusId === 4) {
+    // 待处理状态 不可删除 一直处于禁止删除状态 
+    // 根据状态code 是否为create 为create则如下
+    if (this.findStatusCodeByStatusId(data.statusId) === 'create') {
       return [true, '初始化状态'];
     }
     if (columnId === 0) {

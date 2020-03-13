@@ -580,7 +580,17 @@ const CreateFilter = (props) => {
       } else {
         // return multiple value
         return (
-          <SelectFocusLoad label="值" type="user" mode="multiple" labelInValue />
+          <SelectFocusLoad
+            label="值"
+            type="user"
+            mode="multiple"
+            labelInValue
+            render={user => (
+              <Option key={user.id} value={user.id}>
+                {user.realName}
+              </Option>
+            )}
+          />
         );
       }
     } else if (

@@ -26,7 +26,6 @@ class IterationBoardHome extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       sprintId: undefined,
       sprintName: undefined,
     };
@@ -40,11 +39,9 @@ class IterationBoardHome extends Component {
     const { match } = this.props;
     const sprintId = match.params.id;
     if (!sprintId) return;
-    this.setState({ loading: true });
     loadSprint(sprintId)
       .then((res) => {
         this.setState({
-          loading: false,
           sprintId: res.sprintId,
           sprintName: res.sprintName,
         });
@@ -52,8 +49,8 @@ class IterationBoardHome extends Component {
   }
 
   renderContent() {
-    const { loading, sprintId, sprintName } = this.state;
-    if (!loading && !sprintId) {
+    const { sprintId, sprintName } = this.state;
+    if (!sprintId) {
       return (
         <div>
           当前项目下无冲刺

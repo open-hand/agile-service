@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import React, { useContext } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
@@ -19,12 +20,16 @@ import { FieldStoryPoint, FieldSummary } from './Field';
 import CreateBranch from '../../../CreateBranch';
 import DailyLog from '../../../DailyLog';
 import EditIssueContext from '../../stores';
+import IsInProgramStore from '../../../../stores/common/program/IsInProgramStore';
+
 import './IssueBody.less';
 
 const { TabPane } = Tabs;
 
-const IssueBody = observer((props) => {
-  const { prefixCls, disabled, store } = useContext(EditIssueContext);
+function IssueBody(props) {
+  const {
+    prefixCls, disabled, store, applyType, 
+  } = useContext(EditIssueContext);
   const issue = store.getIssue;
   const {
     issueId, issueNum, typeCode, issueTypeVO = {},
@@ -59,7 +64,7 @@ const IssueBody = observer((props) => {
         {
           issueId && ['issue_epic', 'feature'].indexOf(typeCode) === -1 ? (
             <div style={{ display: 'flex' }}>
-              <FieldStoryPoint {...props} field={{ fieldCode: 'remainingTime', fieldName: '预估时间' }} />
+              <FieldStoryPoint {...props} field={{ fieldCode: 'remainingTime', fieldName: '剩余预估时间' }} />
             </div>
           ) : null
         }
@@ -70,7 +75,7 @@ const IssueBody = observer((props) => {
           <IssueDetail {...props} />
           <IssueDes {...props} />
           <IssueAttachment {...props} />
-          {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
+          {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1 && !IsInProgramStore.isInProgram
             ? <IssueDoc {...props} /> : ''
           }
 
@@ -85,9 +90,9 @@ const IssueBody = observer((props) => {
             ? <TestLink {...props} /> : ''
           }
           {issueTypeVO.typeCode && ['feature', 'sub_task'].indexOf(issueTypeVO.typeCode) === -1
-            ? <IssueLink {...props} /> : ''
+            ? (applyType === 'program' && issueTypeVO.typeCode === 'issue_epic' ? null : <IssueLink {...props} />) : ''
           }
-          { store.testExecutes.length > 0 ? <IssueTestExecute {...props} /> : null}
+          {store.testExecutes.length > 0 ? <IssueTestExecute {...props} /> : null}
         </TabPane>
         <TabPane tab="评论" key="2">
           <IssueCommit {...props} />
@@ -135,6 +140,6 @@ const IssueBody = observer((props) => {
       }
     </section>
   );
-});
+}
 
-export default IssueBody;
+export default observer(IssueBody);
