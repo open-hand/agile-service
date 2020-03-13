@@ -11,12 +11,13 @@ import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';
 import IssueDetail from '../components/issue-detail';
 import CreateIssue from '../components/create-issue';
-import CreateSprint from '../components/create-sprint';
+import CreateSprint, { CreateCurrentPiSprint } from '../components/create-sprint';
 import SprintList from '../components/sprint-list';
 import ShowPlanSprint from '../components/show-plan-sprint';
 import './BacklogHome.less';
 
 const createSprintKey = Modal.key();
+const createCurrentPiSprintKey = Modal.key();
 
 @observer
 class BacklogHome extends Component {
@@ -71,6 +72,26 @@ class BacklogHome extends Component {
     });
   };
 
+  /**
+   * 当前PI下创建冲刺
+   */
+  handleCreateCurrentPiSprint = () => {
+    const { BacklogStore } = this.props;
+    const onCreate = (sprint) => {
+      BacklogStore.setCreatedSprint(sprint.sprintId);
+      this.refresh();
+    };
+    Modal.open({
+      drawer: true,
+      style: {
+        width: 340,
+      },
+      key: createCurrentPiSprintKey,
+      title: '当前PI下创建冲刺',
+      children: <CreateCurrentPiSprint onCreate={onCreate} />,
+    });
+  };
+
   onQuickSearchChange = (onlyMeChecked, onlyStoryChecked, moreChecked) => {
     const { BacklogStore } = this.props;
     BacklogStore.setQuickFilters(onlyMeChecked, onlyStoryChecked, moreChecked);
@@ -120,6 +141,13 @@ class BacklogHome extends Component {
               创建冲刺
             </Button>
           )}
+          {isShowFeature
+           && (
+           <Button className="leftBtn" functyp="flat" onClick={this.handleCreateCurrentPiSprint}>
+             <Icon type="playlist_add icon" />
+             当前PI下创建冲刺
+           </Button>
+           )}
           {isInProgram && arr.length && arr.length > 1
             ? <ShowPlanSprint /> : null
           }
