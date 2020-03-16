@@ -1,10 +1,28 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Form, TextField, DataSet, TextArea, DateTimePicker,
 } from 'choerodon-ui/pro';
+import moment from 'moment';
 import { Choerodon } from '@choerodon/boot';
 import SprintApi from '@/api/SprintApi';
 import { MAX_LENGTH_SPRINT } from '@/constants/MAX_LENGTH';
+/**
+ * 判断在这个时间范围内时间是否可访问
+ * @param {*} startDate 
+ * @param {*} endDate 
+ */
+function stopChooseBetween(time, start, end) {
+  // const date = time.format('YYYY-MM-DD HH:mm:ss');
+  const startDate = moment(start);
+  const endDate = moment(end);
+  const endDateZero = moment(end).hour(0).minute(0).second(0);
+  if (moment(time).isBetween(startDate, endDateZero, null, '[]')) {
+    return false;
+  } else if (moment(time).isBetween(endDateZero, endDate, null, '[]')) {
+    return false;
+  }
+  return true;
+}
 
 export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
   async function sprintNameValidator(value, name, record) {
@@ -60,7 +78,9 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
     </Form>
   );
 }
-export function CreateCurrentPiSprint({ modal: { handleOk, close }, onCreate }) {
+export function CreateCurrentPiSprint({
+  modal: { handleOk, close }, onCreate, PiName, sprints,
+}) {
   async function sprintNameValidator(value, name, record) {
     const isSame = await SprintApi.validate(value);
     return isSame ? '冲刺名称已存在' : true;
@@ -100,12 +120,59 @@ export function CreateCurrentPiSprint({ modal: { handleOk, close }, onCreate }) 
     handleOk(submit);
   }, [handleOk]);
 
+  function findDateRange(time) {
+    return sprints.find((sprint) => {
+      const { startDate, endDate } = sprint;
+      if (moment(time).isBetween(startDate, endDate)) {
+        return true;
+      }
+      return false;
+    });
+  }
+
   return (
     <Form dataSet={dataSet}>
-      <div>提示：创建的冲刺将自动关联当前PI：PI-5</div>
+      <div>
+        提示：创建的冲刺将自动关联当前PI：
+        {PiName}
+      </div>
       <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} />
-      <DateTimePicker name="startDate" />
-      <DateTimePicker name="endDate" />
+      <DateTimePicker
+        name="startDate"
+        filter={(currentDate, selected) => {
+          let isBan = true;
+          // eslint-disable-next-line no-plusplus
+          for (let index = 0; index < sprints.length; index++) {
+            const { endDate, startDate } = sprints[index];
+            if (!stopChooseBetween(currentDate.format('YYYY-MM-DD HH:mm:ss'), startDate, endDate)) {
+              isBan = false;
+              break;
+            }
+            // if (moment(currentDate.format('YYYY-MM-DD HH:mm:ss')).) {
+            //   const data = dataSet.current.get('endDate').format('YYYY-MM-DD HH:mm:ss');
+             
+            // }
+          }
+
+
+          return isBan;
+        }}
+      />
+      <DateTimePicker
+        name="endDate"
+        filter={(currentDate, selected) => {
+          let isBan = true;
+          // eslint-disable-next-line no-plusplus
+          for (let index = 0; index < sprints.length; index++) {
+            const { endDate, startDate } = sprints[index];
+            if (!stopChooseBetween(currentDate.format('YYYY-MM-DD HH:mm:ss'), startDate, endDate)) {
+              isBan = false; 
+              break;
+            }
+          }
+          return isBan;
+        }}
+      />
       <TextArea
         rowSpan={2}
         colSpan={2}

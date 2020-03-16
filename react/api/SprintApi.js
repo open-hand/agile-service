@@ -20,6 +20,24 @@ function create(data) {
 function createOnCurrentPi(data) {
   return axios.post(`/agile/v1/projects/${getProjectId()}/sprint/sub_project`, data);
 }
+
+/**
+ *
+ *得到PI信息
+ * @returns
+ */
+export function getCurrentPiInfo(programId, artId) {
+  return axios.get(`/agile/v1/projects/${getProjectId()}/pi/query_doing_pi?program_id=${programId}&art_id=${artId}`);
+}
+ 
+/**
+ *
+ *查询当前项目pi下的所有冲刺
+ * @returns
+ */
+export function getCurrentPiAllSprint(piId) {
+  return axios.get(`/agile//v1/projects/${getProjectId()}/sprint/sub_project/list?pi_id=${piId}`);
+}
 /**
  *
  *
@@ -35,4 +53,5 @@ function validate(name) {
 export default {
   create,
   validate,
+  createOnCurrentPi,
 };
