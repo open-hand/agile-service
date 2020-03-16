@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   Form, TextField, DataSet, TextArea, DateTimePicker,
 } from 'choerodon-ui/pro';
+import { observer } from 'mobx-react-lite';
 import moment from 'moment';
 import { Choerodon } from '@choerodon/boot';
 import SprintApi from '@/api/SprintApi';
@@ -79,7 +80,7 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
   );
 }
 export function CreateCurrentPiSprint({
-  modal: { handleOk, close }, onCreate, PiName, sprints,
+  modal: { handleOk, close }, onCreate, PiName, sprints, piId,
 }) {
   async function sprintNameValidator(value, name, record) {
     const isSame = await SprintApi.validate(value);
@@ -106,7 +107,8 @@ export function CreateCurrentPiSprint({
     const isValidate = await dataSet.validate();
     if (isValidate) {
       const [values] = dataSet.toData();
-      const sprint = await SprintApi.createOnCurrentPi(values);
+
+      const sprint = await SprintApi.createOnCurrentPi({ ...values, piId });
       if (!sprint.failed) {
         onCreate(sprint);
         close();
@@ -116,19 +118,37 @@ export function CreateCurrentPiSprint({
     }
     return false;
   }
+  function findDateMaxRange(data) {
+    let maxDate = null;
+    const startDates = sprints.filter(sprint => moment(sprint.startDate).isAfter(data)).map(item => item.startDate);
+    if (startDates.length !== 0) {
+      // eslint-disable-next-line prefer-destructuring
+      maxDate = startDates[0];
+      startDates.forEach((startDate) => {
+        if (moment(startDate).isBefore(moment(maxDate))) {
+          maxDate = moment(startDate);
+        }
+      });
+    }
+    return maxDate;
+  }
+  function findDateMinRange(data) {
+    let minDate = null;
+    const startDates = sprints.filter(sprint => moment(sprint.startDate).isBefore(data)).map(item => item.endDate);
+    if (startDates.length !== 0) {
+      // eslint-disable-next-line prefer-destructuring
+      minDate = startDates[0];
+      startDates.forEach((startDate) => {
+        if (moment(startDate).isAfter(moment(minDate))) {
+          minDate = moment(startDate);
+        }
+      });
+    }
+    return minDate;
+  }
   useEffect(() => {
     handleOk(submit);
   }, [handleOk]);
-
-  function findDateRange(time) {
-    return sprints.find((sprint) => {
-      const { startDate, endDate } = sprint;
-      if (moment(time).isBetween(startDate, endDate)) {
-        return true;
-      }
-      return false;
-    });
-  }
 
   return (
     <Form dataSet={dataSet}>
@@ -141,17 +161,20 @@ export function CreateCurrentPiSprint({
         name="startDate"
         filter={(currentDate, selected) => {
           let isBan = true;
+          const currentDateFormat = currentDate.format('YYYY-MM-DD HH:mm:ss');
           // eslint-disable-next-line no-plusplus
           for (let index = 0; index < sprints.length; index++) {
             const { endDate, startDate } = sprints[index];
-            if (!stopChooseBetween(currentDate.format('YYYY-MM-DD HH:mm:ss'), startDate, endDate)) {
+            if (!stopChooseBetween(currentDateFormat, startDate, endDate)) {
               isBan = false;
               break;
             }
-            // if (moment(currentDate.format('YYYY-MM-DD HH:mm:ss')).) {
-            //   const data = dataSet.current.get('endDate').format('YYYY-MM-DD HH:mm:ss');
-             
-            // }
+            if (isBan && dataSet.current.get('endDate')) {
+              const minTime = findDateMinRange(dataSet.current.get('endDate').format('YYYY-MM-DD HH:mm:ss'));
+              if (moment(currentDateFormat).isBefore(minTime)) {
+                isBan = false;
+              }
+            }
           }
 
 
@@ -162,12 +185,19 @@ export function CreateCurrentPiSprint({
         name="endDate"
         filter={(currentDate, selected) => {
           let isBan = true;
+          const currentDateFormat = currentDate.format('YYYY-MM-DD HH:mm:ss');
           // eslint-disable-next-line no-plusplus
           for (let index = 0; index < sprints.length; index++) {
             const { endDate, startDate } = sprints[index];
-            if (!stopChooseBetween(currentDate.format('YYYY-MM-DD HH:mm:ss'), startDate, endDate)) {
-              isBan = false; 
+            if (!stopChooseBetween(currentDateFormat, startDate, endDate)) {
+              isBan = false;
               break;
+            }
+          }
+          if (isBan && dataSet.current.get('startDate')) {
+            const maxTime = findDateMaxRange(dataSet.current.get('startDate').format('YYYY-MM-DD HH:mm:ss'));
+            if (moment(currentDateFormat).isAfter(maxTime)) {
+              isBan = false;
             }
           }
           return isBan;

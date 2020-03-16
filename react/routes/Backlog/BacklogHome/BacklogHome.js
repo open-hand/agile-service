@@ -93,7 +93,7 @@ class BacklogHome extends Component {
           },
           key: createCurrentPiSprintKey,
           title: '当前PI下创建冲刺',
-          children: <CreateCurrentPiSprint onCreate={onCreate} PiName={`${res.code}-${res.name}`} sprints={sprints} />,
+          children: <CreateCurrentPiSprint onCreate={onCreate} PiName={`${res.code}-${res.name}`} sprints={sprints} piId={res.id} />,
         });
       });
     });
