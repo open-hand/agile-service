@@ -86,14 +86,14 @@ function compileFile() {
   return babelify(gulp.src(source));
 }
 
-function compile() {
+async function compile() {
   rimraf.sync(libDir);
-  compileAssets();
-  compileFile();
+  await compileAssets();
+  await compileFile();
 }
 
 gulp.task('compile', () => {
-  compile();
+  return compile();
 });
 function updateFile() {
   let timer;
