@@ -9,6 +9,17 @@ import { getProjectId, getOrganizationId } from '../common/utils';
 function create(data) {
   return axios.post(`/agile/v1/projects/${getProjectId()}/sprint`, data);
 }
+
+
+/**
+ *
+ *
+ * @param {*} data {*sprintName,startDate,endDate,sprintGoal}
+ * @returns
+ */
+function createOnCurrentPi(data) {
+  return axios.post(`/agile/v1/projects/${getProjectId()}/sprint/sub_project`, data);
+}
 /**
  *
  *

@@ -8,14 +8,14 @@ import { MAX_LENGTH_SPRINT } from '@/constants/MAX_LENGTH';
 
 export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
   async function sprintNameValidator(value, name, record) {
-    const isSame = await SprintApi.validate(value);     
+    const isSame = await SprintApi.validate(value);
     return isSame ? '冲刺名称已存在' : true;
   }
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [
       {
-        name: 'sprintName', type: 'string', label: '冲刺名称', required: true, validator: sprintNameValidator, 
+        name: 'sprintName', type: 'string', label: '冲刺名称', required: true, validator: sprintNameValidator,
       },
       {
         name: 'startDate', type: 'dateTime', label: '开始日期', max: 'endDate',
@@ -31,7 +31,7 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
   async function submit() {
     const isValidate = await dataSet.validate();
     if (isValidate) {
-      const [values] = dataSet.toData();  
+      const [values] = dataSet.toData();
       const sprint = await SprintApi.create(values);
       if (!sprint.failed) {
         onCreate(sprint);
@@ -48,6 +48,61 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
 
   return (
     <Form dataSet={dataSet}>
+      <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} />
+      <DateTimePicker name="startDate" />
+      <DateTimePicker name="endDate" />
+      <TextArea
+        rowSpan={2}
+        colSpan={2}
+        name="sprintGoal"
+      // placeholder="请输入冲刺目标"
+      />
+    </Form>
+  );
+}
+export function CreateCurrentPiSprint({ modal: { handleOk, close }, onCreate }) {
+  async function sprintNameValidator(value, name, record) {
+    const isSame = await SprintApi.validate(value);
+    return isSame ? '冲刺名称已存在' : true;
+  }
+  const dataSet = useMemo(() => new DataSet({
+    autoCreate: true,
+    fields: [
+      {
+        name: 'sprintName', type: 'string', label: '冲刺名称', required: true, validator: sprintNameValidator,
+      },
+      {
+        name: 'startDate', type: 'dateTime', label: '开始日期', max: 'endDate', required: true,
+      },
+      {
+        name: 'endDate', type: 'dateTime', label: '结束日期', min: 'startDate', required: true,
+      },
+      {
+        name: 'sprintGoal', type: 'string', label: '冲刺目标',
+      },
+    ],
+  }));
+  async function submit() {
+    const isValidate = await dataSet.validate();
+    if (isValidate) {
+      const [values] = dataSet.toData();
+      const sprint = await SprintApi.createOnCurrentPi(values);
+      if (!sprint.failed) {
+        onCreate(sprint);
+        close();
+      } else {
+        Choerodon.prompt(sprint.message);
+      }
+    }
+    return false;
+  }
+  useEffect(() => {
+    handleOk(submit);
+  }, [handleOk]);
+
+  return (
+    <Form dataSet={dataSet}>
+      <div>提示：创建的冲刺将自动关联当前PI：PI-5</div>
       <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} />
       <DateTimePicker name="startDate" />
       <DateTimePicker name="endDate" />

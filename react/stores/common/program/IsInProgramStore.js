@@ -28,7 +28,7 @@ class IsInProgramStore {
 
   loadIsShowFeature = () => {
     getProjectIsShowFeature().then((res) => {
-      this.setIsShowFeature(res);
+      this.setIsShowFeature(Boolean(res));
     });
   }
 
