@@ -284,6 +284,9 @@ export function randomWord(randomFlag, min, max) {
   }
   return str;
 }
+export const getProjectId = () => Number(AppState.currentMenuType ? AppState.currentMenuType.id : 0);
+export const getProjectName = () => (AppState.currentMenuType ? AppState.currentMenuType.name : '');
+export const getOrganizationId = () => (AppState.currentMenuType ? AppState.currentMenuType.organizationId : 0);
 export function commonLink(link) {
   const menu = AppState.currentMenuType;
   const {
@@ -305,6 +308,11 @@ export function issueLink(issueId, typeCode, issueName = null) {
     return encodeURI(`/agile/work-list/issue?type=${type}&id=${projectId}&name=${name}&organizationId=${organizationId}&paramIssueId=${issueId}&orgId=${organizationId}`);
   }
 }
+export function toIssueInProject({ 
+  issueId, issueNum, projectId, projectName, 
+}) {
+  return encodeURI(`/agile/work-list/issue?type=${'project'}&id=${projectId}&name=${projectName}&organizationId=${getOrganizationId()}&paramIssueId=${issueId}&paramName=${issueNum}`);
+}
 export function programIssueLink(issueId, issueName, projectId) {
   const menu = AppState.currentMenuType;
   const {
@@ -319,9 +327,7 @@ export function testExecuteLink(executeId) {
   } = menu;
   return encodeURI(`/testManager/TestExecute/execute/${executeId}?type=${type}&id=${id}&name=${name}&organizationId=${organizationId}&orgId=${organizationId}`);
 }
-export const getProjectId = () => Number(AppState.currentMenuType ? AppState.currentMenuType.id : 0);
-export const getProjectName = () => (AppState.currentMenuType ? AppState.currentMenuType.name : '');
-export const getOrganizationId = () => (AppState.currentMenuType ? AppState.currentMenuType.organizationId : 0);
+
 export const getIsInProgram = () => true;
 // 选择主题
 export function configTheme({

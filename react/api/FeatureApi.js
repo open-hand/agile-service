@@ -21,3 +21,6 @@ export function exportFeatures(search) {
 export function getFeaturesColor() {
   return axios.get('/agile/v1/lookup_values/feature_color');
 } 
+export function getSubStoryByFeature(issueId) {
+  return axios.post(`/agile/v1/projects/${getProjectId()}/issues/list_story_by_feature_id?issueId=${issueId}`);
+} 

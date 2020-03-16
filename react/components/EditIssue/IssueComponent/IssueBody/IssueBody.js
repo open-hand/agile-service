@@ -6,6 +6,7 @@ import IssueDes from './IssueDes';
 import IssueAttachment from './IssueAttachment';
 import IssueDoc from './IssueDoc';
 import IssueCommit from './IssueCommit';
+import SplitStory from './SplitStory';
 import IssueWorkLog from './IssueWorkLog';
 import IssueLog from './IssueLog';
 import SubTask from './SubTask';
@@ -95,17 +96,17 @@ const IssueBody = observer((props) => {
           }
           { store.testExecutes.length > 0 ? <IssueTestExecute {...props} /> : null}
         </TabPane>
-        <TabPane tab="评论" key="2">
-          <IssueCommit {...props} />
-        </TabPane>
         {
           issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
             ? (
               <TabPane tab="拆分的Story" key="5">
-                {/* <IssueCommit {...props} /> */}
+                <SplitStory {...props} />
               </TabPane>
             ) : ''
         }
+        <TabPane tab="评论" key="2">
+          <IssueCommit {...props} />
+        </TabPane>       
         <TabPane tab="记录" key="3">
           {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueWorkLog {...props} /> : ''

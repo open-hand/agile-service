@@ -310,7 +310,6 @@ class DataLog extends Component {
       task: '任务',
       sub_task: '子任务',
     };
-    debugger;
     if ((!oldValue && oldValue !== 0) && (newValue || newValue === 0)) {
       // null -> xxx
       if (['Knowledge Relation', 'Feature Link', 'Epic Link', 'Sprint', 'Pi', 'Story Points', 'timeestimate', 'summary', 'Epic Name', 'assignee', 'reporter'].includes(field)) {
