@@ -535,7 +535,7 @@ class BacklogStore {
         this.dealWithCtrl(data, currentIndex, currentClick);
       }
     } else {
-      this.clickedOnce(currentClick, currentIndex);
+      this.clickedOnce(currentClick, currentClick, false);
     }
   }
 
@@ -571,7 +571,7 @@ class BacklogStore {
     };
   }
 
-  @action clickedOnce(sprintId, currentClick) {
+  @action clickedOnce(sprintId, currentClick, open = true) {
     const index = this.issueMap.get(sprintId).findIndex(issue => issue.issueId === currentClick.issueId);
     this.multiSelected = observable.map();
     this.multiSelected.set(currentClick.issueId, currentClick);
@@ -579,7 +579,9 @@ class BacklogStore {
       ...currentClick,
       index,
     };
-    this.setClickIssueDetail(currentClick);
+    if (open) {
+      this.setClickIssueDetail(currentClick);
+    }
   }
 
   @action setClickIssueDetail(data) {
