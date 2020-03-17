@@ -25,7 +25,7 @@ class BacklogHome extends Component {
   componentDidMount() {
     const { BacklogStore } = this.props;
     BacklogStore.refresh();
-    IsInProgramStore.loadIsShowFeature();
+    IsInProgramStore.loadIsShowFeature().then(res => res && IsInProgramStore.loadPiInfoAndSprint());
   }
 
   refresh = (...args) => {

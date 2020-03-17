@@ -9,6 +9,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import WorkCalendar from '@/components/WorkCalendar';
+import IsInProgramStore from '../../../../stores/common/program/IsInProgramStore';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -147,6 +148,7 @@ class StartSprint extends Component {
   render() {
     const {
       data,
+      data: { sprintId },
       workSetting,
       sprintDetail,
       form: { getFieldDecorator, getFieldValue, setFieldsValue },
@@ -239,8 +241,28 @@ class StartSprint extends Component {
                     label="开始日期"
                     showTime
                     format="YYYY-MM-DD HH:mm:ss"
-                    disabledDate={endDate
-                      ? current => current > moment(endDate) || current < moment().subtract(1, 'days') : current => current < moment().subtract(1, 'days')}
+                    disabledDate={(current) => {
+                      if (current < moment().subtract(1, 'days')) {
+                        return true;
+                      }
+                      if (endDate && current > moment(endDate)) {
+                        return true;
+                      }
+                      if (IsInProgramStore.isShowFeature) {
+                        const endDateFormat = moment(endDate).format('YYYY-MM-DD HH:mm:ss');
+                        const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
+                        let isBan = IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
+                        if (isBan && endDate) {
+                          const minTime = IsInProgramStore.findDateMinRange(endDateFormat, sprintId);
+                          if (moment(currentDateFormat).isBefore(minTime)) {
+                            isBan = true;
+                          }
+                        }
+
+                        return isBan;
+                      }
+                      return false;
+                    }}
                     onChange={(date, dateString) => {
                       setFieldsValue({
                         startDate: date,
@@ -301,9 +323,28 @@ class StartSprint extends Component {
                         endDate: date,
                       });
                     }}
-                    disabledDate={startDate
-                      ? current => current < moment(startDate) || current < moment().subtract(1, 'days')
-                      : current => current < moment().subtract(1, 'days')}
+                    disabledDate={(current) => {
+                      if (current < moment().subtract(1, 'days')) {
+                        return true;
+                      }
+                      if (startDate && current < moment(startDate)) {
+                        return true;
+                      }
+                      if (IsInProgramStore.isShowFeature) {
+                        const startDateFormat = moment(startDate).format('YYYY-MM-DD HH:mm:ss');
+                        const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
+                        let isBan = IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
+                        if (isBan) {
+                          const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
+                          if (moment(currentDateFormat).isAfter(maxTime)) {
+                            isBan = false;
+                          }
+                        }
+                        return isBan;
+                      }
+                      return false;
+                    }
+                    }
                   />,
                 )}
               </FormItem>
