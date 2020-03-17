@@ -56,7 +56,7 @@ function IssueItem({ issue }) {
           </Link>
         </div>
       </Tooltip>
-      <Tooltip title={`团队${projectVO.name}`}>
+      <Tooltip title={`团队: ${projectVO.name}`}>
         <UserHead
           user={{
             id: projectVO.id,
@@ -67,7 +67,7 @@ function IssueItem({ issue }) {
           tooltip={false}
         />
       </Tooltip>
-      {totalCount && (
+      {totalCount ? (
         <Tooltip
           mouseEnterDelay={0.5}
           title={(
@@ -85,7 +85,7 @@ function IssueItem({ issue }) {
             {`${completedCount}/${totalCount}`}
           </div>
         </Tooltip>
-      )}
+      ) : null}
       <div style={{ margin: '0 4px', overflow: 'hidden' }}>
         <Tooltip mouseEnterDelay={0.5} title={`优先级： ${priorityVO.name}`}>
           <PriorityTag
