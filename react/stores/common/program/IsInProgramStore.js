@@ -16,6 +16,8 @@ class IsInProgramStore {
 
   @observable isShowFeature = false; // 判断是否可以展示特性字段
 
+  @observable artInfo = {};
+
   refresh = () => {
     if (AppState.currentMenuType.type === 'project') {
       getProjectsInProgram().then((program) => {
@@ -29,8 +31,18 @@ class IsInProgramStore {
   loadIsShowFeature = () => {
     getProjectIsShowFeature().then((res) => {
       this.setIsShowFeature(Boolean(res));
+      this.setArtInfo(res);
     });
   }
+
+  @action setArtInfo(data) {
+    this.artInfo = data;
+  }
+
+  @computed get getArtInfo() {
+    return this.artInfo;
+  }
+
 
   @action setIsInProgram(isInProgram) {
     this.isInProgram = isInProgram;

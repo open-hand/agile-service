@@ -6,6 +6,7 @@ import {
 import { Button, Spin, Icon } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import { getCurrentPiInfo, getCurrentPiAllSprint } from '@/api/SprintApi.js';
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';
@@ -77,18 +78,24 @@ class BacklogHome extends Component {
    */
   handleCreateCurrentPiSprint = () => {
     const { BacklogStore } = this.props;
+    const artInfo = IsInProgramStore.getArtInfo;
     const onCreate = (sprint) => {
       BacklogStore.setCreatedSprint(sprint.sprintId);
       this.refresh();
     };
-    Modal.open({
-      drawer: true,
-      style: {
-        width: 340,
-      },
-      key: createCurrentPiSprintKey,
-      title: '当前PI下创建冲刺',
-      children: <CreateCurrentPiSprint onCreate={onCreate} />,
+    const { programId, id: artId } = artInfo;
+    getCurrentPiInfo(programId, artId).then((res) => {
+      getCurrentPiAllSprint(res.id).then((sprints) => {
+        Modal.open({
+          drawer: true,
+          style: {
+            width: 340,
+          },
+          key: createCurrentPiSprintKey,
+          title: '当前PI下创建冲刺',
+          children: <CreateCurrentPiSprint onCreate={onCreate} PiName={`${res.code}-${res.name}`} sprints={sprints} piId={res.id} />,
+        });
+      });
     });
   };
 
@@ -142,12 +149,12 @@ class BacklogHome extends Component {
             </Button>
           )}
           {isShowFeature
-           && (
-           <Button className="leftBtn" functyp="flat" onClick={this.handleCreateCurrentPiSprint}>
-             <Icon type="playlist_add icon" />
-             当前PI下创建冲刺
-           </Button>
-           )}
+            && (
+              <Button className="leftBtn" functyp="flat" onClick={this.handleCreateCurrentPiSprint}>
+                <Icon type="playlist_add icon" />
+                当前PI下创建冲刺
+              </Button>
+            )}
           {isInProgram && arr.length && arr.length > 1
             ? <ShowPlanSprint /> : null
           }
