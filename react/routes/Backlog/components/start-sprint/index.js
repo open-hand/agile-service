@@ -145,6 +145,28 @@ class StartSprint extends Component {
     });
   };
 
+  isDisabledOption(value) {
+    if (IsInProgramStore.isShowFeature) {
+      const { data: { sprintId }, form: { getFieldValue } } = this.props;
+      // const {
+      //   startDate,
+      // } = this.state;
+      const fieldStartDate = getFieldValue('startDate');
+
+      const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
+      const optionDateFormat = moment(startDateFormat).add(parseInt(value, 10), 'w').format('YYYY-MM-DD HH:mm:ss');
+      let isBan = IsInProgramStore.stopChooseBetween(optionDateFormat, sprintId);
+      if (!isBan && fieldStartDate) {
+        const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
+        if (moment(optionDateFormat).isAfter(maxTime)) {
+          isBan = true;
+        }
+      }
+      return isBan;
+    }
+    return false;
+  }
+
   render() {
     const {
       data,
@@ -218,9 +240,9 @@ class StartSprint extends Component {
                     }}
                   >
                     <Option value="0">自定义</Option>
-                    <Option value="1">1周</Option>
-                    <Option value="2">2周</Option>
-                    <Option value="4">4周</Option>
+                    <Option value="1" disabled={this.isDisabledOption('1')}>1周</Option>
+                    <Option value="2" disabled={this.isDisabledOption('2')}>2周</Option>
+                    <Option value="4" disabled={this.isDisabledOption('4')}>4周</Option>
                   </Select>,
                 )}
               </FormItem>
@@ -249,10 +271,11 @@ class StartSprint extends Component {
                         return true;
                       }
                       if (IsInProgramStore.isShowFeature) {
-                        const endDateFormat = moment(endDate).format('YYYY-MM-DD HH:mm:ss');
+                        const fieldEndDate = getFieldValue('endDate');
+                        const endDateFormat = moment(fieldEndDate).format('YYYY-MM-DD HH:mm:ss');
                         const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
                         let isBan = IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
-                        if (isBan && endDate) {
+                        if (!isBan && fieldEndDate) {
                           const minTime = IsInProgramStore.findDateMinRange(endDateFormat, sprintId);
                           if (moment(currentDateFormat).isBefore(minTime)) {
                             isBan = true;
@@ -331,13 +354,14 @@ class StartSprint extends Component {
                         return true;
                       }
                       if (IsInProgramStore.isShowFeature) {
-                        const startDateFormat = moment(startDate).format('YYYY-MM-DD HH:mm:ss');
+                        const fieldStartDate = getFieldValue('startDate');
+                        const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
                         const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
                         let isBan = IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
-                        if (isBan) {
+                        if (!isBan && fieldStartDate) {
                           const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
                           if (moment(currentDateFormat).isAfter(maxTime)) {
-                            isBan = false;
+                            isBan = true;
                           }
                         }
                         return isBan;
