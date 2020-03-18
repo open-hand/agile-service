@@ -46,8 +46,11 @@ function IssueItem({ issue }) {
         />
       </Tooltip>
       <Tooltip title={`概要： ${issue.issueNum} ${issue.summary}`}>
-        <div style={{ margin: '0 4px', flex: 1, overflow: 'hidden' }}>
-          <Link style={{ margin: '0 2px' }}>{issueNum}</Link>
+        <div style={{
+          margin: '0 4px', flex: 1, overflow: 'hidden', display: 'flex', 
+        }}
+        >
+          <Link style={{ margin: '0 2px', flexShrink: 0 }}>{issueNum}</Link>
           <Link
             style={{ margin: '0 2px' }}
             onClick={handleSummaryClick}

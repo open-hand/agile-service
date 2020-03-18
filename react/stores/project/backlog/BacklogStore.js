@@ -585,6 +585,9 @@ class BacklogStore {
   }
 
   @action setClickIssueDetail(data) {
+    if (!this.multiSelected.get(data.issueId)) {
+      this.multiSelected.set(data.issueId, data);
+    }
     this.clickIssueDetail = data;
     if (this.clickIssueDetail) {
       this.clickIssueId = data.issueId;

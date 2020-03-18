@@ -14,11 +14,9 @@ class IssueDetail extends Component {
   }
 
   handleResetClicked = (data) => {
-    // ScrumBoardStore.setIssue(data);
     if (ScrumBoardStore.getCurrentClickId !== data.issueId) {
       // 确认当前跳转点击
-      ScrumBoardStore.resetCurrentClick(data.issueId, true);
-      ScrumBoardStore.setIssue(data);
+      ScrumBoardStore.resetCurrentClick(data.issueId);
     }
   }
 
