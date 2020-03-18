@@ -169,11 +169,11 @@ export function CreateCurrentPiSprint({
               isBan = false;
               break;
             }
-            if (isBan && dataSet.current.get('endDate')) {
-              const minTime = findDateMinRange(dataSet.current.get('endDate').format('YYYY-MM-DD HH:mm:ss'));
-              if (moment(currentDateFormat).isBefore(minTime)) {
-                isBan = false;
-              }
+          }
+          if (isBan && dataSet.current.get('endDate')) {
+            const minTime = findDateMinRange(dataSet.current.get('endDate').format('YYYY-MM-DD HH:mm:ss'));
+            if (moment(currentDateFormat).isBefore(minTime)) {
+              isBan = false;
             }
           }
 

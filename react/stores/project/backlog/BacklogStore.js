@@ -221,8 +221,8 @@ class BacklogStore {
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${sprintId}`);
   }
 
-  axiosStartSprint(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/start`, data);
+  axiosStartSprint(data, isCurrentPi = false) {
+    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${isCurrentPi ? 'sub_project/' : ''}start`, data);
   }
 
   axiosCloseSprint(data) {
@@ -253,8 +253,8 @@ class BacklogStore {
     this.recent = data;
   }
 
-  axiosUpdateSprint(data) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint`, data);
+  axiosUpdateSprint(data, isCurrentPi = false) {
+    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint${isCurrentPi ? '/sub_project' : ''}`, data);
   }
 
   @action updateSprint(sprintId, newData) {

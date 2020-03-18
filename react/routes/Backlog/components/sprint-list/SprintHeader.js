@@ -25,12 +25,12 @@ function BacklogHeader({ data }) {
           type={expand ? 'baseline-arrow_drop_down' : 'baseline-arrow_right'}
           role="none"
           onClick={() => { BacklogStore.expandSprint(sprintId, !expand); }}
-        />      
+        />
         <SprintName data={data} />
         <SprintVisibleIssue
           data={data}
-        />  
-      </div>      
+        />
+      </div>
     </div>
   );
 }
@@ -53,7 +53,7 @@ function SprintHeader({ data }) {
           <SprintVisibleIssue
             data={data}
           />
-          <SprintStatus          
+          <SprintStatus
             data={data}
           />
           <SprintButton

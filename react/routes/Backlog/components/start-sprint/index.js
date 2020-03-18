@@ -9,6 +9,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import WorkCalendar from '@/components/WorkCalendar';
+import IsInProgramStore from '../../../../stores/common/program/IsInProgramStore';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -55,7 +56,7 @@ class StartSprint extends Component {
           objectVersionNumber: data.objectVersionNumber,
           workDates,
         };
-        BacklogStore.axiosStartSprint(newData).then((res) => {
+        BacklogStore.axiosStartSprint(newData, IsInProgramStore.isShowFeature).then((res) => {
           modal.close();
           BacklogStore.refresh();
         }).catch((error) => {
@@ -144,9 +145,32 @@ class StartSprint extends Component {
     });
   };
 
+  isDisabledOption(value) {
+    if (IsInProgramStore.isShowFeature) {
+      const { data: { sprintId }, form: { getFieldValue } } = this.props;
+      // const {
+      //   startDate,
+      // } = this.state;
+      const fieldStartDate = getFieldValue('startDate');
+
+      const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
+      const optionDateFormat = moment(startDateFormat).add(parseInt(value, 10), 'w').format('YYYY-MM-DD HH:mm:ss');
+      let isBan = IsInProgramStore.stopChooseBetween(optionDateFormat, sprintId);
+      if (!isBan && fieldStartDate) {
+        const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
+        if (moment(optionDateFormat).isAfter(maxTime)) {
+          isBan = true;
+        }
+      }
+      return isBan;
+    }
+    return false;
+  }
+
   render() {
     const {
       data,
+      data: { sprintId },
       workSetting,
       sprintDetail,
       form: { getFieldDecorator, getFieldValue, setFieldsValue },
@@ -216,9 +240,9 @@ class StartSprint extends Component {
                     }}
                   >
                     <Option value="0">自定义</Option>
-                    <Option value="1">1周</Option>
-                    <Option value="2">2周</Option>
-                    <Option value="4">4周</Option>
+                    <Option value="1" disabled={this.isDisabledOption('1')}>1周</Option>
+                    <Option value="2" disabled={this.isDisabledOption('2')}>2周</Option>
+                    <Option value="4" disabled={this.isDisabledOption('4')}>4周</Option>
                   </Select>,
                 )}
               </FormItem>
@@ -239,8 +263,29 @@ class StartSprint extends Component {
                     label="开始日期"
                     showTime
                     format="YYYY-MM-DD HH:mm:ss"
-                    disabledDate={endDate
-                      ? current => current > moment(endDate) || current < moment().subtract(1, 'days') : current => current < moment().subtract(1, 'days')}
+                    disabledDate={(current) => {
+                      if (current < moment().subtract(1, 'days')) {
+                        return true;
+                      }
+                      if (endDate && current > moment(endDate)) {
+                        return true;
+                      }
+                      if (IsInProgramStore.isShowFeature) {
+                        const fieldEndDate = getFieldValue('endDate');
+                        const endDateFormat = moment(fieldEndDate).format('YYYY-MM-DD HH:mm:ss');
+                        const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
+                        let isBan = IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
+                        if (!isBan && fieldEndDate) {
+                          const minTime = IsInProgramStore.findDateMinRange(endDateFormat, sprintId);
+                          if (moment(currentDateFormat).isBefore(minTime)) {
+                            isBan = true;
+                          }
+                        }
+
+                        return isBan;
+                      }
+                      return false;
+                    }}
                     onChange={(date, dateString) => {
                       setFieldsValue({
                         startDate: date,
@@ -301,9 +346,29 @@ class StartSprint extends Component {
                         endDate: date,
                       });
                     }}
-                    disabledDate={startDate
-                      ? current => current < moment(startDate) || current < moment().subtract(1, 'days')
-                      : current => current < moment().subtract(1, 'days')}
+                    disabledDate={(current) => {
+                      if (current < moment().subtract(1, 'days')) {
+                        return true;
+                      }
+                      if (startDate && current < moment(startDate)) {
+                        return true;
+                      }
+                      if (IsInProgramStore.isShowFeature) {
+                        const fieldStartDate = getFieldValue('startDate');
+                        const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
+                        const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
+                        let isBan = IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
+                        if (!isBan && fieldStartDate) {
+                          const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
+                          if (moment(currentDateFormat).isAfter(maxTime)) {
+                            isBan = true;
+                          }
+                        }
+                        return isBan;
+                      }
+                      return false;
+                    }
+                    }
                   />,
                 )}
               </FormItem>
