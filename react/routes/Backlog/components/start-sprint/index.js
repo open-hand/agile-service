@@ -56,7 +56,7 @@ class StartSprint extends Component {
           objectVersionNumber: data.objectVersionNumber,
           workDates,
         };
-        BacklogStore.axiosStartSprint(newData).then((res) => {
+        BacklogStore.axiosStartSprint(newData, IsInProgramStore.isShowFeature).then((res) => {
           modal.close();
           BacklogStore.refresh();
         }).catch((error) => {

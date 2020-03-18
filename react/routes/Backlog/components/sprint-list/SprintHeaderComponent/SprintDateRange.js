@@ -26,7 +26,7 @@ const { Text, Edit } = TextEditToggle;
       sprintId: data.sprintId,
       [type]: date,
     };
-    BacklogStore.axiosUpdateSprint(req).then((res) => {
+    BacklogStore.axiosUpdateSprint(req, IsInProgramStore.isShowFeature).then((res) => {
       BacklogStore.updateSprint(sprintId, {
         objectVersionNumber: res.objectVersionNumber,
         startDate: res.startDate,
