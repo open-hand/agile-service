@@ -7,13 +7,14 @@ import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import CloseSprint from '@/components/close-sprint';
 import StartSprint from '../../start-sprint';
 import './SprintButton.less';
+import IsInProgramStore from '../../../../../stores/common/program/IsInProgramStore';
 
 const prefix = 'c7n-backlog-SprintButton';
 function SprintButton({
   data,
 }) {
   const {
-    statusCode, sprintId, piId, 
+    statusCode, sprintId, piId,
   } = data;
   const issueList = BacklogStore.getIssueListBySprintId(sprintId);
   const hasActiveSprint = BacklogStore.getHasActiveSprint;
@@ -41,7 +42,7 @@ function SprintButton({
   };
   const menu = (
     <Menu
-      onClick={() => { BacklogStore.handleDeleteSprint(data); }}
+      onClick={() => { BacklogStore.handleDeleteSprint(data, IsInProgramStore.isShowFeature); }}
     >
       <Menu.Item key="0">
         删除sprint
@@ -73,7 +74,7 @@ function SprintButton({
             <Icon style={{ cursor: 'pointer', marginRight: 15 }} type="more_vert" />
           </Dropdown>
         )
-          }
+        }
     </Fragment>
   );
 }

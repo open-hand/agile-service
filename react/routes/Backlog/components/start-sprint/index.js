@@ -151,11 +151,15 @@ class StartSprint extends Component {
       // const {
       //   startDate,
       // } = this.state;
-      const fieldStartDate = getFieldValue('startDate');
-
+      // const fieldStartDate = getFieldValue('startDate') || moment();
+      // 目前 开始时间限定为当前
+      const fieldStartDate = moment();
       const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
       const optionDateFormat = moment(startDateFormat).add(parseInt(value, 10), 'w').format('YYYY-MM-DD HH:mm:ss');
-      let isBan = IsInProgramStore.stopChooseBetween(optionDateFormat, sprintId);
+      // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
+      let isBan = !moment(optionDateFormat).isSameOrBefore(IsInProgramStore.getPiInfo.endDate)
+        || !moment(optionDateFormat).isSameOrAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
+        || IsInProgramStore.stopChooseBetween(optionDateFormat, sprintId); IsInProgramStore.stopChooseBetween(optionDateFormat, sprintId);
       if (!isBan && fieldStartDate) {
         const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
         if (moment(optionDateFormat).isAfter(maxTime)) {
@@ -256,12 +260,19 @@ class StartSprint extends Component {
                     required: true,
                     message: '开始日期是必填的',
                   }],
-                  initialValue: start ? moment(start) : undefined,
+                  initialValue: start ? (() => {
+                    if (IsInProgramStore.isShowFeature) {
+                      return moment();
+                    } else {
+                      return moment(start);
+                    }
+                  })() : undefined,
                 })(
                   <DatePicker
                     style={{ width: '100%' }}
                     label="开始日期"
                     showTime
+                    disabled={IsInProgramStore.isShowFeature}
                     format="YYYY-MM-DD HH:mm:ss"
                     disabledDate={(current) => {
                       if (current < moment().subtract(1, 'days')) {
@@ -270,20 +281,22 @@ class StartSprint extends Component {
                       if (endDate && current > moment(endDate)) {
                         return true;
                       }
-                      if (IsInProgramStore.isShowFeature) {
-                        const fieldEndDate = getFieldValue('endDate');
-                        const endDateFormat = moment(fieldEndDate).format('YYYY-MM-DD HH:mm:ss');
-                        const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
-                        let isBan = IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
-                        if (!isBan && fieldEndDate) {
-                          const minTime = IsInProgramStore.findDateMinRange(endDateFormat, sprintId);
-                          if (moment(currentDateFormat).isBefore(minTime)) {
-                            isBan = true;
-                          }
-                        }
+                      // 用于项目群下开始日期验证
+                      // if (current && IsInProgramStore.isShowFeature) {
+                      //   const fieldEndDate = getFieldValue('endDate');
+                      //   const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
+                      //   let isBan = IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
+                      //   if (!isBan && fieldEndDate) {
+                      //     const endDateFormat = moment(fieldEndDate).format('YYYY-MM-DD HH:mm:ss');
+                      //     const minTime = IsInProgramStore.findDateMinRange(endDateFormat, sprintId);
+                      //     // console.log(isBan, 'current', minTime, current);
+                      //     if (moment(currentDateFormat).isBefore(minTime)) {
+                      //       isBan = true;
+                      //     }
+                      //   }
 
-                        return isBan;
-                      }
+                      //   return isBan;
+                      // }
                       return false;
                     }}
                     onChange={(date, dateString) => {
@@ -353,17 +366,21 @@ class StartSprint extends Component {
                       if (startDate && current < moment(startDate)) {
                         return true;
                       }
-                      if (IsInProgramStore.isShowFeature) {
+
+                      if (current && IsInProgramStore.isShowFeature) {
                         const fieldStartDate = getFieldValue('startDate');
-                        const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
                         const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
                         let isBan = IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
                         if (!isBan && fieldStartDate) {
+                          const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
                           const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
+                          // console.log(isBan, 'current', maxTime, current);
+                          // console.log('******************************');
                           if (moment(currentDateFormat).isAfter(maxTime)) {
                             isBan = true;
                           }
                         }
+
                         return isBan;
                       }
                       return false;

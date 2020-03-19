@@ -76,11 +76,14 @@ const { Text, Edit } = TextEditToggle;
                   const endDateFormat = moment(endDate).format('YYYY-MM-DD HH:mm:ss');
                   if (current > moment(endDateFormat, 'YYYY-MM-DD HH:mm:ss')) {
                     return true;
-                  } else if (IsInProgramStore.isShowFeature) { // 项目群启用
+                  } else if (IsInProgramStore.isShowFeature) { // 项目群启用 
                     const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
-                    let isBan = IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
+                    // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
+                    let isBan = !moment(currentDateFormat).isSameOrBefore(IsInProgramStore.getPiInfo.endDate)
+                      || !moment(currentDateFormat).isSameOrAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
+                      || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
                     // eslint-disable-next-line no-plusplus
-                    if (isBan) {
+                    if (!isBan) {
                       const minTime = IsInProgramStore.findDateMinRange(endDateFormat, sprintId);
                       if (moment(currentDateFormat).isBefore(minTime)) {
                         isBan = true;
@@ -136,12 +139,15 @@ const { Text, Edit } = TextEditToggle;
                     return true;
                   } else if (IsInProgramStore.isShowFeature) { // 项目群启用
                     const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
-                    let isBan = IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
+                    // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
+                    let isBan = !moment(currentDateFormat).isSameOrBefore(IsInProgramStore.getPiInfo.endDate)
+                      || !moment(currentDateFormat).isSameOrAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
+                      || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
                     // eslint-disable-next-line no-plusplus
-                    if (isBan) {
+                    if (!isBan) {
                       const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
                       if (moment(currentDateFormat).isAfter(maxTime)) {
-                        isBan = false;
+                        isBan = true;
                       }
                     }
                     return isBan;

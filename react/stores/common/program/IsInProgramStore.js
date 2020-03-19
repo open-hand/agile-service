@@ -31,12 +31,18 @@ class IsInProgramStore {
    */
   findDateMinRange(data, sprintId) {
     let minDate = null;
-    const startDates = this.sprints.filter(sprint => sprint.sprintId !== sprintId || moment(sprint.startDate).isBefore(data)).map(item => item.endDate);
+    const startDates = this.sprints.filter(sprint => sprint.sprintId !== sprintId && moment(sprint.startDate).isBefore(data)).map(item => item.endDate);
+    const sprintDate = sprintId && this.sprints.find(sprint => sprint.sprintId === sprintId);
+
     if (startDates.length !== 0) {
       // eslint-disable-next-line prefer-destructuring
       minDate = startDates[0];
       startDates.forEach((startDate) => {
-        if (moment(startDate).isAfter(moment(minDate))) {
+        if (sprintDate) {
+          if (!moment(startDate).isBetween(sprintDate.startDate, sprintDate.endDate, null, '()') && moment(startDate).isAfter(moment(minDate))) {
+            minDate = moment(startDate);
+          }
+        } else if (moment(startDate).isAfter(moment(minDate))) {
           minDate = moment(startDate);
         }
       });
@@ -52,12 +58,17 @@ class IsInProgramStore {
    */
   findDateMaxRange(data, sprintId) {
     let maxDate = null;
-    const startDates = this.sprints.filter(sprint => sprint.sprintId !== sprintId || moment(sprint.startDate).isAfter(data)).map(item => item.startDate);
+    const startDates = this.sprints.filter(sprint => sprint.sprintId !== sprintId && moment(sprint.startDate).isAfter(data)).map(item => item.startDate);
+    const sprintDate = sprintId && this.sprints.find(sprint => sprint.sprintId === sprintId);
     if (startDates.length !== 0) {
       // eslint-disable-next-line prefer-destructuring
       maxDate = startDates[0];
       startDates.forEach((startDate) => {
-        if (moment(startDate).isBefore(moment(maxDate))) {
+        if (sprintDate) {
+          if (!moment(startDate).isBetween(sprintDate.startDate, sprintDate.endDate, null, '()') && moment(startDate).isBefore(moment(maxDate))) {
+            maxDate = moment(startDate);
+          }
+        } else if (moment(startDate).isBefore(moment(maxDate))) {
           maxDate = moment(startDate);
         }
       });
@@ -107,10 +118,12 @@ class IsInProgramStore {
 
   loadPiInfoAndSprint = (programId = this.artInfo.programId, artId = this.artInfo.id) => {
     getCurrentPiInfo(programId, artId).then((res) => {
-      getCurrentPiAllSprint(res.id).then((sprints) => {
-        this.setPiInfo(res);
-        this.setSprints(sprints);
-      });
+      if (res.id) {
+        getCurrentPiAllSprint(res.id).then((sprints) => {
+          this.setPiInfo(res);
+          this.setSprints(sprints);
+        });
+      }
     });
   }
 
