@@ -3,7 +3,9 @@ import { observer } from 'mobx-react';
 import {
   TabPage as Page, Header, Breadcrumb, Content,
 } from '@choerodon/boot';
-import { Button, Spin, Icon } from 'choerodon-ui';
+import {
+  Button, Spin, Icon, Tooltip,
+} from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import { getCurrentPiInfo, getCurrentPiAllSprint } from '@/api/SprintApi.js';
@@ -84,18 +86,21 @@ class BacklogHome extends Component {
       this.refresh();
     };
     const { programId, id: artId } = artInfo;
-    getCurrentPiInfo(programId, artId).then((res) => {
-      getCurrentPiAllSprint(res.id).then((sprints) => {
-        Modal.open({
-          drawer: true,
-          style: {
-            width: 340,
-          },
-          key: createCurrentPiSprintKey,
-          title: '当前PI下创建冲刺',
-          children: <CreateCurrentPiSprint onCreate={onCreate} PiName={`${res.code}-${res.name}`} sprints={sprints} piId={res.id} />,
-        });
-      });
+    // getCurrentPiInfo(programId, artId).then((res) => {
+    //   getCurrentPiAllSprint(res.id).then((sprints) => {
+
+    //   });
+    // });
+    const piInfo = IsInProgramStore.getPiInfo;
+    const sprints = IsInProgramStore.getSprints;
+    Modal.open({
+      drawer: true,
+      style: {
+        width: 340,
+      },
+      key: createCurrentPiSprintKey,
+      title: '当前PI下创建冲刺',
+      children: <CreateCurrentPiSprint onCreate={onCreate} PiName={`${piInfo.code}-${piInfo.name}`} sprints={sprints} piId={piInfo.id} />,
     });
   };
 
@@ -148,7 +153,17 @@ class BacklogHome extends Component {
               创建冲刺
             </Button>
           )}
-          {isShowFeature
+          {isShowFeature && !IsInProgramStore.getPiInfo.id
+            && (
+              <Tooltip title="无活跃的PI">
+                <Button className="leftBtn" functyp="flat" onClick={this.handleCreateCurrentPiSprint} disabled>
+                  <Icon type="playlist_add icon" />
+                  当前PI下创建冲刺
+                </Button>
+              </Tooltip>
+
+            )}
+          {isShowFeature && IsInProgramStore.getPiInfo.id
             && (
               <Button className="leftBtn" functyp="flat" onClick={this.handleCreateCurrentPiSprint}>
                 <Icon type="playlist_add icon" />

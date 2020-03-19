@@ -177,8 +177,8 @@ class BacklogStore {
     return data;
   }
 
-  axiosDeleteSprint(id) {
-    return axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${id}`);
+  axiosDeleteSprint(id, isCurrentPi = false) {
+    return axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${isCurrentPi ? 'sub_project/' : ''}${id}`);
   }
 
   axiosGetColorLookupValue() {
@@ -1057,7 +1057,7 @@ class BacklogStore {
     }
   };
 
-  handleDeleteSprint = (data) => {
+  handleDeleteSprint = (data, isCurrentPi) => {
     if (data.issueSearchVOList && data.issueSearchVOList.length > 0) {
       Modal.confirm({
         width: 560,
@@ -1070,7 +1070,7 @@ class BacklogStore {
           </div>
         ),
         onOk() {
-          return this.axiosDeleteSprint(data.sprintId).then((res) => {
+          return this.axiosDeleteSprint(data.sprintId, isCurrentPi).then((res) => {
             this.refresh();
           }).catch((error) => {
           });
@@ -1080,7 +1080,7 @@ class BacklogStore {
         okType: 'danger',
       });
     } else {
-      this.axiosDeleteSprint(data.sprintId).then((res) => {
+      this.axiosDeleteSprint(data.sprintId, isCurrentPi).then((res) => {
         this.refresh();
       }).catch((error) => {
       });

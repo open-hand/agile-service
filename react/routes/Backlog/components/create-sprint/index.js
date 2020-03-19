@@ -7,6 +7,7 @@ import moment from 'moment';
 import { Choerodon } from '@choerodon/boot';
 import SprintApi from '@/api/SprintApi';
 import { MAX_LENGTH_SPRINT } from '@/constants/MAX_LENGTH';
+import IsInProgramStore from '../../../../stores/common/program/IsInProgramStore';
 /**
  * 判断在这个时间范围内时间是否可访问
  * @param {*} startDate 
@@ -37,10 +38,20 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
         name: 'sprintName', type: 'string', label: '冲刺名称', required: true, validator: sprintNameValidator,
       },
       {
-        name: 'startDate', type: 'dateTime', label: '开始日期', max: 'endDate',
+        name: 'startDate',
+        type: 'dateTime',
+        label: '开始日期',
+        dynamicProps: {
+          max: ({ record }) => record.get('endDate'),
+        },
       },
       {
-        name: 'endDate', type: 'dateTime', label: '结束日期', min: 'startDate',
+        name: 'endDate',
+        type: 'dateTime',
+        label: '结束日期',
+        dynamicProps: {
+          min: ({ record }) => record.get('startDate'),
+        },
       },
       {
         name: 'sprintGoal', type: 'string', label: '冲刺目标',
@@ -93,10 +104,30 @@ export function CreateCurrentPiSprint({
         name: 'sprintName', type: 'string', label: '冲刺名称', required: true, validator: sprintNameValidator,
       },
       {
-        name: 'startDate', type: 'dateTime', label: '开始日期', max: 'endDate', required: true,
+        name: 'startDate',
+        type: 'dateTime',
+        label: '开始日期',
+        required: true,
+        min: moment(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate),
+        dynamicProps: {
+          max: ({ record }) => {
+            const { endDate } = IsInProgramStore.piInfo;
+            return record.get('endDate') || moment(endDate, 'YYYY-MM-DD HH:mm:ss');
+          },
+        },
       },
       {
-        name: 'endDate', type: 'dateTime', label: '结束日期', min: 'startDate', required: true,
+        name: 'endDate',
+        type: 'dateTime',
+        label: '结束日期',
+        required: true,
+        max: moment(IsInProgramStore.piInfo.endDate),
+        dynamicProps: {
+          min: ({ record }) => {
+            const startDate = IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate;
+            return record.get('startDate') || moment(startDate, 'YYYY-MM-DD HH:mm:ss');
+          },
+        },
       },
       {
         name: 'sprintGoal', type: 'string', label: '冲刺目标',
@@ -148,6 +179,7 @@ export function CreateCurrentPiSprint({
   }
   useEffect(() => {
     handleOk(submit);
+    IsInProgramStore.loadPiInfoAndSprint();
   }, [handleOk]);
 
   return (
@@ -177,7 +209,6 @@ export function CreateCurrentPiSprint({
             }
           }
 
-
           return isBan;
         }}
       />
@@ -196,6 +227,7 @@ export function CreateCurrentPiSprint({
           }
           if (isBan && dataSet.current.get('startDate')) {
             const maxTime = findDateMaxRange(dataSet.current.get('startDate').format('YYYY-MM-DD HH:mm:ss'));
+
             if (moment(currentDateFormat).isAfter(maxTime)) {
               isBan = false;
             }
