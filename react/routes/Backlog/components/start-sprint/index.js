@@ -354,7 +354,8 @@ class StartSprint extends Component {
                     style={{ width: '100%' }}
                     label="结束日期"
                     format="YYYY-MM-DD HH:mm:ss"
-                    disabled={parseInt(getFieldValue('duration'), 10) > 0}
+                    // ip冲刺时禁止结束时间
+                    disabled={sprintDetail.type === 'ip' || parseInt(getFieldValue('duration'), 10) > 0}
                     showTime
                     onChange={(date) => {
                       this.setState({

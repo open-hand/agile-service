@@ -389,6 +389,7 @@ class BacklogStore {
         ...sprint,
         issueSearchVOList: null,
         type: 'sprint',
+        sprintType: sprint.type, // 冲刺类型 用于辨别ip冲刺
         expand: true,
       };
     }).concat({
