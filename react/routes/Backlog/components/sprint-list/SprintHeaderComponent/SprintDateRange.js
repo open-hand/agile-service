@@ -1,9 +1,9 @@
 import React, { Component, createRef } from 'react';
 import moment from 'moment';
 import { observer } from 'mobx-react';
-import { DatePicker } from 'choerodon-ui';
+import { DatePicker, message } from 'choerodon-ui';
 import TextEditToggle from '@/components/TextEditToggle';
-import { getProjectId } from '@/common/utils';
+import { getProjectId, catchFailed } from '@/common/utils';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import IsInProgramStore from '../../../../../stores/common/program/IsInProgramStore';
 
@@ -26,13 +26,14 @@ const { Text, Edit } = TextEditToggle;
       sprintId: data.sprintId,
       [type]: date,
     };
-    BacklogStore.axiosUpdateSprint(req, IsInProgramStore.isShowFeature).then((res) => {
+    BacklogStore.axiosUpdateSprint(req, IsInProgramStore.isShowFeature).then(res => catchFailed(res)).then((res) => {
       BacklogStore.updateSprint(sprintId, {
         objectVersionNumber: res.objectVersionNumber,
         startDate: res.startDate,
         endDate: res.endDate,
       });
     }).catch((error) => {
+      message.error(error);
     });
   };
 

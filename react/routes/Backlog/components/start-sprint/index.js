@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Form, Select, Input, DatePicker, Icon,
+  Form, Select, Input, DatePicker, Icon, message,
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
@@ -9,6 +9,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import WorkCalendar from '@/components/WorkCalendar';
+import { catchFailed } from '@/common/utils';
 import IsInProgramStore from '../../../../stores/common/program/IsInProgramStore';
 
 const FormItem = Form.Item;
@@ -56,10 +57,11 @@ class StartSprint extends Component {
           objectVersionNumber: data.objectVersionNumber,
           workDates,
         };
-        BacklogStore.axiosStartSprint(newData, IsInProgramStore.isShowFeature).then((res) => {
+        BacklogStore.axiosStartSprint(newData, IsInProgramStore.isShowFeature).then(res => catchFailed(res)).then((res) => {
           modal.close();
           BacklogStore.refresh();
         }).catch((error) => {
+          message.error(error);
         });
       }
     });
