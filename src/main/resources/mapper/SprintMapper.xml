@@ -10,6 +10,7 @@
         <id column="end_date" property="endDate"/>
         <id column="status_code" property="statusCode"/>
         <id column="object_version_number" property="objectVersionNumber"/>
+        <result column="type" property="type"/>
         <collection property="assigneeIssueDTOList" ofType="io.choerodon.agile.infra.dto.AssigneeIssueDTO">
             <result property="sprintId" column="asi_sprint_id"/>
             <result property="assigneeId" column="asi_assignee_id"/>
@@ -176,7 +177,8 @@
         sp.sprint_id, sp.sprint_name,
         sp.sprint_goal, start_date,
         sp.end_date, status_code,
-        sp.object_version_number
+        sp.object_version_number,
+        sp.type
         FROM agile_sprint sp
         WHERE sp.project_id = #{projectId} AND sp.status_code = 'started'
     </sql>
@@ -485,7 +487,8 @@
         sp.sprint_id, sp.sprint_name,
         sp.sprint_goal, start_date,
         sp.end_date, status_code,
-        sp.object_version_number
+        sp.object_version_number,
+        sp.type
         FROM agile_sprint sp
         WHERE sp.project_id = #{projectId} AND sp.status_code = 'sprint_planning'
     </sql>

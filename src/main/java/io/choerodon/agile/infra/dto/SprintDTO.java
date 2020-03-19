@@ -27,6 +27,16 @@ public class SprintDTO extends BaseDTO {
     @NotNull
     private Long projectId;
 
+    private String type;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public Long getSprintId() {
         return sprintId;
     }
