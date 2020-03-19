@@ -20,12 +20,13 @@ const { Text, Edit } = TextEditToggle;
     const { store } = this.props;
     const issue = store.getIssue;
     const { activePi = {} } = issue;
-    const name = activePi ? activePi.name : undefined;
+    const { name, code } = activePi;
+
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
           <span className="c7n-property">
-            {'PI'}
+            活跃PI
           </span>
         </div>
         <div className="c7n-value-wrapper">
@@ -39,11 +40,11 @@ const { Text, Edit } = TextEditToggle;
               {
                 name ? (
                   <div>
-                    {name}
+                    {`${code}-${name}`}
                   </div>
                 ) : (
                   <div>
-                    {'无'}
+                    无
                   </div>
                 )
               }
