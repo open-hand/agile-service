@@ -308,8 +308,8 @@ export function issueLink(issueId, typeCode, issueName = null) {
     return encodeURI(`/agile/work-list/issue?type=${type}&id=${projectId}&name=${name}&organizationId=${organizationId}&paramIssueId=${issueId}&orgId=${organizationId}`);
   }
 }
-export function toIssueInProject({ 
-  issueId, issueNum, projectId, projectName, 
+export function toIssueInProject({
+  issueId, issueNum, projectId, projectName,
 }) {
   return encodeURI(`/agile/work-list/issue?type=${'project'}&id=${projectId}&name=${projectName}&organizationId=${getOrganizationId()}&paramIssueId=${issueId}&paramName=${issueNum}`);
 }
@@ -340,7 +340,7 @@ export function configTheme({
 } = {}) {
   const renderPlaceHolder = (ommittedValues) => {
     const values = [];
-    for (const value of ommittedValues) {  
+    for (const value of ommittedValues) {
       // eslint-disable-next-line no-restricted-globals
       const target = parseNumber ? find(list, { [valueFiled]: isNaN(value) ? value : Number(value) })
         : find(list, { [valueFiled]: value });
@@ -501,4 +501,14 @@ export function hexToRgba(hex, opacity) {
   // eslint-disable-next-line radix
   const RGBA = `rgba(${parseInt(`0x${hex.slice(1, 3)}`)},${parseInt(`0x${hex.slice(3, 5)}`)},${parseInt(`0x${hex.slice(5, 7)}`)},${opacity})`;
   return RGBA;
+}
+
+// 捕获failed异常错误code
+export function catchFailed(res) {
+  const { failed } = res;
+  if (failed) {
+    throw res.message;
+  } else {
+    return res;
+  }
 }

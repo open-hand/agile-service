@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Form, Select, Input, DatePicker, Icon,
+  Form, Select, Input, DatePicker, Icon, message,
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
@@ -9,6 +9,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import WorkCalendar from '@/components/WorkCalendar';
+import { catchFailed } from '@/common/utils';
 import IsInProgramStore from '../../../../stores/common/program/IsInProgramStore';
 
 const FormItem = Form.Item;
@@ -56,10 +57,11 @@ class StartSprint extends Component {
           objectVersionNumber: data.objectVersionNumber,
           workDates,
         };
-        BacklogStore.axiosStartSprint(newData, IsInProgramStore.isShowFeature).then((res) => {
+        BacklogStore.axiosStartSprint(newData, IsInProgramStore.isShowFeature).then(res => catchFailed(res)).then((res) => {
           modal.close();
           BacklogStore.refresh();
         }).catch((error) => {
+          message.error(error);
         });
       }
     });
@@ -157,9 +159,9 @@ class StartSprint extends Component {
       const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
       const optionDateFormat = moment(startDateFormat).add(parseInt(value, 10), 'w').format('YYYY-MM-DD HH:mm:ss');
       // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
-      let isBan = !moment(optionDateFormat).isSameOrBefore(IsInProgramStore.getPiInfo.endDate)
-        || !moment(optionDateFormat).isSameOrAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
-        || IsInProgramStore.stopChooseBetween(optionDateFormat, sprintId); IsInProgramStore.stopChooseBetween(optionDateFormat, sprintId);
+      let isBan = !moment(optionDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
+        || !moment(optionDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
+        || IsInProgramStore.stopChooseBetween(optionDateFormat, sprintId); 
       if (!isBan && fieldStartDate) {
         const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
         if (moment(optionDateFormat).isAfter(maxTime)) {
@@ -352,7 +354,8 @@ class StartSprint extends Component {
                     style={{ width: '100%' }}
                     label="结束日期"
                     format="YYYY-MM-DD HH:mm:ss"
-                    disabled={parseInt(getFieldValue('duration'), 10) > 0}
+                    // ip冲刺时禁止结束时间
+                    disabled={sprintDetail.type === 'ip' || parseInt(getFieldValue('duration'), 10) > 0}
                     showTime
                     onChange={(date) => {
                       this.setState({
@@ -370,7 +373,9 @@ class StartSprint extends Component {
                       if (current && IsInProgramStore.isShowFeature) {
                         const fieldStartDate = getFieldValue('startDate');
                         const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
-                        let isBan = IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
+                        let isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
+                        || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
+                        || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId); 
                         if (!isBan && fieldStartDate) {
                           const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
                           const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);

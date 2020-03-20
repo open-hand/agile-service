@@ -1,9 +1,9 @@
 import React, { Component, createRef } from 'react';
 import moment from 'moment';
 import { observer } from 'mobx-react';
-import { DatePicker } from 'choerodon-ui';
+import { DatePicker, message } from 'choerodon-ui';
 import TextEditToggle from '@/components/TextEditToggle';
-import { getProjectId } from '@/common/utils';
+import { getProjectId, catchFailed } from '@/common/utils';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import IsInProgramStore from '../../../../../stores/common/program/IsInProgramStore';
 
@@ -26,13 +26,14 @@ const { Text, Edit } = TextEditToggle;
       sprintId: data.sprintId,
       [type]: date,
     };
-    BacklogStore.axiosUpdateSprint(req, IsInProgramStore.isShowFeature).then((res) => {
+    BacklogStore.axiosUpdateSprint(req, IsInProgramStore.isShowFeature).then(res => catchFailed(res)).then((res) => {
       BacklogStore.updateSprint(sprintId, {
         objectVersionNumber: res.objectVersionNumber,
         startDate: res.startDate,
         endDate: res.endDate,
       });
     }).catch((error) => {
+      message.error(error);
     });
   };
 
@@ -79,8 +80,8 @@ const { Text, Edit } = TextEditToggle;
                   } else if (IsInProgramStore.isShowFeature) { // 项目群启用 
                     const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
                     // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
-                    let isBan = !moment(currentDateFormat).isSameOrBefore(IsInProgramStore.getPiInfo.endDate)
-                      || !moment(currentDateFormat).isSameOrAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
+                    let isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
+                      || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
                       || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
                     // eslint-disable-next-line no-plusplus
                     if (!isBan) {
@@ -140,8 +141,8 @@ const { Text, Edit } = TextEditToggle;
                   } else if (IsInProgramStore.isShowFeature) { // 项目群启用
                     const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
                     // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
-                    let isBan = !moment(currentDateFormat).isSameOrBefore(IsInProgramStore.getPiInfo.endDate)
-                      || !moment(currentDateFormat).isSameOrAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
+                    let isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
+                      || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
                       || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
                     // eslint-disable-next-line no-plusplus
                     if (!isBan) {
