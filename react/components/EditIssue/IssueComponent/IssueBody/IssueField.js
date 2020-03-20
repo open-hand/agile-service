@@ -5,7 +5,7 @@ import {
   Field, FieldAssignee, FieldVersion, FieldStatus, FieldSprint, FieldText,
   FieldReporter, FieldPriority, FieldLabel, FieldFixVersion, FieldPI,
   FieldEpic, FieldDateTime, FieldComponent, FieldTimeTrace, FieldStoryPoint,
-  FieldSummary, FieldInput, FieldTeams, FieldTeamSprint,
+  FieldSummary, FieldInput, FieldTeams, FieldTeamSprint, FieldTeamAndSprint,
 } from './Field';
 import EditIssueContext from '../../stores';
 
@@ -71,9 +71,9 @@ const IssueField = observer((props) => {
       case 'storyPoints':
         return (<FieldStoryPoint {...props} field={field} />);
       case 'teams':
-        return (<FieldTeams {...props} field={field} TEAMSCOLOR={TEAMSCOLOR} />);
-      case 'teamSprint':
-        return (<FieldTeamSprint {...props} field={field} TEAMSCOLOR={TEAMSCOLOR} />);
+        return (<FieldTeamAndSprint {...props} field={field} TEAMSCOLOR={TEAMSCOLOR} />);
+      // case 'teamSprint':
+      //   return (<FieldTeamSprint {...props} field={field} TEAMSCOLOR={TEAMSCOLOR} />);
       default:
         return (<Field {...props} field={field} />);
     }
@@ -87,8 +87,8 @@ const IssueField = observer((props) => {
   } else if (typeCode === 'issue_epic') {
     fields = fields.filter(field => field.fieldCode !== 'epic');
   } else if (typeCode === 'feature') {
-    fields.splice(3, 0, { fieldCode: 'teams', fieldName: '负责团队' });
-    fields.splice(4, 0, { fieldCode: 'teamSprint', fieldName: '团队Sprint' });
+    fields.splice(3, 0, { fieldCode: 'teams', fieldName: '负责团队和冲刺' });
+    // fields.splice(4, 0, { fieldCode: 'teamSprint', fieldName: '团队Sprint' });
   }
   if (!store.detailShow) {
     fields = fields.slice(0, 4);

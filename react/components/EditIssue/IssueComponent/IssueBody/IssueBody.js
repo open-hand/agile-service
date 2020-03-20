@@ -16,6 +16,7 @@ import IssueBranch from './IssueBranch';
 import TestLink from './TestLink';
 import IssueTestExecute from './IssueTestExecute';
 import IssueDropDown from '../IssueDropDown';
+import IssuePIHistory from './IssuePIHistory';
 import { FieldStoryPoint, FieldSummary } from './Field';
 import CreateBranch from '../../../CreateBranch';
 import DailyLog from '../../../DailyLog';
@@ -108,6 +109,7 @@ const IssueBody = observer((props) => {
           <IssueCommit {...props} />
         </TabPane>       
         <TabPane tab="记录" key="3">
+          {issueTypeVO.typeCode === 'feature' && <IssuePIHistory {...props} />}
           {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueWorkLog {...props} /> : ''
           }

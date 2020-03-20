@@ -404,3 +404,12 @@ export function getTestExecute(issueId) {
 export function getFeaturesByEpic() {
   return axios.get(`/agile/v1/projects/${getProjectId()}/issues/feature/select_data?organizationId=${getOrganizationId()}`);
 }
+
+export function loadSprintsByTeam(teamId, piId) {
+  const projectId = AppState.currentMenuType.id;
+  return axios.get(`/agile/v1/projects/${projectId}/sprint/sub_project/${teamId}/list_by_team_id?piId=${piId}`);
+}
+export function getHistoryPI(issueId) {
+  const projectId = AppState.currentMenuType.id;
+  return axios.get(`/agile/v1/projects/${projectId}/pi/${issueId}/list_feature_pi_log`);
+}
