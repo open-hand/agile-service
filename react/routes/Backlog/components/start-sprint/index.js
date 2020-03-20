@@ -159,9 +159,9 @@ class StartSprint extends Component {
       const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
       const optionDateFormat = moment(startDateFormat).add(parseInt(value, 10), 'w').format('YYYY-MM-DD HH:mm:ss');
       // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
-      let isBan = !moment(optionDateFormat).isSameOrBefore(IsInProgramStore.getPiInfo.endDate)
-        || !moment(optionDateFormat).isSameOrAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
-        || IsInProgramStore.stopChooseBetween(optionDateFormat, sprintId); IsInProgramStore.stopChooseBetween(optionDateFormat, sprintId);
+      let isBan = !moment(optionDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
+        || !moment(optionDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
+        || IsInProgramStore.stopChooseBetween(optionDateFormat, sprintId); 
       if (!isBan && fieldStartDate) {
         const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
         if (moment(optionDateFormat).isAfter(maxTime)) {
@@ -373,7 +373,9 @@ class StartSprint extends Component {
                       if (current && IsInProgramStore.isShowFeature) {
                         const fieldStartDate = getFieldValue('startDate');
                         const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
-                        let isBan = IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
+                        let isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
+                        || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
+                        || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId); 
                         if (!isBan && fieldStartDate) {
                           const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
                           const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);

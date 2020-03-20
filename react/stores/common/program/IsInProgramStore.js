@@ -90,9 +90,9 @@ class IsInProgramStore {
       const startDate = moment(sprints[index].startDate);
       const endDate = moment(sprints[index].endDate);
       const endDateZero = moment(sprints[index].endDate).hour(0).minute(0).second(0);
-      if (moment(time).isBetween(startDate, endDateZero, null, '[]')) {
+      if (moment(time).isBetween(startDate, endDateZero, null, '()')) {
         return true;
-      } else if (moment(time).isBetween(endDateZero, endDate, null, '[]')) {
+      } else if (moment(time).isBetween(endDateZero, endDate, null, '()')) {
         return true;
       }
     }

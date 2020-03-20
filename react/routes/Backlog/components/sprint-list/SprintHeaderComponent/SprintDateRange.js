@@ -80,8 +80,8 @@ const { Text, Edit } = TextEditToggle;
                   } else if (IsInProgramStore.isShowFeature) { // 项目群启用 
                     const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
                     // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
-                    let isBan = !moment(currentDateFormat).isSameOrBefore(IsInProgramStore.getPiInfo.endDate)
-                      || !moment(currentDateFormat).isSameOrAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
+                    let isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
+                      || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
                       || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
                     // eslint-disable-next-line no-plusplus
                     if (!isBan) {
@@ -141,8 +141,8 @@ const { Text, Edit } = TextEditToggle;
                   } else if (IsInProgramStore.isShowFeature) { // 项目群启用
                     const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
                     // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
-                    let isBan = !moment(currentDateFormat).isSameOrBefore(IsInProgramStore.getPiInfo.endDate)
-                      || !moment(currentDateFormat).isSameOrAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
+                    let isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
+                      || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
                       || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
                     // eslint-disable-next-line no-plusplus
                     if (!isBan) {
