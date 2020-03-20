@@ -24,7 +24,7 @@ function IssuePIHistory(props) {
         </div>
       </div>
       <div>
-        {(expand ? data : data.slice(0, 3)).map(item => <HistoryItem data={item} logo="characteristic" />)}
+        {(expand ? data : data.slice(0, 3)).map(item => <HistoryItem data={item} logo="agile-feature" />)}
       </div>      
       {data.length >= 3 && (
         <Button
