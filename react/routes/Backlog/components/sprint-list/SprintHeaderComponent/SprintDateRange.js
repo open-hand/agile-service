@@ -37,6 +37,7 @@ const { Text, Edit } = TextEditToggle;
     });
   };
 
+  // console.log('data', data);
   render() {
     const {
       data: {
@@ -53,7 +54,7 @@ const { Text, Edit } = TextEditToggle;
         role="none"
       >
         <TextEditToggle
-          disabled={disabled}
+          disabled={disabled || statusCode === 'started'}
           saveRef={this.startDateEdit}
         >
           <Text>
