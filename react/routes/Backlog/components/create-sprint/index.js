@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Form, TextField, DataSet, TextArea, DateTimePicker,
+  Form, TextField, DataSet, TextArea, DateTimePicker, Icon,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import moment from 'moment';
@@ -97,6 +97,14 @@ export function CreateCurrentPiSprint({
     const isSame = await SprintApi.validate(value);
     return isSame ? '冲刺名称已存在' : true;
   }
+  function checkDateSame(value, name, record) {
+    const startDate = record.get('startDate');
+    const endDate = record.get('endDate');
+    if (startDate && endDate && startDate.isSame(endDate)) {
+      return `${name === 'endDate' ? '结束' : '开始'}时间与${name === 'endDate' ? '开始' : '结束'}相同`;
+    }
+    return true;
+  }
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [
@@ -108,6 +116,7 @@ export function CreateCurrentPiSprint({
         type: 'dateTime',
         label: '开始日期',
         required: true,
+        validator: checkDateSame,
         min: moment(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate),
         dynamicProps: {
           max: ({ record }) => {
@@ -121,6 +130,7 @@ export function CreateCurrentPiSprint({
         type: 'dateTime',
         label: '结束日期',
         required: true,
+        validator: checkDateSame,
         max: moment(IsInProgramStore.piInfo.endDate),
         dynamicProps: {
           min: ({ record }) => {
@@ -185,7 +195,8 @@ export function CreateCurrentPiSprint({
   return (
     <Form dataSet={dataSet}>
       <div>
-        提示：创建的冲刺将自动关联当前PI：
+        <Icon type="info" style={{ marginBottom: '.04rem', marginRight: '.05rem', color: 'rgb(255,0,0,1)' }} />
+        创建的冲刺将自动关联当前PI：
         {PiName}
       </div>
       <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} />
@@ -208,6 +219,7 @@ export function CreateCurrentPiSprint({
               isBan = false;
             }
           }
+
 
           return isBan;
         }}
