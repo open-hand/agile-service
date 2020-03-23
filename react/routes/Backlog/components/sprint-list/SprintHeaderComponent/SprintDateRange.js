@@ -32,6 +32,10 @@ const { Text, Edit } = TextEditToggle;
         startDate: res.startDate,
         endDate: res.endDate,
       });
+      // 在项目群的子项目 刷新冲刺限制列表
+      if (IsInProgramStore.isShowFeature) {
+        IsInProgramStore.loadPiInfoAndSprint();
+      }
     }).catch((error) => {
       message.error(error);
     });

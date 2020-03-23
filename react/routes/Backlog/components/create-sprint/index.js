@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Form, TextField, DataSet, TextArea, DateTimePicker,
+  Form, TextField, DataSet, TextArea, DateTimePicker, Icon,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import moment from 'moment';
@@ -195,7 +195,8 @@ export function CreateCurrentPiSprint({
   return (
     <Form dataSet={dataSet}>
       <div>
-        提示：创建的冲刺将自动关联当前PI：
+        <Icon type="info" style={{ marginBottom: '.04rem', marginRight: '.05rem', color: 'rgb(0,0,0,0.54)' }} />
+        创建的冲刺将自动关联当前PI：
         {PiName}
       </div>
       <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} />
