@@ -123,17 +123,21 @@ class StatusCard extends Component {
             className={prefix}
           >
             {ScrumBoardStore.getCanAddStatus && (
-              <Permission type={type} projectId={projectId} organizationId={orgId} service={['agile-service.issue-status.deleteStatus']}>
-                <Tooltip title={disableDelete ? `${reason}，不可删除` : undefined}>
-                  <div className={`${prefix}-delete`}>
+              <Permission type={type} projectId={projectId} organizationId={orgId} service={['agile-service.issue-status.deleteStatus']}>                
+                <div className={`${prefix}-delete`}>
+                  {disableDelete ? (
+                    <Tooltip title={disableDelete ? `${reason}，不可删除` : undefined}>
+                      <Icon type="delete" style={{ fontSize: '14px', color: 'gray' }} />
+                    </Tooltip>
+                  ) : (
                     <Button
                       size="small"
                       icon="delete"
                       disabled={disableDelete}
                       onClick={this.handleDeleteClick}
                     />
-                  </div>
-                </Tooltip>
+                  )}                    
+                </div> 
               </Permission>
             )}
             <div
