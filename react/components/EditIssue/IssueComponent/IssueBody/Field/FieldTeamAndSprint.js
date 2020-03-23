@@ -291,7 +291,7 @@ class FieldTeamAndSprint extends Component {
                 />
               ))}
             </div>
-            {!disabled && <Button icon="playlist_add" onClick={this.handleAdd} shape="circle" />}
+            {!disabled && <Button icon="add" onClick={this.handleAdd}>添加团队</Button>}
           </div>
         </div>
       </div>
