@@ -97,6 +97,7 @@ class TeamItem extends Component {
             label="团队"
             style={{
               width: '100%',
+              minWidth: 150,
             }}
             disabled={!isTemp}
             loadWhenMount
@@ -115,6 +116,7 @@ class TeamItem extends Component {
             label="冲刺"
             style={{
               width: '100%',
+              minWidth: 150,
               marginTop: 5,
             }}
             requestArgs={{
@@ -186,7 +188,7 @@ class FieldTeamAndSprint extends Component {
 
   handleDelete = async (team) => {
     const { tempTeams } = this.state;
-    const { store, reloadIssue, piId } = this.props;
+    const { store, reloadIssue } = this.props;
     const issue = store.getIssue;
     const { isTemp, key } = team;
     if (isTemp) {
@@ -199,7 +201,7 @@ class FieldTeamAndSprint extends Component {
       await removeFeatureTeam({
         teamId: team.id,
         featureId: issue.issueId,
-        piId,
+        piId: issue.activePi ? issue.activePi.id : null,
       });
       reloadIssue();
     }
@@ -218,7 +220,7 @@ class FieldTeamAndSprint extends Component {
   }
 
   handleSubmit = async (team, sprintIds) => {
-    const { store, reloadIssue, piId } = this.props;
+    const { store, reloadIssue } = this.props;
     const issue = store.getIssue;
     if (team.isTemp && !team.id) {
       this.handleDelete(team);
@@ -228,7 +230,7 @@ class FieldTeamAndSprint extends Component {
       await updateFeatureTeamAndSprint({
         teamProjectId: team.id,
         featureId: issue.issueId,
-        piId,
+        piId: issue.activePi ? issue.activePi.id : null,
       });
       this.setState({
         tempTeams: [],
@@ -244,7 +246,7 @@ class FieldTeamAndSprint extends Component {
         await updateFeatureTeamAndSprint({
           teamProjectId: team.id,
           featureId: issue.issueId,
-          piId,
+          piId: issue.activePi ? issue.activePi.id : null,
           sprintIds: addSprints,
           deleteSprintIds: removeSprints,
         });
