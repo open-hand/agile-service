@@ -5,7 +5,6 @@ import { Button, Popconfirm } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
 import { find, findIndex } from 'lodash';
 import { updateFeatureTeamAndSprint, removeFeatureTeam } from '@/api/FeatureApi';
-import { hexToRgba } from '../../../../../common/utils';
 import TextEditToggle from '../../../../TextEditToggle';
 import SelectFocusLoad from '../../../../SelectFocusLoad';
 
@@ -35,7 +34,7 @@ class TeamItem extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      team: props.team,
+      teamId: props.team.id,
       sprintIds: props.team.sprints.map(sprint => sprint.sprintId),
     };
     this.ref = React.createRef();
@@ -85,15 +84,16 @@ class TeamItem extends Component {
   }
 
   renderEdit() {
-    const { team } = this.state;
-    const { isTemp, id } = team;
+    const { teamId } = this.state;
+    const { team } = this.props;
+    const { isTemp } = team;
     const { sprintIds } = this.state;
     const { piId, optionFilter } = this.props;
     return (
       <Fragment>
         {isTemp ? (
           <SelectFocusLoad
-            value={team.id}
+            value={teamId}
             label="团队"
             style={{
               width: '100%',
@@ -105,7 +105,7 @@ class TeamItem extends Component {
             type="sub_project"
             onChange={(value) => {
               this.setState({
-                team: { ...team, id: value },
+                teamId: value,
               });
             }}
           />
@@ -120,7 +120,7 @@ class TeamItem extends Component {
               marginTop: 5,
             }}
             requestArgs={{
-              teamId: id,
+              teamId,
               piId: piId || 0,
             }}
             allowClear
@@ -138,13 +138,13 @@ class TeamItem extends Component {
   }
 
   handleSubmit = async () => {
-    const { team, sprintIds } = this.state;
-    const { onSubmit } = this.props;
-    onSubmit(team, sprintIds);
+    const { teamId, sprintIds } = this.state;
+    const { onSubmit, team } = this.props;
+    onSubmit({ ...team, id: teamId }, sprintIds);
   }
 
   render() {
-    const { team } = this.state;
+    const { team } = this.props;
     const { disabled } = this.props;
     return (
       <div style={{ display: 'flex' }}>
