@@ -121,7 +121,10 @@ class IsInProgramStore {
       if (res.id) {
         getCurrentPiAllSprint(res.id).then((sprints) => {
           this.setPiInfo(res);
-          this.setSprints(sprints);
+          this.setSprints(sprints.map(sprint => ({
+            ...sprint,
+            endDate: sprint.actualEndDate || sprint.endDate,
+          })));
         });
       }
     });
