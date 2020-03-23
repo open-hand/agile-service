@@ -246,18 +246,6 @@ public class SprintServiceImpl implements SprintService {
         } else {
             handleSprintNoIssue(sprintSearches, projectId);
         }
-        //根据开始时间升序排序
-        sprintSearches.sort(new Comparator<SprintSearchVO>() {
-            @Override
-            public int compare(SprintSearchVO o1, SprintSearchVO o2) {
-                Date startDate1 = o1.getStartDate();
-                Date startDate2 = o2.getStartDate();
-                if (ObjectUtils.isEmpty(startDate1) || ObjectUtils.isEmpty(startDate2)) {
-                    return 0;
-                }
-                return startDate1.compareTo(startDate2);
-            }
-        });
         backlog.put(SPRINT_DATA, sprintSearches);
         backlog.put(BACKLOG_DATA, backLogIssueVO);
         return backlog;
