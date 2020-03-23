@@ -195,7 +195,7 @@ export function CreateCurrentPiSprint({
   return (
     <Form dataSet={dataSet}>
       <div>
-        <Icon type="info" style={{ marginBottom: '.04rem', marginRight: '.05rem', color: 'rgb(0,0,0,0.54)' }} />
+        <Icon type="info" style={{ marginBottom: '.04rem', marginRight: '.05rem', color: 'rgb(255,0,0,1)' }} />
         创建的冲刺将自动关联当前PI：
         {PiName}
       </div>
