@@ -92,7 +92,7 @@ class TeamItem extends Component {
   }
 
   renderEdit() {
-    const { team } = this.props;
+    const { team } = this.state;
     const { isTemp, id } = team;
     const { sprintIds } = this.state;
     const { piId, optionFilter } = this.props;
