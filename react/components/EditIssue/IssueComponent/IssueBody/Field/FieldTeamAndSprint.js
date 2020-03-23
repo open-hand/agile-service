@@ -58,7 +58,7 @@ class TeamItem extends Component {
   renderTeamText = () => {
     const { TEAMSCOLOR, index, team } = this.props;
     return (
-      <TeamTag TEAMSCOLOR={TEAMSCOLOR} index={index}>{team.name}</TeamTag>     
+      <TeamTag TEAMSCOLOR={TEAMSCOLOR} index={index}>{team.name}</TeamTag>
     );
   }
 
@@ -70,7 +70,7 @@ class TeamItem extends Component {
         {sprints.map((sprint, i) => (
           <TeamTag TEAMSCOLOR={TEAMSCOLOR} index={i}>
             {sprint.sprintName}
-          </TeamTag>          
+          </TeamTag>
         ))}
       </div>
     );
@@ -150,9 +150,11 @@ class TeamItem extends Component {
 
   render() {
     const { team } = this.state;
+    const { disabled } = this.props;
     return (
       <div style={{ display: 'flex' }}>
         <TextEditToggle
+          disabled={disabled}
           onSubmit={this.handleSubmit}
           style={{ maxWidth: 'unset' }}
           saveRef={this.ref}
@@ -164,13 +166,17 @@ class TeamItem extends Component {
             {this.renderEdit()}
           </Edit>
         </TextEditToggle>
-        {team.isTemp 
-          ? <Button icon="delete" onClick={() => { this.props.onDelete(team); }} shape="circle" style={{ flexShrink: 0 }} /> 
-          : (
-            <Popconfirm disabled={team.isTemp} title="确认删除关联团队吗" onConfirm={() => { this.props.onDelete(team); }}>
-              <Button icon="delete" shape="circle" style={{ flexShrink: 0 }} />
-            </Popconfirm>
-          )}
+
+        {// eslint-disable-next-line no-nested-ternary
+          disabled
+            ? null
+            : !team.isTemp
+              ? <Button icon="delete" onClick={() => { this.props.onDelete(team); }} shape="circle" style={{ flexShrink: 0 }} />
+              : (
+                <Popconfirm disabled={team.isTemp} title="确认删除关联团队吗" onConfirm={() => { this.props.onDelete(team); }}>
+                  <Button icon="delete" shape="circle" style={{ flexShrink: 0 }} />
+                </Popconfirm>
+              )}
       </div>
     );
   }
@@ -255,7 +261,7 @@ class FieldTeamAndSprint extends Component {
   }
 
   render() {
-    const { store, TEAMSCOLOR } = this.props;
+    const { store, TEAMSCOLOR, disabled } = this.props;
     const { tempTeams } = this.state;
     const issue = store.getIssue;
     const { teamSprint } = issue;
@@ -285,7 +291,7 @@ class FieldTeamAndSprint extends Component {
                 />
               ))}
             </div>
-            <Button icon="playlist_add" onClick={this.handleAdd} shape="circle" />
+            {!disabled && <Button icon="playlist_add" onClick={this.handleAdd} shape="circle" />}
           </div>
         </div>
       </div>

@@ -32,7 +32,7 @@ const IssueBody = observer((props) => {
   const {
     issueId, issueNum, typeCode, issueTypeVO = {},
   } = issue;
-  const { reloadIssue } = props;
+  const { reloadIssue, applyType } = props;
   const createBranchShow = store.getCreateBranchShow;
   const workLogShow = store.getWorkLogShow;
 
@@ -92,13 +92,13 @@ const IssueBody = observer((props) => {
           {issueTypeVO.typeCode && ['feature', 'sub_task'].indexOf(issueTypeVO.typeCode) === -1
             ? <TestLink {...props} /> : ''
           }
-          {issueTypeVO.typeCode && ['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
+          {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''
           }
           { store.testExecutes.length > 0 ? <IssueTestExecute {...props} /> : null}
         </TabPane>
         {
-          issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
+          !disabled && issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
             ? (
               <TabPane tab="拆分的Story" key="5">
                 <SplitStory {...props} />
@@ -109,7 +109,7 @@ const IssueBody = observer((props) => {
           <IssueCommit {...props} />
         </TabPane>       
         <TabPane tab="记录" key="3">
-          {issueTypeVO.typeCode === 'feature' && <IssuePIHistory {...props} />}
+          {!disabled && issueTypeVO.typeCode === 'feature' && <IssuePIHistory {...props} />}
           {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueWorkLog {...props} /> : ''
           }
