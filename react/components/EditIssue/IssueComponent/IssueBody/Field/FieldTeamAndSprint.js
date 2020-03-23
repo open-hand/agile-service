@@ -193,7 +193,7 @@ class FieldTeamAndSprint extends Component {
 
   handleDelete = async (team) => {
     const { tempTeams } = this.state;
-    const { store, reloadIssue } = this.props;
+    const { store, reloadIssue, piId } = this.props;
     const issue = store.getIssue;
     const { isTemp, key } = team;
     if (isTemp) {
@@ -206,7 +206,7 @@ class FieldTeamAndSprint extends Component {
       await removeFeatureTeam({
         teamId: team.id,
         featureId: issue.issueId,
-        piId: issue.activePi ? issue.activePi.id : null,
+        piId,
       });
       reloadIssue();
     }
@@ -225,7 +225,7 @@ class FieldTeamAndSprint extends Component {
   }
 
   handleSubmit = async (team, sprintIds) => {
-    const { store, reloadIssue } = this.props;
+    const { store, reloadIssue, piId } = this.props;
     const issue = store.getIssue;
     if (team.isTemp && !team.id) {
       this.handleDelete(team);
@@ -235,7 +235,7 @@ class FieldTeamAndSprint extends Component {
       await updateFeatureTeamAndSprint({
         teamProjectId: team.id,
         featureId: issue.issueId,
-        piId: issue.activePi ? issue.activePi.id : null,
+        piId,
       });
       this.setState({
         tempTeams: [],
@@ -251,7 +251,7 @@ class FieldTeamAndSprint extends Component {
         await updateFeatureTeamAndSprint({
           teamProjectId: team.id,
           featureId: issue.issueId,
-          piId: issue.activePi ? issue.activePi.id : null,
+          piId,
           sprintIds: addSprints,
           deleteSprintIds: removeSprints,
         });
@@ -282,7 +282,7 @@ class FieldTeamAndSprint extends Component {
                   team={team}
                   index={i}
                   TEAMSCOLOR={TEAMSCOLOR}
-                  piId={issue.activePi.id}
+                  piId={issue.activePi ? issue.activePi.id : undefined}
                   {...this.props}
                   onSubmit={this.handleSubmit}
                   onDelete={this.handleDelete}
