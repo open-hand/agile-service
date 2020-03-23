@@ -76,7 +76,7 @@ class TeamItem extends Component {
       return null;
     }
     return (
-      <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+      <div>
         {this.renderTeamText()}
         {this.renderSprintText()}
       </div>
@@ -151,7 +151,7 @@ class TeamItem extends Component {
         <TextEditToggle
           disabled={disabled}
           onSubmit={this.handleSubmit}
-          style={{ maxWidth: 'unset' }}
+          style={{ maxWidth: 'unset', marginRight: 10 }}
           saveRef={this.ref}
         >
           <Text>
