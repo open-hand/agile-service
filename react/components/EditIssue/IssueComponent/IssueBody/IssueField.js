@@ -5,13 +5,11 @@ import {
   Field, FieldAssignee, FieldVersion, FieldStatus, FieldSprint, FieldText,
   FieldReporter, FieldPriority, FieldLabel, FieldFixVersion, FieldPI,
   FieldEpic, FieldDateTime, FieldComponent, FieldTimeTrace, FieldStoryPoint,
-  FieldSummary, FieldInput, FieldTeams, FieldTeamSprint, FieldTeamAndSprint,
+  FieldSummary, FieldInput, FieldTeamAndSprint,
 } from './Field';
 import EditIssueContext from '../../stores';
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
-
-const TEAMSCOLOR = ['#4D90FE', '#303F9F', '#FFB100', '#FF7043', '#F44336', '#F953BA'];
 
 const IssueField = observer((props) => {
   const {
@@ -71,9 +69,7 @@ const IssueField = observer((props) => {
       case 'storyPoints':
         return (<FieldStoryPoint {...props} field={field} />);
       case 'teams':
-        return (<FieldTeamAndSprint {...props} field={field} TEAMSCOLOR={TEAMSCOLOR} />);
-      // case 'teamSprint':
-      //   return (<FieldTeamSprint {...props} field={field} TEAMSCOLOR={TEAMSCOLOR} />);
+        return (<FieldTeamAndSprint {...props} field={field} />);
       default:
         return (<Field {...props} field={field} />);
     }

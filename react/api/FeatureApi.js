@@ -42,5 +42,5 @@ export function removeFeatureTeam({
   featureId,
   piId,
 }) {
-  return axios.delete(`/agile/v1/projects/${getProjectId()}/board_feature/delete_project_related?teamId=${teamId}&featureId=${featureId}&piId=${piId}`);
+  return axios.delete(`/agile/v1/projects/${getProjectId()}/board_feature/delete_project_related?teamId=${teamId}&featureId=${featureId}${piId ? `&piId=${piId}` : ''}`);
 }

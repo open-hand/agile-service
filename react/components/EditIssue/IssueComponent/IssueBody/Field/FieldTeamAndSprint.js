@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { observer } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { Button, Popconfirm } from 'choerodon-ui';
@@ -10,18 +10,12 @@ import TextEditToggle from '../../../../TextEditToggle';
 import SelectFocusLoad from '../../../../SelectFocusLoad';
 
 const { Text, Edit } = TextEditToggle;
-function getColor(TEAMSCOLOR, index) {
-  return {
-    color: `${TEAMSCOLOR[index % 6]}`,
-    border: `1px solid ${TEAMSCOLOR[index % 6]}`,
-    background: `${hexToRgba(TEAMSCOLOR[index % 6], 0.05)}`,
-  };
-}
-function TeamTag({ TEAMSCOLOR, index, children }) {
+function SprintTag({ children }) {
   return (
     <div
       style={{
-        ...getColor(TEAMSCOLOR, index),
+        color: 'rgb(74, 77, 97)',
+        border: '1px solid rgb(74, 77, 97)',
         height: 25,
         marginRight: 2,
         marginBottom: 3,
@@ -56,21 +50,21 @@ class TeamItem extends Component {
   }
 
   renderTeamText = () => {
-    const { TEAMSCOLOR, index, team } = this.props;
+    const { team } = this.props;
     return (
-      <TeamTag TEAMSCOLOR={TEAMSCOLOR} index={index}>{team.name}</TeamTag>
+      <div>{`${team.name}${team.sprints.length > 0 ? '：' : ''}`}</div>
     );
   }
 
   renderSprintText = () => {
-    const { TEAMSCOLOR, team } = this.props;
+    const { team } = this.props;
     const { sprints } = team;
     return sprints.length > 0 && (
       <div>
-        {sprints.map((sprint, i) => (
-          <TeamTag TEAMSCOLOR={TEAMSCOLOR} index={i}>
+        {sprints.map(sprint => (
+          <SprintTag>
             {sprint.sprintName}
-          </TeamTag>
+          </SprintTag>
         ))}
       </div>
     );
@@ -83,11 +77,10 @@ class TeamItem extends Component {
       return null;
     }
     return (
-      <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap' }}>
         {this.renderTeamText()}
         {this.renderSprintText()}
       </div>
-
     );
   }
 
@@ -97,14 +90,13 @@ class TeamItem extends Component {
     const { sprintIds } = this.state;
     const { piId, optionFilter } = this.props;
     return (
-      <div style={{ display: 'flex', alignItems: 'center' }}>
+      <Fragment>
         {isTemp ? (
           <SelectFocusLoad
             value={team.id}
             label="团队"
             style={{
-              flex: 1,
-              maxWidth: 200,
+              width: '100%',
             }}
             disabled={!isTemp}
             loadWhenMount
@@ -122,11 +114,12 @@ class TeamItem extends Component {
             value={sprintIds}
             label="冲刺"
             style={{
-              flex: 1,
+              width: '100%',
+              marginTop: 5,
             }}
             requestArgs={{
               teamId: id,
-              piId,
+              piId: piId || 0,
             }}
             allowClear
             type="sprint_in_project"
@@ -138,7 +131,7 @@ class TeamItem extends Component {
             }}
           />
         )}
-      </div>
+      </Fragment>
     );
   }
 
@@ -170,7 +163,7 @@ class TeamItem extends Component {
         {// eslint-disable-next-line no-nested-ternary
           disabled
             ? null
-            : !team.isTemp
+            : team.isTemp
               ? <Button icon="delete" onClick={() => { this.props.onDelete(team); }} shape="circle" style={{ flexShrink: 0 }} />
               : (
                 <Popconfirm disabled={team.isTemp} title="确认删除关联团队吗" onConfirm={() => { this.props.onDelete(team); }}>
@@ -261,7 +254,7 @@ class FieldTeamAndSprint extends Component {
   }
 
   render() {
-    const { store, TEAMSCOLOR, disabled } = this.props;
+    const { store, disabled } = this.props;
     const { tempTeams } = this.state;
     const issue = store.getIssue;
     const { teamSprint } = issue;
@@ -274,23 +267,23 @@ class FieldTeamAndSprint extends Component {
           </span>
         </div>
         <div className="c7n-value-wrapper">
-          <div style={{ display: 'flex', width: '100%' }}>
-            <div style={{ flex: 1, maxWidth: 250 }}>
-              {teams.map((team, i) => (
-                <TeamItem
-                  key={team.id || team.key}
-                  team={team}
-                  index={i}
-                  TEAMSCOLOR={TEAMSCOLOR}
-                  piId={issue.activePi ? issue.activePi.id : undefined}
-                  {...this.props}
-                  onSubmit={this.handleSubmit}
-                  onDelete={this.handleDelete}
-                  // 已经选择的团队，过滤掉
-                  optionFilter={pro => pro.projectId === team.teamProjectId || !find(teams, { teamProjectId: pro.projectId })}
-                />
-              ))}
-            </div>
+          <div style={{ display: 'flex', width: '100%', flexWrap: 'wrap' }}>
+            {teams.length > 0 && (
+              <div>
+                {teams.map(team => (
+                  <TeamItem
+                    key={team.id || team.key}
+                    team={team}
+                    piId={issue.activePi ? issue.activePi.id : undefined}
+                    {...this.props}
+                    onSubmit={this.handleSubmit}
+                    onDelete={this.handleDelete}
+                    // 已经选择的团队，过滤掉
+                    optionFilter={pro => pro.projectId === team.teamProjectId || !find(teams, { teamProjectId: pro.projectId })}
+                  />
+                ))}
+              </div>
+            )}
             {!disabled && <Button icon="add" onClick={this.handleAdd}>添加团队</Button>}
           </div>
         </div>
