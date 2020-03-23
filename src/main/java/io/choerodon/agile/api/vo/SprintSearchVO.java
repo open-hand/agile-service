@@ -21,17 +21,7 @@ public class SprintSearchVO {
     private List<IssueSearchVO> issueSearchVOList;
     private List<AssigneeIssueVO> assigneeIssues;
     private String objectVersionNumber;
-    private String type;
 //    private Long piId;
-
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
 
     public Long getSprintId() {
         return sprintId;

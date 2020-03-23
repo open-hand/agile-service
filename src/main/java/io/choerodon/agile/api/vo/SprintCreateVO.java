@@ -16,16 +16,6 @@ public class SprintCreateVO {
 
     private Date endDate;
 
-    private Long piId;
-
-    public Long getPiId() {
-        return piId;
-    }
-
-    public void setPiId(Long piId) {
-        this.piId = piId;
-    }
-
     public String getSprintName() {
         return sprintName;
     }
