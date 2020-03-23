@@ -19,8 +19,8 @@ const { Text, Edit } = TextEditToggle;
   render() {
     const { store } = this.props;
     const issue = store.getIssue;
-    const { activePi = {} } = issue;
-    const { name, code } = activePi;
+    const { activePi } = issue;
+    const { name, code } = activePi || {};
 
     return (
       <div className="line-start mt-10">

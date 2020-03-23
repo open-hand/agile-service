@@ -24,3 +24,23 @@ export function getFeaturesColor() {
 export function getSubStoryByFeature(issueId) {
   return axios.post(`/agile/v1/projects/${getProjectId()}/issues/list_story_by_feature_id?issueId=${issueId}`);
 } 
+/**
+ *  "teamProjectId": 1655,
+ *  "featureId": 81031,
+ *  "piId":57,
+ *  "sprintIds": [4971]
+ *
+ * @export
+ * @param {*} issueId
+ * @returns
+ */
+export function updateFeatureTeamAndSprint(data) {
+  return axios.post(`/agile/v1/projects/${getProjectId()}/board_feature/feature_link_project`, data);
+} 
+export function removeFeatureTeam({
+  teamId,
+  featureId,
+  piId,
+}) {
+  return axios.delete(`/agile/v1/projects/${getProjectId()}/board_feature/delete_project_related?teamId=${teamId}&featureId=${featureId}&piId=${piId}`);
+}
