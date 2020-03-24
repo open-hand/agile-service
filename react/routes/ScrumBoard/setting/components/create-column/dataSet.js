@@ -35,7 +35,7 @@ export default function DataSetFactory({ sequence, boardId }) {
         required: true, 
         lookupAxiosConfig: () => ({
           url: '/agile/v1/lookup_values/status_category',
-          transformResponse: data => (Array.isArray(data) ? data : JSON.parse(data).lookupValues),
+          transformResponse: data => ((Array.isArray(data) ? data : JSON.parse(data).lookupValues)).filter(status => status.valueCode !== 'prepare'),
         }),
         textField: 'name',
         valueField: 'valueCode',

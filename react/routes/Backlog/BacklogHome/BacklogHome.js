@@ -293,6 +293,7 @@ export default props => (
       'base-service.organization-project.getGroupInfoByEnableProject',
       'agile-service.issue.createIssue',
       'agile-service.field-value.queryPageFieldViewList',
+      'agile-service.scheme.queryDefaultByOrganizationId', // /v1/projects/{project_id}/priority/default
       'agile-service.product-version.queryNameByOptions',
       'agile-service.issue-component.queryComponentById',
       'agile-service.scheme.queryByOrganizationIdList',

@@ -17,9 +17,4 @@ export FieldText from './FieldText';
 export FieldSummary from './FieldSummary';
 export FieldInput from './FieldInput';
 export FieldWSJFDTO from './FieldWSJFDTO';
-<<<<<<< HEAD
-=======
-export FieldTeams from './FieldTeams';
-export FieldTeamSprint from './FieldTeamSprint';
->>>>>>> ecc78d3f838596bc18e2ffc2d149ff25e6f47240
 export FieldTeamAndSprint from './FieldTeamAndSprint';

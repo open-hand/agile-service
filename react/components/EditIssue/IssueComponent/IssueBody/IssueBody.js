@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import React, { useContext } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
@@ -22,28 +23,20 @@ import CreateBranch from '../../../CreateBranch';
 import DailyLog from '../../../DailyLog';
 import IssueWSJF from './IssueWSJF';
 import EditIssueContext from '../../stores';
-<<<<<<< HEAD
 
-=======
->>>>>>> ecc78d3f838596bc18e2ffc2d149ff25e6f47240
 import './IssueBody.less';
 
 const { TabPane } = Tabs;
 
-<<<<<<< HEAD
 function IssueBody(props) {
   const {
     prefixCls, disabled, store, 
   } = useContext(EditIssueContext);
-=======
-const IssueBody = observer((props) => {
-  const { prefixCls, disabled, store } = useContext(EditIssueContext);
->>>>>>> ecc78d3f838596bc18e2ffc2d149ff25e6f47240
   const issue = store.getIssue;
   const {
     issueId, issueNum, typeCode, issueTypeVO = {},
   } = issue;
-  const { reloadIssue, applyType } = props;
+  const { reloadIssue } = props;
   const createBranchShow = store.getCreateBranchShow;
   const workLogShow = store.getWorkLogShow;
 
@@ -73,7 +66,7 @@ const IssueBody = observer((props) => {
         {
           issueId && ['issue_epic', 'feature'].indexOf(typeCode) === -1 ? (
             <div style={{ display: 'flex' }}>
-              <FieldStoryPoint {...props} field={{ fieldCode: 'remainingTime', fieldName: '预估时间' }} />
+              <FieldStoryPoint {...props} field={{ fieldCode: 'remainingTime', fieldName: '剩余预估时间' }} />
             </div>
           ) : null
         }
@@ -106,7 +99,7 @@ const IssueBody = observer((props) => {
           {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''
           }
-          { store.testExecutes.length > 0 ? <IssueTestExecute {...props} /> : null}
+          {store.testExecutes.length > 0 ? <IssueTestExecute {...props} /> : null}
         </TabPane>
         {
           !disabled && issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
@@ -163,6 +156,6 @@ const IssueBody = observer((props) => {
       }
     </section>
   );
-});
+}
 
-export default IssueBody;
+export default observer(IssueBody);

@@ -8,12 +8,12 @@ import React, { memo } from 'react';
  */
 function IssueNum({ issueNum, completed }) {  
   return (
-    <p
+    <div
       style={{ marginLeft: 5, marginTop: 2, textDecoration: completed ? 'line-through' : '' }}
       className="textDisplayOneColumn"
     >
       {issueNum}
-    </p>
+    </div>
   );
 }
 export default memo(IssueNum);

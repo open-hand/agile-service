@@ -143,19 +143,6 @@ const EditComponent = (props) => {
       .catch((e) => { setSelectLoading(true); });
   };
 
-  const getFirst = (str) => {
-    if (!str) {
-      return '';
-    }
-    const re = /[\u4E00-\u9FA5]/g;
-    for (let i = 0, len = str.length; i < len; i += 1) {
-      if (re.test(str[i])) {
-        return str[i];
-      }
-    }
-    return str[0];
-  };
-
   useEffect(() => localLoadComponent(props.componentId), []);
 
   return (
@@ -224,12 +211,7 @@ const EditComponent = (props) => {
                     <Option key={JSON.stringify(user)} value={JSON.stringify(user)}>
                       <div style={{ display: 'inline-flex', alignItems: 'center', padding: '2px' }}>
                         <UserHead
-                          user={{
-                            id: user.id,
-                            loginName: user.loginName,
-                            realName: user.realName,
-                            avatar: user.imageUrl,
-                          }}
+                          user={user}
                         />
                       </div>
                     </Option>

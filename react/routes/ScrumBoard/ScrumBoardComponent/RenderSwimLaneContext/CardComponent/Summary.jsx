@@ -9,9 +9,9 @@ import { Tooltip } from 'choerodon-ui';
 function Summary({ summary }) {
   return (
     <Tooltip title={summary} placement="topLeft">
-      <p className="textDisplayTwoColumn">
+      <div className="textDisplayTwoColumn">
         {summary}
-      </p>
+      </div>
     </Tooltip>
   );
 }

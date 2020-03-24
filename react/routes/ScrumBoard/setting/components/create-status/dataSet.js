@@ -1,6 +1,8 @@
 import { getProjectId, getOrganizationId } from '@/common/utils';
+import { Choerodon } from '@choerodon/boot';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 
-export default function DataSetFactory() {
+export default function DataSetFactory(setCategoryCode) {
   return {
     autoCreate: true,
     transport: {
@@ -8,14 +10,15 @@ export default function DataSetFactory() {
         url: `/agile/v1/projects/${getProjectId()}/issue_status`,
         method: 'post',
         params: {
-          applyType: 'agile', 
+          applyType: 'agile',
         },
         transformRequest: (([data]) => JSON.stringify({
           ...data,
           projectId: getProjectId(),
-          enable: true,          
+          enable: true,
         })),
       },
+      // 进行验证 当存在同名状态 将类别自动选择
       validate: ({ data: { unique } }) => ({
         url: `agile/v1/projects/${getProjectId()}/status/project_check_name`,
         method: 'GET',
@@ -24,8 +27,24 @@ export default function DataSetFactory() {
           name: unique[0].name,
         },
         data: null,
-        transformResponse: data => !JSON.parse(data).statusExist,
+        transformResponse: (res) => {
+          const data = JSON.parse(res);
+          const { statusExist, type } = data;
+          if (statusExist) {
+            setCategoryCode(type);
+          } else {
+            setCategoryCode(null);
+          }
+          return true;
+        },
       }),
+    },
+    feedback: {
+      submitFailed(error) {
+        if (error.code === 'error.status.exist') {
+          Choerodon.prompt('状态已存在');
+        }
+      },
     },
     fields: [
       {
@@ -34,16 +53,16 @@ export default function DataSetFactory() {
         label: '状态名称',
         required: true,
         unique: true,
-        
+
       },
       {
         name: 'categoryCode',
         type: 'string',
         label: '类别',
-        required: true, 
+        required: true,
         lookupAxiosConfig: () => ({
           url: '/agile/v1/lookup_values/status_category',
-          transformResponse: data => (Array.isArray(data) ? data : JSON.parse(data).lookupValues),
+          transformResponse: data => ((Array.isArray(data) ? data : JSON.parse(data).lookupValues)).filter(status => status.valueCode !== 'prepare'),
         }),
         textField: 'name',
         valueField: 'valueCode',

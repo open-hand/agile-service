@@ -73,12 +73,12 @@ function ObjectScheme() {
     schemeCode,
     store,
   } = context;
-  
+
 
   function handleRefresh() {
     schemeTableDataSet.query();
   }
-  
+
   function handleRemove() {
     const record = schemeTableDataSet.current;
     const modalProps = {
@@ -109,7 +109,7 @@ function ObjectScheme() {
       handleRefresh();
     });
   }
-  
+
 
   // 打开创建模态框
   function openCreateFieldModal() {
@@ -178,7 +178,7 @@ function ObjectScheme() {
   const renderContextName = ({ text }) => (
     <Fragment>
       {text.split(',').map(name => (
-        showIcons[name] ? <div><TypeTag data={showIcons[name]} showName /></div> : name
+        showIcons[name] ? <TypeTag style={{ marginRight: 4 }} data={showIcons[name]} showName /> : name
       ))}
     </Fragment>
   );
@@ -210,7 +210,7 @@ function ObjectScheme() {
       </div>
     );
   };
-  
+
 
   const service = AppState.currentMenuType.type === 'project' ? [
     'agile-service.project-object-scheme-field.listQuery',
@@ -249,7 +249,7 @@ function ObjectScheme() {
       <Content className={`${prefixCls}-detail-content`}>
         <Table dataSet={schemeTableDataSet} queryBar="none" className={`${prefixCls}-detail-content-table`}>
           <Column name="name" renderer={renderDropDown} />
-          <Column name="contextName" renderer={renderContextName} />
+          <Column name="contextName" renderer={renderContextName} width={330} />
           <Column name="fieldOrigin" renderer={renderFieldOrigin} header={formatMessage({ id: 'field.origin' })} />
           <Column name="fieldTypeName" />
           <Column name="required" renderer={renderRequired} />

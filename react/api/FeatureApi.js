@@ -43,7 +43,6 @@ export function removeFeatureTeam({
   piId,
 }) {
   return axios.delete(`/agile/v1/projects/${getProjectId()}/board_feature/delete_project_related?teamId=${teamId}&featureId=${featureId}${piId ? `&piId=${piId}` : ''}`);
-<<<<<<< HEAD
 }
 export function checkFeatureName(summary, epicId) {
   return axios.post(`/agile/v1/projects/${getProjectId()}/issues/check_feature_summary`, {
@@ -56,6 +55,4 @@ export function checkFeatureNameById(featureId, epicId) {
     epicId,
     featureIds: [featureId],
   });
-=======
->>>>>>> ecc78d3f838596bc18e2ffc2d149ff25e6f47240
 }

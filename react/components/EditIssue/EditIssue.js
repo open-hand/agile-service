@@ -35,10 +35,8 @@ const defaultProps = {
   applyType: 'agile',
 };
 
-const EditIssue = observer(() => {
+function EditIssue() {
   const [issueLoading, setIssueLoading] = useState(false);
-  // 侧滑详情高度
-  const [isHasBanner, setIsHasBanner] = useState(false);
   const {
     onCurrentClicked, // 设置当前加载的问题详情信息
     store,
@@ -375,6 +373,6 @@ const EditIssue = observer(() => {
       </ResizeAble>
     </div>
   );
-});
+}
 EditIssue.defaultProps = defaultProps;
-export default EditIssue;
+export default observer(EditIssue);

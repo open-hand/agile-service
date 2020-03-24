@@ -21,7 +21,7 @@ function StatusName({ statusName, categoryCode }) {
   };
   return (
     <Tooltip title={`状态: ${statusName}`}>
-      <p
+      <div
         style={{
           borderRadius: 2,
           paddingLeft: 4,
@@ -38,7 +38,7 @@ function StatusName({ statusName, categoryCode }) {
         }}
       >
         {statusName}
-      </p>
+      </div>
     </Tooltip>
   );
 }

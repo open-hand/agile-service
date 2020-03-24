@@ -12,40 +12,36 @@ import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import './IssueItem.less';
 
 const prefix = 'c7n-backlog-issue';
+function DraggingNum({ num }) {
+  return (
+    <div style={{
+      position: 'absolute',
+      width: 20,
+      height: 20,
+      background: 'red',
+      textAlign: 'center',
+      color: 'white',
+      borderRadius: '50%',
+      top: 0,
+      left: 0,
+    }}
+    >
+      {num}
+    </div>
+  );
+}
 function getStyle({ draggableStyle, virtualStyle, isDragging }) {
-  // If you don't want any spacing between your items
-  // then you could just return this.
-  // I do a little bit of magic to have some nice visual space
-  // between the row items
   const combined = {
     ...virtualStyle,
     ...draggableStyle,
   };
-
-  // Being lazy: this is defined in our css file
-  const grid = 0;
-
-  // when dragging we want to use the draggable style for placement, otherwise use the virtual style
-  // const result = {
-  //   ...combined,
-  //   height: isDragging ? combined.height : combined.height - grid,
-  //   left: isDragging ? combined.left : combined.left + grid,
-  //   width: isDragging
-  //     ? draggableStyle.width
-  //     : `calc(${combined.width} - ${grid * 2}px)`,
-  //   marginBottom: grid,
-  // };
-
   return combined;
 }
-<<<<<<< HEAD
 const Item = memo(({ issue, draggingNum }) => {
-=======
-const Item = memo(({ issue }) => {
->>>>>>> ecc78d3f838596bc18e2ffc2d149ff25e6f47240
   const { isShowFeature } = IsInProgramStore; // 由后端判断是否显示特性
   return (
     <Fragment>
+      {draggingNum && (<DraggingNum num={draggingNum} />)}
       <div
         className={`${prefix}-left`}
       >
@@ -137,6 +133,7 @@ function IssueItem({
   provided, style, issue, isDragging, sprintId,
 }) {
   const selected = BacklogStore.getMultiSelected.get(issue.issueId);
+  const draggingNum = BacklogStore.getIsDragging === issue.issueId && BacklogStore.getMultiSelected.size > 0 ? BacklogStore.getMultiSelected.size : undefined; 
   return (
     <div
       role="none"
@@ -151,7 +148,7 @@ function IssueItem({
       className={`${prefix} ${selected ? `${prefix}-selected` : ''}`}
       onClick={(e) => { BacklogStore.handleIssueClick(e, issue, String(sprintId)); }}
     >
-      <Item issue={issue} />
+      <Item issue={issue} draggingNum={draggingNum} />
     </div>
   );
 }

@@ -1105,7 +1105,7 @@ class BacklogStore {
       } else if (e.ctrlKey || e.metaKey) {
         this.dealWithMultiSelect(sprintId, item, 'ctrl');
       } else {
-        this.clickedOnce(sprintId, item);
+        this.clickedOnce(sprintId, item, e.shiftKey || e.ctrlKey || e.metaKey);
       }
     }
   }
