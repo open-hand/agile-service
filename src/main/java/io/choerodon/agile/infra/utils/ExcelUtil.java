@@ -434,7 +434,7 @@ public class ExcelUtil {
         }
     }
 
-    private static <T> void handleWriteCell(SXSSFRow row, int i, int j, List<T> list, CellStyle cellStyle, String[] fields, Class<T> clazz) {
+    protected static <T> void handleWriteCell(SXSSFRow row, int i, int j, List<T> list, CellStyle cellStyle, String[] fields, Class<T> clazz) {
         SXSSFCell cell = row.createCell(i);
         cell.setCellStyle(cellStyle);
         if (list.get(j) != null) {
@@ -482,7 +482,7 @@ public class ExcelUtil {
      * @param fontSize 字体大小
      * @return 单元格样式
      */
-    private static CellStyle createCellStyle(SXSSFWorkbook workbook, short fontSize, short aligment, Boolean bold) {
+    protected static CellStyle createCellStyle(SXSSFWorkbook workbook, short fontSize, short aligment, Boolean bold) {
         CellStyle cellStyle = workbook.createCellStyle();
         cellStyle.setAlignment(aligment);
         //垂直居中
@@ -503,7 +503,7 @@ public class ExcelUtil {
      * @param fieldName fieldName
      * @return String
      */
-    private static String createGetter(String fieldName) {
+    protected static String createGetter(String fieldName) {
         if (fieldName == null || fieldName.length() == 0) {
             return null;
         }
