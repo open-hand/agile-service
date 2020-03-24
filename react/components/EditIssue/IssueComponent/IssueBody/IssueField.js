@@ -5,11 +5,12 @@ import {
   Field, FieldAssignee, FieldVersion, FieldStatus, FieldSprint, FieldText,
   FieldReporter, FieldPriority, FieldLabel, FieldFixVersion, FieldPI,
   FieldEpic, FieldDateTime, FieldComponent, FieldTimeTrace, FieldStoryPoint,
-  FieldSummary, FieldInput,
+  FieldSummary, FieldInput, FieldTeamAndSprint,
 } from './Field';
 import EditIssueContext from '../../stores';
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
+
 const IssueField = observer((props) => {
   const {
     store, applyType, saveFieldVersionRef, saveFieldFixVersionRef,
@@ -39,7 +40,7 @@ const IssueField = observer((props) => {
         return (<FieldLabel {...props} />);
       case 'fixVersion':
         return (<FieldFixVersion {...props} saveRef={saveFieldFixVersionRef} />);
-      case 'epic':
+      case 'epic': // 包含 feature 当有子项目时 只有特性
         // 子任务、史诗不显示史诗
         if (['issue_epic', 'sub_task'].indexOf(typeCode) === -1) {
           return (<FieldEpic {...props} />);
@@ -67,6 +68,8 @@ const IssueField = observer((props) => {
       case 'remainingTime':
       case 'storyPoints':
         return (<FieldStoryPoint {...props} field={field} />);
+      case 'teams':
+        return (<FieldTeamAndSprint {...props} field={field} />);
       default:
         return (<Field {...props} field={field} />);
     }
@@ -79,6 +82,9 @@ const IssueField = observer((props) => {
     fields = fields.filter(field => ['component', 'epic'].indexOf(field.fieldCode) === -1);
   } else if (typeCode === 'issue_epic') {
     fields = fields.filter(field => field.fieldCode !== 'epic');
+  } else if (typeCode === 'feature') {
+    fields.splice(3, 0, { fieldCode: 'teams', fieldName: '负责团队和冲刺' });
+    // fields.splice(4, 0, { fieldCode: 'teamSprint', fieldName: '团队Sprint' });
   }
   if (!store.detailShow) {
     fields = fields.slice(0, 4);

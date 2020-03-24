@@ -61,13 +61,12 @@ const { Text, Edit } = TextEditToggle;
     const { store, disabled } = this.props;
     const issue = store.getIssue;
     const { priorityId, priorityVO = {} } = issue;
-    const { colour, name } = priorityVO;
-
+    const { colour, name } = priorityVO || {}; // 防止优先级为空时 出错
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
           <span className="c7n-property">
-            {'优先级'}
+            优先级
           </span>
         </div>
         <div className="c7n-value-wrapper">
@@ -94,7 +93,7 @@ const { Text, Edit } = TextEditToggle;
                   </div>
                 ) : (
                   <div>
-                    {'无'}
+                    无
                   </div>
                 )
               }

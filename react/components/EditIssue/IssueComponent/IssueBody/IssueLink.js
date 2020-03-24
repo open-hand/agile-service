@@ -49,8 +49,11 @@ import Divider from './Divider';
 
   renderLinkIssues() {
     const { store } = this.props;
+    const issue = store.getIssue;
+    const { typeCode } = issue;
     const linkIssues = store.getLinkIssues;
-    const group = _.groupBy(linkIssues.filter(i => i.applyType === 'agile'), 'ward');
+    // const group = _.groupBy(linkIssues.filter(i => i.applyType === 'agile'), 'ward');
+    const group = typeCode !== 'feature' ? _.groupBy(linkIssues, 'ward') : _.groupBy(linkIssues, 'relationName');
     return (
       <div className="c7n-tasks">
         {
@@ -58,8 +61,8 @@ import Divider from './Divider';
             <div key={k}>
               <div style={{ margin: '7px auto' }}>{k}</div>
               {
-                _.map(v, (linkIssue, i) => this.renderLinkList(linkIssue, i))
-              }
+                  _.map(v, (linkIssue, i) => this.renderLinkList(linkIssue, i))
+                }
             </div>
           ))
         }
@@ -71,18 +74,18 @@ import Divider from './Divider';
     const { createLinkTaskShow } = this.state;
     const { store, disabled } = this.props;
     const issue = store.getIssue;
-    const { issueId } = issue;
+    const { issueId, typeCode } = issue;
 
     return (
       <div id="link_task">
         <Divider />
         <div className="c7n-title-wrapper">
           <div className="c7n-title-left">            
-            <span>关联问题</span>
+            <span>{typeCode === 'feature' ? '关联Feature' : '关联问题'}</span>
           </div>         
           {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
-            <Tooltip placement="topRight" title="关联问题" getPopupContainer={triggerNode => triggerNode.parentNode}>
+            <Tooltip placement="topRight" title={typeCode === 'feature' ? '创建关联Feature' : '创建关联问题'} getPopupContainer={triggerNode => triggerNode.parentNode}>
               <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => this.setState({ createLinkTaskShow: true })}>
                 <Icon type="playlist_add icon" />
               </Button>
@@ -94,7 +97,9 @@ import Divider from './Divider';
         {
           createLinkTaskShow ? (
             <CreateLinkTask
+              issue={issue}
               issueId={issueId}
+              issueType={typeCode}
               visible={createLinkTaskShow}
               onCancel={() => this.setState({ createLinkTaskShow: false })}
               onOk={this.handleCreateLinkIssue.bind(this)}

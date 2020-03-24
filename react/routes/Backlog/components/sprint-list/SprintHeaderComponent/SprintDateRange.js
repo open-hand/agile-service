@@ -1,10 +1,11 @@
 import React, { Component, createRef } from 'react';
 import moment from 'moment';
 import { observer } from 'mobx-react';
-import { DatePicker } from 'choerodon-ui';
+import { DatePicker, message } from 'choerodon-ui';
 import TextEditToggle from '@/components/TextEditToggle';
-import { getProjectId } from '@/common/utils';
+import { getProjectId, catchFailed } from '@/common/utils';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
+import IsInProgramStore from '../../../../../stores/common/program/IsInProgramStore';
 
 const { Text, Edit } = TextEditToggle;
 
@@ -25,31 +26,39 @@ const { Text, Edit } = TextEditToggle;
       sprintId: data.sprintId,
       [type]: date,
     };
-    BacklogStore.axiosUpdateSprint(req).then((res) => {
+    BacklogStore.axiosUpdateSprint(req, IsInProgramStore.isShowFeature).then(res => catchFailed(res)).then((res) => {
       BacklogStore.updateSprint(sprintId, {
         objectVersionNumber: res.objectVersionNumber,
         startDate: res.startDate,
         endDate: res.endDate,
-      });     
+      });
+      // 在项目群的子项目 刷新冲刺限制列表
+      if (IsInProgramStore.isShowFeature) {
+        IsInProgramStore.loadPiInfoAndSprint();
+      }
     }).catch((error) => {
+      message.error(error);
     });
   };
 
+  // console.log('data', data);
   render() {
     const {
-      data: { statusCode, startDate, endDate }, disabled,
+      data: {
+        statusCode, startDate, endDate, sprintId,
+      }, disabled,
     } = this.props;
-    return statusCode === 'started' ? (
+    return (IsInProgramStore.isShowFeature || statusCode === 'started') ? (
       <div
         className="c7n-backlog-sprintData"
         style={{
           display: 'flex',
-          alignItems: 'center', 
+          alignItems: 'center',
         }}
         role="none"
       >
-        <TextEditToggle          
-          disabled={disabled}
+        <TextEditToggle
+          disabled={disabled || statusCode === 'started'}
           saveRef={this.startDateEdit}
         >
           <Text>
@@ -63,35 +72,60 @@ const { Text, Edit } = TextEditToggle;
           <Edit>
             {({ width }) => (
               <DatePicker
-                autoFocus   
+                autoFocus
                 style={{ width, height: 32 }}
                 allowClear={false}
-                defaultOpen         
+                defaultOpen
                 defaultValue={startDate ? moment(startDate, 'YYYY-MM-DD HH-mm-ss') : ''}
-                disabledDate={endDate ? current => current > moment(endDate, 'YYYY-MM-DD HH:mm:ss') : ''}
+                disabledDate={endDate ? (current) => {
+                  // return true;
+                  const endDateFormat = moment(endDate).format('YYYY-MM-DD HH:mm:ss');
+                  if (current > moment(endDateFormat, 'YYYY-MM-DD HH:mm:ss')) {
+                    return true;
+                  } else if (IsInProgramStore.isShowFeature) { // 项目群启用 
+                    const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
+                    // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
+                    let isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
+                      || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
+                      || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
+                    // eslint-disable-next-line no-plusplus
+                    if (!isBan) {
+                      const minTime = IsInProgramStore.findDateMinRange(endDateFormat, sprintId);
+                      if (moment(currentDateFormat).isBefore(minTime)) {
+                        isBan = true;
+                      }
+                    }
+
+                    return isBan;
+                  } else {
+                    return false;
+                  }
+
+                  // if(current > moment(endDate, 'YYYY-MM-DD HH:mm:ss'))
+                } : ''}
                 format="YYYY-MM-DD HH:mm:ss"
                 showTime
                 onChange={(date, dateString) => {
-                  this.handleUpdateDate('startDate', dateString);                  
+                  this.handleUpdateDate('startDate', dateString);
                 }}
                 onOpenChange={(open) => {
                   if (!open) {
                     this.startDateEdit.current.leaveEditing();
                   }
-                }}   
+                }}
               />
             )}
-            
+
           </Edit>
-        </TextEditToggle>        
+        </TextEditToggle>
         <p>~</p>
-        <TextEditToggle          
+        <TextEditToggle
           disabled={disabled}
           saveRef={this.endDateEdit}
         >
           <Text>
-            <div             
-              className="c7n-backlog-sprintDataItem"          
+            <div
+              className="c7n-backlog-sprintDataItem"
             >
               {endDate ? moment(endDate, 'YYYY-MM-DD HH:mm:ss').format('YYYY年MM月DD日 HH:mm:ss') : '无'}
             </div>
@@ -99,26 +133,49 @@ const { Text, Edit } = TextEditToggle;
           <Edit>
             {({ width }) => (
               <DatePicker
-                autoFocus     
+                autoFocus
                 style={{ width, height: 32 }}
                 allowClear={false}
-                defaultOpen         
+                defaultOpen
                 defaultValue={endDate ? moment(endDate, 'YYYY-MM-DD HH-mm-ss') : ''}
-                disabledDate={startDate ? current => current < moment(startDate, 'YYYY-MM-DD HH:mm:ss') : ''}         
+                disabledDate={startDate ? (current) => {
+                  const startDateFormat = moment(startDate).format('YYYY-MM-DD HH:mm:ss');
+
+                  if (current < moment(startDate, 'YYYY-MM-DD HH:mm:ss')) {
+                    return true;
+                  } else if (IsInProgramStore.isShowFeature) { // 项目群启用
+                    const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
+                    // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
+                    let isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
+                      || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
+                      || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
+                    // eslint-disable-next-line no-plusplus
+                    if (!isBan) {
+                      const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
+                      if (moment(currentDateFormat).isAfter(maxTime)) {
+                        isBan = true;
+                      }
+                    }
+                    return isBan;
+                  } else {
+                    return false;
+                  }
+                } : ''}
                 format="YYYY-MM-DD HH:mm:ss"
                 showTime
                 onChange={(date, dateString) => {
-                  this.handleUpdateDate('endDate', dateString);           
+                  this.handleUpdateDate('endDate', dateString);
                 }}
+                d
                 onOpenChange={(open) => {
                   if (!open) {
                     this.endDateEdit.current.leaveEditing();
                   }
-                }}                
+                }}
               />
-            )}            
+            )}
           </Edit>
-        </TextEditToggle>            
+        </TextEditToggle>
       </div>
     ) : null;
   }

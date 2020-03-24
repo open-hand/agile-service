@@ -3,26 +3,31 @@ import { observer } from 'mobx-react';
 import {
   TabPage as Page, Header, Breadcrumb, Content,
 } from '@choerodon/boot';
-import { Button, Spin, Icon } from 'choerodon-ui';
+import {
+  Button, Spin, Icon, Tooltip,
+} from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import { getCurrentPiInfo, getCurrentPiAllSprint } from '@/api/SprintApi.js';
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';
 import IssueDetail from '../components/issue-detail';
 import CreateIssue from '../components/create-issue';
-import CreateSprint from '../components/create-sprint';
+import CreateSprint, { CreateCurrentPiSprint } from '../components/create-sprint';
 import SprintList from '../components/sprint-list';
 import ShowPlanSprint from '../components/show-plan-sprint';
 import './BacklogHome.less';
 
 const createSprintKey = Modal.key();
+const createCurrentPiSprintKey = Modal.key();
 
 @observer
-class BacklogHome extends Component { 
+class BacklogHome extends Component {
   componentDidMount() {
     const { BacklogStore } = this.props;
     BacklogStore.refresh();
+    IsInProgramStore.loadIsShowFeature().then(res => res && IsInProgramStore.loadPiInfoAndSprint());
   }
 
   refresh = (...args) => {
@@ -70,6 +75,35 @@ class BacklogHome extends Component {
     });
   };
 
+  /**
+   * 当前PI下创建冲刺
+   */
+  handleCreateCurrentPiSprint = () => {
+    const { BacklogStore } = this.props;
+    const artInfo = IsInProgramStore.getArtInfo;
+    const onCreate = (sprint) => {
+      BacklogStore.setCreatedSprint(sprint.sprintId);
+      this.refresh();
+    };
+    const { programId, id: artId } = artInfo;
+    // getCurrentPiInfo(programId, artId).then((res) => {
+    //   getCurrentPiAllSprint(res.id).then((sprints) => {
+
+    //   });
+    // });
+    const piInfo = IsInProgramStore.getPiInfo;
+    const sprints = IsInProgramStore.getSprints;
+    Modal.open({
+      drawer: true,
+      style: {
+        width: 340,
+      },
+      key: createCurrentPiSprintKey,
+      title: '当前PI下创建冲刺',
+      children: <CreateCurrentPiSprint onCreate={onCreate} PiName={`${piInfo.code}-${piInfo.name}`} sprints={sprints} piId={piInfo.id} />,
+    });
+  };
+
   onQuickSearchChange = (onlyMeChecked, onlyStoryChecked, moreChecked) => {
     const { BacklogStore } = this.props;
     BacklogStore.setQuickFilters(onlyMeChecked, onlyStoryChecked, moreChecked);
@@ -101,7 +135,7 @@ class BacklogHome extends Component {
   render() {
     const { BacklogStore } = this.props;
     const arr = BacklogStore.getSprintData;
-    const { isInProgram } = IsInProgramStore;
+    const { isInProgram, isShowFeature } = IsInProgramStore;
     return (
       <Fragment>
         <Header title="待办事项">
@@ -119,6 +153,23 @@ class BacklogHome extends Component {
               创建冲刺
             </Button>
           )}
+          {isShowFeature && !IsInProgramStore.getPiInfo.id
+            && (
+              <Tooltip title="无活跃的PI">
+                <Button className="leftBtn" functyp="flat" onClick={this.handleCreateCurrentPiSprint} disabled>
+                  <Icon type="playlist_add icon" />
+                  当前PI下创建冲刺
+                </Button>
+              </Tooltip>
+
+            )}
+          {isShowFeature && IsInProgramStore.getPiInfo.id
+            && (
+              <Button className="leftBtn" functyp="flat" onClick={this.handleCreateCurrentPiSprint}>
+                <Icon type="playlist_add icon" />
+                当前PI下创建冲刺
+              </Button>
+            )}
           {isInProgram && arr.length && arr.length > 1
             ? <ShowPlanSprint /> : null
           }
@@ -155,7 +206,7 @@ class BacklogHome extends Component {
               >
                 版本
               </p>
-              {!isInProgram && (
+              {!isShowFeature && (
                 <p
                   style={{
                     marginTop: 12,
@@ -168,7 +219,7 @@ class BacklogHome extends Component {
                   史诗
                 </p>
               )}
-              {isInProgram && (
+              {isShowFeature && (
                 <p
                   style={{
                     marginTop: 12,
@@ -190,7 +241,7 @@ class BacklogHome extends Component {
                 this.IssueDetail.refreshIssueDetail();
               }}
             />
-            {!isInProgram && (
+            {!isShowFeature && (
               <Epic
                 refresh={this.refresh}
                 visible={BacklogStore.getCurrentVisible}
@@ -199,21 +250,23 @@ class BacklogHome extends Component {
                 }}
               />
             )}
-            <Feature
-              refresh={this.refresh}
-              isInProgram={isInProgram}
-              visible={BacklogStore.getCurrentVisible}
-              issueRefresh={() => {
-                this.IssueDetail.refreshIssueDetail();
-              }}
-            />
+            {isShowFeature ? (
+              <Feature
+                refresh={this.refresh}
+                isInProgram={isShowFeature}
+                visible={BacklogStore.getCurrentVisible}
+                issueRefresh={() => {
+                  this.IssueDetail.refreshIssueDetail();
+                }}
+              />
+            ) : null}
             <Spin spinning={BacklogStore.getSpinIf}>
               <div className="c7n-backlog-content">
-                <SprintList />                
+                <SprintList />
               </div>
             </Spin>
-            <CreateIssue />            
-            <IssueDetail             
+            <CreateIssue />
+            <IssueDetail
               refresh={() => this.refresh(false)}
               onRef={(ref) => {
                 this.IssueDetail = ref;

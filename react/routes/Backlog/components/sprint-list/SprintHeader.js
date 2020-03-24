@@ -25,12 +25,12 @@ function BacklogHeader({ data }) {
           type={expand ? 'baseline-arrow_drop_down' : 'baseline-arrow_right'}
           role="none"
           onClick={() => { BacklogStore.expandSprint(sprintId, !expand); }}
-        />      
+        />
         <SprintName data={data} />
         <SprintVisibleIssue
           data={data}
-        />  
-      </div>      
+        />
+      </div>
     </div>
   );
 }
@@ -53,7 +53,7 @@ function SprintHeader({ data }) {
           <SprintVisibleIssue
             data={data}
           />
-          <SprintStatus          
+          <SprintStatus
             data={data}
           />
           <SprintButton
@@ -70,7 +70,7 @@ function SprintHeader({ data }) {
         </div>
         <div className={`${prefix}-bottom`}>
           <SprintDateRange
-            disabled={piId}
+            disabled={piId || data.sprintType === 'ip'} // data.sprintType 用于禁止ip冲刺修改时间
             data={data}
           />
           <SprintGoal

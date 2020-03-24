@@ -11,7 +11,10 @@ import { sort } from '@/api/StoryMapApi';
 import { getProjectId } from '@/common/utils';
 
 const { AppState } = stores;
-
+function randomItem(array) {
+  const index = Math.floor(Math.random() * (array.length - 1));
+  return array[index];
+}
 @store('BacklogStore')
 class BacklogStore {
   @observable createdSprint = '';
@@ -174,8 +177,8 @@ class BacklogStore {
     return data;
   }
 
-  axiosDeleteSprint(id) {
-    return axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${id}`);
+  axiosDeleteSprint(id, isCurrentPi = false) {
+    return axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${isCurrentPi ? 'sub_project/' : ''}${id}`);
   }
 
   axiosGetColorLookupValue() {
@@ -188,6 +191,16 @@ class BacklogStore {
 
   @action setColorLookupValue(data) {
     this.colorLookupValue = data;
+  }
+
+  @observable randomFeatureColor = {};
+
+  @action setRandomFeatureColor(featureList, colorLookupValue) {
+    featureList.forEach((feature) => {
+      if (!feature.color) {
+        this.randomFeatureColor[feature.summary] = randomItem(colorLookupValue.map(c => c.name));
+      }
+    });
   }
 
   @computed get getSprintWidth() {
@@ -208,8 +221,8 @@ class BacklogStore {
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${sprintId}`);
   }
 
-  axiosStartSprint(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/start`, data);
+  axiosStartSprint(data, isCurrentPi = false) {
+    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${isCurrentPi ? 'sub_project/' : ''}start`, data);
   }
 
   axiosCloseSprint(data) {
@@ -240,8 +253,8 @@ class BacklogStore {
     this.recent = data;
   }
 
-  axiosUpdateSprint(data) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint`, data);
+  axiosUpdateSprint(data, isCurrentPi = false) {
+    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint${isCurrentPi ? '/sub_project' : ''}`, data);
   }
 
   @action updateSprint(sprintId, newData) {
@@ -305,6 +318,11 @@ class BacklogStore {
     return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issues`, data);
   }
 
+  // 更新特性颜色
+  axiosUpdateFeatureColor(data) {
+    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/update_feature`, data);
+  }
+
   @computed get getChosenVersion() {
     return this.chosenVersion;
   }
@@ -360,7 +378,7 @@ class BacklogStore {
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version`);
   }
 
-  @action setSprintData({ backlogData, sprintData }) {    
+  @action setSprintData({ backlogData, sprintData }) {
     this.issueMap.set('0', backlogData.backLogIssue ? backlogData.backLogIssue : []);
     const { backLogIssue, backlogIssueCount } = backlogData;
     this.sprintData = sprintData.map((sprint) => {
@@ -369,9 +387,10 @@ class BacklogStore {
       // 这里只保留几个字段，省内存
       return {
         ...sprint,
-        issueSearchVOList: null,        
+        issueSearchVOList: null,
         type: 'sprint',
-        expand: true,    
+        sprintType: sprint.type, // 冲刺类型 用于辨别ip冲刺
+        expand: true,
       };
     }).concat({
       type: 'backlog',
@@ -517,7 +536,7 @@ class BacklogStore {
         this.dealWithCtrl(data, currentIndex, currentClick);
       }
     } else {
-      this.clickedOnce(sprintId, currentClick, true);
+      this.clickedOnce(currentClick, currentClick, false);
     }
   }
 
@@ -553,7 +572,7 @@ class BacklogStore {
     };
   }
 
-  @action clickedOnce(sprintId, currentClick, hasExtraKey) {
+  @action clickedOnce(sprintId, currentClick, open = true) {
     const index = this.issueMap.get(sprintId).findIndex(issue => issue.issueId === currentClick.issueId);
     this.multiSelected = observable.map();
     this.multiSelected.set(currentClick.issueId, currentClick);
@@ -561,12 +580,15 @@ class BacklogStore {
       ...currentClick,
       index,
     };
-    if (!hasExtraKey) {
+    if (open) {
       this.setClickIssueDetail(currentClick);
     }
   }
 
   @action setClickIssueDetail(data) {
+    if (!this.multiSelected.get(data.issueId)) {
+      this.multiSelected.set(data.issueId, data);
+    }
     this.clickIssueDetail = data;
     if (this.clickIssueDetail) {
       this.clickIssueId = data.issueId;
@@ -717,6 +739,12 @@ class BacklogStore {
     const updateIndex = this.epicList.findIndex(item => epic.issueId === item.issueId);
     this.epicList[updateIndex].name = epic.name;
     this.epicList[updateIndex].objectVersionNumber = epic.objectVersionNumber;
+  }
+
+  @action updateFeature(feature) {
+    const updateIndex = this.featureList.findIndex(item => feature.issueId === item.issueId);
+    this.featureList[updateIndex].name = feature.name;
+    this.featureList[updateIndex].objectVersionNumber = feature.objectVersionNumber;
   }
 
   @action moveEpic(sourceIndex, destinationIndex) {
@@ -1030,7 +1058,7 @@ class BacklogStore {
     }
   };
 
-  handleDeleteSprint = (data) => {
+  handleDeleteSprint = (data, isCurrentPi) => {
     if (data.issueSearchVOList && data.issueSearchVOList.length > 0) {
       Modal.confirm({
         width: 560,
@@ -1043,7 +1071,7 @@ class BacklogStore {
           </div>
         ),
         onOk() {
-          return this.axiosDeleteSprint(data.sprintId).then((res) => {
+          return this.axiosDeleteSprint(data.sprintId, isCurrentPi).then((res) => {
             this.refresh();
           }).catch((error) => {
           });
@@ -1053,7 +1081,7 @@ class BacklogStore {
         okType: 'danger',
       });
     } else {
-      this.axiosDeleteSprint(data.sprintId).then((res) => {
+      this.axiosDeleteSprint(data.sprintId, isCurrentPi).then((res) => {
         this.refresh();
       }).catch((error) => {
       });

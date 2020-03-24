@@ -41,31 +41,12 @@ const { Text, Edit } = TextEditToggle;
     } = issue;
     const typeId = issueTypeVO.id;
     loadStatus(statusId, issueId, typeId, applyType, projectId).then((res) => {
-      if (applyType === 'program') {
-        if (activePi && activePi.statusCode === 'doing') {
-          this.setState({
-            originStatus: res,
-            selectLoading: false,
-          });
-        } else if (activePi && activePi.statusCode === 'todo') {
-          this.setState({
-            originStatus: res.filter(item => item.statusVO && ['prepare', 'todo'].indexOf(item.statusVO.type) !== -1),
-            selectLoading: false,
-          });
-        } else {
-          this.setState({
-            originStatus: res.filter(item => item.statusVO && ['prepare'].indexOf(item.statusVO.type) !== -1),
-            selectLoading: false,
-          });
-        } 
-      } else {
-        this.setState({
-          originStatus: res,
-          selectLoading: false,
-        });
-      }
+      this.setState({
+        originStatus: res,
+        selectLoading: false,
+      });
     });
-  };
+  }
 
   updateIssueStatus = () => {
     const { transformId } = this.state;
@@ -101,7 +82,7 @@ const { Text, Edit } = TextEditToggle;
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
           <span className="c7n-property">
-            {'状态'}
+            状态
           </span>
         </div>
         <div className="c7n-value-wrapper">
@@ -128,7 +109,7 @@ const { Text, Edit } = TextEditToggle;
                   </div>
                 ) : (
                   <div>
-                    {'无'}
+                    无
                   </div>
                 )
               }

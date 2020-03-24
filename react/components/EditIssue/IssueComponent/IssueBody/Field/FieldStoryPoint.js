@@ -9,7 +9,7 @@ import SelectNumber from '../../../../SelectNumber';
 const { Text, Edit } = TextEditToggle;
 @inject('AppState')
 @observer class FieldStoryPoint extends Component {
-  updateIssueField = (value) => {  
+  updateIssueField = (value) => {
     const {
       store, onUpdate, reloadIssue, field,
     } = this.props;
@@ -22,7 +22,7 @@ const { Text, Edit } = TextEditToggle;
     const obj = {
       issueId,
       objectVersionNumber,
-      [fieldCode]: value === '' ? null : value,
+      [fieldCode === 'remainingTime' ? 'estimateTime' : fieldCode]: value === '' ? null : value,
     };
     updateIssue(obj)
       .then(() => {
@@ -39,7 +39,7 @@ const { Text, Edit } = TextEditToggle;
     const { store, field, disabled } = this.props;
     const issue = store.getIssue;
     const { fieldCode, fieldName } = field;
-    const { [fieldCode]: value } = issue;
+    const { [fieldCode]: value, typeCode } = issue;
 
     return (
       <div className="line-start mt-10" style={{ width: '100%' }}>
@@ -51,7 +51,7 @@ const { Text, Edit } = TextEditToggle;
         <div className="c7n-value-wrapper" style={{ width: '80px' }}>
           <TextEditToggle
             formKey={fieldName}
-            disabled={disabled}
+            disabled={typeCode === 'feature' || disabled}
             onSubmit={this.updateIssueField}
             originData={value ? String(value) : undefined}
           >

@@ -87,6 +87,7 @@ class CloseSprint extends Component {
 
 export default function (props) {
   Modal.open({
+    key: 'sprint',
     title: '完成冲刺',
     okText: '结束',
     cancelText: '取消',

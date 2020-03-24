@@ -38,3 +38,5 @@ yarn.lock
 **/lib/dist/
 **/lib/assets/
 **/lib/fonts/
+.yalc
+yalc.lock

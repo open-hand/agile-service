@@ -122,6 +122,8 @@ class EditIssueStore {
 
   @observable detailShow = false;
 
+  @observable wsjfDTOShow = true;
+
   @action setCreateBranchShow(data) {
     this.createBranchShow = data;
   }
@@ -224,6 +226,14 @@ class EditIssueStore {
 
   @computed get getDetailShow() {
     return this.detailShow;
+  }
+
+  @action setWSJFDTOShow(wsjfDTOShow) {
+    this.wsjfDTOShow = wsjfDTOShow;
+  }
+
+  @computed get getWSJFDTOShow() {
+    return this.wsjfDTOShow;
   }
 }
 export default EditIssueStore;

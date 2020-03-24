@@ -3,12 +3,12 @@ import React from 'react';
 import { Select } from 'choerodon-ui';
 import { find } from 'lodash';
 import { getPISelect } from '@/api/PIApi';
-import { getUsers, getUser } from '@/api/CommonApi';
+import { getUsers, getUser, getSubProjects } from '@/api/CommonApi';
 import {
   loadEpics, loadProgramEpics, loadIssueTypes, loadPriorities,
   loadComponents, loadLabels, loadVersions,
-  loadStatusList, loadIssuesInLink, loadSprints,
-
+  loadStatusList, loadIssuesInLink, loadFeaturesInLink, loadSprints, getFeaturesByEpic,
+  loadSprintsByTeam,
 } from '@/api/NewIssueApi';
 import IssueLinkType from '@/api/IssueLinkType';
 import UserHead from '../UserHead';
@@ -268,6 +268,48 @@ export default {
       </Option>
     ),
   },
+  features_in_link: {
+    props: {
+      mode: 'multiple',
+      optionLabelProp: 'showName',
+      getPopupContainer: triggerNode => triggerNode.parentNode,
+    },
+    request: ({ filter, page }, issueId) => loadFeaturesInLink(page, 20, issueId, filter),
+    render: issue => (
+      <Option
+        key={issue.featureId}
+        value={issue.featureId}
+        showName={issue.issueNum}
+      >
+        <div style={{
+          display: 'inline-flex',
+          flex: 1,
+          width: 'calc(100% - 30px)',
+          alignItems: 'center',
+          verticalAlign: 'middle',
+        }}
+        >
+          <TypeTag
+            data={issue.issueTypeVO}
+          />
+          <span style={{
+            paddingLeft: 12, paddingRight: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}
+          >
+            {issue.issueNum}
+          </span>
+          <div style={{ overflow: 'hidden', flex: 1 }}>
+            <p style={{
+              paddingRight: '25px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, maxWidth: 'unset',
+            }}
+            >
+              {issue.summary}
+            </p>
+          </div>
+        </div>
+      </Option>
+    ),
+  },
   priority: {
     props: {
       getPopupContainer: triggerNode => triggerNode.parentNode,
@@ -346,6 +388,19 @@ export default {
       </Option>
     ),
   },
+  sprint_in_project: {
+    props: {
+      getPopupContainer: triggerNode => triggerNode.parentNode,
+      filterOption,
+      loadWhenMount: true,
+    },
+    request: ({ filter, page }, { teamId, piId }) => loadSprintsByTeam(teamId, piId),
+    render: sprint => (
+      <Option key={sprint.sprintId} value={sprint.sprintId}>
+        {sprint.sprintName}
+      </Option>
+    ),
+  },
   pi: {
     props: {
       getPopupContainer: triggerNode => triggerNode.parentNode,
@@ -356,6 +411,26 @@ export default {
     render: pi => (
       <Option key={pi.id} value={pi.id}>
         {`${pi.code}-${pi.name}`}
+      </Option>
+    ),
+  },
+  feature: {
+    request: () => getFeaturesByEpic(),
+    render: item => (
+      <Option key={`${item.issueId}`} value={item.issueId}>{item.summary}</Option>
+    ),
+  }, // 特性列表
+  sub_project: {
+    props: {
+      getPopupContainer: triggerNode => triggerNode.parentNode,
+      filterOption,
+      onFilterChange: false,
+      loadWhenMount: true,
+    },
+    request: () => getSubProjects(),
+    render: pro => (
+      <Option key={pro.projectId} value={pro.projectId}>
+        {pro.projName}
       </Option>
     ),
   },

@@ -45,7 +45,7 @@ export default function useFullScreen(target, onFullScreenChange) {
       exitFullScreen();
     } else {
       const element = typeof target === 'function' ? target() : target;
-      toFullScreen(element);      
+      toFullScreen(element);
     }
   };
   useEffect(() => {

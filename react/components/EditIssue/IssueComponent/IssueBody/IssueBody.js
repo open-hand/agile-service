@@ -7,6 +7,7 @@ import IssueDes from './IssueDes';
 import IssueAttachment from './IssueAttachment';
 import IssueDoc from './IssueDoc';
 import IssueCommit from './IssueCommit';
+import SplitStory from './SplitStory';
 import IssueWorkLog from './IssueWorkLog';
 import IssueLog from './IssueLog';
 import SubTask from './SubTask';
@@ -16,11 +17,12 @@ import IssueBranch from './IssueBranch';
 import TestLink from './TestLink';
 import IssueTestExecute from './IssueTestExecute';
 import IssueDropDown from '../IssueDropDown';
+import IssuePIHistory from './IssuePIHistory';
 import { FieldStoryPoint, FieldSummary } from './Field';
 import CreateBranch from '../../../CreateBranch';
 import DailyLog from '../../../DailyLog';
+import IssueWSJF from './IssueWSJF';
 import EditIssueContext from '../../stores';
-import IsInProgramStore from '../../../../stores/common/program/IsInProgramStore';
 
 import './IssueBody.less';
 
@@ -28,7 +30,7 @@ const { TabPane } = Tabs;
 
 function IssueBody(props) {
   const {
-    prefixCls, disabled, store, applyType, 
+    prefixCls, disabled, store, 
   } = useContext(EditIssueContext);
   const issue = store.getIssue;
   const {
@@ -75,7 +77,12 @@ function IssueBody(props) {
           <IssueDetail {...props} />
           <IssueDes {...props} />
           <IssueAttachment {...props} />
-          {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1 && !IsInProgramStore.isInProgram
+          {
+            issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature' && (
+              <IssueWSJF {...props} />
+            )
+          }
+          {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueDoc {...props} /> : ''
           }
 
@@ -89,15 +96,24 @@ function IssueBody(props) {
           {issueTypeVO.typeCode && ['feature', 'sub_task'].indexOf(issueTypeVO.typeCode) === -1
             ? <TestLink {...props} /> : ''
           }
-          {issueTypeVO.typeCode && ['feature', 'sub_task'].indexOf(issueTypeVO.typeCode) === -1
-            ? (applyType === 'program' && issueTypeVO.typeCode === 'issue_epic' ? null : <IssueLink {...props} />) : ''
+          {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
+            ? <IssueLink {...props} /> : ''
           }
           {store.testExecutes.length > 0 ? <IssueTestExecute {...props} /> : null}
         </TabPane>
+        {
+          !disabled && issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
+            ? (
+              <TabPane tab="拆分的Story" key="5">
+                <SplitStory {...props} />
+              </TabPane>
+            ) : ''
+        }
         <TabPane tab="评论" key="2">
           <IssueCommit {...props} />
-        </TabPane>
+        </TabPane>       
         <TabPane tab="记录" key="3">
+          {!disabled && issueTypeVO.typeCode === 'feature' && <IssuePIHistory {...props} />}
           {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueWorkLog {...props} /> : ''
           }

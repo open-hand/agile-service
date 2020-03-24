@@ -34,9 +34,9 @@ const IssueWorkLog = observer(({
   return (
     <div id="log">
       <div className="c7n-title-wrapper">
-        <div className="c7n-title-left">        
+        <div className="c7n-title-left">
           <FormattedMessage id="issue.log" />
-        </div>        
+        </div>
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title="登记工作" getPopupContainer={triggerNode => triggerNode.parentNode}>

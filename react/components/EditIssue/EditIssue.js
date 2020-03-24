@@ -63,6 +63,8 @@ function EditIssue() {
   } = useContext(EditIssueContext);
   const container = useRef();
   const idRef = useRef();
+  // 判断是否为子项目 如果是子项目 则将史诗从左上角删掉 并将史诗栏替换成特性栏
+  const { isInProgram } = IsInProgramStore;
   const loadIssueDetail = (paramIssueId) => {
     if (FieldVersionRef.current) {
       FieldVersionRef.current.loadIssueVersions();
@@ -99,11 +101,12 @@ function EditIssue() {
       axios.all([
         loadDocs(id),
         programId ? loadDatalogsProgram(id, programId) : loadDatalogs(id),
-      ]).then(axios.spread((doc, dataLogs) => {
+        loadLinkIssues(id, 'program'),
+      ]).then(axios.spread((doc, dataLogs, linkIssues) => {
         if (idRef.current !== id) {
           return;
         }
-        store.initIssueAttribute(doc, [], dataLogs, [], {}, []);
+        store.initIssueAttribute(doc, [], dataLogs, linkIssues, {}, []);
       }));
     } else {
       axios.all([
@@ -114,7 +117,7 @@ function EditIssue() {
         loadBranchs(id),
         // getTestExecute(id),
       ])
-        .then(axios.spread((doc, workLogs, dataLogs, linkIssues, branches) => {          
+        .then(axios.spread((doc, workLogs, dataLogs, linkIssues, branches) => {
           if (idRef.current !== id) {
             return;
           }
@@ -131,7 +134,7 @@ function EditIssue() {
       container.current.removeAttribute('max-width');
     }
   };
-  useEffect(() => {    
+  useEffect(() => {
     loadIssueDetail(currentIssueId);
     if (!programId) {
       axios.all([
@@ -152,7 +155,7 @@ function EditIssue() {
         .then(axios.spread((users, permission, issueTypes) => {
           loginUserId = users.id;
           hasPermission = permission[0].approve || permission[1].approve;
-          store.setIssueTypes(issueTypes);
+          store.setIssueTypes(isInProgram && issueTypes ? issueTypes.filter(type => type.typeCode !== 'issue_epic') : issueTypes);
         }));
     }
     setQuery();
