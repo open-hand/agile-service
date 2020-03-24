@@ -18,9 +18,9 @@ function stopChooseBetween(time, start, end) {
   const startDate = moment(start);
   const endDate = moment(end);
   const endDateZero = moment(end).hour(0).minute(0).second(0);
-  if (moment(time).isBetween(startDate, endDateZero, null, '[]')) {
+  if (moment(time).isBetween(startDate, endDateZero, null, '()')) {
     return false;
-  } else if (moment(time).isBetween(endDateZero, endDate, null, '[]')) {
+  } else if (moment(time).isBetween(endDateZero, endDate, null, '()')) {
     return false;
   }
   return true;
@@ -239,7 +239,6 @@ export function CreateCurrentPiSprint({
           }
           if (isBan && dataSet.current.get('startDate')) {
             const maxTime = findDateMaxRange(dataSet.current.get('startDate').format('YYYY-MM-DD HH:mm:ss'));
-
             if (moment(currentDateFormat).isAfter(maxTime)) {
               isBan = false;
             }

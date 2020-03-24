@@ -68,7 +68,7 @@ function SprintButton({
       >
         开启冲刺
       </p>
-      {piId
+      {(piId || data.sprintType === 'ip') // ip冲刺不可删除
         ? '' : (
           <Dropdown overlay={menu} trigger={['click']}>
             <Icon style={{ cursor: 'pointer', marginRight: 15 }} type="more_vert" />
