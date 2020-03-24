@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Icon } from 'choerodon-ui';
+import moment from 'moment';
 import './HistoryItem.less';
 
 const prefix = 'c7n-agile-pi-history-item';
 function HistoryItem({ data, logo }) {
   const [expand, setExpand] = useState(false);
   const { name, code, teamSprintVOS } = data;
+  const date = data.actualStartDate || data.startDate;
   const renderTeam = team => (
     <div className={`${prefix}-team`}>
       <div className={`${prefix}-team-name`}>
@@ -32,7 +34,7 @@ function HistoryItem({ data, logo }) {
             {name}
           </div>
           <div className={`${prefix}-date`}>
-            {/* {date} */}
+            {date && moment(date).format('YYYY-MM-DD')}
           </div>
         </div>
         <div className={`${prefix}-content-bottom`}>
