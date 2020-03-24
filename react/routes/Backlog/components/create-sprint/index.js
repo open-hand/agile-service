@@ -101,7 +101,7 @@ export function CreateCurrentPiSprint({
     const startDate = record.get('startDate');
     const endDate = record.get('endDate');
     if (startDate && endDate && startDate.isSame(endDate)) {
-      return `${name === 'endDate' ? '结束' : '开始'}时间与${name === 'endDate' ? '开始' : '结束'}相同`;
+      return `${name === 'endDate' ? '结束' : '开始'}时间与${name === 'endDate' ? '开始' : '结束'}时间相同`;
     }
     return true;
   }
