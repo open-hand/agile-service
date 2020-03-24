@@ -28,13 +28,13 @@ function CreateField() {
     formDataSet, formatMessage, modal, AppState: { currentMenuType: { type, id, organizationId } }, schemeCode, isEdit, handleRefresh, userOptionDataSet,
   } = ctx;
   const [fieldOptions, setFieldOptions] = useState([]);
-
+  
   useEffect(() => {
     if (isEdit && formDataSet.status === 'ready') {
-      setFieldOptions(formDataSet.current.get('fieldOptions') || []);
+      setFieldOptions(formDataSet.current.get('fieldOptions'));
     }
   }, [formDataSet && formDataSet.status]);
-
+  
   const fieldTypeOptionRender = ({ text, value }) => (
     <Fragment>
       <img src={images[value]} alt="" className="issue-field-img" />
@@ -43,7 +43,7 @@ function CreateField() {
       </span>
     </Fragment>
   );
-
+  
   const contextOptionSetter = ({ record }) => {
     const contextValue = formDataSet.current.get('context');
     const currentValue = record.get('valueCode');
@@ -51,7 +51,7 @@ function CreateField() {
       disabled: currentValue === 'global' ? contextValue.length > 0 && contextValue.indexOf('global') < 0 : contextValue.indexOf('global') >= 0,
     };
   };
-
+  
   // 创建或者编辑的提交操作
   async function handleOk() {
     const { current } = formDataSet;
@@ -77,19 +77,19 @@ function CreateField() {
         return false;
       }
       obj.fieldOptions = fieldOptions.map((o) => {
-        if (obj.defaultValue && (obj.defaultValue.indexOf(String(o.tempKey)) !== -1
-          || obj.defaultValue.indexOf(String(o.id)) !== -1)) {
+        if (obj.defaultValue.indexOf(String(o.tempKey)) !== -1
+            || obj.defaultValue.indexOf(String(o.id)) !== -1) {
           return { ...o, isDefault: true };
         } else {
           return { ...o, isDefault: false };
         }
       });
-      if (obj.defaultValue && obj.defaultValue.length) {
+      if (obj.defaultValue.length) {
         obj.defaultValue = obj.defaultValue.join(',');
       }
     }
-    // 防止使用dataSet提交时 忽略filedOptions
-    formDataSet.current.set('updateFieldOptions', obj.fieldOptions);
+  
+  
     const url = isEdit ? `/agile/v1/${type}s/${id}/object_scheme_field/${current.get('id')}?organizationId=${organizationId}` : `/agile/v1/${type}s/${id}/object_scheme_field?organizationId=${organizationId}`;
     const method = isEdit ? 'put' : 'post';
     formDataSet.transport[isEdit ? 'update' : 'create'] = ({ data: [data] }) => ({
@@ -116,8 +116,8 @@ function CreateField() {
         return JSON.stringify(postData);
       },
     });
-
-    // return false;
+  
+  
     try {
       if ((await formDataSet.submit()) !== false) {
         handleRefresh();
@@ -130,27 +130,26 @@ function CreateField() {
     }
   }
   modal.handleOk(handleOk);
-
+  
   const onTreeChange = (newFieldOptions) => {
     setFieldOptions(newFieldOptions);
   };
-
+  
   const onTreeCreate = (code, value) => {
-    setFieldOptions([...fieldOptions,
-      {
-        enabled: true,
-        status: 'add',
-        code,
-        value,
-        tempKey: randomString(5),
-      }]);
+    setFieldOptions([...fieldOptions, {
+      enabled: true,
+      status: 'add',
+      code,
+      value,
+      tempKey: randomString(5),
+    }]);
   };
-
+  
   const onTreeDelete = (tempKey) => {
     const { current } = formDataSet;
     const newDefaultValue = current.get('defaultValue');
     const fieldType = current.get('fieldType');
-
+  
     if (multipleList.indexOf(fieldType) !== -1) {
       const newValue = newDefaultValue.filter(v => v !== String(tempKey));
       current.set('defaultValue', newValue);
@@ -160,23 +159,23 @@ function CreateField() {
       }
     }
   };
-
+  
   function memberOptionRender({ record }) {
     return <UserInfo name={record.get('realName') || ''} id={record.get('loginName')} avatar={record.get('imageUrl')} />;
   }
-
+  
   function loadUserData(value) {
     const userId = formDataSet.current.get('defaultValue');
     userOptionDataSet.setQueryParameter('param', value);
     userOptionDataSet.setQueryParameter('userId', userId);
     userOptionDataSet.query();
   }
-
+  
   const searchData = useMemo(() => debounce((value) => {
     loadUserData(value);
   }, 500), []);
-
-
+  
+  
   function getAttachFields() {
     const { current } = formDataSet;
     const isCheck = current.get('check');
@@ -267,25 +266,25 @@ function CreateField() {
         return (
           <Fragment>
             <Select
-              name="defaultValue"
+              name="defaultValue" 
               style={{ width: '100%', marginBottom: '20px' }}
               multiple={!(singleList.indexOf(fieldType) !== -1)}
-            >
-              {fieldOptions
-                && fieldOptions.length > 0
-                && fieldOptions.map((item) => {
-                  if (item.enabled) {
-                    return (
-                      <Option
-                        value={item.tempKey || item.id}
-                        key={item.tempKey || item.id}
-                      >
-                        {item.value}
-                      </Option>
-                    );
-                  }
-                  return [];
-                })}
+            > 
+              {fieldOptions 
+                  && fieldOptions.length > 0
+                  && fieldOptions.map((item) => {
+                    if (item.enabled) {
+                      return (
+                        <Option
+                          value={item.tempKey || item.id}
+                          key={item.tempKey || item.id}
+                        >
+                          {item.value}
+                        </Option>
+                      );
+                    }
+                    return [];
+                  })}
             </Select>
             <DragList
               title={formatMessage({ id: `field.${fieldType}` })}
@@ -304,11 +303,11 @@ function CreateField() {
           <Select
             name="defaultValue"
             searchable
-            searchMatcher="param"
+            searchMatcher={() => true}
             onBlur={(e) => { e.persist(); loadUserData(''); }}
             onInput={(e) => { e.persist(); searchData(e.target.value); }}
             optionRenderer={memberOptionRender}
-          />
+          /> 
         );
       default:
         return null;
@@ -325,7 +324,7 @@ function CreateField() {
               name="code"
             />
           )
-        }
+          }
         <TextField
           name="name"
         />
@@ -340,7 +339,7 @@ function CreateField() {
         />
         {getAttachFields()}
       </Form>
-    </div>
+    </div> 
   );
 }
 

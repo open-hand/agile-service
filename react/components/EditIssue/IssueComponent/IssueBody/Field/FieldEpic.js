@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
-import { Choerodon } from '@choerodon/boot';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { Select } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
-import { checkFeatureNameById } from '@/api/FeatureApi';
 import TextEditToggle from '../../../../TextEditToggle';
 import { loadEpics, updateIssue } from '../../../../../api/NewIssueApi';
 import { getFeaturesByEpic } from '../../../../../api/FeatureApi';
@@ -21,6 +19,7 @@ const { Text, Edit } = TextEditToggle;
       originEpics: [],
       originFeatures: [],
       selectLoading: true,
+      newEpicId: undefined,
       newFeatureId: undefined,
     };
   }
@@ -34,6 +33,9 @@ const { Text, Edit } = TextEditToggle;
   }
 
   init = () => {
+    const { store } = this.props;
+    const issue = store.getIssue;
+    const { epicId } = issue;
     loadEpics().then((res) => {
       this.setState({
         originEpics: res,
@@ -49,22 +51,12 @@ const { Text, Edit } = TextEditToggle;
     IsInProgramStore.loadIsShowFeature();
   };
 
-  updateIssueEpic = async (newEpicId, done) => {
-    // const { newEpicId } = this.state;
+  updateIssueEpic = () => {
+    const { newEpicId } = this.state;
     const { store, onUpdate, reloadIssue } = this.props;
     const issue = store.getIssue;
-    const {
-      epicId, issueId, objectVersionNumber, typeCode, 
-    } = issue;
+    const { epicId, issueId, objectVersionNumber } = issue;
     if (epicId !== newEpicId) {
-      if (typeCode === 'feature' && newEpicId) {
-        const hasSame = await checkFeatureNameById(issueId, newEpicId);
-        if (hasSame) {
-          Choerodon.prompt('史诗下已含有同名特性');
-          done();
-          return;
-        }
-      }
       const obj = {
         issueId,
         objectVersionNumber,
@@ -220,6 +212,14 @@ const { Text, Edit } = TextEditToggle;
                     getPopupContainer={() => document.getElementById('detail')}
                     allowClear
                     loading={selectLoading}
+<<<<<<< HEAD
+=======
+                    onChange={(value) => {
+                      this.setState({
+                        newEpicId: value,
+                      });
+                    }}
+>>>>>>> ecc78d3f838596bc18e2ffc2d149ff25e6f47240
                   >
                     {originEpics.map(epic => <Option key={`${epic.issueId}`} value={epic.issueId}>{epic.epicName}</Option>)}
                   </Select>

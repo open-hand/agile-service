@@ -27,7 +27,7 @@ const modelStyle = {
 function IssueLinkHome() {
   const {
     formatMessage,
-    type, id, orgId,
+    type, id, orgId, 
     issueLinkTableDs,
   } = useLinkHomeStore();
 
@@ -39,7 +39,6 @@ function IssueLinkHome() {
     const values = {
       record,
     };
-
     Modal.open({
       key: modelKey,
       title: formatMessage({ id: titleId }),
@@ -48,10 +47,12 @@ function IssueLinkHome() {
       style: modelStyle,
       okText: formatMessage({ id: okTextId }),
       cancelText: formatMessage({ id: 'cancel' }),
-      onOk: async () => issueLinkTableDs.submit().then((res) => {
-        issueLinkTableDs.query();
-        return !!res;
-      }),      
+      onOk: () => {
+        issueLinkTableDs.submit().then((res) => {
+          issueLinkTableDs.query();
+          return !!res;
+        });
+      },
       afterClose: () => {
         issueLinkTableDs.reset();
       },

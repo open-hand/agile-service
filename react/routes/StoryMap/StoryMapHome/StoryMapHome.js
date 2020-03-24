@@ -124,7 +124,7 @@ const StoryMapHome = observer(() => {
   }, [selectedIssueMap.size]);
   const { isInProgram } = IsInProgramStore; // 判断是否为项目群下的子项目 是则不显示史诗
   const isEmpty = StoryMapStore.getIsEmpty;
-  const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.getElementsByClassName('c7nagile-StoryMap')[0], onFullScreenChange);
+  const [isFullScreen, toggleFullScreen] = useFullScreen(document.getElementsByClassName('c7nagile-StoryMap')[0], onFullScreenChange);
   return (
     <Page
       className="c7nagile-StoryMap"

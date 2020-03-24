@@ -1,14 +1,11 @@
 import React, { Component, Fragment } from 'react';
-import {
-  stores, Content, axios, Choerodon, 
-} from '@choerodon/boot';
+import { stores, Content, axios } from '@choerodon/boot';
 import { map, find } from 'lodash';
 import {
   Select, Form, Input, Button, Modal, Spin,
 } from 'choerodon-ui';
 import moment from 'moment';
 import reactComponentDebounce from '@/components/DebounceComponent';
-import { checkFeatureName } from '@/api/FeatureApi';
 import { UploadButton } from '../CommonComponent';
 import {
   handleFileUpload, beforeTextUpload, validateFile, normFile, getProjectName, getProjectId,
@@ -245,13 +242,6 @@ class CreateIssue extends Component {
           featureId,
         } = values;
         const { typeCode } = originIssueTypes.find(t => t.id === typeId);
-        if (typeCode === 'feature' && epicId) {
-          const hasSame = await checkFeatureName(summary, epicId);
-          if (hasSame) {
-            Choerodon.prompt('史诗下已含有同名特性');
-            return;
-          }
-        }
         const exitComponents = originComponents;
         const componentIssueRelVOList = map(componentIssueRel
           && componentIssueRel.filter(v => v && v.trim()), (component) => {
@@ -570,12 +560,12 @@ class CreateIssue extends Component {
         );
       case 'fixVersion':
         return (
-          <FormItem label="修复的版本">
+          <FormItem label="版本">
             {getFieldDecorator('fixVersionIssueRel', {
               rules: [{ transform: value => (value ? value.toString() : value) }],
             })(
               <SelectFocusLoad
-                label="修复的版本"
+                label="版本"
                 mode="multiple"
                 loadWhenMount
                 type="version"
@@ -851,7 +841,7 @@ class CreateIssue extends Component {
                 {fields && fields.filter(field => !hiddenFields.includes(field.fieldCode)).map(field => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
                 {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}
               </div>
-              {mode !== 'feature' && !['issue_epic', 'feature'].includes(newIssueTypeCode) && <FieldIssueLinks form={form} />}
+              {mode !== 'feature' && newIssueTypeCode !== 'issue_epic' && <FieldIssueLinks form={form} />}
             </Form>
           </Spin>
         </Content>

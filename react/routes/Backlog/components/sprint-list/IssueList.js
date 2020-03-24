@@ -85,10 +85,7 @@ function IssueList({ data, sprintId }) {
                   },
                 ] : undefined}
                 sprintId={sprintId}
-                onCreate={(res) => { 
-                  BacklogStore.handleCreateIssue(res, String(sprintId));
-                  BacklogStore.refresh(false, res); // 更新侧边框 
-                }}
+                onCreate={(res) => { BacklogStore.handleCreateIssue(res, String(sprintId)); }}
               />
             </div>  
           </div>

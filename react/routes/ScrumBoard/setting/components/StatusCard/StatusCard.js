@@ -5,8 +5,7 @@ import {
   Radio, Icon, Tooltip, Modal,
 } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
-import { find } from 'lodash';
-import { stores, Permission, Choerodon } from '@choerodon/boot';
+import { stores, Permission } from '@choerodon/boot';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import { STATUS } from '@/common/Constant';
 import './StatusCard.less';
@@ -39,7 +38,7 @@ class StatusCard extends Component {
     } else {
       warning({
         title: '移除状态',
-        content: `状态 ${data.name}已在其他看板的列中，不可删除。`,
+        content: `无法移除初始状态 ${data.name}，如要移除请联系组织管理员。`,
       });
     }
   };
@@ -49,14 +48,14 @@ class StatusCard extends Component {
     const originData = JSON.parse(JSON.stringify(ScrumBoardStore.getBoardData));
     const data = JSON.parse(JSON.stringify(ScrumBoardStore.getBoardData));
     const deleteCode = propData.statusId;
-    let deleteIndex = '';    
+    let deleteIndex = '';
     for (let index = 0, len = data[data.length - 1].subStatusDTOS.length; index < len; index += 1) {
-      if (String(data[data.length - 1].subStatusDTOS[index].statusId) === String(deleteCode)) {
+      if (String(data[data.length - 1].subStatusDTOS[index].id) === String(deleteCode)) {
         deleteIndex = index;
       }
     }
     data[data.length - 1].subStatusDTOS.splice(deleteIndex, 1);
-    ScrumBoardStore.setBoardData(data);    
+    ScrumBoardStore.setBoardData(data);
     try {
       await ScrumBoardStore.axiosDeleteStatus(deleteCode);
     } catch (err) {
@@ -65,22 +64,8 @@ class StatusCard extends Component {
     refresh();
   }
 
-  /**
-   * 搜索状态code
-   * @param {*} statusId 
-   */
-  findStatusCodeByStatusId(statusId) {
-    const statusList = ScrumBoardStore.getStatusList;
-    return find(statusList, { id: statusId }).code;
-  }
-
   getDisabled = () => {
     const { columnId, data } = this.props;
-    // 待处理状态 不可删除 一直处于禁止删除状态 
-    // 根据状态code 是否为create 为create则如下
-    if (this.findStatusCodeByStatusId(data.statusId) === 'create') {
-      return [true, '初始化状态'];
-    }
     if (columnId === 0) {
       if (data.issues.length === 0) {
         if (this.getStatusNumber() <= 1) {
@@ -97,7 +82,7 @@ class StatusCard extends Component {
 
   handleSetComplete = () => {
     const {
-      data, columnId,
+      data, refresh,
     } = this.props;
     const clickData = {
       id: data.id,
@@ -110,9 +95,8 @@ class StatusCard extends Component {
     ScrumBoardStore.axiosUpdateIssueStatus(
       data.id, clickData,
     ).then((res) => {
-      ScrumBoardStore.updateStatusLocal(columnId, data, res);
+      refresh();
     }).catch((error) => {
-      Choerodon.prompt(error.message, 'error');
     });
   }
 
@@ -177,7 +161,7 @@ class StatusCard extends Component {
                 <Tooltip title="勾选后，卡片处于此状态的编号会显示为：#̶0̶0̶1̶，卡片状态视为已完成。" placement="topRight">
                   <Icon
                     type="help"
-                    className={`${prefix}-set-complete-icon`}
+                    className={`${prefix}-set-complete-icon`}                    
                   />
                 </Tooltip>
               </Radio>

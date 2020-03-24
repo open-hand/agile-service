@@ -1,14 +1,13 @@
 import { findIndex } from 'lodash';
 
 export default ({
-  type, id, defaultUserId, isEdit,
+  type, id,
 }) => ({
   autoQuery: true,
   paging: false,
   transport: {
-    read: ({ data: p, dataSet, params }) => ({
-      // defaultUserId 初始值（初次进入编辑框未修改时）
-      url: `/base/v1/${type}s/${id}/users?size=3${isEdit && p.userId === defaultUserId ? `&id=${defaultUserId}` : ''}`,
+    read: ({ data: p, dataSet }) => ({
+      url: `/base/v1/${type}s/${id}/users`,
       method: 'get',
       transformResponse: (response) => {
         try {

@@ -173,7 +173,6 @@ class Setting extends Component {
           'agile-service.board-column.createBoardColumn',
           'agile-service.board-column.updateColumnContraint',
           'agile-service.lookup-value.queryLookupValueByCode',
-          'agile-service.status.checkName',
         ]}
       >
         <Header title="配置看板">

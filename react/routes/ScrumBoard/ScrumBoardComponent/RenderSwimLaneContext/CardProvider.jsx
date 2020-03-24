@@ -1,11 +1,11 @@
 import React from 'react';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { find } from 'lodash';
 import { Draggable } from 'react-beautiful-dnd';
 import { WindowScroller, List, AutoSizer } from 'react-virtualized';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import Card from './Card';
-import { VIRTUAL_LIMIT } from './constant';
 
 @observer
 class CardProvider extends React.Component {
@@ -57,27 +57,25 @@ class CardProvider extends React.Component {
       ? data.length + 1
       : data.length;
     return (
-      data.length > VIRTUAL_LIMIT ? (
-        <WindowScroller scrollElement={document.getElementsByClassName('c7n-scrumboard')[0]}>
-          {({ height, scrollTop, registerChild }) => (         
-            <AutoSizer disableHeight>
-              {({ width }) => (
-                <div ref={el => registerChild(el)} style={{ width: '100%' }}>
-                  <List
-                    autoHeight
-                    width={width}
-                    height={height}
-                    rowCount={rowCount}
-                    rowHeight={120}
-                    rowRenderer={this.renderIssueItem.bind(this, data)}
-                    scrollTop={scrollTop}
-                  />
-                </div>
-              )}
-            </AutoSizer>
-          )}
-        </WindowScroller>
-      ) : data.map((item, index) => this.renderIssueItem(data, { index }))       
+      <WindowScroller scrollElement={document.getElementsByClassName('c7n-scrumboard')[0]}>
+        {({ height, scrollTop, registerChild }) => (         
+          <AutoSizer disableHeight>
+            {({ width }) => (
+              <div ref={el => registerChild(el)} style={{ width: '100%' }}>
+                <List
+                  autoHeight
+                  width={width}
+                  height={height}
+                  rowCount={rowCount}
+                  rowHeight={120}
+                  rowRenderer={this.renderIssueItem.bind(this, data)}
+                  scrollTop={scrollTop}
+                />
+              </div>
+            )}
+          </AutoSizer>
+        )}
+      </WindowScroller>
     ); 
   }
 }

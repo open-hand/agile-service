@@ -41,7 +41,9 @@ const Issue = withRouter(observer(() => {
    * 防止删除此页一条数据时页时停留当前页时出现无数据清空
    * @param {Boolean} isDelete  用于标记是否为删除操作
    */
-  const refresh = (isDelete = false) => dataSet.query(isDelete && dataSet.length === 1 && dataSet.totalCount > 1 ? dataSet.currentPage - 1 : dataSet.currentPage);
+  const refresh = (isDelete = false) => {
+    dataSet.query(isDelete && dataSet.length === 1 && dataSet.totalCount > 1 ? dataSet.currentPage - 1 : dataSet.currentPage);
+  };
 
   const initFilter = async () => {
     const {
@@ -370,7 +372,7 @@ const Issue = withRouter(observer(() => {
         </Button>
         <Button
           className="leftBtn"
-          icon="unarchive"
+          icon="get_app"
           funcType="flat"
           onClick={() => {
             IssueStore.setExportModalVisible(true);

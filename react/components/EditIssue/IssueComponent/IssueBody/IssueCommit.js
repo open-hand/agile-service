@@ -1,16 +1,14 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { Button, Icon } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import WYSIWYGEditor from '../../../WYSIWYGEditor';
 import Comment from '../../Component/Comment';
 import { text2Delta, beforeTextUpload } from '../../../../common/utils';
 import { createCommit } from '../../../../api/NewIssueApi';
-import EditIssueContext from '../../stores';
 
-function IssueCommit({
+const IssueCommit = observer(({
   disabled, reloadIssue, store, loginUserId, hasPermission,
-}) {
-  const { applyType } = useContext(EditIssueContext);
+}) => {
   const [addCommit, setAddCommit] = useState(false);
   const [addCommitDes, setAddCommitDes] = useState('');
   const [commentExpendAll, setCommentExpendAll] = useState(false);
@@ -97,7 +95,7 @@ function IssueCommit({
   return (
     <div id="commit" style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
       {renderCommits()}
-      {(!disabled || (disabled && applyType === 'agile')) && (
+      {!disabled && (
         <div style={{ marginTop: 'auto', marginBottom: 20 }}>
           {
             addCommit ? (
@@ -133,7 +131,7 @@ function IssueCommit({
                   cursor: 'pointer',
                 }}
               >
-                点击添加评论…
+                  点击添加评论…
               </div>
             )
           }
@@ -141,6 +139,6 @@ function IssueCommit({
       )}
     </div>
   );
-}
+});
 
-export default observer(IssueCommit);
+export default IssueCommit;
