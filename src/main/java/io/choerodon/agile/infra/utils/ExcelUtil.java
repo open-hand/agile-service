@@ -78,7 +78,7 @@ public class ExcelUtil {
 
     }
 
-    private ExcelUtil() {
+    protected ExcelUtil() {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExcelUtil.class);
@@ -99,14 +99,15 @@ public class ExcelUtil {
         }
     }
 
-    private static void initGuideSheetRemind(Workbook workbook, Sheet sheet, String remindInfo) {
+    protected static void initGuideSheetRemind(Workbook workbook, Sheet sheet, String remindInfo,
+                                             int startRow, int lastRow, int firstCol, int lastCol) {
         CellStyle ztStyle = workbook.createCellStyle();
         Font ztFont = workbook.createFont();
         ztFont.setColor(Font.COLOR_RED);
         ztStyle.setFont(ztFont);
         ztStyle.setAlignment(CellStyle.ALIGN_CENTER);
         ztStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
-        sheet.addMergedRegion(new CellRangeAddress(0, 9, 2, 4));
+        sheet.addMergedRegion(new CellRangeAddress(startRow, lastRow, firstCol, lastCol));
         Row row = sheet.getRow(0);
         Cell cell = row.createCell(2);
         cell.setCellValue(remindInfo);
@@ -133,6 +134,12 @@ public class ExcelUtil {
     }
 
     public static void createGuideSheet(Workbook wb, List<GuideSheet> guideSheets, boolean withFeature) {
+        Sheet sheet = initGuide(wb, guideSheets, withFeature);
+        initGuideSheetRemind(wb, sheet, "请至下一页，填写信息",0, 9, 2, 4);
+        initExample(wb, sheet, withFeature);
+    }
+
+    protected static Sheet initGuide(Workbook wb, List<GuideSheet> guideSheets, boolean withFeature) {
         if (withFeature) {
             GuideSheet guideSheet = new GuideSheet(1, "所属特性", "非必须项，普通应用项目加入项目群后且问题类型为故事可选，否则不可选", true);
             guideSheets.set(1, guideSheet);
@@ -148,9 +155,7 @@ public class ExcelUtil {
         }
 
         sheet.setColumnWidth(2, 3000);
-        initGuideSheetRemind(wb, sheet, "请至下一页，填写信息");
-
-        initExample(wb, sheet, withFeature);
+        return sheet;
     }
 
     private static void initExample(Workbook wb, Sheet sheet, boolean withFeature) {
