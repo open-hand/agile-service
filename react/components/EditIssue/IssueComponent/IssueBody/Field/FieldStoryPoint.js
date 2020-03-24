@@ -22,7 +22,7 @@ const { Text, Edit } = TextEditToggle;
     const obj = {
       issueId,
       objectVersionNumber,
-      [fieldCode === 'remainingTime' ? 'estimateTime' : fieldCode]: value === '' ? null : value,
+      [fieldCode]: value === '' ? null : value,
     };
     updateIssue(obj)
       .then(() => {
