@@ -376,6 +376,7 @@ class StartSprint extends Component {
                         let isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
                         || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
                         || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId); 
+
                         if (!isBan && fieldStartDate) {
                           const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
                           const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
