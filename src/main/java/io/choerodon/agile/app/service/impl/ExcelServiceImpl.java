@@ -45,8 +45,8 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final Logger LOGGER = LoggerFactory.getLogger(ExcelServiceImpl.class);
 
     protected static final String[] FIELDS_NAME =
-            {"问题类型*", "所属史诗", "模块", "冲刺", "概述*", "子任务概述(仅子任务生效)", "经办人",
-                    "优先级*", "预估时间(小时)", "版本", "故事点", "描述", "史诗名称(仅问题类型为史诗时生效)"};
+            {"问题类型*", "所属史诗", "模块", "冲刺", "概述*", "描述", "子任务概述(仅子任务生效)", "经办人",
+                    "优先级*", "预估时间(小时)", "版本", "故事点", "史诗名称(仅问题类型为史诗时生效)"};
 
     protected static final String BACKETNAME = "agile-service";
     protected static final String SUB_TASK = "sub_task";
@@ -101,9 +101,6 @@ public class ExcelServiceImpl implements ExcelService {
     @Autowired
     private PriorityService priorityService;
 
-//    @Autowired
-//    protected PlatformTransactionManager transactionManager;
-
     @Autowired
     protected BaseFeignClient baseFeignClient;
 
@@ -137,19 +134,21 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected Predefined getEpicPredefined(Long projectId) {
-        List<String> values = getEpics(projectId);
+        List<String> values = new ArrayList<>(getEpicMap(projectId).keySet());
+        values.sort(String.CASE_INSENSITIVE_ORDER);
         return new Predefined(values, 1, 500, 1, 1, "hidden_epic", 8);
     }
 
-    protected List<String> getEpics(Long projectId) {
+    protected Map<String, Long> getEpicMap(Long projectId) {
+        Map<String, Long> epicMap = new HashMap<>();
         List<EpicDataVO> epics = issueService.listEpic(projectId);
-        List<String> values = new ArrayList<>();
         epics.forEach(e -> {
-            Long id = e.getIssueId();
             String summary = e.getSummary();
-            values.add(id + ":" + summary);
+            if (ObjectUtils.isEmpty(epicMap.get(summary))) {
+                epicMap.put(summary, e.getIssueId());
+            }
         });
-        return values;
+        return epicMap;
     }
 
     protected void fillInPredefinedValues(Workbook wb, Sheet sheet, List<Predefined> predefinedList) {
@@ -181,7 +180,7 @@ public class ExcelServiceImpl implements ExcelService {
                 priorityList.add(priorityVO.getName());
             }
         }
-        predefinedList.add(new Predefined(priorityList, 1, 500, 7, 7, HIDDEN_PRIORITY, 2));
+        predefinedList.add(new Predefined(priorityList, 1, 500, 8, 8, HIDDEN_PRIORITY, 2));
 
         List<String> issueTypeList = new ArrayList<>();
         for (IssueTypeVO issueTypeVO : issueTypeVOList) {
@@ -201,7 +200,7 @@ public class ExcelServiceImpl implements ExcelService {
                 versionList.add(productVersionCommonDTO.getName());
             }
         }
-        predefinedList.add(new Predefined(versionList, 1, 500, 9, 9, HIDDEN_FIX_VERSION, 4));
+        predefinedList.add(new Predefined(versionList, 1, 500, 10, 10, HIDDEN_FIX_VERSION, 4));
 
         List<String> componentList = new ArrayList<>();
         for (IssueComponentDTO issueComponentDTO : issueComponentDTOList) {
@@ -216,7 +215,7 @@ public class ExcelServiceImpl implements ExcelService {
         predefinedList.add(new Predefined(sprintList, 1, 500, 3, 3, HIDDEN_SPRINT, 6));
 
         List<String> users = new ArrayList<>(getManagers(projectId).keySet());
-        predefinedList.add(new Predefined(users, 1, 500, 6, 6, "hidden_manager", 7));
+        predefinedList.add(new Predefined(users, 1, 500, 7, 7, "hidden_manager", 7));
         return predefinedList;
     }
 
@@ -247,14 +246,15 @@ public class ExcelServiceImpl implements ExcelService {
                                          Integer rowNum,
                                          Sheet sheet,
                                          Map<Integer, Integer> sonParentMap,
-                                         IssueTypeVO subTask) {
+                                         IssueTypeVO subTask,
+                                         Map<String, Long> theSecondColumnMap) {
         issueCreateVO.setProjectId(projectId);
         issueCreateVO.setReporterId(userId);
         Row row = sheet.getRow(rowNum);
         //经办人
         setManager(issueCreateVO, managerMap, row);
         //优先级
-        String priorityName = row.getCell(7).toString();
+        String priorityName = row.getCell(8).toString();
         Long priorityId = priorityMap.get(priorityName);
         if (ObjectUtils.isEmpty(priorityId)) {
             return false;
@@ -271,7 +271,7 @@ public class ExcelServiceImpl implements ExcelService {
 
         if (isSubTask(row)) {
             //子任务是任务类型，无需设置故事点和史诗名
-            String summary = row.getCell(5).toString();
+            String summary = row.getCell(6).toString();
             if (!StringUtils.hasText(summary)) {
                 throw new CommonException("error.summary.null");
             }
@@ -280,7 +280,7 @@ public class ExcelServiceImpl implements ExcelService {
             issueCreateVO.setIssueTypeId(subTask.getId());
             //子任务的所属史诗模块和冲刺，保持与父节点统一
             Row parentRow = sheet.getRow(sonParentMap.get(rowNum));
-            setBelongsEpic(issueCreateVO, parentRow);
+            setBelongsEpic(issueCreateVO, parentRow, theSecondColumnMap);
             setComponent(issueCreateVO, parentRow, componentMap);
             setSprint(issueCreateVO, parentRow, sprintMap);
         } else {
@@ -303,12 +303,12 @@ public class ExcelServiceImpl implements ExcelService {
                 issueCreateVO.setEpicName(epicName);
             } else {
                 if ("故事".equals(typeName)) {
-                    Cell storyPointCell = row.getCell(10);
+                    Cell storyPointCell = row.getCell(11);
                     if (!isCellEmpty(storyPointCell)) {
                         issueCreateVO.setStoryPoints(new BigDecimal(storyPointCell.toString()));
                     }
                 }
-                setBelongsEpic(issueCreateVO, row);
+                setBelongsEpic(issueCreateVO, row, theSecondColumnMap);
             }
             setComponent(issueCreateVO, row, componentMap);
             setSprint(issueCreateVO, row, sprintMap);
@@ -317,7 +317,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void setDescription(IssueCreateVO issueCreateVO, Row row) {
-        Cell descriptionCell = row.getCell(11);
+        Cell descriptionCell = row.getCell(5);
         if (!isCellEmpty(descriptionCell)) {
             String description = descriptionCell.toString();
             if (StringUtils.hasText(description)) {
@@ -327,7 +327,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void setVersion(IssueCreateVO issueCreateVO, Map<String, Long> versionMap, Row row) {
-        Cell versionCell = row.getCell(9);
+        Cell versionCell = row.getCell(10);
         if (!isCellEmpty(versionCell)) {
             String version = versionCell.toString();
             if (StringUtils.hasText(version)) {
@@ -342,14 +342,14 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void setRemainTime(IssueCreateVO issueCreateVO, Row row) {
-        Cell remainTimeCell = row.getCell(8);
+        Cell remainTimeCell = row.getCell(9);
         if (!isCellEmpty(remainTimeCell)) {
             issueCreateVO.setRemainingTime(new BigDecimal(remainTimeCell.toString()));
         }
     }
 
     protected void setManager(IssueCreateVO issueCreateVO, Map<String, Long> managerMap, Row row) {
-        Cell cell = row.getCell(6);
+        Cell cell = row.getCell(7);
         if (!isCellEmpty(cell)) {
             String manager = cell.toString();
             if (StringUtils.hasText(manager)) {
@@ -381,13 +381,13 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    protected void setBelongsEpic(IssueCreateVO issueCreateVO, Row row) {
+    protected void setBelongsEpic(IssueCreateVO issueCreateVO, Row row,
+                                  Map<String, Long> theSecondColumnMap) {
         Cell cell = row.getCell(1);
         if (!isCellEmpty(cell)) {
             String belongsEpic = cell.toString();
             if (StringUtils.hasText(belongsEpic)) {
-                Long belongsEpicId = Long.valueOf(belongsEpic.split(":")[0]);
-                issueCreateVO.setEpicId(belongsEpicId);
+                issueCreateVO.setEpicId(theSecondColumnMap.get(belongsEpic));
             }
         }
     }
@@ -469,7 +469,7 @@ public class ExcelServiceImpl implements ExcelService {
                                              List<String> sprintList,
                                              int rowNum,
                                              Set<Integer> illegalRow,
-                                             List<String> theSecondColumn,
+                                             Set<String> theSecondColumn,
                                              List<String> managers) {
         Row row = sheet.getRow(rowNum);
         Map<Integer, String> errorMessage = new HashMap<>();
@@ -486,11 +486,11 @@ public class ExcelServiceImpl implements ExcelService {
 
         if (isSubTask(row)) {
             //子任务只校验子任务概述列
-            String subTaskSummary = row.getCell(5).toString();
+            String subTaskSummary = row.getCell(6).toString();
             if (illegalRow.contains(rowNum)) {
                 errorMessage.put(0, "子任务必须有父节点");
             } else if (subTaskSummary.length() > 44) {
-                errorMessage.put(5, "子任务概要过长");
+                errorMessage.put(6, "子任务概要过长");
             }
         } else {
             Cell issueTypeCell = row.getCell(0);
@@ -544,7 +544,7 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    protected void checkSecondColumn(List<String> theSecondColumn, Row row, Map<Integer, String> errorMessage) {
+    protected void checkSecondColumn(Set<String> theSecondColumn, Row row, Map<Integer, String> errorMessage) {
         Cell secondColumnCell = row.getCell(1);
         if (!isCellEmpty(secondColumnCell) && !theSecondColumn.contains(secondColumnCell.toString())) {
             errorMessage.put(1, "所属史诗输入错误");
@@ -552,73 +552,73 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void checkStoryPoint(Row row, Map<Integer, String> errorMessage) {
-        Cell storyPointCell = row.getCell(10);
+        Cell storyPointCell = row.getCell(11);
         if (!isCellEmpty(storyPointCell)) {
             String storyPointStr = storyPointCell.toString().trim();
             if (storyPointStr.length() > 3) {
-                errorMessage.put(10, "请输入正确的位数");
+                errorMessage.put(11, "请输入正确的位数");
             } else if (!NumberUtil.isNumeric(storyPointStr)) {
-                errorMessage.put(10, "请输入数字");
+                errorMessage.put(11, "请输入数字");
             } else {
                 if (NumberUtil.isInteger(storyPointStr) || NumberUtil.canParseInteger(storyPointStr)) {
                     if (storyPointStr.trim().length() > 3) {
-                        errorMessage.put(10, "最大支持3位整数");
+                        errorMessage.put(11, "最大支持3位整数");
                     } else if (storyPointStr.trim().length() > 1 && "0".equals(storyPointStr.trim().substring(0, 0))) {
-                        errorMessage.put(10, "请输入正确的整数");
+                        errorMessage.put(11, "请输入正确的整数");
                     }
                 } else if (!"0.5".equals(storyPointStr)) {
-                    errorMessage.put(10, "小数只支持0.5");
+                    errorMessage.put(11, "小数只支持0.5");
                 }
             }
         }
     }
 
     protected void checkVersion(List<String> versionList, Row row, Map<Integer, String> errorMessage) {
-        Cell versionCell = row.getCell(9);
+        Cell versionCell = row.getCell(10);
         if (!isCellEmpty(versionCell)) {
             if (!versionList.contains(versionCell.toString())) {
-                errorMessage.put(9, "请输入正确的版本");
+                errorMessage.put(10, "请输入正确的版本");
             }
         }
     }
 
     protected void checkRemainTime(Row row, Map<Integer, String> errorMessage) {
-        Cell remainTimeCell = row.getCell(8);
+        Cell remainTimeCell = row.getCell(9);
         if (!isCellEmpty(remainTimeCell)) {
             String remainTime = remainTimeCell.toString().trim();
             if (remainTime.length() > 3) {
-                errorMessage.put(8, "请输入正确的位数");
+                errorMessage.put(9, "请输入正确的位数");
             } else if (!NumberUtil.isNumeric(remainTime)) {
-                errorMessage.put(8, "请输入数字");
+                errorMessage.put(9, "请输入数字");
             } else {
                 if (NumberUtil.isInteger(remainTime) || NumberUtil.canParseInteger(remainTime)) {
                     if (remainTime.length() > 3) {
-                        errorMessage.put(8, "最大支持3位整数");
+                        errorMessage.put(9, "最大支持3位整数");
                     } else if (remainTime.length() > 1 && "0".equals(remainTime.substring(0, 0))) {
-                        errorMessage.put(8, "请输入正确的整数");
+                        errorMessage.put(9, "请输入正确的整数");
                     }
                 } else if (!"0.5".equals(remainTime)) {
-                    errorMessage.put(8, "小数只支持0.5");
+                    errorMessage.put(9, "小数只支持0.5");
                 }
             }
         }
     }
 
     protected void checkPriority(List<String> priorityList, Row row, Map<Integer, String> errorMessage) {
-        Cell priorityCell = row.getCell(7);
+        Cell priorityCell = row.getCell(8);
         if (isCellEmpty(priorityCell)) {
-            errorMessage.put(7, "优先级不能为空");
+            errorMessage.put(8, "优先级不能为空");
         } else if (!priorityList.contains(priorityCell.toString())) {
-            errorMessage.put(7, "优先级输入错误");
+            errorMessage.put(8, "优先级输入错误");
         }
     }
 
     protected void checkManager(List<String> managers, Row row, Map<Integer, String> errorMessage) {
-        Cell managerCell = row.getCell(6);
+        Cell managerCell = row.getCell(7);
         if (!isCellEmpty(managerCell)) {
             String manager = managerCell.toString();
             if (!managers.contains(manager)) {
-                errorMessage.put(6, "经办人输入错误");
+                errorMessage.put(7, "经办人输入错误");
             }
         }
     }
@@ -721,7 +721,7 @@ public class ExcelServiceImpl implements ExcelService {
             sprintMap.put(sprintDTO.getSprintName(), sprintDTO.getSprintId());
         }
         //第二列为所属史诗
-        List<String> theSecondColumn = getEpics(projectId);
+        Map<String, Long> theSecondColumnMap = getEpicMap(projectId);
 
         Map<String, Long> managerMap = getManagers(projectId);
         List<String> managers = new ArrayList<>(managerMap.keySet());
@@ -756,7 +756,7 @@ public class ExcelServiceImpl implements ExcelService {
             if (("故事".equals(typeName) || "任务".equals(typeName)) && hasSonNodes) {
                 Map<String, Object> returnMap = batchCheck(projectId, sheet, issueTypeList, priorityList,
                         versionList, issueTypeMap, componentList, sprintList, r, illegalRow, set, columnNum,
-                        theSecondColumn, managers);
+                        theSecondColumnMap.keySet(), managers);
                 Map<Integer, Map<Integer, String>> errorMaps = (Map<Integer, Map<Integer, String>>) returnMap.get("errorMap");
                 set = (Set<Integer>) returnMap.get("sonSet");
                 if (!errorMaps.isEmpty()) {
@@ -776,7 +776,7 @@ public class ExcelServiceImpl implements ExcelService {
                 }
 
                 Set<Long> insertIds = batchInsert(projectId, r, issueTypeMap, priorityMap, versionMap,
-                        userId, componentMap, sprintMap, sheet, set, managerMap, sonParentMap, subTask);
+                        userId, componentMap, sprintMap, sheet, set, managerMap, sonParentMap, subTask, theSecondColumnMap);
                 if (insertIds.isEmpty()) {
                     failCount = failCount + set.size() + 1;
                     errorRows.add(r);
@@ -788,7 +788,7 @@ public class ExcelServiceImpl implements ExcelService {
                 r = Collections.max(set);
             } else {
                 Map<Integer, String> errorMap = checkRule(projectId, sheet, issueTypeList, priorityList,
-                        versionList, componentList, sprintList, r, illegalRow, theSecondColumn, managers);
+                        versionList, componentList, sprintList, r, illegalRow, theSecondColumnMap.keySet(), managers);
                 if (!errorMap.isEmpty()) {
                     failCount++;
                     processErrorMap(errorMapList, r, row, errorMap, errorRows);
@@ -799,7 +799,8 @@ public class ExcelServiceImpl implements ExcelService {
                 }
                 IssueCreateVO issueCreateVO = new IssueCreateVO();
                 Boolean ok = setIssueCreateInfo(issueCreateVO, projectId, issueTypeMap, priorityMap,
-                        versionMap, userId, componentMap, sprintMap, managerMap, r, sheet, sonParentMap, subTask);
+                        versionMap, userId, componentMap, sprintMap, managerMap, r, sheet, sonParentMap,
+                        subTask, theSecondColumnMap);
 
                 IssueVO result = null;
                 if (ok) {
@@ -840,26 +841,19 @@ public class ExcelServiceImpl implements ExcelService {
                                     Map<String, Long> priorityMap, Map<String, Long> versionMap,
                                     Long userId, Map<String, Long> componentMap, Map<String, Long> sprintMap,
                                     Sheet sheet, Set<Integer> set, Map<String, Long> managerMap,
-                                    Map<Integer, Integer> sonParentMap, IssueTypeVO subTask) {
+                                    Map<Integer, Integer> sonParentMap, IssueTypeVO subTask,
+                                    Map<String, Long> theSecondColumnMap) {
         Set<Long> issueIds = new HashSet<>();
-        //批量插入
-//        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        // explicitly setting the transaction name is something that can only be done programmatically
-//        def.setName("batchCommit");
-//        def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-//        TransactionStatus txStatus = transactionManager.getTransaction(def);
         //插入父节点
         IssueCreateVO issueCreateVO = new IssueCreateVO();
 
         Boolean ok = setIssueCreateInfo(issueCreateVO, projectId, issueTypeMap, priorityMap,
-                versionMap, userId, componentMap, sprintMap, managerMap, rowNum, sheet, sonParentMap, subTask);
+                versionMap, userId, componentMap, sprintMap, managerMap, rowNum, sheet, sonParentMap, subTask, theSecondColumnMap);
         IssueVO parent = null;
         if (ok) {
             parent = stateMachineClientService.createIssue(issueCreateVO, APPLY_TYPE_AGILE);
         }
         if (parent == null) {
-            //回滚
-//            transactionManager.rollback(txStatus);
             return issueIds;
         }
         Long parentId = parent.getIssueId();
@@ -868,7 +862,7 @@ public class ExcelServiceImpl implements ExcelService {
         set.forEach(s -> {
             IssueCreateVO issueCreate = new IssueCreateVO();
             Boolean success = setIssueCreateInfo(issueCreate, projectId, issueTypeMap, priorityMap,
-                    versionMap, userId, componentMap, sprintMap, managerMap, s, sheet, sonParentMap, subTask);
+                    versionMap, userId, componentMap, sprintMap, managerMap, s, sheet, sonParentMap, subTask, theSecondColumnMap);
             if (success) {
                 String typeCode = issueCreate.getTypeCode();
                 if (SUB_TASK.equals(typeCode)) {
@@ -884,11 +878,8 @@ public class ExcelServiceImpl implements ExcelService {
             }
         });
         if (set.size() + 1 == issueIds.size()) {
-//            transactionManager.commit(txStatus);
             return issueIds;
         } else {
-            //有失败的数据，所有的都标记为失败，回滚数据
-//            transactionManager.rollback(txStatus);
             return new HashSet<>();
         }
     }
@@ -897,7 +888,7 @@ public class ExcelServiceImpl implements ExcelService {
                                              List<String> priorityList, List<String> versionList, Map<String, IssueTypeVO> issueTypeMap,
                                              List<String> componentList, List<String> sprintList, int rowNum,
                                              Set<Integer> illegalRow, Set<Integer> sonSet, int columnNum,
-                                             List<String> theSecondColumn, List<String> managers) {
+                                             Set<String> theSecondColumn, List<String> managers) {
         //key为row,value为错误信息
         Map<Integer, Map<Integer, String>> map = new HashMap<>();
         //key为列，value为错误详情，先判断父节点
@@ -1053,7 +1044,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     private String getTypeName(Row row) {
         Cell issueTypeCell = row.getCell(0);
-        Cell subTaskCell = row.getCell(5);
+        Cell subTaskCell = row.getCell(6);
         if (isCellEmpty(issueTypeCell) && !isCellEmpty(subTaskCell)) {
             return "子任务";
         } else if (!isCellEmpty(issueTypeCell)) {
