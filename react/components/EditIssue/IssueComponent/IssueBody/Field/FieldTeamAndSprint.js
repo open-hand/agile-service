@@ -41,9 +41,9 @@ class TeamItem extends Component {
   }
 
   componentDidMount() {
-    const { team } = this.props;
+    const { team, autoOpen } = this.props;
     // 添加后默认编辑状态
-    if (team.isTemp) {
+    if (team.isTemp || autoOpen) {
       this.ref.current.enterEditing();
     }
   }
@@ -183,6 +183,7 @@ class FieldTeamAndSprint extends Component {
     super(props);
     this.state = {
       tempTeams: [],
+      autoOpen: null,
     };
   }
 
@@ -233,6 +234,7 @@ class FieldTeamAndSprint extends Component {
         piId: issue.activePi ? issue.activePi.id : null,
       });
       this.setState({
+        autoOpen: team.id,
         tempTeams: [],
       });
       reloadIssue();
@@ -257,7 +259,7 @@ class FieldTeamAndSprint extends Component {
 
   render() {
     const { store, disabled } = this.props;
-    const { tempTeams } = this.state;
+    const { tempTeams, autoOpen } = this.state;
     const issue = store.getIssue;
     const { teamSprint } = issue;
     const teams = (teamSprint || []).map(team => ({ ...team, ...team.projectVO })).concat(tempTeams);
@@ -280,6 +282,7 @@ class FieldTeamAndSprint extends Component {
                     {...this.props}
                     onSubmit={this.handleSubmit}
                     onDelete={this.handleDelete}
+                    autoOpen={autoOpen === team.id}
                     // 已经选择的团队，过滤掉
                     optionFilter={pro => pro.projectId === team.teamProjectId || !find(teams, { teamProjectId: pro.projectId })}
                   />
