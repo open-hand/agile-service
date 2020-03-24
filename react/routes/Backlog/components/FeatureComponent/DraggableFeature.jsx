@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
-import { stores, axios, Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react';
 import classnames from 'classnames';
-import { Menu, Icon } from 'choerodon-ui';
+import { Menu, Icon, Dropdown } from 'choerodon-ui';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
-const { AppState } = stores;
 
 @observer
 class DraggableFeature extends Component {
@@ -42,7 +40,7 @@ class DraggableFeature extends Component {
   }
 
   /**
-   *每个epic 右侧下拉选择项的menu
+   *每个feature 右侧下拉选择项的menu
    *
    * @returns
    * @memberof FeatureItem
@@ -67,7 +65,7 @@ class DraggableFeature extends Component {
                     issueId: item.issueId,
                     objectVersionNumber: item.objectVersionNumber,
                   };
-                  BacklogStore.axiosUpdateIssue(inputData).then((res) => {
+                  BacklogStore.axiosUpdateFeatureColor(inputData).then((res) => {
                     BacklogStore.updateFeature(res);
                     refresh();
                   }).catch((error) => {
@@ -77,50 +75,10 @@ class DraggableFeature extends Component {
             ))}
           </div>
         </div>
-        <Menu.Divider />
-        <Menu.Item key="1">编辑名称</Menu.Item>
-        <Menu.Item key="2">查看史诗详情</Menu.Item>
       </Menu>
     );
   }
 
-  /**
-   *epic名称保存事件
-   *
-   * @param {*} e
-   * @memberof FeatureItem
-   */
-  handleSave = (e) => {
-    const { item, index, refresh } = this.props;
-    e.stopPropagation();
-    const { value } = e.target;
-    if (item && item.epicName === value) {
-      this.setState({
-        editName: false,
-      });
-    } else {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/check_epic_name?epicName=${value}`)
-        .then((checkRes) => {
-          if (checkRes) {
-            Choerodon.prompt('史诗名称重复');
-          } else {
-            this.setState({
-              editName: false,
-            });
-            const req = {
-              objectVersionNumber: item.objectVersionNumber,
-              issueId: item.issueId,
-              epicName: value,
-            };
-            BacklogStore.axiosUpdateIssue(req).then((res) => {
-              BacklogStore.updateFeature(res);
-              refresh();
-            }).catch((error) => {
-            });
-          }
-        });
-    }
-  }
 
   toggleExpand = (e) => {
     e.stopPropagation();
@@ -135,7 +93,6 @@ class DraggableFeature extends Component {
       draggableProvided, item,
     } = this.props;
     const { expand, editName } = this.state;
-
     return (
       <div
         ref={draggableProvided.innerRef}
@@ -154,23 +111,40 @@ class DraggableFeature extends Component {
             role="none"
             onClick={this.toggleExpand}
           />
+      
           <div style={{ width: '100%' }}>
             <div className="c7n-backlog-epicItemsHead">              
               <p>{item.summary}</p>
+              <Dropdown onClick={e => e.stopPropagation()} overlay={this.getmenu()} trigger={['click']}>
+                <Icon
+                  style={{
+                    width: 12,
+                    height: 12,
+                    background: item.color || BacklogStore.randomFeatureColor[item.summary],
+                    color: 'white',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    borderRadius: 2,
+                  }}
+                  type="arrow_drop_down"
+                />
+              </Dropdown>
             </div>
+         
             <div
               className="c7n-backlog-epicItemProgress"
             >
               <div
                 className="c7n-backlog-epicItemDone"
                 style={{
-                  flex: item.doneIssueCount,
+                  flex: item.successStoryPoints,
                 }}
               />
               <div
                 className="c7n-backlog-epicItemTodo"
                 style={{
-                  flex: item.issueCount ? item.issueCount - item.doneIssueCount : 1,
+                  flex: item.totalStoryPoints ? item.totalStoryPoints - item.successStoryPoints : 1,
                 }}
               />
             </div>
@@ -185,25 +159,34 @@ class DraggableFeature extends Component {
             <div role="none" onClick={this.handleClickDetail}>查看详情</div>
             <div className="c7n-backlog-epicItemParams">
               <div className="c7n-backlog-epicItemParam">
-                <p className="c7n-backlog-epicItemParamKey">问题数</p>
+                <p className="c7n-backlog-epicItemParamKey">总故事数量</p>
                 <p className="c7n-backlog-epicItemNotStoryPoint">{item.storyCount}</p>
               </div>
               <div className="c7n-backlog-epicItemParam">
-                <p className="c7n-backlog-epicItemParamKey">已完成数</p>
+                <p className="c7n-backlog-epicItemParamKey">已完成故事数</p>
                 <p className="c7n-backlog-epicItemNotStoryPoint">{item.storyCompletedCount}</p>
-              </div>
+              </div>              
               <div className="c7n-backlog-epicItemParam">
-                <p className="c7n-backlog-epicItemParamKey">未预估数</p>
-                <p className="c7n-backlog-epicItemNotStoryPoint">{item.unEstimateStoryCount}</p>
-              </div>
-              <div className="c7n-backlog-epicItemParam">
-                <p className="c7n-backlog-epicItemParamKey">故事点数</p>
+                <p className="c7n-backlog-epicItemParamKey">总故事点数</p>
                 <p
                   className="c7n-backlog-epicItemParamValue"
                   style={{ minWidth: 31, color: 'rgba(0,0,0,0.65)' }}
                 >
                   {item.totalStoryPoints}
                 </p>
+              </div>
+              <div className="c7n-backlog-epicItemParam">
+                <p className="c7n-backlog-epicItemParamKey">已完成故事点数</p>
+                <p
+                  className="c7n-backlog-epicItemParamValue"
+                  style={{ minWidth: 31, color: 'rgba(0,0,0,0.65)' }}
+                >
+                  {item.successStoryPoints}
+                </p>
+              </div>
+              <div className="c7n-backlog-epicItemParam">
+                <p className="c7n-backlog-epicItemParamKey">未预估故事数</p>
+                <p className="c7n-backlog-epicItemNotStoryPoint">{item.unEstimateStoryCount}</p>
               </div>
             </div>
           </div>

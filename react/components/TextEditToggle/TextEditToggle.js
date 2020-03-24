@@ -109,11 +109,6 @@ class TextEditToggle extends Component {
     this.setState({
       newData: null,
     });
-    const {
-      required, fieldType, onSubmit, originData,
-      formKey, form, fieldName,
-    } = this.props;
-    form.setFieldsValue({ [formKey]: originData });
   }
 
   // 提交编辑

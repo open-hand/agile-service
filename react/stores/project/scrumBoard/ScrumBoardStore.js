@@ -1,7 +1,6 @@
 import {
-  observable, action, computed, toJS, 
+  observable, action, computed, toJS,
 } from 'mobx';
-import { find } from 'lodash';
 import axios from 'axios';
 import { store, stores, Choerodon } from '@choerodon/boot';
 
@@ -9,88 +8,6 @@ const { AppState } = stores;
 
 @store('ScrumBoardStore')
 class ScrumBoardStore {
-  // issue
-  @observable issue = {};
-
-  @action setIssue(data) {
-    this.issue = data;
-  }
-
-  @computed get getIssue() {
-    return this.issue;
-  }
-
-  // fields
-  @observable fields = [];
-
-  @action setIssueFields(issue, fields) {
-    this.fields = fields;
-    this.issue = issue;
-  }
-
-  @computed get getFields() {
-    return this.fields;
-  }
-
-  // issue attribute
-  @observable doc = {};
-
-  @observable workLogs = [];
-
-  @observable dataLogs = [];
-
-  @observable linkIssues = [];
-
-  @observable branches = {};
-
-  @action setDoc(data) {
-    this.doc = data;
-  }
-
-  @computed get getDoc() {
-    return this.doc;
-  }
-
-  @action setWorkLogs(data) {
-    this.workLogs = data;
-  }
-
-  @computed get getWorkLogs() {
-    return this.workLogs.slice();
-  }
-
-  @action setDataLogs(data) {
-    this.dataLogs = data;
-  }
-
-  @computed get getDataLogs() {
-    return this.dataLogs;
-  }
-
-  @action setLinkIssues(data) {
-    this.linkIssues = data;
-  }
-
-  @computed get getLinkIssues() {
-    return this.linkIssues;
-  }
-
-  @action setBranches(data) {
-    this.branches = data;
-  }
-
-  @computed get getBranches() {
-    return this.branches;
-  }
-
-  @action initIssueAttribute(doc, workLogs, dataLogs, linkIssues, branches) {
-    this.doc = doc;
-    this.workLogs = workLogs;
-    this.dataLogs = dataLogs;
-    this.linkIssues = linkIssues;
-    this.branches = branches;
-  }
-
   @observable quickSearchObj = {
     onlyMe: false,
     onlyStory: false,
@@ -496,19 +413,6 @@ class ScrumBoardStore {
     return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issue_status/${id}`, data);
   }
 
-  @action updateStatusLocal(columnId, data, res) {
-    const status = this.findStatusById(columnId, data.statusId);
-    status.completed = res.completed;
-    status.objectVersionNumber = res.objectVersionNumber;
-  }
-
-  findStatusById(columnId, statusId) {
-    const data = this.boardData;       
-    const column = find(data, { columnId });
-    const status = find(column.subStatusDTOS, { statusId });
-    return status;
-  }
-
   axiosCheckRepeatName(name) {
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board_column/check?statusName=${name}`);
   }
@@ -567,7 +471,6 @@ class ScrumBoardStore {
       assigneeFilterIds: [],
     };
     this.currentSprintExist = false;
-    this.calanderCouldUse = false;
   }
 
   @computed get getDayRemain() {

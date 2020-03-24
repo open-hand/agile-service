@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { stores, axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '../common/utils';
 
@@ -33,4 +34,12 @@ export async function checkPermissionProject(service) {
 
 export function getProjectsInProgram() {
   return axios.get(`base/v1/organizations/${getOrganizationId()}/projects/${getProjectId()}/program`);
+}
+
+export function getProjectIsShowFeature() { // /v1/projects/1551/art/isArtDoding
+  return axios.get(`agile/v1/projects/${getProjectId()}/art/isArtDoding`);
+}
+
+export function getSubProjects(only_select_enable = false) {
+  return axios.get(`/base/v1/organizations/${getOrganizationId()}/project_relations/${getProjectId()}/${getProjectId()}?only_select_enable=${only_select_enable || false}`);
 }

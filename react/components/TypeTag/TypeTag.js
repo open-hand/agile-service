@@ -3,7 +3,7 @@ import { Icon } from 'choerodon-ui';
 import './TypeTag.less';
 
 const TypeTag = ({
-  data, showName, style, featureType,
+  data, showName, style, featureType, iconSize,
 }) => {
   let { colour, name = '' } = data || {};
   if (featureType === 'business') {
@@ -17,7 +17,7 @@ const TypeTag = ({
     <div className="c7n-typeTag" style={style}>
       <Icon
         style={{
-          fontSize: '26px',
+          fontSize: iconSize || '26px',
           color: colour || '#fab614',
         }}
         type={data ? data.icon : 'help'}

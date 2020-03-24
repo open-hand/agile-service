@@ -4,7 +4,7 @@ import { Tooltip } from 'choerodon-ui';
 function Priority({ priorityVO }) {
   return (
     <Tooltip>
-      <div
+      <p
         style={{
           background: `${priorityVO ? priorityVO.colour : '#FFFFFF'}1F`,
           color: priorityVO ? priorityVO.colour : '#FFFFFF',
@@ -22,7 +22,7 @@ function Priority({ priorityVO }) {
         }}
       >
         {priorityVO && priorityVO.name}
-      </div>
+      </p>
     </Tooltip>
   );
 }

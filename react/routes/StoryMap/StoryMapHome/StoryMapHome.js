@@ -9,7 +9,8 @@ import { Button } from 'choerodon-ui';
 import { DragDropContextProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { observer } from 'mobx-react-lite';
-import HeaderLine from '@/common/Headerline';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import HeaderLine from '@/components/HeaderLine';
 import Minimap from '../../../components/MiniMap';
 import Empty from '../../../components/Empty';
 import epicPic from '../../../assets/image/emptyStory.svg';
@@ -121,9 +122,9 @@ const StoryMapHome = observer(() => {
       ref.current.source.style.width = '';
     }
   }, [selectedIssueMap.size]);
-
+  const { isInProgram } = IsInProgramStore; // 判断是否为项目群下的子项目 是则不显示史诗
   const isEmpty = StoryMapStore.getIsEmpty;
-  const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.getElementsByClassName('c7nagile-StoryMap')[0], onFullScreenChange);
+  const [isFullScreen, toggleFullScreen] = useFullScreen(document.getElementsByClassName('c7nagile-StoryMap')[0], onFullScreenChange);
   return (
     <Page
       className="c7nagile-StoryMap"
@@ -148,7 +149,7 @@ const StoryMapHome = observer(() => {
         >
             刷新
         </Button> */}
-        {isEmpty && !loading ? <Button onClick={handleCreateEpicClick} icon="playlist_add">创建史诗</Button> : null}
+        {!isInProgram && isEmpty && !loading ? <Button onClick={handleCreateEpicClick} icon="playlist_add">创建史诗</Button> : null}
         {!StoryMapStore.isFullScreen && (
           <Button
             icon="view_module"

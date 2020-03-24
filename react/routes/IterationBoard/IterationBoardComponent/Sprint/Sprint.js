@@ -18,12 +18,15 @@ class Sprint extends Component {
     };
   }
 
-  componentDidMount() {
+  componentWillReceiveProps(nextProps) {
     const { sprintId } = this.props;
-    this.setState({
-      sprintId,
-    });
-    this.loadSprintInfo(sprintId);
+    if (nextProps.sprintId !== sprintId) {
+      const newSprintId = nextProps.sprintId;
+      this.setState({
+        sprintId: newSprintId,
+      });
+      this.loadSprintInfo(newSprintId);
+    }
   }
 
   loadSprintInfo(sprintId) {

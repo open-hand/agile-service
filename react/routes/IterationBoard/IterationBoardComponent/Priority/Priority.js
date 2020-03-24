@@ -19,12 +19,15 @@ class Priority extends Component {
     };
   }
 
-  componentDidMount() {
+  componentWillReceiveProps(nextProps) {
     const { sprintId } = this.props;
-    this.setState({
-      sprintId,
-    });
-    this.loadPriorityInfo(sprintId);
+    if (nextProps.sprintId !== sprintId) {
+      const newSprintId = nextProps.sprintId;
+      this.setState({
+        sprintId: newSprintId,
+      });
+      this.loadPriorityInfo(newSprintId);
+    }
   }
 
   loadPriorityInfo(sprintId) {

@@ -7,8 +7,8 @@ import BacklogStore from '@/stores/project/backlog/BacklogStore';
 function ShowPlanSprint() {
   return (
     <Checkbox
-      className="primary"
-      style={{ marginLeft: 20 }}
+      // className="primary"
+      style={{ marginLeft: 20, color: 'black' }}
       checked={BacklogStore.showPlanSprint}
       onChange={(e) => {
         BacklogStore.setShowPlanSprint(e.target.checked);

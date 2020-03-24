@@ -20,12 +20,15 @@ class Status extends Component {
     };
   }
 
-  componentDidMount() {
+  componentWillReceiveProps(nextProps) {
     const { sprintId } = this.props;
-    this.setState({
-      sprintId,
-    });
-    this.loadStatus(sprintId);
+    if (nextProps.sprintId !== sprintId) {
+      const newSprintId = nextProps.sprintId;
+      this.setState({
+        sprintId: newSprintId,
+      });
+      this.loadStatus(newSprintId);
+    }
   }
 
   getOption() {

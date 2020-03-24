@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { Input } from 'choerodon-ui';
-import { Choerodon } from '@choerodon/boot';
 import { injectIntl } from 'react-intl';
 import TextEditToggle from '../../../../TextEditToggle';
 import { updateIssue } from '../../../../../api/NewIssueApi';
@@ -53,10 +52,7 @@ const { TextArea } = Input;
       }
       if (obj) {
         updateIssue(obj)
-          .then((res) => {
-            if (res.failed && res.code === 'error.epic.duplicate.feature.summary') {
-              Choerodon.prompt('史诗下有相同的特性概要');
-            }
+          .then(() => {
             if (onUpdate) {
               onUpdate();
             }

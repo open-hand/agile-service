@@ -12,36 +12,36 @@ import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import './IssueItem.less';
 
 const prefix = 'c7n-backlog-issue';
-function DraggingNum({ num }) {
-  return (
-    <div style={{
-      position: 'absolute',
-      width: 20,
-      height: 20,
-      background: 'red',
-      textAlign: 'center',
-      color: 'white',
-      borderRadius: '50%',
-      top: 0,
-      left: 0,
-    }}
-    >
-      {num}
-    </div>
-  );
-}
 function getStyle({ draggableStyle, virtualStyle, isDragging }) {
+  // If you don't want any spacing between your items
+  // then you could just return this.
+  // I do a little bit of magic to have some nice visual space
+  // between the row items
   const combined = {
     ...virtualStyle,
     ...draggableStyle,
   };
+
+  // Being lazy: this is defined in our css file
+  const grid = 0;
+
+  // when dragging we want to use the draggable style for placement, otherwise use the virtual style
+  // const result = {
+  //   ...combined,
+  //   height: isDragging ? combined.height : combined.height - grid,
+  //   left: isDragging ? combined.left : combined.left + grid,
+  //   width: isDragging
+  //     ? draggableStyle.width
+  //     : `calc(${combined.width} - ${grid * 2}px)`,
+  //   marginBottom: grid,
+  // };
+
   return combined;
 }
-const Item = memo(({ issue, draggingNum }) => {
-  const { isInProgram } = IsInProgramStore;
+const Item = memo(({ issue }) => {
+  const { isShowFeature } = IsInProgramStore; // 由后端判断是否显示特性
   return (
     <Fragment>
-      {draggingNum && (<DraggingNum num={draggingNum} />)}
       <div
         className={`${prefix}-left`}
       >
@@ -67,7 +67,7 @@ const Item = memo(({ issue, draggingNum }) => {
             </span>
           </Tooltip>
         ) : ''}
-        {!isInProgram && issue.epicName ? (
+        {!isShowFeature && issue.epicName ? (
           <Tooltip title={`史诗: ${issue.epicName}`}>
             <span 
               className={`${prefix}-epic`}
@@ -80,10 +80,14 @@ const Item = memo(({ issue, draggingNum }) => {
             </span>
           </Tooltip>
         ) : ''}
-        {isInProgram && issue.featureName ? (
+        {isShowFeature && issue.featureName ? (
           <Tooltip title={`特性: ${issue.featureName}`}>
             <span     
-              className={`${prefix}-feature`}             
+              className={`${prefix}-feature`}   
+              style={{
+                color: issue.featureColor || issue.color,
+                border: `1px solid ${issue.featureColor || issue.color || BacklogStore.randomFeatureColor[issue.featureName]}`,
+              }}          
             >
               {issue.featureName}
             </span>
@@ -129,7 +133,6 @@ function IssueItem({
   provided, style, issue, isDragging, sprintId,
 }) {
   const selected = BacklogStore.getMultiSelected.get(issue.issueId);
-  const draggingNum = BacklogStore.getIsDragging === issue.issueId && BacklogStore.getMultiSelected.size > 0 ? BacklogStore.getMultiSelected.size : undefined; 
   return (
     <div
       role="none"
@@ -144,7 +147,7 @@ function IssueItem({
       className={`${prefix} ${selected ? `${prefix}-selected` : ''}`}
       onClick={(e) => { BacklogStore.handleIssueClick(e, issue, String(sprintId)); }}
     >
-      <Item issue={issue} draggingNum={draggingNum} />
+      <Item issue={issue} />
     </div>
   );
 }

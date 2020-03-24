@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Form, Select, Input, DatePicker, Icon,
+  Form, Select, Input, DatePicker, Icon, message,
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
@@ -9,6 +9,8 @@ import _ from 'lodash';
 import moment from 'moment';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import WorkCalendar from '@/components/WorkCalendar';
+import { catchFailed } from '@/common/utils';
+import IsInProgramStore from '../../../../stores/common/program/IsInProgramStore';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -55,10 +57,11 @@ class StartSprint extends Component {
           objectVersionNumber: data.objectVersionNumber,
           workDates,
         };
-        BacklogStore.axiosStartSprint(newData).then((res) => {
+        BacklogStore.axiosStartSprint(newData, IsInProgramStore.isShowFeature).then(res => catchFailed(res)).then((res) => {
           modal.close();
           BacklogStore.refresh();
         }).catch((error) => {
+          message.error(error);
         });
       }
     });
@@ -144,9 +147,36 @@ class StartSprint extends Component {
     });
   };
 
+  isDisabledOption(value) {
+    if (IsInProgramStore.isShowFeature) {
+      const { data: { sprintId }, form: { getFieldValue } } = this.props;
+      // const {
+      //   startDate,
+      // } = this.state;
+      // const fieldStartDate = getFieldValue('startDate') || moment();
+      // 目前 开始时间限定为当前
+      const fieldStartDate = moment();
+      const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
+      const optionDateFormat = moment(startDateFormat).add(parseInt(value, 10), 'w').format('YYYY-MM-DD HH:mm:ss');
+      // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
+      let isBan = !moment(optionDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
+        || !moment(optionDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
+        || IsInProgramStore.stopChooseBetween(optionDateFormat, sprintId); 
+      if (!isBan && fieldStartDate) {
+        const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
+        if (moment(optionDateFormat).isAfter(maxTime)) {
+          isBan = true;
+        }
+      }
+      return isBan;
+    }
+    return false;
+  }
+
   render() {
     const {
       data,
+      data: { sprintId },
       workSetting,
       sprintDetail,
       form: { getFieldDecorator, getFieldValue, setFieldsValue },
@@ -216,9 +246,9 @@ class StartSprint extends Component {
                     }}
                   >
                     <Option value="0">自定义</Option>
-                    <Option value="1">1周</Option>
-                    <Option value="2">2周</Option>
-                    <Option value="4">4周</Option>
+                    <Option value="1" disabled={this.isDisabledOption('1')}>1周</Option>
+                    <Option value="2" disabled={this.isDisabledOption('2')}>2周</Option>
+                    <Option value="4" disabled={this.isDisabledOption('4')}>4周</Option>
                   </Select>,
                 )}
               </FormItem>
@@ -232,15 +262,45 @@ class StartSprint extends Component {
                     required: true,
                     message: '开始日期是必填的',
                   }],
-                  initialValue: start ? moment(start) : undefined,
+                  initialValue: start ? (() => {
+                    if (IsInProgramStore.isShowFeature) {
+                      return moment();
+                    } else {
+                      return moment(start);
+                    }
+                  })() : undefined,
                 })(
                   <DatePicker
                     style={{ width: '100%' }}
                     label="开始日期"
                     showTime
+                    disabled={IsInProgramStore.isShowFeature}
                     format="YYYY-MM-DD HH:mm:ss"
-                    disabledDate={endDate
-                      ? current => current > moment(endDate) || current < moment().subtract(1, 'days') : current => current < moment().subtract(1, 'days')}
+                    disabledDate={(current) => {
+                      if (current < moment().subtract(1, 'days')) {
+                        return true;
+                      }
+                      if (endDate && current > moment(endDate)) {
+                        return true;
+                      }
+                      // 用于项目群下开始日期验证
+                      // if (current && IsInProgramStore.isShowFeature) {
+                      //   const fieldEndDate = getFieldValue('endDate');
+                      //   const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
+                      //   let isBan = IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
+                      //   if (!isBan && fieldEndDate) {
+                      //     const endDateFormat = moment(fieldEndDate).format('YYYY-MM-DD HH:mm:ss');
+                      //     const minTime = IsInProgramStore.findDateMinRange(endDateFormat, sprintId);
+                      //     // console.log(isBan, 'current', minTime, current);
+                      //     if (moment(currentDateFormat).isBefore(minTime)) {
+                      //       isBan = true;
+                      //     }
+                      //   }
+
+                      //   return isBan;
+                      // }
+                      return false;
+                    }}
                     onChange={(date, dateString) => {
                       setFieldsValue({
                         startDate: date,
@@ -294,16 +354,44 @@ class StartSprint extends Component {
                     style={{ width: '100%' }}
                     label="结束日期"
                     format="YYYY-MM-DD HH:mm:ss"
-                    disabled={parseInt(getFieldValue('duration'), 10) > 0}
+                    // ip冲刺时禁止结束时间
+                    disabled={sprintDetail.type === 'ip' || parseInt(getFieldValue('duration'), 10) > 0}
                     showTime
                     onChange={(date) => {
                       this.setState({
                         endDate: date,
                       });
                     }}
-                    disabledDate={startDate
-                      ? current => current < moment(startDate) || current < moment().subtract(1, 'days')
-                      : current => current < moment().subtract(1, 'days')}
+                    disabledDate={(current) => {
+                      if (current < moment().subtract(1, 'days')) {
+                        return true;
+                      }
+                      if (startDate && current < moment(startDate)) {
+                        return true;
+                      }
+
+                      if (current && IsInProgramStore.isShowFeature) {
+                        const fieldStartDate = getFieldValue('startDate');
+                        const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
+                        let isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
+                        || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
+                        || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId); 
+
+                        if (!isBan && fieldStartDate) {
+                          const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
+                          const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
+                          // console.log(isBan, 'current', maxTime, current);
+                          // console.log('******************************');
+                          if (moment(currentDateFormat).isAfter(maxTime)) {
+                            isBan = true;
+                          }
+                        }
+
+                        return isBan;
+                      }
+                      return false;
+                    }
+                    }
                   />,
                 )}
               </FormItem>
@@ -396,6 +484,7 @@ class StartSprint extends Component {
 const FormStartSprint = Form.create()(StartSprint);
 export default function (props) {
   Modal.open({
+    key: 'sprint',
     title: '开启冲刺',
     okText: '开启',
     cancelText: '取消',

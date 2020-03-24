@@ -159,6 +159,10 @@ export function updateIssue(data, projectId = AppState.currentMenuType.id) {
   return axios.put(`/agile/v1/projects/${projectId}/issues`, data);
 }
 
+export function updateIssueWSJFDTO(data, projectId = AppState.currentMenuType.id) {
+  return axios.post(`/agile/v1/projects/${projectId}/wsjf`, data);
+}
+
 export function updateStatus(transformId, issueId, objVerNum, applyType = 'agile', proId = AppState.currentMenuType.id) {
   return axios.put(`/agile/v1/projects/${proId}/issues/update_status?applyType=${applyType}&transformId=${transformId}&issueId=${issueId}&objectVersionNumber=${objVerNum}`);
 }
@@ -173,6 +177,10 @@ export function deleteIssue(issueId, projectId = AppState.currentMenuType.id) {
 
 export function deleteLink(issueLinkId, projectId = AppState.currentMenuType.id) {
   return axios.delete(`/agile/v1/projects/${projectId}/issue_links/${issueLinkId}`);
+}
+
+export function deleteFeatureLink(featureDependId, projectId = AppState.currentMenuType.id) {
+  return axios.delete(`/agile/v1/projects/${projectId}/board_depend/${featureDependId}`);
 }
 
 export function createWorklog(data, projectId = AppState.currentMenuType.id) {
@@ -248,14 +256,37 @@ export function loadIssuesInLink(page = 1, size = 10, issueId, content) {
   }
 }
 
+export function loadFeaturesInLink(page = 1, size = 10, issueId, content) {
+  const projectId = AppState.currentMenuType.id;
+  if (issueId && content) {
+    return axios.get(`/agile/v1/projects/${projectId}/issues/agile/feature?issueId=${issueId}&self=false&content=${content}&page=${page}&size=${size}`);
+  } else if (issueId && !content) {
+    return axios.get(`/agile/v1/projects/${projectId}/issues/agile/feature?issueId=${issueId}&self=false&page=${page}&size=${size}`);
+  } else if (!issueId && content) {
+    return axios.get(`/agile/v1/projects/${projectId}/issues/agile/feature?self=false&content=${content}&page=${page}&size=${size}`);
+  } else {
+    return axios.get(`/agile/v1/projects/${projectId}/issues/agile/feature?self=false&page=${page}&size=${size}`);
+  }
+}
+
 export function createLink(issueId, issueLinkCreateVOList) {
   const projectId = AppState.currentMenuType.id;
   return axios.post(`/agile/v1/projects/${projectId}/issue_links/${issueId}`, issueLinkCreateVOList);
 }
 
-export function loadLinkIssues(issueId) {
+export function createFeatureLink(data) {
   const projectId = AppState.currentMenuType.id;
-  return axios.get(`/agile/v1/projects/${projectId}/issue_links/${issueId}`);
+  return axios.post(`/agile/v1/projects/${projectId}/board_depend/batch_create_depend`, data);
+}
+
+export function loadLinkIssues(issueId, applyType = 'project') {
+  const projectId = AppState.currentMenuType.id;
+  // eslint-disable-next-line no-cond-assign
+  if (applyType === 'project') {
+    return axios.get(`/agile/v1/projects/${projectId}/issue_links/${issueId}`);
+  } else {
+    return axios.get(`/agile/v1/projects/${projectId}/board_depend/feature_depend/${issueId}`);
+  }
 }
 
 /**
@@ -367,4 +398,18 @@ export function deleteMyFilter(filterId) {
 export function getTestExecute(issueId) {
   const projectId = AppState.currentMenuType.id;
   return axios.get(`/test/v1/projects/${projectId}/defect/query_by_bug?bugId=${issueId}`);
+}
+
+// 特性列表
+export function getFeaturesByEpic() {
+  return axios.get(`/agile/v1/projects/${getProjectId()}/issues/feature/select_data?organizationId=${getOrganizationId()}`);
+}
+
+export function loadSprintsByTeam(teamId, piId) {
+  const projectId = AppState.currentMenuType.id;
+  return axios.get(`/agile/v1/projects/${projectId}/sprint/sub_project/${teamId}/list_by_team_id?piId=${piId}`);
+}
+export function getHistoryPI(issueId) {
+  const projectId = AppState.currentMenuType.id;
+  return axios.get(`/agile/v1/projects/${projectId}/pi/${issueId}/list_feature_pi_log`);
 }

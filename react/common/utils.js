@@ -284,6 +284,9 @@ export function randomWord(randomFlag, min, max) {
   }
   return str;
 }
+export const getProjectId = () => Number(AppState.currentMenuType ? AppState.currentMenuType.id : 0);
+export const getProjectName = () => (AppState.currentMenuType ? AppState.currentMenuType.name : '');
+export const getOrganizationId = () => (AppState.currentMenuType ? AppState.currentMenuType.organizationId : 0);
 export function commonLink(link) {
   const menu = AppState.currentMenuType;
   const {
@@ -305,6 +308,11 @@ export function issueLink(issueId, typeCode, issueName = null) {
     return encodeURI(`/agile/work-list/issue?type=${type}&id=${projectId}&name=${name}&organizationId=${organizationId}&paramIssueId=${issueId}&orgId=${organizationId}`);
   }
 }
+export function toIssueInProject({
+  issueId, issueNum, projectId, projectName,
+}) {
+  return encodeURI(`/agile/work-list/issue?type=${'project'}&id=${projectId}&name=${projectName}&organizationId=${getOrganizationId()}&paramIssueId=${issueId}&paramName=${issueNum}`);
+}
 export function programIssueLink(issueId, issueName, projectId) {
   const menu = AppState.currentMenuType;
   const {
@@ -319,9 +327,7 @@ export function testExecuteLink(executeId) {
   } = menu;
   return encodeURI(`/testManager/TestExecute/execute/${executeId}?type=${type}&id=${id}&name=${name}&organizationId=${organizationId}&orgId=${organizationId}`);
 }
-export const getProjectId = () => Number(AppState.currentMenuType ? AppState.currentMenuType.id : 0);
-export const getProjectName = () => (AppState.currentMenuType ? AppState.currentMenuType.name : '');
-export const getOrganizationId = () => (AppState.currentMenuType ? AppState.currentMenuType.organizationId : 0);
+
 export const getIsInProgram = () => true;
 // 选择主题
 export function configTheme({
@@ -334,7 +340,7 @@ export function configTheme({
 } = {}) {
   const renderPlaceHolder = (ommittedValues) => {
     const values = [];
-    for (const value of ommittedValues) {  
+    for (const value of ommittedValues) {
       // eslint-disable-next-line no-restricted-globals
       const target = parseNumber ? find(list, { [valueFiled]: isNaN(value) ? value : Number(value) })
         : find(list, { [valueFiled]: value });
@@ -484,4 +490,25 @@ export function getStageMap() {
 // 获取文件名后缀
 export function getFileSuffix(fileName) {
   return fileName.replace(/.+\./, '').toLowerCase();
+}
+
+export function rgbToRgba(hex, opacity) {
+  const rgb = hex.split('(')[1].split(')')[0].split(',');
+  return `rgba(${rgb[0].trim()},${rgb[1].trim()},${rgb[2].trim()},${opacity})`;
+}
+
+export function hexToRgba(hex, opacity) {
+  // eslint-disable-next-line radix
+  const RGBA = `rgba(${parseInt(`0x${hex.slice(1, 3)}`)},${parseInt(`0x${hex.slice(3, 5)}`)},${parseInt(`0x${hex.slice(5, 7)}`)},${opacity})`;
+  return RGBA;
+}
+
+// 捕获failed异常错误code
+export function catchFailed(res) {
+  const { failed } = res;
+  if (failed) {
+    throw res.message;
+  } else {
+    return res;
+  }
 }

@@ -18,7 +18,7 @@ import NoneSprint from '../ScrumBoardComponent/NoneSprint/NoneSprint';
 import '../ScrumBoardComponent/RenderSwimLaneContext/RenderSwimLaneContext.less';
 import SwimLane from '../ScrumBoardComponent/RenderSwimLaneContext/SwimLane';
 import CSSBlackMagic from '../../../components/CSSBlackMagic/CSSBlackMagic';
-import HaederLine from '../../../common/Headerline';
+import HeaderLine from '../../../components/HeaderLine';
 import CreateBoard from '../ScrumBoardComponent/CreateBoard';
 
 const { Option } = Select;
@@ -62,7 +62,7 @@ class ScrumBoardHome extends Component {
 
   componentWillUnmount() {
     this.dataConverter = null;
-    ScrumBoardStore.resetDataBeforeUnmount();
+    // ScrumBoardStore.resetDataBeforeUnmount();
   }
 
   getBoard = async () => {
@@ -328,7 +328,7 @@ class ScrumBoardHome extends Component {
                 ))
               }
           </Select>
-          <HaederLine />
+          <HeaderLine />
           <Button
             funcType="flat"
             icon="settings"

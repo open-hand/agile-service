@@ -53,6 +53,7 @@ class IssueList extends Component {
     const {
       issue, i, showAssignee, onOpen,
     } = this.props;
+    const { typeCode } = issue;
     const menu = AppState.currentMenuType;
     const { type, id: projectId, organizationId: orgId } = menu;
     const issueTypeName = this.getIssueTypeName(issue.typeCode);

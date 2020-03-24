@@ -129,7 +129,6 @@ function IssueItem({
         draggableStyle: provided.draggableProps.style,
         virtualStyle: style,
         isDragging,
-        height: 120,
       })}
     >
       <Card completed={completed} issue={issue} statusName={statusName} categoryCode={categoryCode} />

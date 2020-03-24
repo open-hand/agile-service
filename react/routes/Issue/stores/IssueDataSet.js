@@ -27,6 +27,7 @@ export default ({
     { name: 'storyPoints', type: 'string', label: '故事点' },
     { name: 'version', type: 'string', label: '版本' },
     { name: 'epic', type: 'string', label: '史诗' },
+    { name: 'feature', type: 'string', label: '特性' },
     { name: 'lastUpdateDate', type: 'string', label: '最后更新时间' },
     { name: 'issueSprintVOS', type: 'array', label: '冲刺' },    
   ],

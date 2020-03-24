@@ -17,7 +17,7 @@
   --theme: #3F51B5; //这样可以在jsx中的style使用
   height: 100%;
 
-  >div:first-child {
+  > div:first-child {
     width: 100%;
     height: 100%;
   }
@@ -85,6 +85,10 @@
       .c7n-select-label {
         color: @primary-color;
       }
+
+      .icon-arrow_drop_down {
+        color: @primary-color;
+      }
     }
 
 
@@ -111,7 +115,7 @@
         margin-top: .04rem;
         padding: 0 !important;
 
-        ul>li {
+        ul > li {
           height: .23rem;
           margin-bottom: -.01rem;
         }
@@ -189,14 +193,13 @@
       .c7n-calendar-range-picker-separator {
         display: none;
       }
-      .c7n-calendar-range-picker-input::placeholder {
-        color: rgba(0, 0, 0, 0.6)
-      }
+
       .c7n-calendar-range-picker-input:nth-of-type(1) {
         width: calc(~'100% - 33px');
         text-overflow: ellipsis;
         text-align: left;
-      }      
+      }
+
       .c7n-calendar-range-picker-input:nth-of-type(2) {
         display: none;
       }
@@ -243,7 +246,7 @@
   }
 
   .c7n-input-focused {
-    .hidden-label+.c7n-input-label-wrapper {
+    .hidden-label + .c7n-input-label-wrapper {
       .hidden-label-mixin;
     }
   }
@@ -316,6 +319,7 @@
 .c7n-modal-body {
   height: calc(100% - 1.21rem) !important;
 }
+
 .c7n-calendar {
   font-size: 16px !important;
 }
