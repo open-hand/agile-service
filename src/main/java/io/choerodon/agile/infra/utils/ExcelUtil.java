@@ -176,9 +176,9 @@ public class ExcelUtil {
         coralBackground.setFillForegroundColor(IndexedColors.CORAL.getIndex());
         coralBackground.setFillPattern(CellStyle.SOLID_FOREGROUND);
 
-        String[] data1 = {"问题类型*", "所属史诗", "模块", "冲刺", "概述*",
+        String[] data1 = {"问题类型*", "所属史诗", "模块", "冲刺", "概述*", "描述",
                 "子任务概述(仅子任务生效)", "经办人", "优先级*", "预估时间(小时)",
-                "版本", "故事点", "描述", "史诗名称(仅问题类型为史诗时生效)"};
+                "版本", "故事点", "史诗名称(仅问题类型为史诗时生效)"};
         String secondColumnValue = "可以选择史诗";
         if (withFeature) {
             data1[1] = "所属特性";
@@ -187,44 +187,44 @@ public class ExcelUtil {
         int count = 19;
         createRow(sheet, count++, subArray(data1, withFeature), blueBackground);
 
-        String[] data2 = {"史诗", "", "敏捷管理", "", "请输入史诗的概述",
-                "", "", "高", "", "", "", "请输入导入史诗类型的问题的描述信息", "导入问题"};
+        String[] data2 = {"史诗", "", "敏捷管理", "", "请输入史诗的概述", "请输入导入史诗类型的问题的描述信息",
+                "", "", "高", "", "", "", "导入问题"};
         if (withFeature) {
             data2[0] = "特性";
             data2[4] = "请输入特性的概述";
         }
         createRow(sheet, count++, subArray(data2, withFeature), null);
 
-        String[] data3 = {"故事", secondColumnValue, "敏捷管理", "sprint-1", "这里输入故事的概述：故事1",
-                "", "张三", "中", "8", "0.1", "2", "导入故事并且导入故事下的子任务", ""};
+        String[] data3 = {"故事", secondColumnValue, "敏捷管理", "sprint-1", "这里输入故事的概述：故事1", "导入故事并且导入故事下的子任务",
+                "", "张三", "中", "8", "0.1", "2", ""};
         createRow(sheet, count++, subArray(data3, withFeature), coralBackground);
 
-        String[] data4 = {"", "", "", "", "", "故事1的子任务1的概述", "李四", "高", "2", "", "", "请输入子任务1的描述信息", ""};
+        String[] data4 = {"", "", "", "", "", "请输入子任务1的描述信息", "故事1的子任务1的概述", "李四", "高", "2", "", "", ""};
         createRow(sheet, count++, subArray(data4, withFeature), coralBackground);
 
-        String[] data5 = {"", "", "", "", "", "故事1的子任务2的概述", "王五", "中", "4", "", "", "请输入子任务2的描述信息", ""};
+        String[] data5 = {"", "", "", "", "", "请输入子任务2的描述信息", "故事1的子任务2的概述", "王五", "中", "4", "", "", ""};
         createRow(sheet, count++, subArray(data5, withFeature), coralBackground);
 
-        String[] data6 = {"", "", "", "", "", "故事1的子任务3的概述……", "陈七", "低", "2", "", "", "请输入子任务3的描述信息", ""};
+        String[] data6 = {"", "", "", "", "", "请输入子任务3的描述信息", "故事1的子任务3的概述……", "陈七", "低", "2", "", "", ""};
         createRow(sheet, count++, subArray(data6, withFeature), coralBackground);
 
-        String[] data7 = {"任务", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入任务的概述：任务1", "", "王五", "中", "5", "0.2", "", "请输入任务2的描述信息", ""};
+        String[] data7 = {"任务", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入任务的概述：任务1", "请输入任务2的描述信息", "", "王五", "中", "5", "0.2", "", ""};
         createRow(sheet, count++, subArray(data7, withFeature), null);
 
-        String[] data8 = {"", "", "", "", "", "任务1的子任务4的概述", "小六", "中", "2", "0.2", "", "请输入子任务4的描述信息", ""};
+        String[] data8 = {"", "", "", "", "", "请输入子任务4的描述信息", "任务1的子任务4的概述", "小六", "中", "2", "0.2", "", ""};
         createRow(sheet, count++, subArray(data8, withFeature), null);
 
-        String[] data9 = {"", "", "", "", "", "任务1的子任务5的概述", "初八", "中", "2", "0.2", "", "请输入子任务5的描述信息", ""};
+        String[] data9 = {"", "", "", "", "", "请输入子任务5的描述信息", "任务1的子任务5的概述", "初八", "中", "2", "0.2", "", ""};
         createRow(sheet, count++, subArray(data9, withFeature), null);
 
 
-        String[] data10 = {"故事", secondColumnValue, "敏捷管理", "sprint-1", "这里输入故事的概述：故事2", "", "张三", "中", "8", "0.1", "2", "仅导入故事", ""};
+        String[] data10 = {"故事", secondColumnValue, "敏捷管理", "sprint-1", "这里输入故事的概述：故事2", "仅导入故事", "", "张三", "中", "8", "0.1", "2", ""};
         createRow(sheet, count++, subArray(data10, withFeature), coralBackground);
 
-        String[] data11 = {"任务", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入任务的概述：任务2", "", "张三", "中", "8", "0.1", "", "请输入任务2的描述信息", ""};
+        String[] data11 = {"任务", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入任务的概述：任务2", "请输入任务2的描述信息", "", "张三", "中", "8", "0.1", "", ""};
         createRow(sheet, count++, subArray(data11, withFeature), null);
 
-        String[] data12 = {"缺陷", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入缺陷的概述：缺陷1", "", "李四", "低", "0.5", "0.1", "", "请输入缺陷2的描述信息", ""};
+        String[] data12 = {"缺陷", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入缺陷的概述：缺陷1", "请输入缺陷2的描述信息", "", "李四", "低", "0.5", "0.1", "", ""};
         createRow(sheet, count++, subArray(data12, withFeature), coralBackground);
     }
 
@@ -329,7 +329,7 @@ public class ExcelUtil {
         for (int i = 0; i < columnNum; i++) {
             int width = 3500;
             //子任务名称和史诗名称两列加宽
-            if (i == 5 || i == 12) {
+            if (i == 6 || i == 12) {
                 width = 8000;
             }
             sheet.setColumnWidth(i, width);
