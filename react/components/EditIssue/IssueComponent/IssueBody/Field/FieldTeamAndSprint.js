@@ -273,7 +273,7 @@ class FieldTeamAndSprint extends Component {
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
           <span className="c7n-property">
-            负责团队
+            负责的子项目
           </span>
         </div>
         <div className="c7n-value-wrapper">
