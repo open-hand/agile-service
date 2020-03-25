@@ -4,7 +4,7 @@ import moment from 'moment';
 import './HistoryItem.less';
 
 const prefix = 'c7n-agile-pi-history-item';
-function HistoryItem({ data, logo }) {
+function HistoryItem({ data, featureType }) {
   const [expand, setExpand] = useState(false);
   const { name, code, teamSprintVOS } = data;
   const date = data.actualStartDate || data.startDate;
@@ -24,9 +24,15 @@ function HistoryItem({ data, logo }) {
   );
   return (
     <div className={prefix}>
-      <div className={`${prefix}-logo`}>
-        <Icon type={logo} />
-      </div>
+      {featureType === 'business' ? (
+        <div className={`${prefix}-logo-normal`}>
+          <Icon type="characteristic" />
+        </div>
+      ) : (
+        <div className={`${prefix}-logo`}>
+          <Icon type="agile-feature" />
+        </div>
+      )}
       <div className={`${prefix}-line`} />
       <div className={`${prefix}-content`}>
         <div className={`${prefix}-content-header`}>

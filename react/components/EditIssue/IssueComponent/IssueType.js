@@ -108,6 +108,7 @@ const IssueType = observer(({
               style={{ margin: 0 }}
               data={t}
               showName
+              featureType={t.featureType}
             />
           </Menu.Item>
         ))
