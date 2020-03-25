@@ -1,22 +1,25 @@
 import React from 'react';
 import Animate from 'choerodon-ui/lib/animate';
+import ErrorBoundary from '../ErrorBoundary';
 import EditIssue from './EditIssue';
 import { EditIssueContextProvider } from './stores';
 
 export default function Index(props) {
   return (
-    <Animate
+    <ErrorBoundary>
+      <Animate
       // key={props.key}
-      component="div"
-      transitionAppear
-      transitionName="slide-right"
-      hiddenProp="hidden"
-    >
-      {props.visible && (
+        component="div"
+        transitionAppear
+        transitionName="slide-right"
+        hiddenProp="hidden"
+      >
+        {props.visible && (
         <EditIssueContextProvider {...props}>
           <EditIssue />
         </EditIssueContextProvider>
-      )}
-    </Animate>
+        )}
+      </Animate>
+    </ErrorBoundary>
   );
 }

@@ -31,7 +31,7 @@ class IssueDetail extends Component {
         onCancel={() => {
           ScrumBoardStore.resetClickedIssue();
         }}
-        onCurrentClicked={this.handleResetClicked}
+        afterIssueUpdate={this.handleResetClicked}
         onDeleteIssue={() => {
           ScrumBoardStore.resetClickedIssue();
           refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));

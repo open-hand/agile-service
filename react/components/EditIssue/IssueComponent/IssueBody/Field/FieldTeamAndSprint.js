@@ -189,7 +189,7 @@ class FieldTeamAndSprint extends Component {
 
   handleDelete = async (team) => {
     const { tempTeams } = this.state;
-    const { store, reloadIssue } = this.props;
+    const { store, reloadIssue, onUpdate } = this.props;
     const issue = store.getIssue;
     const { isTemp, key } = team;
     if (isTemp) {
@@ -205,6 +205,9 @@ class FieldTeamAndSprint extends Component {
         piId: issue.activePi ? issue.activePi.id : null,
       });
       reloadIssue();
+      if (onUpdate) {
+        onUpdate();
+      }
     }
   }
 
@@ -221,7 +224,7 @@ class FieldTeamAndSprint extends Component {
   }
 
   handleSubmit = async (team, sprintIds) => {
-    const { store, reloadIssue } = this.props;
+    const { store, reloadIssue, onUpdate } = this.props;
     const issue = store.getIssue;
     if (team.isTemp && !team.id) {
       this.handleDelete(team);
@@ -238,6 +241,9 @@ class FieldTeamAndSprint extends Component {
         tempTeams: [],
       });
       reloadIssue();
+      if (onUpdate) {
+        onUpdate();
+      }
     }
     if (!team.isTemp) {
       // 判断冲刺有没有变化

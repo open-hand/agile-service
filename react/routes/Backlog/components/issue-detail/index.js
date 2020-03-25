@@ -60,7 +60,7 @@ class IssueDetail extends Component {
         programId={programId}
         disabled={programId}
         applyType={programId ? 'program' : 'agile'}
-        onCurrentClicked={this.handleResetClicked}
+        afterIssueUpdate={this.handleResetClicked}
         onCancel={() => {
           BacklogStore.setClickIssueDetail({});
           BacklogStore.setIsLeaveSprint(false);
