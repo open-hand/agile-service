@@ -1,19 +1,8 @@
 import React, { Component } from 'react';
-import classnames from 'classnames';
 import './StatusTag.less';
 import { STATUS } from '../../common/Constant';
 
 class StatusTag extends Component {
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   if (
-  //     nextProps.name === this.props.name
-  //     && nextProps.color === this.props.color
-  //   ) {
-  //     return false;
-  //   }
-  //   return true;
-  // }
-
   renderStatusBackground = (categoryCode) => {
     switch (categoryCode) {
       case 'todo':
@@ -36,17 +25,14 @@ class StatusTag extends Component {
       data,
       style,
       categoryCode,
-      inTable,
     } = this.props;
     return (
       <div
-        className={classnames('c7n-statusTag', {
-          'c7nagile-statusTag-table': inTable,
-        })}
+        className="c7n-statusTag"
         style={{
           background: color || (categoryCode && this.renderStatusBackground(categoryCode)) || (data && STATUS[data.type]) || 'transparent',
-          lineHeight: inTable ? '16px' : '20px',
-          height: inTable ? '16px' : '20px',
+          lineHeight: '20px',
+          height: '20px',
           ...style,
         }}
       >

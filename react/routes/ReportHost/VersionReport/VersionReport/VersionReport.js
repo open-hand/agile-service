@@ -567,7 +567,6 @@ class EpicReport extends Component {
               <Tooltip mouseEnterDelay={0.5} title={`任务状态： ${record.statusVO.name}`}>
                 <div>
                   <StatusTag
-                    inTable
                     style={{ display: 'inline-block' }}
                     name={record.statusVO.name}
                     color={STATUS[record.statusVO.type]}
@@ -694,8 +693,8 @@ class EpicReport extends Component {
                         </div>
                       ) : (
                         <div style={{ padding: '20px 0', textAlign: 'center', width: '100%' }}>
-                            {VS.tableData.length ? '当前单位下问题均未预估，切换单位或从下方问题列表进行预估。' : '当前版本下没有问题。'}
-                          </div>
+                          {VS.tableData.length ? '当前单位下问题均未预估，切换单位或从下方问题列表进行预估。' : '当前版本下没有问题。'}
+                        </div>
                       )
                     }
                   </div>
