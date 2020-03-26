@@ -43,19 +43,6 @@ class BacklogHome extends Component {
     BacklogStore.resetFilter();
   }
 
-  paramConverter = (url) => {
-    const reg = /[^?&]([^=&#]+)=([^&#]*)/g;
-    const retObj = {};
-    url.match(reg).forEach((item) => {
-      const [tempKey, paramValue] = item.split('=');
-      const paramKey = tempKey[0] !== '&' ? tempKey : tempKey.substring(1);
-      Object.assign(retObj, {
-        [paramKey]: paramValue,
-      });
-    });
-    return retObj;
-  };
-
   /**
    * 创建冲刺
    */
@@ -104,16 +91,6 @@ class BacklogHome extends Component {
       children: <CreateCurrentPiSprint onCreate={onCreate} PiName={`${piInfo.code}-${piInfo.name}`} sprints={sprints} piId={piInfo.id} />,
     });
   };
-
-  onQuickSearchChange = (onlyMeChecked, onlyStoryChecked, moreChecked) => {
-    const { BacklogStore } = this.props;
-    BacklogStore.setQuickFilters(onlyMeChecked, onlyStoryChecked, moreChecked);
-    BacklogStore.axiosGetSprint()
-      .then((res) => {
-        BacklogStore.setSprintData(res);
-      }).catch((error) => {
-      });
-  }
 
   handleClickCBtn = () => {
     const { BacklogStore } = this.props;

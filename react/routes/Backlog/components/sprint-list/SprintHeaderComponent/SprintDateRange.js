@@ -92,7 +92,7 @@ const FormItem = Form.Item;
   render() {
     const {
       data: {
-        statusCode, startDate, endDate, sprintId,
+        statusCode, startDate, endDate, sprintId, sprintType,
       }, disabled, form: { getFieldDecorator }, form,
     } = this.props;
     return (IsInProgramStore.isShowFeature || statusCode === 'started') ? (
@@ -155,7 +155,7 @@ const FormItem = Form.Item;
                         const endDateFormat = moment(formEndDate).format('YYYY-MM-DD HH:mm:ss');
                         if (formEndDate && current > moment(endDateFormat, 'YYYY-MM-DD HH:mm:ss')) {
                           return true;
-                        } else if (IsInProgramStore.isShowFeature) { // 项目群启用 
+                        } else if (current && IsInProgramStore.isShowFeature && sprintType) { // 项目群启用 
                           const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
                           // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
                           const isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
@@ -195,7 +195,7 @@ const FormItem = Form.Item;
                         const startDateFormat = moment(formStartDate).format('YYYY-MM-DD HH:mm:ss');
                         if (formStartDate && current < moment(startDateFormat, 'YYYY-MM-DD HH:mm:ss')) {
                           return true;
-                        } else if (current && IsInProgramStore.isShowFeature) { // 项目群启用
+                        } else if (current && IsInProgramStore.isShowFeature && sprintType) { // 项目群启用
                           const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
                           // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
                           const isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
