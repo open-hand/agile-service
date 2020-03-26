@@ -161,7 +161,7 @@ class StartSprint extends Component {
       // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
       let isBan = !moment(optionDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
         || !moment(optionDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
-        || IsInProgramStore.stopChooseBetween(optionDateFormat, sprintId); 
+        || IsInProgramStore.stopChooseBetween(optionDateFormat, sprintId);
       if (!isBan && fieldStartDate) {
         const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
         if (moment(optionDateFormat).isAfter(maxTime)) {
@@ -186,7 +186,9 @@ class StartSprint extends Component {
       startDate,
       endDate,
     } = this.state;
-    const { piId, startDate: start, endDate: end } = data;
+    const {
+      piId, startDate: start, endDate: end, sprintType,
+    } = data;
     const {
       saturdayWork,
       sundayWork,
@@ -218,44 +220,58 @@ class StartSprint extends Component {
               <TextArea label="目标" autoSize maxLength={30} />,
             )}
           </FormItem>
-          {!piId
+          <FormItem>
+            {getFieldDecorator('duration', {
+              initialValue: '0',
+            })(
+              <Select
+                label="周期"
+                onChange={(value) => {
+                  if (parseInt(value, 10) > 0) {
+                    if (!getFieldValue('startDate')) {
+                      setFieldsValue({
+                        startDate: moment(),
+                      });
+                      this.setState({
+                        startDate: moment(),
+                      });
+                    }
+                    setFieldsValue({
+                      endDate: moment(getFieldValue('startDate')).add(parseInt(value, 10), 'w'),
+                    });
+                    this.setState({
+                      endDate: moment(getFieldValue('startDate')).add(parseInt(value, 10), 'w'),
+                    });
+                  }
+                }}
+              >
+                <Option value="0">自定义</Option>
+                <Option value="1" disabled={sprintType ? this.isDisabledOption('1') : false}>1周</Option>
+                <Option value="2" disabled={sprintType ? this.isDisabledOption('2') : false}>2周</Option>
+                <Option value="4" disabled={sprintType ? this.isDisabledOption('4') : false}>4周</Option>
+              </Select>,
+            )}
+          </FormItem>
+          {sprintType
             ? (
               <FormItem>
-                {getFieldDecorator('duration', {
-                  initialValue: '0',
+                {getFieldDecorator('startDate', {
+                  rules: [{
+                    required: true,
+                    message: '开始日期是必填的',
+                  }],
+                  initialValue: moment(),
                 })(
-                  <Select
-                    label="周期"
-                    onChange={(value) => {
-                      if (parseInt(value, 10) > 0) {
-                        if (!getFieldValue('startDate')) {
-                          setFieldsValue({
-                            startDate: moment(),
-                          });
-                          this.setState({
-                            startDate: moment(),
-                          });
-                        }
-                        setFieldsValue({
-                          endDate: moment(getFieldValue('startDate')).add(parseInt(value, 10), 'w'),
-                        });
-                        this.setState({
-                          endDate: moment(getFieldValue('startDate')).add(parseInt(value, 10), 'w'),
-                        });
-                      }
-                    }}
-                  >
-                    <Option value="0">自定义</Option>
-                    <Option value="1" disabled={this.isDisabledOption('1')}>1周</Option>
-                    <Option value="2" disabled={this.isDisabledOption('2')}>2周</Option>
-                    <Option value="4" disabled={this.isDisabledOption('4')}>4周</Option>
-                  </Select>,
+                  <DatePicker
+                    style={{ width: '100%' }}
+                    label="开始日期"
+                    showTime
+                    format="YYYY-MM-DD HH:mm:ss"
+                    disabled
+                  />,
                 )}
               </FormItem>
-            ) : ''
-          }
-          {!piId
-            ? (
+            ) : (
               <FormItem>
                 {getFieldDecorator('startDate', {
                   rules: [{
@@ -274,31 +290,14 @@ class StartSprint extends Component {
                     style={{ width: '100%' }}
                     label="开始日期"
                     showTime
-                    disabled={IsInProgramStore.isShowFeature}
                     format="YYYY-MM-DD HH:mm:ss"
                     disabledDate={(current) => {
-                      if (current < moment().subtract(1, 'days')) {
+                      if (current < moment()) {
                         return true;
                       }
                       if (endDate && current > moment(endDate)) {
                         return true;
                       }
-                      // 用于项目群下开始日期验证
-                      // if (current && IsInProgramStore.isShowFeature) {
-                      //   const fieldEndDate = getFieldValue('endDate');
-                      //   const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
-                      //   let isBan = IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
-                      //   if (!isBan && fieldEndDate) {
-                      //     const endDateFormat = moment(fieldEndDate).format('YYYY-MM-DD HH:mm:ss');
-                      //     const minTime = IsInProgramStore.findDateMinRange(endDateFormat, sprintId);
-                      //     // console.log(isBan, 'current', minTime, current);
-                      //     if (moment(currentDateFormat).isBefore(minTime)) {
-                      //       isBan = true;
-                      //     }
-                      //   }
-
-                      //   return isBan;
-                      // }
                       return false;
                     }}
                     onChange={(date, dateString) => {
@@ -320,27 +319,8 @@ class StartSprint extends Component {
                   />,
                 )}
               </FormItem>
-            ) : (
-              <FormItem>
-                {getFieldDecorator('startDate', {
-                  rules: [{
-                    required: true,
-                    message: '开始日期是必填的',
-                  }],
-                  initialValue: moment(start),
-                })(
-                  <DatePicker
-                    style={{ width: '100%' }}
-                    label="开始日期"
-                    showTime
-                    format="YYYY-MM-DD HH:mm:ss"
-                    disabled
-                  />,
-                )}
-              </FormItem>
-            )
-          }
-          {!piId
+            )}
+          {sprintType
             ? (
               <FormItem>
                 {getFieldDecorator('endDate', {
@@ -348,22 +328,15 @@ class StartSprint extends Component {
                     required: true,
                     message: '结束日期是必填的',
                   }],
-                  initialValue: end ? moment(end) : undefined,
+                  initialValue: moment(end),
                 })(
                   <DatePicker
                     style={{ width: '100%' }}
                     label="结束日期"
                     format="YYYY-MM-DD HH:mm:ss"
-                    // ip冲刺时禁止结束时间
                     disabled={sprintDetail.type === 'ip' || parseInt(getFieldValue('duration'), 10) > 0}
-                    showTime
-                    onChange={(date) => {
-                      this.setState({
-                        endDate: date,
-                      });
-                    }}
                     disabledDate={(current) => {
-                      if (current < moment().subtract(1, 'days')) {
+                      if (current < moment()) {
                         return true;
                       }
                       if (startDate && current < moment(startDate)) {
@@ -392,6 +365,7 @@ class StartSprint extends Component {
                       return false;
                     }
                     }
+                    showTime
                   />,
                 )}
               </FormItem>
@@ -402,21 +376,35 @@ class StartSprint extends Component {
                     required: true,
                     message: '结束日期是必填的',
                   }],
-                  initialValue: moment(end),
+                  initialValue: end ? moment(end) : undefined,
                 })(
                   <DatePicker
                     style={{ width: '100%' }}
                     label="结束日期"
-                    format="YYYY-MM-DD HH:mm:ss"
-                    disabled
+                    format="YYYY-MM-DD HH:mm:ss"                    
                     showTime
+                    onChange={(date) => {
+                      this.setState({
+                        endDate: date,
+                      });
+                    }}
+                    disabledDate={(current) => {
+                      if (current < moment()) {
+                        return true;
+                      }
+                      if (startDate && current < moment(startDate)) {
+                        return true;
+                      }
+                      return false;
+                    }
+                    }
                   />,
                 )}
               </FormItem>
             )
           }
         </Form>
-        {!piId && startDate && endDate
+        {!sprintType && startDate && endDate
           ? (
             <div>
               <div style={{ marginBottom: 20 }}>
@@ -446,7 +434,7 @@ class StartSprint extends Component {
             </div>
           ) : ''
         }
-        {piId
+        {sprintType
           ? (
             <div>
               <div style={{ marginBottom: 20 }}>
