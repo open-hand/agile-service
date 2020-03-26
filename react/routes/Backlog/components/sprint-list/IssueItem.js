@@ -48,18 +48,18 @@ const Item = memo(({ issue, draggingNum }) => {
         <TypeTag
           data={issue.issueTypeVO}
         />
-    
+
         <div className={`${prefix}-issueNum`} style={{ textDecoration: issue.statusVO && issue.statusVO.completed ? 'line-through' : 'none' }}>
           {`${issue.issueNum}`}
         </div>
         <Tooltip title={issue.summary} placement="topLeft">
           <div className={`${prefix}-summary`}>{issue.summary}</div>
         </Tooltip>
-      </div>    
+      </div>
       <div
         className={`${prefix}-right`}
       >
-    
+
         {issue.versionNames.length > 0 ? (
           <Tooltip title={`版本: ${issue.versionNames.join(', ')}`}>
             <span className={`${prefix}-version`}>
@@ -69,7 +69,7 @@ const Item = memo(({ issue, draggingNum }) => {
         ) : ''}
         {!isShowFeature && issue.epicName ? (
           <Tooltip title={`史诗: ${issue.epicName}`}>
-            <span 
+            <span
               className={`${prefix}-epic`}
               style={{
                 color: issue.color || issue.epicColor,
@@ -82,27 +82,27 @@ const Item = memo(({ issue, draggingNum }) => {
         ) : ''}
         {isShowFeature && issue.featureName ? (
           <Tooltip title={`特性: ${issue.featureName}`}>
-            <span     
-              className={`${prefix}-feature`}   
+            <span
+              className={`${prefix}-feature`}
               style={{
-                color: issue.featureColor || issue.color,
-                border: `1px solid ${issue.featureColor || issue.color || BacklogStore.randomFeatureColor[issue.featureName]}`,
-              }}          
+                color: issue.featureColor || BacklogStore.randomFeatureColor[issue.featureName] || issue.color,
+                border: `1px solid ${issue.featureColor || BacklogStore.randomFeatureColor[issue.featureName] || issue.color}`,
+              }}
             >
               {issue.featureName}
             </span>
           </Tooltip>
         ) : ''}
         {issue.assigneeId && (
-        <UserHead
-          user={{
-            id: issue.assigneeId,
-            loginName: issue.assigneeLoginName,
-            realName: issue.assigneeRealName,
-            name: issue.assigneeName,
-            avatar: issue.imageUrl,
-          }}
-        />
+          <UserHead
+            user={{
+              id: issue.assigneeId,
+              loginName: issue.assigneeLoginName,
+              realName: issue.assigneeRealName,
+              name: issue.assigneeName,
+              avatar: issue.imageUrl,
+            }}
+          />
         )}
         <Tooltip title={`状态: ${issue.statusVO ? issue.statusVO.name : ''}`}>
           <div className={`${prefix}-status`}>
@@ -115,7 +115,7 @@ const Item = memo(({ issue, draggingNum }) => {
           <PriorityTag priority={issue.priorityVO} />
         </Tooltip>
         <Tooltip title={`故事点: ${issue.storyPoints}`}>
-          <div     
+          <div
             className={classnames(`${prefix}-storyPoint`, {
               visible: issue.storyPoints && issue.issueTypeVO && issue.issueTypeVO.typeCode === 'story',
             })}
@@ -127,13 +127,13 @@ const Item = memo(({ issue, draggingNum }) => {
     </Fragment>
   );
 });
-  
+
 
 function IssueItem({
   provided, style, issue, isDragging, sprintId,
 }) {
   const selected = BacklogStore.getMultiSelected.get(issue.issueId);
-  const draggingNum = BacklogStore.getIsDragging === issue.issueId && BacklogStore.getMultiSelected.size > 0 ? BacklogStore.getMultiSelected.size : undefined; 
+  const draggingNum = BacklogStore.getIsDragging === issue.issueId && BacklogStore.getMultiSelected.size > 0 ? BacklogStore.getMultiSelected.size : undefined;
   return (
     <div
       role="none"

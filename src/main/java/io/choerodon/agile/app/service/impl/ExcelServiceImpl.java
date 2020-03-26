@@ -45,7 +45,7 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final Logger LOGGER = LoggerFactory.getLogger(ExcelServiceImpl.class);
 
     protected static final String[] FIELDS_NAME =
-            {"问题类型*", "所属史诗", "模块", "冲刺", "概述*", "描述", "子任务概述(仅子任务生效)", "经办人",
+            {"问题类型*", "所属史诗", "模块", "冲刺", "概述*", "子任务概述(仅子任务生效)", "描述", "经办人",
                     "优先级*", "预估时间(小时)", "版本", "故事点", "史诗名称(仅问题类型为史诗时生效)"};
 
     protected static final String BACKETNAME = "agile-service";
@@ -122,7 +122,11 @@ public class ExcelServiceImpl implements ExcelService {
         ExcelUtil.createGuideSheet(wb, ExcelUtil.initGuideSheet(), false);
         Sheet sheet = wb.createSheet(IMPORT_TEMPLATE_NAME);
         CellStyle style = CatalogExcelUtil.getHeadStyle(wb);
-        ExcelUtil.generateHeaders(sheet, style, Arrays.asList(FIELDS_NAME));
+        Map<Integer,Integer> widthMap = new HashMap<>();
+        widthMap.put(1, 8000);
+        widthMap.put(5, 8000);
+        widthMap.put(12, 8000);
+        ExcelUtil.generateHeaders(sheet, style, Arrays.asList(FIELDS_NAME), widthMap);
 
         try {
             //填充预定义值
@@ -271,7 +275,7 @@ public class ExcelServiceImpl implements ExcelService {
 
         if (isSubTask(row)) {
             //子任务是任务类型，无需设置故事点和史诗名
-            String summary = row.getCell(6).toString();
+            String summary = row.getCell(5).toString();
             if (!StringUtils.hasText(summary)) {
                 throw new CommonException("error.summary.null");
             }
@@ -317,7 +321,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void setDescription(IssueCreateVO issueCreateVO, Row row) {
-        Cell descriptionCell = row.getCell(5);
+        Cell descriptionCell = row.getCell(6);
         if (!isCellEmpty(descriptionCell)) {
             String description = descriptionCell.toString();
             if (StringUtils.hasText(description)) {
@@ -486,11 +490,11 @@ public class ExcelServiceImpl implements ExcelService {
 
         if (isSubTask(row)) {
             //子任务只校验子任务概述列
-            String subTaskSummary = row.getCell(6).toString();
+            String subTaskSummary = row.getCell(5).toString();
             if (illegalRow.contains(rowNum)) {
                 errorMessage.put(0, "子任务必须有父节点");
             } else if (subTaskSummary.length() > 44) {
-                errorMessage.put(6, "子任务概要过长");
+                errorMessage.put(5, "子任务概要过长");
             }
         } else {
             Cell issueTypeCell = row.getCell(0);
@@ -1044,7 +1048,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     private String getTypeName(Row row) {
         Cell issueTypeCell = row.getCell(0);
-        Cell subTaskCell = row.getCell(6);
+        Cell subTaskCell = row.getCell(5);
         if (isCellEmpty(issueTypeCell) && !isCellEmpty(subTaskCell)) {
             return "子任务";
         } else if (!isCellEmpty(issueTypeCell)) {
