@@ -94,7 +94,6 @@ const FormItem = Form.Item;
       data: {
         statusCode, startDate, endDate, sprintId,
       }, disabled, form: { getFieldDecorator }, form,
-
     } = this.props;
     return (IsInProgramStore.isShowFeature || statusCode === 'started') ? (
       <div
@@ -106,7 +105,7 @@ const FormItem = Form.Item;
         role="none"
       >
         <TextEditToggle
-          disabled={disabled || statusCode === 'started'}
+          disabled={disabled}
           saveRef={this.startDateEdit}
           onSubmit={() => {
             form.validateFields((err, values) => {
@@ -162,7 +161,7 @@ const FormItem = Form.Item;
                           const isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
                             || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
                             || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
-                
+
                           return isBan;
                         } else {
                           return false;
@@ -210,7 +209,7 @@ const FormItem = Form.Item;
                       }}
                       format="YYYY-MM-DD HH:mm:ss"
                       showTime
-                      
+
                     />,
                   )}
                 </FormItem>
