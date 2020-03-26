@@ -130,6 +130,7 @@ const IssueType = observer(({
         >
           <TypeTag
             data={currentIssueType}
+            featureType={featureType}
           />
         </div>
       ) : (
