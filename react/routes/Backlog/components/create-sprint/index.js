@@ -203,18 +203,19 @@ export function CreateCurrentPiSprint({
       <DateTimePicker
         name="startDate"
         filter={(currentDate, selected) => {
-          let isBan = true;
           const currentDateFormat = currentDate.format('YYYY-MM-DD HH:mm:ss');
+
+          let isBan = !IsInProgramStore.stopChooseBetween(currentDateFormat);
           // eslint-disable-next-line no-plusplus
-          for (let index = 0; index < sprints.length; index++) {
-            const { endDate, startDate } = sprints[index];
-            if (!stopChooseBetween(currentDateFormat, startDate, endDate)) {
-              isBan = false;
-              break;
-            }
-          }
+          // for (let index = 0; index < sprints.length; index++) {
+          //   const { endDate, startDate } = sprints[index];
+          //   if (!stopChooseBetween(currentDateFormat, startDate, endDate)) {
+          //     isBan = false;
+          //     break;
+          //   }
+          // }
           if (isBan && dataSet.current.get('endDate')) {
-            const minTime = findDateMinRange(dataSet.current.get('endDate').format('YYYY-MM-DD HH:mm:ss'));
+            const minTime = IsInProgramStore.findDateMinRange(dataSet.current.get('endDate').format('YYYY-MM-DD HH:mm:ss'));
             if (moment(currentDateFormat).isBefore(minTime)) {
               isBan = false;
             }
@@ -227,18 +228,20 @@ export function CreateCurrentPiSprint({
       <DateTimePicker
         name="endDate"
         filter={(currentDate, selected) => {
-          let isBan = true;
           const currentDateFormat = currentDate.format('YYYY-MM-DD HH:mm:ss');
+
+          let isBan = !IsInProgramStore.stopChooseBetween(currentDateFormat);
           // eslint-disable-next-line no-plusplus
-          for (let index = 0; index < sprints.length; index++) {
-            const { endDate, startDate } = sprints[index];
-            if (!stopChooseBetween(currentDateFormat, startDate, endDate)) {
-              isBan = false;
-              break;
-            }
-          }
+          // for (let index = 0; index < sprints.length; index++) {
+          //   const { endDate, startDate } = sprints[index];
+          //   if (!stopChooseBetween(currentDateFormat, startDate, endDate)) {
+          //     isBan = false;
+          //     break;
+          //   }
+          // }
+          
           if (isBan && dataSet.current.get('startDate')) {
-            const maxTime = findDateMaxRange(dataSet.current.get('startDate').format('YYYY-MM-DD HH:mm:ss'));
+            const maxTime = IsInProgramStore.findDateMaxRange(dataSet.current.get('startDate').format('YYYY-MM-DD HH:mm:ss'));
             if (moment(currentDateFormat).isAfter(maxTime)) {
               isBan = false;
             }

@@ -84,17 +84,50 @@ class IsInProgramStore {
    */
   stopChooseBetween(time, sprintId) {
     // const date = time.format('YYYY-MM-DD HH:mm:ss');
-    const sprints = this.sprints.filter(sprint => sprint.sprintId !== sprintId);
+    let sprints = this.sprints.filter(sprint => sprint.sprintId !== sprintId);
+    sprints = sprints.map((item) => {
+      let isPiStart = false;
+      let isPiEnd = false;
+      if (moment(item.startDate).isSame(this.getPiInfo.actualStartDate || this.getPiInfo.sprintDate)) {
+        isPiStart = true;
+      }
+      if (moment(item.endDate).isSame(this.piInfo.endDate)) {
+        isPiEnd = true;
+      }
+      const result = sprints.find(sprint => sprint.startDate === item.endDate);
+      if (result) {
+        return ({
+          startDate: item.startDate,
+          endDate: result.endDate,
+          isPiStart,
+          isPiEnd,
+        });
+      } else {
+        return ({
+          startDate: item.startDate,
+          endDate: item.endDate,
+          isPiStart,
+          isPiEnd,
+        });
+      }
+    });
     // eslint-disable-next-line no-plusplus
     for (let index = 0; index < sprints.length; index++) {
       const startDate = moment(sprints[index].startDate);
       const endDate = moment(sprints[index].endDate);
       const endDateZero = moment(sprints[index].endDate).hour(0).minute(0).second(0);
-      if (moment(time).isBetween(startDate, endDateZero, null, '()')) {
-        return true;
-      } else if (moment(time).isBetween(endDateZero, endDate, null, '()')) {
+      if (moment(time).isBetween(startDate, endDate, null, '()')) {
         return true;
       }
+      if (sprints[index].isPiStart && moment(time).isSame(sprints[index].startDate)) {
+        return true;
+      }
+      if (sprints[index].isPiEnd && moment(time).isSame(sprints[index].endDate)) {
+        return true;
+      }
+      // else if (moment(time).isBetween(endDateZero, endDate, null, '()')) {
+      //   return true;
+      // }
     }
 
     return false;
