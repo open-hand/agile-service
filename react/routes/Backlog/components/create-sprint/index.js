@@ -139,7 +139,6 @@ export function CreateCurrentPiSprint({
 
   useEffect(() => {
     handleOk(submit);
-    IsInProgramStore.loadPiInfoAndSprint();
   }, [handleOk]);
 
   return (

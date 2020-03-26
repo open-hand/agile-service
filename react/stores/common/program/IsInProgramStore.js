@@ -149,18 +149,16 @@ class IsInProgramStore {
     return Boolean(res);
   })
 
-  loadPiInfoAndSprint = (programId = this.artInfo.programId, artId = this.artInfo.id) => {
-    getCurrentPiInfo(programId, artId).then((res) => {
-      if (res.id) {
-        getCurrentPiAllSprint(res.id).then((sprints) => {
-          this.setPiInfo(res);
-          this.setSprints(sprints.map(sprint => ({
-            ...sprint,
-            endDate: sprint.actualEndDate || sprint.endDate,
-          })));
-        });
-      }
-    });
+  loadPiInfoAndSprint = async (programId = this.artInfo.programId, artId = this.artInfo.id) => {
+    const currentPiInfo = await getCurrentPiInfo(programId, artId);
+    if (currentPiInfo.id) {
+      const sprints = await getCurrentPiAllSprint(currentPiInfo.id);
+      this.setPiInfo(currentPiInfo);
+      this.setSprints(sprints.map(sprint => ({
+        ...sprint,
+        endDate: sprint.actualEndDate || sprint.endDate,
+      })));
+    }
   }
 
 

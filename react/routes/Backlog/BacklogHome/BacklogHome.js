@@ -46,7 +46,7 @@ class BacklogHome extends Component {
   /**
    * 创建冲刺
    */
-  handleCreateSprint = () => {
+  handleCreateSprint = async () => {
     const { BacklogStore } = this.props;
     const onCreate = (sprint) => {
       BacklogStore.setCreatedSprint(sprint.sprintId);
@@ -66,8 +66,9 @@ class BacklogHome extends Component {
   /**
    * 当前PI下创建冲刺
    */
-  handleCreateCurrentPiSprint = () => {
+  handleCreateCurrentPiSprint = async () => {
     const { BacklogStore } = this.props;
+    await IsInProgramStore.loadPiInfoAndSprint();
     const artInfo = IsInProgramStore.getArtInfo;
     const onCreate = (sprint) => {
       BacklogStore.setCreatedSprint(sprint.sprintId);
