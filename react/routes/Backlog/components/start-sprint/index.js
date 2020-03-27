@@ -155,7 +155,7 @@ class StartSprint extends Component {
       const startDate = moment();
       // 使用moment套一下，因为add是会改变原值的
       const endDate = moment(startDate).add(parseInt(value, 10), 'weeks');
-      return IsInProgramStore.rangeCanChoose(startDate, endDate, sprintId);
+      return !IsInProgramStore.rangeCanChoose(startDate, endDate, sprintId);
     }
     return false;
   }
