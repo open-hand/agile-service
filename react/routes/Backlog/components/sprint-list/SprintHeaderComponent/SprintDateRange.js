@@ -44,51 +44,6 @@ const FormItem = Form.Item;
     });
   };
 
-  /**
-   * 防止时间相同
-   */
-  checkDateSame = (name, callback) => {
-    const { form } = this.props;
-    const formStartDate = form.getFieldValue('startDate');
-    const formEndDate = form.getFieldValue('endDate');
-    if (formStartDate.isSame(formEndDate)) {
-      callback(`${name === 'endDate' ? '结束' : '开始'}时间与${name === 'endDate' ? '开始' : '结束'}时间相同`);
-    }
-    callback();
-  }
-
-  checkEndDate = (rule, value, callback) => {
-    const {
-      data: { sprintId }, form,
-    } = this.props;
-    const formStartDate = form.getFieldValue('startDate');
-
-    if (formStartDate && value) {
-      this.checkDateSame('endDate', callback);
-      const formStartDateFormat = formStartDate.format('YYYY-MM-DD HH:mm:ss');
-
-      const maxTime = IsInProgramStore.findDateMaxRange(formStartDateFormat, sprintId);
-      if (moment(value.format('YYYY-MM-DD HH:mm:ss')).isAfter(maxTime)) {
-        callback('日期与已存在的冲刺日期有重合');
-      }
-    }
-    callback();
-  }
-
-  checkStartDate = (rule, value, callback) => {
-    const { data: { sprintId }, form } = this.props;
-    const formEndDate = form.getFieldValue('endDate');
-    if (formEndDate && value) {
-      this.checkDateSame('startDate', callback);
-      const formEndDateFormat = formEndDate.format('YYYY-MM-DD HH:mm:ss');
-      const minTime = IsInProgramStore.findDateMinRange(formEndDateFormat, sprintId);
-      if (moment(value.format('YYYY-MM-DD HH:mm:ss')).isBefore(minTime)) {
-        callback('日期与已存在的冲刺日期有重合');
-      }
-    }
-    callback();
-  }
-
   render() {
     const {
       data: {
@@ -141,7 +96,6 @@ const FormItem = Form.Item;
                   {getFieldDecorator('startDate', {
                     rules: [
                       { required: true, message: '请选择开始日期' },
-                      { validator: this.checkStartDate },
                     ],
                     initialValue: startDate ? moment(startDate, 'YYYY-MM-DD HH:mm:ss') : '',
                   })(
@@ -180,10 +134,7 @@ const FormItem = Form.Item;
                   {getFieldDecorator('endDate', {
                     rules: [
                       { required: true, message: '请选择结束日期' },
-                      { validator: this.checkEndDate },
                     ],
-
-
                     initialValue: endDate ? moment(endDate, 'YYYY-MM-DD HH:mm:ss') : '',
                   })(
                     <DatePicker

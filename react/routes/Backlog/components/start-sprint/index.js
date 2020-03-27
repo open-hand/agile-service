@@ -148,27 +148,14 @@ class StartSprint extends Component {
   };
 
   isDisabledOption(value) {
-    if (IsInProgramStore.isShowFeature) {
-      const { data: { sprintId }, form: { getFieldValue } } = this.props;
-      // const {
-      //   startDate,
-      // } = this.state;
-      // const fieldStartDate = getFieldValue('startDate') || moment();
-      // 目前 开始时间限定为当前
-      const fieldStartDate = moment();
-      const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
-      const optionDateFormat = moment(startDateFormat).add(parseInt(value, 10), 'w').format('YYYY-MM-DD HH:mm:ss');
-      // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
-      let isBan = !moment(optionDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
-        || !moment(optionDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
-        || IsInProgramStore.stopChooseBetween(optionDateFormat, sprintId);
-      if (!isBan && fieldStartDate) {
-        const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
-        if (moment(optionDateFormat).isAfter(maxTime)) {
-          isBan = true;
-        }
-      }
-      return isBan;
+    const { data: { sprintType } } = this.props;
+    if (sprintType) {
+      const { data: { sprintId } } = this.props;
+      // 开启日期是当前时间
+      const startDate = moment();
+      // 使用moment套一下，因为add是会改变原值的
+      const endDate = moment(startDate).add(parseInt(value, 10), 'weeks');
+      return IsInProgramStore.rangeCanChoose(startDate, endDate, sprintId);
     }
     return false;
   }
@@ -179,6 +166,7 @@ class StartSprint extends Component {
       data: { sprintId },
       workSetting,
       sprintDetail,
+      form,
       form: { getFieldDecorator, getFieldValue, setFieldsValue },
     } = this.props;
     const {
@@ -246,9 +234,9 @@ class StartSprint extends Component {
                 }}
               >
                 <Option value="0">自定义</Option>
-                <Option value="1" disabled={sprintType ? this.isDisabledOption('1') : false}>1周</Option>
-                <Option value="2" disabled={sprintType ? this.isDisabledOption('2') : false}>2周</Option>
-                <Option value="4" disabled={sprintType ? this.isDisabledOption('4') : false}>4周</Option>
+                <Option value="1" disabled={this.isDisabledOption('1')}>1周</Option>
+                <Option value="2" disabled={this.isDisabledOption('2')}>2周</Option>
+                <Option value="4" disabled={this.isDisabledOption('4')}>4周</Option>
               </Select>,
             )}
           </FormItem>
@@ -300,7 +288,7 @@ class StartSprint extends Component {
                       }
                       return false;
                     }}
-                    onChange={(date, dateString) => {
+                    onChange={(date) => {
                       setFieldsValue({
                         startDate: date,
                       });
@@ -335,36 +323,25 @@ class StartSprint extends Component {
                     label="结束日期"
                     format="YYYY-MM-DD HH:mm:ss"
                     disabled={sprintDetail.type === 'ip' || parseInt(getFieldValue('duration'), 10) > 0}
-                    disabledDate={(current) => {
-                      if (current < moment()) {
+                    disabledDate={(date) => {
+                      if (date < moment()) {
                         return true;
                       }
-                      if (startDate && current < moment(startDate)) {
-                        return true;
-                      }
-
-                      if (current && IsInProgramStore.isShowFeature) {
-                        const fieldStartDate = getFieldValue('startDate');
-                        const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
-                        let isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
-                        || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
-                        || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId); 
-
-                        if (!isBan && fieldStartDate) {
-                          const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
-                          const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
-                          // console.log(isBan, 'current', maxTime, current);
-                          // console.log('******************************');
-                          if (moment(currentDateFormat).isAfter(maxTime)) {
-                            isBan = true;
-                          }
+                      // eslint-disable-next-line no-shadow
+                      const startDate = form.getFieldValue('startDate');
+                      if (!sprintType && startDate) {
+                        return date <= startDate;
+                      } else {
+                        // 没选开始时间的时候，只判断时间点能不能选
+                        // eslint-disable-next-line no-lonely-if
+                        if (!startDate) {
+                          return !IsInProgramStore.dateCanChoose(date);
+                        } else {
+                          // 选了开始时间之后，判断形成的时间段是否和其他重叠
+                          return !IsInProgramStore.rangeCanChoose(startDate, date, sprintId);
                         }
-
-                        return isBan;
-                      }
-                      return false;
-                    }
-                    }
+                      }              
+                    }}
                     showTime
                   />,
                 )}
@@ -381,7 +358,7 @@ class StartSprint extends Component {
                   <DatePicker
                     style={{ width: '100%' }}
                     label="结束日期"
-                    format="YYYY-MM-DD HH:mm:ss"                    
+                    format="YYYY-MM-DD HH:mm:ss"
                     showTime
                     onChange={(date) => {
                       this.setState({
