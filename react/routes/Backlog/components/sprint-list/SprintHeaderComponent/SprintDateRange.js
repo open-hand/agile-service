@@ -116,7 +116,7 @@ const FormItem = Form.Item;
                           // 没选结束时间的时候，只判断时间点能不能选
                           // eslint-disable-next-line no-lonely-if
                           if (!endDate) {
-                            return !IsInProgramStore.dateCanChoose(date);
+                            return !IsInProgramStore.dateCanChoose(date, sprintId);
                           } else {
                             // 选了结束时间之后，判断形成的时间段是否和其他重叠
                             return !IsInProgramStore.rangeCanChoose(date, endDate, sprintId);
@@ -153,7 +153,7 @@ const FormItem = Form.Item;
                           // 没选开始时间的时候，只判断时间点能不能选
                           // eslint-disable-next-line no-lonely-if
                           if (!startDate) {
-                            return !IsInProgramStore.dateCanChoose(date);
+                            return !IsInProgramStore.dateCanChoose(date, sprintId);
                           } else {
                             // 选了开始时间之后，判断形成的时间段是否和其他重叠
                             return !IsInProgramStore.rangeCanChoose(startDate, date, sprintId);
