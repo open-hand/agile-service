@@ -108,7 +108,7 @@ function EditIssue() {
         loadDocs(id),
         programId || applyType === 'program' ? null : loadWorklogs(id),
         programId ? loadDatalogsProgram(id, programId) : loadDatalogs(id),
-        loadLinkIssues(id),
+        programId || applyType === 'program' ? null : loadLinkIssues(id),
         programId || applyType === 'program' ? null : loadBranchs(id),
       ]);
       if (idRef.current !== id) {
