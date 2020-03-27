@@ -93,9 +93,9 @@ const FormItem = Form.Item;
     const {
       data: {
         statusCode, startDate, endDate, sprintId, sprintType,
-      }, disabled, form: { getFieldDecorator }, form,
+      }, form: { getFieldDecorator }, form,
     } = this.props;
-    return (IsInProgramStore.isShowFeature || statusCode === 'started') ? (
+    return (sprintType || statusCode === 'started') ? (
       <div
         className="c7n-backlog-sprintData"
         style={{
@@ -105,7 +105,7 @@ const FormItem = Form.Item;
         role="none"
       >
         <TextEditToggle
-          disabled={disabled}
+          disabled={sprintType === 'ip'} // ip冲刺禁止修改时间
           saveRef={this.startDateEdit}
           onSubmit={() => {
             form.validateFields((err, values) => {
@@ -150,24 +150,24 @@ const FormItem = Form.Item;
                       style={{ width: 165, height: 32 }}
                       allowClear
                       disabled={statusCode === 'started'}
-                      disabledDate={(current) => {
-                        const formEndDate = form.getFieldValue('endDate');
-                        const endDateFormat = moment(formEndDate).format('YYYY-MM-DD HH:mm:ss');
-                        if (formEndDate && current > moment(endDateFormat, 'YYYY-MM-DD HH:mm:ss')) {
-                          return true;
-                        } else if (current && IsInProgramStore.isShowFeature && sprintType) { // 项目群启用 
-                          const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
-                          // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
-                          const isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
-                            || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
-                            || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
-
-                          return isBan;
-                        } else {
+                      disabledDate={(date) => {
+                        if (!date) {
                           return false;
                         }
-
-                        // if(current > moment(endDate, 'YYYY-MM-DD HH:mm:ss'))
+                        // eslint-disable-next-line no-shadow
+                        const endDate = form.getFieldValue('endDate');
+                        if (!sprintType && endDate) {
+                          return date >= endDate;
+                        } else {
+                          // 没选结束时间的时候，只判断时间点能不能选
+                          // eslint-disable-next-line no-lonely-if
+                          if (!endDate) {
+                            return !IsInProgramStore.dateCanChoose(date);
+                          } else {
+                            // 选了结束时间之后，判断形成的时间段是否和其他重叠
+                            return !IsInProgramStore.rangeCanChoose(date, endDate, sprintId);
+                          }
+                        }                  
                       }}
                       format="YYYY-MM-DD HH:mm:ss"
                       showTime
@@ -190,26 +190,27 @@ const FormItem = Form.Item;
                       autoFocus
                       style={{ width: 165, height: 32 }}
                       allowClear
-                      disabledDate={(current) => {
-                        const formStartDate = form.getFieldValue('startDate');
-                        const startDateFormat = moment(formStartDate).format('YYYY-MM-DD HH:mm:ss');
-                        if (formStartDate && current < moment(startDateFormat, 'YYYY-MM-DD HH:mm:ss')) {
-                          return true;
-                        } else if (current && IsInProgramStore.isShowFeature && sprintType) { // 项目群启用
-                          const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
-                          // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
-                          const isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
-                            || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
-                            || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
-
-                          return isBan;
-                        } else {
+                      disabledDate={(date) => {
+                        if (!date) {
                           return false;
+                        }
+                        // eslint-disable-next-line no-shadow
+                        const startDate = form.getFieldValue('startDate');
+                        if (!sprintType && startDate) {
+                          return date <= startDate;
+                        } else {
+                          // 没选开始时间的时候，只判断时间点能不能选
+                          // eslint-disable-next-line no-lonely-if
+                          if (!startDate) {
+                            return !IsInProgramStore.dateCanChoose(date);
+                          } else {
+                            // 选了开始时间之后，判断形成的时间段是否和其他重叠
+                            return !IsInProgramStore.rangeCanChoose(startDate, date, sprintId);
+                          }        
                         }
                       }}
                       format="YYYY-MM-DD HH:mm:ss"
                       showTime
-
                     />,
                   )}
                 </FormItem>

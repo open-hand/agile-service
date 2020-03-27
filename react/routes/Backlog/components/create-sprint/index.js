@@ -39,7 +39,7 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
         name: 'sprintGoal', type: 'string', label: '冲刺目标',
       },
     ],
-  }));
+  }), []);
   async function submit() {
     const isValidate = await dataSet.validate();
     if (isValidate) {
@@ -94,13 +94,6 @@ export function CreateCurrentPiSprint({
         label: '开始日期',
         required: true,
         validator: checkDateSame,
-        min: moment(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate),
-        dynamicProps: {
-          max: ({ record }) => {
-            const { endDate } = IsInProgramStore.piInfo;
-            return record.get('endDate') || moment(endDate, 'YYYY-MM-DD HH:mm:ss');
-          },
-        },
       },
       {
         name: 'endDate',
@@ -108,24 +101,16 @@ export function CreateCurrentPiSprint({
         label: '结束日期',
         required: true,
         validator: checkDateSame,
-        max: moment(IsInProgramStore.piInfo.endDate),
-        dynamicProps: {
-          min: ({ record }) => {
-            const startDate = IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate;
-            return record.get('startDate') || moment(startDate, 'YYYY-MM-DD HH:mm:ss');
-          },
-        },
       },
       {
         name: 'sprintGoal', type: 'string', label: '冲刺目标',
       },
     ],
-  }));
+  }), []);
   async function submit() {
     const isValidate = await dataSet.validate();
     if (isValidate) {
       const [values] = dataSet.toData();
-
       const sprint = await SprintApi.createOnCurrentPi({ ...values, piId });
       if (!sprint.failed) {
         onCreate(sprint);
@@ -151,30 +136,26 @@ export function CreateCurrentPiSprint({
       <TextField name="sprintName" required maxLength={MAX_LENGTH_SPRINT} />
       <DateTimePicker
         name="startDate"
-        filter={(currentDate) => {
-          const currentDateFormat = currentDate.format('YYYY-MM-DD HH:mm:ss');
-          let isBan = !IsInProgramStore.stopChooseBetween(currentDateFormat);
-          if (isBan && dataSet.current.get('endDate')) {
-            const minTime = IsInProgramStore.findDateMinRange(dataSet.current.get('endDate').format('YYYY-MM-DD HH:mm:ss'));
-            if (moment(currentDateFormat).isBefore(minTime)) {
-              isBan = false;
-            }
+        filter={(date) => {   
+          // 没选结束时间的时候，只判断时间点能不能选
+          if (!dataSet.current.get('endDate')) {
+            return IsInProgramStore.dateCanChoose(date);
+          } else {
+            // 选了结束时间之后，判断形成的时间段是否和其他重叠
+            return IsInProgramStore.rangeCanChoose(date, dataSet.current.get('endDate'));
           }
-          return isBan;
         }}
       />
       <DateTimePicker
         name="endDate"
-        filter={(currentDate) => {
-          const currentDateFormat = currentDate.format('YYYY-MM-DD HH:mm:ss');
-          let isBan = !IsInProgramStore.stopChooseBetween(currentDateFormat);
-          if (isBan && dataSet.current.get('startDate')) {
-            const maxTime = IsInProgramStore.findDateMaxRange(dataSet.current.get('startDate').format('YYYY-MM-DD HH:mm:ss'));
-            if (moment(currentDateFormat).isAfter(maxTime)) {
-              isBan = false;
-            }
-          }
-          return isBan;
+        filter={(date) => {
+          // 没选开始时间的时候，只判断时间点能不能选
+          if (!dataSet.current.get('startDate')) {
+            return IsInProgramStore.dateCanChoose(date);
+          } else {
+            // 选了开始时间之后，判断形成的时间段是否和其他重叠
+            return IsInProgramStore.rangeCanChoose(dataSet.current.get('startDate'), date);
+          }          
         }}
       />
       <TextArea
