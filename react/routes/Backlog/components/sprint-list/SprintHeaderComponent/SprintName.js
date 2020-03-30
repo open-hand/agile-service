@@ -53,12 +53,12 @@ class SprintName extends Component {
 
   render() {
     const {
-      data: { sprintName, type },
+      data: { sprintName, type, sprintType },
     } = this.props;
     return (
       <div className="c7n-backlog-sprintName">        
         <TextEditToggle
-          disabled={type === 'backlog'}
+          disabled={type === 'backlog' || sprintType === 'ip'}
           formKey="sprint"
           onSubmit={this.handleBlurName}
           originData={sprintName}

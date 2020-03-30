@@ -108,6 +108,7 @@ const IssueType = observer(({
               style={{ margin: 0 }}
               data={t}
               showName
+              featureType={t.featureType}
             />
           </Menu.Item>
         ))
@@ -129,6 +130,7 @@ const IssueType = observer(({
         >
           <TypeTag
             data={currentIssueType}
+            featureType={featureType}
           />
         </div>
       ) : (

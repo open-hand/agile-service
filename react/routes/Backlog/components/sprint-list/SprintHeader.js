@@ -69,8 +69,7 @@ function SprintHeader({ data }) {
           />
         </div>
         <div className={`${prefix}-bottom`}>
-          <SprintDateRange
-            disabled={piId || data.sprintType === 'ip'} // data.sprintType 用于禁止ip冲刺修改时间
+          <SprintDateRange            
             data={data}
           />
           <SprintGoal

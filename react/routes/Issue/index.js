@@ -250,7 +250,6 @@ const Issue = withRouter(observer(() => {
         name="statusId"
         renderer={({ record }) => (
           <StatusTag
-            inTable
             data={record.get('statusVO')}
             style={{ display: 'inline-block' }}
           />

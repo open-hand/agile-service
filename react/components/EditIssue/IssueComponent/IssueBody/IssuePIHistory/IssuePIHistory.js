@@ -15,7 +15,7 @@ function IssuePIHistory(props) {
     };
     loadData();
   }, []);
-
+  const { featureVO: { featureType } } = store.getIssue;
   return (
     <div id="data_log">
       <div className="c7n-title-wrapper">
@@ -24,7 +24,7 @@ function IssuePIHistory(props) {
         </div>
       </div>
       <div>
-        {(expand ? data : data.slice(0, 3)).map(item => <HistoryItem data={item} logo="agile-feature" />)}
+        {(expand ? data : data.slice(0, 3)).map(item => <HistoryItem data={item} featureType={featureType} />)}
       </div>      
       {data.length >= 3 && (
         <Button

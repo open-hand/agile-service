@@ -489,7 +489,6 @@ class VersionBurndown extends Component {
               <Tooltip mouseEnterDelay={0.5} title={`任务状态:${record.statusVO.name}`}>
                 <div>
                   <StatusTag
-                    inTable
                     style={{ display: 'inline-block', minWidth: 50 }}
                     name={record.statusVO.name}
                     color={STATUS[record.statusVO.type]}

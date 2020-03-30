@@ -14,6 +14,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -122,12 +123,12 @@ public class ExcelUtil {
                 new GuideSheet(3, "冲刺", "非必输项，任务/故事下的子任务冲刺默认和父级一致", false),
                 new GuideSheet(4, "概要", "必输项，限制44个字符以内", true),
                 new GuideSheet(5, "子任务概述", "非必输项，故事、任务类型下可创建子任务", false),
-                new GuideSheet(6, "经办人", "非必选项", false),
-                new GuideSheet(7, "优先级", "必选项", true),
-                new GuideSheet(8, "预估时间", "非必输项，仅支持3位整数或者0.5，预估时间以小时为单位", false),
-                new GuideSheet(9, "版本", "非必选项", false),
-                new GuideSheet(10, "故事点", "非必输，仅支持3位整数或者0.5，仅故事类型须填写，否则不生效", false),
-                new GuideSheet(11, "描述", "非必输，仅支持填写纯文本", false),
+                new GuideSheet(6, "描述", "非必输，仅支持填写纯文本", false),
+                new GuideSheet(7, "经办人", "非必选项", false),
+                new GuideSheet(8, "优先级", "必选项", true),
+                new GuideSheet(9, "预估时间", "非必输项，仅支持3位整数或者0.5，预估时间以小时为单位", false),
+                new GuideSheet(10, "版本", "非必选项", false),
+                new GuideSheet(11, "故事点", "非必输，仅支持3位整数或者0.5，仅故事类型须填写，否则不生效", false),
                 new GuideSheet(12, "史诗名称", "如果问题类型选择史诗，此项必填, 限制10个字符", true),
         };
         return Arrays.asList(guideSheets);
@@ -161,8 +162,8 @@ public class ExcelUtil {
     private static void initExample(Workbook wb, Sheet sheet, boolean withFeature) {
         sheet.setColumnWidth(4, 8000);
         sheet.setColumnWidth(5, 6000);
+        sheet.setColumnWidth(6, 8500);
         sheet.setColumnWidth(8, 6000);
-        sheet.setColumnWidth(11, 8000);
         sheet.setColumnWidth(12, 9000);
 
         Row row = sheet.createRow(17);
@@ -176,8 +177,8 @@ public class ExcelUtil {
         coralBackground.setFillForegroundColor(IndexedColors.CORAL.getIndex());
         coralBackground.setFillPattern(CellStyle.SOLID_FOREGROUND);
 
-        String[] data1 = {"问题类型*", "所属史诗", "模块", "冲刺", "概述*", "描述",
-                "子任务概述(仅子任务生效)", "经办人", "优先级*", "预估时间(小时)",
+        String[] data1 = {"问题类型*", "所属史诗", "模块", "冲刺", "概述*",
+                "子任务概述(仅子任务生效)", "描述", "经办人", "优先级*", "预估时间(小时)",
                 "版本", "故事点", "史诗名称(仅问题类型为史诗时生效)"};
         String secondColumnValue = "可以选择史诗";
         if (withFeature) {
@@ -187,44 +188,44 @@ public class ExcelUtil {
         int count = 19;
         createRow(sheet, count++, subArray(data1, withFeature), blueBackground);
 
-        String[] data2 = {"史诗", "", "敏捷管理", "", "请输入史诗的概述", "请输入导入史诗类型的问题的描述信息",
-                "", "", "高", "", "", "", "导入问题"};
+        String[] data2 = {"史诗", "", "敏捷管理", "", "请输入史诗的概述",
+                "", "请输入导入史诗类型的问题的描述信息", "", "高", "", "", "", "导入问题"};
         if (withFeature) {
             data2[0] = "特性";
             data2[4] = "请输入特性的概述";
         }
         createRow(sheet, count++, subArray(data2, withFeature), null);
 
-        String[] data3 = {"故事", secondColumnValue, "敏捷管理", "sprint-1", "这里输入故事的概述：故事1", "导入故事并且导入故事下的子任务",
-                "", "张三", "中", "8", "0.1", "2", ""};
+        String[] data3 = {"故事", secondColumnValue, "敏捷管理", "sprint-1", "这里输入故事的概述：故事1",
+                "", "导入故事并且导入故事下的子任务", "张三", "中", "8", "0.1", "2", ""};
         createRow(sheet, count++, subArray(data3, withFeature), coralBackground);
 
-        String[] data4 = {"", "", "", "", "", "请输入子任务1的描述信息", "故事1的子任务1的概述", "李四", "高", "2", "", "", ""};
+        String[] data4 = {"", "", "", "", "", "故事1的子任务1的概述", "请输入子任务1的描述信息", "李四", "高", "2", "", "", ""};
         createRow(sheet, count++, subArray(data4, withFeature), coralBackground);
 
-        String[] data5 = {"", "", "", "", "", "请输入子任务2的描述信息", "故事1的子任务2的概述", "王五", "中", "4", "", "", ""};
+        String[] data5 = {"", "", "", "", "", "故事1的子任务2的概述", "请输入子任务2的描述信息", "王五", "中", "4", "", "", ""};
         createRow(sheet, count++, subArray(data5, withFeature), coralBackground);
 
-        String[] data6 = {"", "", "", "", "", "请输入子任务3的描述信息", "故事1的子任务3的概述……", "陈七", "低", "2", "", "", ""};
+        String[] data6 = {"", "", "", "", "", "故事1的子任务3的概述……", "请输入子任务3的描述信息", "陈七", "低", "2", "", "", ""};
         createRow(sheet, count++, subArray(data6, withFeature), coralBackground);
 
-        String[] data7 = {"任务", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入任务的概述：任务1", "请输入任务2的描述信息", "", "王五", "中", "5", "0.2", "", ""};
+        String[] data7 = {"任务", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入任务的概述：任务1", "", "请输入任务2的描述信息", "王五", "中", "5", "0.2", "", ""};
         createRow(sheet, count++, subArray(data7, withFeature), null);
 
-        String[] data8 = {"", "", "", "", "", "请输入子任务4的描述信息", "任务1的子任务4的概述", "小六", "中", "2", "0.2", "", ""};
+        String[] data8 = {"", "", "", "", "", "任务1的子任务4的概述", "请输入子任务4的描述信息", "小六", "中", "2", "0.2", "", ""};
         createRow(sheet, count++, subArray(data8, withFeature), null);
 
-        String[] data9 = {"", "", "", "", "", "请输入子任务5的描述信息", "任务1的子任务5的概述", "初八", "中", "2", "0.2", "", ""};
+        String[] data9 = {"", "", "", "", "", "任务1的子任务5的概述", "请输入子任务5的描述信息", "初八", "中", "2", "0.2", "", ""};
         createRow(sheet, count++, subArray(data9, withFeature), null);
 
 
-        String[] data10 = {"故事", secondColumnValue, "敏捷管理", "sprint-1", "这里输入故事的概述：故事2", "仅导入故事", "", "张三", "中", "8", "0.1", "2", ""};
+        String[] data10 = {"故事", secondColumnValue, "敏捷管理", "sprint-1", "这里输入故事的概述：故事2", "", "仅导入故事", "张三", "中", "8", "0.1", "2", ""};
         createRow(sheet, count++, subArray(data10, withFeature), coralBackground);
 
-        String[] data11 = {"任务", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入任务的概述：任务2", "请输入任务2的描述信息", "", "张三", "中", "8", "0.1", "", ""};
+        String[] data11 = {"任务", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入任务的概述：任务2", "", "请输入任务2的描述信息", "张三", "中", "8", "0.1", "", ""};
         createRow(sheet, count++, subArray(data11, withFeature), null);
 
-        String[] data12 = {"缺陷", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入缺陷的概述：缺陷1", "请输入缺陷2的描述信息", "", "李四", "低", "0.5", "0.1", "", ""};
+        String[] data12 = {"缺陷", secondColumnValue, "敏捷管理", "sprint-1", "请在此处输入缺陷的概述：缺陷1", "", "请输入缺陷2的描述信息", "李四", "低", "0.5", "0.1", "", ""};
         createRow(sheet, count++, subArray(data12, withFeature), coralBackground);
     }
 
@@ -270,7 +271,11 @@ public class ExcelUtil {
         createGuideSheet(workbook, initGuideSheet(), withFeature);
         Sheet resultSheet = workbook.createSheet(sheetName);
         CellStyle style = CatalogExcelUtil.getHeadStyle(workbook);
-        generateHeaders(resultSheet, style, Arrays.asList(fieldsName));
+        Map<Integer,Integer> widthMap = new HashMap<>();
+        widthMap.put(1, 8000);
+        widthMap.put(5, 8000);
+        widthMap.put(12, 8000);
+        generateHeaders(resultSheet, style, Arrays.asList(fieldsName), widthMap);
 
         List<Predefined> predefinedList = new ArrayList<>();
         predefinedList.add(new Predefined(priorityList, 1, 500, 7, 7, "hidden_priority", 2));
@@ -323,18 +328,19 @@ public class ExcelUtil {
         return workbook;
     }
 
-    public static void generateHeaders(Sheet sheet, CellStyle style, List<String> headers) {
+    public static void generateHeaders(Sheet sheet, CellStyle style, List<String> headers,
+                                       Map<Integer, Integer> widthMap) {
         Row row = sheet.createRow(0);
         int columnNum = headers.size();
+        int defaultWidth = 4000;
         for (int i = 0; i < columnNum; i++) {
-            int width = 3500;
-            //子任务名称和史诗名称两列加宽
-            if (i == 6 || i == 12) {
-                width = 8000;
+            if (!ObjectUtils.isEmpty(widthMap)
+                    && !ObjectUtils.isEmpty(widthMap.get(i))) {
+                sheet.setColumnWidth(i, widthMap.get(i));
+            } else {
+                sheet.setColumnWidth(i, defaultWidth);
             }
-            sheet.setColumnWidth(i, width);
         }
-
         for (int i = 0; i < headers.size(); i++) {
             CatalogExcelUtil.initCell(row.createCell(i), style, headers.get(i));
         }

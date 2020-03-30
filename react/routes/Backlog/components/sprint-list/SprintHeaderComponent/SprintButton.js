@@ -14,7 +14,7 @@ function SprintButton({
   data,
 }) {
   const {
-    statusCode, sprintId, piId,
+    statusCode, sprintId,
   } = data;
   const issueList = BacklogStore.getIssueListBySprintId(sprintId);
   const hasActiveSprint = BacklogStore.getHasActiveSprint;
@@ -68,13 +68,14 @@ function SprintButton({
       >
         开启冲刺
       </p>
-      {(piId || data.sprintType === 'ip') // ip冲刺不可删除
-        ? '' : (
-          <Dropdown overlay={menu} trigger={['click']}>
-            <Icon style={{ cursor: 'pointer', marginRight: 15 }} type="more_vert" />
-          </Dropdown>
-        )
-        }
+      {/* ip冲刺不可删除 */}
+      {(data.sprintType !== 'ip'
+          && (
+            <Dropdown overlay={menu} trigger={['click']}>
+              <Icon style={{ cursor: 'pointer', marginRight: 15 }} type="more_vert" />
+            </Dropdown>
+          )
+        )}
     </Fragment>
   );
 }

@@ -631,7 +631,6 @@ class SprintReport extends Component {
             <Tooltip mouseEnterDelay={0.5} placement="topLeft" title={`任务状态： ${record.statusVO.name}`}>
               <div>
                 <StatusTag
-                  inTable
                   style={{ display: 'inline-block' }}
                   name={record.statusVO.name}
                   color={STATUS[record.statusVO.type]}

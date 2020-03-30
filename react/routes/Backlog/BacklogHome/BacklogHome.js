@@ -27,6 +27,7 @@ class BacklogHome extends Component {
   componentDidMount() {
     const { BacklogStore } = this.props;
     BacklogStore.refresh();
+    IsInProgramStore.refresh();
     IsInProgramStore.loadIsShowFeature().then(res => res && IsInProgramStore.loadPiInfoAndSprint());
   }
 
@@ -42,23 +43,10 @@ class BacklogHome extends Component {
     BacklogStore.resetFilter();
   }
 
-  paramConverter = (url) => {
-    const reg = /[^?&]([^=&#]+)=([^&#]*)/g;
-    const retObj = {};
-    url.match(reg).forEach((item) => {
-      const [tempKey, paramValue] = item.split('=');
-      const paramKey = tempKey[0] !== '&' ? tempKey : tempKey.substring(1);
-      Object.assign(retObj, {
-        [paramKey]: paramValue,
-      });
-    });
-    return retObj;
-  };
-
   /**
    * 创建冲刺
    */
-  handleCreateSprint = () => {
+  handleCreateSprint = async () => {
     const { BacklogStore } = this.props;
     const onCreate = (sprint) => {
       BacklogStore.setCreatedSprint(sprint.sprintId);
@@ -78,8 +66,9 @@ class BacklogHome extends Component {
   /**
    * 当前PI下创建冲刺
    */
-  handleCreateCurrentPiSprint = () => {
+  handleCreateCurrentPiSprint = async () => {
     const { BacklogStore } = this.props;
+    await IsInProgramStore.loadPiInfoAndSprint();
     const artInfo = IsInProgramStore.getArtInfo;
     const onCreate = (sprint) => {
       BacklogStore.setCreatedSprint(sprint.sprintId);
@@ -103,16 +92,6 @@ class BacklogHome extends Component {
       children: <CreateCurrentPiSprint onCreate={onCreate} PiName={`${piInfo.code}-${piInfo.name}`} sprints={sprints} piId={piInfo.id} />,
     });
   };
-
-  onQuickSearchChange = (onlyMeChecked, onlyStoryChecked, moreChecked) => {
-    const { BacklogStore } = this.props;
-    BacklogStore.setQuickFilters(onlyMeChecked, onlyStoryChecked, moreChecked);
-    BacklogStore.axiosGetSprint()
-      .then((res) => {
-        BacklogStore.setSprintData(res);
-      }).catch((error) => {
-      });
-  }
 
   handleClickCBtn = () => {
     const { BacklogStore } = this.props;

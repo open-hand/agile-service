@@ -148,27 +148,14 @@ class StartSprint extends Component {
   };
 
   isDisabledOption(value) {
-    if (IsInProgramStore.isShowFeature) {
-      const { data: { sprintId }, form: { getFieldValue } } = this.props;
-      // const {
-      //   startDate,
-      // } = this.state;
-      // const fieldStartDate = getFieldValue('startDate') || moment();
-      // 目前 开始时间限定为当前
-      const fieldStartDate = moment();
-      const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
-      const optionDateFormat = moment(startDateFormat).add(parseInt(value, 10), 'w').format('YYYY-MM-DD HH:mm:ss');
-      // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
-      let isBan = !moment(optionDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
-        || !moment(optionDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
-        || IsInProgramStore.stopChooseBetween(optionDateFormat, sprintId); 
-      if (!isBan && fieldStartDate) {
-        const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
-        if (moment(optionDateFormat).isAfter(maxTime)) {
-          isBan = true;
-        }
-      }
-      return isBan;
+    const { data: { sprintType } } = this.props;
+    if (sprintType) {
+      const { data: { sprintId } } = this.props;
+      // 开启日期是当前时间
+      const startDate = moment();
+      // 使用moment套一下，因为add是会改变原值的
+      const endDate = moment(startDate).add(parseInt(value, 10), 'weeks');
+      return !IsInProgramStore.rangeCanChoose(startDate, endDate, sprintId);
     }
     return false;
   }
@@ -179,6 +166,7 @@ class StartSprint extends Component {
       data: { sprintId },
       workSetting,
       sprintDetail,
+      form,
       form: { getFieldDecorator, getFieldValue, setFieldsValue },
     } = this.props;
     const {
@@ -186,7 +174,9 @@ class StartSprint extends Component {
       startDate,
       endDate,
     } = this.state;
-    const { piId, startDate: start, endDate: end } = data;
+    const {
+      piId, startDate: start, endDate: end, sprintType,
+    } = data;
     const {
       saturdayWork,
       sundayWork,
@@ -218,44 +208,58 @@ class StartSprint extends Component {
               <TextArea label="目标" autoSize maxLength={30} />,
             )}
           </FormItem>
-          {!piId
+          <FormItem>
+            {getFieldDecorator('duration', {
+              initialValue: '0',
+            })(
+              <Select
+                label="周期"
+                onChange={(value) => {
+                  if (parseInt(value, 10) > 0) {
+                    if (!getFieldValue('startDate')) {
+                      setFieldsValue({
+                        startDate: moment(),
+                      });
+                      this.setState({
+                        startDate: moment(),
+                      });
+                    }
+                    setFieldsValue({
+                      endDate: moment(getFieldValue('startDate')).add(parseInt(value, 10), 'w'),
+                    });
+                    this.setState({
+                      endDate: moment(getFieldValue('startDate')).add(parseInt(value, 10), 'w'),
+                    });
+                  }
+                }}
+              >
+                <Option value="0">自定义</Option>
+                <Option value="1" disabled={this.isDisabledOption('1')}>1周</Option>
+                <Option value="2" disabled={this.isDisabledOption('2')}>2周</Option>
+                <Option value="4" disabled={this.isDisabledOption('4')}>4周</Option>
+              </Select>,
+            )}
+          </FormItem>
+          {sprintType
             ? (
               <FormItem>
-                {getFieldDecorator('duration', {
-                  initialValue: '0',
+                {getFieldDecorator('startDate', {
+                  rules: [{
+                    required: true,
+                    message: '开始日期是必填的',
+                  }],
+                  initialValue: moment(),
                 })(
-                  <Select
-                    label="周期"
-                    onChange={(value) => {
-                      if (parseInt(value, 10) > 0) {
-                        if (!getFieldValue('startDate')) {
-                          setFieldsValue({
-                            startDate: moment(),
-                          });
-                          this.setState({
-                            startDate: moment(),
-                          });
-                        }
-                        setFieldsValue({
-                          endDate: moment(getFieldValue('startDate')).add(parseInt(value, 10), 'w'),
-                        });
-                        this.setState({
-                          endDate: moment(getFieldValue('startDate')).add(parseInt(value, 10), 'w'),
-                        });
-                      }
-                    }}
-                  >
-                    <Option value="0">自定义</Option>
-                    <Option value="1" disabled={this.isDisabledOption('1')}>1周</Option>
-                    <Option value="2" disabled={this.isDisabledOption('2')}>2周</Option>
-                    <Option value="4" disabled={this.isDisabledOption('4')}>4周</Option>
-                  </Select>,
+                  <DatePicker
+                    style={{ width: '100%' }}
+                    label="开始日期"
+                    showTime
+                    format="YYYY-MM-DD HH:mm:ss"
+                    disabled
+                  />,
                 )}
               </FormItem>
-            ) : ''
-          }
-          {!piId
-            ? (
+            ) : (
               <FormItem>
                 {getFieldDecorator('startDate', {
                   rules: [{
@@ -274,34 +278,17 @@ class StartSprint extends Component {
                     style={{ width: '100%' }}
                     label="开始日期"
                     showTime
-                    disabled={IsInProgramStore.isShowFeature}
                     format="YYYY-MM-DD HH:mm:ss"
                     disabledDate={(current) => {
-                      if (current < moment().subtract(1, 'days')) {
+                      if (current < moment()) {
                         return true;
                       }
                       if (endDate && current > moment(endDate)) {
                         return true;
                       }
-                      // 用于项目群下开始日期验证
-                      // if (current && IsInProgramStore.isShowFeature) {
-                      //   const fieldEndDate = getFieldValue('endDate');
-                      //   const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
-                      //   let isBan = IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
-                      //   if (!isBan && fieldEndDate) {
-                      //     const endDateFormat = moment(fieldEndDate).format('YYYY-MM-DD HH:mm:ss');
-                      //     const minTime = IsInProgramStore.findDateMinRange(endDateFormat, sprintId);
-                      //     // console.log(isBan, 'current', minTime, current);
-                      //     if (moment(currentDateFormat).isBefore(minTime)) {
-                      //       isBan = true;
-                      //     }
-                      //   }
-
-                      //   return isBan;
-                      // }
                       return false;
                     }}
-                    onChange={(date, dateString) => {
+                    onChange={(date) => {
                       setFieldsValue({
                         startDate: date,
                       });
@@ -320,82 +307,9 @@ class StartSprint extends Component {
                   />,
                 )}
               </FormItem>
-            ) : (
-              <FormItem>
-                {getFieldDecorator('startDate', {
-                  rules: [{
-                    required: true,
-                    message: '开始日期是必填的',
-                  }],
-                  initialValue: moment(start),
-                })(
-                  <DatePicker
-                    style={{ width: '100%' }}
-                    label="开始日期"
-                    showTime
-                    format="YYYY-MM-DD HH:mm:ss"
-                    disabled
-                  />,
-                )}
-              </FormItem>
-            )
-          }
-          {!piId
+            )}
+          {sprintType
             ? (
-              <FormItem>
-                {getFieldDecorator('endDate', {
-                  rules: [{
-                    required: true,
-                    message: '结束日期是必填的',
-                  }],
-                  initialValue: end ? moment(end) : undefined,
-                })(
-                  <DatePicker
-                    style={{ width: '100%' }}
-                    label="结束日期"
-                    format="YYYY-MM-DD HH:mm:ss"
-                    // ip冲刺时禁止结束时间
-                    disabled={sprintDetail.type === 'ip' || parseInt(getFieldValue('duration'), 10) > 0}
-                    showTime
-                    onChange={(date) => {
-                      this.setState({
-                        endDate: date,
-                      });
-                    }}
-                    disabledDate={(current) => {
-                      if (current < moment().subtract(1, 'days')) {
-                        return true;
-                      }
-                      if (startDate && current < moment(startDate)) {
-                        return true;
-                      }
-
-                      if (current && IsInProgramStore.isShowFeature) {
-                        const fieldStartDate = getFieldValue('startDate');
-                        const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
-                        let isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
-                        || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
-                        || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId); 
-
-                        if (!isBan && fieldStartDate) {
-                          const startDateFormat = moment(fieldStartDate).format('YYYY-MM-DD HH:mm:ss');
-                          const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
-                          // console.log(isBan, 'current', maxTime, current);
-                          // console.log('******************************');
-                          if (moment(currentDateFormat).isAfter(maxTime)) {
-                            isBan = true;
-                          }
-                        }
-
-                        return isBan;
-                      }
-                      return false;
-                    }
-                    }
-                  />,
-                )}
-              </FormItem>
-            ) : (
               <FormItem>
                 {getFieldDecorator('endDate', {
                   rules: [{
@@ -408,15 +322,66 @@ class StartSprint extends Component {
                     style={{ width: '100%' }}
                     label="结束日期"
                     format="YYYY-MM-DD HH:mm:ss"
-                    disabled
+                    disabled={sprintDetail.type === 'ip' || parseInt(getFieldValue('duration'), 10) > 0}
+                    disabledDate={(date) => {
+                      if (date < moment()) {
+                        return true;
+                      }
+                      // eslint-disable-next-line no-shadow
+                      const startDate = form.getFieldValue('startDate');
+                      if (!sprintType && startDate) {
+                        return date <= startDate;
+                      } else {
+                        // 没选开始时间的时候，只判断时间点能不能选
+                        // eslint-disable-next-line no-lonely-if
+                        if (!startDate) {
+                          return !IsInProgramStore.dateCanChoose(date, sprintId);
+                        } else {
+                          // 选了开始时间之后，判断形成的时间段是否和其他重叠
+                          return !IsInProgramStore.rangeCanChoose(startDate, date, sprintId);
+                        }
+                      }              
+                    }}
                     showTime
+                  />,
+                )}
+              </FormItem>
+            ) : (
+              <FormItem>
+                {getFieldDecorator('endDate', {
+                  rules: [{
+                    required: true,
+                    message: '结束日期是必填的',
+                  }],
+                  initialValue: end ? moment(end) : undefined,
+                })(
+                  <DatePicker
+                    style={{ width: '100%' }}
+                    label="结束日期"
+                    format="YYYY-MM-DD HH:mm:ss"
+                    showTime
+                    onChange={(date) => {
+                      this.setState({
+                        endDate: date,
+                      });
+                    }}
+                    disabledDate={(current) => {
+                      if (current < moment()) {
+                        return true;
+                      }
+                      if (startDate && current < moment(startDate)) {
+                        return true;
+                      }
+                      return false;
+                    }
+                    }
                   />,
                 )}
               </FormItem>
             )
           }
         </Form>
-        {!piId && startDate && endDate
+        {!sprintType && startDate && endDate
           ? (
             <div>
               <div style={{ marginBottom: 20 }}>
@@ -446,7 +411,7 @@ class StartSprint extends Component {
             </div>
           ) : ''
         }
-        {piId
+        {sprintType
           ? (
             <div>
               <div style={{ marginBottom: 20 }}>

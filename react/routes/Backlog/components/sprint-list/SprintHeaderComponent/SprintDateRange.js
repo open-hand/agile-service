@@ -1,30 +1,33 @@
 import React, { Component, createRef } from 'react';
 import moment from 'moment';
 import { observer } from 'mobx-react';
-import { DatePicker, message } from 'choerodon-ui';
+import { DatePicker, message, Form } from 'choerodon-ui';
 import TextEditToggle from '@/components/TextEditToggle';
 import { getProjectId, catchFailed } from '@/common/utils';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import IsInProgramStore from '../../../../../stores/common/program/IsInProgramStore';
 
 const { Text, Edit } = TextEditToggle;
+const FormItem = Form.Item;
 
 @observer class SprintDateRange extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.startDateEdit = createRef();
     this.endDateEdit = createRef();
   }
 
-  handleUpdateDate = (type, dateString) => {
-    const date = `${dateString} 00:00:00`;
+  handleUpdateDate = (date) => {
+    // const date = `${dateString} 00:00:00`;
     const { data } = this.props;
+    const { startDate, endDate } = date;
     const { objectVersionNumber, sprintId } = data;
     const req = {
       objectVersionNumber,
       projectId: getProjectId(),
       sprintId: data.sprintId,
-      [type]: date,
+      startDate,
+      endDate,
     };
     BacklogStore.axiosUpdateSprint(req, IsInProgramStore.isShowFeature).then(res => catchFailed(res)).then((res) => {
       BacklogStore.updateSprint(sprintId, {
@@ -41,14 +44,13 @@ const { Text, Edit } = TextEditToggle;
     });
   };
 
-  // console.log('data', data);
   render() {
     const {
       data: {
-        statusCode, startDate, endDate, sprintId,
-      }, disabled,
+        statusCode, startDate, endDate, sprintId, sprintType,
+      }, form: { getFieldDecorator }, form,
     } = this.props;
-    return (IsInProgramStore.isShowFeature || statusCode === 'started') ? (
+    return (sprintType || statusCode === 'started') ? (
       <div
         className="c7n-backlog-sprintData"
         style={{
@@ -58,8 +60,20 @@ const { Text, Edit } = TextEditToggle;
         role="none"
       >
         <TextEditToggle
-          disabled={disabled || statusCode === 'started'}
+          disabled={sprintType === 'ip'} // ip冲刺禁止修改时间
           saveRef={this.startDateEdit}
+          onSubmit={() => {
+            form.validateFields((err, values) => {
+              if (!err) {
+                // console.log('v', values);
+                this.handleUpdateDate({
+                  startDate: values.startDate.format('YYYY-MM-DD HH:mm:ss'),
+                  endDate: values.endDate.format('YYYY-MM-DD HH:mm:ss'),
+                });
+              }
+            });
+            form.resetFields();
+          }}
         >
           <Text>
             <div
@@ -68,62 +82,7 @@ const { Text, Edit } = TextEditToggle;
             >
               {startDate ? moment(startDate, 'YYYY-MM-DD HH:mm:ss').format('YYYY年MM月DD日 HH:mm:ss') : '无'}
             </div>
-          </Text>
-          <Edit>
-            {({ width }) => (
-              <DatePicker
-                autoFocus
-                style={{ width, height: 32 }}
-                allowClear={false}
-                defaultOpen
-                defaultValue={startDate ? moment(startDate, 'YYYY-MM-DD HH-mm-ss') : ''}
-                disabledDate={endDate ? (current) => {
-                  // return true;
-                  const endDateFormat = moment(endDate).format('YYYY-MM-DD HH:mm:ss');
-                  if (current > moment(endDateFormat, 'YYYY-MM-DD HH:mm:ss')) {
-                    return true;
-                  } else if (IsInProgramStore.isShowFeature) { // 项目群启用 
-                    const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
-                    // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
-                    let isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
-                      || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
-                      || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
-                    // eslint-disable-next-line no-plusplus
-                    if (!isBan) {
-                      const minTime = IsInProgramStore.findDateMinRange(endDateFormat, sprintId);
-                      if (moment(currentDateFormat).isBefore(minTime)) {
-                        isBan = true;
-                      }
-                    }
-
-                    return isBan;
-                  } else {
-                    return false;
-                  }
-
-                  // if(current > moment(endDate, 'YYYY-MM-DD HH:mm:ss'))
-                } : ''}
-                format="YYYY-MM-DD HH:mm:ss"
-                showTime
-                onChange={(date, dateString) => {
-                  this.handleUpdateDate('startDate', dateString);
-                }}
-                onOpenChange={(open) => {
-                  if (!open) {
-                    this.startDateEdit.current.leaveEditing();
-                  }
-                }}
-              />
-            )}
-
-          </Edit>
-        </TextEditToggle>
-        <p>~</p>
-        <TextEditToggle
-          disabled={disabled}
-          saveRef={this.endDateEdit}
-        >
-          <Text>
+            <p>~</p>
             <div
               className="c7n-backlog-sprintDataItem"
             >
@@ -131,49 +90,83 @@ const { Text, Edit } = TextEditToggle;
             </div>
           </Text>
           <Edit>
-            {({ width }) => (
-              <DatePicker
-                autoFocus
-                style={{ width, height: 32 }}
-                allowClear={false}
-                defaultOpen
-                defaultValue={endDate ? moment(endDate, 'YYYY-MM-DD HH-mm-ss') : ''}
-                disabledDate={startDate ? (current) => {
-                  const startDateFormat = moment(startDate).format('YYYY-MM-DD HH:mm:ss');
+            <Form>
+              <div style={{ display: 'flex' }}>
+                <FormItem>
+                  {getFieldDecorator('startDate', {
+                    rules: [
+                      { required: true, message: '请选择开始日期' },
+                    ],
+                    initialValue: startDate ? moment(startDate, 'YYYY-MM-DD HH:mm:ss') : '',
+                  })(
+                    <DatePicker
+                      autoFocus
+                      style={{ width: 165, height: 32 }}
+                      allowClear
+                      disabled={statusCode === 'started'}
+                      disabledDate={(date) => {
+                        if (!date) {
+                          return false;
+                        }
+                        // eslint-disable-next-line no-shadow
+                        const endDate = form.getFieldValue('endDate');
+                        if (!sprintType && endDate) {
+                          return date >= endDate;
+                        } else {
+                          // 没选结束时间的时候，只判断时间点能不能选
+                          // eslint-disable-next-line no-lonely-if
+                          if (!endDate) {
+                            return !IsInProgramStore.dateCanChoose(date, sprintId);
+                          } else {
+                            // 选了结束时间之后，判断形成的时间段是否和其他重叠
+                            return !IsInProgramStore.rangeCanChoose(date, endDate, sprintId);
+                          }
+                        }                  
+                      }}
+                      format="YYYY-MM-DD HH:mm:ss"
+                      showTime
+                    />,
+                  )}
+                </FormItem>
 
-                  if (current < moment(startDate, 'YYYY-MM-DD HH:mm:ss')) {
-                    return true;
-                  } else if (IsInProgramStore.isShowFeature) { // 项目群启用
-                    const currentDateFormat = current.format('YYYY-MM-DD HH:mm:ss');
-                    // 时间要在pi结束时间与开始时间内  还要满足时间不能再冲刺范围内
-                    let isBan = !moment(currentDateFormat).isBefore(IsInProgramStore.getPiInfo.endDate)
-                      || !moment(currentDateFormat).isAfter(IsInProgramStore.piInfo.actualStartDate || IsInProgramStore.piInfo.startDate)
-                      || IsInProgramStore.stopChooseBetween(currentDateFormat, sprintId);
-                    // eslint-disable-next-line no-plusplus
-                    if (!isBan) {
-                      const maxTime = IsInProgramStore.findDateMaxRange(startDateFormat, sprintId);
-                      if (moment(currentDateFormat).isAfter(maxTime)) {
-                        isBan = true;
-                      }
-                    }
-                    return isBan;
-                  } else {
-                    return false;
-                  }
-                } : ''}
-                format="YYYY-MM-DD HH:mm:ss"
-                showTime
-                onChange={(date, dateString) => {
-                  this.handleUpdateDate('endDate', dateString);
-                }}
-                d
-                onOpenChange={(open) => {
-                  if (!open) {
-                    this.endDateEdit.current.leaveEditing();
-                  }
-                }}
-              />
-            )}
+                <p style={{ marginTop: '.08rem' }}>~</p>
+                <FormItem>
+                  {getFieldDecorator('endDate', {
+                    rules: [
+                      { required: true, message: '请选择结束日期' },
+                    ],
+                    initialValue: endDate ? moment(endDate, 'YYYY-MM-DD HH:mm:ss') : '',
+                  })(
+                    <DatePicker
+                      autoFocus
+                      style={{ width: 165, height: 32 }}
+                      allowClear
+                      disabledDate={(date) => {
+                        if (!date) {
+                          return false;
+                        }
+                        // eslint-disable-next-line no-shadow
+                        const startDate = form.getFieldValue('startDate');
+                        if (!sprintType && startDate) {
+                          return date <= startDate;
+                        } else {
+                          // 没选开始时间的时候，只判断时间点能不能选
+                          // eslint-disable-next-line no-lonely-if
+                          if (!startDate) {
+                            return !IsInProgramStore.dateCanChoose(date, sprintId);
+                          } else {
+                            // 选了开始时间之后，判断形成的时间段是否和其他重叠
+                            return !IsInProgramStore.rangeCanChoose(startDate, date, sprintId);
+                          }        
+                        }
+                      }}
+                      format="YYYY-MM-DD HH:mm:ss"
+                      showTime
+                    />,
+                  )}
+                </FormItem>
+              </div>
+            </Form>
           </Edit>
         </TextEditToggle>
       </div>
@@ -181,4 +174,4 @@ const { Text, Edit } = TextEditToggle;
   }
 }
 
-export default SprintDateRange;
+export default Form.create({})(SprintDateRange);

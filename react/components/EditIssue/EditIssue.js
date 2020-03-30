@@ -3,7 +3,7 @@ import React, {
   useContext, useState, useEffect, useImperativeHandle, useRef,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { stores, axios } from '@choerodon/boot';
+import { stores, axios, Choerodon } from '@choerodon/boot';
 import { Spin } from 'choerodon-ui';
 import { throttle } from 'lodash';
 import './EditIssue.less';
@@ -38,7 +38,7 @@ const defaultProps = {
 function EditIssue() {
   const [issueLoading, setIssueLoading] = useState(false);
   const {
-    onCurrentClicked, // 设置当前加载的问题详情信息
+    afterIssueUpdate,
     store,
     forwardedRef,
     issueId: currentIssueId,
@@ -65,7 +65,7 @@ function EditIssue() {
   const idRef = useRef();
   // 判断是否为子项目 如果是子项目 则将史诗从左上角删掉 并将史诗栏替换成特性栏
   const { isInProgram } = IsInProgramStore;
-  const loadIssueDetail = (paramIssueId) => {
+  const loadIssueDetail = async (paramIssueId) => {
     if (FieldVersionRef.current) {
       FieldVersionRef.current.loadIssueVersions();
     }
@@ -75,54 +75,48 @@ function EditIssue() {
     const id = paramIssueId || currentIssueId;
     idRef.current = id;
     setIssueLoading(true);
-    (programId ? loadIssueProgram(id, programId) : loadIssue(id)).then((res) => {
+    try {
+      // 1. 加载详情
+      const issue = await (programId ? loadIssueProgram(id, programId) : loadIssue(id));
       if (idRef.current !== id) {
         return;
       }
-      // 刷新MOBX中详情信息，防止在列表界面再次点击父问题时无法跳转
-      if (onCurrentClicked) {
-        onCurrentClicked(res);
+      // 详情中更新信息时，外部列表根据这个新的issue信息进行本地更新
+      if (afterIssueUpdate) {
+        afterIssueUpdate(issue);
       }
-
+      // 2. 根据详情加载fields
       const param = {
         schemeCode: 'agile_issue',
-        context: res.typeCode,
+        context: issue.typeCode,
         pageCode: 'agile_issue_edit',
       };
-      (programId ? getFieldAndValueProgram(id, param, programId) : getFieldAndValue(id, param)).then((fields) => {
-        setIssueLoading(false);
-        store.setIssueFields(res, fields);
-      });
+      const fields = await (programId ? getFieldAndValueProgram(id, param, programId) : getFieldAndValue(id, param));
+      setIssueLoading(false);
+      store.setIssueFields(issue, fields);
       if (issueStore) {
-        issueStore.setSelectedIssue(res);
+        issueStore.setSelectedIssue(issue);
       }
-    });
-    if (programId || applyType === 'program') {
-      axios.all([
+      // 3. 加载额外信息
+      const [
+        doc, 
+        workLogs,
+        dataLogs, 
+        linkIssues,
+        branches,
+      ] = await Promise.all([
         loadDocs(id),
+        programId || applyType === 'program' ? null : loadWorklogs(id),
         programId ? loadDatalogsProgram(id, programId) : loadDatalogs(id),
-        loadLinkIssues(id, 'program'),
-      ]).then(axios.spread((doc, dataLogs, linkIssues) => {
-        if (idRef.current !== id) {
-          return;
-        }
-        store.initIssueAttribute(doc, [], dataLogs, linkIssues, {}, []);
-      }));
-    } else {
-      axios.all([
-        loadDocs(id),
-        loadWorklogs(id),
-        loadDatalogs(id),
-        loadLinkIssues(id),
-        loadBranchs(id),
-        // getTestExecute(id),
-      ])
-        .then(axios.spread((doc, workLogs, dataLogs, linkIssues, branches) => {
-          if (idRef.current !== id) {
-            return;
-          }
-          store.initIssueAttribute(doc, workLogs, dataLogs, linkIssues, branches, []);
-        }));
+        programId || applyType === 'program' ? null : loadLinkIssues(id),
+        programId || applyType === 'program' ? null : loadBranchs(id),
+      ]);
+      if (idRef.current !== id) {
+        return;
+      }
+      store.initIssueAttribute(doc, workLogs, dataLogs, linkIssues, branches, []);
+    } catch (error) {
+      Choerodon.prompt(error.message, 'error');
     }
   };
 

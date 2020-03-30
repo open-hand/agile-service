@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import {
   Dropdown, Icon, Menu, Button, Modal,
-} from 'choerodon-ui'; 
+} from 'choerodon-ui';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
@@ -9,12 +9,12 @@ import { deleteIssue } from '../../../api/NewIssueApi';
 
 const { confirm } = Modal;
 const IssueDropDown = ({
-  onDeleteIssue, loginUserId, hasPermission, reloadIssue, 
+  onDeleteIssue, loginUserId, hasPermission, reloadIssue,
 }) => {
   const { store, onUpdate } = useContext(EditIssueContext);
   const issue = store.getIssue;
   const {
-    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, 
+    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber,
   } = issue;
 
   const handleDeleteIssue = () => {
@@ -64,7 +64,7 @@ const IssueDropDown = ({
       ModalPro.open({
         title: '分配问题',
         children: <Assignee
-          issueId={issueId}         
+          issueId={issueId}
           assigneeId={assigneeId}
           objectVersionNumber={objectVersionNumber}
           onOk={() => {
@@ -116,9 +116,11 @@ const IssueDropDown = ({
           </Menu.Item>
         )
       }
-      <Menu.Item key="3">
-        复制问题
-      </Menu.Item>
+      {['feature'].indexOf(typeCode) === -1 && (
+        <Menu.Item key="3">
+          复制问题
+        </Menu.Item>
+      )}
       {
         ['sub_task', 'feature', 'issue_epic'].indexOf(typeCode) === -1 && subIssueVOList.length === 0 && (
           <Menu.Item key="4">
@@ -168,7 +170,7 @@ const IssueDropDown = ({
       overlay={getMenu()}
       trigger={['click']}
       getPopupContainer={trigger => trigger.parentNode}
-      placement="bottomRight"   
+      placement="bottomRight"
     >
       <Button icon="more_vert" />
     </Dropdown>

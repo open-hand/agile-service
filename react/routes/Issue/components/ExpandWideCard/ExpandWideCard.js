@@ -66,7 +66,7 @@ class ExpandWideCard extends Component {
           });
           this.handleIssueDelete();
         }}
-        onCurrentClicked={this.handleResetIssue}
+        afterIssueUpdate={this.handleResetIssue}
         onUpdate={this.handleIssueUpdate}
         onIssueCopy={this.handleIssueCopy}
         onCopyAndTransformToSubIssue={this.handleIssueUpdate}
