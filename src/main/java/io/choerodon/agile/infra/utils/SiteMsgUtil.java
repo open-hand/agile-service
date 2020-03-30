@@ -1,18 +1,18 @@
 package io.choerodon.agile.infra.utils;
 
+import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.ProjectVO;
+import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.core.notify.NoticeSendDTO;
+import io.choerodon.core.notify.WebHookJsonSendDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/10/8.
@@ -33,6 +33,8 @@ public class SiteMsgUtil {
     private NotifyFeignClient notifyFeignClient;
     @Autowired
     private BaseFeignClient baseFeignClient;
+    @Autowired
+    private UserService userService;
 
     public void issueCreate(List<Long> userIds,String userName, String summary, String url, Long reporterId, Long projectId) {
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
@@ -56,6 +58,13 @@ public class SiteMsgUtil {
         fromUser.setId(reporterId);
         noticeSendDTO.setFromUser(fromUser);
         noticeSendDTO.setSourceId(projectId);
+        // 添加webhook
+        WebHookJsonSendDTO webHookJsonSendDTO = new WebHookJsonSendDTO();
+        webHookJsonSendDTO.setObjectKind("issueCreate");
+        webHookJsonSendDTO.setEventName("问题创建");
+        webHookJsonSendDTO.setObjectAttributes((JSONObject) JSONObject.toJSON(params));
+        webHookJsonSendDTO.setCreatedAt(new Date());
+        webHookJsonSendDTO.setUser(userService.getWebHookUserById(reporterId));
         try {
             notifyFeignClient.postNotice(noticeSendDTO);
         } catch (Exception e) {
@@ -85,6 +94,13 @@ public class SiteMsgUtil {
         fromUser.setId(assigneeId);
         noticeSendDTO.setFromUser(fromUser);
         noticeSendDTO.setSourceId(projectId);
+        // 添加webhook
+        WebHookJsonSendDTO webHookJsonSendDTO = new WebHookJsonSendDTO();
+        webHookJsonSendDTO.setObjectKind("issueAssignee");
+        webHookJsonSendDTO.setEventName("问题分配");
+        webHookJsonSendDTO.setObjectAttributes((JSONObject) JSONObject.toJSON(params));
+        webHookJsonSendDTO.setCreatedAt(new Date());
+        webHookJsonSendDTO.setUser(userService.getWebHookUserById(assigneeId));
         try {
             notifyFeignClient.postNotice(noticeSendDTO);
         } catch (Exception e) {
@@ -114,6 +130,13 @@ public class SiteMsgUtil {
         fromUser.setId(assigneeId);
         noticeSendDTO.setFromUser(fromUser);
         noticeSendDTO.setSourceId(projectId);
+        // 添加webhook
+        WebHookJsonSendDTO webHookJsonSendDTO = new WebHookJsonSendDTO();
+        webHookJsonSendDTO.setObjectKind("issueSolve");
+        webHookJsonSendDTO.setEventName("问题完成");
+        webHookJsonSendDTO.setObjectAttributes((JSONObject) JSONObject.toJSON(params));
+        webHookJsonSendDTO.setCreatedAt(new Date());
+        webHookJsonSendDTO.setUser(userService.getWebHookUserById(assigneeId));
         try {
             notifyFeignClient.postNotice(noticeSendDTO);
         } catch (Exception e) {

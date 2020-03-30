@@ -10,6 +10,7 @@ import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.core.notify.WebHookJsonSendDTO;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,4 +121,16 @@ public class UserServiceImpl implements UserService {
         return projectDTOResponseEntity != null ? projectDTOResponseEntity.getBody() : null;
     }
 
+    @Override
+    public WebHookJsonSendDTO.User getWebHookUserById(Long userId) {
+        Long[] ids = new Long[2];
+        ids[0] = userId;
+        ResponseEntity<List<UserDTO>> users = baseFeignClient.listUsersByIds(ids, false);
+        if (users != null) {
+            UserDTO userDTO = users.getBody().get(0);
+            return new WebHookJsonSendDTO.User(userDTO.getLoginName(), userDTO.getRealName());
+        } else {
+            return new WebHookJsonSendDTO.User("0", "unknown");
+        }
+    }
 }

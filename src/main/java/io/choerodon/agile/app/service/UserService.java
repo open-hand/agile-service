@@ -7,6 +7,7 @@ import io.choerodon.agile.api.vo.RoleVO;
 import io.choerodon.agile.api.vo.UserVO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
+import io.choerodon.core.notify.WebHookJsonSendDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -53,4 +54,6 @@ public interface UserService {
     List<UserDTO> listUsersByIds(Long[] ids);
 
     ProjectVO getGroupInfoByEnableProject(Long organizationId, Long projectId);
+
+    WebHookJsonSendDTO.User getWebHookUserById(Long userId);
 }
