@@ -22,6 +22,7 @@
         <id column="color_value" property="color"/>
         <id column="epic_color" property="epicColor"/>
         <id column="parent_issue_num" property="parentIssueNum"/>
+        <id column="parent_issue_summary" property="parentIssueSummary"/>
         <id column="object_version_number" property="objectVersionNumber"/>
         <id column="priority_id" property="priorityId"/>
         <id column="issue_type_id" property="issueTypeId"/>
@@ -121,6 +122,7 @@
             alv2.name                                                                        AS epic_color,
             alv3.name                                                                        AS color_value,
             IF(ai3.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai3.issue_num)) AS parent_issue_num,
+            ai3.summary                                                                      AS parent_issue_summary,
             IF(ai4.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai4.issue_num)) AS relate_issue_num,
             CONCAT_WS('-', api.project_code, ai.issue_num)                                   AS issue_num_splicing
         FROM agile_issue ai

@@ -118,6 +118,9 @@ public class IssueVO {
     @ApiModelProperty(value = "父任务的问题编码")
     private String parentIssueNum;
 
+    @ApiModelProperty(value = "父任务问题概要")
+    private String parentIssueSummary;
+
     @ApiModelProperty(value = "经办人图标")
     private String assigneeImageUrl;
 
@@ -464,6 +467,14 @@ public class IssueVO {
 
     public void setParentIssueNum(String parentIssueNum) {
         this.parentIssueNum = parentIssueNum;
+    }
+
+    public void setParentIssueSummary(String parentIssueSummary) {
+        this.parentIssueSummary = parentIssueSummary;
+    }
+
+    public String getParentIssueSummary() {
+        return parentIssueSummary;
     }
 
     public SprintNameVO getActiveSprint() {

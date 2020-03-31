@@ -88,6 +88,8 @@ public class IssueDetailDTO {
 
     private String parentIssueNum;
 
+    private String parentIssueSummary;
+
     private PriorityVO priorityVO;
 
     private IssueTypeVO issueTypeVO;
@@ -364,6 +366,14 @@ public class IssueDetailDTO {
 
     public void setParentIssueNum(String parentIssueNum) {
         this.parentIssueNum = parentIssueNum;
+    }
+
+    public void setParentIssueSummary(String parentIssueSummary) {
+        this.parentIssueSummary = parentIssueSummary;
+    }
+
+    public String getParentIssueSummary() {
+        return parentIssueSummary;
     }
 
     public SprintNameDTO getActiveSprint() {
