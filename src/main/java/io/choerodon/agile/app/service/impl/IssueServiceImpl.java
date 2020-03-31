@@ -382,7 +382,7 @@ public class IssueServiceImpl implements IssueService {
             } else {
                 Map<String, String> order = new HashMap<>(1);
                 //处理表映射
-                order.put("issueId", "search.issue_issue_id");
+                order.put("issueId", "t.issue_issue_id");
                 Sort sort = PageUtil.sortResetOrder(pageable.getSort(), SEARCH, order);
                 issueIdPage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(),
                         PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> issueMapper.queryIssueIdsListWithSub
