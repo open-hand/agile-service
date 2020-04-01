@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -368,7 +369,8 @@ public interface IssueMapper extends Mapper<IssueDTO> {
                                         @Param("filterSql") String filterSql,
                                         @Param("assigneeFilterIds") List<Long> assigneeFilterIds);
 
-    List<IssueDTO> queryIssueListWithSubByIssueIds(@Param("issueIds") List<Long> issueIds);
+    List<IssueDTO> queryIssueListWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
+                                                   @Param("childrenIds") Set<Long> childrenIds);
 
     /**
      * 查询issueIds对应的issueDo
@@ -452,4 +454,10 @@ public interface IssueMapper extends Mapper<IssueDTO> {
     List<Long> queryProjectIds();
 
     List<IssueDTO> listIssueInfoByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+
+    Set<Long> queryChildrenIdByParentId(@Param("issueIds") List<Long> issueIds,
+                                        @Param("projectId") Long projectId,
+                                        @Param("searchVO") SearchVO searchVO,
+                                        @Param("filterSql") String filterSql,
+                                        @Param("assigneeFilterIds") List<Long> assigneeFilterIds);
 }
