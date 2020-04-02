@@ -19,6 +19,7 @@ import '../ScrumBoardComponent/RenderSwimLaneContext/RenderSwimLaneContext.less'
 import SwimLane from '../ScrumBoardComponent/RenderSwimLaneContext/SwimLane';
 import CSSBlackMagic from '../../../components/CSSBlackMagic/CSSBlackMagic';
 import HeaderLine from '../../../components/HeaderLine';
+import ScrumBoardFullScreen from '../ScrumBoardComponent/ScrumBoardFullScreen';
 import CreateBoard from '../ScrumBoardComponent/CreateBoard';
 
 const { Option } = Select;
@@ -328,8 +329,10 @@ class ScrumBoardHome extends Component {
                 ))
               }
           </Select>
+          <ScrumBoardFullScreen />
           <HeaderLine />
           <Button
+            className="c7n-scrumboard-settingButton"
             funcType="flat"
             icon="settings"
             style={{

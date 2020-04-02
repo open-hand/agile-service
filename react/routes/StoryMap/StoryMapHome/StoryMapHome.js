@@ -22,7 +22,7 @@ import CreateVersion from './components/CreateVersion';
 import CreateEpicModal from './components/CreateEpicModal';
 import IssueDetail from './components/IssueDetail';
 import StoryMapStore from '../../../stores/project/StoryMap/StoryMapStore';
-import useFullScreen from './useFullScreen';
+import useFullScreen from '../../../common/useFullScreen';
 import './StoryMapHome.less';
 
 const HEX = {
