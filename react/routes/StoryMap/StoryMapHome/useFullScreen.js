@@ -30,22 +30,28 @@ function getCurrentFullScreen() {
   return Boolean(isFullScreen);
 }
 
-export default function useFullScreen(target, onFullScreenChange) {
+export default function useFullScreen(target, onFullScreenChange, customClassName = 'fullScrenn') {
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const handleChangeFullScreen = () => {    
+  const handleChangeFullScreen = () => {  
+    const element = typeof target === 'function' ? target() : target;
     const currentFullScreen = getCurrentFullScreen();
     setIsFullScreen(currentFullScreen);
+    if (currentFullScreen) {
+      element.classList.add(customClassName);
+    } else {
+      element.classList.remove(customClassName);
+    }
     if (onFullScreenChange) {
       onFullScreenChange(currentFullScreen);
     }
   };
   const toggleFullScreen = () => {
     const currentFullScreen = getCurrentFullScreen();
+    const element = typeof target === 'function' ? target() : target;
     if (currentFullScreen) {
       exitFullScreen();
     } else {
-      const element = typeof target === 'function' ? target() : target;
-      toFullScreen(element);
+      toFullScreen(element);      
     }
   };
   useEffect(() => {
