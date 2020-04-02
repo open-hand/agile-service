@@ -448,6 +448,7 @@
             SELECT
             distinct case
             when search.type_code = 'sub_task' and search.parent_type_code != 'bug' then search.parent_issue_id
+            when search.type_code = 'sub_task' then search.parent_issue_id
             when search.type_code = 'bug' and search.relate_issue_id != 0 then search.relate_issue_id
             else search.issue_issue_id
             end as issue_issue_id
