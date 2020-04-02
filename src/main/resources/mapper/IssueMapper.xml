@@ -426,21 +426,6 @@
                      close=")">
                 #{issueId}
             </foreach>
-            or (
-            aii.parent_issue_id in
-            (select ai2.issue_id from agile_issue ai2 where ai2.relate_issue_id in
-            <foreach collection="issueIds" item="issueId" open="(" separator=","
-                     close=")">
-                #{issueId}
-            </foreach>)
-            <if test="childrenIds != null and childrenIds.size > 0">
-                and aii.issue_id in
-                <foreach collection="childrenIds" item="id" open="(" separator=","
-                         close=")">
-                    #{id}
-                </foreach>
-            </if>
-            )
         )
 
         <!-- mysql的按照顺序排序在h2会报错，所以用下面的 -->
