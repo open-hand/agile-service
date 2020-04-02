@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import {
   Route,
   Switch,
@@ -27,6 +28,17 @@ const PageConfig = asyncRouter(() => import('./routes/page-config'));
 const settings = asyncRouter(() => import('./routes/settings'));
 
 const { AppState } = stores;
+function Test() {
+  const ref = useRef();
+  useEffect(() => {
+    ReactDOM.createPortal(<div>scroll</div>, ref.current);
+  }, []);
+  return (
+    <div ref={ref}>
+      <div className="body" />
+    </div>
+  );
+}
 class Index extends React.Component {
   // componentDidCatch(error, info) {
   //   Choerodon.prompt(error.message);
@@ -66,6 +78,7 @@ class Index extends React.Component {
             <Route path={`${match.url}/settings`} component={settings} />            
             <Route path={`${match.url}/states`} component={StateIndex} />
             <Route path={`${match.url}/priorities`} component={PriorityIndex} />
+            <Route path={`${match.url}/test`} component={Test} />
             <Route path="*" component={nomatch} />
           </Switch>
         </IntlProviderAsync>

@@ -134,12 +134,7 @@ function EditIssue() {
       axios.all([
         axios.get('/base/v1/users/self'),
         axios.post('/base/v1/permissions/checkPermission', [{
-          code: 'agile-service.project-info.updateProjectInfo',
-          organizationId: AppState.currentMenuType.organizationId,
-          projectId: AppState.currentMenuType.id,
-          resourceType: 'project',
-        }, {
-          code: 'agile-service.notice.queryByProjectId',
+          code: 'agile-service.issue.deleteIssue',
           organizationId: AppState.currentMenuType.organizationId,
           projectId: AppState.currentMenuType.id,
           resourceType: 'project',
