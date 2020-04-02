@@ -103,11 +103,11 @@ const IssueDropDown = ({
         </Menu.Item>
       }
       {
-        ['sub_task', 'feature', 'issue_epic'].indexOf(typeCode) === -1 && (
+        ['sub_task', 'feature', 'issue_epic'].indexOf(typeCode) === -1 && !(typeCode === 'bug' && issue.relateIssueId) ? (
           <Menu.Item key="2">
             创建子任务
           </Menu.Item>
-        )
+        ) : null
       }
       {
         ['story', 'task'].indexOf(typeCode) !== -1 && (

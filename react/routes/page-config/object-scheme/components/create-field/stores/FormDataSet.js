@@ -90,7 +90,7 @@ export default ({
         type: 'string',
         label: formatMessage({ id: 'code' }),
         required: !isEdit,
-        maxLength: 10,
+        maxLength: isEdit ? 15 : 10,
         validator: checkCode,
       },
       {
