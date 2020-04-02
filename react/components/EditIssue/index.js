@@ -8,7 +8,6 @@ export default function Index(props) {
   return (
     <ErrorBoundary>
       <Animate
-      // key={props.key}
         component="div"
         transitionAppear
         transitionName="slide-right"

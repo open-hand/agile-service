@@ -65,7 +65,9 @@ export default ({
         // const data = test;
         runInAction(() => {
           set(dataSet, { issueTotal: data.total });
-          set(dataSet, { issuePageSize: data.pageSize });
+          if (data.pageSize > 0) {
+            set(dataSet, { issuePageSize: data.pageSize });
+          }
           set(dataSet, { issueCurrentPage: data.pageNum });
         });
         return data;
