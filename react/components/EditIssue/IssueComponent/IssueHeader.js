@@ -23,7 +23,7 @@ const IssueHeader = (props) => {
       <div className={`${prefixCls}-IssueHeader-top`}>
         <IssueType {...props} />
         {/* 问题编号 */}
-        <span style={{ marginLeft: 15 }}>
+        <span style={{ marginLeft: 15 }} className={`${prefixCls}-IssueHeader-top-number`}>
           <IssueNumber
             parentIssueId={parentIssueId || relateIssueId}
             resetIssue={resetIssue}

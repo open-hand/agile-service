@@ -1,9 +1,22 @@
 .c7n-agile-EditIssue-IssueHeader {
   padding: 0 20px;
 
+
+
   &-top {
     display: flex;
     align-items: center;
+    &-number {
+      width: calc(~'90% - 1.5rem');
+    }
+    .parent-summary-hidden {
+      display: inline-block;
+      width: calc(~'100% - .22rem');    
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      vertical-align: bottom;
+    }
   }
 
   &-btn {

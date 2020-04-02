@@ -38,21 +38,23 @@ const IssueNumber = ({
     }
     return str;
   }
-
   const { issueNum, parentIssueSummary } = issue;
   return (
-    <div style={{ fontSize: 16, lineHeight: '28px', fontWeight: 500 }}>
+    <div style={{
+      fontSize: 16, lineHeight: '28px', fontWeight: 500, whiteSpace: 'nowrap',
+    }}
+    >
       {
         parentIssueNum ? (
-          <span>
+          <span style={{ display: 'inline-block', width: '90%', maxWidth: 'max-content' }}>
             <Tooltip title={parentIssueSummary}>
               <span
                 role="none"
-                className="primary"
+                className="primary parent-summary-hidden"
                 style={{ cursor: disabled ? 'auto' : 'pointer' }}
                 onClick={handleClickParent}
               >
-                {hiddenText(parentIssueSummary)}
+                {parentIssueSummary}
               </span>
             </Tooltip>
 
