@@ -382,7 +382,7 @@ public class IssueServiceImpl implements IssueService {
             } else {
                 Map<String, String> order = new HashMap<>(1);
                 //处理表映射
-                order.put("issueId", "search.issue_issue_id");
+                order.put("issueId", "t.issue_issue_id");
                 Sort sort = PageUtil.sortResetOrder(pageable.getSort(), SEARCH, order);
                 issueIdPage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(),
                         PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> issueMapper.queryIssueIdsListWithSub
@@ -391,7 +391,9 @@ public class IssueServiceImpl implements IssueService {
 
             PageInfo<IssueListFieldKVVO> issueListDTOPage;
             if (issueIdPage.getList() != null && !issueIdPage.getList().isEmpty()) {
-                List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIdPage.getList());
+                List<Long> issueIds = issueIdPage.getList();
+                Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds);
                 Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
                 Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
                 Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
