@@ -14,6 +14,7 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -142,9 +143,23 @@ public class IssueAssembler extends AbstractAssembler {
             issueListFieldKVVO.setIssueSprintVOS(toTargetList(issueDO.getIssueSprintDTOS(), IssueSprintVO.class));
             issueListFieldKVVO.setLabelIssueRelVOS(toTargetList(issueDO.getLabelIssueRelDTOS(), LabelIssueRelVO.class));
             issueListFieldKVVO.setFoundationFieldValue(foundationCodeValue.get(issueDO.getIssueId()) != null ? foundationCodeValue.get(issueDO.getIssueId()) : new HashMap<>());
+            setParentId(issueListFieldKVVO, issueDO);
             issueListFieldKVDTOList.add(issueListFieldKVVO);
         });
         return issueListFieldKVDTOList;
+    }
+
+    private void setParentId(IssueListFieldKVVO issueListFieldKVVO, IssueDTO issue) {
+        Long parentId = null;
+        Long parentIssueId = issue.getParentIssueId();
+        Long relateIssueId = issue.getRelateIssueId();
+        if (!ObjectUtils.isEmpty(parentIssueId) && parentIssueId != 0) {
+            parentId = parentIssueId;
+        }
+        if (!ObjectUtils.isEmpty(relateIssueId) && relateIssueId != 0) {
+            parentId = relateIssueId;
+        }
+        issueListFieldKVVO.setParentId(parentId);
     }
 
 
