@@ -35,7 +35,6 @@ class IssueDetail extends Component {
     const { issueId } = data;
     const { dataSet } = this.props;
     if (dataSet.totalCount && issueId.toString() !== dataSet.current.get('issueId')) {
-      dataSet.unSelect(dataSet.current);
       IssueStore.setSelectedIssue(data);
     }
     // const record = dataSet.find(this.findCurrentIndex); unSelect
