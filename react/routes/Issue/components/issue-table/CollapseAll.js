@@ -22,7 +22,6 @@ function CollapseAll({ tableRef }) {
           cursor: 'pointer',
           left: 13,
           top: 0,
-          zIndex: 5,        
         }}
         onClick={() => {
           if (needExpand) {

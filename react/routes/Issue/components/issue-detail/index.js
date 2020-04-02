@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import IssueStore from '@/stores/project/sprint/IssueStore';
 import EditIssue from '@/components/EditIssue';
 
-@inject('AppState', 'HeaderStore')
 @observer
-class ExpandWideCard extends Component {
+class IssueDetail extends Component {
   // 更新 Issue 时
   handleIssueUpdate = () => {
     const { issueRefresh } = this.props;
@@ -76,4 +75,4 @@ class ExpandWideCard extends Component {
   }
 }
 
-export default ExpandWideCard;
+export default IssueDetail;

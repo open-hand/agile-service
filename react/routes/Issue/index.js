@@ -16,7 +16,7 @@ import Search from './components/search';
 import FilterManage from './components/FilterManage';
 import SaveFilterModal from './components/SaveFilterModal';
 import ExportIssue from './components/ExportIssue';
-import ExpandWideCard from './components/ExpandWideCard';
+import IssueDetail from './components/issue-detail';
 import ImportIssue from './components/ImportIssue';
 import IssueTable from './components/issue-table';
 import Modal from './components/Modal';
@@ -200,7 +200,7 @@ const Issue = withRouter(observer(() => {
             onOk={handleCreateIssue}
           />
         )}
-        <ExpandWideCard
+        <IssueDetail
           onHideIssue={onHideIssue}
           issueRefresh={refresh}
           dataSet={dataSet}
