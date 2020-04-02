@@ -75,9 +75,7 @@ public class IssueListFieldKVVO {
     @ApiModelProperty(value = "故事点")
     private BigDecimal storyPoints;
 
-    private Long parentIssueId;
-
-    private Long relateIssueId;
+    private Long parentId;
 
     @ApiModelProperty(value = "如果问题类型是特性，返回特性类别:business、enabler")
     private String featureType;
@@ -372,20 +370,12 @@ public class IssueListFieldKVVO {
         this.foundationFieldValue = foundationFieldValue;
     }
 
-    public void setParentIssueId(Long parentIssueId) {
-        this.parentIssueId = parentIssueId;
+    public Long getParentId() {
+        return parentId;
     }
 
-    public Long getParentIssueId() {
-        return parentIssueId;
-    }
-
-    public void setRelateIssueId(Long relateIssueId) {
-        this.relateIssueId = relateIssueId;
-    }
-
-    public Long getRelateIssueId() {
-        return relateIssueId;
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
     }
 
     @Override
