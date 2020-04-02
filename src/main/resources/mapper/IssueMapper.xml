@@ -449,12 +449,13 @@
             distinct case
             when search.type_code = 'sub_task' and search.parent_type_code != 'bug' then search.parent_issue_id
             when search.type_code = 'sub_task' then search.parent_issue_id
-            when search.type_code = 'bug' and search.relate_issue_id != 0 then search.relate_issue_id
+            when search.type_code = 'bug' and search.relate_issue_id is not null and search.relate_issue_id != 0 then search.relate_issue_id
             else search.issue_issue_id
             end as issue_issue_id
             from (
               <include refid="queryIssueIdsListWithSubSql"/>
             )search where 1=1
+            and (search.type_code != 'sub_task' or search.parent_type_code != 'bug')
             <if test='searchVO.searchArgs != null'>
                 <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
                     AND search.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
@@ -476,6 +477,7 @@
         <include refid="queryIssueIdsListWithSubSql"/>
         ) search
         where 1=1
+        and (search.type_code != 'sub_task' or search.parent_type_code != 'bug')
         <if test="issueIds != null and issueIds.size > 0">
             and (
             (search.type_code = 'sub_task' and search.parent_type_code != 'bug' and
