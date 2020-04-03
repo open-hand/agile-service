@@ -44,8 +44,8 @@ export default ({
 }) => ({
   primaryKey: 'issueId',
   autoQuery: false,
-  // selection: 'multiple',
-  selection: false,
+  selection: 'multiple',
+  // selection: false,
   parentField: 'parentId',
   expandField: 'expand',
   idField: 'issueId',

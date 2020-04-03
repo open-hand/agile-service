@@ -22,6 +22,7 @@ import IssueTable from './components/issue-table';
 import Modal from './components/Modal';
 import './index.less';
 
+
 const Issue = withRouter(observer(() => {
   const {
     dataSet, projectId, 
