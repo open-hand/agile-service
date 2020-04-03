@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 import { IssueTypeContext } from '@/hooks/useIssueTypes';
 import { DefaultPriorityContext } from '@/hooks/useDefaultPriority';
+import { PriorityContext } from '@/hooks/usePriorities';
 
 function wrapWithContexts(contexts, values, children) {
   return contexts.reduce((last, Context, index) => (
@@ -34,4 +35,5 @@ const AgileProvider = contexts => function AgileDataProvider({ children }) {
 export default AgileProvider([
   IssueTypeContext,
   DefaultPriorityContext,
+  PriorityContext,
 ]);

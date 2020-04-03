@@ -1,6 +1,6 @@
 import React, { useReducer, useState } from 'react';
 import produce from 'immer';
-import { remove, find } from 'lodash';
+import { remove, findIndex } from 'lodash';
 
 const requestKey = (() => {
   let key = 0;
@@ -23,11 +23,12 @@ function reducer(state, action) {
     }
     case 'SET': {
       return produce(state, (draft) => {
-        const target = find(draft, { key: action.payload.key });
-        Object.assign(target, {
-          key: target.key,
+        const index = findIndex(draft, { key: action.payload.key });
+        // eslint-disable-next-line no-param-reassign
+        draft[index] = {
+          key: action.payload.key,
           ...action.payload.value,
-        });
+        };       
       });
     }
     default: throw new Error();

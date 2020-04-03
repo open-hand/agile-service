@@ -3,6 +3,7 @@ import {
   Form, Button, Select, DataSet, Row, Col,
 } from 'choerodon-ui/pro';
 import { find } from 'lodash';
+import { getProjectId } from '@/common/utils';
 import useFields from './useFields';
 import renderField from './renderField';
 import fieldMock from './fields.json';
@@ -39,6 +40,93 @@ function BatchModal() {
         },
       }),
     },
+    fields: [{
+      name: 'priority',
+      type: 'number',
+      label: '优先级',
+      lookupAxiosConfig: () => ({
+        url: `/agile/v1/projects/${getProjectId()}/priority/list_by_org`,
+        method: 'get',
+        transformResponse: (response) => {
+          try {
+            const data = JSON.parse(response);         
+            return data.filter(v => v.enable);
+          } catch (error) {
+            return response;
+          }
+        },
+      }),
+      valueField: 'id',
+      textField: 'name',
+    }, {
+      name: 'status',
+      type: 'number',
+      label: '状态',
+      lookupAxiosConfig: () => ({
+        url: `/agile/v1/projects/${getProjectId()}/schemes/query_status_by_project_id?apply_type=${'agile'}`,
+        method: 'get',
+      }),
+      valueField: 'id',
+      textField: 'name',
+    }, {
+      name: 'component',
+      type: 'array',
+      label: '模块',
+      lookupAxiosConfig: ({ record, dataSet: ds, params }) => ({
+        url: `/agile/v1/projects/${getProjectId()}/component/query_all`,
+        method: 'post',
+        data: {
+          advancedSearchArgs: {},
+          searchArgs: { name: params.name },
+        },          
+        params: {
+          size: 999,
+          page: 1,
+        },
+        transformResponse: (response) => {
+          try {
+            const data = JSON.parse(response);         
+            return data.list;
+          } catch (error) {
+            return response;
+          }
+        },
+      }),
+      valueField: 'componentId',
+      textField: 'name',
+    }, {
+      name: 'label',
+      type: 'array',
+      label: '标签',
+      lookupAxiosConfig: () => ({
+        url: `/agile/v1/projects/${getProjectId()}/issue_labels`,
+        method: 'get',
+      }),
+      valueField: 'labelId',
+      textField: 'labelName',
+    }, {
+      name: 'fixVersion',
+      type: 'array',
+      label: '修复的版本',
+      lookupAxiosConfig: () => ({
+        url: `/agile/v1/projects/${getProjectId()}/product_version/names`,
+        method: 'post',
+        data: ['version_planning'],
+      }),
+      valueField: 'versionId',
+      textField: 'name',
+    }, {
+      name: 'influenceVersion',
+      type: 'array',
+      label: '影响的版本',
+      lookupAxiosConfig: () => ({
+        url: `/agile/v1/projects/${getProjectId()}/product_version/names`,
+        method: 'post',
+        data: [],
+      }),
+      valueField: 'versionId',
+      textField: 'name',
+    }],
   }), []);
   return (
     <div style={{ padding: 15 }}>
@@ -68,7 +156,7 @@ function BatchModal() {
                 </Select>
               </Col>
               {id && (
-                <Col span={10}>
+                <Col span={10} key={id}>
                   {renderField(f)}
                 </Col>
               )}

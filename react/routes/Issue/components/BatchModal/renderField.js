@@ -19,7 +19,18 @@ function memberOptionRender({ record }) {
 //   userOptionDataSet.setQueryParameter('userId', userId);
 //   userOptionDataSet.query();
 // }
+
+function renderDefaultField({ code }) {
+  switch (code) {
+    case 'component':
+      return <Select multiple name={code} searchable searchMatcher="name" />;
+    default: return null;
+  }
+}
 export default function renderField({ code, fieldType, fieldOptions }) {
+  if (['component'].includes(code)) {
+    return renderDefaultField({ code });
+  }
   switch (fieldType) {
     case 'time':
       return (
