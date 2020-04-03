@@ -77,7 +77,7 @@ export default ({
   fields: [
     { name: 'issueId', type: 'number', label: '概要' },
     { name: 'issueTypeId', type: 'object', label: '问题类型' },
-    { name: 'issueNum', type: 'string', label: '问题编号' },
+    { name: 'issueNum', type: 'string', label: '任务编号' },
     { name: 'priorityId', type: 'string', label: '优先级' },
     { name: 'statusId', type: 'object', label: '状态' },
     { name: 'assigneeId', type: 'string', label: '经办人' },

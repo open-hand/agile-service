@@ -100,19 +100,22 @@ function IssueTable({ tableRef, onCreateIssue }) {
             },
           })}
           renderer={({ record }) => (
-            <Tooltip mouseEnterDelay={0.5} placement="topLeft" title={`问题概要： ${record.get('summary')}`}>
-              <span className="c7n-agile-table-cell-click">
-                {record.get('summary')}
-              </span>
-            </Tooltip>
+            <Fragment>
+              <TypeTag data={record.get('issueTypeVO')} style={{ marginRight: 5, marginTop: -2 }} />
+              <Tooltip mouseEnterDelay={0.5} placement="topLeft" title={`问题概要： ${record.get('summary')}`}>
+                <span className="c7n-agile-table-cell-click">
+                  {record.get('summary')}
+                </span>
+              </Tooltip>
+            </Fragment>
           )}
         />
-        <Column
+        {/* <Column
           sortable
           name="issueTypeId"
           className="c7n-agile-table-cell"
           renderer={({ record }) => (<TypeTag data={record.get('issueTypeVO')} showName />)}
-        />
+        /> */}
         <Column sortable name="issueNum" className="c7n-agile-table-cell" />
         <Column
           sortable
@@ -217,7 +220,6 @@ function IssueTable({ tableRef, onCreateIssue }) {
         total={dataSet.issueTotal}
         style={{ float: 'right', marginTop: 10 }}
         onChange={(page, pageSize) => {
-          console.log(pageSize);
           if (dataSet.issuePageSize !== pageSize) {
             dataSet.issuePageSize = pageSize;
             dataSet.issueCurrentPage = 1;
