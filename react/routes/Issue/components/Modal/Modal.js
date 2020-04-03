@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Draggable from 'react-draggable';
+import Portal from '@/components/Portal';
 import './Modal.less';
 
 const prefix = 'c7nagile-modal';
