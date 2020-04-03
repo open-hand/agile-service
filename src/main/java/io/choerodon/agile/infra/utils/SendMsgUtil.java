@@ -155,7 +155,7 @@ public class SendMsgUtil {
             Long[] ids = new Long[1];
             ids[0] = result.getAssigneeId();
             List<UserDTO> userDTOList = baseFeignClient.listUsersByIds(ids, false).getBody();
-            String userName = !userDTOList.isEmpty() && userDTOList.get(0) != null ? userDTOList.get(0).getLoginName() + userDTOList.get(0).getRealName() : "";
+            String userName = !userDTOList.isEmpty() && userDTOList.get(0) != null ? userDTOList.get(0).getRealName() + "(" + userDTOList.get(0).getLoginName() + ")" : "";
             String summary = result.getIssueNum() + "-" + result.getSummary();
             siteMsgUtil.issueSolve(userIds, userName, summary, url.toString(), result.getAssigneeId(), projectId);
         }
@@ -190,7 +190,7 @@ public class SendMsgUtil {
             Long[] ids = new Long[1];
             ids[0] = issueDTO.getAssigneeId();
             List<UserDTO> userDTOList = userService.listUsersByIds(ids);
-            String userName = !userDTOList.isEmpty() && userDTOList.get(0) != null ? userDTOList.get(0).getLoginName() + userDTOList.get(0).getRealName() : "";
+            String userName = !userDTOList.isEmpty() && userDTOList.get(0) != null ? userDTOList.get(0).getRealName() + "(" + userDTOList.get(0).getLoginName() + ")" : "";
             siteMsgUtil.issueSolve(userIds, userName, summary, url.toString(), issueDTO.getAssigneeId(), projectId);
         }
     }
