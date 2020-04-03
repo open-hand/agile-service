@@ -486,8 +486,15 @@
                 #{id}
             </foreach>
             )
+            or (
+            search.type_code = 'sub_task' and
+            search.parent_issue_id in
+            <foreach collection="issueIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            )
             or
-            (search.type_code = 'bug' and search.relate_issue_id != 0 and
+            (search.type_code = 'bug' and search.relate_issue_id is not null and search.relate_issue_id != 0 and
             search.relate_issue_id in
             <foreach collection="issueIds" item="id" open="(" separator="," close=")">
                 #{id}
