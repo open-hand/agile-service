@@ -1,24 +1,25 @@
-/* eslint-disable */
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Button, Spin, message, Icon, Select, Table, Menu, Checkbox, Tooltip,
+  Button, Spin, Icon, Select, Table, Checkbox, Tooltip,
 } from 'choerodon-ui';
 import {
   Page, Header, Content, stores, Breadcrumb,
 } from '@choerodon/boot';
 import ReactEcharts from 'echarts-for-react';
 import _ from 'lodash';
-import moment from 'moment';
+import Moment from 'moment';
+import { extendMoment } from 'moment-range';
 import BurndownChartStore from '../../../../stores/project/burndownChart/BurndownChartStore';
 import './BurndownChartHome.less';
 import NoDataComponent from '../../Component/noData';
 import epicSvg from '../../../../assets/image/emptyChart.svg';
 import SwithChart from '../../Component/switchChart';
 
+const moment = extendMoment(Moment);
 const { AppState } = stores;
 const { Option } = Select;
-let backUrl;
+
 
 @observer
 class BurndownChartHome extends Component {
@@ -29,11 +30,9 @@ class BurndownChartHome extends Component {
       yAxis: [],
       select: 'remainingEstimatedTime',
       defaultSprintId: '',
-      loading: false,
       chartLoading: true,
       tableLoading: true,
       endDate: '',
-      startDate: '',
       linkFromParamUrl: undefined,
       restDayShow: true,
       restDays: [],
@@ -43,7 +42,6 @@ class BurndownChartHome extends Component {
     };
   }
 
-  // componentWillMount() {
   componentDidMount() {
     const { location: { search } } = this.props;
     // const linkFromParamUrl = _.last(search.split('&')).split('=')[1];
@@ -54,50 +52,14 @@ class BurndownChartHome extends Component {
     this.getSprintData();
   }
 
-  // 废弃
-  // GetRequest(url) {
-  //   const theRequest = {};
-  //   if (url.indexOf('?') !== -1) {
-  //     const str = url.split('?')[1];
-  //     const strs = str.split('&');
-  //     for (let i = 0; i < strs.length; i += 1) {
-  //       theRequest[strs[i].split('=')[0]] = decodeURI(strs[i].split('=')[1]);
-  //     }
-  //   }
-  //   return theRequest;
-  // }
 
   getBetweenDateStr(start, end) {
     // 是否显示非工作日
-    const { restDayShow, restDays } = this.state;
-    const result = [];
-    const rest = [];
-    const beginDay = start.split('-');
-    const endDay = end.split('-');
-    const diffDay = new Date();
-    const dateList = new Array();
-    let i = 0;
-    diffDay.setDate(beginDay[2]);
-    diffDay.setMonth(beginDay[1] - 1);
-    diffDay.setFullYear(beginDay[0]);
-    while (i === 0) {
-      const countDay = diffDay.getTime();
-      if (restDays.includes(moment(diffDay).format('YYYY-MM-DD'))) {
-        rest.push(moment(diffDay).format('YYYY-MM-DD'));
-      }
-      dateList[2] = diffDay.getDate();
-      dateList[1] = diffDay.getMonth() + 1;
-      dateList[0] = diffDay.getFullYear();
-      if (String(dateList[1]).length === 1) { dateList[1] = `0${dateList[1]}`; }
-      if (String(dateList[2]).length === 1) { dateList[2] = `0${dateList[2]}`; }
-      if (restDayShow || !restDays.includes(moment(diffDay).format('YYYY-MM-DD'))) {
-        result.push(`${dateList[0]}-${dateList[1]}-${dateList[2]}`);
-      }
-      diffDay.setTime(countDay + 24 * 60 * 60 * 1000);
-      if (String(dateList[0]) === endDay[0] && String(dateList[1]) === endDay[1] && String(dateList[2]) === endDay[2]) {
-        i = 1;
-      }
-    }
+    const { restDays } = this.state;
+    const range = moment.range(start, end);
+    const days = Array.from(range.by('day'));
+    const result = days.map(day => day.format('YYYY-MM-DD'));
+    const rest = days.filter(day => restDays.includes(day.format('YYYY-MM-DD'))).map(day => day.format('YYYY-MM-DD'));
     return { result, rest };
   }
 
@@ -108,7 +70,6 @@ class BurndownChartHome extends Component {
       this.setState({
         defaultSprintId: defaultSprint.sprintId,
         endDate: defaultSprint.endDate,
-        startDate: defaultSprint.startDate,
       }, () => {
         if (this.state.defaultSprintId) {
           this.getChartData();
@@ -133,7 +94,6 @@ class BurndownChartHome extends Component {
     this.setState({ chartLoading: true });
     BurndownChartStore.axiosGetBurndownCoordinate(this.state.defaultSprintId, this.state.select).then((res) => {
       this.setState({
-        expectCount: res.expectCount,
         chartLoading: false,
       });
       const keys = Object.keys(res.coordinate);
@@ -303,30 +263,12 @@ class BurndownChartHome extends Component {
           tableLoading: false,
         });
       }).catch((error) => {
+        console.log(error)
       });
-  }
-
-  // 废弃
-  getMaxY() {
-    // const data = this.state.yAxis;
-    // let max = 0;
-    // for (let index = 0, len = data.length; index < len; index += 1) {
-    //   if (data[index] > max) {
-    //     max = data[index];
-    //   }
-    // }
-    let max = 0;
-    const data = BurndownChartStore.getBurndownList;
-    const tar = data.filter(item => item.type === 'startSprint');
-    if (tar.length) {
-      max = tar[0].rest;
-    }
-    return max;
   }
 
   getOption() {
     const { select } = this.state;
-    console.log(this.state.exportAxis)
     return {
       tooltip: {
         trigger: 'axis',
@@ -456,7 +398,6 @@ class BurndownChartHome extends Component {
           name: '期望值',
           type: 'line',
           data: this.state.exportAxis,
-          // data: [[this.state.startDate.split(' ')[0].slice(5).replace('-', '/'), this.state.expectCount], [this.state.endDate.split(' ')[0].slice(5).replace('-', '/'), 0]],
           itemStyle: {
             color: 'rgba(0,0,0,0.65)',
           },
