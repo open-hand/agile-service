@@ -6,7 +6,7 @@ import { programIssueLink, issueLink } from '../../../common/utils';
 
 
 const IssueNumber = ({
-  parentIssueId, resetIssue, reloadIssue, typeCode, parentIssueNum, issue, type, history, disabled,
+  parentIssueId, resetIssue, reloadIssue, typeCode, parentSummary, issue, type, history, disabled,
 }) => {
   const handleClickParent = () => {
     if (disabled) {
@@ -30,31 +30,24 @@ const IssueNumber = ({
     return false;
   };
 
-  function hiddenText(str) {
-    if (!str || str === null) {
-      return str;
-    } else if (str.length > 12) {
-      return `${str.substring(0, 12)}...`;
-    }
-    return str;
-  }
-  const { issueNum, parentIssueSummary } = issue;
+
+  const { issueNum } = issue;
   return (
     <div style={{
       fontSize: 16, lineHeight: '28px', fontWeight: 500, whiteSpace: 'nowrap',
     }}
     >
       {
-        parentIssueNum ? (
+        parentSummary ? (
           <span style={{ display: 'inline-block', width: '90%', maxWidth: 'max-content' }}>
-            <Tooltip title={parentIssueSummary}>
+            <Tooltip title={parentSummary}>
               <span
                 role="none"
                 className="primary parent-summary-hidden"
                 style={{ cursor: disabled ? 'auto' : 'pointer' }}
                 onClick={handleClickParent}
               >
-                {parentIssueSummary}
+                {parentSummary}
               </span>
             </Tooltip>
 
@@ -63,7 +56,7 @@ const IssueNumber = ({
         ) : null
       }
       {
-        (['sub_task', 'bug'].includes(typeCode) && parentIssueNum) ? (
+        (['sub_task', 'bug'].includes(typeCode) && parentSummary) ? (
           <span>
             {issueNum}
           </span>
