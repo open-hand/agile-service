@@ -77,26 +77,6 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         return list;
     }
 
-//    @DataLog(type = "createAttachment")
-//    public IssueAttachmentDTO insertIssueAttachment(IssueAttachmentDTO issueAttachmentDTO) {
-//        if (issueAttachmentMapper.insert(issueAttachmentDTO) != 1) {
-//            throw new CommonException(INSERT_ERROR);
-//        }
-//        return issueAttachmentMapper.selectByPrimaryKey(issueAttachmentDTO.getAttachmentId());
-//    }
-
-//    @DataLog(type = "deleteAttachment")
-//    public Boolean deleteById(Long attachmentId) {
-//        IssueAttachmentDTO issueAttachmentDTO = issueAttachmentMapper.selectByPrimaryKey(attachmentId);
-//        if (issueAttachmentDTO == null) {
-//            throw new CommonException("error.attachment.get");
-//        }
-//        if (issueAttachmentMapper.delete(issueAttachmentDTO) != 1) {
-//            throw new CommonException("error.attachment.delete");
-//        }
-//        return true;
-//    }
-
     private String dealUrl(String url) {
         String dealUrl = null;
         try {

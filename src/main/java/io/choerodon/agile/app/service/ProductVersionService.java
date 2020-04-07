@@ -16,13 +16,9 @@ public interface ProductVersionService {
 
     ProductVersionDetailVO createVersion(Long projectId, ProductVersionCreateVO versionCreateDTO);
 
-//    Boolean deleteVersion(Long projectId, Long versionId, Long targetVersionId);
-
     Boolean deleteVersion(Long projectId, Long versionId, Long targetVersionId);
 
     ProductVersionDetailVO updateVersion(Long projectId, Long versionId, ProductVersionUpdateVO versionUpdateDTO, List<String> fieldList);
-
-//    void updateVersionBySelective(ProductVersionDTO productVersionDTO);
 
     PageInfo<ProductVersionPageVO> queryByProjectId(Long projectId, Pageable pageable, SearchVO searchVO);
 
@@ -50,8 +46,6 @@ public interface ProductVersionService {
 
     ProductVersionDetailVO revokeArchivedVersion(Long projectId, Long versionId);
 
-//    Boolean mergeVersion(Long projectId, ProductVersionMergeVO productVersionMergeVO);
-
     ProductVersionDetailVO queryVersionByVersionId(Long projectId, Long versionId);
 
     List<Long> listIds(Long projectId);
@@ -59,8 +53,6 @@ public interface ProductVersionService {
     ProductVersionPageVO dragVersion(Long projectId, VersionSequenceVO versionSequenceVO);
 
     VersionIssueCountVO queryByCategoryCode(Long projectId, Long versionId);
-
-//    Long queryProjectIdByVersionId(Long projectId, Long versionId);
 
     ProductVersionDTO createBase(ProductVersionDTO versionDTO);
 

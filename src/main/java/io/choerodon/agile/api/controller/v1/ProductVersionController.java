@@ -146,35 +146,6 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(VERSION_STATISTICS_ERROR));
     }
 
-//    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
-//    @ApiOperation(value = "版本详情")
-//    @GetMapping(value = "/{versionId}/detail")
-//    public ResponseEntity<ProductVersionDetailVO> queryVersionByVersionId(@ApiParam(value = "项目id", required = true)
-//                                                                           @PathVariable(name = "project_id") Long projectId,
-//                                                                          @ApiParam(value = "versionId", required = true)
-//                                                                           @PathVariable Long versionId) {
-//        return Optional.ofNullable(productVersionService.queryVersionByVersionId(projectId, versionId))
-//                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-//                .orElseThrow(() -> new CommonException(QUERY_ERROR));
-//    }
-//
-//    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
-//    @ApiOperation(value = "获取版本下指定状态的issue")
-//    @PostMapping(value = "/{versionId}/issues")
-//    public ResponseEntity<List<IssueListVO>> queryByVersionIdAndStatusCode(@ApiParam(value = "项目id", required = true)
-//                                                                            @PathVariable(name = "project_id") Long projectId,
-//                                                                           @ApiParam(value = "versionId", required = true)
-//                                                                            @PathVariable Long versionId,
-//                                                                           @ApiParam(value = "组织id", required = true)
-//                                                                            @RequestParam Long organizationId,
-//                                                                           @RequestBody SearchVO searchVO,
-//                                                                           @ApiParam(value = "issue状态码")
-//                                                                            @RequestParam(required = false) String statusCode) {
-//        return Optional.ofNullable(productVersionService.queryIssueByVersionIdAndStatusCode(projectId, versionId, statusCode, organizationId, searchVO))
-//                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-//                .orElseThrow(() -> new CommonException(QUERY_ISSUE_ERROR));
-//    }
-
     @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
     @ApiOperation(value = "查询规划中版本名及要发布版本未完成issue统计")
     @GetMapping(value = "/{versionId}/plan_names")
@@ -270,18 +241,6 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(QUERY_ERROR));
     }
 
-//    @Permission(type = ResourceType.PROJECT, roles = InitRoleCode.PROJECT_OWNER)
-//    @ApiOperation(value = "合并版本")
-//    @PostMapping(value = "/merge")
-//    public ResponseEntity<Boolean> mergeVersion(@ApiParam(value = "项目id", required = true)
-//                                                @PathVariable(name = "project_id") Long projectId,
-//                                                @ApiParam(value = "合并版本信息", required = true)
-//                                                @RequestBody @Valid ProductVersionMergeVO productVersionMergeVO) {
-//        return Optional.ofNullable(productVersionService.mergeVersion(projectId, productVersionMergeVO))
-//                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-//                .orElseThrow(() -> new CommonException(REVOKE_ARCHIVED_ERROR));
-//    }
-
     @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
     @ApiOperation(value = "查找所有项目的version ids")
     @GetMapping(value = "/ids")
@@ -303,28 +262,4 @@ public class ProductVersionController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException(DRAG_ERROR));
     }
-
-//    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
-//    @ApiOperation(value = "dashboard根据版本下类别统计数量数量")
-//    @GetMapping(value = "/{versionId}/issue_count")
-//    public ResponseEntity<VersionIssueCountVO> queryByCategoryCode(@ApiParam(value = "项目id", required = true)
-//                                                                    @PathVariable(name = "project_id") Long projectId,
-//                                                                   @ApiParam(value = "version id", required = true)
-//                                                                    @PathVariable Long versionId) {
-//        return Optional.ofNullable(productVersionService.queryByCategoryCode(projectId, versionId))
-//                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-//                .orElseThrow(() -> new CommonException("error.VersionIssueCountVO.get"));
-//    }
-//
-//    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
-//    @ApiOperation(value = "根据versionId查询projectId,测试项目修数据用，其它勿调用")
-//    @GetMapping(value = "/{versionId}/project_id")
-//    public ResponseEntity<Long> queryProjectIdByVersionId(@ApiParam(value = "项目id", required = true)
-//                                                          @PathVariable(name = "project_id") Long projectId,
-//                                                          @ApiParam(value = "version id", required = true)
-//                                                          @PathVariable Long versionId) {
-//        return Optional.ofNullable(productVersionService.queryProjectIdByVersionId(projectId, versionId))
-//                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-//                .orElseThrow(() -> new CommonException("error.queryProjectIdByVersionId.get"));
-//    }
 }

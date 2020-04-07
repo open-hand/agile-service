@@ -21,7 +21,6 @@ public class SprintSearchVO {
     private List<IssueSearchVO> issueSearchVOList;
     private List<AssigneeIssueVO> assigneeIssues;
     private String objectVersionNumber;
-//    private Long piId;
 
     public Long getSprintId() {
         return sprintId;
@@ -127,11 +126,4 @@ public class SprintSearchVO {
         this.doneStoryPoint = doneStoryPoint;
     }
 
-//    public void setPiId(Long piId) {
-//        this.piId = piId;
-//    }
-//
-//    public Long getPiId() {
-//        return piId;
-//    }
 }

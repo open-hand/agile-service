@@ -277,12 +277,6 @@
         </if>
     </select>
 
-    <select id="queryVersionIdByNameAndProjectId" resultType="java.lang.Long">
-        SELECT apv.version_id
-        FROM agile_product_version apv
-        WHERE apv.project_id = #{projectId} AND apv.name = #{name} and apv.status_code != 'archived'
-    </select>
-
     <select id="queryNotDoneIssueCount" resultType="java.lang.Integer">
         SELECT COUNT(1)
         FROM agile_version_issue_rel avir, agile_issue ai, agile_issue_status ais
@@ -329,23 +323,6 @@
         FROM agile_version_issue_rel avir, agile_issue ai
         WHERE avir.version_id = #{versionId} AND ai.project_id = #{projectId} AND avir.relation_type = #{relationType}
               AND avir.issue_id = ai.issue_id
-    </select>
-
-    <select id="queryIssueByVersionIds" resultType="io.choerodon.agile.infra.dto.VersionIssueDTO">
-        SELECT DISTINCT(ai.issue_id), avir.relation_type
-        FROM agile_version_issue_rel avir, agile_issue ai
-        WHERE ai.project_id = #{projectId} AND avir.issue_id = ai.issue_id
-        AND avir.relation_type = 'fix'
-        AND avir.version_id IN
-        <foreach collection="versionIds" item="versionId" index="index"
-                 open="(" close=")" separator=",">
-            #{versionId}
-        </foreach>
-        AND ai.issue_id NOT IN
-        ( SELECT issue_id
-        FROM agile_version_issue_rel
-        WHERE project_id = #{projectId} AND version_id = #{targetVersionId}
-        )
     </select>
 
     <select id="queryIssueForLogByVersionIds" resultType="io.choerodon.agile.infra.dto.VersionIssueDTO">
@@ -419,13 +396,6 @@
             old_status_code = 'version_planning'
         WHERE project_id = #{projectId} AND version_id = #{versionId}
     </update>
-
-    <select id="queryIssueCountByRelationType" resultType="java.lang.Integer">
-        SELECT COUNT(1)
-        FROM agile_version_issue_rel avir, agile_issue ai
-        WHERE avir.version_id = #{versionId} AND avir.issue_id = ai.issue_id AND avir.relation_type = #{relationType}
-              AND ai.project_id = #{projectId}
-    </select>
 
     <select id="queryIssueCountByApplyType" resultType="java.lang.Integer">
         SELECT COUNT(1)
