@@ -57,7 +57,7 @@ function CreateField() {
     const { current } = formDataSet;
     const obj = {
       fieldType: current.get('fieldType'),
-      defaultValue: current.get('defaultValue'),
+      defaultValue: String(current.get('defaultValue') || ''),
     };
     if (singleList.indexOf(obj.fieldType) !== -1) {
       if (fieldOptions.length === 0) {

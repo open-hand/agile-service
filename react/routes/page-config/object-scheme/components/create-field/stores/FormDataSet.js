@@ -130,7 +130,7 @@ export default ({
       {
         name: 'defaultValue',
         label: formatMessage({ id: 'field.default' }),
-        required: false,
+        required: oldRecord.get('required'),
         valueField: 'id',
         textField: 'realName',
         dynamicProps: {
