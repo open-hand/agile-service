@@ -195,47 +195,4 @@ public class SendMsgUtil {
         }
     }
 
-//    private void getProjectOwnerByProjects(List<Long> projectIds, List<Long> result) {
-//        RoleAssignmentSearchVO roleAssignmentSearchVO = new RoleAssignmentSearchVO();
-//        for (Long projectId : projectIds) {
-//            Long roleId = null;
-//            List<RoleVO> roleVOS = userService.listRolesWithUserCountOnProjectLevel(projectId, roleAssignmentSearchVO);
-//            for (RoleVO roleVO : roleVOS) {
-//                if ("role/project/default/project-owner".equals(roleVO.getCode())) {
-//                    roleId = roleVO.getId();
-//                    break;
-//                }
-//            }
-//            if (roleId != null) {
-//                PageInfo<UserVO> userDTOS = userService.pagingQueryUsersByRoleIdOnProjectLevel(0, 300, roleId, projectId, roleAssignmentSearchVO);
-//                for (UserVO userVO : userDTOS.getList()) {
-//                    if (!result.contains(userVO.getId())) {
-//                        result.add(userVO.getId());
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-//    @Async
-//    public void sendPmAndEmailAfterPiComplete(Long programId, PiDTO piDTO) {
-//        CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
-//        List<ProjectRelationshipVO> projectRelationshipVOList = iamFeignClient.getProjUnderGroup(ConvertUtil.getOrganizationId(programId), programId, true).getBody();
-//        List<Long> projectIds = (projectRelationshipVOList != null && !projectRelationshipVOList.isEmpty() ? projectRelationshipVOList.stream().map(ProjectRelationshipVO::getProjectId).collect(Collectors.toList()) : null);
-//        if (projectIds == null) {
-//            return;
-//        }
-//        ProjectVO projectVO = userService.queryProject(programId);
-//        if (projectVO == null) {
-//            throw new CommonException(ERROR_PROJECT_NOTEXIST);
-//        }
-//        List<Long> result = new ArrayList<>();
-//        getProjectOwnerByProjects(projectIds, result);
-//        List<SprintDTO> sprintDTOList = sprintMapper.selectListByPiId(programId, piDTO.getId());
-//        Map<String, Object> params = new HashMap<>();
-//        params.put("programName", projectVO.getName());
-//        params.put("piName", piDTO.getCode() + "-" + piDTO.getName());
-//        params.put("sprintNameList", sprintDTOList != null && !sprintDTOList.isEmpty() ? sprintDTOList.stream().map(SprintDTO::getSprintName).collect(Collectors.joining(",")) : "");
-//        siteMsgUtil.piComplete(result, customUserDetails.getUserId(), programId, params);
-//    }
 }

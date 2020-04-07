@@ -181,6 +181,9 @@ public class IssueVO {
     @ApiModelProperty(value = "缺陷关联的故事编号")
     private String relateIssueNum;
 
+    @ApiModelProperty(value = "子缺陷的父任务概要")
+    private String parentRelateSummary;
+
     public String getCreaterEmail() {
         return createrEmail;
     }
@@ -619,6 +622,14 @@ public class IssueVO {
 
     public void setCreaterRealName(String createrRealName) {
         this.createrRealName = createrRealName;
+    }
+
+    public void setParentRelateSummary(String parentRelateSummary) {
+        this.parentRelateSummary = parentRelateSummary;
+    }
+
+    public String getParentRelateSummary() {
+        return parentRelateSummary;
     }
 
     @Override

@@ -560,8 +560,6 @@ public class IssueServiceImpl implements IssueService {
             if (condition) {
                 BatchRemoveSprintDTO batchRemoveSprintDTO = new BatchRemoveSprintDTO(projectId, issueConvertDTO.getSprintId(), issueIds);
                 issueAccessDataService.removeIssueFromSprintByIssueIds(batchRemoveSprintDTO);
-//                //不是活跃冲刺，修改冲刺状态回到第一个状态
-//                handleIssueStatus(projectId, oldIssue, issueConvertDTO, fieldList, issueIds);
             }
             if (exitSprint) {
                 issueAccessDataService.issueToDestinationByIds(projectId, issueConvertDTO.getSprintId(), issueIds, new Date(), customUserDetails.getUserId());
@@ -573,34 +571,6 @@ public class IssueServiceImpl implements IssueService {
             }
         }
         issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
-    }
-
-    private void handleIssueStatus(Long projectId, IssueConvertDTO oldIssue, IssueConvertDTO issueConvertDTO, List<String> fieldList, List<Long> issueIds) {
-        SprintSearchDTO sprintSearchDTO = sprintMapper.queryActiveSprintNoIssueIds(projectId);
-        if (oldIssue.getApplyType().equals(SchemeApplyType.AGILE)) {
-            if (sprintSearchDTO == null || !Objects.equals(issueConvertDTO.getSprintId(), sprintSearchDTO.getSprintId())) {
-                Long stateMachineId = projectConfigService.queryStateMachineId(projectId, AGILE, oldIssue.getIssueTypeId());
-                if (stateMachineId == null) {
-                    throw new CommonException(ERROR_ISSUE_STATE_MACHINE_NOT_FOUND);
-                }
-                Long initStatusId = instanceService.queryInitStatusId(ConvertUtil.getOrganizationId(projectId), stateMachineId);
-                if (issueConvertDTO.getStatusId() == null && !oldIssue.getStatusId().equals(initStatusId)) {
-                    issueConvertDTO.setStatusId(initStatusId);
-                    fieldList.add(STATUS_ID);
-                }
-                //子任务的处理
-                if (issueIds != null && !issueIds.isEmpty()) {
-                    List<IssueConvertDTO> issueDOList = issueAssembler.toTargetList(issueMapper.queryIssueSubList(projectId, oldIssue.getIssueId()), IssueConvertDTO.class);
-                    String[] field = {STATUS_ID};
-                    issueDOList.forEach(issue -> {
-                        if (!issue.getStatusId().equals(initStatusId)) {
-                            issue.setStatusId(initStatusId);
-                            issueAccessDataService.update(issue, field);
-                        }
-                    });
-                }
-            }
-        }
     }
 
 
