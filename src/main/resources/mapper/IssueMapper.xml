@@ -449,7 +449,6 @@
         select t.issue_issue_id from (
             SELECT
             distinct case
-            when search.type_code = 'sub_task' and search.parent_type_code != 'bug' then search.parent_issue_id
             when search.type_code = 'sub_task' then search.parent_issue_id
             when search.type_code = 'bug' and search.relate_issue_id is not null and search.relate_issue_id != 0 then search.relate_issue_id
             else search.issue_issue_id
@@ -1390,15 +1389,10 @@
         WHERE project_id = #{projectId} AND relate_issue_id = #{issueId}
     </select>
 
-    <select id="queryExportIssues" resultType="io.choerodon.agile.infra.dto.ExportIssuesDTO">
+    <select id="queryFlatExportIssues" resultType="io.choerodon.agile.infra.dto.ExportIssuesDTO">
         SELECT
         ai.issue_id,
-        IF ((ai.parent_issue_id IS NULL OR ai.parent_issue_id = 0),
-        CONCAT(#{projectCode},'-', ai.issue_num),
-        CONCAT(#{projectCode},'-',
-        (SELECT issue_num FROM agile_issue
-        WHERE issue_id = ai.parent_issue_id
-        ),'/',#{projectCode},'-',ai.issue_num)) as issue_num,
+        concat(#{projectCode},'-', ai.issue_num) as issue_num,
         ai.summary,
         ai.assignee_id,
         ai.reporter_id,
@@ -1414,8 +1408,9 @@
         ai.priority_id,
         ai.story_points,
         IF((ais.is_completed = 1), '是', '否') AS resolution,
-        IF ((ai.parent_issue_id IS NULL OR ai.parent_issue_id = 0),
-        ai.issue_id,ai.parent_issue_id) as parent_issue_id,
+        ai.parent_issue_id,
+        ai.relate_issue_id,
+        ai.type_code,
         epic.epic_name
         FROM agile_issue ai
         LEFT JOIN agile_issue_status ais ON ais.status_id = ai.status_id and ais.project_id = ai.project_id
@@ -1429,10 +1424,29 @@
         ) asp1 ON asp1.issue_id = ai.issue_id
         WHERE ai.project_id = #{projectId}
         and ai.issue_id IN
-        <foreach collection="issueIds" item="issueId" open="(" separator=","
-                 close=")">
-            #{issueId}
-        </foreach>
+        (
+          select search.issue_issue_id from (
+            <include refid="queryIssueIdsListWithSubSql"/>
+          )search where 1=1
+          and (
+            search.type_code != 'sub_task'
+            or search.parent_type_code != 'bug'
+            or search.parent_relate_issue_id is null
+            or search.parent_relate_issue_id = 0
+          )
+            <if test='searchVO.searchArgs != null'>
+                <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                    AND search.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+                </if>
+            </if>
+            <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+                <foreach collection="searchVO.contents" item="content" index="index">
+                    AND (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE
+                    CONCAT(CONCAT('%',
+                    #{content}), '%'))
+                </foreach>
+            </if>
+        )
         ORDER BY ai.issue_id
     </select>
 

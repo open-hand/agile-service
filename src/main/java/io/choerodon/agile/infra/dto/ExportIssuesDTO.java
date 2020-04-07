@@ -30,6 +30,36 @@ public class ExportIssuesDTO {
     private BigDecimal storyPoints;
     private String epicName;
 
+    private Long parentIssueId;
+
+    private Long relateIssueId;
+
+    private String typeCode;
+
+    public String getTypeCode() {
+        return typeCode;
+    }
+
+    public void setTypeCode(String typeCode) {
+        this.typeCode = typeCode;
+    }
+
+    public Long getParentIssueId() {
+        return parentIssueId;
+    }
+
+    public void setParentIssueId(Long parentIssueId) {
+        this.parentIssueId = parentIssueId;
+    }
+
+    public Long getRelateIssueId() {
+        return relateIssueId;
+    }
+
+    public void setRelateIssueId(Long relateIssueId) {
+        this.relateIssueId = relateIssueId;
+    }
+
     public Long getIssueTypeId() {
         return issueTypeId;
     }
