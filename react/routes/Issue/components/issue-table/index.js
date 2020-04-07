@@ -79,7 +79,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
     return name ? <span style={style}>{name}</span> : null;
   }
   return (
-    <div className="c7nagile-issue-table">      
+    <div className="c7nagile-issue-table">
       <Table
         mode="tree"
         ref={tableRef}
@@ -90,7 +90,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
         })}
       >
         <Column
-          sortable          
+          sortable
           align="left"
           name="issueId"
           width={240}
@@ -132,25 +132,25 @@ function IssueTable({ tableRef, onCreateIssue }) {
         />
         <Column
           sortable
-          name="reporterId"
-          className="c7n-agile-table-cell"
+          name="assigneeId"
           renderer={({ record }) => (
             <div style={{ display: 'inline-flex' }}>
-              {record.get('reporterId') && record.get('reporterId') !== '0' && (
-              <UserHead
-                user={{
-                  id: record.get('reporterId'),
-                  name: record.get('reporterName'),
-                  loginName: record.get('reporterLoginName'),
-                  realName: record.get('reporterRealName'),
-                  avatar: record.get('reporterImageUrl'),
-                }}
-              />
-              )}
+              {
+                record.get('assigneeId') && record.get('assigneeId') !== '0' && (
+                  <UserHead
+                    user={{
+                      id: record.get('assigneeId'),
+                      name: record.get('assigneeName'),
+                      loginName: record.get('assigneeLoginName'),
+                      realName: record.get('assigneeRealName'),
+                      avatar: record.get('assigneeImageUrl'),
+                    }}
+                  />
+                )
+              }
             </div>
           )}
         />
-
         <Column
           sortable
           name="statusId"
@@ -163,23 +163,21 @@ function IssueTable({ tableRef, onCreateIssue }) {
         />
         <Column
           sortable
-          name="assigneeId"
+          name="reporterId"
+          className="c7n-agile-table-cell"
           renderer={({ record }) => (
             <div style={{ display: 'inline-flex' }}>
-              {
-          record.get('assigneeId') && record.get('assigneeId') !== '0' && (
-            <UserHead
-              user={{
-                id: record.get('assigneeId'),
-                name: record.get('assigneeName'),
-                loginName: record.get('assigneeLoginName'),
-                realName: record.get('assigneeRealName'),
-                avatar: record.get('assigneeImageUrl'),
-              }}
-            />
-          )
-        }
-
+              {record.get('reporterId') && record.get('reporterId') !== '0' && (
+                <UserHead
+                  user={{
+                    id: record.get('reporterId'),
+                    name: record.get('reporterName'),
+                    loginName: record.get('reporterLoginName'),
+                    realName: record.get('reporterRealName'),
+                    avatar: record.get('reporterImageUrl'),
+                  }}
+                />
+              )}
             </div>
           )}
         />
@@ -202,11 +200,11 @@ function IssueTable({ tableRef, onCreateIssue }) {
               const value = record.get('foundationFieldValue')[code];
               if (fieldType === 'member') {
                 return value && (
-                <div style={{ display: 'inline-flex' }}>
-                  <UserHead
-                    user={value}
-                  />
-                </div>
+                  <div style={{ display: 'inline-flex' }}>
+                    <UserHead
+                      user={value}
+                    />
+                  </div>
                 );
               }
               return <span>{value || ''}</span>;
@@ -214,7 +212,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
           />
         ))}
       </Table>
-      <Pagination          
+      <Pagination
         pageSize={dataSet.issuePageSize}
         page={dataSet.issueCurrentPage}
         total={dataSet.issueTotal}
@@ -229,9 +227,9 @@ function IssueTable({ tableRef, onCreateIssue }) {
             dataSet.query();
           }
         }}
-      />       
+      />
       <CollapseAll tableRef={tableRef} />
-    </div>    
+    </div>
   );
 }
 export default observer(IssueTable);

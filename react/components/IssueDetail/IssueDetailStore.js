@@ -1,7 +1,21 @@
 import { observable, action, computed } from 'mobx';
+import {
+  loadBranchs, loadDatalogs, loadLinkIssues,
+  loadIssue, loadWorklogs, loadDocs, getFieldAndValue, 
+} from '@/api/NewIssueApi';
+import {
+  loadDatalogs as loadDatalogsProgram,
+  loadIssue as loadIssueProgram,
+  getFieldAndValue as getFieldAndValueProgram,
+} from '@/api/QueryProgramApi';
 
-class EditIssueStore {
-  // issue
+class IssueDetailStore {
+  @observable loading = false;
+
+  @action setLoading(loading) {
+    this.loading = loading;
+  }
+
   @observable issue = {};
 
   @action setIssue(data) {
@@ -12,7 +26,6 @@ class EditIssueStore {
     return this.issue;
   }
 
-  // fields
   @observable fields = [];
 
   @action setIssueFields(issue, fields) {
@@ -23,6 +36,48 @@ class EditIssueStore {
   @computed get getFields() {
     return this.fields;
   }
+
+  loadIssueDetail = async (paramIssueId) => {
+    this.setLoading(true);
+    try {
+      // 1. 加载详情
+      const issue = await (programId ? loadIssueProgram(id, programId) : loadIssue(id));
+      if (idRef.current !== id) {
+        return;
+      }
+      
+      // 2. 根据详情加载fields
+      const param = {
+        schemeCode: 'agile_issue',
+        context: issue.typeCode,
+        pageCode: 'agile_issue_edit',
+      };
+      const fields = await (programId ? getFieldAndValueProgram(id, param, programId) : getFieldAndValue(id, param));
+      setIssueLoading(false);
+      store.setIssueFields(issue, fields);
+      
+      // 3. 加载额外信息
+      const [
+        doc,
+        workLogs,
+        dataLogs,
+        linkIssues,
+        branches,
+      ] = await Promise.all([
+        loadDocs(id),
+        programId || applyType === 'program' ? null : loadWorklogs(id),
+        programId ? loadDatalogsProgram(id, programId) : loadDatalogs(id),
+        programId || applyType === 'program' ? null : loadLinkIssues(id),
+        programId || applyType === 'program' ? null : loadBranchs(id),
+      ]);
+      if (idRef.current !== id) {
+        return;
+      }
+      store.initIssueAttribute(doc, workLogs, dataLogs, linkIssues, branches, []);
+    } catch (error) {
+      Choerodon.prompt(error.message, 'error');
+    }
+  };
 
   @observable issueTypes = [];
 
@@ -236,4 +291,4 @@ class EditIssueStore {
     return this.wsjfDTOShow;
   }
 }
-export default EditIssueStore;
+export default IssueDetailStore;
