@@ -171,11 +171,11 @@ public class ExcelUtil {
 
         CellStyle blueBackground = wb.createCellStyle();
         blueBackground.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
-        blueBackground.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        blueBackground.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
         CellStyle coralBackground = wb.createCellStyle();
         coralBackground.setFillForegroundColor(IndexedColors.CORAL.getIndex());
-        coralBackground.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        coralBackground.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
         String[] data1 = {"问题类型*", "所属史诗", "模块", "冲刺", "概述*",
                 "子任务概述(仅子任务生效)", "描述", "经办人", "优先级*", "预估时间(小时)",
@@ -365,6 +365,7 @@ public class ExcelUtil {
             for (int j = 0; j < list.size(); j++) {
                 SXSSFRow row = sheet.createRow(j + 1);
                 row.setHeight((short) 260);
+                Object data = list.get(j);
                 for (int i = 0; i < fieldsName.length; i++) {
                     //3.3设置列标题
                     SXSSFCell cell2 = row2.createCell(i);
@@ -372,7 +373,7 @@ public class ExcelUtil {
                     cell2.setCellStyle(style2);
                     cell2.setCellValue(fieldsName[i]);
                     //4、操作单元格；将数据写入excel
-                    handleWriteCell(row, i, j, list, cellStyle, fields, clazz);
+                    handleWriteCell(row, i, data, cellStyle, fields, clazz, null);
                 }
             }
         }
@@ -382,8 +383,13 @@ public class ExcelUtil {
     /**
      * 通过类导出
      */
-    public static <T> void export(List<T> list, Class<T> clazz, String[] fieldsName, String[] fields, String sheetName, List<String> autoSizeColumn, HttpServletResponse response) {
-        if (list != null && !list.isEmpty()) {
+    public static <T> void export(Map<Long, T> map,
+                                  Map<Long,Set<Long>> parentSonMap,
+                                  Class<T> clazz, String[] fieldsName,
+                                  String[] fields, String sheetName,
+                                  List<String> autoSizeColumn,
+                                  HttpServletResponse response) {
+        if (!ObjectUtils.isEmpty(map)) {
             //1、创建工作簿
             SXSSFWorkbook workbook = new SXSSFWorkbook();
             //1.3、列标题样式
@@ -405,13 +411,43 @@ public class ExcelUtil {
                 cell2.setCellStyle(style2);
                 cell2.setCellValue(fieldsName[i]);
             }
-            for (int j = 0; j < list.size(); j++) {
-                SXSSFRow row = sheet.createRow(j + 1);
-                row.setHeight((short) 260);
-                for (int i = 0; i < fieldsName.length; i++) {
-                    ;
-                    //4、操作单元格；将数据写入excel
-                    handleWriteCell(row, i, j, list, cellStyle, fields, clazz);
+
+            Set<Long> childrenSet = new HashSet<>();
+            for (Map.Entry<Long, Set<Long>> entry : parentSonMap.entrySet()) {
+                childrenSet.addAll(entry.getValue());
+            }
+            int rowNum = 1;
+            IndexedColors lastColors = null;
+            for (Map.Entry<Long, T> entry : map.entrySet()) {
+                Long id = entry.getKey();
+                T data = entry.getValue();
+                if (childrenSet.contains(id)) {
+                    continue;
+                }
+                Set<Long> sonSet = parentSonMap.get(id);
+                boolean hasSonNodes = !ObjectUtils.isEmpty(sonSet);
+                CellStyle foregroundColor = null;
+                if (hasSonNodes) {
+                    if (ObjectUtils.isEmpty(lastColors)) {
+                        lastColors = IndexedColors.TAN;
+                    } else if (IndexedColors.TAN.equals(lastColors)) {
+                        lastColors = IndexedColors.LIGHT_TURQUOISE;
+                    } else if (IndexedColors.LIGHT_TURQUOISE.equals(lastColors)) {
+                        lastColors = IndexedColors.TAN;
+                    }
+                    foregroundColor = createForegroundColor(workbook, lastColors);
+                }
+                fillInExcelRow(clazz, fieldsName, fields, cellStyle, sheet, rowNum, data, foregroundColor);
+                rowNum++;
+
+                if (hasSonNodes) {
+                    for (Long sonId : sonSet) {
+                        T son = map.get(sonId);
+                        if (!ObjectUtils.isEmpty(son)) {
+                            fillInExcelRow(clazz, fieldsName, fields, cellStyle, sheet, rowNum, son, foregroundColor);
+                            rowNum++;
+                        }
+                    }
                 }
             }
             sheet.trackAllColumnsForAutoSizing();
@@ -440,10 +476,42 @@ public class ExcelUtil {
         }
     }
 
-    protected static <T> void handleWriteCell(SXSSFRow row, int i, int j, List<T> list, CellStyle cellStyle, String[] fields, Class<T> clazz) {
+    protected static CellStyle createForegroundColor(SXSSFWorkbook workbook, IndexedColors colors) {
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setFillForegroundColor(colors.getIndex());
+        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        return cellStyle;
+    }
+
+    protected static <T> void fillInExcelRow(Class<T> clazz,
+                                           String[] fieldsName,
+                                           String[] fields,
+                                           CellStyle cellStyle,
+                                           SXSSFSheet sheet,
+                                           int rowNum,
+                                           T data,
+                                           CellStyle foregroundColor) {
+        SXSSFRow row = sheet.createRow(rowNum);
+        row.setHeight((short) 260);
+        for (int i = 0; i < fieldsName.length; i++) {
+            //4、操作单元格；将数据写入excel
+            handleWriteCell(row, i, data, cellStyle, fields, clazz, foregroundColor);
+        }
+    }
+
+    protected static <T> void handleWriteCell(SXSSFRow row,
+                                              int i,
+                                              Object data,
+                                              CellStyle cellStyle,
+                                              String[] fields,
+                                              Class<T> clazz,
+                                              CellStyle foregroundColor) {
         SXSSFCell cell = row.createCell(i);
         cell.setCellStyle(cellStyle);
-        if (list.get(j) != null) {
+        if (!ObjectUtils.isEmpty(foregroundColor)) {
+            cell.setCellStyle(foregroundColor);
+        }
+        if (data != null) {
             Method method = null;
             try {
                 method = clazz.getMethod(createGetter(fields[i]));
@@ -457,7 +525,7 @@ public class ExcelUtil {
             }
             Object invoke = new Object();
             try {
-                invoke = method.invoke(list.get(j));
+                invoke = method.invoke(data);
             } catch (InvocationTargetException | IllegalAccessException e) {
                 LOGGER.error(EXCEPTION, e);
             }
