@@ -35,7 +35,9 @@ export default function useFullScreen(target, onFullScreenChange, customClassNam
   const handleChangeFullScreen = () => {  
     const element = typeof target === 'function' ? target() : target;
     const currentFullScreen = getCurrentFullScreen();
-    setIsFullScreen(currentFullScreen);
+    setTimeout(() => {
+      setIsFullScreen(currentFullScreen); // 推迟设置state，防止出现state更改完成，但是没有渲染完成，可能导致的问题
+    });
     if (currentFullScreen) {
       element.classList.add(customClassName);
     } else {
