@@ -825,6 +825,7 @@
             WHERE ai.project_id = #{projectId}
             AND ai.type_code in ('story', 'task', 'bug')
             AND ai.apply_type = 'agile'
+            AND (ai.relate_issue_id IS NULL OR ai.relate_issue_id = 0)
             <if test="issueId != null">
                 AND ai.issue_id != #{issueId}
             </if>
