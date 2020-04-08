@@ -14,7 +14,7 @@ const IssueDropDown = ({
   const { store, onUpdate } = useContext(EditIssueContext);
   const issue = store.getIssue;
   const {
-    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, relateIssueId,
+    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, 
   } = issue;
 
   const handleDeleteIssue = () => {
@@ -157,7 +157,7 @@ const IssueDropDown = ({
         )
       }
       {
-        typeCode === 'bug' && !relateIssueId && (
+        typeCode === 'bug' && !subIssueVOList.length > 0 && (
           <Menu.Item key="10">
             关联问题
           </Menu.Item>
