@@ -1229,10 +1229,10 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public void exportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request, HttpServletResponse response, Long organizationId) {
         //处理根据界面筛选结果导出的字段
-        Map<String, String[]> fieldMap = handleExportFields(searchVO.getExportFieldCodes(), projectId, organizationId);
+        Map<String, String[]> fieldMap =
+                handleExportFields(searchVO.getExportFieldCodes(), projectId, organizationId, FIELDS, FIELDS_NAME);
         String[] fieldCodes = sortFieldCodes(fieldMap.get(FIELD_CODES));
         String[] fieldNames = sortFieldNames(fieldMap.get(FIELD_NAMES));
-
         ProjectInfoDTO projectInfoDTO = new ProjectInfoDTO();
         projectInfoDTO.setProjectId(projectId);
         projectInfoDTO = projectInfoMapper.selectOne(projectInfoDTO);
@@ -1294,39 +1294,35 @@ public class IssueServiceImpl implements IssueService {
     }
 
     protected String[] sortFieldNames(String[] fieldNames) {
-        String[] result = new String[fieldNames.length];
-        result[0] = "类型";
-        result[1] = "任务编号";
-        result[2] = "概要";
-        int index = 3;
+        List<String> result = new ArrayList<>();
+        result.add("类型");
+        result.add("任务编号");
+        result.add("概要");
         for (String str : fieldNames) {
-            if (result[0].equals(str)
-                    || result[1].equals(str)
-                    || result[2].equals(str)) {
+            if (result.get(0).equals(str)
+                    || result.get(1).equals(str)
+                    || result.get(2).equals(str)) {
                 continue;
             }
-            result[index] = str;
-            index++;
+            result.add(str);
         }
-        return result;
+        return result.toArray(new String[result.size()]);
     }
 
     protected String[] sortFieldCodes(String[] fieldCodes) {
-        String[] result = new String[fieldCodes.length];
-        result[0] = "typeName";
-        result[1] = "issueNum";
-        result[2] = "summary";
-        int index = 3;
+        List<String> result = new ArrayList<>();
+        result.add("typeName");
+        result.add("issueNum");
+        result.add("summary");
         for (String str : fieldCodes) {
-            if (result[0].equals(str)
-                    || result[1].equals(str)
-                    || result[2].equals(str)) {
+            if (result.get(0).equals(str)
+                    || result.get(1).equals(str)
+                    || result.get(2).equals(str)) {
                 continue;
             }
-            result[index] = str;
-            index++;
+            result.add(str);
         }
-        return result;
+        return result.toArray(new String[result.size()]);
     }
 
     protected void processParentSonRelation(Map<Long, Set<Long>> parentSonMap, ExportIssuesDTO issue) {
@@ -1362,7 +1358,11 @@ public class IssueServiceImpl implements IssueService {
      * @param exportFieldCodes
      * @return
      */
-    private Map<String, String[]> handleExportFields(List<String> exportFieldCodes, Long projectId, Long organizationId) {
+    protected Map<String, String[]> handleExportFields(List<String> exportFieldCodes,
+                                                     Long projectId,
+                                                     Long organizationId,
+                                                     String[] fieldsName,
+                                                     String[] fields) {
         Map<String, String[]> fieldMap = new HashMap<>(2);
         ObjectMapper m = new ObjectMapper();
 
@@ -1383,9 +1383,9 @@ public class IssueServiceImpl implements IssueService {
                 filter(v -> !v.getSystem()).collect(Collectors.toList());
 
         if (exportFieldCodes != null && exportFieldCodes.size() != 0) {
-            Map<String, String> data = new HashMap<>(FIELDS.length + userDefinedFieldDTOS.size());
-            for (int i = 0; i < FIELDS.length; i++) {
-                data.put(FIELDS[i], FIELDS_NAME[i]);
+            Map<String, String> data = new HashMap<>(fields.length + userDefinedFieldDTOS.size());
+            for (int i = 0; i < fields.length; i++) {
+                data.put(fields[i], fieldsName[i]);
             }
             for (ObjectSchemeFieldDTO userDefinedFieldDTO : userDefinedFieldDTOS) {
                 data.put(userDefinedFieldDTO.getCode(), userDefinedFieldDTO.getName());
@@ -1399,15 +1399,15 @@ public class IssueServiceImpl implements IssueService {
                     fieldCodes.add(code);
                     fieldNames.add(name);
                 } else {
-                    throw new CommonException("error.issue.exportFieldIllegal");
+                    throw new CommonException("error.issue.illegal.exportField", code);
                 }
             });
             fieldMap.put(FIELD_CODES, fieldCodes.stream().toArray(String[]::new));
             fieldMap.put(FIELD_NAMES, fieldNames.stream().toArray(String[]::new));
         } else {
             if (!userDefinedFieldDTOS.isEmpty()) {
-                List<String> fieldCodes = new ArrayList(Arrays.asList(FIELDS));
-                List<String> fieldNames = new ArrayList(Arrays.asList(FIELDS_NAME));
+                List<String> fieldCodes = new ArrayList(Arrays.asList(fields));
+                List<String> fieldNames = new ArrayList(Arrays.asList(fieldsName));
                 userDefinedFieldDTOS.forEach(fieldDTO -> {
                     fieldCodes.add(fieldDTO.getCode());
                     fieldNames.add(fieldDTO.getName());
@@ -1416,8 +1416,8 @@ public class IssueServiceImpl implements IssueService {
                 fieldMap.put(FIELD_CODES, fieldCodes.stream().toArray(String[]::new));
                 fieldMap.put(FIELD_NAMES, fieldNames.stream().toArray(String[]::new));
             } else {
-                fieldMap.put(FIELD_CODES, FIELDS);
-                fieldMap.put(FIELD_NAMES, FIELDS_NAME);
+                fieldMap.put(FIELD_CODES, fields);
+                fieldMap.put(FIELD_NAMES, fieldsName);
             }
         }
         return fieldMap;
