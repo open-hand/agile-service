@@ -84,7 +84,7 @@ function CreateField() {
           return { ...o, isDefault: false };
         }
       });
-      if (obj.defaultValue && obj.defaultValue.length) {
+      if (obj.defaultValue && Array.isArray(obj.defaultValue)) {
         obj.defaultValue = obj.defaultValue.join(',');
       }
     }
