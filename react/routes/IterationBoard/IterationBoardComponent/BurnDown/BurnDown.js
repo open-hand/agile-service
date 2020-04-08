@@ -1,8 +1,10 @@
+/* eslint-disable prefer-destructuring */
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import ReactEcharts from 'echarts-for-react';
 import _ from 'lodash';
-import moment from 'moment';
+import Moment from 'moment';
+import { extendMoment } from 'moment-range';
 import {
   Dropdown, Icon, Menu, Spin, Checkbox,
 } from 'choerodon-ui';
@@ -14,7 +16,7 @@ import './BurnDown.less';
 
 
 const { AppState } = stores;
-
+const moment = extendMoment(Moment);
 class BurnDown extends Component {
   constructor(props) {
     super(props);
@@ -245,35 +247,12 @@ class BurnDown extends Component {
   }
 
   getBetweenDateStr(start, end) {
-    const { restDayShow, restDays } = this.state;
-    const result = [];
-    const rest = [];
-    const beginDay = start.split('-');
-    const endDay = end.split('-');
-    const diffDay = new Date();
-    const dateList = [];
-    let i = 0;
-    diffDay.setDate(beginDay[2]);
-    diffDay.setMonth(beginDay[1] - 1);
-    diffDay.setFullYear(beginDay[0]);
-    while (i == 0) {
-      const countDay = diffDay.getTime();
-      if (restDays.includes(moment(diffDay).format('YYYY-MM-DD'))) {
-        rest.push(moment(diffDay).format('YYYY-MM-DD'));
-      }
-      dateList[2] = diffDay.getDate();
-      dateList[1] = diffDay.getMonth() + 1;
-      dateList[0] = diffDay.getFullYear();
-      if (String(dateList[1]).length == 1) { dateList[1] = `0${dateList[1]}`; }
-      if (String(dateList[2]).length === 1) { dateList[2] = `0${dateList[2]}`; }
-      if (restDayShow || !restDays.includes(moment(diffDay).format('YYYY-MM-DD'))) {
-        result.push(`${dateList[0]}-${dateList[1]}-${dateList[2]}`);
-      }
-      diffDay.setTime(countDay + 24 * 60 * 60 * 1000);
-      if (dateList[0] == endDay[0] && dateList[1] == endDay[1] && dateList[2] == endDay[2]) {
-        i = 1;
-      }
-    }
+    // 是否显示非工作日
+    const { restDays } = this.state;
+    const range = moment.range(start, end);
+    const days = Array.from(range.by('day'));
+    const result = days.map(day => day.format('YYYY-MM-DD'));
+    const rest = days.filter(day => restDays.includes(day.format('YYYY-MM-DD'))).map(day => day.format('YYYY-MM-DD'));
     return { result, rest };
   }
 
