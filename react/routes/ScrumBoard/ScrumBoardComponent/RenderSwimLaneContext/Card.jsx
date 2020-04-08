@@ -7,30 +7,27 @@ import {
 } from './CardComponent/index';
 import './StatusIssue.less';
 
-function getStyle({ draggableStyle, virtualStyle, isDragging }) {
-  // If you don't want any spacing between your items
-  // then you could just return this.
-  // I do a little bit of magic to have some nice visual space
-  // between the row items
+function getStyle({ draggableStyle, virtualStyle, isDragging }) {  
   const combined = {
     ...virtualStyle,
     ...draggableStyle,
   };
 
-  // Being lazy: this is defined in our css file
+  
   const grid = 8;
-
-  // when dragging we want to use the draggable style for placement, otherwise use the virtual style
+  const height = isDragging ? combined.height : combined.height - grid;
   const result = {
     ...combined,
-    height: isDragging ? combined.height : combined.height - grid,
     left: isDragging ? combined.left : combined.left + grid,
     width: isDragging
       ? draggableStyle.width
       : `calc(${combined.width} - ${grid * 2}px)`,
     marginBottom: grid,
   };
-
+  // eslint-disable-next-line no-restricted-globals
+  if (!isNaN(height)) {
+    result.height = height;
+  }
   return result;
 }
 // @observer
@@ -129,7 +126,6 @@ function IssueItem({
         draggableStyle: provided.draggableProps.style,
         virtualStyle: style,
         isDragging,
-        height: 120,
       })}
     >
       <Card completed={completed} issue={issue} statusName={statusName} categoryCode={categoryCode} />

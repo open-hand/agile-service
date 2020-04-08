@@ -29,9 +29,6 @@ const { Text, Edit } = TextEditToggle;
     this.init();
   }
 
-  componentWillReceiveProps() {
-    this.init();
-  }
 
   init = () => {
     loadEpics().then((res) => {

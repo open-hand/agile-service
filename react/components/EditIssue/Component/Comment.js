@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import { Icon, Popconfirm } from 'choerodon-ui';
 import UserHead from '../../UserHead';
 import WYSIWYGEditor from '../../WYSIWYGEditor';
-import { IssueDescription, DatetimeAgo } from '../../CommonComponent';
+import WYSIWYGViewer from '../../WYSIWYGViewer';
+import { DatetimeAgo } from '../../CommonComponent';
 import {
-  delta2Html, text2Delta, beforeTextUpload,
+  text2Delta, beforeTextUpload,
 } from '../../../common/utils';
 import { deleteCommit, updateCommit } from '../../../api/NewIssueApi';
 import './Comment.less';
@@ -196,7 +197,7 @@ class Comment extends Component {
                         // toolbarHeight={66}
                         />
                       ) : (
-                        <IssueDescription data={delta2Html(comment.commentText)} />
+                        <WYSIWYGViewer data={comment.commentText} />
                       )
                     }
                   </div>
