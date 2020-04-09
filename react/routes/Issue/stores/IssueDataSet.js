@@ -4,7 +4,6 @@ import { observer } from 'mobx-react-lite';
 import { Button } from 'choerodon-ui';
 import Modal from '../components/Modal';
 import transform from '../utils';
-import test from './test.json';
 import BatchModal from '../components/BatchModal';
 
 let modal;
