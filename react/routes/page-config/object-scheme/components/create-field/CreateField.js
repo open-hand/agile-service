@@ -153,12 +153,11 @@ function CreateField() {
       return;
     }
     const fieldType = current.get('fieldType');
-
     if (multipleList.indexOf(fieldType) !== -1) {
       const newValue = newDefaultValue.filter(v => v !== String(tempKey));
       current.set('defaultValue', newValue);
     } else if (singleList.indexOf(fieldType) !== -1) {
-      if (newDefaultValue === tempKey) {
+      if (newDefaultValue === String(tempKey)) {
         current.set('defaultValue', '');
       }
     }
