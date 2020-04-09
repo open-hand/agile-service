@@ -5,7 +5,6 @@ import useFullScreen from '../../../../common/useFullScreen';
 
 const BoardFullScreen = () => {
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => {}, 'c7n-scrumboard-fullScreen');
-
   return (
     <Button
       className="c7nagile-board-fullScreenBtn"

@@ -30,6 +30,7 @@ function getCurrentFullScreen() {
   return Boolean(isFullScreen);
 }
 
+
 export default function useFullScreen(target, onFullScreenChange, customClassName = 'fullScrenn') {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const handleChangeFullScreen = () => {  
@@ -47,6 +48,7 @@ export default function useFullScreen(target, onFullScreenChange, customClassNam
       onFullScreenChange(currentFullScreen);
     }
   };
+  
   const toggleFullScreen = () => {
     const currentFullScreen = getCurrentFullScreen();
     const element = typeof target === 'function' ? target() : target;
@@ -62,6 +64,9 @@ export default function useFullScreen(target, onFullScreenChange, customClassNam
     document.addEventListener('mozfullscreenchange', handleChangeFullScreen);
     document.addEventListener('MSFullscreenChange', handleChangeFullScreen);
     return function cleanup() {
+      if (isFullScreen) {
+        exitFullScreen(); // 组件卸载时如果是全屏，就自动退出全屏
+      } 
       document.removeEventListener('fullscreenchange', handleChangeFullScreen);
       document.removeEventListener('webkitfullscreenchange', handleChangeFullScreen);
       document.removeEventListener('mozfullscreenchange', handleChangeFullScreen);
