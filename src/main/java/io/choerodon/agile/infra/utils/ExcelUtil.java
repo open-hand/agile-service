@@ -4,6 +4,7 @@ import io.choerodon.agile.app.domain.Predefined;
 import io.choerodon.core.exception.CommonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
@@ -401,6 +402,7 @@ public class ExcelUtil {
             SXSSFSheet sheet = workbook.createSheet(sheetName);
             //设置默认列宽
             sheet.setDefaultColumnWidth(13);
+            sheet.setColumnWidth(3, 12000);
             //创建标题列
             SXSSFRow row2 = sheet.createRow(0);
             row2.setHeight((short) 260);
@@ -408,6 +410,8 @@ public class ExcelUtil {
                 //3.3设置列标题
                 SXSSFCell cell2 = row2.createCell(i);
                 //加载单元格样式
+                style2.setFillForegroundColor(HSSFColor.PALE_BLUE.index);
+                style2.setFillPattern(FillPatternType.SOLID_FOREGROUND);
                 cell2.setCellStyle(style2);
                 cell2.setCellValue(fieldsName[i]);
             }

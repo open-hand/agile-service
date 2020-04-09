@@ -1448,7 +1448,7 @@
                 </foreach>
             </if>
         )
-        ORDER BY ai.issue_id
+        ORDER BY ai.issue_id desc
     </select>
 
     <select id="queryIssueEpicInfoByIssueIds" resultType="io.choerodon.agile.infra.dto.IssueDTO">
