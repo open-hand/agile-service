@@ -24,7 +24,6 @@ public class IssueSearchDTO {
     private Long projectId;
     private Long epicId;
     private String epicName;
-//    private String featureName;
     private List<Long> versionIds;
     private List<String> versionNames;
     private Long sprintId;
@@ -250,11 +249,4 @@ public class IssueSearchDTO {
         this.assigneeRealName = assigneeRealName;
     }
 
-//    public String getFeatureName() {
-//        return featureName;
-//    }
-//
-//    public void setFeatureName(String featureName) {
-//        this.featureName = featureName;
-//    }
 }

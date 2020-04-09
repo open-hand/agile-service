@@ -14,16 +14,6 @@
         agile_version_issue_rel.version_id = #{versionId} AND agile_version_issue_rel.project_id = #{projectId}
     </delete>
 
-    <!--<delete id="deleteByVersionIds">-->
-        <!--DELETE-->
-        <!--FROM agile_version_issue_rel-->
-        <!--WHERE project_id = #{projectId} AND version_id IN-->
-        <!--<foreach collection="versionIds" item="versionId" index="index"-->
-                 <!--open="(" close=")" separator=",">-->
-            <!--#{versionId}-->
-        <!--</foreach>-->
-    <!--</delete>-->
-
     <delete id="batchDeleteByIssueIdAndTypeArchivedExceptInfluence">
         DELETE avir
         FROM

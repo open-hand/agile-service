@@ -44,8 +44,6 @@ public interface VersionIssueRelService {
 
     Boolean deleteIncompleteIssueByVersionId(Long projectId, Long versionId);
 
-//    int deleteByVersionIds(Long projectId, List<Long> versionIds);
-
     /**
      * 根据查询条件删除版本关联
      * @param versionIssueRelDTO versionIssueRelDTO

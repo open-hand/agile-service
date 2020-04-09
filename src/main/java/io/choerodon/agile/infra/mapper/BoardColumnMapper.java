@@ -38,14 +38,6 @@ public interface BoardColumnMapper extends Mapper<BoardColumnDTO> {
 
     List queryColumnStatusRelByProjectId(@Param("projectId") Long projectId);
 
-//    BoardColumnCheckDTO selectColumnByColumnId(@Param("projectId") Long projectId,
-//                                              @Param("columnId") Long columnId,
-//                                              @Param("activeSprintId") Long activeSprintId);
-
-//    BoardColumnCheckDTO selectColumnByColumnIdWithoutSub(@Param("projectId") Long projectId,
-//                                                        @Param("columnId") Long columnId,
-//                                                        @Param("activeSprintId") Long activeSprintId);
-
     void updateMaxAndMinNum(@Param("columnInfo") ColumnWithMaxMinNumVO columnWithMaxMinNumVO);
 
     List<BoardColumnDTO> selectByBoardIdOrderBySequence(@Param("boardId") Long boardId);
@@ -95,11 +87,6 @@ public interface BoardColumnMapper extends Mapper<BoardColumnDTO> {
                                             @Param("boardId") Long boardId,
                                             @Param("activeSprintId") Long activeSprintId,
                                             @Param("columnConstraint") String columnConstraint);
-
-//    List<ColumnAndIssueDTO> selectBoardByProgram(@Param("projectId") Long projectId,
-//                                                 @Param("boardId") Long boardId,
-//                                                 @Param("activePiId") Long activePiId,
-//                                                 @Param("searchVO")SearchVO searchVO);
 
     List<BoardColumnStatusRelDTO> queryRelByColumnIds(@Param("columnIds") List<Long> columnIds);
 }
