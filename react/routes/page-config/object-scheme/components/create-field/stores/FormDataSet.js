@@ -32,7 +32,6 @@ export default ({
   formatMessage, type, store, schemeCode, id, isEdit, oldRecord, userOptionDataSet,
 }) => {
   const regex = /^[0-9a-zA-Z_]+$/;
-
   // eslint-disable-next-line consistent-return
   async function checkCode(value) {
     if (isEdit) return;
