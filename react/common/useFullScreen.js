@@ -77,6 +77,6 @@ export default function useFullScreen(target, onFullScreenChange, customClassNam
       document.removeEventListener('mozfullscreenchange', handleChangeFullScreen);
       document.removeEventListener('MSFullscreenChange', handleChangeFullScreen);
     };
-  });
+  }, [isFullScreen]);
   return [isFullScreen, toggleFullScreen];
 }
