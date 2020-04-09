@@ -40,3 +40,4 @@ yarn.lock
 **/lib/fonts/
 .yalc
 yalc.lock
+yarn-error.log

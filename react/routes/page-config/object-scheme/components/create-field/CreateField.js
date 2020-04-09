@@ -149,6 +149,9 @@ function CreateField() {
   const onTreeDelete = (tempKey) => {
     const { current } = formDataSet;
     const newDefaultValue = current.get('defaultValue');
+    if (!newDefaultValue) {
+      return;
+    }
     const fieldType = current.get('fieldType');
 
     if (multipleList.indexOf(fieldType) !== -1) {

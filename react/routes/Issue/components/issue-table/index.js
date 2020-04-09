@@ -2,6 +2,7 @@ import React, {
   useContext, Fragment,
 } from 'react';
 import { observer } from 'mobx-react-lite';
+import _ from 'lodash';
 import { Tooltip, Tag } from 'choerodon-ui';
 import { Table, Pagination } from 'choerodon-ui/pro';
 import { map } from 'lodash';
@@ -40,21 +41,23 @@ function IssueTable({ tableRef, onCreateIssue }) {
     if (list) {
       if (list.length > 0) {
         return (
-          <div style={{ display: 'inline-flex', maxWidth: '100%' }}>
-            <Tag
-              color="blue"
-              style={{
-                maxWidth: 160,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                cursor: 'auto',
-              }}
-            >
-              {list[0][nameField]}
-            </Tag>
-            {list.length > 1 ? <Tag color="blue">...</Tag> : null}
-          </div>
+          <Tooltip title={_.map(list, item => item[nameField]).join(',')}>
+            <div style={{ display: 'inline-flex', maxWidth: '100%' }}>
+              <Tag
+                color="blue"
+                style={{
+                  maxWidth: 160,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  cursor: 'auto',
+                }}
+              >
+                {list[0][nameField]}
+              </Tag>
+              {list.length > 1 ? <Tag color="blue">...</Tag> : null}
+            </div>
+          </Tooltip>
         );
       }
     }
@@ -64,6 +67,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
     const color = fieldName === 'epic' ? record.get('epicColor') : record.get('featureColor');
     const name = fieldName === 'epic' ? record.get('epicName') : record.get('featureName');
     const style = {
+      width: '100%',
       color,
       borderWidth: '1px',
       borderStyle: 'solid',
@@ -71,13 +75,13 @@ function IssueTable({ tableRef, onCreateIssue }) {
       borderRadius: '2px',
       fontSize: '13px',
       lineHeight: '20px',
-      padding: '0 8px',
+      padding: '0 4px',
       display: 'inline-block',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
     };
-    return name ? <span style={style}>{name}</span> : null;
+    return name ? <Tooltip title={name}><span style={style}>{name}</span></Tooltip> : null;
   }
   return (
     <div className="c7nagile-issue-table">
@@ -182,7 +186,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
             </div>
           )}
         />
-        <Column sortable name="lastUpdateDate" className="c7n-agile-table-cell" />
+        <Column sortable width={150} name="lastUpdateDate" className="c7n-agile-table-cell" />
         <Column hidden name="label" className="c7n-agile-table-cell" renderer={renderTag('labelIssueRelVOS', 'labelName')} />
         <Column hidden name="component" className="c7n-agile-table-cell" renderer={renderTag('issueComponentBriefVOS', 'name')} />
         <Column hidden name="storyPoints" className="c7n-agile-table-cell" renderer={({ text }) => text || '-'} />
