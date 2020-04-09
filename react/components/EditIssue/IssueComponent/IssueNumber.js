@@ -26,7 +26,7 @@ const IssueNumber = ({
       return false;
     }
     const { issueId, issueNum } = issue;
-    history.push(typeCode === 'feature' ? programIssueLink(issueId, issueNum) : issueLink(issueId, typeCode, issueNum));
+    history.push(issueLink(issueId, typeCode, issueNum));
     return false;
   };
 
@@ -56,7 +56,7 @@ const IssueNumber = ({
         ) : null
       }
       {
-        (['sub_task', 'bug'].includes(typeCode) && parentSummary) ? (
+        ((['sub_task', 'bug'].includes(typeCode) && parentSummary) || typeCode === 'feature') ? (
           <span>
             {issueNum}
           </span>
