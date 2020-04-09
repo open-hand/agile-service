@@ -194,8 +194,6 @@ public class IssueServiceImpl implements IssueService {
     private static final String RANK_FIELD = "rank";
     private static final String FIX_RELATION_TYPE = "fix";
     private static final String INFLUENCE_RELATION_TYPE = "influence";
-    private static final String[] FIELDS_NAME = {"任务编号", "概要", "描述", "类型", "所属项目", "经办人", "经办人名称", "报告人", "报告人名称", "解决状态", "状态", "冲刺", "创建时间", "最后更新时间", "优先级", "是否子任务", "剩余预估", "版本", "史诗", "标签", "故事点", "模块"};
-    private static final String[] FIELDS = {"issueNum", "summary", "description", "typeName", "projectName", "assigneeName", "assigneeRealName", "reporterName", "reporterRealName", "resolution", "statusName", "sprintName", "creationDate", "lastUpdateDate", "priorityName", "subTask", REMAIN_TIME_FIELD, "versionName", "epicName", "labelName", "storyPoints", "componentName"};
     private static final String[] FIELDS_IN_PROGRAM = {"issueNum", "summary", "typeName", "statusName", "piName", "creationDate", "lastUpdateDate", "epicName", "storyPoints", "benfitHypothesis", "acceptanceCritera"};
     private static final String[] FIELDS_NAME_IN_PROGRAM = {"任务编号", "概要", "类型", "状态", "PI", "创建时间", "最后更新时间", "史诗", "故事点", "特性价值", "验收标准"};
     private static final String PROJECT_ERROR = "error.project.notFound";
@@ -210,6 +208,37 @@ public class IssueServiceImpl implements IssueService {
     private static final String BACKETNAME = "agile-service";
 
     private ModelMapper modelMapper = new ModelMapper();
+
+    private static final String[] FIELDS_NAME;
+
+    private static final String[] FIELDS;
+
+    protected static Map<String, String> FIELD_MAP = new LinkedHashMap<>();
+
+    protected static String[] AUTO_SIZE_WIDTH = {"summary", "epicName", "feature", "creationDate", "lastUpdateDate"};
+
+    static {
+        FIELD_MAP.put("typeName", "问题类型");
+        FIELD_MAP.put("issueNum", "问题编号");
+        FIELD_MAP.put("summary", "概要");
+        FIELD_MAP.put("description", "描述");
+        FIELD_MAP.put("priorityName", "优先级");
+        FIELD_MAP.put("statusName", "状态");
+        FIELD_MAP.put("resolution", "解决状态");
+        FIELD_MAP.put("assigneeName", "经办人");
+        FIELD_MAP.put("reporterName", "报告人");
+        FIELD_MAP.put("storyPoints", "故事点");
+        FIELD_MAP.put("remainingTime", "剩余预估时间");
+        FIELD_MAP.put("versionName", "版本");
+        FIELD_MAP.put("epicName", "所属史诗");
+        FIELD_MAP.put("labelName", "标签");
+        FIELD_MAP.put("componentName", "模块");
+        FIELD_MAP.put("creationDate", "创建时间");
+        FIELD_MAP.put("lastUpdateDate", "最后更新时间");
+        FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
+        FIELDS_NAME = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
+    }
+
 
     @PostConstruct
     public void init() {
@@ -1230,7 +1259,7 @@ public class IssueServiceImpl implements IssueService {
     public void exportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request, HttpServletResponse response, Long organizationId) {
         //处理根据界面筛选结果导出的字段
         Map<String, String[]> fieldMap =
-                handleExportFields(searchVO.getExportFieldCodes(), projectId, organizationId, FIELDS, FIELDS_NAME);
+                handleExportFields(searchVO.getExportFieldCodes(), projectId, organizationId, FIELDS_NAME, FIELDS);
         String[] fieldCodes = sortFieldCodes(fieldMap.get(FIELD_CODES));
         String[] fieldNames = sortFieldNames(fieldMap.get(FIELD_NAMES));
         ProjectInfoDTO projectInfoDTO = new ProjectInfoDTO();
@@ -1287,16 +1316,16 @@ public class IssueServiceImpl implements IssueService {
                     issueMap.put(exportIssue.getIssueId(), exportIssue);
                 });
             }
-            ExcelUtil.export(issueMap, parentSonMap, ExportIssuesVO.class, fieldNames, fieldCodes, project.getName(), Arrays.asList("sprintName"), response);
+            ExcelUtil.export(issueMap, parentSonMap, ExportIssuesVO.class, fieldNames, fieldCodes, project.getName(), Arrays.asList(AUTO_SIZE_WIDTH), response);
         } else {
-            ExcelUtil.export(Collections.emptyMap(), Collections.emptyMap(), ExportIssuesVO.class, fieldNames, fieldCodes, project.getName(), Arrays.asList("sprintName"), response);
+            ExcelUtil.export(Collections.emptyMap(), Collections.emptyMap(), ExportIssuesVO.class, fieldNames, fieldCodes, project.getName(), Arrays.asList(AUTO_SIZE_WIDTH), response);
         }
     }
 
     protected String[] sortFieldNames(String[] fieldNames) {
         List<String> result = new ArrayList<>();
-        result.add("类型");
-        result.add("任务编号");
+        result.add("问题类型");
+        result.add("问题编号");
         result.add("概要");
         for (String str : fieldNames) {
             if (result.get(0).equals(str)
