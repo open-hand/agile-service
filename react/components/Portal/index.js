@@ -14,7 +14,7 @@ function Portal({ children, target }) {
   useLayoutEffect(() => {
     setMount(true);
   }, []);
-  if (!mount) {
+  if (!mount || !container) {
     return null;
   }
   return ReactDOM.createPortal(children, container);

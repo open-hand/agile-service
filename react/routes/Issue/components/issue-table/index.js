@@ -13,6 +13,7 @@ import UserHead from '@/components/UserHead';
 import IssueStore from '@/stores/project/sprint/IssueStore/IssueStore';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import CollapseAll from './CollapseAll';
+import IssuePagination from './IssuePagination';
 import Store from '../../stores';
 import './index.less';
 
@@ -212,22 +213,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
           />
         ))}
       </Table>
-      <Pagination
-        pageSize={dataSet.issuePageSize}
-        page={dataSet.issueCurrentPage}
-        total={dataSet.issueTotal}
-        style={{ float: 'right', marginTop: 10 }}
-        onChange={(page, pageSize) => {
-          if (dataSet.issuePageSize !== pageSize) {
-            dataSet.issuePageSize = pageSize;
-            dataSet.issueCurrentPage = 1;
-            dataSet.query();
-          } else {
-            dataSet.issueCurrentPage = page;
-            dataSet.query();
-          }
-        }}
-      />
+      <IssuePagination />
       <CollapseAll tableRef={tableRef} />
     </div>
   );
