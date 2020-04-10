@@ -536,7 +536,7 @@ class BacklogStore {
         this.dealWithCtrl(data, currentIndex, currentClick);
       }
     } else {
-      this.clickedOnce(currentClick.sprintId, currentClick, false);
+      this.clickedOnce(sprintId, currentClick, true);
     }
   }
 
