@@ -215,7 +215,8 @@ public class IssueServiceImpl implements IssueService {
 
     protected static Map<String, String> FIELD_MAP = new LinkedHashMap<>();
 
-    protected static String[] AUTO_SIZE_WIDTH = {"summary", "epicName", "feature", "creationDate", "lastUpdateDate"};
+    protected static String[] AUTO_SIZE_WIDTH = {"summary", "epicName", "feature",
+            "creationDate", "lastUpdateDate", "sprintName"};
 
     static {
         FIELD_MAP.put("typeName", "问题类型");
@@ -225,6 +226,7 @@ public class IssueServiceImpl implements IssueService {
         FIELD_MAP.put("priorityName", "优先级");
         FIELD_MAP.put("statusName", "状态");
         FIELD_MAP.put("resolution", "解决状态");
+        FIELD_MAP.put("sprintName", "冲刺");
         FIELD_MAP.put("assigneeName", "经办人");
         FIELD_MAP.put("reporterName", "报告人");
         FIELD_MAP.put("storyPoints", "故事点");
