@@ -66,12 +66,17 @@ export default function useFullScreen(target, onFullScreenChange, customClassNam
     return function cleanup() {
       if (isFullScreen) {
         exitFullScreen(); // 组件卸载时如果是全屏，就自动退出全屏
+        setTimeout(() => {
+          setIsFullScreen(false); // 推迟设置state，防止出现state更改完成，但是没有渲染完成，可能导致的问题
+        });
+        const element = typeof target === 'function' ? target() : target;
+        element.classList.remove(customClassName);
       } 
       document.removeEventListener('fullscreenchange', handleChangeFullScreen);
       document.removeEventListener('webkitfullscreenchange', handleChangeFullScreen);
       document.removeEventListener('mozfullscreenchange', handleChangeFullScreen);
       document.removeEventListener('MSFullscreenChange', handleChangeFullScreen);
     };
-  });
+  }, [isFullScreen]);
   return [isFullScreen, toggleFullScreen];
 }
