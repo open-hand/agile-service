@@ -536,7 +536,7 @@ class BacklogStore {
         this.dealWithCtrl(data, currentIndex, currentClick);
       }
     } else {
-      this.clickedOnce(currentClick, currentClick, false);
+      this.clickedOnce(currentClick.sprintId, currentClick, false);
     }
   }
 
@@ -573,7 +573,7 @@ class BacklogStore {
   }
 
   @action clickedOnce(sprintId, currentClick, hasExtraKey) {
-    const index = this.issueMap.get(sprintId).findIndex(issue => issue.issueId === currentClick.issueId);
+    const index = this.issueMap.get(sprintId.toString()).findIndex(issue => issue.issueId === currentClick.issueId);
     this.multiSelected = observable.map();
     this.multiSelected.set(currentClick.issueId, currentClick);
     this.prevClickedIssue = {
