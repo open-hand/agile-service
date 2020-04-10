@@ -16,6 +16,7 @@ import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -31,6 +32,8 @@ import java.util.*;
  * @since 2018/8/17
  */
 public class ExcelUtil {
+
+    private static final Integer CELL_MAX_LENGTH = 32767;
 
     public enum Mode {
         SXSSF("SXSSF"), HSSF("HSSF"), XSSF("XSSF");
@@ -95,7 +98,7 @@ public class ExcelUtil {
         Row row = sheet.createRow(rowNum);
         row.createCell(0).setCellValue(fieldName);
         Cell cell = row.createCell(1);
-        cell.setCellValue(requestStr);
+        cell.setCellValue(substring(requestStr));
         if (hasStyle) {
             cell.setCellStyle(ztStyle);
         }
@@ -112,7 +115,7 @@ public class ExcelUtil {
         sheet.addMergedRegion(new CellRangeAddress(startRow, lastRow, firstCol, lastCol));
         Row row = sheet.getRow(0);
         Cell cell = row.createCell(2);
-        cell.setCellValue(remindInfo);
+        cell.setCellValue(substring(remindInfo));
         cell.setCellStyle(ztStyle);
     }
 
@@ -247,7 +250,7 @@ public class ExcelUtil {
         Row row = sheet.createRow(rowNum);
         for (int i = 0; i < data.length; i++) {
             Cell cell = row.createCell(i);
-            cell.setCellValue(data[i]);
+            cell.setCellValue(substring(data[i]));
             if (background != null) {
                 cell.setCellStyle(background);
             }
@@ -315,7 +318,7 @@ public class ExcelUtil {
                 for (int j = 0; j < fieldsName.length; j++) {
                     Cell cell = newRow.createCell(j);
                     if (row.getCell(j) != null) {
-                        cell.setCellValue(row.getCell(j).toString());
+                        cell.setCellValue(substring(row.getCell(j).toString()));
                     }
                     if (errorMapList.get(i) != null) {
                         List<Integer> errList = errorMapList.get(i);
@@ -535,21 +538,29 @@ public class ExcelUtil {
             }
             if (invoke instanceof Date) {
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                cell.setCellValue(formatter.format(invoke));
+                cell.setCellValue(substring(formatter.format(invoke)));
             } else if (invoke instanceof Map) {
                 ObjectMapper m = new ObjectMapper();
                 Map<String, String> foundationFieldValue = m.convertValue(invoke, Map.class);
 
                 String str = foundationFieldValue.get(fields[i]) != null ? foundationFieldValue.get(fields[i]) : "";
-                cell.setCellValue(str);
+                cell.setCellValue(substring(str));
             } else {
                 String str = invoke == null ? null : invoke.toString();
-                cell.setCellValue(str);
+                cell.setCellValue(substring(str));
             }
         } else {
             cell.setCellValue("");
         }
 
+    }
+
+    protected static String substring(String str) {
+        if (StringUtils.hasText(str) && str.length() > CELL_MAX_LENGTH) {
+            return str.substring(0, CELL_MAX_LENGTH);
+        } else {
+            return str;
+        }
     }
 
 
@@ -643,7 +654,7 @@ public class ExcelUtil {
         for (int i = 0; i < datas.size(); i++) {
             row = hidden.createRow(i);
             cell = row.createCell(0);
-            cell.setCellValue(datas.get(i));
+            cell.setCellValue(substring(datas.get(i)));
         }
         XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper((XSSFSheet) realSheet);
         XSSFDataValidationConstraint dvConstraint = (XSSFDataValidationConstraint) dvHelper.createFormulaListConstraint(hiddenSheetName + "!$A$1:$A" + datas.size());
