@@ -2,11 +2,12 @@ import React, { Component } from 'react';
 import { find, debounce } from 'lodash';
 import { Select, Form, Modal } from 'choerodon-ui';
 import {
-  updateIssue, loadIssueTypes, loadIssues, loadIssue,
+  updateIssue, loadIssueTypes, loadLinkIssuesForBug, loadIssue,
 } from '../../api/NewIssueApi';
 import TypeTag from '../TypeTag';
 import IssueOption from '../IssueOption';
 import './RelateStory.less';
+import SelectFocusLoad from '../SelectFocusLoad';
 
 const { Sidebar } = Modal;
 const { Option } = Select;
@@ -15,6 +16,13 @@ let sign = false;
 
 class RelateStory extends Component {
   debounceFilterIssues = debounce((input) => {
+    this.setState({
+      filters: {
+        advancedSearchArgs: {
+          summary: input,
+        },
+      },
+    });
     this.loadIssues();
   }, 500);
 
@@ -24,6 +32,7 @@ class RelateStory extends Component {
       createLoading: false,
       selectLoading: true,
       storys: [],
+      filters: {},
     };
   }
 
@@ -55,7 +64,8 @@ class RelateStory extends Component {
       this.setState({
         selectLoading: true,
       });
-      loadIssues(1, 10, this.filters)
+      const { filters } = this.state;
+      loadLinkIssuesForBug(1, 20, filters)
         .then((res) => {
           const storys = res.list;
           if (storys) {

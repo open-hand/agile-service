@@ -242,6 +242,17 @@ export function loadIssues(page = 1, size = 10, searchVO, orderField, orderType)
     },
   });
 }
+/**
+ * 关联问题时进行问题查询 (对于BUG管理问题)
+ * @param {*} page 
+ * @param {*} size 
+ * @param {*} searchVO  
+ */
+export function loadLinkIssuesForBug(page = 1, size = 10, searchVO) {
+  const orgId = AppState.currentMenuType.organizationId;
+  const projectId = AppState.currentMenuType.id;
+  return axios.post(`/agile/v1/projects/${projectId}/issues/query_story_task?page=${page}&size=${size}`, searchVO);
+}
 
 export function loadIssuesInLink(page = 1, size = 10, issueId, content) {
   const projectId = AppState.currentMenuType.id;
