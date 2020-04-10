@@ -282,12 +282,12 @@ public class ExcelUtil {
         generateHeaders(resultSheet, style, Arrays.asList(fieldsName), widthMap);
 
         List<Predefined> predefinedList = new ArrayList<>();
-        predefinedList.add(new Predefined(priorityList, 1, 500, 7, 7, "hidden_priority", 2));
+        predefinedList.add(new Predefined(priorityList, 1, 500, 8, 8, "hidden_priority", 2));
         predefinedList.add(new Predefined(issueTypeList, 1, 500, 0, 0, "hidden_issue_type", 3));
-        predefinedList.add(new Predefined(versionList, 1, 500, 9, 9, "hidden_fix_version", 4));
+        predefinedList.add(new Predefined(versionList, 1, 500, 10, 10, "hidden_fix_version", 4));
         predefinedList.add(new Predefined(componentList, 1, 500, 2, 2, "hidden_component", 5));
         predefinedList.add(new Predefined(sprintList, 1, 500, 3, 3, "hidden_sprint", 6));
-        predefinedList.add(new Predefined(users, 1, 500, 6, 6, "hidden_manager", 7));
+        predefinedList.add(new Predefined(users, 1, 500, 7, 7, "hidden_manager", 7));
         predefinedList.add(theSecondColumnPredefined);
 
         for (Predefined predefined : predefinedList) {
