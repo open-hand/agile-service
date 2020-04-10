@@ -57,7 +57,7 @@ function CreateField() {
     const { current } = formDataSet;
     const obj = {
       fieldType: current.get('fieldType'),
-      defaultValue: current.get('defaultValue'),
+      defaultValue: String(current.get('defaultValue') || ''),
     };
     if (singleList.indexOf(obj.fieldType) !== -1) {
       if (fieldOptions.length === 0) {
@@ -84,7 +84,7 @@ function CreateField() {
           return { ...o, isDefault: false };
         }
       });
-      if (obj.defaultValue && obj.defaultValue.length) {
+      if (obj.defaultValue && Array.isArray(obj.defaultValue)) {
         obj.defaultValue = obj.defaultValue.join(',');
       }
     }
@@ -149,13 +149,15 @@ function CreateField() {
   const onTreeDelete = (tempKey) => {
     const { current } = formDataSet;
     const newDefaultValue = current.get('defaultValue');
+    if (!newDefaultValue) {
+      return;
+    }
     const fieldType = current.get('fieldType');
-
     if (multipleList.indexOf(fieldType) !== -1) {
       const newValue = newDefaultValue.filter(v => v !== String(tempKey));
       current.set('defaultValue', newValue);
     } else if (singleList.indexOf(fieldType) !== -1) {
-      if (newDefaultValue === tempKey) {
+      if (newDefaultValue === String(tempKey)) {
         current.set('defaultValue', '');
       }
     }

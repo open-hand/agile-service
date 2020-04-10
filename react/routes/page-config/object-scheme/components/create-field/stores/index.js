@@ -29,6 +29,17 @@ export const StoreProvider = inject('AppState')(
         formDataSet.transport.read = () => ({
           url: `/agile/v1/${type}s/${id}/object_scheme_field/${record.get('id')}?organizationId=${organizationId}`,
           method: 'get',
+          transformResponse: (response) => {
+            try {
+              const data = JSON.parse(response);         
+              if (data.defaultValue === '') {
+                data.defaultValue = undefined;
+              }
+              return data;
+            } catch (error) {
+              return response;
+            }
+          },
         });
         formDataSet.query().then((data) => {
           const dateList = ['time', 'datetime', 'date'];

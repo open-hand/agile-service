@@ -32,7 +32,6 @@ export default ({
   formatMessage, type, store, schemeCode, id, isEdit, oldRecord, userOptionDataSet,
 }) => {
   const regex = /^[0-9a-zA-Z_]+$/;
-
   // eslint-disable-next-line consistent-return
   async function checkCode(value) {
     if (isEdit) return;
@@ -90,7 +89,7 @@ export default ({
         type: 'string',
         label: formatMessage({ id: 'code' }),
         required: !isEdit,
-        maxLength: 10,
+        maxLength: isEdit ? 15 : 10,
         validator: checkCode,
       },
       {
@@ -130,7 +129,7 @@ export default ({
       {
         name: 'defaultValue',
         label: formatMessage({ id: 'field.default' }),
-        required: false,
+        required: oldRecord && oldRecord.get('required'),
         valueField: 'id',
         textField: 'realName',
         dynamicProps: {

@@ -283,7 +283,7 @@ class DragList extends Component {
                     {data && data.map((item, index) => (
                       <Draggable
                         key={item.tempKey || item.id}
-                        draggableId={item.tempKey || item.id}
+                        draggableId={String(item.tempKey || item.id)}
                         index={index}
                       >
                         {(subProvided, subSnapshot) => (
