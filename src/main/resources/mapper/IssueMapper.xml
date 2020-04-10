@@ -527,6 +527,17 @@
         </if>
     </select>
 
+    <select id="queryStoryAndTaskByProjectId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+        select ai.* from agile_issue ai
+        where ai.project_id = #{projectId}
+        AND ai.type_code in ('story','task')
+        <if test="searchVO != null and searchVO.advancedSearchArgs != null and searchVO.advancedSearchArgs.size > 0">
+             <if test="searchVO.advancedSearchArgs.summary != null">
+                AND ai.summary LIKE CONCAT(CONCAT('%', #{searchVO.advancedSearchArgs.summary}), '%')
+             </if>
+        </if>
+    </select>
+
     <sql id="queryIssueIdsListWithSubSql">
         SELECT
         ai.issue_id as issue_issue_id,

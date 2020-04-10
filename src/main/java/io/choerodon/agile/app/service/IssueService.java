@@ -299,4 +299,6 @@ public interface IssueService {
     List<Long> queryProjectIds();
 
     List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds);
+
+    PageInfo<IssueListFieldKVVO> queryStoryAndTask(Long projectId, Pageable pageable, SearchVO searchVO);
 }

@@ -167,6 +167,8 @@ public class IssueServiceImpl implements IssueService {
     private InstanceService instanceService;
     @Autowired
     private TestFeignClient testFeignClient;
+    @Autowired
+    private ProjectUtil projectUtil;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -2141,5 +2143,28 @@ public class IssueServiceImpl implements IssueService {
     public List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds) {
 
         return issueAssembler.issueDTOTOVO(projectId, issueMapper.listIssueInfoByIssueIds(projectId, issueIds));
+    }
+
+    @Override
+    public PageInfo<IssueListFieldKVVO> queryStoryAndTask(Long projectId, Pageable pageable, SearchVO searchVO) {
+        PageInfo<IssueDTO> pageInfo = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(pageable.getSort())).doSelectPageInfo(() -> issueMapper.queryStoryAndTaskByProjectId(projectId, searchVO));
+        List<IssueDTO> list = pageInfo.getList();
+        if (!CollectionUtils.isEmpty(list)) {
+            Long organizationId = projectUtil.getOrganizationId(projectId);
+            Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
+            Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+            Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
+            List<IssueListFieldKVVO> listFieldKVVOS = new ArrayList<>();
+            list.forEach(v -> {
+                IssueListFieldKVVO map = modelMapper.map(v, IssueListFieldKVVO.class);
+                map.setPriorityVO(priorityMap.get(v.getPriorityId()) == null ? null : priorityMap.get(v.getPriorityId()));
+                map.setStatusVO(statusMapDTOMap.get(v.getStatusId()) == null ? null : statusMapDTOMap.get(v.getStatusId()));
+                map.setIssueTypeVO(issueTypeDTOMap.get(v.getIssueTypeId()) == null ? null : issueTypeDTOMap.get(v.getIssueTypeId()));
+                listFieldKVVOS.add(map);
+            });
+            return PageUtil.buildPageInfoWithPageInfoList(pageInfo, listFieldKVVOS);
+        } else {
+            return PageUtil.emptyPageInfo(pageable.getPageNumber(), pageable.getPageSize());
+        }
     }
 }
