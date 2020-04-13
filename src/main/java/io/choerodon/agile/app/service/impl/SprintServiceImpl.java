@@ -314,8 +314,11 @@ public class SprintServiceImpl implements SprintService {
 
     private void queryAssigneeIssue(List<SprintSearchDTO> sprintSearch, Long projectId) {
         Set<Long> sprintIds = sprintSearch.stream().map(SprintSearchDTO::getSprintId).collect(Collectors.toSet());
-        List<AssigneeIssueDTO> assigneeIssueList = sprintMapper.queryAssigneeIssueByPlanSprintId(sprintIds, projectId);
-        sprintSearch.forEach(ss -> {
+        List<AssigneeIssueDTO> assigneeIssueList = new ArrayList<>();
+        if (!ObjectUtils.isEmpty(sprintIds)) {
+            assigneeIssueList = sprintMapper.queryAssigneeIssueByPlanSprintId(sprintIds, projectId);
+        }
+        for (SprintSearchDTO ss : sprintSearch) {
             Long sprintId = ss.getSprintId();
             List<AssigneeIssueDTO> assigneeIssues = ss.getAssigneeIssueDTOList();
             if (assigneeIssues == null) {
@@ -328,7 +331,7 @@ public class SprintServiceImpl implements SprintService {
                     assigneeIssues.add(ai);
                 }
             }
-        });
+        }
     }
 
     @Override
