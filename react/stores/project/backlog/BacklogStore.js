@@ -996,8 +996,6 @@ class BacklogStore {
    * 加载选择快速搜索的冲刺数据
    */
   getSprint = () => {
-    this.axiosGetIssueTypes();
-    this.axiosGetDefaultPriority();
     Promise.all([this.axiosGetQuickSearchList(), this.axiosGetIssueTypes(), this.axiosGetDefaultPriority(), this.axiosGetSprint()]).then(([quickSearch, issueTypes, priorityArr, backlogData]) => {
       this.initBacklogData(quickSearch, issueTypes, priorityArr, backlogData);
     });

@@ -7,18 +7,20 @@ export default observer(() => {
   const visible = BacklogStore.newIssueVisible;
   
   return (
-    <CreateIssue
-      visible={visible}
-      onCancel={() => {
-        BacklogStore.setNewIssueVisible(false);
-      }}
-      onOk={(res) => {
-        BacklogStore.setNewIssueVisible(false);
-        // 创建issue后刷新
-        if (res) {
-          BacklogStore.refresh(false, res);
-        }      
-      }}
-    />
+    visible ? (
+      <CreateIssue
+        visible={visible}
+        onCancel={() => {
+          BacklogStore.setNewIssueVisible(false);
+        }}
+        onOk={(res) => {
+          BacklogStore.setNewIssueVisible(false);
+          // 创建issue后刷新
+          if (res) {
+            BacklogStore.refresh(false, res);
+          }      
+        }}
+      />
+    ) : null
   );
 });

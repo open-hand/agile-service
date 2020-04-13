@@ -86,7 +86,6 @@ class CreateIssue extends Component {
 
   componentDidMount() {
     this.loadIssueTypes();
-    IsInProgramStore.loadIsShowFeature();
   }
 
   /**
