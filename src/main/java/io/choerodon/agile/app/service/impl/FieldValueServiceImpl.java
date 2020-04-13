@@ -54,12 +54,11 @@ public class FieldValueServiceImpl implements FieldValueService {
 
     @Override
     public void fillValues(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewVO> pageFieldViews) {
-        List<FieldValueVO> values = modelMapper.map(fieldValueMapper.queryList(projectId, instanceId, schemeCode, null), new TypeToken<List<FieldValueVO>>() {
-        }.getType());
-        Map<Long, UserDTO> userMap = FieldValueUtil.handleUserMap(values.stream().filter(x -> x.getFieldType().equals(FieldType.MEMBER)).map(FieldValueVO::getOptionId).collect(Collectors.toList()));
-        Map<Long, List<FieldValueVO>> valueGroup = values.stream().collect(Collectors.groupingBy(FieldValueVO::getFieldId));
+        List<FieldValueDTO> values = fieldValueMapper.queryList(projectId, instanceId, schemeCode, null);
+        Map<Long, UserDTO> userMap = FieldValueUtil.handleUserMap(values.stream().filter(x -> x.getFieldType().equals(FieldType.MEMBER)).map(FieldValueDTO::getOptionId).collect(Collectors.toList()));
+        Map<Long, List<FieldValueDTO>> valueGroup = values.stream().collect(Collectors.groupingBy(FieldValueDTO::getFieldId));
         pageFieldViews.forEach(view -> {
-            List<FieldValueVO> fieldValues = valueGroup.get(view.getFieldId());
+            List<FieldValueDTO> fieldValues = valueGroup.get(view.getFieldId());
             FieldValueUtil.handleDTO2Value(view, view.getFieldType(), fieldValues, userMap, false);
         });
     }
