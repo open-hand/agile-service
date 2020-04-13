@@ -342,18 +342,20 @@ public class PageFieldServiceImpl implements PageFieldService {
     @Override
     public Map<Long, Map<String, Object>> queryFieldValueWithIssueIdsForAgileExport(Long organizationId, Long projectId, List<Long> instanceIds, Boolean isJustStr) {
         Map<Long, Map<String, Object>> result = new HashMap<>();
-        List<FieldValueDTO> values = fieldValueMapper.queryList(projectId, null, null, null);
+        List<FieldValueVO> values = modelMapper.map(fieldValueMapper.queryList(projectId, null, null, null),
+                new TypeToken<List<FieldValueVO>>() {
+                }.getType());
         ObjectSchemeFieldSearchVO searchDTO = new ObjectSchemeFieldSearchVO();
         searchDTO.setSchemeCode(ObjectSchemeCode.AGILE_ISSUE);
         List<ObjectSchemeFieldDTO> fieldDTOS = objectSchemeFieldService.listQuery(organizationId, projectId, searchDTO);
         Map<Long, ObjectSchemeFieldDTO> fieldMap = fieldDTOS.stream().collect(Collectors.toMap(ObjectSchemeFieldDTO::getId, Function.identity()));
-        Map<Long, List<FieldValueDTO>> valuesMap = values.stream().collect(Collectors.groupingBy(FieldValueDTO::getInstanceId));
-        Map<Long, UserDTO> userMap = FieldValueUtil.handleUserMap(values.stream().filter(x -> x.getFieldType().equals(FieldType.MEMBER)).map(FieldValueDTO::getOptionId).collect(Collectors.toList()));
+        Map<Long, List<FieldValueVO>> valuesMap = values.stream().collect(Collectors.groupingBy(FieldValueVO::getInstanceId));
+        Map<Long, UserDTO> userMap = FieldValueUtil.handleUserMap(values.stream().filter(x -> x.getFieldType().equals(FieldType.MEMBER)).map(FieldValueVO::getOptionId).collect(Collectors.toList()));
         for (Long instanceId : instanceIds) {
             Map<String, Object> codeValueMap = new HashMap<>();
-            List<FieldValueDTO> instanceValues = valuesMap.get(instanceId);
+            List<FieldValueVO> instanceValues = valuesMap.get(instanceId);
             if (instanceValues != null) {
-                Map<Long, List<FieldValueDTO>> valueGroup = instanceValues.stream().collect(Collectors.groupingBy(FieldValueDTO::getFieldId));
+                Map<Long, List<FieldValueVO>> valueGroup = instanceValues.stream().collect(Collectors.groupingBy(FieldValueVO::getFieldId));
                 valueGroup.forEach((fieldId, fieldValueDTOList) -> {
                     ObjectSchemeFieldDTO objectSchemeField = fieldMap.get(fieldId);
                     if (objectSchemeField != null) {

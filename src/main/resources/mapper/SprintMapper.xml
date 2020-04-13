@@ -200,73 +200,73 @@
         bb.remaining_issue_count
         FROM
         (
-            SELECT
-            a.sprint_id AS asi_sprint_id,
-            a.assignee_id AS asi_assignee_id,
-            SUM( a.story_points ) AS total_story_points,
-            SUM( a.remaining_time ) AS total_remaining_time,
-            COUNT( 1 ) AS issue_count
-            FROM
-            (
+        SELECT
+        a.sprint_id AS asi_sprint_id,
+        a.assignee_id AS asi_assignee_id,
+        SUM( a.story_points ) AS total_story_points,
+        SUM( a.remaining_time ) AS total_remaining_time,
+        COUNT( 1 ) AS issue_count
+        FROM
+        (
+        SELECT
+        aisr.sprint_id,
+        CASE WHEN
+        ai.assignee_id IS NULL THEN 0 ELSE ai.assignee_id
+        END AS assignee_id,
+        ai.story_points,
+        ai.remaining_time
+        FROM
+        agile_issue ai,
+        agile_issue_sprint_rel aisr
+        WHERE
+        aisr.issue_id = ai.issue_id
+        AND aisr.sprint_id in (
                 SELECT
-                    aisr.sprint_id,
-                    CASE WHEN
-                    ai.assignee_id IS NULL THEN 0 ELSE ai.assignee_id
-                    END AS assignee_id,
-                    ai.story_points,
-                    ai.remaining_time
-                FROM
-                agile_issue ai,
-                agile_issue_sprint_rel aisr
-                WHERE
-                aisr.issue_id = ai.issue_id
-                AND aisr.sprint_id in (
-                        SELECT
-                    asp.sprint_id
-                FROM
-                    agile_sprint asp
-                WHERE
-                    asp.project_id = #{projectId}
-                    AND asp.status_code = 'sprint_planning')
-            ) a
-            GROUP BY
-            a.sprint_id,
-            a.assignee_id
+            asp.sprint_id
+        FROM
+            agile_sprint asp
+        WHERE
+            asp.project_id = #{projectId}
+            AND asp.status_code = 'sprint_planning')
+        ) a
+        GROUP BY
+        a.sprint_id,
+        a.assignee_id
         ) cc
         LEFT JOIN (
-            SELECT
-                a2.sprint_id AS asi_sprint_id,
-                a2.assignee_id AS asi_assignee_id,
-                SUM( a2.story_points ) AS remaining_story_points,
-                SUM( a2.remaining_time ) AS remaining_time,
-                COUNT( 1 ) AS remaining_issue_count
-            FROM
-            (
+        SELECT
+        a2.sprint_id AS asi_sprint_id,
+        a2.assignee_id AS asi_assignee_id,
+        SUM( a2.story_points ) AS remaining_story_points,
+        SUM( a2.remaining_time ) AS remaining_time,
+        COUNT( 1 ) AS remaining_issue_count
+        FROM
+        (
+        SELECT
+        aisr.sprint_id,
+        CASE WHEN
+        ai2.assignee_id IS NULL THEN 0 ELSE ai2.assignee_id
+        END AS assignee_id,
+        ai2.story_points,
+        ai2.remaining_time
+        FROM
+        agile_issue ai2,
+        agile_issue_sprint_rel aisr
+        WHERE
+        aisr.issue_id = ai2.issue_id
+        AND aisr.sprint_id in (
                 SELECT
-                    aisr.sprint_id,
-                    CASE WHEN
-                    ai2.assignee_id IS NULL THEN 0 ELSE ai2.assignee_id
-                    END AS assignee_id,
-                    ai2.story_points,
-                    ai2.remaining_time
-                FROM
-                agile_issue ai2,
-                agile_issue_sprint_rel aisr
-                WHERE
-                aisr.issue_id = ai2.issue_id
-                AND aisr.sprint_id in (
-                        SELECT
-                    asp.sprint_id
-                FROM
-                    agile_sprint asp
-                WHERE
-                    asp.project_id = #{projectId}
-                    AND asp.status_code = 'sprint_planning')
-                AND ai2.status_id IN ( SELECT ais.status_id FROM agile_issue_status ais WHERE ais.project_id = #{projectId} AND ais.is_completed != 1 )
-            ) a2
-            GROUP BY
-            a2.sprint_id,
-            a2.assignee_id
+            asp.sprint_id
+        FROM
+            agile_sprint asp
+        WHERE
+            asp.project_id = #{projectId}
+            AND asp.status_code = 'sprint_planning')
+        AND ai2.status_id IN ( SELECT ais.status_id FROM agile_issue_status ais WHERE ais.project_id = #{projectId} AND ais.is_completed != 1 )
+        ) a2
+        GROUP BY
+        a2.sprint_id,
+        a2.assignee_id
         ) bb ON cc.asi_assignee_id = bb.asi_assignee_id and cc.asi_sprint_id = bb.asi_sprint_id order by cc.asi_assignee_id
     </sql>
 
@@ -354,6 +354,7 @@
         ai2.object_version_number as is_object_version_number, ai2.priority_code,
         ai1.epic_name AS issue_epic_name,
         alv2.name AS color,
+--         feature_info.feature_name AS feature_name,
         apv1.version_id AS version_id,
         apv1.name AS version_name
         FROM
@@ -366,6 +367,14 @@
         </foreach>)ai2
         LEFT JOIN agile_project_info api ON ai2.project_id = api.project_id
         LEFT JOIN agile_issue ai1 ON ai2.epic_id = ai1.issue_id
+--         LEFT JOIN (
+--             select
+--             ai3.issue_id as issue_id,
+--             ai3.summary as feature_name
+--             from agile_issue ai3, agile_feature af
+--             where ai3.type_code = 'feature'
+--             and ai3.issue_id = af.issue_id
+--         ) feature_info ON ai2.feature_id = feature_info.issue_id
         LEFT JOIN lookup_value alv2 ON ai1.color_code = alv2.value_code
         left join agile_issue_sprint_rel aisr2 on aisr2.issue_id = ai2.issue_id
         LEFT JOIN
