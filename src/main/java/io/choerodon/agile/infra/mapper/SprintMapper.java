@@ -34,7 +34,7 @@ public interface SprintMapper extends Mapper<SprintDTO> {
 
     String queryMinRank(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId);
 
-    List<SprintSearchDTO> queryPlanSprint(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+    List<SprintSearchDTO> queryPlanSprint(@Param("projectId") Long projectId, @Param("issueIds") Set<Long> issueIds);
 
     int queryIssueCount(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId);
 
@@ -54,7 +54,7 @@ public interface SprintMapper extends Mapper<SprintDTO> {
 
     List<Long> queryIssueIds(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId);
 
-    Set<Long> queryAssigneeIdsByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+    Set<Long> queryAssigneeIdsByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") Set<Long> issueIds);
 
     List<Long> queryAllRankIssueIds(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId);
 
@@ -118,4 +118,7 @@ public interface SprintMapper extends Mapper<SprintDTO> {
     List<SprintDTO> getSprintByProjectId(@Param("projectId") Long projectId);
 
     List<SprintDTO> selectNotDoneByProjectId(@Param("projectId") Long projectId);
+
+    List<AssigneeIssueDTO> queryAssigneeIssueByPlanSprintId(@Param("sprintIds") Set<Long> sprintIds,
+                                                            @Param("projectId") Long projectId);
 }
