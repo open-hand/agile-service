@@ -78,7 +78,7 @@ function IssueList({ data, sprintId }) {
               )}
             <div style={{ padding: '10px 0px 10px 33px', borderBottom: '0.01rem solid rgba(0, 0, 0, 0.12)' }}>
               <QuickCreateIssue
-                issueTypes={BacklogStore.issueTypes}
+                issueTypes={BacklogStore.issueTypes.filter(t => !['issue_epic', 'feature', 'sub_task'].includes(t.typeCode))}
                 defaultPriority={BacklogStore.defaultPriority}
                 epicId={!isNaN(BacklogStore.getChosenEpic) ? BacklogStore.getChosenEpic : undefined}
                 versionIssueRelVOList={!isNaN(BacklogStore.getChosenVersion) ? [
