@@ -46,7 +46,6 @@ const { Text, Edit } = TextEditToggle;
         selectLoading: false,
       });
     });
-    IsInProgramStore.loadIsShowFeature();
   };
 
   updateIssueEpic = async (newEpicId, done) => {
