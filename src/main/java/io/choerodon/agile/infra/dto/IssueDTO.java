@@ -165,6 +165,17 @@ public class IssueDTO extends BaseDTO {
     @Transient
     private Long epicRankObjectVersionNumber;
 
+    @Transient
+    private String resolution;
+
+    public String getResolution() {
+        return resolution;
+    }
+
+    public void setResolution(String resolution) {
+        this.resolution = resolution;
+    }
+
     public List<LabelIssueRelDTO> getLabelIssueRelDTOS() {
         return labelIssueRelDTOS;
     }

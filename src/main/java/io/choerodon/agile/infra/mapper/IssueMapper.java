@@ -385,7 +385,8 @@ public interface IssueMapper extends Mapper<IssueDTO> {
                                         @Param("assigneeFilterIds") List<Long> assigneeFilterIds);
 
     List<IssueDTO> queryIssueListWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
-                                                   @Param("childrenIds") Set<Long> childrenIds);
+                                                   @Param("childrenIds") Set<Long> childrenIds,
+                                                   @Param("isExcelExported") boolean isExcelExported);
 
     /**
      * 查询issueIds对应的issueDo
