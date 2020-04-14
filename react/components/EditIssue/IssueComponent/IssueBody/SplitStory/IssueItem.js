@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router';
-import { Tooltip, Avatar } from 'choerodon-ui';
-import UserHead from '@/components/UserHead';
+import { Tooltip } from 'choerodon-ui';
+import ProjectHead from '@/components/ProjectHead';
 import PriorityTag from '@/components/PriorityTag';
 import StatusTag from '@/components/StatusTag';
 import TypeTag from '@/components/TypeTag';
@@ -60,12 +60,8 @@ function IssueItem({ issue }) {
         </div>
       </Tooltip>
       <Tooltip title={`团队: ${projectVO.name}`}>
-        <UserHead
-          user={{
-            id: projectVO.id,
-            imageUrl: projectVO.imageUrl,
-            realName: projectVO.name,
-          }}
+        <ProjectHead
+          project={projectVO}
           hiddenText
           tooltip={false}
         />
