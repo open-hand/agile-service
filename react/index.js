@@ -35,10 +35,12 @@ class Index extends React.Component {
   // }
 
   componentDidMount() {
-    if (AppState.currentMenuType.category !== 'PROGRAM') {
-      // 切换项目查是否在项目群中
-      RunWhenProjectChange(IsInProgramStore.refresh);
-      IsInProgramStore.refresh();
+    if (process.env.NODE_ENV === 'development') {
+      if (AppState.currentMenuType.category !== 'PROGRAM') {
+        // 切换项目查是否在项目群中
+        RunWhenProjectChange(IsInProgramStore.refresh);
+        IsInProgramStore.refresh();
+      }
     }
   }
 

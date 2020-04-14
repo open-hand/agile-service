@@ -26,21 +26,24 @@ class IsInProgramStore {
 
   @observable sprints = []; // 用于时间判断
 
-  refresh = () => {
+  refresh = async () => {
     if (AppState.currentMenuType.type === 'project') {
-      getProjectsInProgram().then((program) => {
-        // console.log(program);
-        this.setIsInProgram(Boolean(program));
-        this.setProgram(program);
-      });
+      const program = await getProjectsInProgram();
+      const hasProgram = Boolean(program);
+      this.setIsInProgram(hasProgram);
+      this.setProgram(program);
+      if (hasProgram) {
+        this.loadIsShowFeature();
+      }
     }
   }
 
-  loadIsShowFeature = () => getProjectIsShowFeature().then((res) => {
-    this.setIsShowFeature(Boolean(res));
-    this.setArtInfo(res);
-    return Boolean(res);
-  })
+  loadIsShowFeature = async () => {
+    const artInfo = await getProjectIsShowFeature();
+    this.setIsShowFeature(Boolean(artInfo));
+    this.setArtInfo(artInfo);
+    return Boolean(artInfo);
+  }
 
   loadPiInfoAndSprint = async (programId = this.artInfo.programId, artId = this.artInfo.id) => {
     const currentPiInfo = await getCurrentPiInfo(programId, artId);
@@ -134,7 +137,7 @@ class IsInProgramStore {
     });
   }
 
-  
+
   // 开始时间应小于结束时间
   isRange(startDate, endDate) {
     return startDate < endDate;
@@ -142,8 +145,8 @@ class IsInProgramStore {
 
   // 时间能不能选
   dateCanChoose(date, sprintId) {
-  // 首先时间应该在PI的实际开始时间和结束时间之间
-  // 并且不能在其他冲刺之间
+    // 首先时间应该在PI的实际开始时间和结束时间之间
+    // 并且不能在其他冲刺之间
     return this.isDateBetweenPiDate(date) && !this.isDateBetweenOtherSprints(date, sprintId);
   }
 
