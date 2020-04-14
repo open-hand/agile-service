@@ -7,10 +7,10 @@ import {
   TabPage as Page, Header, Content, stores, Permission, Breadcrumb,
 } from '@choerodon/boot';
 import './ComponentHome.less';
+import TableAction from '@/components/TableAction';
 import CreateComponent from '../ComponentComponent/AddComponent';
 import EditComponent from '../ComponentComponent/EditComponent';
 import DeleteComponent from '../ComponentComponent/DeleteComponent';
-import TableAction from '@/components/TableAction';
 import UserHead from '../../../../components/UserHead';
 import Store from './stores';
 
