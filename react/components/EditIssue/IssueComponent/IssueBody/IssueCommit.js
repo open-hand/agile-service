@@ -98,7 +98,7 @@ function IssueCommit({
     <div id="commit" style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
       {renderCommits()}
       {(!disabled || (disabled && applyType === 'agile')) && (
-        <div style={{ marginTop: 'auto', marginBottom: 20 }}>
+        <div style={{ marginBottom: 20 }}>
           {
             addCommit ? (
               <div className="line-start mt-10" style={{ width: '100%' }}>
