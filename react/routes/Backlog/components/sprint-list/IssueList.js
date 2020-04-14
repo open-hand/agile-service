@@ -47,9 +47,9 @@ function IssueList({ data, sprintId }) {
           : data.length;
         return (
           <div
-            ref={provided.innerRef}            
+            ref={provided.innerRef}
           >
-            {rowCount === 0 || (rowCount === 1 && snapshot.isUsingPlaceholder) > 0 
+            {rowCount === 0 || (rowCount === 1 && snapshot.isUsingPlaceholder) > 0
               ? <NoneIssue type={sprintId === 0 ? 'backlog' : 'sprint'} />
               : (
                 <WindowScroller scrollElement={document.getElementsByClassName('c7n-backlog-content')[0]}>
@@ -65,9 +65,9 @@ function IssueList({ data, sprintId }) {
                             rowRenderer={renderIssueItem}
                             scrollTop={scrollTop}
                             width={width}
-                            style={{     
-                              background: snapshot.isDraggingOver ? '#e9e9e9' : 'inherit',             
-                              transition: 'background-color 0.2s ease', 
+                            style={{
+                              background: snapshot.isDraggingOver ? '#e9e9e9' : 'inherit',
+                              transition: 'background-color 0.2s ease',
                             }}
                           />
                         </div>
@@ -75,7 +75,7 @@ function IssueList({ data, sprintId }) {
                     </AutoSizer>
                   )}
                 </WindowScroller>
-              )}  
+              )}
             <div style={{ padding: '10px 0px 10px 33px', borderBottom: '0.01rem solid rgba(0, 0, 0, 0.12)' }}>
               <QuickCreateIssue
                 epicId={!isNaN(BacklogStore.getChosenEpic) ? BacklogStore.getChosenEpic : undefined}
@@ -85,17 +85,17 @@ function IssueList({ data, sprintId }) {
                   },
                 ] : undefined}
                 sprintId={sprintId}
-                onCreate={(res) => { 
+                onCreate={(res) => {
                   BacklogStore.handleCreateIssue(res, String(sprintId));
                   BacklogStore.refresh(false, res); // 更新侧边框 
                 }}
               />
-            </div>  
+            </div>
           </div>
         );
       }}
     </Droppable>
   );
 }
-    
+
 export default observer(IssueList);

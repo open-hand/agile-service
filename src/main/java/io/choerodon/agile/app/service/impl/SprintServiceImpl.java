@@ -271,6 +271,7 @@ public class SprintServiceImpl implements SprintService {
             sprintSearches.add(activeSprint);
         }
         List<SprintSearchDTO> sprintSearchDTOS = sprintMapper.queryPlanSprintNoIssueIds(projectId);
+        queryAssigneeIssue(sprintSearchDTOS, projectId);
         List<SprintSearchVO> planSprints = sprintSearchAssembler.dtoListToVO(sprintSearchDTOS, usersMap, null, null, null);
         if (planSprints != null && !planSprints.isEmpty()) {
             sprintSearches.addAll(planSprints);
@@ -280,7 +281,7 @@ public class SprintServiceImpl implements SprintService {
     protected void handleSprintIssueData(List<IssueIdSprintIdVO> issueIdSprintIdVOS, List<Long> issueIds, List<SprintSearchVO> sprintSearches, BackLogIssueVO backLogIssueVO, Long projectId, Map<Long, PriorityVO> priorityMap, Map<Long, StatusVO> statusMapDTOMap, Map<Long, IssueTypeVO> issueTypeDTOMap) {
         List<Long> allIssueIds = issueIdSprintIdVOS.stream().map(IssueIdSprintIdVO::getIssueId).collect(Collectors.toList());
         //查询出所有经办人用户id
-        Set<Long> assigneeIds = sprintMapper.queryAssigneeIdsByIssueIds(projectId, allIssueIds);
+        Set<Long> assigneeIds = sprintMapper.queryAssigneeIdsByIssueIds(projectId, new HashSet<>(allIssueIds));
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(new ArrayList<>(assigneeIds), true);
         SprintSearchDTO sprintSearchDTO = sprintMapper.queryActiveSprintNoIssueIds(projectId);
         if (sprintSearchDTO != null) {
@@ -297,7 +298,8 @@ public class SprintServiceImpl implements SprintService {
             activeSprint.setDoneStoryPoint(statusMap.get(CATEGORY_DONE_CODE) != null && !statusMap.get(CATEGORY_DONE_CODE).isEmpty() && !activeSprintIssueIds.isEmpty() ? sprintMapper.queryStoryPoint(statusMap.get(CATEGORY_DONE_CODE), activeSprintIssueIds, projectId) : zero);
             sprintSearches.add(activeSprint);
         }
-        List<SprintSearchDTO> sprintSearchDTOS = sprintMapper.queryPlanSprint(projectId, allIssueIds);
+        List<SprintSearchDTO> sprintSearchDTOS = sprintMapper.queryPlanSprint(projectId, new HashSet<>(allIssueIds));
+        queryAssigneeIssue(sprintSearchDTOS, projectId);
         if (sprintSearchDTOS != null && !sprintSearchDTOS.isEmpty()) {
             List<SprintSearchVO> planSprints = sprintSearchAssembler.dtoListToVO(sprintSearchDTOS, usersMap, priorityMap, statusMapDTOMap, issueTypeDTOMap);
             planSprints.parallelStream().forEachOrdered(planSprint -> planSprint.setIssueCount(planSprint.getIssueSearchVOList() == null ? 0 : planSprint.getIssueSearchVOList().size()));
@@ -307,6 +309,28 @@ public class SprintServiceImpl implements SprintService {
             List<IssueSearchDTO> backLogIssue = sprintMapper.queryBacklogIssues(projectId, issueIds);
             backLogIssueVO.setBackLogIssue(issueSearchAssembler.dtoListToVO(backLogIssue, usersMap, priorityMap, statusMapDTOMap, issueTypeDTOMap));
             backLogIssueVO.setBacklogIssueCount(backLogIssue.size());
+        }
+    }
+
+    private void queryAssigneeIssue(List<SprintSearchDTO> sprintSearch, Long projectId) {
+        Set<Long> sprintIds = sprintSearch.stream().map(SprintSearchDTO::getSprintId).collect(Collectors.toSet());
+        List<AssigneeIssueDTO> assigneeIssueList = new ArrayList<>();
+        if (!ObjectUtils.isEmpty(sprintIds)) {
+            assigneeIssueList = sprintMapper.queryAssigneeIssueByPlanSprintId(sprintIds, projectId);
+        }
+        for (SprintSearchDTO ss : sprintSearch) {
+            Long sprintId = ss.getSprintId();
+            List<AssigneeIssueDTO> assigneeIssues = ss.getAssigneeIssueDTOList();
+            if (assigneeIssues == null) {
+                assigneeIssues = new ArrayList<>();
+                ss.setAssigneeIssueDTOList(assigneeIssues);
+            }
+            for (AssigneeIssueDTO ai : assigneeIssueList) {
+                Long aiSprintId = ai.getSprintId();
+                if (Objects.equals(sprintId, aiSprintId)) {
+                    assigneeIssues.add(ai);
+                }
+            }
         }
     }
 

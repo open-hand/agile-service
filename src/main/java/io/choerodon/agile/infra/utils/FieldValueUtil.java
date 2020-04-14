@@ -54,7 +54,7 @@ public class FieldValueUtil {
      * @param fieldType
      * @param values
      */
-    public static void handleDTO2Value(PageFieldViewVO view, String fieldType, List<FieldValueVO> values, Map<Long, UserDTO> userMap, Boolean isJustStr) {
+    public static void handleDTO2Value(PageFieldViewVO view, String fieldType, List<FieldValueDTO> values, Map<Long, UserDTO> userMap, Boolean isJustStr) {
         Object valueStr = null;
         Object value = null;
         if (values != null && !values.isEmpty()) {
@@ -62,9 +62,9 @@ public class FieldValueUtil {
             switch (fieldType) {
                 case FieldType.CHECKBOX:
                 case FieldType.MULTIPLE:
-                    values.stream().map(FieldValueVO::getOptionId).collect(Collectors.toList()).toArray(longValues);
+                    values.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList()).toArray(longValues);
                     value = longValues;
-                    valueStr = values.stream().map(FieldValueVO::getOptionValue).collect(Collectors.joining(", "));
+                    valueStr = values.stream().map(FieldValueDTO::getOptionValue).collect(Collectors.joining(", "));
                     break;
                 case FieldType.RADIO:
                 case FieldType.SINGLE:

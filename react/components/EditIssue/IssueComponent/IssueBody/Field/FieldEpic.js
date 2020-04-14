@@ -37,13 +37,14 @@ const { Text, Edit } = TextEditToggle;
         selectLoading: false,
       });
     });
-    getFeaturesByEpic().then((data) => {
-      this.setState({
-        originFeatures: data,
-        selectLoading: false,
+    if (IsInProgramStore.isInProgram) {
+      getFeaturesByEpic().then((data) => {
+        this.setState({
+          originFeatures: data,
+          selectLoading: false,
+        });
       });
-    });
-    IsInProgramStore.loadIsShowFeature();
+    }
   };
 
   updateIssueEpic = async (newEpicId, done) => {
