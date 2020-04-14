@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import {
-  Dropdown, Icon, Menu, Button, Modal,
+  Dropdown, Menu, Button, Modal,
 } from 'choerodon-ui';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import EditIssueContext from '../stores';
