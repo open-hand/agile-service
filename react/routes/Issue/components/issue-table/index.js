@@ -15,6 +15,7 @@ import IssueStore from '@/stores/project/sprint/IssueStore/IssueStore';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import CollapseAll from './CollapseAll';
 import IssuePagination from './IssuePagination';
+import IssueHeader from './IssueHeader';
 import Store from '../../stores';
 import './index.less';
 
@@ -41,7 +42,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
     if (list) {
       if (list.length > 0) {
         return (
-          <Tooltip title={_.map(list, item => item[nameField]).join(',')}>
+          <Tooltip title={<div>{_.map(list, item => item[nameField]).map(name => <div>{name}</div>)}</div>}>
             <div style={{ display: 'inline-flex', maxWidth: '100%' }}>
               <Tag
                 color="blue"
@@ -83,6 +84,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
     };
     return name ? <Tooltip title={name}><span style={style}>{name}</span></Tooltip> : null;
   }
+  
   return (
     <div className="c7nagile-issue-table">
       <Table
@@ -95,10 +97,10 @@ function IssueTable({ tableRef, onCreateIssue }) {
         })}
       >
         <Column
-          sortable
+          header={<IssueHeader fieldCode="issueId" dataSet={dataSet} />}
           align="left"
           name="issueId"
-          width={240}
+          width="30%"
           onCell={({ record }) => ({
             onClick: () => {
               handleRowClick(record);
@@ -115,15 +117,13 @@ function IssueTable({ tableRef, onCreateIssue }) {
             </Fragment>
           )}
         />
-        {/* <Column
-          sortable
-          name="issueTypeId"
-          className="c7n-agile-table-cell"
-          renderer={({ record }) => (<TypeTag data={record.get('issueTypeVO')} showName />)}
-        /> */}
-        <Column sortable name="issueNum" className="c7n-agile-table-cell" />
+        <Column 
+          header={<IssueHeader fieldCode="issueNum" dataSet={dataSet} />}
+          name="issueNum" 
+          className="c7n-agile-table-cell" 
+        />
         <Column
-          sortable
+          header={<IssueHeader fieldCode="priorityId" dataSet={dataSet} />}
           name="priorityId"
           className="c7n-agile-table-cell"
           renderer={({ record }) => (
@@ -136,7 +136,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
           )}
         />
         <Column
-          sortable
+          header={<IssueHeader fieldCode="assigneeId" dataSet={dataSet} />}
           name="assigneeId"
           renderer={({ record }) => (
             <div style={{ display: 'inline-flex' }}>
@@ -157,7 +157,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
           )}
         />
         <Column
-          sortable
+          header={<IssueHeader fieldCode="statusId" dataSet={dataSet} />}
           name="statusId"
           renderer={({ record }) => (
             <StatusTag
@@ -167,8 +167,8 @@ function IssueTable({ tableRef, onCreateIssue }) {
           )}
         />
         <Column
-          sortable
           name="reporterId"
+          header={<IssueHeader fieldCode="reporterId" dataSet={dataSet} />}
           className="c7n-agile-table-cell"
           renderer={({ record }) => (
             <div style={{ display: 'inline-flex' }}>
@@ -186,7 +186,12 @@ function IssueTable({ tableRef, onCreateIssue }) {
             </div>
           )}
         />
-        <Column sortable width={150} name="lastUpdateDate" className="c7n-agile-table-cell" />
+        <Column 
+          header={<IssueHeader fieldCode="lastUpdateDate" dataSet={dataSet} />}
+          width={170} 
+          name="lastUpdateDate" 
+          className="c7n-agile-table-cell" 
+        />
         <Column hidden name="label" className="c7n-agile-table-cell" renderer={renderTag('labelIssueRelVOS', 'labelName')} />
         <Column hidden name="component" className="c7n-agile-table-cell" renderer={renderTag('issueComponentBriefVOS', 'name')} />
         <Column hidden name="storyPoints" className="c7n-agile-table-cell" renderer={({ text }) => text || '-'} />
@@ -212,7 +217,11 @@ function IssueTable({ tableRef, onCreateIssue }) {
                   </div>
                 );
               }
-              return <span>{value || ''}</span>;
+              return (
+                <Tooltip title={value || ''}>
+                  <span>{value || ''}</span>
+                </Tooltip>
+              );
             }}
           />
         ))}
