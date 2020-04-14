@@ -30,8 +30,8 @@ const { TabPane } = Tabs;
 
 function IssueBody(props) {
   const {
-    prefixCls, disabled, store, 
-  } = useContext(EditIssueContext);
+    prefixCls, disabled, store, isOnlyAgileProject,
+  } = useContext(EditIssueContext);  
   const issue = store.getIssue;
   const {
     issueId, issueNum, typeCode, issueTypeVO = {},
@@ -120,7 +120,7 @@ function IssueBody(props) {
           }
           <IssueLog {...props} />
         </TabPane>
-        {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
+        {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1 && !isOnlyAgileProject
           ? <TabPane tab="开发" key="4"><IssueBranch {...props} /></TabPane> : ''
         }
       </Tabs>

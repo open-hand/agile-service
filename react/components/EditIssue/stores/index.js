@@ -13,8 +13,10 @@ export const EditIssueContextProvider = injectIntl(inject('AppState', 'HeaderSto
   const FieldFixVersionRef = {
     current: null,
   };
+  const isOnlyAgileProject = props.AppState.menuType.category === 'AGILE';
   const value = {
     ...props,
+    isOnlyAgileProject,
     prefixCls: 'c7n-agile-EditIssue',
     intlPrefix: 'agile.EditIssue',
     store: useMemo(() => new EditIssueStore(), []), // 防止update时创建多次store
