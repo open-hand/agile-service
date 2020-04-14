@@ -289,47 +289,51 @@
 
     <resultMap id="IssueWithSub" type="io.choerodon.agile.infra.dto.IssueDTO">
         <id property="issueId" column="issue_issue_id"/>
-        <id property="typeCode" column="type_code"/>
-        <id property="summary" column="summary"/>
-        <id property="priorityId" column="priority_id"/>
-        <id property="issueTypeId" column="issue_type_id"/>
-        <id property="assigneeId" column="assignee_id"/>
-        <id property="epicName" column="epic_name"/>
-        <id property="epicId" column="epic_id"/>
-        <id property="epicColor" column="epic_color"/>
-        <id property="reporterId" column="reporter_id"/>
-        <id property="projectId" column="issue_project_id"/>
-        <id property="statusId" column="status_id"/>
-        <id property="issueNum" column="issue_num"/>
-        <id property="lastUpdateDate" column="issue_last_update_date"/>
-        <id property="remainingTime" column="remaining_time"/>
-        <id property="storyPoints" column="story_points"/>
-        <id property="parentIssueId" column="parent_issue_id"/>
-        <id property="relateIssueId" column="relate_issue_id"/>
+        <result property="typeCode" column="type_code"/>
+        <result property="summary" column="summary"/>
+        <result property="priorityId" column="priority_id"/>
+        <result property="issueTypeId" column="issue_type_id"/>
+        <result property="assigneeId" column="assignee_id"/>
+        <result property="epicName" column="epic_name"/>
+        <result property="epicId" column="epic_id"/>
+        <result property="epicColor" column="epic_color"/>
+        <result property="reporterId" column="reporter_id"/>
+        <result property="projectId" column="issue_project_id"/>
+        <result property="statusId" column="status_id"/>
+        <result property="issueNum" column="issue_num"/>
+        <result property="lastUpdateDate" column="issue_last_update_date"/>
+        <result property="remainingTime" column="remaining_time"/>
+        <result property="storyPoints" column="story_points"/>
+        <result property="parentIssueId" column="parent_issue_id"/>
+        <result property="relateIssueId" column="relate_issue_id"/>
+        <result property="description" column="description"/>
+        <result property="creationDate" column="creation_date"/>
+        <result property="estimateTime" column="estimate_time"/>
+        <result property="resolution" column="resolution"/>
         <collection property="versionIssueRelDTOS" autoMapping="true"
                     ofType="io.choerodon.agile.infra.dto.VersionIssueRelDTO">
             <id property="versionId" column="version_id"/>
-            <id property="statusCode" column="version_status_code"/>
-            <id property="relationType" column="relation_type"/>
-            <id property="issueId" column="version_issue_id"/>
-            <id property="projectId" column="version_project_id"/>
-            <id property="name" column="version_name"/>
+            <result property="statusCode" column="version_status_code"/>
+            <result property="relationType" column="relation_type"/>
+            <result property="issueId" column="version_issue_id"/>
+            <result property="projectId" column="version_project_id"/>
+            <result property="name" column="version_name"/>
         </collection>
         <collection property="issueSprintDTOS" autoMapping="true"
                     ofType="io.choerodon.agile.infra.dto.IssueSprintDTO">
             <id property="sprintId" column="sprint_id"/>
-            <id property="sprintName" column="sprint_name"/>
-            <id property="statusCode" column="sp_status_code"/>
+            <result property="sprintName" column="sprint_name"/>
+            <result property="statusCode" column="sp_status_code"/>
         </collection>
         <collection property="issueComponentBriefDTOS" autoMapping="true"
                     ofType="io.choerodon.agile.infra.dto.IssueComponentBriefDTO">
             <id property="componentId" column="component_id"/>
-            <id property="name" column="component_name"/>
+            <result property="name" column="component_name"/>
         </collection>
         <collection property="labelIssueRelDTOS" autoMapping="true"
                     ofType="io.choerodon.agile.infra.dto.LabelIssueRelDTO">
             <id property="labelId" column="label_id"/>
-            <id property="labelName" column="label_name"/>
+            <result property="labelName" column="label_name"/>
         </collection>
     </resultMap>
 
@@ -376,9 +380,18 @@
         ail.label_id,
         ai.story_points,
         ai.remaining_time,
+        <if test="isExcelExported">
+            ai.description,
+            ai.creation_date,
+            ai.estimate_time,
+            IF((ais.is_completed = 1), '是', '否') AS resolution,
+        </if>
         ai.parent_issue_id,
         ai.relate_issue_id
         FROM agile_issue ai
+        <if test="isExcelExported">
+          left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
+        </if>
         left join agile_issue ai3 on ai.epic_id = ai3.issue_id
         LEFT JOIN lookup_value alv2 ON ai3.color_code = alv2.value_code
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id

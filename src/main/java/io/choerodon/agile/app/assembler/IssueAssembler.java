@@ -284,10 +284,10 @@ public class IssueAssembler extends AbstractAssembler {
         return issueSubVO;
     }
 
-    public List<ExportIssuesVO> exportIssuesDOListToExportIssuesDTO(List<ExportIssuesDTO> exportIssues, Long projectId) {
+    public List<ExportIssuesVO> exportIssuesDOListToExportIssuesDTO(List<IssueDTO> exportIssues, Long projectId) {
         List<ExportIssuesVO> exportIssuesVOS = new ArrayList<>(exportIssues.size());
-        Set<Long> userIds = exportIssues.stream().filter(issue -> issue.getAssigneeId() != null && !Objects.equals(issue.getAssigneeId(), 0L)).map(ExportIssuesDTO::getAssigneeId).collect(Collectors.toSet());
-        userIds.addAll(exportIssues.stream().filter(issue -> issue.getReporterId() != null && !Objects.equals(issue.getReporterId(), 0L)).map(ExportIssuesDTO::getReporterId).collect(Collectors.toSet()));
+        Set<Long> userIds = exportIssues.stream().filter(issue -> issue.getAssigneeId() != null && !Objects.equals(issue.getAssigneeId(), 0L)).map(IssueDTO::getAssigneeId).collect(Collectors.toSet());
+        userIds.addAll(exportIssues.stream().filter(issue -> issue.getReporterId() != null && !Objects.equals(issue.getReporterId(), 0L)).map(IssueDTO::getReporterId).collect(Collectors.toSet()));
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(new ArrayList<>(userIds), true);
         Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
