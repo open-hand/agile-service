@@ -137,7 +137,7 @@ const IssueDes = ({ reloadIssue }) => {
                 <Icon type="zoom_out_map icon" style={{ marginRight: 2 }} />
               </Button>
             </Tooltip>
-            <Tooltip placement="topRight" autoAdjustOverflow={false} title="编辑" getPopupContainer={triggerNode => triggerNode.parentNode}>
+            <Tooltip placement="topRight" autoAdjustOverflow={false} title="编辑">
               <Button
                 style={{ padding: '0 6px' }}
                 className="leftBtn"
