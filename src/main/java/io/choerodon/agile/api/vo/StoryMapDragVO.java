@@ -14,17 +14,11 @@ public class StoryMapDragVO {
     @ApiModelProperty(value = "要关联的史诗id")
     private Long epicId;
 
-//    @ApiModelProperty(value = "要关联的特性id")
-//    private Long featureId;
-
     @ApiModelProperty(value = "要关联的版本id")
     private Long versionId;
 
     @ApiModelProperty(value = "问题id列表，移动到史诗，配合epicId使用")
     private List<Long> epicIssueIds;
-
-//    @ApiModelProperty(value = "问题id列表，移动到特性，配合featureId使用")
-//    private List<Long> featureIssueIds;
 
     @ApiModelProperty(value = "问题id列表，移动到版本，配合versionId使用")
     private List<Long> versionIssueIds;
@@ -39,14 +33,6 @@ public class StoryMapDragVO {
     public void setEpicId(Long epicId) {
         this.epicId = epicId;
     }
-
-//    public Long getFeatureId() {
-//        return featureId;
-//    }
-//
-//    public void setFeatureId(Long featureId) {
-//        this.featureId = featureId;
-//    }
 
     public Long getVersionId() {
         return versionId;
@@ -63,14 +49,6 @@ public class StoryMapDragVO {
     public void setEpicIssueIds(List<Long> epicIssueIds) {
         this.epicIssueIds = epicIssueIds;
     }
-
-//    public List<Long> getFeatureIssueIds() {
-//        return featureIssueIds;
-//    }
-//
-//    public void setFeatureIssueIds(List<Long> featureIssueIds) {
-//        this.featureIssueIds = featureIssueIds;
-//    }
 
     public List<Long> getVersionIssueIds() {
         return versionIssueIds;

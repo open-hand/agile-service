@@ -1,7 +1,7 @@
 {
   "name": "@choerodon/agile",
   "routeName": "agile",
-  "version": "0.21.3",
+  "version": "0.22.1",
   "description": "",
   "main": "./lib/index.js",
   "files": [
@@ -29,6 +29,7 @@
     "react-color": "^2.14.1",
     "react-dnd": "^5.0.0",
     "react-dnd-html5-backend": "^5.0.1",
+    "react-draggable": "^4.2.0",
     "react-fast-compare": "^2.0.4",
     "react-image-lightbox": "^4.6.0",
     "react-onclickoutside": "^6.8.0",
@@ -40,7 +41,7 @@
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@choerodon/boot": "0.21.0",
-    "@choerodon/master": "^0.21.0",
+    "@choerodon/master": "0.0.0",
     "babel-plugin-module-resolver": "^3.2.0",
     "gulp-watch": "^5.0.1"
   },

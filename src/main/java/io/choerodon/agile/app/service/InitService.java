@@ -53,15 +53,6 @@ public interface InitService {
      */
     Long initTEStateMachine(Long organizationId, ProjectEvent projectEvent);
 
-//    /**
-//     * 初始化项目群状态机
-//     *
-//     * @param organizationId
-//     * @param projectEvent
-//     * @return
-//     */
-//    Long initPRStateMachine(Long organizationId, ProjectEvent projectEvent);
-
     void createStateMachineDetail(Long organizationId, Long stateMachineId, String applyType);
 }
 

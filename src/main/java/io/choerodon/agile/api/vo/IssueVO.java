@@ -118,6 +118,9 @@ public class IssueVO {
     @ApiModelProperty(value = "父任务的问题编码")
     private String parentIssueNum;
 
+    @ApiModelProperty(value = "父任务问题概要")
+    private String parentIssueSummary;
+
     @ApiModelProperty(value = "经办人图标")
     private String assigneeImageUrl;
 
@@ -177,6 +180,9 @@ public class IssueVO {
 
     @ApiModelProperty(value = "缺陷关联的故事编号")
     private String relateIssueNum;
+
+    @ApiModelProperty(value = "子缺陷的父任务概要")
+    private String parentRelateSummary;
 
     public String getCreaterEmail() {
         return createrEmail;
@@ -466,6 +472,14 @@ public class IssueVO {
         this.parentIssueNum = parentIssueNum;
     }
 
+    public void setParentIssueSummary(String parentIssueSummary) {
+        this.parentIssueSummary = parentIssueSummary;
+    }
+
+    public String getParentIssueSummary() {
+        return parentIssueSummary;
+    }
+
     public SprintNameVO getActiveSprint() {
         return activeSprint;
     }
@@ -608,6 +622,14 @@ public class IssueVO {
 
     public void setCreaterRealName(String createrRealName) {
         this.createrRealName = createrRealName;
+    }
+
+    public void setParentRelateSummary(String parentRelateSummary) {
+        this.parentRelateSummary = parentRelateSummary;
+    }
+
+    public String getParentRelateSummary() {
+        return parentRelateSummary;
     }
 
     @Override

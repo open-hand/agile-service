@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import { Icon, Popconfirm } from 'choerodon-ui';
 import UserHead from '../../UserHead';
 import WYSIWYGEditor from '../../WYSIWYGEditor';
-import { IssueDescription, DatetimeAgo } from '../../CommonComponent';
+import WYSIWYGViewer from '../../WYSIWYGViewer';
+import { DatetimeAgo } from '../../CommonComponent';
 import {
-  delta2Html, text2Delta, beforeTextUpload,
+  text2Delta, beforeTextUpload,
 } from '../../../common/utils';
 import { deleteWorklog, updateWorklog } from '../../../api/NewIssueApi';
 import './Log.less';
@@ -177,7 +178,7 @@ class Log extends Component {
                 <span style={{ flex: 1 }}>
                   {
                     worklog.logId !== editLogId ? (
-                      <IssueDescription data={delta2Html(worklog.description)} />
+                      <WYSIWYGViewer data={worklog.description} />
                     ) : null
                   }
                 </span>

@@ -56,10 +56,6 @@ public class IssueDetailDTO {
 
     private List<SprintNameDTO> closeSprint;
 
-//    private PiNameDTO activePi;
-
-//    private List<PiNameDTO> closePi;
-
     private List<IssueCommentDTO> issueCommentDTOList;
 
     private List<IssueAttachmentDTO> issueAttachmentDTOList;
@@ -88,6 +84,8 @@ public class IssueDetailDTO {
 
     private String parentIssueNum;
 
+    private String parentIssueSummary;
+
     private PriorityVO priorityVO;
 
     private IssueTypeVO issueTypeVO;
@@ -100,15 +98,11 @@ public class IssueDetailDTO {
 
     private String issueTypeCode;
 
-//    private FeatureDTO featureDTO;
-
-//    private Long featureId;
-
-//    private String featureName;
-
     private Long relateIssueId;
 
     private String relateIssueNum;
+
+    private String parentRelateSummary;
 
     public String getIssueTypeCode() {
         return issueTypeCode;
@@ -366,6 +360,14 @@ public class IssueDetailDTO {
         this.parentIssueNum = parentIssueNum;
     }
 
+    public void setParentIssueSummary(String parentIssueSummary) {
+        this.parentIssueSummary = parentIssueSummary;
+    }
+
+    public String getParentIssueSummary() {
+        return parentIssueSummary;
+    }
+
     public SprintNameDTO getActiveSprint() {
         return activeSprint;
     }
@@ -430,46 +432,6 @@ public class IssueDetailDTO {
         this.applyType = applyType;
     }
 
-//    public void setFeatureDTO(FeatureDTO featureDTO) {
-//        this.featureDTO = featureDTO;
-//    }
-//
-//    public FeatureDTO getFeatureDTO() {
-//        return featureDTO;
-//    }
-
-//    public Long getFeatureId() {
-//        return featureId;
-//    }
-//
-//    public void setFeatureId(Long featureId) {
-//        this.featureId = featureId;
-//    }
-
-//    public String getFeatureName() {
-//        return featureName;
-//    }
-//
-//    public void setFeatureName(String featureName) {
-//        this.featureName = featureName;
-//    }
-
-//    public void setActivePi(PiNameDTO activePi) {
-//        this.activePi = activePi;
-//    }
-//
-//    public PiNameDTO getActivePi() {
-//        return activePi;
-//    }
-//
-//    public void setClosePi(List<PiNameDTO> closePi) {
-//        this.closePi = closePi;
-//    }
-//
-//    public List<PiNameDTO> getClosePi() {
-//        return closePi;
-//    }
-
     public void setRelateIssueId(Long relateIssueId) {
         this.relateIssueId = relateIssueId;
     }
@@ -492,6 +454,14 @@ public class IssueDetailDTO {
 
     public String getRelateIssueNum() {
         return relateIssueNum;
+    }
+
+    public void setParentRelateSummary(String parentRelateSummary) {
+        this.parentRelateSummary = parentRelateSummary;
+    }
+
+    public String getParentRelateSummary() {
+        return parentRelateSummary;
     }
 
     @Override

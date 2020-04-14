@@ -5,9 +5,9 @@ import {
   Icon, Button, Tooltip,  
 } from 'choerodon-ui';
 
-import WYSIWYGEditor from '../../../WYSIWYGEditor';
+import WYSIWYGViewer from '@/components/WYSIWYGViewer';
+import WYSIWYGEditor from '@/components/WYSIWYGEditor';
 import { text2Delta, delta2Html, returnBeforeTextUpload } from '../../../../common/utils';
-import { IssueDescription } from '../../../CommonComponent';
 import FullEditor from '../../../FullEditor';
 import { updateIssue } from '../../../../api/NewIssueApi';
 import EditIssueContext from '../../stores';
@@ -100,14 +100,13 @@ const IssueDes = ({ reloadIssue }) => {
         )
       );
     } else {
-      const delta = delta2Html(description);
       return (
         <div className="c7n-content-wrapper">
           <div
             className="mt-10 c7n-description"
             role="none"
           >
-            <IssueDescription data={delta} />
+            <WYSIWYGViewer data={description} />
           </div>
         </div>
       );

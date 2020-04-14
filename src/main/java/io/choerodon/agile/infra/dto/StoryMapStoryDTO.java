@@ -16,8 +16,6 @@ public class StoryMapStoryDTO {
 
     private Long epicId;
 
-//    private Long featureId;
-
     private Boolean completed;
 
     private Long issueTypeId;
@@ -57,14 +55,6 @@ public class StoryMapStoryDTO {
     public void setEpicId(Long epicId) {
         this.epicId = epicId;
     }
-
-//    public Long getFeatureId() {
-//        return featureId;
-//    }
-//
-//    public void setFeatureId(Long featureId) {
-//        this.featureId = featureId;
-//    }
 
     public void setStoryMapVersionDTOList(List<StoryMapVersionDTO> storyMapVersionDTOList) {
         this.storyMapVersionDTOList = storyMapVersionDTOList;

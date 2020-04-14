@@ -16,7 +16,6 @@ public class SprintDetailVO {
     private String statusCode;
     private Long projectId;
     private Long objectVersionNumber;
-//    private Long piId;
 
     public Long getSprintId() {
         return sprintId;
@@ -98,11 +97,4 @@ public class SprintDetailVO {
         this.objectVersionNumber = objectVersionNumber;
     }
 
-//    public void setPiId(Long piId) {
-//        this.piId = piId;
-//    }
-//
-//    public Long getPiId() {
-//        return piId;
-//    }
 }

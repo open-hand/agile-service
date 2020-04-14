@@ -93,12 +93,6 @@ public class IssueUpdateVO {
     @ApiModelProperty(value = "停留时间")
     private Date stayDate;
 
-//    @ApiModelProperty(value = "关联的featureDTO")
-//    private FeatureVO featureVO;
-
-//    @ApiModelProperty(value = "关联的featureId")
-//    private Long featureId;
-
     @ApiModelProperty(value = "bug关联的故事id")
     private Long relateIssueId;
 
@@ -309,22 +303,6 @@ public class IssueUpdateVO {
     public Date getStayDate() {
         return stayDate;
     }
-
-//    public void setFeatureVO(FeatureVO featureVO) {
-//        this.featureVO = featureVO;
-//    }
-//
-//    public FeatureVO getFeatureVO() {
-//        return featureVO;
-//    }
-//
-//    public Long getFeatureId() {
-//        return featureId;
-//    }
-//
-//    public void setFeatureId(Long featureId) {
-//        this.featureId = featureId;
-//    }
 
     public void setRelateIssueId(Long relateIssueId) {
         this.relateIssueId = relateIssueId;

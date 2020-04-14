@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, Fragment } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import {
@@ -91,7 +91,7 @@ const IssueField = observer((props) => {
   }
   return (
     <div className="c7n-content-wrapper IssueField">
-      {issueId ? fields.map(field => getFieldComponent(field)) : ''}
+      {issueId ? fields.map(field => <Fragment key={field.id}>{getFieldComponent(field)}</Fragment>) : ''}
     </div>
   );
 });

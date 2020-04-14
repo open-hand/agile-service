@@ -77,9 +77,6 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     @Autowired
     private IssueService issueService;
 
-//    @Autowired
-//    private ProductVersionMapper versionMapper;
-
     @Autowired
     private RedisUtil redisUtil;
 
@@ -127,7 +124,6 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         this.sagaClient = sagaClient;
     }
 
-//    @Saga(code = "agile-create-version", description = "创建版本", inputSchemaClass = VersionPayload.class)
     @Override
     public synchronized ProductVersionDetailVO createVersion(Long projectId, ProductVersionCreateVO versionCreateVO) {
         try {
@@ -145,10 +141,6 @@ public class ProductVersionServiceImpl implements ProductVersionService {
             ProductVersionDetailVO result = new ProductVersionDetailVO();
             ProductVersionDTO query = createBase(productVersionDTO);
             BeanUtils.copyProperties(query, result);
-//            VersionPayload versionPayload = new VersionPayload();
-//            versionPayload.setVersionId(query.getVersionId());
-//            versionPayload.setProjectId(query.getProjectId());
-//            sagaClient.startSaga("agile-create-version", new StartInstanceDTO(JSON.toJSONString(versionPayload), "", "", ResourceLevel.PROJECT.value(), projectId));
             return result;
         } catch (Exception e) {
             throw new CommonException(e.getMessage());
@@ -174,7 +166,6 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         return simpleDeleteVersion(projectId, versionId);
     }
 
-//    @Saga(code = "agile-delete-version", description = "删除版本", inputSchemaClass = VersionPayload.class)
     private Boolean simpleDeleteVersion(Long projectId, Long versionId) {
         try {
             ProductVersionDTO version = new ProductVersionDTO();
@@ -185,22 +176,11 @@ public class ProductVersionServiceImpl implements ProductVersionService {
                 throw new CommonException(NOT_FOUND);
             }
             Boolean deleteResult = iProductVersionService.delete(versionDTO);
-//            VersionPayload versionPayload = new VersionPayload();
-//            versionPayload.setVersionId(versionDTO.getVersionId());
-//            versionPayload.setProjectId(versionDTO.getProjectId());
-//            sagaClient.startSaga("agile-delete-version", new StartInstanceDTO(JSON.toJSONString(versionPayload), "", "", ResourceLevel.PROJECT.value(), projectId));
             return deleteResult;
         } catch (Exception e) {
             throw new CommonException(e.getMessage());
         }
     }
-
-//    @Override
-//    public void updateVersionBySelective(ProductVersionDTO productVersionDTO) {
-//        if (productVersionMapper.updateByPrimaryKeySelective(productVersionDTO) != 1) {
-//            throw new CommonException("error.productVersion.update");
-//        }
-//    }
 
     @Override
     public ProductVersionDetailVO updateVersion(Long projectId, Long versionId, ProductVersionUpdateVO versionUpdateVO, List<String> fieldList) {
@@ -387,30 +367,6 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         return productVersionUpdateAssembler.toTarget(updateBase(version), ProductVersionDetailVO.class);
     }
 
-//    @Override
-//    @Saga(code = "agile-delete-version", description = "删除版本", inputSchemaClass = VersionPayload.class)
-//    public Boolean mergeVersion(Long projectId, ProductVersionMergeVO productVersionMergeVO) {
-//        productVersionMergeVO.getSourceVersionIds().remove(productVersionMergeVO.getTargetVersionId());
-//        if (productVersionMergeVO.getSourceVersionIds().isEmpty()) {
-//            throw new CommonException(SOURCE_VERSION_ERROR);
-//        }
-//        CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
-//        List<VersionIssueDTO> versionIssues = productVersionMapper.queryIssueByVersionIds(projectId, productVersionMergeVO.getSourceVersionIds(), productVersionMergeVO.getTargetVersionId());
-//        versionIssueRelService.deleteByVersionIds(projectId, productVersionMergeVO.getSourceVersionIds());
-//        if (!versionIssues.isEmpty()) {
-//            iProductVersionService.batchIssueToDestination(projectId, productVersionMergeVO.getTargetVersionId(), versionIssues, new Date(), customUserDetails.getUserId());
-//        }
-//        //这里不用日志是因为deleteByVersionIds方法已经有删除的日志了
-//        deleteByVersionIds(projectId, productVersionMergeVO.getSourceVersionIds());
-//        productVersionMergeVO.getSourceVersionIds().forEach(versionId -> {
-//            VersionPayload versionPayload = new VersionPayload();
-//            versionPayload.setVersionId(versionId);
-//            versionPayload.setProjectId(projectId);
-//            sagaClient.startSaga("agile-delete-version", new StartInstanceDTO(JSON.toJSONString(versionPayload), "", "", ResourceLevel.PROJECT.value(), projectId));
-//        });
-//        return true;
-//    }
-
     @Override
     public ProductVersionDetailVO queryVersionByVersionId(Long projectId, Long versionId) {
         ProductVersionDTO productVersionDTO = new ProductVersionDTO();
@@ -485,15 +441,6 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     public VersionIssueCountVO queryByCategoryCode(Long projectId, Long versionId) {
         return modelMapper.map(productVersionMapper.queryVersionStatisticsByVersionId(projectId, versionId), VersionIssueCountVO.class);
     }
-
-//    @Override
-//    public Long queryProjectIdByVersionId(Long projectId, Long versionId) {
-//        ProductVersionDTO productVersionDTO = productVersionMapper.selectByPrimaryKey(versionId);
-//        if (productVersionDTO == null) {
-//            throw new CommonException("error.productVersion.get");
-//        }
-//        return productVersionDTO.getProjectId();
-//    }
 
 
     @Override

@@ -15,15 +15,14 @@ const IssueHeader = (props) => {
   const urlParams = AppState.currentMenuType;
   const issue = store.getIssue;
   const {
-    parentIssueId, relateIssueId, typeCode, parentIssueNum, relateIssueNum,
+    parentIssueId, relateIssueId, typeCode, parentIssueSummary, parentRelateSummary,
   } = issue;
-
   return (
     <div className={`${prefixCls}-IssueHeader`}>
       <div className={`${prefixCls}-IssueHeader-top`}>
         <IssueType {...props} />
         {/* 问题编号 */}
-        <span style={{ marginLeft: 15 }}>
+        <span style={{ marginLeft: 15 }} className={`${prefixCls}-IssueHeader-top-number`}>
           <IssueNumber
             parentIssueId={parentIssueId || relateIssueId}
             resetIssue={resetIssue}
@@ -31,7 +30,8 @@ const IssueHeader = (props) => {
             urlParams={urlParams}
             backUrl={backUrl}
             typeCode={typeCode}
-            parentIssueNum={parentIssueNum || relateIssueNum}
+            // parentIssueNum={parentIssueNum || relateIssueNum}
+            parentSummary={parentIssueSummary || parentRelateSummary}
             issue={issue}
             disabled={disabled}
           />

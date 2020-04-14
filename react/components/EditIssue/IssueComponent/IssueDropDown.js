@@ -14,7 +14,7 @@ const IssueDropDown = ({
   const { store, onUpdate } = useContext(EditIssueContext);
   const issue = store.getIssue;
   const {
-    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber,
+    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, 
   } = issue;
 
   const handleDeleteIssue = () => {
@@ -103,11 +103,11 @@ const IssueDropDown = ({
         </Menu.Item>
       }
       {
-        ['sub_task', 'feature', 'issue_epic'].indexOf(typeCode) === -1 && (
+        ['sub_task', 'feature', 'issue_epic'].indexOf(typeCode) === -1 && !(typeCode === 'bug' && issue.relateIssueId) ? (
           <Menu.Item key="2">
             创建子任务
           </Menu.Item>
-        )
+        ) : null
       }
       {
         ['story', 'task'].indexOf(typeCode) !== -1 && (
@@ -157,7 +157,7 @@ const IssueDropDown = ({
         )
       }
       {
-        typeCode === 'bug' && (
+        typeCode === 'bug' && !subIssueVOList.length > 0 && (
           <Menu.Item key="10">
             关联问题
           </Menu.Item>

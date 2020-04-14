@@ -626,4 +626,16 @@ public class IssueController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueIds"));
     }
+
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @ApiOperation("查询项目下的故事和任务(不包含子任务以及子bug)")
+    @PostMapping(value = "/query_story_task")
+    public ResponseEntity<PageInfo<IssueListFieldKVVO>> queryStoryAndTask(@ApiParam(value = "项目id", required = true)
+                                                         @PathVariable(name = "project_id") Long projectId,
+                                                         @SortDefault Pageable pageable,
+                                                          @RequestBody(required = false) SearchVO searchVO) {
+        return Optional.ofNullable(issueService.queryStoryAndTask(projectId,pageable,searchVO))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueIds"));
+    }
 }

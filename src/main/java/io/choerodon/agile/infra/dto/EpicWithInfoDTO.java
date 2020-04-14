@@ -12,8 +12,6 @@ public class EpicWithInfoDTO {
 
     private String epicName;
 
-//    private Long programId;
-
     private String epicRank;
 
     private Long epicRankObjectVersionNumber;
@@ -57,14 +55,6 @@ public class EpicWithInfoDTO {
     public String getEpicName() {
         return epicName;
     }
-
-//    public void setProgramId(Long programId) {
-//        this.programId = programId;
-//    }
-//
-//    public Long getProgramId() {
-//        return programId;
-//    }
 
     public String getEpicRank() {
         return epicRank;

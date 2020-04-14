@@ -30,22 +30,32 @@ function getCurrentFullScreen() {
   return Boolean(isFullScreen);
 }
 
-export default function useFullScreen(target, onFullScreenChange) {
+
+export default function useFullScreen(target, onFullScreenChange, customClassName = 'fullScrenn') {
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const handleChangeFullScreen = () => {    
+  const handleChangeFullScreen = () => {  
+    const element = typeof target === 'function' ? target() : target;
     const currentFullScreen = getCurrentFullScreen();
-    setIsFullScreen(currentFullScreen);
+    setTimeout(() => {
+      setIsFullScreen(currentFullScreen); // 推迟设置state，防止出现state更改完成，但是没有渲染完成，可能导致的问题
+    });
+    if (currentFullScreen) {
+      element.classList.add(customClassName);
+    } else {
+      element.classList.remove(customClassName);
+    }
     if (onFullScreenChange) {
       onFullScreenChange(currentFullScreen);
     }
   };
+  
   const toggleFullScreen = () => {
     const currentFullScreen = getCurrentFullScreen();
+    const element = typeof target === 'function' ? target() : target;
     if (currentFullScreen) {
       exitFullScreen();
     } else {
-      const element = typeof target === 'function' ? target() : target;
-      toFullScreen(element);
+      toFullScreen(element);      
     }
   };
   useEffect(() => {
@@ -54,11 +64,19 @@ export default function useFullScreen(target, onFullScreenChange) {
     document.addEventListener('mozfullscreenchange', handleChangeFullScreen);
     document.addEventListener('MSFullscreenChange', handleChangeFullScreen);
     return function cleanup() {
+      if (isFullScreen) {
+        exitFullScreen(); // 组件卸载时如果是全屏，就自动退出全屏
+        setTimeout(() => {
+          setIsFullScreen(false); // 推迟设置state，防止出现state更改完成，但是没有渲染完成，可能导致的问题
+        });
+        const element = typeof target === 'function' ? target() : target;
+        element.classList.remove(customClassName);
+      } 
       document.removeEventListener('fullscreenchange', handleChangeFullScreen);
       document.removeEventListener('webkitfullscreenchange', handleChangeFullScreen);
       document.removeEventListener('mozfullscreenchange', handleChangeFullScreen);
       document.removeEventListener('MSFullscreenChange', handleChangeFullScreen);
     };
-  });
+  }, [isFullScreen]);
   return [isFullScreen, toggleFullScreen];
 }

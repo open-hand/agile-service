@@ -2,7 +2,6 @@ package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.infra.dto.EpicWithInfoDTO;
-//import io.choerodon.agile.infra.dto.FeatureCommonDTO;
 import io.choerodon.agile.infra.dto.StoryMapStoryDTO;
 import org.apache.ibatis.annotations.Param;
 

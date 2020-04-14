@@ -17,13 +17,13 @@ import io.choerodon.agile.app.assembler.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.TestFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.agile.infra.utils.*;
-import io.choerodon.asgard.saga.annotation.Saga;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
 import io.choerodon.web.util.PageableHelper;
@@ -44,6 +44,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -166,6 +167,8 @@ public class IssueServiceImpl implements IssueService {
     private InstanceService instanceService;
     @Autowired
     private TestFeignClient testFeignClient;
+    @Autowired
+    private ProjectUtil projectUtil;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -193,8 +196,6 @@ public class IssueServiceImpl implements IssueService {
     private static final String RANK_FIELD = "rank";
     private static final String FIX_RELATION_TYPE = "fix";
     private static final String INFLUENCE_RELATION_TYPE = "influence";
-    private static final String[] FIELDS_NAME = {"任务编号", "概要", "描述", "类型", "所属项目", "经办人", "经办人名称", "报告人", "报告人名称", "解决状态", "状态", "冲刺", "创建时间", "最后更新时间", "优先级", "是否子任务", "剩余预估", "版本", "史诗", "标签", "故事点", "模块"};
-    private static final String[] FIELDS = {"issueNum", "summary", "description", "typeName", "projectName", "assigneeName", "assigneeRealName", "reporterName", "reporterRealName", "resolution", "statusName", "sprintName", "creationDate", "lastUpdateDate", "priorityName", "subTask", REMAIN_TIME_FIELD, "versionName", "epicName", "labelName", "storyPoints", "componentName"};
     private static final String[] FIELDS_IN_PROGRAM = {"issueNum", "summary", "typeName", "statusName", "piName", "creationDate", "lastUpdateDate", "epicName", "storyPoints", "benfitHypothesis", "acceptanceCritera"};
     private static final String[] FIELDS_NAME_IN_PROGRAM = {"任务编号", "概要", "类型", "状态", "PI", "创建时间", "最后更新时间", "史诗", "故事点", "特性价值", "验收标准"};
     private static final String PROJECT_ERROR = "error.project.notFound";
@@ -209,6 +210,39 @@ public class IssueServiceImpl implements IssueService {
     private static final String BACKETNAME = "agile-service";
 
     private ModelMapper modelMapper = new ModelMapper();
+
+    private static final String[] FIELDS_NAME;
+
+    private static final String[] FIELDS;
+
+    protected static Map<String, String> FIELD_MAP = new LinkedHashMap<>();
+
+    protected static String[] AUTO_SIZE_WIDTH = {"summary", "epicName", "feature",
+            "creationDate", "lastUpdateDate", "sprintName"};
+
+    static {
+        FIELD_MAP.put("typeName", "问题类型");
+        FIELD_MAP.put("issueNum", "问题编号");
+        FIELD_MAP.put("summary", "概要");
+        FIELD_MAP.put("description", "描述");
+        FIELD_MAP.put("priorityName", "优先级");
+        FIELD_MAP.put("statusName", "状态");
+        FIELD_MAP.put("resolution", "解决状态");
+        FIELD_MAP.put("sprintName", "冲刺");
+        FIELD_MAP.put("assigneeName", "经办人");
+        FIELD_MAP.put("reporterName", "报告人");
+        FIELD_MAP.put("storyPoints", "故事点");
+        FIELD_MAP.put("remainingTime", "剩余预估时间");
+        FIELD_MAP.put("versionName", "版本");
+        FIELD_MAP.put("epicName", "所属史诗");
+        FIELD_MAP.put("labelName", "标签");
+        FIELD_MAP.put("componentName", "模块");
+        FIELD_MAP.put("creationDate", "创建时间");
+        FIELD_MAP.put("lastUpdateDate", "最后更新时间");
+        FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
+        FIELDS_NAME = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
+    }
+
 
     @PostConstruct
     public void init() {
@@ -382,7 +416,7 @@ public class IssueServiceImpl implements IssueService {
             } else {
                 Map<String, String> order = new HashMap<>(1);
                 //处理表映射
-                order.put("issueId", "search.issue_issue_id");
+                order.put("issueId", "t.issue_issue_id");
                 Sort sort = PageUtil.sortResetOrder(pageable.getSort(), SEARCH, order);
                 issueIdPage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(),
                         PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> issueMapper.queryIssueIdsListWithSub
@@ -391,11 +425,14 @@ public class IssueServiceImpl implements IssueService {
 
             PageInfo<IssueListFieldKVVO> issueListDTOPage;
             if (issueIdPage.getList() != null && !issueIdPage.getList().isEmpty()) {
-                List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIdPage.getList());
+                List<Long> issueIds = issueIdPage.getList();
+                Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds);
                 Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
                 Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
                 Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
-                Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, issueIdPage.getList(), false);
+                List<Long> allIssueIds = issueDTOList.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+                Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, allIssueIds, false);
                 issueListDTOPage = PageUtil.buildPageInfoWithPageInfoList(issueIdPage,
                         issueAssembler.issueDoToIssueListFieldKVDTO(issueDTOList, priorityMap, statusMapDTOMap, issueTypeDTOMap, foundationCodeValue));
             } else {
@@ -558,8 +595,6 @@ public class IssueServiceImpl implements IssueService {
             if (condition) {
                 BatchRemoveSprintDTO batchRemoveSprintDTO = new BatchRemoveSprintDTO(projectId, issueConvertDTO.getSprintId(), issueIds);
                 issueAccessDataService.removeIssueFromSprintByIssueIds(batchRemoveSprintDTO);
-//                //不是活跃冲刺，修改冲刺状态回到第一个状态
-//                handleIssueStatus(projectId, oldIssue, issueConvertDTO, fieldList, issueIds);
             }
             if (exitSprint) {
                 issueAccessDataService.issueToDestinationByIds(projectId, issueConvertDTO.getSprintId(), issueIds, new Date(), customUserDetails.getUserId());
@@ -571,34 +606,6 @@ public class IssueServiceImpl implements IssueService {
             }
         }
         issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
-    }
-
-    private void handleIssueStatus(Long projectId, IssueConvertDTO oldIssue, IssueConvertDTO issueConvertDTO, List<String> fieldList, List<Long> issueIds) {
-        SprintSearchDTO sprintSearchDTO = sprintMapper.queryActiveSprintNoIssueIds(projectId);
-        if (oldIssue.getApplyType().equals(SchemeApplyType.AGILE)) {
-            if (sprintSearchDTO == null || !Objects.equals(issueConvertDTO.getSprintId(), sprintSearchDTO.getSprintId())) {
-                Long stateMachineId = projectConfigService.queryStateMachineId(projectId, AGILE, oldIssue.getIssueTypeId());
-                if (stateMachineId == null) {
-                    throw new CommonException(ERROR_ISSUE_STATE_MACHINE_NOT_FOUND);
-                }
-                Long initStatusId = instanceService.queryInitStatusId(ConvertUtil.getOrganizationId(projectId), stateMachineId);
-                if (issueConvertDTO.getStatusId() == null && !oldIssue.getStatusId().equals(initStatusId)) {
-                    issueConvertDTO.setStatusId(initStatusId);
-                    fieldList.add(STATUS_ID);
-                }
-                //子任务的处理
-                if (issueIds != null && !issueIds.isEmpty()) {
-                    List<IssueConvertDTO> issueDOList = issueAssembler.toTargetList(issueMapper.queryIssueSubList(projectId, oldIssue.getIssueId()), IssueConvertDTO.class);
-                    String[] field = {STATUS_ID};
-                    issueDOList.forEach(issue -> {
-                        if (!issue.getStatusId().equals(initStatusId)) {
-                            issue.setStatusId(initStatusId);
-                            issueAccessDataService.update(issue, field);
-                        }
-                    });
-                }
-            }
-        }
     }
 
 
@@ -1255,10 +1262,10 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public void exportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request, HttpServletResponse response, Long organizationId) {
         //处理根据界面筛选结果导出的字段
-        Map<String, String[]> fieldMap = handleExportFields(searchVO.getExportFieldCodes(), projectId, organizationId);
-        String[] fieldCodes = fieldMap.get(FIELD_CODES);
-        String[] fieldNames = fieldMap.get(FIELD_NAMES);
-
+        Map<String, String[]> fieldMap =
+                handleExportFields(searchVO.getExportFieldCodes(), projectId, organizationId, FIELDS_NAME, FIELDS);
+        String[] fieldCodes = sortFieldCodes(fieldMap.get(FIELD_CODES));
+        String[] fieldNames = sortFieldNames(fieldMap.get(FIELD_NAMES));
         ProjectInfoDTO projectInfoDTO = new ProjectInfoDTO();
         projectInfoDTO.setProjectId(projectId);
         projectInfoDTO = projectInfoMapper.selectOne(projectInfoDTO);
@@ -1275,9 +1282,17 @@ public class IssueServiceImpl implements IssueService {
                 filterSql = getQuickFilter(searchVO.getQuickFilterIds());
             }
             final String searchSql = filterSql;
-            //连表查询需要设置主表别名
-            List<Long> issueIds = issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
-            List<ExportIssuesVO> exportIssues = issueAssembler.exportIssuesDOListToExportIssuesDTO(issueMapper.queryExportIssues(projectId, issueIds, projectCode), projectId);
+            //查询扁平层级满足条件的所有问题
+            List<ExportIssuesDTO> issues =
+                    issueMapper.queryFlatExportIssues(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), projectCode);
+            List<Long> issueIds = new ArrayList<>();
+            Map<Long, Set<Long>> parentSonMap = new HashMap<>();
+            issues.forEach(e -> {
+                issueIds.add(e.getIssueId());
+                processParentSonRelation(parentSonMap, e);
+            });
+            List<ExportIssuesVO> exportIssues = issueAssembler.exportIssuesDOListToExportIssuesDTO(issues, projectId);
+            Map<Long, ExportIssuesVO> issueMap = new LinkedHashMap<>();
             if (!issueIds.isEmpty()) {
                 Map<Long, List<SprintNameDTO>> closeSprintNames = issueMapper.querySprintNameByIssueIds(projectId, issueIds).stream().collect(Collectors.groupingBy(SprintNameDTO::getIssueId));
                 Map<Long, List<VersionIssueRelDTO>> fixVersionNames = issueMapper.queryVersionNameByIssueIds(projectId, issueIds, FIX_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
@@ -1302,12 +1317,71 @@ public class IssueServiceImpl implements IssueService {
                     exportIssue.setLabelName(labelName);
                     exportIssue.setComponentName(componentName);
                     exportIssue.setFoundationFieldValue(fieldValue);
+                    issueMap.put(exportIssue.getIssueId(), exportIssue);
                 });
             }
-            ExcelUtil.export(exportIssues, ExportIssuesVO.class, fieldNames, fieldCodes, project.getName(), Arrays.asList("sprintName"), response);
+            ExcelUtil.export(issueMap, parentSonMap, ExportIssuesVO.class, fieldNames, fieldCodes, project.getName(), Arrays.asList(AUTO_SIZE_WIDTH), response);
         } else {
-            ExcelUtil.export(new ArrayList<>(), ExportIssuesVO.class, fieldNames, fieldCodes, project.getName(), Arrays.asList("sprintName"), response);
+            ExcelUtil.export(Collections.emptyMap(), Collections.emptyMap(), ExportIssuesVO.class, fieldNames, fieldCodes, project.getName(), Arrays.asList(AUTO_SIZE_WIDTH), response);
         }
+    }
+
+    protected String[] sortFieldNames(String[] fieldNames) {
+        List<String> result = new ArrayList<>();
+        result.add("问题类型");
+        result.add("问题编号");
+        result.add("概要");
+        for (String str : fieldNames) {
+            if (result.get(0).equals(str)
+                    || result.get(1).equals(str)
+                    || result.get(2).equals(str)) {
+                continue;
+            }
+            result.add(str);
+        }
+        return result.toArray(new String[result.size()]);
+    }
+
+    protected String[] sortFieldCodes(String[] fieldCodes) {
+        List<String> result = new ArrayList<>();
+        result.add("typeName");
+        result.add("issueNum");
+        result.add("summary");
+        for (String str : fieldCodes) {
+            if (result.get(0).equals(str)
+                    || result.get(1).equals(str)
+                    || result.get(2).equals(str)) {
+                continue;
+            }
+            result.add(str);
+        }
+        return result.toArray(new String[result.size()]);
+    }
+
+    protected void processParentSonRelation(Map<Long, Set<Long>> parentSonMap, ExportIssuesDTO issue) {
+        String typeCode = issue.getTypeCode();
+        Long issueId = issue.getIssueId();
+        if (IssueTypeCode.isBug(typeCode)) {
+            Long relateIssueId = issue.getRelateIssueId();
+            if (!ObjectUtils.isEmpty(relateIssueId) && !Objects.equals(relateIssueId, 0L)) {
+                appendToParentSonMap(relateIssueId, issueId, parentSonMap);
+            }
+        }
+        if (IssueTypeCode.isSubTask(typeCode)) {
+            Long parentIssueId = issue.getParentIssueId();
+            if (!ObjectUtils.isEmpty(parentIssueId) && !Objects.equals(parentIssueId, 0L)) {
+                appendToParentSonMap(parentIssueId, issueId, parentSonMap);
+            }
+        }
+    }
+
+    private void appendToParentSonMap(Long parentId, Long issueId, Map<Long, Set<Long>> parentSonMap) {
+        Set<Long> childrenSet =  parentSonMap.get(parentId);
+        if (childrenSet == null) {
+            childrenSet = new HashSet<>();
+            parentSonMap.put(parentId, childrenSet);
+        }
+        childrenSet.add(issueId);
     }
 
 
@@ -1317,7 +1391,11 @@ public class IssueServiceImpl implements IssueService {
      * @param exportFieldCodes
      * @return
      */
-    private Map<String, String[]> handleExportFields(List<String> exportFieldCodes, Long projectId, Long organizationId) {
+    protected Map<String, String[]> handleExportFields(List<String> exportFieldCodes,
+                                                     Long projectId,
+                                                     Long organizationId,
+                                                     String[] fieldsName,
+                                                     String[] fields) {
         Map<String, String[]> fieldMap = new HashMap<>(2);
         ObjectMapper m = new ObjectMapper();
 
@@ -1338,9 +1416,9 @@ public class IssueServiceImpl implements IssueService {
                 filter(v -> !v.getSystem()).collect(Collectors.toList());
 
         if (exportFieldCodes != null && exportFieldCodes.size() != 0) {
-            Map<String, String> data = new HashMap<>(FIELDS.length + userDefinedFieldDTOS.size());
-            for (int i = 0; i < FIELDS.length; i++) {
-                data.put(FIELDS[i], FIELDS_NAME[i]);
+            Map<String, String> data = new HashMap<>(fields.length + userDefinedFieldDTOS.size());
+            for (int i = 0; i < fields.length; i++) {
+                data.put(fields[i], fieldsName[i]);
             }
             for (ObjectSchemeFieldDTO userDefinedFieldDTO : userDefinedFieldDTOS) {
                 data.put(userDefinedFieldDTO.getCode(), userDefinedFieldDTO.getName());
@@ -1354,15 +1432,15 @@ public class IssueServiceImpl implements IssueService {
                     fieldCodes.add(code);
                     fieldNames.add(name);
                 } else {
-                    throw new CommonException("error.issue.exportFieldIllegal");
+                    throw new CommonException("error.issue.illegal.exportField", code);
                 }
             });
             fieldMap.put(FIELD_CODES, fieldCodes.stream().toArray(String[]::new));
             fieldMap.put(FIELD_NAMES, fieldNames.stream().toArray(String[]::new));
         } else {
             if (!userDefinedFieldDTOS.isEmpty()) {
-                List<String> fieldCodes = new ArrayList(Arrays.asList(FIELDS));
-                List<String> fieldNames = new ArrayList(Arrays.asList(FIELDS_NAME));
+                List<String> fieldCodes = new ArrayList(Arrays.asList(fields));
+                List<String> fieldNames = new ArrayList(Arrays.asList(fieldsName));
                 userDefinedFieldDTOS.forEach(fieldDTO -> {
                     fieldCodes.add(fieldDTO.getCode());
                     fieldNames.add(fieldDTO.getName());
@@ -1371,8 +1449,8 @@ public class IssueServiceImpl implements IssueService {
                 fieldMap.put(FIELD_CODES, fieldCodes.stream().toArray(String[]::new));
                 fieldMap.put(FIELD_NAMES, fieldNames.stream().toArray(String[]::new));
             } else {
-                fieldMap.put(FIELD_CODES, FIELDS);
-                fieldMap.put(FIELD_NAMES, FIELDS_NAME);
+                fieldMap.put(FIELD_CODES, fields);
+                fieldMap.put(FIELD_NAMES, fieldsName);
             }
         }
         return fieldMap;
@@ -2067,5 +2145,28 @@ public class IssueServiceImpl implements IssueService {
     public List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds) {
 
         return issueAssembler.issueDTOTOVO(projectId, issueMapper.listIssueInfoByIssueIds(projectId, issueIds));
+    }
+
+    @Override
+    public PageInfo<IssueListFieldKVVO> queryStoryAndTask(Long projectId, Pageable pageable, SearchVO searchVO) {
+        PageInfo<IssueDTO> pageInfo = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(pageable.getSort())).doSelectPageInfo(() -> issueMapper.queryStoryAndTaskByProjectId(projectId, searchVO));
+        List<IssueDTO> list = pageInfo.getList();
+        if (!CollectionUtils.isEmpty(list)) {
+            Long organizationId = projectUtil.getOrganizationId(projectId);
+            Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
+            Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+            Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
+            List<IssueListFieldKVVO> listFieldKVVOS = new ArrayList<>();
+            list.forEach(v -> {
+                IssueListFieldKVVO map = modelMapper.map(v, IssueListFieldKVVO.class);
+                map.setPriorityVO(priorityMap.get(v.getPriorityId()) == null ? null : priorityMap.get(v.getPriorityId()));
+                map.setStatusVO(statusMapDTOMap.get(v.getStatusId()) == null ? null : statusMapDTOMap.get(v.getStatusId()));
+                map.setIssueTypeVO(issueTypeDTOMap.get(v.getIssueTypeId()) == null ? null : issueTypeDTOMap.get(v.getIssueTypeId()));
+                listFieldKVVOS.add(map);
+            });
+            return PageUtil.buildPageInfoWithPageInfoList(pageInfo, listFieldKVVOS);
+        } else {
+            return PageUtil.emptyPageInfo(pageable.getPageNumber(), pageable.getPageSize());
+        }
     }
 }

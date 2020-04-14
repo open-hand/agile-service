@@ -4,6 +4,7 @@ import io.choerodon.agile.app.domain.Predefined;
 import io.choerodon.core.exception.CommonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
@@ -15,6 +16,7 @@ import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +32,8 @@ import java.util.*;
  * @since 2018/8/17
  */
 public class ExcelUtil {
+
+    private static final Integer CELL_MAX_LENGTH = 32767;
 
     public enum Mode {
         SXSSF("SXSSF"), HSSF("HSSF"), XSSF("XSSF");
@@ -94,7 +98,7 @@ public class ExcelUtil {
         Row row = sheet.createRow(rowNum);
         row.createCell(0).setCellValue(fieldName);
         Cell cell = row.createCell(1);
-        cell.setCellValue(requestStr);
+        cell.setCellValue(substring(requestStr));
         if (hasStyle) {
             cell.setCellStyle(ztStyle);
         }
@@ -111,7 +115,7 @@ public class ExcelUtil {
         sheet.addMergedRegion(new CellRangeAddress(startRow, lastRow, firstCol, lastCol));
         Row row = sheet.getRow(0);
         Cell cell = row.createCell(2);
-        cell.setCellValue(remindInfo);
+        cell.setCellValue(substring(remindInfo));
         cell.setCellStyle(ztStyle);
     }
 
@@ -171,11 +175,11 @@ public class ExcelUtil {
 
         CellStyle blueBackground = wb.createCellStyle();
         blueBackground.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
-        blueBackground.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        blueBackground.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
         CellStyle coralBackground = wb.createCellStyle();
         coralBackground.setFillForegroundColor(IndexedColors.CORAL.getIndex());
-        coralBackground.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        coralBackground.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
         String[] data1 = {"问题类型*", "所属史诗", "模块", "冲刺", "概述*",
                 "子任务概述(仅子任务生效)", "描述", "经办人", "优先级*", "预估时间(小时)",
@@ -246,7 +250,7 @@ public class ExcelUtil {
         Row row = sheet.createRow(rowNum);
         for (int i = 0; i < data.length; i++) {
             Cell cell = row.createCell(i);
-            cell.setCellValue(data[i]);
+            cell.setCellValue(substring(data[i]));
             if (background != null) {
                 cell.setCellStyle(background);
             }
@@ -278,12 +282,12 @@ public class ExcelUtil {
         generateHeaders(resultSheet, style, Arrays.asList(fieldsName), widthMap);
 
         List<Predefined> predefinedList = new ArrayList<>();
-        predefinedList.add(new Predefined(priorityList, 1, 500, 7, 7, "hidden_priority", 2));
+        predefinedList.add(new Predefined(priorityList, 1, 500, 8, 8, "hidden_priority", 2));
         predefinedList.add(new Predefined(issueTypeList, 1, 500, 0, 0, "hidden_issue_type", 3));
-        predefinedList.add(new Predefined(versionList, 1, 500, 9, 9, "hidden_fix_version", 4));
+        predefinedList.add(new Predefined(versionList, 1, 500, 10, 10, "hidden_fix_version", 4));
         predefinedList.add(new Predefined(componentList, 1, 500, 2, 2, "hidden_component", 5));
         predefinedList.add(new Predefined(sprintList, 1, 500, 3, 3, "hidden_sprint", 6));
-        predefinedList.add(new Predefined(users, 1, 500, 6, 6, "hidden_manager", 7));
+        predefinedList.add(new Predefined(users, 1, 500, 7, 7, "hidden_manager", 7));
         predefinedList.add(theSecondColumnPredefined);
 
         for (Predefined predefined : predefinedList) {
@@ -314,7 +318,7 @@ public class ExcelUtil {
                 for (int j = 0; j < fieldsName.length; j++) {
                     Cell cell = newRow.createCell(j);
                     if (row.getCell(j) != null) {
-                        cell.setCellValue(row.getCell(j).toString());
+                        cell.setCellValue(substring(row.getCell(j).toString()));
                     }
                     if (errorMapList.get(i) != null) {
                         List<Integer> errList = errorMapList.get(i);
@@ -365,6 +369,7 @@ public class ExcelUtil {
             for (int j = 0; j < list.size(); j++) {
                 SXSSFRow row = sheet.createRow(j + 1);
                 row.setHeight((short) 260);
+                Object data = list.get(j);
                 for (int i = 0; i < fieldsName.length; i++) {
                     //3.3设置列标题
                     SXSSFCell cell2 = row2.createCell(i);
@@ -372,7 +377,7 @@ public class ExcelUtil {
                     cell2.setCellStyle(style2);
                     cell2.setCellValue(fieldsName[i]);
                     //4、操作单元格；将数据写入excel
-                    handleWriteCell(row, i, j, list, cellStyle, fields, clazz);
+                    handleWriteCell(row, i, data, cellStyle, fields, clazz, null);
                 }
             }
         }
@@ -382,8 +387,13 @@ public class ExcelUtil {
     /**
      * 通过类导出
      */
-    public static <T> void export(List<T> list, Class<T> clazz, String[] fieldsName, String[] fields, String sheetName, List<String> autoSizeColumn, HttpServletResponse response) {
-        if (list != null && !list.isEmpty()) {
+    public static <T> void export(Map<Long, T> map,
+                                  Map<Long,Set<Long>> parentSonMap,
+                                  Class<T> clazz, String[] fieldsName,
+                                  String[] fields, String sheetName,
+                                  List<String> autoSizeColumn,
+                                  HttpServletResponse response) {
+        if (!ObjectUtils.isEmpty(map)) {
             //1、创建工作簿
             SXSSFWorkbook workbook = new SXSSFWorkbook();
             //1.3、列标题样式
@@ -395,6 +405,7 @@ public class ExcelUtil {
             SXSSFSheet sheet = workbook.createSheet(sheetName);
             //设置默认列宽
             sheet.setDefaultColumnWidth(13);
+            sheet.setColumnWidth(3, 12000);
             //创建标题列
             SXSSFRow row2 = sheet.createRow(0);
             row2.setHeight((short) 260);
@@ -402,16 +413,48 @@ public class ExcelUtil {
                 //3.3设置列标题
                 SXSSFCell cell2 = row2.createCell(i);
                 //加载单元格样式
+                style2.setFillForegroundColor(HSSFColor.PALE_BLUE.index);
+                style2.setFillPattern(FillPatternType.SOLID_FOREGROUND);
                 cell2.setCellStyle(style2);
                 cell2.setCellValue(fieldsName[i]);
             }
-            for (int j = 0; j < list.size(); j++) {
-                SXSSFRow row = sheet.createRow(j + 1);
-                row.setHeight((short) 260);
-                for (int i = 0; i < fieldsName.length; i++) {
-                    ;
-                    //4、操作单元格；将数据写入excel
-                    handleWriteCell(row, i, j, list, cellStyle, fields, clazz);
+
+            Set<Long> childrenSet = new HashSet<>();
+            for (Map.Entry<Long, Set<Long>> entry : parentSonMap.entrySet()) {
+                childrenSet.addAll(entry.getValue());
+            }
+            int rowNum = 1;
+            IndexedColors lastColors = null;
+            for (Map.Entry<Long, T> entry : map.entrySet()) {
+                Long id = entry.getKey();
+                T data = entry.getValue();
+                if (childrenSet.contains(id)) {
+                    continue;
+                }
+                Set<Long> sonSet = parentSonMap.get(id);
+                boolean hasSonNodes = !ObjectUtils.isEmpty(sonSet);
+                CellStyle foregroundColor = null;
+                if (hasSonNodes) {
+                    if (ObjectUtils.isEmpty(lastColors)) {
+                        lastColors = IndexedColors.TAN;
+                    } else if (IndexedColors.TAN.equals(lastColors)) {
+                        lastColors = IndexedColors.LIGHT_TURQUOISE;
+                    } else if (IndexedColors.LIGHT_TURQUOISE.equals(lastColors)) {
+                        lastColors = IndexedColors.TAN;
+                    }
+                    foregroundColor = createForegroundColor(workbook, lastColors);
+                }
+                fillInExcelRow(clazz, fieldsName, fields, cellStyle, sheet, rowNum, data, foregroundColor);
+                rowNum++;
+
+                if (hasSonNodes) {
+                    for (Long sonId : sonSet) {
+                        T son = map.get(sonId);
+                        if (!ObjectUtils.isEmpty(son)) {
+                            fillInExcelRow(clazz, fieldsName, fields, cellStyle, sheet, rowNum, son, foregroundColor);
+                            rowNum++;
+                        }
+                    }
                 }
             }
             sheet.trackAllColumnsForAutoSizing();
@@ -440,10 +483,42 @@ public class ExcelUtil {
         }
     }
 
-    protected static <T> void handleWriteCell(SXSSFRow row, int i, int j, List<T> list, CellStyle cellStyle, String[] fields, Class<T> clazz) {
+    protected static CellStyle createForegroundColor(SXSSFWorkbook workbook, IndexedColors colors) {
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setFillForegroundColor(colors.getIndex());
+        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        return cellStyle;
+    }
+
+    protected static <T> void fillInExcelRow(Class<T> clazz,
+                                           String[] fieldsName,
+                                           String[] fields,
+                                           CellStyle cellStyle,
+                                           SXSSFSheet sheet,
+                                           int rowNum,
+                                           T data,
+                                           CellStyle foregroundColor) {
+        SXSSFRow row = sheet.createRow(rowNum);
+        row.setHeight((short) 260);
+        for (int i = 0; i < fieldsName.length; i++) {
+            //4、操作单元格；将数据写入excel
+            handleWriteCell(row, i, data, cellStyle, fields, clazz, foregroundColor);
+        }
+    }
+
+    protected static <T> void handleWriteCell(SXSSFRow row,
+                                              int i,
+                                              Object data,
+                                              CellStyle cellStyle,
+                                              String[] fields,
+                                              Class<T> clazz,
+                                              CellStyle foregroundColor) {
         SXSSFCell cell = row.createCell(i);
         cell.setCellStyle(cellStyle);
-        if (list.get(j) != null) {
+        if (!ObjectUtils.isEmpty(foregroundColor)) {
+            cell.setCellStyle(foregroundColor);
+        }
+        if (data != null) {
             Method method = null;
             try {
                 method = clazz.getMethod(createGetter(fields[i]));
@@ -457,27 +532,35 @@ public class ExcelUtil {
             }
             Object invoke = new Object();
             try {
-                invoke = method.invoke(list.get(j));
+                invoke = method.invoke(data);
             } catch (InvocationTargetException | IllegalAccessException e) {
                 LOGGER.error(EXCEPTION, e);
             }
             if (invoke instanceof Date) {
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                cell.setCellValue(formatter.format(invoke));
+                cell.setCellValue(substring(formatter.format(invoke)));
             } else if (invoke instanceof Map) {
                 ObjectMapper m = new ObjectMapper();
                 Map<String, String> foundationFieldValue = m.convertValue(invoke, Map.class);
 
                 String str = foundationFieldValue.get(fields[i]) != null ? foundationFieldValue.get(fields[i]) : "";
-                cell.setCellValue(str);
+                cell.setCellValue(substring(str));
             } else {
                 String str = invoke == null ? null : invoke.toString();
-                cell.setCellValue(str);
+                cell.setCellValue(substring(str));
             }
         } else {
             cell.setCellValue("");
         }
 
+    }
+
+    protected static String substring(String str) {
+        if (StringUtils.hasText(str) && str.length() > CELL_MAX_LENGTH) {
+            return str.substring(0, CELL_MAX_LENGTH);
+        } else {
+            return str;
+        }
     }
 
 
@@ -571,7 +654,7 @@ public class ExcelUtil {
         for (int i = 0; i < datas.size(); i++) {
             row = hidden.createRow(i);
             cell = row.createCell(0);
-            cell.setCellValue(datas.get(i));
+            cell.setCellValue(substring(datas.get(i)));
         }
         XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper((XSSFSheet) realSheet);
         XSSFDataValidationConstraint dvConstraint = (XSSFDataValidationConstraint) dvHelper.createFormulaListConstraint(hiddenSheetName + "!$A$1:$A" + datas.size());
