@@ -312,7 +312,7 @@ public class SprintServiceImpl implements SprintService {
         }
     }
 
-    private void queryAssigneeIssue(List<SprintSearchDTO> sprintSearch, Long projectId) {
+    protected void queryAssigneeIssue(List<? extends SprintSearchDTO> sprintSearch, Long projectId) {
         Set<Long> sprintIds = sprintSearch.stream().map(SprintSearchDTO::getSprintId).collect(Collectors.toSet());
         List<AssigneeIssueDTO> assigneeIssueList = new ArrayList<>();
         if (!ObjectUtils.isEmpty(sprintIds)) {
