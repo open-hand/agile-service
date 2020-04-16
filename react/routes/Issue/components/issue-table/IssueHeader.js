@@ -25,14 +25,14 @@ const IssueHeader = ({ fieldCode, dataSet }) => {
     iconType = 'arrow_downward';
   }
   return (
-    <div className={`c7nagile-issue-table-header ${dataSet.sort === fieldCode ? 'c7nagile-issue-table-header-sortBy' : ''}`}>
+    <span className={`c7nagile-issue-table-header ${dataSet.sort === fieldCode ? 'c7nagile-issue-table-header-sortBy' : ''}`}>
       {FIELD[fieldCode]}
       <Icon 
         className="c7nagile-issue-table-header-icon"
         type={iconType}
         onClick={handleSortIssueByField}
       />
-    </div>
+    </span>
   );
 };
 

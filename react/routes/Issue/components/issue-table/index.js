@@ -119,7 +119,8 @@ function IssueTable({ tableRef, onCreateIssue }) {
         />
         <Column 
           header={<IssueHeader fieldCode="issueNum" dataSet={dataSet} />}
-          name="issueNum" 
+          name="issueNum"
+          width={120}
           className="c7n-agile-table-cell" 
         />
         <Column
