@@ -401,7 +401,7 @@ public class IssueServiceImpl implements IssueService {
                 String sortCode = fieldCode.split("\\.")[1];
                 order.put(fieldCode, sortCode);
                 PageUtil.sortResetOrder(pageable.getSort(), null, order);
-                List<Long> issueIdsWithSub = issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                List<Long> issueIdsWithSub = issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
                 List<Long> foundationIssueIds = fieldValueService.sortIssueIdsByFieldValue(organizationId, projectId, pageable);
 
                 List<Long> foundationIssueIdsWithSub = foundationIssueIds.stream().filter(issueIdsWithSub::contains).collect(Collectors.toList());
@@ -416,11 +416,12 @@ public class IssueServiceImpl implements IssueService {
             } else {
                 Map<String, String> order = new HashMap<>(1);
                 //处理表映射
-                order.put("issueId", "t.issue_issue_id");
-                Sort sort = PageUtil.sortResetOrder(pageable.getSort(), SEARCH, order);
-                issueIdPage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(),
-                        PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> issueMapper.queryIssueIdsListWithSub
-                        (projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds()));
+                order.put("issueId", "issue_issue_id");
+                Sort sort = PageUtil.sortResetOrder(pageable.getSort(), null, order);
+                String orderStr = PageableHelper.getSortSql(sort);
+                issueIdPage = PageHelper
+                        .startPage(pageable.getPageNumber(), pageable.getPageSize())
+                        .doSelectPageInfo(() -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr));
             }
 
             PageInfo<IssueListFieldKVVO> issueListDTOPage;
@@ -1283,7 +1284,7 @@ public class IssueServiceImpl implements IssueService {
             final String searchSql = filterSql;
             //查询所有父节点问题
             List<Long> parentIds =
-                    issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                    issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
             List<Long> issueIds = new ArrayList<>();
             Map<Long, Set<Long>> parentSonMap = new HashMap<>();
             List<IssueDTO> issues = null;
