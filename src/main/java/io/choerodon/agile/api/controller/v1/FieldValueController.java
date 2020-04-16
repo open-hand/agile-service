@@ -120,4 +120,12 @@ public class FieldValueController {
                                                                        @RequestParam String schemeCode) {
         return new ResponseEntity<>(objectSchemeFieldService.getIssueHeadForAgile(organizationId, projectId, schemeCode), HttpStatus.OK);
     }
+
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @ApiOperation(value = "获取项目下的自定义字段")
+    @GetMapping("/list/custom_field")
+    public ResponseEntity<List<ObjectSchemeFieldDetailVO>> queryCustomFieldList(@ApiParam(value = "项目id", required = true)
+                                                                                @PathVariable("project_id") Long projectId) {
+        return new ResponseEntity<>(objectSchemeFieldService.queryCustomFieldList(projectId), HttpStatus.OK);
+    }
 }

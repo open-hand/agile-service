@@ -312,4 +312,14 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         });
         return agileIssueHeadDTOS;
     }
+
+    @Override
+    public List<ObjectSchemeFieldDetailVO> queryCustomFieldList(Long projectId) {
+        List<ObjectSchemeFieldDetailVO> objectSchemeFieldDetailVOList = objectSchemeFieldMapper.selectCustomFieldList(projectId);
+        if (objectSchemeFieldDetailVOList != null && !objectSchemeFieldDetailVOList.isEmpty()) {
+            return objectSchemeFieldDetailVOList;
+        } else {
+            return new ArrayList<>();
+        }
+    }
 }

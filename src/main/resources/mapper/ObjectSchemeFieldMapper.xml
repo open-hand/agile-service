@@ -77,4 +77,36 @@
         </if>))
         AND osf.code = #{fieldCode}
     </select>
+
+    <resultMap id="objectSchemeFieldDetailMap" type="io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO">
+        <id property="id" column="osf_id"/>
+        <id property="code" column="osf_code"/>
+        <id property="name" column="osf_name"/>
+        <id property="fieldType" column="osf_field_type"/>
+        <id property="fieldTypeName" column="field_type_name"/>
+        <collection property="fieldOptions" autoMapping="true" ofType="io.choerodon.agile.api.vo.FieldOptionVO">
+            <id property="id" column="ffo_id"/>
+            <result property="fieldId" column="ffo_field_id"/>
+            <result property="code" column="ffo_code"/>
+            <result property="value" column="ffo_value"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectCustomFieldList" resultMap="objectSchemeFieldDetailMap">
+        SELECT
+            osf.id as osf_id,
+            osf.code as osf_code,
+            osf.name as osf_name,
+            osf.field_type as osf_field_type,
+            flv.name as field_type_name,
+            ffo.id as ffo_id,
+            ffo.field_id as ffo_field_id,
+            ffo.code as ffo_code,
+            ffo.value as ffo_value
+        FROM fd_object_scheme_field osf
+        LEFT JOIN lookup_value flv ON flv.value_code = osf.field_type and flv.type_code = 'field_type'
+        LEFT JOIN fd_field_option ffo ON osf.id = ffo.field_id
+        WHERE osf.project_id = #{projectId}
+        order by osf.id DESC
+    </select>
 </mapper>
