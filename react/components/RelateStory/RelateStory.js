@@ -3,11 +3,9 @@ import { find, debounce } from 'lodash';
 import { Select, Form, Modal } from 'choerodon-ui';
 import {
   updateIssue, loadIssueTypes, loadLinkIssuesForBug, loadIssue,
-} from '../../api/NewIssueApi';
-import TypeTag from '../TypeTag';
+} from '@/api/NewIssueApi';
 import IssueOption from '../IssueOption';
 import './RelateStory.less';
-import SelectFocusLoad from '../SelectFocusLoad';
 
 const { Sidebar } = Modal;
 const { Option } = Select;

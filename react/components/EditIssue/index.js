@@ -1,5 +1,5 @@
 import React from 'react';
-import Animate from 'choerodon-ui/lib/animate';
+import { Animate } from 'choerodon-ui/';
 import ErrorBoundary from '../ErrorBoundary';
 import EditIssue from './EditIssue';
 import { EditIssueContextProvider } from './stores';
@@ -14,9 +14,9 @@ export default function Index(props) {
         hiddenProp="hidden"
       >
         {props.visible && (
-        <EditIssueContextProvider {...props}>
-          <EditIssue />
-        </EditIssueContextProvider>
+          <EditIssueContextProvider {...props}>
+            <EditIssue />
+          </EditIssueContextProvider>
         )}
       </Animate>
     </ErrorBoundary>
