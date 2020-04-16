@@ -1,7 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.IssueIdSprintIdVO;
-import io.choerodon.agile.api.vo.IssueListFieldKVVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.mybatis.common.Mapper;
@@ -137,21 +136,6 @@ public interface IssueMapper extends Mapper<IssueDTO> {
                                                  @Param("self") Boolean self,
                                                  @Param("content") String content);
 
-    /**
-     * 查询扁平层级满足条件的所有问题
-     *
-     * @param projectId
-     * @param searchVO
-     * @param filterSql
-     * @param assigneeFilterIds
-     * @param projectCode
-     * @return
-     */
-    List<ExportIssuesDTO> queryFlatExportIssues(@Param("projectId") Long projectId,
-                                                @Param("searchVO") SearchVO searchVO,
-                                                @Param("filterSql") String filterSql,
-                                                @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
-                                                @Param("projectCode") String projectCode);
 
     List<SprintNameDTO> querySprintNameByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 
@@ -382,7 +366,8 @@ public interface IssueMapper extends Mapper<IssueDTO> {
     List<Long> queryIssueIdsListWithSub(@Param("projectId") Long projectId,
                                         @Param("searchVO") SearchVO searchVO,
                                         @Param("filterSql") String filterSql,
-                                        @Param("assigneeFilterIds") List<Long> assigneeFilterIds);
+                                        @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
+                                        @Param("orderStr") String orderStr);
 
     List<IssueDTO> queryIssueListWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
                                                    @Param("childrenIds") Set<Long> childrenIds,

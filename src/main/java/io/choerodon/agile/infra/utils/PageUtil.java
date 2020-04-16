@@ -6,6 +6,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
 
 import org.springframework.data.domain.Sort;
+import tk.mybatis.mapper.util.StringUtil;
 
 /**
  * Created by WangZhe@choerodon.io on 2019-06-13.
@@ -38,13 +39,20 @@ public class PageUtil {
                         flag = true;
                     }
                 }
-                if (mainTableAlias != null && !flag) {
+                if (!flag) {
                     //驼峰转下划线
                     if(order.getDirection().isAscending()){
-                        order = Sort.Order.by(mainTableAlias + "." + tk.mybatis.mapper.util.StringUtil.camelhumpToUnderline(order.getProperty()));
-                    }
-                    else {
-                        order = Sort.Order.desc(mainTableAlias + "." + tk.mybatis.mapper.util.StringUtil.camelhumpToUnderline(order.getProperty()));
+                        if (mainTableAlias != null) {
+                            order = Sort.Order.by(mainTableAlias + "." + StringUtil.camelhumpToUnderline(order.getProperty()));
+                        } else {
+                            order = Sort.Order.by(StringUtil.camelhumpToUnderline(order.getProperty()));
+                        }
+                    } else {
+                        if (mainTableAlias != null) {
+                            order = Sort.Order.desc(mainTableAlias + "." + StringUtil.camelhumpToUnderline(order.getProperty()));
+                        } else {
+                            order = Sort.Order.desc(StringUtil.camelhumpToUnderline(order.getProperty()));
+                        }
                     }
                 }
                 orders.add(order);
