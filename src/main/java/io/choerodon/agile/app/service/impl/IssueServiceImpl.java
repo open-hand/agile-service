@@ -394,14 +394,15 @@ public class IssueServiceImpl implements IssueService {
             //处理未匹配的筛选
             handleOtherArgs(searchVO);
             final String searchSql = filterSql;
-
             if (!handleSortField(pageable).equals("")) {
                 String fieldCode = handleSortField(pageable);
                 Map<String, String> order = new HashMap<>(1);
                 String sortCode = fieldCode.split("\\.")[1];
                 order.put(fieldCode, sortCode);
                 PageUtil.sortResetOrder(pageable.getSort(), null, order);
-                List<Long> issueIdsWithSub = issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
+                List<Long> issueIdsWithSub =
+                        issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null)
+                                .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
                 List<Long> foundationIssueIds = fieldValueService.sortIssueIdsByFieldValue(organizationId, projectId, pageable);
 
                 List<Long> foundationIssueIdsWithSub = foundationIssueIds.stream().filter(issueIdsWithSub::contains).collect(Collectors.toList());
@@ -411,7 +412,6 @@ public class IssueServiceImpl implements IssueService {
                 page.setTotal(issueIdsWithSub.size());
                 page.addAll(handleIssueLists(foundationIssueIdsWithSub, issueIdsWithSubWithoutFoundation, pageable)
                         .subList((pageable.getPageNumber() - 1) * pageable.getPageSize(), pageable.getPageNumber() * pageable.getPageSize()));
-
                 issueIdPage = page.toPageInfo();
             } else {
                 Map<String, String> order = new HashMap<>(1);
@@ -419,9 +419,10 @@ public class IssueServiceImpl implements IssueService {
                 order.put("issueId", "issue_issue_id");
                 Sort sort = PageUtil.sortResetOrder(pageable.getSort(), null, order);
                 String orderStr = PageableHelper.getSortSql(sort);
-                issueIdPage = PageHelper
-                        .startPage(pageable.getPageNumber(), pageable.getPageSize())
+                PageInfo<IssueDTO> issues = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize())
                         .doSelectPageInfo(() -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr));
+                List<Long> issueIds = issues.getList().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+                issueIdPage = PageUtil.buildPageInfoWithPageInfoList(issues, issueIds);
             }
 
             PageInfo<IssueListFieldKVVO> issueListDTOPage;
@@ -1284,7 +1285,8 @@ public class IssueServiceImpl implements IssueService {
             final String searchSql = filterSql;
             //查询所有父节点问题
             List<Long> parentIds =
-                    issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null);
+                    issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null)
+                            .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             List<Long> issueIds = new ArrayList<>();
             Map<Long, Set<Long>> parentSonMap = new HashMap<>();
             List<IssueDTO> issues = null;

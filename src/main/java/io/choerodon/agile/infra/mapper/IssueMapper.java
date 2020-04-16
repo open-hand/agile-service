@@ -363,11 +363,11 @@ public interface IssueMapper extends Mapper<IssueDTO> {
      */
     List<IssueProjectDTO> queryIssueTestGroupByProject();
 
-    List<Long> queryIssueIdsListWithSub(@Param("projectId") Long projectId,
-                                        @Param("searchVO") SearchVO searchVO,
-                                        @Param("filterSql") String filterSql,
-                                        @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
-                                        @Param("orderStr") String orderStr);
+    List<IssueDTO> queryIssueIdsListWithSub(@Param("projectId") Long projectId,
+                                            @Param("searchVO") SearchVO searchVO,
+                                            @Param("filterSql") String filterSql,
+                                            @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
+                                            @Param("orderStr") String orderStr);
 
     List<IssueDTO> queryIssueListWithSubByIssueIds(@Param("issueIds") List<Long> issueIds,
                                                    @Param("childrenIds") Set<Long> childrenIds,

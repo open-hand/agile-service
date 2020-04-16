@@ -458,46 +458,45 @@
         END
     </select>
 
-    <select id="queryIssueIdsListWithSub" resultType="java.lang.Long">
-        select t.issue_issue_id from (
+    <select id="queryIssueIdsListWithSub" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+        select
+        t1.issue_issue_id as issue_id,
+        ai.priority_id,
+        ai.reporter_id,
+        ai.status_id,
+        ai.assignee_id,
+        ai.last_update_date,
+        concat(api.project_code,'-', ai.issue_num) as issue_num,
+        ai.issue_type_id
+        from (
             select
-            t1.issue_issue_id,
-            ai.priority_id,
-            ai.reporter_id,
-            ai.status_id,
-            ai.assignee_id,
-            ai.last_update_date,
-            concat(api.project_code,'-', ai.issue_num) as issue_num,
-            ai.issue_type_id
+            distinct case
+            when search.type_code = 'sub_task' then search.parent_issue_id
+            when search.type_code = 'bug' and search.relate_issue_id is not null and search.relate_issue_id != 0 then search.relate_issue_id
+            else search.issue_issue_id
+            end as issue_issue_id
             from (
-                select
-                distinct case
-                when search.type_code = 'sub_task' then search.parent_issue_id
-                when search.type_code = 'bug' and search.relate_issue_id is not null and search.relate_issue_id != 0 then search.relate_issue_id
-                else search.issue_issue_id
-                end as issue_issue_id
-                from (
-                <include refid="queryIssueIdsListWithSubSql"/>
-                )search
-                where 1=1
-                and (
-                search.type_code != 'sub_task'
-                or search.parent_type_code != 'bug'
-                or search.parent_relate_issue_id is null
-                or search.parent_relate_issue_id = 0
-                )
-                <if test='searchVO.searchArgs != null'>
-                    <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
-                        AND search.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
-                    </if>
+            <include refid="queryIssueIdsListWithSubSql"/>
+            )search
+            where 1=1
+            and (
+            search.type_code != 'sub_task'
+            or search.parent_type_code != 'bug'
+            or search.parent_relate_issue_id is null
+            or search.parent_relate_issue_id = 0
+            )
+            <if test='searchVO.searchArgs != null'>
+                <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                    AND search.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
                 </if>
-                <if test='searchVO.contents != null and searchVO.contents.size != 0'>
-                    <foreach collection="searchVO.contents" item="content" index="index">
-                        AND (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE
-                        CONCAT(CONCAT('%',
-                        #{content}), '%'))
-                    </foreach>
-                </if>
+            </if>
+            <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+                <foreach collection="searchVO.contents" item="content" index="index">
+                    AND (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE
+                    CONCAT(CONCAT('%',
+                    #{content}), '%'))
+                </foreach>
+            </if>
         ) t1
         join agile_issue ai
         on t1.issue_issue_id = ai.issue_id
@@ -505,7 +504,6 @@
         <if test="orderStr != null">
             order by ${orderStr}
         </if>
-        ) t
     </select>
 
     <select id="queryChildrenIdByParentId" resultType="java.lang.Long">
