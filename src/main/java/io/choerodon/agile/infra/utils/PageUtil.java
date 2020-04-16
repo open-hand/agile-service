@@ -17,7 +17,6 @@ public class PageUtil {
         Page page = new Page<>(pageInfo.getPageNum(), pageInfo.getPageSize());
         page.setTotal(pageInfo.getTotal());
         page.addAll(list);
-
         return page.toPageInfo();
     }
 
