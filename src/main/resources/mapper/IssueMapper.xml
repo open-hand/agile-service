@@ -822,6 +822,97 @@
                     #{issueId}
                 </foreach>
             </if>
+            <if test="searchVO.otherArgs.customField != null and searchVO.otherArgs.customField.size > 0">
+                <if test="searchVO.otherArgs.customField.option != null and searchVO.otherArgs.customField.option.size > 0">
+                    and
+                    <foreach collection="searchVO.otherArgs.customField.option" item="item" open="(" separator="and"
+                             close=")">
+                         ai.issue_id in
+                        (
+                            SELECT
+                              ffv.instance_id
+                            FROM
+                              fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.option_id IN
+                            <foreach collection="item.value" item="value" open="(" separator=","
+                                     close=")">
+                                #{value}
+                            </foreach>
+                        )
+                    </foreach>
+                </if>
+                <if test="searchVO.otherArgs.customField.date != null and searchVO.otherArgs.customField.date.size > 0">
+                    and
+                    <foreach collection="searchVO.otherArgs.customField.date" item="item" open="(" separator="and"
+                             close=")">
+                        ai.issue_id in
+                        (
+                            SELECT
+                              ffv.instance_id
+                            FROM
+                              fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.date_value &gt;= #{item.startDate} AND ffv.date_value &lt;= #{item.endDate}
+                        )
+                    </foreach>
+                </if>
+                <if test="searchVO.otherArgs.customField.number != null and searchVO.otherArgs.customField.number.size > 0">
+                    and
+                    <foreach collection="searchVO.otherArgs.customField.number" item="item" open="(" separator="and"
+                             close=")">
+                        ai.issue_id in
+                        (
+                            SELECT
+                            ffv.instance_id
+                            FROM
+                            fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.number_value = #{item.value}
+                        )
+                    </foreach>
+                </if>
+                <if test="searchVO.otherArgs.customField.string != null and searchVO.otherArgs.customField.string.size > 0">
+                    and
+                    <foreach collection="searchVO.otherArgs.customField.string" item="item" open="(" separator="and"
+                             close=")">
+                        ai.issue_id in
+                        (
+                            SELECT
+                            ffv.instance_id
+                            FROM
+                            fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.string_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
+                        )
+                    </foreach>
+                </if>
+                <if test="searchVO.otherArgs.customField.text != null and searchVO.otherArgs.customField.text.size > 0">
+                    and
+                    <foreach collection="searchVO.otherArgs.customField.text" item="item" open="(" separator="and"
+                             close=")">
+                        ai.issue_id in
+                        (
+                            SELECT
+                            ffv.instance_id
+                            FROM
+                            fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.text_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
+                        )
+                    </foreach>
+                </if>
+            </if>
         </if>
         <if test='filterSql != null'>
             AND ai.issue_id IN (${filterSql})
