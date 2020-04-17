@@ -100,7 +100,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
           header={<IssueHeader fieldCode="issueId" dataSet={dataSet} />}
           align="left"
           name="issueId"
-          width="30%"
+          width={320}
           onCell={({ record }) => ({
             onClick: () => {
               handleRowClick(record);
