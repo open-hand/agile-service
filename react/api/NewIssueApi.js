@@ -424,3 +424,7 @@ export function getHistoryPI(issueId) {
   const projectId = AppState.currentMenuType.id;
   return axios.get(`/agile/v1/projects/${projectId}/pi/${issueId}/list_feature_pi_log`);
 }
+export function getCustomFields() {
+  const projectId = AppState.currentMenuType.id;
+  return axios.get(`/agile/v1/projects/${projectId}/field_value/list/custom_field`);
+}

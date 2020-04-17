@@ -5,28 +5,10 @@
   margin-right: 38px;
 
   &-left {
-
     flex: 1;
     margin-right: 15px;
-
-    &-row {
-      display: flex;
-      align-items: center;
-      transition: all 0.3s ease-in-out;
-
-      &-hidden {
-        opacity: 0;
-        height: 0;
-        margin-left: 185px;
-        overflow: hidden;
-      }
-
-      &-more {
-        opacity: 1;
-        height: 36px;
-        margin-left: 185px;
-      }
-    }
+    display: flex;
+    flex-wrap: wrap;
 
     .c7n-calendar-range-picker {
       &:hover {
