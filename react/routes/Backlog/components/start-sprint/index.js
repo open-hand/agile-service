@@ -184,6 +184,8 @@ class StartSprint extends Component {
       timeZoneWorkCalendarDTOS: selectDays,
       workHolidayCalendarDTOS: holidayRefs,
     } = workSetting;
+    console.log('sprintType, data：');
+    console.log(sprintType, data);
     return (
       <div>
         <p className="c7n-closeSprint-message">
@@ -416,7 +418,7 @@ class StartSprint extends Component {
             <div>
               <div style={{ marginBottom: 20 }}>
                 <span style={{ marginRight: 20 }}>
-                  {`此Sprint中有${this.getWorkDays(start, end)}个工作日`}
+                  {`此Sprint中有${this.getWorkDays(moment(), end)}个工作日`}
                 </span>
                 <Icon type="settings" style={{ verticalAlign: 'top' }} />
                 <a onClick={this.showWorkCalendar} role="none">
@@ -426,7 +428,7 @@ class StartSprint extends Component {
               {showCalendar
                 ? (
                   <WorkCalendar
-                    startDate={moment(start).format(format)}
+                    startDate={moment().format(format)}
                     endDate={moment(end).format(format)}
                     mode="BacklogComponent"
                     saturdayWork={saturdayWork}
