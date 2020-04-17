@@ -159,7 +159,6 @@ const Issue = withRouter(observer(() => {
     >
       <Header
         title="问题管理"
-        backPath={IssueStore.getBackUrl}
       >
         {/* <BackButton /> */}
         <Button

@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import { set, runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'choerodon-ui';
+import IssueStore from '@/stores/project/sprint/IssueStore';
 import Modal from '../components/Modal';
 import transform from '../utils';
 import BatchModal from '../components/BatchModal';
@@ -58,7 +59,12 @@ export default ({
         size: dataSet.issuePageSize,
         sort: dataSet.sort && `${dataSet.sort},${dataSet.isAsc ? 'asc' : 'desc'}`,
       },
-      transformRequest: data => JSON.stringify(transform(data)),
+      transformRequest: (data) => {
+        const searchDTO = transform(data);
+        const customField = IssueStore.getCustomFieldFilters();
+        searchDTO.otherArgs.customField = customField;
+        return JSON.stringify(searchDTO);
+      },
       transformResponse: (res) => {
         const data = JSON.parse(res);
         // const data = test;

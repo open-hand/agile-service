@@ -16,8 +16,10 @@ import moment from 'moment';
 import { getRequest } from '@/common/utils';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
 import { configTheme } from '@/common/utils';
+import IssueStore from '@/stores/project/sprint/IssueStore';
 import Store from '../../stores';
-import IssueStore from '../../../../stores/project/sprint/IssueStore';
+import CustomFields from './custom-fields';
+import ChooseField from './choose-field';
 import './index.less';
 
 
@@ -57,7 +59,6 @@ export default withRouter(observer(({
   const editFilterInfo = IssueStore.getEditFilterInfo;
   const [quickFilters, setQuickFilters] = useState([]);
   const [selectedQuickFilters, setSelectedQuickFilters] = useState([]);
-  const [showMore, setShowMore] = useState(false);
   const loadFilters = async () => {
     IssueStore.axiosGetMyFilterList();
     const QuickFilters = await axios.post(`/agile/v1/projects/${projectId}/quick_filter/query_all`, {
@@ -69,6 +70,7 @@ export default withRouter(observer(({
 
   useEffect(() => {
     loadFilters();
+    IssueStore.loadCustomFields();
   }, []);
   const reset = () => {
     const {
@@ -93,11 +95,7 @@ export default withRouter(observer(({
       dataSet.queryDataSet.current.set('quickFilterIds', quickFilterIds);
     } else if (type === 'my') {
       const targetMyFilter = find(filters, { filterId: Number(id) });
-      const filterObject = flattenObject(JSON.parse(targetMyFilter.filterJson));
-      // 自动展开
-      if (filterObject.component || filterObject.version || filterObject.createEndDate || filterObject.createStartDate) {
-        setShowMore(true);
-      }
+      const filterObject = flattenObject(JSON.parse(targetMyFilter.filterJson));      
       // 先清除筛选
       dataSet.queryDataSet.current.clear();
       dataSet.queryDataSet.current.set(filterObject);
@@ -175,217 +173,213 @@ export default withRouter(observer(({
     IssueStore.setFilterListVisible(false);
     IssueStore.setEditFilterInfo(map(editFilterInfo, item => Object.assign(item, { isEditing: false })));
   };
-  const shouldShowMore = showMore;
+
   const renderSearch = () => (
     <Fragment>
+      <Input
+        onChange={handleInputChange}
+        value={getValue('contents') ? getValue('contents')[0] : undefined}
+        onPressEnter={handlePressEnter}
+        className="hidden-label"
+        prefix={<Icon type="search" style={{ color: 'rgba(0, 0, 0, 0.45)', marginLeft: 2 }} />}
+        style={{ width: 180, marginRight: 5 }}
+        placeholder="请输入搜索内容"
+        label={false}
+      />
       <div className={`${prefixCls}-search-left`}>
-        <div className={`${prefixCls}-search-left-row`}>
-          <Input
-            onChange={handleInputChange}
-            value={getValue('contents') ? getValue('contents')[0] : undefined}
-            onPressEnter={handlePressEnter}
-            className="hidden-label"
-            prefix={<Icon type="search" style={{ color: 'rgba(0, 0, 0, 0.45)', marginLeft: 2 }} />}
-            style={{ width: 180, marginRight: 5 }}
-            placeholder="请输入搜索内容"
-            label={false}
-          />
-          <Select
-            mode="multiple"
-            showCheckAll={false}
-            allowClear
-            className="SelectTheme"
-            dropdownMatchSelectWidth={false}
-            placeholder="快速筛选"
-            maxTagCount={0}
-            labelInValue
-            maxTagPlaceholder={ommittedValues => `${ommittedValues.map(item => item.label).join(', ')}`}
-            style={{ width: 120, margin: '0 5px' }}
-            onSelect={handleSelect}
-            onDeselect={handleDeselect}
-            onClear={handleDeselect}
-            value={getMyFilterSelectValue()}
-            getPopupContainer={triggerNode => triggerNode.parentNode}
-          >
-            <OptGroup label="快速筛选">
-              {quickFilters.map(filter => (
-                <Option value={`quick-${filter.filterId}`}>{filter.name}</Option>
-              ))}
-            </OptGroup>
-            <OptGroup label="我的筛选">
-              {
+        <Select
+          mode="multiple"
+          showCheckAll={false}
+          allowClear
+          className="SelectTheme"
+          dropdownMatchSelectWidth={false}
+          placeholder="快速筛选"
+          maxTagCount={0}
+          labelInValue
+          maxTagPlaceholder={ommittedValues => `${ommittedValues.map(item => item.label).join(', ')}`}
+          style={{ width: 120, margin: '0 5px' }}
+          onSelect={handleSelect}
+          onDeselect={handleDeselect}
+          onClear={handleDeselect}
+          value={getMyFilterSelectValue()}
+          getPopupContainer={triggerNode => triggerNode.parentNode}
+        >
+          <OptGroup label="快速筛选">
+            {quickFilters.map(filter => (
+              <Option value={`quick-${filter.filterId}`}>{filter.name}</Option>
+            ))}
+          </OptGroup>
+          <OptGroup label="我的筛选">
+            {
                 filters.map(filter => (
                   <Option value={`my-${filter.filterId}`}>{filter.name}</Option>
                 ))
               }
-            </OptGroup>
-          </Select>
-          <SelectFocusLoad
-            {...configTheme({
-              list: issueTypes,
-              textField: 'name',
-              valueFiled: 'id',
-            })}
-            type="issue_type"
-            loadWhenMount
-            style={{ width: 120, margin: '0 5px' }}
-            mode="multiple"
-            showCheckAll={false}
-            allowClear
-            dropdownMatchSelectWidth={false}
-            placeholder="问题类型"
-            saveList={(v) => { issueTypes = unionBy(issueTypes, v, 'id'); }}
-            filter={false}
-            onChange={handleFilterChange('issueTypeId')}
-            value={getValue('issueTypeId')}
-            getPopupContainer={triggerNode => triggerNode.parentNode}
-          />
-
-          <SelectFocusLoad
-            {...configTheme({
-              list: issueStatus,
-              textField: 'name',
-              valueFiled: 'id',
-            })}
-            type="issue_status"
-            showCheckAll={false}
-            loadWhenMount
-            style={{ width: 82, margin: '0 5px' }}
-            mode="multiple"
-            allowClear
-            dropdownMatchSelectWidth={false}
-            placeholder="状态"
-            saveList={(v) => { issueStatus = unionBy(issueStatus, v, 'id'); }}
-            filter={false}
-            onChange={handleFilterChange('statusId')}
-            value={getValue('statusId')}
-            getPopupContainer={triggerNode => triggerNode.parentNode}
-          />
-          <SelectFocusLoad
-            {...configTheme({
-              list: users.concat({ id: 0, realName: '未分配' }),
-              textField: 'realName',
-              valueFiled: 'id',
-              parseNumber: true,
-            })}
-            type="user"
-            loadWhenMount
-            key="assigneeSelect"
-            style={{ width: 96, margin: '0 5px' }}
-            mode="multiple"
-            showCheckAll={false}
-            allowClear
-            dropdownMatchSelectWidth={false}
-            placeholder="经办人"
-            saveList={(v) => { users = unionBy(users, v, 'id'); }}
-            filter
-            onChange={handleFilterChange('assigneeId')}
-            value={getValue('assigneeId')}
-            getPopupContainer={triggerNode => triggerNode.parentNode}
-            render={user => <Option value={user.id}>{user.realName || user.loginName}</Option>}
-          >
-            <Option value="0">未分配</Option>
-          </SelectFocusLoad>
-          <SelectFocusLoad
-            {...configTheme({
-              list: users,
-              textField: 'realName',
-              valueFiled: 'id',
-              parseNumber: true,
-            })}
-            type="user"
-            loadWhenMount
-            key="reporterSelect"
-            style={{ width: 96, margin: '0 5px' }}
-            mode="multiple"
-            showCheckAll={false}
-            allowClear
-            dropdownMatchSelectWidth={false}
-            placeholder="报告人"
-            saveList={(v) => { users = unionBy(users, v, 'id'); }}
-            filter
-            onChange={handleFilterChange('reporterIds')}
-            value={getValue('reporterIds')}
-            getPopupContainer={triggerNode => triggerNode.parentNode}
-            render={user => <Option value={user.id}>{user.realName || user.loginName}</Option>}
-          />
-          <Button funcType="flat" color="blue" style={{ marginLeft: 'auto' }} onClick={() => { setShowMore(!shouldShowMore); }}>{shouldShowMore ? '收起' : '更多'}</Button>
-        </div>
-        <div className={`${prefixCls}-search-left-row ${shouldShowMore ? `${prefixCls}-search-left-row-more` : `${prefixCls}-search-left-row-hidden`}`}>
-          <SelectFocusLoad
-            {...configTheme({
-              list: sprints,
-              textField: 'sprintName',
-              valueFiled: 'sprintId',
-              parseNumber: true,
-            })}
-            type="sprint"
-            loadWhenMount
-            key="reporterSelect"
-            style={{ width: 120, margin: '0 5px' }}
-            mode="multiple"
-            showCheckAll={false}
-            allowClear
-            dropdownMatchSelectWidth={false}
-            placeholder="冲刺"
-            saveList={(v) => { sprints = unionBy(sprints, v, 'sprintId'); }}
-            filter
-            onChange={handleFilterChange('sprint')}
-            value={getValue('sprint')}
-            getPopupContainer={triggerNode => triggerNode.parentNode}    
-            requestArgs={[]}        
-          />
-          <SelectFocusLoad
-            {...configTheme({
-              list: components,
-              textField: 'name',
-              valueFiled: 'componentId',
-              parseNumber: true,
-            })}
-            type="component"
-            loadWhenMount            
-            style={{ width: 120, margin: '0 5px' }}
-            mode="multiple"
-            showCheckAll={false}
-            allowClear
-            dropdownMatchSelectWidth={false}
-            placeholder="模块"
-            saveList={(v) => { components = unionBy(components, v, 'componentId'); }}
-            filter
-            onChange={handleFilterChange('component')}
-            value={getValue('component')}
-            getPopupContainer={triggerNode => triggerNode.parentNode}
-            render={c => (
-              <Option        
-                value={c.componentId}
-              >
-                {c.name}
-              </Option>
-            )}
-          />
-          <SelectFocusLoad
-            {...configTheme({
-              list: versions,
-              textField: 'name',
-              valueFiled: 'versionId',
-              parseNumber: true,
-            })}
-            type="version"
-            loadWhenMount            
-            style={{ width: 82, margin: '0 5px' }}
-            mode="multiple"
-            showCheckAll={false}
-            allowClear
-            dropdownMatchSelectWidth={false}
-            placeholder="版本"
-            saveList={(v) => { versions = unionBy(versions, v, 'versionId'); }}
-            filter
-            onChange={handleFilterChange('version')}
-            value={getValue('version')}
-            getPopupContainer={triggerNode => triggerNode.parentNode}
-            requestArgs={[]}
-          />
-          {
+          </OptGroup>
+        </Select>
+        <SelectFocusLoad
+          {...configTheme({
+            list: issueTypes,
+            textField: 'name',
+            valueFiled: 'id',
+          })}
+          type="issue_type"
+          loadWhenMount
+          style={{ width: 120, margin: '0 5px' }}
+          mode="multiple"
+          showCheckAll={false}
+          allowClear
+          dropdownMatchSelectWidth={false}
+          placeholder="问题类型"
+          saveList={(v) => { issueTypes = unionBy(issueTypes, v, 'id'); }}
+          filter={false}
+          onChange={handleFilterChange('issueTypeId')}
+          value={getValue('issueTypeId')}
+          getPopupContainer={triggerNode => triggerNode.parentNode}
+        />
+        <SelectFocusLoad
+          {...configTheme({
+            list: issueStatus,
+            textField: 'name',
+            valueFiled: 'id',
+          })}
+          type="issue_status"
+          showCheckAll={false}
+          loadWhenMount
+          style={{ width: 82, margin: '0 5px' }}
+          mode="multiple"
+          allowClear
+          dropdownMatchSelectWidth={false}
+          placeholder="状态"
+          saveList={(v) => { issueStatus = unionBy(issueStatus, v, 'id'); }}
+          filter={false}
+          onChange={handleFilterChange('statusId')}
+          value={getValue('statusId')}
+          getPopupContainer={triggerNode => triggerNode.parentNode}
+        />
+        <SelectFocusLoad
+          {...configTheme({
+            list: users.concat({ id: 0, realName: '未分配' }),
+            textField: 'realName',
+            valueFiled: 'id',
+            parseNumber: true,
+          })}
+          type="user"
+          loadWhenMount
+          key="assigneeSelect"
+          style={{ width: 96, margin: '0 5px' }}
+          mode="multiple"
+          showCheckAll={false}
+          allowClear
+          dropdownMatchSelectWidth={false}
+          placeholder="经办人"
+          saveList={(v) => { users = unionBy(users, v, 'id'); }}
+          filter
+          onChange={handleFilterChange('assigneeId')}
+          value={getValue('assigneeId')}
+          getPopupContainer={triggerNode => triggerNode.parentNode}
+          render={user => <Option value={user.id}>{user.realName || user.loginName}</Option>}
+        >
+          <Option value="0">未分配</Option>
+        </SelectFocusLoad>
+        <SelectFocusLoad
+          {...configTheme({
+            list: users,
+            textField: 'realName',
+            valueFiled: 'id',
+            parseNumber: true,
+          })}
+          type="user"
+          loadWhenMount
+          key="reporterSelect"
+          style={{ width: 96, margin: '0 5px' }}
+          mode="multiple"
+          showCheckAll={false}
+          allowClear
+          dropdownMatchSelectWidth={false}
+          placeholder="报告人"
+          saveList={(v) => { users = unionBy(users, v, 'id'); }}
+          filter
+          onChange={handleFilterChange('reporterIds')}
+          value={getValue('reporterIds')}
+          getPopupContainer={triggerNode => triggerNode.parentNode}
+          render={user => <Option value={user.id}>{user.realName || user.loginName}</Option>}
+        />      
+        
+        <SelectFocusLoad
+          {...configTheme({
+            list: sprints,
+            textField: 'sprintName',
+            valueFiled: 'sprintId',
+            parseNumber: true,
+          })}
+          type="sprint"
+          loadWhenMount
+          key="reporterSelect"
+          style={{ width: 120, margin: '0 5px' }}
+          mode="multiple"
+          showCheckAll={false}
+          allowClear
+          dropdownMatchSelectWidth={false}
+          placeholder="冲刺"
+          saveList={(v) => { sprints = unionBy(sprints, v, 'sprintId'); }}
+          filter
+          onChange={handleFilterChange('sprint')}
+          value={getValue('sprint')}
+          getPopupContainer={triggerNode => triggerNode.parentNode}    
+          requestArgs={[]}
+        />
+        <SelectFocusLoad
+          {...configTheme({
+            list: components,
+            textField: 'name',
+            valueFiled: 'componentId',
+            parseNumber: true,
+          })}
+          type="component"
+          loadWhenMount            
+          style={{ width: 120, margin: '0 5px' }}
+          mode="multiple"
+          showCheckAll={false}
+          allowClear
+          dropdownMatchSelectWidth={false}
+          placeholder="模块"
+          saveList={(v) => { components = unionBy(components, v, 'componentId'); }}
+          filter
+          onChange={handleFilterChange('component')}
+          value={getValue('component')}
+          getPopupContainer={triggerNode => triggerNode.parentNode}
+          render={c => (
+            <Option        
+              value={c.componentId}
+            >
+              {c.name}
+            </Option>
+          )}
+        />
+        <SelectFocusLoad
+          {...configTheme({
+            list: versions,
+            textField: 'name',
+            valueFiled: 'versionId',
+            parseNumber: true,
+          })}
+          type="version"
+          loadWhenMount            
+          style={{ width: 82, margin: '0 5px' }}
+          mode="multiple"
+          showCheckAll={false}
+          allowClear
+          dropdownMatchSelectWidth={false}
+          placeholder="版本"
+          saveList={(v) => { versions = unionBy(versions, v, 'versionId'); }}
+          filter
+          onChange={handleFilterChange('version')}
+          value={getValue('version')}
+          getPopupContainer={triggerNode => triggerNode.parentNode}
+          requestArgs={[]}
+        />
+        {
             getSelectedDate().length > 0 ? (
               <Tooltip title={`创建问题时间范围为${getSelectedDate()[0].format('YYYY-MM-DD')} ~  ${getSelectedDate()[1].format('YYYY-MM-DD')}`}>
                 <div>
@@ -410,8 +404,8 @@ export default withRouter(observer(({
               />
             )
           }
-        </div>
-
+        <CustomFields />
+        <ChooseField />
       </div>
       <div className={`${prefixCls}-search-right`}>
         {isHasFilter() && <Button onClick={reset} funcType="flat" color="blue">重置</Button>}
