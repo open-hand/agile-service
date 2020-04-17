@@ -187,7 +187,7 @@ public interface ReportMapper {
      */
     List<ReportIssueDTO> queryIssueValueAfterSprint(@Param("sprintDTO") SprintDTO sprintDTO, @Param("field") String field);
 
-    List<Long> queryReportIssueIds(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId, @Param("startDate") Date startDate, @Param("actualEndDate") Date actualEndDate, @Param("status") Boolean status);
+    List<Long> queryReportIssueIds(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId, @Param("actualEndDate") Date actualEndDate, @Param("status") Boolean status);
 
     List<IssueDTO> queryIssueByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 

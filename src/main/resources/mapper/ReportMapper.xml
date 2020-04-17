@@ -786,7 +786,6 @@
         AND aisr1.issue_id = adl1.issue_id
         AND adl1.project_id = #{projectId}
         AND adl1.field = 'resolution'
-        AND adl1.creation_date > #{startDate}
         <if test="actualEndDate != null">
             AND adl1.creation_date &lt; #{actualEndDate}
         </if>
