@@ -6,9 +6,97 @@ import {
 } from '@choerodon/boot';
 import moment from 'moment';
 import { getCustomFields } from '@/api/NewIssueApi';
-import _ from 'lodash';
+import {
+  debounce, reverse, map, find, 
+} from 'lodash';
 
+const systemFields = [{
+  code: 'issueIds',
+  name: 'issueId',
+  defaultShow: true,
+}, {
+  code: 'quickFilterIds',
+  name: '快速筛选',
+  defaultShow: true,
+}, {
+  code: 'contents',
+  name: '概要',
+  defaultShow: true,
+}, {
+  code: 'issueTypeId',
+  name: '问题类型',
+  defaultShow: false,
+}, {
+  code: 'statusId',
+  name: '状态',
+  defaultShow: true,
+}, {
+  code: 'assigneeId',
+  name: '经办人',
+  defaultShow: true,
+}, {
+  code: 'reporterIds',
+  name: '报告人',
+  defaultShow: false,
+}, {
+  code: 'sprint',
+  name: '冲刺',
+  defaultShow: true,
+}, {
+  code: 'component',
+  name: '模块',
+  defaultShow: false,
+}, {
+  code: 'version',
+  name: '版本',
+  defaultShow: false,
+}, {
+  code: 'createDate',
+  name: '创建时间',
+  defaultShow: false,
+}];
 const { AppState } = stores;
+function transformSystemFilter(data) {
+  const {
+    issueTypeId,
+    assigneeId,
+    statusId,
+    issueIds,
+    quickFilterIds,
+    createDate = [],
+    contents,
+    component,
+    epic,
+    label,
+    reporterIds,
+    sprint,
+    summary,
+    version,
+  } = data;
+  return {
+    advancedSearchArgs: {
+      issueTypeId,
+      reporterIds,
+      statusId,
+    },
+    otherArgs: {
+      assigneeId,
+      issueIds,
+      component,
+      epic,
+      label,
+      sprint,
+      summary,
+      version,
+    },
+    searchArgs: {
+      createStartDate: createDate[0],
+      createEndDate: createDate[1],
+    },
+    quickFilterIds,
+    contents,
+  };
+}
 
 class IssueStore {
   // 当前加载状态
@@ -26,6 +114,7 @@ class IssueStore {
   // 筛选列表是否显示
   @observable filterListVisible = false;
 
+  @observable systemFields = systemFields;
 
   @computed get getFilterListVisible() {
     return this.filterListVisible;
@@ -43,6 +132,17 @@ class IssueStore {
 
   @action setUpdateFilterName(data) {
     this.updateFilterName = data;
+  }
+
+  // 控制保存模态框是否显示
+  @observable saveFilterVisible = false;
+
+  @computed get getSaveFilterVisible() {
+    return this.saveFilterVisible;
+  }
+
+  @action setSaveFilterVisible(data) {
+    this.saveFilterVisible = data;
   }
 
   // 控制导出模态框是否显示
@@ -132,9 +232,9 @@ class IssueStore {
     this.setLoading(true);
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/personal_filter/query_all/${id}`).then((myFilters) => {
       this.setLoading(false);
-      const reverseMyFilters = _.reverse(myFilters);
+      const reverseMyFilters = reverse(myFilters);
       this.setMyFilters(reverseMyFilters);
-      this.setEditFilterInfo(_.map(_.map(reverseMyFilters, item => ({
+      this.setEditFilterInfo(map(map(reverseMyFilters, item => ({
         filterId: item.filterId,
       })), (item, index) => ({
         ...item,
@@ -158,7 +258,7 @@ class IssueStore {
     this.fields = fields;
   }
 
-  @observable chosenFields = new Map();
+  @observable chosenFields = new Map(systemFields.filter(f => f.defaultShow).map(f => ([f.code, observable({ ...f, value: undefined })])));
 
   @action handleChosenFieldChange = (select, field) => {
     const { code } = field;
@@ -169,9 +269,30 @@ class IssueStore {
     }
   }
 
+  getFilterValueByCode(code) {
+    return this.chosenFields.get(code) ? toJS(this.chosenFields.get(code).value) : undefined;
+  }
+
+  query = debounce(() => {
+    this.dataSet.query();
+  }, 300);
+
+  handleFilterChange = (code, value) => {    
+    this.setFieldFilter(code, value);
+    this.query();
+  }
+
   @action setFieldFilter = (code, value) => {
     const field = this.chosenFields.get(code);
-    field.value = value;
+    // 说明这时候没有被选择，那么要自动选上
+    if (!field) {
+      const unSelectField = find([...this.fields, ...systemFields], { code });
+      if (unSelectField) {
+        this.chosenFields.set(code, observable({ ...unSelectField, value }));
+      }
+    } else {
+      field.value = value;
+    }
   }
 
   @action setChosenFields(chosenFields) {
@@ -179,55 +300,50 @@ class IssueStore {
   }
 
   @action chooseAll() {
-    this.fields.forEach((field) => {
+    [...systemFields, ...this.fields].forEach((field) => {
       this.chosenFields.set(field.code, observable({ ...field, value: undefined }));
     });
   }
 
   @action unChooseAll() {
-    this.chosenFields.clear();
+    this.chosenFields = new Map(systemFields.filter(f => f.defaultShow).map(f => ([f.code, this.chosenFields.get(f.code)])));
   }
 
-  getCustomFieldFilters() {
+  @action
+  clearAllFilter() {
+    for (const [, field] of this.chosenFields) {
+      if (field.value) {
+        field.value = undefined;
+      }
+    }
+  }
+
+  getCustomFieldFilters = () => {
     const customField = {
       option: [],
-      // date: [
-      //   {
-      //     fieldId: 294,
-      //     startDate: '2020-04-16 10:48:28',
-      //     endDate: '2020-04-18 13:48:28',
-      //   },
-      // ],
-      // number: [
-      //   {
-      //     fieldId: 296,
-      //     value: 3,
-      //   },
-      // ],
-      // string: [
-      //   {
-      //     fieldId: 297,
-      //     value: '1',
-      //   },
-      // ],
-      // text: [
-      //   {
-      //     fieldId: 298,
-      //     value: '123',
-      //   },
-      // ],
+      date: [],
+      number: [],
+      string: [],
+      text: [],
     };
-    for (const [, field] of this.chosenFields) {
+    const systemFilter = {};
+    for (const [code, field] of this.chosenFields) {
       const { fieldType, id } = field;
       const value = toJS(field.value);
-      if (!value) {
-        break;
+      if (value === undefined || value === null || value === '') {
+        // eslint-disable-next-line no-continue
+        continue;
+      }      
+      // 系统字段
+      if (!id) {
+        systemFilter[code] = value;
       }
       switch (fieldType) {
         case 'single':
         case 'multiple':
         case 'radio':
-          // eslint-disable-next-line no-case-declarations
+        case 'checkbox':
+        case 'member': {
           const v = Array.isArray(value) ? value : [value];
           if (v.length > 0) {
             customField.option.push({
@@ -235,11 +351,57 @@ class IssueStore {
               value: v,
             });
           }
-          break;      
+          break;
+        }
+        case 'input': {
+          if (value && value.length > 0) {
+            customField.string.push({
+              fieldId: id,
+              value,
+            });
+          }
+          break;
+        }
+        case 'text': {
+          if (value && value.length > 0) {
+            customField.text.push({
+              fieldId: id,
+              value,
+            });
+          }
+          break;
+        }
+        case 'number': {
+          customField.number.push({
+            fieldId: id,
+            value,
+          });
+          break;
+        }
+        case 'time':
+        case 'datetime':
+        case 'date': {
+          if (value && value.length > 0) {
+            customField.date.push({
+              fieldId: id,
+              startDate: moment(value[0]).format('YYYY-MM-DD HH:mm:ss'),
+              endDate: moment(value[1]).format('YYYY-MM-DD HH:mm:ss'),
+            });
+          }
+          break;
+        }
         default: break;
       }
     }
-    return customField;
+    const filter = transformSystemFilter(systemFilter);
+    filter.otherArgs.customField = customField;
+    // console.log(filter);
+    return filter;
+  }
+
+  getFieldCodeById(id) {
+    const field = find(this.fields, { id: Number(id) });
+    return field ? field.code : undefined;
   }
 }
 

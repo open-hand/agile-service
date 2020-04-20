@@ -31,27 +31,28 @@ function ChooseField() {
   }, []);
   const ref = useClickOut(handleClickOut);
   return (
-    <Dropdown
-      style={{ marginLeft: 5 }}
-      hidden={hidden}
-      overlay={(
-        <div            
-          ref={ref}
-        >
-          <FieldList />
-        </div>
+    <div style={{ marginLeft: 5 }}>
+      <Dropdown      
+        hidden={hidden}
+        overlay={(
+          <div            
+            ref={ref}
+          >
+            <FieldList />
+          </div>
         )}
-      trigger={['click']}
-    >
-      <Button onClick={(e) => {
-        e.nativeEvent.stopImmediatePropagation();
-        setHidden(false);
-      }}
+        trigger={['click']}
       >
-        添加筛选
-        <Icon type="arrow_drop_down" />
-      </Button>
-    </Dropdown>
+        <Button onClick={(e) => {
+          e.nativeEvent.stopImmediatePropagation();
+          setHidden(false);
+        }}
+        >
+          添加筛选
+          <Icon type="arrow_drop_down" />
+        </Button>
+      </Dropdown>
+    </div>    
   );
 }
 export default observer(ChooseField);

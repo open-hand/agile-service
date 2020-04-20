@@ -6,6 +6,7 @@ import { DataSet } from 'choerodon-ui/pro';
 import { inject } from 'mobx-react';
 import { injectIntl } from 'react-intl';
 import { getFoundationHeader } from '@/api/NewIssueApi';
+import IssueStore from '@/stores/project/sprint/IssueStore';
 import IssueDataSet from './IssueDataSet';
 
 const Store = createContext();
@@ -33,6 +34,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
     set(dataSet, { issuePageSize: 10 });
     set(dataSet, { issueCurrentPage: 1 });
     set(dataSet, { sort: '', isAsc: true });
+    IssueStore.dataSet = dataSet;
     /**
     * detail data
     * 详情页数据

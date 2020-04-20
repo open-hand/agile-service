@@ -4,7 +4,6 @@ import {
   Modal, Form, Input,
 } from 'choerodon-ui';
 import { stores, axios, Choerodon } from '@choerodon/boot';
-import _ from 'lodash';
 import IssueStore from '@/stores/project/sprint/IssueStore';
 
 const { AppState } = stores;
@@ -25,36 +24,10 @@ class SaveFilterModal extends Component {
   }
 
   handleSaveFilterOk = () => {
-    const { form, dataSet } = this.props;
+    const { form } = this.props;
     form.validateFields(['filterName'], (err, value) => {
       if (!err) {
-        const {
-          issueTypeId, assigneeId, statusId, issueIds, quickFilterIds,
-          reporterIds,
-          sprint,
-          createStartDate, createEndDate, contents,
-          component, version,
-        } = dataSet.queryDataSet.current.toData();
-        const searchDTO = { 
-          advancedSearchArgs: {
-            issueTypeId,              
-            statusId,        
-            reporterIds,      
-          },
-          otherArgs: {
-            issueIds,
-            assigneeId,
-            sprint,
-            component, 
-            version,
-          },
-          searchArgs: {
-            createStartDate,
-            createEndDate,
-          },
-          quickFilterIds,
-          contents, 
-        };
+        const searchDTO = IssueStore.getCustomFieldFilters();
         const data = {
           name: value.filterName,
           filterJson: JSON.stringify(searchDTO),

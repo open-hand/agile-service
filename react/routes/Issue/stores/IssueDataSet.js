@@ -60,9 +60,7 @@ export default ({
         sort: dataSet.sort && `${dataSet.sort},${dataSet.isAsc ? 'asc' : 'desc'}`,
       },
       transformRequest: (data) => {
-        const searchDTO = transform(data);
-        const customField = IssueStore.getCustomFieldFilters();
-        searchDTO.otherArgs.customField = customField;
+        const searchDTO = IssueStore.getCustomFieldFilters();
         return JSON.stringify(searchDTO);
       },
       transformResponse: (res) => {
