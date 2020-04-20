@@ -82,7 +82,7 @@ public class IssueServiceImpl implements IssueService {
     @Autowired
     private EpicDataAssembler epicDataAssembler;
     @Autowired
-    private IssueSearchAssembler issueSearchAssembler;
+    protected IssueSearchAssembler issueSearchAssembler;
     @Autowired
     private ReportAssembler reportAssembler;
     @Autowired
@@ -94,7 +94,7 @@ public class IssueServiceImpl implements IssueService {
     @Autowired
     private IssueLabelService issueLabelService;
     @Autowired
-    private SprintValidator sprintValidator;
+    protected SprintValidator sprintValidator;
     @Autowired
     private SprintMapper sprintMapper;
     @Autowired
@@ -191,8 +191,8 @@ public class IssueServiceImpl implements IssueService {
     private static final String ASSIGNEE = "assignee";
     private static final String REPORTER = "reporter";
     private static final String FIELD_RANK = "Rank";
-    private static final String RANK_HIGHER = "评级更高";
-    private static final String RANK_LOWER = "评级更低";
+    protected static final String RANK_HIGHER = "评级更高";
+    protected static final String RANK_LOWER = "评级更低";
     private static final String RANK_FIELD = "rank";
     private static final String FIX_RELATION_TYPE = "fix";
     private static final String INFLUENCE_RELATION_TYPE = "influence";
@@ -771,7 +771,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
 
-    private void dataLogRank(Long projectId, MoveIssueVO moveIssueVO, String rankStr, Long sprintId) {
+    protected void dataLogRank(Long projectId, MoveIssueVO moveIssueVO, String rankStr, Long sprintId) {
         for (Long issueId : moveIssueVO.getIssueIds()) {
             SprintNameVO activeSprintName = sprintNameAssembler.toTarget(issueMapper.queryActiveSprintNameByIssueId(issueId), SprintNameVO.class);
             Boolean condition = (sprintId == 0 && activeSprintName == null) || (activeSprintName != null
@@ -852,7 +852,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
 
-    private void beforeRank(Long projectId, Long sprintId, MoveIssueVO moveIssueVO, List<MoveIssueDTO> moveIssueDTOS) {
+    protected void beforeRank(Long projectId, Long sprintId, MoveIssueVO moveIssueVO, List<MoveIssueDTO> moveIssueDTOS) {
         moveIssueVO.setIssueIds(issueMapper.queryIssueIdOrderByRankDesc(projectId, moveIssueVO.getIssueIds()));
         if (moveIssueVO.getOutsetIssueId() == null || Objects.equals(moveIssueVO.getOutsetIssueId(), 0L)) {
             noOutsetBeforeRank(projectId, sprintId, moveIssueVO, moveIssueDTOS);
@@ -893,7 +893,7 @@ public class IssueServiceImpl implements IssueService {
         }
     }
 
-    private void afterRank(Long projectId, Long sprintId, MoveIssueVO moveIssueVO, List<MoveIssueDTO> moveIssueDTOS) {
+    protected void afterRank(Long projectId, Long sprintId, MoveIssueVO moveIssueVO, List<MoveIssueDTO> moveIssueDTOS) {
         moveIssueVO.setIssueIds(issueMapper.queryIssueIdOrderByRankAsc(projectId, moveIssueVO.getIssueIds()));
         String leftRank = issueMapper.queryRank(projectId, moveIssueVO.getOutsetIssueId());
         String rightRank = issueMapper.queryRightRank(projectId, sprintId, leftRank);
