@@ -16,6 +16,7 @@
             <id property="id" column="ais_id"/>
             <id property="completed" column="ais_completed"/>
             <id property="statusId" column="ais_status_id"/>
+            <id property="position" column="ais_position"/>
             <id property="objectVersionNumber" column="ais_object_version_number"/>
             <collection property="issues" autoMapping="true" columnPrefix="ai_"
                         ofType="io.choerodon.agile.infra.dto.IssueForBoardDO"/>
@@ -49,11 +50,12 @@
         ai.epic_id AS ai_epic_id,
         ai.stay_date AS ai_stay_date,
         ai.object_version_number AS ai_object_version_number,
-        ai.relate_issue_id AS ai_relate_issue_id
+        ai.relate_issue_id AS ai_relate_issue_id,
+        abcsr.position as  ais_position
         FROM
         agile_board_column abc
         LEFT JOIN agile_board_column_status_rel abcsr ON abc.column_id = abcsr.column_id
-        LEFT JOIN agile_issue_status ais ON abcsr.status_id = ais.status_id and ais.project_id = abc.project_id
+        INNER JOIN agile_issue_status ais ON abcsr.status_id = ais.status_id and ais.project_id = abc.project_id
         LEFT JOIN (SELECT ai1.*
         from agile_issue ai1, agile_issue_sprint_rel aisr
         WHERE aisr.sprint_id = #{activeSprintId} AND ai1.issue_id = aisr.issue_id
