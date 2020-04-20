@@ -1,7 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Select } from 'choerodon-ui';
-import { toJS } from 'mobx';
 import { configTheme } from '@/common/utils';
 
 const { Option } = Select;
@@ -15,7 +14,7 @@ function SelectField({ field, value, onChange }) {
         valueFiled: 'id',
         parseNumber: true,
       })}
-      value={toJS(value)}
+      value={value}
       onChange={onChange}
       placeholder={name}
       mode="multiple"

@@ -190,7 +190,7 @@ const Issue = withRouter(observer(() => {
       <Content style={{ paddingTop: 0 }} className="c7nagile-issue-content">
         <Search urlFilter={urlFilter} onClear={handleClear} />
         <IssueTable tableRef={tableRef} onCreateIssue={handleCreateIssue} />        
-        <SaveFilterModal dataSet={dataSet} />
+        <SaveFilterModal />
         <FilterManage />
         <ExportIssue dataSet={dataSet} tableRef={tableRef} onCreateIssue={handleCreateIssue} />
         {IssueStore.getCreateQuestion && (
