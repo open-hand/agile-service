@@ -1037,11 +1037,12 @@ public class DataLogAspect {
                 if (storyCondition || remainingTimeCondition) {
                     IssueDTO originIssueDTO = new IssueDTO();
                     BeanUtils.copyProperties(issueConvertDTO, originIssueDTO);
-                    if (storyCondition) {
+                    if (Boolean.TRUE.equals(storyCondition)) {
                         BigDecimal zero = new BigDecimal(0);
                         originIssueDTO.setStoryPoints(zero);
                         handleStoryPointsLog(originIssueDTO, issueConvertDTO);
-                    } else {
+                    }
+                    if (Boolean.TRUE.equals(remainingTimeCondition)) {
                         originIssueDTO.setRemainingTime(null);
                         handleCalculateRemainData(issueConvertDTO, originIssueDTO);
                     }
