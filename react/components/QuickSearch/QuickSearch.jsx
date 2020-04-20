@@ -5,6 +5,7 @@ import { Select } from 'choerodon-ui';
 import EventEmitter from 'wolfy87-eventemitter';
 
 import './QuickSearch.less';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import BacklogStore from '../../stores/project/backlog/BacklogStore';
 
 const { Option, OptGroup } = Select;
@@ -19,6 +20,7 @@ class QuickSearch extends Component {
       quickSearchArray: [],
       selectQuickSearch: [],
       selectUsers: [],
+      selectSprint: undefined,
     };
   }
 
@@ -98,6 +100,14 @@ class QuickSearch extends Component {
     onAssigneeChange(flattenValue);
   };
 
+  handleSprintChange = (value) => {
+    const { onSprintChange } = this.props;
+    this.setState({
+      selectSprint: value,
+    });
+    onSprintChange(value && value.key);
+  }
+
   deBounce = (delay) => {
     let timeout;
     return (fn, that) => {
@@ -113,6 +123,7 @@ class QuickSearch extends Component {
     this.setState({
       selectQuickSearch: [],
       selectUsers: [],
+      selectSprint: undefined,
     });
   }
 
@@ -136,7 +147,7 @@ class QuickSearch extends Component {
     // 防抖函数
     const debounceCallback = this.deBounce(500);
     const {
-      style, AppState, onAssigneeChange, quickSearchAllowClear, hideQuickSearch,
+      style, AppState, onAssigneeChange, quickSearchAllowClear, hideQuickSearch, onSprintChange,
     } = this.props;
     const { showRealQuickSearch } = BacklogStore;
     const {
@@ -144,6 +155,7 @@ class QuickSearch extends Component {
       quickSearchArray,
       selectQuickSearch,
       selectUsers,
+      selectSprint,
     } = this.state;
 
     // showRealQuickSearch 用于在待办事项中销毁组件
@@ -229,15 +241,39 @@ class QuickSearch extends Component {
                     ))
                   }
                 </Select>
+              
+              )
+            }
+            {
+              onSprintChange && IsInProgramStore.isShowFeature && IsInProgramStore.sprints.filter(item => item.statusCode !== 'closed').length > 0 && (
+              <Select
+                key="sprintSelect"
+                className="SelectTheme primary c7n-agile-sprintSearchSelect"
+                style={{ width: 120 }}
+                placeholder="冲刺"
+                allowClear
+                dropdownMatchSelectWidth={false}
+                labelInValue
+                optionFilterProp="children"
+                value={selectSprint}
+                onChange={this.handleSprintChange}
+                getPopupContainer={triggerNode => triggerNode.parentNode}
+              >
+                {
+                  IsInProgramStore.sprints.filter(item => item.statusCode !== 'closed').map(item => (
+                    <Option key={item.sprintId} value={item.sprintId} title={item.sprintName}>{item.sprintName}</Option>
+                  ))
+                }
+              </Select>
               )
             }
           </React.Fragment>
         ) : (
-            <React.Fragment>
-              {hideQuickSearch ? null : <Select className="SelectTheme primary" placeholder="快速搜索" />}
-              <Select className="SelectTheme primary" placeholder="经办人" />
-            </React.Fragment>
-          )}
+          <React.Fragment>
+            {hideQuickSearch ? null : <Select className="SelectTheme primary" placeholder="快速搜索" />}
+            <Select className="SelectTheme primary" placeholder="经办人" />
+          </React.Fragment>
+        )}
       </div>
     );
   }

@@ -8,6 +8,7 @@ import {
 } from 'choerodon-ui';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
@@ -59,6 +60,9 @@ class ScrumBoardHome extends Component {
   componentDidMount() {
     ScrumBoardStore.setSelectedBoardId('');
     this.getBoard();
+    if (IsInProgramStore.isShowFeature) {
+      IsInProgramStore.loadPiInfoAndSprint();
+    }
   }
 
   componentWillUnmount() {
@@ -100,6 +104,11 @@ class ScrumBoardHome extends Component {
     ScrumBoardStore.addAssigneeFilter(value);
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   };
+
+  onSprintChange = (value) => {
+    ScrumBoardStore.addSprintFilter(value);
+    this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
+  }
 
   handleClearFilter = () => {
     ScrumBoardStore.clearFilter();
@@ -285,6 +294,8 @@ class ScrumBoardHome extends Component {
     } = this.state;
     const menu = AppState.currentMenuType;
     const { type, id: projectId, organizationId: orgId } = menu;
+    const currentSprintIsDoing = ScrumBoardStore.didCurrentSprintExist && IsInProgramStore.isShowFeature && IsInProgramStore.sprints.find(item => item.statusCode === 'started' && item.sprintId === ScrumBoardStore.sprintId); 
+
     return (
       <Fragment>
         <Header title="活跃冲刺">         
@@ -346,7 +357,7 @@ class ScrumBoardHome extends Component {
             配置看板
           </Button>
           {
-            ScrumBoardStore.didCurrentSprintExist && (
+            currentSprintIsDoing && (
             <Fragment>             
               {this.renderRemainDate()}
               <Button
@@ -370,6 +381,7 @@ class ScrumBoardHome extends Component {
             <QuickSearch
               onQuickSearchChange={this.onQuickSearchChange}
               onAssigneeChange={this.onAssigneeChange}
+              onSprintChange={this.onSprintChange}
               style={{ height: 32, margin: '0 0 16px 16px' }}
             />
             {ScrumBoardStore.hasSetFilter && <Button type="primary" onClick={this.handleClearFilter}>清除筛选</Button>}
