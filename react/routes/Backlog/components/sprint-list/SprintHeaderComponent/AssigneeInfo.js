@@ -12,25 +12,6 @@ import AssigneeModal from './AssigneeModal';
 import './AssigneeInfo.less';
 
 @observer class AssigneeInfo extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      expand: false,
-    };
-  }
-
-  expandMore = () => {
-    this.setState({
-      expand: true,
-    });
-  };
-
-  closeMore = () => {
-    this.setState({
-      expand: false,
-    });
-  };
-
   handleSearchAssignee = (assigneeId) => {
     const { data: { sprintId } } = this.props;
     const filterSprintAssignId = BacklogStore.filterSprintAssign.get(sprintId);
@@ -52,7 +33,6 @@ import './AssigneeInfo.less';
   render() {
     const { data } = this.props;
     const { assigneeIssues } = data;
-    const { expand } = this.state;
     const filterSprintAssignId = BacklogStore.filterSprintAssign.get(data.sprintId);
     return (
       <Fragment>
@@ -107,26 +87,10 @@ import './AssigneeInfo.less';
               )) : null}
           </div>
           <div className="c7n-backlog-assignInfo-right">
-            <Icon
-              style={{
-                cursor: 'pointer',
-                fontSize: 20,
-                marginLeft: 8,
-                display: assigneeIssues && assigneeIssues.length > 0 ? 'inline-block' : 'none',
-              }}
-              type="more_vert"
-              role="none"
-              onClick={this.expandMore}
-            />
-
             {filterSprintAssignId && <Button color="blue" onClick={this.handleClearAssignee}>清除筛选</Button>}
           </div>
         </div>
-        <AssigneeModal
-          visible={expand}
-          onCancel={this.closeMore}
-          data={data}
-        />
+       
       </Fragment>
     );
   }

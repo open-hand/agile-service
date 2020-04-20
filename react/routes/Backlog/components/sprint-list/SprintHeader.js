@@ -10,6 +10,7 @@ import AssigneeInfo from './SprintHeaderComponent/AssigneeInfo';
 import StoryPoint from './SprintHeaderComponent/StoryPoint';
 import SprintDateRange from './SprintHeaderComponent/SprintDateRange';
 import SprintGoal from './SprintHeaderComponent/SprintGoal';
+import WorkLoadBtn from './SprintHeaderComponent/WorkLoadBtn';
 import './SprintHeader.less';
 
 const prefix = 'c7n-backlog-SprintHeader';
@@ -56,6 +57,7 @@ function SprintHeader({ data }) {
           <SprintStatus
             data={data}
           />
+          <WorkLoadBtn data={data} />
           <SprintButton
             data={data}
           />
