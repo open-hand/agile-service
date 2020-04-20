@@ -44,7 +44,6 @@ export default ({
 }) => ({
   primaryKey: 'issueId',
   autoQuery: false,
-  // selection: 'multiple',
   selection: false,
   parentField: 'parentId',
   expandField: 'expand',
@@ -58,6 +57,7 @@ export default ({
       params: {
         page: dataSet.issueCurrentPage,
         size: dataSet.issuePageSize,
+        sort: dataSet.sort && `${dataSet.sort},${dataSet.isAsc ? 'asc' : 'desc'}`,
       },
       transformRequest: (data) => {
         const searchDTO = IssueStore.getCustomFieldFilters();
@@ -75,7 +75,8 @@ export default ({
         });
         return data;
       },
-    }),
+    })
+    ,
   },
   fields: [
     { name: 'issueId', type: 'number', label: '概要' },
@@ -103,6 +104,6 @@ export default ({
     select: handleSelect,
     selectAll: handleSelect,
     unSelect: handleUnSelect,
-    unSelectAll: handleUnSelect,    
+    unSelectAll: handleUnSelect,
   },
 });

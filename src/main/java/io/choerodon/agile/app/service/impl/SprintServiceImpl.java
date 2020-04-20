@@ -312,7 +312,7 @@ public class SprintServiceImpl implements SprintService {
         }
     }
 
-    private void queryAssigneeIssue(List<SprintSearchDTO> sprintSearch, Long projectId) {
+    protected void queryAssigneeIssue(List<? extends SprintSearchDTO> sprintSearch, Long projectId) {
         Set<Long> sprintIds = sprintSearch.stream().map(SprintSearchDTO::getSprintId).collect(Collectors.toSet());
         List<AssigneeIssueDTO> assigneeIssueList = new ArrayList<>();
         if (!ObjectUtils.isEmpty(sprintIds)) {
@@ -470,10 +470,10 @@ public class SprintServiceImpl implements SprintService {
         //pageable.resetOrder("ai", new HashMap<>());
         switch (status) {
             case DONE:
-                reportIssuePage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> reportMapper.queryReportIssueIds(projectId, sprintId, startDate, actualEndDate, true));
+                reportIssuePage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> reportMapper.queryReportIssueIds(projectId, sprintId, actualEndDate, true));
                 break;
             case UNFINISHED:
-                reportIssuePage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> reportMapper.queryReportIssueIds(projectId, sprintId, startDate, actualEndDate, false));
+                reportIssuePage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> reportMapper.queryReportIssueIds(projectId, sprintId, actualEndDate, false));
                 break;
             case REMOVE:
                 reportIssuePage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> reportMapper.queryRemoveIssueIdsDuringSprintWithOutSubEpicIssue(sprint));
@@ -534,9 +534,11 @@ public class SprintServiceImpl implements SprintService {
         String statusCode;
         String statusName;
         if (issueBeforeStatus != null) {
+            reportIssue.setStatusId(issueBeforeStatus.getStatusId());
             statusCode = issueBeforeStatus.getCategoryCode();
             statusName = issueBeforeStatus.getStatusName();
         } else if (issueAfterStatus != null) {
+            reportIssue.setStatusId(issueAfterStatus.getStatusId());
             statusCode = issueAfterStatus.getCategoryCode();
             statusName = issueAfterStatus.getStatusName();
         } else {

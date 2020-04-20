@@ -82,7 +82,7 @@ public class IssueServiceImpl implements IssueService {
     @Autowired
     private EpicDataAssembler epicDataAssembler;
     @Autowired
-    private IssueSearchAssembler issueSearchAssembler;
+    protected IssueSearchAssembler issueSearchAssembler;
     @Autowired
     private ReportAssembler reportAssembler;
     @Autowired
@@ -94,7 +94,7 @@ public class IssueServiceImpl implements IssueService {
     @Autowired
     private IssueLabelService issueLabelService;
     @Autowired
-    private SprintValidator sprintValidator;
+    protected SprintValidator sprintValidator;
     @Autowired
     private SprintMapper sprintMapper;
     @Autowired
@@ -191,8 +191,8 @@ public class IssueServiceImpl implements IssueService {
     private static final String ASSIGNEE = "assignee";
     private static final String REPORTER = "reporter";
     private static final String FIELD_RANK = "Rank";
-    private static final String RANK_HIGHER = "评级更高";
-    private static final String RANK_LOWER = "评级更低";
+    protected static final String RANK_HIGHER = "评级更高";
+    protected static final String RANK_LOWER = "评级更低";
     private static final String RANK_FIELD = "rank";
     private static final String FIX_RELATION_TYPE = "fix";
     private static final String INFLUENCE_RELATION_TYPE = "influence";
@@ -394,14 +394,15 @@ public class IssueServiceImpl implements IssueService {
             //处理未匹配的筛选
             handleOtherArgs(searchVO);
             final String searchSql = filterSql;
-
             if (!handleSortField(pageable).equals("")) {
                 String fieldCode = handleSortField(pageable);
                 Map<String, String> order = new HashMap<>(1);
                 String sortCode = fieldCode.split("\\.")[1];
                 order.put(fieldCode, sortCode);
                 PageUtil.sortResetOrder(pageable.getSort(), null, order);
-                List<Long> issueIdsWithSub = issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                List<Long> issueIdsWithSub =
+                        issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null)
+                                .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
                 List<Long> foundationIssueIds = fieldValueService.sortIssueIdsByFieldValue(organizationId, projectId, pageable);
 
                 List<Long> foundationIssueIdsWithSub = foundationIssueIds.stream().filter(issueIdsWithSub::contains).collect(Collectors.toList());
@@ -411,23 +412,24 @@ public class IssueServiceImpl implements IssueService {
                 page.setTotal(issueIdsWithSub.size());
                 page.addAll(handleIssueLists(foundationIssueIdsWithSub, issueIdsWithSubWithoutFoundation, pageable)
                         .subList((pageable.getPageNumber() - 1) * pageable.getPageSize(), pageable.getPageNumber() * pageable.getPageSize()));
-
                 issueIdPage = page.toPageInfo();
             } else {
                 Map<String, String> order = new HashMap<>(1);
                 //处理表映射
-                order.put("issueId", "t.issue_issue_id");
-                Sort sort = PageUtil.sortResetOrder(pageable.getSort(), SEARCH, order);
-                issueIdPage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(),
-                        PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> issueMapper.queryIssueIdsListWithSub
-                        (projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds()));
+                order.put("issueId", "issue_issue_id");
+                Sort sort = PageUtil.sortResetOrder(pageable.getSort(), null, order);
+                String orderStr = PageableHelper.getSortSql(sort);
+                PageInfo<IssueDTO> issues = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize())
+                        .doSelectPageInfo(() -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr));
+                List<Long> issueIds = issues.getList().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+                issueIdPage = PageUtil.buildPageInfoWithPageInfoList(issues, issueIds);
             }
 
             PageInfo<IssueListFieldKVVO> issueListDTOPage;
             if (issueIdPage.getList() != null && !issueIdPage.getList().isEmpty()) {
                 List<Long> issueIds = issueIdPage.getList();
                 Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(issueIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
-                List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds);
+                List<IssueDTO> issueDTOList = issueMapper.queryIssueListWithSubByIssueIds(issueIds, childrenIds, false);
                 Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
                 Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
                 Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
@@ -769,7 +771,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
 
-    private void dataLogRank(Long projectId, MoveIssueVO moveIssueVO, String rankStr, Long sprintId) {
+    protected void dataLogRank(Long projectId, MoveIssueVO moveIssueVO, String rankStr, Long sprintId) {
         for (Long issueId : moveIssueVO.getIssueIds()) {
             SprintNameVO activeSprintName = sprintNameAssembler.toTarget(issueMapper.queryActiveSprintNameByIssueId(issueId), SprintNameVO.class);
             Boolean condition = (sprintId == 0 && activeSprintName == null) || (activeSprintName != null
@@ -850,7 +852,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
 
-    private void beforeRank(Long projectId, Long sprintId, MoveIssueVO moveIssueVO, List<MoveIssueDTO> moveIssueDTOS) {
+    protected void beforeRank(Long projectId, Long sprintId, MoveIssueVO moveIssueVO, List<MoveIssueDTO> moveIssueDTOS) {
         moveIssueVO.setIssueIds(issueMapper.queryIssueIdOrderByRankDesc(projectId, moveIssueVO.getIssueIds()));
         if (moveIssueVO.getOutsetIssueId() == null || Objects.equals(moveIssueVO.getOutsetIssueId(), 0L)) {
             noOutsetBeforeRank(projectId, sprintId, moveIssueVO, moveIssueDTOS);
@@ -891,7 +893,7 @@ public class IssueServiceImpl implements IssueService {
         }
     }
 
-    private void afterRank(Long projectId, Long sprintId, MoveIssueVO moveIssueVO, List<MoveIssueDTO> moveIssueDTOS) {
+    protected void afterRank(Long projectId, Long sprintId, MoveIssueVO moveIssueVO, List<MoveIssueDTO> moveIssueDTOS) {
         moveIssueVO.setIssueIds(issueMapper.queryIssueIdOrderByRankAsc(projectId, moveIssueVO.getIssueIds()));
         String leftRank = issueMapper.queryRank(projectId, moveIssueVO.getOutsetIssueId());
         String rightRank = issueMapper.queryRightRank(projectId, sprintId, leftRank);
@@ -1269,7 +1271,6 @@ public class IssueServiceImpl implements IssueService {
         ProjectInfoDTO projectInfoDTO = new ProjectInfoDTO();
         projectInfoDTO.setProjectId(projectId);
         projectInfoDTO = projectInfoMapper.selectOne(projectInfoDTO);
-        String projectCode = projectInfoDTO.getProjectCode();
         ProjectVO project = userService.queryProject(projectId);
         if (project == null) {
             throw new CommonException(PROJECT_ERROR);
@@ -1282,18 +1283,24 @@ public class IssueServiceImpl implements IssueService {
                 filterSql = getQuickFilter(searchVO.getQuickFilterIds());
             }
             final String searchSql = filterSql;
-            //查询扁平层级满足条件的所有问题
-            List<ExportIssuesDTO> issues =
-                    issueMapper.queryFlatExportIssues(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), projectCode);
+            //查询所有父节点问题
+            List<Long> parentIds =
+                    issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null)
+                            .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             List<Long> issueIds = new ArrayList<>();
             Map<Long, Set<Long>> parentSonMap = new HashMap<>();
-            issues.forEach(e -> {
-                issueIds.add(e.getIssueId());
-                processParentSonRelation(parentSonMap, e);
-            });
-            List<ExportIssuesVO> exportIssues = issueAssembler.exportIssuesDOListToExportIssuesDTO(issues, projectId);
+            List<IssueDTO> issues = null;
+            if (!parentIds.isEmpty()) {
+                Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(parentIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                issues = issueMapper.queryIssueListWithSubByIssueIds(parentIds, childrenIds, true);
+                issues.forEach(i -> {
+                    issueIds.add(i.getIssueId());
+                    processParentSonRelation(parentSonMap, i);
+                });
+            }
             Map<Long, ExportIssuesVO> issueMap = new LinkedHashMap<>();
             if (!issueIds.isEmpty()) {
+                List<ExportIssuesVO> exportIssues = issueAssembler.exportIssuesDOListToExportIssuesDTO(issues, projectId);
                 Map<Long, List<SprintNameDTO>> closeSprintNames = issueMapper.querySprintNameByIssueIds(projectId, issueIds).stream().collect(Collectors.groupingBy(SprintNameDTO::getIssueId));
                 Map<Long, List<VersionIssueRelDTO>> fixVersionNames = issueMapper.queryVersionNameByIssueIds(projectId, issueIds, FIX_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
                 Map<Long, List<VersionIssueRelDTO>> influenceVersionNames = issueMapper.queryVersionNameByIssueIds(projectId, issueIds, INFLUENCE_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
@@ -1358,7 +1365,7 @@ public class IssueServiceImpl implements IssueService {
         return result.toArray(new String[result.size()]);
     }
 
-    protected void processParentSonRelation(Map<Long, Set<Long>> parentSonMap, ExportIssuesDTO issue) {
+    protected void processParentSonRelation(Map<Long, Set<Long>> parentSonMap, IssueDTO issue) {
         String typeCode = issue.getTypeCode();
         Long issueId = issue.getIssueId();
         if (IssueTypeCode.isBug(typeCode)) {

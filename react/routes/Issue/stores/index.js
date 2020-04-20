@@ -33,6 +33,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
     set(dataSet, { issueTotal: 10 });
     set(dataSet, { issuePageSize: 10 });
     set(dataSet, { issueCurrentPage: 1 });
+    set(dataSet, { sort: '', isAsc: true });
     IssueStore.dataSet = dataSet;
     /**
     * detail data

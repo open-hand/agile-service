@@ -14,6 +14,7 @@ class ScrumBoardStore {
     onlyStory: false,
     quickSearchArray: [],
     assigneeFilterIds: [],
+    sprintId: undefined,
   };
 
   @observable allColumnCount = [];
@@ -361,6 +362,10 @@ class ScrumBoardStore {
     this.quickSearchObj.assigneeFilterIds = data;
   }
 
+  @action addSprintFilter(data) {
+    this.quickSearchObj.sprintId = data;
+  }
+
   @action addQuickSearchFilter(onlyMeChecked = false, onlyStoryChecked = false, moreChecked = []) {
     this.quickSearchObj.onlyMe = onlyMeChecked;
     this.quickSearchObj.onlyStory = onlyStoryChecked;
@@ -372,13 +377,14 @@ class ScrumBoardStore {
     this.quickSearchObj.onlyMe = false;
     this.quickSearchObj.onlyStory = false;
     this.quickSearchObj.quickSearchArray = [];
+    this.quickSearchObj.sprintId = undefined;
   }
 
   @computed get hasSetFilter() {
     const {
-      onlyMe, onlyStory, quickSearchArray, assigneeFilterIds,
+      onlyMe, onlyStory, quickSearchArray, assigneeFilterIds, sprintId,
     } = this.quickSearchObj;
-    if (onlyMe === false && onlyStory === false && quickSearchArray.length === 0 && assigneeFilterIds.length === 0) {
+    if (onlyMe === false && onlyStory === false && quickSearchArray.length === 0 && assigneeFilterIds.length === 0 && !sprintId) {
       return false;
     }
     return true;
@@ -483,6 +489,7 @@ class ScrumBoardStore {
       onlyStory: false,
       quickSearchArray: [],
       assigneeFilterIds: [],
+      sprintId: undefined,
     };
     this.currentSprintExist = false;
     this.calanderCouldUse = false;
@@ -658,9 +665,9 @@ class ScrumBoardStore {
 
   axiosGetBoardData(boardId) {
     const {
-      onlyMe, onlyStory, quickSearchArray, assigneeFilterIds,
+      onlyMe, onlyStory, quickSearchArray, assigneeFilterIds, sprintId,
     } = this.quickSearchObj;
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board/${boardId}/all_data/${AppState.currentMenuType.organizationId}?${onlyMe ? `assigneeId=${AppState.getUserId}&` : ''}onlyStory=${onlyStory}&quickFilterIds=${quickSearchArray}${assigneeFilterIds.length > 0 ? `&assigneeFilterIds=${assigneeFilterIds}` : ''}`);
+    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board/${boardId}/all_data/${AppState.currentMenuType.organizationId}?${onlyMe ? `assigneeId=${AppState.getUserId}&` : ''}onlyStory=${onlyStory}&quickFilterIds=${quickSearchArray}${assigneeFilterIds.length > 0 ? `&assigneeFilterIds=${assigneeFilterIds}` : ''}${sprintId ? `&sprintId=${sprintId}` : ''}`);
   }
 
   axiosFilterBoardData(boardId, assign, recent) {

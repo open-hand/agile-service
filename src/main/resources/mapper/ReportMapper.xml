@@ -786,7 +786,6 @@
         AND aisr1.issue_id = adl1.issue_id
         AND adl1.project_id = #{projectId}
         AND adl1.field = 'resolution'
-        AND adl1.creation_date > #{startDate}
         <if test="actualEndDate != null">
             AND adl1.creation_date &lt; #{actualEndDate}
         </if>
@@ -1508,44 +1507,47 @@
         FROM
         agile_data_log adl,
         (
-        SELECT
-        aisr.sprint_id,
-        aisr.issue_id,
-        max(adl1.log_id) AS log_id
-        FROM
-        agile_issue_sprint_rel aisr,
-        agile_sprint asp,
-        agile_data_log adl1
-        WHERE
-        aisr.project_id = #{projectId}
-        AND aisr.sprint_id = asp.sprint_id
-        AND adl1.project_id = #{projectId}
-        AND aisr.issue_id = adl1.issue_id
-        AND adl1.field = 'timeestimate'
-        AND adl1.last_update_date &lt;= IF(asp.actual_end_date IS NULL,#{now}, asp.actual_end_date)
-        GROUP BY
-        aisr.sprint_id,
-        aisr.issue_id
+            SELECT
+            aisr.sprint_id,
+            aisr.issue_id,
+            max(adl1.log_id) AS log_id
+            FROM
+            agile_issue_sprint_rel aisr,
+            agile_sprint asp,
+            agile_data_log adl1
+            WHERE
+            aisr.project_id = #{projectId}
+            AND aisr.sprint_id = asp.sprint_id
+            AND adl1.project_id = #{projectId}
+            AND aisr.issue_id = adl1.issue_id
+            AND adl1.field = 'timeestimate'
+            AND adl1.last_update_date &lt;= IF(asp.actual_end_date IS NULL,#{now}, asp.actual_end_date)
+            GROUP BY
+            aisr.sprint_id,
+            aisr.issue_id
         ) t1
         LEFT JOIN (
-        SELECT t4.sprint_id,t4.issue_id,SUM(adlf.new_value + 0) AS work_times FROM agile_data_log adlf,
-        (SELECT
-        aisr.sprint_id,
-        aisr.issue_id,
-        max(adl1.log_id) AS log_id
-        FROM
-        agile_issue_sprint_rel aisr,
-        agile_sprint asp,
-        agile_data_log adl1
-        WHERE
-        aisr.project_id = #{projectId}
-        AND aisr.sprint_id = asp.sprint_id
-        AND adl1.project_id = #{projectId}
-        AND aisr.issue_id = adl1.issue_id
-        AND adl1.field = 'timespent'
-        AND adl1.last_update_date &lt;= IF (asp.actual_end_date IS NULL, #{now}, asp.actual_end_date)
-        GROUP BY aisr.sprint_id, aisr.issue_id) t4 WHERE adlf.project_id = #{projectId} AND adlf.log_id = t4.log_id
-        GROUP BY t4.sprint_id,t4.issue_id
+            SELECT t4.sprint_id,t4.issue_id,SUM(adlf.new_value + 0) AS work_times FROM agile_data_log adlf,
+            (
+                SELECT
+                aisr.sprint_id,
+                aisr.issue_id,
+                max(adl1.log_id) AS log_id
+                FROM
+                agile_issue_sprint_rel aisr,
+                agile_sprint asp,
+                agile_data_log adl1
+                WHERE
+                aisr.project_id = #{projectId}
+                AND aisr.sprint_id = asp.sprint_id
+                AND adl1.project_id = #{projectId}
+                AND aisr.issue_id = adl1.issue_id
+                AND adl1.field = 'timespent'
+                AND adl1.last_update_date &lt;= IF (asp.actual_end_date IS NULL, #{now}, asp.actual_end_date)
+                GROUP BY aisr.sprint_id, aisr.issue_id
+            ) t4
+            WHERE adlf.project_id = #{projectId} AND adlf.log_id = t4.log_id
+            GROUP BY t4.sprint_id,t4.issue_id
         ) t5 ON t1.sprint_id = t5.sprint_id AND t1.issue_id = t5.issue_id,
         agile_issue ai
         WHERE

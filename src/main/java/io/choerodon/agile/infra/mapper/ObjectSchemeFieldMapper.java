@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldSearchVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.mybatis.common.Mapper;
@@ -23,4 +24,6 @@ public interface ObjectSchemeFieldMapper extends Mapper<ObjectSchemeFieldDTO> {
     ObjectSchemeFieldDTO queryById(@Param("fieldId") Long fieldId);
 
     ObjectSchemeFieldDTO queryByFieldCode(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId, @Param("fieldCode") String fieldCode);
+
+    List<ObjectSchemeFieldDetailVO> selectCustomFieldList(@Param("projectId") Long projectId);
 }

@@ -20,6 +20,8 @@ public class SubStatusDTO {
 
     private Long objectVersionNumber;
 
+    private Integer position;
+
     private List<IssueForBoardDO> issues;
 
     public void setId(Long id) {
@@ -76,5 +78,13 @@ public class SubStatusDTO {
 
     public String getCategoryCode() {
         return categoryCode;
+    }
+
+    public Integer getPosition() {
+        return position;
+    }
+
+    public void setPosition(Integer position) {
+        this.position = position;
     }
 }

@@ -289,47 +289,51 @@
 
     <resultMap id="IssueWithSub" type="io.choerodon.agile.infra.dto.IssueDTO">
         <id property="issueId" column="issue_issue_id"/>
-        <id property="typeCode" column="type_code"/>
-        <id property="summary" column="summary"/>
-        <id property="priorityId" column="priority_id"/>
-        <id property="issueTypeId" column="issue_type_id"/>
-        <id property="assigneeId" column="assignee_id"/>
-        <id property="epicName" column="epic_name"/>
-        <id property="epicId" column="epic_id"/>
-        <id property="epicColor" column="epic_color"/>
-        <id property="reporterId" column="reporter_id"/>
-        <id property="projectId" column="issue_project_id"/>
-        <id property="statusId" column="status_id"/>
-        <id property="issueNum" column="issue_num"/>
-        <id property="lastUpdateDate" column="issue_last_update_date"/>
-        <id property="remainingTime" column="remaining_time"/>
-        <id property="storyPoints" column="story_points"/>
-        <id property="parentIssueId" column="parent_issue_id"/>
-        <id property="relateIssueId" column="relate_issue_id"/>
+        <result property="typeCode" column="type_code"/>
+        <result property="summary" column="summary"/>
+        <result property="priorityId" column="priority_id"/>
+        <result property="issueTypeId" column="issue_type_id"/>
+        <result property="assigneeId" column="assignee_id"/>
+        <result property="epicName" column="epic_name"/>
+        <result property="epicId" column="epic_id"/>
+        <result property="epicColor" column="epic_color"/>
+        <result property="reporterId" column="reporter_id"/>
+        <result property="projectId" column="issue_project_id"/>
+        <result property="statusId" column="status_id"/>
+        <result property="issueNum" column="issue_num"/>
+        <result property="lastUpdateDate" column="issue_last_update_date"/>
+        <result property="remainingTime" column="remaining_time"/>
+        <result property="storyPoints" column="story_points"/>
+        <result property="parentIssueId" column="parent_issue_id"/>
+        <result property="relateIssueId" column="relate_issue_id"/>
+        <result property="description" column="description"/>
+        <result property="creationDate" column="creation_date"/>
+        <result property="estimateTime" column="estimate_time"/>
+        <result property="resolution" column="resolution"/>
         <collection property="versionIssueRelDTOS" autoMapping="true"
                     ofType="io.choerodon.agile.infra.dto.VersionIssueRelDTO">
             <id property="versionId" column="version_id"/>
-            <id property="statusCode" column="version_status_code"/>
-            <id property="relationType" column="relation_type"/>
-            <id property="issueId" column="version_issue_id"/>
-            <id property="projectId" column="version_project_id"/>
-            <id property="name" column="version_name"/>
+            <result property="statusCode" column="version_status_code"/>
+            <result property="relationType" column="relation_type"/>
+            <result property="issueId" column="version_issue_id"/>
+            <result property="projectId" column="version_project_id"/>
+            <result property="name" column="version_name"/>
         </collection>
         <collection property="issueSprintDTOS" autoMapping="true"
                     ofType="io.choerodon.agile.infra.dto.IssueSprintDTO">
             <id property="sprintId" column="sprint_id"/>
-            <id property="sprintName" column="sprint_name"/>
-            <id property="statusCode" column="sp_status_code"/>
+            <result property="sprintName" column="sprint_name"/>
+            <result property="statusCode" column="sp_status_code"/>
         </collection>
         <collection property="issueComponentBriefDTOS" autoMapping="true"
                     ofType="io.choerodon.agile.infra.dto.IssueComponentBriefDTO">
             <id property="componentId" column="component_id"/>
-            <id property="name" column="component_name"/>
+            <result property="name" column="component_name"/>
         </collection>
         <collection property="labelIssueRelDTOS" autoMapping="true"
                     ofType="io.choerodon.agile.infra.dto.LabelIssueRelDTO">
             <id property="labelId" column="label_id"/>
-            <id property="labelName" column="label_name"/>
+            <result property="labelName" column="label_name"/>
         </collection>
     </resultMap>
 
@@ -376,9 +380,18 @@
         ail.label_id,
         ai.story_points,
         ai.remaining_time,
+        <if test="isExcelExported">
+            ai.description,
+            ai.creation_date,
+            ai.estimate_time,
+            IF((ais.is_completed = 1), '是', '否') AS resolution,
+        </if>
         ai.parent_issue_id,
         ai.relate_issue_id
         FROM agile_issue ai
+        <if test="isExcelExported">
+          left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
+        </if>
         left join agile_issue ai3 on ai.epic_id = ai3.issue_id
         LEFT JOIN lookup_value alv2 ON ai3.color_code = alv2.value_code
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
@@ -445,22 +458,32 @@
         END
     </select>
 
-    <select id="queryIssueIdsListWithSub" resultType="java.lang.Long">
-        select t.issue_issue_id from (
-            SELECT
+    <select id="queryIssueIdsListWithSub" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+        select
+        t1.issue_issue_id as issue_id,
+        ai.priority_id,
+        ai.reporter_id,
+        ai.status_id,
+        ai.assignee_id,
+        ai.last_update_date,
+        concat(api.project_code,'-', ai.issue_num) as issue_num,
+        ai.issue_type_id
+        from (
+            select
             distinct case
             when search.type_code = 'sub_task' then search.parent_issue_id
             when search.type_code = 'bug' and search.relate_issue_id is not null and search.relate_issue_id != 0 then search.relate_issue_id
             else search.issue_issue_id
             end as issue_issue_id
             from (
-              <include refid="queryIssueIdsListWithSubSql"/>
-            )search where 1=1
+            <include refid="queryIssueIdsListWithSubSql"/>
+            )search
+            where 1=1
             and (
-              search.type_code != 'sub_task'
-              or search.parent_type_code != 'bug'
-              or search.parent_relate_issue_id is null
-              or search.parent_relate_issue_id = 0
+            search.type_code != 'sub_task'
+            or search.parent_type_code != 'bug'
+            or search.parent_relate_issue_id is null
+            or search.parent_relate_issue_id = 0
             )
             <if test='searchVO.searchArgs != null'>
                 <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
@@ -474,7 +497,13 @@
                     #{content}), '%'))
                 </foreach>
             </if>
-        ) t
+        ) t1
+        join agile_issue ai
+        on t1.issue_issue_id = ai.issue_id
+        left join agile_project_info api on ai.project_id = api.project_id
+        <if test="orderStr != null">
+            order by ${orderStr}
+        </if>
     </select>
 
     <select id="queryChildrenIdByParentId" resultType="java.lang.Long">
@@ -528,12 +557,28 @@
     </select>
 
     <select id="queryStoryAndTaskByProjectId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
-        select ai.* from agile_issue ai
+        select
+        ai.issue_id as issue_id,
+        ai.summary,
+        CONCAT(api.project_code,'-', ai.issue_num) as issue_num,
+        ai.reporter_id,
+        ai.last_update_date,
+        ai.priority_id,
+        ai.assignee_id,
+        ai.issue_type_id,
+        ai.status_id,
+        ai.apply_type
+        from agile_issue ai
+        LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         where ai.project_id = #{projectId}
         AND ai.type_code in ('story','task')
         <if test="searchVO != null and searchVO.advancedSearchArgs != null and searchVO.advancedSearchArgs.size > 0">
              <if test="searchVO.advancedSearchArgs.summary != null">
-                AND ai.summary LIKE CONCAT(CONCAT('%', #{searchVO.advancedSearchArgs.summary}), '%')
+                AND (
+                 ai.summary LIKE CONCAT(CONCAT('%', #{searchVO.advancedSearchArgs.summary}), '%')
+                 OR
+                 ai.issue_num LIKE CONCAT(CONCAT('%', #{searchVO.advancedSearchArgs.summary}), '%')
+                 )
              </if>
         </if>
     </select>
@@ -778,6 +823,97 @@
                          close=")">
                     #{issueId}
                 </foreach>
+            </if>
+            <if test="searchVO.otherArgs.customField != null and searchVO.otherArgs.customField.size > 0">
+                <if test="searchVO.otherArgs.customField.option != null and searchVO.otherArgs.customField.option.size > 0">
+                    and
+                    <foreach collection="searchVO.otherArgs.customField.option" item="item" open="(" separator="and"
+                             close=")">
+                         ai.issue_id in
+                        (
+                            SELECT
+                              ffv.instance_id
+                            FROM
+                              fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.option_id IN
+                            <foreach collection="item.value" item="value" open="(" separator=","
+                                     close=")">
+                                #{value}
+                            </foreach>
+                        )
+                    </foreach>
+                </if>
+                <if test="searchVO.otherArgs.customField.date != null and searchVO.otherArgs.customField.date.size > 0">
+                    and
+                    <foreach collection="searchVO.otherArgs.customField.date" item="item" open="(" separator="and"
+                             close=")">
+                        ai.issue_id in
+                        (
+                            SELECT
+                              ffv.instance_id
+                            FROM
+                              fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.date_value &gt;= #{item.startDate} AND ffv.date_value &lt;= #{item.endDate}
+                        )
+                    </foreach>
+                </if>
+                <if test="searchVO.otherArgs.customField.number != null and searchVO.otherArgs.customField.number.size > 0">
+                    and
+                    <foreach collection="searchVO.otherArgs.customField.number" item="item" open="(" separator="and"
+                             close=")">
+                        ai.issue_id in
+                        (
+                            SELECT
+                            ffv.instance_id
+                            FROM
+                            fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.number_value = #{item.value}
+                        )
+                    </foreach>
+                </if>
+                <if test="searchVO.otherArgs.customField.string != null and searchVO.otherArgs.customField.string.size > 0">
+                    and
+                    <foreach collection="searchVO.otherArgs.customField.string" item="item" open="(" separator="and"
+                             close=")">
+                        ai.issue_id in
+                        (
+                            SELECT
+                            ffv.instance_id
+                            FROM
+                            fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.string_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
+                        )
+                    </foreach>
+                </if>
+                <if test="searchVO.otherArgs.customField.text != null and searchVO.otherArgs.customField.text.size > 0">
+                    and
+                    <foreach collection="searchVO.otherArgs.customField.text" item="item" open="(" separator="and"
+                             close=")">
+                        ai.issue_id in
+                        (
+                            SELECT
+                            ffv.instance_id
+                            FROM
+                            fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.text_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
+                        )
+                    </foreach>
+                </if>
             </if>
         </if>
         <if test='filterSql != null'>
@@ -1399,67 +1535,6 @@
         SELECT issue_id
         FROM agile_issue
         WHERE project_id = #{projectId} AND relate_issue_id = #{issueId}
-    </select>
-
-    <select id="queryFlatExportIssues" resultType="io.choerodon.agile.infra.dto.ExportIssuesDTO">
-        SELECT
-        ai.issue_id,
-        concat(#{projectCode},'-', ai.issue_num) as issue_num,
-        ai.summary,
-        ai.assignee_id,
-        ai.reporter_id,
-        ai.description,
-        asp1.sprint_name,
-        ai.creation_date,
-        ai.last_update_date,
-        IF((ai.parent_issue_id IS NULL OR ai.parent_issue_id = 0), '否', '是') AS sub_task,
-        ai.estimate_time,
-        ai.remaining_time,
-        ai.issue_type_id,
-        ai.status_id,
-        ai.priority_id,
-        ai.story_points,
-        IF((ais.is_completed = 1), '是', '否') AS resolution,
-        ai.parent_issue_id,
-        ai.relate_issue_id,
-        ai.type_code,
-        epic.epic_name
-        FROM agile_issue ai
-        LEFT JOIN agile_issue_status ais ON ais.status_id = ai.status_id and ais.project_id = ai.project_id
-        LEFT JOIN agile_issue epic on ai.epic_id = epic.issue_id
-        LEFT JOIN (SELECT
-        aisr.issue_id,
-        asp.sprint_name
-        FROM agile_issue_sprint_rel aisr, agile_sprint asp
-        WHERE aisr.project_id = #{projectId} AND aisr.sprint_id = asp.sprint_id
-        AND asp.status_code != 'closed'
-        ) asp1 ON asp1.issue_id = ai.issue_id
-        WHERE ai.project_id = #{projectId}
-        and ai.issue_id IN
-        (
-          select search.issue_issue_id from (
-            <include refid="queryIssueIdsListWithSubSql"/>
-          )search where 1=1
-          and (
-            search.type_code != 'sub_task'
-            or search.parent_type_code != 'bug'
-            or search.parent_relate_issue_id is null
-            or search.parent_relate_issue_id = 0
-          )
-            <if test='searchVO.searchArgs != null'>
-                <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
-                    AND search.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
-                </if>
-            </if>
-            <if test='searchVO.contents != null and searchVO.contents.size != 0'>
-                <foreach collection="searchVO.contents" item="content" index="index">
-                    AND (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE
-                    CONCAT(CONCAT('%',
-                    #{content}), '%'))
-                </foreach>
-            </if>
-        )
-        ORDER BY ai.issue_id desc
     </select>
 
     <select id="queryIssueEpicInfoByIssueIds" resultType="io.choerodon.agile.infra.dto.IssueDTO">
