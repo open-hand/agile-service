@@ -11,6 +11,7 @@ import StoryPoint from './SprintHeaderComponent/StoryPoint';
 import SprintDateRange from './SprintHeaderComponent/SprintDateRange';
 import SprintGoal from './SprintHeaderComponent/SprintGoal';
 import WorkLoadBtn from './SprintHeaderComponent/WorkLoadBtn';
+import SprintIcon from './SprintHeaderComponent/SprintIcon';
 import './SprintHeader.less';
 
 const prefix = 'c7n-backlog-SprintHeader';
@@ -37,7 +38,7 @@ function BacklogHeader({ data }) {
 }
 function SprintHeader({ data }) {
   const {
-    type, expand, sprintId, piId,
+    type, expand, sprintId, piId, sprintType,
   } = data;
   const isSprint = type === 'sprint';
   return (
@@ -50,6 +51,7 @@ function SprintHeader({ data }) {
             role="none"
             onClick={() => { BacklogStore.expandSprint(sprintId, !expand); }}
           />
+          <SprintIcon sprintType={sprintType} />
           <SprintName data={data} />
           <SprintVisibleIssue
             data={data}
