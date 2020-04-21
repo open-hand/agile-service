@@ -249,7 +249,7 @@ class QuickSearch extends Component {
               <Select
                 key="sprintSelect"
                 className="SelectTheme primary c7n-agile-sprintSearchSelect"
-                style={{ width: 120 }}
+                // style={{ width: 120 }}
                 placeholder="冲刺"
                 allowClear
                 dropdownMatchSelectWidth={false}
@@ -261,7 +261,14 @@ class QuickSearch extends Component {
               >
                 {
                   IsInProgramStore.sprints.filter(item => item.statusCode !== 'closed').map(item => (
-                    <Option key={item.sprintId} value={item.sprintId} title={item.sprintName}>{item.sprintName}</Option>
+                    <Option key={item.sprintId} value={item.sprintId} title={item.sprintName}>
+                      {item.sprintName}
+                      {
+                        item.statusCode === 'started' && (
+                          <div className="c7n-agile-sprintSearchSelect-option-active">活跃</div>
+                        )
+                      }
+                    </Option>
                   ))
                 }
               </Select>
