@@ -89,6 +89,7 @@ const IssueField = observer((props) => {
   if (!store.detailShow) {
     fields = fields.slice(0, 4);
   }
+ 
   return (
     <div className="c7n-content-wrapper IssueField">
       {issueId ? fields.map(field => <Fragment key={field.id}>{getFieldComponent(field)}</Fragment>) : ''}

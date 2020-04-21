@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Choerodon } from '@choerodon/boot';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
-import { Select } from 'choerodon-ui';
+import { Select, Tooltip } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
 import { checkFeatureNameById } from '@/api/FeatureApi';
 import TextEditToggle from '../../../../TextEditToggle';
@@ -162,8 +162,9 @@ const { Text, Edit } = TextEditToggle;
                           newFeatureId: value,
                         });
                       }}
+                      dropdownClassName="c7n-agile-featureSelectDropdown"
                     >
-                      {originFeatures.map(feature => <Option key={`${feature.issueId}`} value={feature.issueId}>{feature.summary}</Option>)}
+                      {originFeatures.map(feature => <Option key={`${feature.issueId}`} value={feature.issueId}><Tooltip title={feature.summary}>{feature.summary}</Tooltip></Option>)}
                     </Select>
                   </Edit>
                 </TextEditToggle>
