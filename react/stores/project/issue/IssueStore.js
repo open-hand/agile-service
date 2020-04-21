@@ -1,13 +1,12 @@
 import {
-  observable, action, computed, toJS, set,
+  observable, action, computed, toJS,
 } from 'mobx';
 import {
   stores, axios, Choerodon,
 } from '@choerodon/boot';
-import moment from 'moment';
 import { getCustomFields } from '@/api/NewIssueApi';
 import {
-  debounce, reverse, map, find, 
+  debounce, reverse, map, find, isEmpty,
 } from 'lodash';
 
 const systemFields = [{
@@ -270,7 +269,7 @@ class IssueStore {
     } else {
       const { value } = this.chosenFields.get(code);
       this.chosenFields.delete(code);
-      if (value) {
+      if (!isEmpty(value)) {
         this.query();
       }
     }
@@ -284,7 +283,7 @@ class IssueStore {
     this.dataSet.query();
   }, 300);
 
-  handleFilterChange = (code, value) => {    
+  handleFilterChange = (code, value) => {
     this.setFieldFilter(code, value);
     this.query();
   }
@@ -315,7 +314,7 @@ class IssueStore {
   @action unChooseAll() {
     let hasValue = false;
     for (const [, field] of this.chosenFields) {
-      if (field.value) {
+      if (!isEmpty(field.value)) {
         hasValue = true;
         break;
       }
@@ -352,7 +351,7 @@ class IssueStore {
       if (value === undefined || value === null || value === '') {
         // eslint-disable-next-line no-continue
         continue;
-      }      
+      }
       // 系统字段
       if (!id) {
         systemFilter[code] = value;

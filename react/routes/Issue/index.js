@@ -160,7 +160,6 @@ const Issue = withRouter(observer(() => {
       <Header
         title="问题管理"
       >
-        {/* <BackButton /> */}
         <Button
           className="leftBtn"
           funcType="flat"
@@ -189,7 +188,7 @@ const Issue = withRouter(observer(() => {
       <Breadcrumb />
       <Content style={{ paddingTop: 0 }} className="c7nagile-issue-content">
         <Search urlFilter={urlFilter} onClear={handleClear} />
-        <IssueTable tableRef={tableRef} onCreateIssue={handleCreateIssue} />        
+        <IssueTable tableRef={tableRef} onCreateIssue={handleCreateIssue} />
         <SaveFilterModal />
         <FilterManage />
         <ExportIssue tableRef={tableRef} onCreateIssue={handleCreateIssue} />

@@ -4,8 +4,6 @@ import { toJS } from 'mobx';
 import IssueStore from '@/stores/project/issue/IssueStore';
 import IssueTypeField from './field/IssueTypeField';
 import StatusField from './field/StatusField';
-import AssignField from './field/AssignField';
-import ReporterField from './field/ReporterField';
 import SprintField from './field/SprintField';
 import ComponentField from './field/ComponentField';
 import VersionField from './field/VersionField';
@@ -44,7 +42,7 @@ function renderField(field) {
         );
       case 'assigneeId':
         return (
-          <AssignField
+          <MemberField
             field={field}
             value={value}
             onChange={handleChange}
@@ -52,7 +50,7 @@ function renderField(field) {
         );
       case 'reporterIds':
         return (
-          <ReporterField
+          <MemberField
             field={field}
             value={value}
             onChange={handleChange}

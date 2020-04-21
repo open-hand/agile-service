@@ -181,7 +181,7 @@ export default withRouter(observer(({
   };
   const renderSearch = () => (
     <Fragment>
-      <div style={{ marginTop: 5 }}>
+      <div style={{ marginTop: 8 }}>
         <SummaryField
           onChange={handleInputChange}
           value={IssueStore.getFilterValueByCode('contents') ? IssueStore.getFilterValueByCode('contents')[0] : undefined}
@@ -198,19 +198,19 @@ export default withRouter(observer(({
           maxTagCount={0}
           labelInValue
           maxTagPlaceholder={ommittedValues => `${ommittedValues.map(item => item.label).join(', ')}`}
-          style={{ width: 120, margin: '5px  5px 0', height: 34 }}
+          style={{ width: 120, margin: '8px 5px 0', height: 34 }}
           onSelect={handleSelect}
           onDeselect={handleDeselect}
           onClear={handleDeselect}
           value={getMyFilterSelectValue()}
           getPopupContainer={triggerNode => triggerNode.parentNode}
         >
-          <OptGroup label="快速筛选">
+          <OptGroup key="quick" label="快速筛选">
             {quickFilters.map(filter => (
               <Option value={`quick-${filter.filterId}`}>{filter.name}</Option>
             ))}
           </OptGroup>
-          <OptGroup label="我的筛选">
+          <OptGroup key="my" label="我的筛选">
             {
               filters.map(filter => (
                 <Option value={`my-${filter.filterId}`}>{filter.name}</Option>
