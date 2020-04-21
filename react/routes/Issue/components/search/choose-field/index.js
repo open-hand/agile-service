@@ -31,7 +31,7 @@ function ChooseField() {
   }, []);
   const ref = useClickOut(handleClickOut);
   return (
-    <div style={{ marginLeft: 5 }}>
+    <div style={{ marginLeft: 5, marginTop: 8 }}>
       <Dropdown      
         hidden={hidden}
         overlay={(

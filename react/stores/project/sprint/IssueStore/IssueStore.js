@@ -14,14 +14,17 @@ const systemFields = [{
   code: 'issueIds',
   name: 'issueId',
   defaultShow: true,
+  noDisplay: true, // 不需要展示，仅作为一个筛选项
 }, {
   code: 'quickFilterIds',
   name: '快速筛选',
   defaultShow: true,
+  noDisplay: true,
 }, {
   code: 'contents',
   name: '概要',
   defaultShow: true,
+  noDisplay: true,
 }, {
   code: 'issueTypeId',
   name: '问题类型',
@@ -322,6 +325,7 @@ class IssueStore {
     const customField = {
       option: [],
       date: [],
+      date_hms: [],
       number: [],
       string: [],
       text: [],
@@ -382,11 +386,19 @@ class IssueStore {
         case 'datetime':
         case 'date': {
           if (value && value.length > 0) {
-            customField.date.push({
-              fieldId: id,
-              startDate: moment(value[0]).format('YYYY-MM-DD HH:mm:ss'),
-              endDate: moment(value[1]).format('YYYY-MM-DD HH:mm:ss'),
-            });
+            if (fieldType === 'time') {
+              customField.date_hms.push({
+                fieldId: id,
+                startDate: value[0],
+                endDate: value[1],
+              });
+            } else {
+              customField.date.push({
+                fieldId: id,
+                startDate: value[0],
+                endDate: value[1],
+              });
+            }
           }
           break;
         }

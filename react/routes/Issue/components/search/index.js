@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import React, {
   useContext, useEffect, useState, Fragment,
 } from 'react';
@@ -38,12 +39,13 @@ function flattenObject(object) {
   }
   const {
     date = [],
+    date_hms = [],
     number = [],
     option = [],
     string = [],
     text = [],
   } = result;
-  date.forEach((d) => {
+  [...date, ...date_hms].forEach((d) => {
     result[d.fieldId] = { isCustom: true, value: [d.startDate, d.endDate] };
   });
   [...number, ...option, ...string, ...text].forEach((d) => {
@@ -51,6 +53,7 @@ function flattenObject(object) {
   });
 
   delete result.date;
+  delete result.date_hms;
   delete result.number;
   delete result.option;
   delete result.string;
@@ -193,7 +196,7 @@ export default withRouter(observer(({
           maxTagCount={0}
           labelInValue
           maxTagPlaceholder={ommittedValues => `${ommittedValues.map(item => item.label).join(', ')}`}
-          style={{ width: 120, margin: '0 5px' }}
+          style={{ width: 120, margin: '5px  5px 0', height: 34 }}
           onSelect={handleSelect}
           onDeselect={handleDeselect}
           onClear={handleDeselect}
