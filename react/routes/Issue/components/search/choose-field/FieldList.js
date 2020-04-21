@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { CheckBox } from 'choerodon-ui/pro';
+import {
+  CheckBox, Button, TextField, Icon,
+} from 'choerodon-ui/pro';
 import IssueStore from '@/stores/project/sprint/IssueStore';
 import './FieldList.less';
 
@@ -13,11 +15,26 @@ function FieldList() {
   const defaultShowSystemFields = systemFields.filter(field => field.defaultShow);
   const checked = chosenFields.size - defaultShowSystemFields.length > 0;
   const indeterminate = checked && chosenFields.size - defaultShowSystemFields.length < fields.length + selectableSystemFields.length;
-
+  const [search, setSearch] = useState('');
+  const filter = field => (search ? field.name.indexOf(search) > -1 : true);
+  const filteredFields = fields.filter(filter);
+  const filteredSystemFields = selectableSystemFields.filter(filter);
   return (
     <div
       className={prefix}
     >
+      <div className={`${prefix}-search`}>
+        <TextField
+          style={{ flex: 1 }}
+          value={search}
+          onChange={(v) => {
+            setSearch(v);
+          }}
+          prefix={<Icon type="search" />}
+          placeholder="输入文字以进行过滤"
+          clearButton
+        />
+      </div>
       <div className={`${prefix}-header`}>
         <CheckBox
           indeterminate={indeterminate}
@@ -32,32 +49,42 @@ function FieldList() {
         >
           全选
         </CheckBox>
+        {(checked || indeterminate) && (
+          <Button onClick={() => {
+            IssueStore.unChooseAll();
+          }}
+          >
+            清除筛选项
+          </Button>
+        )}
       </div>
       <div className={`${prefix}-content`}>
-        <div className={`${prefix}-section`}>
-          <div className={`${prefix}-title`}>预定义字段</div>
-          <div className={`${prefix}-list`}>
-            {selectableSystemFields.map((field) => {
-              const { name, code } = field;
-              return (
-                <div className={`${prefix}-item`} key={code}>
-                  <CheckBox
-                    value={code}
-                    checked={chosenFields.has(code)}
-                    onChange={value => handleChosenFieldChange(value, field)}
-                  >
-                    {name}
-                  </CheckBox>
-                </div>
-              );
-            })}
+        {filteredSystemFields.length > 0 && (
+          <div className={`${prefix}-section`}>
+            <div className={`${prefix}-title`}>预定义字段</div>
+            <div className={`${prefix}-list`}>
+              {filteredSystemFields.map((field) => {
+                const { name, code } = field;
+                return (
+                  <div className={`${prefix}-item`} key={code}>
+                    <CheckBox
+                      value={code}
+                      checked={chosenFields.has(code)}
+                      onChange={value => handleChosenFieldChange(value, field)}
+                    >
+                      {name}
+                    </CheckBox>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-        {fields.length > 0 && (
+        )}
+        {filteredFields.length > 0 && (
           <div className={`${prefix}-section`}>
             <div className={`${prefix}-title`}>自定义字段</div>
             <div className={`${prefix}-list`}>
-              {fields.map((field) => {
+              {filteredFields.map((field) => {
                 const { name, code } = field;
                 return (
                   <div className={`${prefix}-item`} key={code}>
