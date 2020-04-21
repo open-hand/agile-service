@@ -1285,7 +1285,7 @@ public class IssueServiceImpl implements IssueService {
             final String searchSql = filterSql;
             //查询所有父节点问题
             List<Long> parentIds =
-                    issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), null)
+                    issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), "issue_id desc")
                             .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             List<Long> issueIds = new ArrayList<>();
             Map<Long, Set<Long>> parentSonMap = new HashMap<>();
