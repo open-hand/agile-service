@@ -58,7 +58,7 @@
         INNER JOIN agile_issue_status ais ON  ais.project_id = abc.project_id and ais.status_id = abcsr.status_id
         LEFT JOIN (SELECT ai1.*
         from agile_issue ai1, agile_issue_sprint_rel aisr
-        WHERE aisr.sprint_id = #{activeSprintId} AND ai1.issue_id = aisr.issue_id
+        WHERE aisr.sprint_id = #{sprintId} AND ai1.issue_id = aisr.issue_id
         AND ai1.type_code in ('story', 'task', 'bug', 'sub_task')
         <if test='onlyStory != null and onlyStory == true'>
             AND ai1.type_code = 'story'
@@ -301,7 +301,7 @@
         ai1.issue_id,
         ai1.status_id
         FROM agile_issue ai1, agile_issue_sprint_rel aisr
-        WHERE aisr.sprint_id = #{activeSprintId} AND ai1.issue_id = aisr.issue_id
+        WHERE aisr.sprint_id = #{sprintId} AND ai1.issue_id = aisr.issue_id
         <if test="columnConstraint == 'issue'">
             and ai1.type_code in ('story', 'task', 'bug', 'sub_task') and ai1.apply_type = 'agile'
         </if>
