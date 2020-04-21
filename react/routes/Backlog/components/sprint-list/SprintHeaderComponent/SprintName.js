@@ -58,7 +58,7 @@ class SprintName extends Component {
     return (
       <div className="c7n-backlog-sprintName">        
         <TextEditToggle
-          disabled={type === 'backlog' || sprintType === 'ip'}
+          disabled={type === 'backlog'}
           formKey="sprint"
           onSubmit={this.handleBlurName}
           originData={sprintName}
