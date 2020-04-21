@@ -18,7 +18,7 @@ function SelectField({ field, value, onChange }) {
       onChange={onChange}
       placeholder={name}
       mode="multiple"
-      style={{ width: 120 }}
+      style={{ width: 120, margin: 0 }}
       allowClear
     >
       {(fieldOptions || []).map(option => <Option value={String(option.id)}>{option.value}</Option>)}    

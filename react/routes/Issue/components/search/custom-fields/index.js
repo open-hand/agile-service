@@ -13,6 +13,7 @@ import InputField from './field/InputField';
 import NumberField from './field/NumberField';
 import MemberField from './field/MemberField';
 import DateTimeField from './field/DateTimeField';
+import ChooseField from '../choose-field';
 
 function renderField(field) {
   const { fieldType } = field;
@@ -144,9 +145,31 @@ function renderField(field) {
     default: return null;
   }
 }
-function CustomFields() {
+function CustomFields({ children }) {
   const { chosenFields } = IssueStore;
-  return [...chosenFields.entries()].map(([, field]) => !field.noDisplay && <div key={field.code} style={{ margin: '8px 5px 0' }}>{renderField(field)}</div>);
+  const selectTypes = [];
+  const dateTypes = [];
+  const inputTypes = [];
+  for (const [, field] of chosenFields) {
+    if (['single', 'multiple', 'radio', 'checkbox', 'member'].includes(field.fieldType)) {
+      selectTypes.push(field);
+    } else if (['time', 'datetime', 'date'].includes(field.fieldType)) {
+      dateTypes.push(field);
+    } else if (['input', 'text', 'number'].includes(field.fieldType)) {
+      inputTypes.push(field);
+    }
+  }
+  
+  const render = f => f.map(field => !field.noDisplay && <div key={field.code} style={{ margin: '4px 5px' }}>{renderField(field)}</div>);
+  const types = [selectTypes, inputTypes, dateTypes].filter(arr => arr.length > 0);
+  const result = types.map(type => <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: 4 }}>{render(type)}</div>);
+  result[0].props.children.unshift(children);
+  result[result.length - 1].props.children.push(<ChooseField key="choose" />);
+  return (
+    <div>
+      {result}
+    </div>
+  );
 }
 
 export default observer(CustomFields);

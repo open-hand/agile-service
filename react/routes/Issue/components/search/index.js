@@ -181,45 +181,47 @@ export default withRouter(observer(({
   };
   const renderSearch = () => (
     <Fragment>
-      <div style={{ marginTop: 8 }}>
+      <div style={{ marginTop: 4 }}>
         <SummaryField
           onChange={handleInputChange}
           value={IssueStore.getFilterValueByCode('contents') ? IssueStore.getFilterValueByCode('contents')[0] : undefined}
         />
       </div>      
-      <div className={`${prefixCls}-search-left`}>
-        <Select
-          mode="multiple"
-          showCheckAll={false}
-          allowClear
-          className="SelectTheme"
-          dropdownMatchSelectWidth={false}
-          placeholder="快速筛选"
-          maxTagCount={0}
-          labelInValue
-          maxTagPlaceholder={ommittedValues => `${ommittedValues.map(item => item.label).join(', ')}`}
-          style={{ width: 120, margin: '8px 5px 0', height: 34 }}
-          onSelect={handleSelect}
-          onDeselect={handleDeselect}
-          onClear={handleDeselect}
-          value={getMyFilterSelectValue()}
-          getPopupContainer={triggerNode => triggerNode.parentNode}
-        >
-          <OptGroup key="quick" label="快速筛选">
-            {quickFilters.map(filter => (
-              <Option value={`quick-${filter.filterId}`}>{filter.name}</Option>
-            ))}
-          </OptGroup>
-          <OptGroup key="my" label="我的筛选">
-            {
+      <div className={`${prefixCls}-search-left`}>                
+        <CustomFields>
+          <div style={{ margin: '4px 5px' }}>
+            <Select
+              mode="multiple"
+              showCheckAll={false}
+              allowClear
+              className="SelectTheme"
+              dropdownMatchSelectWidth={false}
+              placeholder="快速筛选"
+              maxTagCount={0}
+              labelInValue
+              maxTagPlaceholder={ommittedValues => `${ommittedValues.map(item => item.label).join(', ')}`}
+              style={{ width: 120, margin: 0, height: 34 }}
+              onSelect={handleSelect}
+              onDeselect={handleDeselect}
+              onClear={handleDeselect}
+              value={getMyFilterSelectValue()}
+              getPopupContainer={triggerNode => triggerNode.parentNode}
+            >
+              <OptGroup key="quick" label="快速筛选">
+                {quickFilters.map(filter => (
+                  <Option value={`quick-${filter.filterId}`}>{filter.name}</Option>
+                ))}
+              </OptGroup>
+              <OptGroup key="my" label="我的筛选">
+                {
               filters.map(filter => (
                 <Option value={`my-${filter.filterId}`}>{filter.name}</Option>
               ))
             }
-          </OptGroup>
-        </Select>
-        <CustomFields />
-        <ChooseField />
+              </OptGroup>
+            </Select>
+          </div>
+        </CustomFields>
       </div>
       <div className={`${prefixCls}-search-right`}>
         {isHasFilter() && <Button onClick={reset} funcType="flat" color="blue">重置</Button>}

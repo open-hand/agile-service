@@ -16,7 +16,7 @@ function IssueTypeField({ field, value, onChange }) {
       })}
       type="issue_type"
       loadWhenMount
-      style={{ width: 120, margin: '0 5px' }}
+      style={{ width: 120, margin: 0 }}
       mode="multiple"
       showCheckAll={false}
       allowClear

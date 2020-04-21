@@ -32,7 +32,7 @@ function ChooseField() {
   const ref = useClickOut(handleClickOut);
   return (
     <div
-      style={{ marginLeft: 5, marginTop: 8 }}
+      style={{ marginLeft: 5, display: 'flex', alignItems: 'center' }}
     >
       <Dropdown
         getPopupContainer={trigger => trigger.parentNode}

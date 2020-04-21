@@ -6,7 +6,7 @@ function InputField({ field, value, onChange }) {
   const { name } = field;
   return (
     <Input
-      className="hidden-label"
+      // className="hidden-label"
       value={value}
       onChange={e => onChange(e.target.value)}
       placeholder={name}

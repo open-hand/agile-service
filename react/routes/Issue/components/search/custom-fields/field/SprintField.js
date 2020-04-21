@@ -18,7 +18,7 @@ function SprintField({ field, value, onChange }) {
       type="sprint"
       loadWhenMount
       key="reporterSelect"
-      style={{ width: 120, margin: '0 5px' }}
+      style={{ width: 120, margin: 0 }}
       mode="multiple"
       showCheckAll={false}
       allowClear
