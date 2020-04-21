@@ -192,7 +192,7 @@ const Issue = withRouter(observer(() => {
         <IssueTable tableRef={tableRef} onCreateIssue={handleCreateIssue} />        
         <SaveFilterModal />
         <FilterManage />
-        <ExportIssue dataSet={dataSet} tableRef={tableRef} onCreateIssue={handleCreateIssue} />
+        <ExportIssue tableRef={tableRef} onCreateIssue={handleCreateIssue} />
         {IssueStore.getCreateQuestion && (
           <CreateIssue
             visible={IssueStore.getCreateQuestion}
