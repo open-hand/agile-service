@@ -181,10 +181,12 @@ export default withRouter(observer(({
   };
   const renderSearch = () => (
     <Fragment>
-      <SummaryField
-        onChange={handleInputChange}
-        value={IssueStore.getFilterValueByCode('contents') ? IssueStore.getFilterValueByCode('contents')[0] : undefined}
-      />
+      <div style={{ marginTop: 5 }}>
+        <SummaryField
+          onChange={handleInputChange}
+          value={IssueStore.getFilterValueByCode('contents') ? IssueStore.getFilterValueByCode('contents')[0] : undefined}
+        />
+      </div>      
       <div className={`${prefixCls}-search-left`}>
         <Select
           mode="multiple"
