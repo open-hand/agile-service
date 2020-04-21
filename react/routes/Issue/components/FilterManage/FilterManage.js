@@ -5,7 +5,7 @@ import {
 } from 'choerodon-ui';
 import { stores, axios, Choerodon } from '@choerodon/boot';
 import _ from 'lodash';
-import IssueStore from '@/stores/project/sprint/IssueStore';
+import IssueStore from '@/stores/project/issue/IssueStore';
 import './FilterManage.less';
 
 const { AppState, HeaderStore } = stores;

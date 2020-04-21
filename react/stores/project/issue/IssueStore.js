@@ -268,7 +268,11 @@ class IssueStore {
     if (select) {
       this.chosenFields.set(code, observable({ ...field, value: undefined }));
     } else {
+      const { value } = this.chosenFields.get(code);
       this.chosenFields.delete(code);
+      if (value) {
+        this.query();
+      }
     }
   }
 
@@ -309,7 +313,18 @@ class IssueStore {
   }
 
   @action unChooseAll() {
+    let hasValue = false;
+    for (const [, field] of this.chosenFields) {
+      if (field.value) {
+        hasValue = true;
+        break;
+      }
+    }
     this.chosenFields = new Map(systemFields.filter(f => f.defaultShow).map(f => ([f.code, this.chosenFields.get(f.code)])));
+    // 取消全选之前如果有筛选就查一次
+    if (hasValue) {
+      this.query();
+    }
   }
 
   @action

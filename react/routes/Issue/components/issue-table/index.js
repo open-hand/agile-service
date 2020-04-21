@@ -11,7 +11,7 @@ import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
 import UserHead from '@/components/UserHead';
-import IssueStore from '@/stores/project/sprint/IssueStore/IssueStore';
+import IssueStore from '@/stores/project/issue/IssueStore';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import CollapseAll from './CollapseAll';
 import IssuePagination from './IssuePagination';

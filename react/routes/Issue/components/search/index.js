@@ -14,7 +14,7 @@ import {
 } from 'lodash';
 import { observer } from 'mobx-react-lite';
 import { getRequest } from '@/common/utils';
-import IssueStore from '@/stores/project/sprint/IssueStore';
+import IssueStore from '@/stores/project/issue/IssueStore';
 import SummaryField from './custom-fields/field/SummaryField';
 import Store from '../../stores';
 import CustomFields from './custom-fields';
@@ -171,9 +171,9 @@ export default withRouter(observer(({
     IssueStore.setFilterListVisible(false);
     IssueStore.setEditFilterInfo(map(editFilterInfo, item => Object.assign(item, { isEditing: false })));
   };
-  const handleInputChange = (e) => {
-    if (e.target.value) {
-      IssueStore.handleFilterChange('contents', [e.target.value]);
+  const handleInputChange = (value) => {
+    if (value) {
+      IssueStore.handleFilterChange('contents', [value]);
     } else {
       IssueStore.handleFilterChange('contents', []);
     }
