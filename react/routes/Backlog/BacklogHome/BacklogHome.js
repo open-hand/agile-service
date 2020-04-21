@@ -185,6 +185,11 @@ class BacklogHome extends Component {
                 }}
               >
                 版本
+                {
+                  BacklogStore.chosenVersion !== 'all' && (
+                    <span className="c7n-backlog-side-tip" />
+                  )
+                }
               </p>
               {!isShowFeature && (
                 <p
@@ -197,6 +202,11 @@ class BacklogHome extends Component {
                   }}
                 >
                   史诗
+                  {
+                  BacklogStore.chosenEpic !== 'all' && (
+                    <span className="c7n-backlog-side-tip" />
+                  )
+                }
                 </p>
               )}
               {isShowFeature && (
@@ -210,6 +220,11 @@ class BacklogHome extends Component {
                   }}
                 >
                   特性
+                  {
+                  BacklogStore.chosenFeature !== 'all' && (
+                    <span className="c7n-backlog-side-tip" />
+                  )
+                }
                 </p>
               )}
             </div>
