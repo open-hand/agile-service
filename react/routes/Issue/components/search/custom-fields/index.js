@@ -1,6 +1,5 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { debounce } from 'lodash';
 import { toJS } from 'mobx';
 import IssueStore from '@/stores/project/sprint/IssueStore';
 import IssueTypeField from './field/IssueTypeField';
@@ -10,15 +9,12 @@ import ReporterField from './field/ReporterField';
 import SprintField from './field/SprintField';
 import ComponentField from './field/ComponentField';
 import VersionField from './field/VersionField';
-import CreateDateField from './field/CreateDateField';
 // 自定义字段
 import SelectField from './field/SelectField';
 import InputField from './field/InputField';
 import NumberField from './field/NumberField';
 import MemberField from './field/MemberField';
-import TimeField from './field/TimeField';
-import Store from '../../../stores';
-
+import DateTimeField from './field/DateTimeField';
 
 function renderField(field) {
   const { fieldType } = field;
@@ -33,7 +29,7 @@ function renderField(field) {
       case 'issueTypeId':
         return (
           <IssueTypeField
-            field={field} 
+            field={field}
             value={value}
             onChange={handleChange}
           />
@@ -41,7 +37,7 @@ function renderField(field) {
       case 'statusId':
         return (
           <StatusField
-            field={field} 
+            field={field}
             value={value}
             onChange={handleChange}
           />
@@ -49,7 +45,7 @@ function renderField(field) {
       case 'assigneeId':
         return (
           <AssignField
-            field={field} 
+            field={field}
             value={value}
             onChange={handleChange}
           />
@@ -57,7 +53,7 @@ function renderField(field) {
       case 'reporterIds':
         return (
           <ReporterField
-            field={field} 
+            field={field}
             value={value}
             onChange={handleChange}
           />
@@ -65,7 +61,7 @@ function renderField(field) {
       case 'sprint':
         return (
           <SprintField
-            field={field} 
+            field={field}
             value={value}
             onChange={handleChange}
           />
@@ -73,27 +69,30 @@ function renderField(field) {
       case 'component':
         return (
           <ComponentField
-            field={field} 
+            field={field}
             value={value}
             onChange={handleChange}
           />
-        );    
+        );
       case 'version':
         return (
           <VersionField
-            field={field} 
+            field={field}
             value={value}
             onChange={handleChange}
           />
         );
       case 'createDate':
         return (
-          <CreateDateField
-            field={field} 
+          <DateTimeField
+            field={{
+              fieldType: 'datetime',
+              name: '创建时间',
+            }}
             value={value}
             onChange={handleChange}
           />
-        );     
+        );
       default: return null;
     }
   }
@@ -104,7 +103,7 @@ function renderField(field) {
     case 'checkbox':
       return (
         <SelectField
-          field={field} 
+          field={field}
           value={value}
           onChange={handleChange}
         />
@@ -113,15 +112,15 @@ function renderField(field) {
     case 'text':
       return (
         <InputField
-          field={field} 
+          field={field}
           value={value}
           onChange={handleChange}
         />
-      );    
+      );
     case 'member':
       return (
         <MemberField
-          field={field} 
+          field={field}
           value={value}
           onChange={handleChange}
         />
@@ -129,7 +128,7 @@ function renderField(field) {
     case 'number':
       return (
         <NumberField
-          field={field} 
+          field={field}
           value={value}
           onChange={handleChange}
         />
@@ -138,8 +137,8 @@ function renderField(field) {
     case 'datetime':
     case 'date':
       return (
-        <TimeField
-          field={field} 
+        <DateTimeField
+          field={field}
           value={value}
           onChange={handleChange}
         />
@@ -149,10 +148,7 @@ function renderField(field) {
 }
 function CustomFields() {
   const { chosenFields } = IssueStore;
-  const {
-    dataSet, 
-  } = useContext(Store);
-  return [...chosenFields.entries()].map(([, field]) => <div key={field.code} style={{ margin: '0 5px' }}>{renderField(field)}</div>);
+  return [...chosenFields.entries()].map(([, field]) => !field.noDisplay && <div key={field.code} style={{ margin: '8px 5px 0' }}>{renderField(field)}</div>);
 }
 
 export default observer(CustomFields);
