@@ -4,7 +4,6 @@ import { observer } from 'mobx-react';
 import { Modal, Radio } from 'choerodon-ui';
 import FileSaver from 'file-saver';
 import IssueStore from '@/stores/project/issue/IssueStore';
-import transform from '../../utils';
 
 const RadioGroup = Radio.Group;
 const { AppState } = stores;
@@ -66,8 +65,7 @@ class ExportIssue extends Component {
   exportExcel = () => {
     const projectId = AppState.currentMenuType.id;
     const orgId = AppState.currentMenuType.organizationId;
-    const { dataSet } = this.props;
-    const searchDTO = transform(dataSet.queryDataSet.current.toData());
+    const searchDTO = IssueStore.getCustomFieldFilters();
     const { mode } = this.state;
     const tableShowColumns = mode === 'all' ? [] : this.getVisibleColumns();
     const search = {
