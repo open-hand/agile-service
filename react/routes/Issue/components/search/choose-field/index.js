@@ -2,9 +2,9 @@ import React, {
   useState, useCallback, useRef, useEffect,
 } from 'react';
 import {
-  Dropdown, Button, Icon,  
+  Button, Icon,  
 } from 'choerodon-ui/pro';
-import IssueStore from '@/stores/project/sprint/IssueStore';
+import { Dropdown } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import FieldList from './FieldList';
 
@@ -25,28 +25,35 @@ function useClickOut(onClickOut) {
 }
 
 function ChooseField() {  
-  const [hidden, setHidden] = useState(true);
+  const [hidden, setHidden] = useState(true);  
   const handleClickOut = useCallback(() => {
     setHidden(true);
   }, []);
   const ref = useClickOut(handleClickOut);
   return (
-    <div style={{ marginLeft: 5, marginTop: 8 }}>
-      <Dropdown      
-        hidden={hidden}
+    <div
+      style={{ marginLeft: 5, marginTop: 8 }}
+    >
+      <Dropdown
+        getPopupContainer={trigger => trigger.parentNode}
+        visible={!hidden}
         overlay={(
           <div            
             ref={ref}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
           >
             <FieldList />
           </div>
         )}
         trigger={['click']}
       >
-        <Button onClick={(e) => {
-          e.nativeEvent.stopImmediatePropagation();
-          setHidden(false);
-        }}
+        <Button
+          onClick={(e) => {
+            e.nativeEvent.stopImmediatePropagation();
+            setHidden(false);
+          }}
         >
           添加筛选
           <Icon type="arrow_drop_down" />
