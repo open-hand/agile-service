@@ -46,11 +46,11 @@ const Issue = withRouter(observer(() => {
     let prefix = '';
     if (paramChoose) {
       if (paramChoose === 'version' && paramCurrentVersion) {
-        dataSet.queryDataSet.current.set(paramChoose, [paramCurrentVersion]);
+        IssueStore.handleFilterChange(paramChoose, [paramCurrentVersion]);
         prefix = '版本';
       }
       if (paramChoose === 'sprint' && paramCurrentSprint) {
-        dataSet.queryDataSet.current.set(paramChoose, [paramCurrentSprint]);
+        IssueStore.handleFilterChange(paramChoose, [paramCurrentSprint]);
         prefix = '冲刺';
       }
     }
@@ -68,14 +68,14 @@ const Issue = withRouter(observer(() => {
     };
     if (paramType) {
       prefix = prefixs[paramType];
-      dataSet.queryDataSet.current.set(paramType, [paramId]);
+      IssueStore.handleFilterChange(paramType, [paramId]);
     }
     setUrlFilter(`${prefix ? `${prefix}:` : ''}${paramName || ''}`);
     // this.paramName = decodeURI(paramName);
     // 单个任务跳转 => otherArgs 设置 issueId，将任务设定为展开模式
     if (paramIssueId) {
-      dataSet.queryDataSet.current.set('issueIds', [paramOpenIssueId || paramIssueId]);
-      dataSet.queryDataSet.current.set('contents', [`${IssueStore.getProjectInfo.projectCode}-${paramName.split('-')[paramName.split('-').length - 1]}`]);
+      IssueStore.handleFilterChange('issueIds', [paramOpenIssueId || paramIssueId]);
+      IssueStore.handleFilterChange('contents', [`${IssueStore.getProjectInfo.projectCode}-${paramName.split('-')[paramName.split('-').length - 1]}`]);
       IssueStore.setClickedRow({
         selectedIssue: {
           issueId: paramOpenIssueId || paramIssueId,
@@ -83,7 +83,7 @@ const Issue = withRouter(observer(() => {
         expand: true,
       });
     } else {
-      await dataSet.query();
+      await IssueStore.query();
     }
   };
   const handleClear = () => {
