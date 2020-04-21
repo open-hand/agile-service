@@ -41,7 +41,7 @@
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@choerodon/boot": "0.21.0",
-    "@choerodon/master": "0.0.0",
+    "@choerodon/master": "0.22.0",
     "babel-plugin-module-resolver": "^3.2.0",
     "gulp-watch": "^5.0.1",
     "webpackbar": "^4.0.0"
