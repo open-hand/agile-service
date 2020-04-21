@@ -16,7 +16,7 @@ public interface BoardColumnMapper extends Mapper<BoardColumnDTO> {
 
     List selectColumnsByBoardId(@Param("projectId") Long projectId,
                                 @Param("boardId") Long boardId,
-                                @Param("activeSprintId") Long activeSprintId,
+                                @Param("sprintId") Long sprintId,
                                 @Param("assigneeId") Long assigneeId,
                                 @Param("onlyStory") Boolean onlyStory,
                                 @Param("filterSql") String filterSql,
@@ -85,7 +85,7 @@ public interface BoardColumnMapper extends Mapper<BoardColumnDTO> {
 
     List<ColumnIssueNumDTO> getAllColumnNum(@Param("projectId") Long projectId,
                                             @Param("boardId") Long boardId,
-                                            @Param("activeSprintId") Long activeSprintId,
+                                            @Param("sprintId") Long sprintId,
                                             @Param("columnConstraint") String columnConstraint);
 
     List<BoardColumnStatusRelDTO> queryRelByColumnIds(@Param("columnIds") List<Long> columnIds);

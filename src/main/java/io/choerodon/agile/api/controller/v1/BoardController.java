@@ -145,8 +145,10 @@ public class BoardController {
                                                      @ApiParam(value = "组织id", required = true)
                                                      @PathVariable(name = "organization_id") Long organizationId,
                                                      @ApiParam(value = "经办人搜索", required = false)
-                                                     @RequestParam(required = false) List<Long> assigneeFilterIds) {
-        return Optional.ofNullable(boardService.queryAllData(projectId, boardId, assigneeId, onlyStory, quickFilterIds, organizationId, assigneeFilterIds))
+                                                     @RequestParam(required = false) List<Long> assigneeFilterIds,
+                                                     @ApiParam(value = "冲刺id", required = false)
+                                                     @RequestParam(required = false) Long sprintId) {
+        return Optional.ofNullable(boardService.queryAllData(projectId, boardId, assigneeId, onlyStory, quickFilterIds, organizationId, assigneeFilterIds, sprintId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.board.get"));
     }

@@ -24,6 +24,7 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -334,22 +335,29 @@ public class BoardServiceImpl implements BoardService {
         return parentIssueDTOList;
     }
 
-    private List<ColumnIssueNumDTO> getAllColumnNum(Long projectId, Long boardId, Long activeSprintId) {
+    private List<ColumnIssueNumDTO> getAllColumnNum(Long projectId, Long boardId, Long sprintId) {
         BoardDTO boardDTO = boardMapper.selectByPrimaryKey(boardId);
         if (!CONTRAINT_NONE.equals(boardDTO.getColumnConstraint())) {
-            return boardColumnMapper.getAllColumnNum(projectId, boardId, activeSprintId, boardDTO.getColumnConstraint());
+            return boardColumnMapper.getAllColumnNum(projectId, boardId, sprintId, boardDTO.getColumnConstraint());
         } else {
             return new ArrayList<>();
         }
     }
 
     @Override
-    public JSONObject queryAllData(Long projectId, Long boardId, Long assigneeId, Boolean onlyStory, List<Long> quickFilterIds, Long organizationId, List<Long> assigneeFilterIds) {
+    public JSONObject queryAllData(Long projectId, Long boardId, Long assigneeId, Boolean onlyStory,
+                                   List<Long> quickFilterIds, Long organizationId, List<Long> assigneeFilterIds,
+                                   Long sprintId) {
         JSONObject jsonObject = new JSONObject(true);
-        SprintDTO activeSprint = getActiveSprint(projectId);
-        Long activeSprintId = null;
-        if (activeSprint != null) {
-            activeSprintId = activeSprint.getSprintId();
+        //没有传冲刺id，则使用激活的冲刺
+        SprintDTO currentSprint;
+        if (ObjectUtils.isEmpty(sprintId)) {
+            currentSprint = getActiveSprint(projectId);
+            if (!ObjectUtils.isEmpty(currentSprint)) {
+                sprintId = currentSprint.getSprintId();
+            }
+        } else {
+            currentSprint = sprintMapper.selectByPrimaryKey(sprintId);
         }
         String filterSql = null;
         if (quickFilterIds != null && !quickFilterIds.isEmpty()) {
@@ -358,7 +366,7 @@ public class BoardServiceImpl implements BoardService {
         List<Long> assigneeIds = new ArrayList<>();
         List<Long> parentIds = new ArrayList<>();
         List<Long> epicIds = new ArrayList<>();
-        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, activeSprintId, assigneeId, onlyStory, filterSql, assigneeFilterIds);
+        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, sprintId, assigneeId, onlyStory, filterSql, assigneeFilterIds);
         Boolean condition = assigneeId != null && onlyStory;
         Map<Long, List<Long>> parentWithSubs = new HashMap<>();
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
@@ -370,7 +378,7 @@ public class BoardServiceImpl implements BoardService {
         jsonObject.put("parentWithSubs", parentWithSubs);
         jsonObject.put("parentCompleted", sortAndJudgeCompleted(projectId, parentIds));
         jsonObject.put("epicInfo", !epicIds.isEmpty() ? boardColumnMapper.selectEpicBatchByIds(epicIds) : null);
-        jsonObject.put("allColumnNum", getAllColumnNum(projectId, boardId, activeSprintId));
+        jsonObject.put("allColumnNum", getAllColumnNum(projectId, boardId, sprintId));
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
         Comparator<IssueForBoardDO> comparator = Comparator.comparing(IssueForBoardDO::getRank, nullsFirst(naturalOrder()));
         columns.forEach(columnAndIssueDTO ->
@@ -391,7 +399,7 @@ public class BoardServiceImpl implements BoardService {
             });
         });
         jsonObject.put("columnsData", putColumnData(columns));
-        jsonObject.put("currentSprint", putCurrentSprint(activeSprint, organizationId));
+        jsonObject.put("currentSprint", putCurrentSprint(currentSprint, organizationId));
         //处理用户默认看板设置，保存最近一次的浏览
         handleUserSetting(boardId, projectId);
         return jsonObject;
