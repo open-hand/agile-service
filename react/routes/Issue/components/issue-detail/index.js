@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import IssueStore from '@/stores/project/sprint/IssueStore';
+import IssueStore from '@/stores/project/issue/IssueStore';
 import EditIssue from '@/components/EditIssue';
 
 @observer

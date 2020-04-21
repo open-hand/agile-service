@@ -3,7 +3,7 @@ import { stores, axios, Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react';
 import { Modal, Radio } from 'choerodon-ui';
 import FileSaver from 'file-saver';
-import IssueStore from '@/stores/project/sprint/IssueStore/IssueStore';
+import IssueStore from '@/stores/project/issue/IssueStore';
 import transform from '../../utils';
 
 const RadioGroup = Radio.Group;

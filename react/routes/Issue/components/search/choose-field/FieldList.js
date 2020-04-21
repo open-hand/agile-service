@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import {
   CheckBox, Button, TextField, Icon,
 } from 'choerodon-ui/pro';
-import IssueStore from '@/stores/project/sprint/IssueStore';
+import IssueStore from '@/stores/project/issue/IssueStore';
 import './FieldList.less';
 
 const prefix = 'c7nagile-choose-field-list';
@@ -48,15 +48,15 @@ function FieldList() {
           }}
         >
           全选
-        </CheckBox>
-        {(checked || indeterminate) && (
-          <Button onClick={() => {
+        </CheckBox>  
+        <Button 
+          style={{ display: checked || indeterminate ? 'inline-block' : 'none' }}
+          onClick={() => {
             IssueStore.unChooseAll();
           }}
-          >
-            清除筛选项
-          </Button>
-        )}
+        >
+          清除筛选项
+        </Button>
       </div>
       <div className={`${prefix}-content`}>
         {filteredSystemFields.length > 0 && (

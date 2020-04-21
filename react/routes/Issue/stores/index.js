@@ -6,7 +6,7 @@ import { DataSet } from 'choerodon-ui/pro';
 import { inject } from 'mobx-react';
 import { injectIntl } from 'react-intl';
 import { getFoundationHeader } from '@/api/NewIssueApi';
-import IssueStore from '@/stores/project/sprint/IssueStore';
+import IssueStore from '@/stores/project/issue/IssueStore';
 import IssueDataSet from './IssueDataSet';
 
 const Store = createContext();

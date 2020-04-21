@@ -4,7 +4,7 @@ import {
   Modal, Form, Input,
 } from 'choerodon-ui';
 import { stores, axios, Choerodon } from '@choerodon/boot';
-import IssueStore from '@/stores/project/sprint/IssueStore';
+import IssueStore from '@/stores/project/issue/IssueStore';
 
 const { AppState } = stores;
 const FormItem = Form.Item;

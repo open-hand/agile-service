@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import { set, runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'choerodon-ui';
-import IssueStore from '@/stores/project/sprint/IssueStore';
+import IssueStore from '@/stores/project/issue/IssueStore';
 import Modal from '../components/Modal';
 import transform from '../utils';
 import BatchModal from '../components/BatchModal';

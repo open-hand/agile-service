@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
-import IssueStore from '@/stores/project/sprint/IssueStore';
+import IssueStore from '@/stores/project/issue/IssueStore';
 import IssueTypeField from './field/IssueTypeField';
 import StatusField from './field/StatusField';
 import AssignField from './field/AssignField';

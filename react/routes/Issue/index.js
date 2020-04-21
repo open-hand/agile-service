@@ -10,7 +10,7 @@ import { Button } from 'choerodon-ui';
 import queryString from 'querystring';
 import { map } from 'lodash';
 import CreateIssue from '@/components/CreateIssue';
-import IssueStore from '../../stores/project/sprint/IssueStore/IssueStore';
+import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
 import Search from './components/search';
 import FilterManage from './components/FilterManage';
