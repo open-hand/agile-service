@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { unionBy } from 'lodash';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
 import { configTheme } from '@/common/utils';
 
-let sprints = [];
+let list = [];
 function SprintField({ field, value, onChange }) {
+  const [, setValue] = useState(0);
   return (
     <SelectFocusLoad
       {...configTheme({
-        list: sprints,
+        list,
         textField: 'sprintName',
         valueFiled: 'sprintId',
         parseNumber: true,
@@ -23,7 +24,14 @@ function SprintField({ field, value, onChange }) {
       allowClear
       dropdownMatchSelectWidth={false}
       placeholder="冲刺"
-      saveList={(v) => { sprints = unionBy(sprints, v, 'sprintId'); }}
+      saveList={(v) => {
+        const shouldRender = list.length === 0 && value && value.length > 0;
+        list = unionBy(list, v, 'sprintId'); 
+        // 已保存筛选条件含有用户，并且这个时候select并没有显示，那么选了自定义筛选，要渲染一次
+        if (list.length > 0 && shouldRender) {
+          setValue(Math.random());
+        }
+      }}
       filter
       onChange={onChange}
       value={value}

@@ -5,7 +5,7 @@ import { unionBy } from 'lodash';
 import { configTheme } from '@/common/utils';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
 
-let users = [];
+let list = [];
 const { Option } = Select;
 function MemberField({ field, value, onChange }) {
   const { code, name } = field;
@@ -13,7 +13,7 @@ function MemberField({ field, value, onChange }) {
   return (
     <SelectFocusLoad
       {...configTheme({
-        list: users,
+        list,
         textField: 'realName',
         valueFiled: 'id',
         parseNumber: true,
@@ -27,10 +27,10 @@ function MemberField({ field, value, onChange }) {
       allowClear
       placeholder={name}
       saveList={(v) => {
-        const shouldRender = users.length === 0 && value && value.length > 0;
-        users = unionBy(users, v, 'id'); 
+        const shouldRender = list.length === 0 && value && value.length > 0;
+        list = unionBy(list, v, 'id'); 
         // 已保存筛选条件含有用户，并且这个时候select并没有显示，那么选了自定义筛选，要渲染一次
-        if (users.length > 0 && shouldRender) {
+        if (list.length > 0 && shouldRender) {
           setValue(Math.random());
         }
       }}

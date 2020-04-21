@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { unionBy } from 'lodash';
 import { Select } from 'choerodon-ui';
@@ -6,12 +6,13 @@ import SelectFocusLoad from '@/components/SelectFocusLoad';
 import { configTheme } from '@/common/utils';
 
 const { Option } = Select;
-let components = [];
+let list = [];
 function ComponentField({ field, value, onChange }) {
+  const [, setValue] = useState(0);
   return (
     <SelectFocusLoad
       {...configTheme({
-        list: components,
+        list,
         textField: 'name',
         valueFiled: 'componentId',
         parseNumber: true,
@@ -24,7 +25,14 @@ function ComponentField({ field, value, onChange }) {
       allowClear
       dropdownMatchSelectWidth={false}
       placeholder="模块"
-      saveList={(v) => { components = unionBy(components, v, 'componentId'); }}
+      saveList={(v) => {
+        const shouldRender = list.length === 0 && value && value.length > 0;
+        list = unionBy(list, v, 'componentId'); 
+        // 已保存筛选条件含有用户，并且这个时候select并没有显示，那么选了自定义筛选，要渲染一次
+        if (list.length > 0 && shouldRender) {
+          setValue(Math.random());
+        }
+      }}
       filter
       onChange={onChange}
       value={value}
