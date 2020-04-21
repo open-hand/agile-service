@@ -85,6 +85,7 @@ function IssueList({ data, sprintId }) {
                   },
                 ] : undefined}
                 sprintId={sprintId}
+                chosenFeatureId={!isNaN(BacklogStore.getChosenFeature) ? BacklogStore.getChosenFeature : undefined}
                 onCreate={(res) => {
                   BacklogStore.handleCreateIssue(res, String(sprintId));
                   BacklogStore.refresh(false, res); // 更新侧边框 

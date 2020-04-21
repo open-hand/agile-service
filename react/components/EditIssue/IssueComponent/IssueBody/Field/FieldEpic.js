@@ -39,8 +39,13 @@ const { Text, Edit } = TextEditToggle;
     });
     if (IsInProgramStore.isInProgram) {
       getFeaturesByEpic().then((data) => {
+        const { store } = this.props;
+        const issue = store.getIssue;
+        const {
+          featureId, featureName,
+        } = issue;
         this.setState({
-          originFeatures: data,
+          originFeatures: data.find(item => item.issueId === featureId) ? data : [...data, { issueId: featureId, summary: featureName }],
           selectLoading: false,
         });
       });
@@ -100,6 +105,13 @@ const { Text, Edit } = TextEditToggle;
       };
       updateIssue(obj)
         .then(() => {
+          if (IsInProgramStore.isInProgram) {
+            getFeaturesByEpic().then((data) => {
+              this.setState({
+                originFeatures: data,
+              });
+            });
+          }
           if (onUpdate) {
             onUpdate();
           }
@@ -162,7 +174,6 @@ const { Text, Edit } = TextEditToggle;
                           newFeatureId: value,
                         });
                       }}
-                      dropdownClassName="c7n-agile-featureSelectDropdown"
                     >
                       {originFeatures.map(feature => <Option key={`${feature.issueId}`} value={feature.issueId}><Tooltip title={feature.summary}>{feature.summary}</Tooltip></Option>)}
                     </Select>
