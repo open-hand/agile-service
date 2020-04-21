@@ -295,7 +295,6 @@ class ScrumBoardHome extends Component {
     const menu = AppState.currentMenuType;
     const { type, id: projectId, organizationId: orgId } = menu;
     const currentSprintIsDoing = ScrumBoardStore.didCurrentSprintExist && IsInProgramStore.isShowFeature && IsInProgramStore.sprints.find(item => item.statusCode === 'started' && item.sprintId === ScrumBoardStore.sprintId); 
-
     return (
       <Fragment>
         <Header title="活跃冲刺">         
@@ -392,8 +391,8 @@ class ScrumBoardHome extends Component {
                 <div className="c7n-scrumboard-header">
                   <StatusColumn />
                 </div>
-                {!ScrumBoardStore.didCurrentSprintExist ? (
-                  <NoneSprint />
+                {(!ScrumBoardStore.didCurrentSprintExist || ((!ScrumBoardStore.otherIssue || ScrumBoardStore.otherIssue.length === 0) && (!ScrumBoardStore.interconnectedData || ScrumBoardStore.interconnectedData.size === 0))) ? (
+                  <NoneSprint doingSprintExist={ScrumBoardStore.didCurrentSprintExist} />
                 )
                   : (
                     <div

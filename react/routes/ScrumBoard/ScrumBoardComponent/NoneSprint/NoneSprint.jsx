@@ -2,7 +2,7 @@
 import React from 'react';
 import EmptyScrumboard from '@/assets/image/emptyScrumboard.svg';
 
-const NoneSprint = () => (
+const NoneSprint = ({ doingSprintExist }) => (
   <React.Fragment>
     <div
       style={{
@@ -18,11 +18,11 @@ const NoneSprint = () => (
           marginLeft: 40,
         }}
       >
-        <p style={{ color: 'rgba(0,0,0,0.65)', fontSize: '13px' }}>没有活动的Sprint</p>
+        <p style={{ color: 'rgba(0,0,0,0.65)', fontSize: '13px' }}>{`${!doingSprintExist ? '没有活跃的Sprint' : '当前冲刺下未规划问题'}`}</p>
         <p style={{ fontSize: 16, lineHeight: '34px' }}>
           在工作列表的
           <span style={{ color: '#3f51b5' }}>待办事项</span>
-          中开启冲刺
+          {!doingSprintExist ? '中开启冲刺' : '规划问题到当前冲刺'}
         </p>
       </div>
     </div>
