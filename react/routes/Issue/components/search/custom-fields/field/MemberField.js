@@ -20,7 +20,7 @@ function MemberField({ field, value, onChange }) {
       })}
       type="user"
       loadWhenMount
-      style={{ width: 150, margin: '0 5px' }}
+      style={{ width: 120, margin: 0 }}
       dropdownMatchSelectWidth={false}
       mode="multiple"
       showCheckAll={false}

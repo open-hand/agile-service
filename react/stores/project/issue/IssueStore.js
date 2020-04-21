@@ -28,34 +28,42 @@ const systemFields = [{
   code: 'issueTypeId',
   name: '问题类型',
   defaultShow: false,
+  fieldType: 'multiple',
 }, {
   code: 'statusId',
   name: '状态',
   defaultShow: true,
+  fieldType: 'multiple',
 }, {
   code: 'assigneeId',
   name: '经办人',
   defaultShow: true,
+  fieldType: 'user',
 }, {
   code: 'reporterIds',
   name: '报告人',
   defaultShow: false,
+  fieldType: 'user',
 }, {
   code: 'sprint',
   name: '冲刺',
   defaultShow: true,
+  fieldType: 'multiple',
 }, {
   code: 'component',
   name: '模块',
   defaultShow: false,
+  fieldType: 'multiple',
 }, {
   code: 'version',
   name: '版本',
   defaultShow: false,
+  fieldType: 'multiple',
 }, {
   code: 'createDate',
   name: '创建时间',
   defaultShow: false,
+  fieldType: 'datetime',
 }];
 const { AppState } = stores;
 function transformSystemFilter(data) {

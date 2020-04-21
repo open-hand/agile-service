@@ -16,7 +16,7 @@ function StatusField({ field, value, onChange }) {
       type="issue_status"
       showCheckAll={false}
       loadWhenMount
-      style={{ width: 82, margin: '0 5px' }}
+      style={{ width: 120, margin: 0 }}
       mode="multiple"
       allowClear
       dropdownMatchSelectWidth={false}

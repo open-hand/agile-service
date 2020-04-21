@@ -16,8 +16,8 @@ function VersionField({ field, value, onChange }) {
         parseNumber: true,
       })}
       type="version"
-      loadWhenMount            
-      style={{ width: 82, margin: '0 5px' }}
+      loadWhenMount
+      style={{ width: 120, margin: 0 }}
       mode="multiple"
       showCheckAll={false}
       allowClear

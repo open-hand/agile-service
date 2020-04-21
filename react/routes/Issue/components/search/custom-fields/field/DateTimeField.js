@@ -19,11 +19,19 @@ const PickerMap = new Map([
 ]);
 function TimeField({ field, value, onChange }) {
   const Picker = PickerMap.get(field.fieldType);
+  let width;
+  if (field.fieldType === 'datetime') {
+    width = 380;
+  } else if (field.fieldType === 'date') {
+    width = 265;
+  } else if (field.fieldType === 'time') {
+    width = 230;
+  }
   return (
     <Picker
       label={field.name}
       labelLayout="float"
-      style={{ width: 230 }}
+      style={{ width, margin: '6px 0' }}
       placeholder={['开始时间', '结束时间']}
       value={getSelectedDate(field, value)}
       onChange={(range) => {
