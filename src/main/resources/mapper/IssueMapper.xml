@@ -863,6 +863,23 @@
                         )
                     </foreach>
                 </if>
+                <if test="searchVO.otherArgs.customField.date_hms != null and searchVO.otherArgs.customField.date_hms.size > 0">
+                    and
+                    <foreach collection="searchVO.otherArgs.customField.date_hms" item="item" open="(" separator="and"
+                             close=")">
+                        ai.issue_id in
+                        (
+                            SELECT
+                            ffv.instance_id
+                            FROM
+                            fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND DATE_FORMAT(ffv.date_value, '%H:%i:%s') &gt;= #{item.startDate} AND DATE_FORMAT(ffv.date_value, '%H:%i:%s') &lt;= #{item.endDate}
+                        )
+                    </foreach>
+                </if>
                 <if test="searchVO.otherArgs.customField.number != null and searchVO.otherArgs.customField.number.size > 0">
                     and
                     <foreach collection="searchVO.otherArgs.customField.number" item="item" open="(" separator="and"
