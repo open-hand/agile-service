@@ -35,7 +35,7 @@ class QuickCreateIssue extends Component {
   handleCreate = () => {
     const { currentTypeCode } = this.state;
     const {
-      form, issueTypes, sprintId, epicId, versionIssueRelVOList,
+      form, issueTypes, sprintId, epicId, versionIssueRelVOList, chosenFeatureId,
     } = this.props;
     form.validateFields((err, values) => {
       const { summary } = values;
@@ -66,6 +66,7 @@ class QuickCreateIssue extends Component {
                 issueLinkCreateVOList: [],
                 labelIssueRelVOList: [],
                 versionIssueRelVOList: versionIssueRelVOList || [],
+                featureId: currentType.typeCode === 'story' ? chosenFeatureId : 0,
               };
               this.setState({
                 loading: true,
