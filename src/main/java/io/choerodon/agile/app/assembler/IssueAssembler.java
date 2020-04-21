@@ -292,16 +292,17 @@ public class IssueAssembler extends AbstractAssembler {
         Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
         Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
-        exportIssues.forEach(issueDO -> {
-            String assigneeName = usersMap.get(issueDO.getAssigneeId()) != null ? usersMap.get(issueDO.getAssigneeId()).getName() : null;
-            String assigneeRealName = usersMap.get(issueDO.getAssigneeId()) != null ? usersMap.get(issueDO.getAssigneeId()).getRealName() : null;
-            String reporterName = usersMap.get(issueDO.getReporterId()) != null ? usersMap.get(issueDO.getReporterId()).getName() : null;
-            String reporterRealName = usersMap.get(issueDO.getReporterId()) != null ? usersMap.get(issueDO.getReporterId()).getRealName() : null;
+        exportIssues.forEach(issue -> {
+            String assigneeName = usersMap.get(issue.getAssigneeId()) != null ? usersMap.get(issue.getAssigneeId()).getName() : null;
+            String assigneeRealName = usersMap.get(issue.getAssigneeId()) != null ? usersMap.get(issue.getAssigneeId()).getRealName() : null;
+            String reporterName = usersMap.get(issue.getReporterId()) != null ? usersMap.get(issue.getReporterId()).getName() : null;
+            String reporterRealName = usersMap.get(issue.getReporterId()) != null ? usersMap.get(issue.getReporterId()).getRealName() : null;
             ExportIssuesVO exportIssuesVO = new ExportIssuesVO();
-            BeanUtils.copyProperties(issueDO, exportIssuesVO);
-            exportIssuesVO.setPriorityName(priorityDTOMap.get(issueDO.getPriorityId()) == null ? null : priorityDTOMap.get(issueDO.getPriorityId()).getName());
-            exportIssuesVO.setStatusName(statusMapDTOMap.get(issueDO.getStatusId()) == null ? null : statusMapDTOMap.get(issueDO.getStatusId()).getName());
-            exportIssuesVO.setTypeName(issueTypeDTOMap.get(issueDO.getIssueTypeId()) == null ? null : issueTypeDTOMap.get(issueDO.getIssueTypeId()).getName());
+            BeanUtils.copyProperties(issue, exportIssuesVO);
+            exportIssuesVO.setSprintName(getActiveSprintName(issue));
+            exportIssuesVO.setPriorityName(priorityDTOMap.get(issue.getPriorityId()) == null ? null : priorityDTOMap.get(issue.getPriorityId()).getName());
+            exportIssuesVO.setStatusName(statusMapDTOMap.get(issue.getStatusId()) == null ? null : statusMapDTOMap.get(issue.getStatusId()).getName());
+            exportIssuesVO.setTypeName(issueTypeDTOMap.get(issue.getIssueTypeId()) == null ? null : issueTypeDTOMap.get(issue.getIssueTypeId()).getName());
             exportIssuesVO.setAssigneeName(assigneeName);
             exportIssuesVO.setAssigneeRealName(assigneeRealName);
             exportIssuesVO.setReporterName(reporterName);
@@ -309,6 +310,18 @@ public class IssueAssembler extends AbstractAssembler {
             exportIssuesVOS.add(exportIssuesVO);
         });
         return exportIssuesVOS;
+    }
+
+    private String getActiveSprintName(IssueDTO issue) {
+        List<IssueSprintDTO>  issueSprintList = issue.getIssueSprintDTOS();
+        if (!ObjectUtils.isEmpty(issueSprintList)) {
+            for(IssueSprintDTO sprint : issueSprintList) {
+                if (!"closed".equals(sprint.getStatusCode())) {
+                    return sprint.getSprintName();
+                }
+            }
+        }
+        return null;
     }
 
     public IssueCreateVO issueDtoToIssueCreateDto(IssueDetailDTO issueDetailDTO) {
