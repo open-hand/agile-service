@@ -20,6 +20,7 @@ const TypeTag = ({
         <Icon
           className="c7n-typeTag-icon-normal"
           style={{
+            transition: 'none',
             fontSize: iconSize * 15 / 24 || '15px',
             background: colour || '#fab614',
             color: 'white',
@@ -29,6 +30,7 @@ const TypeTag = ({
       ) : (
         <Icon
           style={{
+            transition: 'none',
             fontSize: iconSize || '26px',
             color: colour || '#fab614',
           }}
