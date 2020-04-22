@@ -786,6 +786,20 @@
                 ) and ai.type_code = 'sub_task'))
                 )
             </if>
+            <if test='searchVO.otherArgs.feature != null and searchVO.otherArgs.feature.size > 0'>
+                AND (
+                    <if test='searchVO.otherArgs.featureNull != null and searchVO.otherArgs.featureNull == true'>
+                        ((ai.feature_id is null or ai.feature_id = 0) and ai.type_code in ('story'))
+                        OR
+                    </if>
+                    (ai.feature_id in
+                    <foreach collection="searchVO.otherArgs.feature" item="id" open="(" separator=","
+                             close=")">
+                        #{id}
+                    </foreach>
+                    and ai.type_code in ('story'))
+                )
+            </if>
             <if test='searchVO.otherArgs.version != null and searchVO.otherArgs.version.size > 0'>
                 AND (
                 <if test='searchVO.otherArgs.versionNull != null and searchVO.otherArgs.versionNull == true'>
