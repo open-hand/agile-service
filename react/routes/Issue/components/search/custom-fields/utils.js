@@ -1,4 +1,5 @@
 const canvas = document.createElement('canvas');
+canvas.style.display = 'none';
 document.body.append(canvas);
 const ctx = canvas.getContext('2d');
 function getWidth(text, {
