@@ -18,7 +18,7 @@ import IssueStore from '@/stores/project/issue/IssueStore';
 import SummaryField from './custom-fields/field/SummaryField';
 import Store from '../../stores';
 import CustomFields from './custom-fields';
-import ChooseField from './choose-field';
+import { getSelectStyle } from './custom-fields/utils';
 import './index.less';
 
 
@@ -200,7 +200,7 @@ export default withRouter(observer(({
               maxTagCount={0}
               labelInValue
               maxTagPlaceholder={ommittedValues => `${ommittedValues.map(item => item.label).join(', ')}`}
-              style={{ width: 120, margin: 0, height: 34 }}
+              style={{ ...getSelectStyle({ name: '快速筛选' }, getMyFilterSelectValue()), height: 34 }}
               onSelect={handleSelect}
               onDeselect={handleDeselect}
               onClear={handleDeselect}

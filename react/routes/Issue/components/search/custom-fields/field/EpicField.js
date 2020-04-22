@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { unionBy } from 'lodash';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
 import { configTheme } from '@/common/utils';
+import { getSelectStyle } from '../utils';
 
 let list = [];
 function EpicField({ field, value, onChange }) {
@@ -17,7 +18,7 @@ function EpicField({ field, value, onChange }) {
       })}
       type="epic"
       loadWhenMount
-      style={{ width: 120, margin: 0 }}
+      style={getSelectStyle(field, value)}
       mode="multiple"
       showCheckAll={false}
       allowClear

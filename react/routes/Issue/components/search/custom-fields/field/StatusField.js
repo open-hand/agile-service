@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { unionBy } from 'lodash';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
 import { configTheme } from '@/common/utils';
+import { getSelectStyle } from '../utils';
 
 let issueStatus = [];
 function StatusField({ field, value, onChange }) {
@@ -16,7 +17,7 @@ function StatusField({ field, value, onChange }) {
       type="issue_status"
       showCheckAll={false}
       loadWhenMount
-      style={{ width: 120, margin: 0 }}
+      style={getSelectStyle(field, value)}
       mode="multiple"
       allowClear
       dropdownMatchSelectWidth={false}

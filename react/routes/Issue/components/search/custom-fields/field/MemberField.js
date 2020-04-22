@@ -4,6 +4,7 @@ import { Select } from 'choerodon-ui';
 import { unionBy } from 'lodash';
 import { configTheme } from '@/common/utils';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
+import { getSelectStyle } from '../utils';
 
 let list = [];
 const { Option } = Select;
@@ -20,7 +21,7 @@ function MemberField({ field, value, onChange }) {
       })}
       type="user"
       loadWhenMount
-      style={{ width: 120, margin: 0 }}
+      style={getSelectStyle(field, value)}
       dropdownMatchSelectWidth={false}
       mode="multiple"
       showCheckAll={false}

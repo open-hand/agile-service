@@ -10,7 +10,7 @@ function NumberField({ field, value, onChange }) {
       value={value}
       onChange={onChange}
       placeholder={name}
-      style={{ width: 150 }}
+      style={{ width: 100, height: 30 }}
     />      
   );
 }
