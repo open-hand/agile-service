@@ -12,6 +12,15 @@ public class SprintNameDTO {
     private Date startDate;
     private Date endDate;
     private String statusCode;
+    private Long piId;
+
+    public Long getPiId() {
+        return piId;
+    }
+
+    public void setPiId(Long piId) {
+        this.piId = piId;
+    }
 
     public Long getSprintId() {
         return sprintId;
