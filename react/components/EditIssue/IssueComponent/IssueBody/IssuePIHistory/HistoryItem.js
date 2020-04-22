@@ -44,10 +44,10 @@ function HistoryItem({ data, featureType }) {
           </div>
         </div>
         <div className={`${prefix}-content-bottom`}>
-          {(expand ? teamSprintVOS : teamSprintVOS.slice(0, 1)).map(team => renderTeam(team))}
+          {(expand ? teamSprintVOS : teamSprintVOS.slice(0, 5)).map(team => renderTeam(team))}
         </div>
       </div>
-      {teamSprintVOS.length > 1 && (
+      {teamSprintVOS.length > 5 && (
         <div className={`${prefix}-expand ${expand ? `${prefix}-expanded` : ''}`} onClick={() => setExpand(e => !e)}>
           <Icon type="skipped_a" />
         </div>
