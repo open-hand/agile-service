@@ -363,6 +363,8 @@ class IssueStore {
       // 系统字段
       if (!id) {
         systemFilter[code] = value;
+        // eslint-disable-next-line no-continue
+        continue;
       }
       switch (fieldType) {
         case 'single':

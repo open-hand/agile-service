@@ -67,6 +67,8 @@ class ExportIssue extends Component {
     const orgId = AppState.currentMenuType.organizationId;
     const searchDTO = IssueStore.getCustomFieldFilters();
     const { mode } = this.state;
+    const { dataSet } = this.props;
+    const sort = dataSet.sort && `${dataSet.sort},${dataSet.isAsc ? 'asc' : 'desc'}`;
     const tableShowColumns = mode === 'all' ? [] : this.getVisibleColumns();
     const search = {
       ...searchDTO,
@@ -75,7 +77,7 @@ class ExportIssue extends Component {
     this.setState({
       loading: true,
     });
-    axios.post(`/zuul/agile/v1/projects/${projectId}/issues/export?organizationId=${orgId}`, search, { responseType: 'arraybuffer' })
+    axios.post(`/zuul/agile/v1/projects/${projectId}/issues/export?organizationId=${orgId}${sort ? `&sort=${sort}` : ''}`, search, { responseType: 'arraybuffer' })
       .then((data) => {
         const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const fileName = `${AppState.currentMenuType.name}.xlsx`;
