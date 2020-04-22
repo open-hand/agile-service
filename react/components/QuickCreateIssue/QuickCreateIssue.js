@@ -104,6 +104,7 @@ class QuickCreateIssue extends Component {
     } = this.state;
     const { issueTypes, form: { getFieldDecorator } } = this.props;    
     const currentType = issueTypes.find(t => t.typeCode === currentTypeCode);
+
     const typeList = (
       <Menu
         style={{

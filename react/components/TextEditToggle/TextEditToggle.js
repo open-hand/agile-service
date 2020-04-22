@@ -329,10 +329,8 @@ class TextEditToggle extends Component {
           noButton,
         })}
         ref={this.Edit}
-          // onClick={this.enterEditing}
         onMouseDown={() => { this.timer = Date.now(); }}
         onMouseUp={(e) => {
-          // console.log(Date.now() - this.timer);
           if (Date.now() - this.timer <= 200) {
             this.enterEditing(e);
           }

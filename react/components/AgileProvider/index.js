@@ -12,7 +12,7 @@ function wrapWithContexts(contexts, values, children) {
     </Context.Provider>
   ), children);
 }
-const AgileProvider = contexts => function AgileDataProvider({ children }) {
+const AgileProvider = contexts => function AgileDataProvider({ children, projectId }) {
   const dataRef = useRef(new Map());
   contexts.forEach((context, index) => {
     const { data: initData, refresh } = useContext(context);    
@@ -26,7 +26,7 @@ const AgileProvider = contexts => function AgileDataProvider({ children }) {
     dataRef.current.set(context, { data, refresh: loadData });
     useEffect(() => {
       loadData();
-    }, []);
+    }, [projectId]);
   });
   return wrapWithContexts(contexts, dataRef.current, children);
 };

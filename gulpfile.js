@@ -114,7 +114,7 @@ gulp.task('watch', async () => {
     'react/**/*.jsx',
   ];
   await Promise.all([
-    babelify(gulp.src(source).pipe(watch(source))),
-    gulp.src(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)']).pipe(watch(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)'])).pipe(gulp.dest(libDir))
+  babelify(gulp.src(source).pipe(watch(source))).on('data', updateFileTask),
+  gulp.src(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)']).pipe(watch(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)'])).pipe(gulp.dest(libDir)).on('data', updateFileTask)
   ])
 })

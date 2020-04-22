@@ -6,7 +6,6 @@ import QuickCreateIssue from './QuickCreateIssue';
 const QuickCreateIssueWithProvider = (props) => {
   const [issueTypes] = useIssueTypes();
   const [defaultPriority] = useDefaultPriority();
-
   return (
     <QuickCreateIssue
       defaultPriority={defaultPriority}
