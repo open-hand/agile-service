@@ -6,12 +6,11 @@ function InputField({ field, value, onChange }) {
   const { name } = field;
   return (
     <Input
-      // className="hidden-label"
       value={value}
       onChange={e => onChange(e.target.value)}
       placeholder={name}
-      style={{ width: 150 }}
-    />      
+      style={{ width: 100 }}
+    />
   );
 }
 export default observer(InputField);

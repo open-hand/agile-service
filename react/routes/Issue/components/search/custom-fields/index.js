@@ -1,6 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
+import { Icon } from 'choerodon-ui';
 import IssueStore from '@/stores/project/issue/IssueStore';
 import IssueTypeField from './field/IssueTypeField';
 import StatusField from './field/StatusField';
@@ -84,7 +85,7 @@ function renderField(field) {
             value={value}
             onChange={handleChange}
           />
-        );  
+        );
       case 'priorityId':
         return (
           <PriorityField
@@ -195,8 +196,37 @@ function CustomFields({ children }) {
       inputTypes.push(field);
     }
   }
-  
-  const render = f => f.map(field => !field.noDisplay && <div key={field.code} style={{ margin: '4px 5px' }}>{renderField(field)}</div>);
+
+  const render = f => f.map(field => !field.noDisplay && (
+    <div className="field" key={field.code} style={{ margin: '4px 5px', display: 'flex', alignItems: 'center' }}>
+      {renderField(field)}
+      
+      {!field.defaultShow && (
+        <div
+          className="test"
+          style={{
+            cursor: 'pointer',
+            borderRadius: '50%', 
+            width: 14,
+            height: 14,
+            lineHeight: '11px',
+            background: 'rgba(0,0,0,0.16)',
+            color: 'white',
+            textAlign: 'center', 
+            marginLeft: 5,
+          }}
+          onClick={() => {
+            IssueStore.handleChosenFieldChange(false, field);
+          }}
+        > 
+          <Icon
+            type="close"     
+            style={{ fontSize: '10px' }}       
+          />
+        </div>
+      )}
+    </div>
+  ));
   const types = [selectTypes, inputTypes, dateTypes].filter(arr => arr.length > 0);
   const result = types.map(type => <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: 4 }}>{render(type)}</div>);
   result[0].props.children.unshift(children);

@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { unionBy } from 'lodash';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
 import { configTheme } from '@/common/utils';
+import { getSelectStyle } from '../utils';
 
 let list = [];
 function SprintField({ field, value, onChange }) {
@@ -18,7 +19,7 @@ function SprintField({ field, value, onChange }) {
       type="sprint"
       loadWhenMount
       key="reporterSelect"
-      style={{ width: 120, margin: 0 }}
+      style={getSelectStyle(field, value)}
       mode="multiple"
       showCheckAll={false}
       allowClear

@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { unionBy } from 'lodash';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
 import { configTheme } from '@/common/utils';
+import { getSelectStyle } from '../utils';
 
 let list = [];
 function LabelField({ field, value, onChange }) {
@@ -17,7 +18,7 @@ function LabelField({ field, value, onChange }) {
       })}
       type="label_id"
       loadWhenMount
-      style={{ width: 120, margin: 0 }}
+      style={getSelectStyle(field, value)}
       mode="multiple"
       showCheckAll={false}
       allowClear

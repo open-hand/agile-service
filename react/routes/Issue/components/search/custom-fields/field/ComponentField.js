@@ -4,6 +4,7 @@ import { unionBy } from 'lodash';
 import { Select } from 'choerodon-ui';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
 import { configTheme } from '@/common/utils';
+import { getSelectStyle } from '../utils';
 
 const { Option } = Select;
 let list = [];
@@ -19,7 +20,7 @@ function ComponentField({ field, value, onChange }) {
       })}
       type="component"
       loadWhenMount            
-      style={{ width: 120, margin: 0 }}
+      style={getSelectStyle(field, value)}
       mode="multiple"
       showCheckAll={false}
       allowClear

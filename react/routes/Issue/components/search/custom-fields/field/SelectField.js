@@ -2,6 +2,7 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Select } from 'choerodon-ui';
 import { configTheme } from '@/common/utils';
+import { getSelectStyle } from '../utils';
 
 const { Option } = Select;
 function SelectField({ field, value, onChange }) {
@@ -18,7 +19,8 @@ function SelectField({ field, value, onChange }) {
       onChange={onChange}
       placeholder={name}
       mode="multiple"
-      style={{ width: 120, margin: 0 }}
+      style={getSelectStyle(field, value)}
+      dropdownMatchSelectWidth={false}
       allowClear
     >
       {(fieldOptions || []).map(option => <Option value={String(option.id)}>{option.value}</Option>)}    

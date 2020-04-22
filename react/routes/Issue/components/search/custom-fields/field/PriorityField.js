@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { unionBy } from 'lodash';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
 import { configTheme } from '@/common/utils';
+import { getSelectStyle } from '../utils';
 
 let list = [];
 function PriorityField({ field, value, onChange }) {
@@ -17,7 +18,7 @@ function PriorityField({ field, value, onChange }) {
       })}
       type="priority"
       loadWhenMount
-      style={{ width: 120, margin: 0 }}
+      style={getSelectStyle(field, value)}
       mode="multiple"
       showCheckAll={false}
       allowClear

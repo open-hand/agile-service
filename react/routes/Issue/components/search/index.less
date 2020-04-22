@@ -7,7 +7,7 @@
 
   &-left {
     flex: 1;
-    margin-right: 15px;    
+    margin-right: 15px;
 
     .c7n-calendar-range-picker {
       &:hover {
@@ -17,6 +17,17 @@
       &:before {
         border: none !important;
       }
+    }
+
+    .c7n-input {
+      height: 30px;
+    }
+
+    .c7n-input-label-wrapper {
+      transform: translateY(-3px);
+    }
+    .c7n-input-has-value .c7n-input-label-wrapper, .c7n-input-focused .c7n-input-label-wrapper{
+      transform: scaleX(0.8);
     }
   }
 
