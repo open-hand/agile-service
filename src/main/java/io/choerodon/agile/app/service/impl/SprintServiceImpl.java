@@ -243,8 +243,6 @@ public class SprintServiceImpl implements SprintService {
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
         if (issueIdSprintIdVOS != null && !issueIdSprintIdVOS.isEmpty()) {
             handleSprintIssueData(issueIdSprintIdVOS, issueIds, sprintSearches, backLogIssueVO, projectId, priorityMap, statusMapDTOMap, issueTypeDTOMap);
-        } else {
-            handleSprintNoIssue(sprintSearches, projectId);
         }
         backlog.put(SPRINT_DATA, sprintSearches);
         backlog.put(BACKLOG_DATA, backLogIssueVO);
