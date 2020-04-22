@@ -386,14 +386,20 @@ public class BoardServiceImpl implements BoardService {
             columnAndIssueDTO.getSubStatusDTOS().forEach(subStatusDTO -> {
                 subStatusDTO.getIssues().forEach(issueForBoardDO -> {
                     UserMessageDTO userMessageDTO = usersMap.get(issueForBoardDO.getAssigneeId());
-                    String assigneeName = userMessageDTO != null ? userMessageDTO.getName() : null;
-                    String assigneeLoginName = userMessageDTO != null ? userMessageDTO.getLoginName() : null;
-                    String assigneeRealName = userMessageDTO != null ? userMessageDTO.getRealName() : null;
-                    String imageUrl = userMessageDTO != null ? userMessageDTO.getImageUrl() : null;
-                    issueForBoardDO.setAssigneeName(assigneeName);
-                    issueForBoardDO.setAssigneeLoginName(assigneeLoginName);
-                    issueForBoardDO.setAssigneeRealName(assigneeRealName);
-                    issueForBoardDO.setImageUrl(imageUrl);
+                    if(userMessageDTO != null){
+                        String assigneeName = userMessageDTO.getName();
+                        String assigneeLoginName =  userMessageDTO.getLoginName();
+                        String assigneeRealName = userMessageDTO.getRealName();
+                        String imageUrl = userMessageDTO.getImageUrl();
+                        String email = userMessageDTO.getEmail();
+                        boolean ldap = userMessageDTO.getLdap();
+                        issueForBoardDO.setAssigneeName(assigneeName);
+                        issueForBoardDO.setAssigneeLoginName(assigneeLoginName);
+                        issueForBoardDO.setAssigneeRealName(assigneeRealName);
+                        issueForBoardDO.setImageUrl(imageUrl);
+                        issueForBoardDO.setEmail(email);
+                        issueForBoardDO.setLdap(ldap);
+                    }
                 });
                 subStatusDTO.getIssues().sort(comparator);
             });
