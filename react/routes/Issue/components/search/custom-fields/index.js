@@ -6,7 +6,11 @@ import IssueTypeField from './field/IssueTypeField';
 import StatusField from './field/StatusField';
 import SprintField from './field/SprintField';
 import ComponentField from './field/ComponentField';
+import LabelField from './field/LabelField';
 import VersionField from './field/VersionField';
+import EpicField from './field/EpicField';
+import FeatureField from './field/FeatureField';
+import PriorityField from './field/PriorityField';
 // 自定义字段
 import SelectField from './field/SelectField';
 import InputField from './field/InputField';
@@ -73,9 +77,41 @@ function renderField(field) {
             onChange={handleChange}
           />
         );
+      case 'label':
+        return (
+          <LabelField
+            field={field}
+            value={value}
+            onChange={handleChange}
+          />
+        );  
+      case 'priorityId':
+        return (
+          <PriorityField
+            field={field}
+            value={value}
+            onChange={handleChange}
+          />
+        );
       case 'version':
         return (
           <VersionField
+            field={field}
+            value={value}
+            onChange={handleChange}
+          />
+        );
+      case 'epic':
+        return (
+          <EpicField
+            field={field}
+            value={value}
+            onChange={handleChange}
+          />
+        );
+      case 'feature':
+        return (
+          <FeatureField
             field={field}
             value={value}
             onChange={handleChange}

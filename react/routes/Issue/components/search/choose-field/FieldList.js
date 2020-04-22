@@ -3,14 +3,15 @@ import { observer } from 'mobx-react-lite';
 import {
   CheckBox, Button, TextField, Icon,
 } from 'choerodon-ui/pro';
-import IssueStore from '@/stores/project/issue/IssueStore';
+import IssueStore, { getSystemFields } from '@/stores/project/issue/IssueStore';
 import './FieldList.less';
 
 const prefix = 'c7nagile-choose-field-list';
 function FieldList() {
   const {
-    fields, systemFields, chosenFields, handleChosenFieldChange,
+    fields, chosenFields, handleChosenFieldChange,
   } = IssueStore;
+  const systemFields = getSystemFields();
   const selectableSystemFields = systemFields.filter(field => !field.defaultShow);
   const defaultShowSystemFields = systemFields.filter(field => field.defaultShow);
   const checked = chosenFields.size - defaultShowSystemFields.length > 0;

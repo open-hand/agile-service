@@ -34,6 +34,8 @@ class IsInProgramStore {
       this.setProgram(program);
       if (hasProgram) {
         this.loadIsShowFeature();
+      } else {
+        this.setIsShowFeature(false);
       }
     }
   }

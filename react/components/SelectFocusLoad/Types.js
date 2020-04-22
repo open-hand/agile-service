@@ -358,6 +358,20 @@ export default {
       </Option>
     ),
   },
+  label_id: {
+    props: {
+      getPopupContainer: triggerNode => triggerNode.parentNode,
+      filter: false,
+      filterOption: false,
+      loadWhenMount: true,
+    },
+    request: loadLabels,
+    render: label => (
+      <Option key={label.labelId} value={label.labelId}>
+        {label.labelName}
+      </Option>
+    ),
+  },
   version: {
     props: {
       getPopupContainer: triggerNode => triggerNode.parentNode,

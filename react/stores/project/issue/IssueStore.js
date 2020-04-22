@@ -8,75 +8,103 @@ import { getCustomFields } from '@/api/NewIssueApi';
 import {
   debounce, reverse, map, find, isEmpty,
 } from 'lodash';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 
-const systemFields = [{
-  code: 'issueIds',
-  name: 'issueId',
-  defaultShow: true,
-  noDisplay: true, // 不需要展示，仅作为一个筛选项
-}, {
-  code: 'quickFilterIds',
-  name: '快速筛选',
-  defaultShow: true,
-  noDisplay: true,
-}, {
-  code: 'contents',
-  name: '概要',
-  defaultShow: true,
-  noDisplay: true,
-}, {
-  code: 'issueTypeId',
-  name: '问题类型',
-  defaultShow: false,
-  fieldType: 'multiple',
-}, {
-  code: 'statusId',
-  name: '状态',
-  defaultShow: true,
-  fieldType: 'multiple',
-}, {
-  code: 'assigneeId',
-  name: '经办人',
-  defaultShow: true,
-  fieldType: 'user',
-}, {
-  code: 'reporterIds',
-  name: '报告人',
-  defaultShow: false,
-  fieldType: 'user',
-}, {
-  code: 'sprint',
-  name: '冲刺',
-  defaultShow: true,
-  fieldType: 'multiple',
-}, {
-  code: 'component',
-  name: '模块',
-  defaultShow: false,
-  fieldType: 'multiple',
-}, {
-  code: 'version',
-  name: '版本',
-  defaultShow: false,
-  fieldType: 'multiple',
-}, {
-  code: 'createDate',
-  name: '创建时间',
-  defaultShow: false,
-  fieldType: 'datetime',
-}];
+export function getSystemFields() {
+  const systemFields = [{
+    code: 'issueIds',
+    name: 'issueId',
+    defaultShow: true,
+    noDisplay: true, // 不需要展示，仅作为一个筛选项
+  }, {
+    code: 'quickFilterIds',
+    name: '快速筛选',
+    defaultShow: true,
+    noDisplay: true,
+  }, {
+    code: 'contents',
+    name: '概要',
+    defaultShow: true,
+    noDisplay: true,
+  }, {
+    code: 'issueTypeId',
+    name: '问题类型',
+    defaultShow: false,
+    fieldType: 'multiple',
+  }, {
+    code: 'statusId',
+    name: '状态',
+    defaultShow: true,
+    fieldType: 'multiple',
+  }, {
+    code: 'assigneeId',
+    name: '经办人',
+    defaultShow: true,
+    fieldType: 'member',
+  }, {
+    code: 'reporterIds',
+    name: '报告人',
+    defaultShow: false,
+    fieldType: 'member',
+  }, {
+    code: 'sprint',
+    name: '冲刺',
+    defaultShow: true,
+    fieldType: 'multiple',
+  }, {
+    code: 'component',
+    name: '模块',
+    defaultShow: false,
+    fieldType: 'multiple',
+  }, {
+    code: 'label',
+    name: '标签',
+    defaultShow: false,
+    fieldType: 'multiple',
+  }, {
+    code: 'priorityId',
+    name: '优先级',
+    defaultShow: false,
+    fieldType: 'multiple',
+  }, {
+    code: 'version',
+    name: '版本',
+    defaultShow: false,
+    fieldType: 'multiple',
+  }, {
+    code: 'epic',
+    name: '史诗',
+    defaultShow: false,
+    fieldType: 'multiple',
+  }, {
+    code: 'feature',
+    name: '特性',
+    defaultShow: false,
+    fieldType: 'multiple',
+  }, {
+    code: 'createDate',
+    name: '创建时间',
+    defaultShow: false,
+    fieldType: 'datetime',
+  }];
+  return IsInProgramStore.isInProgram ? systemFields : systemFields.filter(f => f.code !== 'feature');
+}
+
+
 const { AppState } = stores;
 function transformSystemFilter(data) {
   const {
     issueTypeId,
     assigneeId,
     statusId,
+    priorityId,
     issueIds,
     quickFilterIds,
     createDate = [],
     contents,
     component,
     epic,
+    feature,
     label,
     reporterIds,
     sprint,
@@ -88,12 +116,14 @@ function transformSystemFilter(data) {
       issueTypeId,
       reporterIds,
       statusId,
+      priorityId,
     },
     otherArgs: {
       assigneeId,
       issueIds,
       component,
       epic,
+      feature,
       label,
       sprint,
       summary,
@@ -123,8 +153,6 @@ class IssueStore {
 
   // 筛选列表是否显示
   @observable filterListVisible = false;
-
-  @observable systemFields = systemFields;
 
   @computed get getFilterListVisible() {
     return this.filterListVisible;
@@ -268,7 +296,11 @@ class IssueStore {
     this.fields = fields;
   }
 
-  @observable chosenFields = new Map(systemFields.filter(f => f.defaultShow).map(f => ([f.code, observable({ ...f, value: undefined })])));
+  @observable chosenFields = new Map();
+
+  @action initChosenFields() {
+    this.chosenFields = new Map(getSystemFields().filter(f => f.defaultShow).map(f => ([f.code, observable({ ...f, value: undefined })])));
+  }
 
   @action handleChosenFieldChange = (select, field) => {
     const { code } = field;
@@ -300,7 +332,7 @@ class IssueStore {
     const field = this.chosenFields.get(code);
     // 说明这时候没有被选择，那么要自动选上
     if (!field) {
-      const unSelectField = find([...this.fields, ...systemFields], { code });
+      const unSelectField = find([...this.fields, ...getSystemFields()], { code });
       if (unSelectField) {
         this.chosenFields.set(code, observable({ ...unSelectField, value }));
       }
@@ -314,7 +346,7 @@ class IssueStore {
   }
 
   @action chooseAll() {
-    [...systemFields, ...this.fields].forEach((field) => {
+    [...getSystemFields(), ...this.fields].forEach((field) => {
       this.chosenFields.set(field.code, observable({ ...field, value: undefined }));
     });
   }
@@ -327,7 +359,7 @@ class IssueStore {
         break;
       }
     }
-    this.chosenFields = new Map(systemFields.filter(f => f.defaultShow).map(f => ([f.code, this.chosenFields.get(f.code)])));
+    this.chosenFields = new Map(getSystemFields().filter(f => f.defaultShow).map(f => ([f.code, this.chosenFields.get(f.code)])));
     // 取消全选之前如果有筛选就查一次
     if (hasValue) {
       this.query();

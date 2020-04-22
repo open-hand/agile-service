@@ -97,6 +97,7 @@ const Issue = withRouter(observer(() => {
   };
   useEffect(() => {
     getProjectInfo();
+    IssueStore.initChosenFields();
     return () => {
       IssueStore.setClickedRow({ selectedIssue: {}, expand: false });
       IssueStore.setFilterListVisible(false);
