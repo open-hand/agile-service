@@ -53,7 +53,7 @@ class Index extends React.Component {
     const IntlProviderAsync = asyncLocaleProvider(language, () => import(`./locale/${language}`));
     return (
       <div id="agile">
-        <AgileProvider>
+        <AgileProvider projectId={AppState.currentMenuType.id}>
           <IntlProviderAsync>
             <Switch>
               {/* 协作 */}
