@@ -229,8 +229,10 @@ function CustomFields({ children }) {
   ));
   const types = [selectTypes, inputTypes, dateTypes].filter(arr => arr.length > 0);
   const result = types.map(type => <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: 4 }}>{render(type)}</div>);
-  result[0].props.children.unshift(children);
-  result[result.length - 1].props.children.push(<ChooseField key="choose" />);
+  if (result.length > 0) {
+    result[0].props.children.unshift(children);
+    result[result.length - 1].props.children.push(<ChooseField key="choose" />);
+  }  
   return (
     <div>
       {result}
