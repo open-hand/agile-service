@@ -292,8 +292,8 @@
                 agile_issue_sprint_rel aisr
             WHERE
                 aisr.issue_id = ai.issue_id
-                AND aisr.sprint_id = #{sprintId}
                 AND aisr.project_id = #{projectId}
+                AND aisr.sprint_id = #{sprintId}
             ) a
         GROUP BY
             a.assignee_id
@@ -319,8 +319,8 @@
                 agile_issue_sprint_rel aisr
             WHERE
                 aisr.issue_id = ai2.issue_id
-                AND aisr.sprint_id = #{sprintId}
                 AND aisr.project_id = #{projectId}
+                AND aisr.sprint_id = #{sprintId}
                 AND ai2.status_id IN ( SELECT ais.status_id FROM agile_issue_status ais WHERE ais.project_id = #{projectId} AND ais.is_completed != 1 )
             ) a2
         GROUP BY
@@ -360,8 +360,8 @@
                 agile_issue_sprint_rel aisr
             WHERE
                 aisr.issue_id = ai.issue_id
-                AND aisr.sprint_id = #{sprintId}
                 AND aisr.project_id = #{projectId}
+                AND aisr.sprint_id = #{sprintId}
                 AND ai.issue_id in
                 <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
                     #{issueId}
@@ -391,8 +391,8 @@
                 agile_issue_sprint_rel aisr
             WHERE
                 aisr.issue_id = ai2.issue_id
-                AND aisr.sprint_id = #{sprintId}
                 AND aisr.project_id = #{projectId}
+                AND aisr.sprint_id = #{sprintId}
                 AND ai2.issue_id in
                 <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
                     #{issueId}

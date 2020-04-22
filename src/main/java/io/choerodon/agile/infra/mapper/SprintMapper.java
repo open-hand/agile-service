@@ -129,6 +129,5 @@ public interface SprintMapper extends Mapper<SprintDTO> {
 
     List<SprintDTO> selectNotDoneByProjectId(@Param("projectId") Long projectId);
 
-    List<AssigneeIssueDTO> queryAssigneeIssueByPlanSprintId(@Param("sprintIds") Set<Long> sprintIds,
-                                                            @Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+    List<AssigneeIssueDTO> queryAssigneeIssueByPlanSprintId(@Param("sprintIds") Set<Long> sprintIds, @Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 }
