@@ -370,7 +370,11 @@ public class IssueController {
     @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
     @ApiOperation("导出issue列表")
     @PostMapping(value = "/export")
-    public void exportIssues(@ApiParam(value = "项目id", required = true)
+    public void exportIssues(@ApiIgnore
+                             @ApiParam(value = "分页信息", required = true)
+                             @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
+                             Pageable pageable,
+                             @ApiParam(value = "项目id", required = true)
                              @PathVariable(name = "project_id") Long projectId,
                              @ApiParam(value = "组织id", required = true)
                              @RequestParam Long organizationId,
@@ -378,7 +382,7 @@ public class IssueController {
                              @RequestBody(required = false) SearchVO searchVO,
                              HttpServletRequest request,
                              HttpServletResponse response) {
-        issueService.exportIssues(projectId, searchVO, request, response, organizationId);
+        issueService.exportIssues(projectId, searchVO, request, response, organizationId, pageable.getSort());
     }
 
 

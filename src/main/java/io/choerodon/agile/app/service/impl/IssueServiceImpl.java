@@ -414,11 +414,7 @@ public class IssueServiceImpl implements IssueService {
                         .subList((pageable.getPageNumber() - 1) * pageable.getPageSize(), pageable.getPageNumber() * pageable.getPageSize()));
                 issueIdPage = page.toPageInfo();
             } else {
-                Map<String, String> order = new HashMap<>(1);
-                //处理表映射
-                order.put("issueId", "issue_issue_id");
-                Sort sort = PageUtil.sortResetOrder(pageable.getSort(), null, order);
-                String orderStr = PageableHelper.getSortSql(sort);
+                String orderStr = getOrderStrOfQueryingIssuesWithSub(pageable.getSort());
                 PageInfo<IssueDTO> issues = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize())
                         .doSelectPageInfo(() -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr));
                 List<Long> issueIds = issues.getList().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
@@ -444,6 +440,12 @@ public class IssueServiceImpl implements IssueService {
         } else {
             return new PageInfo<>(new ArrayList<>());
         }
+    }
+
+    protected String getOrderStrOfQueryingIssuesWithSub(Sort sort) {
+        Map<String, String> order = new HashMap<>(1);
+        order.put("issueId", "issue_issue_id");
+        return PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, order));
     }
 
     private List<Long> handleIssueLists(List<Long> foundationList, List<Long> agileList, Pageable pageable) {
@@ -1262,7 +1264,8 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public void exportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request, HttpServletResponse response, Long organizationId) {
+    public void exportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request,
+                             HttpServletResponse response, Long organizationId, Sort sort) {
         //处理根据界面筛选结果导出的字段
         Map<String, String[]> fieldMap =
                 handleExportFields(searchVO.getExportFieldCodes(), projectId, organizationId, FIELDS_NAME, FIELDS);
@@ -1284,8 +1287,9 @@ public class IssueServiceImpl implements IssueService {
             }
             final String searchSql = filterSql;
             //查询所有父节点问题
+            String orderStr = getOrderStrOfQueryingIssuesWithSub(sort);
             List<Long> parentIds =
-                    issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), "issue_id desc")
+                    issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr)
                             .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
             List<Long> issueIds = new ArrayList<>();
             Map<Long, Set<Long>> parentSonMap = new HashMap<>();

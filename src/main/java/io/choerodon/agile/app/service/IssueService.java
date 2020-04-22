@@ -11,6 +11,7 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 /**
  * 敏捷开发Issue
@@ -142,7 +143,8 @@ public interface IssueService {
 
     PageInfo<IssueNumVO> queryIssueByOption(Long projectId, Long issueId, String issueNum, Boolean onlyActiveSprint, Boolean self, String content, Pageable pageable);
 
-    void exportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request, HttpServletResponse response, Long organizationId);
+    void exportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request,
+                      HttpServletResponse response, Long organizationId, Sort sort);
 
     /**
      * 根据issueId复制一个issue
