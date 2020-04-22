@@ -33,6 +33,10 @@ public class IssueForBoardDO {
 
     private String imageUrl;
 
+    private String email;
+
+    private Boolean ldap;
+
     private Long epicId;
 
     private String rank;
@@ -229,5 +233,21 @@ public class IssueForBoardDO {
 
     public Long getRelateIssueId() {
         return relateIssueId;
+    }
+
+    public Boolean getLdap() {
+        return ldap;
+    }
+
+    public void setLdap(Boolean ldap) {
+        this.ldap = ldap;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
