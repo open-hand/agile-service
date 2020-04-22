@@ -41,7 +41,6 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
             throw new CommonException(NOTFOUND_ERROR);
         }
         PersonalFilterVO personalFilterVO = modelMapper.map(personalFilterDTO, PersonalFilterVO.class);
-        parseJson(personalFilterVO);
         return personalFilterVO;
     }
 
@@ -89,7 +88,6 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
     public List<PersonalFilterVO> listByProjectId(Long projectId, Long userId, String searchStr) {
         List<PersonalFilterVO> list = modelMapper.map(personalFilterMapper.queryByProjectIdAndUserId(projectId, userId, searchStr), new TypeToken<List<PersonalFilterVO>>() {
         }.getType());
-        list.stream().forEach(PersonalFilterServiceImpl::parseJson);
         return list;
     }
 
@@ -103,11 +101,5 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
         return list != null && !list.isEmpty();
     }
 
-    /**
-     * 解析json为dto
-     * @param personalFilterVO
-     */
-    private static void parseJson(PersonalFilterVO personalFilterVO) {
-        personalFilterVO.setPersonalFilterSearchVO(JSONObject.parseObject(personalFilterVO.getFilterJson(), PersonalFilterSearchVO.class));
-    }
+
 }

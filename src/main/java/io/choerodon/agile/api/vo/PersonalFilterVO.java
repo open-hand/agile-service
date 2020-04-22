@@ -26,17 +26,6 @@ public class PersonalFilterVO {
     @ApiModelProperty(value = "版本号")
     private Long objectVersionNumber;
 
-    @ApiModelProperty(value = "搜索条件")
-    private PersonalFilterSearchVO personalFilterSearchVO;
-
-    public PersonalFilterSearchVO getPersonalFilterSearchVO() {
-        return personalFilterSearchVO;
-    }
-
-    public void setPersonalFilterSearchVO(PersonalFilterSearchVO personalFilterSearchVO) {
-        this.personalFilterSearchVO = personalFilterSearchVO;
-    }
-
     public Long getObjectVersionNumber() {
         return objectVersionNumber;
     }

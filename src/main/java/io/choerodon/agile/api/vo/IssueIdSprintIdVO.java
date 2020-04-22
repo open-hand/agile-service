@@ -7,6 +7,7 @@ package io.choerodon.agile.api.vo;
 public class IssueIdSprintIdVO {
 
     private Long issueId;
+    private String typeCode;
     private Long sprintId;
 
     public Long getIssueId() {
@@ -23,6 +24,14 @@ public class IssueIdSprintIdVO {
 
     public void setSprintId(Long sprintId) {
         this.sprintId = sprintId;
+    }
+
+    public String getTypeCode() {
+        return typeCode;
+    }
+
+    public void setTypeCode(String typeCode) {
+        this.typeCode = typeCode;
     }
 }
 
