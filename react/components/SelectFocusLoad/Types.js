@@ -415,10 +415,15 @@ export default {
     ),
   },
   feature: {
-    request: () => getFeaturesByEpic(),
+    request: ({ filter, page }, requestArgs) => getFeaturesByEpic({ filter, page }, requestArgs),
     render: item => (
       <Option key={`${item.issueId}`} value={item.issueId}>{item.summary}</Option>
     ),
+    props: {
+      getPopupContainer: triggerNode => triggerNode.parentNode,
+      filterOption,
+      loadWhenMount: true,
+    },
   }, // 特性列表
   sub_project: {
     props: {

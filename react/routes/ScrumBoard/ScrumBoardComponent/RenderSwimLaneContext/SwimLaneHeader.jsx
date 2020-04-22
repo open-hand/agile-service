@@ -101,7 +101,7 @@ export default class SwimLaneHeader extends Component {
   };
 
   renderAssigneeComponent = ({
-    assigneeName, assigneeAvatarUrl, assigneeId, assigneeLoginName, assigneeRealName,
+    assigneeName, assigneeAvatarUrl, assigneeId, assigneeLoginName, assigneeRealName, ldap, email,
   }) => (
     <React.Fragment>
       <UserHead
@@ -113,6 +113,8 @@ export default class SwimLaneHeader extends Component {
           name: assigneeName,
           realName: assigneeRealName,
           avatar: assigneeAvatarUrl,
+          ldap,
+          email,
         }}
       />
       <span>{assigneeName}</span>
