@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
@@ -271,7 +271,16 @@ public class SprintServiceImpl implements SprintService {
             sprintSearches.add(activeSprint);
         }
         List<SprintSearchDTO> sprintSearchDTOS = sprintMapper.queryPlanSprintNoIssueIds(projectId);
-        queryAssigneeIssue(sprintSearchDTOS, projectId);
+        List<Long> issueIds = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(sprintSearchDTOS)) {
+            for (SprintSearchDTO searchDTO : sprintSearchDTOS) {
+                List<IssueSearchDTO> issueSearchDTOList = searchDTO.getIssueSearchDTOList();
+                if (!CollectionUtils.isEmpty(issueSearchDTOList)) {
+                    issueIds.addAll(issueSearchDTOList.stream().map(IssueSearchDTO::getIssueId).collect(Collectors.toList()));
+                }
+            }
+        }
+        queryAssigneeIssue(sprintSearchDTOS, projectId,issueIds);
         List<SprintSearchVO> planSprints = sprintSearchAssembler.dtoListToVO(sprintSearchDTOS, usersMap, null, null, null);
         if (planSprints != null && !planSprints.isEmpty()) {
             sprintSearches.addAll(planSprints);
@@ -285,9 +294,9 @@ public class SprintServiceImpl implements SprintService {
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(new ArrayList<>(assigneeIds), true);
         SprintSearchDTO sprintSearchDTO = sprintMapper.queryActiveSprintNoIssueIds(projectId);
         if (sprintSearchDTO != null) {
-            List<Long> activeSprintIssueIds = issueIdSprintIdVOS.stream().filter(x -> sprintSearchDTO.getSprintId().equals(x.getSprintId())).map(IssueIdSprintIdVO::getIssueId).collect(Collectors.toList());
+            List<Long> activeSprintIssueIds = issueIdSprintIdVOS.stream().filter(x -> sprintSearchDTO.getSprintId().equals(x.getSprintId()) && !"sub_task".equals(x.getTypeCode())).map(IssueIdSprintIdVO::getIssueId).collect(Collectors.toList());
             sprintSearchDTO.setIssueSearchDTOList(!activeSprintIssueIds.isEmpty() ? sprintMapper.queryActiveSprintIssueSearchByIssueIds(projectId, activeSprintIssueIds, sprintSearchDTO.getSprintId()) : new ArrayList<>());
-            sprintSearchDTO.setAssigneeIssueDTOList(sprintMapper.queryAssigneeIssueByActiveSprintId(projectId, sprintSearchDTO.getSprintId()));
+            sprintSearchDTO.setAssigneeIssueDTOList(sprintMapper.queryAssigneeIssueByActiveSprintIdAndIssueIds(projectId, sprintSearchDTO.getSprintId(),allIssueIds));
             SprintSearchVO activeSprint = sprintSearchAssembler.dtoToVO(sprintSearchDTO, usersMap, priorityMap, statusMapDTOMap, issueTypeDTOMap);
             activeSprint.setIssueCount(activeSprint.getIssueSearchVOList() == null ? 0 : activeSprint.getIssueSearchVOList().size());
             Map<String, List<Long>> statusMap = projectConfigService.queryStatusByProjectId(projectId, SchemeApplyType.AGILE)
@@ -299,7 +308,7 @@ public class SprintServiceImpl implements SprintService {
             sprintSearches.add(activeSprint);
         }
         List<SprintSearchDTO> sprintSearchDTOS = sprintMapper.queryPlanSprint(projectId, new HashSet<>(allIssueIds));
-        queryAssigneeIssue(sprintSearchDTOS, projectId);
+        queryAssigneeIssue(sprintSearchDTOS, projectId,allIssueIds);
         if (sprintSearchDTOS != null && !sprintSearchDTOS.isEmpty()) {
             List<SprintSearchVO> planSprints = sprintSearchAssembler.dtoListToVO(sprintSearchDTOS, usersMap, priorityMap, statusMapDTOMap, issueTypeDTOMap);
             planSprints.parallelStream().forEachOrdered(planSprint -> planSprint.setIssueCount(planSprint.getIssueSearchVOList() == null ? 0 : planSprint.getIssueSearchVOList().size()));
@@ -312,12 +321,13 @@ public class SprintServiceImpl implements SprintService {
         }
     }
 
-    protected void queryAssigneeIssue(List<? extends SprintSearchDTO> sprintSearch, Long projectId) {
+    protected void queryAssigneeIssue(List<? extends SprintSearchDTO> sprintSearch, Long projectId,List<Long> issueIds) {
         Set<Long> sprintIds = sprintSearch.stream().map(SprintSearchDTO::getSprintId).collect(Collectors.toSet());
         List<AssigneeIssueDTO> assigneeIssueList = new ArrayList<>();
-        if (!ObjectUtils.isEmpty(sprintIds)) {
-            assigneeIssueList = sprintMapper.queryAssigneeIssueByPlanSprintId(sprintIds, projectId);
+        if (!CollectionUtils.isEmpty(sprintIds) && !CollectionUtils.isEmpty(issueIds)) {
+            assigneeIssueList = sprintMapper.queryAssigneeIssueByPlanSprintId(sprintIds, projectId, issueIds);
         }
+
         for (SprintSearchDTO ss : sprintSearch) {
             Long sprintId = ss.getSprintId();
             List<AssigneeIssueDTO> assigneeIssues = ss.getAssigneeIssueDTOList();

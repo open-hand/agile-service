@@ -98,6 +98,16 @@ public interface SprintMapper extends Mapper<SprintDTO> {
      */
     List<AssigneeIssueDTO> queryAssigneeIssueByActiveSprintId(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId);
 
+
+    /**
+     * 根据issueids活跃冲刺的经办人统计信息
+     *
+     * @param projectId projectId
+     * @param sprintId  sprintId
+     * @return AssigneeIssueDTO
+     */
+    List<AssigneeIssueDTO> queryAssigneeIssueByActiveSprintIdAndIssueIds(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId, @Param("issueIds") List<Long> issueIds);
+
     /**
      * 查询活跃冲刺的issue列表
      *
@@ -120,5 +130,5 @@ public interface SprintMapper extends Mapper<SprintDTO> {
     List<SprintDTO> selectNotDoneByProjectId(@Param("projectId") Long projectId);
 
     List<AssigneeIssueDTO> queryAssigneeIssueByPlanSprintId(@Param("sprintIds") Set<Long> sprintIds,
-                                                            @Param("projectId") Long projectId);
+                                                            @Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
 }
