@@ -10,6 +10,7 @@ function getWidth(text, {
   const { width } = ctx.measureText(text);
   return width;
 }
+// eslint-disable-next-line import/prefer-default-export
 export function getSelectStyle(field, value) {
   const width = getWidth(field.name) + 28;
   return {
