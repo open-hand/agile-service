@@ -8,6 +8,7 @@ import { getCustomFields } from '@/api/NewIssueApi';
 import {
   debounce, reverse, map, find, isEmpty,
 } from 'lodash';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 
 const systemFields = [{
   code: 'issueIds',
@@ -75,16 +76,19 @@ const systemFields = [{
   defaultShow: false,
   fieldType: 'multiple',
 }, {
-  code: 'feature',
-  name: '特性',
-  defaultShow: false,
-  fieldType: 'multiple',
-}, {
   code: 'createDate',
   name: '创建时间',
   defaultShow: false,
   fieldType: 'datetime',
 }];
+if (IsInProgramStore.isInProgram) {
+  systemFields.splice(13, 0, {
+    code: 'feature',
+    name: '特性',
+    defaultShow: false,
+    fieldType: 'multiple',
+  });
+}
 const { AppState } = stores;
 function transformSystemFilter(data) {
   const {
