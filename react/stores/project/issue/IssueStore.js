@@ -38,12 +38,12 @@ const systemFields = [{
   code: 'assigneeId',
   name: '经办人',
   defaultShow: true,
-  fieldType: 'user',
+  fieldType: 'member',
 }, {
   code: 'reporterIds',
   name: '报告人',
   defaultShow: false,
-  fieldType: 'user',
+  fieldType: 'member',
 }, {
   code: 'sprint',
   name: '冲刺',
