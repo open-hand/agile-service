@@ -312,7 +312,7 @@ public class IssueAssembler extends AbstractAssembler {
         return exportIssuesVOS;
     }
 
-    private String getActiveSprintName(IssueDTO issue) {
+    protected String getActiveSprintName(IssueDTO issue) {
         List<IssueSprintDTO>  issueSprintList = issue.getIssueSprintDTOS();
         if (!ObjectUtils.isEmpty(issueSprintList)) {
             for(IssueSprintDTO sprint : issueSprintList) {
