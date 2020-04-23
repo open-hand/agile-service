@@ -86,6 +86,11 @@ export function getSystemFields() {
     name: '创建时间',
     defaultShow: false,
     fieldType: 'datetime',
+  }, {
+    code: 'updateDate',
+    name: '更新时间',
+    defaultShow: false,
+    fieldType: 'datetime',
   }];
   return IsInProgramStore.isInProgram ? systemFields : systemFields.filter(f => f.code !== 'feature');
 }
@@ -101,6 +106,7 @@ function transformSystemFilter(data) {
     issueIds,
     quickFilterIds,
     createDate = [],
+    updateDate = [],
     contents,
     component,
     epic,
@@ -132,6 +138,8 @@ function transformSystemFilter(data) {
     searchArgs: {
       createStartDate: createDate[0],
       createEndDate: createDate[1],
+      updateStartDate: updateDate[0],
+      updateEndDate: updateDate[1],
     },
     quickFilterIds,
     contents,
