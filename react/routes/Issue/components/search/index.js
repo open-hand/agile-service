@@ -120,6 +120,8 @@ export default withRouter(observer(({
           }
         } else if (key === 'createEndDate' || key === 'createStartDate') {
           IssueStore.handleFilterChange('createDate', [filterObject.createStartDate, filterObject.createEndDate]);
+        } else if (key === 'updateEndDate' || key === 'updateStartDate') {
+          IssueStore.handleFilterChange('updateDate', [filterObject.updateStartDate, filterObject.updateEndDate]);
         } else {
           IssueStore.handleFilterChange(key, value);
         }

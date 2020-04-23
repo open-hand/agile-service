@@ -121,10 +121,15 @@ function renderField(field) {
       case 'createDate':
         return (
           <DateTimeField
-            field={{
-              fieldType: 'datetime',
-              name: '创建时间',
-            }}
+            field={field}
+            value={value}
+            onChange={handleChange}
+          />
+        );
+      case 'updateDate':
+        return (
+          <DateTimeField
+            field={field}
             value={value}
             onChange={handleChange}
           />
