@@ -151,7 +151,9 @@ class EpicCell extends Component {
       epic, otherData, lastCollapse, index, connectDropTarget, isOver,
     } = this.props;
     const { resizing } = this.state;
-    const { collapse, storys, feature } = otherData || {};
+    const {
+      collapse, storys, feature, epicId, 
+    } = otherData || {};
     const { isInProgram } = IsInProgramStore;
     const {
       // featureCommonDTOList,
@@ -163,7 +165,7 @@ class EpicCell extends Component {
     } = epic;
     let subIssueNum = 0;
     if (storys && feature) { 
-      subIssueNum = Math.max(storys.length + Object.keys(feature).length - 1, 0);// 减去none
+      subIssueNum = Math.max((epicId ? storys.length : storys.filter(story => !!story.featureId && Object.keys(feature).map(featureId => Number(featureId)).includes(Number(story.featureId))).length) + (epicId ? Object.keys(feature).length - 1 : Object.keys(feature).length), 0);// 减去none
     }
 
     return (
