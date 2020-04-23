@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { Select } from 'choerodon-ui';
 import { unionBy } from 'lodash';
 import { configTheme } from '@/common/utils';
+import { getIssueUsers } from '@/api/CommonApi';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
 import { getSelectStyle } from '../utils';
 
@@ -40,6 +41,7 @@ function MemberField({ field, value, onChange }) {
       value={value}
       getPopupContainer={triggerNode => triggerNode.parentNode}
       render={user => <Option value={user.id}>{user.realName || user.loginName}</Option>}
+      request={({ filter, page }) => getIssueUsers(filter, undefined, page).then(UserData => ({ ...UserData, list: UserData.list.filter(user => user.enabled) }))}
     >
       {code === 'assigneeId' ? <Option value="0">未分配</Option> : undefined}
     </SelectFocusLoad>

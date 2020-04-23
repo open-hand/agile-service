@@ -43,3 +43,11 @@ export function getProjectIsShowFeature() { // /v1/projects/1551/art/isArtDoding
 export function getSubProjects(only_select_enable = false) {
   return axios.get(`/base/v1/organizations/${getOrganizationId()}/project_relations/${getProjectId()}/${getProjectId()}?only_select_enable=${only_select_enable || false}`);
 }
+
+export function getIssueUsers(param, userId, page = 1) {
+  const projectId = AppState.currentMenuType.id;
+  if (param) {
+    return axios.get(`/agile/v1/projects/${projectId}/issues/users?param=${param}${userId ? `&id=${userId}` : ''}`);
+  }
+  return axios.get(`/agile/v1/projects/${projectId}/issues/users?size=20&page=${page}${userId ? `&id=${userId}` : ''}`);
+}

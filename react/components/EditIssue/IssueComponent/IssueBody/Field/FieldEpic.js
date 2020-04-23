@@ -13,6 +13,11 @@ import IsInProgramStore from '../../../../../stores/common/program/IsInProgramSt
 const { Option } = Select;
 const { Text, Edit } = TextEditToggle;
 
+// 增加 typeof 避免选项中 加载更多 影响 
+const filterOption = (input, option) => option.props.name && option.props.name.toLowerCase().indexOf(
+  input.toLowerCase(),
+) >= 0;
+
 @inject('AppState')
 @observer class FieldEpic extends Component {
   constructor(props) {
@@ -45,7 +50,7 @@ const { Text, Edit } = TextEditToggle;
           featureId, featureName,
         } = issue;
         this.setState({
-          originFeatures: data.find(item => item.issueId === featureId) ? data : [...data, { issueId: featureId, summary: featureName }],
+          originFeatures: (data.find(item => item.issueId === featureId) || !featureId) ? data : [...data, { issueId: featureId, summary: featureName }],
           selectLoading: false,
         });
       });
@@ -174,8 +179,10 @@ const { Text, Edit } = TextEditToggle;
                           newFeatureId: value,
                         });
                       }}
+                      filter
+                      filterOption={filterOption}
                     >
-                      {originFeatures.map(feature => <Option key={`${feature.issueId}`} value={feature.issueId}><Tooltip title={feature.summary}>{feature.summary}</Tooltip></Option>)}
+                      {originFeatures.map(feature => <Option name={feature.summary} key={`${feature.issueId}`} value={feature.issueId}><Tooltip title={feature.summary}>{feature.summary}</Tooltip></Option>)}
                     </Select>
                   </Edit>
                 </TextEditToggle>
