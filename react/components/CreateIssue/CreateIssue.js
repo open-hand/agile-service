@@ -598,7 +598,7 @@ class CreateIssue extends Component {
               </FormItem>
             )
           );
-        } else if (IsInProgramStore.isShowFeature) {
+        } else if (IsInProgramStore.isShowFeature && newIssueTypeCode === 'story') {
           return (
             <FormItem label="特性">
               {getFieldDecorator('featureId', {})(
@@ -827,6 +827,7 @@ class CreateIssue extends Component {
     const {
       createLoading, fields, loading, newIssueTypeCode,
     } = this.state;
+
     return (
       <Sidebar
         className="c7n-createIssue"
