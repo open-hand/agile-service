@@ -1,12 +1,10 @@
 package io.choerodon.agile.infra.utils;
 
-import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.core.notify.NoticeSendDTO;
-import io.choerodon.core.notify.WebHookJsonSendDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +38,8 @@ public class SiteMsgUtil {
         NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
         // 添加普通消息
         setCommonMsg(noticeSendDTO, projectId, "issueCreate", userName, summary, url, userIds, reporterId);
-        // 添加webhook
-        setWebHookJson(noticeSendDTO, noticeSendDTO.getParams(), reporterId, "issueCreate", "问题创建");
+//        // 添加webhook
+//        setWebHookJson(noticeSendDTO, noticeSendDTO.getParams(), reporterId, "issueCreate", "问题创建");
         try {
             notifyFeignClient.postNotice(noticeSendDTO);
         } catch (Exception e) {
@@ -53,8 +51,8 @@ public class SiteMsgUtil {
         NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
         // 添加普通消息
         setCommonMsg(noticeSendDTO, projectId, "issueAssignee", userName, summary, url, userIds, assigneeId);
-        // 添加webhook
-        setWebHookJson(noticeSendDTO, noticeSendDTO.getParams(), assigneeId, "issueAssignee", "问题分配");
+//        // 添加webhook
+//        setWebHookJson(noticeSendDTO, noticeSendDTO.getParams(), assigneeId, "issueAssignee", "问题分配");
         try {
             notifyFeignClient.postNotice(noticeSendDTO);
         } catch (Exception e) {
@@ -66,8 +64,8 @@ public class SiteMsgUtil {
         NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
         // 添加普通消息
         setCommonMsg(noticeSendDTO, projectId, "issueSolve", userName, summary, url, userIds, assigneeId);
-        // 添加webhook
-        setWebHookJson(noticeSendDTO, noticeSendDTO.getParams(), assigneeId, "issueSolve", "问题完成");
+//        // 添加webhook
+//        setWebHookJson(noticeSendDTO, noticeSendDTO.getParams(), assigneeId, "issueSolve", "问题完成");
         try {
             notifyFeignClient.postNotice(noticeSendDTO);
         } catch (Exception e) {
@@ -99,15 +97,15 @@ public class SiteMsgUtil {
         noticeSendDTO.setSourceId(projectId);
     }
 
-    private void setWebHookJson(NoticeSendDTO noticeSendDTO, Map<String, Object> params, Long userId, String objectKand, String eventName) {
-        WebHookJsonSendDTO webHookJsonSendDTO = new WebHookJsonSendDTO();
-        webHookJsonSendDTO.setObjectKind(objectKand);
-        webHookJsonSendDTO.setEventName(eventName);
-        webHookJsonSendDTO.setObjectAttributes((JSONObject) JSONObject.toJSON(params));
-        webHookJsonSendDTO.setCreatedAt(new Date());
-        webHookJsonSendDTO.setUser(userService.getWebHookUserById(userId));
-        noticeSendDTO.setWebHookJsonSendDTO(webHookJsonSendDTO);
-    }
+//    private void setWebHookJson(NoticeSendDTO noticeSendDTO, Map<String, Object> params, Long userId, String objectKand, String eventName) {
+//        WebHookJsonSendDTO webHookJsonSendDTO = new WebHookJsonSendDTO();
+//        webHookJsonSendDTO.setObjectKind(objectKand);
+//        webHookJsonSendDTO.setEventName(eventName);
+//        webHookJsonSendDTO.setObjectAttributes((JSONObject) JSONObject.toJSON(params));
+//        webHookJsonSendDTO.setCreatedAt(new Date());
+//        webHookJsonSendDTO.setUser(userService.getWebHookUserById(userId));
+//        noticeSendDTO.setWebHookJsonSendDTO(webHookJsonSendDTO);
+//    }
 
 
 
