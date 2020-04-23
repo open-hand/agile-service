@@ -463,4 +463,11 @@ public interface IssueMapper extends Mapper<IssueDTO> {
                                         @Param("assigneeFilterIds") List<Long> assigneeFilterIds);
 
     List<IssueDTO> queryStoryAndTaskByProjectId(@Param("projectId") Long projectId,@Param("searchVO") SearchVO searchVO);
+
+    /**
+     * 查项目下issue的
+     * @param projectId
+     * @return
+     */
+    Set<Long> selectUserIdsByProjectId(@Param("projectId") Long projectId);
 }

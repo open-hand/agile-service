@@ -959,6 +959,13 @@
         </if>
     </sql>
 
+    <select id="selectUserIdsByProjectId" resultType="java.lang.Long">
+        select distinct assignee_id
+        from agile_issue
+        where project_id = #{projectId}
+        and apply_type = 'agile'
+        and assignee_id is not null
+    </select>
 
     <select id="queryIssueByOption" resultType="io.choerodon.agile.infra.dto.IssueNumDTO">
         SELECT
