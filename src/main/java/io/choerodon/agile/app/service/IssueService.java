@@ -303,4 +303,14 @@ public interface IssueService {
     List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds);
 
     PageInfo<IssueListFieldKVVO> queryStoryAndTask(Long projectId, Pageable pageable, SearchVO searchVO);
+
+    /**
+     * 分页查询项目下的项目成员和分配过问题的用户
+     *
+     * @param pageable
+     * @param projectId
+     * @param param
+     * @return
+     */
+    PageInfo<UserDTO> pagingQueryUsers(Pageable pageable, Long projectId, String param);
 }

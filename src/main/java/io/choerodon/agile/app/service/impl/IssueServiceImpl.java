@@ -20,6 +20,7 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.TestFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
@@ -167,6 +168,8 @@ public class IssueServiceImpl implements IssueService {
     private InstanceService instanceService;
     @Autowired
     private TestFeignClient testFeignClient;
+    @Autowired
+    private BaseFeignClient baseFeignClient;
     @Autowired
     private ProjectUtil projectUtil;
 
@@ -2179,5 +2182,11 @@ public class IssueServiceImpl implements IssueService {
         } else {
             return PageUtil.emptyPageInfo(pageable.getPageNumber(), pageable.getPageSize());
         }
+    }
+
+    @Override
+    public PageInfo<UserDTO> pagingQueryUsers(Pageable pageable, Long projectId, String param) {
+        Set<Long> userIds = issueMapper.selectUserIdsByProjectId(projectId);
+        return baseFeignClient.agileUsers(projectId, pageable.getPageNumber(), pageable.getPageSize(), param, userIds).getBody();
     }
 }

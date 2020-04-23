@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author dinghuang123@gmail.com
@@ -50,6 +51,14 @@ public interface BaseFeignClient {
     ResponseEntity<PageInfo<UserDTO>> listUsersByProjectId(@PathVariable("id") Long id,
                                                  @RequestParam("page") int page,
                                                  @RequestParam("size") int size);
+
+
+    @PostMapping(value = "/v1/projects/{id}/agile_users")
+    ResponseEntity<PageInfo<UserDTO>> agileUsers(@PathVariable("id") Long projectId,
+                                                 @RequestParam("page") int page,
+                                                 @RequestParam("size") int size,
+                                                 @RequestParam("param") String param,
+                                                 @RequestBody Set<Long> userIds);
 
     /**
      * 根据projectId和param模糊查询loginName和realName两列

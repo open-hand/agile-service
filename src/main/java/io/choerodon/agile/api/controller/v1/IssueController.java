@@ -3,6 +3,7 @@ package io.choerodon.agile.api.controller.v1;
 import com.alibaba.fastjson.JSONObject;
 
 import io.choerodon.agile.infra.dto.IssueNumDTO;
+import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.core.annotation.Permission;
 import io.choerodon.core.enums.ResourceType;
 import io.swagger.annotations.ApiOperation;
@@ -642,4 +643,19 @@ public class IssueController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueIds"));
     }
+
+
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @ApiOperation("查询项目所有经办人")
+    @GetMapping(value = "/users")
+    public ResponseEntity<PageInfo<UserDTO>> pagingQueryUsers(@ApiIgnore
+                                                              @ApiParam(value = "分页信息", required = true)
+                                                              Pageable pageable,
+                                                              @ApiParam(value = "项目id", required = true)
+                                                              @PathVariable(name = "project_id") Long projectId,
+                                                              @RequestParam(value = "param", required = false) String param) {
+        return ResponseEntity.ok(issueService.pagingQueryUsers(pageable, projectId, param));
+    }
+
+
 }
