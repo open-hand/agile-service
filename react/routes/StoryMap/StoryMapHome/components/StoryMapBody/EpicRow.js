@@ -9,7 +9,6 @@ class EpicRow extends Component {
   render() {
     const { storyData } = StoryMapStore;
     const epicList = StoryMapStore.getEpicList;
-
     return (
       <tr style={{ height: 60 }}>
         {epicList.map((epic, index) => (

@@ -250,14 +250,13 @@ class StoryMapStore {
     storyList.forEach((story) => {
       this.addStoryToStoryData(story, storyData);
     });
-    // console.log(storyData);
     this.storyData = storyData;
     this.storyMapData = storyMapData;
   }
 
   @action addStoryToStoryData(story, storyData = this.storyData) {
     const { epicId, featureId, storyMapVersionDTOList } = story;
-    if (epicId !== undefined && storyData[epicId]) {
+    if (epicId !== undefined && storyData[epicId] && storyData.epicId === story.epicData) {
       const targetEpic = storyData[epicId];
       const { feature, storys } = targetEpic;
       storys.push(story);
