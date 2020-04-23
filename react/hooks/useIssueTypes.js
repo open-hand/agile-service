@@ -14,6 +14,6 @@ const IssueTypeContext = createContext({
 export { IssueTypeContext };
 
 export default function useIssueTypes() {
-  const { data, refresh } = useContext(IssueTypeContext);  
+  const { data, refresh } = useContext(IssueTypeContext) || {};  
   return [data, refresh];
 }
