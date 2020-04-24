@@ -5,15 +5,21 @@ import './TypeTag.less';
 const TypeTag = ({
   data, showName, style, featureType, iconSize,
 }) => {
-  let { colour, name = '', icon } = data || {};
-  if (featureType === 'business') {
-    colour = '#3D5AFE';
-    name = '特性';
-    icon = 'characteristic';
-  } else if (featureType === 'enabler') {
-    colour = '#FFCA28';
-    name = '使能';
+  let {
+    colour, name = '', icon,
+  } = data || {};
+  const { typeCode } = data || {};
+  if (typeCode === 'feature') {
+    if (!featureType || featureType === 'business') {
+      colour = '#3D5AFE';
+      name = '特性';
+      icon = 'characteristic';
+    } else if (featureType === 'enabler') {
+      colour = '#FFCA28';
+      name = '使能';
+    }
   }
+  
   return (
     <div className="c7n-typeTag" style={style}>
       {icon === 'characteristic' ? (

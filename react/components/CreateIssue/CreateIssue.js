@@ -461,19 +461,20 @@ class CreateIssue extends Component {
                       {
                         ...this.getDefaultType(),
                         colour: '#3D5AFE',
-                        typeCode: 'business',
+                        featureType: 'business',
                         name: '特性',
                       }, {
                         ...this.getDefaultType(),
                         colour: '#FFCA28',
-                        typeCode: 'enabler',
+                        featureType: 'enabler',
                         name: '使能',
                       },
                     ].map(type => (
-                      <Option key={type.typeCode} value={type.typeCode}>
+                      <Option key={type.featureType} value={type.featureType}>
                         <TypeTag
                           data={type}
                           showName
+                          featureType={type.featureType}
                         />
                       </Option>
                     ))}
