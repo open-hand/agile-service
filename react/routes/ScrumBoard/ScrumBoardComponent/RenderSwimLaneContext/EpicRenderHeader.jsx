@@ -1,20 +1,36 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Collapse } from 'choerodon-ui';
+import { isEqual } from 'lodash';
 import './RenderSwimLaneContext.less';
 
 import SwimLaneHeader from './SwimLaneHeader';
 
 const { Panel } = Collapse;
 
-
+const getDefaultExpanded = issueArr => [...issueArr.map(issue => `swimlane_epic-${issue.epicId}`), 'swimlane_epic-other'];
 @observer
 class EpicRenderHeader extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      activeKey: this.getDefaultExpanded([...props.parentIssueArr.values(), props.otherIssueWithoutParent]),
+      activeKey: [],
+      issues: [],
     };
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    const issues = [...props.parentIssueArr.values(), props.otherIssueWithoutParent];
+    const activeKey = getDefaultExpanded(issues);
+    const activeKeyFromOld = getDefaultExpanded(state.issues);
+    if (!isEqual(activeKey, activeKeyFromOld)) {
+      return {
+        issues,
+        activeKey,
+      };
+    } else {
+      return null;
+    }
   }
 
   getPanelKey = (key) => {
@@ -24,8 +40,7 @@ class EpicRenderHeader extends Component {
       return `swimlane_epic-${key}`;
     }
   };
-
-  getDefaultExpanded = issueArr => [...issueArr.map(issue => `swimlane_epic-${issue.epicId}`), 'swimlane_epic-other'];
+  
 
   getPanelItem = (key, parentIssue) => {
     const { activeKey } = this.state;

@@ -2,42 +2,60 @@ import React from 'react';
 import { observer } from 'mobx-react';
 import classnames from 'classnames';
 import { Collapse } from 'choerodon-ui';
+import { isEqual } from 'lodash';
 import './RenderSwimLaneContext.less';
 import SwimLaneHeader from './SwimLaneHeader';
 
 const { Panel } = Collapse;
+const getPanelKey = (mode, issue) => {
+  const modeMap = new Map([
+    ['swimlane_none', 'swimlaneContext-all'],
+    ['assignee', `swimlaneContext-${issue.assigneeId || issue.type}`],
+    ['swimlane_epic', `swimlaneContext-${issue.epicId || issue.type}`],
+    ['parent_child', `swimlaneContext-${issue.issueId || issue.type || 'other'}`],
+  ]);
+  return modeMap.get(mode);
+};
+
+const getDefaultExpanded = (mode, issueArr, key) => {
+  let retArr = issueArr;
+  if (mode === 'parent_child') {
+    retArr = retArr.filter(issue => !issue.isComplish || key === 'other');
+  }
+  return retArr.map(issue => getPanelKey(mode, issue));
+};
 @observer
 class SwimLaneContext extends React.Component {
   constructor(props) {    
     super(props);
     this.state = {
-      activeKey: this.getDefaultExpanded(props.mode, [...props.parentIssueArr.values(), props.otherIssueWithoutParent]).slice(0, 15),
+      activeKey: [],
+      issues: [],
     };
   }
 
-  getPanelKey = (mode, issue) => {
-    const modeMap = new Map([
-      ['swimlane_none', 'swimlaneContext-all'],
-      ['assignee', `swimlaneContext-${issue.assigneeId || issue.type}`],
-      ['swimlane_epic', `swimlaneContext-${issue.epicId || issue.type}`],
-      ['parent_child', `swimlaneContext-${issue.issueId || issue.type || 'other'}`],
-    ]);
-    return modeMap.get(mode);
-  };
-
-  getDefaultExpanded = (mode, issueArr, key) => {
-    let retArr = issueArr;
-    if (mode === 'parent_child') {
-      retArr = retArr.filter(issue => !issue.isComplish || key === 'other');
+  static getDerivedStateFromProps(props, state) {
+    const { mode } = props;
+    const issues = [...props.parentIssueArr.values(), props.otherIssueWithoutParent];
+    const activeKey = getDefaultExpanded(mode, issues).slice(0, 15);
+    const activeKeyFromOld = getDefaultExpanded(state.mode, state.issues).slice(0, 15);
+    if (!isEqual(activeKey, activeKeyFromOld)) {
+      return {
+        mode,
+        issues,
+        activeKey,
+      };
+    } else {
+      return null;
     }
-    return retArr.map(issue => this.getPanelKey(mode, issue));
-  };
+  }
+
 
   getPanelItem = (key, parentIssue = null) => {
     const {
       children, mode, fromEpic, parentIssueArr,
     } = this.props;
-    const panelKey = this.getPanelKey(mode, parentIssue, key);
+    const panelKey = getPanelKey(mode, parentIssue, key);
     return (
       <Panel
         showArrow={mode !== 'swimlane_none'}
