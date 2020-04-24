@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
 import React, { useEffect, useState } from 'react';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
-import { Progress, Spin } from 'choerodon-ui';
+import { Progress, Spin, Tooltip } from 'choerodon-ui';
 import { getSubStoryByFeature } from '@/api/FeatureApi';
 import IssueItem from './IssueItem';
 
@@ -24,10 +24,18 @@ function SplitStory(props) {
   return (
     <Spin spinning={loading}>
       <span style={{ fontSize: '16px', fontWeight: 500 }}>故事点完成进度</span>
-      <div className="c7n-subTask-progress">
-        <Progress percent={isNaN(progress) ? 0 : progress} style={{ marginRight: 5 }} />
-        已完成
-      </div>
+      <Tooltip title={(
+        <div>
+          <p>{`已完成故事点：${completedStoryPoints || 0}`}</p>
+          <p>{`总故事点：${totalStoryPoints || 0}`}</p>
+        </div>
+      )}
+      >
+        <div className="c7n-subTask-progress">
+          <Progress percent={isNaN(progress) ? 0 : progress} style={{ marginRight: 5 }} />
+          已完成
+        </div>
+      </Tooltip>
       {storyList.map(issue => <IssueItem issue={issue} />)}
     </Spin>
   );
