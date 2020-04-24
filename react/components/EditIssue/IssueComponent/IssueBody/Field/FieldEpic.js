@@ -181,6 +181,7 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
                       }}
                       filter
                       filterOption={filterOption}
+                      dropdownClassName="c7n-agile-featureField-SelectDropDown"
                     >
                       {originFeatures.map(feature => <Option name={feature.summary} key={`${feature.issueId}`} value={feature.issueId}><Tooltip title={feature.summary}>{feature.summary}</Tooltip></Option>)}
                     </Select>
