@@ -2123,12 +2123,24 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public Boolean checkEpicName(Long projectId, String epicName) {
-        IssueDTO issueDTO = new IssueDTO();
-        issueDTO.setProjectId(projectId);
-        issueDTO.setEpicName(epicName);
-        List<IssueDTO> issueDTOList = issueMapper.select(issueDTO);
-        return issueDTOList != null && !issueDTOList.isEmpty();
+    public Boolean checkEpicName(Long projectId, String epicName, Long epicId) {
+        boolean isUpdate = !ObjectUtils.isEmpty(epicId);
+        IssueDTO example = new IssueDTO();
+        example.setProjectId(projectId);
+        example.setEpicName(epicName);
+        List<IssueDTO> result = issueMapper.select(example);
+        if (isUpdate) {
+            boolean existed = false;
+            for (IssueDTO issue : result) {
+                if (!epicId.equals(issue.getIssueId())) {
+                    existed = true;
+                    break;
+                }
+            }
+            return existed;
+        } else {
+            return !result.isEmpty();
+        }
     }
 
 

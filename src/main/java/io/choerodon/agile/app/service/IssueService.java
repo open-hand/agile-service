@@ -286,7 +286,7 @@ public interface IssueService {
      */
     Boolean handleSearchUser(SearchVO searchVO, Long projectId);
 
-    Boolean checkEpicName(Long projectId, String epicName);
+    Boolean checkEpicName(Long projectId, String epicName, Long epicId);
 
     IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum);
 

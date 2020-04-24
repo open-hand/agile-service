@@ -76,8 +76,9 @@ public class IssueController {
     public ResponseEntity<Boolean> checkEpicName(@ApiParam(value = "项目id", required = true)
                                                  @PathVariable(name = "project_id") Long projectId,
                                                  @ApiParam(value = "史诗名称", required = true)
-                                                 @RequestParam String epicName) {
-        return Optional.ofNullable(issueService.checkEpicName(projectId, epicName))
+                                                 @RequestParam String epicName,
+                                                 @RequestParam(required = false) Long epicId) {
+        return Optional.ofNullable(issueService.checkEpicName(projectId, epicName, epicId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.checkEpicName.get"));
     }
