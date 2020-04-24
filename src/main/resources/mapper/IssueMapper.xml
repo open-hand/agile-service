@@ -301,7 +301,6 @@
         <result property="projectId" column="issue_project_id"/>
         <result property="statusId" column="status_id"/>
         <result property="issueNum" column="issue_num"/>
-        <result property="creationDate" column="issue_creation_date"/>
         <result property="lastUpdateDate" column="issue_last_update_date"/>
         <result property="remainingTime" column="remaining_time"/>
         <result property="storyPoints" column="story_points"/>
@@ -364,7 +363,7 @@
         ai3.epic_name,
         alv2.name as epic_color,
         ai.epic_id,
-        ai.creation_date as issue_creation_date,
+        ai.creation_date,
         ai.last_update_date as issue_last_update_date,
         apv.version_id,
         apv.status_code as version_status_code,
@@ -384,7 +383,6 @@
         ai.remaining_time,
         <if test="isExcelExported">
             ai.description,
-            ai.creation_date,
             ai.estimate_time,
             IF((ais.is_completed = 1), '是', '否') AS resolution,
         </if>
