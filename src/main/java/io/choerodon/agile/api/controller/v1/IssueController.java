@@ -645,6 +645,7 @@ public class IssueController {
     }
 
 
+    @CustomPageRequest
     @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
     @ApiOperation("查询项目所有经办人")
     @GetMapping(value = "/users")
@@ -655,6 +656,19 @@ public class IssueController {
                                                               @PathVariable(name = "project_id") Long projectId,
                                                               @RequestParam(value = "param", required = false) String param) {
         return ResponseEntity.ok(issueService.pagingQueryUsers(pageable, projectId, param));
+    }
+
+    @CustomPageRequest
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @ApiOperation("查询项目所有报告人")
+    @GetMapping(value = "/reporters")
+    public ResponseEntity<PageInfo<UserDTO>> pagingQueryReporters(@ApiIgnore
+                                                                  @ApiParam(value = "分页信息", required = true)
+                                                                  Pageable pageable,
+                                                                  @ApiParam(value = "项目id", required = true)
+                                                                  @PathVariable(name = "project_id") Long projectId,
+                                                                  @RequestParam(value = "param", required = false) String param) {
+        return ResponseEntity.ok(issueService.pagingQueryReporters(pageable, projectId, param));
     }
 
 
