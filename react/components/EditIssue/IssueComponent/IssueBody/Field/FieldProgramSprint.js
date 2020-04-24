@@ -123,7 +123,7 @@ const { Text, Edit } = TextEditToggle;
               >
                 {originSprints.map(team => (
                   <OptGroup label={team.projectVO.name} key={team.projectVO.id}>
-                    {team.sprints.map(sprint => (
+                    {(team.sprints || []).map(sprint => (
                       <Option key={`${sprint.sprintId}`} value={sprint.sprintId}>
                         <Tooltip placement="topRight" title={sprint.sprintName}>{sprint.sprintName}</Tooltip>
                       </Option>
