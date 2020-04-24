@@ -52,11 +52,10 @@ class FieldTeamAndSprint extends Component {
             formKey="team"
             disabled={disabled}
             onSubmit={this.handleSubmit}
-            style={{ maxWidth: 'unset', marginRight: 10 }}
             originData={teamIds}
           >
             <Text>
-              {activePiTeams.map(team => team.name).join(' 、 ')}
+              {activePiTeams.length > 0 ? activePiTeams.map(team => team.name).join(' 、 ') : '无'}
             </Text>
             <Edit>
               <SelectFocusLoad

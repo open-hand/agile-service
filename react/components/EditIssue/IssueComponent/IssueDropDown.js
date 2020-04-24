@@ -16,7 +16,7 @@ const IssueDropDown = ({
   } = useContext(EditIssueContext);
   const issue = store.getIssue;
   const {
-    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, 
+    issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi,
   } = issue;
 
   const handleDeleteIssue = () => {
@@ -99,7 +99,7 @@ const IssueDropDown = ({
       {
         <Menu.Item
           key="1"
-          disabled={loginUserId !== createdBy && !hasPermission}
+          disabled={activePi && activePi.statusCode === 'doing' ? !hasPermission : loginUserId !== createdBy && !hasPermission}
         >
           删除
         </Menu.Item>
