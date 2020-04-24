@@ -8,7 +8,7 @@ export default ({
   transport: {
     read: ({ data: p, dataSet, params }) => ({
       // defaultUserId 初始值（初次进入编辑框未修改时）
-      url: `/base/v1/${type}s/${id}/users?size=3${isEdit && p.userId === defaultUserId ? `&id=${defaultUserId}` : ''}`,
+      url: `/base/v1/${type}s/${id}/users?size=10${isEdit && p.userId === defaultUserId ? `&id=${defaultUserId}` : ''}`,
       method: 'get',
       transformResponse: (response) => {
         try {

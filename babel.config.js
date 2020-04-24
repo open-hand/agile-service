@@ -2,7 +2,9 @@ const alias = require('./alias').gulp;
 module.exports = {
   presets: [
     '@babel/preset-react',
-    ['@babel/preset-env'],
+    ['@babel/preset-env', {
+      modules: false,
+    }],
   ],
   plugins: [
     [

@@ -7,6 +7,7 @@ import { stores, axios, Choerodon } from '@choerodon/boot';
 import { Spin } from 'choerodon-ui';
 import { throttle } from 'lodash';
 import './EditIssue.less';
+import { getIsOwner } from '@/api/CommonApi';
 import {
   loadBranchs, loadDatalogs, loadLinkIssues,
   loadIssue, loadWorklogs, loadDocs, getFieldAndValue, loadIssueTypes,
@@ -133,17 +134,12 @@ function EditIssue() {
     if (!programId) {
       axios.all([
         axios.get('/base/v1/users/self'),
-        axios.post('/base/v1/permissions/checkPermission', [{
-          code: 'agile-service.issue.deleteIssue',
-          organizationId: AppState.currentMenuType.organizationId,
-          projectId: AppState.currentMenuType.id,
-          resourceType: 'project',
-        }]),
+        getIsOwner(),
         loadIssueTypes(applyType),
       ])
-        .then(axios.spread((users, permission, issueTypes) => {
+        .then(axios.spread((users, isOwner, issueTypes) => {
           loginUserId = users.id;
-          hasPermission = permission[0].approve || permission[1].approve;
+          hasPermission = isOwner;
           store.setIssueTypes(isInProgram && issueTypes ? issueTypes.filter(type => type.typeCode !== 'issue_epic') : issueTypes);
         }));
     }

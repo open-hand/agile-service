@@ -2,7 +2,7 @@
 import React from 'react';
 import { Select } from 'choerodon-ui';
 import { find } from 'lodash';
-import { getPISelect } from '@/api/PIApi';
+import { getPISelect, getAllPIList } from '@/api/PIApi';
 import { getUsers, getUser, getSubProjects } from '@/api/CommonApi';
 import {
   loadEpics, loadProgramEpics, loadIssueTypes, loadPriorities,
@@ -425,6 +425,21 @@ export default {
     render: pi => (
       <Option key={pi.id} value={pi.id}>
         {`${pi.code}-${pi.name}`}
+      </Option>
+    ),
+  },
+  all_pi: {
+    props: {
+      getPopupContainer: triggerNode => triggerNode.parentNode,
+      filterOption,
+      onFilterChange: false,
+      loadWhenMount: true,
+      label: 'PI',
+    },
+    request: () => getAllPIList(),
+    render: pi => (
+      <Option key={pi.id} value={pi.id}>
+        {pi.code ? `${pi.code}-${pi.name}` : pi.name}
       </Option>
     ),
   },
