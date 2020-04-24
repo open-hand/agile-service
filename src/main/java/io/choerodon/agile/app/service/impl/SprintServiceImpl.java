@@ -28,6 +28,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
@@ -236,6 +237,14 @@ public class SprintServiceImpl implements SprintService {
         List<IssueIdSprintIdVO> issueIdSprintIdVOS = issueMapper.querySprintAllIssueIdsByCondition(projectId, customUserDetails.getUserId(),
                 StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)), filterSql, assigneeFilterIds);
         List<SprintSearchVO> sprintSearches = new ArrayList<>();
+        Map<String, Object> advancedSearchArgs = StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS));
+        if (!ObjectUtils.isEmpty(advancedSearchArgs.get("epicId"))) {
+            if (!CollectionUtils.isEmpty(issueIdSprintIdVOS)) {
+                List<Long> allissueIds = issueIdSprintIdVOS.stream().map(IssueIdSprintIdVO::getIssueId).collect(Collectors.toList());
+                List<IssueIdSprintIdVO> subTask = issueMapper.selectIssueSubTaskAndSubBugIds(projectId, allissueIds);
+                issueIdSprintIdVOS.addAll(subTask);
+            }
+        }
         BackLogIssueVO backLogIssueVO = new BackLogIssueVO();
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
