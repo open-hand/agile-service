@@ -2189,4 +2189,10 @@ public class IssueServiceImpl implements IssueService {
         Set<Long> userIds = issueMapper.selectUserIdsByProjectId(projectId);
         return baseFeignClient.agileUsers(projectId, pageable.getPageNumber(), pageable.getPageSize(), param, userIds).getBody();
     }
+
+    @Override
+    public PageInfo<UserDTO> pagingQueryReporters(Pageable pageable, Long projectId, String param) {
+        Set<Long> userIds = issueMapper.selectReporterIdsByProjectId(projectId);
+        return baseFeignClient.agileUsers(projectId, pageable.getPageNumber(), pageable.getPageSize(), param, userIds).getBody();
+    }
 }

@@ -313,4 +313,14 @@ public interface IssueService {
      * @return
      */
     PageInfo<UserDTO> pagingQueryUsers(Pageable pageable, Long projectId, String param);
+
+    /**
+     * 分页查询项目下的项目成员和分配过问题的报告人
+     *
+     * @param pageable
+     * @param projectId
+     * @param param
+     * @return
+     */
+    PageInfo<UserDTO> pagingQueryReporters(Pageable pageable, Long projectId, String param);
 }
