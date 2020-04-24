@@ -95,6 +95,9 @@ public class IssueListFieldKVVO {
     @ApiModelProperty(value = "问题类型DTO")
     private IssueTypeVO issueTypeVO;
 
+    @ApiModelProperty(value = "创建时间")
+    private Date creationDate;
+
     @ApiModelProperty(value = "最后更新时间")
     private Date lastUpdateDate;
 
@@ -160,6 +163,14 @@ public class IssueListFieldKVVO {
 
     public void setEpicColor(String epicColor) {
         this.epicColor = epicColor;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 
     public Date getLastUpdateDate() {
