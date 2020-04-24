@@ -5,7 +5,7 @@ import {
   Field, FieldAssignee, FieldVersion, FieldStatus, FieldSprint, FieldText,
   FieldReporter, FieldPriority, FieldLabel, FieldFixVersion, FieldPI,
   FieldEpic, FieldDateTime, FieldComponent, FieldTimeTrace, FieldStoryPoint,
-  FieldSummary, FieldInput, FieldTeamAndSprint,
+  FieldSummary, FieldInput, FieldTeam, FieldProgramSprint,
 } from './Field';
 import EditIssueContext from '../../stores';
 
@@ -69,7 +69,7 @@ const IssueField = observer((props) => {
       case 'storyPoints':
         return (<FieldStoryPoint {...props} field={field} />);
       case 'teams':
-        return (<FieldTeamAndSprint {...props} field={field} />);
+        return ([<FieldTeam {...props} field={field} />, <FieldProgramSprint {...props} field={field} />]);
       default:
         return (<Field {...props} field={field} />);
     }

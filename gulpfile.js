@@ -50,7 +50,9 @@ function getBabelCommonConfig() {
   return {
     presets: [
       '@babel/preset-react',
-      '@babel/preset-env',
+      ['@babel/preset-env', {
+        modules: false,
+      }],
     ],
     plugins,
   };

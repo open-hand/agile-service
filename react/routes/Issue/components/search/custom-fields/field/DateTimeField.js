@@ -5,7 +5,7 @@ import moment from 'moment';
 
 const getSelectedDate = (field, value) => {
   if (!value || value.length === 0) {
-    return { start: undefined, end: undefined };
+    return undefined;
   }
   if (field.fieldType === 'time') {
     return { start: moment(`2000-01-01 ${value[0]}`), end: moment(`2000-01-01 ${value[1]}`) };
