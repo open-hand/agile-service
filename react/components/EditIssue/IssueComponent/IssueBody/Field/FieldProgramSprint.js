@@ -26,8 +26,8 @@ const { Text, Edit } = TextEditToggle;
   loadIssueSprints = () => {
     const { store } = this.props;
     const issue = store.getIssue;
-    const { activePi = {}, activePiTeams } = issue;
-    const { id } = activePi;
+    const activePiTeams = issue.activePiTeams || [];
+    const { id } = issue.activePi || {};
     const teamIds = activePiTeams.map(team => team.id);
     if (!id || teamIds.length === 0) {
       return;
@@ -45,7 +45,8 @@ const { Text, Edit } = TextEditToggle;
       store, onUpdate, reloadIssue,
     } = this.props;
     const issue = store.getIssue;
-    const { activePiSprints = {}, issueId } = issue;
+    const { issueId } = issue;
+    const activePiSprints = issue.activePiSprints || [];
     const originSprintIds = activePiSprints.map(sprint => sprint.sprintId);
     const addSprints = sprintIds.filter(teamId => !originSprintIds.includes(teamId));
     const removeSprints = originSprintIds.filter(sprintId => !sprintIds.includes(sprintId));
@@ -69,7 +70,8 @@ const { Text, Edit } = TextEditToggle;
     const { selectLoading, originSprints } = this.state;
     const { store, disabled } = this.props;
     const issue = store.getIssue;
-    const { closedPiSprints = [], activePiSprints = [] } = issue;
+    const activePiSprints = issue.activePiSprints || [];
+    const closedPiSprints = issue.closedPiSprints || [];
     const sprintIds = activePiSprints.map(s => s.sprintId);
     return (
       <div className="line-start mt-10">
@@ -98,14 +100,29 @@ const { Text, Edit } = TextEditToggle;
             <Text>
               <Tooltip
                 placement="top"
-                title={`该问题经历迭代数${closedPiSprints.length + activePiSprints.length}`}
+                title={`该特性经历迭代数${closedPiSprints.length + activePiSprints.length}`}
               >
                 <div>
                   {
                     closedPiSprints.concat(activePiSprints).length === 0 ? '无' : (
                       <div>
                         <div>
-                          {map(closedPiSprints.concat(activePiSprints), 'sprintName').join(' , ')}
+                          {map(closedPiSprints, 'sprintName').join(' , ')}
+                        </div>
+                        <div>
+                          {activePiSprints.map(sprint => (
+                            <div
+                              style={{
+                                color: '#4d90fe',
+                                fontSize: '13px',
+                                lineHeight: '20px',
+                                display: 'inline-block',
+                                marginTop: closedPiSprints.length ? 5 : 0,
+                              }}
+                            >
+                              {sprint.sprintName}
+                            </div>
+                          ))}                        
                         </div>
                       </div>
                     )

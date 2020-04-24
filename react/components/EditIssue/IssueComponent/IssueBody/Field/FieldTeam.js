@@ -15,7 +15,8 @@ class FieldTeamAndSprint extends Component {
       store, onUpdate, reloadIssue,
     } = this.props;
     const issue = store.getIssue;
-    const { activePiTeams, issueId } = issue;
+    const { issueId } = issue;
+    const activePiTeams = issue.activePiTeams || [];
     const originTeamIds = activePiTeams.map(team => team.id);
     const addTeams = teamIds.filter(teamId => !originTeamIds.includes(teamId));
     const removeTeams = originTeamIds.filter(teamId => !teamIds.includes(teamId));
@@ -37,7 +38,7 @@ class FieldTeamAndSprint extends Component {
   render() {
     const { store, disabled } = this.props;
     const issue = store.getIssue;
-    const { activePiTeams } = issue;
+    const activePiTeams = issue.activePiTeams || [];
     const teamIds = activePiTeams.map(team => team.id);
     return (
       <div className="line-start mt-10">

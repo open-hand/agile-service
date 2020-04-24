@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { Choerodon } from '@choerodon/boot';
+import { Tooltip } from 'choerodon-ui';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
 import { getAllPIList, changeIssuePI } from '@/api/PIApi';
 import TextEditToggle from '@/components/TextEditToggle';
@@ -18,10 +18,9 @@ class FieldPI extends Component {
     await changeIssuePI(issueId, id, value || 0);    
     if (onUpdate) {
       onUpdate();
-    }
-    if (reloadIssue) {
-      reloadIssue(issueId);
-    }
+    }    
+    await reloadIssue(issueId);
+    done();
   }
 
 
@@ -47,8 +46,37 @@ class FieldPI extends Component {
             originData={id}
           >
             <Text>
-              {closePi.length > 0 ? `历史PI:${closePi.map(p => `${p.code}-${p.name}`)}` : ''}
-              {`活跃PI:${name ? `${code}-${name}` : '无'}`}
+              <Tooltip
+                placement="top"
+                title={`该特性经历PI数${closePi.length + (id ? 1 : 0)}`}
+              >
+                <div>
+                  {
+                    !closePi.length && !id ? '无' : (
+                      <div>
+                        <div>
+                          {closePi.map(p => `${p.code}-${p.name}`).join(' , ')}
+                        </div>
+                        {
+                          id && (
+                            <div
+                              style={{
+                                color: '#4d90fe',
+                                fontSize: '13px',
+                                lineHeight: '20px',
+                                display: 'inline-block',
+                                marginTop: closePi.length ? 5 : 0,
+                              }}
+                            >
+                              {`${code}-${name}`}
+                            </div>
+                          )
+                        }
+                      </div>
+                    )
+                  }
+                </div>
+              </Tooltip>
             </Text>
             <Edit>
               <SelectFocusLoad
