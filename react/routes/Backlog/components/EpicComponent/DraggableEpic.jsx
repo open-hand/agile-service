@@ -98,7 +98,7 @@ class DraggableEpic extends Component {
         editName: false,
       });
     } else {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/check_epic_name?epicName=${value}`)
+      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/check_epic_name?epicName=${value}&epicId=${item.issueId}`)
         .then((checkRes) => {
           if (checkRes) {
             Choerodon.prompt('史诗名称重复');
