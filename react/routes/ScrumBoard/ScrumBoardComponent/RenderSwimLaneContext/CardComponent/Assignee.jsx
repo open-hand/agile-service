@@ -18,7 +18,7 @@ function Assignee({
           assigneeId ? (
             <UserHead
               hiddenText
-              size={32}
+              size={28}
               style={{ marginLeft: 8 }}
               user={{
                 id: assigneeId,
@@ -30,8 +30,8 @@ function Assignee({
             />
           ) : (
             <div style={{
-              width: 32,
-              height: 32,
+              width: 28,
+              height: 28,
               flexShrink: 0,
               marginLeft: 8,
               marginBottom: 4,
