@@ -1,4 +1,5 @@
 import { stores, axios } from '@choerodon/boot';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import { getProjectId, getOrganizationId } from '../common/utils';
 
 export function getFeatures(pagination, searchVO, sort) {
@@ -7,8 +8,8 @@ export function getFeatures(pagination, searchVO, sort) {
     params: sort,
   });
 }
-export function getFeaturesInProject() {
-  return axios.get(`/agile/v1/projects/${getProjectId()}/issues/features?organizationId=${getOrganizationId()}`);
+export function getFeaturesInProject(piId) {
+  return axios.get(`/agile/v1/projects/${getProjectId()}/issues/features?organizationId=${getOrganizationId()}${piId ? `&piId=${piId}` : ''}`);
 }
 
 export function getFeaturesByEpic(epicId) {
@@ -55,4 +56,8 @@ export function checkFeatureNameById(featureId, epicId) {
     epicId,
     featureIds: [featureId],
   });
+}
+
+export function getPiNotDone(data) {
+  return axios.post(`/agile/v1/projects/${getProjectId()}/project_invoke_program/pi/query_pi_by_status?programId=${IsInProgramStore.artInfo.programId}`, data);
 }

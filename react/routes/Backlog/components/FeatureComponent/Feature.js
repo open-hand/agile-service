@@ -1,24 +1,37 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Icon } from 'choerodon-ui';
+import { Select } from 'choerodon-ui/pro';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 import { QuickSearchEvent } from '../../../../components/QuickSearch';
 import FeatureItem from './FeatureItem';
-import { getFeaturesInProject, getFeaturesColor } from '../../../../api/FeatureApi';
+import { getFeaturesInProject, getFeaturesColor, getPiNotDone } from '../../../../api/FeatureApi';
 import './Feature.less';
 
+const { Option } = Select;
 @observer
 class Feature extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      notDonePiList: [],
+      selectedPiId: undefined,
+    };
+  }
+
   componentDidMount() {
     this.featureRefresh();
   }
 
-  featureRefresh = () => {
-    Promise.all([getFeaturesInProject(), getFeaturesColor()]).then(([featureData, featureColor]) => {
+  featureRefresh = (piId) => {
+    Promise.all([getFeaturesInProject(piId), getFeaturesColor(), getPiNotDone(['todo', 'doing'])]).then(([featureData, featureColor, notDonePiList]) => {
       BacklogStore.setFeatureData(featureData);
       BacklogStore.setColorLookupValue(featureColor.lookupValues);
       BacklogStore.setRandomFeatureColor(featureData, featureColor.lookupValues);
+      this.setState({
+        notDonePiList,
+      });
     }).catch((error3) => { });
   };
 
@@ -36,8 +49,16 @@ class Feature extends Component {
     });
   };
 
+  handlePiChange = (piId) => {
+    this.setState({
+      selectedPiId: piId,
+    });
+    this.featureRefresh(piId);
+  }
+
   render() {
     const { refresh, issueRefresh } = this.props;
+    const { notDonePiList, selectedPiId } = this.state;
     return BacklogStore.getCurrentVisible === 'feature' ? (
       <div className="c7n-backlog-epic">
         <div className="c7n-backlog-epicContent">
@@ -71,6 +92,20 @@ class Feature extends Component {
             >
               所有问题
             </div>
+            <Select
+              onChange={this.handlePiChange}
+              value={selectedPiId}
+              placeholder="PI"
+              style={{
+                marginLeft: 8,
+              }}
+            >
+              {
+                notDonePiList.map(pi => (
+                  <Option key={pi.id} value={pi.id}>{`${pi.code}-${pi.name}`}</Option>
+                ))
+              }
+            </Select>
             <DragDropContext
               onDragEnd={(result) => {
                 const { destination, source } = result;
