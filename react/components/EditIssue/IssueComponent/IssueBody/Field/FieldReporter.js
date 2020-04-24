@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
-import { getIssueUsers } from '@/api/CommonApi';
 import TextEditToggle from '../../../../TextEditToggle';
 import SelectFocusLoad from '../../../../SelectFocusLoad';
 import UserHead from '../../../../UserHead';
@@ -96,7 +95,6 @@ const { Text, Edit } = TextEditToggle;
                   points: ['tl', 'bl'],   
                   overflow: { adjustX: true },
                 }}
-                request={({ filter, page }) => getIssueUsers(filter, undefined, page).then(UserData => ({ ...UserData, list: UserData.list.filter(user => user.enabled) }))}
               />
             </Edit>
           </TextEditToggle>

@@ -13,7 +13,6 @@ import IsInProgramStore from '../../../../../stores/common/program/IsInProgramSt
 const { Option } = Select;
 const { Text, Edit } = TextEditToggle;
 
-// 增加 typeof 避免选项中 加载更多 影响 
 const filterOption = (input, option) => option.props.name && option.props.name.toLowerCase().indexOf(
   input.toLowerCase(),
 ) >= 0;

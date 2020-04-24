@@ -32,7 +32,6 @@ function LabelField({ field, value, onChange }) {
           setValue(Math.random());
         }
       }}
-      filter
       onChange={onChange}
       value={value}
       getPopupContainer={triggerNode => triggerNode.parentNode}    

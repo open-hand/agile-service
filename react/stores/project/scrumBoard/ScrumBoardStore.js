@@ -511,6 +511,12 @@ class ScrumBoardStore {
     return this.sprintName;
   }
 
+  @observable sprintNotClosedArray = [];
+
+  @action setSprintNotClosedArray = (sprintNotClosedArray) => {
+    this.sprintNotClosedArray = sprintNotClosedArray;
+  }
+
   axiosDeleteBoard() {
     return axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/board/${this.selectedBoardId}`);
   }
