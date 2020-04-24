@@ -314,7 +314,8 @@ public class IssueValidator {
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
             throw new CommonException("error.applyType.illegal");
         }
-        if (SchemeApplyType.AGILE.equals(applyType) && issueCreateVO.getEpicName() != null && issueService.checkEpicName(issueCreateVO.getProjectId(), issueCreateVO.getEpicName())) {
+        if (SchemeApplyType.AGILE.equals(applyType) && issueCreateVO.getEpicName() != null
+                && issueService.checkEpicName(issueCreateVO.getProjectId(), issueCreateVO.getEpicName(), null)) {
             throw new CommonException("error.epicName.exist");
         }
         if (issueCreateVO.getRankVO() != null) {
