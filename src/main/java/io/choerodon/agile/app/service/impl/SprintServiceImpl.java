@@ -242,9 +242,9 @@ public class SprintServiceImpl implements SprintService {
         List<Long> allIssue = new ArrayList<>();
         if (!ObjectUtils.isEmpty(advancedSearchArgs.get("epicId"))) {
             if (!CollectionUtils.isEmpty(issueIdSprintIdVOS)) {
-                List<Long> allissueIds = issueIdSprintIdVOS.stream().map(IssueIdSprintIdVO::getIssueId).collect(Collectors.toList());
-                List<Long> subTask = issueMapper.selectIssueSubTaskAndSubBugIds(projectId, allissueIds);
-                allIssue.addAll(allissueIds);
+                List<Long> allIssueIds = issueIdSprintIdVOS.stream().map(IssueIdSprintIdVO::getIssueId).collect(Collectors.toList());
+                List<Long> subTask = issueMapper.selectIssueSubTaskAndSubBugIds(projectId, allIssueIds);
+                allIssue.addAll(allIssueIds);
                 allIssue.addAll(subTask.isEmpty() ? new ArrayList<>() : subTask);
             }
         }
