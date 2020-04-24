@@ -583,6 +583,35 @@
         </if>
     </select>
 
+    <select id="selectIssueSubTaskAndSubBugIds" resultType="io.choerodon.agile.api.vo.IssueIdSprintIdVO">
+        SELECT
+        ai.issue_id,
+        ai.type_code,
+        aisr.sprint_id
+        FROM agile_issue ai
+        LEFT JOIN agile_issue_sprint_rel aisr ON aisr.issue_id = ai.issue_id
+        WHERE
+        ai.project_id = #{projectId}
+        AND
+        ai.apply_type = 'agile'
+        AND ai.issue_id in (
+        select ai2.issue_id from agile_issue ai2
+        where ai2.project_id = #{projectId}
+        AND ai2.type_code in ('sub_task','bug')
+        AND (
+            ai2.parent_issue_id in
+            <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+                #{issueId}
+            </foreach>
+            or
+            ai2.relate_issue_id in
+            <foreach collection="issueIds" item="issueId" open="(" close=")" separator=",">
+                #{issueId}
+            </foreach>
+        )
+        )
+    </select>
+
     <sql id="queryIssueIdsListWithSubSql">
         SELECT
         ai.issue_id as issue_issue_id,
