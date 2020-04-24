@@ -585,11 +585,9 @@
         </if>
     </select>
 
-    <select id="selectIssueSubTaskAndSubBugIds" resultType="io.choerodon.agile.api.vo.IssueIdSprintIdVO">
+    <select id="selectIssueSubTaskAndSubBugIds" resultType="long">
         SELECT
-        ai.issue_id,
-        ai.type_code,
-        aisr.sprint_id
+        ai.issue_id
         FROM agile_issue ai
         LEFT JOIN agile_issue_sprint_rel aisr ON aisr.issue_id = ai.issue_id
         WHERE
