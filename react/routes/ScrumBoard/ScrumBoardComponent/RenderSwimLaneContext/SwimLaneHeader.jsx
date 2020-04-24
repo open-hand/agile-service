@@ -50,7 +50,7 @@ export default class SwimLaneHeader extends Component {
   }
 
   renderStoryComponent = ({
-    issueTypeVO, issueNum, categoryCode, statusName, summary, assigneeId,
+    issueTypeVO, issueNum, categoryCode, statusName, summary, assigneeId, ldap, email,
     assigneeName, imageUrl, assigneeLoginName, assigneeRealName,
   }) => {
     const { parentIssue } = this.props;
@@ -82,6 +82,8 @@ export default class SwimLaneHeader extends Component {
             loginName: assigneeLoginName,
             realName: assigneeRealName,
             avatar: imageUrl,
+            ldap,
+            email,
           }}
         />
         <span
