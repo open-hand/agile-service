@@ -24,6 +24,7 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.PostConstruct;
@@ -223,7 +224,7 @@ public class BoardServiceImpl implements BoardService {
         List<Long> issueIds = new ArrayList<>();
         for (ColumnAndIssueDTO column : columns) {
             List<SubStatusDTO> subStatusDTOS = column.getSubStatusDTOS();
-            fillStatusData(subStatusDTOS, statusMap);
+            column.setSubStatusDTOS(fillStatusData(subStatusDTOS, statusMap));
             getDatas(subStatusDTOS, parentIds, assigneeIds, issueIds, epicIds, organizationId, parentWithSubss, issueTypeDTOMap);
             Collections.sort(subStatusDTOS, (o1, o2) -> o1.getPosition() - o2.getPosition());
         }
@@ -235,13 +236,18 @@ public class BoardServiceImpl implements BoardService {
         Collections.sort(assigneeIds);
     }
 
-    private void fillStatusData(List<SubStatusDTO> subStatusDTOS, Map<Long, StatusVO> statusMap) {
+    private List<SubStatusDTO> fillStatusData(List<SubStatusDTO> subStatusDTOS, Map<Long, StatusVO> statusMap) {
+        List<SubStatusDTO> subStatusDTO1 = new ArrayList<>();
         for (SubStatusDTO subStatusDTO : subStatusDTOS) {
             StatusVO status = statusMap.get(subStatusDTO.getStatusId());
-            subStatusDTO.setCategoryCode(status.getType());
-            subStatusDTO.setName(status.getName());
-            Collections.sort(subStatusDTO.getIssues(), Comparator.comparing(IssueForBoardDO::getIssueId));
+            if (!ObjectUtils.isEmpty(status)) {
+                subStatusDTO.setCategoryCode(status.getType());
+                subStatusDTO.setName(status.getName());
+                Collections.sort(subStatusDTO.getIssues(), Comparator.comparing(IssueForBoardDO::getIssueId));
+                subStatusDTO1.add(subStatusDTO);
+            }
         }
+        return subStatusDTO1;
     }
 
     private void handleParentIdsWithSubIssues(List<Long> parentIds, List<Long> issueIds, List<ColumnAndIssueDTO> columns, Long boardId) {
