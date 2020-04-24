@@ -56,7 +56,7 @@ class FieldTeamAndSprint extends Component {
             originData={teamIds}
           >
             <Text>
-              {activePiTeams.map(team => team.name).join(',')}
+              {activePiTeams.map(team => team.name).join(' 、 ')}
             </Text>
             <Edit>
               <SelectFocusLoad
