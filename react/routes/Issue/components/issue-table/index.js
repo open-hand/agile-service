@@ -161,10 +161,18 @@ function IssueTable({ tableRef, onCreateIssue }) {
           header={<IssueHeader fieldCode="statusId" dataSet={dataSet} />}
           name="statusId"
           renderer={({ record }) => (
-            <StatusTag
-              data={record.get('statusVO')}
-              style={{ display: 'inline-block' }}
-            />
+            <Tooltip title={record.get('statusVO').name}>
+              <div style={{
+                display: 'inline-flex',
+                overflow: 'hidden',
+              }}
+              >
+                <StatusTag
+                  data={record.get('statusVO')}
+                  style={{ display: 'inline-block' }}
+                />
+              </div>
+            </Tooltip>
           )}
         />
         <Column

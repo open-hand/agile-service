@@ -5,8 +5,8 @@ import { Select } from 'choerodon-ui';
 import EventEmitter from 'wolfy87-eventemitter';
 
 import './QuickSearch.less';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import BacklogStore from '../../stores/project/backlog/BacklogStore';
+import ScrumBoardStore from '../../stores/project/scrumBoard/ScrumBoardStore';
 
 const { Option, OptGroup } = Select;
 const QuickSearchEvent = new EventEmitter();
@@ -40,7 +40,8 @@ class QuickSearch extends Component {
       filterName: '',
     });
     const axiosGetUser = axios.get(`/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=40`);
-    Promise.all([axiosGetFilter, axiosGetUser]).then((res = []) => {
+    const axiosGetSprintNotClosed = axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/names`, ['sprint_planning', 'started']);
+    Promise.all([axiosGetFilter, axiosGetUser, axiosGetSprintNotClosed]).then((res = []) => {
       const resFilterData = res[0].map(item => ({
         label: item.name,
         value: item.filterId,
@@ -50,10 +51,14 @@ class QuickSearch extends Component {
         id: item.id,
         realName: item.realName,
       }));
+
+      const resSprintData = res[2];
+
       this.setState({
         userDataArray: resUserData,
         quickSearchArray: resFilterData,
       });
+      ScrumBoardStore.setSprintNotClosedArray(resSprintData);
     }).catch((error) => {
       Choerodon.prompt(error);
     });
@@ -68,6 +73,7 @@ class QuickSearch extends Component {
       quickSearchArray: [],
       selectQuickSearch: [],
     });
+    ScrumBoardStore.setSprintNotClosedArray([]);
   }
 
   /**
@@ -157,6 +163,8 @@ class QuickSearch extends Component {
       selectUsers,
       selectSprint,
     } = this.state;
+    
+    const { sprintNotClosedArray } = ScrumBoardStore;
 
     // showRealQuickSearch 用于在待办事项中销毁组件
     // 具体查看 Backlog/BacklogComponent/SprintComponent/SprintItem.js 中 clearFilter 方法
@@ -245,7 +253,7 @@ class QuickSearch extends Component {
               )
             }
             {
-              onSprintChange && IsInProgramStore.isShowFeature && IsInProgramStore.sprints.filter(item => item.statusCode !== 'closed').length > 0 && (
+              onSprintChange && sprintNotClosedArray && (
               <Select
                 key="sprintSelect"
                 className="SelectTheme primary c7n-agile-sprintSearchSelect"
@@ -260,7 +268,7 @@ class QuickSearch extends Component {
                 getPopupContainer={triggerNode => triggerNode.parentNode}
               >
                 {
-                  IsInProgramStore.sprints.filter(item => item.statusCode !== 'closed').map(item => (
+                  (sprintNotClosedArray || []).map(item => (
                     <Option key={item.sprintId} value={item.sprintId} title={item.sprintName}>
                       {item.sprintName}
                       {

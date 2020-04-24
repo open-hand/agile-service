@@ -294,7 +294,7 @@ class ScrumBoardHome extends Component {
     } = this.state;
     const menu = AppState.currentMenuType;
     const { type, id: projectId, organizationId: orgId } = menu;
-    const currentSprintIsDoing = ScrumBoardStore.didCurrentSprintExist && IsInProgramStore.isShowFeature && IsInProgramStore.sprints.find(item => item.statusCode === 'started' && item.sprintId === ScrumBoardStore.sprintId); 
+    const currentSprintIsDoing = ScrumBoardStore.didCurrentSprintExist && ScrumBoardStore.sprintNotClosedArray.find(item => item.statusCode === 'started' && item.sprintId === ScrumBoardStore.sprintId); 
     return (
       <Fragment>
         <Header title="活跃冲刺">         

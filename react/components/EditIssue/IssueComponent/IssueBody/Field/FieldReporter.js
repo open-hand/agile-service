@@ -46,7 +46,7 @@ const { Text, Edit } = TextEditToggle;
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
           <span className="c7n-property">
-            {'报告人'}
+            报告人
           </span>
         </div>
         <div className="c7n-value-wrapper">
@@ -71,7 +71,7 @@ const { Text, Edit } = TextEditToggle;
                   />
                 ) : (
                   <div>
-                    {'无'}
+                    无
                   </div>
                 )
               }

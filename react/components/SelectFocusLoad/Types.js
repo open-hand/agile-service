@@ -361,8 +361,8 @@ export default {
   label_id: {
     props: {
       getPopupContainer: triggerNode => triggerNode.parentNode,
-      filter: false,
-      filterOption: false,
+      filter: true,
+      filterOption,
       loadWhenMount: true,
     },
     request: loadLabels,

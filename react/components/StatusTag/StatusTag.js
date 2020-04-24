@@ -36,7 +36,14 @@ class StatusTag extends Component {
           ...style,
         }}
       >
-        <div>{name || (data && data.name) || ''}</div>
+        <div style={{
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+        >
+          {name || (data && data.name) || ''}
+        </div>
       </div>
     );
   }

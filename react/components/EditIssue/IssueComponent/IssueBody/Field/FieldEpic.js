@@ -13,7 +13,6 @@ import IsInProgramStore from '../../../../../stores/common/program/IsInProgramSt
 const { Option } = Select;
 const { Text, Edit } = TextEditToggle;
 
-// 增加 typeof 避免选项中 加载更多 影响 
 const filterOption = (input, option) => option.props.name && option.props.name.toLowerCase().indexOf(
   input.toLowerCase(),
 ) >= 0;
@@ -181,6 +180,7 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
                       }}
                       filter
                       filterOption={filterOption}
+                      dropdownClassName="c7n-agile-featureField-SelectDropDown"
                     >
                       {originFeatures.map(feature => <Option name={feature.summary} key={`${feature.issueId}`} value={feature.issueId}><Tooltip title={feature.summary}>{feature.summary}</Tooltip></Option>)}
                     </Select>

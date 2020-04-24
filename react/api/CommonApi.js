@@ -51,9 +51,18 @@ export function getIssueUsers(param, userId, page = 1) {
   }
   return axios.get(`/agile/v1/projects/${projectId}/issues/users?size=20&page=${page}${userId ? `&id=${userId}` : ''}`);
 }
+
 export async function getIsOwner() {
   const projectId = AppState.currentMenuType.id;
   const userId = AppState.userInfo.id;
   const roles = await axios.get(`base/v1/projects/${projectId}/role_members/users/${userId}`);
   return roles.some(role => role.code === 'role/project/default/project-owner');
+}
+
+export function getIssueReports(param, userId, page = 1) {
+  const projectId = AppState.currentMenuType.id;
+  if (param) {
+    return axios.get(`/agile/v1/projects/${projectId}/issues/reporters?param=${param}${userId ? `&id=${userId}` : ''}`);
+  }
+  return axios.get(`/agile/v1/projects/${projectId}/issues/reporters?size=20&page=${page}${userId ? `&id=${userId}` : ''}`);
 }
