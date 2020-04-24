@@ -10,7 +10,7 @@ const { Text, Edit } = TextEditToggle;
 
 @observer
 class FieldTeamAndSprint extends Component {
-  handleSubmit = async (teamIds) => {
+  handleSubmit = async (teamIds, done) => {
     const {
       store, onUpdate, reloadIssue,
     } = this.props;
@@ -30,9 +30,8 @@ class FieldTeamAndSprint extends Component {
     if (onUpdate) {
       onUpdate();
     }
-    if (reloadIssue) {
-      reloadIssue(issueId);
-    }
+    await reloadIssue(issueId);
+    done();
   }
 
   render() {

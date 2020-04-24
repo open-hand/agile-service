@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
-import { withRouter } from 'react-router-dom';
+import { observer } from 'mobx-react';
 import { Select, Tooltip } from 'choerodon-ui';
-import { injectIntl } from 'react-intl';
-import _ from 'lodash';
+import { map } from 'lodash';
 import { updateFeatureTeamAndSprint } from '@/api/FeatureApi';
 import { getTeamSprints } from '@/api/PIApi';
 import TextEditToggle from '../../../../TextEditToggle';
@@ -42,7 +40,7 @@ const { Text, Edit } = TextEditToggle;
     });
   };
 
-  updateIssueSprint = async (sprintIds) => {
+  updateIssueSprint = async (sprintIds, done) => {
     const {
       store, onUpdate, reloadIssue,
     } = this.props;
@@ -59,12 +57,12 @@ const { Text, Edit } = TextEditToggle;
       teamProjectIds: [],
       deleteTeamProjectIds: [],
     });
+    
     if (onUpdate) {
       onUpdate();
     }
-    if (reloadIssue) {
-      reloadIssue(issueId);
-    }
+    await reloadIssue(issueId);
+    done();
   };
 
   render() {
@@ -73,7 +71,6 @@ const { Text, Edit } = TextEditToggle;
     const issue = store.getIssue;
     const { closedPiSprints = [], activePiSprints = [] } = issue;
     const sprintIds = activePiSprints.map(s => s.sprintId);
-
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -92,7 +89,7 @@ const { Text, Edit } = TextEditToggle;
                 <div style={{ maxWidth: 170 }}>
                   <span>已结束冲刺</span>
                   <span>
-                    {_.map(closedPiSprints, 'sprintName').join(' , ')}
+                    {map(closedPiSprints, 'sprintName').join(' , ')}
                   </span>
                 </div>
               ) : null
@@ -108,7 +105,7 @@ const { Text, Edit } = TextEditToggle;
                     closedPiSprints.concat(activePiSprints).length === 0 ? '无' : (
                       <div>
                         <div>
-                          {_.map(closedPiSprints.concat(activePiSprints), 'sprintName').join(' , ')}
+                          {map(closedPiSprints.concat(activePiSprints), 'sprintName').join(' , ')}
                         </div>
                       </div>
                     )
@@ -125,7 +122,7 @@ const { Text, Edit } = TextEditToggle;
                 loading={selectLoading}
               >
                 {originSprints.map(team => (
-                  <OptGroup label={team.projectVO.name}>
+                  <OptGroup label={team.projectVO.name} key={team.projectVO.id}>
                     {team.sprints.map(sprint => (
                       <Option key={`${sprint.sprintId}`} value={sprint.sprintId}>
                         <Tooltip placement="topRight" title={sprint.sprintName}>{sprint.sprintName}</Tooltip>
