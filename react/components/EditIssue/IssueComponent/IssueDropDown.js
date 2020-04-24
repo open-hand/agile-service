@@ -11,7 +11,9 @@ const { confirm } = Modal;
 const IssueDropDown = ({
   onDeleteIssue, loginUserId, hasPermission, reloadIssue,
 }) => {
-  const { store, onUpdate, isOnlyAgileProject } = useContext(EditIssueContext);
+  const {
+    store, onUpdate, isOnlyAgileProject, applyType, 
+  } = useContext(EditIssueContext);
   const issue = store.getIssue;
   const {
     issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, 
@@ -136,7 +138,7 @@ const IssueDropDown = ({
         )
       }
       {
-        typeCode !== 'feature' && !isOnlyAgileProject && (
+        applyType !== 'program' && !isOnlyAgileProject && (
           <Menu.Item key="6">
             创建分支
           </Menu.Item>
