@@ -307,7 +307,7 @@ public class SprintServiceImpl implements SprintService {
         if (sprintSearchDTO != null) {
             List<Long> activeSprintIssueIds = issueIdSprintIdVOS.stream().filter(x -> sprintSearchDTO.getSprintId().equals(x.getSprintId()) && !"sub_task".equals(x.getTypeCode())).map(IssueIdSprintIdVO::getIssueId).collect(Collectors.toList());
             sprintSearchDTO.setIssueSearchDTOList(!activeSprintIssueIds.isEmpty() ? sprintMapper.queryActiveSprintIssueSearchByIssueIds(projectId, activeSprintIssueIds, sprintSearchDTO.getSprintId()) : new ArrayList<>());
-            sprintSearchDTO.setAssigneeIssueDTOList(!allIssueIds.isEmpty() ? sprintMapper.queryAssigneeIssueByActiveSprintIdAndIssueIds(projectId, sprintSearchDTO.getSprintId(),allIssue) : new ArrayList<>());
+            sprintSearchDTO.setAssigneeIssueDTOList(!allIssue.isEmpty() ? sprintMapper.queryAssigneeIssueByActiveSprintIdAndIssueIds(projectId, sprintSearchDTO.getSprintId(),allIssue) : new ArrayList<>());
             SprintSearchVO activeSprint = sprintSearchAssembler.dtoToVO(sprintSearchDTO, usersMap, priorityMap, statusMapDTOMap, issueTypeDTOMap);
             activeSprint.setIssueCount(activeSprint.getIssueSearchVOList() == null ? 0 : activeSprint.getIssueSearchVOList().size());
             Map<String, List<Long>> statusMap = projectConfigService.queryStatusByProjectId(projectId, SchemeApplyType.AGILE)
