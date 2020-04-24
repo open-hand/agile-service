@@ -585,7 +585,7 @@
         </if>
     </select>
 
-    <select id="selectIssueSubTaskAndSubBugIds" resultType="long">
+    <select id="selectIssueSubTaskAndSubBugIds" resultType="java.lang.Long">
         SELECT
         ai.issue_id
         FROM agile_issue ai
