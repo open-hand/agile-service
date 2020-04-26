@@ -540,21 +540,11 @@ public class IssueServiceImpl implements IssueService {
         return true;
     }
 
-    protected Boolean checkEpicNameUpdate(Long projectId, Long issueId, String epicName) {
-        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
-        if (epicName.equals(issueDTO.getEpicName())) {
-            return false;
-        }
-        IssueDTO check = new IssueDTO();
-        check.setProjectId(projectId);
-        check.setEpicName(epicName);
-        List<IssueDTO> issueDTOList = issueMapper.select(check);
-        return issueDTOList != null && !issueDTOList.isEmpty();
-    }
-
     @Override
     public IssueVO updateIssue(Long projectId, IssueUpdateVO issueUpdateVO, List<String> fieldList) {
-        if (fieldList.contains("epicName") && issueUpdateVO.getEpicName() != null && checkEpicNameUpdate(projectId, issueUpdateVO.getIssueId(), issueUpdateVO.getEpicName())) {
+        if (fieldList.contains("epicName")
+                && issueUpdateVO.getEpicName() != null
+                && checkEpicName(projectId, issueUpdateVO.getEpicName(), issueUpdateVO.getIssueId())) {
             throw new CommonException("error.epicName.exist");
         }
         if (!fieldList.isEmpty()) {
