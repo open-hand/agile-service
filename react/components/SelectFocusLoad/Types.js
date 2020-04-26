@@ -14,6 +14,7 @@ import IssueLinkType from '@/api/IssueLinkType';
 import UserHead from '../UserHead';
 import TypeTag from '../TypeTag';
 import StatusTag from '../StatusTag';
+import { IsInProgramStore } from '../../exports';
 
 // 增加 typeof 避免选项中 加载更多 影响 
 const filterOption = (input, option) => option.props.children && typeof (option.props.children) === 'string' && option.props.children.toLowerCase().indexOf(
@@ -423,7 +424,7 @@ export default {
     },
     request: getPISelect,
     render: pi => (
-      <Option key={pi.id} value={pi.id}>
+      <Option disabled={!IsInProgramStore.isOwner && pi.statusCode === 'doing'} key={pi.id} value={pi.id}>
         {`${pi.code}-${pi.name}`}
       </Option>
     ),
@@ -438,7 +439,7 @@ export default {
     },
     request: () => getAllPIList(),
     render: pi => (
-      <Option key={pi.id} value={pi.id}>
+      <Option disabled={!IsInProgramStore.isOwner && pi.statusCode === 'doing'} key={pi.id} value={pi.id}>
         {pi.code ? `${pi.code}-${pi.name}` : pi.name}
       </Option>
     ),
@@ -461,7 +462,7 @@ export default {
       onFilterChange: false,
       loadWhenMount: true,
     },
-    request: () => getSubProjects(),
+    request: () => getSubProjects(true),
     render: pro => (
       <Option key={pro.projectId} value={pro.projectId}>
         {pro.projName}

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Icon } from 'choerodon-ui';
-import { Select } from 'choerodon-ui/pro';
+import { Select } from 'choerodon-ui';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 import { QuickSearchEvent } from '../../../../components/QuickSearch';
@@ -21,10 +22,10 @@ class Feature extends Component {
   }
 
   componentDidMount() {
-    this.featureRefresh();
+    this.featureRefresh(undefined, true);
   }
 
-  featureRefresh = (piId) => {
+  featureRefresh = (piId, isFirstLoad = false) => {
     Promise.all([getFeaturesInProject(piId), getFeaturesColor(), getPiNotDone(['todo', 'doing'])]).then(([featureData, featureColor, notDonePiList]) => {
       BacklogStore.setFeatureData(featureData);
       BacklogStore.setColorLookupValue(featureColor.lookupValues);
@@ -32,6 +33,11 @@ class Feature extends Component {
       this.setState({
         notDonePiList,
       });
+      if (isFirstLoad) {
+        this.setState({
+          selectedPiId: IsInProgramStore.piInfo && IsInProgramStore.piInfo.id,
+        });
+      }
     }).catch((error3) => { });
   };
 
@@ -96,13 +102,24 @@ class Feature extends Component {
               onChange={this.handlePiChange}
               value={selectedPiId}
               placeholder="PI"
-              style={{
-                marginLeft: 8,
-              }}
+              className="c7n-backlog-piSelect"
+              allowClear
             >
               {
                 notDonePiList.map(pi => (
-                  <Option key={pi.id} value={pi.id}>{`${pi.code}-${pi.name}`}</Option>
+                  <Option key={pi.id} value={pi.id}>
+                    {`${pi.code}-${pi.name}`}
+                    {pi.id === (IsInProgramStore.piInfo && IsInProgramStore.piInfo.id) && (
+                    <div
+                      style={{
+                        marginLeft: '0.08rem',
+                      }}
+                      className="c7n-agile-sprintSearchSelect-option-active"
+                    >
+                      当前
+                    </div>
+                    )}
+                  </Option>
                 ))
               }
             </Select>

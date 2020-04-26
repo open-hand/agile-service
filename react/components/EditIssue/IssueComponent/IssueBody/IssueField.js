@@ -17,6 +17,9 @@ const IssueField = observer((props) => {
   } = useContext(EditIssueContext);
   const getFieldComponent = (field) => {
     const issue = store.getIssue;
+    const activePiTeams = issue.activePiTeams || [];
+    const teamIds = activePiTeams.map(team => team.id);
+
     const { typeCode } = issue;
     // debugger;
     switch (field.fieldCode) {
@@ -69,7 +72,7 @@ const IssueField = observer((props) => {
       case 'storyPoints':
         return (<FieldStoryPoint {...props} field={field} />);
       case 'teams':
-        return ([<FieldTeam {...props} field={field} />, <FieldProgramSprint {...props} field={field} />]);
+        return ([<FieldTeam {...props} field={field} />, <FieldProgramSprint {...props} field={field} key={teamIds} />]);
       default:
         return (<Field {...props} field={field} />);
     }
@@ -83,7 +86,7 @@ const IssueField = observer((props) => {
   } else if (typeCode === 'issue_epic') {
     fields = fields.filter(field => field.fieldCode !== 'epic');
   } else if (typeCode === 'feature') {
-    fields.splice(3, 0, { fieldCode: 'teams', fieldName: '负责团队和冲刺' });
+    fields.splice(4, 0, { fieldCode: 'teams', fieldName: '负责团队和冲刺' });
     // fields.splice(4, 0, { fieldCode: 'teamSprint', fieldName: '团队Sprint' });
   }
   if (!store.detailShow) {
