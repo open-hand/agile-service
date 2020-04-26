@@ -172,3 +172,25 @@
     height: 100%;
   }
 }
+
+.c7n-backlog-piSelect {
+  margin: 0 8px;
+  display: flex;
+  height: 30px;
+  .c7n-select-selection__rendered {
+    height: 30px;
+    .c7n-select-selection-selected-value {
+      height: 30px;
+      margin-top: -10px;
+    }
+  }
+  .c7n-select-label {
+    margin-top: -4px;
+  }
+}
+.c7n-backlog-piSelect.c7n-select-has-border::before {
+  border-radius: unset;
+}
+.c7n-backlog-piSelect.c7n-select-focused.c7n-select::before, .has-error .c7n-select::before{
+  border-width: 1px !important;
+}

@@ -5,7 +5,7 @@ import { stores } from '@choerodon/boot';
 import Moment from 'moment';
 import { extendMoment } from 'moment-range';
 import { getCurrentPiInfo, getCurrentPiAllSprint } from '@/api/SprintApi.js';
-import { getProjectsInProgram, getProjectIsShowFeature } from '../../../api/CommonApi';
+import { getProjectsInProgram, getProjectIsShowFeature, getIsOwner } from '../../../api/CommonApi';
 
 const moment = extendMoment(Moment);
 const { AppState } = stores;
@@ -14,6 +14,8 @@ const { AppState } = stores;
  * @param isShowFeature 判断项目是否显示特性 需先使用loadIsShowFeature 
  */
 class IsInProgramStore {
+  @observable isOwner = true;
+
   @observable isInProgram = false;
 
   @observable program = false;
@@ -40,6 +42,11 @@ class IsInProgramStore {
     }
   }
 
+  getIsOwner = async () => {
+    const isOwner = await getIsOwner();
+    this.setIsOwner(isOwner);
+  }
+
   loadIsShowFeature = async () => {
     const artInfo = await getProjectIsShowFeature();
     this.setIsShowFeature(Boolean(artInfo));
@@ -59,6 +66,9 @@ class IsInProgramStore {
     }
   }
 
+  @action setIsOwner(data) {
+    this.isOwner = data;
+  }
 
   @action setPiInfo(data) {
     this.piInfo = data;

@@ -92,6 +92,7 @@ export default ({
     { name: 'epic', type: 'string', label: '史诗' },
     { name: 'feature', type: 'string', label: '特性' },
     { name: 'lastUpdateDate', type: 'string', label: '最后更新时间' },
+    { name: 'creationDate', type: 'string', label: '创建时间' },
     { name: 'issueSprintVOS', type: 'array', label: '冲刺' },
   ],
   queryFields: [
