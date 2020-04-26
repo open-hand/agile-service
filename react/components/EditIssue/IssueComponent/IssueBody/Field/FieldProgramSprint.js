@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Select, Tooltip } from 'choerodon-ui';
-import { map } from 'lodash';
+import { map, isEqual } from 'lodash';
 import { updateFeatureTeamAndSprint } from '@/api/FeatureApi';
 import { getTeamSprints } from '@/api/PIApi';
 import TextEditToggle from '../../../../TextEditToggle';
@@ -15,12 +15,21 @@ const { Text, Edit } = TextEditToggle;
     super(props);
     this.state = {
       originSprints: [],
-      selectLoading: true,
+      selectLoading: false,
     };
   }
 
   componentDidMount() {
     this.loadIssueSprints();
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    if (isEqual(state.teamIds, props.teamIds)) {
+      return ({
+        teamIds: props.teamIds,
+      });
+    }
+    return null;
   }
 
   loadIssueSprints = () => {

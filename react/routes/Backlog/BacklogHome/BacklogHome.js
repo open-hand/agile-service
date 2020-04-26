@@ -8,7 +8,6 @@ import {
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
-import { getCurrentPiInfo, getCurrentPiAllSprint } from '@/api/SprintApi.js';
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';
@@ -76,11 +75,6 @@ class BacklogHome extends Component {
       this.refresh();
     };
     const { programId, id: artId } = artInfo;
-    // getCurrentPiInfo(programId, artId).then((res) => {
-    //   getCurrentPiAllSprint(res.id).then((sprints) => {
-
-    //   });
-    // });
     const piInfo = IsInProgramStore.getPiInfo;
     const sprints = IsInProgramStore.getSprints;
     Modal.open({

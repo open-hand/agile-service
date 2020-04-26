@@ -224,9 +224,10 @@ public class BoardServiceImpl implements BoardService {
         List<Long> issueIds = new ArrayList<>();
         for (ColumnAndIssueDTO column : columns) {
             List<SubStatusDTO> subStatusDTOS = column.getSubStatusDTOS();
-            column.setSubStatusDTOS(fillStatusData(subStatusDTOS, statusMap));
+            subStatusDTOS = fillStatusData(subStatusDTOS, statusMap);
             getDatas(subStatusDTOS, parentIds, assigneeIds, issueIds, epicIds, organizationId, parentWithSubss, issueTypeDTOMap);
             Collections.sort(subStatusDTOS, (o1, o2) -> o1.getPosition() - o2.getPosition());
+            column.setSubStatusDTOS(subStatusDTOS);
         }
         //选择故事泳道选择仅我的任务后，子任务经办人为自己，父任务经办人不为自己的情况
         if (condition) {

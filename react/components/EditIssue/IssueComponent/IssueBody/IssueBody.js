@@ -39,7 +39,6 @@ function IssueBody(props) {
   const { reloadIssue } = props;
   const createBranchShow = store.getCreateBranchShow;
   const workLogShow = store.getWorkLogShow;
-
   return (
     <section className={`${prefixCls}-body`} id="scroll-area" style={{ position: 'relative' }}>
       <div style={{ paddingRight: 20 }}>      
@@ -115,7 +114,7 @@ function IssueBody(props) {
         </TabPane>       
         <TabPane tab="记录" key="3">
           {!disabled && issueTypeVO.typeCode === 'feature' && <IssuePIHistory {...props} />}
-          {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
+          {issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueWorkLog {...props} /> : ''
           }
           <IssueLog {...props} />

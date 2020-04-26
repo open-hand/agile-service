@@ -201,6 +201,13 @@ function IssueTable({ tableRef, onCreateIssue }) {
           name="lastUpdateDate" 
           className="c7n-agile-table-cell" 
         />
+        <Column 
+          // header={<IssueHeader fieldCode="creationDate" dataSet={dataSet} />}
+          width={170} 
+          hidden
+          name="creationDate" 
+          className="c7n-agile-table-cell" 
+        />
         <Column hidden name="label" className="c7n-agile-table-cell" renderer={renderTag('labelIssueRelVOS', 'labelName')} />
         <Column hidden name="component" className="c7n-agile-table-cell" renderer={renderTag('issueComponentBriefVOS', 'name')} />
         <Column hidden name="storyPoints" className="c7n-agile-table-cell" renderer={({ text }) => text || '-'} />
