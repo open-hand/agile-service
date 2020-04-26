@@ -224,7 +224,7 @@ public class BoardServiceImpl implements BoardService {
         List<Long> issueIds = new ArrayList<>();
         for (ColumnAndIssueDTO column : columns) {
             List<SubStatusDTO> subStatusDTOS = column.getSubStatusDTOS();
-            column.setSubStatusDTOS(fillStatusData(subStatusDTOS, statusMap));
+            subStatusDTOS = fillStatusData(subStatusDTOS, statusMap);
             getDatas(subStatusDTOS, parentIds, assigneeIds, issueIds, epicIds, organizationId, parentWithSubss, issueTypeDTOMap);
             Collections.sort(subStatusDTOS, (o1, o2) -> o1.getPosition() - o2.getPosition());
         }

@@ -239,13 +239,15 @@ public class SprintServiceImpl implements SprintService {
                 StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS)), filterSql, assigneeFilterIds);
         List<SprintSearchVO> sprintSearches = new ArrayList<>();
         Map<String, Object> advancedSearchArgs = StringUtil.cast(searchParamMap.get(ADVANCED_SEARCH_ARGS));
-        List<Long> allIssue = new ArrayList<>();
-        if (!ObjectUtils.isEmpty(advancedSearchArgs.get("epicId"))) {
-            if (!CollectionUtils.isEmpty(issueIdSprintIdVOS)) {
-                List<Long> allIssueIds = issueIdSprintIdVOS.stream().map(IssueIdSprintIdVO::getIssueId).collect(Collectors.toList());
+        List<Long> allIssueIds = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(issueIdSprintIdVOS)) {
+            allIssueIds = issueIdSprintIdVOS.stream().map(IssueIdSprintIdVO::getIssueId).collect(Collectors.toList());
+        }
+
+        if (!ObjectUtils.isEmpty(advancedSearchArgs.get("featureId")) || !ObjectUtils.isEmpty(advancedSearchArgs.get("epicId"))) {
+            if (!CollectionUtils.isEmpty(allIssueIds)) {
                 List<Long> subTask = issueMapper.selectIssueSubTaskAndSubBugIds(projectId, allIssueIds);
-                allIssue.addAll(allIssueIds);
-                allIssue.addAll(subTask.isEmpty() ? new ArrayList<>() : subTask);
+                allIssueIds.addAll(subTask.isEmpty() ? new ArrayList<>() : subTask);
             }
         }
         BackLogIssueVO backLogIssueVO = new BackLogIssueVO();
@@ -253,7 +255,7 @@ public class SprintServiceImpl implements SprintService {
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
         setStatusIsCompleted(projectId, statusMapDTOMap);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
-        handleSprintIssueData(issueIdSprintIdVOS, issueIds, sprintSearches, backLogIssueVO, projectId, priorityMap, statusMapDTOMap, issueTypeDTOMap,allIssue);
+        handleSprintIssueData(issueIdSprintIdVOS, issueIds, sprintSearches, backLogIssueVO, projectId, priorityMap, statusMapDTOMap, issueTypeDTOMap,allIssueIds);
         backlog.put(SPRINT_DATA, sprintSearches);
         backlog.put(BACKLOG_DATA, backLogIssueVO);
         return backlog;
