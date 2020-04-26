@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { toJS } from 'mobx';
 import { Icon } from 'choerodon-ui';
 import IssueStore from '@/stores/project/issue/IssueStore';
-import { getIssueUsers, getIssueReports } from '@/api/CommonApi';
+import { getIssueUsers, getIssueReports, getUsers } from '@/api/CommonApi';
 import IssueTypeField from './field/IssueTypeField';
 import StatusField from './field/StatusField';
 import SprintField from './field/SprintField';
@@ -167,6 +167,7 @@ function renderField(field) {
           field={field}
           value={value}
           onChange={handleChange}
+          request={({ filter, page }) => getUsers(filter, undefined, page).then(UserData => ({ ...UserData, list: UserData.list.filter(user => user.enabled) }))}
         />
       );
     case 'number':
