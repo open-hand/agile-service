@@ -26,6 +26,7 @@ function IssueItem({ issue }) {
       issueNum,
       projectId: projectVO.id,
       projectName: projectVO.name,
+      category: projectVO.category,
     }));
   });
 
