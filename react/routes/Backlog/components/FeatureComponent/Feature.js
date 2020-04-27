@@ -35,7 +35,7 @@ class Feature extends Component {
       });
       if (isFirstLoad) {
         this.setState({
-          selectedPiId: IsInProgramStore.piInfo && IsInProgramStore.piInfo.id,
+          selectedPiId: notDonePiList.find(pi => pi.statusCode === 'doing') && notDonePiList.find(pi => pi.statusCode === 'doing').id,
         });
       }
     }).catch((error3) => { });
