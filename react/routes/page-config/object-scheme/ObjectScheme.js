@@ -190,8 +190,28 @@ function ObjectScheme() {
       return <Tag style={{ color: 'rgba(0,0,0,0.65)', borderColor: '#d9d9d9', background: '#fafafa' }}>{formatMessage({ id: 'system' })}</Tag>;
     } else {
       return projectId
-        ? <Tag color="orange"><span>{formatMessage({ id: 'project' })}</span></Tag>
-        : <Tag color="geekblue"><span>{formatMessage({ id: 'organization' })}</span></Tag>;
+        ? (
+          <Tag 
+            style={{
+              background: '#fafafa',
+              color: '#5CC2F2',
+              borderColor: '#5CC2F2',
+            }}
+          >
+            <span>{formatMessage({ id: 'project' })}</span>
+          </Tag>
+        )
+        : (
+          <Tag 
+            style={{
+              background: '#fafafa',
+              color: '#3f51b5',
+              borderColor: '#3f51b5',
+            }}
+          >
+            <span>{formatMessage({ id: 'organization' })}</span>
+          </Tag>
+        );
     }
   };
 
