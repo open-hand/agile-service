@@ -42,6 +42,10 @@ let sign = false;
     };
   }
 
+  componentDidMount() {
+
+  }
+
   handleChange = (e) => {
     const { field } = this.props;
     const { fieldType } = field;
@@ -253,7 +257,6 @@ let sign = false;
     } else if (field.fieldType === 'number') {
       return (
         <InputNumber
-          defaultValue={value}
           autoFocus
           onChange={e => this.handleChange(e)}
           className="fieldWith"
@@ -322,7 +325,7 @@ let sign = false;
         <div className="c7n-value-wrapper" style={{ width: 'auto' }}>
           <TextEditToggle
             disabled={disabled}            
-            formKey={fieldType === 'number' ? undefined : fieldCode}
+            formKey={fieldCode}
             onSubmit={this.updateIssueField}
             originData={this.transform(fieldType, value)}
             required={required}
