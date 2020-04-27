@@ -123,6 +123,17 @@ class Feature extends Component {
                 ))
               }
             </Select>
+            {!notDonePiList.find(pi => pi.statusCode === 'doing') && !selectedPiId && (
+              <p style={{
+                paddingLeft: '10px',
+                paddingTop: '2px',
+                color: 'rgba(0, 0, 0, 0.5)',
+                fontSize: '12px',
+              }}
+              >
+                当前没有已开启的PI
+              </p>
+            )}
             <DragDropContext
               onDragEnd={(result) => {
                 const { destination, source } = result;
