@@ -18,6 +18,15 @@ public class RoleVO {
     @ApiModelProperty(value = "角色code")
     private String code;
 
+    private Boolean enabled;
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
 
     public Long getId() {
         return id;
