@@ -100,7 +100,7 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     }
 
     @Override
-    public ResponseEntity<PageInfo<UserWithRoleVO>> pagingQueryUsersWithRolesOnProjectLevel(Long organizationId, int page, int size, String loginName, String realName, String roleName, Boolean enabled, Long userId, String params) {
-        throw new CommonException("error.iamServiceFeignFallback.pagingQueryUsersWithRolesOnProjectLevel");
+    public ResponseEntity<List<RoleVO>> getUserWithProjLevelRolesByUserId(Long projectId, Long userId) {
+        throw new CommonException("error.iamServiceFeignFallback.getUserWithProjLevelRolesByUserId");
     }
 }
