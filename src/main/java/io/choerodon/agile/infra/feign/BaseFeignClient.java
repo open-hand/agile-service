@@ -146,5 +146,31 @@ public interface BaseFeignClient {
                                                                                  @PathVariable(name = "organization_id") Long organizationId,
                                                                                  @ApiParam(value = "要查询的年份", required = true)
                                                                                  @RequestParam(name = "year") Integer year);
+
+
+    /**
+     * 分页查询项目层用户，附带所分配的角色
+     *
+     * @param organizationId
+     * @param page
+     * @param size
+     * @param loginName
+     * @param realName
+     * @param roleName
+     * @param enabled
+     * @param userId
+     * @param params
+     * @return
+     */
+    @GetMapping(value = "/v1/projects/{project_id}/users/search")
+    ResponseEntity<PageInfo<UserWithRoleVO>> pagingQueryUsersWithRolesOnProjectLevel(@PathVariable(name = "project_id") Long organizationId,
+                                                                                     @RequestParam(required = false) int page,
+                                                                                     @RequestParam(required = false) int size,
+                                                                                     @RequestParam(required = false) String loginName,
+                                                                                     @RequestParam(required = false) String realName,
+                                                                                     @RequestParam(required = false) String roleName,
+                                                                                     @RequestParam(required = false) Boolean enabled,
+                                                                                     @RequestParam(required = false) Long userId,
+                                                                                     @RequestParam(required = false) String params);
 }
 

@@ -1,10 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import com.github.pagehelper.PageInfo;
-import io.choerodon.agile.api.vo.ProjectVO;
-import io.choerodon.agile.api.vo.RoleAssignmentSearchVO;
-import io.choerodon.agile.api.vo.RoleVO;
-import io.choerodon.agile.api.vo.UserVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.UserDTO;
@@ -16,6 +13,7 @@ import io.choerodon.core.oauth.DetailsHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +26,8 @@ import java.util.Map;
  */
 @Component
 public class UserServiceImpl implements UserService {
+
+    private static final String PROJECT_OWNER = "role/project/default/project-owner";
 
     private final BaseFeignClient baseFeignClient;
 
@@ -131,6 +131,43 @@ public class UserServiceImpl implements UserService {
             return new WebHookJsonSendDTO.User(userDTO.getLoginName(), userDTO.getRealName());
         } else {
             return new WebHookJsonSendDTO.User("0", "unknown");
+        }
+    }
+
+    @Override
+    public boolean isProjectOwner(Long projectId, Long userId) {
+        if (ObjectUtils.isEmpty(projectId)
+                || ObjectUtils.isEmpty(userId)) {
+            return false;
+        }
+        ResponseEntity<PageInfo<UserWithRoleVO>> response =
+                baseFeignClient.pagingQueryUsersWithRolesOnProjectLevel(
+                        projectId,
+                        1,
+                        1,
+                        null,
+                        null,
+                        null,
+                        null,
+                        userId,
+                        null);
+        PageInfo<UserWithRoleVO> pageInfo = response.getBody();
+        List<UserWithRoleVO> users = pageInfo.getList();
+        if (ObjectUtils.isEmpty(users)) {
+            return false;
+        } else {
+            boolean isProjectOwner = false;
+            UserWithRoleVO user = users.get(0);
+            List<RoleVO> roles = user.getRoles();
+            if (!ObjectUtils.isEmpty(roles)) {
+                for (RoleVO role : roles) {
+                    if (PROJECT_OWNER.equals(role.getCode())) {
+                        isProjectOwner = true;
+                        break;
+                    }
+                }
+            }
+            return isProjectOwner;
         }
     }
 }
