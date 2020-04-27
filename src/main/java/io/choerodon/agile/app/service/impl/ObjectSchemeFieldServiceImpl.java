@@ -250,10 +250,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 updateDTO.setDefaultValue(defaultIds);
             }
         }
-        ObjectSchemeFieldDTO field = baseQueryById(organizationId, projectId, fieldId);
-        if (field.getRequired() && "".equals(updateDTO.getDefaultValue())) {
-            throw new CommonException(ERROR_FIELD_REQUIRED_NEED_DEFAULT_VALUE);
-        }
         ObjectSchemeFieldDTO update = modelMapper.map(updateDTO, ObjectSchemeFieldDTO.class);
         //处理context
         String[] contexts = updateDTO.getContext();
