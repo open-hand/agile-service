@@ -17,7 +17,6 @@ class Feature extends Component {
     super(props);
     this.state = {
       notDonePiList: [],
-      selectedPiId: undefined,
     };
   }
 
@@ -34,9 +33,7 @@ class Feature extends Component {
         notDonePiList,
       });
       if (isFirstLoad) {
-        this.setState({
-          selectedPiId: notDonePiList.find(pi => pi.statusCode === 'doing') && notDonePiList.find(pi => pi.statusCode === 'doing').id,
-        });
+        BacklogStore.setSelectedPiId(notDonePiList.find(pi => pi.statusCode === 'doing') && notDonePiList.find(pi => pi.statusCode === 'doing').id);
       }
     }).catch((error3) => { });
   };
@@ -56,15 +53,14 @@ class Feature extends Component {
   };
 
   handlePiChange = (piId) => {
-    this.setState({
-      selectedPiId: piId,
-    });
+    BacklogStore.setSelectedPiId(piId);
     this.featureRefresh(piId);
   }
 
   render() {
     const { refresh, issueRefresh } = this.props;
-    const { notDonePiList, selectedPiId } = this.state;
+    const { notDonePiList } = this.state;
+    const { selectedPiId } = BacklogStore;
     return BacklogStore.getCurrentVisible === 'feature' ? (
       <div className="c7n-backlog-epic">
         <div className="c7n-backlog-epicContent">

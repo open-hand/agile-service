@@ -35,6 +35,8 @@ class BacklogStore {
 
   @observable featureList = [];
 
+  @observable selectedPiId = undefined;
+
   @observable selectedIssueId = [];
 
   @observable issueMap = observable.map();
@@ -368,6 +370,10 @@ class BacklogStore {
 
   @action setFeatureData(data) {
     this.featureList = sortBy(data, 'featureRank');
+  }
+
+  @action setSelectedPiId(data) {
+    this.selectedPiId = data;
   }
 
   axiosGetEpic() {
@@ -798,7 +804,9 @@ class BacklogStore {
     sort(sortVO).then(
       action('fetchSuccess', (res) => {
         if (!res.message) {
-          getFeaturesInProject().then((data) => {
+          console.log('this.selectedPiId：');
+          console.log(this.selectedPiId);
+          getFeaturesInProject(this.selectedPiId).then((data) => {
             this.setFeatureData(data);
           });
         } else {
@@ -1034,7 +1042,7 @@ class BacklogStore {
    * 加载特性
    */
   loadFeature = () => {
-    getFeaturesInProject().then((data) => {
+    getFeaturesInProject(this.selectedPiId).then((data) => {
       this.setFeatureData(data);
     }).catch(() => {
     });
