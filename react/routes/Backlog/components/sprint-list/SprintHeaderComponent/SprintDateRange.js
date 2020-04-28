@@ -50,7 +50,7 @@ const FormItem = Form.Item;
         statusCode, startDate, endDate, sprintId, sprintType,
       }, form: { getFieldDecorator }, form,
     } = this.props;
-    return (sprintType || statusCode === 'started') ? (
+    return (
       <div
         className="c7n-backlog-sprintData"
         style={{
@@ -110,8 +110,12 @@ const FormItem = Form.Item;
                         }
                         // eslint-disable-next-line no-shadow
                         const endDate = form.getFieldValue('endDate');
-                        if (!sprintType && endDate) {
-                          return date >= endDate;
+                        if (!sprintType) {
+                          if (endDate) {
+                            return date >= endDate;
+                          } else {
+                            return false;
+                          }
                         } else {
                           // 没选结束时间的时候，只判断时间点能不能选
                           // eslint-disable-next-line no-lonely-if
@@ -120,8 +124,8 @@ const FormItem = Form.Item;
                           } else {
                             // 选了结束时间之后，判断形成的时间段是否和其他重叠
                             return !IsInProgramStore.rangeCanChoose(date, endDate, sprintId);
-                          }
-                        }                  
+                          }                  
+                        }
                       }}
                       format="YYYY-MM-DD HH:mm:ss"
                       showTime
@@ -147,8 +151,12 @@ const FormItem = Form.Item;
                         }
                         // eslint-disable-next-line no-shadow
                         const startDate = form.getFieldValue('startDate');
-                        if (!sprintType && startDate) {
-                          return date <= startDate;
+                        if (!sprintType) {
+                          if (startDate) {
+                            return date <= startDate;
+                          } else {
+                            return false;
+                          }
                         } else {
                           // 没选开始时间的时候，只判断时间点能不能选
                           // eslint-disable-next-line no-lonely-if
@@ -157,7 +165,7 @@ const FormItem = Form.Item;
                           } else {
                             // 选了开始时间之后，判断形成的时间段是否和其他重叠
                             return !IsInProgramStore.rangeCanChoose(startDate, date, sprintId);
-                          }        
+                          }
                         }
                       }}
                       format="YYYY-MM-DD HH:mm:ss"
@@ -170,7 +178,7 @@ const FormItem = Form.Item;
           </Edit>
         </TextEditToggle>
       </div>
-    ) : null;
+    );
   }
 }
 
