@@ -132,7 +132,7 @@ public class StatusController extends BaseController {
     @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
     @ApiOperation(value = "校验状态名字是否未被使用,项目层")
     @GetMapping(value = "/projects/{project_id}/status/project_check_name")
-    public ResponseEntity<StatusCheckVO> checkName(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<StatusCheckVO> checkNameOnPro(@PathVariable("project_id") Long projectId,
                                                    @RequestParam("organization_id") Long organizationId,
                                                    @RequestParam("name") String name) {
         return Optional.ofNullable(statusService.checkName(organizationId, name))
