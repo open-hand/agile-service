@@ -5,7 +5,7 @@ import { DatePicker, message, Form } from 'choerodon-ui';
 import TextEditToggle from '@/components/TextEditToggle';
 import { getProjectId, catchFailed } from '@/common/utils';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
-import IsInProgramStore from '../../../../../stores/common/program/IsInProgramStore';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 
 const { Text, Edit } = TextEditToggle;
 const FormItem = Form.Item;
@@ -47,8 +47,8 @@ const FormItem = Form.Item;
   render() {
     const {
       data: {
-        statusCode, startDate, endDate, sprintId, sprintType,
-      }, form: { getFieldDecorator }, form,
+        statusCode, startDate, endDate, sprintId, sprintType, 
+      }, form: { getFieldDecorator }, form, noPermission,
     } = this.props;
     return (
       <div
@@ -60,7 +60,7 @@ const FormItem = Form.Item;
         role="none"
       >
         <TextEditToggle
-          disabled={sprintType === 'ip'} // ip冲刺禁止修改时间
+          disabled={sprintType === 'ip' || noPermission} // ip冲刺禁止修改时间
           saveRef={this.startDateEdit}
           onSubmit={() => {
             form.validateFields((err, values) => {

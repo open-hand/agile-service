@@ -28,7 +28,7 @@ const { Text, Edit } = TextEditToggle;
   };
 
   render() {
-    const { data: { sprintGoal } } = this.props;
+    const { data: { sprintGoal }, noPermission } = this.props;
     return (
       <div
         style={{
@@ -45,6 +45,7 @@ const { Text, Edit } = TextEditToggle;
           冲刺目标：
         </p>
         <TextEditToggle
+          disabled={noPermission}
           formKey="goal"
           onSubmit={this.handler}
           originData={sprintGoal}

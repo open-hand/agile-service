@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
 import { Input } from 'choerodon-ui';
 import { observer } from 'mobx-react';
-import { Choerodon } from '@choerodon/boot';
+import { Choerodon, stores, Permission } from '@choerodon/boot';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import SprintApi from '@/api/SprintApi';
 import TextEditToggle from '@/components/TextEditToggle';
 import { MAX_LENGTH_SPRINT } from '@/constants/MAX_LENGTH';
 import { getProjectId } from '@/common/utils';
 
-
+const { AppState } = stores;
 const { Text, Edit } = TextEditToggle;
 
 @observer
@@ -53,12 +54,13 @@ class SprintName extends Component {
 
   render() {
     const {
-      data: { sprintName, type, sprintType },
+      data: { sprintName, type }, noPermission,
     } = this.props;
+
     return (
       <div className="c7n-backlog-sprintName">        
         <TextEditToggle
-          disabled={type === 'backlog'}
+          disabled={type === 'backlog' || noPermission}
           formKey="sprint"
           onSubmit={this.handleBlurName}
           originData={sprintName}
