@@ -60,7 +60,7 @@ const Item = memo(({ issue, draggingNum }) => {
         className={`${prefix}-right`}
       >
 
-        {issue.versionNames.length > 0 ? (
+        {issue.versionNames && issue.versionNames.length > 0 ? (
           <Tooltip title={`版本: ${issue.versionNames.join(', ')}`}>
             <span className={`${prefix}-version`}>
               {issue.versionNames.join(', ')}
@@ -130,7 +130,7 @@ const Item = memo(({ issue, draggingNum }) => {
 
 
 function IssueItem({
-  provided, style, issue, isDragging, sprintId,
+  provided, style, issue = {}, isDragging, sprintId,
 }) {
   const selected = BacklogStore.getMultiSelected && BacklogStore.getMultiSelected.get(issue.issueId);
   const draggingNum = BacklogStore.getIsDragging === issue.issueId && BacklogStore.getMultiSelected.size > 0 ? BacklogStore.getMultiSelected.size : undefined;
