@@ -132,7 +132,7 @@ const Item = memo(({ issue, draggingNum }) => {
 function IssueItem({
   provided, style, issue, isDragging, sprintId,
 }) {
-  const selected = BacklogStore.getMultiSelected.get(issue.issueId);
+  const selected = BacklogStore.getMultiSelected && BacklogStore.getMultiSelected.get(issue.issueId);
   const draggingNum = BacklogStore.getIsDragging === issue.issueId && BacklogStore.getMultiSelected.size > 0 ? BacklogStore.getMultiSelected.size : undefined;
   return (
     <div

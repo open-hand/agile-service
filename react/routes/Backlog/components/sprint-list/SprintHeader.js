@@ -1,7 +1,10 @@
 import React from 'react';
 import { Icon } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
+import { Permission, stores } from '@choerodon/boot';
+
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import SprintName from './SprintHeaderComponent/SprintName';
 import SprintStatus from './SprintHeaderComponent/SprintStatus';
 import SprintButton from './SprintHeaderComponent/SprintButton';
@@ -13,6 +16,8 @@ import SprintGoal from './SprintHeaderComponent/SprintGoal';
 import WorkLoadBtn from './SprintHeaderComponent/WorkLoadBtn';
 import SprintIcon from './SprintHeaderComponent/SprintIcon';
 import './SprintHeader.less';
+
+const { AppState } = stores;
 
 const prefix = 'c7n-backlog-SprintHeader';
 function BacklogHeader({ data }) {
@@ -41,6 +46,8 @@ function SprintHeader({ data }) {
     type, expand, sprintId, piId, sprintType,
   } = data;
   const isSprint = type === 'sprint';
+  const { type: projectType, id: projectId, organizationId: orgId } = AppState.currentMenuType;
+
   return (
     isSprint ? (
       <div className={prefix}>
@@ -52,7 +59,20 @@ function SprintHeader({ data }) {
             onClick={() => { BacklogStore.expandSprint(sprintId, !expand); }}
           />
           <SprintIcon sprintType={sprintType} />
-          <SprintName data={data} />
+          <Permission
+            type={projectType}
+            projectId={projectId}
+            organizationId={orgId}
+            service={[IsInProgramStore.isInProgram ? 'agile-service.sprint-pro.updateSubProjectSprint' : 'agile-service.sprint.updateSprint']}
+            noAccessChildren={(
+              <SprintName            
+                data={data}
+                noPermission
+              />
+            )}
+          >
+            <SprintName data={data} />
+          </Permission>
           <SprintVisibleIssue
             data={data}
           />
@@ -73,12 +93,38 @@ function SprintHeader({ data }) {
           />
         </div>
         <div className={`${prefix}-bottom`}>
-          <SprintDateRange            
-            data={data}
-          />
-          <SprintGoal
-            data={data}
-          />
+          <Permission
+            type={projectType}
+            projectId={projectId}
+            organizationId={orgId}
+            service={[IsInProgramStore.isInProgram ? 'agile-service.sprint-pro.updateSubProjectSprint' : 'agile-service.sprint.updateSprint']}
+            noAccessChildren={(
+              <SprintDateRange            
+                data={data}
+                noPermission
+              />
+            )}
+          >
+            <SprintDateRange            
+              data={data}
+            />
+          </Permission>
+          <Permission
+            type={projectType}
+            projectId={projectId}
+            organizationId={orgId}
+            service={[IsInProgramStore.isInProgram ? 'agile-service.sprint-pro.updateSubProjectSprint' : 'agile-service.sprint.updateSprint']}
+            noAccessChildren={(
+              <SprintGoal            
+                data={data}
+                noPermission
+              />
+            )}
+          >
+            <SprintGoal
+              data={data}
+            />
+          </Permission>
         </div>
       </div>
     ) : <BacklogHeader data={data} />

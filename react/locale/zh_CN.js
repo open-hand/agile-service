@@ -336,7 +336,7 @@ const zh_CN = {
   'stateMachine.delete.confirm': '确定要删除状态“{des}”及其相关转换吗？',
   'stateMachine.node.deleteTip': '确认删除？',
   'stateMachine.node.deleteInfo': '无法删除状态',
-  'stateMachine.node.deleteDes': '有{count}个问题在使用此状态，如要删除状态，需要将问题转换到其他状态。',
+  'stateMachine.node.deleteDes': '有{count}个问题在使用此状态，或者该状态配置在看板列中。如要删除状态，需要将问题转换到其他状态或将状态移出看板列。',
   'stateMachine.transfer.deleteTip': '请选择需要删除的转换。',
   'stateMachine.transfer.deleteConfirm': '确认删除？',
   'stateMachine.draft': '草稿',
