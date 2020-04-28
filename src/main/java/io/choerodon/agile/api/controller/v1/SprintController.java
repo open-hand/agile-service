@@ -43,7 +43,7 @@ public class SprintController {
     private static final String CLOSE_ERROR = "error.sprint.close";
     private static final String QUERY_SPRINT_MESSAGE_ERROR = "error.sprintMessage.query";
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
     @ApiOperation(value = "创建冲刺")
     @PostMapping
     public ResponseEntity<SprintDetailVO> createSprint(@ApiParam(value = "项目id", required = true)
@@ -55,7 +55,7 @@ public class SprintController {
                 .orElseThrow(() -> new CommonException(CREATE_ERROR));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
     @ApiOperation(value = "更新冲刺部分字段")
     @PutMapping
     public ResponseEntity<SprintDetailVO> updateSprint(@ApiParam(value = "项目id", required = true)
@@ -67,7 +67,7 @@ public class SprintController {
                 .orElseThrow(() -> new CommonException(UPDATE_ERROR));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
     @ApiOperation("根据id删除冲刺")
     @DeleteMapping(value = "/{sprintId}")
     public ResponseEntity<Boolean> deleteSprint(@ApiParam(value = "项目id", required = true)
@@ -109,7 +109,7 @@ public class SprintController {
                 .orElseThrow(() -> new CommonException(QUERY_NAME_ERROR));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
     @ApiOperation(value = "开启冲刺")
     @PostMapping(value = "/start")
     public ResponseEntity<SprintDetailVO> startSprint(@ApiParam(value = "项目id", required = true)
@@ -121,7 +121,7 @@ public class SprintController {
                 .orElseThrow(() -> new CommonException(OPEN_ERROR));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
     @ApiOperation(value = "完成冲刺")
     @PostMapping(value = "/complete")
     public ResponseEntity<Boolean> completeSprint(@ApiParam(value = "项目id", required = true)
@@ -223,7 +223,7 @@ public class SprintController {
                 .orElseThrow(() -> new CommonException("error.queryNonWorkdays.get"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
     @ApiOperation("冲刺重名校验")
     @PostMapping(value = "/check_name")
     public ResponseEntity<Boolean> checkName(@ApiParam(value = "项目id", required = true)
