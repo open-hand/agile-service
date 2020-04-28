@@ -125,7 +125,6 @@ const { Text, Edit } = TextEditToggle;
                                 color: '#4d90fe',
                                 fontSize: '13px',
                                 lineHeight: '20px',
-                                display: 'inline-block',
                                 marginTop: closedPiSprints.length ? 5 : 0,
                               }}
                             >
