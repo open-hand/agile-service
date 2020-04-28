@@ -1,13 +1,16 @@
 import React, { Fragment } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Icon, Dropdown, Menu } from 'choerodon-ui';
+import { Permission, stores } from '@choerodon/boot';
 import moment from 'moment';
 import classnames from 'classnames';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import CloseSprint from '@/components/close-sprint';
 import StartSprint from '../../start-sprint';
 import './SprintButton.less';
-import IsInProgramStore from '../../../../../stores/common/program/IsInProgramStore';
+
+const { AppState } = stores;
 
 const prefix = 'c7n-backlog-SprintButton';
 function SprintButton({
@@ -49,33 +52,56 @@ function SprintButton({
       </Menu.Item>
     </Menu>
   );
+
+  const { type, id: projectId, organizationId: orgId } = AppState.currentMenuType;
+
   return statusCode === 'started' ? (
-    <p
-      className={prefix}
-      role="none"
-      onClick={openCloseSprint}
+    <Permission
+      type={type}
+      projectId={projectId}
+      organizationId={orgId}
+      service={['agile-service.sprint.completeSprint']}
     >
-      完成冲刺
-    </p>
+      <p
+        className={prefix}
+        role="none"
+        onClick={openCloseSprint}
+      >
+        完成冲刺
+      </p>
+    </Permission>
   ) : (
     <Fragment>
-      <p
-        className={classnames(prefix, {
-          [`${prefix}-disabled`]: hasActiveSprint || !issueList || issueList.length === 0,
-        })}
-        role="none"
-        onClick={openStartSprint}
+      <Permission
+        type={type}
+        projectId={projectId}
+        organizationId={orgId}
+        service={[IsInProgramStore.isInProgram ? 'agile-service.sprint-pro.startSubProjectSprint' : 'agile-service.sprint.startSprint']}
       >
-        开启冲刺
-      </p>
-      {/* ip冲刺不可删除 */}
-      {(data.sprintType !== 'ip'
-          && (
-            <Dropdown overlay={menu} trigger={['click']}>
-              <Icon style={{ cursor: 'pointer', marginRight: 15 }} type="more_vert" />
-            </Dropdown>
-          )
-        )}
+        <p
+          className={classnames(prefix, {
+            [`${prefix}-disabled`]: hasActiveSprint || !issueList || issueList.length === 0,
+          })}
+          role="none"
+          onClick={openStartSprint}
+        >
+          开启冲刺
+        </p>
+      </Permission>
+      <Permission
+        type={type}
+        projectId={projectId}
+        organizationId={orgId}
+        service={[IsInProgramStore.isInProgram ? 'agile-service.sprint-pro.deleteSubProjectSprint' : 'agile-service.sprint.deleteSprint']}
+      >
+        {(data.sprintType !== 'ip'
+            && (
+              <Dropdown overlay={menu} trigger={['click']}>
+                <Icon style={{ cursor: 'pointer', marginRight: 15 }} type="more_vert" />
+              </Dropdown>
+            )
+          )}
+      </Permission>
     </Fragment>
   );
 }
