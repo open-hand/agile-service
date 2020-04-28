@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -311,7 +312,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     @Override
     public List<ObjectSchemeFieldDetailVO> queryCustomFieldList(Long projectId) {
-        List<ObjectSchemeFieldDetailVO> objectSchemeFieldDetailVOList = objectSchemeFieldMapper.selectCustomFieldList(projectId);
+        List<ObjectSchemeFieldDetailVO> objectSchemeFieldDetailVOList = objectSchemeFieldMapper.selectCustomFieldList(ConvertUtil.getOrganizationId(projectId),projectId);
         if (objectSchemeFieldDetailVOList != null && !objectSchemeFieldDetailVOList.isEmpty()) {
             return objectSchemeFieldDetailVOList;
         } else {
