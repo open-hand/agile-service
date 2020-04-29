@@ -53,7 +53,7 @@ function renderField(field) {
             field={field}
             value={value}
             onChange={handleChange}
-            request={({ filter, page }) => getIssueUsers(filter, undefined, page).then(UserData => ({ ...UserData, list: UserData.list.filter(user => user.enabled) }))}
+            request={({ filter, page }) => getIssueUsers(filter, undefined, page)}
           />
         );
       case 'reporterIds':
@@ -62,7 +62,7 @@ function renderField(field) {
             field={field}
             value={value}
             onChange={handleChange}
-            request={({ filter, page }) => getIssueReports(filter, undefined, page).then(UserData => ({ ...UserData, list: UserData.list.filter(user => user.enabled) }))}
+            request={({ filter, page }) => getIssueReports(filter, undefined, page)}
           />
         );
       case 'sprint':
