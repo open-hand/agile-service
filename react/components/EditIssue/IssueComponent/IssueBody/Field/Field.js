@@ -327,7 +327,7 @@ let sign = false;
             required={required}
             fieldType={fieldType}
             fieldName={fieldName}
-            fieldProps={{ getValueFromEvent: fieldType === 'number' ? v => String(v) : undefined }}
+            fieldProps={{ getValueFromEvent: fieldType === 'number' ? v => (v ? String(v) : undefined) : undefined }}
           >
             <Text key="text">
               <div style={{ maxWidth: 200, wordBreak: 'break-all', whiteSpace: 'pre-line' }}>
