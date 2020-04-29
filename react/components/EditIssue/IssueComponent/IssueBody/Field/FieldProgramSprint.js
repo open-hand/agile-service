@@ -145,6 +145,7 @@ const { Text, Edit } = TextEditToggle;
                 getPopupContainer={() => document.getElementById('detail')}
                 allowClear
                 loading={selectLoading}
+                showCheckAll={false}
               >
                 {originSprints.map(team => (
                   <OptGroup label={team.projectVO.name} key={team.projectVO.id}>
