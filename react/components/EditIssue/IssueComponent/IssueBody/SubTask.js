@@ -129,13 +129,14 @@ const SubTask = observer(({
     setSummary(e.target && e.target.value && e.target.value.trim());
   };
   return (
-    <div id="sub_task">
-      <Divider />
-      <div className="c7n-title-wrapper">
-        <div className="c7n-title-left">
-          <span>子任务</span>
-        </div>
-        {!disableCreate && (
+    disableCreate && subIssueVOList.length === 0 ? null : (
+      <div id="sub_task">
+        <Divider />
+        <div className="c7n-title-wrapper">
+          <div className="c7n-title-left">
+            <span>子任务</span>
+          </div>
+          {!disableCreate && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title="创建子任务" getPopupContainer={triggerNode => triggerNode.parentNode}>
               <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => store.setCreateSubTaskShow(true)}>
@@ -143,18 +144,18 @@ const SubTask = observer(({
               </Button>
             </Tooltip>
           </div>
-        )}
-      </div>
-      {subIssueVOList && subIssueVOList.length
-        ? (
-          <div className="c7n-subTask-progress">
-            <Progress percent={getPercent()} style={{ marginRight: 5 }} />
-            已完成
-          </div>
-        ) : ''
+          )}
+        </div>
+        {subIssueVOList && subIssueVOList.length
+          ? (
+            <div className="c7n-subTask-progress">
+              <Progress percent={getPercent()} style={{ marginRight: 5 }} />
+              已完成
+            </div>
+          ) : ''
       }
-      {renderSubIssues()}
-      {!disableCreate && (
+        {renderSubIssues()}
+        {!disableCreate && (
         <div className="c7n-subTask-quickCreate">
           {expand
             ? (
@@ -196,8 +197,8 @@ const SubTask = observer(({
             )
           }
         </div>
-      )}
-      {
+        )}
+        {
         createSubTaskShow ? (
           <CreateSubTask
             parentIssueId={parentIssueId}
@@ -209,7 +210,8 @@ const SubTask = observer(({
           />
         ) : null
       }
-    </div>
+      </div>
+    )
   );
 });
 
