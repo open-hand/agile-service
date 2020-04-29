@@ -19,13 +19,14 @@ const SubTask = observer(({
 }) => {
   const creatingRef = useRef(false);
   const { store, disabled } = useContext(EditIssueContext);
+  
   const [expand, setExpand] = useState(false);
   const [summary, setSummary] = useState(false);
   const {
-    issueId: parentIssueId, subIssueVOList = [], priorityId, sprintId,
+    issueId: parentIssueId, subIssueVOList = [], priorityId, sprintId, typeCode, relateIssueId,
   } = store.getIssue;
   const { getCreateSubTaskShow: createSubTaskShow } = store;
-
+  const disableCreate = disabled || (typeCode === 'bug' && relateIssueId);
   const renderIssueList = (issue, i) => (
     <IssueList
       showAssignee
@@ -134,7 +135,7 @@ const SubTask = observer(({
         <div className="c7n-title-left">
           <span>子任务</span>
         </div>
-        {!disabled && (
+        {!disableCreate && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
             <Tooltip placement="topRight" title="创建子任务" getPopupContainer={triggerNode => triggerNode.parentNode}>
               <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => store.setCreateSubTaskShow(true)}>
@@ -153,7 +154,7 @@ const SubTask = observer(({
         ) : ''
       }
       {renderSubIssues()}
-      {!disabled && (
+      {!disableCreate && (
         <div className="c7n-subTask-quickCreate">
           {expand
             ? (
