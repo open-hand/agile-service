@@ -103,7 +103,6 @@ const FormItem = Form.Item;
                       autoFocus
                       style={{ width: 165, height: 32 }}
                       allowClear
-                      disabled={statusCode === 'started'}
                       disabledDate={(date) => {
                         if (!date) {
                           return false;
