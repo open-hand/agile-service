@@ -253,7 +253,6 @@ let sign = false;
     } else if (field.fieldType === 'number') {
       return (
         <InputNumber
-          defaultValue={value}
           autoFocus
           onChange={e => this.handleChange(e)}
           className="fieldWith"
@@ -321,13 +320,14 @@ let sign = false;
         </div>
         <div className="c7n-value-wrapper" style={{ width: 'auto' }}>
           <TextEditToggle
-            disabled={disabled}            
-            formKey={fieldType === 'number' ? undefined : fieldCode}
+            disabled={disabled}
             onSubmit={this.updateIssueField}
+            formKey={fieldCode}
             originData={this.transform(fieldType, value)}
             required={required}
             fieldType={fieldType}
             fieldName={fieldName}
+            fieldProps={{ getValueFromEvent: fieldType === 'number' ? v => String(v) : undefined }}
           >
             <Text key="text">
               <div style={{ maxWidth: 200, wordBreak: 'break-all', whiteSpace: 'pre-line' }}>

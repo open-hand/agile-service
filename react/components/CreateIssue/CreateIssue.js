@@ -741,6 +741,7 @@ class CreateIssue extends Component {
           <FormItem label={fieldName} style={{ width: 330 }}>
             {getFieldDecorator(fieldCode, {
               rules: [{ required, message: `${fieldName}为必填项` }],
+              getValueFromEvent: fieldType === 'number' ? value => String(value) : undefined,
               initialValue: this.transformValue(fieldType, defaultValue),
             })(
               renderField(field),
