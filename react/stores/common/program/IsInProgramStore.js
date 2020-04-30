@@ -29,7 +29,7 @@ class IsInProgramStore {
   @observable sprints = []; // 用于时间判断
 
   refresh = async () => {
-    if (AppState.currentMenuType.type === 'project') {
+    if (AppState.currentMenuType.category !== 'PROGRAM' && AppState.currentMenuType.type === 'project') {
       const program = await getProjectsInProgram();
       const hasProgram = Boolean(program);
       this.setIsInProgram(hasProgram);

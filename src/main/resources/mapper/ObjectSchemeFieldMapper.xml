@@ -106,7 +106,10 @@
         FROM fd_object_scheme_field osf
         LEFT JOIN lookup_value flv ON flv.value_code = osf.field_type and flv.type_code = 'field_type'
         LEFT JOIN fd_field_option ffo ON osf.id = ffo.field_id
-        WHERE osf.project_id = #{projectId}
+        WHERE
+        osf.organization_id = #{organizationId}
+        AND
+        (osf.project_id = #{projectId} OR osf.project_id IS NULL)
         order by osf.id DESC
     </select>
 </mapper>

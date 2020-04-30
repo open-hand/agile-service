@@ -146,5 +146,11 @@ public interface BaseFeignClient {
                                                                                  @PathVariable(name = "organization_id") Long organizationId,
                                                                                  @ApiParam(value = "要查询的年份", required = true)
                                                                                  @RequestParam(name = "year") Integer year);
+
+
+
+    @GetMapping(value = "/v1/projects/{project_id}/role_members/users/{user_id}")
+    ResponseEntity<List<RoleVO>> getUserWithProjLevelRolesByUserId(@PathVariable(name = "project_id") Long projectId,
+                                                                   @PathVariable(name = "user_id") Long userId);
 }
 

@@ -98,4 +98,9 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     public ResponseEntity<List<WorkCalendarHolidayRefVO>> queryByYearIncludeLastAndNext(Long organizationId, Integer year) {
         throw new CommonException("error.iamServiceFeignFallback.queryByYearIncludeLastAndNext");
     }
+
+    @Override
+    public ResponseEntity<List<RoleVO>> getUserWithProjLevelRolesByUserId(Long projectId, Long userId) {
+        throw new CommonException("error.iamServiceFeignFallback.getUserWithProjLevelRolesByUserId");
+    }
 }

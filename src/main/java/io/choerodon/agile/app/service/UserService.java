@@ -56,4 +56,13 @@ public interface UserService {
     ProjectVO getGroupInfoByEnableProject(Long organizationId, Long projectId);
 
     WebHookJsonSendDTO.User getWebHookUserById(Long userId);
+
+    /**
+     * 查询是否为项目所有者
+     *
+     * @param projectId
+     * @param userId
+     * @return
+     */
+    boolean isProjectOwner(Long projectId, Long userId);
 }

@@ -359,16 +359,22 @@ class ScrumBoardHome extends Component {
             currentSprintIsDoing && (
             <Fragment>             
               {this.renderRemainDate()}
-              <Button
-                style={{
-                  marginLeft: 15,
-                }}
-                icon="alarm_on"
-                onClick={this.handleFinishSprint}
+              <Permission
+                type={type}
+                projectId={projectId}
+                organizationId={orgId}
+                service={['agile-service.sprint.completeSprint']}
               >
-                完成冲刺
-  
-              </Button>
+                <Button
+                  style={{
+                    marginLeft: 15,
+                  }}
+                  icon="alarm_on"
+                  onClick={this.handleFinishSprint}
+                >
+                  完成冲刺
+                </Button>
+              </Permission>
               {this.renderSwitchMode()}
             </Fragment>
             )

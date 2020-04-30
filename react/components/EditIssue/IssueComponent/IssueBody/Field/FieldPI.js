@@ -15,7 +15,7 @@ class FieldPI extends Component {
     const issue = store.getIssue;
     const { issueId, activePi } = issue;
     const { id } = activePi || {};
-    await changeIssuePI(issueId, id, value || 0);    
+    await changeIssuePI(issueId, id || 0, value || 0);    
     if (onUpdate) {
       onUpdate();
     }    

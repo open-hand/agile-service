@@ -7,6 +7,7 @@ import {
   Button, Spin, Icon, Tooltip,
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
+import { Permission, stores } from '@choerodon/boot';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
@@ -20,6 +21,7 @@ import './BacklogHome.less';
 
 const createSprintKey = Modal.key();
 const createCurrentPiSprintKey = Modal.key();
+const { AppState } = stores;
 
 @observer
 class BacklogHome extends Component {
@@ -110,6 +112,8 @@ class BacklogHome extends Component {
     const { BacklogStore } = this.props;
     const arr = BacklogStore.getSprintData;
     const { isInProgram, isShowFeature } = IsInProgramStore;
+    const { type, id: projectId, organizationId: orgId } = AppState.currentMenuType;
+
     return (
       <Fragment>
         <Header title="待办事项">
@@ -122,27 +126,48 @@ class BacklogHome extends Component {
             <span>创建问题</span>
           </Button>
           {!isInProgram && (
-            <Button className="leftBtn" functyp="flat" onClick={this.handleCreateSprint}>
-              <Icon type="playlist_add icon" />
-              创建冲刺
-            </Button>
+            <Permission
+              type={type}
+              projectId={projectId}
+              organizationId={orgId}
+              service={['agile-service.sprint.createSprint']}
+            >
+              <Button className="leftBtn" functyp="flat" onClick={this.handleCreateSprint}>
+                <Icon type="playlist_add icon" />
+                创建冲刺
+              </Button>
+            </Permission>
+
           )}
           {isShowFeature && !IsInProgramStore.getPiInfo.id
             && (
-              <Tooltip title="无活跃的PI">
-                <Button className="leftBtn" functyp="flat" onClick={this.handleCreateCurrentPiSprint} disabled>
-                  <Icon type="playlist_add icon" />
-                  当前PI下创建冲刺
-                </Button>
-              </Tooltip>
-
+              <Permission
+                type={type}
+                projectId={projectId}
+                organizationId={orgId}
+                service={['agile-service.sprint-pro.createSubProjectSprint']}
+              >
+                <Tooltip title="无活跃的PI">
+                  <Button className="leftBtn" functyp="flat" onClick={this.handleCreateCurrentPiSprint} disabled>
+                    <Icon type="playlist_add icon" />
+                    当前PI下创建冲刺
+                  </Button>
+                </Tooltip>
+              </Permission>
             )}
           {isShowFeature && IsInProgramStore.getPiInfo.id
             && (
-              <Button className="leftBtn" functyp="flat" onClick={this.handleCreateCurrentPiSprint}>
-                <Icon type="playlist_add icon" />
-                当前PI下创建冲刺
-              </Button>
+              <Permission
+                type={type}
+                projectId={projectId}
+                organizationId={orgId}
+                service={['agile-service.sprint-pro.createSubProjectSprint']}
+              >
+                <Button className="leftBtn" functyp="flat" onClick={this.handleCreateCurrentPiSprint}>
+                  <Icon type="playlist_add icon" />
+                  当前PI下创建冲刺
+                </Button>
+              </Permission>
             )}
           {isInProgram && arr.length && arr.length > 1
             ? <ShowPlanSprint /> : null

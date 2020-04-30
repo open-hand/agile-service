@@ -17,7 +17,6 @@ class Feature extends Component {
     super(props);
     this.state = {
       notDonePiList: [],
-      selectedPiId: undefined,
     };
   }
 
@@ -34,9 +33,7 @@ class Feature extends Component {
         notDonePiList,
       });
       if (isFirstLoad) {
-        this.setState({
-          selectedPiId: IsInProgramStore.piInfo && IsInProgramStore.piInfo.id,
-        });
+        BacklogStore.setSelectedPiId(notDonePiList.find(pi => pi.statusCode === 'doing') && notDonePiList.find(pi => pi.statusCode === 'doing').id);
       }
     }).catch((error3) => { });
   };
@@ -56,15 +53,14 @@ class Feature extends Component {
   };
 
   handlePiChange = (piId) => {
-    this.setState({
-      selectedPiId: piId,
-    });
+    BacklogStore.setSelectedPiId(piId);
     this.featureRefresh(piId);
   }
 
   render() {
     const { refresh, issueRefresh } = this.props;
-    const { notDonePiList, selectedPiId } = this.state;
+    const { notDonePiList } = this.state;
+    const { selectedPiId } = BacklogStore;
     return BacklogStore.getCurrentVisible === 'feature' ? (
       <div className="c7n-backlog-epic">
         <div className="c7n-backlog-epicContent">
@@ -123,6 +119,17 @@ class Feature extends Component {
                 ))
               }
             </Select>
+            {!notDonePiList.find(pi => pi.statusCode === 'doing') && !selectedPiId && (
+              <p style={{
+                paddingLeft: '10px',
+                paddingTop: '2px',
+                color: 'rgba(0, 0, 0, 0.5)',
+                fontSize: '12px',
+              }}
+              >
+                当前没有已开启的PI
+              </p>
+            )}
             <DragDropContext
               onDragEnd={(result) => {
                 const { destination, source } = result;

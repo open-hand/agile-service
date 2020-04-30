@@ -310,7 +310,7 @@
         <result property="creationDate" column="creation_date"/>
         <result property="estimateTime" column="estimate_time"/>
         <result property="resolution" column="resolution"/>
-        <collection property="versionIssueRelDTOS" autoMapping="true"
+        <collection property="versionIssueRelDTOS"
                     ofType="io.choerodon.agile.infra.dto.VersionIssueRelDTO">
             <id property="versionId" column="version_id"/>
             <result property="statusCode" column="version_status_code"/>
@@ -319,18 +319,18 @@
             <result property="projectId" column="version_project_id"/>
             <result property="name" column="version_name"/>
         </collection>
-        <collection property="issueSprintDTOS" autoMapping="true"
+        <collection property="issueSprintDTOS"
                     ofType="io.choerodon.agile.infra.dto.IssueSprintDTO">
             <id property="sprintId" column="sprint_id"/>
             <result property="sprintName" column="sprint_name"/>
             <result property="statusCode" column="sp_status_code"/>
         </collection>
-        <collection property="issueComponentBriefDTOS" autoMapping="true"
+        <collection property="issueComponentBriefDTOS"
                     ofType="io.choerodon.agile.infra.dto.IssueComponentBriefDTO">
             <id property="componentId" column="component_id"/>
             <result property="name" column="component_name"/>
         </collection>
-        <collection property="labelIssueRelDTOS" autoMapping="true"
+        <collection property="labelIssueRelDTOS"
                     ofType="io.choerodon.agile.infra.dto.LabelIssueRelDTO">
             <id property="labelId" column="label_id"/>
             <result property="labelName" column="label_name"/>

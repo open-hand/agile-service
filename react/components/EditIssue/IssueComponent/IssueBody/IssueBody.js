@@ -86,7 +86,7 @@ function IssueBody(props) {
             ? <IssueDoc {...props} /> : ''
           }
 
-          {issueTypeVO.typeCode && ['issue_epic', 'sub_task', 'feature'].indexOf(issueTypeVO.typeCode) === -1 && !(typeCode === 'bug' && issue.relateIssueId)
+          {issueTypeVO.typeCode && ['issue_epic', 'sub_task', 'feature'].indexOf(issueTypeVO.typeCode) === -1 
             ? <SubTask {...props} /> : ''
           }
 

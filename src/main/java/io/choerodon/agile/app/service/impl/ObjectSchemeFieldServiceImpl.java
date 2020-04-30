@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -250,10 +251,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 updateDTO.setDefaultValue(defaultIds);
             }
         }
-        ObjectSchemeFieldDTO field = baseQueryById(organizationId, projectId, fieldId);
-        if (field.getRequired() && "".equals(updateDTO.getDefaultValue())) {
-            throw new CommonException(ERROR_FIELD_REQUIRED_NEED_DEFAULT_VALUE);
-        }
         ObjectSchemeFieldDTO update = modelMapper.map(updateDTO, ObjectSchemeFieldDTO.class);
         //处理context
         String[] contexts = updateDTO.getContext();
@@ -315,7 +312,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     @Override
     public List<ObjectSchemeFieldDetailVO> queryCustomFieldList(Long projectId) {
-        List<ObjectSchemeFieldDetailVO> objectSchemeFieldDetailVOList = objectSchemeFieldMapper.selectCustomFieldList(projectId);
+        List<ObjectSchemeFieldDetailVO> objectSchemeFieldDetailVOList = objectSchemeFieldMapper.selectCustomFieldList(ConvertUtil.getOrganizationId(projectId),projectId);
         if (objectSchemeFieldDetailVOList != null && !objectSchemeFieldDetailVOList.isEmpty()) {
             return objectSchemeFieldDetailVOList;
         } else {

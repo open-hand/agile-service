@@ -757,7 +757,10 @@ public class ExcelServiceImpl implements ExcelService {
             //有子节点的故事和任务，要和子节点一块校验，有一个不合法，则全为错误的
             Set<Integer> set = parentSonMap.get(r);
             Boolean hasSonNodes = (set != null && !set.isEmpty());
-            if (("故事".equals(typeName) || "任务".equals(typeName)) && hasSonNodes) {
+            if (("故事".equals(typeName)
+                    || "任务".equals(typeName)
+                    || "缺陷".equals(typeName))
+                    && hasSonNodes) {
                 Map<String, Object> returnMap = batchCheck(projectId, sheet, issueTypeList, priorityList,
                         versionList, issueTypeMap, componentList, sprintList, r, illegalRow, set, columnNum,
                         theSecondColumnMap.keySet(), managers);
@@ -972,12 +975,12 @@ public class ExcelServiceImpl implements ExcelService {
         for (IssueType issueType : issueTypes) {
             Integer row = issueType.getRow();
             String type = issueType.getType();
-            //故事下只有子缺陷和子任务
+            //故事下只有子任务
             if ("故事".equals(type)) {
                 storyRecursive(map, issueType, row);
             }
-            //任务下只能有子任务
-            if ("任务".equals(type)) {
+            //任务或缺陷下的子任务
+            if ("任务".equals(type) || "缺陷".equals(type)) {
                 taskRecursive(map, issueType, row);
             }
         }

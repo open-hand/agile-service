@@ -42,10 +42,6 @@ let sign = false;
     };
   }
 
-  componentDidMount() {
-
-  }
-
   handleChange = (e) => {
     const { field } = this.props;
     const { fieldType } = field;
@@ -324,13 +320,14 @@ let sign = false;
         </div>
         <div className="c7n-value-wrapper" style={{ width: 'auto' }}>
           <TextEditToggle
-            disabled={disabled}            
-            formKey={fieldCode}
+            disabled={disabled}
             onSubmit={this.updateIssueField}
+            formKey={fieldCode}
             originData={this.transform(fieldType, value)}
             required={required}
             fieldType={fieldType}
             fieldName={fieldName}
+            fieldProps={{ getValueFromEvent: fieldType === 'number' ? v => (v ? String(v) : undefined) : undefined }}
           >
             <Text key="text">
               <div style={{ maxWidth: 200, wordBreak: 'break-all', whiteSpace: 'pre-line' }}>
