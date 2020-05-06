@@ -1,7 +1,7 @@
 /* eslint-disable no-mixed-operators */
 /* eslint-disable consistent-return */
 /* eslint-disable react/no-unused-state */
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 import { observer } from 'mobx-react';
 import echarts from 'echarts/lib/echarts';
 import ReactEchartsCore from 'echarts-for-react/lib/core';
@@ -77,6 +77,7 @@ class ReleaseDetail extends Component {
       startDate: '',
       endDate: '',
     };
+    this.otherTooltipRef = createRef();
   }
 
   componentDidMount = async () => {
@@ -137,19 +138,6 @@ class ReleaseDetail extends Component {
     return str[0].toUpperCase();
   };
 
-  isShowOtherToolTip(e) {
-    this.setState({
-      showOtherTooltip: true,
-    });
-    const otherTooptipItem = document.getElementsByClassName('pie-otherTooptip-item-percent');
-    let opacity = 0.9;
-    for (let i = 0; i < otherTooptipItem.length; i += 1) {
-      opacity = 1 - i * 0.1 > 0 ? 1 - i * 0.1 : 0.9;
-      otherTooptipItem[i].style.backgroundColor = `rgba(250,211,82,${opacity})`;
-    }
-    // e.stopPropageation();
-  }
-
   getSelectDefaultValue = () => {
     const { location: { pathname } } = this.props;
     const quaryLinks = [
@@ -179,28 +167,25 @@ class ReleaseDetail extends Component {
     const { colors } = VersionReportStore;
     const datas = VersionReportStore.pieData;
     return {
-      // title : {
-      //   text: '某站点用户访问来源',
-      //   subtext: '统计图',
-      //   x:'center'
-      // },
-      // color:['#9665E2','#F7667F','#FAD352', '#45A3FC','#56CA77'],
       color: colors,
       tooltip: {
         trigger: 'item',
-        // formatter: '问题: {c} {a} <br/>{b} : {d}%',
-        // formatter: value => (
-        //   `<div>
-        //       <span>问题：${value.data.value}</span><br/>
-        //       <span>百分比：${(value.data.percent.toFixed(2))}%</span>
-        //     </div>`
-        // ),
         formatter: (value) => {
           if (value.data.name !== '其它') {
-            this.setState({ showOtherTooltip: false });
+            if (this.otherTooltipRef && this.otherTooltipRef.current) {
+              this.otherTooltipRef.current.style.display = 'none';
+            }
             return `<div><span>问题：${value.data.value} 个</span><br/><span>百分比：${(value.data.percent.toFixed(2))}%</span></div>`;
           } else {
-            this.isShowOtherToolTip();
+            if (this.otherTooltipRef && this.otherTooltipRef.current) {
+              this.otherTooltipRef.current.style.display = 'block';
+              const otherTooptipItem = document.getElementsByClassName('pie-otherTooptip-item-percent');
+              let opacity = 0.9;
+              for (let i = 0; i < otherTooptipItem.length; i += 1) {
+                opacity = 1 - i * 0.1 > 0 ? 1 - i * 0.1 : 0.9;
+                otherTooptipItem[i].style.backgroundColor = `rgba(250,211,82,${opacity})`;
+              }
+            }
             return '';
           }
         },
@@ -430,7 +415,7 @@ class ReleaseDetail extends Component {
 
   renderChooseDimension = () => {
     const {
-      value, showOtherTooltip, sprintAndVersion, currentChooseDimension, currentSprintChoose, currentVersionChoose, startDate, endDate,
+      sprintAndVersion, currentChooseDimension, currentSprintChoose, currentVersionChoose, startDate, endDate,
     } = this.state;
     return (
       <div>
@@ -519,7 +504,6 @@ class ReleaseDetail extends Component {
       <Page className="pie-chart">
         <Header
           title="统计图"
-          // backPath={`/agile/${backUrl}?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}
           backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
         >
           <SwitchChart
@@ -580,7 +564,7 @@ class ReleaseDetail extends Component {
                     option={this.getOption()}
                   />
 
-                  <div className="pie-otherTooltip" style={{ display: `${showOtherTooltip ? 'block' : 'none'}` }}>
+                  <div className="pie-otherTooltip" ref={this.otherTooltipRef} style={{ display: 'none' }}>
                     <div className="pie-otherTooltip-wrap" />
                     <div className="pie-otherTooltip-item-wrap">
                       {this.renderOtherTooltip()}
