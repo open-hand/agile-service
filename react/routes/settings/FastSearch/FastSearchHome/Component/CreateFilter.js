@@ -2,7 +2,7 @@ import React, {
   Component, useState, useEffect, useImperativeHandle,
 } from 'react';
 import {
-  Form, Input, Select, Button, DatePicker, Icon,
+  Form, Input, Select, Button, DatePicker, Icon, TimePicker,
 } from 'choerodon-ui';
 import { Content, stores, axios } from '@choerodon/boot';
 import _ from 'lodash';
@@ -12,6 +12,7 @@ import { NumericInput } from '../../../../../components/CommonComponent';
 const { Option } = Select;
 const { AppState } = stores;
 const FormItem = Form.Item;
+const { TextArea } = Input;
 
 const arrOperation1 = [
   {
@@ -77,6 +78,44 @@ const arrOperation4 = [
   },
 ];
 
+const arrOperation5 = [
+  {
+    value: '=',
+    text: '等于',
+  },
+  {
+    value: '!=',
+    text: '不等于',
+  },
+  {
+    value: 'is',
+    text: '是',
+  },
+  {
+    value: 'isNot',
+    text: '不是',
+  },
+];
+
+const arrOperation6 = [
+  {
+    value: 'in',
+    text: '包含',
+  },
+  {
+    value: 'notIn',
+    text: '不包含',
+  },
+  {
+    value: 'is',
+    text: '是',
+  },
+  {
+    value: 'isNot',
+    text: '不是',
+  },
+];
+
 const OPERATION_FILTER = {
   assignee: arrOperation2,
   priority: arrOperation1,
@@ -95,6 +134,18 @@ const OPERATION_FILTER = {
   last_update_date: arrOperation3,
   story_point: arrOperation4,
   remain_time: arrOperation4,
+
+  radio: arrOperation5,
+  checkbox: arrOperation6,
+  time: arrOperation3, //
+  datetime: arrOperation3, //
+  number: arrOperation4, //
+  input: arrOperation1, //
+  text: arrOperation1, //
+  single: arrOperation5, //
+  multiple: arrOperation6, //
+  member: arrOperation2, //
+  date: arrOperation3, //
 };
 
 const CreateFilter = (props) => {
@@ -192,7 +243,10 @@ const CreateFilter = (props) => {
    * @param filter
    * @returns {*|Array}
    */
-  const getOperation = filter => OPERATION_FILTER[filter] || [];
+  const getOperation = (filter) => {
+    console.log(filter);
+    return OPERATION_FILTER[filter] || [];
+  };
 
   /**
    * 调用接口，获取'属性'的值列表
@@ -296,10 +350,16 @@ const CreateFilter = (props) => {
    * 加载属性列表
    */
   const loadQuickFilterFiled = () => {
-    axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/fields`)
-      .then((res) => {
-        setQuickFilterFiled(res);
-      });
+    const getPreDefinedField = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/fields`);
+    const getCustomField = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/field_value/list/custom_field`);
+    Promise.all([getPreDefinedField(), getCustomField()]).then(([preDefinedField, customField]) => {
+      console.log(preDefinedField, customField);
+      setQuickFilterFiled([...preDefinedField, ...customField].map(field => ({ ...field, fieldCode: field.code || field.fieldCode, type: field.fieldType || field.type })) || []);
+    });
+    // axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/object_scheme_field/list?schemeCode=agile_issue&organizationId=${AppState.currentMenuType.organizationId}`)
+    //   .then((res) => {
+    //     setQuickFilterFiled(res.content.filter(field => field.context !== 'feature').map(field => ({ ...field, fieldCode: field.code, type: field.fieldType })) || []);
+    //   });
   };
 
   /**
@@ -407,7 +467,6 @@ const CreateFilter = (props) => {
    */
   const tempOption = (filter, addEmpty) => {
     const projectId = AppState.currentMenuType.id;
-    const orgId = AppState.currentMenuType.organizationId;
     const OPTION_FILTER = {
       assignee: {
         url: `/base/v1/projects/${projectId}/users?page=${page}&size=20`,
@@ -506,7 +565,7 @@ const CreateFilter = (props) => {
    * @returns {XML}
    */
   const renderOperation = (filter, index) => {
-    // const { form } = props;
+    const { id, type } = quickFilterFiled.find(item => item.fieldCode === filter) || {};
     if (!filter) {
       return (
         <Select label="关系" />
@@ -524,7 +583,7 @@ const CreateFilter = (props) => {
           }}
         >
           {
-            getOperation(filter).map(v => (
+            getOperation(!id ? filter : type).map(v => (
               <Option key={v.value} value={v.value}>{v.text}</Option>
             ))
           }
@@ -540,12 +599,14 @@ const CreateFilter = (props) => {
    * @returns {XML}
    */
   const renderValue = (filter, operation) => {
+    const { id, type, fieldOptions = [] } = quickFilterFiled.find(item => item.fieldCode === filter) || {};
+
     if (!filter || !operation) {
       return (
         <Select label="值" />
       );
-    } else if (['assignee', 'reporter', 'created_user',
-      'last_updated_user'].indexOf(filter) > -1) {
+    } else if ((['assignee', 'reporter', 'created_user',
+      'last_updated_user'].indexOf(filter) > -1 && !id) || (id && type === 'member')) {
       if (['=', '!='].indexOf(operation) > -1) {
         // return normal value
         return (
@@ -594,10 +655,10 @@ const CreateFilter = (props) => {
         );
       }
     } else if (
-      ['priority', 'status',
+      (['priority', 'status',
         'epic', 'sprint', 'label', 'component',
-        'influence_version', 'fix_version', 'issue_type'].indexOf(filter) > -1) {
-      if (['=', '!='].indexOf(operation) > -1) {
+        'influence_version', 'fix_version', 'issue_type'].indexOf(filter) > -1 && !id) || (id && (type === 'single' || type === 'multiple' || type === 'radio' || type === 'checkbox'))) {
+      if (['=', '!='].indexOf(operation) > -1 && (!id || (id && (type === 'single' || type === 'radio')))) {
         // return normal value
         return (
           <Select
@@ -608,11 +669,13 @@ const CreateFilter = (props) => {
             optionFilterProp="children"
             filterOption={(input, option) => option.props.children.toLowerCase()
               .indexOf(input.toLowerCase()) >= 0}
-            onFocus={() => {
+            onFocus={!id ? () => {
               getOption(filter, false, page);
-            }}
+            } : () => {}}
           >
-            {tempOption(filter, false)}
+            {!id ? tempOption(filter, false) : fieldOptions.map(option => (
+              <Option key={option.id} value={option.id}>{option.value}</Option>
+            ))}
           </Select>
         );
       } else if (['is', 'isNot'].indexOf(operation) > -1) {
@@ -644,15 +707,17 @@ const CreateFilter = (props) => {
             optionFilterProp="children"
             filterOption={(input, option) => option.props.children.toLowerCase()
               .indexOf(input.toLowerCase()) >= 0}
-            onFocus={() => {
-              getOption(filter, false);
-            }}
+            onFocus={!id ? () => {
+              getOption(filter, false, page);
+            } : () => {}}
           >
-            {tempOption(filter, false)}
+            {!id ? tempOption(filter, false) : fieldOptions.map(option => (
+              <Option key={option.id} value={option.id}>{option.value}</Option>
+            ))}
           </Select>
         );
       }
-    } else if (['creation_date', 'last_update_date'].indexOf(filter) > -1) {
+    } else if ((['creation_date', 'last_update_date'].indexOf(filter) > -1 && !id) || (type === 'datetime' && id)) {
       // time
       // return data picker
       return (
@@ -661,6 +726,35 @@ const CreateFilter = (props) => {
           label="值"
           format="YYYY-MM-DD HH:mm:ss"
           showTime
+        />
+      );
+    } else if (id && type === 'date') {
+      return (
+        <DatePicker
+          style={{ width: '100%' }}
+          label="值"
+          format="YYYY-MM-DD"
+        />
+      );
+    } else if (id && type === 'time') {
+      return (
+        <TimePicker
+          style={{ width: '100%' }}
+          label="值"
+        />
+      );
+    } else if (id && type === 'input') {
+      return (
+        <Input
+          style={{ width: '100%' }}
+          label="值"
+        />
+      );
+    } else if (id && type === 'text') {
+      return (
+        <TextArea
+          style={{ width: '100%' }}
+          label="值"
         />
       );
     } else {
