@@ -1,4 +1,4 @@
-import React, { useReducer, useMemo, Fragment } from 'react';
+import React, { useMemo } from 'react';
 import {
   Form, Button, Select, DataSet, Row, Col,
 } from 'choerodon-ui/pro';
@@ -6,40 +6,131 @@ import { find } from 'lodash';
 import { getProjectId } from '@/common/utils';
 import useFields from './useFields';
 import renderField from './renderField';
-import fieldMock from './fields.json';
 
-
+const systemFields = new Map([
+  ['status', {
+    id: 'status',
+    code: 'status',
+    name: '状态',
+    fieldType: 'single',
+  }],
+  ['assignee', {
+    id: 'assignee',
+    code: 'assignee',
+    name: '经办人',
+    fieldType: 'single',
+  }],
+  ['reporter', {
+    id: 'reporter',
+    code: 'reporter',
+    name: '报告人',
+    fieldType: 'single',
+  }],
+  ['sprint', {
+    id: 'sprint',
+    code: 'sprint',
+    name: '冲刺',
+    fieldType: 'single',
+  }],
+  ['epic', {
+    id: 'epic',
+    code: 'epic',
+    name: '所属史诗',
+    fieldType: 'single',
+  }],
+  // ['feature', {
+  //   id: 'feature',
+  //   code: 'feature',
+  //   name: '所属特性',
+  //   fieldType: 'single',
+  // }],
+  ['priority', {
+    id: 'priority',
+    code: 'priority',
+    name: '优先级',
+    fieldType: 'single',
+  }],
+  ['label', {
+    id: 'label',
+    code: 'label',
+    name: '标签',
+    fieldType: 'multiple',
+    format: (value, label) => label,
+  }],
+  ['componentIssueRelVOList', {
+    id: 'componentIssueRelVOList',
+    code: 'componentIssueRelVOList',
+    name: '模块',
+    fieldType: 'multiple',
+    format: (value, component) => component,
+  }],
+  ['influenceVersion', {
+    id: 'influenceVersion',
+    code: 'influenceVersion',
+    name: '影响的版本',
+    fieldType: 'multiple',
+  }],
+  ['fixVersion', {
+    id: 'fixVersion',
+    code: 'fixVersion',
+    name: '修复的版本',
+    fieldType: 'multiple',
+  }],
+  ['storyPoints', {
+    id: 'storyPoints',
+    code: 'storyPoints',
+    name: '故事点',
+    fieldType: 'number',
+  }],
+  ['remainingTime', {
+    id: 'remainingTime',
+    code: 'remainingTime',
+    name: '预估时间',
+    fieldType: 'number',
+  }],
+]);
 const { Option } = Select;
 
-const initialState = {
-  count: 0,
-};
-function reducer(state, action) {
-  switch (action.type) {
-    case 'add': {
-      return {
-        ...state,
-        count: state.count + 1,
-      };
-    }
-    default: throw new Error();
+function transformValue(dataSet, key, value, format) {
+  if (!value || !format) {
+    return value;
   }
+  function transform(v) {
+    const lookup = dataSet.getField(key).getLookupData(v);
+    return format(v, lookup);
+  }
+  if (Array.isArray(value)) {
+    return value.map(v => transform(v));
+  }
+  return transform(value);
 }
 
-function BatchModal() {
-  const [state, dispatch] = useReducer(reducer, initialState);
+function formatFields(fieldData, data, dataSet) {
+  const temp = {
+    predefinedFields: {},
+    customFields: [],
+  };
+  for (const key of Object.keys(data)) {
+    if (systemFields.get(key)) {
+      temp.predefinedFields[key] = transformValue(dataSet, key, data[key], systemFields.get(key).format);
+    } else {
+      const customField = find(fieldData, { code: key });
+      temp.customFields.push({
+        fieldId: customField.id,
+        fieldType: customField.fieldType,
+        value: data[key],
+      });
+    }
+  }
+  return temp;
+}
+
+function BatchModal({ dataSet: tableDataSet, fields: customFields }) {
+  const fieldData = [...systemFields.values(), ...customFields]; 
   const [fields, Field] = useFields();
+
   const dataSet = useMemo(() => new DataSet({
-    transport: {
-      submit: () => ({
-        url: 'test',
-        method: 'post',
-        transformRequest: (data) => {
-          // eslint-disable-next-line no-console
-          console.log(data);
-        },
-      }),
-    },
+    autoCreate: true,
     fields: [{
       name: 'priority',
       type: 'number',
@@ -69,7 +160,7 @@ function BatchModal() {
       valueField: 'id',
       textField: 'name',
     }, {
-      name: 'component',
+      name: 'componentIssueRelVOList',
       type: 'array',
       label: '模块',
       lookupAxiosConfig: ({ record, dataSet: ds, params }) => ({
@@ -128,6 +219,22 @@ function BatchModal() {
       textField: 'name',
     }],
   }), []);
+  const data = useMemo(() => {
+    const temp = dataSet.current.toData();
+    const obj = {};
+    fields.forEach((field) => {
+      if (field.code) {
+        obj[field.code] = temp[field.code];
+      }
+    });
+    return obj;
+  }, [fields]);
+  const submit = () => {
+    const issueIds = tableDataSet.selected.map(record => record.get('issueId'));
+    const res = { issueIds, ...formatFields(fieldData, data, dataSet) };
+    // eslint-disable-next-line no-console
+    console.log(res);
+  };
   return (
     <div style={{ padding: 15 }}>
       <Form
@@ -144,11 +251,11 @@ function BatchModal() {
                 <Select
                   placeholder="请选择"
                   onChange={(value) => {
-                    const field = find(fieldMock, { id: value });
+                    const field = find(fieldData, { id: value });
                     Field.set(key, field);
                   }}
                 >
-                  {fieldMock.filter(field => (id === field.id) || !find(fields, { id: field.id })).map(field => (
+                  {fieldData.filter(field => (id === field.id) || !find(fields, { id: field.id })).map(field => (
                     <Option value={field.id}>
                       {field.name}
                     </Option>
@@ -161,7 +268,14 @@ function BatchModal() {
                 </Col>
               )}
               <Col span={4}>
-                <Button onClick={() => { Field.remove(key); }} icon="delete" />
+                <Button
+                  onClick={() => { 
+                    Field.remove(key); 
+                    dataSet.current.init(f.code);
+                  }}
+                  icon="delete"
+                  style={{ marginLeft: 10 }}
+                />
               </Col>
             </Row>
           );
@@ -173,9 +287,10 @@ function BatchModal() {
       <div>         
         <Button>取消</Button>
         <Button
+          disabled={Object.keys(data).length === 0}
           color="blue"
           onClick={() => {
-            dataSet.submit();
+            submit();
           }}
         >
           确定

@@ -4,21 +4,11 @@ import {
   TextField, Select, DatePicker, TimePicker, DateTimePicker, CheckBox, NumberField, TextArea, UrlField,
 } from 'choerodon-ui/pro';
 
-import UserInfo from '@/components/UserInfo';
+import SelectUser from './select-user';
 
 const { Option } = Select;
 const singleList = ['radio', 'single'];
 
-function memberOptionRender({ record }) {
-  return <UserInfo name={record.get('realName') || ''} id={record.get('loginName')} avatar={record.get('imageUrl')} />;
-}
-
-// function loadUserData(value) {
-//   const userId = formDataSet.current.get('defaultValue');
-//   userOptionDataSet.setQueryParameter('param', value);
-//   userOptionDataSet.setQueryParameter('userId', userId);
-//   userOptionDataSet.query();
-// }
 
 function renderDefaultField({ code }) {
   switch (code) {
@@ -108,11 +98,8 @@ export default function renderField({ code, fieldType, fieldOptions }) {
       );
     case 'member':
       return (
-        <Select
+        <SelectUser
           name={code}
-          searchable
-          searchMatcher="param"
-          optionRenderer={memberOptionRender}
         />
       );
     default:

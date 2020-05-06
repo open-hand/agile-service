@@ -30,7 +30,7 @@ function handleSelect({ dataSet }) {
   modal = Modal.open({
     key: 'modal',
     header: <ObserverHeader dataSet={dataSet} modal={modal} />,
-    content: <BatchModal />,
+    content: <BatchModal dataSet={dataSet} fields={IssueStore.fields} />,
   });
 }
 function handleUnSelect({ dataSet }) {
@@ -43,7 +43,7 @@ export default ({
 }) => ({
   primaryKey: 'issueId',
   autoQuery: false,
-  selection: false,
+  // selection: false,
   parentField: 'parentId',
   expandField: 'expand',
   idField: 'issueId',
