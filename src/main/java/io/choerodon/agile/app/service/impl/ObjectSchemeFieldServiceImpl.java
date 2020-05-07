@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -12,10 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.dto.LookupTypeWithValuesDTO;
-import io.choerodon.agile.infra.dto.LookupValueDTO;
-import io.choerodon.agile.infra.dto.ObjectSchemeDTO;
-import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.enums.FieldType;
 import io.choerodon.agile.infra.enums.LookupType;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
@@ -27,6 +24,7 @@ import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.FieldValueUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.entity.Criteria;
+
 
 /**
  * @author shinan.chen
@@ -318,5 +316,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         } else {
             return new ArrayList<>();
         }
+    }
+
+    @Override
+    public ObjectSchemeFieldDTO selectById(Long fieldId) {
+        return objectSchemeFieldMapper.selectByPrimaryKey(fieldId);
     }
 }

@@ -2783,7 +2783,10 @@
         ai.assignee_id,
         ai.issue_type_id,
         ai.status_id,
-        ai.apply_type
+        ai.type_code,
+        ai.apply_type,
+        ai.relate_issue_id,
+        ai.object_version_number
         FROM agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         WHERE

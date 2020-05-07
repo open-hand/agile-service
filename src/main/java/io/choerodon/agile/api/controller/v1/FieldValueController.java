@@ -2,6 +2,7 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.FieldValueService;
+import io.choerodon.agile.app.service.IssueFieldValueService;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
 import io.choerodon.agile.app.service.PageFieldService;
 import io.choerodon.core.annotation.Permission;
@@ -32,6 +33,8 @@ public class FieldValueController {
     private FieldValueService fieldValueService;
     @Autowired
     private ObjectSchemeFieldService objectSchemeFieldService;
+    @Autowired
+    private IssueFieldValueService issueFieldValueService;
 
     @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
     @ApiOperation(value = "界面上获取字段列表，带有字段选项")
@@ -127,5 +130,17 @@ public class FieldValueController {
     public ResponseEntity<List<ObjectSchemeFieldDetailVO>> queryCustomFieldList(@ApiParam(value = "项目id", required = true)
                                                                                 @PathVariable("project_id") Long projectId) {
         return new ResponseEntity<>(objectSchemeFieldService.queryCustomFieldList(projectId), HttpStatus.OK);
+    }
+
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @ApiOperation(value = "批量修改预定义字段值和自定义字段值")
+    @PostMapping("/batch_update_fields_value")
+    public ResponseEntity batchUpdateFieldsValue(@ApiParam(value = "项目id", required = true)
+                                                   @PathVariable("project_id") Long projectId,
+                                                   @ApiParam(value = "方案编码", required = true)
+                                                   @RequestParam String schemeCode,
+                                                   @RequestBody  BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
+        issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

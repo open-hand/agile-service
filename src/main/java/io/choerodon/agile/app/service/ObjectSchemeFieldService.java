@@ -97,4 +97,6 @@ public interface ObjectSchemeFieldService {
     List<AgileIssueHeadVO> getIssueHeadForAgile(Long organizationId, Long projectId, String schemeCode);
 
     List<ObjectSchemeFieldDetailVO> queryCustomFieldList(Long projectId);
+
+    ObjectSchemeFieldDTO selectById(Long fieldId);
 }
