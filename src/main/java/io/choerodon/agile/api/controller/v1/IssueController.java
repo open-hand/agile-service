@@ -671,6 +671,4 @@ public class IssueController {
                                                                   @RequestParam(value = "param", required = false) String param) {
         return ResponseEntity.ok(issueService.pagingQueryReporters(pageable, projectId, param));
     }
-
-
 }
