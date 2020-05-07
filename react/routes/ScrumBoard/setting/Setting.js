@@ -170,6 +170,11 @@ class Setting extends Component {
           'agile-service.board-column.updateColumnContraint',
           'agile-service.lookup-value.queryLookupValueByCode',
           'agile-service.status.checkName',
+          'agile-service.work-calendar-ref.deleteProjectWorkCalendarRef',
+          'agile-service.work-calendar-ref.createSprintWorkCalendarRef',
+          'agile-service.board-column.columnSort',
+          'agile-service.issue-status.moveStatusToUnCorrespond',
+          'agile-service.issue-status.updateStatus',
         ]}
       >
         <Header title="配置看板">
