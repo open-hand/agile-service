@@ -107,20 +107,10 @@ const Issue = withRouter(observer(() => {
 
   const handleCreateIssue = (issue) => {
     IssueStore.createQuestion(false);
-    // dataSet.queryDataSet.current.clear();
     dataSet.query();
-    // handleClear();
-    // if (issue) {
-    //   IssueStore.setClickedRow({
-    //     selectedIssue: issue,
-    //     expand: true,
-    //   });
-    // }
   };
 
-  const onHideIssue = () => {
-    dataSet.unSelectAll();
-  };
+
   const handleClickFilterManage = () => {
     const editFilterInfo = IssueStore.getEditFilterInfo;
     const filterListVisible = IssueStore.getFilterListVisible;
@@ -201,7 +191,6 @@ const Issue = withRouter(observer(() => {
           />
         )}
         <IssueDetail
-          onHideIssue={onHideIssue}
           issueRefresh={refresh}
           dataSet={dataSet}
         />
