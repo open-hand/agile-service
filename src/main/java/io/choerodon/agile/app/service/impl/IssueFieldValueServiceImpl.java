@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.BatchUpdateFieldsValueVo;
 import io.choerodon.agile.api.vo.PageFieldViewUpdateVO;
@@ -16,7 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author zhaotianxin
@@ -37,6 +40,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
     @Override
     public void asyncUpdateFields(Long projectId, String schemeCode, BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
+        Map<String,String> code = new HashMap<>();
         try {
             if (Boolean.FALSE.equals(EnumUtil.contain(ObjectSchemeCode.class, schemeCode))) {
                 throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
@@ -57,10 +61,13 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
                 fieldValueService.handlerCustomFields(projectId, customFields, schemeCode, issueIds);
             }
              //发送websocket
-            notifyFeignClient.postWebSocket(WEBSOCKET_BATCH_UPDATE_FIELD, userId.toString(), "batch_update_success");
+            code.put("status","batch_update_success");
         } catch (Exception e) {
-            notifyFeignClient.postWebSocket(WEBSOCKET_BATCH_UPDATE_FIELD, userId.toString(), "batch_update_failed");
+            code.put("status","batch_update_failed");
             throw new CommonException(e, e.getMessage());
+        }
+        finally {
+            notifyFeignClient.postWebSocket(WEBSOCKET_BATCH_UPDATE_FIELD, userId.toString(), JSON.toJSONString(code));
         }
     }
 }
