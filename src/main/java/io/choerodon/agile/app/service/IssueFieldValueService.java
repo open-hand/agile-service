@@ -20,20 +20,4 @@ public interface IssueFieldValueService {
      */
     void asyncUpdateFields(Long projectId, String schemeCode, BatchUpdateFieldsValueVo batchUpdateFieldsValueVo);
 
-    /**
-     * 批量处理自定义字段的值
-     * @param projectId
-     * @param customFields
-     * @param schemeCode
-     * @param issueIds
-     */
-    void handlerCustomFields(Long projectId, List<PageFieldViewUpdateVO> customFields, String schemeCode, List<Long> issueIds);
-
-    /**
-     * 批量处理预定义字段值
-     * @param projectId
-     * @param issueIds
-     * @param predefinedFields
-     */
-    void handlerPredefinedFields(Long projectId, List<Long> issueIds, JSONObject predefinedFields);
 }
