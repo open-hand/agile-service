@@ -79,18 +79,13 @@ class Column extends Component {
 
 
   renderColumnName = () => {
-    const menu = AppState.currentMenuType;
     const {
-      data, index, draggabled,
+      data,
     } = this.props;
-    const { type, id: projectId, organizationId: orgId } = menu;
     return (
       <div className="c7n-scrumsetting-columnStatus">
         <Permission
-          type={type}
-          projectId={projectId}
-          organizationId={orgId}
-          service={['agile-service.board.deleteScrumBoard']}
+          service={['agile-service.board-column.updateBoardColumn']}
           noAccessChildren={data.name}
         >
           <TextEditToggle
@@ -150,15 +145,17 @@ class Column extends Component {
                       }}
                       {...provided.dragHandleProps}
                     />
-                    <Icon
-                      type="delete"
-                      style={{
-                        cursor: 'pointer',
-                        display: isDragDisabled && 'none',
-                      }}
-                      role="none"
-                      onClick={this.handleDeleteColumn.bind(this)}
-                    />
+                    <Permission service={['agile-service.board-column.deleteBoardColumn']}>
+                      <Icon
+                        type="delete"
+                        style={{
+                          cursor: 'pointer',
+                          display: isDragDisabled && 'none',
+                        }}
+                        role="none"
+                        onClick={this.handleDeleteColumn.bind(this)}
+                      />
+                    </Permission>
                   </div>
                 </div>
                 {this.renderColumnName()}
@@ -180,7 +177,7 @@ class Column extends Component {
                       type={type}
                       projectId={projectId}
                       organizationId={orgId}
-                      service={['agile-service.project-info.updateProjectInfo']}
+                      service={['agile-service.board-column.updateColumnContraint']}
                       noAccessChildren={(
                         <span
                           style={{ minWidth: '110px' }}
@@ -218,7 +215,7 @@ class Column extends Component {
                       type={type}
                       projectId={projectId}
                       organizationId={orgId}
-                      service={['agile-service.project-info.updateProjectInfo']}
+                      service={['agile-service.board-column.updateColumnContraint']}
                       noAccessChildren={(
                         <span
                           style={{ minWidth: '110px' }}

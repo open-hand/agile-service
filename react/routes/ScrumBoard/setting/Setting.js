@@ -27,28 +27,12 @@ class Setting extends Component {
     super(props);
     this.state = {
       loading: false,
-      hasPermission: false,
       activeKey: '1',
     };
   }
 
   componentDidMount() {
     this.refresh();
-    axios.post('/base/v1/permissions/checkPermission', [{
-      code: 'agile-service.project-info.updateProjectInfo',
-      organizationId: AppState.currentMenuType.organizationId,
-      projectId: AppState.currentMenuType.id,
-      resourceType: 'project',
-    }, {
-      code: 'agile-service.notice.queryByProjectId',
-      organizationId: AppState.currentMenuType.organizationId,
-      projectId: AppState.currentMenuType.id,
-      resourceType: 'project',
-    }]).then((permission) => {
-      this.setState({
-        hasPermission: permission[0].approve || permission[1].approve,
-      });
-    });
   }
 
   refresh=() => {
@@ -142,12 +126,24 @@ class Setting extends Component {
       boardId: ScrumBoardStore.getSelectedBoard,
     });
   }
+
+  renderWorkcalendarPage = updateWorkDatePermission => (
+    <WorkcalendarPage selectedDateDisabled={!updateWorkDatePermission} />
+  )
+
+  renderEditBoardName = editBoardNamePermission => (
+    <EditBoardName
+      editBoardNameDisabled={!editBoardNamePermission}
+      saveRef={(ref) => {
+        this.input = ref;
+      }}
+    />
+  )
   
   render() {
     const { loading, activeKey } = this.state;
     const menu = AppState.currentMenuType;
     const { type, id: projectId, organizationId: orgId } = menu;
-    const { hasPermission } = this.state;
     return (
       <Page
         service={[
@@ -245,17 +241,16 @@ class Setting extends Component {
             {ScrumBoardStore.getCalanderCouldUse
               ? (
                 <TabPane tab="工作日历" key="3">
-                  <WorkcalendarPage selectedDateDisabled={!hasPermission} />
+                  <Permission service={['agile-service.work-calendar-ref.createSprintWorkCalendarRef', 'agile-service.work-calendar-ref.deleteProjectWorkCalendarRef']}>
+                    {this.renderWorkcalendarPage}
+                  </Permission>
                 </TabPane>
               ) : null
             }
             <TabPane tab="看板名称" key="4">
-              <EditBoardName
-                editBoardNameDisabled={!hasPermission}
-                saveRef={(ref) => {
-                  this.input = ref;
-                }}
-              />
+              <Permission service={['agile-service.board.updateScrumBoard']}>
+                {this.renderEditBoardName}
+              </Permission>
             </TabPane>
           </Tabs>
         </Content>

@@ -139,10 +139,7 @@ class SettingColumn extends Component {
           }}
         >
           <Permission
-            type={type}
-            projectId={projectId}
-            organizationId={orgId}
-            service={['agile-service.project-info.updateProjectInfo']}
+            service={['agile-service.board.updateScrumBoard']}
             noAccessChildren={(
               <Select
                 value={ScrumBoardStore.getCurrentConstraint}
@@ -203,9 +200,6 @@ class SettingColumn extends Component {
                   {...provided.droppableProps}
                 >
                   <Permission
-                    type={type}
-                    projectId={projectId}
-                    organizationId={orgId}
                     service={['agile-service.board-column.columnSortByProgram']}
                     noAccessChildren={this.renderColumns(columns, true)}
                   >
