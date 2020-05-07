@@ -360,9 +360,6 @@ class ScrumBoardHome extends Component {
             <Fragment>             
               {this.renderRemainDate()}
               <Permission
-                type={type}
-                projectId={projectId}
-                organizationId={orgId}
                 service={['agile-service.sprint.completeSprint']}
               >
                 <Button
