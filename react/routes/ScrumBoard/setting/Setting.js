@@ -175,6 +175,7 @@ class Setting extends Component {
           'agile-service.board-column.columnSort',
           'agile-service.issue-status.moveStatusToUnCorrespond',
           'agile-service.issue-status.updateStatus',
+          'agile-service.issue-status.createStatus',
         ]}
       >
         <Header title="配置看板">
