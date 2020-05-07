@@ -18,13 +18,13 @@ const systemFields = new Map([
     id: 'assignee',
     code: 'assignee',
     name: '经办人',
-    fieldType: 'single',
+    fieldType: 'member',
   }],
   ['reporter', {
     id: 'reporter',
     code: 'reporter',
     name: '报告人',
-    fieldType: 'single',
+    fieldType: 'member',
   }],
   ['sprint', {
     id: 'sprint',
