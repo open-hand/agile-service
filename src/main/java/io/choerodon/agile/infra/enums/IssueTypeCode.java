@@ -2,7 +2,7 @@ package io.choerodon.agile.infra.enums;
 
 /**
  * @author superlee
- * @since -07
+ * @since 2020-04-07
  */
 public enum IssueTypeCode {
     BUG("bug"),

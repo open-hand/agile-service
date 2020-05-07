@@ -91,6 +91,7 @@
             ORDER BY ${sortSql}
         </if>
     </select>
+
     <select id="listByInstanceIdsAndFieldId" resultMap="fieldValueMap">
         SELECT fv.*,
         fo.value as option_value,
@@ -115,6 +116,7 @@
             AND fv.field_id = #{fieldId}
         </if>
     </select>
+
     <delete id="deleteByInstanceIds">
         DELETE
         FROM fd_field_value
