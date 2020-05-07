@@ -43,14 +43,12 @@ class IssueDetail extends Component {
   }
 
   render() {
-    const { onHideIssue } = this.props;
     return (
       <EditIssue
         {...this.props}
         visible={IssueStore.getExpand}
         issueId={IssueStore.getSelectedIssue && IssueStore.getSelectedIssue.issueId}
         onCancel={() => {
-          onHideIssue();
           IssueStore.setClickedRow({
             expand: false,
             selectedIssue: {},

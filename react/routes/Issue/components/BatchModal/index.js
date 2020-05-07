@@ -1,11 +1,19 @@
-import React, { useMemo } from 'react';
+import React, {
+  useMemo, useCallback, Fragment, useState,
+} from 'react';
 import {
   Form, Button, Select, DataSet, Row, Col,
 } from 'choerodon-ui/pro';
+import { stores, WSHandler, Choerodon } from '@choerodon/boot';
 import { find } from 'lodash';
-import { getProjectId } from '@/common/utils';
+import { getProjectId, getOrganizationId } from '@/common/utils';
+import { batchUpdateIssue } from '@/api/NewIssueApi';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import useFields from './useFields';
 import renderField from './renderField';
+import './index.less';
+
+const { AppState } = stores;
 
 const systemFields = new Map([
   ['status', {
@@ -14,48 +22,48 @@ const systemFields = new Map([
     name: '状态',
     fieldType: 'single',
   }],
-  ['assignee', {
-    id: 'assignee',
-    code: 'assignee',
+  ['assigneeId', {
+    id: 'assigneeId',
+    code: 'assigneeId',
     name: '经办人',
     fieldType: 'member',
   }],
-  ['reporter', {
-    id: 'reporter',
-    code: 'reporter',
+  ['reporterId', {
+    id: 'reporterId',
+    code: 'reporterId',
     name: '报告人',
     fieldType: 'member',
   }],
-  ['sprint', {
-    id: 'sprint',
-    code: 'sprint',
+  ['sprintId', {
+    id: 'sprintId',
+    code: 'sprintId',
     name: '冲刺',
     fieldType: 'single',
   }],
-  ['epic', {
-    id: 'epic',
-    code: 'epic',
+  ['epicId', {
+    id: 'epicId',
+    code: 'epicId',
     name: '所属史诗',
     fieldType: 'single',
   }],
-  // ['feature', {
-  //   id: 'feature',
-  //   code: 'feature',
-  //   name: '所属特性',
-  //   fieldType: 'single',
-  // }],
-  ['priority', {
-    id: 'priority',
-    code: 'priority',
+  ['featureId', {
+    id: 'featureId',
+    code: 'featureId',
+    name: '所属特性',
+    fieldType: 'single',
+  }],
+  ['priorityId', {
+    id: 'priorityId',
+    code: 'priorityId',
     name: '优先级',
     fieldType: 'single',
   }],
-  ['label', {
-    id: 'label',
-    code: 'label',
+  ['labelIssueRelVOList', {
+    id: 'labelIssueRelVOList',
+    code: 'labelIssueRelVOList',
     name: '标签',
     fieldType: 'multiple',
-    format: (value, label) => label,
+    format: (value, labelIssueRelVOList) => labelIssueRelVOList,
   }],
   ['componentIssueRelVOList', {
     id: 'componentIssueRelVOList',
@@ -126,30 +134,12 @@ function formatFields(fieldData, data, dataSet) {
 }
 
 function BatchModal({ dataSet: tableDataSet, fields: customFields }) {
-  const fieldData = [...systemFields.values(), ...customFields]; 
+  const { isInProgram } = IsInProgramStore;
+  const fieldData = [...systemFields.values(), ...customFields].filter((f => (isInProgram ? f.code !== 'epicId' : f.code !== 'featureId')));
   const [fields, Field] = useFields();
-
+  const [loading, setLoading] = useState(false);
   const dataSet = useMemo(() => new DataSet({
-    autoCreate: true,
     fields: [{
-      name: 'priority',
-      type: 'number',
-      label: '优先级',
-      lookupAxiosConfig: () => ({
-        url: `/agile/v1/projects/${getProjectId()}/priority/list_by_org`,
-        method: 'get',
-        transformResponse: (response) => {
-          try {
-            const data = JSON.parse(response);         
-            return data.filter(v => v.enable);
-          } catch (error) {
-            return response;
-          }
-        },
-      }),
-      valueField: 'id',
-      textField: 'name',
-    }, {
       name: 'status',
       type: 'number',
       label: '状态',
@@ -160,6 +150,66 @@ function BatchModal({ dataSet: tableDataSet, fields: customFields }) {
       valueField: 'id',
       textField: 'name',
     }, {
+      name: 'sprintId',
+      type: 'number',
+      label: '冲刺',
+      lookupAxiosConfig: () => ({
+        url: `/agile/v1/projects/${getProjectId()}/sprint/names`,
+        method: 'post',
+        data: ['started', 'sprint_planning'],
+      }),
+      valueField: 'sprintId',
+      textField: 'sprintName',
+    },
+    ...isInProgram ? [{
+      name: 'featureId',
+      type: 'number',
+      label: '所属特性',
+      lookupAxiosConfig: () => ({
+        url: `/agile/v1/projects/${getProjectId()}/issues/feature/select_data?organizationId=${getOrganizationId()}`,
+        method: 'get',
+      }),
+      valueField: 'issueId',
+      textField: 'summary',
+    }] : [{
+      name: 'epicId',
+      type: 'number',
+      label: '所属史诗',
+      lookupAxiosConfig: () => ({
+        url: `/agile/v1/projects/${getProjectId()}/issues/epics/select_data`,
+        method: 'get',
+      }),
+      valueField: 'issueId',
+      textField: 'epicName',
+    }], {
+      name: 'priorityId',
+      type: 'number',
+      label: '优先级',
+      lookupAxiosConfig: () => ({
+        url: `/agile/v1/projects/${getProjectId()}/priority/list_by_org`,
+        method: 'get',
+        transformResponse: (response) => {
+          try {
+            const data = JSON.parse(response);
+            return data.filter(v => v.enable);
+          } catch (error) {
+            return response;
+          }
+        },
+      }),
+      valueField: 'id',
+      textField: 'name',
+    }, {
+      name: 'labelIssueRelVOList',
+      type: 'array',
+      label: '标签',
+      lookupAxiosConfig: () => ({
+        url: `/agile/v1/projects/${getProjectId()}/issue_labels`,
+        method: 'get',
+      }),
+      valueField: 'labelId',
+      textField: 'labelName',
+    }, {
       name: 'componentIssueRelVOList',
       type: 'array',
       label: '模块',
@@ -169,14 +219,14 @@ function BatchModal({ dataSet: tableDataSet, fields: customFields }) {
         data: {
           advancedSearchArgs: {},
           searchArgs: { name: params.name },
-        },          
+        },
         params: {
           size: 999,
           page: 1,
         },
         transformResponse: (response) => {
           try {
-            const data = JSON.parse(response);         
+            const data = JSON.parse(response);
             return data.list;
           } catch (error) {
             return response;
@@ -185,16 +235,6 @@ function BatchModal({ dataSet: tableDataSet, fields: customFields }) {
       }),
       valueField: 'componentId',
       textField: 'name',
-    }, {
-      name: 'label',
-      type: 'array',
-      label: '标签',
-      lookupAxiosConfig: () => ({
-        url: `/agile/v1/projects/${getProjectId()}/issue_labels`,
-        method: 'get',
-      }),
-      valueField: 'labelId',
-      textField: 'labelName',
     }, {
       name: 'fixVersion',
       type: 'array',
@@ -219,8 +259,8 @@ function BatchModal({ dataSet: tableDataSet, fields: customFields }) {
       textField: 'name',
     }],
   }), []);
-  const data = useMemo(() => {
-    const temp = dataSet.current.toData();
+  const getData = () => {
+    const temp = dataSet.current ? dataSet.current.toData() : {};
     const obj = {};
     fields.forEach((field) => {
       if (field.code) {
@@ -228,27 +268,53 @@ function BatchModal({ dataSet: tableDataSet, fields: customFields }) {
       }
     });
     return obj;
-  }, [fields]);
-  const submit = () => {
+  };
+  const submit = async () => {
+    const data = getData();
     const issueIds = tableDataSet.selected.map(record => record.get('issueId'));
     const res = { issueIds, ...formatFields(fieldData, data, dataSet) };
     // eslint-disable-next-line no-console
     console.log(res);
+    await batchUpdateIssue(res);
+    setLoading(true);
   };
-  return (
-    <div style={{ padding: 15 }}>
+
+  const handleMessage = (message) => {
+    if (message === 'ok') {
+      return;
+    }
+    const data = JSON.parse(message);
+    if (data) {
+      // eslint-disable-next-line no-console
+      console.log(data);
+      // this.setState({
+      //   wsData: data,
+      //   historyId: data.id,
+      //   ovn: data.objectVersionNumber,
+      // });
+      // if (data.status === 'failed') {
+      //   if (data.fileUrl) {
+      //     window.location.href = data.fileUrl;
+      //   }
+      // }
+    }
+  };
+  const render = () => (
+    <Fragment>
       <Form
+        disabled={loading}
         dataSet={dataSet}
         style={{
-          maxHeight: 400, overflowY: 'auto', overflowX: 'hidden', 
+          maxHeight: 400, overflowY: 'auto', overflowX: 'hidden',
         }}
       >
         {fields.map((f) => {
           const { key, id } = f;
           return (
-            <Row key={key}>
-              <Col span={10}>
+            <Row key={key} gutter={20}>
+              <Col span={11}>
                 <Select
+                  style={{ width: '100%' }}
                   placeholder="请选择"
                   onChange={(value) => {
                     const field = find(fieldData, { id: value });
@@ -263,18 +329,17 @@ function BatchModal({ dataSet: tableDataSet, fields: customFields }) {
                 </Select>
               </Col>
               {id && (
-                <Col span={10} key={id}>
+                <Col span={11} key={id}>
                   {renderField(f)}
                 </Col>
               )}
-              <Col span={4}>
+              <Col span={2}>                
                 <Button
-                  onClick={() => { 
-                    Field.remove(key); 
+                  onClick={() => {
+                    Field.remove(key);
                     dataSet.current.init(f.code);
                   }}
                   icon="delete"
-                  style={{ marginLeft: 10 }}
                 />
               </Col>
             </Row>
@@ -282,20 +347,37 @@ function BatchModal({ dataSet: tableDataSet, fields: customFields }) {
         })}
         <div>
           <Button onClick={Field.add} icon="add" color="blue">添加字段</Button>
-        </div>          
+        </div>
       </Form>
-      <div>         
+      {loading && (
+      <div style={{ color: 'rgba(254,71,87,1)', textAlign: 'center' }}>
+        正在修改，请稍等片刻
+        <span className="dot">…</span>
+      </div>
+      )}
+      <div>
         <Button>取消</Button>
         <Button
-          disabled={Object.keys(data).length === 0}
+          disabled={Object.keys(getData()).length === 0}
           color="blue"
+          loading={loading}
           onClick={() => {
             submit();
           }}
         >
           确定
         </Button>
-      </div>      
+      </div>
+    </Fragment>
+  );
+  return (
+    <div style={{ padding: 15 }}>
+      <WSHandler
+        messageKey={`choerodon:msg:agile-batch-update-field:${AppState.userInfo.id}`}
+        onMessage={handleMessage}
+      >
+        {render()}
+      </WSHandler>
     </div>
   );
 }

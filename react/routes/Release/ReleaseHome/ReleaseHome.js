@@ -4,10 +4,9 @@ import {
   Page, Header, Content, stores, Permission, Breadcrumb,
 } from '@choerodon/boot';
 import {
-  Button, Menu, Icon, Breadcrumb as Bread, Spin, Tooltip,
+  Button, Menu, Icon, Spin, Tooltip,
 } from 'choerodon-ui';
-import { Action, axios } from '@choerodon/boot';
-import { withRouter, Link } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import DragSortingTable from '../ReleaseComponent/DragSortingTable';
 import AddRelease from '../ReleaseComponent/AddRelease';
 import ReleaseStore from '../../../stores/project/release/ReleaseStore';
@@ -18,7 +17,6 @@ import TableDropMenu from '../../../common/TableDropMenu';
 import DeleteReleaseWithIssues from '../ReleaseComponent/DeleteReleaseWithIssues';
 
 const { AppState } = stores;
-const { Item } = Bread;
 const COLOR_MAP = {
   规划中: '#ffb100',
   已发布: '#00bfa5',
@@ -195,13 +193,15 @@ class ReleaseHome extends Component {
         {record.statusCode === 'archived'
           ? null
           : (
-            <Menu.Item key="4">
-              <Tooltip placement="top" title="删除">
-                <span>
-                  删除
-                </span>
-              </Tooltip>
-            </Menu.Item>
+            <Permission service={['agile-service.product-version.deleteVersion']} key="4">
+              <Menu.Item>
+                <Tooltip placement="top" title="删除">
+                  <span>
+                    删除
+                  </span>
+                </Tooltip>
+              </Menu.Item>
+            </Permission>
           )
         }
       </Menu>

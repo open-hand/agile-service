@@ -7,7 +7,7 @@ import {
   Button, Spin, Icon, Tooltip,
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
-import { Permission, stores } from '@choerodon/boot';
+import { Permission } from '@choerodon/boot';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
@@ -21,7 +21,6 @@ import './BacklogHome.less';
 
 const createSprintKey = Modal.key();
 const createCurrentPiSprintKey = Modal.key();
-const { AppState } = stores;
 
 @observer
 class BacklogHome extends Component {
@@ -71,12 +70,10 @@ class BacklogHome extends Component {
   handleCreateCurrentPiSprint = async () => {
     const { BacklogStore } = this.props;
     await IsInProgramStore.loadPiInfoAndSprint();
-    const artInfo = IsInProgramStore.getArtInfo;
     const onCreate = (sprint) => {
       BacklogStore.setCreatedSprint(sprint.sprintId);
       this.refresh();
     };
-    const { programId, id: artId } = artInfo;
     const piInfo = IsInProgramStore.getPiInfo;
     const sprints = IsInProgramStore.getSprints;
     Modal.open({
@@ -108,67 +105,51 @@ class BacklogHome extends Component {
     }
   };
 
+  renderCreateSprintInPi = (visible, disabled) => { 
+    if (!visible) {
+      return null;
+    }
+    return disabled ? (
+      <Tooltip title="无活跃的PI">
+        <Button icon="playlist_add" disabled>
+          当前PI下创建冲刺
+        </Button>
+      </Tooltip>
+    ) : (
+      <Permission
+        service={['agile-service.sprint-pro.createSubProjectSprint']}
+      >
+        <Button icon="playlist_add" onClick={this.handleCreateCurrentPiSprint}>
+          当前PI下创建冲刺
+        </Button>
+      </Permission>
+    );
+  }
+
   render() {
     const { BacklogStore } = this.props;
     const arr = BacklogStore.getSprintData;
     const { isInProgram, isShowFeature } = IsInProgramStore;
-    const { type, id: projectId, organizationId: orgId } = AppState.currentMenuType;
 
     return (
       <Fragment>
         <Header title="待办事项">
           <Button
-            className="leftBtn"
-            funcType="flat"
             onClick={this.handleClickCBtn}
+            icon="playlist_add"
           >
-            <Icon type="playlist_add icon" />
-            <span>创建问题</span>
+            创建问题
           </Button>
           {!isInProgram && (
             <Permission
-              type={type}
-              projectId={projectId}
-              organizationId={orgId}
               service={['agile-service.sprint.createSprint']}
             >
-              <Button className="leftBtn" functyp="flat" onClick={this.handleCreateSprint}>
-                <Icon type="playlist_add icon" />
+              <Button icon="playlist_add" onClick={this.handleCreateSprint}>
                 创建冲刺
               </Button>
             </Permission>
-
           )}
-          {isShowFeature && !IsInProgramStore.getPiInfo.id
-            && (
-              <Permission
-                type={type}
-                projectId={projectId}
-                organizationId={orgId}
-                service={['agile-service.sprint-pro.createSubProjectSprint']}
-              >
-                <Tooltip title="无活跃的PI">
-                  <Button className="leftBtn" functyp="flat" onClick={this.handleCreateCurrentPiSprint} disabled>
-                    <Icon type="playlist_add icon" />
-                    当前PI下创建冲刺
-                  </Button>
-                </Tooltip>
-              </Permission>
-            )}
-          {isShowFeature && IsInProgramStore.getPiInfo.id
-            && (
-              <Permission
-                type={type}
-                projectId={projectId}
-                organizationId={orgId}
-                service={['agile-service.sprint-pro.createSubProjectSprint']}
-              >
-                <Button className="leftBtn" functyp="flat" onClick={this.handleCreateCurrentPiSprint}>
-                  <Icon type="playlist_add icon" />
-                  当前PI下创建冲刺
-                </Button>
-              </Permission>
-            )}
+          {this.renderCreateSprintInPi(isShowFeature, IsInProgramStore.getPiInfo.id)}
           {isInProgram && arr.length && arr.length > 1
             ? <ShowPlanSprint /> : null
           }
@@ -222,10 +203,10 @@ class BacklogHome extends Component {
                 >
                   史诗
                   {
-                  BacklogStore.chosenEpic !== 'all' && (
-                    <span className="c7n-backlog-side-tip" />
-                  )
-                }
+                    BacklogStore.chosenEpic !== 'all' && (
+                      <span className="c7n-backlog-side-tip" />
+                    )
+                  }
                 </p>
               )}
               {isShowFeature && (
@@ -240,10 +221,10 @@ class BacklogHome extends Component {
                 >
                   特性
                   {
-                  BacklogStore.chosenFeature !== 'all' && (
-                    <span className="c7n-backlog-side-tip" />
-                  )
-                }
+                    BacklogStore.chosenFeature !== 'all' && (
+                      <span className="c7n-backlog-side-tip" />
+                    )
+                  }
                 </p>
               )}
             </div>

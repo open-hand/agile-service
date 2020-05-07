@@ -34,7 +34,7 @@ function handleSelect({ dataSet }) {
   });
 }
 function handleUnSelect({ dataSet }) {
-  if (dataSet.selected.length === 0) {
+  if (dataSet.selected.length === 0 && modal) {
     modal.close();
   }
 }

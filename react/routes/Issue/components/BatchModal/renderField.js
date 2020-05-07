@@ -12,13 +12,13 @@ const singleList = ['radio', 'single'];
 
 function renderDefaultField({ code }) {
   switch (code) {
-    case 'component':
-      return <Select multiple name={code} searchable searchMatcher="name" />;
+    case 'componentIssueRelVOList':
+      return <Select style={{ width: '100%' }} multiple name={code} searchable searchMatcher="name" />;
     default: return null;
   }
 }
 export default function renderField({ code, fieldType, fieldOptions }) {
-  if (['component'].includes(code)) {
+  if (['componentIssueRelVOList'].includes(code)) {
     return renderDefaultField({ code });
   }
   switch (fieldType) {
@@ -26,18 +26,21 @@ export default function renderField({ code, fieldType, fieldOptions }) {
       return (
         <TimePicker
           name={code}
+          style={{ width: '100%' }}
         />         
       );
     case 'datetime':
       return (
         <DateTimePicker
           name={code}
+          style={{ width: '100%' }}
         />
       );
     case 'date':
       return (
         <DatePicker
           name={code}
+          style={{ width: '100%' }}
         />
       );
     case 'number':
@@ -45,6 +48,7 @@ export default function renderField({ code, fieldType, fieldOptions }) {
         <div>
           <NumberField
             name={code}
+            style={{ width: '100%' }}
             // step={isCheck ? 0.1 : 1}
           />
         </div>
@@ -54,6 +58,7 @@ export default function renderField({ code, fieldType, fieldOptions }) {
         <TextField
           name={code}
           maxLength={100}
+          style={{ width: '100%' }}
         />
       );
     case 'text':
@@ -62,6 +67,7 @@ export default function renderField({ code, fieldType, fieldOptions }) {
           name={code}
           rows={3}
           maxLength={255}
+          style={{ width: '100%' }}
         />
       );
     case 'url':
@@ -72,13 +78,12 @@ export default function renderField({ code, fieldType, fieldOptions }) {
       );
     case 'radio': case 'single': case 'checkbox': case 'multiple':
       return (
-        <Fragment>
-          <Select
-            name={code}
-            style={{ width: '100%', marginBottom: '20px' }}
-            multiple={!(singleList.indexOf(fieldType) !== -1)}
-          >
-            {fieldOptions
+        <Select
+          name={code}
+          style={{ width: '100%' }}
+          multiple={!(singleList.indexOf(fieldType) !== -1)}
+        >
+          {fieldOptions
               && fieldOptions.length > 0
               && fieldOptions.map((item) => {
                 if (item.enabled) {
@@ -93,8 +98,7 @@ export default function renderField({ code, fieldType, fieldOptions }) {
                 }
                 return [];
               })}
-          </Select>          
-        </Fragment>
+        </Select>
       );
     case 'member':
       return (

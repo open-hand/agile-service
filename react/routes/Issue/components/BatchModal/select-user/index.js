@@ -18,6 +18,7 @@ function SelectUser({ onChange, ...props }) {
   }, []);
   return (
     <Select
+      style={{ width: '100%' }}
       searchable
       searchMatcher="param"
       placeholder="人员"
