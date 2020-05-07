@@ -235,7 +235,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.Epic.listEpic"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER, InitRoleCode.PROJECT_MEMBER})
     @ApiOperation("通过issueId删除")
     @DeleteMapping(value = "/{issueId}")
     public ResponseEntity deleteIssue(@ApiParam(value = "项目id", required = true)
