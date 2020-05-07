@@ -671,15 +671,4 @@ public class IssueController {
                                                                   @RequestParam(value = "param", required = false) String param) {
         return ResponseEntity.ok(issueService.pagingQueryReporters(pageable, projectId, param));
     }
-
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
-    @ApiOperation("敏捷批量删除issue")
-    @DeleteMapping(value = "/batch_delete_issues")
-    public ResponseEntity agileBatchDeleteIssues(@ApiParam(value = "项目id", required = true)
-                                                               @PathVariable(name = "project_id") Long projectId,
-                                                               @RequestParam(value = "issueIds", required = false) List<Long> issueIds) {
-        issueService.batchDeleteIssues(projectId, issueIds);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
-    }
-
 }
