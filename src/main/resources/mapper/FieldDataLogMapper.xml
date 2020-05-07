@@ -35,4 +35,12 @@
         AND fdl.instance_id = #{instanceId}
     </select>
 
+    <insert id="batchInsert">
+        insert into fd_field_data_log(project_id,scheme_code,field_id,instance_id,old_value,old_string,new_value,new_string,created_by,last_updated_by)
+        values
+        <foreach collection="list" item="fieldDateLog" separator=",">
+            (#{projectId},#{schemeCode},#{fieldDateLog.fieldId},#{fieldDateLog.instanceId},#{fieldDateLog.oldValue},#{fieldDateLog.oldString},#{fieldDateLog.newValue},#{fieldDateLog.newString},#{userId},#{userId})
+        </foreach>
+    </insert>
+
 </mapper>

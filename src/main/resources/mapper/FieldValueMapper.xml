@@ -91,4 +91,62 @@
             ORDER BY ${sortSql}
         </if>
     </select>
+
+    <select id="listByInstanceIdsAndFieldId" resultMap="fieldValueMap">
+        SELECT fv.*,
+        fo.value as option_value,
+        f.field_type
+        FROM fd_field_value fv
+        LEFT JOIN fd_field_option fo ON fo.id = fv.option_id
+        LEFT JOIN fd_object_scheme_field f ON f.id = fv.field_id
+        WHERE 1 = 1
+        <if test="projectId != null">
+            AND fv.project_id = #{projectId}
+        </if>
+        <if test="instanceIds != null and instanceIds.size > 0">
+            AND fv.instance_id in
+            <foreach collection="instanceIds" item="instanceId" open="(" close=")" separator=",">
+                #{instanceId}
+            </foreach>
+        </if>
+        <if test="schemeCode != null">
+            AND fv.scheme_code = #{schemeCode}
+        </if>
+        <if test="fieldId != null">
+            AND fv.field_id = #{fieldId}
+        </if>
+    </select>
+
+    <delete id="deleteByInstanceIds">
+        DELETE
+        FROM fd_field_value
+        WHERE 1 = 1
+        <if test="projectId != null">
+            AND project_id = #{projectId}
+        </if>
+        <if test="instanceIds != null and instanceIds.size > 0">
+            AND instance_id  in
+            <foreach collection="instanceIds" item="instanceId" open="(" close=")" separator=",">
+                #{instanceId}
+            </foreach>
+        </if>
+        <if test="schemeCode != null">
+            AND scheme_code = #{schemeCode}
+        </if>
+        <if test="fieldId != null">
+            AND field_id = #{fieldId}
+        </if>
+    </delete>
+
+    <insert id="batchInsertField">
+        INSERT IGNORE INTO fd_field_value
+        (instance_id,project_id,scheme_code, field_id,option_id, string_value, number_value, text_value, date_value)
+        values
+        <foreach collection="fieldValues" item="fieldValue" index="index"
+                 separator=",">
+            (#{fieldValue.instanceId}, #{projectId}, #{schemeCode}, #{fieldValue.fieldId},
+            #{fieldValue.optionId}, #{fieldValue.stringValue}, #{fieldValue.numberValue}, #{fieldValue.textValue},
+            #{fieldValue.dateValue})
+        </foreach>
+    </insert>
 </mapper>

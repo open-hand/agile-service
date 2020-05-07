@@ -15,6 +15,8 @@ import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.FieldOptionMapper;
 import org.springframework.data.domain.Pageable;
 import io.choerodon.core.exception.CommonException;
+import org.springframework.util.CollectionUtils;
+import springfox.documentation.schema.Entry;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -519,4 +521,136 @@ public class FieldValueUtil {
             throw new CommonException(e.getMessage());
         }
     }
+
+    public static List<FieldDataLogCreateVO> batchHandlerFiledLog(Long projectId,Long instanceId,List<FieldValueDTO> oldFieldValues, List<FieldValueDTO> newFieldValues){
+        List<FieldDataLogCreateVO> list = new ArrayList<>();
+        Map<Long, List<FieldValueDTO>> oldFieldMap = new HashMap<>();
+        if(!CollectionUtils.isEmpty(oldFieldValues)){
+            oldFieldMap.putAll(oldFieldValues.stream().collect(Collectors.groupingBy(FieldValueDTO::getFieldId)));
+        }
+        Map<Long, List<FieldValueDTO>> newFieldMap = new HashMap<>();
+        if(!CollectionUtils.isEmpty(newFieldValues)){
+            newFieldMap.putAll(newFieldValues.stream().collect(Collectors.groupingBy(FieldValueDTO::getFieldId)));
+        }
+        Iterator<Map.Entry<Long, List<FieldValueDTO>>> it = newFieldMap.entrySet().iterator();
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        while (it.hasNext()){
+            Map.Entry<Long, List<FieldValueDTO>> next = it.next();
+            List<FieldValueDTO> oldValue =CollectionUtils.isEmpty(oldFieldMap.get(next.getKey())) ? new ArrayList<>() : oldFieldMap.get(next.getKey());
+            List<FieldValueDTO> value = next.getValue();
+            if(!CollectionUtils.isEmpty(value)){
+                FieldDataLogCreateVO fieldDataLogCreateVO = new FieldDataLogCreateVO();
+                fieldDataLogCreateVO.setFieldId(next.getKey());
+                fieldDataLogCreateVO.setInstanceId(instanceId);
+                batchHandlerFiled(fieldDataLogCreateVO,organizationId,value.get(0).getFieldType(),oldValue,value);
+                list.add(fieldDataLogCreateVO);
+            }
+        }
+        return list;
+    }
+    public static void batchHandlerFiled(FieldDataLogCreateVO create,Long organizationId,String fieldType, List<FieldValueDTO> oldFieldValues, List<FieldValueDTO> newFieldValues){
+        FieldOptionMapper fieldOptionMapper = SpringBeanUtil.getBean(FieldOptionMapper.class);
+        try {
+            switch (fieldType) {
+                case FieldType.CHECKBOX:
+                case FieldType.MULTIPLE:
+                    if (!oldFieldValues.isEmpty()) {
+                        create.setOldValue(oldFieldValues.stream().map(x -> String.valueOf(x.getOptionId())).collect(Collectors.joining(",")));
+                        create.setOldString(oldFieldValues.stream().map(FieldValueDTO::getOptionValue).collect(Collectors.joining(",")));
+                    }
+                    if (!newFieldValues.isEmpty()) {
+                        List<Long> newOptionIds = newFieldValues.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList());
+                        create.setNewValue(newOptionIds.stream().map(x -> String.valueOf(x)).collect(Collectors.joining(",")));
+                        create.setNewString(fieldOptionMapper.selectByOptionIds(organizationId, newOptionIds).stream().map(FieldOptionDTO::getValue).collect(Collectors.joining(",")));
+                    }
+                    break;
+                case FieldType.RADIO:
+                case FieldType.SINGLE:
+                    if (!oldFieldValues.isEmpty()) {
+                        create.setOldValue(String.valueOf(oldFieldValues.get(0).getOptionId()));
+                        create.setOldString(String.valueOf(oldFieldValues.get(0).getOptionValue()));
+                    }
+                    if (!newFieldValues.isEmpty()) {
+                        List<Long> newOptionIds = Arrays.asList(newFieldValues.get(0).getOptionId());
+                        List<FieldOptionDTO> fieldOptions = fieldOptionMapper.selectByOptionIds(organizationId, newOptionIds);
+                        create.setNewValue(String.valueOf(newFieldValues.get(0).getOptionId()));
+                        if (!fieldOptions.isEmpty()) {
+                            create.setNewString(fieldOptions.get(0).getValue());
+                        }
+                    }
+                    break;
+                case FieldType.DATETIME:
+                    DateFormat df1 = new SimpleDateFormat(DATETIME_FORMAT);
+                    if (!oldFieldValues.isEmpty()) {
+                        create.setOldString(df1.format(oldFieldValues.get(0).getDateValue()));
+                    }
+                    if (!newFieldValues.isEmpty()) {
+                        create.setNewString(df1.format(newFieldValues.get(0).getDateValue()));
+                    }
+                    break;
+                case FieldType.DATE:
+                    DateFormat df3 = new SimpleDateFormat(DATE_FORMAT);
+                    if (!oldFieldValues.isEmpty()) {
+                        create.setOldString(df3.format(oldFieldValues.get(0).getDateValue()));
+                    }
+                    if (!newFieldValues.isEmpty()) {
+                        create.setNewString(df3.format(newFieldValues.get(0).getDateValue()));
+                    }
+                    break;
+                case FieldType.TIME:
+                    DateFormat df2 = new SimpleDateFormat(DATETIME_FORMAT);
+                    if (!oldFieldValues.isEmpty()) {
+                        create.setOldString(df2.format(oldFieldValues.get(0).getDateValue()));
+                    }
+                    if (!newFieldValues.isEmpty()) {
+                        create.setNewString(df2.format(newFieldValues.get(0).getDateValue()));
+                    }
+                    break;
+                case FieldType.INPUT:
+                    if (!oldFieldValues.isEmpty()) {
+                        create.setOldString(oldFieldValues.get(0).getStringValue());
+                    }
+                    if (!newFieldValues.isEmpty()) {
+                        create.setNewString(newFieldValues.get(0).getStringValue());
+                    }
+                    break;
+                case FieldType.NUMBER:
+                    if (!oldFieldValues.isEmpty()) {
+                        create.setOldString(oldFieldValues.get(0).getNumberValue());
+                    }
+                    if (!newFieldValues.isEmpty()) {
+                        create.setNewString(newFieldValues.get(0).getNumberValue());
+                    }
+                    break;
+                case FieldType.TEXT:
+                    if (!oldFieldValues.isEmpty()) {
+                        create.setOldString(oldFieldValues.get(0).getTextValue());
+                    }
+                    if (!newFieldValues.isEmpty()) {
+                        create.setNewString(newFieldValues.get(0).getTextValue());
+                    }
+                    break;
+                case FieldType.MEMBER:
+                    //查询用户
+                    List<Long> userIds = oldFieldValues.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList());
+                    userIds.addAll(newFieldValues.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList()));
+                    Map<Long, UserDTO> userMap = handleUserMap(userIds);
+                    if (!oldFieldValues.isEmpty()) {
+                        create.setOldValue(String.valueOf(oldFieldValues.get(0).getOptionId()));
+                        create.setOldString(userMap.getOrDefault(oldFieldValues.get(0).getOptionId(), new UserDTO()).getRealName());
+                    }
+                    if (!newFieldValues.isEmpty()) {
+                        create.setNewValue(String.valueOf(newFieldValues.get(0).getOptionId()));
+                        create.setNewString(userMap.getOrDefault(newFieldValues.get(0).getOptionId(), new UserDTO()).getRealName());
+                    }
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            throw new CommonException(e.getMessage());
+        }
+    }
+
+
 }

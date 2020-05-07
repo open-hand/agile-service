@@ -7,6 +7,8 @@ import io.swagger.annotations.ApiModelProperty;
  * @since 2019/4/8
  */
 public class PageFieldViewUpdateVO {
+    @ApiModelProperty(value = "fieldId")
+    private Long fieldId;
     @ApiModelProperty(value = "字段类型")
     private String fieldType;
     @ApiModelProperty(value = "字段值")
@@ -26,5 +28,13 @@ public class PageFieldViewUpdateVO {
 
     public void setValue(Object value) {
         this.value = value;
+    }
+
+    public Long getFieldId() {
+        return fieldId;
+    }
+
+    public void setFieldId(Long fieldId) {
+        this.fieldId = fieldId;
     }
 }
