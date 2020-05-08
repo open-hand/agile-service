@@ -81,12 +81,14 @@ const systemFields = new Map([
     code: 'influenceVersion',
     name: '影响的版本',
     fieldType: 'multiple',
+    format: (value, influenceVersion) => influenceVersion,
   }],
   ['fixVersion', {
     id: 'fixVersion',
     code: 'fixVersion',
     name: '修复的版本',
     fieldType: 'multiple',
+    format: (value, fixVersion) => fixVersion,
   }],
   ['storyPoints', {
     id: 'storyPoints',
@@ -279,8 +281,6 @@ function BatchModal({
     const data = getData();
     const issueIds = tableDataSet.selected.map(record => record.get('issueId'));
     const res = { issueIds, ...formatFields(fieldData, data, dataSet) };
-    // eslint-disable-next-line no-console
-    console.log(res);
     await batchUpdateIssue(res);
     setLoading(true);
   };
@@ -291,8 +291,6 @@ function BatchModal({
     }
     const data = JSON.parse(message);
     if (data) {
-      // eslint-disable-next-line no-console
-      console.log(data);
       const { status } = data;
       if (status === 'batch_update_success') {
         setLoading('success');
@@ -308,7 +306,7 @@ function BatchModal({
   const render = () => (
     <Fragment>
       <Form
-        disabled={loading}
+        disabled={Boolean(loading)}
         dataSet={dataSet}
         style={{
           maxHeight: 400, overflowY: 'auto', overflowX: 'hidden',
