@@ -130,6 +130,25 @@ const arrOperation6 = [
   },
 ];
 
+const arrOperation7 = [
+  {
+    value: '=',
+    text: '等于',
+  },
+  {
+    value: '!=',
+    text: '不等于',
+  },
+  {
+    value: 'like',
+    text: '包含',
+  },
+  {
+    value: 'notLike',
+    text: '不包含',
+  },
+];
+
 const OPERATION_FILTER = {
   assignee: arrOperation2,
   priority: arrOperation1,
@@ -154,8 +173,8 @@ const OPERATION_FILTER = {
   time: arrOperation3,
   datetime: arrOperation3,
   number: arrOperation4,
-  input: arrOperation1,
-  text: arrOperation1,
+  input: arrOperation7,
+  text: arrOperation7,
   single: arrOperation5,
   multiple: arrOperation6,
   member: arrOperation2,
@@ -257,10 +276,7 @@ const CreateFilter = (props) => {
    * @param filter
    * @returns {*|Array}
    */
-  const getOperation = (filter) => {
-    console.log(filter);
-    return OPERATION_FILTER[filter] || [];
-  };
+  const getOperation = filter => OPERATION_FILTER[filter] || [];
 
   /**
    * 调用接口，获取'属性'的值列表
@@ -367,7 +383,6 @@ const CreateFilter = (props) => {
     const getPreDefinedField = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/fields`);
     const getCustomField = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/field_value/list/custom_field`);
     Promise.all([getPreDefinedField(), getCustomField()]).then(([preDefinedField, customField]) => {
-      console.log(preDefinedField, customField);
       setQuickFilterFiled([...preDefinedField, ...customField].map(field => ({ ...field, fieldCode: field.code || field.fieldCode, type: field.fieldType || field.type })) || []);
     });
     // axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/object_scheme_field/list?schemeCode=agile_issue&organizationId=${AppState.currentMenuType.organizationId}`)
@@ -393,6 +408,8 @@ const CreateFilter = (props) => {
       '<=': '<=',
       '>': '>',
       '>=': '>=',
+      like: 'like',
+      notLike: 'not like',
     };
     return OPERATION[value];
   };
