@@ -235,7 +235,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.Epic.listEpic"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER, InitRoleCode.PROJECT_MEMBER})
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
     @ApiOperation("通过issueId删除")
     @DeleteMapping(value = "/{issueId}")
     public ResponseEntity deleteIssue(@ApiParam(value = "项目id", required = true)
@@ -243,6 +243,17 @@ public class IssueController {
                                       @ApiParam(value = "issueId", required = true)
                                       @PathVariable Long issueId) {
         issueService.deleteIssue(projectId, issueId);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER, InitRoleCode.PROJECT_MEMBER})
+    @ApiOperation("删除自己创建的issue")
+    @DeleteMapping(value = "/delete_owner_issue/{issueId}")
+    public ResponseEntity deleteOwnerIssue(@ApiParam(value = "项目id", required = true)
+                                      @PathVariable(name = "project_id") Long projectId,
+                                      @ApiParam(value = "issueId", required = true)
+                                      @PathVariable Long issueId) {
+        issueService.deleteOwnerIssue(projectId, issueId);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 

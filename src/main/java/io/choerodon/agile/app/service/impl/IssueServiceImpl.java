@@ -2197,4 +2197,15 @@ public class IssueServiceImpl implements IssueService {
         Set<Long> userIds = issueMapper.selectReporterIdsByProjectId(projectId);
         return baseFeignClient.agileUsers(projectId, pageable.getPageNumber(), pageable.getPageSize(), param, userIds).getBody();
     }
+
+    @Override
+    public void deleteOwnerIssue(Long projectId, Long issueId) {
+        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        // 判断要删除的issue是否是自己创建的
+        if (!userId.equals(issueDTO.getCreatedBy())) {
+            throw new CommonException("error.delete.issue.permission");
+        }
+        deleteIssue(projectId, issueId);
+    }
 }
