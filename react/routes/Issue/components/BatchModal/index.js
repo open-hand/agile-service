@@ -299,6 +299,9 @@ function BatchModal({
         setTimeout(() => {
           onEdit();
         }, 2000); 
+      } else if (status === 'batch_update_failed') {
+        Choerodon.prompt('更新失败', 'error');
+        setLoading(false);
       }
     }
   };
