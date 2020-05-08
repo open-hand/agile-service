@@ -2199,12 +2199,12 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public void deleteOwnerIssue(Long projectId, Long issueId) {
+    public void deleteSelfIssue(Long projectId, Long issueId) {
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         Long userId = DetailsHelper.getUserDetails().getUserId();
         // 判断要删除的issue是否是自己创建的
         if (!userId.equals(issueDTO.getCreatedBy())) {
-            throw new CommonException("error.delete.issue.permission");
+            throw new CommonException("error.created.user.illegal");
         }
         deleteIssue(projectId, issueId);
     }

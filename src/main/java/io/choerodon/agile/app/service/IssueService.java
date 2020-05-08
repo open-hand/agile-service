@@ -329,5 +329,5 @@ public interface IssueService {
      * @param projectId
      * @param issueId
      */
-    void deleteOwnerIssue(Long projectId, Long issueId);
+    void deleteSelfIssue(Long projectId, Long issueId);
 }
