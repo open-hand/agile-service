@@ -14,6 +14,20 @@ const { AppState } = stores;
 const FormItem = Form.Item;
 const { TextArea } = Input;
 
+const customFieldType = {
+  radio: 'OPTION',
+  checkbox: 'OPTION',
+  time: 'DATE_HMS',
+  datetime: 'DATE',
+  number: 'NUMBER',
+  input: 'STRING',
+  text: 'TEXT',
+  single: 'OPTION',
+  multiple: 'OPTION',
+  member: 'OPTION',
+  date: 'DATE',
+};
+
 const arrOperation1 = [
   {
     value: '=',
@@ -137,15 +151,15 @@ const OPERATION_FILTER = {
 
   radio: arrOperation5,
   checkbox: arrOperation6,
-  time: arrOperation3, //
-  datetime: arrOperation3, //
-  number: arrOperation4, //
-  input: arrOperation1, //
-  text: arrOperation1, //
-  single: arrOperation5, //
-  multiple: arrOperation6, //
-  member: arrOperation2, //
-  date: arrOperation3, //
+  time: arrOperation3,
+  datetime: arrOperation3,
+  number: arrOperation4,
+  input: arrOperation1,
+  text: arrOperation1,
+  single: arrOperation5,
+  multiple: arrOperation6,
+  member: arrOperation2,
+  date: arrOperation3,
 };
 
 const CreateFilter = (props) => {
@@ -398,10 +412,13 @@ const CreateFilter = (props) => {
           if (deleteItem.indexOf(i) !== -1) {
             return;
           }
+          const { id, type } = quickFilterFiled.find(item => item.fieldCode === values[`filter-${i}-prop`]) || {};
           const a = {
             fieldCode: values[`filter-${i}-prop`],
             operation: transformOperation(values[`filter-${i}-rule`]),
             value: getValue(values[`filter-${i}-value`], values[`filter-${i}-prop`]),
+            predefined: !id,
+            customFieldType: id ? customFieldType[type] : undefined,
           };
           // 如果不是第一项
           if (i) {
