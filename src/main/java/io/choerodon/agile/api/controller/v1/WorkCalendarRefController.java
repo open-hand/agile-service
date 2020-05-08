@@ -30,7 +30,7 @@ public class WorkCalendarRefController {
     @Autowired
     private WorkCalendarRefService workCalendarRefService;
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
     @ApiOperation(value = "创建冲刺工作日历")
     @PostMapping(value = "/sprint/{sprint_id}")
     public ResponseEntity<WorkCalendarRefVO> createSprintWorkCalendarRef(@ApiParam(value = "项目id", required = true)
@@ -80,7 +80,7 @@ public class WorkCalendarRefController {
                 .orElseThrow(() -> new CommonException("error.workCalendarRef.get"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
     @ApiOperation("删除项目工作日历")
     @DeleteMapping(value = "/{calendar_id}")
     public ResponseEntity deleteProjectWorkCalendarRef(@ApiParam(value = "项目id", required = true)

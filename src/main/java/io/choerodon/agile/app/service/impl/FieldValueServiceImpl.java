@@ -1,16 +1,15 @@
 package io.choerodon.agile.app.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.service.FieldValueService;
-import io.choerodon.agile.app.service.IssueService;
-import io.choerodon.agile.app.service.ObjectSchemeFieldService;
-import io.choerodon.agile.app.service.PageFieldService;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.FieldType;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.enums.ObjectSchemeFieldContext;
 import io.choerodon.agile.infra.enums.PageCode;
+import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.mapper.FieldDataLogMapper;
 import io.choerodon.agile.infra.mapper.FieldValueMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
@@ -30,6 +29,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -63,6 +63,10 @@ public class FieldValueServiceImpl implements FieldValueService {
     private VerifyUpdateUtil verifyUpdateUtil;
     @Autowired
     private IssueService issueService;
+    @Autowired
+    private ProjectConfigService projectConfigService;
+    @Autowired
+    private NotifyFeignClient notifyFeignClient;
 
     @Override
     public void fillValues(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewVO> pageFieldViews) {
@@ -191,7 +195,7 @@ public class FieldValueServiceImpl implements FieldValueService {
     }
 
     @Override
-    public void handlerPredefinedFields(Long projectId, List<Long> issueIds, JSONObject predefinedFields) {
+    public void handlerPredefinedFields(Long projectId, List<Long> issueIds, JSONObject predefinedFields,BatchUpdateFieldStatusVO batchUpdateFieldStatusVO) {
         List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds);
         if (CollectionUtils.isEmpty(issueDTOS)) {
             throw new CommonException("error.issues.null");
@@ -217,7 +221,12 @@ public class FieldValueServiceImpl implements FieldValueService {
                 issueUpdateVO.setVersionType("fix");
                 issueUpdateVO.setVersionIssueRelVOList(fixVersion);
             }
-
+            // 获取传入的状态
+            Long statusId = issueUpdateVO.getStatusId();
+            if (!ObjectUtils.isEmpty(statusId)) {
+                fieldList.remove("statusId");
+                issueUpdateVO.setStatusId(null);
+            }
             issueUpdateVO.setIssueId(v.getIssueId());
             issueUpdateVO.setObjectVersionNumber(v.getObjectVersionNumber());
             IssueVO issueVO = issueService.updateIssue(projectId, issueUpdateVO, fieldList);
@@ -231,11 +240,24 @@ public class FieldValueServiceImpl implements FieldValueService {
                 issueUpdateVO1.setObjectVersionNumber(issueVO.getObjectVersionNumber());
                 issueService.updateIssue(projectId, issueUpdateVO1, new ArrayList<>());
             }
-
+            // 修改issue的状态
+            if (!ObjectUtils.isEmpty(statusId)) {
+                List<TransformVO> transformVOS = projectConfigService.queryTransformsByProjectId(projectId, v.getStatusId(), v.getIssueId(), v.getIssueTypeId(), "agile");
+                if (!CollectionUtils.isEmpty(transformVOS)) {
+                    Map<Long, TransformVO> map = transformVOS.stream().collect(Collectors.toMap(TransformVO::getEndStatusId, Function.identity()));
+                    TransformVO transformVO = map.get(statusId);
+                    if (!ObjectUtils.isEmpty(transformVO)) {
+                        issueService.updateIssueStatus(projectId, v.getIssueId(), transformVO.getId(), transformVO.getStatusVO().getObjectVersionNumber(), "agile");
+                    }
+                }
+            }
+            batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
+            notifyFeignClient.postWebSocket(batchUpdateFieldStatusVO.getKey(),batchUpdateFieldStatusVO.getUserId().toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
         });
     }
+
     @Override
-    public void handlerCustomFields(Long projectId, List<PageFieldViewUpdateVO> customFields, String schemeCode, List<Long> issueIds) {
+    public void handlerCustomFields(Long projectId, List<PageFieldViewUpdateVO> customFields, String schemeCode, List<Long> issueIds,BatchUpdateFieldStatusVO batchUpdateFieldStatusVO) {
         List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds);
         if (CollectionUtils.isEmpty(customFields)) {
             throw new CommonException("error.customFields.null");
@@ -258,6 +280,8 @@ public class FieldValueServiceImpl implements FieldValueService {
                 }
                 batchHandlerCustomFields(projectId, v, schemeCode, needAddIssueIds);
             }
+            batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
+            notifyFeignClient.postWebSocket(batchUpdateFieldStatusVO.getKey(),batchUpdateFieldStatusVO.getUserId().toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
         });
     }
 

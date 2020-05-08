@@ -323,4 +323,11 @@ public interface IssueService {
      * @return
      */
     PageInfo<UserDTO> pagingQueryReporters(Pageable pageable, Long projectId, String param);
+
+    /**
+     * 删除自己的创建的Issue
+     * @param projectId
+     * @param issueId
+     */
+    void deleteSelfIssue(Long projectId, Long issueId);
 }

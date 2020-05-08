@@ -89,6 +89,7 @@
             <result property="fieldId" column="ffo_field_id"/>
             <result property="code" column="ffo_code"/>
             <result property="value" column="ffo_value"/>
+            <result property="enabled" column="ffo_enabled"/>
         </collection>
     </resultMap>
 
@@ -102,7 +103,8 @@
             ffo.id as ffo_id,
             ffo.field_id as ffo_field_id,
             ffo.code as ffo_code,
-            ffo.value as ffo_value
+            ffo.value as ffo_value,
+            ffo.is_enabled as ffo_enabled
         FROM fd_object_scheme_field osf
         LEFT JOIN lookup_value flv ON flv.value_code = osf.field_type and flv.type_code = 'field_type'
         LEFT JOIN fd_field_option ffo ON osf.id = ffo.field_id
