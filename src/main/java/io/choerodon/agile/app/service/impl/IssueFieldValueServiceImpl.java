@@ -43,6 +43,11 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
         Long userId = DetailsHelper.getUserDetails().getUserId();
         BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
         try {
+            batchUpdateFieldStatusVO.setStatus("doing");
+            batchUpdateFieldStatusVO.setKey(WEBSOCKET_BATCH_UPDATE_FIELD);
+            batchUpdateFieldStatusVO.setUserId(userId);
+            batchUpdateFieldStatusVO.setProcess(0.0);
+            notifyFeignClient.postWebSocket(WEBSOCKET_BATCH_UPDATE_FIELD, userId.toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
             if (Boolean.FALSE.equals(EnumUtil.contain(ObjectSchemeCode.class, schemeCode))) {
                 throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
             }
@@ -50,21 +55,26 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             if (ObjectUtils.isEmpty(issueIds)) {
                 throw new CommonException(ERROR_ISSUE_ID);
             }
-            // 修改issue预定义字段值
+            List<PageFieldViewUpdateVO> customFields = batchUpdateFieldsValueVo.getCustomFields();
+            int customFieldSize = CollectionUtils.isEmpty(customFields) ? 0 :customFields.size();
+            JSONObject predefinedFields = batchUpdateFieldsValueVo.getPredefinedFields();
+            double incrementalValue = 1.0 /  ((ObjectUtils.isEmpty(predefinedFields) ? 0 : issueIds.size())+ customFieldSize) ;
+            batchUpdateFieldStatusVO.setIncrementalValue(incrementalValue);
+            //修改issue预定义字段值
             if (!CollectionUtils.isEmpty(batchUpdateFieldsValueVo.getPredefinedFields())) {
-                JSONObject predefinedFields = batchUpdateFieldsValueVo.getPredefinedFields();
-                fieldValueService.handlerPredefinedFields(projectId, issueIds, predefinedFields);
+                fieldValueService.handlerPredefinedFields(projectId, issueIds, predefinedFields,batchUpdateFieldStatusVO);
             }
 
             // 批量修改issue自定义字段值
-            if (!CollectionUtils.isEmpty(batchUpdateFieldsValueVo.getCustomFields())) {
-                List<PageFieldViewUpdateVO> customFields = batchUpdateFieldsValueVo.getCustomFields();
-                fieldValueService.handlerCustomFields(projectId, customFields, schemeCode, issueIds);
+            if (!CollectionUtils.isEmpty(customFields)) {
+                fieldValueService.handlerCustomFields(projectId, customFields, schemeCode, issueIds,batchUpdateFieldStatusVO);
             }
              //发送websocket
-            batchUpdateFieldStatusVO.setStatus("batch_update_success");
+            batchUpdateFieldStatusVO.setStatus("success");
+            batchUpdateFieldStatusVO.setProcess(1.0);
         } catch (Exception e) {
-            batchUpdateFieldStatusVO.setStatus("batch_update_failed");
+            batchUpdateFieldStatusVO.setStatus("failed");
+            batchUpdateFieldStatusVO.setError(e.getMessage());
             throw new CommonException(e, e.getMessage());
         }
         finally {
