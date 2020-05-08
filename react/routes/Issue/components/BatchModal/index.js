@@ -4,11 +4,15 @@ import React, {
 import {
   Form, Button, Select, DataSet, Row, Col,
 } from 'choerodon-ui/pro';
-import { stores, WSHandler, Choerodon } from '@choerodon/boot';
+import {
+  stores, WSHandler, Choerodon,  
+} from '@choerodon/boot';
 import { find } from 'lodash';
 import { getProjectId, getOrganizationId } from '@/common/utils';
 import { batchUpdateIssue } from '@/api/NewIssueApi';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import WSProvider from '@choerodon/master/lib/containers/components/c7n/tools/ws/WSProvider';
+import { WEBSOCKET_SERVER } from '@choerodon/master/lib/containers/common';
 import useFields from './useFields';
 import renderField from './renderField';
 import styles from './index.less';
@@ -16,12 +20,12 @@ import styles from './index.less';
 const { AppState } = stores;
 
 const systemFields = new Map([
-  ['status', {
-    id: 'status',
-    code: 'status',
-    name: '状态',
-    fieldType: 'single',
-  }],
+  // ['status', {
+  //   id: 'status',
+  //   code: 'status',
+  //   name: '状态',
+  //   fieldType: 'single',
+  // }],
   ['assigneeId', {
     id: 'assigneeId',
     code: 'assigneeId',
@@ -133,7 +137,9 @@ function formatFields(fieldData, data, dataSet) {
   return temp;
 }
 
-function BatchModal({ dataSet: tableDataSet, fields: customFields }) {
+function BatchModal({
+  dataSet: tableDataSet, fields: customFields, onEdit, 
+}) {
   const { isInProgram } = IsInProgramStore;
   const fieldData = [...systemFields.values(), ...customFields].filter((f => (isInProgram ? f.code !== 'epicId' : f.code !== 'featureId')));
   const [fields, Field] = useFields();
@@ -287,16 +293,13 @@ function BatchModal({ dataSet: tableDataSet, fields: customFields }) {
     if (data) {
       // eslint-disable-next-line no-console
       console.log(data);
-      // this.setState({
-      //   wsData: data,
-      //   historyId: data.id,
-      //   ovn: data.objectVersionNumber,
-      // });
-      // if (data.status === 'failed') {
-      //   if (data.fileUrl) {
-      //     window.location.href = data.fileUrl;
-      //   }
-      // }
+      const { status } = data;
+      if (status === 'batch_update_success') {
+        setLoading('success');
+        setTimeout(() => {
+          onEdit();
+        }, 2000); 
+      }
     }
   };
   const render = () => (
@@ -351,8 +354,7 @@ function BatchModal({ dataSet: tableDataSet, fields: customFields }) {
       </Form>
       {loading && (
       <div style={{ color: 'rgba(254,71,87,1)', textAlign: 'center' }}>
-        正在修改，请稍等片刻
-        <span className={styles.dot}>…</span>
+        {loading === 'success' ? '修改成功' : ['正在修改，请稍等片刻', <span className={styles.dot}>…</span>]}        
       </div>
       )}
       <div>
@@ -372,12 +374,14 @@ function BatchModal({ dataSet: tableDataSet, fields: customFields }) {
   );
   return (
     <div style={{ padding: 15 }}>
-      <WSHandler
-        messageKey={`choerodon:msg:agile-batch-update-field:${AppState.userInfo.id}`}
-        onMessage={handleMessage}
-      >
-        {render()}
-      </WSHandler>
+      <WSProvider server={WEBSOCKET_SERVER}>
+        <WSHandler
+          messageKey={`choerodon:msg:agile-batch-update-field:${AppState.userInfo.id}`}
+          onMessage={handleMessage}
+        >
+          {render()}
+        </WSHandler>
+      </WSProvider>
     </div>
   );
 }

@@ -30,7 +30,15 @@ function handleSelect({ dataSet }) {
   modal = Modal.open({
     key: 'modal',
     header: <ObserverHeader dataSet={dataSet} modal={modal} />,
-    content: <BatchModal dataSet={dataSet} fields={IssueStore.fields} />,
+    content: <BatchModal
+      dataSet={dataSet}
+      modal={modal}
+      fields={IssueStore.fields}
+      onEdit={() => {
+        modal.close();
+        dataSet.query();
+      }}
+    />,
   });
 }
 function handleUnSelect({ dataSet }) {

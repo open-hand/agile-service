@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import {
   Dropdown, Menu, Button, Modal,
 } from 'choerodon-ui';
+import { Permission } from '@choerodon/boot';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
@@ -97,12 +98,14 @@ const IssueDropDown = ({
         </Menu.Item>
       )}
       {
-        <Menu.Item
-          key="1"
-          disabled={activePi && activePi.statusCode === 'doing' ? !hasPermission : loginUserId !== createdBy && !hasPermission}
-        >
-          删除
-        </Menu.Item>
+        <Permission service={['agile-service.issue.deleteIssue']} key="1">
+          <Menu.Item
+            key="1"
+            disabled={activePi && activePi.statusCode === 'doing' ? !hasPermission : loginUserId !== createdBy && !hasPermission}
+          >
+            删除
+          </Menu.Item>
+        </Permission>
       }
       {
         ['sub_task', 'feature', 'issue_epic'].indexOf(typeCode) === -1 && !(typeCode === 'bug' && issue.relateIssueId) ? (
