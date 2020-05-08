@@ -1,5 +1,5 @@
 import React, {
-  useMemo, useCallback, Fragment, useState,
+  useMemo, Fragment, useState,
 } from 'react';
 import {
   Form, Button, Select, DataSet, Row, Col,
@@ -11,7 +11,7 @@ import { batchUpdateIssue } from '@/api/NewIssueApi';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import useFields from './useFields';
 import renderField from './renderField';
-import './index.less';
+import styles from './index.less';
 
 const { AppState } = stores;
 
@@ -352,7 +352,7 @@ function BatchModal({ dataSet: tableDataSet, fields: customFields }) {
       {loading && (
       <div style={{ color: 'rgba(254,71,87,1)', textAlign: 'center' }}>
         正在修改，请稍等片刻
-        <span className="dot">…</span>
+        <span className={styles.dot}>…</span>
       </div>
       )}
       <div>

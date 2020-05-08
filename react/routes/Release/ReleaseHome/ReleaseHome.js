@@ -174,22 +174,26 @@ class ReleaseHome extends Component {
         {record.statusCode === 'archived'
           ? null
           : (
-            <Menu.Item key="0">
-              <Tooltip placement="top" title={record.statusCode === 'version_planning' ? '发布' : '撤销发布'}>
-                <span>
-                  {record.statusCode === 'version_planning' ? '发布' : '撤销发布'}
-                </span>
-              </Tooltip>
-            </Menu.Item>
+            <Permission service={record.statusCode === 'version_planning' ? ['agile-service.product-version.releaseVersion'] : ['agile-service.product-version.revokeReleaseVersion']} key="0">
+              <Menu.Item key="0">
+                <Tooltip placement="top" title={record.statusCode === 'version_planning' ? '发布' : '撤销发布'}>
+                  <span>
+                    {record.statusCode === 'version_planning' ? '发布' : '撤销发布'}
+                  </span>
+                </Tooltip>
+              </Menu.Item>
+            </Permission>            
           )
         }
-        <Menu.Item key="3">
-          <Tooltip placement="top" title={record.statusCode === 'archived' ? '撤销归档' : '归档'}>
-            <span>
-              {record.statusCode === 'archived' ? '撤销归档' : '归档'}
-            </span>
-          </Tooltip>
-        </Menu.Item>
+        <Permission service={record.statusCode === 'archived' ? ['agile-service.product-version.revokeArchivedVersion'] : ['agile-service.product-version.archivedVersion']} key="3">
+          <Menu.Item key="3">
+            <Tooltip placement="top" title={record.statusCode === 'archived' ? '撤销归档' : '归档'}>
+              <span>
+                {record.statusCode === 'archived' ? '撤销归档' : '归档'}
+              </span>
+            </Tooltip>
+          </Menu.Item>
+        </Permission>
         {record.statusCode === 'archived'
           ? null
           : (
