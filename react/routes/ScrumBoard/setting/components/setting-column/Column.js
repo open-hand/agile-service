@@ -49,8 +49,10 @@ class Column extends Component {
       if (!failed) {
         Choerodon.prompt('设置成功');
         refresh();
+      } else if (res.code === 'error.num.minNumCannotUpToMaxNum') {
+        Choerodon.prompt('最小值应该小于最大值，最大值应该大于最小值，设置失败');
       } else {
-        Choerodon.prompt(res.message);
+        Choerodon.prompt('设置失败');
       }
     }).catch((error) => {
       Choerodon.prompt(error);

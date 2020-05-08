@@ -22,6 +22,7 @@ import CSSBlackMagic from '../../../components/CSSBlackMagic/CSSBlackMagic';
 import HeaderLine from '../../../components/HeaderLine';
 import ScrumBoardFullScreen from '../ScrumBoardComponent/ScrumBoardFullScreen';
 import CreateBoard from '../ScrumBoardComponent/CreateBoard';
+import { service } from '../setting/Setting';
 
 const { Option } = Select;
 const { AppState } = stores;
@@ -485,7 +486,7 @@ class ScrumBoardHome extends Component {
 export default props => (
   <Page
     className="c7n-scrumboard-page"
-    service={[
+    service={[...[
       'agile-service.quick-filter.listByProjectId',
       'base-service.project.list',
       'agile-service.board.queryByProjectId',
@@ -544,7 +545,7 @@ export default props => (
       'devops-service.devops-git.pageBranchByOptions',
       'devops-service.devops-git.pageTagsByOptions',
       'devops-service.devops-git.createBranch',
-    ]}
+    ], ...service]}
   >
     <ScrumBoardHome {...props} />
   </Page>

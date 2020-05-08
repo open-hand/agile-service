@@ -101,11 +101,11 @@ class EditBoardName extends Component {
           {
             editBoardNameDisabled ? (
               <Input
-                style={{ width: 512 }}
+                style={{ width: 512, marginTop: 5 }}
                 label="看板名称"
                 maxLength={10}
-                defaultValue={initialBoardName}
-                disabled={editBoardNameDisabled}
+                value={initialBoardName}
+                disabled
               />
             ) : (
               <div>
@@ -132,7 +132,7 @@ class EditBoardName extends Component {
                     loading={loading}
                     onClick={this.handleUpdateBoardName}
                   >
-                      保存
+                    保存
                   </Button>
                   <Button
                     funcType="raised"
@@ -146,7 +146,7 @@ class EditBoardName extends Component {
                       });
                     }}
                   >
-                      取消
+                    取消
                   </Button>
                 </div>
               </div>
