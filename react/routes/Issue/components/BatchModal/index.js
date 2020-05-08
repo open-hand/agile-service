@@ -20,12 +20,12 @@ import styles from './index.less';
 const { AppState } = stores;
 
 const systemFields = new Map([
-  // ['status', {
-  //   id: 'status',
-  //   code: 'status',
-  //   name: '状态',
-  //   fieldType: 'single',
-  // }],
+  ['statusId', {
+    id: 'statusId',
+    code: 'statusId',
+    name: '状态',
+    fieldType: 'single',
+  }],
   ['assigneeId', {
     id: 'assigneeId',
     code: 'assigneeId',
@@ -149,7 +149,7 @@ function BatchModal({
   const [progress, setProgress] = useState(0);
   const dataSet = useMemo(() => new DataSet({
     fields: [{
-      name: 'status',
+      name: 'statusId',
       type: 'number',
       label: '状态',
       lookupAxiosConfig: () => ({
