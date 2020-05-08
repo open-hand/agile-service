@@ -249,7 +249,7 @@ public class IssueController {
     @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER})
     @ApiOperation("删除自己创建的issue")
     @DeleteMapping(value = "/delete_self_issue/{issueId}")
-    public ResponseEntity deleteOwnerIssue(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity deleteSelfIssue(@ApiParam(value = "项目id", required = true)
                                       @PathVariable(name = "project_id") Long projectId,
                                       @ApiParam(value = "issueId", required = true)
                                       @PathVariable Long issueId) {
