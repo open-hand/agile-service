@@ -21,6 +21,39 @@ const { TabPane } = Tabs;
 const { confirm } = Modal;
 const { AppState } = stores;
 
+const service = [
+  'agile-service.quick-filter.listByProjectId',
+  'base-service.project.list',
+  'agile-service.board.queryByProjectId',
+  'agile-service.board.checkName',
+  'agile-service.board.createScrumBoard',
+  'agile-service.board.move',
+  'agile-service.board.deleteScrumBoard',
+  'agile-service.scheme.queryStatusByProjectId',
+  'base-service.time-zone-work-calendar-project.queryTimeZoneWorkCalendarDetail',
+  'agile-service.scheme.checkCreateStatusForAgile',
+  'agile-service.work-calendar-ref.querySprintWorkCalendarRefs',
+  'agile-service.issue-status.listUnCorrespondStatus',
+  'agile-service.board.updateUserSettingBoard',
+  'agile-service.board.updateScrumBoard',
+  'agile-service.issue-status.moveStatusToColumn',
+  'agile-service.board-column.deleteBoardColumn',
+  'agile-service.scheme.checkRemoveStatusForAgile',
+  'agile-service.issue-status.deleteStatus',
+  'agile-service.board-column.columnSortByProgram',
+  'agile-service.board-column.createBoardColumn',
+  'agile-service.board-column.updateColumnContraint',
+  'agile-service.lookup-value.queryLookupValueByCode',
+  'agile-service.status.checkName',
+  'agile-service.work-calendar-ref.deleteProjectWorkCalendarRef',
+  'agile-service.work-calendar-ref.createSprintWorkCalendarRef',
+  'agile-service.board-column.columnSort',
+  'agile-service.issue-status.moveStatusToUnCorrespond',
+  'agile-service.issue-status.updateStatus',
+  'agile-service.issue-status.createStatus',
+  'agile-service.board-column.updateBoardColumn',
+];
+
 @observer
 class Setting extends Component {
   constructor(props) {
@@ -146,37 +179,7 @@ class Setting extends Component {
     const { type, id: projectId, organizationId: orgId } = menu;
     return (
       <Page
-        service={[
-          'agile-service.quick-filter.listByProjectId',
-          'base-service.project.list',
-          'agile-service.board.queryByProjectId',
-          'agile-service.board.checkName',
-          'agile-service.board.createScrumBoard',
-          'agile-service.board.move',
-          'agile-service.board.deleteScrumBoard',
-          'agile-service.scheme.queryStatusByProjectId',
-          'base-service.time-zone-work-calendar-project.queryTimeZoneWorkCalendarDetail',
-          'agile-service.scheme.checkCreateStatusForAgile',
-          'agile-service.work-calendar-ref.querySprintWorkCalendarRefs',
-          'agile-service.issue-status.listUnCorrespondStatus',
-          'agile-service.board.updateUserSettingBoard',
-          'agile-service.board.updateScrumBoard',
-          'agile-service.issue-status.moveStatusToColumn',
-          'agile-service.board-column.deleteBoardColumn',
-          'agile-service.scheme.checkRemoveStatusForAgile',
-          'agile-service.issue-status.deleteStatus',
-          'agile-service.board-column.columnSortByProgram',
-          'agile-service.board-column.createBoardColumn',
-          'agile-service.board-column.updateColumnContraint',
-          'agile-service.lookup-value.queryLookupValueByCode',
-          'agile-service.status.checkName',
-          'agile-service.work-calendar-ref.deleteProjectWorkCalendarRef',
-          'agile-service.work-calendar-ref.createSprintWorkCalendarRef',
-          'agile-service.board-column.columnSort',
-          'agile-service.issue-status.moveStatusToUnCorrespond',
-          'agile-service.issue-status.updateStatus',
-          'agile-service.issue-status.createStatus',
-        ]}
+        service={service}
       >
         <Header title="配置看板">
           {activeKey === '1' ? (
@@ -266,3 +269,4 @@ class Setting extends Component {
 }
 
 export default withRouter(Setting);
+export { service };
