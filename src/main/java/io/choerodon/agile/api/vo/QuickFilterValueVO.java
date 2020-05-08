@@ -17,6 +17,32 @@ public class QuickFilterValueVO {
     @ApiModelProperty(value = "快速搜索值")
     private String value;
 
+    /**
+     * 是否为预定义字段，必填
+     */
+    private Boolean predefined;
+
+    /**
+     * 自定义字段的字段类型
+     */
+    private String customFieldType;
+
+    public String getCustomFieldType() {
+        return customFieldType;
+    }
+
+    public void setCustomFieldType(String customFieldType) {
+        this.customFieldType = customFieldType;
+    }
+
+    public Boolean getPredefined() {
+        return predefined;
+    }
+
+    public void setPredefined(Boolean predefined) {
+        this.predefined = predefined;
+    }
+
     public void setFieldCode(String fieldCode) {
         this.fieldCode = fieldCode;
     }
