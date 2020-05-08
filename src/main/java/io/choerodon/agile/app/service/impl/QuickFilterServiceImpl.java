@@ -246,9 +246,9 @@ public class QuickFilterServiceImpl implements QuickFilterService {
                         .append(column)
                         .append(" ")
                         .append(operation)
-                        .append(" ")
+                        .append(" '")
                         .append(value)
-                        .append(" ) ");
+                        .append("' ) ");
                 return builder.toString();
 
             }
