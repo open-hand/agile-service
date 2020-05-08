@@ -138,7 +138,7 @@ function formatFields(fieldData, data, dataSet) {
 }
 
 function BatchModal({
-  dataSet: tableDataSet, fields: customFields, onEdit, 
+  dataSet: tableDataSet, fields: customFields, onCancel, onEdit, 
 }) {
   const { isInProgram } = IsInProgramStore;
   const fieldData = [...systemFields.values(), ...customFields].filter((f => (isInProgram ? f.code !== 'epicId' : f.code !== 'featureId')));
@@ -361,7 +361,7 @@ function BatchModal({
       </div>
       )}
       <div>
-        <Button>取消</Button>
+        <Button onClick={onCancel}>取消</Button>
         <Button
           disabled={Object.keys(getData()).length === 0}
           color="blue"

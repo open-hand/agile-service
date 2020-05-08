@@ -34,6 +34,9 @@ function handleSelect({ dataSet }) {
       dataSet={dataSet}
       modal={modal}
       fields={IssueStore.fields}
+      onCancel={() => {
+        modal.close();
+      }}
       onEdit={() => {
         modal.close();
         dataSet.query();
