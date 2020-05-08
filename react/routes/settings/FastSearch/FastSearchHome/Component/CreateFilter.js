@@ -15,17 +15,17 @@ const FormItem = Form.Item;
 const { TextArea } = Input;
 
 const customFieldType = {
-  radio: 'OPTION',
-  checkbox: 'OPTION',
-  time: 'DATE_HMS',
-  datetime: 'DATE',
-  number: 'NUMBER',
-  input: 'STRING',
-  text: 'TEXT',
-  single: 'OPTION',
-  multiple: 'OPTION',
-  member: 'OPTION',
-  date: 'DATE',
+  radio: 'option',
+  checkbox: 'option',
+  time: 'date_hms',
+  datetime: 'date',
+  number: 'number',
+  input: 'string',
+  text: 'text',
+  single: 'option',
+  multiple: 'option',
+  member: 'option',
+  date: 'date',
 };
 
 const arrOperation1 = [
