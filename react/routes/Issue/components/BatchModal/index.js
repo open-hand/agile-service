@@ -360,7 +360,7 @@ function BatchModal({
         {loading === 'success' ? '修改成功' : ['正在修改，请稍等片刻', <span className={styles.dot}>…</span>]}        
       </div>
       )}
-      <div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <Button onClick={onCancel}>取消</Button>
         <Button
           disabled={Object.keys(getData()).length === 0}
