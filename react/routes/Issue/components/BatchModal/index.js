@@ -2,7 +2,7 @@ import React, {
   useMemo, Fragment, useState,
 } from 'react';
 import {
-  Form, Button, Select, DataSet, Row, Col,
+  Form, Button, Select, DataSet, Row, Col, Progress,
 } from 'choerodon-ui/pro';
 import {
   stores, WSHandler, Choerodon,  
@@ -146,6 +146,7 @@ function BatchModal({
   const fieldData = [...systemFields.values(), ...customFields].filter((f => (isInProgram ? f.code !== 'epicId' : f.code !== 'featureId')));
   const [fields, Field] = useFields();
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const dataSet = useMemo(() => new DataSet({
     fields: [{
       name: 'status',
@@ -291,16 +292,26 @@ function BatchModal({
     }
     const data = JSON.parse(message);
     if (data) {
-      const { status } = data;
-      if (status === 'batch_update_success') {
-        setLoading('success');
-        setTimeout(() => {
-          onEdit();
-        }, 2000); 
-      } else if (status === 'batch_update_failed') {
-        Choerodon.prompt('更新失败', 'error');
-        setLoading(false);
-      }
+      const { status, process } = data;
+      switch (status) {
+        case 'success': {
+          setLoading('success');
+          setTimeout(() => {
+            onEdit();
+          }, 2000); 
+          break;
+        }
+        case 'doing': {
+          setProgress(Number(process));
+          break;
+        }
+        case 'failed': {
+          Choerodon.prompt('更新失败', 'error');
+          setLoading(false);
+          break;
+        }
+        default: break;
+      }      
     }
   };
   const render = () => (
@@ -355,7 +366,8 @@ function BatchModal({
       </Form>
       {loading && (
       <div style={{ color: 'rgba(254,71,87,1)', textAlign: 'center' }}>
-        {loading === 'success' ? '修改成功' : ['正在修改，请稍等片刻', <span className={styles.dot}>…</span>]}        
+        {loading === 'success' ? '修改成功' : ['正在修改，请稍等片刻', <span className={styles.dot}>…</span>]}      
+        <Progress value={Math.round(progress * 100)} />  
       </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
