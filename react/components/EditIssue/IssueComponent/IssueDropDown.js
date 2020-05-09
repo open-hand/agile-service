@@ -10,16 +10,16 @@ import { deleteIssue } from '../../../api/NewIssueApi';
 
 const { confirm } = Modal;
 const IssueDropDown = ({
-  onDeleteIssue, loginUserId, hasPermission, reloadIssue,
+  onDeleteIssue, loginUserId, reloadIssue,
 }) => {
   const {
-    store, onUpdate, isOnlyAgileProject, applyType, 
+    store, onUpdate, isOnlyAgileProject, applyType,
   } = useContext(EditIssueContext);
   const issue = store.getIssue;
   const {
     issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi,
   } = issue;
-
+  const disableFeatureDeleteWhilePiDoing = typeCode === 'feature' && activePi && activePi.statusCode === 'doing';
   const handleDeleteIssue = () => {
     confirm({
       width: 560,
@@ -36,7 +36,7 @@ const IssueDropDown = ({
           </div>
         ),
       onOk() {
-        return deleteIssue(issueId)
+        return deleteIssue(issueId, createdBy)
           .then((res) => {
             if (onDeleteIssue) {
               onDeleteIssue();
@@ -98,11 +98,18 @@ const IssueDropDown = ({
         </Menu.Item>
       )}
       {
-        <Permission service={['agile-service.issue.deleteIssue']} key="1">
-          <Menu.Item
-            key="1"
-            disabled={activePi && activePi.statusCode === 'doing' ? !hasPermission : loginUserId !== createdBy && !hasPermission}
-          >
+        <Permission
+          service={['agile-service.issue.deleteIssue']}
+          key="1"
+          noAccessChildren={(
+            <Menu.Item
+              disabled={disableFeatureDeleteWhilePiDoing ? true : loginUserId !== createdBy}
+            >
+              删除
+            </Menu.Item>
+          )}
+        >
+          <Menu.Item>
             删除
           </Menu.Item>
         </Permission>
