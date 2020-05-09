@@ -16,14 +16,14 @@ class IssueList extends Component {
   };
 
   handleDeleteIssue(issueId) {
-    const { onRefresh, issue: { objectVersionNumber, typeCode } } = this.props;
+    const { onRefresh, issue: { objectVersionNumber, typeCode, createBy } } = this.props;
     const data = {
       issueId,
       relateIssueId: 0,
       objectVersionNumber,
     };
     if (typeCode === 'sub_task') {
-      deleteIssue(issueId)
+      deleteIssue(issueId, createBy)
         .then(() => {
           if (onRefresh) {
             onRefresh();

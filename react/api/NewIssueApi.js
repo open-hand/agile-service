@@ -171,8 +171,11 @@ export function createSubIssue(obj, applyType, projectId = AppState.currentMenuT
   return axios.post(`/agile/v1/projects/${projectId}/issues/sub_issue`, obj);
 }
 
-export function deleteIssue(issueId, projectId = AppState.currentMenuType.id) {
-  return axios.delete(`/agile/v1/projects/${projectId}/issues/${issueId}`);
+export function deleteIssue(issueId, createBy) {
+  if (createBy === AppState.userInfo.id) {
+    return axios.delete(`/agile/v1/projects/${getProjectId()}/issues/delete_self_issue/${issueId}`);
+  }  
+  return axios.delete(`/agile/v1/projects/${getProjectId()}/issues/${issueId}`);
 }
 
 export function deleteLink(issueLinkId, projectId = AppState.currentMenuType.id) {
