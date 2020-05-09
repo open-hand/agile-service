@@ -184,8 +184,6 @@ class StartSprint extends Component {
       timeZoneWorkCalendarDTOS: selectDays,
       workHolidayCalendarDTOS: holidayRefs,
     } = workSetting;
-    console.log('sprintType, data：');
-    console.log(sprintType, data);
     return (
       <div>
         <p className="c7n-closeSprint-message">

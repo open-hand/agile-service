@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Tooltip } from 'choerodon-ui';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
-import { getAllPIList, changeIssuePI } from '@/api/PIApi';
+import { changeIssuePI } from '@/api/PIApi';
 import TextEditToggle from '@/components/TextEditToggle';
+import { piApi } from '@/api';
 
 const { Text, Edit } = TextEditToggle;
 @observer
@@ -82,7 +83,7 @@ class FieldPI extends Component {
               <SelectFocusLoad
                 allowClear
                 type="all_pi"
-                request={() => getAllPIList(['todo', 'doing'])}
+                request={() => piApi.getByStatus(['todo', 'doing'])}
               />
             </Edit>
           </TextEditToggle>

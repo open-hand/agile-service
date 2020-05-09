@@ -2,14 +2,14 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
-import { updateFeatureTeamAndSprint } from '@/api/FeatureApi';
+import { featureApi } from '@/api';
 import TextEditToggle from '../../../../TextEditToggle';
 import SelectFocusLoad from '../../../../SelectFocusLoad';
 
 const { Text, Edit } = TextEditToggle;
 
 @observer
-class FieldTeamAndSprint extends Component {
+class FieldTeam extends Component {
   handleSubmit = async (teamIds, done) => {
     const {
       store, onUpdate, reloadIssue,
@@ -20,7 +20,7 @@ class FieldTeamAndSprint extends Component {
     const originTeamIds = activePiTeams.map(team => team.id);
     const addTeams = teamIds.filter(teamId => !originTeamIds.includes(teamId));
     const removeTeams = originTeamIds.filter(teamId => !teamIds.includes(teamId));
-    await updateFeatureTeamAndSprint({
+    await featureApi.updateTeamAndSprint({
       piId: issue.activePi ? issue.activePi.id : null,
       deleteSprintIds: [],
       featureId: issue.issueId,
@@ -76,4 +76,4 @@ class FieldTeamAndSprint extends Component {
   }
 }
 
-export default withRouter(injectIntl(FieldTeamAndSprint));
+export default withRouter(injectIntl(FieldTeam));

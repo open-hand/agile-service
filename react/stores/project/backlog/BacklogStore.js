@@ -6,7 +6,7 @@ import {
 import { sortBy, find } from 'lodash';
 import { store, stores } from '@choerodon/boot';
 import { Modal } from 'choerodon-ui';
-import { getFeaturesInProject } from '@/api/FeatureApi';
+import { featureApi } from '@/api';
 import { sort } from '@/api/StoryMapApi';
 import { getProjectId } from '@/common/utils';
 
@@ -804,9 +804,7 @@ class BacklogStore {
     sort(sortVO).then(
       action('fetchSuccess', (res) => {
         if (!res.message) {
-          console.log('this.selectedPiId：');
-          console.log(this.selectedPiId);
-          getFeaturesInProject(this.selectedPiId).then((data) => {
+          featureApi.getByPiIdInSubProject(this.selectedPiId).then((data) => {
             this.setFeatureData(data);
           });
         } else {
@@ -1042,7 +1040,7 @@ class BacklogStore {
    * 加载特性
    */
   loadFeature = () => {
-    getFeaturesInProject(this.selectedPiId).then((data) => {
+    featureApi.getByPiIdInSubProject(this.selectedPiId).then((data) => {
       this.setFeatureData(data);
     }).catch(() => {
     });

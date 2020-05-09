@@ -8,7 +8,7 @@ import {
 } from 'choerodon-ui';
 import moment from 'moment';
 import reactComponentDebounce from '@/components/DebounceComponent';
-import { checkFeatureName } from '@/api/FeatureApi';
+import { featureApi } from '@/api';
 import { UploadButton } from '../CommonComponent';
 import {
   handleFileUpload, beforeTextUpload, validateFile, normFile, getProjectName, getProjectId,
@@ -245,7 +245,7 @@ class CreateIssue extends Component {
         } = values;
         const { typeCode } = originIssueTypes.find(t => t.id === typeId);
         if (typeCode === 'feature' && epicId) {
-          const hasSame = await checkFeatureName(summary, epicId);
+          const hasSame = await featureApi.hasSameInEpicBySummary(summary, epicId);
           if (hasSame) {
             Choerodon.prompt('史诗下已含有同名特性');
             return;

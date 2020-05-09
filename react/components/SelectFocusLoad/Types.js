@@ -2,16 +2,15 @@
 import React from 'react';
 import { Select } from 'choerodon-ui';
 import { find } from 'lodash';
-import { getPISelect, getAllPIList } from '@/api/PIApi';
 import { getUsers, getUser, getSubProjects } from '@/api/CommonApi';
 import {
   loadEpics, loadProgramEpics, loadIssueTypes, loadPriorities,
   loadComponents, loadLabels, loadVersions,
-  loadStatusList, loadIssuesInLink, loadFeaturesInLink, loadSprints, getFeaturesByEpic,
+  loadStatusList, loadIssuesInLink, loadFeaturesInLink, loadSprints,
   loadSprintsByTeam,
 } from '@/api/NewIssueApi';
 import IssueLinkType from '@/api/IssueLinkType';
-import { featureApi } from '@/api';
+import { featureApi, piApi } from '@/api';
 import UserHead from '../UserHead';
 import TypeTag from '../TypeTag';
 import StatusTag from '../StatusTag';
@@ -422,7 +421,7 @@ export default {
       filterOption,
       loadWhenMount: true,
     },
-    request: getPISelect,
+    request: () => piApi.getUnfinished(),
     render: pi => (
       <Option disabled={!IsInProgramStore.isOwner && pi.statusCode === 'doing'} key={pi.id} value={pi.id}>
         {`${pi.code}-${pi.name}`}
@@ -437,7 +436,7 @@ export default {
       loadWhenMount: true,
       label: 'PI',
     },
-    request: () => getAllPIList(),
+    request: () => piApi.getByStatus(),
     render: pi => (
       <Option disabled={!IsInProgramStore.isOwner && pi.statusCode === 'doing'} key={pi.id} value={pi.id}>
         {pi.code ? `${pi.code}-${pi.name}` : pi.name}
@@ -445,7 +444,7 @@ export default {
     ),
   },
   feature: {
-    request: ({ filter, page }, requestArgs) => getFeaturesByEpic({ filter, page }, requestArgs),
+    request: ({ filter, page }, requestArgs) => featureApi.getByEpicId({ filter, page }, requestArgs),
     render: item => (
       <Option key={`${item.issueId}`} value={item.issueId}>{item.summary}</Option>
     ),

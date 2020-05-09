@@ -2,14 +2,13 @@ import React, { useEffect, useMemo } from 'react';
 import {
   Form, TextField, DataSet, TextArea, DateTimePicker, Icon,
 } from 'choerodon-ui/pro';
-import moment from 'moment';
+import { sprintApi } from '@/api';
 import { Choerodon } from '@choerodon/boot';
-import SprintApi from '@/api/SprintApi';
 import { MAX_LENGTH_SPRINT } from '@/constants/MAX_LENGTH';
 import IsInProgramStore from '../../../../stores/common/program/IsInProgramStore';
 
 async function sprintNameValidator(value) {
-  const isSame = await SprintApi.validate(value);
+  const isSame = await sprintApi.validate(value);
   return isSame ? '冲刺名称已存在' : true;
 }
 export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
@@ -44,7 +43,7 @@ export default function CreateSprint({ modal: { handleOk, close }, onCreate }) {
     const isValidate = await dataSet.validate();
     if (isValidate) {
       const [values] = dataSet.toData();
-      const sprint = await SprintApi.create(values);
+      const sprint = await sprintApi.create(values);
       if (!sprint.failed) {
         onCreate(sprint);
         close();
@@ -111,7 +110,7 @@ export function CreateCurrentPiSprint({
     const isValidate = await dataSet.validate();
     if (isValidate) {
       const [values] = dataSet.toData();
-      const sprint = await SprintApi.createOnCurrentPi({ ...values, piId });
+      const sprint = await sprintApi.createOnCurrentPi({ ...values, piId });
       if (!sprint.failed) {
         onCreate(sprint);
         close();
