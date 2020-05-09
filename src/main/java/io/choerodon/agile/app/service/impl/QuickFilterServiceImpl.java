@@ -324,9 +324,13 @@ public class QuickFilterServiceImpl implements QuickFilterService {
     }
 
     protected void appendPredefinedFieldSql(StringBuilder sqlQuery, QuickFilterValueVO quickFilterValueVO, Long projectId) {
-        String field = quickFilterFieldMapper.selectByPrimaryKey(quickFilterValueVO.getFieldCode()).getField();
         String value = "'null'".equals(quickFilterValueVO.getValue()) ? NULL_STR : quickFilterValueVO.getValue();
         String operation = quickFilterValueVO.getOperation();
+        processPredefinedField(sqlQuery, quickFilterValueVO, value, operation);
+    }
+
+    protected void processPredefinedField(StringBuilder sqlQuery, QuickFilterValueVO quickFilterValueVO, String value, String operation) {
+        String field = quickFilterFieldMapper.selectByPrimaryKey(quickFilterValueVO.getFieldCode()).getField();
         switch (field) {
             case "component_id":
                 dealCaseComponent(field, value, operation, sqlQuery);
