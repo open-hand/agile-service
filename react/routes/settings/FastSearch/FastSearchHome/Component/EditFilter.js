@@ -437,6 +437,7 @@ class AddComponent extends Component {
         {v[OPTION_FILTER[filter].name]}
       </Option>
     ));
+   
     if (addEmpty) {
       arr.unshift(
         <Option key="null" value="null">
@@ -682,7 +683,6 @@ class AddComponent extends Component {
     };
 
     const field = quickFilterFiled.find(item => item.fieldCode === filter) || {};
-    console.log(state, filter, OPTION_FILTER, OPTION_FILTER[filter], field, value);
 
     if (sign === index) {
       if (operation === 'in' || operation === 'notIn') {
@@ -693,15 +693,15 @@ class AddComponent extends Component {
         return undefined;
       }
     }
-    if (filter === 'creation_date' || filter === 'last_update_date' || field.type === 'datetime') {
+    if (filter === 'creation_date' || filter === 'last_update_date' || (field.id && field.type === 'datetime')) {
       // return moment
       return moment(value, 'YYYY-MM-DD HH:mm:ss');
     }
-    if (field.type === 'date') {
+    if (field.id && field.type === 'date') {
       // return moment
       return moment(value, 'YYYY-MM-DD');
     }
-    if (field.type === 'time') {
+    if (field.id && field.type === 'time') {
       return moment(value);
     }
     if (operation === 'is' || operation === 'isNot' || operation === 'is not') {
@@ -710,7 +710,7 @@ class AddComponent extends Component {
         label: '空',
       });
     }
-    if (filter === 'story_point' || filter === 'remain_time' || field.type === 'number' || field.type === 'input' || field.type === 'text') {
+    if (filter === 'story_point' || filter === 'remain_time' || (field.id && (field.type === 'number' || field.type === 'input' || field.type === 'text'))) {
       return value;
     }
     if (filter === 'priority') {
@@ -849,12 +849,42 @@ class AddComponent extends Component {
     axios.get(`/agile/v1/projects/${projectId}/schemes/query_issue_types?apply_type=agile`).then(res => this.setState({ originTypes: res }));
     axios.get(`/agile/v1/projects/${projectId}/issues/feature/select_data?organizationId=${orgId}`).then(res => this.setState({ originFeatures: res }));
     axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/field_value/list/custom_field`).then((res) => {
+      const customFieldState = {};
       res.forEach((item) => {
-        this.setState({
-          [`origin${item.code}`]: item.fieldOptions || [],
-        });
+        customFieldState[`origin${item.code}`] = item.fieldOptions || [];
       });
+      this.setState(...customFieldState);
     });
+    // const getUsers = () => axios.get(`/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`);
+    // const getPriority = () => axios.get(`/agile/v1/projects/${projectId}/priority/list_by_org`);
+    // const getStatus = () => axios.get(`/agile/v1/projects/${projectId}/schemes/query_status_by_project_id?apply_type=agile`);
+    // const getEpics = () => axios.get(`/agile/v1/projects/${projectId}/issues/epics/select_data`);
+    // const getSprints = () => axios.post(`/agile/v1/projects/${projectId}/sprint/names`);
+    // const getLabels = () => axios.get(`/agile/v1/projects/${projectId}/issue_labels`);
+    // const getComponents = () => axios.get(`/agile/v1/projects/${projectId}/component`);
+    // const getVersions = () => axios.post(`/agile/v1/projects/${projectId}/product_version/names`);
+    // const getIssueTypes = () => axios.get(`/agile/v1/projects/${projectId}/schemes/query_issue_types?apply_type=agile`);
+    // const getFeatures = () => axios.get(`/agile/v1/projects/${projectId}/issues/feature/select_data?organizationId=${orgId}`);
+    // const getCustomFields = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/field_value/list/custom_field`);
+    // Promise.all([getUsers(), getPriority(), getStatus(), getEpics(), getSprints(), getLabels(), getComponents(), getVersions(), getIssueTypes(), getFeatures(), getCustomFields()]).then((res) => {
+    //   this.setState({ 
+    //     originUsers: res[0].list, 
+    //     originPriorities: res[1],
+    //     originStatus: res[2],
+    //     originEpics: res[3],
+    //     originSprints: res[4],
+    //     originLabels: res[5],
+    //     originComponents: res[6],
+    //     originVersions: res[7],
+    //     originTypes: res[8],
+    //     originFeatures: res[9],
+    //   });
+    //   res[10].forEach((item) => {
+    //     this.setState({
+    //       [`origin${item.code}`]: item.fieldOptions || [],
+    //     });
+    //   });
+    // });
   }
 
   renderOperation(filter, index) {
@@ -1060,11 +1090,9 @@ class AddComponent extends Component {
             )}
           </FormItem>
           {
-            arr.map((filter, index) => {
-              console.log(arr[index].value);
-              return (
-                <div key={index.toString()}>
-                  {
+            arr.map((filter, index) => (
+              <div key={index.toString()}>
+                {
                   deleteItem.indexOf(index) === -1 && (
                     <div>
                       {
@@ -1159,9 +1187,8 @@ class AddComponent extends Component {
                     </div>
                   )
                 }
-                </div>
-              );
-            })
+              </div>
+            ))
           }
           <Button
             style={{ margin: '-10px 0 10px' }}
