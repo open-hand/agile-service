@@ -102,6 +102,8 @@ class Search extends Component {
       '=': '等于',
       OR: '或',
       AND: '与',
+      'not like': '不包含',
+      like: '包含',
     };
 
     let transformKey = str;
