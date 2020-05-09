@@ -149,7 +149,7 @@ class BacklogHome extends Component {
               </Button>
             </Permission>
           )}
-          {this.renderCreateSprintInPi(isShowFeature, IsInProgramStore.getPiInfo.id)}
+          {this.renderCreateSprintInPi(isShowFeature, !IsInProgramStore.getPiInfo.id)}
           {isInProgram && arr.length && arr.length > 1
             ? <ShowPlanSprint /> : null
           }
