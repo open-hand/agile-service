@@ -7,7 +7,7 @@ import { getUsers, getUser, getSubProjects } from '@/api/CommonApi';
 import {
   loadEpics, loadProgramEpics, loadIssueTypes, loadPriorities,
   loadComponents, loadLabels, loadVersions,
-  loadStatusList, loadIssuesInLink, loadFeaturesInLink, loadSprints, getFeaturesByEpic,
+  loadStatusList, loadIssuesInLink, loadFeaturesInLink, loadSprints,
   loadSprintsByTeam,
 } from '@/api/NewIssueApi';
 import IssueLinkType from '@/api/IssueLinkType';
@@ -445,7 +445,7 @@ export default {
     ),
   },
   feature: {
-    request: ({ filter, page }, requestArgs) => getFeaturesByEpic({ filter, page }, requestArgs),
+    request: ({ filter, page }, requestArgs) => featureApi.getByEpicId({ filter, page }, requestArgs),
     render: item => (
       <Option key={`${item.issueId}`} value={item.issueId}>{item.summary}</Option>
     ),

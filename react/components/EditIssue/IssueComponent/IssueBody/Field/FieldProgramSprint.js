@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Select, Tooltip } from 'choerodon-ui';
 import { map, isEqual } from 'lodash';
-import { updateFeatureTeamAndSprint } from '@/api/FeatureApi';
+import { featureApi } from '@/api';
 import { getTeamSprints } from '@/api/PIApi';
 import TextEditToggle from '../../../../TextEditToggle';
 
@@ -59,7 +59,7 @@ const { Text, Edit } = TextEditToggle;
     const originSprintIds = activePiSprints.map(sprint => sprint.sprintId);
     const addSprints = sprintIds.filter(teamId => !originSprintIds.includes(teamId));
     const removeSprints = originSprintIds.filter(sprintId => !sprintIds.includes(sprintId));
-    await updateFeatureTeamAndSprint({
+    await featureApi.updateTeamAndSprint({
       piId: issue.activePi ? issue.activePi.id : null,
       deleteSprintIds: removeSprints,
       featureId: issue.issueId,

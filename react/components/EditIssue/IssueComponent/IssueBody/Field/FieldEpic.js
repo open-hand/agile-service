@@ -4,10 +4,9 @@ import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { Select, Tooltip } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
-import { checkFeatureNameById } from '@/api/FeatureApi';
+import { featureApi } from '@/api';
 import TextEditToggle from '../../../../TextEditToggle';
 import { loadEpics, updateIssue } from '../../../../../api/NewIssueApi';
-import { getFeaturesByEpic } from '../../../../../api/FeatureApi';
 import IsInProgramStore from '../../../../../stores/common/program/IsInProgramStore';
 
 const { Option } = Select;
@@ -42,7 +41,7 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
       });
     });
     if (IsInProgramStore.isInProgram) {
-      getFeaturesByEpic().then((data) => {
+      featureApi.getByEpicId().then((data) => {
         const { store } = this.props;
         const issue = store.getIssue;
         const {
@@ -65,7 +64,7 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
     } = issue;
     if (epicId !== newEpicId) {
       if (typeCode === 'feature' && newEpicId) {
-        const hasSame = await checkFeatureNameById(issueId, newEpicId);
+        const hasSame = await featureApi.hasSameInEpicById(issueId, newEpicId);
         if (hasSame) {
           Choerodon.prompt('史诗下已含有同名特性');
           done();
@@ -80,7 +79,7 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
       updateIssue(obj)
         .then(() => {
           if (IsInProgramStore.isInProgram) {
-            getFeaturesByEpic().then((data) => {
+            featureApi.getByEpicId().then((data) => {
               this.setState({
                 originFeatures: data,
               });
@@ -110,7 +109,7 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
       updateIssue(obj)
         .then(() => {
           if (IsInProgramStore.isInProgram) {
-            getFeaturesByEpic().then((data) => {
+            featureApi.getByEpicId().then((data) => {
               this.setState({
                 originFeatures: data,
               });

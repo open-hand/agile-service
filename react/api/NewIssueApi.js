@@ -414,11 +414,6 @@ export function getTestExecute(issueId) {
   return axios.get(`/test/v1/projects/${projectId}/defect/query_by_bug?bugId=${issueId}`);
 }
 
-// 特性列表
-export function getFeaturesByEpic() {
-  return axios.get(`/agile/v1/projects/${getProjectId()}/issues/feature/select_data?organizationId=${getOrganizationId()}`);
-}
-
 export function loadSprintsByTeam(teamId, piId) {
   const projectId = AppState.currentMenuType.id;
   return axios.get(`/agile/v1/projects/${projectId}/sprint/sub_project/${teamId}/list_by_team_id?piId=${piId}`);

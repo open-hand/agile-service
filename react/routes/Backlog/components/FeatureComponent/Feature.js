@@ -4,10 +4,11 @@ import { Icon } from 'choerodon-ui';
 import { Select } from 'choerodon-ui';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
+import { featureApi } from '@/api';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 import { QuickSearchEvent } from '../../../../components/QuickSearch';
 import FeatureItem from './FeatureItem';
-import { getFeaturesInProject, getFeaturesColor, getPiNotDone } from '../../../../api/FeatureApi';
+import { getPiNotDone } from '../../../../api/FeatureApi';
 import './Feature.less';
 
 const { Option } = Select;
@@ -25,7 +26,7 @@ class Feature extends Component {
   }
 
   featureRefresh = (piId, isFirstLoad = false) => {
-    Promise.all([getFeaturesInProject(piId), getFeaturesColor(), getPiNotDone(['todo', 'doing'])]).then(([featureData, featureColor, notDonePiList]) => {
+    Promise.all([featureApi.getByPiIdInSubProject(piId), featureApi.getColors(), getPiNotDone(['todo', 'doing'])]).then(([featureData, featureColor, notDonePiList]) => {
       BacklogStore.setFeatureData(featureData);
       BacklogStore.setColorLookupValue(featureColor.lookupValues);
       BacklogStore.setRandomFeatureColor(featureData, featureColor.lookupValues);
