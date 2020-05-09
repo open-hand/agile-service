@@ -235,7 +235,7 @@ class Search extends Component {
             menu={this.renderMenu(record)}
             onClickEdit={this.handleClickEdit.bind(this, record)}
             text={(
-              <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={name}>
+              <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={text}>
                 <p
                   style={{
                     width: '3.5rem',
