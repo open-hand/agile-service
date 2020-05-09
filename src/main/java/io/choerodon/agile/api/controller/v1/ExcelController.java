@@ -50,11 +50,9 @@ public class ExcelController {
                                       @PathVariable(name = "project_id") Long projectId,
                                       @ApiParam(value = "组织id", required = true)
                                       @RequestParam Long organizationId,
-                                      @ApiParam(value = "user id", required = true)
-                                      @RequestParam Long userId,
                                       @ApiParam(value = "导入文件", required = true)
                                       @RequestParam("file") MultipartFile file) {
-        userId = DetailsHelper.getUserDetails().getUserId();
+        Long userId = DetailsHelper.getUserDetails().getUserId();
         excelService.batchImport(projectId, organizationId, userId, ExcelUtil.getWorkbookFromMultipartFile(ExcelUtil.Mode.XSSF, file));
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
