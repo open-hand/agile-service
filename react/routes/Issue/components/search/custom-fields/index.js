@@ -207,30 +207,29 @@ function CustomFields({ children }) {
   }
 
   const render = f => f.map(field => !field.noDisplay && (
-    <div className="field" key={field.code} style={{ margin: '4px 5px', display: 'flex', alignItems: 'center' }}>
+    <div className="field" data-type={field.fieldType} key={field.code} style={{ margin: '4px 5px', display: 'flex', alignItems: 'center' }}>
       {renderField(field)}
-      
+
       {!field.defaultShow && (
         <div
-          className="test"
           style={{
             cursor: 'pointer',
-            borderRadius: '50%', 
+            borderRadius: '50%',
             width: 14,
             height: 14,
             lineHeight: '11px',
             background: 'rgba(0,0,0,0.16)',
             color: 'white',
-            textAlign: 'center', 
+            textAlign: 'center',
             marginLeft: 5,
           }}
           onClick={() => {
             IssueStore.handleChosenFieldChange(false, field);
           }}
-        > 
+        >
           <Icon
-            type="close"     
-            style={{ fontSize: '10px' }}       
+            type="close"
+            style={{ fontSize: '10px' }}
           />
         </div>
       )}
@@ -241,7 +240,7 @@ function CustomFields({ children }) {
   if (result.length > 0) {
     result[0].props.children.unshift(children);
     result[result.length - 1].props.children.push(<ChooseField key="choose" />);
-  }  
+  }
   return (
     <div>
       {result}

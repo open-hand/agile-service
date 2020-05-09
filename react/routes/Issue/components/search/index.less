@@ -19,15 +19,21 @@
       }
     }
 
-    .c7n-input {
-      height: 30px;
-    }
+    .field[data-type="text"],
+    .field[data-type="number"],
+    .field[data-type="input"] {
+      .c7n-input {
+        height: 30px;
+      }
 
-    .c7n-input-label-wrapper {
-      transform: translateY(-3px);
-    }
-    .c7n-input-has-value .c7n-input-label-wrapper, .c7n-input-focused .c7n-input-label-wrapper{
-      transform: scaleX(0.8);
+      .c7n-input-label-wrapper {
+        transform: translateY(-3px);
+      }
+
+      .c7n-input-has-value .c7n-input-label-wrapper,
+      .c7n-input-focused .c7n-input-label-wrapper {
+        transform: scaleX(0.8);
+      }
     }
   }
 

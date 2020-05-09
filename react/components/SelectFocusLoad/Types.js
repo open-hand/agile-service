@@ -11,11 +11,11 @@ import {
   loadSprintsByTeam,
 } from '@/api/NewIssueApi';
 import IssueLinkType from '@/api/IssueLinkType';
+import { featureApi } from '@/api';
 import UserHead from '../UserHead';
 import TypeTag from '../TypeTag';
 import StatusTag from '../StatusTag';
 import { IsInProgramStore } from '../../exports';
-
 // 增加 typeof 避免选项中 加载更多 影响 
 const filterOption = (input, option) => option.props.children && typeof (option.props.children) === 'string' && option.props.children.toLowerCase().indexOf(
   input.toLowerCase(),
@@ -446,6 +446,17 @@ export default {
   },
   feature: {
     request: ({ filter, page }, requestArgs) => getFeaturesByEpic({ filter, page }, requestArgs),
+    render: item => (
+      <Option key={`${item.issueId}`} value={item.issueId}>{item.summary}</Option>
+    ),
+    props: {
+      getPopupContainer: triggerNode => triggerNode.parentNode,
+      filterOption,
+      loadWhenMount: true,
+    },
+  }, // 特性列表
+  feature_all: {
+    request: ({ filter, page }, requestArgs) => featureApi.queryAllInSubProject(requestArgs, filter, page),
     render: item => (
       <Option key={`${item.issueId}`} value={item.issueId}>{item.summary}</Option>
     ),
