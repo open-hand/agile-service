@@ -109,8 +109,6 @@ public class FieldValueServiceImpl implements FieldValueService {
         if (!EnumUtil.contain(FieldType.class, updateDTO.getFieldType())) {
             throw new CommonException(ERROR_FIELDTYPE_ILLEGAL);
         }
-        //校验
-        ObjectSchemeFieldDTO field = objectSchemeFieldService.baseQueryById(organizationId, projectId, fieldId);
         //获取原fieldValue
         List<FieldValueDTO> oldFieldValues = fieldValueMapper.queryList(projectId, instanceId, schemeCode, fieldId);
         //删除原fieldValue
@@ -178,7 +176,7 @@ public class FieldValueServiceImpl implements FieldValueService {
 
     @Override
     public List<Long> sortIssueIdsByFieldValue(Long organizationId, Long projectId, Pageable pageable) {
-        if (pageable.getSort() != null) {
+        if (!ObjectUtils.isEmpty(pageable.getSort())) {
             Iterator<Sort.Order> iterator = pageable.getSort().iterator();
             String fieldCode = "";
             while (iterator.hasNext()) {

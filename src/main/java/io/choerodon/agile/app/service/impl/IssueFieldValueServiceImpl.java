@@ -18,9 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author zhaotianxin
@@ -58,7 +56,8 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             List<PageFieldViewUpdateVO> customFields = batchUpdateFieldsValueVo.getCustomFields();
             int customFieldSize = CollectionUtils.isEmpty(customFields) ? 0 :customFields.size();
             JSONObject predefinedFields = batchUpdateFieldsValueVo.getPredefinedFields();
-            double incrementalValue = 1.0 /  ((ObjectUtils.isEmpty(predefinedFields) ? 0 : issueIds.size())+ customFieldSize) ;
+            int allCount = (ObjectUtils.isEmpty(predefinedFields) ? 0 : issueIds.size()) + customFieldSize;
+            double incrementalValue = 1.0 / (allCount == 0 ? 1 : allCount);
             batchUpdateFieldStatusVO.setIncrementalValue(incrementalValue);
             //修改issue预定义字段值
             if (!CollectionUtils.isEmpty(batchUpdateFieldsValueVo.getPredefinedFields())) {

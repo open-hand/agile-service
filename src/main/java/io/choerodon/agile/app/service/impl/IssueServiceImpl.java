@@ -452,7 +452,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
     private List<Long> handleIssueLists(List<Long> foundationList, List<Long> agileList, Pageable pageable) {
-        if (pageable.getSort() != null) {
+        if (!ObjectUtils.isEmpty(pageable.getSort())) {
             Iterator<Sort.Order> iterator = pageable.getSort().iterator();
             Sort.Direction direction = Sort.Direction.ASC;
             while (iterator.hasNext()) {
@@ -470,7 +470,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
     private String handleSortField(Pageable pageable) {
-        if (pageable.getSort() != null) {
+        if (!ObjectUtils.isEmpty(pageable.getSort())) {
             Iterator<Sort.Order> iterator = pageable.getSort().iterator();
             String fieldCode = "";
             while (iterator.hasNext()) {
