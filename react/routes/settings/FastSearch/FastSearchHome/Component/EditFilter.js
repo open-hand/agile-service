@@ -702,8 +702,7 @@ class AddComponent extends Component {
       return moment(value, 'YYYY-MM-DD');
     }
     if (field.type === 'time') {
-      // return moment
-      return moment(value, 'HH:mm:ss');
+      return moment(value);
     }
     if (operation === 'is' || operation === 'isNot' || operation === 'is not') {
       return ({
