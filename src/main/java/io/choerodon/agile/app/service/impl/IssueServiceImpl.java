@@ -91,8 +91,6 @@ public class IssueServiceImpl implements IssueService {
     @Autowired
     private IssueComponentService issueComponentService;
     @Autowired
-    private ProductVersionService productVersionService;
-    @Autowired
     private IssueLabelService issueLabelService;
     @Autowired
     protected SprintValidator sprintValidator;
@@ -199,8 +197,6 @@ public class IssueServiceImpl implements IssueService {
     private static final String RANK_FIELD = "rank";
     private static final String FIX_RELATION_TYPE = "fix";
     private static final String INFLUENCE_RELATION_TYPE = "influence";
-    private static final String[] FIELDS_IN_PROGRAM = {"issueNum", "summary", "typeName", "statusName", "piName", "creationDate", "lastUpdateDate", "epicName", "storyPoints", "benfitHypothesis", "acceptanceCritera"};
-    private static final String[] FIELDS_NAME_IN_PROGRAM = {"任务编号", "概要", "类型", "状态", "PI", "创建时间", "最后更新时间", "史诗", "故事点", "特性价值", "验收标准"};
     private static final String PROJECT_ERROR = "error.project.notFound";
     private static final String ERROR_ISSUE_NOT_FOUND = "error.Issue.queryIssue";
     private static final String ERROR_PROJECT_INFO_NOT_FOUND = "error.createIssue.projectInfoNotFound";
@@ -451,7 +447,7 @@ public class IssueServiceImpl implements IssueService {
         return PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, order));
     }
 
-    private List<Long> handleIssueLists(List<Long> foundationList, List<Long> agileList, Pageable pageable) {
+    protected List<Long> handleIssueLists(List<Long> foundationList, List<Long> agileList, Pageable pageable) {
         if (!ObjectUtils.isEmpty(pageable.getSort())) {
             Iterator<Sort.Order> iterator = pageable.getSort().iterator();
             Sort.Direction direction = Sort.Direction.ASC;
@@ -469,7 +465,7 @@ public class IssueServiceImpl implements IssueService {
         } else return new ArrayList<>();
     }
 
-    private String handleSortField(Pageable pageable) {
+    protected String handleSortField(Pageable pageable) {
         if (!ObjectUtils.isEmpty(pageable.getSort())) {
             Iterator<Sort.Order> iterator = pageable.getSort().iterator();
             String fieldCode = "";
@@ -483,7 +479,7 @@ public class IssueServiceImpl implements IssueService {
         } else return "";
     }
 
-    private void handleOtherArgs(SearchVO searchVO) {
+    protected void handleOtherArgs(SearchVO searchVO) {
         Map<String, Object> otherArgs = searchVO.getOtherArgs();
         if (otherArgs != null) {
             List<String> list = (List<String>) otherArgs.get("sprint");
@@ -1460,33 +1456,6 @@ public class IssueServiceImpl implements IssueService {
         return fieldMap;
     }
 
-    private Map<String, String[]> handleExportFieldsInProgram(List<String> exportFieldCodes) {
-        Map<String, String[]> fieldMap = new HashMap<>(2);
-        if (exportFieldCodes != null && exportFieldCodes.size() != 0) {
-            Map<String, String> data = new HashMap<>(FIELDS_IN_PROGRAM.length);
-            for (int i = 0; i < FIELDS_IN_PROGRAM.length; i++) {
-                data.put(FIELDS_IN_PROGRAM[i], FIELDS_NAME_IN_PROGRAM[i]);
-            }
-            List<String> fieldCodes = new ArrayList<>(exportFieldCodes.size());
-            List<String> fieldNames = new ArrayList<>(exportFieldCodes.size());
-            exportFieldCodes.stream().forEach(code -> {
-                String name = data.get(code);
-                if (name != null) {
-                    fieldCodes.add(code);
-                    fieldNames.add(name);
-                } else {
-                    throw new CommonException("error.issue.exportFieldIllegal");
-                }
-            });
-            fieldMap.put(FIELD_CODES, fieldCodes.stream().toArray(String[]::new));
-            fieldMap.put(FIELD_NAMES, fieldNames.stream().toArray(String[]::new));
-        } else {
-            fieldMap.put(FIELD_CODES, FIELDS_IN_PROGRAM);
-            fieldMap.put(FIELD_NAMES, FIELDS_NAME_IN_PROGRAM);
-        }
-        return fieldMap;
-    }
-
     @Override
     public IssueVO cloneIssueByIssueId(Long projectId, Long issueId, CopyConditionVO copyConditionVO, Long organizationId, String applyType) {
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
@@ -1714,7 +1683,7 @@ public class IssueServiceImpl implements IssueService {
         return queryIssue(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), organizationId);
     }
 
-    private String exportIssuesVersionName(ExportIssuesVO exportIssuesVO) {
+    protected String exportIssuesVersionName(ExportIssuesVO exportIssuesVO) {
         StringBuilder versionName = new StringBuilder();
         if (exportIssuesVO.getFixVersionName() != null && !"".equals(exportIssuesVO.getFixVersionName())) {
             versionName.append("修复的版本:").append(exportIssuesVO.getFixVersionName()).append("\r\n");
@@ -1724,7 +1693,7 @@ public class IssueServiceImpl implements IssueService {
         return versionName.toString();
     }
 
-    private String exportIssuesSprintName(ExportIssuesVO exportIssuesVO) {
+    protected String exportIssuesSprintName(ExportIssuesVO exportIssuesVO) {
         StringBuilder sprintName = new StringBuilder(exportIssuesVO.getSprintName() != null ? "正在使用冲刺:" + exportIssuesVO.getSprintName() + "\r\n" : "");
         sprintName.append(!Objects.equals(exportIssuesVO.getCloseSprintName(), "") ? "已关闭冲刺:" + exportIssuesVO.getCloseSprintName() : "");
         return sprintName.toString();
@@ -1916,7 +1885,7 @@ public class IssueServiceImpl implements IssueService {
         }
     }
 
-    private String getQuickFilter(List<Long> quickFilterIds) {
+    protected String getQuickFilter(List<Long> quickFilterIds) {
         List<String> sqlQuerys = quickFilterMapper.selectSqlQueryByIds(quickFilterIds);
         if (sqlQuerys.isEmpty()) {
             return null;

@@ -8,8 +8,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
 /**
  * 敏捷开发Issue标签
  *
@@ -39,7 +37,6 @@ public class IssueLabelDTO extends BaseDTO {
     /**
      * 项目id
      */
-    @NotNull(message = "error.IssueLabel.projectIdNotNull")
     private Long projectId;
 
     public Long getLabelId() {
