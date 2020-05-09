@@ -63,6 +63,9 @@ public class IssueSubListVO {
     @ApiModelProperty(value = "版本号")
     private Long objectVersionNumber;
 
+    @ApiModelProperty(value = "版本号")
+    private Long createdBy;
+
     public Long getIssueId() {
         return issueId;
     }
@@ -207,6 +210,14 @@ public class IssueSubListVO {
 
     public void setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
+    }
+
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
     }
 
     @Override
