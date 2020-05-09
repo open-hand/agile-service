@@ -5,6 +5,7 @@ import {
   Form, Input, Select, Button, DatePicker, Icon, TimePicker,
 } from 'choerodon-ui';
 import { Content, stores, axios } from '@choerodon/boot';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import _ from 'lodash';
 import SelectFocusLoad from '../../../../../components/SelectFocusLoad';
 import { NumericInput } from '../../../../../components/CommonComponent';
@@ -167,6 +168,7 @@ const OPERATION_FILTER = {
   last_update_date: arrOperation3,
   story_point: arrOperation4,
   remain_time: arrOperation4,
+  feature: arrOperation2,
 
   radio: arrOperation5,
   checkbox: arrOperation6,
@@ -285,6 +287,7 @@ const CreateFilter = (props) => {
    */
   const getOption = (filter, addEmpty, newPage = 1) => {
     const projectId = AppState.currentMenuType.id;
+    const { organizationId } = AppState.currentMenuType;
     const OPTION_FILTER = {
       assignee: {
         url: `/base/v1/projects/${projectId}/users?page=${newPage}&size=20`,
@@ -367,6 +370,12 @@ const CreateFilter = (props) => {
         id: 'typeCode',
         name: 'name',
       },
+      feature: {
+        url: `/agile/v1/projects/${projectId}/issues/feature/select_data?organizationId=${organizationId}`,
+        prop: '',
+        id: 'issueId',
+        name: 'summary',
+      },
     };
     axios[filter === 'sprint'
       || filter === 'influence_version'
@@ -383,12 +392,8 @@ const CreateFilter = (props) => {
     const getPreDefinedField = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/fields`);
     const getCustomField = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/field_value/list/custom_field`);
     Promise.all([getPreDefinedField(), getCustomField()]).then(([preDefinedField, customField]) => {
-      setQuickFilterFiled([...preDefinedField, ...customField].map(field => ({ ...field, fieldCode: field.code || field.fieldCode, type: field.fieldType || field.type })) || []);
+      setQuickFilterFiled([...preDefinedField, ...IsInProgramStore.isInProgram ? [{ fieldCode: 'feature', type: 'long', name: '特性' }] : [], ...customField].map(field => ({ ...field, fieldCode: field.code || field.fieldCode, type: field.fieldType || field.type })) || []);
     });
-    // axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/object_scheme_field/list?schemeCode=agile_issue&organizationId=${AppState.currentMenuType.organizationId}`)
-    //   .then((res) => {
-    //     setQuickFilterFiled(res.content.filter(field => field.context !== 'feature').map(field => ({ ...field, fieldCode: field.code, type: field.fieldType })) || []);
-    //   });
   };
 
   /**
@@ -501,6 +506,7 @@ const CreateFilter = (props) => {
    */
   const tempOption = (filter, addEmpty) => {
     const projectId = AppState.currentMenuType.id;
+    const { organizationId } = AppState.currentMenuType;
     const OPTION_FILTER = {
       assignee: {
         url: `/base/v1/projects/${projectId}/users?page=${page}&size=20`,
@@ -583,8 +589,16 @@ const CreateFilter = (props) => {
         id: 'typeCode',
         name: 'name',
       },
+      feature: {
+        url: `/agile/v1/projects/${projectId}/issues/feature/select_data?organizationId=${organizationId}`,
+        props: '',
+        id: 'issueId',
+        name: 'summary',
+      },
     };
-    const arr = temp.map(v => (
+    console.log(temp);
+
+    const arr = (temp || []).map(v => (
       <Option key={v[OPTION_FILTER[filter].id]} value={v[OPTION_FILTER[filter].id]}>
         {v[OPTION_FILTER[filter].name]}
       </Option>
@@ -691,7 +705,7 @@ const CreateFilter = (props) => {
     } else if (
       (['priority', 'status',
         'epic', 'sprint', 'label', 'component',
-        'influence_version', 'fix_version', 'issue_type'].indexOf(filter) > -1 && !id) || (id && (type === 'single' || type === 'multiple' || type === 'radio' || type === 'checkbox'))) {
+        'influence_version', 'fix_version', 'issue_type', 'feature'].indexOf(filter) > -1 && !id) || (id && (type === 'single' || type === 'multiple' || type === 'radio' || type === 'checkbox'))) {
       if (['=', '!='].indexOf(operation) > -1 && (!id || (id && (type === 'single' || type === 'radio')))) {
         // return normal value
         return (
