@@ -1,15 +1,13 @@
 import React, { Component } from 'react';
 import { Input } from 'choerodon-ui';
 import { observer } from 'mobx-react';
-import { Choerodon, stores, Permission } from '@choerodon/boot';
+import { Choerodon } from '@choerodon/boot';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
-import SprintApi from '@/api/SprintApi';
+import { sprintApi } from '@/api';
 import TextEditToggle from '@/components/TextEditToggle';
 import { MAX_LENGTH_SPRINT } from '@/constants/MAX_LENGTH';
 import { getProjectId } from '@/common/utils';
 
-const { AppState } = stores;
 const { Text, Edit } = TextEditToggle;
 
 @observer
@@ -19,7 +17,7 @@ class SprintName extends Component {
     if (value === sprintName) {
       callback();
     } else {
-      const hasSame = await SprintApi.validate(value);
+      const hasSame = await sprintApi.validate(value);
       if (hasSame) {
         callback('');
       } else {

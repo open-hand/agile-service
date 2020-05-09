@@ -4,7 +4,7 @@ import {
 import { stores } from '@choerodon/boot';
 import Moment from 'moment';
 import { extendMoment } from 'moment-range';
-import { getCurrentPiInfo, getCurrentPiAllSprint } from '@/api/SprintApi.js';
+import { sprintApi, piApi } from '@/api';
 import { getProjectsInProgram, getProjectIsShowFeature, getIsOwner } from '../../../api/CommonApi';
 
 const moment = extendMoment(Moment);
@@ -55,9 +55,9 @@ class IsInProgramStore {
   }
 
   loadPiInfoAndSprint = async (programId = this.artInfo.programId, artId = this.artInfo.id) => {
-    const currentPiInfo = await getCurrentPiInfo(programId, artId);
+    const currentPiInfo = await piApi.getCurrent(programId, artId);
     if (currentPiInfo.id) {
-      const sprints = await getCurrentPiAllSprint(currentPiInfo.id);
+      const sprints = await sprintApi.getAllByPiId(currentPiInfo.id);
       this.setPiInfo(currentPiInfo);
       this.setSprints(sprints.map(sprint => ({
         ...sprint,
