@@ -40,9 +40,10 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
+    "@babel/preset-typescript": "^7.9.0",
     "@choerodon/boot": "^0.21.0",
     "@choerodon/master": "^0.22.0",
-    "babel-plugin-module-resolver": "^3.2.0",    
+    "babel-plugin-module-resolver": "^3.2.0",
     "choerodon-ui": "0.8.57",
     "gulp-watch": "^5.0.1",
     "webpackbar": "^4.0.0"
@@ -51,7 +52,7 @@
     "start": "node --max_old_space_size=4096 node_modules/@choerodon/boot/bin/choerodon-front-boot-start --config ./react/config.js",
     "dist": "choerodon-front-boot dist --config ./react/config.js",
     "watch": "gulp watch",
-    "compile": "choerodon-front-boot compile",
+    "compile": "babel react --out-dir lib --copy-files --extensions \".ts,.js,.jsx,.tsx\"",
     "analyze": "node --max_old_space_size=4096 node_modules/@choerodon/boot/bin/choerodon-front-boot-analyze --config ./react/config.js",
     "lint-staged": "lint-staged",
     "lint-staged:es": "eslint",
