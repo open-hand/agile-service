@@ -596,8 +596,7 @@ const CreateFilter = (props) => {
         name: 'summary',
       },
     };
-    console.log(temp);
-
+    
     const arr = (temp || []).map(v => (
       <Option key={v[OPTION_FILTER[filter].id]} value={v[OPTION_FILTER[filter].id]}>
         {v[OPTION_FILTER[filter].name]}
