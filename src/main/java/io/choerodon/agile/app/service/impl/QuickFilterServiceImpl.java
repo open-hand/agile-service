@@ -33,16 +33,16 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class QuickFilterServiceImpl implements QuickFilterService {
 
-    private static final String NOT_IN = "not in";
-    private static final String IS_NOT = "is not";
-    private static final String NULL_STR = "null";
-    private static final String IS = "is";
+    protected static final String NOT_IN = "not in";
+    protected static final String IS_NOT = "is not";
+    protected static final String NULL_STR = "null";
+    protected static final String IS = "is";
 
     @Autowired
     private QuickFilterMapper quickFilterMapper;
 
     @Autowired
-    private QuickFilterFieldMapper quickFilterFieldMapper;
+    protected QuickFilterFieldMapper quickFilterFieldMapper;
 
     @Autowired
     private ObjectSchemeFieldService objectSchemeFieldService;
@@ -59,7 +59,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
     }
 
-    private void dealCaseComponent(String field, String value, String operation, StringBuilder sqlQuery) {
+    protected void dealCaseComponent(String field, String value, String operation, StringBuilder sqlQuery) {
         if (NULL_STR.equals(value)) {
             if (IS.equals(operation)) {
                 sqlQuery.append(" issue_id not in ( select issue_id from agile_component_issue_rel )  ");
@@ -107,7 +107,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
         }
     }
 
-    private void dealCaseVersion(QuickFilterValueVO quickFilterValueVO, String field, String value, String operation, StringBuilder sqlQuery) {
+    protected void dealCaseVersion(QuickFilterValueVO quickFilterValueVO, String field, String value, String operation, StringBuilder sqlQuery) {
         if ("fix_version".equals(quickFilterValueVO.getFieldCode())) {
             dealFixVersion(quickFilterValueVO, field, value, operation, sqlQuery);
         } else if ("influence_version".equals(quickFilterValueVO.getFieldCode())) {
@@ -115,7 +115,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
         }
     }
 
-    private void dealCaseLabel(String field, String value, String operation, StringBuilder sqlQuery) {
+    protected void dealCaseLabel(String field, String value, String operation, StringBuilder sqlQuery) {
         if (NULL_STR.equals(value)) {
             if (IS.equals(operation)) {
                 sqlQuery.append(" issue_id not in ( select issue_id from agile_label_issue_rel ) ");
@@ -131,7 +131,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
         }
     }
 
-    private void dealCaseSprint(String field, String value, String operation, StringBuilder sqlQuery) {
+    protected void dealCaseSprint(String field, String value, String operation, StringBuilder sqlQuery) {
         if (NULL_STR.equals(value)) {
             if (IS.equals(operation)) {
                 sqlQuery.append(" issue_id not in ( select issue_id from agile_issue_sprint_rel ) ");
@@ -162,7 +162,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
                 throw new CommonException(errorMsg);
             }
             if (predefined) {
-                appendPredefinedFieldSql(sqlQuery, quickFilterValueVO);
+                appendPredefinedFieldSql(sqlQuery, quickFilterValueVO, projectId);
             } else {
                 sqlQuery.append(appendCustomFieldSql(quickFilterValueVO, organizationId, projectId));
             }
@@ -323,7 +323,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
         return build.toString();
     }
 
-    private void appendPredefinedFieldSql(StringBuilder sqlQuery, QuickFilterValueVO quickFilterValueVO) {
+    protected void appendPredefinedFieldSql(StringBuilder sqlQuery, QuickFilterValueVO quickFilterValueVO, Long projectId) {
         String field = quickFilterFieldMapper.selectByPrimaryKey(quickFilterValueVO.getFieldCode()).getField();
         String value = "'null'".equals(quickFilterValueVO.getValue()) ? NULL_STR : quickFilterValueVO.getValue();
         String operation = quickFilterValueVO.getOperation();
