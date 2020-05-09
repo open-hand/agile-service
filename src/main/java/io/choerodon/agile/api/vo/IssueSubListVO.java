@@ -63,7 +63,7 @@ public class IssueSubListVO {
     @ApiModelProperty(value = "版本号")
     private Long objectVersionNumber;
 
-    @ApiModelProperty(value = "版本号")
+    @ApiModelProperty(value = "创建人")
     private Long createdBy;
 
     public Long getIssueId() {
