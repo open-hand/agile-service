@@ -369,7 +369,7 @@ public class ReportServiceImpl implements ReportService {
             changeDto.setColumnTo(columnTo == null ? "0" : columnTo + "");
             changeDto.setColumnFrom(columnFrom == null ? "0" : columnFrom + "");
         });
-        changeIssueDuringDate = changeIssueDuringDate.stream().filter(x -> x.getColumnFrom() != x.getColumnTo()).collect(Collectors.toList());
+        changeIssueDuringDate = changeIssueDuringDate.stream().filter(x -> !x.getColumnFrom().equals(x.getColumnTo())).collect(Collectors.toList());
         if (changeIssueDuringDate != null && !changeIssueDuringDate.isEmpty()) {
             result.addAll(changeIssueDuringDate);
         }

@@ -17,8 +17,6 @@ import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.modelmapper.convention.MatchingStrategies;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,11 +25,8 @@ import org.springframework.util.ObjectUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/16.
@@ -41,7 +36,6 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 public class IssueStatusServiceImpl implements IssueStatusService {
 
-    private static final Logger logger = LoggerFactory.getLogger(IssueStatusServiceImpl.class);
     private static final String AGILE = "Agile:";
     private static final String PIECHART = AGILE + "PieChart";
     private static final String STATUS = "status";
@@ -145,7 +139,7 @@ public class IssueStatusServiceImpl implements IssueStatusService {
     @Override
     public IssueStatusVO moveStatusToColumn(Long projectId, Long statusId, StatusMoveVO statusMoveVO) {
         // 判断是否在同一列中操作，更新列中position
-        Boolean sameRow = statusMoveVO.getColumnId() == statusMoveVO.getOriginColumnId();
+        Boolean sameRow = statusMoveVO.getColumnId().equals(statusMoveVO.getOriginColumnId());
         deleteColumnStatusRel(projectId, statusId, statusMoveVO.getOriginColumnId());
         updateColumnPosition(projectId, statusId, statusMoveVO,sameRow);
         return modelMapper.map(issueStatusMapper.selectByStatusId(projectId, statusId), IssueStatusVO.class);
