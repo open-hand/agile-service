@@ -16,7 +16,7 @@ function FeatureField({ field, value, onChange }) {
         valueFiled: 'issueId',
         parseNumber: true,
       })}
-      type="feature"
+      type="feature_all"
       loadWhenMount
       style={getSelectStyle(field, value)}
       mode="multiple"
@@ -37,7 +37,7 @@ function FeatureField({ field, value, onChange }) {
       onChange={onChange}
       value={value}
       getPopupContainer={triggerNode => triggerNode.parentNode}    
-      requestArgs={[]}
+      requestArgs={value}
     />
   );
 }
