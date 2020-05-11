@@ -11,7 +11,7 @@ function IssuePIHistory(props) {
   useEffect(() => {
     const loadData = async () => {
       const Data = await getHistoryPI(store.getIssue.issueId);
-      setData(Data);
+      setData(Data.reverse());
     };
     loadData();
   }, []);
