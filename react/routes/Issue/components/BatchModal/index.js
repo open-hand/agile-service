@@ -331,7 +331,7 @@ function BatchModal({
               <Col span={11}>
                 <Select
                   style={{ width: '100%' }}
-                  placeholder="请选择"
+                  placeholder="请选择字段"
                   onChange={(value) => {
                     const field = find(fieldData, { id: value });
                     Field.set(key, field);
