@@ -317,6 +317,7 @@ function BatchModal({
   const render = () => (
     <Fragment>
       <Form
+        className={styles.form}
         disabled={Boolean(loading)}
         dataSet={dataSet}
         style={{
