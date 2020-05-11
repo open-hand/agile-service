@@ -83,8 +83,6 @@ class CreateLinkTask extends Component {
           linkTypeId: `${link.type}+${link.forward}`,
         });
       });
-      console.log('newLinks：');
-      console.log(newLinks);
       this.setState({
         show: newLinks,
       });
@@ -194,7 +192,7 @@ class CreateLinkTask extends Component {
                 label={issueType === 'feature' ? '特性' : '问题'}
                 type={issueType === 'feature' ? 'features_in_link' : 'issues_in_link'}
                 requestArgs={issueId}
-                getPopupContainer={() => document.body}
+                // getPopupContainer={() => document.body}
               />,
             )}
           </FormItem>
