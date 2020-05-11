@@ -273,10 +273,9 @@ public class FieldValueServiceImpl implements FieldValueService {
                 }
                 List<String> contexts = Arrays.asList(split);
                 List<Long> needAddIssueIds = issueDTOS.stream().filter(issueDTO -> contexts.contains(issueDTO.getTypeCode())).map(IssueDTO::getIssueId).collect(Collectors.toList());
-                if (CollectionUtils.isEmpty(needAddIssueIds)) {
-                    throw new CommonException(ERROR_ISSUE_ID);
+                if (!CollectionUtils.isEmpty(needAddIssueIds)) {
+                    batchHandlerCustomFields(projectId, v, schemeCode, needAddIssueIds);
                 }
-                batchHandlerCustomFields(projectId, v, schemeCode, needAddIssueIds);
             }
             batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
             notifyFeignClient.postWebSocket(batchUpdateFieldStatusVO.getKey(),batchUpdateFieldStatusVO.getUserId().toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
