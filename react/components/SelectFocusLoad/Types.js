@@ -450,7 +450,7 @@ export default {
     ),
   },
   feature: {
-    request: ({ filter, page }, requestArgs) => featureApi.getByEpicId({ filter, page }, requestArgs),
+    request: ({ filter, page }, requestArgs) => featureApi.getByEpicId(requestArgs),
     render: item => (
       <Option key={`${item.issueId}`} value={item.issueId}>{item.summary}</Option>
     ),
