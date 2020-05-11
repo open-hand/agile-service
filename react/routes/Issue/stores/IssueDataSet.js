@@ -7,7 +7,7 @@ import Modal from '../components/Modal';
 import BatchModal from '../components/BatchModal';
 
 let modal;
-function Header({ dataSet }) {
+function Header({ dataSet, close }) {
   return (
     <Fragment>
       <div style={{ fontSize: '30px', fontWeight: 500, marginRight: 12 }}>{dataSet.selected.length}</div>
@@ -18,9 +18,7 @@ function Header({ dataSet }) {
         icon="close"
         shape="circle"
         style={{ color: 'white', marginLeft: 'auto' }}
-        onClick={() => {
-          modal.close();
-        }}
+        onClick={close}
       />
     </Fragment>
   );
@@ -29,16 +27,25 @@ const ObserverHeader = observer(Header);
 function handleSelect({ dataSet }) {
   modal = Modal.open({
     key: 'modal',
-    header: <ObserverHeader dataSet={dataSet} modal={modal} />,
+    header: <ObserverHeader
+      dataSet={dataSet}
+      modal={modal}
+      close={() => {
+        modal.close();
+        dataSet.unSelectAll();
+      }}
+    />,
     content: <BatchModal
       dataSet={dataSet}
       modal={modal}
       fields={IssueStore.fields}
       onCancel={() => {
         modal.close();
+        dataSet.unSelectAll();
       }}
       onEdit={() => {
         modal.close();
+        dataSet.unSelectAll();
         dataSet.query();
       }}
     />,
