@@ -306,7 +306,7 @@ function BatchModal({
           break;
         }
         case 'failed': {
-          Choerodon.prompt('更新失败', 'error');
+          Choerodon.prompt(data.error, 'error');
           setLoading(false);
           break;
         }
