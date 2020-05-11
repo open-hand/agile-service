@@ -11,6 +11,7 @@ import {
 } from '@/api/NewIssueApi';
 import IssueLinkType from '@/api/IssueLinkType';
 import { featureApi, piApi } from '@/api';
+import { Tooltip } from 'choerodon-ui/pro';
 import UserHead from '../UserHead';
 import TypeTag from '../TypeTag';
 import StatusTag from '../StatusTag';
@@ -257,12 +258,15 @@ export default {
             {issue.issueNum}
           </span>
           <div style={{ overflow: 'hidden', flex: 1 }}>
-            <p style={{
-              paddingRight: '25px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, maxWidth: 'unset',
-            }}
-            >
-              {issue.summary}
-            </p>
+            <Tooltip title={issue.summary}>
+              <p style={{
+                paddingRight: '25px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, maxWidth: 'unset',
+              }}
+              >
+                {issue.summary}
+              </p>
+            </Tooltip>
+            
           </div>
         </div>
       </Option>
@@ -299,12 +303,14 @@ export default {
             {issue.issueNum}
           </span>
           <div style={{ overflow: 'hidden', flex: 1 }}>
-            <p style={{
-              paddingRight: '25px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, maxWidth: 'unset',
-            }}
-            >
-              {issue.summary}
-            </p>
+            <Tooltip title={issue.summary}>
+              <p style={{
+                paddingRight: '25px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, maxWidth: 'unset',
+              }}
+              >
+                {issue.summary}
+              </p>
+            </Tooltip>
           </div>
         </div>
       </Option>
