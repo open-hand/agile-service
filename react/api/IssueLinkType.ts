@@ -1,6 +1,5 @@
-import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/common/utils';
-
+import Api from './Api'
 interface ILinkTypeQuery {
   page?: number,
   size?: number,
@@ -10,11 +9,11 @@ interface ILinkTypeQuery {
     linkName: string,
   },
 }
-class IssueLinkTypeApi {
+
+class IssueLinkTypeApi extends Api {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }
-  
   getAll({
     page = 1,
     size = 999,
@@ -24,18 +23,19 @@ class IssueLinkTypeApi {
       linkName: '',
     },
   }: ILinkTypeQuery = {}) {
-    return axios({
+    return this.request({
       url: `${this.prefix}/issue_link_types/query_all`,
       method: 'POST',
+      data: filter,
       params: {
         page,
         size,
         issueLinkTypeId
-      },
-      data: filter
+      }
     })
   }
 }
 
 const issueLinkTypeApi = new IssueLinkTypeApi();
-export { issueLinkTypeApi };
+const issueLinkTypeApiConfig = new IssueLinkTypeApi(true);
+export { issueLinkTypeApi, issueLinkTypeApiConfig };

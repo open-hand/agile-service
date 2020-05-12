@@ -1,5 +1,6 @@
 
 import { axios } from '@choerodon/boot';
+import { issueLinkTypeApiConfig, issueLinkTypeApi } from '@/api';
 
 export default ({ id, formatMessage }) => {
   async function checkLinkName(value, name, record) {
@@ -44,17 +45,10 @@ export default ({ id, formatMessage }) => {
       { name: 'linkName', type: 'string', label: formatMessage({ id: 'issue_link.name' }) },
     ],
     transport: {
-      read: ({ data }) => {
-        const postData = data;
-        if (data && data.linkName) {
-          postData.contents = [data.linkName];
-        }
-        return {
-          url: `/agile/v1/projects/${id}/issue_link_types/query_all`,
-          method: 'post',
-          data: postData,
-        };
-      },
+      read: ({ params, data }) => issueLinkTypeApiConfig.getAll({
+        ...params,
+        filter: data,
+      }),
       create: ({ data: [data] }) => ({
         url: `/agile/v1/projects/${id}/issue_link_types`,
         method: 'post',
