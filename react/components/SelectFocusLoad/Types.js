@@ -10,7 +10,7 @@ import {
   loadStatusList, loadIssuesInLink, loadFeaturesInLink, loadSprints,
   loadSprintsByTeam,
 } from '@/api/NewIssueApi';
-import IssueLinkType from '@/api/IssueLinkType';
+import IssueLinkType, { issueLinkTypeApi } from '@/api/IssueLinkType';
 import { featureApi, piApi } from '@/api';
 import { Tooltip } from 'choerodon-ui/pro';
 import UserHead from '../UserHead';
@@ -221,7 +221,7 @@ export default {
       filterOption: false,
       loadWhenMount: true,
     },
-    request: () => new Promise(resolve => IssueLinkType.queryAll().then((res) => { resolve(transform(res.list)); })),
+    request: () => issueLinkTypeApi.getAll().then(res => transform(res.list)),
     render: link => (
       <Option value={`${link.linkTypeId}+${link.isIn}`}>
         {link.name}

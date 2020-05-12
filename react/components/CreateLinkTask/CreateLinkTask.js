@@ -2,9 +2,11 @@ import React, { Component } from 'react';
 import { stores, axios } from '@choerodon/boot';
 import _ from 'lodash';
 import { Select, Form, Modal } from 'choerodon-ui';
+import { issueLinkTypeApi } from '@/api';
 import { createLink, createFeatureLink } from '../../api/NewIssueApi';
 import SelectFocusLoad from '../SelectFocusLoad';
 import './CreateLinkTask.less';
+
 
 const { AppState } = stores;
 const { Sidebar } = Modal;
@@ -32,17 +34,13 @@ class CreateLinkTask extends Component {
       selectLoading: true,
     });
     if (issueType !== 'feature') {
-      axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issue_link_types/query_all`, {
-        contents: [],
-        linkName: '',
-      })
-        .then((res) => {
-          this.setState({
-            selectLoading: false,
-            originLinks: res.list,
-          });
-          this.transform(res.list);
+      issueLinkTypeApi.getAll().then((res) => {
+        this.setState({
+          selectLoading: false,
+          originLinks: res.list,
         });
+        this.transform(res.list);
+      });
     } else {
       axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board_depend/list_feature_depend_type`)
         .then((res) => {
