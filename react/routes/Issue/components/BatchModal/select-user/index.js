@@ -1,12 +1,12 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { debounce } from 'lodash';
-import { getUsers } from '@/api/CommonApi';
+import { userApi } from '@/api';
 
 function SelectUser({ onChange, ...props }) {
   const [users, setUsers] = useState([]);
   async function loadUserData(value) {
-    const { list: data } = await getUsers(value);
+    const { list: data } = await userApi.getAllInProject(value);
     setUsers(data);
   }
 

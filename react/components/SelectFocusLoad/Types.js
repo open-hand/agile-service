@@ -2,7 +2,8 @@
 import React from 'react';
 import { Select } from 'choerodon-ui';
 import { find } from 'lodash';
-import { getUsers, getUser, getSubProjects } from '@/api/CommonApi';
+import { userApi } from '@/api';
+import { getSubProjects } from '@/api/CommonApi';
 import {
   loadEpics, loadProgramEpics, loadIssueTypes, loadPriorities,
   loadComponents, loadLabels, loadVersions,
@@ -67,7 +68,7 @@ const issue_type_program = {
 };
 export default {
   user: {
-    request: ({ filter, page }) => getUsers(filter, undefined, page).then(UserData => ({ ...UserData, list: UserData.list.filter(user => user.enabled) })),
+    request: ({ filter, page }) => userApi.getAllInProject(filter, page).then(UserData => ({ ...UserData, list: UserData.list.filter(user => user.enabled) })),
     render: user => (
       <Option key={user.id} value={user.id}>
         <div style={{
@@ -87,7 +88,7 @@ export default {
       const requestQue = [];
       values.forEach((a) => {
         if (a && typeof a === 'number' && !find(List, { id: a })) {
-          requestQue.push(getUser(a));
+          requestQue.push(userApi.getById(a));
         }
       });
       Promise.all(requestQue).then((users) => {

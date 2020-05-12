@@ -1,15 +1,16 @@
+/* eslint-disable no-shadow */
 import React, {
   useState, useEffect, 
 } from 'react';
 import {
-  Form, Input, Select, message, Button,
+  Form, Input, Select, Button,
 } from 'choerodon-ui';
 import {
   Content, stores, axios, Choerodon, 
 } from '@choerodon/boot';
 import _ from 'lodash';
+import { userApi } from '@/api';
 import UserHead from '../../../../components/UserHead';
-import { getUsers, getUser } from '../../../../api/CommonApi';
 import { loadComponent, updateComponent } from '../../../../api/ComponentApi';
 import './component.less';
 
@@ -67,7 +68,7 @@ const EditComponent = (props) => {
   const debounceFilterIssues = _.debounce((text) => {
     setSelectLoading(true);
     setPage(1);
-    getUsers(text, undefined, page).then((res) => {
+    userApi.getAllInProject(text, page).then((res) => {
       setSelectLoading(false);
       setInput(text);
       setPage(1);
@@ -79,7 +80,7 @@ const EditComponent = (props) => {
   const onFilterChange = (input) => {
     if (!sign) {
       setSelectLoading(true);
-      getUsers(input, undefined, page).then((res) => {
+      userApi.getAllInProject(input, page).then((res) => {
         setInput(input);
         setOriginUsers(res.list.filter(u => u.enabled));
         setCanLoadMore(res.hasNextPage);
@@ -92,7 +93,7 @@ const EditComponent = (props) => {
   };
 
   const loadUser = (managerId) => {
-    getUser(managerId).then((res) => {
+    userApi.getById(managerId).then((res) => {
       setManagerId(JSON.stringify(res.list[0]));
       setOriginUsers(res.list.length ? [res.list[0]] : []);
     });
@@ -134,7 +135,7 @@ const EditComponent = (props) => {
   const loadMoreUsers = (e) => {
     e.preventDefault();
     setSelectLoading(true);
-    getUsers(input, undefined, page + 1).then((res) => {
+    userApi.getAllInProject(input, undefined, page + 1).then((res) => {
       setOriginUsers([...originUsers, ...res.list.filter(u => u.enabled)]);
       setSelectLoading(false);
       setCanLoadMore(res.hasNextPage);

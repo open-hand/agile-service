@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import { stores } from '@choerodon/boot';
 import {
-  Modal, Form, Select, Button,
+  Form, Select, Button,
 } from 'choerodon-ui';
-import { getSelf, getUsers, getUser } from '../../api/CommonApi';
+import { userApi } from '@/api';
 import { updateIssue } from '../../api/NewIssueApi';
 import UserHead from '../UserHead';
 import './Assignee.less';
@@ -17,7 +17,7 @@ let sign = false;
 class Assignee extends Component {
   debounceFilterIssues = _.debounce((input) => {
     this.setState({ selectLoading: true });
-    getUsers(input).then((res) => {
+    userApi.getAllInProject(input).then((res) => {
       this.setState({
         originUsers: res.list.filter(u => u.enabled),
         selectLoading: false,
@@ -63,7 +63,7 @@ class Assignee extends Component {
   handleFilterChange(input) {
     if (!sign) {
       this.setState({ selectLoading: true });
-      getUsers(input).then((res) => {
+      userApi.getAllInProject(input).then((res) => {
         this.setState({
           originUsers: res.list.filter(u => u.enabled),
           selectLoading: false,
@@ -82,7 +82,7 @@ class Assignee extends Component {
   handleClickAssigneeToMe() {
     const { assigneeId } = this.state;
     const { form } = this.props;
-    getSelf().then((res) => {
+    userApi.getSelf().then((res) => {
       if (res.id !== assigneeId) {
         this.setState({
           assigneeId: res.id,
@@ -101,7 +101,7 @@ class Assignee extends Component {
   loadUser() {
     const { assigneeId } = this.props;
     if (!assigneeId) return;
-    getUser(assigneeId).then((res) => {
+    userApi.getById(assigneeId).then((res) => {
       this.setState({
         assigneeId: res.list[0].id,
         originUsers: res.list.length ? [res.list[0]] : [],
@@ -157,7 +157,7 @@ class Assignee extends Component {
           funcType="raised"
           onClick={this.handleClickAssigneeToMe.bind(this)}
         >
-          {'分配给我'}
+          分配给我
         </Button>
       </div>
     );

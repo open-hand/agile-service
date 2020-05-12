@@ -7,9 +7,9 @@ import { Modal } from 'choerodon-ui/pro';
 import { Content, stores, axios, Choerodon } from '@choerodon/boot';
 import _ from 'lodash';
 import UserHead from '../../../../components/UserHead';
-import { getUsers } from '../../../../api/CommonApi';
 import { createComponent } from '../../../../api/ComponentApi';
 import './component.less';
+import { userApi } from '@/api';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -19,7 +19,7 @@ let sign = false;
 
 function AddComponent(props) {
   const { modal } = props;
- 
+
   const [originUsers, setOriginUsers] = useState([]);
   const [selectLoading, setSelectLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -51,11 +51,11 @@ function AddComponent(props) {
     });
     return false;
   };
-  modal.handleOk(handleSubmit) 
+  modal.handleOk(handleSubmit)
   const onFilterChange = (input) => {
     if (!sign) {
       setSelectLoading(true);
-      getUsers(input, undefined, page).then((res) => {
+      userApi.getAllInProject(input, page).then((res) => {
         setInput(input);
         setOriginUsers(res.list.filter(u => u.enabled));
         setCanLoadMore(res.hasNextPage);
@@ -70,7 +70,7 @@ function AddComponent(props) {
   const debounceFilterIssues = _.debounce((input) => {
     setSelectLoading(true);
     setPage(1);
-    getUsers(input, undefined, page).then((res) => {
+    userApi.getAllInProject(input, page).then((res) => {
       setInput(input);
       setPage(1);
       setOriginUsers(res.list.filter(u => u.enabled));
@@ -112,7 +112,7 @@ function AddComponent(props) {
   const loadMoreUsers = (e) => {
     e.preventDefault();
     setSelectLoading(true);
-    getUsers(input, undefined, page + 1).then((res) => {
+    userApi.getAllInProject(input, page + 1).then((res) => {
       setOriginUsers([...originUsers, ...res.list.filter(u => u.enabled)]);
       setSelectLoading(false);
       setCanLoadMore(res.hasNextPage);
@@ -120,74 +120,74 @@ function AddComponent(props) {
     });
   };
 
-  return (    
-      <Form className="c7n-component-component"> 
-        <FormItem style={{ marginBottom: 20 }}>
-          {getFieldDecorator('name', {
-            rules: [{
-              required: true,
-              message: '模块名称必填',
-              whitespace: true,
-            }, {
-              validator: checkComponentNameRepeat,
-            }],
-          })(
-            <Input label="模块名称" maxLength={10} />,
-          )}
-        </FormItem>
-        <FormItem style={{ marginBottom: 20 }}>
-          {getFieldDecorator('description', {})(
-            <Input label="模块描述" maxLength={30} />,
-          )}
-        </FormItem>
-        <FormItem style={{ marginBottom: 20 }}>
-          {getFieldDecorator('defaultAssigneeRole', {
-            rules: [{
-              required: true,
-              message: '默认经办人必填',
-            }],
-          })(
-            <Select label="默认经办人">
-              {['模块负责人', '无'].map(defaultAssigneeRole => (
-                <Option key={defaultAssigneeRole} value={defaultAssigneeRole}>
-                  {defaultAssigneeRole}
-                </Option>
-              ))}
-            </Select>,
-          )}
-        </FormItem>
-        {getFieldsValue(['defaultAssigneeRole']).defaultAssigneeRole && getFieldsValue(['defaultAssigneeRole']).defaultAssigneeRole === '模块负责人' && (
-          <FormItem style={{ marginBottom: 20 }}>
-            {getFieldDecorator('managerId', {})(
-              <Select
-                label="负责人"
-                loading={selectLoading}
-                allowClear
-                filter
-                onFilterChange={onFilterChange}
-                dropdownClassName="hidden-text hidden-label"
-              >
-                {
-                  originUsers.map(user => (
-                    <Option key={JSON.stringify(user)} value={JSON.stringify(user)}>
-                      <div style={{ display: 'inline-flex', alignItems: 'center', padding: '2px' }}>
-                        <UserHead
-                          user={user}
-                        />
-                      </div>
-                    </Option>
-                  ))
-                }
-                {
-                  canLoadMore && <Option key='loadMore' disabled className='loadMore-option'>
-                    <Button type="primary" onClick={loadMoreUsers} className="option-btn">更多</Button>
-                  </Option>
-                }
-              </Select> ,
-            )}
-          </FormItem>
+  return (
+    <Form className="c7n-component-component">
+      <FormItem style={{ marginBottom: 20 }}>
+        {getFieldDecorator('name', {
+          rules: [{
+            required: true,
+            message: '模块名称必填',
+            whitespace: true,
+          }, {
+            validator: checkComponentNameRepeat,
+          }],
+        })(
+          <Input label="模块名称" maxLength={10} />,
         )}
-      </Form>   
+      </FormItem>
+      <FormItem style={{ marginBottom: 20 }}>
+        {getFieldDecorator('description', {})(
+          <Input label="模块描述" maxLength={30} />,
+        )}
+      </FormItem>
+      <FormItem style={{ marginBottom: 20 }}>
+        {getFieldDecorator('defaultAssigneeRole', {
+          rules: [{
+            required: true,
+            message: '默认经办人必填',
+          }],
+        })(
+          <Select label="默认经办人">
+            {['模块负责人', '无'].map(defaultAssigneeRole => (
+              <Option key={defaultAssigneeRole} value={defaultAssigneeRole}>
+                {defaultAssigneeRole}
+              </Option>
+            ))}
+          </Select>,
+        )}
+      </FormItem>
+      {getFieldsValue(['defaultAssigneeRole']).defaultAssigneeRole && getFieldsValue(['defaultAssigneeRole']).defaultAssigneeRole === '模块负责人' && (
+        <FormItem style={{ marginBottom: 20 }}>
+          {getFieldDecorator('managerId', {})(
+            <Select
+              label="负责人"
+              loading={selectLoading}
+              allowClear
+              filter
+              onFilterChange={onFilterChange}
+              dropdownClassName="hidden-text hidden-label"
+            >
+              {
+                originUsers.map(user => (
+                  <Option key={JSON.stringify(user)} value={JSON.stringify(user)}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', padding: '2px' }}>
+                      <UserHead
+                        user={user}
+                      />
+                    </div>
+                  </Option>
+                ))
+              }
+              {
+                canLoadMore && <Option key='loadMore' disabled className='loadMore-option'>
+                  <Button type="primary" onClick={loadMoreUsers} className="option-btn">更多</Button>
+                </Option>
+              }
+            </Select> ,
+          )}
+        </FormItem>
+      )}
+    </Form>
   );
 }
 
