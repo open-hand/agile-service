@@ -5,9 +5,9 @@ import {
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import { Content, stores, axios, Choerodon } from '@choerodon/boot';
+import { componentApi } from '@/api';
 import _ from 'lodash';
 import UserHead from '../../../../components/UserHead';
-import { createComponent } from '../../../../api/ComponentApi';
 import './component.less';
 import { userApi } from '@/api';
 
@@ -39,7 +39,7 @@ function AddComponent(props) {
           managerId: managerId ? JSON.parse(managerId).id || 0 : 0,
           name: name.trim(),
         };
-        createComponent(component)
+        componentApi.createComponent(component)
           .then((res) => {
             props.modal.close();
             props.onOk();

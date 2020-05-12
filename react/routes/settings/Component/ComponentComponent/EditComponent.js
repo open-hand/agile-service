@@ -9,9 +9,8 @@ import {
   Content, stores, axios, Choerodon, 
 } from '@choerodon/boot';
 import _ from 'lodash';
-import { userApi } from '@/api';
+import { userApi, componentApi } from '@/api';
 import UserHead from '../../../../components/UserHead';
-import { loadComponent, updateComponent } from '../../../../api/ComponentApi';
 import './component.less';
 
 const { Option } = Select;
@@ -50,7 +49,7 @@ const EditComponent = (props) => {
           name: name.trim(),
         };
         setCreateLoading(true);
-        updateComponent(component.componentId, editComponent)
+        componentApi.updateComponent(component.componentId, editComponent)
           .then((res) => {
             setCreateLoading(false);
             props.modal.close();
@@ -100,7 +99,7 @@ const EditComponent = (props) => {
   };
 
   const localLoadComponent = (componentId) => {
-    loadComponent(componentId)
+    componentApi.loadComponent(componentId)
       .then((res) => {
         const {
           defaultAssigneeRole, description, managerId, name,

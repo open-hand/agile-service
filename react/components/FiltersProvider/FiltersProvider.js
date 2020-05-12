@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { userApi } from '@/api';
+import { userApi, componentApi } from '@/api';
 import {
-  loadIssueTypes, loadStatusList, loadPriorities, loadLabels, loadComponents, loadVersions, loadEpics, loadSprints,
+  loadIssueTypes, loadStatusList, loadPriorities, loadLabels, loadVersions, loadEpics, loadSprints,
 } from '../../api/NewIssueApi';
 
 const requests = {
@@ -45,7 +45,7 @@ const requests = {
     isContent: true,
     textField: 'name',
     valueField: 'componentId',
-    request: loadComponents,
+    request: componentApi.loadAllComponents,
   },
   epic: {
     textField: 'epicName',

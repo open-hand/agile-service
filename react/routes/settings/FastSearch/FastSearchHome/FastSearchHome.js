@@ -158,11 +158,7 @@ class Search extends Component {
       deleteFilterShow: true,
     });
   }
-
-  deleteComponent() {
-    this.loadComponents();
-  }
-
+  
   loadFilters(page = 0, size = 10) {
     const { filterName, barFilters } = this.state;
     this.setState({

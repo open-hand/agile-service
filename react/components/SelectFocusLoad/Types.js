@@ -2,11 +2,11 @@
 import React from 'react';
 import { Select } from 'choerodon-ui';
 import { find } from 'lodash';
-import { userApi } from '@/api';
+import { userApi, componentApi } from '@/api';
 import { getSubProjects } from '@/api/CommonApi';
 import {
   loadEpics, loadProgramEpics, loadIssueTypes, loadPriorities,
-  loadComponents, loadLabels, loadVersions,
+  loadLabels, loadVersions,
   loadStatusList, loadIssuesInLink, loadFeaturesInLink, loadSprints,
   loadSprintsByTeam,
 } from '@/api/NewIssueApi';
@@ -341,7 +341,7 @@ export default {
       filterOption: false,
       loadWhenMount: true,
     },
-    request: ({ filter }) => loadComponents(filter),
+    request: ({ filter }) => componentApi.loadAllComponents(filter),
     render: component => (
       <Option
         key={component.name}
