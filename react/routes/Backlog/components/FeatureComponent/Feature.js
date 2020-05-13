@@ -46,7 +46,8 @@ class Feature extends Component {
    * @memberof 
    */
   handleClickFeature = (type) => {
-    BacklogStore.setChosenFeature(type);
+    const { chosenFeature } = BacklogStore;
+    BacklogStore.setChosenFeature(type === chosenFeature ? 'all' : type);
     BacklogStore.axiosGetSprint().then((res) => {
       BacklogStore.setSprintData(res);
     }).catch(() => {

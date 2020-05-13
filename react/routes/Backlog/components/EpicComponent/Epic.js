@@ -33,7 +33,8 @@ class Epic extends Component {
    * @memberof Epic
    */
   handleClickEpic = (type) => {
-    BacklogStore.setChosenEpic(type);
+    const { chosenEpic } = BacklogStore;
+    BacklogStore.setChosenEpic(type === chosenEpic ? 'all' : type);
     BacklogStore.axiosGetSprint().then((res) => {
       BacklogStore.setSprintData(res);
     }).catch(() => {
