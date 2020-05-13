@@ -1,5 +1,4 @@
 import React, { Fragment } from 'react';
-import { set, runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'choerodon-ui';
 import IssueStore from '@/stores/project/issue/IssueStore';
@@ -57,7 +56,7 @@ function handleUnSelect({ dataSet }) {
   }
 }
 export default ({
-  intl, projectId, organizationId, intlPrefix,
+  projectId, organizationId,
 }) => ({
   primaryKey: 'issueId',
   autoQuery: false,
@@ -65,32 +64,19 @@ export default ({
   parentField: 'parentId',
   expandField: 'expand',
   idField: 'issueId',
-  paging: true,
+  paging: 'server',
   cacheSelection: true,
   transport: {
-    read: ({ dataSet }) => ({
-      url: `/agile/v1/projects/${projectId}/issues/include_sub?organizationId=${organizationId}`,
+    read: ({ params }) => ({
+      url: `/agile/v1/projects/${projectId}/issues/include_sub`,
       method: 'post',
       params: {
-        page: dataSet.issueCurrentPage,
-        size: dataSet.issuePageSize,
-        sort: dataSet.sort && `${dataSet.sort},${dataSet.isAsc ? 'asc' : 'desc'}`,
+        ...params,
+        organizationId,
       },
       transformRequest: (data) => {
         const searchDTO = IssueStore.getCustomFieldFilters();
         return JSON.stringify(searchDTO);
-      },
-      transformResponse: (res) => {
-        const data = JSON.parse(res);
-        // const data = test;
-        runInAction(() => {
-          set(dataSet, { issueTotal: data.total });
-          if (data.pageSize > 0) {
-            set(dataSet, { issuePageSize: data.pageSize });
-          }
-          set(dataSet, { issueCurrentPage: data.pageNum });
-        });
-        return data;
       },
     })
     ,
