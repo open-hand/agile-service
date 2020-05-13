@@ -148,7 +148,7 @@ public class MachineFactory {
      */
     public ExecuteResult executeTransform(Long organizationId, String serviceCode, Long stateMachineId, Long currentStatusId, Long transformId, InputDTO inputDTO) {
         try {
-            Long instanceId = inputDTO.getInstanceId();
+//            Long instanceId = inputDTO.getInstanceId();
             //校验transformId是否合法
             List<StateMachineTransformDTO> transforms = transformService.queryListByStatusIdByDeploy(organizationId, stateMachineId, currentStatusId);
             if (transforms.stream().noneMatch(x -> x.getId().equals(transformId))) {
@@ -157,17 +157,23 @@ public class MachineFactory {
             //状态转节点
             Long currentNodeId = nodeDeployMapper.getNodeDeployByStatusId(stateMachineId, currentStatusId).getId();
 
-            StateMachine<String, String> instance = instanceCache.getInstance(serviceCode, stateMachineId, instanceId);
-            if (instance == null) {
-                instance = buildInstance(organizationId, serviceCode, stateMachineId);
-                //恢复节点
-                String id = instance.getId();
-                instance.getStateMachineAccessor()
-                        .doWithAllRegions(access ->
-                                access.resetStateMachine(new DefaultStateMachineContext<>(currentNodeId.toString(), null, null, null, null, id)));
-                logger.info("restore stateMachine instance successful, stateMachineId:{}", stateMachineId);
-                instanceCache.putInstance(serviceCode, stateMachineId, instanceId, instance);
-            }
+            StateMachine<String, String> instance = buildInstance(organizationId, serviceCode, stateMachineId);
+            String id = instance.getId();
+            instance.getStateMachineAccessor()
+                    .doWithAllRegions(access ->
+                            access.resetStateMachine(new DefaultStateMachineContext<>(currentNodeId.toString(), null, null, null, null, id)));
+            logger.info("restore stateMachine instance successful, stateMachineId:{}", stateMachineId);
+//            StateMachine<String, String> instance = instanceCache.getInstance(serviceCode, stateMachineId, instanceId);
+//            if (instance == null) {
+//                instance = buildInstance(organizationId, serviceCode, stateMachineId);
+//                //恢复节点
+//                String id = instance.getId();
+//                instance.getStateMachineAccessor()
+//                        .doWithAllRegions(access ->
+//                                access.resetStateMachine(new DefaultStateMachineContext<>(currentNodeId.toString(), null, null, null, null, id)));
+//                logger.info("restore stateMachine instance successful, stateMachineId:{}", stateMachineId);
+//                instanceCache.putInstance(serviceCode, stateMachineId, instanceId, instance);
+//            }
             //存入instanceId，以便执行guard和action
             instance.getExtendedState().getVariables().put(INPUT_DTO, inputDTO);
             //触发事件
