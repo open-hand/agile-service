@@ -60,7 +60,7 @@ export default ({
 }) => ({
   primaryKey: 'issueId',
   autoQuery: false,
-  // selection: false,
+  modifiedCheck: false,
   parentField: 'parentId',
   expandField: 'expand',
   idField: 'issueId',
