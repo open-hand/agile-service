@@ -17,6 +17,7 @@ import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.StateMachineBuilder;
 import org.springframework.statemachine.guard.Guard;
+import org.springframework.statemachine.state.State;
 import org.springframework.statemachine.support.DefaultStateMachineContext;
 import org.springframework.stereotype.Component;
 
@@ -148,32 +149,31 @@ public class MachineFactory {
      */
     public ExecuteResult executeTransform(Long organizationId, String serviceCode, Long stateMachineId, Long currentStatusId, Long transformId, InputDTO inputDTO) {
         try {
-//            Long instanceId = inputDTO.getInstanceId();
+            Long instanceId = inputDTO.getInstanceId();
             //校验transformId是否合法
             List<StateMachineTransformDTO> transforms = transformService.queryListByStatusIdByDeploy(organizationId, stateMachineId, currentStatusId);
-            if (transforms.stream().noneMatch(x -> x.getId().equals(transformId))) {
+            StateMachineTransformDTO transform = null;
+            for (StateMachineTransformDTO t : transforms) {
+                if (t.getId().equals(transformId)) {
+                    transform = t;
+                }
+            }
+            if (transform == null) {
                 throw new CommonException("error.executeTransform.transformId.illegal");
             }
             //状态转节点
             Long currentNodeId = nodeDeployMapper.getNodeDeployByStatusId(stateMachineId, currentStatusId).getId();
-
-            StateMachine<String, String> instance = buildInstance(organizationId, serviceCode, stateMachineId);
-            String id = instance.getId();
-            instance.getStateMachineAccessor()
-                    .doWithAllRegions(access ->
-                            access.resetStateMachine(new DefaultStateMachineContext<>(currentNodeId.toString(), null, null, null, null, id)));
-            logger.info("restore stateMachine instance successful, stateMachineId:{}", stateMachineId);
-//            StateMachine<String, String> instance = instanceCache.getInstance(serviceCode, stateMachineId, instanceId);
-//            if (instance == null) {
-//                instance = buildInstance(organizationId, serviceCode, stateMachineId);
-//                //恢复节点
-//                String id = instance.getId();
-//                instance.getStateMachineAccessor()
-//                        .doWithAllRegions(access ->
-//                                access.resetStateMachine(new DefaultStateMachineContext<>(currentNodeId.toString(), null, null, null, null, id)));
-//                logger.info("restore stateMachine instance successful, stateMachineId:{}", stateMachineId);
-//                instanceCache.putInstance(serviceCode, stateMachineId, instanceId, instance);
-//            }
+            StateMachine<String, String> instance =
+                    getInstance(organizationId, serviceCode, stateMachineId, instanceId, currentNodeId);
+            if (!isInstanceLatest(transform, instance)) {
+                //ConcurrentHashMap为内存缓存，在分布式多pod环境中，存在pod中的缓存无法同步的问题。
+                //例如添加一个状态，执行添加操作是在pod1中进行的，则其他pod的内存中没有这个状态，导致instance.sendEvent无法发送事件。
+                //这里判断下pod里的instance是否为最新的，如果不是，则重新构建一次
+                logger.info("the instance of this pod is not latest, so clean the cache and rebuild instance.");
+                instanceCache.cleanStateMachine(stateMachineId);
+                instance =
+                        getInstance(organizationId, serviceCode, stateMachineId, instanceId, currentNodeId);
+            }
             //存入instanceId，以便执行guard和action
             instance.getExtendedState().getVariables().put(INPUT_DTO, inputDTO);
             //触发事件
@@ -183,6 +183,7 @@ public class MachineFactory {
             Long statusId = nodeDeployMapper.getNodeDeployById(Long.parseLong(instance.getState().getId())).getStatusId();
             Object executeResult = instance.getExtendedState().getVariables().get(EXECUTE_RESULT);
             if (executeResult == null) {
+                logger.error("send event failed, the result of instance is null");
                 executeResult = new ExecuteResult();
                 ((ExecuteResult) executeResult).setSuccess(false);
                 ((ExecuteResult) executeResult).setResultStatusId(statusId);
@@ -190,14 +191,39 @@ public class MachineFactory {
             }
             return (ExecuteResult) executeResult;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
             ExecuteResult executeResult = new ExecuteResult();
+            executeResult.setException(e);
             executeResult.setSuccess(false);
             executeResult.setResultStatusId(null);
             executeResult.setErrorMessage("执行转换失败");
             return executeResult;
         }
 
+    }
+
+    private boolean isInstanceLatest(StateMachineTransformDTO transform, StateMachine<String, String> instance) {
+        Long endNodeId = transform.getEndNodeId();
+        for (State<String, String> s :instance.getStates()) {
+            if (Long.valueOf(s.getId()).equals(endNodeId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private StateMachine<String, String> getInstance(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long currentNodeId) {
+        StateMachine<String, String> instance = instanceCache.getInstance(serviceCode, stateMachineId, instanceId);
+        if (instance == null) {
+            instance = buildInstance(organizationId, serviceCode, stateMachineId);
+            //恢复节点
+            String id = instance.getId();
+            instance.getStateMachineAccessor()
+                    .doWithAllRegions(access ->
+                            access.resetStateMachine(new DefaultStateMachineContext<>(currentNodeId.toString(), null, null, null, null, id)));
+            logger.info("restore stateMachine instance successful, stateMachineId:{}", stateMachineId);
+            instanceCache.putInstance(serviceCode, stateMachineId, instanceId, instance);
+        }
+        return instance;
     }
 
     /**

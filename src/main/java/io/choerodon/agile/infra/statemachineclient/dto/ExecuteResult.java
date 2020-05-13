@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.statemachineclient.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
 
 /**
@@ -16,6 +17,9 @@ public class ExecuteResult {
 
     private String errorMessage;
 
+    @JsonIgnore
+    private Exception exception;
+
     public ExecuteResult() {
     }
 
@@ -23,6 +27,14 @@ public class ExecuteResult {
         this.isSuccess = isSuccess;
         this.resultStatusId = resultStatusId;
         this.errorMessage = errorMessage;
+    }
+
+    public Exception getException() {
+        return exception;
+    }
+
+    public void setException(Exception exception) {
+        this.exception = exception;
     }
 
     public Boolean getSuccess() {
