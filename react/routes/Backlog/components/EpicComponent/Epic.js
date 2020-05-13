@@ -78,7 +78,7 @@ class Epic extends Component {
             <div
               className="c7n-backlog-epicItems-first primary"
               style={{                
-                background: BacklogStore.getChosenEpic === 'all' ? 'rgba(140, 158, 255, 0.08)' : '',
+                background: BacklogStore.getChosenEpic === 'all' ? 'rgba(140, 158, 255, 0.16)' : '',
               }}
               role="none"
               onClick={() => {
@@ -121,7 +121,7 @@ class Epic extends Component {
             <div
               className="c7n-backlog-epicItems-last"
               style={{
-                background: BacklogStore.getChosenEpic === 'unset' ? 'rgba(140, 158, 255, 0.08)' : '',
+                background: BacklogStore.getChosenEpic === 'unset' ? 'rgba(140, 158, 255, 0.16)' : '',
               }}
               role="none"
               onClick={() => {

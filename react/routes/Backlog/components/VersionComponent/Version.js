@@ -70,7 +70,7 @@ class Version extends Component {
             <div
               className="c7n-backlog-versionItems primary"
               style={{
-                background: BacklogStore.getChosenVersion === 'all' ? 'rgba(140, 158, 255, 0.08)' : '',
+                background: BacklogStore.getChosenVersion === 'all' ? 'rgba(140, 158, 255, 0.16)' : '',
               }}
               role="none"
               onClick={() => {
@@ -111,7 +111,7 @@ class Version extends Component {
             <div
               className="c7n-backlog-versionItems"
               style={{
-                background: BacklogStore.getChosenVersion === 'unset' ? 'rgba(140, 158, 255, 0.08)' : '',
+                background: BacklogStore.getChosenVersion === 'unset' ? 'rgba(140, 158, 255, 0.16)' : '',
               }}
               role="none"
               onClick={() => {
