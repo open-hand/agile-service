@@ -4,7 +4,7 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import _ from 'lodash';
 import { Tooltip, Tag } from 'choerodon-ui';
-import { Table, Pagination } from 'choerodon-ui/pro';
+import { Table } from 'choerodon-ui/pro';
 import { map } from 'lodash';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import PriorityTag from '@/components/PriorityTag';
@@ -14,8 +14,6 @@ import UserHead from '@/components/UserHead';
 import IssueStore from '@/stores/project/issue/IssueStore';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import CollapseAll from './CollapseAll';
-import IssuePagination from './IssuePagination';
-import IssueHeader from './IssueHeader';
 import Store from '../../stores';
 import './index.less';
 
@@ -97,7 +95,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
         })}
       >
         <Column
-          header={<IssueHeader fieldCode="issueId" dataSet={dataSet} />}
+          sortable
           align="left"
           name="issueId"
           width={320}
@@ -118,13 +116,13 @@ function IssueTable({ tableRef, onCreateIssue }) {
           )}
         />
         <Column 
-          header={<IssueHeader fieldCode="issueNum" dataSet={dataSet} />}
+          sortable
           name="issueNum"
           width={120}
           className="c7n-agile-table-cell" 
         />
         <Column
-          header={<IssueHeader fieldCode="priorityId" dataSet={dataSet} />}
+          sortable
           name="priorityId"
           className="c7n-agile-table-cell"
           renderer={({ record }) => (
@@ -137,7 +135,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
           )}
         />
         <Column
-          header={<IssueHeader fieldCode="assigneeId" dataSet={dataSet} />}
+          sortable
           name="assigneeId"
           renderer={({ record }) => (
             <div style={{ display: 'inline-flex' }}>
@@ -158,7 +156,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
           )}
         />
         <Column
-          header={<IssueHeader fieldCode="statusId" dataSet={dataSet} />}
+          sortable
           name="statusId"
           renderer={({ record }) => (
             <Tooltip title={record.get('statusVO').name}>
@@ -177,7 +175,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
         />
         <Column
           name="reporterId"
-          header={<IssueHeader fieldCode="reporterId" dataSet={dataSet} />}
+          sortable
           className="c7n-agile-table-cell"
           renderer={({ record }) => (
             <div style={{ display: 'inline-flex' }}>
@@ -196,13 +194,12 @@ function IssueTable({ tableRef, onCreateIssue }) {
           )}
         />
         <Column 
-          header={<IssueHeader fieldCode="lastUpdateDate" dataSet={dataSet} />}
+          sortable
           width={170} 
           name="lastUpdateDate" 
           className="c7n-agile-table-cell" 
         />
-        <Column 
-          // header={<IssueHeader fieldCode="creationDate" dataSet={dataSet} />}
+        <Column
           width={170} 
           hidden
           name="creationDate" 
@@ -242,7 +239,6 @@ function IssueTable({ tableRef, onCreateIssue }) {
           />
         ))}
       </Table>
-      <IssuePagination />
       <CollapseAll tableRef={tableRef} />
     </div>
   );

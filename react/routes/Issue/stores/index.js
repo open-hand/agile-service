@@ -29,11 +29,6 @@ export const StoreProvider = inject('AppState')(injectIntl(
     const dataSet = useMemo(() => new DataSet(IssueDataSet({
       intl, projectId, organizationId,
     })), []);
-    // 初始化issue总数，不然之后会不更新
-    set(dataSet, { issueTotal: 10 });
-    set(dataSet, { issuePageSize: 10 });
-    set(dataSet, { issueCurrentPage: 1 });
-    set(dataSet, { sort: '', isAsc: true });
     IssueStore.dataSet = dataSet;
     /**
     * detail data
