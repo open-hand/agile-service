@@ -32,7 +32,8 @@ class Version extends Component {
    * @memberof Version
    */
   handleClickVersion(type) {
-    BacklogStore.setChosenVersion(type);
+    const { chosenVersion } = BacklogStore;
+    BacklogStore.setChosenVersion(type === chosenVersion ? 'all' : type);
     BacklogStore.axiosGetSprint().then((res) => {
       BacklogStore.setSprintData(res);
     }).catch((error) => {
