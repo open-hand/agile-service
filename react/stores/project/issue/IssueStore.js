@@ -29,7 +29,7 @@ export function getSystemFields() {
   }, {
     code: 'issueTypeId',
     name: '问题类型',
-    defaultShow: false,
+    defaultShow: true,
     fieldType: 'multiple',
   }, {
     code: 'statusId',
@@ -64,7 +64,7 @@ export function getSystemFields() {
   }, {
     code: 'priorityId',
     name: '优先级',
-    defaultShow: false,
+    defaultShow: true,
     fieldType: 'multiple',
   }, {
     code: 'version',
@@ -74,12 +74,12 @@ export function getSystemFields() {
   }, {
     code: 'epic',
     name: '史诗',
-    defaultShow: false,
+    defaultShow: !IsInProgramStore.isInProgram,
     fieldType: 'multiple',
   }, {
     code: 'feature',
     name: '特性',
-    defaultShow: false,
+    defaultShow: true,
     fieldType: 'multiple',
   }, {
     code: 'createDate',
