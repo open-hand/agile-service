@@ -46,7 +46,7 @@ const { Text, Edit } = TextEditToggle;
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
           <span className="c7n-property">
-            {'经办人'}
+            经办人
           </span>
         </div>
         <div className="c7n-value-wrapper" style={{ display: 'flex', flexWrap: 'nowrap' }}>
@@ -72,7 +72,7 @@ const { Text, Edit } = TextEditToggle;
                   />
                 ) : (
                   <div>
-                    {'无'}
+                    无
                   </div>
                 )
               }
@@ -120,7 +120,7 @@ const { Text, Edit } = TextEditToggle;
                   });
                 }}
               >
-                {'分配给我'}
+                分配给我
               </span>
             ) : ''
           }
