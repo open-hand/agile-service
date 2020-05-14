@@ -3,9 +3,10 @@ package io.choerodon.agile.app.service;
 import io.choerodon.agile.api.vo.IssueLinkTypeCreateVO;
 import io.choerodon.agile.api.vo.IssueLinkTypeVO;
 import io.choerodon.agile.api.vo.IssueLinkTypeSearchVO;
-import com.github.pagehelper.PageInfo;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.domain.PageInfo;
 import io.choerodon.agile.infra.dto.IssueLinkTypeDTO;
-import org.springframework.data.domain.Pageable;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
  * @author dinghuang123@gmail.com
@@ -22,7 +23,7 @@ public interface IssueLinkTypeService {
      * @param pageable            pageable
      * @return IssueLinkTypeVO
      */
-    PageInfo<IssueLinkTypeVO> listIssueLinkType(Long projectId, Long issueLinkTypeId, IssueLinkTypeSearchVO issueLinkTypeSearchVO, Pageable pageable);
+    Page<IssueLinkTypeVO> listIssueLinkType(Long projectId, Long issueLinkTypeId, IssueLinkTypeSearchVO issueLinkTypeSearchVO, PageRequest pageable);
 
     /**
      * 创建issueLinkType

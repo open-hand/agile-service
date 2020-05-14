@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.*;
 
@@ -8,7 +10,9 @@ import javax.persistence.*;
  * @author peng.jiang,dinghuang123@gmail.com
  */
 @Table(name = "fd_state_machine_node")
-public class StateMachineNodeDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class StateMachineNodeDTO extends AuditDomain {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -1,7 +1,9 @@
 package io.choerodon.agile.infra.dto;
 
 import io.choerodon.agile.infra.utils.StringUtil;
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -14,7 +16,9 @@ import java.util.Objects;
  * @since 2018/10/9
  */
 @Table(name = "agile_work_calendar_holiday_ref")
-public class WorkCalendarHolidayRefDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class WorkCalendarHolidayRefDTO extends AuditDomain {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

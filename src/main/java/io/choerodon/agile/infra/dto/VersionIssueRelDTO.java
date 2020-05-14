@@ -2,10 +2,11 @@ package io.choerodon.agile.infra.dto;
 
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
@@ -15,9 +16,15 @@ import java.util.List;
  * @since 2018-05-15 16:21:18
  */
 @Table(name = "agile_version_issue_rel")
-public class VersionIssueRelDTO extends BaseDTO{
+@ModifyAudit
+@VersionAudit
+public class VersionIssueRelDTO extends AuditDomain{
 
     private static final String STATUS_CODE_PLANNING = "version_planning";
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;  //需要加主键id
 
     /**
      * version id
@@ -45,7 +52,16 @@ public class VersionIssueRelDTO extends BaseDTO{
 
     private Long createdBy;
 
+    @Transient
     private List<Long> issueIds;
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
+    }
 
     public Long getVersionId() {
         return versionId;

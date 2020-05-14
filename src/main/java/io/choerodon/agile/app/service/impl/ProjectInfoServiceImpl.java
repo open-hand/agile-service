@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.github.pagehelper.PageInfo;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.domain.PageInfo;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.ProjectInfoService;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
@@ -81,7 +82,7 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         List<ProjectRelationshipVO> projectRelationshipVOS = baseFeignClient.getProjUnderGroup(organizationId, projectId, true).getBody();
         for (ProjectRelationshipVO relationshipVO : projectRelationshipVOS) {
-            PageInfo<UserWithRoleVO> users = baseFeignClient.pagingQueryUsersWithProjectLevelRoles(0, 0, relationshipVO.getProjectId(), new RoleAssignmentSearchVO(), false).getBody();
+            Page<UserWithRoleVO> users = baseFeignClient.pagingQueryUsersWithProjectLevelRoles(0, 0, relationshipVO.getProjectId(), new RoleAssignmentSearchVO(), false).getBody();
             relationshipVO.setUserCount(users.getSize());
         }
         return projectRelationshipVOS;

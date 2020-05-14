@@ -1,7 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.infra.dto.FieldOptionDTO;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
  * @author shinan.chen
  * @since 2019/4/1
  */
-public interface FieldOptionMapper extends Mapper<FieldOptionDTO> {
+public interface FieldOptionMapper extends BaseMapper<FieldOptionDTO> {
 
     /**
      * 根据字段id获取字段选项

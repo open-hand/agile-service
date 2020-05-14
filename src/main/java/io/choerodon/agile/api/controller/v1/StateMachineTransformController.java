@@ -1,7 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
@@ -29,7 +29,7 @@ public class StateMachineTransformController extends BaseController {
     @Autowired
     private StateMachineTransformValidator transformValidator;
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建转换（草稿）")
     @PostMapping
     public ResponseEntity<StateMachineTransformVO> create(@PathVariable("organization_id") Long organizationId,
@@ -39,7 +39,7 @@ public class StateMachineTransformController extends BaseController {
         return new ResponseEntity<>(transformService.create(organizationId, stateMachineId, transformDTO), HttpStatus.CREATED);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更新转换（草稿）")
     @PutMapping(value = "/{transform_id}")
     public ResponseEntity<StateMachineTransformVO> update(@PathVariable("organization_id") Long organizationId,
@@ -50,7 +50,7 @@ public class StateMachineTransformController extends BaseController {
         return new ResponseEntity<>(transformService.update(organizationId, stateMachineId, transformId, transformDTO), HttpStatus.CREATED);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除转换（草稿）")
     @DeleteMapping(value = "/{transform_id}")
     public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId,
@@ -59,7 +59,7 @@ public class StateMachineTransformController extends BaseController {
         return new ResponseEntity<>(transformService.delete(organizationId, stateMachineId, transformId), HttpStatus.NO_CONTENT);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id获取转换（草稿）")
     @GetMapping(value = "/{transform_id}")
     public ResponseEntity<StateMachineTransformVO> queryById(@PathVariable("organization_id") Long organizationId,
@@ -67,7 +67,7 @@ public class StateMachineTransformController extends BaseController {
         return new ResponseEntity<>(transformService.queryById(organizationId, transformId), HttpStatus.OK);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建【全部】转换，所有节点均可转换到当前节点（草稿）")
     @PostMapping(value = "/create_type_all")
     public ResponseEntity<StateMachineTransformVO> createAllStatusTransform(@PathVariable("organization_id") Long organizationId,
@@ -76,7 +76,7 @@ public class StateMachineTransformController extends BaseController {
         return new ResponseEntity<>(transformService.createAllStatusTransform(organizationId, stateMachineId, endNodeId), HttpStatus.CREATED);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除【全部】转换（草稿）")
     @DeleteMapping(value = "/delete_type_all/{transform_id}")
     public ResponseEntity<Boolean> deleteAllStatusTransform(@PathVariable("organization_id") Long organizationId,
@@ -84,7 +84,7 @@ public class StateMachineTransformController extends BaseController {
         return new ResponseEntity<>(transformService.deleteAllStatusTransform(organizationId, transformId), HttpStatus.OK);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更改条件策略")
     @GetMapping(value = "/update_condition_strategy/{transform_id}")
     public ResponseEntity<Boolean> updateConditionStrategy(@PathVariable("organization_id") Long organizationId,
@@ -93,7 +93,7 @@ public class StateMachineTransformController extends BaseController {
         return new ResponseEntity<>(transformService.updateConditionStrategy(organizationId, transformId, conditionStrategy), HttpStatus.CREATED);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
+    @Permission(level = ResourceLevel.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
     @ApiOperation(value = "校验转换名字在起始终点相同条件下是否未被使用")
     @GetMapping(value = "/check_name")
     public ResponseEntity<Boolean> checkName(@PathVariable("organization_id") Long organizationId,

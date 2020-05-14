@@ -1,7 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
@@ -12,7 +12,7 @@ import java.util.Set;
 /**
  * Created by jian_zhang02@163.com on 2018/5/15.
  */
-public interface SprintMapper extends Mapper<SprintDTO> {
+public interface SprintMapper extends BaseMapper<SprintDTO> {
     List<SprintNameDTO> queryNameByOptions(@Param("projectId") Long projectId, @Param("sprintStatusCodes") List<String> sprintStatusCodes);
 
     /**

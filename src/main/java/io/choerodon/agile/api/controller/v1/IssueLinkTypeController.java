@@ -6,12 +6,12 @@ import io.choerodon.agile.api.vo.IssueLinkTypeCreateVO;
 import io.choerodon.agile.api.vo.IssueLinkTypeSearchVO;
 import io.choerodon.agile.api.validator.IssueLinkTypeValidator;
 import io.choerodon.agile.api.vo.IssueLinkTypeVO;
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
-import com.github.pagehelper.PageInfo;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.SortDefault;
-import org.springframework.data.domain.Pageable;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
+import io.choerodon.swagger.annotation.Permission;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,24 +37,24 @@ public class IssueLinkTypeController {
     @Autowired
     private IssueLinkTypeValidator issueLinkTypeValidator;
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("根据项目id查询issueLinkType")
     @PostMapping("/query_all")
-    public ResponseEntity<PageInfo<IssueLinkTypeVO>> listIssueLinkType(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Page<IssueLinkTypeVO>> listIssueLinkType(@ApiParam(value = "项目id", required = true)
                                                                     @PathVariable(name = "project_id") Long projectId,
-                                                                       @ApiParam(value = "不包含的issueLinkTypeId")
+                                                                   @ApiParam(value = "不包含的issueLinkTypeId")
                                                                     @RequestParam(required = false) Long issueLinkTypeId,
-                                                                       @ApiParam(value = "查询参数")
+                                                                   @ApiParam(value = "查询参数")
                                                                     @RequestBody IssueLinkTypeSearchVO issueLinkTypeSearchVO,
-                                                                       @ApiParam(value = "分页信息", required = true)
+                                                                   @ApiParam(value = "分页信息", required = true)
                                                                     @SortDefault(value = "link_type_id", direction = Sort.Direction.DESC)
-                                                                    @ApiIgnore Pageable pageable) {
-        return Optional.ofNullable(issueLinkTypeService.listIssueLinkType(projectId, issueLinkTypeId, issueLinkTypeSearchVO, pageable))
+                                                                    @ApiIgnore PageRequest pageRequest) {
+        return Optional.ofNullable(issueLinkTypeService.listIssueLinkType(projectId, issueLinkTypeId, issueLinkTypeSearchVO, pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueLinkType.listIssueLinkType"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("根据issueLinkTypeId查询issueLinkType")
     @GetMapping(value = "/{linkTypeId}")
     public ResponseEntity<IssueLinkTypeVO> queryIssueLinkType(@ApiParam(value = "项目id", required = true)
@@ -66,7 +66,7 @@ public class IssueLinkTypeController {
                 .orElseThrow(() -> new CommonException("error.IssueLinkType.queryIssueLinkType"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = InitRoleCode.PROJECT_OWNER)
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("创建issueLinkType")
     @PostMapping
     public ResponseEntity<IssueLinkTypeVO> createIssueLinkType(@ApiParam(value = "项目id", required = true)
@@ -80,7 +80,7 @@ public class IssueLinkTypeController {
                 .orElseThrow(() -> new CommonException("error.IssueLinkType.createIssueLinkType"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = InitRoleCode.PROJECT_OWNER)
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("修改issueLinkType")
     @PutMapping
     public ResponseEntity<IssueLinkTypeVO> updateIssueLinkType(@ApiParam(value = "项目id", required = true)
@@ -94,7 +94,7 @@ public class IssueLinkTypeController {
                 .orElseThrow(() -> new CommonException("error.IssueLinkType.updateIssueLinkType"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = InitRoleCode.PROJECT_OWNER)
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("删除issueLink")
     @DeleteMapping(value = "/{issueLinkTypeId}")
     public ResponseEntity deleteIssueLinkType(@ApiParam(value = "项目id", required = true)
@@ -108,7 +108,7 @@ public class IssueLinkTypeController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = InitRoleCode.PROJECT_OWNER)
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("IssueLinkType重名校验")
     @GetMapping(value = "/check_name")
     public ResponseEntity checkIssueLinkTypeName(@ApiParam(value = "项目id", required = true)

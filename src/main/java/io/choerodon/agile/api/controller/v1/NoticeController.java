@@ -3,8 +3,8 @@ package io.choerodon.agile.api.controller.v1;
 import io.choerodon.agile.api.vo.MessageVO;
 import io.choerodon.agile.app.service.NoticeService;
 import io.choerodon.agile.infra.dto.MessageDetailDTO;
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
@@ -29,7 +29,7 @@ public class NoticeController {
     private NoticeService noticeService;
 
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("查询项目下的通知")
     @GetMapping
     public ResponseEntity<List<MessageVO>> queryByProjectId(@ApiParam(value = "项目id", required = true)
@@ -39,7 +39,7 @@ public class NoticeController {
                 .orElseThrow(() -> new CommonException("error.message.get"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("更新项目下的通知")
     @PutMapping
     public ResponseEntity updateNotice(@ApiParam(value = "项目id", required = true)

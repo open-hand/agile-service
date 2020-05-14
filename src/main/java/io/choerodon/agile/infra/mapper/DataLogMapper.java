@@ -6,7 +6,7 @@ import io.choerodon.agile.infra.dto.DataLogDTO;
 import io.choerodon.agile.infra.dto.DataLogStatusChangeDTO;
 import io.choerodon.agile.infra.dto.IssueDTO;
 import io.choerodon.agile.infra.dto.ProductVersionDTO;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
@@ -18,7 +18,7 @@ import java.util.Set;
  * Email: fuqianghuang01@gmail.com
  */
 
-public interface DataLogMapper extends Mapper<DataLogDTO> {
+public interface DataLogMapper extends BaseMapper<DataLogDTO> {
 
     List selectByIssueId(@Param("projectId") Long projectId,
                          @Param("issueId") Long issueId);

@@ -4,8 +4,8 @@ import io.choerodon.agile.api.vo.IssueStatusVO;
 import io.choerodon.agile.api.vo.StatusAndIssuesVO;
 import io.choerodon.agile.api.vo.StatusMoveVO;
 import io.choerodon.agile.app.service.IssueStatusService;
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
@@ -31,7 +31,7 @@ public class IssueStatusController {
     @Autowired
     private IssueStatusService issueStatusService;
 
-    @Permission(type = ResourceType.PROJECT, roles = InitRoleCode.PROJECT_OWNER)
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("新增状态")
     @PostMapping
     public ResponseEntity<IssueStatusVO> createStatus(@ApiParam(value = "项目id", required = true)
@@ -45,7 +45,7 @@ public class IssueStatusController {
                 .orElseThrow(() -> new CommonException("error.status.create"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = InitRoleCode.PROJECT_OWNER)
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("删除未对应的状态")
     @DeleteMapping(value = "/{statusId}")
     public ResponseEntity deleteStatus(@ApiParam(value = "项目id", required = true)
@@ -58,7 +58,7 @@ public class IssueStatusController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = InitRoleCode.PROJECT_OWNER)
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("状态机服务回写状态信息")
     @PostMapping("/back_update")
     public ResponseEntity<IssueStatusVO> createStatusByStateMachine(@ApiParam(value = "项目id", required = true)
@@ -70,7 +70,7 @@ public class IssueStatusController {
                 .orElseThrow(() -> new CommonException("error.status.create"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("查询项目下未对应的状态")
     @GetMapping(value = "/list_by_options")
     public ResponseEntity<List<StatusAndIssuesVO>> listUnCorrespondStatus(@ApiParam(value = "项目id", required = true)
@@ -84,7 +84,7 @@ public class IssueStatusController {
                 .orElseThrow(() -> new CommonException(ERROR_STATUS_GET));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("状态移动至列中")
     @PostMapping(value = "/{statusId}/move_to_column")
     public ResponseEntity<IssueStatusVO> moveStatusToColumn(@ApiParam(value = "项目id", required = true)
@@ -98,7 +98,7 @@ public class IssueStatusController {
                 .orElseThrow(() -> new CommonException(ERROR_STATUS_GET));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("状态移动至未对应")
     @PostMapping(value = "/{statusId}/move_to_uncorrespond")
     public ResponseEntity<IssueStatusVO> moveStatusToUnCorrespond(@ApiParam(value = "项目id", required = true)
@@ -112,7 +112,7 @@ public class IssueStatusController {
                 .orElseThrow(() -> new CommonException(ERROR_STATUS_GET));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("查询项目下的issue状态")
     @GetMapping(value = "/list")
     public ResponseEntity<List<IssueStatusVO>> listStatusByProjectId(@ApiParam(value = "项目id", required = true)
@@ -122,7 +122,7 @@ public class IssueStatusController {
                 .orElseThrow(() -> new CommonException("error.status.queryIssueStatusList"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = InitRoleCode.PROJECT_OWNER)
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("更新状态")
     @PutMapping(value = "/{id}")
     public ResponseEntity<IssueStatusVO> updateStatus(@ApiParam(value = "项目id", required = true)

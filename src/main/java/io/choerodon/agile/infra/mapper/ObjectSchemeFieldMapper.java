@@ -3,7 +3,7 @@ package io.choerodon.agile.infra.mapper;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldSearchVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
  * @author shinan.chen
  * @since 2019/3/29
  */
-public interface ObjectSchemeFieldMapper extends Mapper<ObjectSchemeFieldDTO> {
+public interface ObjectSchemeFieldMapper extends BaseMapper<ObjectSchemeFieldDTO> {
     /**
      * 根据对象方案编码查询方案字段
      *

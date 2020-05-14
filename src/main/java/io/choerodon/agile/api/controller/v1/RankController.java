@@ -2,8 +2,8 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.RankVO;
 import io.choerodon.agile.app.service.RankService;
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -23,7 +23,7 @@ public class RankController {
     @Autowired
     private RankService rankService;
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("史诗、特性移动")
     @PostMapping
     public ResponseEntity epicAndFeatureRank(@ApiParam(value = "项目id", required = true)

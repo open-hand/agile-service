@@ -1,7 +1,10 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
+import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -9,7 +12,10 @@ import javax.persistence.Transient;
  * @author peng.jiang, dinghuang123@gmail.com
  */
 @Table(name = "fd_state_machine_config")
-public class StateMachineConfigDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class StateMachineConfigDTO extends AuditDomain {
+    @Id
     private Long id;
     private Long transformId;
     private Long stateMachineId;

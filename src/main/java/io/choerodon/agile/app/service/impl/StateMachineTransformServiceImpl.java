@@ -15,7 +15,7 @@ import io.choerodon.agile.infra.enums.TransformType;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.mybatis.entity.Criteria;
+import org.hzero.mybatis.common.Criteria;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -248,9 +248,10 @@ public class StateMachineTransformServiceImpl implements StateMachineTransformSe
             throw new CommonException("error.updateConditionStrategy.queryById.notFound");
         }
         transform.setConditionStrategy(conditionStrategy);
-        Criteria criteria = new Criteria();
-        criteria.update("conditionStrategy");
-        int update = transformDraftMapper.updateByPrimaryKeyOptions(transform, criteria);
+//        Criteria criteria = new Criteria();
+//        criteria.update("conditionStrategy");
+//        int update = transformDraftMapper.updateByPrimaryKeyOptions(transform, criteria);
+        int update = transformDraftMapper.updateOptional(transform, "conditionStrategy");
         if (update != 1) {
             throw new CommonException("error.updateConditionStrategy.updateOptional");
         }

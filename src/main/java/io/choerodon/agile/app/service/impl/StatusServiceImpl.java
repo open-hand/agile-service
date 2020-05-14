@@ -1,7 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.domain.PageInfo;
 import io.choerodon.agile.api.vo.StatusCheckVO;
 import io.choerodon.agile.api.vo.StatusSearchVO;
 import io.choerodon.agile.api.vo.StatusVO;
@@ -18,8 +18,8 @@ import io.choerodon.agile.infra.exception.RemoveStatusException;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
-import io.choerodon.web.util.PageableHelper;
-import org.springframework.data.domain.Pageable;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -53,12 +53,11 @@ public class StatusServiceImpl implements StatusService {
     private ModelMapper modelMapper;
 
     @Override
-    public PageInfo<StatusWithInfoVO> queryStatusList(Pageable pageable, Long organizationId, StatusSearchVO statusSearchVO) {
-        PageInfo<Long> statusIdsPage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(pageable.getSort()))
-                .doSelectPageInfo(() -> statusMapper.selectStatusIds(organizationId, statusSearchVO));
+    public Page<StatusWithInfoVO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchVO statusSearchVO) {
+        Page<Long> statusIdsPage = PageHelper.doPageAndSort(pageRequest, () -> statusMapper.selectStatusIds(organizationId, statusSearchVO));
         List<StatusWithInfoVO> statusWithInfoVOList = new ArrayList<>();
-        if (!statusIdsPage.getList().isEmpty()) {
-            List<StatusWithInfoDTO> statuses = statusMapper.queryStatusList(organizationId, statusIdsPage.getList());
+        if (!statusIdsPage.getContent().isEmpty()) {
+            List<StatusWithInfoDTO> statuses = statusMapper.queryStatusList(organizationId, statusIdsPage.getContent());
             statusWithInfoVOList = modelMapper.map(statuses, new TypeToken<List<StatusWithInfoVO>>() {
             }.getType());
         }

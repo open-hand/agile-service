@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import io.choerodon.agile.infra.dto.*;
 import org.apache.ibatis.annotations.Param;
 
@@ -13,7 +13,7 @@ import java.util.List;
  * @author dinghuang123@gmail.com
  * @since 2018-05-14 21:59:45
  */
-public interface IssueCommentMapper extends Mapper<IssueCommentDTO> {
+public interface IssueCommentMapper extends BaseMapper<IssueCommentDTO> {
 
     /**
      * 根据issueId查询评论

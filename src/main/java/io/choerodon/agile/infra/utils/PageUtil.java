@@ -1,23 +1,25 @@
 package io.choerodon.agile.infra.utils;
 
 import java.util.*;
+import io.choerodon.mybatis.util.StringUtil;
 
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageInfo;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 
-import org.springframework.data.domain.Sort;
-import tk.mybatis.mapper.util.StringUtil;
 
 /**
  * Created by WangZhe@choerodon.io on 2019-06-13.
  * Email: ettwz@hotmail.com
  */
 public class PageUtil {
-    public static PageInfo buildPageInfoWithPageInfoList(PageInfo pageInfo, List list) {
-        Page page = new Page<>(pageInfo.getPageNum(), pageInfo.getPageSize());
-        page.setTotal(pageInfo.getTotal());
-        page.addAll(list);
-        return page.toPageInfo();
+
+    public static Page buildPageInfoWithPageInfoList(Page page, List list) {
+        Page result = new Page<>();
+        result.setNumber(page.getNumber());
+        result.setSize(page.getSize());
+        result.setTotalElements(page.getTotalElements());
+        result.addAll(list);
+        return result;
     }
 
     public static Sort sortResetOrder(Sort sort, String mainTableAlias, Map<String, String> map) {
@@ -29,12 +31,13 @@ public class PageUtil {
                 Sort.Order order = iterator.next();
                 for (Map.Entry<String, String> entry : map.entrySet()) {
                     if (entry.getKey().equals(order.getProperty())) {
-                        if(order.getDirection().isAscending()){
-                            order = Sort.Order.asc(entry.getValue());
-                        }
-                        else {
-                            order = Sort.Order.desc(entry.getValue());
-                        }
+//                        if(order.getDirection().isAscending()){
+//                            order = Sort.Order.asc(entry.getValue());
+//                        }
+//                        else {
+//                            order = Sort.Order.desc(entry.getValue());
+//                        }
+                        order.setProperty(entry.getValue());
                         flag = true;
                     }
                 }
@@ -42,22 +45,22 @@ public class PageUtil {
                     //驼峰转下划线
                     if(order.getDirection().isAscending()){
                         if (mainTableAlias != null) {
-                            order = Sort.Order.by(mainTableAlias + "." + StringUtil.camelhumpToUnderline(order.getProperty()));
+                            order.setProperty(mainTableAlias + "." + StringUtil.camelhumpToUnderline(order.getProperty()));
                         } else {
-                            order = Sort.Order.by(StringUtil.camelhumpToUnderline(order.getProperty()));
+                            order.setProperty(StringUtil.camelhumpToUnderline(order.getProperty()));
                         }
                     } else {
                         if (mainTableAlias != null) {
-                            order = Sort.Order.desc(mainTableAlias + "." + StringUtil.camelhumpToUnderline(order.getProperty()));
+                            order.setProperty(mainTableAlias + "." + StringUtil.camelhumpToUnderline(order.getProperty()));
                         } else {
-                            order = Sort.Order.desc(StringUtil.camelhumpToUnderline(order.getProperty()));
+                            order.setProperty(StringUtil.camelhumpToUnderline(order.getProperty()));
                         }
                     }
                 }
                 orders.add(order);
             }
         }
-        return Sort.by(orders);
+        return new Sort(orders);
     }
 
     public static int getBegin(int page, int size) {
@@ -65,24 +68,20 @@ public class PageUtil {
         return (page - 1) * size;
     }
 
-    public static PageInfo emptyPageInfo(int page, int size) {
-        Page result = new Page(page, size);
-        try {
-            return result.toPageInfo();
-        } finally {
-            result.close();
-        }
+    public static Page emptyPageInfo(int page, int size) {
+        Page result = new Page();
+        result.setNumber(page);
+        result.setSize(size);
+        return result;
     }
 
-    public static PageInfo getPageInfo(int page, int size, int total, Collection list) {
-        Page result = new Page(page, size);
-        try {
-            result.setTotal(total);
-            result.addAll(list);
-            return result.toPageInfo();
-        } finally {
-            result.close();
-        }
+    public static Page getPageInfo(int page, int size, int total, Collection list) {
+        Page result = new Page();
+        result.setNumber(page);
+        result.setSize(size);
+        result.setTotalElements(total);
+        result.addAll(list);
+        return result;
     }
 
 }

@@ -2,8 +2,8 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.ColumnSortVO;
 import io.choerodon.agile.api.vo.ColumnWithMaxMinNumVO;
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.BoardColumnVO;
 import io.choerodon.agile.app.service.BoardColumnService;
@@ -28,7 +28,7 @@ public class BoardColumnController {
     @Autowired
     private BoardColumnService boardColumnService;
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("创建BoardColumn")
     @PostMapping
     public ResponseEntity<BoardColumnVO> createBoardColumn(@ApiParam(value = "项目id", required = true)
@@ -44,7 +44,7 @@ public class BoardColumnController {
                 .orElseThrow(() -> new CommonException("error.BoardColumn.create"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("更新BoardColumn")
     @PutMapping(value = "/{columnId}")
     public ResponseEntity<BoardColumnVO> updateBoardColumn(@ApiParam(value = "项目id", required = true)
@@ -60,7 +60,7 @@ public class BoardColumnController {
                 .orElseThrow(() -> new CommonException("error.BoardColumn.update"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("调整列的顺序")
     @PostMapping(value = "/column_sort")
     public ResponseEntity columnSort(@ApiParam(value = "项目id", required = true)
@@ -71,7 +71,7 @@ public class BoardColumnController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("调整项目群列的顺序")
     @PostMapping(value = "/program/column_sort")
     public ResponseEntity columnSortByProgram(@ApiParam(value = "项目id", required = true)
@@ -82,7 +82,7 @@ public class BoardColumnController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("删除BoardColumn")
     @DeleteMapping(value = "/{columnId}")
     public ResponseEntity deleteBoardColumn(@ApiParam(value = "项目id", required = true)
@@ -93,7 +93,7 @@ public class BoardColumnController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("项目群删除BoardColumn")
     @DeleteMapping(value = "/program/{columnId}")
     public ResponseEntity deleteProgramBoardColumn(@ApiParam(value = "项目id", required = true)
@@ -104,7 +104,7 @@ public class BoardColumnController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("根据id查询BoardColumn")
     @GetMapping(value = "/{columnId}")
     public ResponseEntity<BoardColumnVO> queryBoardColumnById(@ApiParam(value = "项目id", required = true)
@@ -116,7 +116,7 @@ public class BoardColumnController {
                 .orElseThrow(() -> new CommonException("error.BoardColumn.get"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("根据id更新最大最小值")
     @PostMapping(value = "/{columnId}/column_contraint")
     public ResponseEntity<BoardColumnVO> updateColumnContraint(@ApiParam(value = "项目id", required = true)

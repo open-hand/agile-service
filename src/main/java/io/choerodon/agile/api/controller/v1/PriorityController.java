@@ -4,8 +4,8 @@ import io.choerodon.agile.api.validator.PriorityValidator;
 import io.choerodon.agile.api.vo.PriorityVO;
 import io.choerodon.agile.app.service.PriorityService;
 import io.choerodon.agile.infra.utils.ParamUtils;
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
@@ -32,7 +32,7 @@ public class PriorityController {
     @Autowired
     private PriorityValidator priorityValidator;
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "展示页面")
     @CustomPageRequest
     @GetMapping
@@ -51,7 +51,7 @@ public class PriorityController {
         return new ResponseEntity<>(priorityService.selectAll(priorityVO, ParamUtils.arrToStr(param)), HttpStatus.OK);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建优先级")
     @PostMapping
     public ResponseEntity<PriorityVO> create(@PathVariable("organization_id") Long organizationId, @RequestBody PriorityVO priorityVO) {
@@ -59,7 +59,7 @@ public class PriorityController {
         return new ResponseEntity<>(priorityService.create(organizationId, priorityVO), HttpStatus.OK);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更新优先级")
     @PutMapping(value = "/{priority_id}")
     public ResponseEntity<PriorityVO> update(@PathVariable("organization_id") Long organizationId, @PathVariable("priority_id") Long priorityId,
@@ -70,7 +70,7 @@ public class PriorityController {
         return new ResponseEntity<>(priorityService.update(priorityVO), HttpStatus.OK);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "校验优先级名字是否未被使用")
     @GetMapping(value = "/check_name")
     public ResponseEntity<Boolean> checkName(@PathVariable("organization_id") Long organizationId,
@@ -80,7 +80,7 @@ public class PriorityController {
                 .orElseThrow(() -> new CommonException("error.priorityName.check"));
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更新展示顺序")
     @PutMapping(value = "/sequence")
     public ResponseEntity<List<PriorityVO>> updateByList(@PathVariable("organization_id") Long organizationId,
@@ -89,7 +89,7 @@ public class PriorityController {
         return new ResponseEntity<>(priorityService.updateByList(list, organizationId), HttpStatus.OK);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据组织id查询优先级,map")
     @GetMapping("/list")
     public ResponseEntity<Map<Long, PriorityVO>> queryByOrganizationId(@ApiParam(value = "组织id", required = true)
@@ -100,7 +100,7 @@ public class PriorityController {
 
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据组织id查询默认优先级")
     @GetMapping("/default")
     public ResponseEntity<PriorityVO> queryDefaultByOrganizationId(@ApiParam(value = "组织id", required = true)
@@ -111,7 +111,7 @@ public class PriorityController {
 
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据组织id查询优先级,list")
     @GetMapping("/list_by_org")
     public ResponseEntity<List<PriorityVO>> queryByOrganizationIdList(@ApiParam(value = "组织id", required = true)
@@ -121,7 +121,7 @@ public class PriorityController {
                 .orElseThrow(() -> new CommonException("error.priorityList.get"));
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "生效/失效优先级")
     @GetMapping("/enable/{id}")
     public ResponseEntity<PriorityVO> enablePriority(@PathVariable("organization_id") Long organizationId,
@@ -131,7 +131,7 @@ public class PriorityController {
         return new ResponseEntity<>(priorityService.enablePriority(organizationId, id, enable), HttpStatus.OK);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "校验删除优先级")
     @GetMapping("/check_delete/{id}")
     public ResponseEntity<Long> checkDelete(@PathVariable("organization_id") Long organizationId,
@@ -140,7 +140,7 @@ public class PriorityController {
         return new ResponseEntity<>(priorityService.checkDelete(organizationId, id), HttpStatus.OK);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除优先级")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity delete(@PathVariable("organization_id") Long organizationId, @PathVariable("id") Long priorityId,

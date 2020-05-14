@@ -1,7 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.infra.dto.StateMachineNodeDraftDTO;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author peng.jiang, dinghuang123@gmail.com
  */
-public interface StateMachineNodeDraftMapper extends Mapper<StateMachineNodeDraftDTO> {
+public interface StateMachineNodeDraftMapper extends BaseMapper<StateMachineNodeDraftDTO> {
 
     StateMachineNodeDraftDTO getNodeById(@Param("nodeId") Long nodeId);
 

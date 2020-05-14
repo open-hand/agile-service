@@ -1,17 +1,23 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
-import javax.persistence.Column;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/10/9.
  * Email: fuqianghuang01@gmail.com
  */
 @Table(name = "agile_message")
-public class MessageDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class MessageDTO extends AuditDomain {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long messageId;  //需要加主键id
 
     @Transient
     private Long id;
@@ -29,6 +35,14 @@ public class MessageDTO extends BaseDTO {
 
     @Transient
     private Long projectId;
+
+    public void setMessageId(Long messageId) {
+        this.messageId = messageId;
+    }
+
+    public Long getMessageId() {
+        return messageId;
+    }
 
     public String getEvent() {
         return event;

@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -8,7 +10,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Table(name = "agile_rank")
-public class RankDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class RankDTO extends AuditDomain {
 
     public RankDTO() {}
 

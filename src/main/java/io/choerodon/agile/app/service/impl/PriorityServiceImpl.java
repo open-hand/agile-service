@@ -11,7 +11,6 @@ import io.choerodon.agile.infra.mapper.PriorityMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.entity.Criteria;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -235,9 +234,10 @@ public class PriorityServiceImpl implements PriorityService {
             throw new CommonException(NOT_FOUND);
         }
         priority.setEnable(enable);
-        Criteria criteria = new Criteria();
-        criteria.update("enable");
-        priorityMapper.updateByPrimaryKeyOptions(priority, criteria);
+//        Criteria criteria = new Criteria();
+//        criteria.update("enable");
+//        priorityMapper.updateByPrimaryKeyOptions(priority, criteria);
+        priorityMapper.updateOptional(priority, "enable");
         //失效之后再进行默认优先级的重置
         if (!enable && priority.getDefault()) {
             updateOtherDefault(organizationId);

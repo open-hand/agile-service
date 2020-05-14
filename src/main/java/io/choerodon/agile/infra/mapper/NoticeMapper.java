@@ -1,13 +1,13 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.infra.dto.MessageDTO;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
 
-public interface NoticeMapper extends Mapper<MessageDTO> {
+public interface NoticeMapper extends BaseMapper<MessageDTO> {
 
     List<MessageDTO> selectChangeMessageByProjectId(Long projectId);
 

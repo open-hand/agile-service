@@ -1,17 +1,24 @@
 package io.choerodon.agile.infra.dto;
 
 import io.choerodon.agile.infra.utils.StringUtil;
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/15.
  * Email: fuqianghuang01@gmail.com
  */
 @Table(name = "agile_board_column_status_rel")
-public class ColumnStatusRelDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class ColumnStatusRelDTO extends AuditDomain {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;  //需要加主键id
 
     private Integer position;
 
@@ -23,6 +30,14 @@ public class ColumnStatusRelDTO extends BaseDTO {
 
     @Transient
     private Long issueId;
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
+    }
 
     public Integer getPosition() {
         return position;

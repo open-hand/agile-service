@@ -5,7 +5,8 @@ import io.choerodon.agile.infra.dto.StateMachineDTO;
 import io.choerodon.agile.infra.mapper.StateMachineMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.app.service.StateMachineClientService;
-import io.choerodon.mybatis.entity.Criteria;
+import io.choerodon.mybatis.helper.OptionalHelper;
+import org.hzero.mybatis.common.Criteria;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -14,6 +15,9 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * @author shinan.chen
@@ -50,9 +54,10 @@ public class ChangeStateMachineStatusAspect {
         }
         if (stateMachine.getStatus().equals(StateMachineStatus.ACTIVE)) {
             stateMachine.setStatus(StateMachineStatus.DRAFT);
-            Criteria criteria = new Criteria();
-            criteria.update("status");
-            stateMachineMapper.updateByPrimaryKeyOptions(stateMachine, criteria);
+//            Criteria criteria = new Criteria();
+//            criteria.update("status");
+//            stateMachineMapper.updateByPrimaryKeyOptions(stateMachine, criteria);
+            stateMachineMapper.updateOptional(stateMachine, "status");
         }
 
         try {

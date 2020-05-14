@@ -1,7 +1,8 @@
 package io.choerodon.agile.app.service;
 
-import com.github.pagehelper.PageInfo;
-import org.springframework.data.domain.Pageable;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.domain.PageInfo;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.agile.api.vo.ObjectSchemeSearchVO;
 import io.choerodon.agile.api.vo.ObjectSchemeVO;
 
@@ -11,5 +12,5 @@ import io.choerodon.agile.api.vo.ObjectSchemeVO;
  */
 public interface ObjectSchemeService {
 
-    PageInfo<ObjectSchemeVO> pageQuery(Long organizationId, Pageable pageable, ObjectSchemeSearchVO searchDTO);
+    Page<ObjectSchemeVO> pageQuery(Long organizationId, PageRequest pageRequest, ObjectSchemeSearchVO searchDTO);
 }

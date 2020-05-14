@@ -1,7 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.infra.dto.PageFieldDTO;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
  * @author shinan.chen
  * @since 2019/4/1
  */
-public interface PageFieldMapper extends Mapper<PageFieldDTO> {
+public interface PageFieldMapper extends BaseMapper<PageFieldDTO> {
     /**
      * 组织层/项目层 根据页面编码和上下文获取页面字段列表
      *

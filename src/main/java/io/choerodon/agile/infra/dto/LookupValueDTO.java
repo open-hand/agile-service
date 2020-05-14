@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.agile.infra.utils.StringUtil;
 
 import javax.persistence.GeneratedValue;
@@ -16,7 +18,9 @@ import javax.validation.constraints.NotNull;
  * @since 2018-05-15 09:40:27
  */
 @Table(name = "lookup_value")
-public class LookupValueDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class LookupValueDTO extends AuditDomain {
 
     /***/
     @Id

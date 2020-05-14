@@ -1,7 +1,8 @@
 package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.github.pagehelper.PageInfo;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.domain.PageInfo;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.domain.IssueType;
 import io.choerodon.agile.app.domain.Predefined;
@@ -9,7 +10,7 @@ import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.feign.FileFeignClient;
-import io.choerodon.agile.infra.feign.NotifyFeignClient;
+//import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.exception.CommonException;
@@ -73,8 +74,8 @@ public class ExcelServiceImpl implements ExcelService {
     @Autowired
     protected StateMachineClientService stateMachineClientService;
 
-    @Autowired
-    private NotifyFeignClient notifyFeignClient;
+//    @Autowired
+//    private NotifyFeignClient notifyFeignClient;
 
     @Autowired
     private FileOperationHistoryMapper fileOperationHistoryMapper;
@@ -225,8 +226,8 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected Map<String, Long> getManagers(Long projectId) {
         Map<String, Long> managerMap = new HashMap<>();
-        ResponseEntity<PageInfo<UserDTO>> response = baseFeignClient.listUsersByProjectId(projectId, 1, 0);
-        List<UserDTO> users = response.getBody().getList();
+        ResponseEntity<Page<UserDTO>> response = baseFeignClient.listUsersByProjectId(projectId, 1, 0);
+        List<UserDTO> users = response.getBody().getContent();
         users.forEach(u -> {
             if (u.getEnabled()) {
                 String realName = u.getRealName();
@@ -445,7 +446,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process) {
         fileOperationHistoryDTO.setProcess(process);
-        notifyFeignClient.postWebSocket(WEBSOCKET_IMPORT_CODE, userId.toString(), JSON.toJSONString(fileOperationHistoryDTO));
+//        notifyFeignClient.postWebSocket(WEBSOCKET_IMPORT_CODE, userId.toString(), JSON.toJSONString(fileOperationHistoryDTO));
     }
 
     protected String uploadErrorExcel(Workbook errorWorkbook) {

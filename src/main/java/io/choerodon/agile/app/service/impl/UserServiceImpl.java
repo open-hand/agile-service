@@ -1,13 +1,13 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.github.pagehelper.PageInfo;
+import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.core.notify.WebHookJsonSendDTO;
+//import io.choerodon.core.notify.WebHookJsonSendDTO;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,9 +84,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserVO> queryUsersByNameAndProjectId(Long projectId, String name) {
-        ResponseEntity<PageInfo<UserVO>> userList = baseFeignClient.list(projectId, name);
+        ResponseEntity<Page<UserVO>> userList = baseFeignClient.list(projectId, name);
         if (userList != null) {
-            return userList.getBody().getList();
+            return userList.getBody().getContent();
         } else {
             return new ArrayList<>();
         }
@@ -104,9 +104,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public PageInfo<UserVO> pagingQueryUsersByRoleIdOnProjectLevel(int page, int size, Long roleId, Long sourceId, RoleAssignmentSearchVO roleAssignmentSearchVO) {
-        ResponseEntity<PageInfo<UserVO>> users = baseFeignClient.pagingQueryUsersByRoleIdOnProjectLevel(page, size, roleId, sourceId, roleAssignmentSearchVO);
-        return users != null ? users.getBody() : new PageInfo<>(new ArrayList<>());
+    public Page<UserVO> pagingQueryUsersByRoleIdOnProjectLevel(int page, int size, Long roleId, Long sourceId, RoleAssignmentSearchVO roleAssignmentSearchVO) {
+        ResponseEntity<Page<UserVO>> users = baseFeignClient.pagingQueryUsersByRoleIdOnProjectLevel(page, size, roleId, sourceId, roleAssignmentSearchVO);
+        return users != null ? users.getBody() : new Page<>();
     }
 
     @Override
@@ -121,18 +121,18 @@ public class UserServiceImpl implements UserService {
         return projectDTOResponseEntity != null ? projectDTOResponseEntity.getBody() : null;
     }
 
-    @Override
-    public WebHookJsonSendDTO.User getWebHookUserById(Long userId) {
-        Long[] ids = new Long[2];
-        ids[0] = userId;
-        ResponseEntity<List<UserDTO>> users = baseFeignClient.listUsersByIds(ids, false);
-        if (users != null) {
-            UserDTO userDTO = users.getBody().get(0);
-            return new WebHookJsonSendDTO.User(userDTO.getLoginName(), userDTO.getRealName());
-        } else {
-            return new WebHookJsonSendDTO.User("0", "unknown");
-        }
-    }
+//    @Override
+//    public WebHookJsonSendDTO.User getWebHookUserById(Long userId) {
+//        Long[] ids = new Long[2];
+//        ids[0] = userId;
+//        ResponseEntity<List<UserDTO>> users = baseFeignClient.listUsersByIds(ids, false);
+//        if (users != null) {
+//            UserDTO userDTO = users.getBody().get(0);
+//            return new WebHookJsonSendDTO.User(userDTO.getLoginName(), userDTO.getRealName());
+//        } else {
+//            return new WebHookJsonSendDTO.User("0", "unknown");
+//        }
+//    }
 
     @Override
     public boolean isProjectOwner(Long projectId, Long userId) {

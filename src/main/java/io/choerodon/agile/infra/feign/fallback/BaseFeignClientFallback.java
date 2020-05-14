@@ -1,10 +1,10 @@
 package io.choerodon.agile.infra.feign.fallback;
 
-import com.github.pagehelper.PageInfo;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.TimeZoneWorkCalendarDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -39,17 +39,17 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     }
 
     @Override
-    public ResponseEntity<PageInfo<UserDTO>> listUsersByProjectId(Long id, int page, int size) {
+    public ResponseEntity<Page<UserDTO>> listUsersByProjectId(Long id, int page, int size) {
         throw new CommonException(QUERY_ERROR);
     }
 
     @Override
-    public ResponseEntity<PageInfo<UserDTO>> agileUsers(Long projectId, int page, int size, String param, Set<Long> userIds) {
+    public ResponseEntity<Page<UserDTO>> agileUsers(Long projectId, int page, int size, String param, Set<Long> userIds) {
         throw new CommonException(QUERY_ERROR);
     }
 
     @Override
-    public ResponseEntity<PageInfo<UserVO>> list(Long id, String param) {
+    public ResponseEntity<Page<UserVO>> list(Long id, String param) {
         throw new CommonException(QUERY_ERROR);
     }
 
@@ -59,7 +59,7 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     }
 
     @Override
-    public ResponseEntity<PageInfo<UserVO>> pagingQueryUsersByRoleIdOnProjectLevel(int page, int size, Long roleId, Long sourceId, RoleAssignmentSearchVO roleAssignmentSearchVO) {
+    public ResponseEntity<Page<UserVO>> pagingQueryUsersByRoleIdOnProjectLevel(int page, int size, Long roleId, Long sourceId, RoleAssignmentSearchVO roleAssignmentSearchVO) {
         throw new CommonException("error.users.get");
     }
 
@@ -74,7 +74,7 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     }
 
     @Override
-    public ResponseEntity<PageInfo<UserWithRoleVO>> pagingQueryUsersWithProjectLevelRoles(int page, int size, Long sourceId, @Valid RoleAssignmentSearchVO roleAssignmentSearchVO, boolean doPage) {
+    public ResponseEntity<Page<UserWithRoleVO>> pagingQueryUsersWithProjectLevelRoles(int page, int size, Long sourceId, @Valid RoleAssignmentSearchVO roleAssignmentSearchVO, boolean doPage) {
         throw new CommonException("error.usersWithRoles.get");
     }
 

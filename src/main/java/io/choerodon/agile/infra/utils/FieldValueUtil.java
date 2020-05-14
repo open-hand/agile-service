@@ -13,7 +13,7 @@ import io.choerodon.agile.infra.enums.FieldType;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.FieldOptionMapper;
-import org.springframework.data.domain.Pageable;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.util.CollectionUtils;
 import springfox.documentation.schema.Entry;
@@ -504,7 +504,7 @@ public class FieldValueUtil {
         fieldDataLogService.createDataLog(projectId, ObjectSchemeCode.AGILE_ISSUE, create);
     }
 
-    public static void handleAgileSortPageRequest(String fieldCode, String fieldType, Pageable pageable) {
+    public static void handleAgileSortPageRequest(String fieldCode, String fieldType, PageRequest pageRequest) {
         try {
             switch (fieldType) {
                 case FieldType.DATETIME:
@@ -512,7 +512,7 @@ public class FieldValueUtil {
                 case FieldType.TIME:
                     Map<String, String> order = new HashMap<>(1);
                     order.put(fieldCode, DATE_VALUE);
-                    PageUtil.sortResetOrder(pageable.getSort(), "fv", order);
+                    PageUtil.sortResetOrder(pageRequest.getSort(), "fv", order);
                     break;
                 default:
                     break;

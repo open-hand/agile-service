@@ -1,7 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.infra.dto.PriorityDTO;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +13,7 @@ import java.util.List;
  * @Date 2018/8/21
  */
 @Component
-public interface PriorityMapper extends Mapper<PriorityDTO> {
+public interface PriorityMapper extends BaseMapper<PriorityDTO> {
     /**
      * 查询优先级表
      *

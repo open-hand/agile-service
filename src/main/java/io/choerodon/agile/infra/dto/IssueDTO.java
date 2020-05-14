@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.agile.infra.utils.StringUtil;
 
 import javax.persistence.*;
@@ -16,7 +18,9 @@ import java.util.List;
  * @since 2018-05-14 20:30:48
  */
 @Table(name = "agile_issue")
-public class IssueDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class IssueDTO extends AuditDomain {
 
     /***/
     @Id

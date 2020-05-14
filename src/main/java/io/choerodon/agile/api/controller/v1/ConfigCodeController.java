@@ -1,7 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.ConfigCodeVO;
@@ -26,7 +26,7 @@ public class ConfigCodeController extends BaseController {
     @Autowired
     private ConfigCodeService configCodeService;
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "获取未配置的条件，验证，后置动作等列表")
     @GetMapping(value = "/{transform_id}")
     public ResponseEntity<List<ConfigCodeVO>> queryByTransformId(@PathVariable("organization_id") Long organizationId,

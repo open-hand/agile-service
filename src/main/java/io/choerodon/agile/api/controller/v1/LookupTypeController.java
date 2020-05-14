@@ -2,8 +2,8 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.LookupTypeVO;
 import io.choerodon.agile.app.service.LookupTypeService;
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ public class LookupTypeController {
     @Autowired
     private LookupTypeService lookupTypeService;
 
-    @Permission(type = ResourceType.SITE)
+    @Permission(level = ResourceLevel.SITE)
     @ApiOperation("查询所有lookup type类型")
     @GetMapping
     public ResponseEntity<List<LookupTypeVO>> listLookupType() {

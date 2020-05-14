@@ -10,7 +10,7 @@ import io.choerodon.agile.app.service.impl.StateMachineClientServiceImpl
 import io.choerodon.agile.infra.utils.MybatisFunctionTestUtil
 import io.choerodon.agile.infra.dto.*
 import io.choerodon.agile.infra.mapper.*
-import com.github.pagehelper.PageInfo
+import io.choerodon.core.domain.PageInfo
 import io.choerodon.agile.app.service.UserService
 import org.mockito.Matchers
 import org.mockito.Mock

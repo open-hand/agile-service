@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.StoryMapDragVO;
 import io.choerodon.agile.app.service.StoryMapService;
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
@@ -28,7 +28,7 @@ public class StoryMapController {
     @Autowired
     private StoryMapService storyMapService;
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER, InitRoleCode.PROJECT_MEMBER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("查询故事地图整体")
     @PostMapping("/main")
     public ResponseEntity<JSONObject> queryStoryMap(@ApiParam(value = "项目id", required = true)
@@ -42,7 +42,7 @@ public class StoryMapController {
                 .orElseThrow(() -> new CommonException("error.storyMap.get"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_OWNER, InitRoleCode.PROJECT_MEMBER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("查询故事地图需求池")
     @PostMapping("/demand")
     public ResponseEntity<JSONObject> queryStoryMapDemand(@ApiParam(value = "项目id", required = true)
@@ -54,7 +54,7 @@ public class StoryMapController {
                 .orElseThrow(() -> new CommonException("error.storyMapDemand.get"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("故事地图移动卡片")
     @PostMapping(value = "/move")
     public ResponseEntity storyMapMove(@ApiParam(value = "项目id", required = true)

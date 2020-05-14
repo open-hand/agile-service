@@ -1,7 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import io.choerodon.core.domain.Page;
 import com.google.common.collect.Ordering;
 import io.choerodon.agile.api.validator.SprintValidator;
 import io.choerodon.agile.api.vo.*;
@@ -15,17 +14,16 @@ import io.choerodon.agile.infra.utils.DateUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.agile.infra.utils.StringUtil;
-import io.choerodon.web.util.PageableHelper;
-import org.checkerframework.checker.units.qual.A;
-import org.springframework.data.domain.Pageable;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -477,7 +475,7 @@ public class SprintServiceImpl implements SprintService {
     }
 
     @Override
-    public PageInfo<IssueListVO> queryIssueByOptions(Long projectId, Long sprintId, String status, Pageable pageable, Long organizationId) {
+    public Page<IssueListVO> queryIssueByOptions(Long projectId, Long sprintId, String status, PageRequest pageRequest, Long organizationId) {
         SprintDTO sprintDTO = new SprintDTO();
         sprintDTO.setProjectId(projectId);
         sprintDTO.setSprintId(sprintId);
@@ -488,25 +486,25 @@ public class SprintServiceImpl implements SprintService {
         Date actualEndDate = sprint.getActualEndDate() == null ? new Date() : sprint.getActualEndDate();
         sprint.setActualEndDate(actualEndDate);
         Date startDate = sprint.getStartDate();
-        PageInfo<Long> reportIssuePage = new PageInfo<>(new ArrayList<>());
-        Sort sort = PageUtil.sortResetOrder(pageable.getSort(), "ai", new HashMap<>());
+        Page<Long> reportIssuePage = new Page<>();
+        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), "ai", new HashMap<>());
         //pageable.resetOrder("ai", new HashMap<>());
         switch (status) {
             case DONE:
-                reportIssuePage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> reportMapper.queryReportIssueIds(projectId, sprintId, actualEndDate, true));
+                reportIssuePage = PageHelper.doPageAndSort(pageRequest, () -> reportMapper.queryReportIssueIds(projectId, sprintId, actualEndDate, true));
                 break;
             case UNFINISHED:
-                reportIssuePage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> reportMapper.queryReportIssueIds(projectId, sprintId, actualEndDate, false));
+                reportIssuePage = PageHelper.doPageAndSort(pageRequest, () -> reportMapper.queryReportIssueIds(projectId, sprintId, actualEndDate, false));
                 break;
             case REMOVE:
-                reportIssuePage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(sort)).doSelectPageInfo(() -> reportMapper.queryRemoveIssueIdsDuringSprintWithOutSubEpicIssue(sprint));
+                reportIssuePage = PageHelper.doPageAndSort(pageRequest, () -> reportMapper.queryRemoveIssueIdsDuringSprintWithOutSubEpicIssue(sprint));
                 break;
             default:
                 break;
         }
-        List<Long> reportIssueIds = reportIssuePage.getList();
+        List<Long> reportIssueIds = reportIssuePage.getContent();
         if (reportIssueIds.isEmpty()) {
-            return new PageInfo<>(new ArrayList<>());
+            return new Page<>();
         }
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
         //冲刺报告查询的issue

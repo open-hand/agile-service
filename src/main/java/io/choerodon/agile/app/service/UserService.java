@@ -1,13 +1,14 @@
 package io.choerodon.agile.app.service;
 
-import com.github.pagehelper.PageInfo;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.domain.PageInfo;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.RoleAssignmentSearchVO;
 import io.choerodon.agile.api.vo.RoleVO;
 import io.choerodon.agile.api.vo.UserVO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
-import io.choerodon.core.notify.WebHookJsonSendDTO;
+//import io.choerodon.core.notify.WebHookJsonSendDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -49,13 +50,13 @@ public interface UserService {
 
     List<RoleVO> listRolesWithUserCountOnProjectLevel(Long sourceId, RoleAssignmentSearchVO roleAssignmentSearchVO);
 
-    PageInfo<UserVO> pagingQueryUsersByRoleIdOnProjectLevel(int page, int size, Long roleId, Long sourceId, RoleAssignmentSearchVO roleAssignmentSearchVO);
+    Page<UserVO> pagingQueryUsersByRoleIdOnProjectLevel(int page, int size, Long roleId, Long sourceId, RoleAssignmentSearchVO roleAssignmentSearchVO);
 
     List<UserDTO> listUsersByIds(Long[] ids);
 
     ProjectVO getGroupInfoByEnableProject(Long organizationId, Long projectId);
 
-    WebHookJsonSendDTO.User getWebHookUserById(Long userId);
+//    WebHookJsonSendDTO.User getWebHookUserById(Long userId);
 
     /**
      * 查询是否为项目所有者

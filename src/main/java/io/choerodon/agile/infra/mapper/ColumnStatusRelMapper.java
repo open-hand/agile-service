@@ -1,7 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.infra.dto.ColumnStatusRelDTO;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
  * Created by HuangFuqiang@choerodon.io on 2018/5/15.
  * Email: fuqianghuang01@gmail.com
  */
-public interface ColumnStatusRelMapper extends Mapper<ColumnStatusRelDTO> {
+public interface ColumnStatusRelMapper extends BaseMapper<ColumnStatusRelDTO> {
 
     /**
      * 根据statusTo为null的issueId集合和列id集合查询columnStatus关系，用于统计累积流图

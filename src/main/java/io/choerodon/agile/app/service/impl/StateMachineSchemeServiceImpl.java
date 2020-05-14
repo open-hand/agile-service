@@ -1,7 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
@@ -17,10 +16,10 @@ import io.choerodon.agile.infra.mapper.StateMachineSchemeMapper;
 import io.choerodon.agile.infra.utils.ConvertUtils;
 import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.ProjectUtil;
-import io.choerodon.web.util.PageableHelper;
-import org.springframework.data.domain.Pageable;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.mybatis.entity.Criteria;
+import org.hzero.mybatis.common.Criteria;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +59,7 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
     private ModelMapper modelMapper;
 
     @Override
-    public PageInfo<StateMachineSchemeVO> pageQuery(Long organizationId, Pageable pageable, StateMachineSchemeVO schemeVO, String params) {
+    public Page<StateMachineSchemeVO> pageQuery(Long organizationId, PageRequest pageRequest, StateMachineSchemeVO schemeVO, String params) {
         //查询出组织下的所有项目
         List<ProjectVO> projectVOS = baseFeignClient.listProjectsByOrgId(organizationId).getBody();
         Map<Long, ProjectVO> projectMap = projectVOS.stream().collect(Collectors.toMap(ProjectVO::getId, x -> x));
@@ -72,10 +71,9 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
         Map<Long, StateMachineVO> stateMachineVOMap = stateMachineVOS.stream().collect(Collectors.toMap(StateMachineVO::getId, x -> x));
 
         StateMachineSchemeDTO scheme = modelMapper.map(schemeVO, StateMachineSchemeDTO.class);
-        PageInfo<StateMachineSchemeDTO> page = PageHelper.startPage(pageable.getPageNumber(),
-                pageable.getPageSize(), PageableHelper.getSortSql(pageable.getSort())).doSelectPageInfo(() -> schemeMapper.fulltextSearch(scheme, params));
+        Page<StateMachineSchemeDTO> page = PageHelper.doPageAndSort(pageRequest, () -> schemeMapper.fulltextSearch(scheme, params));
 
-        List<StateMachineSchemeDTO> schemes = page.getList();
+        List<StateMachineSchemeDTO> schemes = page.getContent();
         List<StateMachineSchemeDTO> schemesWithConfigs = new ArrayList<>();
         if (!schemes.isEmpty()) {
             schemesWithConfigs = schemeMapper.queryByIdsWithConfig(organizationId, schemes.stream().map(StateMachineSchemeDTO::getId).collect(Collectors.toList()));
@@ -329,9 +327,10 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
         //活跃状态机方案
         if (scheme.getStatus().equals(StateMachineSchemeStatus.CREATE)) {
             scheme.setStatus(StateMachineSchemeStatus.ACTIVE);
-            Criteria criteria = new Criteria();
-            criteria.update("status");
-            int result = schemeMapper.updateByPrimaryKeyOptions(scheme, criteria);
+//            Criteria criteria = new Criteria();
+//            criteria.update("status");
+//            int result = schemeMapper.updateByPrimaryKeyOptions(scheme, criteria);
+            int result = schemeMapper.updateOptional(scheme, "status");
             if (result != 1) {
                 throw new CommonException("error.stateMachineScheme.activeScheme");
             }

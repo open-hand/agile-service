@@ -1,7 +1,9 @@
 package io.choerodon.agile.infra.dto;
 
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.agile.infra.utils.StringUtil;
 
 import javax.persistence.GeneratedValue;
@@ -14,7 +16,9 @@ import javax.persistence.Table;
  * Email: fuqianghuang01@gmail.com
  */
 @Table(name = "agile_issue_attachment")
-public class IssueAttachmentDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class IssueAttachmentDTO extends AuditDomain {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

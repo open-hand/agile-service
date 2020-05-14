@@ -1,7 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.infra.dto.RankDTO;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
  * Created by HuangFuqiang@choerodon.io on 2019/6/24.
  * Email: fuqianghuang01@gmail.com
  */
-public interface RankMapper extends Mapper<RankDTO> {
+public interface RankMapper extends BaseMapper<RankDTO> {
 
     RankDTO selectRankByIssueId(@Param("projectId") Long projectId, @Param("type") String type, @Param("issueId") Long issueId);
 

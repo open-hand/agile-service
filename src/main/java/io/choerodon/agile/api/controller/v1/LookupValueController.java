@@ -2,8 +2,8 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.LookupTypeWithValuesVO;
 import io.choerodon.agile.app.service.LookupValueService;
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -30,7 +30,7 @@ public class LookupValueController {
     @Autowired
     private LookupValueService lookupValueService;
 
-    @Permission(type = ResourceType.SITE, permissionLogin = true)
+    @Permission(level = ResourceLevel.SITE, permissionLogin = true)
     @ApiOperation("根据type code查询其下的value值")
     @GetMapping(value = "/{typeCode}")
     public ResponseEntity<LookupTypeWithValuesVO> queryLookupValueByCode(@ApiParam(value = "type code", required = true)
@@ -40,7 +40,7 @@ public class LookupValueController {
                 .orElseThrow(() -> new CommonException("error.lookupValueList.get"));
     }
 
-    @Permission(type = ResourceType.SITE, permissionLogin = true)
+    @Permission(level = ResourceLevel.SITE, permissionLogin = true)
     @ApiOperation("查询列约束下的value值")
     @GetMapping(value = "/constraint/list")
     public ResponseEntity<LookupTypeWithValuesVO> queryConstraintLookupValue() {

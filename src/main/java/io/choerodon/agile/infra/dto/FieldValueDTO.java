@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -10,7 +12,9 @@ import java.util.Date;
  * @since 2019/4/8
  */
 @Table(name = "fd_field_value")
-public class FieldValueDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class FieldValueDTO extends AuditDomain {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
