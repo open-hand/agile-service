@@ -239,7 +239,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         //执行状态转换
         ExecuteResult executeResult = instanceService.executeTransform(organizationId, AGILE_SERVICE, stateMachineId, currentStatusId, transformId, inputDTO);
         if (!executeResult.getSuccess()) {
-            throw new CommonException("error.stateMachine.executeTransform");
+            throw new CommonException("error.stateMachine.executeTransform", executeResult.getException());
         }
         return executeResult;
     }
