@@ -20,6 +20,7 @@ import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
+import org.hzero.boot.message.MessageClient;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,8 @@ public class FieldValueServiceImpl implements FieldValueService {
     private IssueService issueService;
     @Autowired
     private ProjectConfigService projectConfigService;
+    @Autowired
+    private MessageClient messageClient;
 //    @Autowired
 //    private NotifyFeignClient notifyFeignClient;
 
@@ -251,6 +254,7 @@ public class FieldValueServiceImpl implements FieldValueService {
             }
             batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
 //            notifyFeignClient.postWebSocket(batchUpdateFieldStatusVO.getKey(),batchUpdateFieldStatusVO.getUserId().toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
+            messageClient.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
         });
     }
 
@@ -279,6 +283,7 @@ public class FieldValueServiceImpl implements FieldValueService {
             }
             batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
 //            notifyFeignClient.postWebSocket(batchUpdateFieldStatusVO.getKey(),batchUpdateFieldStatusVO.getUserId().toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
+            messageClient.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
         });
     }
 

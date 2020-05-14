@@ -12,6 +12,7 @@ import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
+import org.hzero.boot.message.MessageClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,9 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
     @Autowired
     private FieldValueService fieldValueService;
 
+    @Autowired
+    private MessageClient messageClient;
+
     @Async
     @Override
     public void asyncUpdateFields(Long projectId, String schemeCode, BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
@@ -46,6 +50,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             batchUpdateFieldStatusVO.setUserId(userId);
             batchUpdateFieldStatusVO.setProcess(0.0);
 //            notifyFeignClient.postWebSocket(WEBSOCKET_BATCH_UPDATE_FIELD, userId.toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
+            messageClient.sendByUserId(userId, WEBSOCKET_BATCH_UPDATE_FIELD, JSON.toJSONString(batchUpdateFieldStatusVO));
             if (Boolean.FALSE.equals(EnumUtil.contain(ObjectSchemeCode.class, schemeCode))) {
                 throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
             }
@@ -78,6 +83,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
         }
         finally {
 //            notifyFeignClient.postWebSocket(WEBSOCKET_BATCH_UPDATE_FIELD, userId.toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
+            messageClient.sendByUserId(userId, WEBSOCKET_BATCH_UPDATE_FIELD, JSON.toJSONString(batchUpdateFieldStatusVO));
         }
     }
 }

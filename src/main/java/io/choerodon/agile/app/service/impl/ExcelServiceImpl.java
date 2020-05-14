@@ -18,6 +18,7 @@ import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.hzero.boot.message.MessageClient;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.slf4j.Logger;
@@ -76,6 +77,9 @@ public class ExcelServiceImpl implements ExcelService {
 
 //    @Autowired
 //    private NotifyFeignClient notifyFeignClient;
+
+    @Autowired
+    private MessageClient messageClient;
 
     @Autowired
     private FileOperationHistoryMapper fileOperationHistoryMapper;
@@ -447,6 +451,7 @@ public class ExcelServiceImpl implements ExcelService {
     protected void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process) {
         fileOperationHistoryDTO.setProcess(process);
 //        notifyFeignClient.postWebSocket(WEBSOCKET_IMPORT_CODE, userId.toString(), JSON.toJSONString(fileOperationHistoryDTO));
+        messageClient.sendByUserId(userId, WEBSOCKET_IMPORT_CODE, JSON.toJSONString(fileOperationHistoryDTO));
     }
 
     protected String uploadErrorExcel(Workbook errorWorkbook) {

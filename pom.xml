@@ -180,6 +180,11 @@
             <artifactId>poi</artifactId>
             <version>3.16</version>
         </dependency>
+        <dependency>
+            <groupId>org.hzero.boot</groupId>
+            <artifactId>hzero-boot-message</artifactId>
+        </dependency>
+
 
     </dependencies>
 
