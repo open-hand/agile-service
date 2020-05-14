@@ -91,15 +91,15 @@ class TextEditToggle extends Component {
   }
 
   handleDocumentClick = (event) => {
-    console.log('handleDocumentClick');
     const { target } = event;
     const root = findDOMNode(this);
     // 如果点击不在当前元素内，就调用submit提交数据
     if (!this.PortalMouseDown && !contains(root, target)) {
-      // console.log(target);
       this.handleSubmit();
     }
-    this.PortalMouseDown = false;
+    setTimeout(() => {
+      this.PortalMouseDown = false;
+    });
   }
 
   handlePortalMouseDown = () => {
@@ -125,7 +125,6 @@ class TextEditToggle extends Component {
     } = this.props;
     try {
       form.validateFields((err, values) => {
-        console.log(!err);
         if (!err) {
           document.removeEventListener('mousedown', this.handleDocumentClick);
           if (formKey) {
@@ -171,7 +170,6 @@ class TextEditToggle extends Component {
   // 进入编辑状态
   enterEditing = () => {
     // 如果禁用，将不进入编辑模式
-    console.log('enterEditing');
     const { disabled } = this.props;
     if (disabled) {
       return;
@@ -273,7 +271,6 @@ class TextEditToggle extends Component {
 
   renderTextChild = (children) => {
     const childrenArray = React.Children.toArray(children);
-    // console.log(childrenArray);
     return childrenArray.map(child => React.cloneElement(child, {
       newData: this.state.newData,
       originData: this.props.originData,
@@ -347,12 +344,15 @@ class TextEditToggle extends Component {
   }
 
   ToggleBlur = (e) => {
-    console.log(e.target, e.target.tagName);
-    if (e.target.tagName === 'INPUT') {
-      setTimeout(() => {
-        console.log('ToggleBlur');
-        this.handleSubmit();
-      }, 3000);
+    if (!this.PortalMouseDown) {
+      this.handleSubmit();
+    }
+  }
+
+  handleKeyDown = (e) => {
+    const { submitOnEnter } = this.props;
+    if (e.keyCode === 13 && submitOnEnter) {
+      this.handleSubmit();
     }
   }
 
@@ -364,6 +364,7 @@ class TextEditToggle extends Component {
         tabIndex: 0,
         onFocus: this.enterEditing,
         onBlur: this.ToggleBlur,
+        onKeyDown: this.handleKeyDown,
       };
     }
     return (
