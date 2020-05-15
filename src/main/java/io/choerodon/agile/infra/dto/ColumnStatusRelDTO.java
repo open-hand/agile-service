@@ -17,7 +17,7 @@ import javax.persistence.*;
 public class ColumnStatusRelDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;  //需要加主键id
 
     private Integer position;

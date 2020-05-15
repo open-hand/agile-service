@@ -16,7 +16,7 @@ import javax.persistence.*;
 public class DataLogDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long logId;
 
     private Long projectId;

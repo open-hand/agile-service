@@ -16,7 +16,7 @@ import java.util.Date;
 @VersionAudit
 public class FieldValueDTO extends AuditDomain {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
     private Long instanceId;
     private Long fieldId;

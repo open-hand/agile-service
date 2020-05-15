@@ -20,7 +20,7 @@ import java.util.Date;
 @VersionAudit
 public class SprintDTO extends AuditDomain {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long sprintId;
     private String sprintName;
     private String sprintGoal;

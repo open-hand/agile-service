@@ -16,7 +16,7 @@ import javax.persistence.*;
 public class BoardDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long boardId;
 
     private String name;

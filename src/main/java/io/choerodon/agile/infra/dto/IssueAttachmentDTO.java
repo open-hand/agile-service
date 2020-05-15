@@ -21,7 +21,7 @@ import javax.persistence.Table;
 public class IssueAttachmentDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long attachmentId;
 
     private Long issueId;

@@ -19,7 +19,7 @@ import javax.persistence.Table;
 public class StoryMapWidthDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
     private String type;

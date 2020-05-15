@@ -15,7 +15,7 @@ import javax.persistence.*;
 @VersionAudit
 public class PageDTO extends AuditDomain {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
     private String name;
     private String description;

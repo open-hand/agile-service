@@ -20,7 +20,7 @@ import javax.persistence.Table;
 public class WorkCalendarRefDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long calendarId;
 
     private Long sprintId;

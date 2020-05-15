@@ -24,7 +24,7 @@ public class LookupTypeDTO extends AuditDomain {
 
     /***/
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private String typeCode;
 
     /**

@@ -20,7 +20,7 @@ import java.util.Objects;
 @VersionAudit
 public class TimeZoneWorkCalendarRefDTO extends AuditDomain {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long calendarId;
 
     private Long timeZoneId;

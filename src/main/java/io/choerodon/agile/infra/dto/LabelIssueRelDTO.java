@@ -21,7 +21,7 @@ public class LabelIssueRelDTO extends AuditDomain {
 
     /***/
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long issueId;
 
     /**

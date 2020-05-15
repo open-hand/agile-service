@@ -16,7 +16,7 @@ import java.util.List;
 public class StateMachineSchemeDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
     private String name;
     private String description;

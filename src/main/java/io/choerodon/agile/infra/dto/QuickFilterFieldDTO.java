@@ -19,7 +19,7 @@ import javax.persistence.Table;
 public class QuickFilterFieldDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private String fieldCode;
 
     private String type;

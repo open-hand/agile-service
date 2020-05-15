@@ -23,7 +23,7 @@ public class VersionIssueRelDTO extends AuditDomain{
     private static final String STATUS_CODE_PLANNING = "version_planning";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;  //需要加主键id
 
     /**

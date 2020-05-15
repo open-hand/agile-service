@@ -19,7 +19,7 @@ import java.math.BigDecimal;
 @VersionAudit
 public class IssueTypeSchemeConfigDTO extends AuditDomain {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
     private Long schemeId;

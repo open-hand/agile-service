@@ -24,7 +24,7 @@ public class IssueDTO extends AuditDomain {
 
     /***/
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long issueId;
 
     /**

@@ -15,7 +15,7 @@ import javax.persistence.Table;
 public class IssueBranchDO extends AuditDomain{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long branchId;
 
     private String branchType;

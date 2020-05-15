@@ -18,7 +18,7 @@ import javax.persistence.*;
 public class UserSettingDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long settingId;
 
     private Long userId;

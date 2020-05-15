@@ -26,7 +26,7 @@ public class IssueComponentDTO extends AuditDomain {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long componentId;
 
     private Long projectId;

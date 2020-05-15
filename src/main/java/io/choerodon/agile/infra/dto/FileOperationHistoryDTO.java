@@ -35,7 +35,7 @@ public class FileOperationHistoryDTO extends AuditDomain {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
     private Long projectId;

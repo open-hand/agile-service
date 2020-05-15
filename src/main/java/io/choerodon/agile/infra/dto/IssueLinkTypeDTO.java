@@ -21,7 +21,7 @@ public class IssueLinkTypeDTO extends AuditDomain {
 
     /***/
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long linkTypeId;
 
     private String linkName;

@@ -21,7 +21,7 @@ import java.util.Objects;
 public class WorkCalendarHolidayRefDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long calendarId;
 
     private String name;

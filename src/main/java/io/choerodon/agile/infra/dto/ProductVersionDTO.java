@@ -17,7 +17,7 @@ import java.util.Date;
 @VersionAudit
 public class ProductVersionDTO extends AuditDomain {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long versionId;
     private String name;
     private String description;

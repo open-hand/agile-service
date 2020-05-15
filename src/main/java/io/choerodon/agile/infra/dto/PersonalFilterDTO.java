@@ -19,7 +19,7 @@ import javax.persistence.Table;
 public class PersonalFilterDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long filterId;
     private Long projectId;
     private Long userId;

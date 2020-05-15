@@ -14,7 +14,7 @@ import javax.persistence.*;
 @VersionAudit
 public class StateMachineNodeDraftDTO extends AuditDomain {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
     private Long stateMachineId;
     private Long statusId;

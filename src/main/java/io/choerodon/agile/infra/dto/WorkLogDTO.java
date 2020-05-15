@@ -21,7 +21,7 @@ import java.util.Date;
 public class WorkLogDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long logId;
 
     private BigDecimal workTime;

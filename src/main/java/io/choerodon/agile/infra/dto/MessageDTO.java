@@ -16,7 +16,7 @@ import javax.persistence.*;
 public class MessageDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long messageId;  //需要加主键id
 
     @Transient

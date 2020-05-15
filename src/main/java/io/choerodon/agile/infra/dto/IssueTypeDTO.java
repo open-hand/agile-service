@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 @VersionAudit
 public class IssueTypeDTO extends AuditDomain {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
     private String icon;

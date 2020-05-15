@@ -16,7 +16,7 @@ import javax.persistence.*;
 public class QuickFilterDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long filterId;
 
     private Long projectId;

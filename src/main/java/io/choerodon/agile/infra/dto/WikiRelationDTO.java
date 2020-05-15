@@ -19,7 +19,7 @@ import javax.persistence.Table;
 public class WikiRelationDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
     private Long projectId;

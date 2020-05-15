@@ -18,7 +18,7 @@ import javax.persistence.Table;
 @VersionAudit
 public class ProjectPageFieldDTO extends AuditDomain {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
     private Long projectId;
     private Long organizationId;

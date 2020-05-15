@@ -18,7 +18,7 @@ import javax.persistence.Table;
 public class StateMachineSchemeConfigDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
     private Long schemeId;
     private Long issueTypeId;

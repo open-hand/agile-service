@@ -20,7 +20,7 @@ import javax.persistence.Table;
 public class ProjectInfoDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long infoId;
 
     private Long projectId;

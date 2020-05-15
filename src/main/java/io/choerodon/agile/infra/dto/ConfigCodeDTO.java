@@ -18,7 +18,7 @@ import javax.persistence.Table;
 @VersionAudit
 public class ConfigCodeDTO extends AuditDomain {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
     private String code;
     private String type;

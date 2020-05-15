@@ -16,7 +16,7 @@ import javax.persistence.*;
 public class IssueStatusDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
     private Long projectId;
