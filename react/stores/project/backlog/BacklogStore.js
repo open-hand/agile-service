@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import {
-  observable, action, computed, toJS, reaction, set,
+  observable, action, computed, toJS,
 } from 'mobx';
 import { sortBy, find } from 'lodash';
 import { store, stores } from '@choerodon/boot';

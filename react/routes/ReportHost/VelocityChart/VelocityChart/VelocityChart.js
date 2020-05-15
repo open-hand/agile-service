@@ -1,15 +1,12 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import ReactEcharts from 'echarts-for-react';
-import _ from 'lodash';
 import {
   Page, Header, Content, stores, Breadcrumb,
 } from '@choerodon/boot';
-import { trace } from 'mobx';
 import {
   Button, Table, Select, Icon, Spin,
 } from 'choerodon-ui';
-// import pic from './no_sprint.svg';
 import pic from '../../../../assets/image/emptyChart.svg';
 import SwithChart from '../../Component/switchChart';
 import VS from '../../../../stores/project/velocityChart';
@@ -18,23 +15,11 @@ import './VelocityChart.less';
 
 const { AppState } = stores;
 const { Option } = Select;
-let backUrl;
+
 
 @observer
 class VelocityChart extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      linkFromParamUrl: undefined,
-    };
-  }
-
   componentDidMount() {
-    const { location: { search } } = this.props;
-    const linkFromParamUrl = _.last(search.split('&')).split('=')[0] === 'paramUrl' ? _.last(search.split('&')).split('=')[1] : undefined;
-    this.setState({
-      linkFromParamUrl,
-    });
     VS.setCurrentUnit('story_point');
     VS.loadChartAndTableData();
   }
@@ -362,13 +347,11 @@ class VelocityChart extends Component {
 
   render() {
     const { history } = this.props;
-    const { linkFromParamUrl } = this.state;
     const urlParams = AppState.currentMenuType;
     return (
       <Page className="c7n-velocity">
         <Header
           title="迭代速度图"
-          // backPath={`/agile/${linkFromParamUrl || 'reporthost'}?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}
           backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
         >
           <SwithChart history={this.props.history} current="velocityChart" />

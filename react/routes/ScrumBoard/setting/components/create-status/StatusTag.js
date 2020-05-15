@@ -1,5 +1,5 @@
 import React from 'react';
-import { STATUS } from '@/common/Constant';
+import STATUS from '@/constants/STATUS';
 
 function StatusTag({ data: { valueCode, name } }) {
   return (

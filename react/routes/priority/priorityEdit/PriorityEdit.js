@@ -1,6 +1,4 @@
-import {
-  Content, Header, Page, stores,
-} from '@choerodon/boot';
+import { stores } from '@choerodon/boot';
 import {
   Form, Input, message, Modal, Checkbox,
 } from 'choerodon-ui';
@@ -13,7 +11,6 @@ import './priorityEdit.less';
 
 const FormItem = Form.Item;
 const { Sidebar } = Modal;
-const { confirm } = Modal;
 const { TextArea } = Input;
 
 const { AppState } = stores;

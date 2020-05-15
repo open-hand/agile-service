@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
@@ -9,23 +10,21 @@ import {
 import ReactEcharts from 'echarts-for-react';
 import _ from 'lodash';
 import moment from 'moment';
+import BurndownChartStore from '@/stores/project/burndownChart/BurndownChartStore';
+import ReportStore from '@/stores/project/Report';
 import { commonformatDate } from '@/utils/Date';
-import BurndownChartStore from '../../../../stores/project/burndownChart/BurndownChartStore';
-import ReportStore from '../../../../stores/project/Report';
-import NoDataComponent from '../../Component/noData';
-// import epicSvg from '../../Home/style/pics/no_sprint.svg';
-import epicSvg from '../../../../assets/image/emptyChart.svg';
-import SwithChart from '../../Component/switchChart';
-import StatusTag from '../../../../components/StatusTag';
-import PriorityTag from '../../../../components/PriorityTag';
-import TypeTag from '../../../../components/TypeTag';
-import './ReleaseDetail.less';
-import { STATUS } from '../../../../common/Constant';
-/* eslint-disable */
+import epicSvg from '@/assets/image/emptyChart.svg';
+import StatusTag from '@/components/StatusTag';
+import PriorityTag from '@/components/PriorityTag';
+import TypeTag from '@/components/TypeTag';
+import STATUS from '@/constants/STATUS';
+import NoDataComponent from '../Component/noData';
+import SwithChart from '../Component/switchChart';
+import './SprintReport.less';
 
 const { AppState } = stores;
-const Option = Select.Option;
-const TabPane = Tabs.TabPane;
+const { Option } = Select;
+const { TabPane } = Tabs;
 
 @observer
 class SprintReport extends Component {
@@ -38,8 +37,6 @@ class SprintReport extends Component {
       defaultSprint: '',
       loading: false,
       endDate: '',
-      startDate: '',
-      linkFromParamUrl: undefined,
       restDayShow: true,
       restDays: [],
       exportAxis: [],
@@ -48,11 +45,6 @@ class SprintReport extends Component {
   }
 
   componentDidMount() {
-    const { location: { search } } = this.props;
-    const linkFromParamUrl = _.last(search.split('&')).split('=')[0] === 'paramUrl' ? _.last(search.split('&')).split('=')[1] : undefined;
-    this.setState({
-      linkFromParamUrl,
-    });
     this.getDefaultSprintId();
     this.getSprintData();
     ReportStore.init();
@@ -114,7 +106,6 @@ class SprintReport extends Component {
       this.setState({
         defaultSprint: defaultSprint === '' ? res[0].sprintId : defaultSprint,
         endDate: defaultSprint === '' ? res[0].endDate : res.filter(item => item.sprintId === defaultSprint)[0].endDate,
-        startDate: defaultSprint === '' ? res[0].startDate : res.filter(item => item.sprintId === defaultSprint)[0].startDate,
       }, () => {
         // this.getChartData();
         this.axiosGetRestDays();
@@ -135,7 +126,6 @@ class SprintReport extends Component {
 
   getChartCoordinate() {
     BurndownChartStore.axiosGetBurndownCoordinate(this.state.defaultSprint, this.state.select).then((res) => {
-      this.setState({ expectCount: res.expectCount });
       const keys = Object.keys(res.coordinate);
       let [minDate, maxDate] = [keys[0], keys[0]];
       for (let a = 1, len = keys.length; a < len; a += 1) {
@@ -200,6 +190,7 @@ class SprintReport extends Component {
             exportAxisData[b + 1] = (exportAxisData[b] - dayAmount) < 0 ? 0 : exportAxisData[b] - dayAmount;
           }
         }
+        // eslint-disable-next-line no-prototype-builtins
         if (res.coordinate.hasOwnProperty(nowKey)) {
           allDateValues.push(res.coordinate[allDate[b]]);
         } else if (moment(nowKey).isAfter(moment())) {
@@ -348,6 +339,7 @@ class SprintReport extends Component {
         },
         axisLabel: {
           show: true,
+          // eslint-disable-next-line radix
           interval: parseInt(this.state.xAxis.length / 7) ? parseInt(this.state.xAxis.length / 7) - 1 : 0,
           textStyle: {
             color: 'rgba(0, 0, 0, 0.65)',
@@ -412,7 +404,6 @@ class SprintReport extends Component {
           name: '期望值',
           type: 'line',
           data: this.state.exportAxis,
-          // data: [[this.state.startDate.split(' ')[0].slice(5).replace('-', '/'), this.state.expectCount], [this.state.endDate.split(' ')[0].slice(5).replace('-', '/'), 0]],
           itemStyle: {
             color: 'rgba(0,0,0,0.65)',
           },
@@ -468,7 +459,6 @@ class SprintReport extends Component {
     if (ReportStore.currentSprint.sprintId) {
       ReportStore[ARRAY[key].func](ARRAY[key].page, ARRAY[key].size);
     }
-
   }
 
   renderDoneIssue(column) {
@@ -571,22 +561,20 @@ class SprintReport extends Component {
         width: '30%',
         title: '概要',
         dataIndex: 'summary',
-        render: (summary, record) => {
-          return (
-            <Tooltip MouseEnterDelay={0.5} title={`问题概要：${record.summary}`}>
-              <div
-                style={{
-                  overflow: 'hidden',
-                  maxWidth: 260,
-                  whiteSpace: 'nowrap',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {record.summary}
-              </div>
-            </Tooltip>
-          );
-        },
+        render: (summary, record) => (
+          <Tooltip MouseEnterDelay={0.5} title={`问题概要：${record.summary}`}>
+            <div
+              style={{
+                overflow: 'hidden',
+                maxWidth: 260,
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {record.summary}
+            </div>
+          </Tooltip>
+        ),
       }, {
         width: '15%',
         title: '问题类型',
@@ -647,21 +635,13 @@ class SprintReport extends Component {
           </div>
         ),
       },
-    ];
-    let sprintName;
-    for (let index = 0, len = BurndownChartStore.getSprintList.length; index < len; index += 1) {
-      if (BurndownChartStore.getSprintList[index].sprintId === this.state.defaultSprint) {
-        sprintName = BurndownChartStore.getSprintList[index].sprintName;
-      }
-    }
-    const { history } = this.props;
+    ];   
+
     const urlParams = AppState.currentMenuType;
-    const { linkFromParamUrl } = this.state;
     return (
       <Page className="c7n-report">
         <Header
           title="冲刺报告图"
-          // backPath={`/agile/${linkFromParamUrl || 'reporthost'}?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}
           backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
         
         >
@@ -673,7 +653,7 @@ class SprintReport extends Component {
             funcType="flat"
             onClick={() => {
               this.axiosGetRestDays();
-              ReportStore.changeCurrentSprint(ReportStore.currentSprint.sprintId)
+              ReportStore.changeCurrentSprint(ReportStore.currentSprint.sprintId);
             }}
           >
             <Icon type="refresh icon" />
@@ -710,17 +690,14 @@ class SprintReport extends Component {
                           total: undefined,
                         });
                         let endDate;
-                        let startDate;
                         for (let index = 0, len = BurndownChartStore.getSprintList.length; index < len; index += 1) {
                           if (BurndownChartStore.getSprintList[index].sprintId === value) {
                             endDate = BurndownChartStore.getSprintList[index].endDate;
-                            startDate = BurndownChartStore.getSprintList[index].startDate;
                           }
                         }
                         this.setState({
                           defaultSprint: value,
                           endDate,
-                          startDate,
                         }, () => {
                           // this.getChartData();
                           // this.getChartCoordinate();
@@ -738,7 +715,7 @@ class SprintReport extends Component {
                       checked={this.state.restDayShow}
                       onChange={this.onCheckChange}
                     >
-                      {'显示非工作日'}
+                      显示非工作日
                     </Checkbox>
                     <div className="c7n-sprintMessage">
                       <div className="c7n-sprintContent">
@@ -763,7 +740,7 @@ class SprintReport extends Component {
                           this.props.history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramType=sprint&paramId=${ReportStore.currentSprint.sprintId}&paramName=${encodeURIComponent(`${ReportStore.currentSprint.sprintName}下的问题`)}&paramUrl=reporthost/sprintreport`);
                         }}
                       >
-                        {'在“问题管理中”查看'}
+                        在“问题管理中”查看
                         <Icon style={{ fontSize: 13, verticalAlign: -2 }} type="open_in_new" />
                       </p>
                     </div>
@@ -782,8 +759,8 @@ class SprintReport extends Component {
                   </Tabs>
                 </div>
               ) : (
-                  <NoDataComponent title="冲刺" links={[{ name: '待办事项', link: '/agile/work-list/backlog' }]} img={epicSvg} />
-                )
+                <NoDataComponent title="冲刺" links={[{ name: '待办事项', link: '/agile/work-list/backlog' }]} img={epicSvg} />
+              )
             }
           </Spin>
         </Content>

@@ -1,6 +1,3 @@
-/* eslint-disable no-mixed-operators */
-/* eslint-disable consistent-return */
-/* eslint-disable react/no-unused-state */
 import React, { Component, createRef } from 'react';
 import { observer } from 'mobx-react';
 import echarts from 'echarts/lib/echarts';
@@ -13,47 +10,26 @@ import {
   Page, Header, Content, stores, axios, Breadcrumb,
 } from '@choerodon/boot';
 import {
-  Button, Select, Icon, Spin, Tooltip, DatePicker,
+  Button, Select, Icon, Spin, Tooltip,
 } from 'choerodon-ui';
-import _ from 'lodash';
 import './pie.less';
-import { reduce } from 'zrender/lib/core/util';
-import util from 'util';
-import moment from 'moment';
 import SwitchChart from '../../Component/switchChart';
 import VersionReportStore from '../../../../stores/project/versionReport/VersionReport';
 import NoDataComponent from '../../Component/noData';
 import pic from '../../../../assets/image/emptyChart.svg';
-import ReleaseStore from '../../../../stores/project/release/ReleaseStore';
-import { loadSprints, loadVersions } from '../../../../api/NewIssueApi';
 
 const { Option } = Select;
 const { AppState } = stores;
-const { RangePicker } = DatePicker;
-let backUrl;
-// const chooseDimension = [
-//   {
-//     key: 'sprint',
-//     name: '迭代冲刺',
-//   }, {
-//     key: 'version',
-//     name: '版本',
-//   }, {
-//     key: 'timeRange',
-//     name: '时间',
-//   },
-// ];
+
 
 @observer
 class ReleaseDetail extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      colors: [],
       type: '',
       value: '',
       showOtherTooltip: false,
-      linkFromParamUrl: undefined,
       sprintAndVersion: {
         sprint: [],
         version: [],
@@ -81,8 +57,6 @@ class ReleaseDetail extends Component {
   }
 
   componentDidMount = async () => {
-    const Request = this.GetRequest(this.props.location.search);
-    backUrl = Request.paramUrl || 'reporthost';
     const value = this.getSelectDefaultValue();
     await VersionReportStore.getPieDatas(AppState.currentMenuType.id, value);
     await axios.all([
@@ -204,17 +178,10 @@ class ReleaseDetail extends Component {
         {
           name: '',
           type: 'pie',
-          // radius: '55%',
-          // hoverAnimation: false,
           startAngle: 245,
           center: ['50%', '47%'],
           data: datas,
-          // labelLine: {
-          //   length: 100,
-          //   length2: 200,
-          // },
           label: {
-            // fontSize: '13px',
             color: 'rgba(0,0,0,0.65)',
             position: 'outside',
 
@@ -222,22 +189,14 @@ class ReleaseDetail extends Component {
               if (value.data.name === null) {
                 return '未分配';
               }
-              // if (value.data.name === '其它') {
-              //   return '';
-              // }
             },
           },
           itemStyle: {
             normal: {
-              // borderRadius: 18,
               borderWidth: 2,
               borderColor: '#ffffff',
             },
-            // color: (data) => {
-            //   return this.state.colors[data.dataIndex];
-            // }
           },
-
         },
       ],
     };
@@ -257,7 +216,6 @@ class ReleaseDetail extends Component {
   };
 
   changeType = (value, option) => {
-    // VersionReportStore.setPieData([]);
     this.setState({
       type: option.key,
       value,
@@ -415,7 +373,7 @@ class ReleaseDetail extends Component {
 
   renderChooseDimension = () => {
     const {
-      sprintAndVersion, currentChooseDimension, currentSprintChoose, currentVersionChoose, startDate, endDate,
+      sprintAndVersion, currentChooseDimension, currentSprintChoose, currentVersionChoose, 
     } = this.state;
     return (
       <div>
@@ -478,14 +436,10 @@ class ReleaseDetail extends Component {
 
   render() {
     const {
-      value, showOtherTooltip, chooseDimensionType, sprintAndVersion, currentChooseDimension, currentSprintChoose, currentVersionChoose, startDate, endDate,
+      value, chooseDimensionType, currentChooseDimension,
     } = this.state;
     const data = VersionReportStore.getPieData;
     const sourceData = VersionReportStore.getSourceData;
-    let total = 0;
-    for (let i = 0; i < data.length; i += 1) {
-      total += data[i].value;
-    }
     const colors = VersionReportStore.getColors;
     const urlParams = AppState.currentMenuType;
     const type = [
@@ -589,7 +543,7 @@ class ReleaseDetail extends Component {
                             <td style={{ width: '158px' }}>
                               <div className="pie-legend-icon" style={{ background: colors[index] }} />
                               <Tooltip title={item && item.name}>
-                                <div className="pie-legend-text">{item.name ? (item.realName && item.realName || item.name) : '未分配'}</div>
+                                <div className="pie-legend-text">{item.name ? (item.realName || item.name) : '未分配'}</div>
                               </Tooltip>
                             </td>
                             <td style={{ width: '62px' }}>

@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import { DragDropContext, DragSource, DropTarget } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
-import isEqual from 'lodash/isEqual';
 import './DrapSortingTable.less';
 
 const dragDirection = (
@@ -40,7 +39,7 @@ let BodyRow = (props) => {
   } = props;
   const style = { ...restProps.style, cursor: 'move' };
 
-  let className = restProps.className;
+  let { className } = restProps;
   if (isOver && initialClientOffset) {
     const direction = dragDirection(
       dragRow.index,
@@ -86,6 +85,7 @@ const rowTarget = {
       return;
     }
     props.moveRow(dragIndex, hoverIndex);
+    // eslint-disable-next-line no-param-reassign
     monitor.getItem().index = hoverIndex;
   },
 };
@@ -139,7 +139,7 @@ class DragSortingTable extends Component {
       afterSequence = result[hoverIndex + 1].sequence;
       beforeSequence = result[hoverIndex - 1].sequence;
     }
-    const versionId = data[dragIndex].versionId;
+    const { versionId } = data[dragIndex];
     const { objectVersionNumber } = data[dragIndex];
     const postData = {
       afterSequence, beforeSequence, versionId, objectVersionNumber,

@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import ReactEcharts from 'echarts-for-react';
-import _ from 'lodash';
 import {
   Page, Header, Content, stores, Breadcrumb,
 } from '@choerodon/boot';
 import {
   Button, Tabs, Table, Select, Icon, Tooltip, Spin,
 } from 'choerodon-ui';
-// import pic from './no_version.svg';
+import STATUS from '@/constants/STATUS';
 import pic from '../../../../assets/image/emptyChart.svg';
 import finish from './legend/finish.svg';
 import total from './legend/total.svg';
@@ -20,30 +19,14 @@ import TypeTag from '../../../../components/TypeTag';
 import VS from '../../../../stores/project/versionReportNew';
 import EmptyBlock from '../../../../components/EmptyBlock';
 import './VersionReport.less';
-import { STATUS } from '../../../../common/Constant';
 
 const { TabPane } = Tabs;
 const { AppState } = stores;
 const { Option } = Select;
-const MONTH = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
-let backUrl;
 
 @observer
 class EpicReport extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      linkFromParamUrl: undefined,
-    };
-  }
-
   componentDidMount() {
-    const { location: { search } } = this.props;
-    const linkFromParamUrl = _.last(search.split('&')).split('=')[0] === 'paramUrl' ? _.last(search.split('&')).split('=')[1] : undefined;
-    this.setState({
-      linkFromParamUrl,
-    });
-
     VS.loadEpicAndChartAndTableData();
   }
 
@@ -605,13 +588,11 @@ class EpicReport extends Component {
 
   render() {
     const { history } = this.props;
-    const { linkFromParamUrl } = this.state;
     const urlParams = AppState.currentMenuType;
     return (
       <Page className="c7n-versionReport">
         <Header
           title="版本报告图"
-          // backPath={`/agile/${linkFromParamUrl || 'reporthost'}?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}
           backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
         >
           <SwithChart

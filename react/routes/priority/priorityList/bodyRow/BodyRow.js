@@ -1,4 +1,4 @@
-import { DragDropContext, DragSource, DropTarget } from 'react-dnd';
+import { DragSource, DropTarget } from 'react-dnd';
 import React from 'react';
 
 function dragDirection(
@@ -32,7 +32,7 @@ let BodyRow = (props) => {
   } = props;
   const style = { ...restProps.style, cursor: 'move' };
 
-  let className = restProps.className;
+  let { className } = restProps;
   if (isOver && initialClientOffset) {
     const direction = dragDirection(
       dragRow.index,
@@ -85,6 +85,7 @@ const rowTarget = {
     // Generally it's better to avoid mutations,
     // but it's good here for the sake of performance
     // to avoid expensive index searches.
+    // eslint-disable-next-line no-param-reassign
     monitor.getItem().index = hoverIndex;
   },
 };
@@ -99,7 +100,7 @@ BodyRow = DropTarget('row', rowTarget, (connect, monitor) => ({
     dragRow: monitor.getItem(),
     clientOffset: monitor.getClientOffset(),
     initialClientOffset: monitor.getInitialClientOffset(),
-  }))(BodyRow)
+  }))(BodyRow),
 );
 
 export default BodyRow;

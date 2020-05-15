@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Button, Icon, DatePicker, Popover, Form, Select, Checkbox, Spin,
+  Button, Icon, DatePicker, Popover, Form, Checkbox, Spin,
 } from 'choerodon-ui';
 import {
   Page, Header, Content, stores, Breadcrumb,
@@ -22,8 +22,7 @@ import SwithChart from '../../Component/switchChart';
 
 const { AppState } = stores;
 const { RangePicker } = DatePicker;
-const { Option } = Select;
-let backUrl;
+
 
 @observer
 class AccumulationHome extends Component {

@@ -1,5 +1,5 @@
 import {
-  observable, action, computed, toJS, 
+  observable, action, computed,  
 } from 'mobx';
 import { store, stores, axios } from '@choerodon/boot';
 import _ from 'lodash';
@@ -73,7 +73,7 @@ class EpicReportStore {
     axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/epic_chart?epicId=${epicId}&type=${unit}`)
       .then((res) => {
         this.setBeforeCurrentUnit(unit);
-        res = res.map(item => ({
+        const data = res.map(item => ({
           ...item,
           allRemainTimes: item.allRemainTimes || 0,
           allStoryPoints: item.allStoryPoints || 0,
@@ -83,7 +83,7 @@ class EpicReportStore {
           issueCount: item.issueCount || 0,
           unEstimateIssueCount: item.unEstimateIssueCount || 0,
         }));
-        this.setChartData(res);
+        this.setChartData(data);
         this.setChartLoading(false);
         this.setReload(false);
       });

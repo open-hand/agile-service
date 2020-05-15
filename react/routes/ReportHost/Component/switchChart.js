@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import _ from 'lodash';
-import {
-  Page, Header, Content, stores, 
-} from '@choerodon/boot';
+import { stores } from '@choerodon/boot';
 import {
   Dropdown, Button, Menu, Icon, 
 } from 'choerodon-ui';
@@ -38,7 +36,6 @@ class SwitchChart extends Component {
     } = urlParams;
     const { key } = e;
     const obj = list.find(v => v.key.toString() === key);
-    const { history: { search } } = this.props;
     if (obj) {
       history.push(`${obj.link}?type=${type}&id=${id}&name=${name}&organizationId=${organizationId}&orgId=${organizationId}&paramUrl=${linkFromParamUrl}`);
     }
