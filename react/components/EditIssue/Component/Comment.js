@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { Icon, Popconfirm } from 'choerodon-ui';
+import {
+  text2Delta, beforeTextUpload,
+} from '@/utils/richText';
 import UserHead from '../../UserHead';
 import WYSIWYGEditor from '../../WYSIWYGEditor';
 import WYSIWYGViewer from '../../WYSIWYGViewer';
 import { DatetimeAgo } from '../../CommonComponent';
-import {
-  text2Delta, beforeTextUpload,
-} from '../../../common/utils';
 import { deleteCommit, updateCommit } from '../../../api/NewIssueApi';
 import './Comment.less';
 

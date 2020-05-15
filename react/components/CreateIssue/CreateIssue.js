@@ -9,10 +9,13 @@ import {
 import moment from 'moment';
 import reactComponentDebounce from '@/components/DebounceComponent';
 import { featureApi } from '@/api';
-import { UploadButton } from '../CommonComponent';
 import {
-  handleFileUpload, beforeTextUpload, validateFile, normFile, getProjectName, getProjectId,
-} from '../../common/utils';
+  beforeTextUpload, handleFileUpload, validateFile, normFile, 
+} from '@/utils/richText';
+import {
+  getProjectName, getProjectId,
+} from '@/utils/common';
+import { UploadButton } from '../CommonComponent';
 import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 import {
   createIssue, getFields, createFieldValue, loadIssue, loadIssueTypes,

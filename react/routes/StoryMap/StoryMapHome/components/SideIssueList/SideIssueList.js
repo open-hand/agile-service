@@ -1,18 +1,16 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {
-  Input, Icon, Checkbox, Popover, Spin, Select,
+  Input, Icon, Select,
 } from 'choerodon-ui';
 import { observer, inject } from 'mobx-react';
+import { configTheme } from '@/utils/common';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import FiltersProvider from '../../../../../components/FiltersProvider';
-import Loading from '../../../../../components/Loading';
-import { configTheme } from '../../../../../common/utils';
 import ClickOutSide from '../../../../../components/CommonComponent/ClickOutSide';
 import IssueItem from './IssueItem';
 import './SideIssueList.less';
 
-const { Option, OptGroup } = Select;
+const { Option } = Select;
 @inject('HeaderStore')
 @FiltersProvider(['issueStatus', 'version'])
 @observer

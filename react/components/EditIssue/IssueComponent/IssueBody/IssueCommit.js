@@ -1,9 +1,9 @@
 import React, { useState, useContext } from 'react';
 import { Button, Icon } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
+import { text2Delta, beforeTextUpload } from '@/utils/richText';
 import WYSIWYGEditor from '../../../WYSIWYGEditor';
 import Comment from '../../Component/Comment';
-import { text2Delta, beforeTextUpload } from '../../../../common/utils';
 import { createCommit } from '../../../../api/NewIssueApi';
 import EditIssueContext from '../../stores';
 

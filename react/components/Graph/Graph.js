@@ -41,7 +41,7 @@ import {
   mxGraphModel,
   mxEventObject,
 } from 'mxgraph-js';
-import { getByteLen, getStageMap } from '../../common/utils';
+import { getByteLen, getStageMap } from '@/utils/stateMachine';
 
 import './Graph.less';
 import Pointer from './point.gif';

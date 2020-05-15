@@ -6,7 +6,7 @@ import { Choerodon } from '@choerodon/boot';
 import {
   find, findIndex, max, remove, groupBy, sortBy,
 } from 'lodash';
-import { getProjectId } from '../../../common/utils';
+import { getProjectId } from '@/utils/common';
 import {
   getStoryMap, getSideIssueList, createWidth, changeWidth, sort,
 } from '../../../api/StoryMapApi';

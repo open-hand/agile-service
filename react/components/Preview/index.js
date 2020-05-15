@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icon } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
-import { getFileSuffix } from '@/common/utils';
+import { getFileSuffix } from '@/utils/common';
 import './index.less';
 import PdfViewer from './PdfViewer';
 

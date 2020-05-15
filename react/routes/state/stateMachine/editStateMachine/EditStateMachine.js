@@ -14,7 +14,7 @@ import {
 import _ from 'lodash';
 import Graph from '../../../../components/Graph';
 import StateStore from '../../../../stores/organization/state';
-import { getByteLen, getStageMap, getStageList } from '../../../../common/utils';
+import { getByteLen, getStageMap, getStageList } from '@/utils/stateMachine';
 
 import './EditStateMachine.less';
 

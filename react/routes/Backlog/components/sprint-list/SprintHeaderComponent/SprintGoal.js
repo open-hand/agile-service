@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Input } from 'choerodon-ui';
 import TextEditToggle from '@/components/TextEditToggle';
-import { getProjectId } from '@/common/utils';
+import { getProjectId } from '@/utils/common';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
 const { Text, Edit } = TextEditToggle;

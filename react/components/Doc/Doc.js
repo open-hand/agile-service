@@ -6,7 +6,7 @@ import {
 } from 'choerodon-ui';
 import './Doc.less';
 import { produce } from 'immer';
-import { getOrganizationId } from '../../common/utils';
+import { getOrganizationId } from '@/utils/common';
 
 const { AppState } = stores;
 const { Sidebar } = Modal;

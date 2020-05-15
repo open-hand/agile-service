@@ -18,6 +18,7 @@ import {
   TabPage as Page, Header, Content, stores, Breadcrumb,
 } from '@choerodon/boot';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import queryString from 'query-string';
 import Graph from '../../../../components/Graph';
 import './EditStateMachineScheme.less';
 
@@ -25,15 +26,12 @@ import StateMachineStore from '../../../../stores/organization/stateMachine';
 import TypeTag from '../../../../components/TypeTag/TypeTag';
 import Tips from '../../../../components/Tips';
 import PublishSidebar from './PublishSidebar';
-import ReadAndEdit from '../../../../components/ReadAndEdit';
-import { getRequest } from '../../../../common/utils';
 import TableDropMenu from '../../../../common/TableDropMenu';
 
 const { Sidebar } = Modal;
 const FormItem = Form.Item;
 const { Option } = Select;
 const { AppState } = stores;
-const { TextArea } = Input;
 const { Item } = Bread;
 const prefixCls = 'issue-stateMachineScheme';
 const formItemLayout = {
@@ -73,7 +71,7 @@ class EditStateMachineScheme extends Component {
     this.loadStateMachine();
     StateMachineSchemeStore.loadAllStateMachine(organizationId);
     this.setState({
-      from: getRequest(location.search).fromMachine,
+      from: queryString.parse(location.search).fromMachine,
     });
   }
 

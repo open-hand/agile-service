@@ -8,7 +8,7 @@ import { store, stores } from '@choerodon/boot';
 import { Modal } from 'choerodon-ui';
 import { featureApi } from '@/api';
 import { sort } from '@/api/StoryMapApi';
-import { getProjectId } from '@/common/utils';
+import { getProjectId } from '@/utils/common';
 
 const { AppState } = stores;
 function randomItem(array) {

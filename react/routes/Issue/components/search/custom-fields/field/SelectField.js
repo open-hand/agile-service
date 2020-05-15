@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Select } from 'choerodon-ui';
-import { configTheme } from '@/common/utils';
+import { configTheme } from '@/utils/common';
 import { getSelectStyle } from '../utils';
 
 const { Option } = Select;

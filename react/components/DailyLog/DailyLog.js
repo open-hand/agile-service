@@ -4,7 +4,7 @@ import moment from 'moment';
 import {
   Select, DatePicker, Modal, Radio,
 } from 'choerodon-ui';
-import { beforeTextUpload } from '../../common/utils';
+import { beforeTextUpload } from '@/utils/richText';
 import { createWorklog } from '../../api/NewIssueApi';
 import WYSIWYGEditor from '../WYSIWYGEditor';
 import './DailyLog.less';

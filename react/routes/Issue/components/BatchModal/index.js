@@ -8,7 +8,7 @@ import {
   stores, WSHandler, Choerodon,  
 } from '@choerodon/boot';
 import { find } from 'lodash';
-import { getProjectId, getOrganizationId } from '@/common/utils';
+import { getProjectId, getOrganizationId } from '@/utils/common';
 import { batchUpdateIssue } from '@/api/NewIssueApi';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import WSProvider from '@choerodon/master/lib/containers/components/c7n/tools/ws/WSProvider';

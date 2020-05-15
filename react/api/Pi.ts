@@ -1,5 +1,5 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId } from '../common/utils';
+import { getProjectId } from '@/utils/common';
 
 class PiApi {
   get prefix() {

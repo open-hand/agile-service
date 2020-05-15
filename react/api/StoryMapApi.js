@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 import { axios } from '@choerodon/boot';
-import { getProjectId, getOrganizationId } from '../common/utils';
+import { getProjectId, getOrganizationId } from '@/utils/common';
 
 /**
  * @returns

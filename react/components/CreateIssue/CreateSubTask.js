@@ -1,7 +1,7 @@
 import React from 'react';
+import { getProjectName } from '@/utils/common';
 import CreateIssue from './CreateIssue';
 import { createSubIssue } from '../../api/NewIssueApi';
-import { getProjectName } from '../../common/utils';
 
 const CreateSubTask = ({ ...props }) => (
   <CreateIssue

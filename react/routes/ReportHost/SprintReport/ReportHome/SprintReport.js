@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Button, Spin, message, Icon, Select, Table, Menu, Checkbox, Tabs, Tooltip, Pagination,
+  Button, Spin, Icon, Select, Table, Checkbox, Tabs, Tooltip, Pagination,
 } from 'choerodon-ui';
 import {
   Page, Header, Content, stores, Breadcrumb,
@@ -9,9 +9,9 @@ import {
 import ReactEcharts from 'echarts-for-react';
 import _ from 'lodash';
 import moment from 'moment';
+import { commonformatDate } from '@/utils/Date';
 import BurndownChartStore from '../../../../stores/project/burndownChart/BurndownChartStore';
 import ReportStore from '../../../../stores/project/Report';
-import { commonformatDate } from '../../../../common/utils';
 import NoDataComponent from '../../Component/noData';
 // import epicSvg from '../../Home/style/pics/no_sprint.svg';
 import epicSvg from '../../../../assets/image/emptyChart.svg';

@@ -9,7 +9,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import WorkCalendar from '@/components/WorkCalendar';
-import { catchFailed } from '@/common/utils';
+import { catchFailed } from '@/utils/common';
 import IsInProgramStore from '../../../../stores/common/program/IsInProgramStore';
 
 const FormItem = Form.Item;

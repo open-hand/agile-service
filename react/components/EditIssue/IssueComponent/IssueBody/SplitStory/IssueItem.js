@@ -6,7 +6,7 @@ import PriorityTag from '@/components/PriorityTag';
 import StatusTag from '@/components/StatusTag';
 import TypeTag from '@/components/TypeTag';
 import styled from '@emotion/styled';
-import { toIssueInProject } from '@/common/utils';
+import { toIssueInProject } from '@/utils/link';
 
 const Link = styled.a`
   overflow:hidden;

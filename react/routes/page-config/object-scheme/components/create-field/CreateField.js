@@ -10,7 +10,7 @@ import { debounce } from 'lodash';
 
 
 import UserInfo from '@/components/UserInfo';
-import { randomString } from '@/common/utils';
+import { randomString } from '@/utils/random';
 import Store from './stores';
 import DragList from '../drag-list';
 

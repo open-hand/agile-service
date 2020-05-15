@@ -1,8 +1,7 @@
 import React from 'react';
-import { observer } from 'mobx-react-lite';
 import { withRouter } from 'react-router-dom';
 import { Tooltip } from 'choerodon-ui';
-import { programIssueLink, issueLink } from '../../../common/utils';
+import { issueLink } from '@/utils/link';
 
 
 const IssueNumber = ({
