@@ -11,8 +11,6 @@ import _ from 'lodash';
 import moment from 'moment';
 import BurndownChartStore from '../../../../stores/project/burndownChart/BurndownChartStore';
 import ReportStore from '../../../../stores/project/Report';
-import restSvg from '../../../../assets/image/rest.svg';
-import hopeSvg from '../../../../assets/image/hope.svg';
 import { commonformatDate } from '../../../../common/utils';
 import NoDataComponent from '../../Component/noData';
 // import epicSvg from '../../Home/style/pics/no_sprint.svg';

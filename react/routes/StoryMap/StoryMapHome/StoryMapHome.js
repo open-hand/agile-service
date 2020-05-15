@@ -13,7 +13,7 @@ import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import HeaderLine from '@/components/HeaderLine';
 import Minimap from '../../../components/MiniMap';
 import Empty from '../../../components/Empty';
-import epicPic from '../../../assets/image/emptyStory.svg';
+import epicPic from './emptyStory.svg';
 import Loading from '../../../components/Loading';
 import StoryMapBody from './components/StoryMapBody';
 import SideIssueList from './components/SideIssueList';
