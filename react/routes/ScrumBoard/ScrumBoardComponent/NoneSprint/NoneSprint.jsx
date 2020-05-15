@@ -1,6 +1,6 @@
 /* eslint-disable react/self-closing-comp,jsx-a11y/accessible-emoji */
 import React from 'react';
-import EmptyScrumboard from '@/assets/image/emptyScrumboard.svg';
+import EmptyScrumboard from './emptyScrumboard.svg';
 
 const NoneSprint = ({ doingSprintExist }) => (
   <React.Fragment>

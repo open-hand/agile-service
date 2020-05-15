@@ -44,7 +44,7 @@ import {
 import { getByteLen, getStageMap } from '../../common/utils';
 
 import './Graph.less';
-import Pointer from '../../assets/image/point.gif';
+import Pointer from './point.gif';
 
 const edgeStyle = 'edgeStyle=orthogonalEdgeStyle;jettySize=20;rounded=0;html=1;strokeColor=#868585;labelBackgroundColor=#fff;strokeWidth=1;';
 const focusStyle = 'edgeStyle=orthogonalEdgeStyle;jettySize=20;rounded=0;html=1;strokeColor=#000;strokeWidth=2;labelBackgroundColor=#fff;';
