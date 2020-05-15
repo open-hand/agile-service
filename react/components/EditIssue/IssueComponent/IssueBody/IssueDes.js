@@ -7,7 +7,7 @@ import {
 
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
-import { text2Delta, delta2Html, returnBeforeTextUpload } from '../../../../common/utils';
+import { text2Delta, returnBeforeTextUpload } from '@/utils/richText';
 import FullEditor from '../../../FullEditor';
 import { updateIssue } from '../../../../api/NewIssueApi';
 import EditIssueContext from '../../stores';

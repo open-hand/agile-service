@@ -1,9 +1,8 @@
 import React from 'react';
-import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Icon, Tooltip } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
-import { getFileSuffix } from '@/common/utils';
+import { getFileSuffix } from '@/utils/common';
 import Preview from '@/components/Preview';
 import './SingleFileUpload.less';
 

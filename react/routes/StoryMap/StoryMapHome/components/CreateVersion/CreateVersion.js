@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { Modal, Form, Input } from 'choerodon-ui';
-import { Choerodon } from '@choerodon/boot'
+import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react';
+import { getProjectId } from '@/utils/common';
 import { createVersion, checkVersionNameRepeat } from '../../../../../api/NewIssueApi';
-import { getProjectId } from '../../../../../common/utils';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 
 const FormItem = Form.Item;
@@ -103,9 +102,9 @@ class CreateVersion extends Component {
           <FormItem>
             {getFieldDecorator('name', {
               rules: [{ required: true, message: '请输入名称' },
-              type === 'version' ? {
-                validator: this.checkVersionNameRepeat,
-              } : {
+                type === 'version' ? {
+                  validator: this.checkVersionNameRepeat,
+                } : {
                   validator: this.checkSprintNameRepeat,
                 }],
               initialValue: nextSprintName,

@@ -1,5 +1,5 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId, getOrganizationId } from '../common/utils';
+import { getProjectId, getOrganizationId } from '@/utils/common';
 
 
 export function getRoadMapInProject(programId) {

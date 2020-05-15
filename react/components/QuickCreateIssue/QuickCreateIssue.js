@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import {
   Button, Icon, Dropdown, Input, Menu, Form,
 } from 'choerodon-ui';
+import { getProjectId } from '@/utils/common';
 import TypeTag from '../TypeTag';
 import { deBounce } from './Utils';
-import { getProjectId } from '../../common/utils';
 import { createIssue, createIssueField } from '../../api/NewIssueApi';
 import './QuickCreateIssue.less';
 

@@ -11,7 +11,7 @@ import { FormattedMessage } from 'react-intl';
 import {
   Content, Header, TabPage as Page, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
-import { getStageMap, getStageList } from '../../../common/utils';
+import { getStageMap, getStageList } from '@/utils/stateMachine';
 import Store from './stores';
 import './StateList.less';
 import TableDropMenu from '../../../common/TableDropMenu';

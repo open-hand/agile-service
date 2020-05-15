@@ -1,4 +1,4 @@
-import { getProjectId, getOrganizationId } from '@/common/utils';
+import { getProjectId, getOrganizationId } from '@/utils/common';
 import { Choerodon } from '@choerodon/boot';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 

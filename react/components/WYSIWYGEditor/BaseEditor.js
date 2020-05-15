@@ -5,7 +5,7 @@ import { isEqual } from 'lodash';
 import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import LightBox from 'react-image-lightbox';
-import { randomWord } from '../../common/utils';
+import { randomWord } from '@/utils/random';
 import ImageDrop from './ImageDrop';
 import Link from './Link';
 import './BaseEditor.less';
@@ -203,14 +203,14 @@ class BaseEditor extends Component {
                 type="primary"
                 onClick={onCancel}
               >
-                {'取消'}
+                取消
               </Button>
               <Button
                 type="primary"
                 loading={loading}
                 onClick={onSave}
               >
-                {'保存'}
+                保存
               </Button>
             </div>
           )

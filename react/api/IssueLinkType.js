@@ -1,5 +1,5 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId, getOrganizationId } from '../common/utils';
+import { getProjectId } from '@/utils/common';
 
 const IssueLinkType = {
   queryAll: ({

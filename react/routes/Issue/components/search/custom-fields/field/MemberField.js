@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Select } from 'choerodon-ui';
 import { unionBy } from 'lodash';
-import { configTheme } from '@/common/utils';
+import { configTheme } from '@/utils/common';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
 import { getSelectStyle } from '../utils';
 

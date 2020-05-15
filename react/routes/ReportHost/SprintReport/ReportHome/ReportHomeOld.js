@@ -7,18 +7,18 @@ import {
 import {
   Button, Tabs, Table, Select, Icon, Tooltip, Dropdown, Menu,
 } from 'choerodon-ui';
+import { formatDate } from '@/utils/Date';
 import ReportStore from '../../../../stores/project/Report';
 import './ReleaseDetail.less';
 import StatusTag from '../../../../components/StatusTag';
 import PriorityTag from '../../../../components/PriorityTag';
 import TypeTag from '../../../../components/TypeTag';
-import { formatDate } from '../../../../common/utils';
 import NoDataComponent from '../../Component/noData';
 import epicSvg from '../../Home/style/pics/no_sprint.svg';
 import SwithChart from '../../Component/switchChart';
 
-const {TabPane} = Tabs;
-const {Option} = Select;
+const { TabPane } = Tabs;
+const { Option } = Select;
 const { AppState } = stores;
 
 @observer
@@ -272,19 +272,19 @@ class ReleaseDetail extends Component {
                 filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
                 }
               >
-                {ReportStore.sprints.map(sprint => (<Option key={sprint.sprintId} value={sprint.sprintId}>{sprint.sprintName}</Option>),)}
+                {ReportStore.sprints.map(sprint => (<Option key={sprint.sprintId} value={sprint.sprintId}>{sprint.sprintName}</Option>))}
               </Select>
               <div className="c7n-sprintMessage">
                 <div className="c7n-sprintContent">
                   <span>
                     {ReportStore.getCurrentSprintStatus.status}
-冲刺,
-                  共
-{' '}
-{ReportStore.currentSprint.issueCount || 0}
-{' '}
-个问题
-</span>
+                    冲刺,
+                    共
+                    {' '}
+                    {ReportStore.currentSprint.issueCount || 0}
+                    {' '}
+                    个问题
+                  </span>
                   <span>
                     {`${formatDate(ReportStore.currentSprint.startDate)} - ${formatDate(ReportStore.currentSprint.actualEndDate) || '至今'}`}
                   </span>

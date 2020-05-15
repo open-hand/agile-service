@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Input } from 'choerodon-ui';
-import { Choerodon } from '@choerodon/boot'
+import { Choerodon } from '@choerodon/boot';
+import { getProjectId } from '@/utils/common';
 import Card from './Card';
 import { createIssue, createIssueField } from '../../../../../api/NewIssueApi';
-import { getProjectId } from '../../../../../common/utils';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import clickOutSide from '../../../../../components/CommonComponent/ClickOutSide';
 

@@ -1,6 +1,6 @@
 import { axios } from '@choerodon/boot';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
-import { getProjectId } from '../common/utils';
+import { getProjectId } from '@/utils/common';
 
 export function getSubStoryByFeature(issueId) {
   return axios.post(`/agile/v1/projects/${getProjectId()}/issues/list_story_by_feature_id?issueId=${issueId}`);

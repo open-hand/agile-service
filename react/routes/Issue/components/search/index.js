@@ -13,7 +13,6 @@ import {
   find, pick, isEqual, remove, map, isEmpty,
 } from 'lodash';
 import { observer } from 'mobx-react-lite';
-import { getRequest } from '@/common/utils';
 import IssueStore from '@/stores/project/issue/IssueStore';
 import SummaryField from './custom-fields/field/SummaryField';
 import Store from '../../stores';
@@ -89,7 +88,7 @@ export default withRouter(observer(({
     const {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
       paramType, paramIssueId, paramName, paramOpenIssueId, ...otherArgs
-    } = getRequest(search);
+    } = queryString.parse(search);
     setSelectedQuickFilters([]);
     if (paramIssueId || paramChoose || paramType) {
       history.replace(`/agile/work-list/issue?${queryString.stringify(otherArgs)}`);

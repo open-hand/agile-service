@@ -3,7 +3,7 @@ import moment from 'moment';
 import { observer } from 'mobx-react';
 import { DatePicker, message, Form } from 'choerodon-ui';
 import TextEditToggle from '@/components/TextEditToggle';
-import { getProjectId, catchFailed } from '@/common/utils';
+import { getProjectId, catchFailed } from '@/utils/common';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 

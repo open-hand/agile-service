@@ -1,4 +1,4 @@
-import { getProjectId } from '@/common/utils';
+import { getProjectId } from '@/utils/common';
 
 export default function DataSetFactory({ sequence, boardId }) {
   return {

@@ -6,7 +6,7 @@ import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import { sprintApi } from '@/api';
 import TextEditToggle from '@/components/TextEditToggle';
 import { MAX_LENGTH_SPRINT } from '@/constants/MAX_LENGTH';
-import { getProjectId } from '@/common/utils';
+import { getProjectId } from '@/utils/common';
 
 const { Text, Edit } = TextEditToggle;
 

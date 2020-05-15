@@ -1,6 +1,6 @@
 import React from 'react';
+import { getProjectName } from '@/utils/common';
 import CreateIssue from './CreateIssue';
-import { getProjectName } from '../../common/utils';
 
 const CreateSubBug = ({ ...props }) => (
   <CreateIssue

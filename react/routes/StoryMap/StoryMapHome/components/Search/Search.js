@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { Select } from 'choerodon-ui';
 import { observer } from 'mobx-react';
+import { configTheme } from '@/utils/common';
 import FiltersProvider from '../../../../../components/FiltersProvider';
-import { configTheme } from '../../../../../common/utils';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 
 const { Option } = Select;
@@ -27,7 +26,7 @@ class Search extends Component {
       }}
       >
         <div style={{ fontWeight: 600, fontSize: '14px', marginRight: 20 }}>
-        搜索:
+          搜索:
         </div>                
         <div style={{ display: 'flex' }}>
           <Select

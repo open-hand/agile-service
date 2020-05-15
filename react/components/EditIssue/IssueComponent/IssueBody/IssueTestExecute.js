@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
+import { testExecuteLink } from '@/utils/link';
 import Divider from './Divider';
-import { testExecuteLink } from '../../../../common/utils';
 
 @observer class IssueTestExecute extends Component {
   renderExecutes = () => {

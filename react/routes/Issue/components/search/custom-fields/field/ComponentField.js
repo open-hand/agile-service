@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { unionBy } from 'lodash';
 import { Select } from 'choerodon-ui';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
-import { configTheme } from '@/common/utils';
+import { configTheme } from '@/utils/common';
 import { getSelectStyle } from '../utils';
 
 const { Option } = Select;

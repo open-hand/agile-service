@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { observer } from 'mobx-react';
 import { Tooltip } from 'choerodon-ui';
 import { find } from 'lodash';
-import { DragSource, DropTarget } from 'react-dnd';
+import { DragSource } from 'react-dnd';
+import { issueLink } from '@/utils/link';
 import TypeTag from '../../../../../components/TypeTag';
-import { issueLink } from '../../../../../common/utils';
 import { storyMove } from '../../../../../api/StoryMapApi';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 

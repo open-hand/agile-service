@@ -2,7 +2,7 @@ import React, { useMemo, Fragment } from 'react';
 import {
   Select, DataSet, Form, Button,
 } from 'choerodon-ui/pro';
-import { getProjectId } from '@/common/utils';
+import { getProjectId } from '@/utils/common';
 import TextEditToggle from '@/components/TextEditTogglePro';
 
 const { Text, Edit } = TextEditToggle;
