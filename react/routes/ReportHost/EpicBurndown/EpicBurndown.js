@@ -9,6 +9,7 @@ import {
   Button, Tabs, Table, Select, Icon, Tooltip, Spin, Checkbox,
 } from 'choerodon-ui';
 // import pic from './no_epic.svg';
+import STATUS from '@/constants/STATUS';
 import pic from '../../../assets/image/emptyChart.svg';
 // import finish from './legend/finish.svg';
 import SwithChart from '../Component/switchChart';
@@ -24,7 +25,6 @@ import sprintIcon from './sprintIcon.svg';
 import storyPointIcon from './storyPointIcon.svg';
 import completed from './completed.svg';
 import './EpicReport.less';
-import { STATUS } from '../../../common/Constant';
 
 const { AppState } = stores;
 const { Option } = Select;

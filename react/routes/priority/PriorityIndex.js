@@ -7,7 +7,7 @@ const PriorityList = asyncRouter(() => import('./priorityList'), () => import('.
 const PriorityIndex = ({ match }) => (
   <Switch>
     <Route exact path={match.url} component={PriorityList} />
-    <Route path={'*'} component={nomatch} />
+    <Route path="*" component={nomatch} />
   </Switch>
 );
 

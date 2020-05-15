@@ -4,9 +4,7 @@ import {
   Switch,
 } from 'react-router-dom';
 import { ModalContainer } from 'choerodon-ui/pro';
-import {
-  asyncRouter, asyncLocaleProvider, stores, nomatch, 
-} from '@choerodon/boot';
+import { asyncLocaleProvider, stores, nomatch } from '@choerodon/boot';
 import 'moment/locale/zh-cn';
 import 'moment/locale/en-nz';
 import moment from 'moment';
@@ -15,21 +13,21 @@ import IsInProgramStore from './stores/common/program/IsInProgramStore';
 import RunWhenProjectChange from './common/RunWhenProjectChange';
 import './style/index.less';
 
-const ScrumBoard = asyncRouter(() => import('./routes/ScrumBoard'));
-const ReportHost = asyncRouter(() => import('./routes/ReportHost'));
-const StoryMap = asyncRouter(() => import('./routes/StoryMap'));
-const IterationBoard = asyncRouter(() => import('./routes/IterationBoard'));
-const WorkList = asyncRouter(() => import('./routes/WorkList'));
-const IssueType = asyncRouter(() => import('./routes/issueType'));
-const Priority = asyncRouter(() => import('./routes/priority'));
-const State = asyncRouter(() => import('./routes/state'));
-const PageConfig = asyncRouter(() => import('./routes/page-config'));
+const ScrumBoard = React.lazy(() => import('./routes/ScrumBoard'));
+const ReportHost = React.lazy(() => import('./routes/ReportHost'));
+const StoryMap = React.lazy(() => import('./routes/StoryMap'));
+const IterationBoard = React.lazy(() => import('./routes/IterationBoard'));
+const WorkList = React.lazy(() => import('./routes/work-list'));
+const IssueType = React.lazy(() => import('./routes/issueType'));
+const Priority = React.lazy(() => import('./routes/priority'));
+const State = React.lazy(() => import('./routes/state'));
+const PageConfig = React.lazy(() => import('./routes/page-config'));
 // 敏捷设置
-const Settings = asyncRouter(() => import('./routes/settings'));
+const Settings = React.lazy(() => import('./routes/settings'));
 
 const { AppState } = stores;
 
-class Index extends React.Component {
+class Agile extends React.Component {
   // componentDidCatch(error, info) {
   //   Choerodon.prompt(error.message);
   // }
@@ -84,4 +82,4 @@ export * from './exports';
 export * from '@/hooks';
 export * from '@/components';
 
-export default Index;
+export default Agile;

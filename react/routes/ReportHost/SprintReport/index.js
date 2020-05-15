@@ -1,6 +1,3 @@
-/**
- * Created by Qyellow on 2018/6/14.
- */
-import ReportHome from './ReportHome';
+import SprintReport from './SprintReport';
 
-export default ReportHome;
+export default SprintReport;

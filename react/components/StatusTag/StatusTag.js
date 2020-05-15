@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './StatusTag.less';
-import { STATUS } from '../../common/Constant';
+import STATUS from '@/constants/STATUS';
 
 class StatusTag extends Component {
   renderStatusBackground = (categoryCode) => {

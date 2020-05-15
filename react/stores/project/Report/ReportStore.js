@@ -1,11 +1,9 @@
 import { observable, action, computed } from 'mobx';
-import { store, stores, axios } from '@choerodon/boot';
+import { store } from '@choerodon/boot';
 import _ from 'lodash';
 import {
   loadSprints, loadSprint, loadSprintIssues, loadChartData, 
 } from '../../../api/NewIssueApi';
-
-const { AppState } = stores;
 
 @store('ReportStore')
 class ReportStore {

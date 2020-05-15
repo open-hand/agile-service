@@ -1,8 +1,6 @@
+import { stores } from '@choerodon/boot';
 import {
-  Content, Header, Page, stores
-} from '@choerodon/boot';
-import {
-  Button, Card, Form, Icon, Input, message, Modal, Spin, Table, Tooltip, Checkbox
+  Form, Input, message, Modal, Checkbox,
 } from 'choerodon-ui';
 import { observer } from 'mobx-react';
 import React, { Component } from 'react';
@@ -13,7 +11,6 @@ import './priorityCreate.less';
 
 const FormItem = Form.Item;
 const { Sidebar } = Modal;
-const { confirm } = Modal;
 const { TextArea } = Input;
 
 const { AppState } = stores;

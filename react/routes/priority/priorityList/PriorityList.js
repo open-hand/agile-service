@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
-import { withRouter } from 'react-router-dom';
+import { observer } from 'mobx-react';
 import {
-  Table, Button, Modal, Form, Select, Input, Tooltip, Icon, Divider, message, Dropdown, Menu,
+  Table, Button, Modal, Select, Icon, message, Menu,
 } from 'choerodon-ui';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import {
-  Content, Header, TabPage as Page, Permission, stores, axios, Breadcrumb,
+  Content, Header, TabPage as Page, stores, Breadcrumb,
 } from '@choerodon/boot';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
@@ -318,7 +317,7 @@ class PriorityList extends Component {
   }
 
   render() {
-    const { PriorityStore, intl } = this.props;
+    const { PriorityStore } = this.props;
     const {
       getPriorityList,
       onLoadingList,
@@ -327,7 +326,7 @@ class PriorityList extends Component {
     } = PriorityStore;
 
     return (
-      <Page 
+      <Page
         className="c7nagile-priority"
         service={[
           'agile-service.priority.selectAll',
@@ -340,16 +339,8 @@ class PriorityList extends Component {
             <Icon type="playlist_add" />
             <FormattedMessage id="priority.create" />
           </Button>
-          {/* <Button onClick={this.refresh}>
-            <Icon type="refresh" />
-            <FormattedMessage id="refresh" />
-          </Button> */}
         </Header>
-        <Breadcrumb title="" />
-        {/* <Content
-          description={intl.formatMessage({ id: 'priority.list.tip' })}
-          link="https://choerodon.io/zh/docs/user-guide/system-configuration/issue-configuration/issue-properties/issue-priority/"
-        > */}
+        <Breadcrumb />
         <Content>
           <Table
             filterBarPlaceholder="过滤表"

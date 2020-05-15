@@ -2,8 +2,6 @@ import { Table } from 'choerodon-ui';
 import React, { Component } from 'react';
 import { DragDropContext, DragSource, DropTarget } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
-import update from 'immutability-helper';
-import isEqual from 'lodash/isEqual';
 import './DrapSortingTable.less';
 
 

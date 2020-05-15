@@ -8,7 +8,7 @@ import { Button } from 'choerodon-ui/pro';
 import { find } from 'lodash';
 import { stores, Permission, Choerodon } from '@choerodon/boot';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
-import { STATUS } from '@/common/Constant';
+import STATUS from '@/constants/STATUS';
 import './StatusCard.less';
 
 const { AppState } = stores;
