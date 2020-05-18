@@ -414,7 +414,7 @@ public class IssueServiceImpl implements IssueService {
                         .subList((pageRequest.getPage() - 1) * pageRequest.getSize(), pageRequest.getPage() * pageRequest.getSize()));
             } else {
                 String orderStr = getOrderStrOfQueryingIssuesWithSub(pageRequest.getSort());
-                Page<IssueDTO> issues = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr));
+                Page<IssueDTO> issues = PageHelper.doPage(pageRequest, () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr));
                 List<Long> issueIds = issues.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
                 issueIdPage = PageUtil.buildPageInfoWithPageInfoList(issues, issueIds);
             }
