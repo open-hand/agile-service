@@ -6,15 +6,13 @@ import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.IssueAttachmentVO;
 import io.choerodon.agile.app.service.IssueAttachmentService;
-import io.choerodon.agile.infra.feign.FileFeignClient;
 import io.choerodon.agile.infra.mapper.IssueAttachmentMapper;
+import org.hzero.boot.file.FileClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -26,6 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -40,12 +39,8 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
 
     private static final String BACKETNAME = "agile-service";
 
-
-    private final FileFeignClient fileFeignClient;
-
     @Autowired
-    public IssueAttachmentServiceImpl(FileFeignClient fileFeignClient) {
-        this.fileFeignClient = fileFeignClient;
+    public IssueAttachmentServiceImpl() {
     }
 
     @Autowired
@@ -56,6 +51,9 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
 
     @Value("${services.attachment.url}")
     private String attachmentUrl;
+
+    @Autowired
+    private FileClient fileClient;
 
     @Override
     public void dealIssue(Long projectId, Long issueId, String fileName, String url) {
@@ -94,11 +92,8 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         if (files != null && !files.isEmpty()) {
             for (MultipartFile multipartFile : files) {
                 String fileName = multipartFile.getOriginalFilename();
-                ResponseEntity<String> response = fileFeignClient.uploadFile(BACKETNAME, fileName, multipartFile);
-                if (response == null || response.getStatusCode() != HttpStatus.OK) {
-                    throw new CommonException("error.attachment.upload");
-                }
-                dealIssue(projectId, issueId, fileName, dealUrl(response.getBody()));
+                String url = fileClient.uploadFile(0L, BACKETNAME, null, fileName, multipartFile);
+                dealIssue(projectId, issueId, fileName, dealUrl(url));
             }
         }
         IssueAttachmentDTO issueAttachmentDTO = new IssueAttachmentDTO();
@@ -126,7 +121,8 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         String url = null;
         try {
             url = URLDecoder.decode(issueAttachmentDTO.getUrl(), "UTF-8");
-            fileFeignClient.deleteFile(BACKETNAME, attachmentUrl + "/" + BACKETNAME + "/" + url);
+            String deleteUrl = attachmentUrl + "/" + BACKETNAME + "/" + url;
+            fileClient.deleteFileByUrl(0L, BACKETNAME, Arrays.asList(deleteUrl));
         } catch (Exception e) {
             LOGGER.error("error.attachment.delete", e);
         }
@@ -142,11 +138,8 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         List<String> result = new ArrayList<>();
         for (MultipartFile multipartFile : files) {
             String fileName = multipartFile.getOriginalFilename();
-            ResponseEntity<String> response = fileFeignClient.uploadFile(BACKETNAME, fileName, multipartFile);
-            if (response == null || response.getStatusCode() != HttpStatus.OK) {
-                throw new CommonException("error.attachment.upload");
-            }
-            result.add(attachmentUrl + "/" + BACKETNAME + "/" + dealUrl(response.getBody()));
+            String url = fileClient.uploadFile(0L, BACKETNAME, null, fileName, multipartFile);
+            result.add(attachmentUrl + "/" + BACKETNAME + "/" + dealUrl(url));
         }
         return result;
     }

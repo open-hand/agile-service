@@ -38,6 +38,11 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.hzero.boot</groupId>
+            <artifactId>hzero-boot-file</artifactId>
+            <version>${hzero.boot.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.hzero.starter</groupId>
             <artifactId>hzero-starter-mybatis-mapper</artifactId>
         </dependency>

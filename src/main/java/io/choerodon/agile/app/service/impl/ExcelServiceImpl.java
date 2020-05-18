@@ -2,15 +2,12 @@ package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.domain.PageInfo;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.domain.IssueType;
 import io.choerodon.agile.app.domain.Predefined;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.feign.FileFeignClient;
-//import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.exception.CommonException;
@@ -18,18 +15,19 @@ import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.hzero.boot.file.FileClient;
 import org.hzero.boot.message.MessageClient;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -85,9 +83,6 @@ public class ExcelServiceImpl implements ExcelService {
     private FileOperationHistoryMapper fileOperationHistoryMapper;
 
     @Autowired
-    private FileFeignClient fileFeignClient;
-
-    @Autowired
     protected ProductVersionMapper productVersionMapper;
 
     @Autowired
@@ -108,6 +103,9 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Autowired
     protected BaseFeignClient baseFeignClient;
+
+    @Autowired
+    private FileClient fileClient;
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -456,11 +454,8 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected String uploadErrorExcel(Workbook errorWorkbook) {
         // 上传错误的excel
-        ResponseEntity<String> response = fileFeignClient.uploadFile(BACKETNAME, FILE_NAME, new MultipartExcelUtil(MULTIPART_NAME, ORIGINAL_FILE_NAME, errorWorkbook));
-        if (response == null || response.getStatusCode() != HttpStatus.OK) {
-            throw new CommonException("error.errorWorkbook.upload");
-        }
-        return response.getBody();
+        MultipartFile multipartFile = new MultipartExcelUtil(MULTIPART_NAME, ORIGINAL_FILE_NAME, errorWorkbook);
+        return fileClient.uploadFile(0L, BACKETNAME, null, FILE_NAME, multipartFile);
     }
 
     protected Boolean checkEpicNameExist(Long projectId, String epicName) {
