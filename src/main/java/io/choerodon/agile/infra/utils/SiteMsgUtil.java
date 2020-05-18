@@ -42,45 +42,103 @@ public class SiteMsgUtil {
     @Autowired
     private MessageClient messageClient;
 
-    private void handleReceiver(List<Receiver> receivers,List<Long> userIds,List<String> messageTypes){
-        List<UserDTO> users = baseFeignClient.listUsersByIds(userIds.toArray(new Long[]{}), true).getBody();
-        Map<Long, UserDTO> userDTOMap = users.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity()));
-        for (Long userId:userIds) {
-            Receiver receiver = new Receiver();
-            receiver.setUserId(userId);
-            UserDTO userDTO = userDTOMap.get(userId);
-            if (messageTypes.contains("email")) {
-                receiver.setEmail(userDTO.getEmail());
-            }
-            if (messageTypes.contains("phone")) {
-                receiver.setPhone(userDTO.getPhone());
-            }
-            receivers.add(receiver);
-        }
-    }
+    public void issueCreate(List<Long> userIds,String userName, String summary, String url, Long reporterId, Long projectId) {
+//        NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
+//        // 添加普通消息
+//        setCommonMsg(noticeSendDTO, projectId, "issueCreate", userName, summary, url, userIds, reporterId);
+//        // 添加webhook
+//        setWebHookJson(noticeSendDTO, noticeSendDTO.getParams(), reporterId, "issueCreate", "问题创建");
+//        try {
+//            notifyFeignClient.postNotice(noticeSendDTO);
+//        } catch (Exception e) {
+//            LOGGER.error("创建issue消息发送失败", e);
+//        }
 
-    public void sendIssueMessage(String messageCode,List<Long> userIds,String userName, String summary, String url, Long reporterId, Long projectId){
-        MessageSender messageSender = new MessageSender();
-        messageSender.setTenantId(0L);
-        messageSender.setMessageCode(messageCode);
-        List<Receiver> receivers = new ArrayList<>();
-        List<String> messageTypes = new ArrayList<>();
-        messageTypes.add("email");
-        handleReceiver(receivers,userIds,messageTypes);
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         Map<String,String> map = new HashMap<>();
         map.put(ASSIGNEENAME, userName);
         map.put(SUMMARY, summary);
         map.put(URL, url);
         map.put(PROJECT_NAME, projectVO.getName());
-        messageSender.setArgs(map);
-        messageSender.setReceiverAddressList(receivers);
         //发送站内信
+        MessageSender messageSender = handlerMessageSender(0L,"issueCreate",userIds,map);
         messageClient.async().sendMessage(messageSender);
     }
 
+    private MessageSender handlerMessageSender(Long tenantId,String messageCode,List<Long> userIds,Map<String,String> map){
+        MessageSender messageSender = new MessageSender();
+        messageSender.setTenantId(tenantId);
+        messageSender.setMessageCode(messageCode);
+        List<Receiver> receivers = new ArrayList<>();
+        handleReceiver(receivers,userIds);
+        // 设置参数
+        messageSender.setArgs(map);
+        // 设置接收者
+        messageSender.setReceiverAddressList(receivers);
+        return messageSender;
+    }
 
+    private void handleReceiver(List<Receiver> receivers,List<Long> userIds){
+        List<UserDTO> users = baseFeignClient.listUsersByIds(userIds.toArray(new Long[]{}), true).getBody();
+        Map<Long, UserDTO> userDTOMap = users.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity()));
+        for (Long userId:userIds) {
+            Receiver receiver = new Receiver();
+            receiver.setUserId(userId);
+            UserDTO userDTO = userDTOMap.get(userId);
+            receiver.setEmail(userDTO.getEmail());
+            receiver.setPhone(userDTO.getPhone());
+            receivers.add(receiver);
+        }
+    }
 
+    public void issueAssignee(List<Long> userIds, String userName, String summary, String url, Long assigneeId, Long projectId) {
+//        NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
+//        // 添加普通消息
+//        setCommonMsg(noticeSendDTO, projectId, "issueAssignee", userName, summary, url, userIds, assigneeId);
+//        // 添加webhook
+//        setWebHookJson(noticeSendDTO, noticeSendDTO.getParams(), assigneeId, "issueAssignee", "问题分配");
+//        try {
+//            notifyFeignClient.postNotice(noticeSendDTO);
+//        } catch (Exception e) {
+//            LOGGER.error("分配issue消息发送失败", e);
+//        }
+
+        // 设置模板参数
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        Map<String,String> map = new HashMap<>();
+        map.put(ASSIGNEENAME, userName);
+        map.put(SUMMARY, summary);
+        map.put(URL, url);
+        map.put(PROJECT_NAME, projectVO.getName());
+        //发送站内信
+        MessageSender messageSender = handlerMessageSender(0L,"issueAssignee",userIds,map);
+        messageClient.async().sendMessage(messageSender);
+
+    }
+
+    public void issueSolve(List<Long> userIds, String userName, String summary, String url, Long assigneeId, Long projectId) {
+//        NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
+//        // 添加普通消息
+//        setCommonMsg(noticeSendDTO, projectId, "issueSolve", userName, summary, url, userIds, assigneeId);
+//        // 添加webhook
+//        setWebHookJson(noticeSendDTO, noticeSendDTO.getParams(), assigneeId, "issueSolve", "问题完成");
+//        try {
+//            notifyFeignClient.postNotice(noticeSendDTO);
+//        } catch (Exception e) {
+//            LOGGER.error("完成issue消息发送失败", e);
+//        }
+
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        Map<String,String> map = new HashMap<>();
+        map.put(ASSIGNEENAME, userName);
+        map.put(SUMMARY, summary);
+        map.put(URL, url);
+        map.put(PROJECT_NAME, projectVO.getName());
+        //发送站内信
+        MessageSender messageSender = handlerMessageSender(0L,"issueSolve",userIds,map);
+        messageClient.async().sendMessage(messageSender);
+
+    }
 
 //    private void setCommonMsg(NoticeSendDTO noticeSendDTO, Long projectId, String noticeCode, String userName,
 //                              String summary, String url, List<Long> userIds, Long fromUserId) {

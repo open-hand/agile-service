@@ -36,9 +36,6 @@ public class SendMsgUtil {
     private static final String ERROR_PROJECT_NOTEXIST = "error.project.notExist";
     private static final String SUB_TASK = "sub_task";
     private static final String STATUS_ID = "statusId";
-    private static final String ISSUE_CREATE = "issueCreate";
-    private static final String ISSUE_ASSIGNEE = "issueAssignee";
-    private static final String ISSUE_SOLVE = "issueSolve";
 
     @Autowired
     private SiteMsgUtil siteMsgUtil;
@@ -85,11 +82,11 @@ public class SendMsgUtil {
             }
             String projectName = convertProjectName(projectVO);
             String url = URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + result.getIssueNum() + URL_TEMPLATE4 + result.getIssueId() + URL_TEMPLATE5 + result.getIssueId();
-            siteMsgUtil.sendIssueMessage(ISSUE_CREATE,userIds,userName,summary,url,result.getReporterId(),projectId);
+            siteMsgUtil.issueCreate(userIds, userName, summary, url, result.getReporterId(), projectId);
             if (result.getAssigneeId() != null) {
                 List<Long> assigneeIds = new ArrayList<>();
                 assigneeIds.add(result.getAssigneeId());
-                siteMsgUtil.sendIssueMessage(ISSUE_ASSIGNEE,assigneeIds, result.getAssigneeName(), summary, url, result.getAssigneeId(), projectId);
+                siteMsgUtil.issueAssignee(assigneeIds, result.getAssigneeName(), summary, url, result.getAssigneeId(), projectId);
             }
         }
     }
@@ -109,11 +106,11 @@ public class SendMsgUtil {
             }
             String projectName = convertProjectName(projectVO);
             String url = URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + result.getIssueNum() + URL_TEMPLATE4 + result.getParentIssueId() + URL_TEMPLATE5 + result.getIssueId();
-            siteMsgUtil.sendIssueMessage(ISSUE_CREATE,userIds, userName, summary, url, result.getReporterId(), projectId);
+            siteMsgUtil.issueCreate(userIds, userName, summary, url, result.getReporterId(), projectId);
             if (result.getAssigneeId() != null) {
                 List<Long> assigneeIds = new ArrayList<>();
                 assigneeIds.add(result.getAssigneeId());
-                siteMsgUtil.sendIssueMessage(ISSUE_ASSIGNEE,assigneeIds, result.getAssigneeName(), summary, url, result.getAssigneeId(), projectId);
+                siteMsgUtil.issueAssignee(assigneeIds, result.getAssigneeName(), summary, url, result.getAssigneeId(), projectId);
             }
         }
     }
@@ -135,7 +132,7 @@ public class SendMsgUtil {
             } else {
                 url.append(URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + result.getIssueNum() + URL_TEMPLATE4 + result.getIssueId() + URL_TEMPLATE5 + result.getIssueId());
             }
-            siteMsgUtil.sendIssueMessage(ISSUE_ASSIGNEE,userIds, userName, summary, url.toString(), result.getAssigneeId(), projectId);
+            siteMsgUtil.issueAssignee(userIds, userName, summary, url.toString(), result.getAssigneeId(), projectId);
         }
     }
 
@@ -160,7 +157,7 @@ public class SendMsgUtil {
             List<UserDTO> userDTOList = baseFeignClient.listUsersByIds(ids, false).getBody();
             String userName = !userDTOList.isEmpty() && userDTOList.get(0) != null ? userDTOList.get(0).getRealName() + "(" + userDTOList.get(0).getLoginName() + ")" : "";
             String summary = result.getIssueNum() + "-" + result.getSummary();
-            siteMsgUtil.sendIssueMessage(ISSUE_SOLVE,userIds, userName, summary, url.toString(), result.getAssigneeId(), projectId);
+            siteMsgUtil.issueSolve(userIds, userName, summary, url.toString(), result.getAssigneeId(), projectId);
         }
     }
 
@@ -194,7 +191,7 @@ public class SendMsgUtil {
             ids[0] = issueDTO.getAssigneeId();
             List<UserDTO> userDTOList = userService.listUsersByIds(ids);
             String userName = !userDTOList.isEmpty() && userDTOList.get(0) != null ? userDTOList.get(0).getRealName() + "(" + userDTOList.get(0).getLoginName() + ")" : "";
-            siteMsgUtil.sendIssueMessage(ISSUE_SOLVE,userIds, userName, summary, url.toString(), issueDTO.getAssigneeId(), projectId);
+            siteMsgUtil.issueSolve(userIds, userName, summary, url.toString(), issueDTO.getAssigneeId(), projectId);
         }
     }
 
