@@ -42,36 +42,6 @@ public class SiteMsgUtil {
     @Autowired
     private MessageClient messageClient;
 
-    public void issueCreate(List<Long> userIds,String userName, String summary, String url, Long reporterId, Long projectId) {
-//        NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
-//        // 添加普通消息
-//        setCommonMsg(noticeSendDTO, projectId, "issueCreate", userName, summary, url, userIds, reporterId);
-//        // 添加webhook
-//        setWebHookJson(noticeSendDTO, noticeSendDTO.getParams(), reporterId, "issueCreate", "问题创建");
-//        try {
-//            notifyFeignClient.postNotice(noticeSendDTO);
-//        } catch (Exception e) {
-//            LOGGER.error("创建issue消息发送失败", e);
-//        }
-        MessageSender messageSender = new MessageSender();
-        messageSender.setTenantId(0L);
-        messageSender.setMessageCode("issueCreate");
-        List<Receiver> receivers = new ArrayList<>();
-        List<String> messageTypes = new ArrayList<>();
-        messageTypes.add("email");
-        handleReceiver(receivers,userIds,messageTypes);
-        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
-        Map<String,String> map = new HashMap<>();
-        map.put(ASSIGNEENAME, userName);
-        map.put(SUMMARY, summary);
-        map.put(URL, url);
-        map.put(PROJECT_NAME, projectVO.getName());
-        messageSender.setArgs(map);
-        messageSender.setReceiverAddressList(receivers);
-        //发送站内信
-        messageClient.async().sendMessage(messageSender);
-    }
-
     private void handleReceiver(List<Receiver> receivers,List<Long> userIds,List<String> messageTypes){
         List<UserDTO> users = baseFeignClient.listUsersByIds(userIds.toArray(new Long[]{}), true).getBody();
         Map<Long, UserDTO> userDTOMap = users.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity()));
@@ -89,20 +59,10 @@ public class SiteMsgUtil {
         }
     }
 
-    public void issueAssignee(List<Long> userIds, String userName, String summary, String url, Long assigneeId, Long projectId) {
-//        NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
-//        // 添加普通消息
-//        setCommonMsg(noticeSendDTO, projectId, "issueAssignee", userName, summary, url, userIds, assigneeId);
-//        // 添加webhook
-//        setWebHookJson(noticeSendDTO, noticeSendDTO.getParams(), assigneeId, "issueAssignee", "问题分配");
-//        try {
-//            notifyFeignClient.postNotice(noticeSendDTO);
-//        } catch (Exception e) {
-//            LOGGER.error("分配issue消息发送失败", e);
-//        }
+    public void sendIssueMessage(String messageCode,List<Long> userIds,String userName, String summary, String url, Long reporterId, Long projectId){
         MessageSender messageSender = new MessageSender();
         messageSender.setTenantId(0L);
-        messageSender.setMessageCode("issueAssignee");
+        messageSender.setMessageCode(messageCode);
         List<Receiver> receivers = new ArrayList<>();
         List<String> messageTypes = new ArrayList<>();
         messageTypes.add("email");
@@ -119,35 +79,8 @@ public class SiteMsgUtil {
         messageClient.async().sendMessage(messageSender);
     }
 
-    public void issueSolve(List<Long> userIds, String userName, String summary, String url, Long assigneeId, Long projectId) {
-//        NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
-//        // 添加普通消息
-//        setCommonMsg(noticeSendDTO, projectId, "issueSolve", userName, summary, url, userIds, assigneeId);
-//        // 添加webhook
-//        setWebHookJson(noticeSendDTO, noticeSendDTO.getParams(), assigneeId, "issueSolve", "问题完成");
-//        try {
-//            notifyFeignClient.postNotice(noticeSendDTO);
-//        } catch (Exception e) {
-//            LOGGER.error("完成issue消息发送失败", e);
-//        }
-        MessageSender messageSender = new MessageSender();
-        messageSender.setTenantId(0L);
-        messageSender.setMessageCode("issueSolve");
-        List<Receiver> receivers = new ArrayList<>();
-        List<String> messageTypes = new ArrayList<>();
-        messageTypes.add("email");
-        handleReceiver(receivers,userIds,messageTypes);
-        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
-        Map<String,String> map = new HashMap<>();
-        map.put(ASSIGNEENAME, userName);
-        map.put(SUMMARY, summary);
-        map.put(URL, url);
-        map.put(PROJECT_NAME, projectVO.getName());
-        messageSender.setArgs(map);
-        messageSender.setReceiverAddressList(receivers);
-        //发送站内信
-        messageClient.async().sendMessage(messageSender);
-    }
+
+
 
 //    private void setCommonMsg(NoticeSendDTO noticeSendDTO, Long projectId, String noticeCode, String userName,
 //                              String summary, String url, List<Long> userIds, Long fromUserId) {
