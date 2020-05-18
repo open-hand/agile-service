@@ -2,15 +2,21 @@ package io.choerodon.agile.infra.utils;
 
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 //import io.choerodon.agile.infra.feign.NotifyFeignClient;
 //import io.choerodon.core.notify.NoticeSendDTO;
+import org.hzero.boot.message.MessageClient;
+import org.hzero.boot.message.entity.MessageSender;
+import org.hzero.boot.message.entity.Receiver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/10/8.
@@ -33,6 +39,8 @@ public class SiteMsgUtil {
     private BaseFeignClient baseFeignClient;
     @Autowired
     private UserService userService;
+    @Autowired
+    private MessageClient messageClient;
 
     public void issueCreate(List<Long> userIds,String userName, String summary, String url, Long reporterId, Long projectId) {
 //        NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
@@ -45,6 +53,40 @@ public class SiteMsgUtil {
 //        } catch (Exception e) {
 //            LOGGER.error("创建issue消息发送失败", e);
 //        }
+        MessageSender messageSender = new MessageSender();
+        messageSender.setTenantId(0L);
+        messageSender.setMessageCode("issueCreate");
+        List<Receiver> receivers = new ArrayList<>();
+        List<String> messageTypes = new ArrayList<>();
+        messageTypes.add("email");
+        handleReceiver(receivers,userIds,messageTypes);
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        Map<String,String> map = new HashMap<>();
+        map.put(ASSIGNEENAME, userName);
+        map.put(SUMMARY, summary);
+        map.put(URL, url);
+        map.put(PROJECT_NAME, projectVO.getName());
+        messageSender.setArgs(map);
+        messageSender.setReceiverAddressList(receivers);
+        //发送站内信
+        messageClient.async().sendMessage(messageSender);
+    }
+
+    private void handleReceiver(List<Receiver> receivers,List<Long> userIds,List<String> messageTypes){
+        List<UserDTO> users = baseFeignClient.listUsersByIds(userIds.toArray(new Long[]{}), true).getBody();
+        Map<Long, UserDTO> userDTOMap = users.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity()));
+        for (Long userId:userIds) {
+            Receiver receiver = new Receiver();
+            receiver.setUserId(userId);
+            UserDTO userDTO = userDTOMap.get(userId);
+            if (messageTypes.contains("email")) {
+                receiver.setEmail(userDTO.getEmail());
+            }
+            if (messageTypes.contains("phone")) {
+                receiver.setPhone(userDTO.getPhone());
+            }
+            receivers.add(receiver);
+        }
     }
 
     public void issueAssignee(List<Long> userIds, String userName, String summary, String url, Long assigneeId, Long projectId) {
@@ -58,6 +100,23 @@ public class SiteMsgUtil {
 //        } catch (Exception e) {
 //            LOGGER.error("分配issue消息发送失败", e);
 //        }
+        MessageSender messageSender = new MessageSender();
+        messageSender.setTenantId(0L);
+        messageSender.setMessageCode("issueAssignee");
+        List<Receiver> receivers = new ArrayList<>();
+        List<String> messageTypes = new ArrayList<>();
+        messageTypes.add("email");
+        handleReceiver(receivers,userIds,messageTypes);
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        Map<String,String> map = new HashMap<>();
+        map.put(ASSIGNEENAME, userName);
+        map.put(SUMMARY, summary);
+        map.put(URL, url);
+        map.put(PROJECT_NAME, projectVO.getName());
+        messageSender.setArgs(map);
+        messageSender.setReceiverAddressList(receivers);
+        //发送站内信
+        messageClient.async().sendMessage(messageSender);
     }
 
     public void issueSolve(List<Long> userIds, String userName, String summary, String url, Long assigneeId, Long projectId) {
@@ -71,6 +130,23 @@ public class SiteMsgUtil {
 //        } catch (Exception e) {
 //            LOGGER.error("完成issue消息发送失败", e);
 //        }
+        MessageSender messageSender = new MessageSender();
+        messageSender.setTenantId(0L);
+        messageSender.setMessageCode("issueSolve");
+        List<Receiver> receivers = new ArrayList<>();
+        List<String> messageTypes = new ArrayList<>();
+        messageTypes.add("email");
+        handleReceiver(receivers,userIds,messageTypes);
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        Map<String,String> map = new HashMap<>();
+        map.put(ASSIGNEENAME, userName);
+        map.put(SUMMARY, summary);
+        map.put(URL, url);
+        map.put(PROJECT_NAME, projectVO.getName());
+        messageSender.setArgs(map);
+        messageSender.setReceiverAddressList(receivers);
+        //发送站内信
+        messageClient.async().sendMessage(messageSender);
     }
 
 //    private void setCommonMsg(NoticeSendDTO noticeSendDTO, Long projectId, String noticeCode, String userName,
