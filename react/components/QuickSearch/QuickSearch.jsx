@@ -39,7 +39,7 @@ class QuickSearch extends Component {
       ],
       filterName: '',
     });
-    const axiosGetUser = axios.get(`/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=40`);
+    const axiosGetUser = axios.get(`/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=40`);
     const axiosGetSprintNotClosed = axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/names`, ['sprint_planning', 'started']);
     Promise.all([axiosGetFilter, axiosGetUser, axiosGetSprintNotClosed]).then((res = []) => {
       const resFilterData = res[0].map(item => ({
@@ -222,7 +222,7 @@ class QuickSearch extends Component {
                   onFilterChange={(value) => {
                     if (value) {
                       debounceCallback(() => {
-                        axios.get(`/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=40&param=${value}`).then((res) => {
+                        axios.get(`/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=40&param=${value}`).then((res) => {
                           // Set 用于查询是否有 id 重复的，没有重复才往里加
                           const temp = new Set(userDataArray.map(item => item.id));
                           res.list.filter(item => item.enabled).forEach((item) => {

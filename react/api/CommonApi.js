@@ -7,7 +7,7 @@ const { AppState } = stores;
 
 
 export function getProjectsInProgram() {
-  return axios.get(`base/v1/organizations/${getOrganizationId()}/projects/${getProjectId()}/program`);
+  return axios.get(`iam/choerodon/v1/organizations/${getOrganizationId()}/projects/${getProjectId()}/program`);
 }
 
 export function getProjectIsShowFeature() { // /v1/projects/1551/art/isArtDoding
@@ -15,13 +15,13 @@ export function getProjectIsShowFeature() { // /v1/projects/1551/art/isArtDoding
 }
 
 export function getSubProjects(only_select_enable = false) {
-  return axios.get(`/base/v1/organizations/${getOrganizationId()}/project_relations/${getProjectId()}/${getProjectId()}?only_select_enable=${only_select_enable || false}`);
+  return axios.get(`/iam/choerodon/v1/organizations/${getOrganizationId()}/project_relations/${getProjectId()}/${getProjectId()}?only_select_enable=${only_select_enable || false}`);
 }
 
 export async function getIsOwner() {
   const projectId = AppState.currentMenuType.id;
   const userId = AppState.userInfo.id;
-  const roles = await axios.get(`base/v1/projects/${projectId}/role_members/users/${userId}`);
+  const roles = await axios.get(`/iam/choerodon/v1/projects/${projectId}/role_members/users/${userId}`);
   return roles.some(role => role.code === 'role/project/default/project-owner');
 }
 

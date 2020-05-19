@@ -3,13 +3,13 @@ import { getProjectId } from '@/common/utils';
 
 class UserApi {
   get prefix() {
-    return `/base/v1/projects/${getProjectId()}`;
+    return `/iam/choerodon/v1/projects/${getProjectId()}`;
   }
   /**
    * 查询当前用户信息
    */
   getSelf() {
-    return axios.get('/base/v1/users/self');
+    return axios.get('/iam/choerodon/v1/users/self');
   }
   /**
  * 根据用户id查询用户信息
