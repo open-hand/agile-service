@@ -2125,11 +2125,11 @@ public class IssueServiceImpl implements IssueService {
         return list;
     }
 
-//    @Override
-//    public List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds) {
-//
-//        return issueAssembler.issueDTOTOVO(projectId, issueMapper.listIssueInfoByIssueIds(projectId, issueIds));
-//    }
+    @Override
+    public List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds) {
+
+        return issueAssembler.issueDTOTOVO(projectId, issueMapper.listIssueInfoByIssueIds(projectId, issueIds));
+    }
 
     @Override
     public Page<IssueListFieldKVVO> queryStoryAndTask(Long projectId, PageRequest pageRequest, SearchVO searchVO) {

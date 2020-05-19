@@ -2,6 +2,7 @@ package io.choerodon.agile.api.controller.v1;
 
 import com.alibaba.fastjson.JSONObject;
 
+import io.choerodon.agile.infra.dto.IssueNumDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
@@ -616,7 +617,7 @@ public class IssueController {
 //                .orElseThrow(() -> new CommonException("error.issue.queryIssueTestGroupByProject"));
 //    }
 
-
+//
 //    @Permission(level = ResourceLevel.PROJECT)
 //    @ApiOperation("【测试专用】根据issueNum查询issue")
 //    @PostMapping(value = "/query_by_issue_num")
@@ -629,17 +630,17 @@ public class IssueController {
 //                .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueNum"));
 //    }
 
-//    @Permission(level = ResourceLevel.PROJECT)
-//    @ApiOperation("【测试专用】根据issueIds查询issue")
-//    @PostMapping(value = "/query_issue_ids")
-//    public ResponseEntity<List<IssueLinkVO>> queryIssues(@ApiParam(value = "项目id", required = true)
-//                                                         @PathVariable(name = "project_id") Long projectId,
-//                                                         @ApiParam(value = "issue编号", required = true)
-//                                                         @RequestBody List<Long> issueIds) {
-//        return Optional.ofNullable(issueService.queryIssueByIssueIds(projectId, issueIds))
-//                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-//                .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueIds"));
-//    }
+    @Permission(level = ResourceLevel.PROJECT)
+    @ApiOperation("【测试专用】根据issueIds查询issue")
+    @PostMapping(value = "/query_issue_ids")
+    public ResponseEntity<List<IssueLinkVO>> queryIssues(@ApiParam(value = "项目id", required = true)
+                                                         @PathVariable(name = "project_id") Long projectId,
+                                                         @ApiParam(value = "issue编号", required = true)
+                                                         @RequestBody List<Long> issueIds) {
+        return Optional.ofNullable(issueService.queryIssueByIssueIds(projectId, issueIds))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueIds"));
+    }
 
     @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("查询项目下的故事和任务(不包含子任务以及子bug)")

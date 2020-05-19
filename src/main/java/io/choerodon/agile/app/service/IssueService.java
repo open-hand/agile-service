@@ -302,7 +302,7 @@ public interface IssueService {
      */
     List<Long> queryProjectIds();
 
-//    List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds);
+    List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds);
 
     Page<IssueListFieldKVVO> queryStoryAndTask(Long projectId, PageRequest pageRequest, SearchVO searchVO);
 
