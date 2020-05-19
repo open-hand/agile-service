@@ -78,8 +78,7 @@ export default ({
         const searchDTO = IssueStore.getCustomFieldFilters();
         return JSON.stringify(searchDTO);
       },
-    })
-    ,
+    }),
   },
   fields: [
     { name: 'issueId', type: 'number', label: '概要' },
