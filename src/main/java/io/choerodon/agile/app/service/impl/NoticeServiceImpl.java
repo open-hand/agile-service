@@ -1,14 +1,14 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.domain.PageInfo;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.NoticeMessageAssembler;
 import io.choerodon.agile.app.service.NoticeService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.MessageDTO;
 import io.choerodon.agile.infra.dto.MessageDetailDTO;
-//import io.choerodon.agile.infra.feign.NotifyFeignClient;
+import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.feign.vo.MessageSettingVO;
 import io.choerodon.agile.infra.mapper.NoticeDetailMapper;
 import io.choerodon.agile.infra.mapper.NoticeMapper;
@@ -46,8 +46,8 @@ public class NoticeServiceImpl implements NoticeService {
     @Autowired
     private NoticeMessageAssembler noticeMessageAssembler;
 
-//    @Autowired
-//    private NotifyFeignClient notifyFeignClient;
+    @Autowired
+    private NotifyFeignClient notifyFeignClient;
 
     private void getIds(List<MessageDTO> result, List<Long> ids) {
         for (MessageDTO messageDTO : result) {
@@ -166,27 +166,26 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     public List<Long> queryUserIdsByProjectId(Long projectId, String code, IssueVO issueVO) {
-//        ResponseEntity<MessageSettingVO> messageSetting = notifyFeignClient.getMessageSetting(projectId,"agile", code,null,null);
-//        MessageSettingVO messageVo = messageSetting.getBody();
-//        if(ObjectUtils.isEmpty(messageVo)){
-//            throw new CommonException("error.message.setting.is.null");
-//        }
-//        Set<String> type = new HashSet<>();
-//        Set<Long> users = new HashSet<>();
-//        messageVo.getTargetUserDTOS().forEach(v -> {
-//            type.add(v.getType());
-//            if (!ObjectUtils.isEmpty(v.getUserId()) && !v.getUserId().equals(0L)) {
-//                users.add(v.getUserId());
-//            }
-//        });
-//        List<String> res = type.stream().collect(Collectors.toList());
-//        List<Long> result = new ArrayList<>();
-//        addUsersByReporter(res, result, issueVO);
-//        addUsersByAssigneer(res, result, issueVO);
-//        addUsersByProjectOwner(projectId, res, result);
-//        addUsersByUsers(res, result, users);
-//        return result;
-        return null;
+        ResponseEntity<MessageSettingVO> messageSetting = notifyFeignClient.getMessageSetting(projectId,"agile", code,null,null);
+        MessageSettingVO messageVo = messageSetting.getBody();
+        if(ObjectUtils.isEmpty(messageVo)){
+            throw new CommonException("error.message.setting.is.null");
+        }
+        Set<String> type = new HashSet<>();
+        Set<Long> users = new HashSet<>();
+        messageVo.getTargetUserDTOS().forEach(v -> {
+            type.add(v.getType());
+            if (!ObjectUtils.isEmpty(v.getUserId()) && !v.getUserId().equals(0L)) {
+                users.add(v.getUserId());
+            }
+        });
+        List<String> res = type.stream().collect(Collectors.toList());
+        List<Long> result = new ArrayList<>();
+        addUsersByReporter(res, result, issueVO);
+        addUsersByAssigneer(res, result, issueVO);
+        addUsersByProjectOwner(projectId, res, result);
+        addUsersByUsers(res, result, users);
+        return result;
     }
 
     @Override
