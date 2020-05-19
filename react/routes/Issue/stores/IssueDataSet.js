@@ -65,6 +65,7 @@ export default ({
   expandField: 'expand',
   idField: 'issueId',
   paging: 'server',
+  modifiedCheck: false,
   cacheSelection: true,
   transport: {
     read: ({ params }) => ({
