@@ -21,9 +21,11 @@ import io.choerodon.agile.infra.dto.IssueComponentDTO;
 import io.choerodon.agile.infra.mapper.IssueComponentMapper;
 
 
+import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.modelmapper.convention.MatchingStrategies;
@@ -32,10 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -159,7 +158,7 @@ public class IssueComponentServiceImpl implements IssueComponentService {
             Page<ComponentForListDTO> componentForListDTOPage = PageHelper.doPageAndSort(pageRequest, () ->
                     issueComponentMapper.queryComponentByOption(projectId, noIssueTest, componentId, searchVO.getSearchArgs(),
                             searchVO.getAdvancedSearchArgs(), searchVO.getContents()));
-            Page<ComponentForListVO> componentForListVOPageInfo = modelMapper.map(componentForListDTOPage, new TypeToken<PageInfo>(){}.getType());
+            Page<ComponentForListVO> componentForListVOPageInfo = modelMapper.map(componentForListDTOPage, new TypeToken<Page>(){}.getType());
             componentForListVOPageInfo.setContent(modelMapper.map(componentForListDTOPage.getContent(), new TypeToken<List<ComponentForListVO>>(){}.getType()));
             if ((componentForListVOPageInfo.getContent() != null) && !componentForListVOPageInfo.getContent().isEmpty()) {
                 List<Long> assigneeIds = componentForListVOPageInfo.getContent().stream().filter(componentForListVO -> componentForListVO.getManagerId() != null
