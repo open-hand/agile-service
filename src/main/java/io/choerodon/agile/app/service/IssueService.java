@@ -216,15 +216,15 @@ public interface IssueService {
      */
     EpicDataVO dragEpic(Long projectId, EpicSequenceVO epicSequenceVO);
 
-    /**
-     * 查询issue统计信息
-     *
-     * @param projectId  projectId
-     * @param type       type
-     * @param issueTypes issueTypes要排除的issue类型
-     * @return PieChartVO
-     */
-    List<PieChartVO> issueStatistic(Long projectId, String type, List<String> issueTypes);
+//    /**
+//     * 查询issue统计信息
+//     *
+//     * @param projectId  projectId
+//     * @param type       type
+//     * @param issueTypes issueTypes要排除的issue类型
+//     * @return PieChartVO
+//     */
+//    List<PieChartVO> issueStatistic(Long projectId, String type, List<String> issueTypes);
 
 //    /**
 //     * 测试模块查询issue详情列表
@@ -254,22 +254,22 @@ public interface IssueService {
      */
     String querySwimLaneCode(Long projectId);
 
-    /**
-     * 克隆issue同时生成版本
-     *
-     * @param projectId projectId
-     * @param versionId versionId
-     * @param issueIds  issueIds
-     * @return new issueIds
-     */
-    List<Long> cloneIssuesByVersionId(Long projectId, Long versionId, List<Long> issueIds);
+//    /**
+//     * 克隆issue同时生成版本
+//     *
+//     * @param projectId projectId
+//     * @param versionId versionId
+//     * @param issueIds  issueIds
+//     * @return new issueIds
+//     */
+//    List<Long> cloneIssuesByVersionId(Long projectId, Long versionId, List<Long> issueIds);
 
-    /**
-     * 根据项目分组测试类型issue
-     *
-     * @return IssueProjectVO
-     */
-    List<IssueProjectVO> queryIssueTestGroupByProject();
+//    /**
+//     * 根据项目分组测试类型issue
+//     *
+//     * @return IssueProjectVO
+//     */
+//    List<IssueProjectVO> queryIssueTestGroupByProject();
 
     /**
      * 批量把issue根据冲刺判断更新为初始状态
@@ -290,7 +290,7 @@ public interface IssueService {
 
     Boolean checkEpicName(Long projectId, String epicName, Long epicId);
 
-    IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum);
+//    IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum);
 
     /**
      * 根据projectId按批次迁移数据
@@ -302,7 +302,7 @@ public interface IssueService {
      */
     List<Long> queryProjectIds();
 
-    List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds);
+//    List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds);
 
     Page<IssueListFieldKVVO> queryStoryAndTask(Long projectId, PageRequest pageRequest, SearchVO searchVO);
 

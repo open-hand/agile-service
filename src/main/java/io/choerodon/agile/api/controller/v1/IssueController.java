@@ -2,7 +2,6 @@ package io.choerodon.agile.api.controller.v1;
 
 import com.alibaba.fastjson.JSONObject;
 
-import io.choerodon.agile.infra.dto.IssueNumDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
@@ -21,10 +20,7 @@ import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.StateMachineClientService;
 import io.choerodon.agile.infra.dto.IssueConvertDTO;
 import io.choerodon.agile.infra.utils.VerifyUpdateUtil;
-import io.choerodon.agile.infra.dto.IssueComponentDetailDTO;
-import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.CustomPageRequest;
@@ -495,19 +491,19 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.issueController.dragEpic"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
-    @ApiOperation("统计issue相关信息（测试模块用）")
-    @PostMapping(value = "/test_component/statistic")
-    public ResponseEntity<List<PieChartVO>> issueStatistic(@ApiParam(value = "项目id", required = true)
-                                                            @PathVariable(name = "project_id") Long projectId,
-                                                           @ApiParam(value = "查询类型(version、component、label)", required = true)
-                                                            @RequestParam String type,
-                                                           @ApiParam(value = "需要排除的issue类型列表")
-                                                            @RequestBody List<String> issueTypes) {
-        return Optional.ofNullable(issueService.issueStatistic(projectId, type, issueTypes))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.Issue.issueStatistic"));
-    }
+//    @Permission(level = ResourceLevel.PROJECT)
+//    @ApiOperation("统计issue相关信息（测试模块用）")
+//    @PostMapping(value = "/test_component/statistic")
+//    public ResponseEntity<List<PieChartVO>> issueStatistic(@ApiParam(value = "项目id", required = true)
+//                                                            @PathVariable(name = "project_id") Long projectId,
+//                                                           @ApiParam(value = "查询类型(version、component、label)", required = true)
+//                                                            @RequestParam String type,
+//                                                           @ApiParam(value = "需要排除的issue类型列表")
+//                                                            @RequestBody List<String> issueTypes) {
+//        return Optional.ofNullable(issueService.issueStatistic(projectId, type, issueTypes))
+//                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+//                .orElseThrow(() -> new CommonException("error.Issue.issueStatistic"));
+//    }
 
 //    @Permission(level = ResourceLevel.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
 //    @ApiOperation("分页过滤查询issue列表(不包含子任务，包含详情),测试模块用")
@@ -595,55 +591,55 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.querySwimLaneCode.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
-    @ApiOperation("【测试专用】批量复制issue并生成版本信息")
-    @PostMapping("/batch_clone_issue/{versionId}")
-    public ResponseEntity<List<Long>> cloneIssuesByVersionId(@ApiParam(value = "项目id", required = true)
-                                                             @PathVariable(name = "project_id") Long projectId,
-                                                             @ApiParam(value = "versionId", required = true)
-                                                             @PathVariable Long versionId,
-                                                             @ApiParam(value = "复制的issueIds", required = true)
-                                                             @RequestBody List<Long> issueIds) {
-        issueValidator.checkIssueIdsAndVersionId(projectId, issueIds, versionId);
-        return Optional.ofNullable(issueService.cloneIssuesByVersionId(projectId, versionId, issueIds))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
-                .orElseThrow(() -> new CommonException("error.issue.cloneIssuesByVersionId"));
-    }
+//    @Permission(level = ResourceLevel.PROJECT)
+//    @ApiOperation("【测试专用】批量复制issue并生成版本信息")
+//    @PostMapping("/batch_clone_issue/{versionId}")
+//    public ResponseEntity<List<Long>> cloneIssuesByVersionId(@ApiParam(value = "项目id", required = true)
+//                                                             @PathVariable(name = "project_id") Long projectId,
+//                                                             @ApiParam(value = "versionId", required = true)
+//                                                             @PathVariable Long versionId,
+//                                                             @ApiParam(value = "复制的issueIds", required = true)
+//                                                             @RequestBody List<Long> issueIds) {
+//        issueValidator.checkIssueIdsAndVersionId(projectId, issueIds, versionId);
+//        return Optional.ofNullable(issueService.cloneIssuesByVersionId(projectId, versionId, issueIds))
+//                .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
+//                .orElseThrow(() -> new CommonException("error.issue.cloneIssuesByVersionId"));
+//    }
 
-    @Permission(level = ResourceLevel.PROJECT)
-    @ApiOperation("【测试专用】issue按照项目分组接口")
-    @GetMapping("/list_issues_by_project")
-    public ResponseEntity<List<IssueProjectVO>> queryIssueTestGroupByProject(@ApiParam(value = "项目id", required = true)
-                                                                              @PathVariable(name = "project_id") Long projectId) {
-        return Optional.ofNullable(issueService.queryIssueTestGroupByProject())
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.issue.queryIssueTestGroupByProject"));
-    }
+//    @Permission(level = ResourceLevel.PROJECT)
+//    @ApiOperation("【测试专用】issue按照项目分组接口")
+//    @GetMapping("/list_issues_by_project")
+//    public ResponseEntity<List<IssueProjectVO>> queryIssueTestGroupByProject(@ApiParam(value = "项目id", required = true)
+//                                                                              @PathVariable(name = "project_id") Long projectId) {
+//        return Optional.ofNullable(issueService.queryIssueTestGroupByProject())
+//                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+//                .orElseThrow(() -> new CommonException("error.issue.queryIssueTestGroupByProject"));
+//    }
 
 
-    @Permission(level = ResourceLevel.PROJECT)
-    @ApiOperation("【测试专用】根据issueNum查询issue")
-    @PostMapping(value = "/query_by_issue_num")
-    public ResponseEntity<IssueNumDTO> queryIssueByIssueNum(@ApiParam(value = "项目id", required = true)
-                                                            @PathVariable(name = "project_id") Long projectId,
-                                                            @ApiParam(value = "issue编号", required = true)
-                                                            @RequestBody String issueNum) {
-        return Optional.ofNullable(issueService.queryIssueByIssueNum(projectId, issueNum))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueNum"));
-    }
+//    @Permission(level = ResourceLevel.PROJECT)
+//    @ApiOperation("【测试专用】根据issueNum查询issue")
+//    @PostMapping(value = "/query_by_issue_num")
+//    public ResponseEntity<IssueNumDTO> queryIssueByIssueNum(@ApiParam(value = "项目id", required = true)
+//                                                            @PathVariable(name = "project_id") Long projectId,
+//                                                            @ApiParam(value = "issue编号", required = true)
+//                                                            @RequestBody String issueNum) {
+//        return Optional.ofNullable(issueService.queryIssueByIssueNum(projectId, issueNum))
+//                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+//                .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueNum"));
+//    }
 
-    @Permission(level = ResourceLevel.PROJECT)
-    @ApiOperation("【测试专用】根据issueIds查询issue")
-    @PostMapping(value = "/query_issue_ids")
-    public ResponseEntity<List<IssueLinkVO>> queryIssues(@ApiParam(value = "项目id", required = true)
-                                                         @PathVariable(name = "project_id") Long projectId,
-                                                         @ApiParam(value = "issue编号", required = true)
-                                                         @RequestBody List<Long> issueIds) {
-        return Optional.ofNullable(issueService.queryIssueByIssueIds(projectId, issueIds))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueIds"));
-    }
+//    @Permission(level = ResourceLevel.PROJECT)
+//    @ApiOperation("【测试专用】根据issueIds查询issue")
+//    @PostMapping(value = "/query_issue_ids")
+//    public ResponseEntity<List<IssueLinkVO>> queryIssues(@ApiParam(value = "项目id", required = true)
+//                                                         @PathVariable(name = "project_id") Long projectId,
+//                                                         @ApiParam(value = "issue编号", required = true)
+//                                                         @RequestBody List<Long> issueIds) {
+//        return Optional.ofNullable(issueService.queryIssueByIssueIds(projectId, issueIds))
+//                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+//                .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueIds"));
+//    }
 
     @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("查询项目下的故事和任务(不包含子任务以及子bug)")

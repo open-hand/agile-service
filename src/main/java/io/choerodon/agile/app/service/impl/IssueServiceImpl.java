@@ -1837,10 +1837,10 @@ public class IssueServiceImpl implements IssueService {
         return epicDataAssembler.toTarget(issueMapper.queryEpicListByEpic(epicSequenceVO.getEpicId(), projectId), EpicDataVO.class);
     }
 
-    @Override
-    public List<PieChartVO> issueStatistic(Long projectId, String type, List<String> issueTypes) {
-        return reportAssembler.toTargetList(issueMapper.issueStatistic(projectId, type, issueTypes), PieChartVO.class);
-    }
+//    @Override
+//    public List<PieChartVO> issueStatistic(Long projectId, String type, List<String> issueTypes) {
+//        return reportAssembler.toTargetList(issueMapper.issueStatistic(projectId, type, issueTypes), PieChartVO.class);
+//    }
 
 //    @Override
 //    public Page<IssueComponentDetailDTO> listIssueWithoutSubDetail(Long projectId, SearchVO searchVO, PageRequest pageRequest) {
@@ -1983,15 +1983,15 @@ public class IssueServiceImpl implements IssueService {
         return result;
     }
 
-    @Override
-    public synchronized List<Long> cloneIssuesByVersionId(Long projectId, Long versionId, List<Long> issueIds) {
-        List<IssueDetailDTO> issueDOList = issueMapper.queryByIssueIds(projectId, issueIds);
-        if (issueDOList.size() == issueIds.size()) {
-            return batchCreateIssue(issueDOList, projectId, versionId);
-        } else {
-            throw new CommonException("error.issueServiceImpl.issueTypeError");
-        }
-    }
+//    @Override
+//    public synchronized List<Long> cloneIssuesByVersionId(Long projectId, Long versionId, List<Long> issueIds) {
+//        List<IssueDetailDTO> issueDOList = issueMapper.queryByIssueIds(projectId, issueIds);
+//        if (issueDOList.size() == issueIds.size()) {
+//            return batchCreateIssue(issueDOList, projectId, versionId);
+//        } else {
+//            throw new CommonException("error.issueServiceImpl.issueTypeError");
+//        }
+//    }
 
     private List<Long> batchCreateIssue(List<IssueDetailDTO> issueDOList, Long projectId, Long versionId) {
         List<Long> issueIds = new ArrayList<>(issueDOList.size());
@@ -2067,10 +2067,10 @@ public class IssueServiceImpl implements IssueService {
         return result.toString();
     }
 
-    @Override
-    public List<IssueProjectVO> queryIssueTestGroupByProject() {
-        return issueAssembler.toTargetList(issueMapper.queryIssueTestGroupByProject(), IssueProjectVO.class);
-    }
+//    @Override
+//    public List<IssueProjectVO> queryIssueTestGroupByProject() {
+//        return issueAssembler.toTargetList(issueMapper.queryIssueTestGroupByProject(), IssueProjectVO.class);
+//    }
 
     public void deleteIssueInfo(Long issueId, Long projectId) {
         //删除issue发送消息
@@ -2102,10 +2102,10 @@ public class IssueServiceImpl implements IssueService {
     }
 
 
-    @Override
-    public IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum) {
-        return issueMapper.queryIssueByIssueNum(projectId, issueNum);
-    }
+//    @Override
+//    public IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum) {
+//        return issueMapper.queryIssueByIssueNum(projectId, issueNum);
+//    }
 
     @Override
     public List<TestCaseDTO> migrateTestCaseByProjectId(Long projectId) {
@@ -2125,11 +2125,11 @@ public class IssueServiceImpl implements IssueService {
         return list;
     }
 
-    @Override
-    public List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds) {
-
-        return issueAssembler.issueDTOTOVO(projectId, issueMapper.listIssueInfoByIssueIds(projectId, issueIds));
-    }
+//    @Override
+//    public List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds) {
+//
+//        return issueAssembler.issueDTOTOVO(projectId, issueMapper.listIssueInfoByIssueIds(projectId, issueIds));
+//    }
 
     @Override
     public Page<IssueListFieldKVVO> queryStoryAndTask(Long projectId, PageRequest pageRequest, SearchVO searchVO) {
