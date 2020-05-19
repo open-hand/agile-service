@@ -179,15 +179,15 @@ public interface IssueService {
 
     List<IssueInfoVO> listByIssueIds(Long projectId, List<Long> issueIds);
 
-//    /**
-//     * 参数查询issueList提供给测试模块
-//     *
-//     * @param projectId   projectId
-//     * @param searchVO   searchVO
-//     * @param pageRequest pageRequest
-//     * @return IssueListVO
-//     */
-//    Page<IssueListTestVO> listIssueWithoutSubToTestComponent(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
+    /**
+     * 参数查询issueList提供给测试模块
+     *
+     * @param projectId   projectId
+     * @param searchVO   searchVO
+     * @param pageRequest pageRequest
+     * @return IssueListVO
+     */
+    Page<IssueListTestVO> listIssueWithoutSubToTestComponent(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
 
 //    Page<IssueListTestWithSprintVersionVO> listIssueWithLinkedIssues(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
 

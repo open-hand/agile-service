@@ -160,21 +160,21 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
 
     List<IssueInfoDTO> listByIssueIds(@Param("projectId") Long prjectId, @Param("issueIds") List<Long> issueIds);
 
-//    /**
-//     * 根据参数查询issueList提供给测试模块
-//     *
-//     * @param projectId          projectId
-//     * @param searchArgs         searchArgs
-//     * @param advancedSearchArgs advancedSearchArgs
-//     * @param otherArgs          otherArgs
-//     * @param contents           contents
-//     * @return IssueDTO
-//     */
-//    List<IssueDTO> listIssueWithoutSubToTestComponent(@Param("projectId") Long projectId,
-//                                                      @Param("searchArgs") Map<String, Object> searchArgs,
-//                                                      @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs,
-//                                                      @Param("otherArgs") Map<String, Object> otherArgs,
-//                                                      @Param("contents") List<String> contents);
+    /**
+     * 根据参数查询issueList提供给测试模块
+     *
+     * @param projectId          projectId
+     * @param searchArgs         searchArgs
+     * @param advancedSearchArgs advancedSearchArgs
+     * @param otherArgs          otherArgs
+     * @param contents           contents
+     * @return IssueDTO
+     */
+    List<IssueDTO> listIssueWithoutSubToTestComponent(@Param("projectId") Long projectId,
+                                                      @Param("searchArgs") Map<String, Object> searchArgs,
+                                                      @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs,
+                                                      @Param("otherArgs") Map<String, Object> otherArgs,
+                                                      @Param("contents") List<String> contents);
 
 //    List<IssueDTO> listIssueWithLinkedIssues(@Param("projectId") Long projectId,
 //                                             @Param("searchArgs") Map<String, Object> searchArgs,

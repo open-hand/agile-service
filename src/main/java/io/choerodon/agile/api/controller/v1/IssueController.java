@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.infra.dto.IssueNumDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
@@ -427,24 +428,24 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.issueNums.get"));
     }
 
-//    @Permission(level = ResourceLevel.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
-//    @ApiOperation("分页过滤查询issue列表提供给测试模块用")
-//    @CustomPageRequest
-//    @PostMapping(value = "/test_component/no_sub")
-//    public ResponseEntity<PageInfo<IssueListTestVO>> listIssueWithoutSubToTestComponent(@ApiIgnore
-//                                                                                     @ApiParam(value = "分页信息", required = true)
-//                                                                                     @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
-//                                                                                             Pageable pageable,
-//                                                                                        @ApiParam(value = "项目id", required = true)
-//                                                                                     @PathVariable(name = "project_id") Long projectId,
-//                                                                                        @ApiParam(value = "组织id", required = true)
-//                                                                                     @RequestParam Long organizationId,
-//                                                                                        @ApiParam(value = "查询参数", required = true)
-//                                                                                     @RequestBody(required = false) SearchVO searchVO) {
-//        return Optional.ofNullable(issueService.listIssueWithoutSubToTestComponent(projectId, searchVO, pageable, organizationId))
-//                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-//                .orElseThrow(() -> new CommonException("error.Issue.listIssueWithoutSubToTestComponent"));
-//    }
+    @Permission(level = ResourceLevel.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @ApiOperation("分页过滤查询issue列表提供给测试模块用")
+    @CustomPageRequest
+    @PostMapping(value = "/test_component/no_sub")
+    public ResponseEntity<Page<IssueListTestVO>> listIssueWithoutSubToTestComponent(@ApiIgnore
+                                                                                     @ApiParam(value = "分页信息", required = true)
+                                                                                     @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
+                                                                                             PageRequest pageRequest,
+                                                                                        @ApiParam(value = "项目id", required = true)
+                                                                                     @PathVariable(name = "project_id") Long projectId,
+                                                                                        @ApiParam(value = "组织id", required = true)
+                                                                                     @RequestParam Long organizationId,
+                                                                                        @ApiParam(value = "查询参数", required = true)
+                                                                                     @RequestBody(required = false) SearchVO searchVO) {
+        return Optional.ofNullable(issueService.listIssueWithoutSubToTestComponent(projectId, searchVO, pageRequest, organizationId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.Issue.listIssueWithoutSubToTestComponent"));
+    }
 
 
 //    @Permission(level = ResourceLevel.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})

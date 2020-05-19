@@ -1710,16 +1710,16 @@ public class IssueServiceImpl implements IssueService {
         }.getType());
     }
 
-//    @Override
-//    public Page<IssueListTestVO> listIssueWithoutSubToTestComponent(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
-//        //连表查询需要设置主表别名
-//        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, new HashMap<>());
-//        //pageable.resetOrder(SEARCH, new HashMap<>());
-//        Page<IssueDTO> issueDOPage = PageHelper.doPageAndSort(pageRequest,
-//                () -> issueMapper.listIssueWithoutSubToTestComponent(projectId, searchVO.getSearchArgs(),
-//                searchVO.getAdvancedSearchArgs(), searchVO.getOtherArgs(), searchVO.getContents()));
-//        return handleIssueListTestDoToDto(issueDOPage, organizationId, projectId);
-//    }
+    @Override
+    public Page<IssueListTestVO> listIssueWithoutSubToTestComponent(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
+        //连表查询需要设置主表别名
+        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, new HashMap<>());
+        //pageable.resetOrder(SEARCH, new HashMap<>());
+        Page<IssueDTO> issueDOPage = PageHelper.doPageAndSort(pageRequest,
+                () -> issueMapper.listIssueWithoutSubToTestComponent(projectId, searchVO.getSearchArgs(),
+                searchVO.getAdvancedSearchArgs(), searchVO.getOtherArgs(), searchVO.getContents()));
+        return handleIssueListTestDoToDto(issueDOPage, organizationId, projectId);
+    }
 
     private Page<IssueListTestVO> handleIssueListTestDoToDto(Page<IssueDTO> issueDOPage, Long organizationId, Long projectId) {
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
