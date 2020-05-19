@@ -9,9 +9,9 @@ import './State.less';
 function State() {
   return (
     <PageWrap noHeader={['choerodon.code.organization.setting.stateMachine.scheme']} cache>
-      <PageTab title="状态" tabKey="choerodon.code.organization.setting.stateMachine.state" component={withRouter(StateList)} />
-      <PageTab title="状态机" tabKey="choerodon.code.organization.setting.stateMachine.machine" component={withRouter(StateMahine)} />
-      <PageTab title="状态机方案" tabKey="choerodon.code.organization.setting.stateMachine.scheme" component={withRouter(StateMachineSchemeList)} />
+      <PageTab title="状态" tabKey="choerodon.code.organization.setting.stateMachine.state" component={withRouter(StateList)} alwaysShow />
+      <PageTab title="状态机" tabKey="choerodon.code.organization.setting.stateMachine.machine" component={withRouter(StateMahine)} alwaysShow />
+      <PageTab title="状态机方案" tabKey="choerodon.code.organization.setting.stateMachine.scheme" component={withRouter(StateMachineSchemeList)} alwaysShow />
     </PageWrap>
 
   );

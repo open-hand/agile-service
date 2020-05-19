@@ -20,8 +20,8 @@ function PageConfig() {
         ? <PageDetail />
         : (
           <PageWrap cache noHeader={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.scheme`}>
-            <PageTab title="字段列表" tabKey={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.field`} component={withRouter(ObjectScheme)} />
-            <PageTab title="页面管理" tabKey={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.scheme`} component={withRouter(PageHome)} />
+            <PageTab title="字段列表" tabKey={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.field`} component={withRouter(ObjectScheme)} alwaysShow />
+            <PageTab title="页面管理" tabKey={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.scheme`} component={withRouter(PageHome)} alwaysShow />
           </PageWrap>
         )}
     </div>

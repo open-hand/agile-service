@@ -23,9 +23,9 @@ class SettingsIndex extends React.Component {
     return (
       <div className="c7n-settings">
         <PageWrap noHeader={['choerodon.code.setting.issue.notification']} cache>
-          <PageTab title="模块管理" tabKey="choerodon.code.setting.issue.component" component={withRouter(ComponentIndex)} />
-          <PageTab title="快速筛选" tabKey="choerodon.code.setting.issue.fastSearch" component={withRouter(FastSearchIndex)} />
-          <PageTab title="问题链接" tabKey="choerodon.code.setting.issue.issueLink" component={withRouter(IssueLinkIndex)} />
+          <PageTab title="模块管理" tabKey="choerodon.code.setting.issue.component" component={withRouter(ComponentIndex)} alwaysShow />
+          <PageTab title="快速筛选" tabKey="choerodon.code.setting.issue.fastSearch" component={withRouter(FastSearchIndex)} alwaysShow />
+          <PageTab title="问题链接" tabKey="choerodon.code.setting.issue.issueLink" component={withRouter(IssueLinkIndex)} alwaysShow />
         </PageWrap>
       </div>
     );
