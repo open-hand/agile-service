@@ -80,7 +80,7 @@ public class PageUtil {
         result.setNumber(page);
         result.setSize(size);
         result.setTotalElements(total);
-        result.addAll(list);
+        result.setContent(Arrays.asList(list.toArray()));
         return result;
     }
 
