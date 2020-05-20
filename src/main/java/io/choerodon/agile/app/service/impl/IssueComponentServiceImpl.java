@@ -158,7 +158,12 @@ public class IssueComponentServiceImpl implements IssueComponentService {
             Page<ComponentForListDTO> componentForListDTOPage = PageHelper.doPageAndSort(pageRequest, () ->
                     issueComponentMapper.queryComponentByOption(projectId, noIssueTest, componentId, searchVO.getSearchArgs(),
                             searchVO.getAdvancedSearchArgs(), searchVO.getContents()));
-            Page<ComponentForListVO> componentForListVOPageInfo = modelMapper.map(componentForListDTOPage, new TypeToken<Page>(){}.getType());
+            Page<ComponentForListVO> componentForListVOPageInfo = new Page<>();
+            componentForListVOPageInfo.setSize(componentForListDTOPage.getSize());
+            componentForListVOPageInfo.setTotalElements(componentForListDTOPage.getTotalElements());
+            componentForListVOPageInfo.setNumber(componentForListDTOPage.getNumber());
+            componentForListVOPageInfo.setNumberOfElements(componentForListDTOPage.getNumberOfElements());
+            componentForListVOPageInfo.setTotalPages(componentForListDTOPage.getTotalPages());
             componentForListVOPageInfo.setContent(modelMapper.map(componentForListDTOPage.getContent(), new TypeToken<List<ComponentForListVO>>(){}.getType()));
             if ((componentForListVOPageInfo.getContent() != null) && !componentForListVOPageInfo.getContent().isEmpty()) {
                 List<Long> assigneeIds = componentForListVOPageInfo.getContent().stream().filter(componentForListVO -> componentForListVO.getManagerId() != null
