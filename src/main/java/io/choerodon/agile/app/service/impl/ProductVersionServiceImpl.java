@@ -137,7 +137,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
             BeanUtils.copyProperties(query, result);
             return result;
         } catch (Exception e) {
-            throw new CommonException(e.getMessage());
+            throw new CommonException("error.create.version", e);
         }
 
     }
@@ -172,7 +172,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
             Boolean deleteResult = iProductVersionService.delete(versionDTO);
             return deleteResult;
         } catch (Exception e) {
-            throw new CommonException(e.getMessage());
+            throw new CommonException("error.simple.delete.version", e);
         }
     }
 

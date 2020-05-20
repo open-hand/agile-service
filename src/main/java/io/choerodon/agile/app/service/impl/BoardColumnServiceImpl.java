@@ -348,7 +348,7 @@ public class BoardColumnServiceImpl implements BoardColumnService {
             boardColumnMapper.updateColumnCategory(columnSortVO.getBoardId(), size);
             boardColumnMapper.updateColumnColor(columnSortVO.getBoardId(), size);
         } catch (Exception e) {
-            throw new CommonException(e.getMessage());
+            throw new CommonException("error.column.sort", e);
         }
     }
 
@@ -371,7 +371,7 @@ public class BoardColumnServiceImpl implements BoardColumnService {
                 throw new CommonException("error.BoardColumn.update");
             }
         } catch (Exception e) {
-            throw new CommonException(e.getMessage());
+            throw new CommonException("error.column.sort.by.program", e);
         }
     }
 
@@ -423,7 +423,7 @@ public class BoardColumnServiceImpl implements BoardColumnService {
         try {
             boardColumnMapper.updateMaxAndMinNum(columnWithMaxMinNumVO);
         } catch (Exception e) {
-            throw new CommonException(e.getMessage());
+            throw new CommonException("error.update.column.contraint", e);
         }
         return modelMapper.map(boardColumnMapper.selectByPrimaryKey(columnWithMaxMinNumVO.getColumnId()), BoardColumnVO.class);
     }

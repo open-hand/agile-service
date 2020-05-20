@@ -79,7 +79,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
         } catch (Exception e) {
             batchUpdateFieldStatusVO.setStatus("failed");
             batchUpdateFieldStatusVO.setError(e.getMessage());
-            throw new CommonException(e, e.getMessage());
+            throw new CommonException("update field failed, exception: {}", e);
         }
         finally {
 //            notifyFeignClient.postWebSocket(WEBSOCKET_BATCH_UPDATE_FIELD, userId.toString(), JSON.toJSONString(batchUpdateFieldStatusVO));

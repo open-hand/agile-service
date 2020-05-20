@@ -136,7 +136,7 @@ public class ExcelServiceImpl implements ExcelService {
             fillInPredefinedValues(wb, sheet, predefinedList);
             wb.write(response.getOutputStream());
         } catch (Exception e) {
-            LOGGER.info(e.getMessage());
+            LOGGER.info("exception: {}", e);
         }
     }
 

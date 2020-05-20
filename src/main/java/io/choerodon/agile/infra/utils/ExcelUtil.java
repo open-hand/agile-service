@@ -523,7 +523,7 @@ public class ExcelUtil {
             try {
                 method = clazz.getMethod(createGetter(fields[i]));
             } catch (NoSuchMethodException e) {
-                LOGGER.debug(e.getMessage());
+                LOGGER.debug("no such method exception: {}", e);
                 try {
                     method = clazz.getMethod("getFoundationFieldValue");
                 } catch (NoSuchMethodException e1) {
@@ -610,7 +610,7 @@ public class ExcelUtil {
                     return null;
             }
         } catch (IOException e) {
-            throw new CommonException(e.getMessage());
+            throw new CommonException("error.multipartFile.to.workbook", e);
         }
     }
 

@@ -1,7 +1,6 @@
 package io.choerodon.agile.infra.utils;
 
 import io.choerodon.agile.api.vo.FieldDataLogCreateVO;
-import io.choerodon.agile.api.vo.FieldValueVO;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO;
 import io.choerodon.agile.api.vo.PageFieldViewVO;
 import io.choerodon.agile.app.service.FieldDataLogService;
@@ -16,9 +15,9 @@ import io.choerodon.agile.infra.mapper.FieldOptionMapper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.util.CollectionUtils;
-import springfox.documentation.schema.Entry;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -296,7 +295,7 @@ public class FieldValueUtil {
                         break;
                 }
             } catch (Exception e) {
-                throw new CommonException(e.getMessage());
+                throw new CommonException("error.date.parse", e);
             }
         }
     }
@@ -357,7 +356,7 @@ public class FieldValueUtil {
                         break;
                 }
             } catch (Exception e) {
-                throw new CommonException(e.getMessage());
+                throw new CommonException("error.date.parse", e);
             }
         }
     }
@@ -499,7 +498,7 @@ public class FieldValueUtil {
                     break;
             }
         } catch (Exception e) {
-            throw new CommonException(e.getMessage());
+            throw new CommonException("error", e);
         }
         fieldDataLogService.createDataLog(projectId, ObjectSchemeCode.AGILE_ISSUE, create);
     }
@@ -518,7 +517,7 @@ public class FieldValueUtil {
                     break;
             }
         } catch (Exception e) {
-            throw new CommonException(e.getMessage());
+            throw new CommonException("error", e);
         }
     }
 
@@ -648,7 +647,7 @@ public class FieldValueUtil {
                     break;
             }
         } catch (Exception e) {
-            throw new CommonException(e.getMessage());
+            throw new CommonException("error.batch.handle.fields", e);
         }
     }
 

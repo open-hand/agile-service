@@ -81,7 +81,7 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
             URL netUrl = new URL(url);
             dealUrl = netUrl.getFile().substring(BACKETNAME.length() + 2);
         } catch (MalformedURLException e) {
-            throw new CommonException(e.getMessage());
+            throw new CommonException("error.malformed.url", e);
         }
         return dealUrl;
     }
