@@ -6,6 +6,7 @@ import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 //import io.choerodon.agile.infra.feign.NotifyFeignClient;
 //import io.choerodon.core.notify.NoticeSendDTO;
+import io.choerodon.core.enums.MessageAdditionalType;
 import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.MessageSender;
 import org.hzero.boot.message.entity.Receiver;
@@ -60,8 +61,12 @@ public class SiteMsgUtil {
         map.put(SUMMARY, summary);
         map.put(URL, url);
         map.put(PROJECT_NAME, projectVO.getName());
+        // 设置额外参数
+        Map<String,Object> objectMap=new HashMap<>();
+        objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
         //发送站内信
         MessageSender messageSender = handlerMessageSender(0L,"issueCreate",userIds,map);
+        messageSender.setAdditionalInformation(objectMap);
         messageClient.async().sendMessage(messageSender);
     }
 
@@ -110,8 +115,12 @@ public class SiteMsgUtil {
         map.put(SUMMARY, summary);
         map.put(URL, url);
         map.put(PROJECT_NAME, projectVO.getName());
+        // 额外参数
+        Map<String,Object> objectMap=new HashMap<>();
+        objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
         //发送站内信
         MessageSender messageSender = handlerMessageSender(0L,"issueAssignee",userIds,map);
+        messageSender.setAdditionalInformation(objectMap);
         messageClient.async().sendMessage(messageSender);
 
     }
@@ -134,8 +143,12 @@ public class SiteMsgUtil {
         map.put(SUMMARY, summary);
         map.put(URL, url);
         map.put(PROJECT_NAME, projectVO.getName());
+        // 额外参数
+        Map<String,Object> objectMap=new HashMap<>();
+        objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
         //发送站内信
         MessageSender messageSender = handlerMessageSender(0L,"issueSolve",userIds,map);
+        messageSender.setAdditionalInformation(objectMap);
         messageClient.async().sendMessage(messageSender);
 
     }
