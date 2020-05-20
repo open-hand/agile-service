@@ -29,6 +29,10 @@ import java.util.stream.Collectors;
 public class FieldValueUtil {
 
     private static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    /**
+     * 匹配 Thu Apr 30 2020 00:00:00 GMT+0800 格式的时间
+     */
+    private static final String ENGLISH_STRING_DATE_FORMAT = "EEE MMM dd yyyy HH:mm:ss 'GMT'Z";
     private static final String DATE_FORMAT = "yyyy-MM-dd";
     private static final String TIME_FORMAT = "HH:mm:ss";
     private static final String DATE_VALUE = "date_value";
@@ -274,10 +278,7 @@ public class FieldValueUtil {
                     case FieldType.DATETIME:
                     case FieldType.DATE:
                     case FieldType.TIME:
-                        DateFormat df = new SimpleDateFormat(DATETIME_FORMAT);
-                        Date dateValue = df.parse(defaultValue);
-                        fieldValue.setDateValue(dateValue);
-                        fieldValues.add(fieldValue);
+                        convertDate(fieldValues, defaultValue, fieldValue);
                         break;
                     case FieldType.INPUT:
                         fieldValue.setStringValue(defaultValue);
@@ -298,6 +299,21 @@ public class FieldValueUtil {
                 throw new CommonException("error.date.parse", e);
             }
         }
+    }
+
+    private static void convertDate(List<FieldValueDTO> fieldValues, String defaultValue, FieldValueDTO fieldValue) throws ParseException {
+        Date dateValue;
+        //兼容Thu Apr 30 2020 00:00:00 GMT+0800和2020-02-13 15:51:22格式的日期
+        try {
+            DateFormat df = new SimpleDateFormat(ENGLISH_STRING_DATE_FORMAT, Locale.ENGLISH);
+            dateValue = df.parse(defaultValue);
+        } catch (ParseException e) {
+            DateFormat df = new SimpleDateFormat(DATETIME_FORMAT);
+            //yyyy-MM-dd HH:mm:ss格式转换失败，直接抛出异常
+            dateValue = df.parse(defaultValue);
+        }
+        fieldValue.setDateValue(dateValue);
+        fieldValues.add(fieldValue);
     }
 
     /**
@@ -332,10 +348,7 @@ public class FieldValueUtil {
                     case FieldType.DATETIME:
                     case FieldType.DATE:
                     case FieldType.TIME:
-                        DateFormat df = new SimpleDateFormat(DATETIME_FORMAT);
-                        Date dateValue = df.parse(value.toString());
-                        fieldValue.setDateValue(dateValue);
-                        fieldValues.add(fieldValue);
+                        convertDate(fieldValues, value.toString(), fieldValue);
                         break;
                     case FieldType.INPUT:
                         String stringValue = (String) value;
