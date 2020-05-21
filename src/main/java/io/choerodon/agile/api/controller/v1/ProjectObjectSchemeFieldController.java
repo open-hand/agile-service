@@ -28,7 +28,7 @@ public class ProjectObjectSchemeFieldController {
     @Autowired
     private ObjectSchemeFieldService objectSchemeFieldService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据方案编码获取字段列表")
     @GetMapping("/list")
     public ResponseEntity<Map<String, Object>> listQuery(@ApiParam(value = "项目id", required = true)
@@ -40,7 +40,7 @@ public class ProjectObjectSchemeFieldController {
         return new ResponseEntity<>(objectSchemeFieldService.listQuery(organizationId, projectId, schemeCode), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建字段")
     @PostMapping
     public ResponseEntity<ObjectSchemeFieldDetailVO> create(@ApiParam(value = "项目id", required = true)
@@ -52,7 +52,7 @@ public class ProjectObjectSchemeFieldController {
         return new ResponseEntity<>(objectSchemeFieldService.create(organizationId, projectId, fieldCreateDTO), HttpStatus.CREATED);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询字段详情")
     @GetMapping(value = "/{field_id}")
     public ResponseEntity<ObjectSchemeFieldDetailVO> queryById(@ApiParam(value = "项目id", required = true)
@@ -64,7 +64,7 @@ public class ProjectObjectSchemeFieldController {
         return new ResponseEntity<>(objectSchemeFieldService.queryById(organizationId, projectId, fieldId), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除字段")
     @DeleteMapping(value = "/{field_id}")
     public ResponseEntity delete(@ApiParam(value = "项目id", required = true)
@@ -76,7 +76,7 @@ public class ProjectObjectSchemeFieldController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "修改字段")
     @PutMapping(value = "/{field_id}")
     public ResponseEntity<ObjectSchemeFieldDetailVO> update(@ApiParam(value = "项目id", required = true)
@@ -89,7 +89,7 @@ public class ProjectObjectSchemeFieldController {
         return new ResponseEntity<>(objectSchemeFieldService.update(organizationId, projectId, fieldId, updateDTO), HttpStatus.CREATED);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "校验字段名称是否已使用")
     @GetMapping(value = "/check_name")
     public ResponseEntity<Boolean> checkName(@ApiParam(value = "项目id", required = true)
@@ -103,7 +103,7 @@ public class ProjectObjectSchemeFieldController {
         return new ResponseEntity<>(objectSchemeFieldService.checkName(organizationId, projectId, name, schemeCode), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "校验字段编码是否已使用")
     @GetMapping(value = "/check_code")
     public ResponseEntity<Boolean> checkCode(@ApiParam(value = "项目id", required = true)

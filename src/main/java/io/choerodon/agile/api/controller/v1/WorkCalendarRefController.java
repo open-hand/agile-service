@@ -30,7 +30,7 @@ public class WorkCalendarRefController {
     @Autowired
     private WorkCalendarRefService workCalendarRefService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建冲刺工作日历")
     @PostMapping(value = "/sprint/{sprint_id}")
     public ResponseEntity<WorkCalendarRefVO> createSprintWorkCalendarRef(@ApiParam(value = "项目id", required = true)
@@ -44,7 +44,7 @@ public class WorkCalendarRefController {
                 .orElseThrow(() -> new CommonException("error.workCalendarRef.create"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("获取冲刺工作日历设置")
     @GetMapping(value = "/sprint")
     public ResponseEntity<SprintWorkCalendarVO> querySprintWorkCalendarRefs(@ApiParam(value = "项目id", required = true)
@@ -56,7 +56,7 @@ public class WorkCalendarRefController {
                 .orElseThrow(() -> new CommonException("error.workCalendarRef.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建项目工作日历")
     @PostMapping(value = "/project")
     public ResponseEntity<WorkCalendarRefVO> createProjectWorkCalendarRef(@ApiParam(value = "项目id", required = true)
@@ -68,7 +68,7 @@ public class WorkCalendarRefController {
                 .orElseThrow(() -> new CommonException("error.workCalendarRef.create"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("获取项目工作日历设置")
     @GetMapping(value = "/project")
     public ResponseEntity<List<WorkCalendarRefVO>> queryProjectWorkCalendarRefs(@ApiParam(value = "项目id", required = true)
@@ -80,7 +80,7 @@ public class WorkCalendarRefController {
                 .orElseThrow(() -> new CommonException("error.workCalendarRef.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("删除项目工作日历")
     @DeleteMapping(value = "/{calendar_id}")
     public ResponseEntity deleteProjectWorkCalendarRef(@ApiParam(value = "项目id", required = true)

@@ -23,7 +23,7 @@ public class RankController {
     @Autowired
     private RankService rankService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("史诗、特性移动")
     @PostMapping
     public ResponseEntity epicAndFeatureRank(@ApiParam(value = "项目id", required = true)

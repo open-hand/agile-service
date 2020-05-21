@@ -28,7 +28,7 @@ public class StoryMapController {
     @Autowired
     private StoryMapService storyMapService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询故事地图整体")
     @PostMapping("/main")
     public ResponseEntity<JSONObject> queryStoryMap(@ApiParam(value = "项目id", required = true)
@@ -42,7 +42,7 @@ public class StoryMapController {
                 .orElseThrow(() -> new CommonException("error.storyMap.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询故事地图需求池")
     @PostMapping("/demand")
     public ResponseEntity<JSONObject> queryStoryMapDemand(@ApiParam(value = "项目id", required = true)
@@ -54,7 +54,7 @@ public class StoryMapController {
                 .orElseThrow(() -> new CommonException("error.storyMapDemand.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("故事地图移动卡片")
     @PostMapping(value = "/move")
     public ResponseEntity storyMapMove(@ApiParam(value = "项目id", required = true)

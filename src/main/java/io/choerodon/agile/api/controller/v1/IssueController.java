@@ -54,7 +54,7 @@ public class IssueController {
         this.issueService = issueService;
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建issue")
     @PostMapping
     public ResponseEntity<IssueVO> createIssue(@ApiParam(value = "项目id", required = true)
@@ -69,7 +69,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.Issue.createIssue"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("史诗名称重复校验")
     @GetMapping(value = "/check_epic_name")
     public ResponseEntity<Boolean> checkEpicName(@ApiParam(value = "项目id", required = true)
@@ -82,7 +82,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.checkEpicName.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建issue子任务")
     @PostMapping(value = "/sub_issue")
     public ResponseEntity<IssueSubVO> createSubIssue(@ApiParam(value = "项目id", required = true)
@@ -95,7 +95,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.Issue.createSubIssue"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("更新issue")
     @PutMapping
     public ResponseEntity<IssueVO> updateIssue(@ApiParam(value = "项目id", required = true)
@@ -110,7 +110,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.Issue.updateIssue"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("更新issue的状态")
     @PutMapping("/update_status")
     public ResponseEntity<IssueVO> updateIssueStatus(@ApiParam(value = "项目id", required = true)
@@ -128,7 +128,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.Issue.updateIssueStatus"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询单个issue")
     @GetMapping(value = "/{issueId}")
     public ResponseEntity<IssueVO> queryIssue(@ApiParam(value = "项目id", required = true)
@@ -142,7 +142,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.Issue.queryIssue"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询单个子任务issue")
     @GetMapping(value = "/sub_issue/{issueId}")
     public ResponseEntity<IssueSubVO> queryIssueSub(@ApiParam(value = "项目id", required = true)
@@ -157,7 +157,7 @@ public class IssueController {
     }
 
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("分页查询问题列表，包含子任务")
     @PostMapping(value = "/include_sub")
     public ResponseEntity<Page<IssueListFieldKVVO>> listIssueWithSub(@ApiIgnore
@@ -175,7 +175,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.Issue.listIssueWithSub"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("分页搜索查询issue列表(包含子任务)")
     @CustomPageRequest
     @GetMapping(value = "/summary")
@@ -200,7 +200,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.Issue.queryIssueByOption"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("分页搜索查询issue列表")
     @CustomPageRequest
     @GetMapping(value = "/agile/summary")
@@ -224,7 +224,7 @@ public class IssueController {
     }
 
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询epic")
     @GetMapping(value = "/epics")
     public ResponseEntity<List<EpicDataVO>> listEpic(@ApiParam(value = "项目id", required = true)
@@ -234,7 +234,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.Epic.listEpic"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("通过issueId删除")
     @DeleteMapping(value = "/{issueId}")
     public ResponseEntity deleteIssue(@ApiParam(value = "项目id", required = true)
@@ -245,7 +245,7 @@ public class IssueController {
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("删除自己创建的issue")
     @DeleteMapping(value = "/delete_self_issue/{issueId}")
     public ResponseEntity deleteSelfIssue(@ApiParam(value = "项目id", required = true)
@@ -256,7 +256,7 @@ public class IssueController {
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("批量删除Issue,给测试")
     @DeleteMapping(value = "/to_version_test")
     public ResponseEntity batchDeleteIssues(@ApiParam(value = "项目id", required = true)
@@ -267,7 +267,7 @@ public class IssueController {
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("issue批量加入版本")
     @PostMapping(value = "/to_version/{versionId}")
     public ResponseEntity<List<IssueSearchVO>> batchIssueToVersion(@ApiParam(value = "项目id", required = true)
@@ -281,7 +281,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.issue.batchToVersion"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("批量替换issue版本,给测试")
     @PostMapping(value = "/to_version_test/{versionId}")
     public ResponseEntity batchIssueToVersionTest(@ApiParam(value = "项目id", required = true)
@@ -294,7 +294,7 @@ public class IssueController {
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("issue批量加入epic")
     @PostMapping(value = "/to_epic/{epicId}")
     public ResponseEntity<List<IssueSearchVO>> batchIssueToEpic(@ApiParam(value = "项目id", required = true)
@@ -309,7 +309,7 @@ public class IssueController {
     }
 
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("issue批量加入冲刺")
     @PostMapping(value = "/to_sprint/{sprintId}")
     public ResponseEntity<List<IssueSearchVO>> batchIssueToSprint(@ApiParam(value = "项目id", required = true)
@@ -323,7 +323,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.issue.batchToSprint"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询当前项目下的epic，提供给列表下拉")
     @GetMapping(value = "/epics/select_data")
     public ResponseEntity<List<IssueEpicVO>> listEpicSelectData(@ApiParam(value = "项目id", required = true)
@@ -333,7 +333,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.Issue.queryIssueEpicList"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("更改issue类型")
     @PostMapping("/update_type")
     public ResponseEntity<IssueVO> updateIssueTypeCode(@ApiParam(value = "项目id", required = true)
@@ -348,7 +348,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.issue.updateIssueTypeCode"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("任务转换为子任务")
     @PostMapping("/transformed_sub_task")
     public ResponseEntity<IssueSubVO> transformedSubTask(@ApiParam(value = "项目id", required = true)
@@ -363,7 +363,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.issue.transformedSubTask"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("子任务转换为任务")
     @PostMapping("/transformed_task")
     public ResponseEntity<IssueVO> transformedTask(@ApiParam(value = "项目id", required = true)
@@ -379,7 +379,7 @@ public class IssueController {
     }
 
     @ResponseBody
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("导出issue列表")
     @PostMapping(value = "/export")
     public void exportIssues(@ApiIgnore
@@ -398,7 +398,7 @@ public class IssueController {
     }
 
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("复制一个issue")
     @PostMapping("/{issueId}/clone_issue")
     public ResponseEntity<IssueVO> cloneIssueByIssueId(@ApiParam(value = "项目id", required = true)
@@ -416,7 +416,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.issue.cloneIssueByIssueId"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据issue ids查询issue相关信息")
     @PostMapping("/issue_infos")
     public ResponseEntity<List<IssueInfoVO>> listByIssueIds(@ApiParam(value = "项目id", required = true)
@@ -467,7 +467,7 @@ public class IssueController {
 //                .orElseThrow(() -> new CommonException("error.Issue.listIssueWithBlockedIssues"));
 //    }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据时间段查询问题类型的数量")
     @GetMapping(value = "/type/{typeCode}")
     public ResponseEntity<List<IssueCreationNumVO>> queryIssueNumByTimeSlot(@ApiParam(value = "项目id", required = true)
@@ -481,7 +481,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.timeSlotCount.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "拖动epic位置")
     @PutMapping(value = "/epic_drag")
     public ResponseEntity<EpicDataVO> dragEpic(@ApiParam(value = "项目id", required = true)
@@ -493,7 +493,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.issueController.dragEpic"));
     }
 
-//    @Permission(level = ResourceLevel.PROJECT)
+//    @Permission(level = ResourceLevel.ORGANIZATION)
 //    @ApiOperation("统计issue相关信息（测试模块用）")
 //    @PostMapping(value = "/test_component/statistic")
 //    public ResponseEntity<List<PieChartVO>> issueStatistic(@ApiParam(value = "项目id", required = true)
@@ -525,7 +525,7 @@ public class IssueController {
 //    }
 
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("更改父任务")
     @PostMapping(value = "/update_parent")
     public ResponseEntity<IssueVO> updateIssueParentId(@ApiParam(value = "项目id", required = true)
@@ -537,7 +537,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.issueParentId.update"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("统计当前项目下未完成的任务数，包括故事、任务、缺陷")
     @GetMapping(value = "/count")
     public ResponseEntity<JSONObject> countUnResolveByProjectId(@ApiParam(value = "项目id", required = true)
@@ -547,7 +547,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.countUnResolveIssue.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据条件过滤查询返回issueIds，测试项目接口")
     @PostMapping(value = "/issue_ids")
     public ResponseEntity<List<Long>> queryIssueIdsByOptions(@ApiParam(value = "项目id", required = true)
@@ -559,7 +559,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.issueIds.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询未分配的问题，类型为story,task,bug")
     @GetMapping(value = "/undistributed")
     public ResponseEntity<Page<UndistributedIssueVO>> queryUnDistributedIssues(@ApiParam(value = "项目id", required = true)
@@ -571,7 +571,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.UndistributedIssueList.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询经办人未完成的问题，类型为story,task,bug")
     @GetMapping(value = "/unfinished/{assignee_id}")
     public ResponseEntity<List<UnfinishedIssueVO>> queryUnfinishedIssues(@ApiParam(value = "项目id", required = true)
@@ -583,7 +583,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.UnfinishedIssueList.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询用户故事地图泳道")
     @GetMapping(value = "/storymap/swim_lane")
     public ResponseEntity<String> querySwimLaneCode(@ApiParam(value = "项目id", required = true)
@@ -593,7 +593,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.querySwimLaneCode.get"));
     }
 
-//    @Permission(level = ResourceLevel.PROJECT)
+//    @Permission(level = ResourceLevel.ORGANIZATION)
 //    @ApiOperation("【测试专用】批量复制issue并生成版本信息")
 //    @PostMapping("/batch_clone_issue/{versionId}")
 //    public ResponseEntity<List<Long>> cloneIssuesByVersionId(@ApiParam(value = "项目id", required = true)
@@ -608,7 +608,7 @@ public class IssueController {
 //                .orElseThrow(() -> new CommonException("error.issue.cloneIssuesByVersionId"));
 //    }
 
-//    @Permission(level = ResourceLevel.PROJECT)
+//    @Permission(level = ResourceLevel.ORGANIZATION)
 //    @ApiOperation("【测试专用】issue按照项目分组接口")
 //    @GetMapping("/list_issues_by_project")
 //    public ResponseEntity<List<IssueProjectVO>> queryIssueTestGroupByProject(@ApiParam(value = "项目id", required = true)
@@ -619,7 +619,7 @@ public class IssueController {
 //    }
 
 //
-//    @Permission(level = ResourceLevel.PROJECT)
+//    @Permission(level = ResourceLevel.ORGANIZATION)
 //    @ApiOperation("【测试专用】根据issueNum查询issue")
 //    @PostMapping(value = "/query_by_issue_num")
 //    public ResponseEntity<IssueNumDTO> queryIssueByIssueNum(@ApiParam(value = "项目id", required = true)
@@ -631,7 +631,7 @@ public class IssueController {
 //                .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueNum"));
 //    }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("【测试专用】根据issueIds查询issue")
     @PostMapping(value = "/query_issue_ids")
     public ResponseEntity<List<IssueLinkVO>> queryIssues(@ApiParam(value = "项目id", required = true)
@@ -643,7 +643,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueIds"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询项目下的故事和任务(不包含子任务以及子bug)")
     @PostMapping(value = "/query_story_task")
     public ResponseEntity<Page<IssueListFieldKVVO>> queryStoryAndTask(@ApiParam(value = "项目id", required = true)
@@ -657,7 +657,7 @@ public class IssueController {
 
 
     @CustomPageRequest
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询项目所有经办人")
     @GetMapping(value = "/users")
     public ResponseEntity<Page<UserDTO>> pagingQueryUsers(@ApiIgnore
@@ -670,7 +670,7 @@ public class IssueController {
     }
 
     @CustomPageRequest
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询项目所有报告人")
     @GetMapping(value = "/reporters")
     public ResponseEntity<Page<UserDTO>> pagingQueryReporters(@ApiIgnore

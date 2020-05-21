@@ -26,7 +26,7 @@ public class PersonalFilterController {
     @Autowired
     private PersonalFilterService personalFilterService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建我的筛选")
     @PostMapping
     public ResponseEntity<PersonalFilterVO> create(@ApiParam(value = "项目id", required = true)
@@ -38,7 +38,7 @@ public class PersonalFilterController {
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("修改我的筛选")
     @PutMapping(value = "/{filterId}")
     public ResponseEntity<PersonalFilterVO> update(@ApiParam(value = "项目id", required = true)
@@ -52,7 +52,7 @@ public class PersonalFilterController {
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("删除我的筛选")
     @DeleteMapping(value = "/{filterId}")
     public ResponseEntity<PersonalFilterVO> deleteById(@ApiParam(value = "项目id", required = true)
@@ -63,7 +63,7 @@ public class PersonalFilterController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询我的筛选列表")
     @GetMapping(value = "/query_all/{userId}")
     public ResponseEntity<List<PersonalFilterVO>> listByProjectId(@ApiParam(value = "项目id", required = true)
@@ -76,7 +76,7 @@ public class PersonalFilterController {
                 .orElseThrow(() -> new CommonException("error.personalFilter.list"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据id查询我的筛选")
     @GetMapping(value = "/{filterId}")
     public ResponseEntity<PersonalFilterVO> queryById(@ApiParam(value = "项目id", required = true)
@@ -88,7 +88,7 @@ public class PersonalFilterController {
                 .orElseThrow(() -> new CommonException("error.personalFilter.queryById"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("我的筛选重名校验")
     @GetMapping(value = "/check_name")
     public ResponseEntity<Boolean> checkName(@ApiParam(value = "项目id", required = true)

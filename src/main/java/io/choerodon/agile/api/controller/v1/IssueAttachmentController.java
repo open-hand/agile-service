@@ -28,7 +28,7 @@ public class IssueAttachmentController {
     @Autowired
     private IssueAttachmentService issueAttachmentService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("上传附件")
     @PostMapping
     public ResponseEntity<List<IssueAttachmentVO>> uploadAttachment(@ApiParam(value = "项目id", required = true)
@@ -41,7 +41,7 @@ public class IssueAttachmentController {
                 .orElseThrow(() -> new CommonException("error.attachment.upload"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("删除附件")
     @DeleteMapping(value = "/{issueAttachmentId}")
     public ResponseEntity deleteAttachment(@ApiParam(value = "项目id", required = true)
@@ -52,7 +52,7 @@ public class IssueAttachmentController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("上传附件，直接返回地址")
     @PostMapping(value = "/upload_for_address")
     public ResponseEntity<List<String>> uploadForAddress(@ApiParam(value = "project id", required = true)

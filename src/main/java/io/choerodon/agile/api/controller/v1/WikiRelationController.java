@@ -28,7 +28,7 @@ public class WikiRelationController {
     @Autowired
     private WikiRelationService wikiRelationService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("添加knowledge relation")
     @PostMapping
     public ResponseEntity create(@ApiParam(value = "项目id", required = true)
@@ -39,7 +39,7 @@ public class WikiRelationController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据issue id查询knowledge relation")
     @GetMapping("/issue/{issueId}")
     public ResponseEntity<JSONObject> queryByIssueId(@ApiParam(value = "项目id", required = true)
@@ -51,7 +51,7 @@ public class WikiRelationController {
                 .orElseThrow(() -> new CommonException("error.knowledgeRelationList.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据id删除knowledge relation")
     @DeleteMapping("/{id}")
     public ResponseEntity deleteById(@ApiParam(value = "项目id", required = true)
@@ -62,7 +62,7 @@ public class WikiRelationController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据workSpaceId删除knowledge relation")
     @DeleteMapping("/delete/{space_id}")
     public ResponseEntity deleteByworkSpaceId(@ApiParam(value = "项目id", required = true)

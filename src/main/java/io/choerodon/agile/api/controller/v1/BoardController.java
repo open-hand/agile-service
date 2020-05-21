@@ -28,7 +28,7 @@ public class BoardController {
     @Autowired
     private BoardService boardService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建scrum board,创建默认列，关联项目状态")
     @PostMapping
     public ResponseEntity createScrumBoard(@ApiParam(value = "项目id", required = true)
@@ -39,7 +39,7 @@ public class BoardController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("更新scrum board")
     @PutMapping(value = "/{boardId}")
     public ResponseEntity<BoardVO> updateScrumBoard(@ApiParam(value = "项目id", required = true)
@@ -53,7 +53,7 @@ public class BoardController {
                 .orElseThrow(() -> new CommonException("error.board.update"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("删除scrum board")
     @DeleteMapping(value = "/{boardId}")
     public ResponseEntity deleteScrumBoard(@ApiParam(value = "项目id", required = true)
@@ -64,7 +64,7 @@ public class BoardController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据id查询scrum board")
     @GetMapping(value = "/{boardId}")
     public ResponseEntity<BoardVO> queryScrumBoardById(@ApiParam(value = "项目id", required = true)
@@ -76,7 +76,7 @@ public class BoardController {
                 .orElseThrow(() -> new CommonException("error.board.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("移动issue")
     @PostMapping(value = "/issue/{issueId}/move")
     public ResponseEntity<IssueMoveVO> move(@ApiParam(value = "项目id", required = true)
@@ -93,7 +93,7 @@ public class BoardController {
     }
 
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据projectId查询项目下的board")
     @GetMapping
     public ResponseEntity<List<BoardVO>> queryByProjectId(@ApiParam(value = "项目id", required = true)
@@ -103,7 +103,7 @@ public class BoardController {
                 .orElseThrow(() -> new CommonException("error.boardList.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据projectId查询项目下的用户的board设置")
     @GetMapping(value = "/user_setting/{boardId}")
     public ResponseEntity<UserSettingVO> queryUserSettingBoard(@ApiParam(value = "项目id", required = true)
@@ -115,7 +115,7 @@ public class BoardController {
                 .orElseThrow(() -> new CommonException("error.userSettingBoard.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("更新用户泳道设置")
     @PostMapping(value = "/user_setting/{boardId}")
     public ResponseEntity<UserSettingVO> updateUserSettingBoard(@ApiParam(value = "项目id", required = true)
@@ -129,7 +129,7 @@ public class BoardController {
                 .orElseThrow(() -> new CommonException("error.userSettingBoard.update"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("all data , Refactoring")
     @GetMapping(value = "/{boardId}/all_data/{organization_id}")
     public ResponseEntity<JSONObject> queryByOptions(@ApiParam(value = "项目id", required = true)
@@ -153,7 +153,7 @@ public class BoardController {
                 .orElseThrow(() -> new CommonException("error.board.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("校验看板名称重复性")
     @GetMapping("/check_name")
     public ResponseEntity<Boolean> checkName(@ApiParam(value = "项目id", required = true)

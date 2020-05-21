@@ -28,7 +28,7 @@ public class ProjectPageFieldController {
     @Autowired
     private PageFieldService pageFieldService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据页面编码获取页面字段列表")
     @GetMapping("/list")
     public ResponseEntity<Map<String, Object>> listQuery(@ApiParam(value = "项目id", required = true)
@@ -42,7 +42,7 @@ public class ProjectPageFieldController {
         return new ResponseEntity<>(pageFieldService.listQuery(organizationId, projectId, pageCode, context), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "调整顺序")
     @PostMapping(value = "/adjust_order")
     public ResponseEntity<PageFieldVO> adjustFieldOrder(@ApiParam(value = "项目id", required = true)
@@ -56,7 +56,7 @@ public class ProjectPageFieldController {
         return new ResponseEntity<>(pageFieldService.adjustFieldOrder(organizationId, projectId, pageCode, adjustOrder), HttpStatus.CREATED);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "修改页面字段")
     @PutMapping(value = "/{field_id}")
     public ResponseEntity<PageFieldVO> update(@ApiParam(value = "项目id", required = true)

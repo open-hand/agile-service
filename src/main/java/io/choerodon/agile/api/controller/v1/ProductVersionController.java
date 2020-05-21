@@ -55,7 +55,7 @@ public class ProductVersionController {
     @Autowired
     private VerifyUpdateUtil verifyUpdateUtil;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建version")
     @PostMapping
     public ResponseEntity<ProductVersionDetailVO> createVersion(@ApiParam(value = "项目id", required = true)
@@ -67,7 +67,7 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(CREATE_ERROR));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("更新version")
     @PutMapping(value = "/update/{versionId}")
     public ResponseEntity<ProductVersionDetailVO> updateVersion(@ApiParam(value = "项目id", required = true)
@@ -83,7 +83,7 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(UPDATE_ERROR));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据id删除version")
     @DeleteMapping(value = "/delete/{versionId}")
     public ResponseEntity<Boolean> deleteVersion(@ApiParam(value = "项目id", required = true)
@@ -97,7 +97,7 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(DELETE_ERROR));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @CustomPageRequest
     @ApiOperation(value = "根据项目id查找version")
     @PostMapping(value = "/versions")
@@ -113,7 +113,7 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(QUERY_ERROR));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "是否重名")
     @GetMapping(value = "/check")
     public ResponseEntity<Boolean> checkName(@ApiParam(value = "项目id", required = true)
@@ -125,7 +125,7 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(CHECK_ERROR));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "backlog页面查询所有版本")
     @GetMapping
     public ResponseEntity<List<ProductVersionDataVO>> queryVersionByProjectId(@ApiParam(value = "项目id", required = true)
@@ -135,7 +135,7 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(QUERY_VERSION_ERROR));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "版本详情及issue统计信息")
     @GetMapping(value = "/{versionId}")
     public ResponseEntity<ProductVersionStatisticsVO> queryVersionStatisticsByVersionId(@ApiParam(value = "项目id", required = true)
@@ -147,7 +147,7 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(VERSION_STATISTICS_ERROR));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询规划中版本名及要发布版本未完成issue统计")
     @GetMapping(value = "/{versionId}/plan_names")
     public ResponseEntity<VersionMessageVO> queryReleaseMessageByVersionId(@ApiParam(value = "项目id", required = true)
@@ -159,7 +159,7 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(QUERY_PLAN_VERSION_NAME_ERROR));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "发布版本")
     @PostMapping(value = "/release")
     public ResponseEntity<ProductVersionDetailVO> releaseVersion(@ApiParam(value = "项目id", required = true)
@@ -171,7 +171,7 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(RELEASE_ERROR));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "撤销发布版本")
     @PostMapping(value = "/{versionId}/revoke_release")
     public ResponseEntity<ProductVersionDetailVO> revokeReleaseVersion(@ApiParam(value = "项目id", required = true)
@@ -183,7 +183,7 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(REVOKE_RELEASE_ERROR));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "归档版本")
     @PostMapping(value = "/{versionId}/archived")
     public ResponseEntity<ProductVersionDetailVO> archivedVersion(@ApiParam(value = "项目id", required = true)
@@ -196,7 +196,7 @@ public class ProductVersionController {
     }
 
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "撤销归档版本")
     @PostMapping(value = "/{versionId}/revoke_archived")
     public ResponseEntity<ProductVersionDetailVO> revokeArchivedVersion(@ApiParam(value = "项目id", required = true)
@@ -208,7 +208,7 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(REVOKE_ARCHIVED_ERROR));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询所有版本名及要删除版本issue统计")
     @GetMapping(value = "/{versionId}/names")
     public ResponseEntity<VersionMessageVO> queryDeleteMessageByVersionId(@ApiParam(value = "项目id", required = true)
@@ -220,7 +220,7 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(QUERY_VERSION_NAME_ERROR));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据状态查询版本名")
     @PostMapping(value = "/names")
     public ResponseEntity<List<ProductVersionNameVO>> queryNameByOptions(@ApiParam(value = "项目id", required = true)
@@ -232,7 +232,7 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(QUERY_VERSION_NAME_ERROR));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据项目id查找version列表")
     @GetMapping(value = "/versions")
     public ResponseEntity<List<ProductVersionVO>> listByProjectId(@ApiParam(value = "项目id", required = true)
@@ -242,7 +242,7 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException(QUERY_ERROR));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查找所有项目的version ids")
     @GetMapping(value = "/ids")
     public ResponseEntity<List<Long>> listIds(@ApiParam(value = "项目id", required = true)
@@ -252,7 +252,7 @@ public class ProductVersionController {
                 .orElseThrow(() -> new CommonException("error.versionIds.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "拖动版本位置")
     @PutMapping(value = "/drag")
     public ResponseEntity<ProductVersionPageVO> dragVersion(@ApiParam(value = "项目id", required = true)

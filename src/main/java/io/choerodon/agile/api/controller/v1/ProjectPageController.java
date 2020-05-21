@@ -32,7 +32,7 @@ public class ProjectPageController extends BaseController {
     @Autowired
     private PageService pageService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "分页查询页面列表")
     @CustomPageRequest
     @PostMapping

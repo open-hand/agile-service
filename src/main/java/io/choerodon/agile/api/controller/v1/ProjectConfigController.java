@@ -25,7 +25,7 @@ public class ProjectConfigController {
     @Autowired
     ProjectConfigService projectConfigService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "获取项目配置方案信息")
     @GetMapping
     public ResponseEntity<ProjectConfigDetailVO> queryById(@PathVariable("project_id") Long projectId) {

@@ -26,7 +26,7 @@ public class StoryMapWidthController {
     @Autowired
     private StoryMapWidthService storyMapWidthService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建故事地图列宽度")
     @PostMapping
     public ResponseEntity<StoryMapWidthVO> create(@ApiParam(value = "项目id", required = true)
@@ -38,7 +38,7 @@ public class StoryMapWidthController {
                 .orElseThrow(() -> new CommonException("error.storyMapWidth.create"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("更新故事地图列宽度")
     @PutMapping
     public ResponseEntity<StoryMapWidthVO> update(@ApiParam(value = "项目id", required = true)

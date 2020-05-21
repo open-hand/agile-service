@@ -37,7 +37,7 @@ public class IssueLinkTypeController {
     @Autowired
     private IssueLinkTypeValidator issueLinkTypeValidator;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据项目id查询issueLinkType")
     @PostMapping("/query_all")
     public ResponseEntity<Page<IssueLinkTypeVO>> listIssueLinkType(@ApiParam(value = "项目id", required = true)
@@ -54,7 +54,7 @@ public class IssueLinkTypeController {
                 .orElseThrow(() -> new CommonException("error.IssueLinkType.listIssueLinkType"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据issueLinkTypeId查询issueLinkType")
     @GetMapping(value = "/{linkTypeId}")
     public ResponseEntity<IssueLinkTypeVO> queryIssueLinkType(@ApiParam(value = "项目id", required = true)
@@ -66,7 +66,7 @@ public class IssueLinkTypeController {
                 .orElseThrow(() -> new CommonException("error.IssueLinkType.queryIssueLinkType"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建issueLinkType")
     @PostMapping
     public ResponseEntity<IssueLinkTypeVO> createIssueLinkType(@ApiParam(value = "项目id", required = true)
@@ -80,7 +80,7 @@ public class IssueLinkTypeController {
                 .orElseThrow(() -> new CommonException("error.IssueLinkType.createIssueLinkType"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("修改issueLinkType")
     @PutMapping
     public ResponseEntity<IssueLinkTypeVO> updateIssueLinkType(@ApiParam(value = "项目id", required = true)
@@ -94,7 +94,7 @@ public class IssueLinkTypeController {
                 .orElseThrow(() -> new CommonException("error.IssueLinkType.updateIssueLinkType"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("删除issueLink")
     @DeleteMapping(value = "/{issueLinkTypeId}")
     public ResponseEntity deleteIssueLinkType(@ApiParam(value = "项目id", required = true)
@@ -108,7 +108,7 @@ public class IssueLinkTypeController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("IssueLinkType重名校验")
     @GetMapping(value = "/check_name")
     public ResponseEntity checkIssueLinkTypeName(@ApiParam(value = "项目id", required = true)

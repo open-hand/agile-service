@@ -33,7 +33,7 @@ public class QuickFilterController {
 
     private static final String DRAG_ERROR = "error.filter.dragVersion";
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建quick filter")
     @PostMapping
     public ResponseEntity<QuickFilterVO> create(@ApiParam(value = "项目id", required = true)
@@ -45,7 +45,7 @@ public class QuickFilterController {
                 .orElseThrow(() -> new CommonException("error.quickFilter.create"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("修改quick filter")
     @PutMapping(value = "/{filterId}")
     public ResponseEntity<QuickFilterVO> update(@ApiParam(value = "项目id", required = true)
@@ -59,7 +59,7 @@ public class QuickFilterController {
                 .orElseThrow(() -> new CommonException("error.quickFilter.update"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("删除quick filter")
     @DeleteMapping(value = "/{filterId}")
     public ResponseEntity<QuickFilterVO> deleteById(@ApiParam(value = "项目id", required = true)
@@ -70,7 +70,7 @@ public class QuickFilterController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据id查询quick filter")
     @GetMapping(value = "/{filterId}")
     public ResponseEntity<QuickFilterVO> queryById(@ApiParam(value = "项目id", required = true)
@@ -82,7 +82,7 @@ public class QuickFilterController {
                 .orElseThrow(() -> new CommonException("error.quickFilter.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询quick filter列表")
     @PostMapping(value = "/query_all")
     public ResponseEntity<List<QuickFilterVO>> listByProjectId(@ApiParam(value = "项目id", required = true)
@@ -94,7 +94,7 @@ public class QuickFilterController {
     }
 
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询quick filter field列表")
     @GetMapping("/fields")
     public ResponseEntity<List<QuickFilterFieldVO>> list(@ApiParam(value = "项目id", required = true)
@@ -104,7 +104,7 @@ public class QuickFilterController {
                 .orElseThrow(() -> new CommonException("error.quickFilterField.list"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "拖动过滤位置")
     @PutMapping(value = "/drag")
     public ResponseEntity<QuickFilterVO> dragFilter(@ApiParam(value = "项目id", required = true)
@@ -116,7 +116,7 @@ public class QuickFilterController {
                 .orElseThrow(() -> new CommonException(DRAG_ERROR));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("快速搜索重名校验")
     @GetMapping("/check_name")
     public ResponseEntity<Boolean> checkName(@ApiParam(value = "项目id", required = true)

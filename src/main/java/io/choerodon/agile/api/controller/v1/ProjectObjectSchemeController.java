@@ -31,7 +31,7 @@ public class ProjectObjectSchemeController extends BaseController {
     @Autowired
     private ObjectSchemeService objectSchemeService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "分页查询对象方案列表")
     @CustomPageRequest
     @PostMapping

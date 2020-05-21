@@ -36,7 +36,7 @@ public class FieldValueController {
     @Autowired
     private IssueFieldValueService issueFieldValueService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "界面上获取字段列表，带有字段选项")
     @PostMapping("/list")
     public ResponseEntity<List<PageFieldViewVO>> queryPageFieldViewList(@ApiParam(value = "项目id", required = true)
@@ -48,7 +48,7 @@ public class FieldValueController {
         return new ResponseEntity<>(pageFieldService.queryPageFieldViewList(organizationId, projectId, paramDTO), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据实例id从界面上获取字段列表，带有字段值、字段选项")
     @PostMapping("/list/{instance_id}")
     public ResponseEntity<List<PageFieldViewVO>> queryPageFieldViewListWithInstanceId(@ApiParam(value = "项目id", required = true)
@@ -62,7 +62,7 @@ public class FieldValueController {
         return new ResponseEntity<>(pageFieldService.queryPageFieldViewListWithInstanceId(organizationId, projectId, instanceId, paramDTO), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建实例时，批量创建字段值")
     @PostMapping("/{instance_id}")
     public ResponseEntity createFieldValues(@ApiParam(value = "项目id", required = true)
@@ -79,7 +79,7 @@ public class FieldValueController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "快速创建实例时，批量创建字段值（默认值）")
     @PostMapping("/quick_create/{instance_id}")
     public ResponseEntity createFieldValuesWithQuickCreate(@ApiParam(value = "项目id", required = true)
@@ -94,7 +94,7 @@ public class FieldValueController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "保存值/修改值")
     @PostMapping("/update/{instance_id}")
     public ResponseEntity<List<FieldValueVO>> updateFieldValue(@ApiParam(value = "项目id", required = true)
@@ -112,7 +112,7 @@ public class FieldValueController {
         return new ResponseEntity<>(fieldValueService.updateFieldValue(organizationId, projectId, instanceId, fieldId, schemeCode, updateDTO), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "【敏捷专用】问题管理界面获取自定义字段表头")
     @GetMapping("/list/getFields")
     public ResponseEntity<List<AgileIssueHeadVO>> getIssueHeadForAgile(@ApiParam(value = "项目id", required = true)
@@ -124,7 +124,7 @@ public class FieldValueController {
         return new ResponseEntity<>(objectSchemeFieldService.getIssueHeadForAgile(organizationId, projectId, schemeCode), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "获取项目下的自定义字段")
     @GetMapping("/list/custom_field")
     public ResponseEntity<List<ObjectSchemeFieldDetailVO>> queryCustomFieldList(@ApiParam(value = "项目id", required = true)
@@ -132,7 +132,7 @@ public class FieldValueController {
         return new ResponseEntity<>(objectSchemeFieldService.queryCustomFieldList(projectId), HttpStatus.OK);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "批量修改预定义字段值和自定义字段值")
     @PostMapping("/batch_update_fields_value")
     public ResponseEntity batchUpdateFieldsValue(@ApiParam(value = "项目id", required = true)

@@ -37,7 +37,7 @@ public class IssueComponentController {
     @Autowired
     private IssueComponentService issueComponentService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建component")
     @PostMapping
     public ResponseEntity<IssueComponentVO> createComponent(@ApiParam(value = "项目id", required = true)
@@ -49,7 +49,7 @@ public class IssueComponentController {
                 .orElseThrow(() -> new CommonException("error.component.create"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("修改component")
     @PutMapping(value = "/{id}")
     public ResponseEntity<IssueComponentVO> updateComponent(@ApiParam(value = "项目id", required = true)
@@ -63,7 +63,7 @@ public class IssueComponentController {
                 .orElseThrow(() -> new CommonException("error.component.update"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("删除component")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity deleteComponent(@ApiParam(value = "项目id", required = true)
@@ -76,7 +76,7 @@ public class IssueComponentController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据id查询component")
     @GetMapping(value = "/{id}")
     public ResponseEntity<IssueComponentVO> queryComponentById(@ApiParam(value = "项目id", required = true)
@@ -88,7 +88,7 @@ public class IssueComponentController {
                 .orElseThrow(() -> new CommonException("error.component.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据project id查询component")
     @CustomPageRequest
     @PostMapping(value = "/query_all")
@@ -108,7 +108,7 @@ public class IssueComponentController {
                 .orElseThrow(() -> new CommonException("error.componentList.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据project id查询component,测试服务用")
     @GetMapping
     public ResponseEntity<List<ComponentForListVO>> listByProjectIdForTest(@ApiParam(value = "项目id", required = true)
@@ -123,7 +123,7 @@ public class IssueComponentController {
                 .orElseThrow(() -> new CommonException("error.componentList.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据id查询component下的issues")
     @GetMapping(value = "/{id}/issues")
     public ResponseEntity<List<IssueVO>> listByOptions(@ApiParam(value = "项目id", required = true)
@@ -135,7 +135,7 @@ public class IssueComponentController {
                 .orElseThrow(() -> new CommonException("error.issues.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("模块重名校验")
     @GetMapping(value = "/check_name")
     public ResponseEntity<Boolean> checkComponentName(@ApiParam(value = "项目id", required = true)

@@ -129,7 +129,7 @@ public class StatusController extends BaseController {
 
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "校验状态名字是否未被使用,项目层")
     @GetMapping(value = "/projects/{project_id}/status/project_check_name")
     public ResponseEntity<StatusCheckVO> checkNameOnPro(@PathVariable("project_id") Long projectId,

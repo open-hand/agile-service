@@ -29,7 +29,7 @@ public class ProjectInfoController {
     @Autowired
     private ProjectInfoValidator projectInfoValidator;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("更新projectInfo")
     @PutMapping
     public ResponseEntity<ProjectInfoVO> updateProjectInfo(@ApiParam(value = "项目id", required = true)
@@ -42,7 +42,7 @@ public class ProjectInfoController {
                 .orElseThrow(() -> new CommonException("error.projectInfo.update"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据项目id查询projectInfo")
     @GetMapping
     public ResponseEntity<ProjectInfoVO> queryProjectInfoByProjectId(@ApiParam(value = "项目id", required = true)

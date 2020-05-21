@@ -28,7 +28,7 @@ public class DataLogController {
     @Autowired
     private DataLogService dataLogService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建DataLog")
     @PostMapping
     public ResponseEntity<DataLogVO> createDataLog(@ApiParam(value = "项目id", required = true)
@@ -40,7 +40,7 @@ public class DataLogController {
                 .orElseThrow(() -> new CommonException("error.dataLog.create"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询DataLog列表")
     @GetMapping
     public ResponseEntity<List<DataLogVO>> listByIssueId(@ApiParam(value = "项目id", required = true)
