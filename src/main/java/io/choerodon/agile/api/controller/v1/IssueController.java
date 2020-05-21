@@ -428,7 +428,7 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.issueNums.get"));
     }
 
-    @Permission(level = ResourceLevel.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("分页过滤查询issue列表提供给测试模块用")
     @CustomPageRequest
     @PostMapping(value = "/test_component/no_sub")
