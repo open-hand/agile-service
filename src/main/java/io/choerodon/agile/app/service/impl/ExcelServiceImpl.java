@@ -452,10 +452,10 @@ public class ExcelServiceImpl implements ExcelService {
         messageClient.sendByUserId(userId, WEBSOCKET_IMPORT_CODE, JSON.toJSONString(fileOperationHistoryDTO));
     }
 
-    protected String uploadErrorExcel(Workbook errorWorkbook) {
+    protected String uploadErrorExcel(Workbook errorWorkbook, Long organizationId) {
         // 上传错误的excel
         MultipartFile multipartFile = new MultipartExcelUtil(MULTIPART_NAME, ORIGINAL_FILE_NAME, errorWorkbook);
-        return fileClient.uploadFile(0L, BACKETNAME, null, FILE_NAME, multipartFile);
+        return fileClient.uploadFile(organizationId, BACKETNAME, null, FILE_NAME, multipartFile);
     }
 
     protected Boolean checkEpicNameExist(Long projectId, String epicName) {
@@ -836,7 +836,7 @@ public class ExcelServiceImpl implements ExcelService {
                     errorMapList, FIELDS_NAME, priorityList, issueTypeList, versionList,
                     IMPORT_TEMPLATE_NAME, componentList, sprintList, managers,
                     theSecondColumnPredefined, false);
-            String errorWorkBookUrl = uploadErrorExcel(result);
+            String errorWorkBookUrl = uploadErrorExcel(result, organizationId);
             res.setFileUrl(errorWorkBookUrl);
             status = FAILED;
         } else {

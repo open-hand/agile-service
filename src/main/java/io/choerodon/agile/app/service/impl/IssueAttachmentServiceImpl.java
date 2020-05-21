@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.app.service.IIssueAttachmentService;
 import io.choerodon.agile.infra.dto.IssueAttachmentDTO;
 import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
+import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.IssueAttachmentVO;
 import io.choerodon.agile.app.service.IssueAttachmentService;
@@ -55,6 +56,9 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
     @Autowired
     private FileClient fileClient;
 
+    @Autowired
+    private ProjectUtil projectUtil;
+
     @Override
     public void dealIssue(Long projectId, Long issueId, String fileName, String url) {
         IssueAttachmentDTO issueAttachmentDTO = new IssueAttachmentDTO();
@@ -92,7 +96,8 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         if (files != null && !files.isEmpty()) {
             for (MultipartFile multipartFile : files) {
                 String fileName = multipartFile.getOriginalFilename();
-                String url = fileClient.uploadFile(0L, BACKETNAME, null, fileName, multipartFile);
+                Long organizationId = projectUtil.getOrganizationId(projectId);
+                String url = fileClient.uploadFile(organizationId, BACKETNAME, null, fileName, multipartFile);
                 dealIssue(projectId, issueId, fileName, dealUrl(url));
             }
         }
@@ -122,7 +127,8 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         try {
             url = URLDecoder.decode(issueAttachmentDTO.getUrl(), "UTF-8");
             String deleteUrl = attachmentUrl + "/" + BACKETNAME + "/" + url;
-            fileClient.deleteFileByUrl(0L, BACKETNAME, Arrays.asList(deleteUrl));
+            Long organizationId = projectUtil.getOrganizationId(projectId);
+            fileClient.deleteFileByUrl(organizationId, BACKETNAME, Arrays.asList(deleteUrl));
         } catch (Exception e) {
             LOGGER.error("error.attachment.delete", e);
         }
@@ -138,7 +144,8 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         List<String> result = new ArrayList<>();
         for (MultipartFile multipartFile : files) {
             String fileName = multipartFile.getOriginalFilename();
-            String url = fileClient.uploadFile(0L, BACKETNAME, null, fileName, multipartFile);
+            Long organizationId = projectUtil.getOrganizationId(projectId);
+            String url = fileClient.uploadFile(organizationId, BACKETNAME, null, fileName, multipartFile);
             result.add(attachmentUrl + "/" + BACKETNAME + "/" + dealUrl(url));
         }
         return result;
