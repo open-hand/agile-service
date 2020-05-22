@@ -92,6 +92,7 @@ public class SiteMsgUtil {
             UserDTO userDTO = userDTOMap.get(userId);
             receiver.setEmail(userDTO.getEmail());
             receiver.setPhone(userDTO.getPhone());
+            receiver.setTargetUserTenantId(userDTO.getOrganizationId());
             receivers.add(receiver);
         }
     }
