@@ -389,7 +389,7 @@ function BatchModal({
     <div style={{ padding: 15 }}>
       <WSProvider server={Choerodon.WEBSOCKET_SERVER}>
         <WSHandler
-          messageKey={`choerodon:msg:agile-batch-update-field:${AppState.userInfo.id}`}
+          messageKey="agile-batch-update-field"
           onMessage={handleMessage}
         >
           {render()}

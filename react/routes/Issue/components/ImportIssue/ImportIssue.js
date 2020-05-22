@@ -318,7 +318,7 @@ class ImportIssue extends Component {
     } else {
       return (
         <WSHandler
-          messageKey={`choerodon:msg:agile-import-issues:${AppState.userInfo.id}`}
+          messageKey="agile-import-issues"
           onMessage={this.handleMessage}
         >
           {this.renderProgress()}
