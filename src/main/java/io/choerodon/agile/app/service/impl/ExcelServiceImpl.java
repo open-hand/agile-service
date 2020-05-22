@@ -1,6 +1,8 @@
 package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.domain.IssueType;
@@ -108,6 +110,9 @@ public class ExcelServiceImpl implements ExcelService {
     private FileClient fileClient;
 
     private ModelMapper modelMapper = new ModelMapper();
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @PostConstruct
     public void init() {
@@ -449,7 +454,13 @@ public class ExcelServiceImpl implements ExcelService {
     protected void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process) {
         fileOperationHistoryDTO.setProcess(process);
 //        notifyFeignClient.postWebSocket(WEBSOCKET_IMPORT_CODE, userId.toString(), JSON.toJSONString(fileOperationHistoryDTO));
-        messageClient.sendByUserId(userId, WEBSOCKET_IMPORT_CODE, JSON.toJSONString(fileOperationHistoryDTO));
+        String message = null;
+        try {
+            message = objectMapper.writeValueAsString(fileOperationHistoryDTO);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        messageClient.sendByUserId(userId, WEBSOCKET_IMPORT_CODE, message);
     }
 
     protected String uploadErrorExcel(Workbook errorWorkbook, Long organizationId) {
