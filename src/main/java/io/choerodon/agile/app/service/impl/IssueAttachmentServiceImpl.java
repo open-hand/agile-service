@@ -3,12 +3,14 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.app.service.IIssueAttachmentService;
 import io.choerodon.agile.infra.dto.IssueAttachmentDTO;
 import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
+import io.choerodon.agile.infra.feign.CustomFileRemoteService;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.IssueAttachmentVO;
 import io.choerodon.agile.app.service.IssueAttachmentService;
 import io.choerodon.agile.infra.mapper.IssueAttachmentMapper;
 import org.hzero.boot.file.FileClient;
+import org.hzero.core.util.ResponseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -55,6 +57,9 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
 
     @Autowired
     private FileClient fileClient;
+
+    @Autowired
+    private CustomFileRemoteService customFileRemoteService;
 
     @Autowired
     private ProjectUtil projectUtil;
@@ -128,7 +133,7 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
             url = URLDecoder.decode(issueAttachmentDTO.getUrl(), "UTF-8");
             String deleteUrl = attachmentUrl + "/" + BACKETNAME + "/" + url;
             Long organizationId = projectUtil.getOrganizationId(projectId);
-            fileClient.deleteFileByUrl(organizationId, BACKETNAME, Arrays.asList(deleteUrl));
+            ResponseUtils.getResponse(customFileRemoteService.deleteFileByUrl(organizationId, BACKETNAME, Arrays.asList(deleteUrl)), String.class);
         } catch (Exception e) {
             LOGGER.error("error.attachment.delete", e);
         }
