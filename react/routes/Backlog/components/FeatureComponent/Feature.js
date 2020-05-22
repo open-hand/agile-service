@@ -87,7 +87,7 @@ class Feature extends Component {
             <div
               className="c7n-backlog-epicItems-first primary"
               style={{
-                background: BacklogStore.getChosenFeature === 'all' ? 'rgba(140, 158, 255, 0.16)' : '',
+                background: BacklogStore.getChosenFeature === 'all' ? 'rgba(140, 158, 254, 0.16)' : '',
               }}
               role="none"
               onClick={() => {
@@ -165,7 +165,7 @@ class Feature extends Component {
             <div
               className="c7n-backlog-epicItems-last"
               style={{
-                background: BacklogStore.getChosenFeature === 'unset' ? 'rgba(140, 158, 255, 0.16)' : '',
+                background: BacklogStore.getChosenFeature === 'unset' ? 'rgba(140, 158, 254, 0.16)' : '',
               }}
               role="none"
               onClick={() => {
