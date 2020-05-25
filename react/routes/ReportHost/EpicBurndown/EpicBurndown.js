@@ -827,7 +827,7 @@ class EpicBurndown extends Component {
     const { checkbox, tabActiveKey, linkFromParamUrl } = this.state;
     const urlParams = AppState.currentMenuType;
     return (
-      <Page className="c7n-epicBurndown">
+      <Page className="c7n-epicBurndown" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.epicburndown']}>
         <Header
           title="史诗燃耗图"
           // backPath={`/agile/${linkFromParamUrl || 'reporthost'}?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}

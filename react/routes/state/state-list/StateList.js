@@ -454,10 +454,7 @@ function StateList(props) {
 
     return (
       <Page service={[
-        'agile-service.status.queryStatusList',
-        'agile-service.status.create',
-        'agile-service.status.checkName',
-        'agile-service.status.delete',
+        'choerodon.code.organization.setting.issue.states.ps.state',
       ]}
       >
         <Header title={<FormattedMessage id="state.title" />}>

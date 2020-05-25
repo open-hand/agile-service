@@ -139,7 +139,7 @@ class SettingColumn extends Component {
           }}
         >
           <Permission
-            service={['agile-service.board.updateScrumBoard']}
+            service={['choerodon.code.project.cooperation.iteration-plan.ps.column']}
             noAccessChildren={(
               <Select
                 value={ScrumBoardStore.getCurrentConstraint}
@@ -200,7 +200,7 @@ class SettingColumn extends Component {
                   {...provided.droppableProps}
                 >
                   <Permission
-                    service={['agile-service.board-column.columnSortByProgram']}
+                    service={['choerodon.code.project.cooperation.iteration-plan.ps.column']}
                     noAccessChildren={this.renderColumns(columns, true)}
                   >
                     {this.renderColumns(columns)}

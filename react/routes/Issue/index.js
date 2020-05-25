@@ -122,30 +122,7 @@ const Issue = withRouter(observer(() => {
     <Page
       className="c7nagile-issue"
       service={[
-        'agile-service.personal-filter.listByProjectId',
-        'agile-service.scheme.queryDefaultByOrganizationId',
-        'agile-service.issue.listFeature',
-        'agile-service.field-value.getIssueHeadForAgile',
-        'agile-service.issue.listIssueWithSub',
-        'agile-service.sprint.queryByProjectId',
-        'agile-service.sprint.queryNameByOptions',
-        'agile-service.product-version.queryNameByOptions',
-        'agile-service.product-version.queryVersionByProjectId',
-        'base-service.organization-project.getGroupInfoByEnableProject',
-        'agile-service.project-info.queryProjectInfoByProjectId',
-        'agile-service.quick-filter.listByProjectId',
-        'agile-service.issue-component.queryComponentById',
-        'agile-service.scheme.queryIssueTypesWithStateMachineIdByProjectId',
-        'agile-service.scheme.queryStatusByProjectId',
-        'base-service.project.list',
-        'agile-service.excel.download',
-        'agile-service.excel.queryLatestRecode',
-        'agile-service.excel.batchImport',
-        'agile-service.issue.exportIssues',
-        'agile-service.personal-filter.checkName',
-        'agile-service.personal-filter.create',
-        'agile-service.personal-filter.update',
-        'agile-service.personal-filter.deleteById',
+        'choerodon.code.project.cooperation.work-list.ps.issue',
       ]}
     >
       <Header

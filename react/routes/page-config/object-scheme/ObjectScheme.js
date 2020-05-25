@@ -233,23 +233,10 @@ function ObjectScheme() {
 
 
   const service = AppState.currentMenuType.type === 'project' ? [
-    'agile-service.project-object-scheme-field.listQuery',
-    'agile-service.project-object-scheme-field.create',
-    'agile-service.project-object-scheme-field.checkCode',
-    'agile-service.project-object-scheme-field.checkName',
-    'agile-service.project-object-scheme-field.listQuery',
-    'agile-service.project-object-scheme-field.queryById',
-    'agile-service.project-object-scheme-field.update',
-    'agile-service.project-object-scheme-field.delete',
+    'choerodon.code.project.setting.page.ps.field',
   ]
-    : ['agile-service.object-scheme-field.listQuery',
-      'agile-service.object-scheme-field.create',
-      'agile-service.object-scheme-field.checkCode',
-      'agile-service.object-scheme-field.checkName',
-      'agile-service.object-scheme-field.listQuery',
-      'agile-service.object-scheme-field.queryById',
-      'agile-service.object-scheme-field.update',
-      'agile-service.object-scheme-field.delete',
+    : [
+      'choerodon.code.organization.setting.issue.page.ps.filed',
     ];
 
   return (

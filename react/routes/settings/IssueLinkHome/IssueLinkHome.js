@@ -127,19 +127,13 @@ function IssueLinkHome() {
   return (
     <Page
       service={[
-        'agile-service.issue-link-type.listIssueLinkType',
-        'agile-service.issue-link-type.updateIssueLinkType',
-        'agile-service.issue-link-type.deleteIssueLinkType',
-        'agile-service.issue-link-type.createIssueLinkType',
+        'choerodon.code.project.setting.issue.ps.issuelink',
       ]}
       className="c7n-issue-link"
     >
       <Header title={formatMessage({ id: 'issue.link_task' })}>
         <Permission
-          type={type}
-          projectId={id}
-          organizationId={orgId}
-          service={['agile-service.issue-link-type.createIssueLinkType']}
+          service={['choerodon.code.project.setting.issue.ps.createfastsearch']}
         >
           <Button funcType="flat" onClick={openCreateEditModal.bind(null, false)}>
             <Icon type="playlist_add icon" />

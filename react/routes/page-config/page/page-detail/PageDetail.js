@@ -126,13 +126,9 @@ function PageDetail(props) {
     <Page
       className="c7n-page-detail"
       service={AppState.currentMenuType.type === 'project' ? [
-        'agile-service.project-page-field.listQuery',
-        'agile-service.project-page-field.adjustFieldOrder',
-        'agile-service.project-page-field.update',
+        'choerodon.code.project.setting.page.ps.scheme',
       ] : [
-        'agile-service.page-field.listQuery',
-        'agile-service.page-field.adjustFieldOrder',
-        'agile-service.page-field.update',
+        'choerodon.code.organization.setting.issue.page.ps.scheme',
       ]}
     >
       <Breadcrumb custom>

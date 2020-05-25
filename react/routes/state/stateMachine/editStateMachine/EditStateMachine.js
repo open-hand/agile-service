@@ -1501,12 +1501,7 @@ class EditStateMachine extends Component {
     return (
       <Page
       service={[
-        'agile-service.state-machine.queryStateMachineWithConfigDraftById',
-        'agile-service.state-machine-transform.checkName',
-        'agile-service.status.queryAllStatus',
-        'agile-service.status.create',
-        'agile-service.status.checkName',
-        
+        'choerodon.code.organization.setting.issue.states.ps.state-machine',
       ]}
       >
         <Header

@@ -117,7 +117,7 @@ class BacklogHome extends Component {
       </Tooltip>
     ) : (
       <Permission
-        service={['agile-service.sprint-pro.createSubProjectSprint']}
+        service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint']}
       >
         <Button icon="playlist_add" onClick={this.handleCreateCurrentPiSprint}>
           当前PI下创建冲刺
@@ -142,7 +142,7 @@ class BacklogHome extends Component {
           </Button>
           {!isInProgram && (
             <Permission
-              service={['agile-service.sprint.createSprint']}
+              service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
             >
               <Button icon="playlist_add" onClick={this.handleCreateSprint}>
                 创建冲刺
@@ -274,37 +274,18 @@ class BacklogHome extends Component {
   }
 }
 
+const { isInProgram } = IsInProgramStore;
 export default props => (
   <Page
-    service={[
-      'agile-service.issue.deleteIssue',
-      'agile-service.sprint.queryByProjectId',
-      'agile-service.issue.listFeature',
-      'agile-service.product-version.queryVersionByProjectId',
-      'agile-service.sprint.queryByProjectId',
-      'agile-service.priority.queryDefaultByOrganizationId',
-      'agile-service.scheme.queryIssueTypesWithStateMachineIdByProjectId',
-      'agile-service.quick-filter.listByProjectId',
-      'base-service.organization-project.getGroupInfoByEnableProject',
-      'agile-service.issue.createIssue',
-      'agile-service.field-value.queryPageFieldViewList',
-      'agile-service.scheme.queryDefaultByOrganizationId', // /v1/projects/{project_id}/priority/default
-      'agile-service.product-version.queryNameByOptions',
-      'agile-service.issue-component.queryComponentById',
-      'agile-service.scheme.queryByOrganizationIdList',
-      'agile-service.sprint.queryNameByOptions',
-      'agile-service.issue-label.listIssueLabel',
-      'base-service.organization.pagingQueryUsersOnOrganization',
-      'agile-service.issue.listEpicSelectData',
-      'agile-service.sprint.queryNameByOptions',
-      'agile-service.issue-link-type.listIssueLinkType',
-      'agile-service.issue.queryIssueByOptionForAgile',
-      'agile-service.sprint.queryCompleteMessageBySprintId',
-      'agile-service.sprint.completeSprint',
-      'base-service.time-zone-work-calendar-project.queryTimeZoneWorkCalendarDetail',
-      'agile-service.sprint.querySprintById',
-      'agile-service.sprint.startSprint',
-      'agile-service.product-version.updateVersion',
+    service={isInProgram ? [
+      'choerodon.code.project.cooperation.work-list.ps.backlog',
+      'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.feature',
+      'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint',
+      'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.pi',
+    ] : [
+      'choerodon.code.project.cooperation.work-list.ps.backlog',
+      'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint',
+      'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.epic',
     ]}
     className="c7n-backlog-page"
   >

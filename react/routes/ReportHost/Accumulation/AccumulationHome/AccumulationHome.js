@@ -465,7 +465,7 @@ class AccumulationHome extends Component {
     const { linkFromParamUrl } = this.state;
     const urlParams = AppState.currentMenuType;
     return (
-      <Page>
+      <Page service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.cumulative_flow_diagram']}>
         <Header
           title="累积流量图"
           // backPath={`/agile/${linkFromParamUrl || 'reporthost'}?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}

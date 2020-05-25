@@ -174,7 +174,7 @@ class ReleaseHome extends Component {
         {record.statusCode === 'archived'
           ? null
           : (
-            <Permission service={record.statusCode === 'version_planning' ? ['agile-service.product-version.releaseVersion'] : ['agile-service.product-version.revokeReleaseVersion']} key="0">
+            <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus']} key="0">
               <Menu.Item key="0">
                 <Tooltip placement="top" title={record.statusCode === 'version_planning' ? '发布' : '撤销发布'}>
                   <span>
@@ -185,7 +185,7 @@ class ReleaseHome extends Component {
             </Permission>            
           )
         }
-        <Permission service={record.statusCode === 'archived' ? ['agile-service.product-version.revokeArchivedVersion'] : ['agile-service.product-version.archivedVersion']} key="3">
+        <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus']} key="3">
           <Menu.Item key="3">
             <Tooltip placement="top" title={record.statusCode === 'archived' ? '撤销归档' : '归档'}>
               <span>
@@ -197,7 +197,7 @@ class ReleaseHome extends Component {
         {record.statusCode === 'archived'
           ? null
           : (
-            <Permission service={['agile-service.product-version.deleteVersion']} key="4">
+            <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion']} key="4">
               <Menu.Item>
                 <Tooltip placement="top" title="删除">
                   <span>
@@ -313,22 +313,15 @@ class ReleaseHome extends Component {
     return (
       <Page
         service={[
-          'agile-service.product-version.releaseVersion',
-          'agile-service.product-version.revokeReleaseVersion',
-          'agile-service.product-version.revokeArchivedVersion',
-          'agile-service.product-version.archivedVersion',
-          'agile-service.product-version.deleteVersion',
-          'agile-service.product-version.updateVersion',
-          'agile-service.product-version.createVersion',
-          'agile-service.product-version.mergeVersion',
-          'agile-service.product-version.listByProjectId',
-          'agile-service.product-version.listByOptions',
-          'agile-service.product-version.queryVersionByProjectId',
-          'base-service.organization-project.getGroupInfoByEnableProject',
+          'choerodon.code.project.cooperation.work-list.ps.version',
+          'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion',
+          'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion',
+          'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus',
+          'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion',
         ]}
       >
         <Header title="版本管理">
-          <Permission type={type} projectId={projectId} organizationId={orgId} service={['agile-service.product-version.createVersion']}>
+          <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion']}>
             <Button
               onClick={() => {
                 this.setState({

@@ -639,7 +639,7 @@ class SprintReport extends Component {
 
     const urlParams = AppState.currentMenuType;
     return (
-      <Page className="c7n-report">
+      <Page className="c7n-report" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.sprintreport']}>
         <Header
           title="冲刺报告图"
           backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}

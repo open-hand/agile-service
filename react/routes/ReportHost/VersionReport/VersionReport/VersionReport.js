@@ -590,7 +590,7 @@ class EpicReport extends Component {
     const { history } = this.props;
     const urlParams = AppState.currentMenuType;
     return (
-      <Page className="c7n-versionReport">
+      <Page className="c7n-versionReport" serice={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.versionreport']}>
         <Header
           title="版本报告图"
           backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}

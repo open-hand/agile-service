@@ -590,7 +590,7 @@ class EpicReport extends Component {
     const { linkFromParamUrl } = this.state;
     const urlParams = AppState.currentMenuType;
     return (
-      <Page className="c7n-epicReport">
+      <Page className="c7n-epicReport" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.epicreport']}>
         <Header
           title="史诗报告图"
           // backPath={`/agile/${linkFromParamUrl || 'reporthost'}?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}

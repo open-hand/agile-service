@@ -57,10 +57,7 @@ function SprintButton({
 
   return statusCode === 'started' ? (
     <Permission
-      type={type}
-      projectId={projectId}
-      organizationId={orgId}
-      service={['agile-service.sprint.completeSprint']}
+      service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
     >
       <p
         className={prefix}
@@ -73,10 +70,7 @@ function SprintButton({
   ) : (
     <Fragment>
       <Permission
-        type={type}
-        projectId={projectId}
-        organizationId={orgId}
-        service={[IsInProgramStore.isInProgram ? 'agile-service.sprint-pro.startSubProjectSprint' : 'agile-service.sprint.startSprint']}
+        service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
       >
         <p
           className={classnames(prefix, {
@@ -92,7 +86,7 @@ function SprintButton({
         type={type}
         projectId={projectId}
         organizationId={orgId}
-        service={[IsInProgramStore.isInProgram ? 'agile-service.sprint-pro.deleteSubProjectSprint' : 'agile-service.sprint.deleteSprint']}
+        service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
       >
         {(data.sprintType !== 'ip'
             && (
