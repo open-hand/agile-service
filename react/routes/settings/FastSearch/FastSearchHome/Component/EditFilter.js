@@ -853,7 +853,7 @@ class AddComponent extends Component {
       res.forEach((item) => {
         customFieldState[`origin${item.code}`] = item.fieldOptions || [];
       });
-      this.setState(...customFieldState);
+      this.setState(customFieldState);
     });
     // const getUsers = () => axios.get(`/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`);
     // const getPriority = () => axios.get(`/agile/v1/projects/${projectId}/priority/list_by_org`);

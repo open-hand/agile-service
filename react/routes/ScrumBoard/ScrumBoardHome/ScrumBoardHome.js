@@ -393,7 +393,7 @@ class ScrumBoardHome extends Component {
                   <StatusColumn />
                 </div>
                 {(!ScrumBoardStore.didCurrentSprintExist || ((!ScrumBoardStore.otherIssue || ScrumBoardStore.otherIssue.length === 0) && (!ScrumBoardStore.interconnectedData || ScrumBoardStore.interconnectedData.size === 0))) ? (
-                  <NoneSprint doingSprintExist={ScrumBoardStore.didCurrentSprintExist} />
+                  <NoneSprint doingSprintExist={ScrumBoardStore.didCurrentSprintExist} hasSetFilter={ScrumBoardStore.hasSetFilter} quickSearchObj={ScrumBoardStore.quickSearchObj} />
                 )
                   : (
                     <div
