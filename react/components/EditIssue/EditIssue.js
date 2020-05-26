@@ -344,6 +344,9 @@ function EditIssue() {
                 objectVersionNumber={objectVersionNumber}
                 onOk={() => {
                   store.setChangeParentShow(false);
+                  if (onUpdate) {
+                    onUpdate();
+                  }
                   loadIssueDetail(issueId);
                 }}
                 onCancel={() => {
