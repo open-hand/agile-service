@@ -10,8 +10,9 @@ import {
   loadStatusList, loadIssuesInLink, loadFeaturesInLink, loadSprints,
   loadSprintsByTeam,
 } from '@/api/NewIssueApi';
-import IssueLinkType, { issueLinkTypeApi } from '@/api/IssueLinkType';
+import { issueLinkTypeApi } from '@/api/IssueLinkType';
 import { featureApi, piApi } from '@/api';
+import { getTeamSprints } from '@/api/PIApi';
 import { Tooltip } from 'choerodon-ui/pro';
 import UserHead from '../UserHead';
 import TypeTag from '../TypeTag';
@@ -42,7 +43,7 @@ function transform(links) {
 
   return active.concat(passive);
 }
-const { Option } = Select;
+const { Option, OptGroup } = Select;
 const issue_type_program = {
   props: {
     filterOption,
@@ -484,6 +485,24 @@ export default {
       <Option key={pro.projectId} value={pro.projectId}>
         {pro.projName}
       </Option>
+    ),
+  },
+  sub_sprint: {
+    props: {
+      getPopupContainer: triggerNode => triggerNode.parentNode,
+      filterOption,
+      onFilterChange: false,
+      loadWhenMount: true,
+    },
+    request: ({ filter, page }, { piId, teamIds }) => getTeamSprints(piId, teamIds),
+    render: team => (
+      <OptGroup label={team.projectVO.name} key={team.projectVO.id}>
+        {(team.sprints || []).map(sprint => (
+          <Option key={`${sprint.sprintId}`} value={sprint.sprintId}>
+            <Tooltip placement="topRight" title={sprint.sprintName}>{sprint.sprintName}</Tooltip>
+          </Option>
+        ))}
+      </OptGroup>
     ),
   },
 };
