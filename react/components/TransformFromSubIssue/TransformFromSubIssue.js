@@ -3,6 +3,7 @@ import { stores, axios } from '@choerodon/boot';
 import {
   Modal, Form, Select, Input,
 } from 'choerodon-ui';
+import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 import { transformedTask } from '../../api/NewIssueApi';
 import TypeTag from '../TypeTag';
 
@@ -107,7 +108,7 @@ class TransformFromSubIssue extends Component {
       .then((data) => {
         this.setState({
           selectLoading: false,
-          originTypes: data,
+          originTypes: data.filter(type => !(IsInProgramStore.isInProgram ? ['issue_epic', 'feature'] : ['feature']).includes(type.typeCode)),
         });
       });
   }
@@ -127,7 +128,7 @@ class TransformFromSubIssue extends Component {
       loading,
       isEpicType,
     } = this.state;
-
+    
     return (
       <Sidebar
         className="c7n-transformFromSubIssue"
