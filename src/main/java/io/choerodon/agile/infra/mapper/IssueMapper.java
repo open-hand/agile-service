@@ -176,11 +176,11 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                                       @Param("otherArgs") Map<String, Object> otherArgs,
                                                       @Param("contents") List<String> contents);
 
-//    List<IssueDTO> listIssueWithLinkedIssues(@Param("projectId") Long projectId,
-//                                             @Param("searchArgs") Map<String, Object> searchArgs,
-//                                             @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs,
-//                                             @Param("otherArgs") Map<String, Object> otherArgs,
-//                                             @Param("contents") List<String> contents);
+    List<IssueDTO> listIssueWithLinkedIssues(@Param("projectId") Long projectId,
+                                             @Param("searchArgs") Map<String, Object> searchArgs,
+                                             @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs,
+                                             @Param("otherArgs") Map<String, Object> otherArgs,
+                                             @Param("contents") List<String> contents);
 
     List<IssueCreationNumDTO> queryIssueNumByTimeSlot(@Param("projectId") Long projectId,
                                                       @Param("typeCode") String typeCode,

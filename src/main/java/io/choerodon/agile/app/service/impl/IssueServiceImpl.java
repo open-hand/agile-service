@@ -1715,6 +1715,7 @@ public class IssueServiceImpl implements IssueService {
         //连表查询需要设置主表别名
         Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, new HashMap<>());
         //pageable.resetOrder(SEARCH, new HashMap<>());
+        pageRequest.setSort(sort);
         Page<IssueDTO> issueDOPage = PageHelper.doPageAndSort(pageRequest,
                 () -> issueMapper.listIssueWithoutSubToTestComponent(projectId, searchVO.getSearchArgs(),
                 searchVO.getAdvancedSearchArgs(), searchVO.getOtherArgs(), searchVO.getContents()));
@@ -1728,15 +1729,15 @@ public class IssueServiceImpl implements IssueService {
         return PageUtil.buildPageInfoWithPageInfoList(issueDOPage, issueAssembler.issueDoToIssueTestListDto(issueDOPage.getContent(), priorityMap, statusMapDTOMap, issueTypeDTOMap));
     }
 
-//    @Override
-//    public Page<IssueListTestWithSprintVersionVO> listIssueWithLinkedIssues(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
-//        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, new HashMap<>());
-//        //pageable.resetOrder(SEARCH, new HashMap<>());
-//        Page<IssueDTO> issueDOPage = PageHelper.doPageAndSort(pageRequest, () ->
-//                issueMapper.listIssueWithLinkedIssues(projectId, searchVO.getSearchArgs(),
-//                        searchVO.getAdvancedSearchArgs(), searchVO.getOtherArgs(), searchVO.getContents()));
-//        return handleILTDTOToILTWSVDTO(projectId, handleIssueListTestDoToDto(issueDOPage, organizationId, projectId));
-//    }
+    @Override
+    public Page<IssueListTestWithSprintVersionVO> listIssueWithLinkedIssues(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId) {
+        Sort sort = PageUtil.sortResetOrder(pageRequest.getSort(), SEARCH, new HashMap<>());
+        //pageable.resetOrder(SEARCH, new HashMap<>());
+        Page<IssueDTO> issueDOPage = PageHelper.doPageAndSort(pageRequest, () ->
+                issueMapper.listIssueWithLinkedIssues(projectId, searchVO.getSearchArgs(),
+                        searchVO.getAdvancedSearchArgs(), searchVO.getOtherArgs(), searchVO.getContents()));
+        return handleILTDTOToILTWSVDTO(projectId, handleIssueListTestDoToDto(issueDOPage, organizationId, projectId));
+    }
 
     private Page<IssueListTestWithSprintVersionVO> handleILTDTOToILTWSVDTO(Long projectId, Page<IssueListTestVO> issueListTestDTOSPage) {
 
@@ -1749,8 +1750,8 @@ public class IssueServiceImpl implements IssueService {
 
         List<IssueListTestWithSprintVersionVO> issueListTestWithSprintVersionVOS = new ArrayList<>();
 
-        for (int a = 0; a < issueListTestDTOSPage.getSize(); a++) {
-            IssueListTestWithSprintVersionVO issueListTestWithSprintVersionVO = new IssueListTestWithSprintVersionVO(issueListTestDTOSPage.getContent().get(a));
+        for (IssueListTestVO issueListTestVO :issueListTestDTOSPage.getContent()) {
+            IssueListTestWithSprintVersionVO issueListTestWithSprintVersionVO = new IssueListTestWithSprintVersionVO(issueListTestVO);
 
             List<VersionIssueRelVO> versionList = new ArrayList<>();
             List<IssueSprintVO> sprintList = new ArrayList<>();

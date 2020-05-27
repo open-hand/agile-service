@@ -448,24 +448,24 @@ public class IssueController {
     }
 
 
-//    @Permission(level = ResourceLevel.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
-//    @ApiOperation("分页过滤查询issue列表, 测试项目接口，过滤linked issue")
-//    @CustomPageRequest
-//    @PostMapping(value = "/test_component/filter_linked")
-//    public ResponseEntity<PageInfo<IssueListTestWithSprintVersionVO>> listIssueWithLinkedIssues(@ApiIgnore
-//                                                                                             @ApiParam(value = "分页信息", required = true)
-//                                                                                             @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
-//                                                                                                     Pageable pageable,
-//                                                                                                @ApiParam(value = "项目id", required = true)
-//                                                                                             @PathVariable(name = "project_id") Long projectId,
-//                                                                                                @ApiParam(value = "组织id", required = true)
-//                                                                                             @RequestParam Long organizationId,
-//                                                                                                @ApiParam(value = "查询参数", required = true)
-//                                                                                             @RequestBody(required = false) SearchVO searchVO) {
-//        return Optional.ofNullable(issueService.listIssueWithLinkedIssues(projectId, searchVO, pageable, organizationId))
-//                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-//                .orElseThrow(() -> new CommonException("error.Issue.listIssueWithBlockedIssues"));
-//    }
+    @Permission(level = ResourceLevel.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @ApiOperation("分页过滤查询issue列表, 测试项目接口，过滤linked issue")
+    @CustomPageRequest
+    @PostMapping(value = "/test_component/filter_linked")
+    public ResponseEntity<Page<IssueListTestWithSprintVersionVO>> listIssueWithLinkedIssues(@ApiIgnore
+                                                                                             @ApiParam(value = "分页信息", required = true)
+                                                                                             @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
+                                                                                                     PageRequest pageable,
+                                                                                                @ApiParam(value = "项目id", required = true)
+                                                                                             @PathVariable(name = "project_id") Long projectId,
+                                                                                                @ApiParam(value = "组织id", required = true)
+                                                                                             @RequestParam Long organizationId,
+                                                                                                @ApiParam(value = "查询参数", required = true)
+                                                                                             @RequestBody(required = false) SearchVO searchVO) {
+        return Optional.ofNullable(issueService.listIssueWithLinkedIssues(projectId, searchVO, pageable, organizationId))
+                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
+                .orElseThrow(() -> new CommonException("error.Issue.listIssueWithBlockedIssues"));
+    }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据时间段查询问题类型的数量")
