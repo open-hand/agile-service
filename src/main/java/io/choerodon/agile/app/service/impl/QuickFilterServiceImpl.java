@@ -15,13 +15,11 @@ import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,13 +49,8 @@ public class QuickFilterServiceImpl implements QuickFilterService {
     private ProjectUtil projectUtil;
 
     private static final String NOT_FOUND = "error.QuickFilter.notFound";
-
-    private ModelMapper modelMapper = new ModelMapper();
-
-    @PostConstruct
-    public void init() {
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    }
+    @Autowired
+    private ModelMapper modelMapper;
 
     protected void dealCaseComponent(String field, String value, String operation, StringBuilder sqlQuery) {
         if (NULL_STR.equals(value)) {

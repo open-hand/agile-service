@@ -13,11 +13,9 @@ import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.app.service.VersionIssueRelService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 
 /**
@@ -47,14 +45,8 @@ public class StoryMapServiceImpl implements StoryMapService {
 
     @Autowired
     private StoryMapAssembler storyMapAssembler;
-
-    private ModelMapper modelMapper = new ModelMapper();
-
-    @PostConstruct
-    public void init() {
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    }
-
+    @Autowired
+    private ModelMapper modelMapper;
 
     protected List<StoryMapWidthVO> setStoryMapWidth(Long projectId) {
         List<StoryMapWidthDTO> storyMapWidthDTOList = storyMapWidthMapper.selectByProjectId(projectId);

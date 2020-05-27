@@ -5,13 +5,10 @@ import io.choerodon.agile.infra.annotation.DataLog;
 import io.choerodon.agile.infra.dto.IssueCommentDTO;
 import io.choerodon.agile.infra.mapper.IssueCommentMapper;
 import io.choerodon.core.exception.CommonException;
-import org.hzero.mybatis.common.Criteria;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 
 @Service
 public class IIssueCommentServiceImpl implements IIssueCommentService {
@@ -22,13 +19,8 @@ public class IIssueCommentServiceImpl implements IIssueCommentService {
 
     @Autowired
     private IssueCommentMapper issueCommentMapper;
-
-    private ModelMapper modelMapper = new ModelMapper();
-
-    @PostConstruct
-    public void init() {
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    }
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     @DataLog(type = "createComment")

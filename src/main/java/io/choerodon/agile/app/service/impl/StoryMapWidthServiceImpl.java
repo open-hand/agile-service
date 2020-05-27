@@ -7,11 +7,9 @@ import io.choerodon.agile.infra.dto.StoryMapWidthDTO;
 import io.choerodon.agile.infra.mapper.StoryMapWidthMapper;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/6/3.
@@ -25,13 +23,8 @@ public class StoryMapWidthServiceImpl implements StoryMapWidthService {
 
     @Autowired
     private StoryMapWidthMapper storyMapWidthMapper;
-
-    private ModelMapper modelMapper = new ModelMapper();
-
-    @PostConstruct
-    public void init() {
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    }
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public StoryMapWidthVO create(Long projectId, StoryMapWidthVO storyMapWidthVO) {

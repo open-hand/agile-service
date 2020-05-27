@@ -10,8 +10,6 @@ import io.swagger.annotations.ApiModelProperty;
  */
 public class ComponentIssueRelVO {
 
-    private Long id;
-
     @ApiModelProperty(value = "模块id")
     private Long componentId;
 
@@ -70,13 +68,5 @@ public class ComponentIssueRelVO {
     @Override
     public String toString() {
         return StringUtil.getToString(this);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 }

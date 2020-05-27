@@ -3,7 +3,6 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.validator.IssueComponentValidator;
-import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.dto.ComponentForListDTO;
 import io.choerodon.agile.infra.dto.ComponentIssueRelDTO;
@@ -13,7 +12,6 @@ import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.mapper.ComponentIssueRelMapper;
 
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.domain.PageInfo;
 
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.app.service.IssueComponentService;
@@ -21,19 +19,15 @@ import io.choerodon.agile.infra.dto.IssueComponentDTO;
 import io.choerodon.agile.infra.mapper.IssueComponentMapper;
 
 
-import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
-import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -69,13 +63,8 @@ public class IssueComponentServiceImpl implements IssueComponentService {
 
 
     private static final String MANAGER = "manager";
-
-    private ModelMapper modelMapper = new ModelMapper();
-
-    @PostConstruct
-    public void init() {
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    }
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public IssueComponentVO create(Long projectId, IssueComponentVO issueComponentVO) {
