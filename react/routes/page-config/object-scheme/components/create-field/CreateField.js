@@ -65,7 +65,7 @@ function CreateField() {
         return false;
       }
       obj.fieldOptions = fieldOptions.map((o) => {
-        if (obj.defaultValue && (o.tempKey === obj.defaultValue || o.id === obj.defaultValue)) {
+        if (obj.defaultValue && (o.code === obj.defaultValue || o.tempKey === obj.defaultValue || o.id === obj.defaultValue)) {
           return { ...o, isDefault: true };
         } else {
           return { ...o, isDefault: false };
@@ -77,7 +77,7 @@ function CreateField() {
         return false;
       }
       obj.fieldOptions = fieldOptions.map((o) => {
-        if (obj.defaultValue && (obj.defaultValue.indexOf(String(o.tempKey)) !== -1
+        if (obj.defaultValue && (obj.defaultValue.indexOf(String(o.code)) !== -1 || obj.defaultValue.indexOf(String(o.tempKey)) !== -1
           || obj.defaultValue.indexOf(String(o.id)) !== -1)) {
           return { ...o, isDefault: true };
         } else {
