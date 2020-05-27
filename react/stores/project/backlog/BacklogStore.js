@@ -37,6 +37,8 @@ class BacklogStore {
 
   @observable selectedPiId = undefined;
 
+  @observable selectedSprintId = undefined;
+
   @observable selectedIssueId = [];
 
   @observable issueMap = observable.map();
@@ -376,12 +378,21 @@ class BacklogStore {
     this.selectedPiId = data;
   }
 
+  @action setSelectedSprintId(data) {
+    this.selectedSprintId = data;
+  }
+
+  
   axiosGetEpic() {
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/epics`);
   }
 
   axiosGetVersion() {
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version`);
+  }
+
+  axiosGetNotDoneSprintByPiId(piId) {
+    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/sub_project/list?pi_id=${piId}`);
   }
 
   @action setSprintData({ backlogData, sprintData }) {

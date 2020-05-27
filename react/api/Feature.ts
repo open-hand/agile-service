@@ -29,13 +29,14 @@ class FeatureApi {
    * 在子项目根据piId查询项目群的特性
    * @param piId 不传默认查询活跃PI
    */
-  getByPiIdInSubProject(piId?: number) {
+  getByPiIdInSubProject(piId?: number, sprintId?:number) {
     return axios.get(
       `${this.prefix}/issues/features`,
       {
         params: {
           organizationId: getOrganizationId(),
-          piId
+          piId,
+          sprintId,
         }
       });
   }
