@@ -483,7 +483,7 @@ export default {
     request: () => getSubProjects(true),
     render: pro => (
       <Option key={pro.projectId} value={pro.projectId}>
-        {pro.projName}
+        <Tooltip title={pro.projName}>{pro.projName}</Tooltip>
       </Option>
     ),
   },

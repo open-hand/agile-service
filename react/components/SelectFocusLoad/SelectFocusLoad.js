@@ -121,7 +121,7 @@ const SelectFocusLoad = (props) => {
       onFilterChange={handleFilterChange}
       {...TypeProps}
       {...props}
-      dropdownClassName="hidden-text hidden-label"
+      dropdownClassName="hidden-text hidden-label minSelectFocusLoadDropDownWidth"
     >
       {Options}
       <Option style={{ display: canLoadMore || Options.length === 0 ? 'block' : 'none', cursor: 'pointer' }} key="SelectFocusLoad-loadMore" className="SelectFocusLoad-loadMore" disabled>

@@ -237,9 +237,9 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
                   loading={selectLoading}
                   filter
                   filterOption={filterOption}
-                  dropdownClassName="c7n-agile-featureField-SelectDropDown"
+                  dropdownClassName="c7n-agile-epicField-SelectDropDown"
                 >
-                  {originEpics.map(epic => <Option key={`${epic.issueId}`} value={epic.issueId} name={epic.epicName}><Tooltip title={epic.epicName}>{epic.epicName}</Tooltip></Option>)}
+                  {originEpics.map(epic => <Option name={epic.epicName} key={`${epic.issueId}`} value={epic.issueId}><Tooltip title={epic.epicName}>{epic.epicName}</Tooltip></Option>)}
                 </Select>
               </Edit>
             </TextEditToggle>
