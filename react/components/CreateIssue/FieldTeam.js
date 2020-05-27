@@ -5,8 +5,8 @@ import SelectFocusLoad from '@/components/SelectFocusLoad';
 const FormItem = Form.Item;
 function FieldTeam({ form: { getFieldDecorator } }) {
   return (
-    <FormItem key="team">
-      {getFieldDecorator('team', {})(
+    <FormItem key="teamProjectIds">
+      {getFieldDecorator('teamProjectIds', {})(
         <SelectFocusLoad
           label="负责的子项目"
           style={{

@@ -246,6 +246,7 @@ class CreateIssue extends Component {
           rrOeValue,
           jobSize,
           featureId,
+          teamProjectIds,
         } = values;
         const { typeCode } = originIssueTypes.find(t => t.id === typeId);
         if (typeCode === 'feature' && epicId) {
@@ -319,6 +320,7 @@ class CreateIssue extends Component {
             jobSize,
           },
           featureId, // 特性字段
+          teamProjectIds,
         };
         this.setState({ createLoading: true });
         const deltaOps = description;
