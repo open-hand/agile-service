@@ -279,8 +279,8 @@ function CreateField() {
                   if (item.enabled) {
                     return (
                       <Option
-                        value={item.tempKey || item.id}
-                        key={item.tempKey || item.id}
+                        value={item.code || item.id}
+                        key={item.code || item.id}
                       >
                         {item.value}
                       </Option>
