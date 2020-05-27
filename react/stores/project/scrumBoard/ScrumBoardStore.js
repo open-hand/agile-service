@@ -511,6 +511,12 @@ class ScrumBoardStore {
     return this.sprintName;
   }
 
+  @observable selectSprint = undefined;
+
+  @action setSelectSprint = (data) => {
+    this.selectSprint = data;
+  }
+
   @observable sprintNotClosedArray = [];
 
   @action setSprintNotClosedArray = (sprintNotClosedArray) => {

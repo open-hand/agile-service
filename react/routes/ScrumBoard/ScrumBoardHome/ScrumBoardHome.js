@@ -125,10 +125,19 @@ class ScrumBoardHome extends Component {
   handleFinishSprint = async () => {
     const sprintId = ScrumBoardStore.getSprintId;    
     const completeMessage = await axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${sprintId}/names`);
+
     CloseSprint({
       completeMessage,
       sprintId,
-      afterClose: () => {
+      afterClose: async () => {
+        console.log('重新请求冲刺');
+        const axiosGetSprintNotClosed = axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/names`, ['sprint_planning', 'started']);
+        await axiosGetSprintNotClosed.then((res) => {
+          ScrumBoardStore.setSprintNotClosedArray(res);
+          ScrumBoardStore.setSelectSprint(undefined);
+          ScrumBoardStore.resetCurrentSprintExist();
+          this.onSprintChange(undefined);
+        });
         this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
       },
     });

@@ -20,7 +20,6 @@ class QuickSearch extends Component {
       quickSearchArray: [],
       selectQuickSearch: [],
       selectUsers: [],
-      selectSprint: undefined,
     };
   }
 
@@ -108,9 +107,7 @@ class QuickSearch extends Component {
 
   handleSprintChange = (value) => {
     const { onSprintChange } = this.props;
-    this.setState({
-      selectSprint: value,
-    });
+    ScrumBoardStore.setSelectSprint(value);
     onSprintChange(value && value.key);
   }
 
@@ -129,8 +126,8 @@ class QuickSearch extends Component {
     this.setState({
       selectQuickSearch: [],
       selectUsers: [],
-      selectSprint: undefined,
     });
+    ScrumBoardStore.setSelectSprint(undefined);
   }
 
   setSelectQuickSearch = (selectQuickSearch) => {
@@ -161,10 +158,9 @@ class QuickSearch extends Component {
       quickSearchArray,
       selectQuickSearch,
       selectUsers,
-      selectSprint,
     } = this.state;
     
-    const { sprintNotClosedArray } = ScrumBoardStore;
+    const { sprintNotClosedArray, selectSprint } = ScrumBoardStore;
 
     // showRealQuickSearch 用于在待办事项中销毁组件
     // 具体查看 Backlog/BacklogComponent/SprintComponent/SprintItem.js 中 clearFilter 方法

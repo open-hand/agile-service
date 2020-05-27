@@ -11,7 +11,7 @@ const NoneSprint = ({ doingSprintExist, quickSearchObj }) => {
  
   if ((doingSprintExist || sprintId) && onlyMe === false && onlyStory === false && quickSearchArray.length === 0 && assigneeFilterIds.length === 0) {
     tipTitle = '当前冲刺下未规划问题';
-  } else {
+  } else if (!(onlyMe === false && onlyStory === false && quickSearchArray.length === 0 && assigneeFilterIds.length === 0)) {
     tipTitle = '当前筛选条件下无问题';
   }
 
