@@ -1,4 +1,4 @@
-package io.choerodon.agile.app.domain;
+package io.choerodon.agile.infra.dto;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ import java.util.List;
  * @author superlee
  * @since 2020-02-23
  */
-public class Predefined {
+public class PredefinedDTO {
 
     private List<String> values;
 
@@ -24,8 +24,8 @@ public class Predefined {
 
     private int hiddenSheetIndex;
 
-    public Predefined(List<String> values, int startRow, int endRow,
-                      int startCol, int endCol, String hidden, int hiddenSheetIndex) {
+    public PredefinedDTO(List<String> values, int startRow, int endRow,
+                         int startCol, int endCol, String hidden, int hiddenSheetIndex) {
         this.values = values;
         this.startRow = startRow;
         this.endRow = endRow;

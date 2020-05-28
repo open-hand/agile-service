@@ -43,9 +43,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -169,7 +171,6 @@ public class IssueServiceImpl implements IssueService {
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
-    private static final String COPY = "Copy";
     private static final String ISSUE_MANAGER_TYPE = "模块负责人";
     private static final String TYPE_CODE_FIELD = "typeCode";
     private static final String EPIC_NAME_FIELD = "epicName";
@@ -1464,7 +1465,9 @@ public class IssueServiceImpl implements IssueService {
                 objectVersionNumber = newIssue.getObjectVersionNumber();
             } else {
                 IssueCreateVO issueCreateVO = issueAssembler.issueDtoToIssueCreateDto(issueDetailDTO);
-                issueCreateVO.setEpicName(issueCreateVO.getTypeCode().equals(ISSUE_EPIC) ? issueCreateVO.getEpicName() + COPY : null);
+                if (ISSUE_EPIC.equals(issueCreateVO.getTypeCode())) {
+                    setEpicName(projectId, copyConditionVO, issueCreateVO);
+                }
                 IssueVO newIssue = stateMachineClientService.createIssue(issueCreateVO, applyType);
                 newIssueId = newIssue.getIssueId();
                 objectVersionNumber = newIssue.getObjectVersionNumber();
@@ -1487,6 +1490,21 @@ public class IssueServiceImpl implements IssueService {
         } else {
             throw new CommonException("error.issue.copyIssueByIssueId");
         }
+    }
+
+    private void setEpicName(Long projectId, CopyConditionVO copyConditionVO, IssueCreateVO issueCreateVO) {
+        String epicName = copyConditionVO.getEpicName();
+        IssueDTO epicExample = new IssueDTO();
+        epicExample.setProjectId(projectId);
+        epicExample.setEpicName(epicName);
+        if (StringUtils.isEmpty(epicName)) {
+            throw new CommonException("error.issue.epic.name.empty");
+        } else if (epicName.length() > 12) {
+            throw new CommonException("error.epic.name.more.than.12character");
+        } else if (!issueMapper.select(epicExample).isEmpty()) {
+            throw new CommonException("error.epic.name.duplicate");
+        }
+        issueCreateVO.setEpicName(epicName);
     }
 
     protected void copyStoryPointAndRemainingTimeData(IssueDetailDTO issueDetailDTO, Long projectId, Long issueId, Long objectVersionNumber) {

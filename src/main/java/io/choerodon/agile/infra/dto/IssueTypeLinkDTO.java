@@ -1,23 +1,23 @@
-package io.choerodon.agile.app.domain;
+package io.choerodon.agile.infra.dto;
 
 /**
  * @author superlee
  * @since 2020-02-23
  */
-public class IssueType {
+public class IssueTypeLinkDTO {
 
     private Integer row;
 
     private String type;
 
-    private IssueType next;
+    private IssueTypeLinkDTO next;
 
-    public IssueType(Integer row, String type) {
+    public IssueTypeLinkDTO(Integer row, String type) {
         this.row = row;
         this.type = type;
     }
 
-    public void setNext(IssueType next) {
+    public void setNext(IssueTypeLinkDTO next) {
         this.next = next;
     }
 
@@ -29,7 +29,7 @@ public class IssueType {
         return type;
     }
 
-    public IssueType getNext() {
+    public IssueTypeLinkDTO getNext() {
         return next;
     }
 

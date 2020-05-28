@@ -21,6 +21,16 @@ public class CopyConditionVO {
     @ApiModelProperty(value = "是否复制冲刺")
     private Boolean sprintValues;
 
+    private String epicName;
+
+    public String getEpicName() {
+        return epicName;
+    }
+
+    public void setEpicName(String epicName) {
+        this.epicName = epicName;
+    }
+
     public String getSummary() {
         return summary;
     }

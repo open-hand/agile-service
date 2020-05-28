@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.domain.IssueType;
-import io.choerodon.agile.app.domain.Predefined;
+import io.choerodon.agile.infra.dto.IssueTypeLinkDTO;
+import io.choerodon.agile.infra.dto.PredefinedDTO;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
@@ -114,7 +114,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Override
     public void download(Long projectId, Long organizationId, HttpServletRequest request, HttpServletResponse response) {
-        List<Predefined> predefinedList = getPredefinedList(organizationId, projectId, false);
+        List<PredefinedDTO> predefinedList = getPredefinedList(organizationId, projectId, false);
         //所属史诗预定义值
         predefinedList.add(getEpicPredefined(projectId));
 
@@ -138,10 +138,10 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    protected Predefined getEpicPredefined(Long projectId) {
+    protected PredefinedDTO getEpicPredefined(Long projectId) {
         List<String> values = new ArrayList<>(getEpicMap(projectId).keySet());
         values.sort(String.CASE_INSENSITIVE_ORDER);
-        return new Predefined(values, 1, 500, 1, 1, "hidden_epic", 8);
+        return new PredefinedDTO(values, 1, 500, 1, 1, "hidden_epic", 8);
     }
 
     protected Map<String, Long> getEpicMap(Long projectId) {
@@ -156,8 +156,8 @@ public class ExcelServiceImpl implements ExcelService {
         return epicMap;
     }
 
-    protected void fillInPredefinedValues(Workbook wb, Sheet sheet, List<Predefined> predefinedList) {
-        for (Predefined predefined : predefinedList) {
+    protected void fillInPredefinedValues(Workbook wb, Sheet sheet, List<PredefinedDTO> predefinedList) {
+        for (PredefinedDTO predefined : predefinedList) {
             wb = ExcelUtil
                     .dropDownList2007(
                             wb,
@@ -172,8 +172,8 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    protected List<Predefined> getPredefinedList(Long organizationId, Long projectId, boolean withFeature) {
-        List<Predefined> predefinedList = new ArrayList<>();
+    protected List<PredefinedDTO> getPredefinedList(Long organizationId, Long projectId, boolean withFeature) {
+        List<PredefinedDTO> predefinedList = new ArrayList<>();
         List<PriorityVO> priorityVOList = priorityService.queryByOrganizationIdList(organizationId);
         List<IssueTypeVO> issueTypeVOList = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE);
         List<ProductVersionCommonDTO> productVersionCommonDTOList = productVersionMapper.listByProjectId(projectId);
@@ -185,7 +185,7 @@ public class ExcelServiceImpl implements ExcelService {
                 priorityList.add(priorityVO.getName());
             }
         }
-        predefinedList.add(new Predefined(priorityList, 1, 500, 8, 8, HIDDEN_PRIORITY, 2));
+        predefinedList.add(new PredefinedDTO(priorityList, 1, 500, 8, 8, HIDDEN_PRIORITY, 2));
 
         List<String> issueTypeList = new ArrayList<>();
         for (IssueTypeVO issueTypeVO : issueTypeVOList) {
@@ -197,7 +197,7 @@ public class ExcelServiceImpl implements ExcelService {
                 issueTypeList.add(issueTypeVO.getName());
             }
         }
-        predefinedList.add(new Predefined(issueTypeList, 1, 500, 0, 0, HIDDEN_ISSUE_TYPE, 3));
+        predefinedList.add(new PredefinedDTO(issueTypeList, 1, 500, 0, 0, HIDDEN_ISSUE_TYPE, 3));
 
         List<String> versionList = new ArrayList<>();
         for (ProductVersionCommonDTO productVersionCommonDTO : productVersionCommonDTOList) {
@@ -205,22 +205,22 @@ public class ExcelServiceImpl implements ExcelService {
                 versionList.add(productVersionCommonDTO.getName());
             }
         }
-        predefinedList.add(new Predefined(versionList, 1, 500, 10, 10, HIDDEN_FIX_VERSION, 4));
+        predefinedList.add(new PredefinedDTO(versionList, 1, 500, 10, 10, HIDDEN_FIX_VERSION, 4));
 
         List<String> componentList = new ArrayList<>();
         for (IssueComponentDTO issueComponentDTO : issueComponentDTOList) {
             componentList.add(issueComponentDTO.getName());
         }
-        predefinedList.add(new Predefined(componentList, 1, 500, 2, 2, HIDDEN_COMPONENT, 5));
+        predefinedList.add(new PredefinedDTO(componentList, 1, 500, 2, 2, HIDDEN_COMPONENT, 5));
 
         List<String> sprintList = new ArrayList<>();
         for (SprintDTO sprintDTO : sprintDTOList) {
             sprintList.add(sprintDTO.getSprintName());
         }
-        predefinedList.add(new Predefined(sprintList, 1, 500, 3, 3, HIDDEN_SPRINT, 6));
+        predefinedList.add(new PredefinedDTO(sprintList, 1, 500, 3, 3, HIDDEN_SPRINT, 6));
 
         List<String> users = new ArrayList<>(getManagers(projectId).keySet());
-        predefinedList.add(new Predefined(users, 1, 500, 7, 7, "hidden_manager", 7));
+        predefinedList.add(new PredefinedDTO(users, 1, 500, 7, 7, "hidden_manager", 7));
         return predefinedList;
     }
 
@@ -738,8 +738,8 @@ public class ExcelServiceImpl implements ExcelService {
         List<Long> importedIssueIds = new ArrayList<>();
 
         Map<Integer, String> allIssueType = new LinkedHashMap<>();
-        List<IssueType> issueTypes = getAllIssueType(allRowCount, sheet, columnNum, allIssueType);
-        Map<Integer, Set<Integer>> parentSonMap = getParentSonMap(issueTypes);
+        List<IssueTypeLinkDTO> issueTypeLinks = getAllIssueTypeLinks(allRowCount, sheet, columnNum, allIssueType);
+        Map<Integer, Set<Integer>> parentSonMap = getParentSonMap(issueTypeLinks);
         Map<Integer, Integer> sonParentMap = getSonParentMap(parentSonMap);
         //获取无父节点的子任务
         Set<Integer> illegalRow = getIllegalRow(allIssueType, sonParentMap);
@@ -835,7 +835,7 @@ public class ExcelServiceImpl implements ExcelService {
 
         if (!errorRows.isEmpty()) {
             LOGGER.info("导入数据有误");
-            Predefined theSecondColumnPredefined = getEpicPredefined(projectId);
+            PredefinedDTO theSecondColumnPredefined = getEpicPredefined(projectId);
             Workbook result = ExcelUtil.generateExcelAwesome(workbook, errorRows,
                     errorMapList, FIELDS_NAME, priorityList, issueTypeList, versionList,
                     IMPORT_TEMPLATE_NAME, componentList, sprintList, managers,
@@ -975,26 +975,26 @@ public class ExcelServiceImpl implements ExcelService {
         return map;
     }
 
-    protected Map<Integer, Set<Integer>> getParentSonMap(List<IssueType> issueTypes) {
+    protected Map<Integer, Set<Integer>> getParentSonMap(List<IssueTypeLinkDTO> issueTypeLinks) {
         Map<Integer, Set<Integer>> map = new HashMap<>();
-        for (IssueType issueType : issueTypes) {
-            Integer row = issueType.getRow();
-            String type = issueType.getType();
+        for (IssueTypeLinkDTO issueTypeLink : issueTypeLinks) {
+            Integer row = issueTypeLink.getRow();
+            String type = issueTypeLink.getType();
             //故事下只有子任务
             if ("故事".equals(type)) {
-                storyRecursive(map, issueType, row);
+                storyRecursive(map, issueTypeLink, row);
             }
             //任务或缺陷下的子任务
             if ("任务".equals(type) || "缺陷".equals(type)) {
-                taskRecursive(map, issueType, row);
+                taskRecursive(map, issueTypeLink, row);
             }
         }
         return map;
     }
 
-    private void taskRecursive(Map<Integer, Set<Integer>> map, IssueType issueType, Integer row) {
-        if (issueType.hasNext()) {
-            IssueType next = issueType.getNext();
+    private void taskRecursive(Map<Integer, Set<Integer>> map, IssueTypeLinkDTO issueTypeLink, Integer row) {
+        if (issueTypeLink.hasNext()) {
+            IssueTypeLinkDTO next = issueTypeLink.getNext();
             String nextType = next.getType();
             Integer nextRow = next.getRow();
             if ("子任务".equals(nextType)) {
@@ -1015,10 +1015,10 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private void storyRecursive(Map<Integer, Set<Integer>> map, IssueType issueType,
+    private void storyRecursive(Map<Integer, Set<Integer>> map, IssueTypeLinkDTO issueTypeLink,
                                 Integer row) {
-        if (issueType.hasNext()) {
-            IssueType next = issueType.getNext();
+        if (issueTypeLink.hasNext()) {
+            IssueTypeLinkDTO next = issueTypeLink.getNext();
             String nextType = next.getType();
             Integer nextRow = next.getRow();
             if ("子缺陷".equals(nextType) || "子任务".equals(nextType)) {
@@ -1028,13 +1028,13 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    protected List<IssueType> getAllIssueType(Integer allRowCount, Sheet sheet, int columnNum, Map<Integer, String> allIssueType) {
-        List<IssueType> issueTypes = new ArrayList<>();
+    protected List<IssueTypeLinkDTO> getAllIssueTypeLinks(Integer allRowCount, Sheet sheet, int columnNum, Map<Integer, String> allIssueType) {
+        List<IssueTypeLinkDTO> issueTypeLinks = new ArrayList<>();
         for (int i = 1; i <= allRowCount; i++) {
-            int size = issueTypes.size();
-            IssueType lastIssueType = null;
+            int size = issueTypeLinks.size();
+            IssueTypeLinkDTO lastIssueTypeLink = null;
             if (size > 0) {
-                lastIssueType = issueTypes.get(size - 1);
+                lastIssueTypeLink = issueTypeLinks.get(size - 1);
             }
             Row row = sheet.getRow(i);
             if (isSkip(row, columnNum)) {
@@ -1044,14 +1044,14 @@ public class ExcelServiceImpl implements ExcelService {
             if (type == null) {
                 continue;
             }
-            IssueType issueType = new IssueType(i, type);
-            issueTypes.add(issueType);
-            if (lastIssueType != null) {
-                lastIssueType.setNext(issueType);
+            IssueTypeLinkDTO issueTypeLink = new IssueTypeLinkDTO(i, type);
+            issueTypeLinks.add(issueTypeLink);
+            if (lastIssueTypeLink != null) {
+                lastIssueTypeLink.setNext(issueTypeLink);
             }
             allIssueType.put(i, type);
         }
-        return issueTypes;
+        return issueTypeLinks;
     }
 
     private String getTypeName(Row row) {
