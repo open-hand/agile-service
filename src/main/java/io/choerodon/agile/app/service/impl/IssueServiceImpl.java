@@ -1492,7 +1492,7 @@ public class IssueServiceImpl implements IssueService {
         }
     }
 
-    private void setEpicName(Long projectId, CopyConditionVO copyConditionVO, IssueCreateVO issueCreateVO) {
+    protected void setEpicName(Long projectId, CopyConditionVO copyConditionVO, IssueCreateVO issueCreateVO) {
         String epicName = copyConditionVO.getEpicName();
         IssueDTO epicExample = new IssueDTO();
         epicExample.setProjectId(projectId);
