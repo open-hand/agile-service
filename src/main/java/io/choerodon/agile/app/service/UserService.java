@@ -1,14 +1,12 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.domain.PageInfo;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.RoleAssignmentSearchVO;
 import io.choerodon.agile.api.vo.RoleVO;
 import io.choerodon.agile.api.vo.UserVO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
-//import io.choerodon.core.notify.WebHookJsonSendDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -66,4 +64,6 @@ public interface UserService {
      * @return
      */
     boolean isProjectOwner(Long projectId, Long userId);
+
+    List<UserVO> listUsersByRealNames(List<String> realNames, boolean onlyEnabled);
 }

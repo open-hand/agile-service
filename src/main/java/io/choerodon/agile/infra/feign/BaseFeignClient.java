@@ -153,5 +153,9 @@ public interface BaseFeignClient {
     @GetMapping(value = "/choerodon/v1/projects/{project_id}/role_members/users/{user_id}")
     ResponseEntity<List<RoleVO>> getUserWithProjLevelRolesByUserId(@PathVariable(name = "project_id") Long projectId,
                                                                    @PathVariable(name = "user_id") Long userId);
+
+    @PostMapping(value = "/choerodon/v1/users/real_names")
+    ResponseEntity<List<UserVO>> listUsersByRealNames(@RequestParam(name = "only_enabled") Boolean onlyEnabled,
+                                                      @RequestBody Set<String> realNames);
 }
 

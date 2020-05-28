@@ -7,7 +7,6 @@ import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
-//import io.choerodon.core.notify.WebHookJsonSendDTO;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 
 /**
  * @author dinghuang123@gmail.com
@@ -89,6 +86,15 @@ public class UserServiceImpl implements UserService {
             return userList.getBody().getContent();
         } else {
             return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public List<UserVO> listUsersByRealNames(List<String> realNames, boolean onlyEnabled) {
+        if (ObjectUtils.isEmpty(realNames)) {
+            return new ArrayList<>();
+        } else {
+            return baseFeignClient.listUsersByRealNames(onlyEnabled, new HashSet<>(realNames)).getBody();
         }
     }
 

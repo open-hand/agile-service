@@ -103,4 +103,9 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     public ResponseEntity<List<RoleVO>> getUserWithProjLevelRolesByUserId(Long projectId, Long userId) {
         throw new CommonException("error.iamServiceFeignFallback.getUserWithProjLevelRolesByUserId");
     }
+
+    @Override
+    public ResponseEntity<List<UserVO>> listUsersByRealNames(Boolean onlyEnabled, Set<String> realNames) {
+        throw new CommonException("error.iamServiceFeignFallback.listUsersByRealNames");
+    }
 }

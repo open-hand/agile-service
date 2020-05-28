@@ -142,7 +142,7 @@ public class IssueComponentServiceImpl implements IssueComponentService {
     @SuppressWarnings("unchecked")
     public Page<ComponentForListVO> queryComponentByProjectId(Long projectId, Long componentId, Boolean noIssueTest, SearchVO searchVO, PageRequest pageRequest) {
         //处理用户搜索
-        Boolean condition = handleSearchUser(searchVO, projectId);
+        Boolean condition = handleSearchUser(searchVO);
         if (condition) {
             Page<ComponentForListDTO> componentForListDTOPage = PageHelper.doPageAndSort(pageRequest, () ->
                     issueComponentMapper.queryComponentByOption(projectId, noIssueTest, componentId, searchVO.getSearchArgs(),
@@ -177,11 +177,11 @@ public class IssueComponentServiceImpl implements IssueComponentService {
 
     }
 
-    private Boolean handleSearchUser(SearchVO searchVO, Long projectId) {
+    private Boolean handleSearchUser(SearchVO searchVO) {
         if (searchVO.getSearchArgs() != null && searchVO.getSearchArgs().get(MANAGER) != null) {
             String userName = (String) searchVO.getSearchArgs().get(MANAGER);
             if (userName != null && !"".equals(userName)) {
-                List<UserVO> userVOS = userService.queryUsersByNameAndProjectId(projectId, userName);
+                List<UserVO> userVOS = userService.listUsersByRealNames(Arrays.asList(userName), false);
                 if (userVOS != null && !userVOS.isEmpty()) {
                     searchVO.getAdvancedSearchArgs().put("managerId", userVOS.stream().map(UserVO::getId).collect(Collectors.toList()));
                 } else {
