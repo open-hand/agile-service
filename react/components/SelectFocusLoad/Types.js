@@ -22,7 +22,9 @@ import { IsInProgramStore } from '../../exports';
 const filterOption = (input, option) => option.props.children && typeof (option.props.children) === 'string' && option.props.children.toLowerCase().indexOf(
   input.toLowerCase(),
 ) >= 0;
-
+const filterOptionByName = (input, option) => option.props.name && typeof (option.props.name) === 'string' && option.props.name.toLowerCase().indexOf(
+  input.toLowerCase(),
+) >= 0;
 function transform(links) {
   // split active and passive
   const active = links.map(link => ({
@@ -476,13 +478,13 @@ export default {
   sub_project: {
     props: {
       getPopupContainer: triggerNode => triggerNode.parentNode,
-      filterOption,
+      filterOption: filterOptionByName,
       onFilterChange: false,
       loadWhenMount: true,
     },
     request: () => getSubProjects(true),
     render: pro => (
-      <Option key={pro.projectId} value={pro.projectId}>
+      <Option key={pro.projectId} value={pro.projectId} name={pro.projName}>
         <Tooltip title={pro.projName}>{pro.projName}</Tooltip>
       </Option>
     ),
