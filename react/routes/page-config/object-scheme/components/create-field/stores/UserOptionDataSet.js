@@ -13,13 +13,13 @@ export default ({
       transformResponse: (response) => {
         try {
           const data = JSON.parse(response);
-          if (data && data.list) {
+          if (data && data.content) {
             const oldIndex = findIndex(dataSet.toData(), item => item.id === p.userId);
             const index = findIndex(data.list, item => item.id === p.userId);
             if (index === -1 && oldIndex !== -1) {
-              data.list.unshift(dataSet.get(oldIndex).toData());
+              data.content.unshift(dataSet.get(oldIndex).toData());
             }
-            return data.list;
+            return data.content;
           } else {
             return data;
           }
