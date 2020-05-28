@@ -107,9 +107,9 @@ class CopyIssue extends Component {
             issue.typeCode === 'issue_epic' && (
             <FormItem style={{ marginTop: 20 }}>
               {getFieldDecorator('issueName', {
-                rules: [{ required: true, message: '请输入史诗名称' }],
+                rules: [{ required: true, message: '请输入史诗名称' },
+                  { validator: this.checkEpicNameRepeat }],
                 initialValue: issue.epicName,
-                validator: this.checkEpicNameRepeat,
               })(
                 <Input
                   ref={(input) => { this.textInput = input; }}
