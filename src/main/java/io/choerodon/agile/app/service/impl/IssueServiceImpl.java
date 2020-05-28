@@ -1499,8 +1499,8 @@ public class IssueServiceImpl implements IssueService {
         epicExample.setEpicName(epicName);
         if (StringUtils.isEmpty(epicName)) {
             throw new CommonException("error.issue.epic.name.empty");
-        } else if (epicName.length() > 10) {
-            throw new CommonException("error.epic.name.more.than.10character");
+        } else if (epicName.length() > 20) {
+            throw new CommonException("error.epic.name.more.than.20character");
         } else if (!issueMapper.select(epicExample).isEmpty()) {
             throw new CommonException("error.epic.name.duplicate");
         }

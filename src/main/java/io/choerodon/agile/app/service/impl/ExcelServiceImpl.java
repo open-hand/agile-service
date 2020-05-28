@@ -516,7 +516,7 @@ public class ExcelServiceImpl implements ExcelService {
                     errorMessage.put(12, "史诗名称不能为空");
                 } else {
                     String epicName = epicNameCell.toString().trim();
-                    if (epicName.length() > 10) {
+                    if (epicName.length() > 20) {
                         errorMessage.put(12, "史诗名称过长");
                     } else if (!checkEpicNameExist(projectId, epicName)) {
                         errorMessage.put(12, "史诗名称重复");
