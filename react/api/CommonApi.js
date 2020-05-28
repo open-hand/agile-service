@@ -22,7 +22,7 @@ export async function getIsOwner() {
   const projectId = AppState.currentMenuType.id;
   const userId = AppState.userInfo.id;
   const roles = await axios.get(`/iam/choerodon/v1/projects/${projectId}/role_members/users/${userId}`);
-  return roles.some(role => role.code === 'role/project/default/project-owner');
+  return roles.some(role => role.code === 'project-admin');
 }
 
 export function getIssueReports(param, userId, page = 1) {
