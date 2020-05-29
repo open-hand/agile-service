@@ -55,51 +55,55 @@ function SprintButton({
   );
 
   const { type, id: projectId, organizationId: orgId } = AppState.currentMenuType;
-  
-  return statusCode === 'started' ? (
-    <Permission
-      service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
-    >
-      <p
-        className={prefix}
-        role="none"
-        onClick={openCloseSprint}
-      >
-        完成冲刺
-      </p>
-    </Permission>
-  ) : (
-    <Fragment>
-      {(belongCurrentPi === true || belongCurrentPi == undefined) ? (
+
+  return (
+    <div style={{ marginLeft: 'auto' }}>
+      {statusCode === 'started' ? (
         <Permission
           service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
         >
           <p
-            className={classnames(prefix, {
-              [`${prefix}-disabled`]: hasActiveSprint || !issueList || issueList.length === 0,
-            })}
+            className={prefix}
             role="none"
-            onClick={openStartSprint}
+            onClick={openCloseSprint}
           >
-            开启冲刺
+            完成冲刺
           </p>
         </Permission>
-      ) : null}
-      <Permission
-        type={type}
-        projectId={projectId}
-        organizationId={orgId}
-        service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
-      >
-        {(data.sprintType !== 'ip'
-            && (
-              <Dropdown overlay={menu} trigger={['click']}>
-                <Icon style={{ cursor: 'pointer', marginRight: 15 }} type="more_vert" />
-              </Dropdown>
-            )
-          )}
-      </Permission>
-    </Fragment>
+      ) : (
+        <Fragment>
+          {(belongCurrentPi === true || belongCurrentPi == undefined) ? (
+            <Permission
+              service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
+            >
+              <p
+                className={classnames(prefix, {
+                  [`${prefix}-disabled`]: hasActiveSprint || !issueList || issueList.length === 0,
+                })}
+                role="none"
+                onClick={openStartSprint}
+              >
+                开启冲刺
+              </p>
+            </Permission>
+          ) : null}
+          <Permission
+            type={type}
+            projectId={projectId}
+            organizationId={orgId}
+            service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
+          >
+            {(data.sprintType !== 'ip'
+                && (
+                  <Dropdown overlay={menu} trigger={['click']}>
+                    <Icon style={{ cursor: 'pointer', marginRight: 15 }} type="more_vert" />
+                  </Dropdown>
+                )
+              )}
+          </Permission>
+        </Fragment>
+      )}
+    </div>
   );
 }
 
