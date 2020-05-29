@@ -33,8 +33,9 @@ function SprintButton({
   } = data;
   const issueList = BacklogStore.getIssueListBySprintId(sprintId);
   const hasActiveSprint = BacklogStore.getHasActiveSprint;
+  const [disableStart, reason] = judgeDisabled([[hasActiveSprint, '已有活跃冲刺'], [!issueList || issueList.length === 0, '冲刺下没有问题'], [belongCurrentPi === false, '非当前PI下冲刺不可开启']]);
   const openStartSprint = async () => {
-    if (!BacklogStore.getHasActiveSprint && issueList && issueList.length > 0) {
+    if (!disableStart) {
       const year = moment().year();
       const workSetting = await BacklogStore.axiosGetWorkSetting(year);
       const sprintDetail = await BacklogStore.axiosGetOpenSprintDetail(data.sprintId);
@@ -66,7 +67,7 @@ function SprintButton({
   );
 
   const { type, id: projectId, organizationId: orgId } = AppState.currentMenuType;
-  const [disableStart, reason] = judgeDisabled([[hasActiveSprint, '已有活跃冲刺'], [!issueList || issueList.length === 0, '冲刺下没有问题'], [belongCurrentPi === false, '非当前PI下冲刺不可开启']]);
+  
   return (
     <Fragment>
       {statusCode === 'started' ? (
