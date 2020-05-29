@@ -1,4 +1,4 @@
-import { getProjectId } from '@/common/utils';
+import { getProjectId } from '@/utils/common';
 import Api from './Api'
 interface ILinkTypeQuery {
   page?: number,
