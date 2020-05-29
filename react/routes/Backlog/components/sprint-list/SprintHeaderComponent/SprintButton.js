@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 import React, { Fragment } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Icon, Dropdown, Menu } from 'choerodon-ui';
@@ -17,7 +18,7 @@ function SprintButton({
   data,
 }) {
   const {
-    statusCode, sprintId,
+    statusCode, sprintId, belongCurrentPi,
   } = data;
   const issueList = BacklogStore.getIssueListBySprintId(sprintId);
   const hasActiveSprint = BacklogStore.getHasActiveSprint;
@@ -54,7 +55,7 @@ function SprintButton({
   );
 
   const { type, id: projectId, organizationId: orgId } = AppState.currentMenuType;
-
+  
   return statusCode === 'started' ? (
     <Permission
       service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
@@ -69,19 +70,21 @@ function SprintButton({
     </Permission>
   ) : (
     <Fragment>
-      <Permission
-        service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
-      >
-        <p
-          className={classnames(prefix, {
-            [`${prefix}-disabled`]: hasActiveSprint || !issueList || issueList.length === 0,
-          })}
-          role="none"
-          onClick={openStartSprint}
+      {(belongCurrentPi === true || belongCurrentPi == undefined) ? (
+        <Permission
+          service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
         >
-          开启冲刺
-        </p>
-      </Permission>
+          <p
+            className={classnames(prefix, {
+              [`${prefix}-disabled`]: hasActiveSprint || !issueList || issueList.length === 0,
+            })}
+            role="none"
+            onClick={openStartSprint}
+          >
+            开启冲刺
+          </p>
+        </Permission>
+      ) : null}
       <Permission
         type={type}
         projectId={projectId}
