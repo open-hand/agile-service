@@ -63,13 +63,6 @@ export function deleteCommit(commitId, projectId = AppState.currentMenuType.id) 
   return axios.delete(`/agile/v1/projects/${projectId}/issue_comment/${commitId}`);
 }
 
-// export function loadComponents() {
-//   const projectId = AppState.currentMenuType.id;
-//   return axios.get(
-//     `/agile/v1/projects/${projectId}/component`,
-//   );
-// }
-
 export function loadComponents() {
   const projectId = AppState.currentMenuType.id;
   return axios.post(

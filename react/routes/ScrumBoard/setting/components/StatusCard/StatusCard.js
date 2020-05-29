@@ -139,7 +139,7 @@ class StatusCard extends Component {
             className={prefix}
           >
             {ScrumBoardStore.getCanAddStatus && (
-              <Permission type={type} projectId={projectId} organizationId={orgId} service={['agile-service.issue-status.deleteStatus']}>                
+              <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.status.delete']}>                
                 <div className={`${prefix}-delete`}>
                   {disableDelete ? (
                     <Tooltip title={disableDelete ? `${reason}，不可删除` : undefined}>
@@ -167,7 +167,7 @@ class StatusCard extends Component {
             <div className={`${prefix}-content`}>
               {data.issues ? `${data.issues.length} issues` : ''}
             </div>
-            <Permission type={type} projectId={projectId} organizationId={orgId} service={['agile-service.issue-status.updateStatus']}>
+            <Permission type={type} projectId={projectId} organizationId={orgId} service={['choerodon.code.project.cooperation.iteration-plan.ps.status.update']}>
               <Radio
                 style={{ marginRight: 0 }}
                 checked={data.completed ? data.completed : false}

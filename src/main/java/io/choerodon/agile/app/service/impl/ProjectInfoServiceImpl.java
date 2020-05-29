@@ -1,6 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.github.pagehelper.PageInfo;
+import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.ProjectInfoService;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
@@ -11,12 +11,10 @@ import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,13 +30,8 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
     private ProjectInfoMapper projectInfoMapper;
     @Autowired
     private BaseFeignClient baseFeignClient;
-
-    private ModelMapper modelMapper = new ModelMapper();
-
-    @PostConstruct
-    public void init() {
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    }
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public void initializationProjectInfo(ProjectEvent projectEvent) {
@@ -81,7 +74,7 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         List<ProjectRelationshipVO> projectRelationshipVOS = baseFeignClient.getProjUnderGroup(organizationId, projectId, true).getBody();
         for (ProjectRelationshipVO relationshipVO : projectRelationshipVOS) {
-            PageInfo<UserWithRoleVO> users = baseFeignClient.pagingQueryUsersWithProjectLevelRoles(0, 0, relationshipVO.getProjectId(), new RoleAssignmentSearchVO(), false).getBody();
+            Page<UserWithRoleVO> users = baseFeignClient.pagingQueryUsersWithProjectLevelRoles(0, 0, relationshipVO.getProjectId(), new RoleAssignmentSearchVO(), false).getBody();
             relationshipVO.setUserCount(users.getSize());
         }
         return projectRelationshipVOS;

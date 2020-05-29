@@ -158,11 +158,7 @@ class Search extends Component {
       deleteFilterShow: true,
     });
   }
-
-  deleteComponent() {
-    this.loadComponents();
-  }
-
+  
   loadFilters(page = 0, size = 10) {
     const { filterName, barFilters } = this.state;
     this.setState({
@@ -316,14 +312,7 @@ class Search extends Component {
       <Page
         className="c7n-fast-search"
         service={[
-          'agile-service.quick-filter.listByProjectId',
-          'agile-service.quick-filter.queryById',
-          'agile-service.quick-filter.update',
-          'agile-service.quick-filter.create',
-          'agile-service.quick-filter.checkName',
-          'agile-service.quick-filter.dragFilter',
-          'agile-service.quick-filter.list',
-          'agile-service.quick-filter.deleteById',
+          'choerodon.code.project.setting.issue.ps.fastsearch',
         ]}
       >
         <Header title="快速筛选">

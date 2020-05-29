@@ -1,7 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.*;
 import io.choerodon.agile.app.service.*;
@@ -10,11 +9,11 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.PageUtil;
-import io.choerodon.web.util.PageableHelper;
-import org.springframework.data.domain.Pageable;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.entity.Criteria;
+import org.hzero.mybatis.common.Criteria;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -84,15 +83,15 @@ public class StateMachineServiceImpl implements StateMachineService {
     private ColumnStatusRelMapper columnStatusRelMapper;
 
     @Override
-    public PageInfo<StateMachineListVO> pageQuery(Long organizationId, Pageable pageable, String name, String description, String param) {
+    public Page<StateMachineListVO> pageQuery(Long organizationId, PageRequest pageRequest, String name, String description, String param) {
         StateMachineDTO stateMachine = new StateMachineDTO();
         stateMachine.setName(name);
         stateMachine.setDescription(description);
         stateMachine.setOrganizationId(organizationId);
 
-        PageInfo<StateMachineDTO> page = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(pageable.getSort())).doSelectPageInfo(
+        Page<StateMachineDTO> page = PageHelper.doPageAndSort(pageRequest,
                 () -> stateMachineMapper.fulltextSearch(stateMachine, param));
-        List<StateMachineListVO> stateMachineVOS = modelMapper.map(page.getList(), new TypeToken<List<StateMachineListVO>>() {
+        List<StateMachineListVO> stateMachineVOS = modelMapper.map(page.getContent(), new TypeToken<List<StateMachineListVO>>() {
         }.getType());
         for (StateMachineListVO stateMachineVO : stateMachineVOS) {
             List<StateMachineSchemeVO> list = schemeService.querySchemeByStateMachineId(organizationId, stateMachineVO.getId());
@@ -210,9 +209,9 @@ public class StateMachineServiceImpl implements StateMachineService {
             }
         }
         stateMachine.setStatus(StateMachineStatus.ACTIVE);
-        Criteria criteria = new Criteria();
-        criteria.update(STATUS);
-        int stateMachineDeploy = stateMachineMapper.updateByPrimaryKeyOptions(stateMachine, criteria);
+//        Criteria criteria = new Criteria();
+//        criteria.update(STATUS);
+        int stateMachineDeploy = stateMachineMapper.updateOptional(stateMachine, STATUS);
         if (stateMachineDeploy != 1) {
             throw new CommonException("error.stateMachine.deploy");
         }
@@ -682,9 +681,9 @@ public class StateMachineServiceImpl implements StateMachineService {
             throw new CommonException("error.stateMachine.deleteDraft.noFound");
         }
         stateMachine.setStatus(StateMachineStatus.ACTIVE);
-        Criteria criteria = new Criteria();
-        criteria.update(STATUS);
-        int stateMachineDeploy = stateMachineMapper.updateByPrimaryKeyOptions(stateMachine, criteria);
+//        Criteria criteria = new Criteria();
+//        criteria.update(STATUS);
+        int stateMachineDeploy = stateMachineMapper.updateOptional(stateMachine, STATUS);
         if (stateMachineDeploy != 1) {
             throw new CommonException("error.stateMachine.deleteDraft");
         }
@@ -791,9 +790,9 @@ public class StateMachineServiceImpl implements StateMachineService {
         StateMachineDTO stateMachine = stateMachineMapper.queryById(organizationId, stateMachineId);
         if (stateMachine != null && stateMachine.getStatus().equals(StateMachineStatus.ACTIVE)) {
             stateMachine.setStatus(StateMachineStatus.DRAFT);
-            Criteria criteria = new Criteria();
-            criteria.update(STATUS);
-            int stateMachineUpdate = stateMachineMapper.updateByPrimaryKeyOptions(stateMachine, criteria);
+//            Criteria criteria = new Criteria();
+//            criteria.update(STATUS);
+            int stateMachineUpdate = stateMachineMapper.updateOptional(stateMachine, STATUS);
             if (stateMachineUpdate != 1) {
                 throw new CommonException("error.stateMachine.update");
             }
@@ -834,9 +833,9 @@ public class StateMachineServiceImpl implements StateMachineService {
                 //更新状态机状态为create
                 Long stateMachineId = stateMachine.getId();
                 stateMachine.setStatus(StateMachineStatus.CREATE);
-                Criteria criteria = new Criteria();
-                criteria.update(STATUS);
-                stateMachineMapper.updateByPrimaryKeyOptions(stateMachine, criteria);
+//                Criteria criteria = new Criteria();
+//                criteria.update(STATUS);
+                stateMachineMapper.updateOptional(stateMachine, STATUS);
                 //删除发布节点
                 StateMachineNodeDTO node = new StateMachineNodeDTO();
                 node.setStateMachineId(stateMachineId);

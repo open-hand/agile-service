@@ -51,7 +51,7 @@ public class HttpRequestUtil {
                 result += line;
             }
         } catch (Exception e) {
-            throw new CommonException(e.getMessage());
+            throw new CommonException("error.io.exception", e);
         }
         // 使用finally块来关闭输入流
         finally {

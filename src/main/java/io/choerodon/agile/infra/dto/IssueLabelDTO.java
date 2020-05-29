@@ -1,7 +1,9 @@
 package io.choerodon.agile.infra.dto;
 
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.agile.infra.utils.StringUtil;
 
 import javax.persistence.GeneratedValue;
@@ -15,7 +17,9 @@ import javax.persistence.Table;
  * @since 2018-05-14 21:04:00
  */
 @Table(name = "agile_issue_label")
-public class IssueLabelDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class IssueLabelDTO extends AuditDomain {
 
     public IssueLabelDTO() {}
 
@@ -26,7 +30,7 @@ public class IssueLabelDTO extends BaseDTO {
 
     /***/
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long labelId;
 
     /**

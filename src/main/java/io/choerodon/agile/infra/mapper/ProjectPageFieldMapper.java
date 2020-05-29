@@ -1,7 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.infra.dto.ProjectPageFieldDTO;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
  * @author shinan.chen
  * @since 2019/4/3
  */
-public interface ProjectPageFieldMapper extends Mapper<ProjectPageFieldDTO> {
+public interface ProjectPageFieldMapper extends BaseMapper<ProjectPageFieldDTO> {
     /**
      * 获取项目层自定义的记录，判断是否存在自定义
      *

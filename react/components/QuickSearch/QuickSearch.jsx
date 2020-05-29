@@ -20,7 +20,6 @@ class QuickSearch extends Component {
       quickSearchArray: [],
       selectQuickSearch: [],
       selectUsers: [],
-      selectSprint: undefined,
     };
   }
 
@@ -39,7 +38,7 @@ class QuickSearch extends Component {
       ],
       filterName: '',
     });
-    const axiosGetUser = axios.get(`/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=40`);
+    const axiosGetUser = axios.get(`/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=40`);
     const axiosGetSprintNotClosed = axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/names`, ['sprint_planning', 'started']);
     Promise.all([axiosGetFilter, axiosGetUser, axiosGetSprintNotClosed]).then((res = []) => {
       const resFilterData = res[0].map(item => ({
@@ -108,9 +107,7 @@ class QuickSearch extends Component {
 
   handleSprintChange = (value) => {
     const { onSprintChange } = this.props;
-    this.setState({
-      selectSprint: value,
-    });
+    ScrumBoardStore.setSelectSprint(value);
     onSprintChange(value && value.key);
   }
 
@@ -129,8 +126,8 @@ class QuickSearch extends Component {
     this.setState({
       selectQuickSearch: [],
       selectUsers: [],
-      selectSprint: undefined,
     });
+    ScrumBoardStore.setSelectSprint(undefined);
   }
 
   setSelectQuickSearch = (selectQuickSearch) => {
@@ -161,10 +158,9 @@ class QuickSearch extends Component {
       quickSearchArray,
       selectQuickSearch,
       selectUsers,
-      selectSprint,
     } = this.state;
     
-    const { sprintNotClosedArray } = ScrumBoardStore;
+    const { sprintNotClosedArray, selectSprint } = ScrumBoardStore;
 
     // showRealQuickSearch 用于在待办事项中销毁组件
     // 具体查看 Backlog/BacklogComponent/SprintComponent/SprintItem.js 中 clearFilter 方法
@@ -222,7 +218,7 @@ class QuickSearch extends Component {
                   onFilterChange={(value) => {
                     if (value) {
                       debounceCallback(() => {
-                        axios.get(`/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=40&param=${value}`).then((res) => {
+                        axios.get(`/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=40&param=${value}`).then((res) => {
                           // Set 用于查询是否有 id 重复的，没有重复才往里加
                           const temp = new Set(userDataArray.map(item => item.id));
                           res.list.filter(item => item.enabled).forEach((item) => {

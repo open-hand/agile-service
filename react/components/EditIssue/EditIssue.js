@@ -30,7 +30,7 @@ import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 // 项目加入群之后，不关联自己的史诗和特性，只能关联项目群的，不能改关联的史诗
 const { AppState } = stores;
 
-let loginUserId;
+
 let hasPermission;
 const defaultProps = {
   applyType: 'agile',
@@ -133,12 +133,10 @@ function EditIssue() {
     loadIssueDetail(currentIssueId);
     if (!programId) {
       axios.all([
-        axios.get('/base/v1/users/self'),
         getIsOwner(),
         loadIssueTypes(applyType),
       ])
-        .then(axios.spread((users, isOwner, issueTypes) => {
-          loginUserId = users.id;
+        .then(axios.spread((isOwner, issueTypes) => {
           hasPermission = isOwner;
           store.setIssueTypes(isInProgram && issueTypes ? issueTypes.filter(type => type.typeCode !== 'issue_epic') : issueTypes);
         }));
@@ -267,7 +265,7 @@ function EditIssue() {
               reloadIssue={loadIssueDetail}
               backUrl={backUrl}
               onCancel={onCancel}
-              loginUserId={loginUserId}
+              loginUserId={AppState.userInfo.id}
               hasPermission={HasPermission}
               onDeleteIssue={onDeleteIssue}
               onUpdate={onUpdate}
@@ -279,7 +277,7 @@ function EditIssue() {
               reloadIssue={loadIssueDetail}
               onUpdate={onUpdate}
               onDeleteSubIssue={onDeleteSubIssue}
-              loginUserId={loginUserId}
+              loginUserId={AppState.userInfo.id}
               hasPermission={hasPermission}
               applyType={applyType}
               onDeleteIssue={onDeleteIssue}
@@ -346,6 +344,9 @@ function EditIssue() {
                 objectVersionNumber={objectVersionNumber}
                 onOk={() => {
                   store.setChangeParentShow(false);
+                  if (onUpdate) {
+                    onUpdate();
+                  }
                   loadIssueDetail(issueId);
                 }}
                 onCancel={() => {

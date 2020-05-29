@@ -37,6 +37,8 @@ class BacklogStore {
 
   @observable selectedPiId = undefined;
 
+  @observable selectedSprintId = undefined;
+
   @observable selectedIssueId = [];
 
   @observable issueMap = observable.map();
@@ -376,12 +378,21 @@ class BacklogStore {
     this.selectedPiId = data;
   }
 
+  @action setSelectedSprintId(data) {
+    this.selectedSprintId = data;
+  }
+
+  
   axiosGetEpic() {
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/epics`);
   }
 
   axiosGetVersion() {
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version`);
+  }
+
+  axiosGetNotDoneSprintByPiId(piId) {
+    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/sub_project/list?pi_id=${piId}`);
   }
 
   @action setSprintData({ backlogData, sprintData }) {
@@ -462,7 +473,7 @@ class BacklogStore {
   axiosGetWorkSetting(year) {
     const proId = AppState.currentMenuType.id;
     const orgId = AppState.currentMenuType.organizationId;
-    return axios.get(`/base/v1/projects/${proId}/time_zone_work_calendars/time_zone_detail/${orgId}?year=${year}`);
+    return axios.get(`/iam/choerodon/v1/projects/${proId}/time_zone_work_calendars/time_zone_detail/${orgId}?year=${year}`);
   }
 
   @computed get getIssueTypes() {
@@ -622,6 +633,7 @@ class BacklogStore {
     this.sprintData = [];
     this.clickIssueDetail = {};
     this.issueMap.clear();
+    this.selectedSprintId = undefined;
   }
 
   @computed get getIssueMap() {

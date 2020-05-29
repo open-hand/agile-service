@@ -40,7 +40,7 @@ export function uploadFile(data, config) {
     headers: { 'content-type': 'multipart/form-datal' },
   };
   return axios.post(
-    `/zuul/agile/v1/projects/${projectId}/issue_attachment?projectId=${projectId}&issueId=${issueId}`,
+    `/agile/v1/projects/${projectId}/issue_attachment?projectId=${projectId}&issueId=${issueId}`,
     data,
     axiosConfig,
   );

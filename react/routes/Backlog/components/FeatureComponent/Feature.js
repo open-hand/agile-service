@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Icon } from 'choerodon-ui';
 import { Select } from 'choerodon-ui';
+import _ from 'lodash';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { featureApi } from '@/api';
@@ -18,15 +19,17 @@ class Feature extends Component {
     super(props);
     this.state = {
       notDonePiList: [],
+      notDoneSprintList: [],
+      sprintSelectShow: true,
     };
   }
 
   componentDidMount() {
-    this.featureRefresh(undefined, true);
+    this.featureRefresh(undefined, true, undefined);
   }
 
-  featureRefresh = (piId, isFirstLoad = false) => {
-    Promise.all([featureApi.getByPiIdInSubProject(piId), featureApi.getColors(), getPiNotDone(['todo', 'doing'])]).then(([featureData, featureColor, notDonePiList]) => {
+  featureRefresh = (piId, isFirstLoad = false, sprintId) => {
+    Promise.all([featureApi.getByPiIdInSubProject(piId, sprintId), featureApi.getColors(), getPiNotDone(['todo', 'doing'])]).then(([featureData, featureColor, notDonePiList]) => {
       BacklogStore.setFeatureData(featureData);
       BacklogStore.setColorLookupValue(featureColor.lookupValues);
       BacklogStore.setRandomFeatureColor(featureData, featureColor.lookupValues);
@@ -34,7 +37,16 @@ class Feature extends Component {
         notDonePiList,
       });
       if (isFirstLoad) {
-        BacklogStore.setSelectedPiId(notDonePiList.find(pi => pi.statusCode === 'doing') && notDonePiList.find(pi => pi.statusCode === 'doing').id);
+        const doingPi = notDonePiList.find(pi => pi.statusCode === 'doing');
+        if (doingPi) {
+          BacklogStore.setSelectedPiId(doingPi.id);
+          BacklogStore.axiosGetNotDoneSprintByPiId(doingPi.id).then((res) => {
+            this.setState({
+              sprintSelectShow: true,
+              notDoneSprintList: res.filter(item => item.statusCode !== 'done'),
+            });
+          });
+        }
       }
     }).catch((error3) => { });
   };
@@ -56,13 +68,38 @@ class Feature extends Component {
 
   handlePiChange = (piId) => {
     BacklogStore.setSelectedPiId(piId);
-    this.featureRefresh(piId);
+    BacklogStore.setSelectedSprintId(undefined);
+    const { notDonePiList } = this.state;
+    const selectedPi = notDonePiList.find(pi => pi.id === piId);
+    const todoPiList = notDonePiList.filter(pi => pi.statusCode !== 'doing');
+    const minPIId = _.min(todoPiList.map(pi => pi.id));
+    if (selectedPi.statusCode === 'doing' || piId === minPIId) {
+      BacklogStore.axiosGetNotDoneSprintByPiId(piId).then((res) => {
+        this.setState({
+          notDoneSprintList: res.filter(item => item.statusCode !== 'done'),
+        });
+      });
+      this.setState({
+        sprintSelectShow: true,
+      });
+    } else {
+      this.setState({
+        sprintSelectShow: false,
+      });
+    }
+    this.featureRefresh(piId, false, undefined);
+  }
+
+  handleSprintChange = (sprintId) => {
+    const { selectedPiId } = BacklogStore;
+    BacklogStore.setSelectedSprintId(sprintId);
+    this.featureRefresh(selectedPiId, false, sprintId);
   }
 
   render() {
     const { refresh, issueRefresh } = this.props;
-    const { notDonePiList } = this.state;
-    const { selectedPiId } = BacklogStore;
+    const { notDonePiList, notDoneSprintList, sprintSelectShow } = this.state;
+    const { selectedPiId, selectedSprintId } = BacklogStore;
     return BacklogStore.getCurrentVisible === 'feature' ? (
       <div className="c7n-backlog-epic">
         <div className="c7n-backlog-epicContent">
@@ -132,6 +169,33 @@ class Feature extends Component {
                 当前没有已开启的PI
               </p>
             )}
+            {
+              sprintSelectShow && (
+              <Select
+                key="sprintSelect"
+                className="c7n-backlog-sprintSelect"
+                placeholder="冲刺"
+                allowClear
+                dropdownMatchSelectWidth={false}
+                value={selectedSprintId}
+                onChange={this.handleSprintChange}
+                getPopupContainer={triggerNode => triggerNode.parentNode}
+              >
+                {
+                (notDoneSprintList || []).map(item => (
+                  <Option key={item.sprintId} value={item.sprintId} title={item.sprintName}>
+                    {item.sprintName}
+                    {
+                      item.statusCode === 'started' && (
+                        <div className="c7n-agile-sprintSearchSelect-option-active">活跃</div>
+                      )
+                    }
+                  </Option>
+                ))
+              }
+              </Select>
+              )
+            }
             <DragDropContext
               onDragEnd={(result) => {
                 const { destination, source } = result;

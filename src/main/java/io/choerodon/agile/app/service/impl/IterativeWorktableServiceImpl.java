@@ -14,11 +14,9 @@ import io.choerodon.agile.infra.mapper.WorkCalendarRefMapper;
 import io.choerodon.agile.infra.utils.DateUtil;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,13 +51,8 @@ public class IterativeWorktableServiceImpl implements IterativeWorktableService 
     private PriorityService priorityService;
     @Autowired
     private StatusService statusService;
-
-    private ModelMapper modelMapper = new ModelMapper();
-
-    @PostConstruct
-    public void init() {
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    }
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public List<PriorityDistributeVO> queryPriorityDistribute(Long projectId, Long sprintId, Long organizationId) {

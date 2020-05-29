@@ -1,7 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.agile.api.vo.AdjustOrderVO;
 import io.choerodon.agile.api.vo.PageFieldUpdateVO;
@@ -28,7 +28,7 @@ public class PageFieldController {
     @Autowired
     private PageFieldService pageFieldService;
 
-    @Permission(type = ResourceType.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据页面编码获取页面字段列表")
     @GetMapping("/list")
     public ResponseEntity<Map<String, Object>> listQuery(@ApiParam(value = "组织id", required = true)
@@ -40,7 +40,7 @@ public class PageFieldController {
         return new ResponseEntity<>(pageFieldService.listQuery(organizationId, null, pageCode, context), HttpStatus.OK);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "调整顺序")
     @PostMapping(value = "/adjust_order")
     public ResponseEntity<PageFieldVO> adjustFieldOrder(@ApiParam(value = "组织id", required = true)
@@ -52,7 +52,7 @@ public class PageFieldController {
         return new ResponseEntity<>(pageFieldService.adjustFieldOrder(organizationId, null, pageCode, adjustOrder), HttpStatus.CREATED);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "修改页面字段")
     @PutMapping(value = "/{field_id}")
     public ResponseEntity<PageFieldVO> update(@ApiParam(value = "组织id", required = true)

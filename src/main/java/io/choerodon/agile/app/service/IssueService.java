@@ -9,9 +9,11 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.mapper.IssueMapper;
-import com.github.pagehelper.PageInfo;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.domain.PageInfo;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
+
 
 /**
  * 敏捷开发Issue
@@ -45,10 +47,10 @@ public interface IssueService {
      *
      * @param projectId   projectId
      * @param searchVO   searchVO
-     * @param pageable pageable
+     * @param pageRequest pageRequest
      * @return IssueListVO
      */
-    PageInfo<IssueListFieldKVVO> listIssueWithSub(Long projectId, SearchVO searchVO, Pageable pageable, Long organizationId);
+    Page<IssueListFieldKVVO> listIssueWithSub(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
 
     List<EpicDataVO> listEpic(Long projectId);
 
@@ -141,7 +143,7 @@ public interface IssueService {
      */
     IssueConvertDTO queryIssueByProjectIdAndIssueId(Long projectId, Long issueId);
 
-    PageInfo<IssueNumVO> queryIssueByOption(Long projectId, Long issueId, String issueNum, Boolean onlyActiveSprint, Boolean self, String content, Pageable pageable);
+    Page<IssueNumVO> queryIssueByOption(Long projectId, Long issueId, String issueNum, Boolean onlyActiveSprint, Boolean self, String content, PageRequest pageRequest);
 
     void exportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request,
                       HttpServletResponse response, Long organizationId, Sort sort);
@@ -182,12 +184,12 @@ public interface IssueService {
      *
      * @param projectId   projectId
      * @param searchVO   searchVO
-     * @param pageable pageable
+     * @param pageRequest pageRequest
      * @return IssueListVO
      */
-    PageInfo<IssueListTestVO> listIssueWithoutSubToTestComponent(Long projectId, SearchVO searchVO, Pageable pageable, Long organizationId);
+    Page<IssueListTestVO> listIssueWithoutSubToTestComponent(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
 
-    PageInfo<IssueListTestWithSprintVersionVO> listIssueWithLinkedIssues(Long projectId, SearchVO searchVO, Pageable pageable, Long organizationId);
+    Page<IssueListTestWithSprintVersionVO> listIssueWithLinkedIssues(Long projectId, SearchVO searchVO, PageRequest pageRequest, Long organizationId);
 
     List<IssueCreationNumVO> queryIssueNumByTimeSlot(Long projectId, String typeCode, Integer timeSlot);
 
@@ -199,11 +201,11 @@ public interface IssueService {
      * @param issueNum    issueNum
      * @param self        self
      * @param content     content
-     * @param pageable pageable
+     * @param pageRequest pageRequest
      * @return IssueNumVO
      */
-    PageInfo<IssueNumVO> queryIssueByOptionForAgile(Long projectId, Long issueId, String issueNum,
-                                                    Boolean self, String content, Pageable pageable);
+    Page<IssueNumVO> queryIssueByOptionForAgile(Long projectId, Long issueId, String issueNum,
+                                                    Boolean self, String content, PageRequest pageRequest);
 
     /**
      * 拖动epic
@@ -214,25 +216,25 @@ public interface IssueService {
      */
     EpicDataVO dragEpic(Long projectId, EpicSequenceVO epicSequenceVO);
 
-    /**
-     * 查询issue统计信息
-     *
-     * @param projectId  projectId
-     * @param type       type
-     * @param issueTypes issueTypes要排除的issue类型
-     * @return PieChartVO
-     */
-    List<PieChartVO> issueStatistic(Long projectId, String type, List<String> issueTypes);
+//    /**
+//     * 查询issue统计信息
+//     *
+//     * @param projectId  projectId
+//     * @param type       type
+//     * @param issueTypes issueTypes要排除的issue类型
+//     * @return PieChartVO
+//     */
+//    List<PieChartVO> issueStatistic(Long projectId, String type, List<String> issueTypes);
 
-    /**
-     * 测试模块查询issue详情列表
-     *
-     * @param projectId   projectId
-     * @param searchVO   searchVO
-     * @param pageable pageable
-     * @return IssueComponentDetailTO
-     */
-    PageInfo<IssueComponentDetailDTO> listIssueWithoutSubDetail(Long projectId, SearchVO searchVO, Pageable pageable);
+//    /**
+//     * 测试模块查询issue详情列表
+//     *
+//     * @param projectId   projectId
+//     * @param searchVO   searchVO
+//     * @param pageRequest pageRequest
+//     * @return IssueComponentDetailTO
+//     */
+//    Page<IssueComponentDetailDTO> listIssueWithoutSubDetail(Long projectId, SearchVO searchVO, PageRequest pageRequest);
 
     IssueVO issueParentIdUpdate(Long projectId, IssueUpdateParentIdVO issueUpdateParentIdVO);
 
@@ -240,7 +242,7 @@ public interface IssueService {
 
     List<Long> queryIssueIdsByOptions(Long projectId, SearchVO searchVO);
 
-    PageInfo<UndistributedIssueVO> queryUnDistributedIssues(Long projectId, Pageable pageable);
+    Page<UndistributedIssueVO> queryUnDistributedIssues(Long projectId, PageRequest pageable);
 
     List<UnfinishedIssueVO> queryUnfinishedIssues(Long projectId, Long assigneeId);
 
@@ -252,22 +254,22 @@ public interface IssueService {
      */
     String querySwimLaneCode(Long projectId);
 
-    /**
-     * 克隆issue同时生成版本
-     *
-     * @param projectId projectId
-     * @param versionId versionId
-     * @param issueIds  issueIds
-     * @return new issueIds
-     */
-    List<Long> cloneIssuesByVersionId(Long projectId, Long versionId, List<Long> issueIds);
+//    /**
+//     * 克隆issue同时生成版本
+//     *
+//     * @param projectId projectId
+//     * @param versionId versionId
+//     * @param issueIds  issueIds
+//     * @return new issueIds
+//     */
+//    List<Long> cloneIssuesByVersionId(Long projectId, Long versionId, List<Long> issueIds);
 
-    /**
-     * 根据项目分组测试类型issue
-     *
-     * @return IssueProjectVO
-     */
-    List<IssueProjectVO> queryIssueTestGroupByProject();
+//    /**
+//     * 根据项目分组测试类型issue
+//     *
+//     * @return IssueProjectVO
+//     */
+//    List<IssueProjectVO> queryIssueTestGroupByProject();
 
     /**
      * 批量把issue根据冲刺判断更新为初始状态
@@ -288,7 +290,7 @@ public interface IssueService {
 
     Boolean checkEpicName(Long projectId, String epicName, Long epicId);
 
-    IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum);
+//    IssueNumDTO queryIssueByIssueNum(Long projectId, String issueNum);
 
     /**
      * 根据projectId按批次迁移数据
@@ -302,27 +304,27 @@ public interface IssueService {
 
     List<IssueLinkVO> queryIssueByIssueIds(Long projectId, List<Long> issueIds);
 
-    PageInfo<IssueListFieldKVVO> queryStoryAndTask(Long projectId, Pageable pageable, SearchVO searchVO);
+    Page<IssueListFieldKVVO> queryStoryAndTask(Long projectId, PageRequest pageRequest, SearchVO searchVO);
 
     /**
      * 分页查询项目下的项目成员和分配过问题的用户
      *
-     * @param pageable
+     * @param pageRequest
      * @param projectId
      * @param param
      * @return
      */
-    PageInfo<UserDTO> pagingQueryUsers(Pageable pageable, Long projectId, String param);
+    Page<UserDTO> pagingQueryUsers(PageRequest pageRequest, Long projectId, String param);
 
     /**
      * 分页查询项目下的项目成员和分配过问题的报告人
      *
-     * @param pageable
+     * @param pageRequest
      * @param projectId
      * @param param
      * @return
      */
-    PageInfo<UserDTO> pagingQueryReporters(Pageable pageable, Long projectId, String param);
+    Page<UserDTO> pagingQueryReporters(PageRequest pageRequest, Long projectId, String param);
 
     /**
      * 删除自己的创建的Issue

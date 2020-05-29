@@ -6,7 +6,6 @@ import TextEditToggle from '../../../../TextEditToggle';
 import SelectFocusLoad from '../../../../SelectFocusLoad';
 import UserHead from '../../../../UserHead';
 import { updateIssue } from '../../../../../api/NewIssueApi';
-import { getSelf } from '../../../../../api/CommonApi';
 import './Field.less';
 
 
@@ -113,11 +112,9 @@ const { Text, Edit } = TextEditToggle;
                   whiteSpace: 'nowrap',
                 }}
                 onClick={() => {
-                  getSelf().then((res) => {
-                    if (res.id !== assigneeId) {
-                      this.updateIssueAssignee(res.id);
-                    }
-                  });
+                  if (loginUserId !== assigneeId) {
+                    this.updateIssueAssignee(loginUserId);
+                  }
                 }}
               >
                 分配给我

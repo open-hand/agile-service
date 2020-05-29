@@ -7,14 +7,11 @@ import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.mybatis.entity.Criteria;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 
@@ -31,21 +28,16 @@ public class IssueAccessDataServiceImpl implements IssueAccessDataService {
 
     @Autowired
     private RedisUtil redisUtil;
-
-    private ModelMapper modelMapper = new ModelMapper();
-
-    @PostConstruct
-    public void init() {
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    }
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     @DataLog(type = "issue")
     public IssueConvertDTO update(IssueConvertDTO issueConvertDTO, String[] fieldList) {
         IssueDTO issueDTO = modelMapper.map(issueConvertDTO, IssueDTO.class);
-        Criteria criteria = new Criteria();
-        criteria.update(fieldList);
-        if (issueMapper.updateByPrimaryKeyOptions(issueDTO, criteria) != 1) {
+//        Criteria criteria = new Criteria();
+//        criteria.update(fieldList);
+        if (issueMapper.updateOptional(issueDTO, fieldList) != 1) {
             throw new CommonException(UPDATE_ERROR);
         }
         return modelMapper.map(issueMapper.selectByPrimaryKey(issueDTO.getIssueId()), IssueConvertDTO.class);

@@ -2,7 +2,7 @@ package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.PageSearchVO;
 import io.choerodon.agile.infra.dto.PageDTO;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
  * @author shinan.chen
  * @since 2019/4/1
  */
-public interface PageMapper extends Mapper<PageDTO> {
+public interface PageMapper extends BaseMapper<PageDTO> {
     /**
      * 分页查询页面
      *

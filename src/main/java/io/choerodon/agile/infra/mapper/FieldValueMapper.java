@@ -1,7 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.infra.dto.FieldValueDTO;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
  * @author shinan.chen
  * @since 2019/4/8
  */
-public interface FieldValueMapper extends Mapper<FieldValueDTO> {
+public interface FieldValueMapper extends BaseMapper<FieldValueDTO> {
 
     List<FieldValueDTO> queryList(@Param("projectId") Long projectId, @Param("instanceId") Long instanceId, @Param("schemeCode") String schemeCode, @Param("fieldId") Long fieldId);
 

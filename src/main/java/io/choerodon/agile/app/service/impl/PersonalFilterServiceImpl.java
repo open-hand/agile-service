@@ -1,8 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.PersonalFilterVO;
-import io.choerodon.agile.api.vo.PersonalFilterSearchVO;
 import io.choerodon.agile.app.service.PersonalFilterService;
 import io.choerodon.agile.infra.dto.PersonalFilterDTO;
 import io.choerodon.agile.infra.mapper.PersonalFilterMapper;
@@ -32,7 +30,8 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
     public static final String NAME_ERROR = "error.personalFilter.nameNotNull";
     public static final String INSERT_ERROR = "error.personalFilter.create";
     public static final String NAME_EXIST = "error.personalFilter.nameExist";
-    private ModelMapper modelMapper = new ModelMapper();
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public PersonalFilterVO queryById(Long projectId, Long filterId) {

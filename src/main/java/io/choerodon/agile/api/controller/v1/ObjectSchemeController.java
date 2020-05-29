@@ -1,16 +1,17 @@
 package io.choerodon.agile.api.controller.v1;
 
-import com.github.pagehelper.PageInfo;
-import io.choerodon.core.annotation.Permission;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.domain.PageInfo;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
+import io.choerodon.swagger.annotation.Permission;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.agile.api.vo.ObjectSchemeSearchVO;
 import io.choerodon.agile.api.vo.ObjectSchemeVO;
 import io.choerodon.agile.app.service.ObjectSchemeService;
-import org.springframework.data.web.SortDefault;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -31,16 +32,16 @@ public class ObjectSchemeController extends BaseController {
     @Autowired
     private ObjectSchemeService objectSchemeService;
 
-    @Permission(type = ResourceType.ORGANIZATION, roles = {InitRoleCode.ORGANIZATION_ADMINISTRATOR, InitRoleCode.ORGANIZATION_MEMBER})
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "分页查询对象方案列表")
     @CustomPageRequest
     @PostMapping
-    public ResponseEntity<PageInfo<ObjectSchemeVO>> pageQuery(@ApiIgnore
-                                                               @SortDefault(value = "id", direction = Sort.Direction.DESC) Pageable pageable,
-                                                              @ApiParam(value = "组织id", required = true)
+    public ResponseEntity<Page<ObjectSchemeVO>> pageQuery(@ApiIgnore
+                                                               @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
+                                                          @ApiParam(value = "组织id", required = true)
                                                                @PathVariable("organization_id") Long organizationId,
-                                                              @ApiParam(value = "search dto", required = true)
+                                                          @ApiParam(value = "search dto", required = true)
                                                                @RequestBody(required = false) ObjectSchemeSearchVO searchDTO) {
-        return new ResponseEntity<>(objectSchemeService.pageQuery(organizationId, pageable, searchDTO), HttpStatus.OK);
+        return new ResponseEntity<>(objectSchemeService.pageQuery(organizationId, pageRequest, searchDTO), HttpStatus.OK);
     }
 }

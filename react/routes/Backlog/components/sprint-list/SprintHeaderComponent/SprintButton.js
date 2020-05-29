@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 import React, { Fragment } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Icon, Dropdown, Menu } from 'choerodon-ui';
@@ -7,17 +8,28 @@ import classnames from 'classnames';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import CloseSprint from '@/components/close-sprint';
+import { Tooltip } from 'choerodon-ui/pro/lib';
 import StartSprint from '../../start-sprint';
 import './SprintButton.less';
 
 const { AppState } = stores;
 
 const prefix = 'c7n-backlog-SprintButton';
+
+function judgeDisabled(arr) {
+  for (let i = 0; i < arr.length; i += 1) {
+    if (arr[i][0]) {
+      return [true, arr[i][1]];
+    }
+  }
+  return [false];
+}
+
 function SprintButton({
   data,
 }) {
   const {
-    statusCode, sprintId,
+    statusCode, sprintId, belongCurrentPi,
   } = data;
   const issueList = BacklogStore.getIssueListBySprintId(sprintId);
   const hasActiveSprint = BacklogStore.getHasActiveSprint;
@@ -54,54 +66,54 @@ function SprintButton({
   );
 
   const { type, id: projectId, organizationId: orgId } = AppState.currentMenuType;
-
-  return statusCode === 'started' ? (
-    <Permission
-      type={type}
-      projectId={projectId}
-      organizationId={orgId}
-      service={['agile-service.sprint.completeSprint']}
-    >
-      <p
-        className={prefix}
-        role="none"
-        onClick={openCloseSprint}
-      >
-        完成冲刺
-      </p>
-    </Permission>
-  ) : (
+  const [disableStart, reason] = judgeDisabled([[hasActiveSprint, '已有活跃冲刺'], [!issueList || issueList.length === 0, '冲刺下没有问题'], [belongCurrentPi === false, '非当前PI下冲刺不可开启']]);
+  return (
     <Fragment>
-      <Permission
-        type={type}
-        projectId={projectId}
-        organizationId={orgId}
-        service={[IsInProgramStore.isInProgram ? 'agile-service.sprint-pro.startSubProjectSprint' : 'agile-service.sprint.startSprint']}
-      >
-        <p
-          className={classnames(prefix, {
-            [`${prefix}-disabled`]: hasActiveSprint || !issueList || issueList.length === 0,
-          })}
-          role="none"
-          onClick={openStartSprint}
+      {statusCode === 'started' ? (
+        <Permission
+          service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
         >
-          开启冲刺
-        </p>
-      </Permission>
-      <Permission
-        type={type}
-        projectId={projectId}
-        organizationId={orgId}
-        service={[IsInProgramStore.isInProgram ? 'agile-service.sprint-pro.deleteSubProjectSprint' : 'agile-service.sprint.deleteSprint']}
-      >
-        {(data.sprintType !== 'ip'
-            && (
-              <Dropdown overlay={menu} trigger={['click']}>
-                <Icon style={{ cursor: 'pointer', marginRight: 15 }} type="more_vert" />
-              </Dropdown>
-            )
-          )}
-      </Permission>
+          <p
+            className={prefix}
+            role="none"
+            onClick={openCloseSprint}
+          >
+            完成冲刺
+          </p>
+        </Permission>
+      ) : (
+        <Fragment>
+          <Permission
+            service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
+          >
+            <Tooltip title={reason}>
+              <p
+                className={classnames(prefix, {
+                  [`${prefix}-disabled`]: disableStart,
+                })}
+                role="none"
+                onClick={openStartSprint}
+              >
+                开启冲刺
+              </p>
+            </Tooltip>
+          </Permission>
+          <Permission
+            type={type}
+            projectId={projectId}
+            organizationId={orgId}
+            service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
+          >
+            {(data.sprintType !== 'ip'
+                && (
+                  <Dropdown overlay={menu} trigger={['click']}>
+                    <Icon style={{ cursor: 'pointer', marginRight: 15 }} type="more_vert" />
+                  </Dropdown>
+                )
+              )}
+          </Permission>
+        </Fragment>
+      )}
     </Fragment>
   );
 }

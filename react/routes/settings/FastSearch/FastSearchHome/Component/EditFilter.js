@@ -314,7 +314,7 @@ class AddComponent extends Component {
     const customMemberField = quickFilterFiled.find(item => item.type === 'member') || {};
     const OPTION_FILTER = {
       assignee: {
-        url: `/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
+        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
         prop: 'list',
         id: 'id',
         name: 'realName',
@@ -335,21 +335,21 @@ class AddComponent extends Component {
         state: 'originStatus',
       },
       reporter: {
-        url: `/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
+        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
         prop: 'list',
         id: 'id',
         name: 'realName',
         state: 'originUsers',
       },
       created_user: {
-        url: `/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
+        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
         prop: 'list',
         id: 'id',
         name: 'realName',
         state: 'originUsers',
       },
       last_updated_user: {
-        url: `/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
+        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
         prop: 'list',
         id: 'id',
         name: 'realName',
@@ -426,7 +426,7 @@ class AddComponent extends Component {
     });
 
     OPTION_FILTER[customMemberField.code] = {
-      url: `/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
+      url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
       prop: 'list',
       id: 'id',
       name: 'realName',
@@ -562,7 +562,7 @@ class AddComponent extends Component {
     const customMemberField = quickFilterFiled.find(item => item.type === 'member') || {};
     const OPTION_FILTER = {
       assignee: {
-        url: `/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
+        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
         prop: 'list',
         id: 'id',
         name: 'realName',
@@ -583,21 +583,21 @@ class AddComponent extends Component {
         state: 'originStatus',
       },
       reporter: {
-        url: `/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
+        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
         prop: 'list',
         id: 'id',
         name: 'realName',
         state: 'originUsers',
       },
       created_user: {
-        url: `/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
+        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
         prop: 'list',
         id: 'id',
         name: 'realName',
         state: 'originUsers',
       },
       last_updated_user: {
-        url: `/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
+        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
         prop: 'list',
         id: 'id',
         name: 'realName',
@@ -675,7 +675,7 @@ class AddComponent extends Component {
     });
 
     OPTION_FILTER[customMemberField.code] = {
-      url: `/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
+      url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
       prop: 'list',
       id: 'id',
       name: 'realName',
@@ -838,7 +838,7 @@ class AddComponent extends Component {
   loadQuickFilter() {
     const projectId = AppState.currentMenuType.id;
     const orgId = AppState.currentMenuType.organizationId;
-    axios.get(`/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`).then(res => this.setState({ originUsers: res.list }));
+    axios.get(`/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`).then(res => this.setState({ originUsers: res.list }));
     axios.get(`/agile/v1/projects/${projectId}/priority/list_by_org`).then(res => this.setState({ originPriorities: res }));
     axios.get(`/agile/v1/projects/${projectId}/schemes/query_status_by_project_id?apply_type=agile`).then(res => this.setState({ originStatus: res }));
     axios.get(`/agile/v1/projects/${projectId}/issues/epics/select_data`).then(res => this.setState({ originEpics: res }));
@@ -853,9 +853,9 @@ class AddComponent extends Component {
       res.forEach((item) => {
         customFieldState[`origin${item.code}`] = item.fieldOptions || [];
       });
-      this.setState(...customFieldState);
+      this.setState(customFieldState);
     });
-    // const getUsers = () => axios.get(`/base/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`);
+    // const getUsers = () => axios.get(`/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`);
     // const getPriority = () => axios.get(`/agile/v1/projects/${projectId}/priority/list_by_org`);
     // const getStatus = () => axios.get(`/agile/v1/projects/${projectId}/schemes/query_status_by_project_id?apply_type=agile`);
     // const getEpics = () => axios.get(`/agile/v1/projects/${projectId}/issues/epics/select_data`);

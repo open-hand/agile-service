@@ -2,7 +2,7 @@ package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.infra.dto.StateMachineDTO;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @author peng.jiang, dinghuang123@gmail.com
  */
-public interface StateMachineMapper extends Mapper<StateMachineDTO> {
+public interface StateMachineMapper extends BaseMapper<StateMachineDTO> {
 
     /**
      * 分页查询状态机

@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -11,9 +13,11 @@ import java.util.Date;
  */
 
 @Table(name = "agile_product_version")
-public class ProductVersionDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class ProductVersionDTO extends AuditDomain {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long versionId;
     private String name;
     private String description;

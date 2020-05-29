@@ -298,17 +298,17 @@ public class IssueValidator {
     }
 
 
-    public void checkIssueIdsAndVersionId(Long projectId, List<Long> issueIds, Long versionId) {
-        if (issueIds.isEmpty()) {
-            throw new CommonException("error.issueValidator.issueIdsNull");
-        }
-        ProductVersionDTO productVersionDTO = new ProductVersionDTO();
-        productVersionDTO.setProjectId(projectId);
-        productVersionDTO.setVersionId(versionId);
-        if (productVersionMapper.selectByPrimaryKey(productVersionDTO) == null) {
-            throw new CommonException("error.issueValidator.versionNotFound");
-        }
-    }
+//    public void checkIssueIdsAndVersionId(Long projectId, List<Long> issueIds, Long versionId) {
+//        if (issueIds.isEmpty()) {
+//            throw new CommonException("error.issueValidator.issueIdsNull");
+//        }
+//        ProductVersionDTO productVersionDTO = new ProductVersionDTO();
+//        productVersionDTO.setProjectId(projectId);
+//        productVersionDTO.setVersionId(versionId);
+//        if (productVersionMapper.selectByPrimaryKey(productVersionDTO) == null) {
+//            throw new CommonException("error.issueValidator.versionNotFound");
+//        }
+//    }
 
     public void checkIssueCreate(IssueCreateVO issueCreateVO, String applyType) {
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {

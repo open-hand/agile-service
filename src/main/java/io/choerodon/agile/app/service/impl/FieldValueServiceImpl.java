@@ -9,17 +9,18 @@ import io.choerodon.agile.infra.enums.FieldType;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.enums.ObjectSchemeFieldContext;
 import io.choerodon.agile.infra.enums.PageCode;
-import io.choerodon.agile.infra.feign.NotifyFeignClient;
+//import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.mapper.FieldDataLogMapper;
 import io.choerodon.agile.infra.mapper.FieldValueMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.web.util.PageableHelper;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import io.choerodon.core.utils.PageableHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
+import org.hzero.boot.message.MessageClient;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +67,9 @@ public class FieldValueServiceImpl implements FieldValueService {
     @Autowired
     private ProjectConfigService projectConfigService;
     @Autowired
-    private NotifyFeignClient notifyFeignClient;
+    private MessageClient messageClient;
+//    @Autowired
+//    private NotifyFeignClient notifyFeignClient;
 
     @Override
     public void fillValues(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewVO> pageFieldViews) {
@@ -175,9 +178,9 @@ public class FieldValueServiceImpl implements FieldValueService {
     }
 
     @Override
-    public List<Long> sortIssueIdsByFieldValue(Long organizationId, Long projectId, Pageable pageable) {
-        if (!ObjectUtils.isEmpty(pageable.getSort())) {
-            Iterator<Sort.Order> iterator = pageable.getSort().iterator();
+    public List<Long> sortIssueIdsByFieldValue(Long organizationId, Long projectId, PageRequest pageRequest) {
+        if (!ObjectUtils.isEmpty(pageRequest.getSort())) {
+            Iterator<Sort.Order> iterator = pageRequest.getSort().iterator();
             String fieldCode = "";
             while (iterator.hasNext()) {
                 Sort.Order order = iterator.next();
@@ -185,8 +188,8 @@ public class FieldValueServiceImpl implements FieldValueService {
             }
             ObjectSchemeFieldDTO objectSchemeField = objectSchemeFieldService.queryByFieldCode(organizationId, projectId, fieldCode);
             String fieldType = objectSchemeField.getFieldType();
-            FieldValueUtil.handleAgileSortPageRequest(fieldCode, fieldType, pageable);
-            return fieldValueMapper.sortIssueIdsByFieldValue(organizationId, projectId, objectSchemeField.getId(), PageableHelper.getSortSql(pageable.getSort()));
+            FieldValueUtil.handleAgileSortPageRequest(fieldCode, fieldType, pageRequest);
+            return fieldValueMapper.sortIssueIdsByFieldValue(organizationId, projectId, objectSchemeField.getId(), PageableHelper.getSortSql(pageRequest.getSort()));
         } else {
             return new ArrayList<>();
         }
@@ -250,7 +253,8 @@ public class FieldValueServiceImpl implements FieldValueService {
                 }
             }
             batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
-            notifyFeignClient.postWebSocket(batchUpdateFieldStatusVO.getKey(),batchUpdateFieldStatusVO.getUserId().toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
+//            notifyFeignClient.postWebSocket(batchUpdateFieldStatusVO.getKey(),batchUpdateFieldStatusVO.getUserId().toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
+            messageClient.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
         });
     }
 
@@ -278,7 +282,8 @@ public class FieldValueServiceImpl implements FieldValueService {
                 }
             }
             batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
-            notifyFeignClient.postWebSocket(batchUpdateFieldStatusVO.getKey(),batchUpdateFieldStatusVO.getUserId().toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
+//            notifyFeignClient.postWebSocket(batchUpdateFieldStatusVO.getKey(),batchUpdateFieldStatusVO.getUserId().toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
+            messageClient.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
         });
     }
 

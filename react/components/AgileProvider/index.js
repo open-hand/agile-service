@@ -9,7 +9,7 @@ import { PriorityContext } from '@/hooks/usePriorities';
 const { AppState } = stores;
 function wrapWithContexts(contexts, values, children) {
   return contexts.reduce((last, Context, index) => (
-    <Context.Provider value={values.get(index)}>
+    <Context.Provider value={values.get(Context)}>
       {last}
     </Context.Provider>
   ), children);
@@ -19,15 +19,18 @@ const AgileProvider = contexts => function AgileDataProvider({ children, project
   contexts.forEach((context, index) => {
     const { data: initData, refresh } = useContext(context);
     const [data, setData] = useState(initData);
-
+    
     const loadData = async (...args) => {
       if (AppState.currentMenuType.type === 'project') {
         const res = await refresh(...args);
-        dataRef.current.set(index, { data: res, refresh: loadData });
+        dataRef.current.set(context, { data: res, refresh: loadData });
         setData(res);
       }
     };
-    dataRef.current.set(context, { data, refresh: loadData });
+    // 初始化
+    if (!dataRef.current.get(context)) {
+      dataRef.current.set(context, { data, refresh: loadData });
+    }    
     useEffect(() => {
       loadData();
     }, [projectId]);

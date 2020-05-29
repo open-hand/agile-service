@@ -24,7 +24,14 @@ class PiApi {
    * @param artId 
    */
   getCurrent(programId: number, artId: number) {
-    return axios.get(`${this.prefix}/pi/query_doing_pi?program_id=${programId}&art_id=${artId}`);
+    return axios({
+      url: `${this.prefix}/pi/query_doing_pi`,
+      method: 'get',
+      params: {
+        program_id: programId,
+        art_id: artId
+      }
+    });
   }
 }
 

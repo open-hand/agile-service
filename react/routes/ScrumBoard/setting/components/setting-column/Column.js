@@ -87,7 +87,7 @@ class Column extends Component {
     return (
       <div className="c7n-scrumsetting-columnStatus">
         <Permission
-          service={['agile-service.board-column.updateBoardColumn']}
+          service={['choerodon.code.project.cooperation.iteration-plan.ps.column']}
           noAccessChildren={data.name}
         >
           <TextEditToggle
@@ -147,7 +147,7 @@ class Column extends Component {
                       }}
                       {...provided.dragHandleProps}
                     />
-                    <Permission service={['agile-service.board-column.deleteBoardColumn']}>
+                    <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.column.create']}>
                       <Icon
                         type="delete"
                         style={{
@@ -176,10 +176,7 @@ class Column extends Component {
                     }}
                   >
                     <Permission
-                      type={type}
-                      projectId={projectId}
-                      organizationId={orgId}
-                      service={['agile-service.board-column.updateColumnContraint']}
+                      service={['choerodon.code.project.cooperation.iteration-plan.ps.column']}
                       noAccessChildren={(
                         <span
                           style={{ minWidth: '110px' }}
@@ -214,10 +211,7 @@ class Column extends Component {
                       </TextEditToggle>
                     </Permission>
                     <Permission
-                      type={type}
-                      projectId={projectId}
-                      organizationId={orgId}
-                      service={['agile-service.board-column.updateColumnContraint']}
+                      service={['choerodon.code.project.cooperation.iteration-plan.ps.column']}
                       noAccessChildren={(
                         <span
                           style={{ minWidth: '110px' }}
@@ -255,10 +249,7 @@ class Column extends Component {
                 </div>
               </div>
               <Permission
-                type={type}
-                projectId={projectId}
-                organizationId={orgId}
-                service={['agile-service.issue-status.moveStatusToColumn']}
+                service={['choerodon.code.project.cooperation.iteration-plan.ps.movetocolomn']}
                 noAccessChildren={(
                   <StatusList data={data} isDragDisabled />
                 )}

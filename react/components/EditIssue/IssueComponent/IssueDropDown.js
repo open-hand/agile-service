@@ -99,7 +99,7 @@ const IssueDropDown = ({
       )}
       {
         <Permission
-          service={['agile-service.issue.deleteIssue']}
+          service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
           key="1"
           noAccessChildren={(
             <Menu.Item

@@ -1,7 +1,9 @@
 package io.choerodon.agile.infra.dto;
 
 import io.choerodon.agile.infra.utils.StringUtil;
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -13,10 +15,12 @@ import javax.persistence.Table;
  * @since 2018/5/30
  */
 @Table(name = "agile_project_info")
-public class ProjectInfoDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class ProjectInfoDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long infoId;
 
     private Long projectId;

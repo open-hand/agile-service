@@ -16,13 +16,11 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.*;
@@ -165,14 +163,8 @@ public class DataLogAspect {
     private StatusService statusService;
     @Autowired
     private WikiRelationMapper wikiRelationMapper;
-
-
-    private ModelMapper modelMapper = new ModelMapper();
-
-    @PostConstruct
-    public void init() {
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    }
+    @Autowired
+    private ModelMapper modelMapper;
 
     /**
      * 定义拦截规则：拦截Spring管理的后缀为ServiceImpl的bean中带有@DataLog注解的方法。
@@ -1239,7 +1231,7 @@ public class DataLogAspect {
             PriorityVO currentPriorityVO = priorityService.queryById(ConvertUtil.getOrganizationId(originIssueDTO.getProjectId()), issueConvertDTO.getPriorityId());
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                     FIELD_PRIORITY, originPriorityVO.getName()
-                    , currentPriorityVO.getName(), originIssueDTO.getProjectId().toString(), issueConvertDTO.getPriorityId().toString());
+                    , currentPriorityVO.getName(), originIssueDTO.getPriorityId().toString(), issueConvertDTO.getPriorityId().toString());
             redisUtil.deleteRedisCache(new String[]{PIECHART + originIssueDTO.getProjectId() + ':' + FIELD_PRIORITY + "*"});
         }
     }

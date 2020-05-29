@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {
-  Input, Icon, Select,
+  Input, Icon, Select, Tooltip,
 } from 'choerodon-ui';
 import { observer, inject } from 'mobx-react';
 import { configTheme } from '@/utils/common';
@@ -106,11 +106,14 @@ class SideIssueList extends Component {
             onChange={this.setFilter.bind(this, 'versionList')}
             getPopupContainer={trigger => trigger.parentNode}
             placeholder="版本"
+            dropdownStyle={{
+              width: 180,
+            }}
           >
             {versionList.concat({
               value: '0',
               text: '无版本',
-            }).map(({ text, value }) => <Option value={value}>{text}</Option>)}
+            }).map(({ text, value }) => <Option value={value}><Tooltip title={text}>{text}</Tooltip></Option>)}
           </Select>
 
         </div>

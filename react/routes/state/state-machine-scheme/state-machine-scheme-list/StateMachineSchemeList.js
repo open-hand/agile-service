@@ -368,9 +368,7 @@ function StateMachineSchemeList(props) {
     return (
       <Page
         service={[
-          'agile-service.state-machine-scheme.pagingQuery',
-          'agile-service.state-machine-scheme.update',
-          'agile-service.state-machine.queryStateMachineWithConfigDraftById',
+          'choerodon.code.organization.setting.issue.states.ps.scheme',
         ]}
       >
         <Breadcrumb />

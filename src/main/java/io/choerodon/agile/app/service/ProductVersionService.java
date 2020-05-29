@@ -1,11 +1,10 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.*;
-import com.github.pagehelper.PageInfo;
+import io.choerodon.core.domain.Page;
 import io.choerodon.agile.infra.dto.ProductVersionDTO;
-import org.springframework.data.domain.Pageable;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -20,7 +19,7 @@ public interface ProductVersionService {
 
     ProductVersionDetailVO updateVersion(Long projectId, Long versionId, ProductVersionUpdateVO versionUpdateDTO, List<String> fieldList);
 
-    PageInfo<ProductVersionPageVO> queryByProjectId(Long projectId, Pageable pageable, SearchVO searchVO);
+    Page<ProductVersionPageVO> queryByProjectId(Long projectId, PageRequest pageRequest, SearchVO searchVO);
 
     Boolean repeatName(Long projectId, String name);
 

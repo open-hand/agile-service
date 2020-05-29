@@ -511,6 +511,12 @@ class ScrumBoardStore {
     return this.sprintName;
   }
 
+  @observable selectSprint = undefined;
+
+  @action setSelectSprint = (data) => {
+    this.selectSprint = data;
+  }
+
   @observable sprintNotClosedArray = [];
 
   @action setSprintNotClosedArray = (sprintNotClosedArray) => {
@@ -761,7 +767,7 @@ class ScrumBoardStore {
   axiosGetWorkSetting(year) {
     const proId = AppState.currentMenuType.id;
     const orgId = AppState.currentMenuType.organizationId;
-    return axios.get(`/base/v1/projects/${proId}/time_zone_work_calendars/time_zone_detail/${orgId}?year=${year}`).then((data) => {
+    return axios.get(`/iam/choerodon/v1/projects/${proId}/time_zone_work_calendars/time_zone_detail/${orgId}?year=${year}`).then((data) => {
       if (data) {
         this.setWorkSetting(data);
       }

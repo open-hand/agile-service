@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
@@ -9,7 +10,7 @@ import java.math.BigDecimal;
  * @Date 2018/8/21
  */
 
-public class PriorityVO {
+public class PriorityVO implements Serializable{
     @ApiModelProperty(value = "优先级id")
     private Long id;
     @ApiModelProperty(value = "名称")

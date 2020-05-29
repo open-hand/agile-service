@@ -845,7 +845,7 @@ class VersionBurndown extends Component {
     const { checkbox, tabActiveKey, linkFromParamUrl } = this.state;
     const urlParams = AppState.currentMenuType;
     return (
-      <Page className="c7n-versionBurndown">
+      <Page className="c7n-versionBurndown" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.versionburndown']}>
         <Header
           title="版本燃耗图"
           // backPath={`/agile/${linkFromParamUrl || 'reporthost'}?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}

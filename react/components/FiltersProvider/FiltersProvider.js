@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { userApi, componentApi } from '@/api';
 import {
-  loadIssueTypes, loadStatusList, loadPriorities, loadLabels, loadComponents, loadVersions, loadEpics, loadSprints,
+  loadIssueTypes, loadStatusList, loadPriorities, loadLabels, loadVersions, loadEpics, loadSprints,
 } from '../../api/NewIssueApi';
-import { getUsers } from '../../api/CommonApi';
 
 const requests = {
   issueType: {
@@ -24,7 +24,7 @@ const requests = {
   user: {
     textField: 'name',
     valueField: 'id',
-    request: getUsers,
+    request: userApi.getAllInProject.bind(userApi),
   },
   sprint: {
     textField: 'sprintName',
@@ -45,7 +45,7 @@ const requests = {
     isContent: true,
     textField: 'name',
     valueField: 'componentId',
-    request: loadComponents,
+    request: componentApi.loadAllComponents,
   },
   epic: {
     textField: 'epicName',

@@ -1,9 +1,8 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import io.choerodon.web.util.PageableHelper;
-import org.springframework.data.domain.Pageable;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.agile.api.vo.PageSearchVO;
 import io.choerodon.agile.api.vo.PageVO;
 import io.choerodon.agile.app.service.PageService;
@@ -23,17 +22,18 @@ import java.util.List;
  */
 @Service
 public class PageServiceImpl implements PageService {
+
     @Autowired
     private PageMapper pageMapper;
+
     @Autowired
     private ModelMapper modelMapper;
 
     @Override
-    public PageInfo<PageVO> pageQuery(Long organizationId, Pageable pageable, PageSearchVO searchDTO) {
-        PageInfo<PageDTO> page = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(),
-                PageableHelper.getSortSql(pageable.getSort())).doSelectPageInfo(() -> pageMapper.fulltextSearch(organizationId, searchDTO));
+    public Page<PageVO> pageQuery(Long organizationId, PageRequest pageRequest, PageSearchVO searchDTO) {
+        Page<PageDTO> page = PageHelper.doPageAndSort(pageRequest, () -> pageMapper.fulltextSearch(organizationId, searchDTO));
         return PageUtil.buildPageInfoWithPageInfoList(page,
-                modelMapper.map(page.getList(), new TypeToken<List<PageVO>>() {
+                modelMapper.map(page.getContent(), new TypeToken<List<PageVO>>() {
                 }.getType()));
     }
 }

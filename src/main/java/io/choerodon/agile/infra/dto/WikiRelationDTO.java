@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,10 +14,12 @@ import javax.persistence.Table;
  * Email: fuqianghuang01@gmail.com
  */
 @Table(name = "agile_wiki_relation")
-public class WikiRelationDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class WikiRelationDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
     private Long projectId;

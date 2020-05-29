@@ -1,7 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.domain.PageInfo;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.IssueTypeService;
 import io.choerodon.agile.app.service.StateMachineSchemeConfigService;
@@ -10,8 +10,8 @@ import io.choerodon.agile.infra.dto.IssueTypeDTO;
 import io.choerodon.agile.infra.enums.InitIssueType;
 import io.choerodon.agile.infra.mapper.IssueTypeMapper;
 import io.choerodon.agile.infra.utils.PageUtil;
-import io.choerodon.web.util.PageableHelper;
-import org.springframework.data.domain.Pageable;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -108,11 +108,11 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public PageInfo<IssueTypeWithInfoVO> queryIssueTypeList(Pageable pageable, Long organizationId, IssueTypeSearchVO issueTypeSearchVO) {
-        PageInfo<Long> issuetypeIdsPage = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(), PageableHelper.getSortSql(pageable.getSort())).doSelectPageInfo(() -> issueTypeMapper.selectIssueTypeIds(organizationId, issueTypeSearchVO));
-        List<IssueTypeWithInfoVO> issueTypeWithInfoVOList = new ArrayList<>(issuetypeIdsPage.getList().size());
-        if (issuetypeIdsPage.getList() != null && !issuetypeIdsPage.getList().isEmpty()) {
-            issueTypeWithInfoVOList.addAll(modelMapper.map(issueTypeMapper.queryIssueTypeList(organizationId, issuetypeIdsPage.getList()), new TypeToken<List<IssueTypeWithInfoVO>>() {
+    public Page<IssueTypeWithInfoVO> queryIssueTypeList(PageRequest pageRequest, Long organizationId, IssueTypeSearchVO issueTypeSearchVO) {
+        Page<Long> issuetypeIdsPage = PageHelper.doPageAndSort(pageRequest, () -> issueTypeMapper.selectIssueTypeIds(organizationId, issueTypeSearchVO));
+        List<IssueTypeWithInfoVO> issueTypeWithInfoVOList = new ArrayList<>(issuetypeIdsPage.getContent().size());
+        if (issuetypeIdsPage.getContent() != null && !issuetypeIdsPage.getContent().isEmpty()) {
+            issueTypeWithInfoVOList.addAll(modelMapper.map(issueTypeMapper.queryIssueTypeList(organizationId, issuetypeIdsPage.getContent()), new TypeToken<List<IssueTypeWithInfoVO>>() {
             }.getType()));
         }
 

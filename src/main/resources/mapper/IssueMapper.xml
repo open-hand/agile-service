@@ -1277,17 +1277,17 @@
         </foreach>
     </insert>
 
-    <select id="queryInVersionIssueIds" resultType="java.lang.Long">
-        SELECT DISTINCT(ai.issue_id)
-        FROM agile_issue ai
-        LEFT JOIN agile_version_issue_rel avir ON avir.issue_id = ai.issue_id
-        WHERE ai.project_id = #{projectId} AND avir.version_id = #{versionId}
-        AND ai.issue_id IN
-        <foreach collection="issueIds" item="issueId" open="("
-                 separator="," close=")">
-            #{issueId}
-        </foreach>
-    </select>
+    <!--<select id="queryInVersionIssueIds" resultType="java.lang.Long">-->
+        <!--SELECT DISTINCT(ai.issue_id)-->
+        <!--FROM agile_issue ai-->
+        <!--LEFT JOIN agile_version_issue_rel avir ON avir.issue_id = ai.issue_id-->
+        <!--WHERE ai.project_id = #{projectId} AND avir.version_id = #{versionId}-->
+        <!--AND ai.issue_id IN-->
+        <!--<foreach collection="issueIds" item="issueId" open="("-->
+                 <!--separator="," close=")">-->
+            <!--#{issueId}-->
+        <!--</foreach>-->
+    <!--</select>-->
 
     <update id="batchIssueToEpic">
         UPDATE agile_issue
@@ -2081,61 +2081,61 @@
         LIMIT 1;
     </select>
 
-    <select id="issueStatistic" resultType="io.choerodon.agile.infra.dto.PieChartDTO">
-        select * from (
-        SELECT
-        <if test="type!=null and type!=''">
-            <if test="type == 'component'">
-                other.component_id AS type_name,
-                otherName.name as name,
-            </if>
-            <if test="type == 'version'">
-                other.version_id AS type_name,
-                otherName.name as name,
-            </if>
-            <if test="type == 'label'">
-                other.label_id AS type_name,
-                otherName.label_name as name,
-            </if>
-        </if>
-        count( * ) AS value
-        FROM
-        agile_issue ai
-        <if test="type!=null and type!=''">
-            <if test="type == 'component'">
-                LEFT JOIN agile_component_issue_rel other on ai.issue_id = other.issue_id
-                LEFT JOIN agile_issue_component otherName on other.component_id = otherName.component_id
-            </if>
-            <if test="type == 'version'">
-                LEFT JOIN agile_version_issue_rel other on ai.issue_id = other.issue_id and other.relation_type = 'fix'
-                LEFT JOIN agile_product_version otherName on other.version_id = otherName.version_id
-            </if>
-            <if test="type == 'label'">
-                LEFT JOIN agile_label_issue_rel other on ai.issue_id = other.issue_id
-                LEFT JOIN agile_issue_label otherName on other.label_id = otherName.label_id
-            </if>
-        </if>
-        WHERE
-        ai.project_id = #{projectId}
-        <if test="issueTypes!=null and issueTypes.size > 0">
-            <foreach collection="issueTypes" item="issueType">
-                AND ai.type_code != #{issueType}
-            </foreach>
-        </if>
-        <if test="type!=null and type!=''">
-            GROUP BY
-            <if test="type == 'component'">
-                other.component_id
-            </if>
-            <if test="type == 'version'">
-                other.version_id
-            </if>
-            <if test="type == 'label'">
-                other.label_id
-            </if>
-        </if>
-        )pieData ORDER BY pieData.value DESC
-    </select>
+    <!--<select id="issueStatistic" resultType="io.choerodon.agile.infra.dto.PieChartDTO">-->
+        <!--select * from (-->
+        <!--SELECT-->
+        <!--<if test="type!=null and type!=''">-->
+            <!--<if test="type == 'component'">-->
+                <!--other.component_id AS type_name,-->
+                <!--otherName.name as name,-->
+            <!--</if>-->
+            <!--<if test="type == 'version'">-->
+                <!--other.version_id AS type_name,-->
+                <!--otherName.name as name,-->
+            <!--</if>-->
+            <!--<if test="type == 'label'">-->
+                <!--other.label_id AS type_name,-->
+                <!--otherName.label_name as name,-->
+            <!--</if>-->
+        <!--</if>-->
+        <!--count( * ) AS value-->
+        <!--FROM-->
+        <!--agile_issue ai-->
+        <!--<if test="type!=null and type!=''">-->
+            <!--<if test="type == 'component'">-->
+                <!--LEFT JOIN agile_component_issue_rel other on ai.issue_id = other.issue_id-->
+                <!--LEFT JOIN agile_issue_component otherName on other.component_id = otherName.component_id-->
+            <!--</if>-->
+            <!--<if test="type == 'version'">-->
+                <!--LEFT JOIN agile_version_issue_rel other on ai.issue_id = other.issue_id and other.relation_type = 'fix'-->
+                <!--LEFT JOIN agile_product_version otherName on other.version_id = otherName.version_id-->
+            <!--</if>-->
+            <!--<if test="type == 'label'">-->
+                <!--LEFT JOIN agile_label_issue_rel other on ai.issue_id = other.issue_id-->
+                <!--LEFT JOIN agile_issue_label otherName on other.label_id = otherName.label_id-->
+            <!--</if>-->
+        <!--</if>-->
+        <!--WHERE-->
+        <!--ai.project_id = #{projectId}-->
+        <!--<if test="issueTypes!=null and issueTypes.size > 0">-->
+            <!--<foreach collection="issueTypes" item="issueType">-->
+                <!--AND ai.type_code != #{issueType}-->
+            <!--</foreach>-->
+        <!--</if>-->
+        <!--<if test="type!=null and type!=''">-->
+            <!--GROUP BY-->
+            <!--<if test="type == 'component'">-->
+                <!--other.component_id-->
+            <!--</if>-->
+            <!--<if test="type == 'version'">-->
+                <!--other.version_id-->
+            <!--</if>-->
+            <!--<if test="type == 'label'">-->
+                <!--other.label_id-->
+            <!--</if>-->
+        <!--</if>-->
+        <!--)pieData ORDER BY pieData.value DESC-->
+    <!--</select>-->
 
     <select id="countIssueByProjectId" resultType="java.lang.Integer">
         select count(ai.issue_id)
@@ -2463,35 +2463,35 @@
             aaa.add_date IS NOT NULL order by aaa.add_date asc
     </select>
 
-    <select id="queryByIssueIds" resultMap="issueDetail">
-        SELECT
-        ai.issue_id,
-        ai.type_code,
-        ai.status_id,
-        ai.summary,
-        ai.priority_code,
-        ai.reporter_id,
-        ai.description,
-        ai.assignee_id,
-        ai.project_id,
-        ai.issue_type_id,
-        ai.priority_id
-        FROM
-        agile_issue ai
-        WHERE
-        ai.project_id = #{projectId}
-        AND ai.apply_type = 'test'
-        AND ai.issue_id IN
-        <foreach collection="issueIds" item="issueId" open="(" separator="," close=")">
-            #{issueId}
-        </foreach>
-        ORDER BY
-        field(ai.issue_id,
-        <foreach collection="issueIds" item="issueId" separator=",">
-            #{issueId}
-        </foreach>
-        );
-    </select>
+    <!--<select id="queryByIssueIds" resultMap="issueDetail">-->
+        <!--SELECT-->
+        <!--ai.issue_id,-->
+        <!--ai.type_code,-->
+        <!--ai.status_id,-->
+        <!--ai.summary,-->
+        <!--ai.priority_code,-->
+        <!--ai.reporter_id,-->
+        <!--ai.description,-->
+        <!--ai.assignee_id,-->
+        <!--ai.project_id,-->
+        <!--ai.issue_type_id,-->
+        <!--ai.priority_id-->
+        <!--FROM-->
+        <!--agile_issue ai-->
+        <!--WHERE-->
+        <!--ai.project_id = #{projectId}-->
+        <!--AND ai.apply_type = 'test'-->
+        <!--AND ai.issue_id IN-->
+        <!--<foreach collection="issueIds" item="issueId" open="(" separator="," close=")">-->
+            <!--#{issueId}-->
+        <!--</foreach>-->
+        <!--ORDER BY-->
+        <!--field(ai.issue_id,-->
+        <!--<foreach collection="issueIds" item="issueId" separator=",">-->
+            <!--#{issueId}-->
+        <!--</foreach>-->
+        <!--);-->
+    <!--</select>-->
 
     <select id="selectMaxRankByProjectId" resultType="java.lang.String">
         select ai.map_rank
@@ -2502,30 +2502,30 @@
         limit 1
     </select>
 
-    <select id="selectIssueIdsByProjectId" resultType="java.lang.Long">
-        select issue_id
-        from agile_issue
-        where project_id = #{projectId}
-        and type_code in ('story', 'task', 'bug')
-        order by map_rank, issue_id
-    </select>
+    <!--<select id="selectIssueIdsByProjectId" resultType="java.lang.Long">-->
+        <!--select issue_id-->
+        <!--from agile_issue-->
+        <!--where project_id = #{projectId}-->
+        <!--and type_code in ('story', 'task', 'bug')-->
+        <!--order by map_rank, issue_id-->
+    <!--</select>-->
 
-    <update id="updateMapRank">
-        UPDATE agile_issue
-        <trim prefix="set" suffixOverrides=",">
-            <trim prefix="map_rank =case" suffix="end,">
-                <foreach collection="mapMoveIssueDOS" item="moveIssue">
-                    when issue_id = #{moveIssue.issueId} then #{moveIssue.mapRank}
-                </foreach>
-            </trim>
-        </trim>
-        WHERE project_id = #{projectId} and type_code in ('story', 'task', 'bug')
-        AND issue_id IN
-        <foreach collection="mapMoveIssueDOS" item="moveIssue" open="("
-                 separator="," close=")">
-            #{moveIssue.issueId,jdbcType=BIGINT}
-        </foreach>
-    </update>
+    <!--<update id="updateMapRank">-->
+        <!--UPDATE agile_issue-->
+        <!--<trim prefix="set" suffixOverrides=",">-->
+            <!--<trim prefix="map_rank =case" suffix="end,">-->
+                <!--<foreach collection="mapMoveIssueDOS" item="moveIssue">-->
+                    <!--when issue_id = #{moveIssue.issueId} then #{moveIssue.mapRank}-->
+                <!--</foreach>-->
+            <!--</trim>-->
+        <!--</trim>-->
+        <!--WHERE project_id = #{projectId} and type_code in ('story', 'task', 'bug')-->
+        <!--AND issue_id IN-->
+        <!--<foreach collection="mapMoveIssueDOS" item="moveIssue" open="("-->
+                 <!--separator="," close=")">-->
+            <!--#{moveIssue.issueId,jdbcType=BIGINT}-->
+        <!--</foreach>-->
+    <!--</update>-->
 
     <select id="queryIssueIdsIsTest" resultType="java.lang.Integer">
         select count(1)
@@ -2603,16 +2603,16 @@
 
     </select>
 
-    <select id="queryIssueTestGroupByProject" resultMap="issueProject">
-        SELECT
-            api.project_id,
-            ai.issue_id
-        FROM
-            agile_project_info api
-            LEFT JOIN agile_issue ai ON ai.project_id = api.project_id
-        WHERE
-            ai.apply_type = 'test'
-    </select>
+    <!--<select id="queryIssueTestGroupByProject" resultMap="issueProject">-->
+        <!--SELECT-->
+            <!--api.project_id,-->
+            <!--ai.issue_id-->
+        <!--FROM-->
+            <!--agile_project_info api-->
+            <!--LEFT JOIN agile_issue ai ON ai.project_id = api.project_id-->
+        <!--WHERE-->
+            <!--ai.apply_type = 'test'-->
+    <!--</select>-->
 
     <resultMap id="issueProject" type="io.choerodon.agile.infra.dto.IssueProjectDTO">
         <id property="projectId" column="project_id"/>
@@ -2730,19 +2730,19 @@
         </foreach>
     </select>
 
-    <select id="queryIssueByIssueNum" resultType="io.choerodon.agile.infra.dto.IssueNumDTO">
-        SELECT
-        ai.issue_id, ai.summary,
-        ai.project_id, ai.type_code,
-        ai.issue_type_id,
-        CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num
-        FROM agile_issue ai
-        LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
-        WHERE ai.project_id = #{projectId}
-        AND ai.type_code in ('story', 'task', 'bug')
-        AND ai.apply_type = 'agile'
-        AND ai.issue_num = #{issueNum}
-    </select>
+    <!--<select id="queryIssueByIssueNum" resultType="io.choerodon.agile.infra.dto.IssueNumDTO">-->
+        <!--SELECT-->
+        <!--ai.issue_id, ai.summary,-->
+        <!--ai.project_id, ai.type_code,-->
+        <!--ai.issue_type_id,-->
+        <!--CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num-->
+        <!--FROM agile_issue ai-->
+        <!--LEFT JOIN agile_project_info api ON ai.project_id = api.project_id-->
+        <!--WHERE ai.project_id = #{projectId}-->
+        <!--AND ai.type_code in ('story', 'task', 'bug')-->
+        <!--AND ai.apply_type = 'agile'-->
+        <!--AND ai.issue_num = #{issueNum}-->
+    <!--</select>-->
 
     <update id="updateSubBugRelateIssueId">
         update agile_issue

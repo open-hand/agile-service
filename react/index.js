@@ -9,15 +9,16 @@ import 'moment/locale/zh-cn';
 import 'moment/locale/en-nz';
 import moment from 'moment';
 import AgileProvider from '@/components/AgileProvider';
+import RunWhenProjectChange from '@/common/RunWhenProjectChange';
 import IsInProgramStore from './stores/common/program/IsInProgramStore';
-import RunWhenProjectChange from './common/RunWhenProjectChange';
+
 import './style/index.less';
 
 const ScrumBoard = React.lazy(() => import('./routes/ScrumBoard'));
 const ReportHost = React.lazy(() => import('./routes/ReportHost'));
 const StoryMap = React.lazy(() => import('./routes/StoryMap'));
 const IterationBoard = React.lazy(() => import('./routes/IterationBoard'));
-const WorkList = React.lazy(() => import('./routes/work-list'));
+const WorkList = React.lazy(() => import('./routes/WorkList'));
 const IssueType = React.lazy(() => import('./routes/issueType'));
 const Priority = React.lazy(() => import('./routes/priority'));
 const State = React.lazy(() => import('./routes/state'));

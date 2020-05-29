@@ -47,7 +47,7 @@ function IssueTypeList() {
     <Page
       className={prefixCls}
       service={[
-        'agile-service.issue-type.queryIssueTypeList',
+        'choerodon.code.organization.setting.issue.issue-type.ps.default',
       ]}
     >
       <Breadcrumb />

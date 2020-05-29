@@ -60,10 +60,7 @@ function SprintHeader({ data }) {
           />
           <SprintIcon sprintType={sprintType} />
           <Permission
-            type={projectType}
-            projectId={projectId}
-            organizationId={orgId}
-            service={[IsInProgramStore.isInProgram ? 'agile-service.sprint-pro.updateSubProjectSprint' : 'agile-service.sprint.updateSprint']}
+            service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
             noAccessChildren={(
               <SprintName            
                 data={data}
@@ -94,10 +91,7 @@ function SprintHeader({ data }) {
         </div>
         <div className={`${prefix}-bottom`}>
           <Permission
-            type={projectType}
-            projectId={projectId}
-            organizationId={orgId}
-            service={[IsInProgramStore.isInProgram ? 'agile-service.sprint-pro.updateSubProjectSprint' : 'agile-service.sprint.updateSprint']}
+            service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
             noAccessChildren={(
               <SprintDateRange            
                 data={data}
@@ -110,10 +104,7 @@ function SprintHeader({ data }) {
             />
           </Permission>
           <Permission
-            type={projectType}
-            projectId={projectId}
-            organizationId={orgId}
-            service={[IsInProgramStore.isInProgram ? 'agile-service.sprint-pro.updateSubProjectSprint' : 'agile-service.sprint.updateSprint']}
+            service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
             noAccessChildren={(
               <SprintGoal            
                 data={data}

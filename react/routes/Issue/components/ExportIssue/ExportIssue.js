@@ -4,6 +4,7 @@ import { observer } from 'mobx-react';
 import { Modal, Radio } from 'choerodon-ui';
 import FileSaver from 'file-saver';
 import IssueStore from '@/stores/project/issue/IssueStore';
+import { find } from 'lodash';
 
 const RadioGroup = Radio.Group;
 const { AppState } = stores;
@@ -55,7 +56,7 @@ class ExportIssue extends Component {
       component: 'componentName',
     };
     const { tableRef } = this.props;
-    const columns = tableRef.current ? tableRef.current.tableStore.columns.filter(column => !column.hidden) : [];
+    const columns = tableRef.current ? tableRef.current.tableStore.columns.filter(column => column.name && !column.hidden) : [];
     return columns.map(column => fieldTransform[column.name] || column.name);
   };
 
@@ -68,7 +69,7 @@ class ExportIssue extends Component {
     const searchDTO = IssueStore.getCustomFieldFilters();
     const { mode } = this.state;
     const { dataSet } = this.props;
-    const sort = dataSet.sort && `${dataSet.sort},${dataSet.isAsc ? 'asc' : 'desc'}`;
+    const field = find([...dataSet.fields.values()], f => f.order);
     const tableShowColumns = mode === 'all' ? [] : this.getVisibleColumns();
     const search = {
       ...searchDTO,
@@ -77,18 +78,26 @@ class ExportIssue extends Component {
     this.setState({
       loading: true,
     });
-    axios.post(`/zuul/agile/v1/projects/${projectId}/issues/export?organizationId=${orgId}${sort ? `&sort=${sort}` : ''}`, search, { responseType: 'arraybuffer' })
-      .then((data) => {
-        const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const fileName = `${AppState.currentMenuType.name}.xlsx`;
-        FileSaver.saveAs(blob, fileName);
-        Choerodon.prompt('导出成功');
-        IssueStore.setExportModalVisible(false);
-      }).finally(() => {
-        this.setState({
-          loading: false,
-        });
+    axios({
+      url: `/agile/v1/projects/${projectId}/issues/export`,
+      method: 'post',
+      data: search,
+      params: {
+        organizationId: orgId,
+        sort: field ? `${field.name},${field.order}` : undefined,
+      },
+      responseType: 'arraybuffer',
+    }).then((data) => {
+      const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const fileName = `${AppState.currentMenuType.name}.xlsx`;
+      FileSaver.saveAs(blob, fileName);
+      Choerodon.prompt('导出成功');
+      IssueStore.setExportModalVisible(false);
+    }).finally(() => {
+      this.setState({
+        loading: false,
       });
+    });
   };
 
   render() {

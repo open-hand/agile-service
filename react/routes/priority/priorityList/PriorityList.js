@@ -329,9 +329,7 @@ class PriorityList extends Component {
       <Page
         className="c7nagile-priority"
         service={[
-          'agile-service.priority.selectAll',
-          'agile-service.priority.checkName',
-          'agile-service.priority.create',
+          'choerodon.code.organization.setting.issue.priority.ps.default',
         ]}
       >
         <Header title={<FormattedMessage id="priority.title" />}>

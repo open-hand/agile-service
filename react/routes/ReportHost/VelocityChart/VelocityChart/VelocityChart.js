@@ -349,7 +349,7 @@ class VelocityChart extends Component {
     const { history } = this.props;
     const urlParams = AppState.currentMenuType;
     return (
-      <Page className="c7n-velocity">
+      <Page className="c7n-velocity" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.velocity_chart']}>
         <Header
           title="迭代速度图"
           backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}

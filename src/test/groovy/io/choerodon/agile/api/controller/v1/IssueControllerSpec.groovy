@@ -10,9 +10,9 @@ import io.choerodon.agile.infra.enums.SchemeApplyType
 import io.choerodon.agile.infra.utils.SiteMsgUtil
 import io.choerodon.agile.infra.dto.*
 import io.choerodon.agile.infra.mapper.*
-import com.github.pagehelper.PageInfo
+import io.choerodon.core.domain.PageInfo
 import io.choerodon.agile.app.service.UserService
-import org.springframework.data.domain.Pageable
+import io.choerodon.mybatis.pagehelper.domain.PageRequest
 import org.mockito.Matchers
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired

@@ -1,7 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.agile.api.vo.ProjectConfigDetailVO;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.swagger.annotations.ApiOperation;
@@ -25,7 +25,7 @@ public class ProjectConfigController {
     @Autowired
     ProjectConfigService projectConfigService;
 
-    @Permission(type = ResourceType.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "获取项目配置方案信息")
     @GetMapping
     public ResponseEntity<ProjectConfigDetailVO> queryById(@PathVariable("project_id") Long projectId) {

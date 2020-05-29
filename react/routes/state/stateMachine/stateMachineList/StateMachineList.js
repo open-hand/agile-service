@@ -337,10 +337,7 @@ class StateMachineList extends Component {
     return (
       <Page
         service={[
-          'agile-service.state-machine.pagingQuery',
-          'agile-service.state-machine.create',
-          'agile-service.state-machine.checkName',
-          'agile-service.state-machine.delete',
+          'choerodon.code.organization.setting.issue.states.ps.state-machine',
         ]}
       >
         <Header>

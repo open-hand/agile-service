@@ -2,7 +2,7 @@ import React, { Fragment, useState } from 'react';
 import {
   Radio, Select, message, Icon,
 } from 'choerodon-ui';
-import { loadComponents, deleteComponent } from '../../../../api/ComponentApi';
+import { componentApi } from '@/api';
 import './component.less';
 
 const RadioGroup = Radio.Group;
@@ -41,7 +41,7 @@ const DeleteComponent = (props) => {
     } else {
       localRelatedComponentId = relatedComponentId;
     }
-    await deleteComponent(componentId, localRelatedComponentId);
+    await componentApi.deleteComponent(componentId, localRelatedComponentId);
     props.onOk();
     return true;
   };
@@ -68,7 +68,7 @@ const DeleteComponent = (props) => {
           value={relatedComponentId}
           onChange={handleRelatedComponentChange}
           onFocus={() => {
-            loadComponents({ current: 1, pageSize: 999 }, filters, componentId).then((res) => {
+            componentApi.loadComponents({ current: 1, pageSize: 999 }, filters, componentId).then((res) => {
               setOriginComponents(res.list);
             });
           }}

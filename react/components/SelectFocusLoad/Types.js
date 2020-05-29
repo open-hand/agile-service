@@ -2,15 +2,17 @@
 import React from 'react';
 import { Select } from 'choerodon-ui';
 import { find } from 'lodash';
-import { getUsers, getUser, getSubProjects } from '@/api/CommonApi';
+import { userApi, componentApi } from '@/api';
+import { getSubProjects } from '@/api/CommonApi';
 import {
   loadEpics, loadProgramEpics, loadIssueTypes, loadPriorities,
-  loadComponents, loadLabels, loadVersions,
+  loadLabels, loadVersions,
   loadStatusList, loadIssuesInLink, loadFeaturesInLink, loadSprints,
   loadSprintsByTeam,
 } from '@/api/NewIssueApi';
-import IssueLinkType from '@/api/IssueLinkType';
+import { issueLinkTypeApi } from '@/api/IssueLinkType';
 import { featureApi, piApi } from '@/api';
+import { getTeamSprints } from '@/api/PIApi';
 import { Tooltip } from 'choerodon-ui/pro';
 import UserHead from '../UserHead';
 import TypeTag from '../TypeTag';
@@ -20,7 +22,9 @@ import { IsInProgramStore } from '../../exports';
 const filterOption = (input, option) => option.props.children && typeof (option.props.children) === 'string' && option.props.children.toLowerCase().indexOf(
   input.toLowerCase(),
 ) >= 0;
-
+const filterOptionByName = (input, option) => option.props.name && typeof (option.props.name) === 'string' && option.props.name.toLowerCase().indexOf(
+  input.toLowerCase(),
+) >= 0;
 function transform(links) {
   // split active and passive
   const active = links.map(link => ({
@@ -41,7 +45,7 @@ function transform(links) {
 
   return active.concat(passive);
 }
-const { Option } = Select;
+const { Option, OptGroup } = Select;
 const issue_type_program = {
   props: {
     filterOption,
@@ -67,7 +71,7 @@ const issue_type_program = {
 };
 export default {
   user: {
-    request: ({ filter, page }) => getUsers(filter, undefined, page).then(UserData => ({ ...UserData, list: UserData.list.filter(user => user.enabled) })),
+    request: ({ filter, page }) => userApi.getAllInProject(filter, page).then(UserData => ({ ...UserData, list: UserData.list.filter(user => user.enabled) })),
     render: user => (
       <Option key={user.id} value={user.id}>
         <div style={{
@@ -87,7 +91,7 @@ export default {
       const requestQue = [];
       values.forEach((a) => {
         if (a && typeof a === 'number' && !find(List, { id: a })) {
-          requestQue.push(getUser(a));
+          requestQue.push(userApi.getById(a));
         }
       });
       Promise.all(requestQue).then((users) => {
@@ -220,7 +224,7 @@ export default {
       filterOption: false,
       loadWhenMount: true,
     },
-    request: () => new Promise(resolve => IssueLinkType.queryAll().then((res) => { resolve(transform(res.list)); })),
+    request: () => issueLinkTypeApi.getAll().then(res => transform(res.list)),
     render: link => (
       <Option value={`${link.linkTypeId}+${link.isIn}`}>
         {link.name}
@@ -340,7 +344,7 @@ export default {
       filterOption: false,
       loadWhenMount: true,
     },
-    request: ({ filter }) => loadComponents(filter),
+    request: ({ filter }) => componentApi.loadAllComponents(filter),
     render: component => (
       <Option
         key={component.name}
@@ -450,7 +454,7 @@ export default {
     ),
   },
   feature: {
-    request: ({ filter, page }, requestArgs) => featureApi.getByEpicId({ filter, page }, requestArgs),
+    request: ({ filter, page }, requestArgs) => featureApi.getByEpicId(requestArgs),
     render: item => (
       <Option key={`${item.issueId}`} value={item.issueId}>{item.summary}</Option>
     ),
@@ -474,15 +478,33 @@ export default {
   sub_project: {
     props: {
       getPopupContainer: triggerNode => triggerNode.parentNode,
-      filterOption,
+      filterOption: filterOptionByName,
       onFilterChange: false,
       loadWhenMount: true,
     },
     request: () => getSubProjects(true),
     render: pro => (
-      <Option key={pro.projectId} value={pro.projectId}>
-        {pro.projName}
+      <Option key={pro.projectId} value={pro.projectId} name={pro.projName}>
+        <Tooltip title={pro.projName}>{pro.projName}</Tooltip>
       </Option>
+    ),
+  },
+  sub_sprint: {
+    props: {
+      getPopupContainer: triggerNode => triggerNode.parentNode,
+      filterOption,
+      onFilterChange: false,
+      loadWhenMount: true,
+    },
+    request: ({ filter, page }, { piId, teamIds }) => getTeamSprints(piId, teamIds),
+    render: team => (
+      <OptGroup label={team.projectVO.name} key={team.projectVO.id}>
+        {(team.sprints || []).map(sprint => (
+          <Option key={`${sprint.sprintId}`} value={sprint.sprintId}>
+            <Tooltip placement="topRight" title={sprint.sprintName}>{sprint.sprintName}</Tooltip>
+          </Option>
+        ))}
+      </OptGroup>
     ),
   },
 };

@@ -1,7 +1,9 @@
 package io.choerodon.agile.infra.dto;
 
 import io.choerodon.agile.infra.utils.StringUtil;
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.*;
 import java.util.List;
@@ -11,10 +13,12 @@ import java.util.List;
  * @since 2018/10/12
  */
 @Table(name = "agile_time_zone_work_calendar")
-public class TimeZoneWorkCalendarDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class TimeZoneWorkCalendarDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long timeZoneId;
 
     private String areaCode;

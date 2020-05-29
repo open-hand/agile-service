@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -10,9 +12,11 @@ import java.math.BigDecimal;
  * @Date 2018/8/21
  */
 @Table(name = "fd_priority")
-public class PriorityDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class PriorityDTO extends AuditDomain {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
     private String name;

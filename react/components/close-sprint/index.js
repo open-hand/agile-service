@@ -39,6 +39,7 @@ class CloseSprint extends Component {
     };
     axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/complete`, data).then((res) => {
       modal.close();
+      console.log('completed');
       if (afterClose) {
         afterClose();
       } 

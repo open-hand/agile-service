@@ -1,12 +1,12 @@
 package io.choerodon.agile.api.vo.event;
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 /**
  * @author shinan.chen
  * @date 2018/11/22
  */
-public class ProjectConfig extends BaseDTO {
+public class ProjectConfig extends AuditDomain {
     private Long id;
     private Long projectId;
     private Long schemeId;

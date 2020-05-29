@@ -17,7 +17,7 @@ import io.choerodon.agile.infra.mapper.StateMachineSchemeConfigMapper;
 import io.choerodon.agile.infra.mapper.StateMachineSchemeMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.entity.Criteria;
+import org.hzero.mybatis.common.Criteria;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -140,9 +140,9 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
         //更新草稿
         StateMachineSchemeConfigDraftDTO defaultConfig = configDraftMapper.selectDefault(organizationId, schemeId);
         defaultConfig.setStateMachineId(stateMachineId);
-        Criteria criteria = new Criteria();
-        criteria.update("stateMachineId");
-        configDraftMapper.updateByPrimaryKeyOptions(defaultConfig, criteria);
+//        Criteria criteria = new Criteria();
+//        criteria.update("stateMachineId");
+        configDraftMapper.updateOptional(defaultConfig, "stateMachineId");
     }
 
     @Override
@@ -311,9 +311,9 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
         //更新状态机方案状态为：活跃
         StateMachineSchemeDTO scheme = schemeMapper.selectByPrimaryKey(schemeId);
         scheme.setStatus(StateMachineSchemeStatus.ACTIVE);
-        Criteria criteria = new Criteria();
-        criteria.update("status");
-        schemeMapper.updateByPrimaryKeyOptions(scheme, criteria);
+//        Criteria criteria = new Criteria();
+//        criteria.update("status");
+        schemeMapper.updateOptional(scheme, "status");
         //发布后，再进行状态增加与减少的判断，并发送saga
         ChangeStatus changeStatus = new ChangeStatus(addStatusIds, deleteStatusIds);
         //发布之前，更新deployStatus为doing
@@ -473,9 +473,9 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
         //更新状态机方案状态为：活跃
         StateMachineSchemeDTO scheme = schemeMapper.selectByPrimaryKey(schemeId);
         scheme.setStatus(StateMachineSchemeStatus.ACTIVE);
-        Criteria criteria = new Criteria();
-        criteria.update("status");
-        schemeMapper.updateByPrimaryKeyOptions(scheme, criteria);
+//        Criteria criteria = new Criteria();
+//        criteria.update("status");
+        schemeMapper.updateOptional(scheme, "status");
         return stateMachineSchemeService.querySchemeWithConfigById(false, organizationId, schemeId);
     }
 

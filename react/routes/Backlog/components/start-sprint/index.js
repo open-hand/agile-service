@@ -74,6 +74,9 @@ class StartSprint extends Component {
   };
 
   getWorkDays = (startDate, endDate) => {
+    if (moment(startDate).isAfter(moment(endDate))) {
+      return 0;
+    }
     // 是否显示非工作日
     const { workSetting } = this.props;
     const {

@@ -33,6 +33,7 @@ function WSJF({ getFieldDecorator }) {
       </FormItem>
       <FormItem key="jobSize">
         {getFieldDecorator('jobSize', {
+          initialValue: '1',
         })(
           <SelectNumber label="工作规模" selectNumbers={['1', '2', '3', '5', '8', '13', '20']} />,
         )}

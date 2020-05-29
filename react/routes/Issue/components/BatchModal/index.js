@@ -12,7 +12,6 @@ import { getProjectId, getOrganizationId } from '@/utils/common';
 import { batchUpdateIssue } from '@/api/NewIssueApi';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import WSProvider from '@choerodon/master/lib/containers/components/c7n/tools/ws/WSProvider';
-import { WEBSOCKET_SERVER } from '@choerodon/master/lib/containers/common';
 import useFields from './useFields';
 import renderField from './renderField';
 import styles from './index.less';
@@ -388,9 +387,9 @@ function BatchModal({
   );
   return (
     <div style={{ padding: 15 }}>
-      <WSProvider server={WEBSOCKET_SERVER}>
+      <WSProvider server={Choerodon.WEBSOCKET_SERVER}>
         <WSHandler
-          messageKey={`choerodon:msg:agile-batch-update-field:${AppState.userInfo.id}`}
+          messageKey="agile-batch-update-field"
           onMessage={handleMessage}
         >
           {render()}

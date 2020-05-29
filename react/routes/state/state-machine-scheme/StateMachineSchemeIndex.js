@@ -15,10 +15,10 @@ const StateMachineSchemeIndex = () => {
     <Switch>
       <Route path={match.url} component={StateMachineSchemeList} />
       <Route exact path={`${match.url}/edit/:id`} component={EditStateMachineScheme} />
-      <Route path={'*'} component={nomatch} />
+      <Route path="*" component={nomatch} />
     </Switch>
   );
-}
+};
 
 
 export default StateMachineSchemeIndex;

@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.github.pagehelper.PageInfo;
+import io.choerodon.agile.infra.feign.NotifyFeignClient;
+import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.NoticeMessageAssembler;
 import io.choerodon.agile.app.service.NoticeService;
@@ -133,8 +134,8 @@ public class NoticeServiceImpl implements NoticeService {
                 }
             }
             if (roleId != null) {
-                PageInfo<UserVO> userDTOS = userService.pagingQueryUsersByRoleIdOnProjectLevel(0, 300,roleId, projectId, roleAssignmentSearchVO);
-                for (UserVO userVO : userDTOS.getList()) {
+                Page<UserVO> userDTOS = userService.pagingQueryUsersByRoleIdOnProjectLevel(0, 300,roleId, projectId, roleAssignmentSearchVO);
+                for (UserVO userVO : userDTOS.getContent()) {
                     if (!result.contains(userVO.getId())) {
                         result.add(userVO.getId());
                     }

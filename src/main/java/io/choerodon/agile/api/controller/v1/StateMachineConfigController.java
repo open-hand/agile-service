@@ -1,7 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.agile.api.vo.StateMachineConfigVO;
 import io.choerodon.agile.app.service.StateMachineConfigService;
@@ -23,7 +23,7 @@ public class StateMachineConfigController extends BaseController {
     @Autowired
     private StateMachineConfigService configService;
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建配置（草稿）")
     @PostMapping(value = "/{state_machine_id}")
     public ResponseEntity<StateMachineConfigVO> create(@PathVariable("organization_id") Long organizationId,
@@ -33,14 +33,14 @@ public class StateMachineConfigController extends BaseController {
         return new ResponseEntity<>(configService.create(organizationId, stateMachineId, transformId, configDTO), HttpStatus.CREATED);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除配置（草稿）")
     @DeleteMapping(value = "/{config_id}")
     public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId, @PathVariable("config_id") Long configId) {
         return new ResponseEntity<>(configService.delete(organizationId, configId), HttpStatus.NO_CONTENT);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "获取转换下的配置（草稿）")
     @GetMapping(value = "/query")
     public ResponseEntity<List<StateMachineConfigVO>> queryByTransformId(@PathVariable("organization_id") Long organizationId,

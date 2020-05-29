@@ -8,11 +8,11 @@ import {
   Checkbox, Select, Input, TimePicker, Row, Col, Radio, DatePicker, InputNumber,
 } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
+import { userApi } from '@/api';
 import TextEditToggle from '../../../../TextEditToggle';
 import SelectFocusLoad from '../../../../SelectFocusLoad';
 import { updateFieldValue } from '../../../../../api/NewIssueApi';
 import UserHead from '../../../../UserHead';
-import { getUsers } from '../../../../../api/CommonApi';
 import './Field.less';
 
 
@@ -25,7 +25,7 @@ let sign = false;
 @observer class IssueField extends Component {
   debounceFilterIssues = _.debounce((input) => {
     this.setState({ selectLoading: true });
-    getUsers(input).then((res) => {
+    userApi.getAllInProject(input).then((res) => {
       this.setState({
         originUsers: res.list,
         selectLoading: false,
@@ -101,7 +101,7 @@ let sign = false;
       this.setState({
         selectLoading: true,
       });
-      getUsers(input).then((res) => {
+      userApi.getAllInProject(input).then((res) => {
         this.setState({
           originUsers: res.list,
           selectLoading: false,

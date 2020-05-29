@@ -3,7 +3,6 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.validator.IssueComponentValidator;
-import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.dto.ComponentForListDTO;
 import io.choerodon.agile.infra.dto.ComponentIssueRelDTO;
@@ -12,30 +11,24 @@ import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.mapper.ComponentIssueRelMapper;
 
-import com.github.pagehelper.PageInfo;
+import io.choerodon.core.domain.Page;
 
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.app.service.IssueComponentService;
 import io.choerodon.agile.infra.dto.IssueComponentDTO;
 import io.choerodon.agile.infra.mapper.IssueComponentMapper;
 
-import com.github.pagehelper.PageHelper;
 
-import io.choerodon.web.util.PageableHelper;
-import org.springframework.data.domain.Pageable;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -70,13 +63,8 @@ public class IssueComponentServiceImpl implements IssueComponentService {
 
 
     private static final String MANAGER = "manager";
-
-    private ModelMapper modelMapper = new ModelMapper();
-
-    @PostConstruct
-    public void init() {
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    }
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public IssueComponentVO create(Long projectId, IssueComponentVO issueComponentVO) {
@@ -152,21 +140,25 @@ public class IssueComponentServiceImpl implements IssueComponentService {
 
     @Override
     @SuppressWarnings("unchecked")
-    public PageInfo<ComponentForListVO> queryComponentByProjectId(Long projectId, Long componentId, Boolean noIssueTest, SearchVO searchVO, Pageable pageable) {
+    public Page<ComponentForListVO> queryComponentByProjectId(Long projectId, Long componentId, Boolean noIssueTest, SearchVO searchVO, PageRequest pageRequest) {
         //处理用户搜索
-        Boolean condition = handleSearchUser(searchVO, projectId);
+        Boolean condition = handleSearchUser(searchVO);
         if (condition) {
-            PageInfo<ComponentForListDTO> componentForListDTOPage = PageHelper.startPage(pageable.getPageNumber(),
-                    pageable.getPageSize(), PageableHelper.getSortSql(pageable.getSort())).doSelectPageInfo(() ->
+            Page<ComponentForListDTO> componentForListDTOPage = PageHelper.doPageAndSort(pageRequest, () ->
                     issueComponentMapper.queryComponentByOption(projectId, noIssueTest, componentId, searchVO.getSearchArgs(),
                             searchVO.getAdvancedSearchArgs(), searchVO.getContents()));
-            PageInfo<ComponentForListVO> componentForListVOPageInfo = modelMapper.map(componentForListDTOPage, new TypeToken<PageInfo>(){}.getType());
-            componentForListVOPageInfo.setList(modelMapper.map(componentForListDTOPage.getList(), new TypeToken<List<ComponentForListVO>>(){}.getType()));
-            if ((componentForListVOPageInfo.getList() != null) && !componentForListVOPageInfo.getList().isEmpty()) {
-                List<Long> assigneeIds = componentForListVOPageInfo.getList().stream().filter(componentForListVO -> componentForListVO.getManagerId() != null
+            Page<ComponentForListVO> componentForListVOPageInfo = new Page<>();
+            componentForListVOPageInfo.setSize(componentForListDTOPage.getSize());
+            componentForListVOPageInfo.setTotalElements(componentForListDTOPage.getTotalElements());
+            componentForListVOPageInfo.setNumber(componentForListDTOPage.getNumber());
+            componentForListVOPageInfo.setNumberOfElements(componentForListDTOPage.getNumberOfElements());
+            componentForListVOPageInfo.setTotalPages(componentForListDTOPage.getTotalPages());
+            componentForListVOPageInfo.setContent(modelMapper.map(componentForListDTOPage.getContent(), new TypeToken<List<ComponentForListVO>>(){}.getType()));
+            if ((componentForListVOPageInfo.getContent() != null) && !componentForListVOPageInfo.getContent().isEmpty()) {
+                List<Long> assigneeIds = componentForListVOPageInfo.getContent().stream().filter(componentForListVO -> componentForListVO.getManagerId() != null
                         && !Objects.equals(componentForListVO.getManagerId(), 0L)).map(ComponentForListVO::getManagerId).distinct().collect(Collectors.toList());
                 Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
-                componentForListVOPageInfo.getList().forEach(componentForListVO -> {
+                componentForListVOPageInfo.getContent().forEach(componentForListVO -> {
                     UserMessageDTO userMessageDTO = usersMap.get(componentForListVO.getManagerId());
                     String assigneeName = userMessageDTO != null ? userMessageDTO.getName() : null;
                     String assigneeLoginName = userMessageDTO != null ? userMessageDTO.getLoginName() : null;
@@ -180,16 +172,16 @@ public class IssueComponentServiceImpl implements IssueComponentService {
             }
             return componentForListVOPageInfo;
         } else {
-            return new PageInfo<>(new ArrayList<>());
+            return new Page<>();
         }
 
     }
 
-    private Boolean handleSearchUser(SearchVO searchVO, Long projectId) {
+    private Boolean handleSearchUser(SearchVO searchVO) {
         if (searchVO.getSearchArgs() != null && searchVO.getSearchArgs().get(MANAGER) != null) {
             String userName = (String) searchVO.getSearchArgs().get(MANAGER);
             if (userName != null && !"".equals(userName)) {
-                List<UserVO> userVOS = userService.queryUsersByNameAndProjectId(projectId, userName);
+                List<UserVO> userVOS = userService.listUsersByRealNames(Arrays.asList(userName), false);
                 if (userVOS != null && !userVOS.isEmpty()) {
                     searchVO.getAdvancedSearchArgs().put("managerId", userVOS.stream().map(UserVO::getId).collect(Collectors.toList()));
                 } else {

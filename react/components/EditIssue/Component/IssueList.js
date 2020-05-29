@@ -130,7 +130,7 @@ class IssueList extends Component {
             </div>
           </Tooltip>
         </div>
-        <Permission type={type} projectId={projectId} organizationId={orgId} service={['agile-service.issue.deleteIssue']}>
+        <Permission service={['agile-service.issue.deleteIssue']}>
           <div
             style={{
               display: 'flex',

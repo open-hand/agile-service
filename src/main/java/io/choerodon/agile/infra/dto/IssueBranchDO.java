@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,10 +12,10 @@ import javax.persistence.Table;
  * Email: fuqianghuang01@gmail.com
  */
 @Table(name = "agile_issue_branch")
-public class IssueBranchDO extends BaseDTO{
+public class IssueBranchDO extends AuditDomain{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long branchId;
 
     private String branchType;

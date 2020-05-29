@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.*;
 
@@ -9,7 +11,9 @@ import javax.persistence.*;
  * Email: fuqianghuang01@gmail.com
  */
 @Table(name = "agile_file_operation_history")
-public class FileOperationHistoryDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class FileOperationHistoryDTO extends AuditDomain {
 
     public FileOperationHistoryDTO() {}
 
@@ -31,7 +35,7 @@ public class FileOperationHistoryDTO extends BaseDTO {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
     private Long projectId;

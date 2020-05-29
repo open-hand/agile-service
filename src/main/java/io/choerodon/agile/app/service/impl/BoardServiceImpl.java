@@ -20,14 +20,11 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 
 /**
@@ -82,13 +79,8 @@ public class BoardServiceImpl implements BoardService {
     private IssueTypeService issueTypeService;
     @Autowired
     private StatusService statusService;
-
-    private ModelMapper modelMapper = new ModelMapper();
-
-    @PostConstruct
-    public void init() {
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    }
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public void create(Long projectId, String boardName) {

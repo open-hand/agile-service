@@ -1,7 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +12,7 @@ import java.util.Date;
  * @since 2018/5/30
  */
 @Component
-public interface ProjectInfoMapper extends Mapper<ProjectInfoDTO> {
+public interface ProjectInfoMapper extends BaseMapper<ProjectInfoDTO> {
 
     ProjectInfoDTO queryByProjectId(@Param("projectId") Long projectId);
 

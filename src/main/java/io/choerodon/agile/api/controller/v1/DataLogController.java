@@ -3,8 +3,8 @@ package io.choerodon.agile.api.controller.v1;
 import io.choerodon.agile.api.vo.DataLogCreateVO;
 import io.choerodon.agile.api.vo.DataLogVO;
 import io.choerodon.agile.app.service.DataLogService;
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
@@ -28,7 +28,7 @@ public class DataLogController {
     @Autowired
     private DataLogService dataLogService;
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建DataLog")
     @PostMapping
     public ResponseEntity<DataLogVO> createDataLog(@ApiParam(value = "项目id", required = true)
@@ -40,7 +40,7 @@ public class DataLogController {
                 .orElseThrow(() -> new CommonException("error.dataLog.create"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询DataLog列表")
     @GetMapping
     public ResponseEntity<List<DataLogVO>> listByIssueId(@ApiParam(value = "项目id", required = true)

@@ -8,10 +8,11 @@ import io.choerodon.agile.api.vo.PageFieldViewUpdateVO;
 import io.choerodon.agile.app.service.FieldValueService;
 import io.choerodon.agile.app.service.IssueFieldValueService;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
-import io.choerodon.agile.infra.feign.NotifyFeignClient;
+//import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
+import org.hzero.boot.message.MessageClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -30,10 +31,13 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
     private static final String WEBSOCKET_BATCH_UPDATE_FIELD = "agile-batch-update-field";
     private static final String ERROR_ISSUE_ID = "error.issueIds.null";
 
-    @Autowired
-    private NotifyFeignClient notifyFeignClient;
+//    @Autowired
+//    private NotifyFeignClient notifyFeignClient;
     @Autowired
     private FieldValueService fieldValueService;
+
+    @Autowired
+    private MessageClient messageClient;
 
     @Async
     @Override
@@ -45,7 +49,8 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             batchUpdateFieldStatusVO.setKey(WEBSOCKET_BATCH_UPDATE_FIELD);
             batchUpdateFieldStatusVO.setUserId(userId);
             batchUpdateFieldStatusVO.setProcess(0.0);
-            notifyFeignClient.postWebSocket(WEBSOCKET_BATCH_UPDATE_FIELD, userId.toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
+//            notifyFeignClient.postWebSocket(WEBSOCKET_BATCH_UPDATE_FIELD, userId.toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
+            messageClient.sendByUserId(userId, WEBSOCKET_BATCH_UPDATE_FIELD, JSON.toJSONString(batchUpdateFieldStatusVO));
             if (Boolean.FALSE.equals(EnumUtil.contain(ObjectSchemeCode.class, schemeCode))) {
                 throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
             }
@@ -74,10 +79,11 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
         } catch (Exception e) {
             batchUpdateFieldStatusVO.setStatus("failed");
             batchUpdateFieldStatusVO.setError(e.getMessage());
-            throw new CommonException(e, e.getMessage());
+            throw new CommonException("update field failed, exception: {}", e);
         }
         finally {
-            notifyFeignClient.postWebSocket(WEBSOCKET_BATCH_UPDATE_FIELD, userId.toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
+//            notifyFeignClient.postWebSocket(WEBSOCKET_BATCH_UPDATE_FIELD, userId.toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
+            messageClient.sendByUserId(userId, WEBSOCKET_BATCH_UPDATE_FIELD, JSON.toJSONString(batchUpdateFieldStatusVO));
         }
     }
 }

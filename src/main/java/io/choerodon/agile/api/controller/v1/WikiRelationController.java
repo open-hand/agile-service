@@ -3,8 +3,8 @@ package io.choerodon.agile.api.controller.v1;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.WikiRelationVO;
 import io.choerodon.agile.app.service.WikiRelationService;
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
@@ -28,7 +28,7 @@ public class WikiRelationController {
     @Autowired
     private WikiRelationService wikiRelationService;
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("添加knowledge relation")
     @PostMapping
     public ResponseEntity create(@ApiParam(value = "项目id", required = true)
@@ -39,7 +39,7 @@ public class WikiRelationController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据issue id查询knowledge relation")
     @GetMapping("/issue/{issueId}")
     public ResponseEntity<JSONObject> queryByIssueId(@ApiParam(value = "项目id", required = true)
@@ -51,7 +51,7 @@ public class WikiRelationController {
                 .orElseThrow(() -> new CommonException("error.knowledgeRelationList.get"));
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据id删除knowledge relation")
     @DeleteMapping("/{id}")
     public ResponseEntity deleteById(@ApiParam(value = "项目id", required = true)
@@ -62,7 +62,7 @@ public class WikiRelationController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据workSpaceId删除knowledge relation")
     @DeleteMapping("/delete/{space_id}")
     public ResponseEntity deleteByworkSpaceId(@ApiParam(value = "项目id", required = true)

@@ -69,5 +69,4 @@ public class ComponentIssueRelVO {
     public String toString() {
         return StringUtil.getToString(this);
     }
-
 }

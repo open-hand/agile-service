@@ -23,7 +23,6 @@ import io.choerodon.agile.infra.mapper.ObjectSchemeMapper;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.FieldValueUtil;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.mybatis.entity.Criteria;
 
 
 /**
@@ -166,7 +165,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         field.setContext(Arrays.asList(fieldCreateDTO.getContext()).stream().collect(Collectors.joining(",")));
         field.setOrganizationId(organizationId);
         field.setProjectId(projectId);
-        baseCreate(field);
+        field = baseCreate(field);
         //创建pageField
         if (projectId != null) {
             pageFieldService.createByFieldWithPro(organizationId, projectId, field);
@@ -179,9 +178,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             String defaultIds = fieldOptionService.handleFieldOption(organizationId, field.getId(), fieldCreateDTO.getFieldOptions());
             if (defaultIds != null && !"".equals(defaultIds)) {
                 field.setDefaultValue(defaultIds);
-                Criteria criteria = new Criteria();
-                criteria.update("defaultValue");
-                objectSchemeFieldMapper.updateByPrimaryKeyOptions(field, criteria);
+                objectSchemeFieldMapper.updateOptional(field, "defaultValue");
             }
         }
 

@@ -1,9 +1,8 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import io.choerodon.web.util.PageableHelper;
-import org.springframework.data.domain.Pageable;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.agile.api.vo.ObjectSchemeSearchVO;
 import io.choerodon.agile.api.vo.ObjectSchemeVO;
 import io.choerodon.agile.app.service.ObjectSchemeService;
@@ -23,16 +22,17 @@ import java.util.List;
  */
 @Service
 public class ObjectSchemeServiceImpl implements ObjectSchemeService {
+
     @Autowired
     private ObjectSchemeMapper objectSchemeMapper;
     @Autowired
     private ModelMapper modelMapper;
+
     @Override
-    public PageInfo<ObjectSchemeVO> pageQuery(Long organizationId, Pageable pageable, ObjectSchemeSearchVO searchDTO) {
-        PageInfo<ObjectSchemeDTO> page = PageHelper.startPage(pageable.getPageNumber(), pageable.getPageSize(),
-                PageableHelper.getSortSql(pageable.getSort())).doSelectPageInfo(() -> objectSchemeMapper.fulltextSearch(organizationId, searchDTO));
+    public Page<ObjectSchemeVO> pageQuery(Long organizationId, PageRequest pageRequest, ObjectSchemeSearchVO searchDTO) {
+        Page<ObjectSchemeDTO> page = PageHelper.doPageAndSort(pageRequest, () -> objectSchemeMapper.fulltextSearch(organizationId, searchDTO));
         return PageUtil.buildPageInfoWithPageInfoList(page,
-                modelMapper.map(page.getList(), new TypeToken<List<ObjectSchemeVO>>() {
+                modelMapper.map(page.getContent(), new TypeToken<List<ObjectSchemeVO>>() {
                 }.getType()));
     }
 }

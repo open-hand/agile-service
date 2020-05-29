@@ -1,7 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.agile.api.validator.StateMachineNodeValidator;
 import io.choerodon.agile.api.vo.StateMachineNodeVO;
@@ -28,7 +28,7 @@ public class StateMachineNodeController extends BaseController {
     private StateMachineNodeValidator nodeValidator;
 
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建节点（草稿）")
     @PostMapping
     public ResponseEntity<List<StateMachineNodeVO>> create(@PathVariable("organization_id") Long organizationId,
@@ -38,7 +38,7 @@ public class StateMachineNodeController extends BaseController {
         return new ResponseEntity<>(nodeService.create(organizationId, stateMachineId, nodeDTO), HttpStatus.CREATED);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更新节点（草稿）")
     @PutMapping(value = "/{node_id}")
     public ResponseEntity<List<StateMachineNodeVO>> update(@PathVariable("organization_id") Long organizationId,
@@ -49,7 +49,7 @@ public class StateMachineNodeController extends BaseController {
         return new ResponseEntity<>(nodeService.update(organizationId, stateMachineId, nodeId, nodeDTO), HttpStatus.CREATED);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除节点（草稿）")
     @DeleteMapping(value = "/{node_id}")
     public ResponseEntity<List<StateMachineNodeVO>> deleteNode(@PathVariable("organization_id") Long organizationId,
@@ -58,7 +58,7 @@ public class StateMachineNodeController extends BaseController {
         return new ResponseEntity<>(nodeService.delete(organizationId, stateMachineId, nodeId), HttpStatus.OK);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "校验是否能删除节点（草稿）")
     @GetMapping(value = "/check_delete")
     public ResponseEntity<Map<String, Object>> checkDelete(@PathVariable("organization_id") Long organizationId,
@@ -67,7 +67,7 @@ public class StateMachineNodeController extends BaseController {
         return new ResponseEntity<>(nodeService.checkDelete(organizationId, stateMachineId, statusId), HttpStatus.OK);
     }
 
-    @Permission(type = ResourceType.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id获取节点（草稿）")
     @GetMapping(value = "/{node_id}")
     public ResponseEntity<StateMachineNodeVO> queryById(@PathVariable("organization_id") Long organizationId,

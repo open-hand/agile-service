@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.Table;
 
@@ -9,7 +11,9 @@ import javax.persistence.Table;
  * @since 2019/5/6
  */
 @Table(name = "agile_board_column_status_rel")
-public class BoardColumnStatusRelDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class BoardColumnStatusRelDTO extends AuditDomain {
     private int position;
     private Long statusId;
     private Long columnId;

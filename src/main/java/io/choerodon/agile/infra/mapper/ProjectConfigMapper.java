@@ -1,7 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.infra.dto.ProjectConfigDTO;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +12,7 @@ import java.util.List;
  * @date 2018/9/4
  */
 @Component
-public interface ProjectConfigMapper extends Mapper<ProjectConfigDTO> {
+public interface ProjectConfigMapper extends BaseMapper<ProjectConfigDTO> {
     List<ProjectConfigDTO> queryByProjectId(@Param("projectId") Long projectId);
 
     ProjectConfigDTO queryBySchemeTypeAndApplyType(@Param("projectId") Long projectId, @Param("schemeType") String schemeType, @Param("applyType") String applyType);

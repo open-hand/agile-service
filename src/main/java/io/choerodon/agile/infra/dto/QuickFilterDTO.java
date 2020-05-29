@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.*;
 
@@ -9,10 +11,12 @@ import javax.persistence.*;
  * Email: fuqianghuang01@gmail.com
  */
 @Table(name = "agile_quick_filter")
-public class QuickFilterDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class QuickFilterDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long filterId;
 
     private Long projectId;

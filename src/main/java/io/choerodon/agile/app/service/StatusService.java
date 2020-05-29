@@ -1,9 +1,10 @@
 package io.choerodon.agile.app.service;
 
-import com.github.pagehelper.PageInfo;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.domain.PageInfo;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.StatusDTO;
-import org.springframework.data.domain.Pageable;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,7 @@ import java.util.Map;
  */
 public interface StatusService {
 
-    PageInfo<StatusWithInfoVO> queryStatusList(Pageable pageable, Long organizationId, StatusSearchVO statusSearchVO);
+    Page<StatusWithInfoVO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchVO statusSearchVO);
 
     /**
      * 创建状态

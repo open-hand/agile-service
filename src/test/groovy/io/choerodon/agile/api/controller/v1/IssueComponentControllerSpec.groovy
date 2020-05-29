@@ -9,7 +9,7 @@ import io.choerodon.agile.infra.dto.IssueComponentDTO
 import io.choerodon.agile.infra.dto.UserDTO
 import io.choerodon.agile.infra.dto.UserMessageDTO
 import io.choerodon.agile.infra.mapper.IssueComponentMapper
-import com.github.pagehelper.PageInfo
+import io.choerodon.core.domain.PageInfo
 import org.mockito.Matchers
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired

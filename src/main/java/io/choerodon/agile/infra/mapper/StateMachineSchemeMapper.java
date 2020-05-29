@@ -1,7 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.infra.dto.StateMachineSchemeDTO;
-import io.choerodon.mybatis.common.Mapper;
+import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,7 @@ import java.util.List;
  * @author peng.jiang@hand-china.com
  */
 @Component
-public interface StateMachineSchemeMapper extends Mapper<StateMachineSchemeDTO> {
+public interface StateMachineSchemeMapper extends BaseMapper<StateMachineSchemeDTO> {
 
     /**
      * 分页查询状态方案

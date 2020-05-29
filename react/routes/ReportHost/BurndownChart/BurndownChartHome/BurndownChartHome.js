@@ -723,7 +723,7 @@ class BurndownChartHome extends Component {
     const urlParams = AppState.currentMenuType;
     const { linkFromParamUrl } = this.state;
     return (
-      <Page>
+      <Page service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.burndown']}>
         <Header
           title="燃尽图"
           // backPath={`/agile/${linkFromParamUrl || 'reporthost'}?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}

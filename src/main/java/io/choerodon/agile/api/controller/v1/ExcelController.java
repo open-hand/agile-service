@@ -3,8 +3,8 @@ package io.choerodon.agile.api.controller.v1;
 import io.choerodon.agile.api.vo.FileOperationHistoryVO;
 import io.choerodon.agile.app.service.ExcelService;
 import io.choerodon.agile.infra.utils.ExcelUtil;
-import io.choerodon.core.annotation.Permission;
-import io.choerodon.core.enums.ResourceType;
+import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -31,7 +31,7 @@ public class ExcelController {
     @Autowired
     private ExcelService excelService;
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("下载导入模版")
     @GetMapping(value = "/download")
     public void download(@ApiParam(value = "项目id", required = true)
@@ -43,7 +43,7 @@ public class ExcelController {
         excelService.download(projectId, organizationId, request, response);
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("导入issue")
     @PostMapping(value = "/import")
     public ResponseEntity batchImport(@ApiParam(value = "项目id", required = true)
@@ -57,7 +57,7 @@ public class ExcelController {
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("取消导入")
     @PutMapping(value = "/cancel")
     public ResponseEntity cancelImport(@ApiParam(value = "项目id", required = true)
@@ -70,7 +70,7 @@ public class ExcelController {
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
-    @Permission(type = ResourceType.PROJECT, roles = {InitRoleCode.PROJECT_MEMBER, InitRoleCode.PROJECT_OWNER})
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询最近的上传记录")
     @GetMapping(value = "/latest")
     public ResponseEntity<FileOperationHistoryVO> queryLatestRecode(@ApiParam(value = "项目id", required = true)

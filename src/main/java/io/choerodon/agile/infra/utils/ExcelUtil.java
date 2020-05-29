@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.utils;
 
-import io.choerodon.agile.app.domain.Predefined;
+import io.choerodon.agile.infra.dto.PredefinedDTO;
 import io.choerodon.core.exception.CommonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -268,7 +268,7 @@ public class ExcelUtil {
                                                 List<String> componentList,
                                                 List<String> sprintList,
                                                 List<String> users,
-                                                Predefined theSecondColumnPredefined,
+                                                PredefinedDTO theSecondColumnPredefined,
                                                 boolean withFeature) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         // create guide sheet
@@ -281,16 +281,16 @@ public class ExcelUtil {
         widthMap.put(12, 8000);
         generateHeaders(resultSheet, style, Arrays.asList(fieldsName), widthMap);
 
-        List<Predefined> predefinedList = new ArrayList<>();
-        predefinedList.add(new Predefined(priorityList, 1, 500, 8, 8, "hidden_priority", 2));
-        predefinedList.add(new Predefined(issueTypeList, 1, 500, 0, 0, "hidden_issue_type", 3));
-        predefinedList.add(new Predefined(versionList, 1, 500, 10, 10, "hidden_fix_version", 4));
-        predefinedList.add(new Predefined(componentList, 1, 500, 2, 2, "hidden_component", 5));
-        predefinedList.add(new Predefined(sprintList, 1, 500, 3, 3, "hidden_sprint", 6));
-        predefinedList.add(new Predefined(users, 1, 500, 7, 7, "hidden_manager", 7));
+        List<PredefinedDTO> predefinedList = new ArrayList<>();
+        predefinedList.add(new PredefinedDTO(priorityList, 1, 500, 8, 8, "hidden_priority", 2));
+        predefinedList.add(new PredefinedDTO(issueTypeList, 1, 500, 0, 0, "hidden_issue_type", 3));
+        predefinedList.add(new PredefinedDTO(versionList, 1, 500, 10, 10, "hidden_fix_version", 4));
+        predefinedList.add(new PredefinedDTO(componentList, 1, 500, 2, 2, "hidden_component", 5));
+        predefinedList.add(new PredefinedDTO(sprintList, 1, 500, 3, 3, "hidden_sprint", 6));
+        predefinedList.add(new PredefinedDTO(users, 1, 500, 7, 7, "hidden_manager", 7));
         predefinedList.add(theSecondColumnPredefined);
 
-        for (Predefined predefined : predefinedList) {
+        for (PredefinedDTO predefined : predefinedList) {
             workbook =
                     dropDownList2007(
                             workbook,
@@ -523,7 +523,7 @@ public class ExcelUtil {
             try {
                 method = clazz.getMethod(createGetter(fields[i]));
             } catch (NoSuchMethodException e) {
-                LOGGER.debug(e.getMessage());
+                LOGGER.debug("no such method exception: {}", e);
                 try {
                     method = clazz.getMethod("getFoundationFieldValue");
                 } catch (NoSuchMethodException e1) {
@@ -610,7 +610,7 @@ public class ExcelUtil {
                     return null;
             }
         } catch (IOException e) {
-            throw new CommonException(e.getMessage());
+            throw new CommonException("error.multipartFile.to.workbook", e);
         }
     }
 

@@ -290,7 +290,7 @@ const CreateFilter = (props) => {
     const { organizationId } = AppState.currentMenuType;
     const OPTION_FILTER = {
       assignee: {
-        url: `/base/v1/projects/${projectId}/users?page=${newPage}&size=20`,
+        url: `/iam/choerodon/v1/projects/${projectId}/users?page=${newPage}&size=20`,
         prop: 'list',
         id: 'id',
         name: 'realName',
@@ -308,19 +308,19 @@ const CreateFilter = (props) => {
         name: 'name',
       },
       reporter: {
-        url: `/base/v1/projects/${projectId}/users?page=${newPage}&size=20`,
+        url: `/iam/choerodon/v1/projects/${projectId}/users?page=${newPage}&size=20`,
         prop: 'list',
         id: 'id',
         name: 'realName',
       },
       created_user: {
-        url: `/base/v1/projects/${projectId}/users?page=${newPage}&size=20`,
+        url: `/iam/choerodon/v1/projects/${projectId}/users?page=${newPage}&size=20`,
         prop: 'list',
         id: 'id',
         name: 'realName',
       },
       last_updated_user: {
-        url: `/base/v1/projects/${projectId}/users?page=${newPage}&size=20`,
+        url: `/iam/choerodon/v1/projects/${projectId}/users?page=${newPage}&size=20`,
         prop: 'list',
         id: 'id',
         name: 'realName',
@@ -509,7 +509,7 @@ const CreateFilter = (props) => {
     const { organizationId } = AppState.currentMenuType;
     const OPTION_FILTER = {
       assignee: {
-        url: `/base/v1/projects/${projectId}/users?page=${page}&size=20`,
+        url: `/iam/choerodon/v1/projects/${projectId}/users?page=${page}&size=20`,
         prop: 'list',
         id: 'id',
         name: 'realName',
@@ -527,19 +527,19 @@ const CreateFilter = (props) => {
         name: 'name',
       },
       reporter: {
-        url: `/base/v1/projects/${projectId}/users?page=${page}&size=20`,
+        url: `/iam/choerodon/v1/projects/${projectId}/users?page=${page}&size=20`,
         prop: 'list',
         id: 'id',
         name: 'realName',
       },
       created_user: {
-        url: `/base/v1/projects/${projectId}/users?page=${page}&size=20`,
+        url: `/iam/choerodon/v1/projects/${projectId}/users?page=${page}&size=20`,
         prop: 'list',
         id: 'id',
         name: 'realName',
       },
       last_updated_user: {
-        url: `/base/v1/projects/${projectId}/users?page=${page}&size=20`,
+        url: `/iam/choerodon/v1/projects/${projectId}/users?page=${page}&size=20`,
         prop: 'list',
         id: 'id',
         name: 'realName',

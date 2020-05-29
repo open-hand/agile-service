@@ -9,7 +9,7 @@ import io.choerodon.agile.infra.dto.VersionIssueRelDTO
 import io.choerodon.agile.infra.mapper.IssueMapper
 import io.choerodon.agile.infra.mapper.ProductVersionMapper
 import io.choerodon.agile.infra.mapper.VersionIssueRelMapper
-import com.github.pagehelper.PageInfo
+import io.choerodon.core.domain.PageInfo
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate

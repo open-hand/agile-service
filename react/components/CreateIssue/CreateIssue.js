@@ -28,6 +28,7 @@ import SelectFocusLoad from '../SelectFocusLoad';
 import renderField from './renderField';
 import FieldIssueLinks from './FieldIssueLinks';
 import WSJF from './WSJF';
+import FieldTeam from './FieldTeam';
 
 const DebounceInput = reactComponentDebounce({
   valuePropName: 'value',
@@ -245,6 +246,7 @@ class CreateIssue extends Component {
           rrOeValue,
           jobSize,
           featureId,
+          teamProjectIds,
         } = values;
         const { typeCode } = originIssueTypes.find(t => t.id === typeId);
         if (typeCode === 'feature' && epicId) {
@@ -318,6 +320,7 @@ class CreateIssue extends Component {
             jobSize,
           },
           featureId, // 特性字段
+          teamProjectIds,
         };
         this.setState({ createLoading: true });
         const deltaOps = description;
@@ -854,7 +857,8 @@ class CreateIssue extends Component {
                   </FormItem>
                 )}
                 {fields && fields.filter(field => !hiddenFields.includes(field.fieldCode)).map(field => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
-                {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}
+                {newIssueTypeCode === 'feature' && <FieldTeam form={form} />}
+                {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}                            
               </div>
               {mode !== 'feature' && !['issue_epic', 'feature'].includes(newIssueTypeCode) && <FieldIssueLinks form={form} />}
             </Form>

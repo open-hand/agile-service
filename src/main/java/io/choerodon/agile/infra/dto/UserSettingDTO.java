@@ -2,7 +2,9 @@ package io.choerodon.agile.infra.dto;
 
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.choerodon.core.oauth.DetailsHelper;
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.*;
 
@@ -11,10 +13,12 @@ import javax.persistence.*;
  * @since 2018/7/4
  */
 @Table(name = "agile_user_setting")
-public class UserSettingDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class UserSettingDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long settingId;
 
     private Long userId;

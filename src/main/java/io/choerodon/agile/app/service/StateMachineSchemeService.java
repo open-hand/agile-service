@@ -1,7 +1,8 @@
 package io.choerodon.agile.app.service;
 
-import com.github.pagehelper.PageInfo;
-import org.springframework.data.domain.Pageable;
+import io.choerodon.core.domain.Page;
+import io.choerodon.core.domain.PageInfo;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.agile.api.vo.StateMachineSchemeVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 
@@ -16,12 +17,12 @@ public interface StateMachineSchemeService {
     /**
      * 分页查询状态机方案
      *
-     * @param pageable 分页对象
+     * @param pageRequest 分页对象
      * @param schemeVO   查询参数
      * @param params      模糊查询参数
      * @return 状态机方案列表
      */
-    PageInfo<StateMachineSchemeVO> pageQuery(Long organizationId, Pageable pageable, StateMachineSchemeVO schemeVO, String params);
+    Page<StateMachineSchemeVO> pageQuery(Long organizationId, PageRequest pageRequest, StateMachineSchemeVO schemeVO, String params);
 
     /**
      * 创建状态机方案

@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.annotation.ModifyAudit;
+import io.choerodon.mybatis.annotation.VersionAudit;
+import io.choerodon.mybatis.domain.AuditDomain;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,10 +14,12 @@ import javax.persistence.Table;
  * @since 2018/11/19
  */
 @Table(name = "fd_state_machine_scheme_config_draft")
-public class StateMachineSchemeConfigDraftDTO extends BaseDTO {
+@ModifyAudit
+@VersionAudit
+public class StateMachineSchemeConfigDraftDTO extends AuditDomain {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
     private Long schemeId;
     private Long issueTypeId;

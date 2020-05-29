@@ -1,10 +1,10 @@
 package io.choerodon.agile.infra.dto;
 
 
-import io.choerodon.mybatis.entity.BaseDTO;
+import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModelProperty;
 
-public class TargetUserDTO extends BaseDTO {
+public class TargetUserDTO extends AuditDomain {
 
     private Long id;
     @ApiModelProperty("接收消息对象的类型")

@@ -7,11 +7,9 @@ import io.choerodon.agile.infra.dto.IssueStatusDTO;
 import io.choerodon.agile.infra.mapper.IssueStatusMapper;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 
 @Service
 public class IIssueStatusServiceImpl implements IIssueStatusService {
@@ -21,13 +19,8 @@ public class IIssueStatusServiceImpl implements IIssueStatusService {
 
     @Autowired
     private DataLogRedisUtil dataLogRedisUtil;
-
-    private ModelMapper modelMapper = new ModelMapper();
-
-    @PostConstruct
-    public void init() {
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    }
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     @DataLog(type = "batchUpdateIssueStatus", single = false)

@@ -22,36 +22,15 @@ const { confirm } = Modal;
 const { AppState } = stores;
 
 const service = [
-  'agile-service.quick-filter.listByProjectId',
-  'base-service.project.list',
-  'agile-service.board.queryByProjectId',
-  'agile-service.board.checkName',
-  'agile-service.board.createScrumBoard',
-  'agile-service.board.move',
-  'agile-service.board.deleteScrumBoard',
-  'agile-service.scheme.queryStatusByProjectId',
-  'base-service.time-zone-work-calendar-project.queryTimeZoneWorkCalendarDetail',
-  'agile-service.scheme.checkCreateStatusForAgile',
-  'agile-service.work-calendar-ref.querySprintWorkCalendarRefs',
-  'agile-service.issue-status.listUnCorrespondStatus',
-  'agile-service.board.updateUserSettingBoard',
-  'agile-service.board.updateScrumBoard',
-  'agile-service.issue-status.moveStatusToColumn',
-  'agile-service.board-column.deleteBoardColumn',
-  'agile-service.scheme.checkRemoveStatusForAgile',
-  'agile-service.issue-status.deleteStatus',
-  'agile-service.board-column.columnSortByProgram',
-  'agile-service.board-column.createBoardColumn',
-  'agile-service.board-column.updateColumnContraint',
-  'agile-service.lookup-value.queryLookupValueByCode',
-  'agile-service.status.checkName',
-  'agile-service.work-calendar-ref.deleteProjectWorkCalendarRef',
-  'agile-service.work-calendar-ref.createSprintWorkCalendarRef',
-  'agile-service.board-column.columnSort',
-  'agile-service.issue-status.moveStatusToUnCorrespond',
-  'agile-service.issue-status.updateStatus',
-  'agile-service.issue-status.createStatus',
-  'agile-service.board-column.updateBoardColumn',
+  'choerodon.code.project.cooperation.iteration-plan.ps.config',
+  'choerodon.code.project.cooperation.iteration-plan.ps.status.create',
+  'choerodon.code.project.cooperation.iteration-plan.ps.column.create',
+  'choerodon.code.project.cooperation.iteration-plan.ps.board.delete',
+  'choerodon.code.project.cooperation.iteration-plan.ps.board.update',
+  'choerodon.code.project.cooperation.iteration-plan.ps.column',
+  'choerodon.code.project.cooperation.iteration-plan.ps.status.update',
+  'choerodon.code.project.cooperation.iteration-plan.ps.status.delete',
+  'choerodon.code.project.cooperation.iteration-plan.ps.work_calendar.update',
 ];
 
 @observer
@@ -186,7 +165,7 @@ class Setting extends Component {
             <Fragment>
               {
               ScrumBoardStore.getCanAddStatus ? (
-                <Permission type={type} projectId={projectId} organizationId={orgId} service={['agile-service.issue-status.createStatus']}>
+                <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.status.create']}>
                   <Button                    
                     icon="playlist_add"
                     onClick={this.handleCreateStatusClick}
@@ -211,7 +190,7 @@ class Setting extends Component {
                 </Tooltip>
               )
             }
-              <Permission type={type} projectId={projectId} organizationId={orgId} service={['agile-service.board-column.createBoardColumn']}>
+              <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.column.create']}>
                 <Button
                   icon="playlist_add"
                   onClick={this.handleCreateColumnClick}
@@ -221,7 +200,7 @@ class Setting extends Component {
               </Permission>
             </Fragment>
           ) : null}
-          <Permission type={type} projectId={projectId} organizationId={orgId} service={['agile-service.board.deleteScrumBoard']}>
+          <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.board.delete']}>
             <Button funcType="flat" onClick={this.handleDeleteBoard.bind(this)} disabled={ScrumBoardStore.getBoardList.size === 1}>
               <Icon type="delete_forever icon" />
               <span>删除看板</span>
@@ -250,14 +229,14 @@ class Setting extends Component {
             {ScrumBoardStore.getCalanderCouldUse
               ? (
                 <TabPane tab="工作日历" key="3">
-                  <Permission service={['agile-service.work-calendar-ref.createSprintWorkCalendarRef', 'agile-service.work-calendar-ref.deleteProjectWorkCalendarRef']}>
+                  <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.work_calendar.update']}>
                     {this.renderWorkcalendarPage}
                   </Permission>
                 </TabPane>
               ) : null
             }
             <TabPane tab="看板名称" key="4">
-              <Permission service={['agile-service.board.updateScrumBoard']}>
+              <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.board.update']}>
                 {this.renderEditBoardName}
               </Permission>
             </TabPane>
