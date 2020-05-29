@@ -128,4 +128,5 @@ public class BoardColumnController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.MaxAndMinNum.update"));
     }
+
 }
