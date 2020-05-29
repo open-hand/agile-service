@@ -8,12 +8,23 @@ import classnames from 'classnames';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import CloseSprint from '@/components/close-sprint';
+import { Tooltip } from 'choerodon-ui/pro/lib';
 import StartSprint from '../../start-sprint';
 import './SprintButton.less';
 
 const { AppState } = stores;
 
 const prefix = 'c7n-backlog-SprintButton';
+
+function judgeDisabled(arr) {
+  for (let i = 0; i < arr.length; i += 1) {
+    if (arr[i][0]) {
+      return [true, arr[i][1]];
+    }
+  }
+  return [false];
+}
+
 function SprintButton({
   data,
 }) {
@@ -55,9 +66,9 @@ function SprintButton({
   );
 
   const { type, id: projectId, organizationId: orgId } = AppState.currentMenuType;
-
+  const [disableStart, reason] = judgeDisabled([[hasActiveSprint, '已有活跃冲刺'], [!issueList || issueList.length === 0, '冲刺下没有问题'], [belongCurrentPi === false, '非当前PI下冲刺不可开启']]);
   return (
-    <div style={{ marginLeft: 'auto' }}>
+    <Fragment>
       {statusCode === 'started' ? (
         <Permission
           service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
@@ -72,21 +83,21 @@ function SprintButton({
         </Permission>
       ) : (
         <Fragment>
-          {(belongCurrentPi === true || belongCurrentPi == undefined) ? (
-            <Permission
-              service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
-            >
+          <Permission
+            service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
+          >
+            <Tooltip title={reason}>
               <p
                 className={classnames(prefix, {
-                  [`${prefix}-disabled`]: hasActiveSprint || !issueList || issueList.length === 0,
+                  [`${prefix}-disabled`]: disableStart,
                 })}
                 role="none"
                 onClick={openStartSprint}
               >
                 开启冲刺
               </p>
-            </Permission>
-          ) : null}
+            </Tooltip>
+          </Permission>
           <Permission
             type={type}
             projectId={projectId}
@@ -103,7 +114,7 @@ function SprintButton({
           </Permission>
         </Fragment>
       )}
-    </div>
+    </Fragment>
   );
 }
 
