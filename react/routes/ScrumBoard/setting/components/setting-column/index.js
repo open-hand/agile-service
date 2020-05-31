@@ -200,7 +200,7 @@ class SettingColumn extends Component {
                   {...provided.droppableProps}
                 >
                   <Permission
-                    service={['choerodon.code.project.cooperation.iteration-plan.ps.column']}
+                    service={['choerodon.code.project.cooperation.iteration-plan.ps.column', 'choerodon.code.project.cooperation.iteration-plan.ps.movetocolomn']}
                     noAccessChildren={this.renderColumns(columns, true)}
                   >
                     {this.renderColumns(columns)}

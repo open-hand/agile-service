@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import {
-  Modal, Form, Input, DatePicker,
+  Modal, Form, Input, DatePicker, Button,
 } from 'choerodon-ui';
 import moment from 'moment';
+import axios from 'axios';
 import { Content, stores } from '@choerodon/boot';
 import ReleaseStore from '../../../stores/project/release/ReleaseStore';
 
@@ -20,6 +21,7 @@ class EditRelease extends Component {
       startDate: null,
       expectReleaseDate: null,
       loading: false,
+      editPermission: true,
     };
   }
 
@@ -27,6 +29,14 @@ class EditRelease extends Component {
     this.setState({
       startDate: ReleaseStore.getVersionDetail.startDate ? moment(ReleaseStore.getVersionDetail.startDate, 'YYYY-MM-DD HH:mm:ss') : null,
       expectReleaseDate: ReleaseStore.getVersionDetail.expectReleaseDate ? moment(ReleaseStore.getVersionDetail.expectReleaseDate, 'YYYY-MM-DD HH:mm:ss') : null,
+    });
+  }
+
+  componentDidMount() {
+    axios.post(`/iam/choerodon/v1/permissions/menus/check-permissions?projectId=${AppState.currentMenuType.id}`, ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion']).then((res) => {
+      this.setState({
+        editPermission: res.find(item => item.code === 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion').approve,
+      });
     });
   }
 
@@ -86,7 +96,9 @@ class EditRelease extends Component {
   };
 
   render() {
-    const { loading, expectReleaseDate, startDate } = this.state;
+    const {
+      loading, expectReleaseDate, startDate, editPermission, 
+    } = this.state;
     const { form, visible, onCancel } = this.props;
     const { getFieldDecorator } = form;
     const data = JSON.parse(JSON.stringify(ReleaseStore.getVersionDetail));
@@ -95,13 +107,15 @@ class EditRelease extends Component {
       <Sidebar
         title="修改发布计划"
         visible={visible}
-        onCancel={onCancel.bind(this)}
         destroyOnClose
-        okText="确定"
-        cancelText="取消"
-        onOk={this.handleOk.bind(this)}
         confirmLoading={loading}
         width={380}
+        footer={[
+          <Button key="submit" type="primary" funcType="raised" loading={loading} onClick={this.handleOk} disabled={!editPermission}>
+            确定
+          </Button>,
+          <Button key="back" onClick={onCancel}>取消</Button>,
+        ]}
       >
         {
           visible ? (
