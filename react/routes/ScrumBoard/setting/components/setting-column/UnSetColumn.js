@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Permission } from '@choerodon/boot';
 import './Column.less';
 
 import StatusList from './StatusList';
@@ -31,7 +32,14 @@ class Column extends Component {
               </div>               
             </div>
           </div>
-          <StatusList data={data} />
+          <Permission
+            service={['choerodon.code.project.cooperation.iteration-plan.ps.movetocolomn']}
+            noAccessChildren={(
+              <StatusList data={data} isDragDisabled />
+                )}
+          >
+            <StatusList data={data} />
+          </Permission>
         </div>
       </div>
     );

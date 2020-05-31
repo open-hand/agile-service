@@ -169,6 +169,7 @@ class ReleaseHome extends Component {
   };
 
   renderMenu = (text, record) => {
+    const { type, id, organizationId } = AppState.currentMenuType;
     const menu = (
       <Menu onClick={e => this.handleClickMenu(record, e.key)}>
         {record.statusCode === 'archived'
@@ -215,6 +216,13 @@ class ReleaseHome extends Component {
         menu={menu}
         text={text}
         onClickEdit={this.handleClickMenu.bind(this, record, '5')}
+        type={type}
+        projectId={id}
+        organizationId={organizationId}
+        service={[
+          'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus',
+          'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.deleteversion',
+        ]}
       />
     );
   };
