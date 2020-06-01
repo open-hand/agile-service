@@ -13,7 +13,7 @@ function SprintStatus({
     </div>
   ) : (         
     <div className={prefix}>
-      {planning === false ? '规划中' : '未开始'}
+      {planning === true ? '规划中' : '未开始'}
     </div>
   );
 }
