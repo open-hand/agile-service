@@ -1,5 +1,7 @@
+import React from 'react';
 import { stores } from '@choerodon/boot';
 import { find } from 'lodash';
+import { Tooltip } from 'choerodon-ui';
 
 const { AppState } = stores;
 
@@ -30,7 +32,7 @@ export function configTheme({
         }
       }
     }
-    return values.join(', ');
+    return <Tooltip title={values.join(', ')}>{values.join(', ')}</Tooltip>;
   };
   return {
     className: `SelectTheme ${primary ? 'primary' : ''}`,
