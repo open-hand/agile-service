@@ -5,7 +5,7 @@ import './SprintStatus.less';
 const prefix = 'c7n-backlog-SprintStatus';
 
 function SprintStatus({
-  data: { statusCode, belongCurrentPi },
+  data: { statusCode, planning },
 }) {
   return statusCode === 'started' ? (         
     <div className={`${prefix} ${prefix}-active`}>
@@ -13,7 +13,7 @@ function SprintStatus({
     </div>
   ) : (         
     <div className={prefix}>
-      {belongCurrentPi === false ? '规划中' : '未开始'}
+      {planning === false ? '规划中' : '未开始'}
     </div>
   );
 }

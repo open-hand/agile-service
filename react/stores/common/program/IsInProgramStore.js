@@ -1,5 +1,5 @@
 import {
-  observable, action, computed,
+  observable, action, computed, runInAction,
 } from 'mobx';
 import { stores } from '@choerodon/boot';
 import Moment from 'moment';
@@ -49,8 +49,10 @@ class IsInProgramStore {
 
   loadIsShowFeature = async () => {
     const artInfo = await getProjectIsShowFeature();
-    this.setIsShowFeature(Boolean(artInfo));
-    this.setArtInfo(artInfo);
+    runInAction(() => {
+      this.setArtInfo(artInfo);
+      this.setIsShowFeature(Boolean(artInfo));
+    });    
     return Boolean(artInfo);
   }
 
