@@ -3,13 +3,20 @@ import axios from 'axios';
 import {
   observable, action, computed, toJS,
 } from 'mobx';
-import { sortBy, find } from 'lodash';
+import {
+  sortBy, find, uniq, intersection, 
+} from 'lodash';
 import { store, stores } from '@choerodon/boot';
 import { Modal } from 'choerodon-ui';
-import { featureApi } from '@/api';
+import Moment from 'moment';
+import { featureApi, sprintApi, piApi } from '@/api';
 import { sort } from '@/api/StoryMapApi';
 import { getProjectId } from '@/utils/common';
+import { extendMoment } from 'moment-range';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import { getPiNotDone } from '@/api/FeatureApi';
 
+const moment = extendMoment(Moment);
 const { AppState } = stores;
 function randomItem(array) {
   const index = Math.floor(Math.random() * (array.length - 1));
@@ -382,7 +389,7 @@ class BacklogStore {
     this.selectedSprintId = data;
   }
 
-  
+
   axiosGetEpic() {
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/epics`);
   }
@@ -1014,10 +1021,30 @@ class BacklogStore {
   /**
    * 加载选择快速搜索的冲刺数据
    */
-  getSprint = () => {
-    Promise.all([this.axiosGetQuickSearchList(), this.axiosGetIssueTypes(), this.axiosGetDefaultPriority(), this.axiosGetSprint()]).then(([quickSearch, issueTypes, priorityArr, backlogData]) => {
-      this.initBacklogData(quickSearch, issueTypes, priorityArr, backlogData);
-    });
+  getSprint = async () => {
+    const [quickSearch, issueTypes, priorityArr, backlogData] = await Promise.all([
+      this.axiosGetQuickSearchList(),
+      this.axiosGetIssueTypes(),
+      this.axiosGetDefaultPriority(),
+      this.axiosGetSprint(),
+    ]);
+    if (IsInProgramStore.isInProgram) {
+      const notDonePiList = await getPiNotDone(['todo', 'doing']);
+      const { sprintData } = backlogData;
+      // 为了可以对规划中的冲刺进行时间修改的限制，这里获取对应pi和冲刺
+      const piIds = intersection(notDonePiList.map(pi => pi.id), uniq(sprintData.filter(sprint => sprint.planning).map(sprint => sprint.piId)));
+      if (piIds.length > 0) {
+        const sprints = await Promise.all(piIds.map(piId => sprintApi.getAllByPiId(piId)));
+        this.setPlanPiAndSprints(piIds, notDonePiList, sprints);
+      }
+      this.notDonePiList = notDonePiList;
+      const doingPi = notDonePiList.find(pi => pi.statusCode === 'doing');
+      if (doingPi) {
+        this.setSelectedPiId(doingPi.id);
+      }
+    }
+
+    this.initBacklogData(quickSearch, issueTypes, priorityArr, backlogData);
   };
 
   /**
@@ -1195,6 +1222,118 @@ class BacklogStore {
 
   @action setShowPlanSprint(showPlanSprint) {
     this.showPlanSprint = showPlanSprint;
+  }
+
+  @observable notDonePiList = []
+
+  piMap = observable.map()
+
+  @action setPlanPiAndSprints(piIds, pis, sprints) {
+    piIds.forEach((piId, index) => {
+      const pi = find(pis, { id: piId });
+      this.piMap.set(piId, {
+        pi,
+        sprints: sprints[index],
+      });
+    });
+  }
+
+  @observable piInfo = {};
+
+  @observable sprints = []; // 用于时间判断
+
+
+  loadPiInfoAndSprint = async (programId = IsInProgramStore.artInfo.programId, artId = IsInProgramStore.artInfo.id) => {
+    const currentPiInfo = await piApi.getCurrent(programId, artId);
+    if (currentPiInfo.id) {
+      const sprints = await sprintApi.getAllByPiId(currentPiInfo.id);
+      this.setPiInfo(currentPiInfo);
+      this.setSprints(sprints.map(sprint => ({
+        ...sprint,
+        endDate: sprint.actualEndDate || sprint.endDate,
+      })));
+    }
+  }
+
+
+  @action setPiInfo(data) {
+    this.piInfo = data;
+  }
+
+  @computed get getPiInfo() {
+    return this.piInfo;
+  }
+
+  @action setSprints(data) {
+    this.sprints = data;
+  }
+
+  @computed get getSprints() {
+    return this.sprints.slice();
+  }
+
+  // 时间点是否在pi内
+  isDateBetweenPiDate({ date, pi = this.getPiInfo } = {}) {
+    const { endDate: piEndDate } = pi;
+    const piActualStartDate = pi.actualStartDate || pi.startDate;
+    return date.isBetween(piActualStartDate, piEndDate);
+  }
+
+  // 时间点是否在其他冲刺中
+  isDateBetweenOtherSprints({ date, sprintId, sprints = this.sprints } = {}) {
+    return sprints.filter(sprint => sprint.sprintId !== sprintId).some((sprint) => {
+      const { startDate } = sprint;
+      const endDate = sprint.actualEndDate || sprint.endDate;
+      return date.isBetween(startDate, endDate);
+    });
+  }
+
+  // 时间段是否在pi中
+  isRangeInPi({ startDate, endDate, pi = this.getPiInfo }) {
+    const { endDate: piEndDate } = pi;
+    const piActualStartDate = pi.actualStartDate || pi.startDate;
+    const piRange = moment.range(piActualStartDate, piEndDate);
+    // 开始时间和结束时间都在pi内
+    return piRange.contains(startDate) && piRange.contains(endDate);
+  }
+
+  // 时间段是否和其他冲刺有重叠
+  isRangeOverlapWithOtherSprints({
+    startDate, endDate, sprintId, sprints = this.sprints,
+  } = {}) {
+    return sprints.filter(sprint => sprint.sprintId !== sprintId).some((sprint) => {
+      const { startDate: sprintStartDate } = sprint;
+      const sprintEndDate = sprint.actualEndDate || sprint.endDate;
+      const sprintRange = moment.range(sprintStartDate, sprintEndDate);
+      const range = moment.range(startDate, endDate);
+      return range.overlaps(sprintRange);
+    });
+  }
+
+
+  // 开始时间应小于结束时间
+  isRange(startDate, endDate) {
+    return startDate < endDate;
+  }
+
+  // 时间能不能选
+  dateCanChoose({
+    date, sprintId, pi, sprints,
+  }) {
+    // 首先时间应该在PI的实际开始时间和结束时间之间
+    // 并且不能在其他冲刺之间
+    return this.isDateBetweenPiDate({ date, pi }) && !this.isDateBetweenOtherSprints({ date, sprintId, sprints });
+  }
+
+  // 时间段是不是可以选
+  rangeCanChoose({
+    startDate, endDate, sprintId, pi, sprints,
+  }) {
+    // 时间段要在pi内部
+    // 时间段不能和其他冲刺重叠
+    return this.isRange(startDate, endDate) && this.isRangeInPi({ startDate, endDate, pi }) && !this.isRangeOverlapWithOtherSprints({
+      startDate, endDate, sprintId, sprints,
+    });
   }
 }
 

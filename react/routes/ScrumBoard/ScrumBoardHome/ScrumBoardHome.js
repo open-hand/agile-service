@@ -8,7 +8,6 @@ import {
 } from 'choerodon-ui';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
@@ -61,9 +60,6 @@ class ScrumBoardHome extends Component {
   componentDidMount() {
     ScrumBoardStore.setSelectedBoardId('');
     this.getBoard();
-    if (IsInProgramStore.isShowFeature) {
-      IsInProgramStore.loadPiInfoAndSprint();
-    }
   }
 
   componentWillUnmount() {
@@ -130,7 +126,6 @@ class ScrumBoardHome extends Component {
       completeMessage,
       sprintId,
       afterClose: async () => {
-        console.log('重新请求冲刺');
         const axiosGetSprintNotClosed = axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/names`, ['sprint_planning', 'started']);
         await axiosGetSprintNotClosed.then((res) => {
           ScrumBoardStore.setSprintNotClosedArray(res);

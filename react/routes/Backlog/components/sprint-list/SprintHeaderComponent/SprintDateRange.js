@@ -37,7 +37,7 @@ const FormItem = Form.Item;
       });
       // 在项目群的子项目 刷新冲刺限制列表
       if (IsInProgramStore.isShowFeature) {
-        IsInProgramStore.loadPiInfoAndSprint();
+        BacklogStore.loadPiInfoAndSprint();
       }
     }).catch((error) => {
       message.error(error);
@@ -47,7 +47,7 @@ const FormItem = Form.Item;
   render() {
     const {
       data: {
-        statusCode, startDate, endDate, sprintId, sprintType, 
+        statusCode, startDate, endDate, sprintId, sprintType, planning, piId,
       }, form: { getFieldDecorator }, form, noPermission,
     } = this.props;
     return (
@@ -116,13 +116,19 @@ const FormItem = Form.Item;
                             return false;
                           }
                         } else {
+                          const pi = planning === true ? BacklogStore.piMap.get(piId).pi : undefined;
+                          const sprints = planning === true ? BacklogStore.piMap.get(piId).sprints : undefined;
                           // 没选结束时间的时候，只判断时间点能不能选
                           // eslint-disable-next-line no-lonely-if
                           if (!endDate) {
-                            return !IsInProgramStore.dateCanChoose(date, sprintId);
+                            return !BacklogStore.dateCanChoose({
+                              date, sprintId, pi, sprints, 
+                            });
                           } else {
                             // 选了结束时间之后，判断形成的时间段是否和其他重叠
-                            return !IsInProgramStore.rangeCanChoose(date, endDate, sprintId);
+                            return !BacklogStore.rangeCanChoose({
+                              startDate: date, endDate, sprintId, pi, sprints,  
+                            });
                           }                  
                         }
                       }}
@@ -157,13 +163,19 @@ const FormItem = Form.Item;
                             return false;
                           }
                         } else {
+                          const pi = planning === true ? BacklogStore.piMap.get(piId).pi : undefined;
+                          const sprints = planning === true ? BacklogStore.piMap.get(piId).sprints : undefined;
                           // 没选开始时间的时候，只判断时间点能不能选
                           // eslint-disable-next-line no-lonely-if
                           if (!startDate) {
-                            return !IsInProgramStore.dateCanChoose(date, sprintId);
+                            return !BacklogStore.dateCanChoose({
+                              date, sprintId, pi, sprints,  
+                            });
                           } else {
                             // 选了开始时间之后，判断形成的时间段是否和其他重叠
-                            return !IsInProgramStore.rangeCanChoose(startDate, date, sprintId);
+                            return !BacklogStore.rangeCanChoose({
+                              startDate, endDate: date, sprintId, pi, sprints,  
+                            });
                           }
                         }
                       }}

@@ -158,7 +158,7 @@ class StartSprint extends Component {
       const startDate = moment();
       // 使用moment套一下，因为add是会改变原值的
       const endDate = moment(startDate).add(parseInt(value, 10), 'weeks');
-      return !IsInProgramStore.rangeCanChoose(startDate, endDate, sprintId);
+      return !BacklogStore.rangeCanChoose({ startDate, endDate, sprintId });
     }
     return false;
   }
@@ -338,10 +338,10 @@ class StartSprint extends Component {
                         // 没选开始时间的时候，只判断时间点能不能选
                         // eslint-disable-next-line no-lonely-if
                         if (!startDate) {
-                          return !IsInProgramStore.dateCanChoose(date, sprintId);
+                          return !BacklogStore.dateCanChoose({ date, sprintId });
                         } else {
                           // 选了开始时间之后，判断形成的时间段是否和其他重叠
-                          return !IsInProgramStore.rangeCanChoose(startDate, date, sprintId);
+                          return !BacklogStore.rangeCanChoose({ startDate, endDate: date, sprintId });
                         }
                       }              
                     }}

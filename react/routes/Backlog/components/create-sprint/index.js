@@ -5,7 +5,7 @@ import {
 import { sprintApi } from '@/api';
 import { Choerodon } from '@choerodon/boot';
 import { MAX_LENGTH_SPRINT } from '@/constants/MAX_LENGTH';
-import IsInProgramStore from '../../../../stores/common/program/IsInProgramStore';
+import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
 async function sprintNameValidator(value) {
   const isSame = await sprintApi.validate(value);
@@ -138,10 +138,10 @@ export function CreateCurrentPiSprint({
         filter={(date) => {   
           // 没选结束时间的时候，只判断时间点能不能选
           if (!dataSet.current.get('endDate')) {
-            return IsInProgramStore.dateCanChoose(date);
+            return BacklogStore.dateCanChoose({ date });
           } else {
             // 选了结束时间之后，判断形成的时间段是否和其他重叠
-            return IsInProgramStore.rangeCanChoose(date, dataSet.current.get('endDate'));
+            return BacklogStore.rangeCanChoose({ startDate: date, endDate: dataSet.current.get('endDate') });
           }
         }}
       />
@@ -150,10 +150,10 @@ export function CreateCurrentPiSprint({
         filter={(date) => {
           // 没选开始时间的时候，只判断时间点能不能选
           if (!dataSet.current.get('startDate')) {
-            return IsInProgramStore.dateCanChoose(date);
+            return BacklogStore.dateCanChoose({ date });
           } else {
             // 选了开始时间之后，判断形成的时间段是否和其他重叠
-            return IsInProgramStore.rangeCanChoose(dataSet.current.get('startDate'), date);
+            return BacklogStore.rangeCanChoose({ startDate: dataSet.current.get('startDate'), endDate: date });
           }          
         }}
       />

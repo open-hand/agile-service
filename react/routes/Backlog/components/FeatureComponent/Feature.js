@@ -2,14 +2,12 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Icon } from 'choerodon-ui';
 import { Select } from 'choerodon-ui';
-import _ from 'lodash';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import { find, min } from 'lodash';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { featureApi } from '@/api';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 import { QuickSearchEvent } from '../../../../components/QuickSearch';
 import FeatureItem from './FeatureItem';
-import { getPiNotDone } from '../../../../api/FeatureApi';
 import './Feature.less';
 
 const { Option } = Select;
@@ -18,9 +16,7 @@ class Feature extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      notDonePiList: [],
       notDoneSprintList: [],
-      sprintSelectShow: true,
     };
   }
 
@@ -29,25 +25,10 @@ class Feature extends Component {
   }
 
   featureRefresh = (piId, isFirstLoad = false, sprintId) => {
-    Promise.all([featureApi.getByPiIdInSubProject(piId, sprintId), featureApi.getColors(), getPiNotDone(['todo', 'doing'])]).then(([featureData, featureColor, notDonePiList]) => {
+    Promise.all([featureApi.getByPiIdInSubProject(piId, sprintId), featureApi.getColors()]).then(([featureData, featureColor]) => {
       BacklogStore.setFeatureData(featureData);
       BacklogStore.setColorLookupValue(featureColor.lookupValues);
       BacklogStore.setRandomFeatureColor(featureData, featureColor.lookupValues);
-      this.setState({
-        notDonePiList,
-      });
-      if (isFirstLoad) {
-        const doingPi = notDonePiList.find(pi => pi.statusCode === 'doing');
-        if (doingPi) {
-          BacklogStore.setSelectedPiId(doingPi.id);
-          BacklogStore.axiosGetNotDoneSprintByPiId(doingPi.id).then((res) => {
-            this.setState({
-              sprintSelectShow: true,
-              notDoneSprintList: res.filter(item => item.statusCode !== 'done'),
-            });
-          });
-        }
-      }
     }).catch((error3) => { });
   };
 
@@ -69,23 +50,16 @@ class Feature extends Component {
   handlePiChange = (piId) => {
     BacklogStore.setSelectedPiId(piId);
     BacklogStore.setSelectedSprintId(undefined);
-    const { notDonePiList } = this.state;
+    const { notDonePiList } = BacklogStore;
     const selectedPi = notDonePiList.find(pi => pi.id === piId);
     const todoPiList = notDonePiList.filter(pi => pi.statusCode !== 'doing');
-    const minPIId = _.min(todoPiList.map(pi => pi.id));
+    const minPIId = min(todoPiList.map(pi => pi.id));
     if (selectedPi.statusCode === 'doing' || piId === minPIId) {
       BacklogStore.axiosGetNotDoneSprintByPiId(piId).then((res) => {
         this.setState({
           notDoneSprintList: res.filter(item => item.statusCode !== 'done'),
         });
-      });
-      this.setState({
-        sprintSelectShow: true,
-      });
-    } else {
-      this.setState({
-        sprintSelectShow: false,
-      });
+      });      
     }
     this.featureRefresh(piId, false, undefined);
   }
@@ -98,8 +72,10 @@ class Feature extends Component {
 
   render() {
     const { refresh, issueRefresh } = this.props;
-    const { notDonePiList, notDoneSprintList, sprintSelectShow } = this.state;
+    const { notDonePiList } = BacklogStore;
+    const { notDoneSprintList } = this.state;
     const { selectedPiId, selectedSprintId } = BacklogStore;
+    const selectedPi = find(BacklogStore.notDonePiList, { id: selectedPiId });
     return BacklogStore.getCurrentVisible === 'feature' ? (
       <div className="c7n-backlog-epic">
         <div className="c7n-backlog-epicContent">
@@ -144,7 +120,7 @@ class Feature extends Component {
                 notDonePiList.map(pi => (
                   <Option key={pi.id} value={pi.id}>
                     {`${pi.code}-${pi.name}`}
-                    {pi.id === (IsInProgramStore.piInfo && IsInProgramStore.piInfo.id) && (
+                    {pi.id === (BacklogStore.piInfo && BacklogStore.piInfo.id) && (
                     <div
                       style={{
                         marginLeft: '0.08rem',
@@ -170,7 +146,7 @@ class Feature extends Component {
               </p>
             )}
             {
-              sprintSelectShow && (
+              selectedPi && selectedPi.statusCode === 'doing' && (
               <Select
                 key="sprintSelect"
                 className="c7n-backlog-sprintSelect"
