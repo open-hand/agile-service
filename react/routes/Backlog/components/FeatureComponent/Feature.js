@@ -15,10 +15,10 @@ const { Option } = Select;
 @observer
 class Feature extends Component {
   componentDidMount() {
-    this.featureRefresh(undefined, true, undefined);
+    this.featureRefresh(undefined, undefined);
   }
 
-  featureRefresh = (piId, isFirstLoad = false, sprintId) => {
+  featureRefresh = (piId, sprintId) => {
     Promise.all([featureApi.getByPiIdInSubProject(piId, sprintId), featureApi.getColors()]).then(([featureData, featureColor]) => {
       BacklogStore.setFeatureData(featureData);
       BacklogStore.setColorLookupValue(featureColor.lookupValues);
@@ -44,13 +44,13 @@ class Feature extends Component {
   handlePiChange = (piId) => {
     BacklogStore.setSelectedPiId(piId);
     BacklogStore.setSelectedSprintId(undefined);
-    this.featureRefresh(piId, false, undefined);
+    this.featureRefresh(piId, undefined);
   }
 
   handleSprintChange = (sprintId) => {
     const { selectedPiId } = BacklogStore;
     BacklogStore.setSelectedSprintId(sprintId);
-    this.featureRefresh(selectedPiId, false, sprintId);
+    this.featureRefresh(selectedPiId, sprintId);
   }
 
   render() {

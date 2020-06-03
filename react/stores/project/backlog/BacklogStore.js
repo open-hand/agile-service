@@ -823,7 +823,7 @@ class BacklogStore {
     sort(sortVO).then(
       action('fetchSuccess', (res) => {
         if (!res.message) {
-          featureApi.getByPiIdInSubProject(this.selectedPiId).then((data) => {
+          featureApi.getByPiIdInSubProject(this.selectedPiId, this.selectedSprintId).then((data) => {
             this.setFeatureData(data);
           });
         } else {
@@ -1081,7 +1081,7 @@ class BacklogStore {
    * 加载特性
    */
   loadFeature = () => {
-    featureApi.getByPiIdInSubProject(this.selectedPiId).then((data) => {
+    featureApi.getByPiIdInSubProject(this.selectedPiId, this.selectedSprintId).then((data) => {
       this.setFeatureData(data);
     }).catch(() => {
     });
