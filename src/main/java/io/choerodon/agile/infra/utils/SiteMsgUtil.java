@@ -65,7 +65,7 @@ public class SiteMsgUtil {
         Map<String,Object> objectMap=new HashMap<>();
         objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
         //发送站内信
-        MessageSender messageSender = handlerMessageSender(0L,"issueCreate",userIds,map);
+        MessageSender messageSender = handlerMessageSender(0L,"ISSUECREATE",userIds,map);
         messageSender.setAdditionalInformation(objectMap);
         messageClient.async().sendMessage(messageSender);
     }
@@ -120,7 +120,7 @@ public class SiteMsgUtil {
         Map<String,Object> objectMap=new HashMap<>();
         objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
         //发送站内信
-        MessageSender messageSender = handlerMessageSender(0L,"issueAssignee",userIds,map);
+        MessageSender messageSender = handlerMessageSender(0L,"ISSUEASSIGNEE",userIds,map);
         messageSender.setAdditionalInformation(objectMap);
         messageClient.async().sendMessage(messageSender);
 
@@ -148,7 +148,7 @@ public class SiteMsgUtil {
         Map<String,Object> objectMap=new HashMap<>();
         objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
         //发送站内信
-        MessageSender messageSender = handlerMessageSender(0L,"issueSolve",userIds,map);
+        MessageSender messageSender = handlerMessageSender(0L,"ISSUESOLVE",userIds,map);
         messageSender.setAdditionalInformation(objectMap);
         messageClient.async().sendMessage(messageSender);
 
