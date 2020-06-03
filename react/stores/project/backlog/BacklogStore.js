@@ -823,7 +823,7 @@ class BacklogStore {
     sort(sortVO).then(
       action('fetchSuccess', (res) => {
         if (!res.message) {
-          featureApi.getByPiIdInSubProject(this.selectedPiId).then((data) => {
+          featureApi.getByPiIdInSubProject(this.selectedPiId, this.selectedSprintId).then((data) => {
             this.setFeatureData(data);
           });
         } else {
@@ -1021,18 +1021,18 @@ class BacklogStore {
   /**
    * 加载选择快速搜索的冲刺数据
    */
-  getSprint = async () => {
+  getSprint = async (setPiIdIf) => {
     const [quickSearch, issueTypes, priorityArr, backlogData] = await Promise.all([
       this.axiosGetQuickSearchList(),
       this.axiosGetIssueTypes(),
       this.axiosGetDefaultPriority(),
       this.axiosGetSprint(),
     ]);
-    await this.getPlanPi(backlogData.sprintData);
+    await this.getPlanPi(backlogData.sprintData, setPiIdIf);
     this.initBacklogData(quickSearch, issueTypes, priorityArr, backlogData);
   };
 
-  getPlanPi = async (sprintData = this.sprintData) => {
+  getPlanPi = async (sprintData = this.sprintData, setPiIdIf = true) => {
     if (IsInProgramStore.isInProgram) {
       const notDonePiList = await getPiNotDone(['todo', 'doing'], IsInProgramStore.program.id);
       // 为了可以对规划中的冲刺进行时间修改的限制，这里获取对应pi和冲刺
@@ -1043,7 +1043,7 @@ class BacklogStore {
       }
       this.notDonePiList = notDonePiList;
       const doingPi = notDonePiList.find(pi => pi.statusCode === 'doing');
-      if (doingPi) {
+      if (doingPi && setPiIdIf) {
         this.setSelectedPiId(doingPi.id);
       }
     }
@@ -1081,20 +1081,20 @@ class BacklogStore {
    * 加载特性
    */
   loadFeature = () => {
-    featureApi.getByPiIdInSubProject(this.selectedPiId).then((data) => {
+    featureApi.getByPiIdInSubProject(this.selectedPiId, this.selectedSprintId).then((data) => {
       this.setFeatureData(data);
     }).catch(() => {
     });
   };
 
-  refresh = (spinIf = true) => {
+  refresh = (spinIf = true, setPiIdIf = true) => {
     // if (this.IssueDetail) {
     //   this.IssueDetail.refreshIssueDetail();
     // }
     if (spinIf) {
       this.setSpinIf(true);
     }
-    this.getSprint();
+    this.getSprint(setPiIdIf);
     if (this.getCurrentVisible === 'version') {
       this.loadVersion();
     } else if (this.getCurrentVisible === 'epic') {
