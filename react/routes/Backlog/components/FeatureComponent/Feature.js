@@ -62,7 +62,7 @@ class Feature extends Component {
       selectedPi = notDonePiList.find(pi => pi.id === selectedPiId);
       const todoPiList = notDonePiList.filter(pi => pi.statusCode !== 'doing');
       const minPIId = min(todoPiList.map(pi => pi.id));
-      if (selectedPi.statusCode === 'doing') {
+      if (selectedPi && selectedPi.statusCode === 'doing') {
         notDoneSprintList = BacklogStore.sprints.filter(item => item.statusCode !== 'done');
       } else if (selectedPiId === minPIId) {
         notDoneSprintList = BacklogStore.piMap.get(minPIId) && BacklogStore.piMap.get(minPIId).sprints;
