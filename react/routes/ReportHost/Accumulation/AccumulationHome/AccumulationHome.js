@@ -442,7 +442,7 @@ class AccumulationHome extends Component {
     }
     if (!AccumulationStore.getAccumulationData.length) {
       return (
-        <NoDataComponent title="问题" links={[{ name: '问题管理', link: '/agile/issue' }]} img={pic} />
+        <NoDataComponent title="问题" links={[{ name: '问题管理', link: '/agile/work-list/issue' }]} img={pic} />
       );
     }
     return (
