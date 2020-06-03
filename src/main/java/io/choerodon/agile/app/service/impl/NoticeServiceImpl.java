@@ -128,7 +128,7 @@ public class NoticeServiceImpl implements NoticeService {
             Long roleId = null;
             List<RoleVO> roleVOS = userService.listRolesWithUserCountOnProjectLevel(projectId, roleAssignmentSearchVO);
             for (RoleVO roleVO : roleVOS) {
-                if ("role/project/default/project-owner".equals(roleVO.getCode())) {
+                if ("project-admin".equals(roleVO.getCode())) {
                     roleId = roleVO.getId();
                     break;
                 }

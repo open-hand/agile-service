@@ -24,7 +24,7 @@ import java.util.*;
 @Component
 public class UserServiceImpl implements UserService {
 
-    private static final String PROJECT_OWNER = "role/project/default/project-owner";
+    private static final String PROJECT_OWNER = "project-admin";
 
     private final BaseFeignClient baseFeignClient;
 
