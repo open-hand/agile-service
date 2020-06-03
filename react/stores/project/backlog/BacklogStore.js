@@ -1028,11 +1028,11 @@ class BacklogStore {
       this.axiosGetDefaultPriority(),
       this.axiosGetSprint(),
     ]);
-    await this.getPlanPi(backlogData.sprintData);
+    await this.getPlanPi(backlogData.sprintData, setPiIdIf);
     this.initBacklogData(quickSearch, issueTypes, priorityArr, backlogData);
   };
 
-  getPlanPi = async (sprintData = this.sprintData) => {
+  getPlanPi = async (sprintData = this.sprintData, setPiIdIf = true) => {
     if (IsInProgramStore.isInProgram) {
       const notDonePiList = await getPiNotDone(['todo', 'doing'], IsInProgramStore.program.id);
       // 为了可以对规划中的冲刺进行时间修改的限制，这里获取对应pi和冲刺
