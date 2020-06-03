@@ -1029,7 +1029,7 @@ class BacklogStore {
       this.axiosGetSprint(),
     ]);
     if (IsInProgramStore.isInProgram) {
-      const notDonePiList = await getPiNotDone(['todo', 'doing']);
+      const notDonePiList = await getPiNotDone(['todo', 'doing'], IsInProgramStore.program.id);
       const { sprintData } = backlogData;
       // 为了可以对规划中的冲刺进行时间修改的限制，这里获取对应pi和冲刺
       const piIds = intersection(notDonePiList.map(pi => pi.id), uniq(sprintData.filter(sprint => sprint.planning).map(sprint => sprint.piId)));
