@@ -8,6 +8,7 @@ import { Spin } from 'choerodon-ui';
 import { throttle } from 'lodash';
 import './EditIssue.less';
 import useIsOwner from '@/hooks/useIsOwner';
+import { useIssueTypes } from '@/hooks';
 import {
   loadBranchs, loadDatalogs, loadLinkIssues,
   loadIssue, loadWorklogs, loadDocs, getFieldAndValue,
@@ -62,6 +63,7 @@ function EditIssue() {
     onChangeWidth,
   } = useContext(EditIssueContext);
   const [isOwner] = useIsOwner();
+  const [issueTypes] = useIssueTypes();
   const container = useRef();
   const idRef = useRef();
   const loadIssueDetail = async (paramIssueId) => {
@@ -307,7 +309,7 @@ function EditIssue() {
                 ovn={objectVersionNumber}
                 onCancel={() => store.setTransformSubIssueShow(false)}
                 onOk={handleTransformSubIssue.bind(this)}
-                store={store}
+                issueTypes={issueTypes}
               />
             ) : null
           }
