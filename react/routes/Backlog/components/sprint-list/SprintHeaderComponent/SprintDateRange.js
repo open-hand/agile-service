@@ -37,7 +37,11 @@ const FormItem = Form.Item;
       });
       // 在项目群的子项目 刷新冲刺限制列表
       if (IsInProgramStore.isShowFeature) {
-        BacklogStore.loadPiInfoAndSprint();
+        if (data.planning) {
+          BacklogStore.getPlanPi();
+        } else {
+          BacklogStore.loadPiInfoAndSprint();
+        }
       }
     }).catch((error) => {
       message.error(error);
@@ -116,6 +120,9 @@ const FormItem = Form.Item;
                             return false;
                           }
                         } else {
+                          if (planning && !BacklogStore.piMap.get(piId)) {
+                            return true;
+                          }
                           const pi = planning === true ? BacklogStore.piMap.get(piId).pi : undefined;
                           const sprints = planning === true ? BacklogStore.piMap.get(piId).sprints : undefined;
                           // 没选结束时间的时候，只判断时间点能不能选
@@ -163,6 +170,9 @@ const FormItem = Form.Item;
                             return false;
                           }
                         } else {
+                          if (planning && !BacklogStore.piMap.get(piId)) {
+                            return true;
+                          }
                           const pi = planning === true ? BacklogStore.piMap.get(piId).pi : undefined;
                           const sprints = planning === true ? BacklogStore.piMap.get(piId).sprints : undefined;
                           // 没选开始时间的时候，只判断时间点能不能选

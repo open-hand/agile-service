@@ -4,7 +4,7 @@ import {
   observable, action, computed, toJS,
 } from 'mobx';
 import {
-  sortBy, find, uniq, intersection, 
+  sortBy, find, uniq, intersection,
 } from 'lodash';
 import { store, stores } from '@choerodon/boot';
 import { Modal } from 'choerodon-ui';
@@ -1028,9 +1028,13 @@ class BacklogStore {
       this.axiosGetDefaultPriority(),
       this.axiosGetSprint(),
     ]);
+    await this.getPlanPi(backlogData.sprintData);
+    this.initBacklogData(quickSearch, issueTypes, priorityArr, backlogData);
+  };
+
+  getPlanPi = async (sprintData = this.sprintData) => {
     if (IsInProgramStore.isInProgram) {
       const notDonePiList = await getPiNotDone(['todo', 'doing'], IsInProgramStore.program.id);
-      const { sprintData } = backlogData;
       // 为了可以对规划中的冲刺进行时间修改的限制，这里获取对应pi和冲刺
       const piIds = intersection(notDonePiList.map(pi => pi.id), uniq(sprintData.filter(sprint => sprint.planning).map(sprint => sprint.piId)));
       if (piIds.length > 0) {
@@ -1043,9 +1047,7 @@ class BacklogStore {
         this.setSelectedPiId(doingPi.id);
       }
     }
-
-    this.initBacklogData(quickSearch, issueTypes, priorityArr, backlogData);
-  };
+  }
 
   /**
    * 加载版本数据
