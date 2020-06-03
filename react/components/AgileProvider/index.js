@@ -5,6 +5,7 @@ import { stores } from '@choerodon/boot';
 import { IssueTypeContext } from '@/hooks/useIssueTypes';
 import { DefaultPriorityContext } from '@/hooks/useDefaultPriority';
 import { PriorityContext } from '@/hooks/usePriorities';
+import { IsOwnerContext } from '@/hooks/useIsOwner';
 
 const { AppState } = stores;
 function wrapWithContexts(contexts, values, children) {
@@ -43,4 +44,5 @@ export default AgileProvider([
   IssueTypeContext,
   DefaultPriorityContext,
   PriorityContext,
+  IsOwnerContext,
 ]);

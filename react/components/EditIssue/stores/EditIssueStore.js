@@ -24,9 +24,6 @@ class EditIssueStore {
     return this.fields;
   }
 
-  @observable issueTypes = [];
-
-  // issue attribute
   @observable doc = {};
 
   @observable workLogs = [];
@@ -38,14 +35,6 @@ class EditIssueStore {
   @observable branch = {};
 
   @observable testExecutes = [];
-
-  @action setIssueTypes(issueTypes) {
-    this.issueTypes = issueTypes;
-  }
-
-  @computed get getIssueTypes() {
-    return this.issueTypes;
-  }
 
   @action setDoc(data) {
     this.doc = data;

@@ -3,14 +3,14 @@ import React, {
   useContext, useState, useEffect, useImperativeHandle, useRef,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { stores, axios, Choerodon } from '@choerodon/boot';
+import { stores, Choerodon } from '@choerodon/boot';
 import { Spin } from 'choerodon-ui';
 import { throttle } from 'lodash';
 import './EditIssue.less';
-import { getIsOwner } from '@/api/CommonApi';
+import useIsOwner from '@/hooks/useIsOwner';
 import {
   loadBranchs, loadDatalogs, loadLinkIssues,
-  loadIssue, loadWorklogs, loadDocs, getFieldAndValue, loadIssueTypes,
+  loadIssue, loadWorklogs, loadDocs, getFieldAndValue,
 } from '../../api/NewIssueApi';
 import {
   loadDatalogs as loadDatalogsProgram,
@@ -31,7 +31,6 @@ import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 const { AppState } = stores;
 
 
-let hasPermission;
 const defaultProps = {
   applyType: 'agile',
 };
@@ -62,10 +61,9 @@ function EditIssue() {
     isFullScreen,
     onChangeWidth,
   } = useContext(EditIssueContext);
+  const [isOwner] = useIsOwner();
   const container = useRef();
   const idRef = useRef();
-  // 判断是否为子项目 如果是子项目 则将史诗从左上角删掉 并将史诗栏替换成特性栏
-  const { isInProgram } = IsInProgramStore;
   const loadIssueDetail = async (paramIssueId) => {
     if (FieldVersionRef.current) {
       FieldVersionRef.current.loadIssueVersions();
@@ -129,18 +127,9 @@ function EditIssue() {
       container.current.removeAttribute('max-width');
     }
   };
+  
   useEffect(() => {
     loadIssueDetail(currentIssueId);
-    if (!programId) {
-      axios.all([
-        getIsOwner(),
-        loadIssueTypes(applyType),
-      ])
-        .then(axios.spread((isOwner, issueTypes) => {
-          hasPermission = isOwner;
-          store.setIssueTypes(isInProgram && issueTypes ? issueTypes.filter(type => type.typeCode !== 'issue_epic') : issueTypes);
-        }));
-    }
     setQuery();
   }, [currentIssueId]);
 
@@ -210,7 +199,7 @@ function EditIssue() {
     getRelateStoryShow: relateStoryShow,
   } = store;
   const rightDisabled = disabled || (IsInProgramStore.isInProgram && typeCode === 'issue_epic');
-  const HasPermission = (hasPermission || createdBy === AppState.userInfo.id);
+  const HasPermission = (isOwner || createdBy === AppState.userInfo.id);
   return (
     <div style={{
       position: 'fixed',
@@ -278,7 +267,7 @@ function EditIssue() {
               onUpdate={onUpdate}
               onDeleteSubIssue={onDeleteSubIssue}
               loginUserId={AppState.userInfo.id}
-              hasPermission={hasPermission}
+              hasPermission={isOwner}
               applyType={applyType}
               onDeleteIssue={onDeleteIssue}
               parentSummary={summary}

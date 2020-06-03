@@ -2,15 +2,18 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Dropdown, Menu, Icon } from 'choerodon-ui';
 import { find } from 'lodash';
+import { useIssueTypes } from '@/hooks';
 import TypeTag from '../../TypeTag';
 import { updateIssueType, updateIssue } from '../../../api/NewIssueApi';
 import EditIssueContext from '../stores';
 import './IssueComponent.less';
 
+
 const IssueType = observer(({
   reloadIssue, onUpdate,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
+  let [issueTypeData] = useIssueTypes();
   const handleChangeType = (type) => {
     const issue = store.getIssue;
     const {
@@ -60,8 +63,7 @@ const IssueType = observer(({
     }
   };
 
-
-  let issueTypeData = store.getIssueTypes ? store.getIssueTypes : [];
+ 
   const issue = store.getIssue;
   const { issueTypeVO = {}, featureVO = {}, subIssueVOList = [] } = issue;
   const { typeCode } = issueTypeVO;
