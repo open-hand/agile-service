@@ -88,7 +88,7 @@ function IssueLinkHome() {
         onClick={openCreateEditModal.bind(null, true)}
         clickAble
         showToolTip
-        permissionCode={['agile-service.issue-link-type.updateIssueLinkType']}
+        permissionCode={['choerodon.code.project.setting.issue.ps.updatelink']}
       />
     );
   }
@@ -96,7 +96,7 @@ function IssueLinkHome() {
   function renderAction() {
     const actionData = [
       {
-        service: ['agile-service.issue-link-type.deleteIssueLinkType'],
+        service: ['choerodon.code.project.setting.issue.ps.deletelink'],
         text: formatMessage({ id: 'delete' }),
         action: openDeleteModal,
       },
@@ -128,6 +128,8 @@ function IssueLinkHome() {
     <Page
       service={[
         'choerodon.code.project.setting.issue.ps.issuelink',
+        'choerodon.code.project.setting.issue.ps.updatelink',
+        'choerodon.code.project.setting.issue.ps.deletelink',
       ]}
       className="c7n-issue-link"
     >

@@ -92,7 +92,7 @@ const IssueDropDown = ({
   };
   const getMenu = () => (
     <Menu onClick={handleClickMenu}>
-      {!['feature'].includes(typeCode) && (
+      {!['feature', 'issue_epic'].includes(typeCode) && (
         <Menu.Item key="0">
           登记工作日志
         </Menu.Item>
@@ -155,7 +155,7 @@ const IssueDropDown = ({
         )
       }
       {
-        typeCode !== 'feature' && (
+        (typeCode !== 'feature' && typeCode !== 'issue_epic') && (
           <Menu.Item key="7">
             分配问题
           </Menu.Item>

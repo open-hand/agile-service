@@ -51,7 +51,7 @@ function IssueItem({ issue }) {
           margin: '0 4px', flex: 1, overflow: 'hidden', display: 'flex', 
         }}
         >
-          <Link style={{ margin: '0 2px', flexShrink: 0 }}>{issueNum}</Link>
+          <Link style={{ margin: '0 2px', flexShrink: 0 }} onClick={handleSummaryClick}>{issueNum}</Link>
           <Link
             style={{ margin: '0 2px' }}
             onClick={handleSummaryClick}
