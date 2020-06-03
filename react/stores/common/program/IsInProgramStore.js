@@ -32,6 +32,8 @@ class IsInProgramStore {
       } else {
         this.setIsShowFeature(false);
       }
+    } else {
+      this.setIsInProgram(false);
     }
   }
 
@@ -79,7 +81,7 @@ class IsInProgramStore {
     runInAction(() => {
       this.setArtInfo(artInfo);
       this.setIsShowFeature(Boolean(artInfo));
-    });    
+    });
     return Boolean(artInfo);
   }
 }
