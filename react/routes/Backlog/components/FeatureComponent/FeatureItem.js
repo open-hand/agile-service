@@ -45,10 +45,10 @@ class FeatureItem extends Component {
                 item.issueId, BacklogStore.getIssueWithEpicOrVersion,
               ).then((res) => {
                 issueRefresh();
-                refresh();
+                refresh(true, false);
               }).catch((error) => {
                 issueRefresh();
-                refresh();
+                refresh(true, false);
               });
             }
           }}
