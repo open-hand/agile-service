@@ -24,7 +24,7 @@ import java.util.*;
 @Component
 public class UserServiceImpl implements UserService {
 
-    private static final String PROJECT_OWNER = "role/project/default/project-owner";
+    private static final String PROJECT_ADMIN = "project-admin";
 
     private final BaseFeignClient baseFeignClient;
 
@@ -154,7 +154,7 @@ public class UserServiceImpl implements UserService {
         } else {
             boolean isProjectOwner = false;
             for (RoleVO role : roles) {
-                if (PROJECT_OWNER.equals(role.getCode())
+                if (PROJECT_ADMIN.equals(role.getCode())
                         && role.getEnabled()) {
                     isProjectOwner = true;
                     break;
