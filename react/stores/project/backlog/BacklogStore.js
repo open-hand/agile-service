@@ -1021,7 +1021,7 @@ class BacklogStore {
   /**
    * 加载选择快速搜索的冲刺数据
    */
-  getSprint = async () => {
+  getSprint = async (setPiIdIf) => {
     const [quickSearch, issueTypes, priorityArr, backlogData] = await Promise.all([
       this.axiosGetQuickSearchList(),
       this.axiosGetIssueTypes(),
@@ -1043,7 +1043,7 @@ class BacklogStore {
       }
       this.notDonePiList = notDonePiList;
       const doingPi = notDonePiList.find(pi => pi.statusCode === 'doing');
-      if (doingPi) {
+      if (doingPi && setPiIdIf) {
         this.setSelectedPiId(doingPi.id);
       }
     }
@@ -1087,14 +1087,14 @@ class BacklogStore {
     });
   };
 
-  refresh = (spinIf = true) => {
+  refresh = (spinIf = true, setPiIdIf = true) => {
     // if (this.IssueDetail) {
     //   this.IssueDetail.refreshIssueDetail();
     // }
     if (spinIf) {
       this.setSpinIf(true);
     }
-    this.getSprint();
+    this.getSprint(setPiIdIf);
     if (this.getCurrentVisible === 'version') {
       this.loadVersion();
     } else if (this.getCurrentVisible === 'epic') {

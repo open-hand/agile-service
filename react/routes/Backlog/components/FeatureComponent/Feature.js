@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import { Icon } from 'choerodon-ui';
 import { Select } from 'choerodon-ui';
 import { find, min } from 'lodash';
+import { toJS } from 'mobx';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { featureApi } from '@/api';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
@@ -13,13 +14,6 @@ import './Feature.less';
 const { Option } = Select;
 @observer
 class Feature extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      notDoneSprintList: [],
-    };
-  }
-
   componentDidMount() {
     this.featureRefresh(undefined, true, undefined);
   }
@@ -50,17 +44,6 @@ class Feature extends Component {
   handlePiChange = (piId) => {
     BacklogStore.setSelectedPiId(piId);
     BacklogStore.setSelectedSprintId(undefined);
-    const { notDonePiList } = BacklogStore;
-    const selectedPi = notDonePiList.find(pi => pi.id === piId);
-    const todoPiList = notDonePiList.filter(pi => pi.statusCode !== 'doing');
-    const minPIId = min(todoPiList.map(pi => pi.id));
-    if (selectedPi.statusCode === 'doing' || piId === minPIId) {
-      BacklogStore.axiosGetNotDoneSprintByPiId(piId).then((res) => {
-        this.setState({
-          notDoneSprintList: res.filter(item => item.statusCode !== 'done'),
-        });
-      });      
-    }
     this.featureRefresh(piId, false, undefined);
   }
 
@@ -72,10 +55,20 @@ class Feature extends Component {
 
   render() {
     const { refresh, issueRefresh } = this.props;
-    const { notDonePiList } = BacklogStore;
-    const { notDoneSprintList } = this.state;
-    const { selectedPiId, selectedSprintId } = BacklogStore;
-    const selectedPi = find(BacklogStore.notDonePiList, { id: selectedPiId });
+    let notDoneSprintList = [];
+    let selectedPi = {};
+    const { notDonePiList, selectedSprintId, selectedPiId } = BacklogStore;
+    if (selectedPiId) {
+      selectedPi = notDonePiList.find(pi => pi.id === selectedPiId);
+      const todoPiList = notDonePiList.filter(pi => pi.statusCode !== 'doing');
+      const minPIId = min(todoPiList.map(pi => pi.id));
+      if (selectedPi.statusCode === 'doing') {
+        notDoneSprintList = BacklogStore.sprints.filter(item => item.statusCode !== 'done');
+      } else if (selectedPiId === minPIId) {
+        notDoneSprintList = BacklogStore.piMap.get(minPIId) && BacklogStore.piMap.get(minPIId).sprints;
+      }
+    }
+   
     return BacklogStore.getCurrentVisible === 'feature' ? (
       <div className="c7n-backlog-epic">
         <div className="c7n-backlog-epicContent">
@@ -146,7 +139,7 @@ class Feature extends Component {
               </p>
             )}
             {
-              selectedPi && selectedPi.statusCode === 'doing' && (
+              selectedPi && notDoneSprintList && notDoneSprintList.length > 0 && (
               <Select
                 key="sprintSelect"
                 className="c7n-backlog-sprintSelect"
