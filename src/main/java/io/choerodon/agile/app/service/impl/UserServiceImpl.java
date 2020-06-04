@@ -12,6 +12,7 @@ import io.choerodon.core.oauth.DetailsHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -99,6 +100,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserVO> listProjectAdminUsersByProjectId(Long projectId) {
+        List<UserVO> users = baseFeignClient.listProjectOwnerById(projectId).getBody();
+        return !CollectionUtils.isEmpty(users) ? users : new ArrayList<>();
+    }
+
+    @Override
     public ProjectVO queryProject(Long projectId) {
         return baseFeignClient.queryProject(projectId).getBody();
     }
@@ -163,4 +170,6 @@ public class UserServiceImpl implements UserService {
             return isProjectOwner;
         }
     }
+    
+    
 }
