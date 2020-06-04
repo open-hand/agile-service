@@ -160,5 +160,8 @@ public interface BaseFeignClient {
 
     @GetMapping(value = "/choerodon/v1/projects/{project_id}/owner/list")
     ResponseEntity<List<UserVO>> listProjectOwnerById(@PathVariable(name = "project_id") Long projectId);
+
+    @GetMapping("/choerodon/v1/users/{id}/projects/{project_id}/check_is_owner")
+    ResponseEntity<Boolean> checkIsProjectOwner(@PathVariable("id") Long id, @PathVariable("project_id") Long projectId);
 }
 

@@ -153,20 +153,11 @@ public class UserServiceImpl implements UserService {
                 || ObjectUtils.isEmpty(userId)) {
             return false;
         }
-        ResponseEntity<List<RoleVO>> response =
-                baseFeignClient.getUserWithProjLevelRolesByUserId(projectId, userId);
-        List<RoleVO> roles = response.getBody();
-        if (ObjectUtils.isEmpty(roles)) {
+
+        boolean  isProjectOwner = baseFeignClient.checkIsProjectOwner(projectId, userId).getBody();
+        if (ObjectUtils.isEmpty(isProjectOwner)) {
             return false;
         } else {
-            boolean isProjectOwner = false;
-            for (RoleVO role : roles) {
-                if (PROJECT_ADMIN.equals(role.getCode())
-                        && role.getEnabled()) {
-                    isProjectOwner = true;
-                    break;
-                }
-            }
             return isProjectOwner;
         }
     }

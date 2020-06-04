@@ -114,5 +114,10 @@ public class BaseFeignClientFallback implements BaseFeignClient {
         throw new CommonException("error.query.project.admin");
     }
 
+    @Override
+    public ResponseEntity<Boolean> checkIsProjectOwner(Long id, Long projectId) {
+        throw new CommonException("error.check.project.admin");
+    }
+
 
 }
