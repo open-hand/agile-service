@@ -108,4 +108,16 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     public ResponseEntity<List<UserVO>> listUsersByRealNames(Boolean onlyEnabled, Set<String> realNames) {
         throw new CommonException("error.iamServiceFeignFallback.listUsersByRealNames");
     }
+
+    @Override
+    public ResponseEntity<List<UserVO>> listProjectOwnerById(Long projectId) {
+        throw new CommonException("error.query.project.admin");
+    }
+
+    @Override
+    public ResponseEntity<Boolean> checkIsProjectOwner(Long id, Long projectId) {
+        throw new CommonException("error.check.project.admin");
+    }
+
+
 }

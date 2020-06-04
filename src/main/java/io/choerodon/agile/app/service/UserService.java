@@ -66,4 +66,6 @@ public interface UserService {
     boolean isProjectOwner(Long projectId, Long userId);
 
     List<UserVO> listUsersByRealNames(List<String> realNames, boolean onlyEnabled);
+
+    List<UserVO> listProjectAdminUsersByProjectId(Long projectId);
 }
