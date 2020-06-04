@@ -139,7 +139,7 @@ class BacklogHome extends Component {
           >
             创建问题
           </Button>
-          {!isInProgram && (
+          {!isShowFeature && (
             <Permission
               service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
             >
