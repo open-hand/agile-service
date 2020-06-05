@@ -235,7 +235,7 @@ function BatchModal({
         transformResponse: (response) => {
           try {
             const data = JSON.parse(response);
-            return data.list;
+            return data.content;
           } catch (error) {
             return response;
           }
