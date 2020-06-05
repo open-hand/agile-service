@@ -860,7 +860,7 @@ class CreateIssue extends Component {
                 {newIssueTypeCode === 'feature' && <FieldTeam form={form} />}
                 {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}                            
               </div>
-              {mode !== 'feature' && !['issue_epic', 'feature'].includes(newIssueTypeCode) && <FieldIssueLinks form={form} />}
+              {mode !== 'feature' && mode !== 'sub_task' && !['issue_epic', 'feature'].includes(newIssueTypeCode) && <FieldIssueLinks form={form} />}
             </Form>
           </Spin>
         </Content>
