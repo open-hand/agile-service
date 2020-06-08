@@ -41,7 +41,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
 
     @Async
     @Override
-    public void asyncUpdateFields(Long projectId, String schemeCode, BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
+    public void asyncUpdateFields(Long projectId, String schemeCode, BatchUpdateFieldsValueVo batchUpdateFieldsValueVo,String applyType) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
         BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
         try {
@@ -66,7 +66,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
             batchUpdateFieldStatusVO.setIncrementalValue(incrementalValue);
             //修改issue预定义字段值
             if (!CollectionUtils.isEmpty(batchUpdateFieldsValueVo.getPredefinedFields())) {
-                fieldValueService.handlerPredefinedFields(projectId, issueIds, predefinedFields,batchUpdateFieldStatusVO);
+                fieldValueService.handlerPredefinedFields(projectId, issueIds, predefinedFields,batchUpdateFieldStatusVO,applyType);
             }
 
             // 批量修改issue自定义字段值
