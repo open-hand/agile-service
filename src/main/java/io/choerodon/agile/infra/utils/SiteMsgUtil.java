@@ -29,13 +29,12 @@ public class SiteMsgUtil {
     private static Logger LOGGER = LoggerFactory.getLogger(SiteMsgUtil.class);
 
     private static final String ASSIGNEENAME = "assigneeName";
+    private static final String OPERATOR_NAME = "operatorName";
     private static final String SUMMARY = "summary";
     private static final String URL = "url";
     private static final String NOTIFY_TYPE = "agile";
     private static final String PROJECT_NAME = "projectName";
 
-//    @Autowired
-//    private NotifyFeignClient notifyFeignClient;
     @Autowired
     private BaseFeignClient baseFeignClient;
     @Autowired
@@ -44,17 +43,6 @@ public class SiteMsgUtil {
     private MessageClient messageClient;
 
     public void issueCreate(List<Long> userIds,String userName, String summary, String url, Long reporterId, Long projectId) {
-//        NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
-//        // 添加普通消息
-//        setCommonMsg(noticeSendDTO, projectId, "issueCreate", userName, summary, url, userIds, reporterId);
-//        // 添加webhook
-//        setWebHookJson(noticeSendDTO, noticeSendDTO.getParams(), reporterId, "issueCreate", "问题创建");
-//        try {
-//            notifyFeignClient.postNotice(noticeSendDTO);
-//        } catch (Exception e) {
-//            LOGGER.error("创建issue消息发送失败", e);
-//        }
-
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         Map<String,String> map = new HashMap<>();
         map.put(ASSIGNEENAME, userName);
@@ -97,25 +85,15 @@ public class SiteMsgUtil {
         }
     }
 
-    public void issueAssignee(List<Long> userIds, String userName, String summary, String url, Long assigneeId, Long projectId) {
-//        NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
-//        // 添加普通消息
-//        setCommonMsg(noticeSendDTO, projectId, "issueAssignee", userName, summary, url, userIds, assigneeId);
-//        // 添加webhook
-//        setWebHookJson(noticeSendDTO, noticeSendDTO.getParams(), assigneeId, "issueAssignee", "问题分配");
-//        try {
-//            notifyFeignClient.postNotice(noticeSendDTO);
-//        } catch (Exception e) {
-//            LOGGER.error("分配issue消息发送失败", e);
-//        }
-
+    public void issueAssignee(List<Long> userIds, String assigneeName, String summary, String url, Long projectId, String operatorName) {
         // 设置模板参数
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         Map<String,String> map = new HashMap<>();
-        map.put(ASSIGNEENAME, userName);
+        map.put(ASSIGNEENAME, assigneeName);
         map.put(SUMMARY, summary);
         map.put(URL, url);
         map.put(PROJECT_NAME, projectVO.getName());
+        map.put(OPERATOR_NAME, operatorName);
         // 额外参数
         Map<String,Object> objectMap=new HashMap<>();
         objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
@@ -123,24 +101,13 @@ public class SiteMsgUtil {
         MessageSender messageSender = handlerMessageSender(0L,"ISSUEASSIGNEE",userIds,map);
         messageSender.setAdditionalInformation(objectMap);
         messageClient.async().sendMessage(messageSender);
-
     }
 
-    public void issueSolve(List<Long> userIds, String userName, String summary, String url, Long assigneeId, Long projectId) {
-//        NoticeSendDTO noticeSendDTO = new NoticeSendDTO();
-//        // 添加普通消息
-//        setCommonMsg(noticeSendDTO, projectId, "issueSolve", userName, summary, url, userIds, assigneeId);
-//        // 添加webhook
-//        setWebHookJson(noticeSendDTO, noticeSendDTO.getParams(), assigneeId, "issueSolve", "问题完成");
-//        try {
-//            notifyFeignClient.postNotice(noticeSendDTO);
-//        } catch (Exception e) {
-//            LOGGER.error("完成issue消息发送失败", e);
-//        }
-
+    public void issueSolve(List<Long> userIds, String assigneeName, String summary, String url, Long projectId, String operatorName) {
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         Map<String,String> map = new HashMap<>();
-        map.put(ASSIGNEENAME, userName);
+        map.put(ASSIGNEENAME, assigneeName);
+        map.put(OPERATOR_NAME, operatorName);
         map.put(SUMMARY, summary);
         map.put(URL, url);
         map.put(PROJECT_NAME, projectVO.getName());
@@ -153,41 +120,4 @@ public class SiteMsgUtil {
         messageClient.async().sendMessage(messageSender);
 
     }
-
-//    private void setCommonMsg(NoticeSendDTO noticeSendDTO, Long projectId, String noticeCode, String userName,
-//                              String summary, String url, List<Long> userIds, Long fromUserId) {
-//        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
-//        noticeSendDTO.setCode(noticeCode);
-//        noticeSendDTO.setNotifyType(NOTIFY_TYPE);
-//        Map<String, Object> params = new HashMap<>();
-//        params.put(ASSIGNEENAME, userName);
-//        params.put(SUMMARY, summary);
-//        params.put(URL, url);
-//        params.put(PROJECT_NAME, projectVO.getName());
-//        noticeSendDTO.setParams(params);
-//        List<NoticeSendDTO.User> userList = new ArrayList<>();
-//        for (Long id : userIds) {
-//            NoticeSendDTO.User user = new NoticeSendDTO.User();
-//            user.setId(id);
-//            userList.add(user);
-//        }
-//        noticeSendDTO.setTargetUsers(userList);
-//        NoticeSendDTO.User fromUser = new NoticeSendDTO.User();
-//        fromUser.setId(fromUserId);
-//        noticeSendDTO.setFromUser(fromUser);
-//        noticeSendDTO.setSourceId(projectId);
-//    }
-
-//    private void setWebHookJson(NoticeSendDTO noticeSendDTO, Map<String, Object> params, Long userId, String objectKand, String eventName) {
-//        WebHookJsonSendDTO webHookJsonSendDTO = new WebHookJsonSendDTO();
-//        webHookJsonSendDTO.setObjectKind(objectKand);
-//        webHookJsonSendDTO.setEventName(eventName);
-//        webHookJsonSendDTO.setObjectAttributes((JSONObject) JSONObject.toJSON(params));
-//        webHookJsonSendDTO.setCreatedAt(new Date());
-//        webHookJsonSendDTO.setUser(userService.getWebHookUserById(userId));
-//        noticeSendDTO.setWebHookJsonSendDTO(webHookJsonSendDTO);
-//    }
-
-
-
 }
