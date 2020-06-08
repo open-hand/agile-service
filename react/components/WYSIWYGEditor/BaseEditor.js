@@ -6,11 +6,10 @@ import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import LightBox from 'react-image-lightbox';
 import { randomWord } from '@/utils/random';
-import ImageDrop from './ImageDrop';
 import Link from './Link';
 import './BaseEditor.less';
 
-Quill.register('modules/imageDrop', ImageDrop);
+
 Quill.register('formats/link', Link);
 
 const defaultStyle = {
@@ -82,7 +81,7 @@ class BaseEditor extends Component {
       toolbar: {
         container: `#${this.toolBarId}`,
       },
-      imageDrop: true,
+      // imageDrop: true,
     };
   }
 

@@ -328,8 +328,8 @@ class ReleaseHome extends Component {
           'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion',
         ]}
       >
-        <Header title="版本管理">
-          <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion']}>
+        <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion']}>
+          <Header title="版本管理">
             <Button
               onClick={() => {
                 this.setState({
@@ -342,8 +342,8 @@ class ReleaseHome extends Component {
               <Icon type="playlist_add" />
               创建发布版本
             </Button>
-          </Permission>
-        </Header>
+          </Header>
+        </Permission>
         <Breadcrumb />
         <Content style={{ paddingTop: 0 }}>
           <Spin spinning={loading}>

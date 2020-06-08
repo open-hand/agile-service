@@ -12,6 +12,7 @@ import io.choerodon.core.oauth.DetailsHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -24,7 +25,7 @@ import java.util.*;
 @Component
 public class UserServiceImpl implements UserService {
 
-    private static final String PROJECT_OWNER = "role/project/default/project-owner";
+    private static final String PROJECT_ADMIN = "project-admin";
 
     private final BaseFeignClient baseFeignClient;
 
@@ -99,6 +100,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserVO> listProjectAdminUsersByProjectId(Long projectId) {
+        List<UserVO> users = baseFeignClient.listProjectOwnerById(projectId).getBody();
+        return !CollectionUtils.isEmpty(users) ? users : new ArrayList<>();
+    }
+
+    @Override
     public ProjectVO queryProject(Long projectId) {
         return baseFeignClient.queryProject(projectId).getBody();
     }
@@ -146,21 +153,14 @@ public class UserServiceImpl implements UserService {
                 || ObjectUtils.isEmpty(userId)) {
             return false;
         }
-        ResponseEntity<List<RoleVO>> response =
-                baseFeignClient.getUserWithProjLevelRolesByUserId(projectId, userId);
-        List<RoleVO> roles = response.getBody();
-        if (ObjectUtils.isEmpty(roles)) {
+
+        boolean  isProjectOwner = baseFeignClient.checkIsProjectOwner(projectId, userId).getBody();
+        if (ObjectUtils.isEmpty(isProjectOwner)) {
             return false;
         } else {
-            boolean isProjectOwner = false;
-            for (RoleVO role : roles) {
-                if (PROJECT_OWNER.equals(role.getCode())
-                        && role.getEnabled()) {
-                    isProjectOwner = true;
-                    break;
-                }
-            }
             return isProjectOwner;
         }
     }
+    
+    
 }

@@ -28,7 +28,7 @@ class BacklogHome extends Component {
     const { BacklogStore } = this.props;
     BacklogStore.refresh();
     if (IsInProgramStore.isShowFeature) {
-      IsInProgramStore.loadPiInfoAndSprint();
+      BacklogStore.loadPiInfoAndSprint();
     }
   }
 
@@ -69,13 +69,13 @@ class BacklogHome extends Component {
    */
   handleCreateCurrentPiSprint = async () => {
     const { BacklogStore } = this.props;
-    await IsInProgramStore.loadPiInfoAndSprint();
+    await BacklogStore.loadPiInfoAndSprint();
     const onCreate = (sprint) => {
       BacklogStore.setCreatedSprint(sprint.sprintId);
       this.refresh();
     };
-    const piInfo = IsInProgramStore.getPiInfo;
-    const sprints = IsInProgramStore.getSprints;
+    const piInfo = BacklogStore.getPiInfo;
+    const sprints = BacklogStore.getSprints;
     Modal.open({
       drawer: true,
       style: {
@@ -139,7 +139,7 @@ class BacklogHome extends Component {
           >
             创建问题
           </Button>
-          {!isInProgram && (
+          {!isShowFeature && (
             <Permission
               service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
             >
@@ -148,7 +148,7 @@ class BacklogHome extends Component {
               </Button>
             </Permission>
           )}
-          {this.renderCreateSprintInPi(isShowFeature, !IsInProgramStore.getPiInfo.id)}
+          {this.renderCreateSprintInPi(isShowFeature, !BacklogStore.getPiInfo.id)}
           {isInProgram && arr.length && arr.length > 1
             ? <ShowPlanSprint /> : null
           }

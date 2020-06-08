@@ -562,7 +562,7 @@ class ReleaseDetail extends Component {
                   </div>
                 </div>
               </React.Fragment>
-            ) : <NoDataComponent title="问题" links={[{ name: '问题管理', link: '/agile/issue' }]} img={pic} />}
+            ) : <NoDataComponent title="问题" links={[{ name: '问题管理', link: '/agile/work-list/issue' }]} img={pic} />}
           </Spin>
 
         </Content>

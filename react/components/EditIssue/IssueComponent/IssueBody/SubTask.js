@@ -5,6 +5,7 @@ import {
   Button, Icon, Progress, Input, Tooltip,
 } from 'choerodon-ui';
 import { stores, Choerodon } from '@choerodon/boot';
+import { useIssueTypes } from '@/hooks';
 import { createSubIssue, createIssueField } from '../../../../api/NewIssueApi';
 import CreateSubTask from '../../../CreateIssue/CreateSubTask';
 import IssueList from '../../Component/IssueList';
@@ -22,6 +23,7 @@ const SubTask = observer(({
   
   const [expand, setExpand] = useState(false);
   const [summary, setSummary] = useState(false);
+  const [issueTypes] = useIssueTypes();
   const {
     issueId: parentIssueId, subIssueVOList = [], priorityId, sprintId, typeCode, relateIssueId,
   } = store.getIssue;
@@ -93,7 +95,7 @@ const SubTask = observer(({
     if (creatingRef.current) {
       return;
     }
-    const subIssueType = store.getIssueTypes && store.getIssueTypes.find(t => t.typeCode === 'sub_task');
+    const subIssueType = issueTypes.find(t => t.typeCode === 'sub_task');
     if (summary) {
       creatingRef.current = true;
       const issue = {

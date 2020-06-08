@@ -72,9 +72,9 @@ class TransformSubIssue extends Component {
     this.setState({
       selectLoading: true,
     });
-    const { store } = this.props;
+    const { issueTypes } = this.props;
     const proId = AppState.currentMenuType.id;
-    const issueTypeData = store.getIssueTypes ? store.getIssueTypes : [];
+    const issueTypeData = issueTypes;
     const subTask = issueTypeData.find(t => t.typeCode === 'sub_task');
     if (subTask) {
       axios.get(`/agile/v1/projects/${proId}/schemes/query_status_by_issue_type_id?issue_type_id=${subTask.id}&apply_type=agile`)
@@ -101,13 +101,13 @@ class TransformSubIssue extends Component {
 
   handleTransformSubIssue = () => {
     const {
-      form, onOk, store, issueId, ovn,
+      form, onOk, issueTypes, issueId, ovn,
     } = this.props;
     form.validateFields((err, values) => {
       if (!err) {
         const projectId = AppState.currentMenuType.id;
         const orgId = AppState.currentMenuType.organizationId;
-        const issueTypeData = store.getIssueTypes ? store.getIssueTypes : [];
+        const issueTypeData = issueTypes;
         const subTask = issueTypeData.find(t => t.typeCode === 'sub_task');
         const issueTransformSubTask = {
           issueId,

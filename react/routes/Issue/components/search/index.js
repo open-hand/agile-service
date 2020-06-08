@@ -14,6 +14,7 @@ import {
 } from 'lodash';
 import { observer } from 'mobx-react-lite';
 import IssueStore from '@/stores/project/issue/IssueStore';
+import { getParams } from '@/utils/link';
 import SummaryField from './custom-fields/field/SummaryField';
 import Store from '../../stores';
 import CustomFields from './custom-fields';
@@ -61,7 +62,7 @@ function flattenObject(object) {
 }
 
 export default withRouter(observer(({
-  urlFilter, onClear, history, location: { search },
+  urlFilter, onClear, history, location,
 }) => {
   const {
     prefixCls, projectId, userId,
@@ -88,7 +89,7 @@ export default withRouter(observer(({
     const {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
       paramType, paramIssueId, paramName, paramOpenIssueId, ...otherArgs
-    } = queryString.parse(search);
+    } = getParams(location.search);
     setSelectedQuickFilters([]);
     if (paramIssueId || paramChoose || paramType) {
       history.replace(`/agile/work-list/issue?${queryString.stringify(otherArgs)}`);
