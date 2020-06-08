@@ -1,6 +1,3 @@
-/* eslint-disable */
-const alias = require('../alias').webpack;
-
 const config = {
   local: true,
   // use for c7n start
@@ -14,10 +11,5 @@ const config = {
   ],
   dashboard: {},
   resourcesLevel: ['site', 'origanization', 'project', 'user'],
-  webSocketServer: 'ws://notify.staging.saas.hand-china.com',
-  webpackConfig(configs) {
-    configs.resolve.alias = alias;
-    return configs;
-  },
 };
 module.exports = config;

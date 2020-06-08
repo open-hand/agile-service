@@ -11,7 +11,7 @@ import moment from 'moment';
 import AgileProvider from '@/components/AgileProvider';
 import RunWhenProjectChange from '@/common/RunWhenProjectChange';
 import IsInProgramStore from './stores/common/program/IsInProgramStore';
-
+import Test from './Test';
 import './style/index.less';
 
 const ScrumBoard = React.lazy(() => import('./routes/ScrumBoard'));
@@ -70,6 +70,7 @@ class Agile extends React.Component {
               <Route path={`${match.url}/settings`} component={Settings} />            
               <Route path={`${match.url}/states`} component={State} />
               <Route path={`${match.url}/priorities`} component={Priority} />
+              <Route path={`${match.url}/test`} component={Test} />
               <Route path="*" component={nomatch} />
             </Switch>
           </IntlProviderAsync>
