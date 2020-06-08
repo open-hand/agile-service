@@ -7,6 +7,9 @@
         from agile_issue ai
         where ai.project_id = #{projectId}
         and ai.type_code = 'issue_epic'
+        <if test="sprintId != null">
+            AND ai.sprint_id = #{sprintId}
+        </if>
         order by ai.issue_id desc
     </select>
 
@@ -39,6 +42,9 @@
                  close=")">
             #{epicId}
         </foreach>
+        <if test="sprintId != null">
+            AND ai.sprint_id = #{sprintId}
+        </if>
         order by ai.issue_id desc
     </select>
 
@@ -100,6 +106,9 @@
                      close=")">
                 #{statusId}
             </foreach>
+        </if>
+        <if test="sprintId != null">
+            AND ai.sprint_id = #{sprintId}
         </if>
         order by ai.issue_id
     </select>

@@ -9,11 +9,11 @@ import java.util.List;
 
 public interface StoryMapMapper {
 
-    List<Long> selectEpicIdsByProject(@Param("projectId") Long projectId);
+    List<Long> selectEpicIdsByProject(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId);
 
-    List<EpicWithInfoDTO> selectEpicList(@Param("projectId") Long projectId, @Param("epicIds") List<Long> epicIds);
+    List<EpicWithInfoDTO> selectEpicList(@Param("projectId") Long projectId, @Param("epicIds") List<Long> epicIds, @Param("sprintId") Long sprintId);
 
-    List<StoryMapStoryDTO> selectStoryList(@Param("projectId") Long projectId, @Param("epicIds") List<Long> epicIds, @Param("searchVO") SearchVO searchVO);
+    List<StoryMapStoryDTO> selectStoryList(@Param("projectId") Long projectId, @Param("epicIds") List<Long> epicIds, @Param("sprintId") Long sprintId, @Param("searchVO") SearchVO searchVO);
 
     List<StoryMapStoryDTO> selectDemandStoryList(@Param("projectId") Long projectId, @Param("searchVO") SearchVO searchVO);
 }
