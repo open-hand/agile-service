@@ -3,12 +3,14 @@ import { Button, Icon } from 'choerodon-ui';
 import PropTypes from 'prop-types';
 import { isEqual } from 'lodash';
 import ReactQuill, { Quill } from 'react-quill';
+import QuillImageDropAndPaste from 'quill-image-drop-and-paste';
 import 'react-quill/dist/quill.snow.css';
 import LightBox from 'react-image-lightbox';
 import { randomWord } from '@/utils/random';
 import Link from './Link';
 import './BaseEditor.less';
 
+Quill.register('modules/imageDropAndPaste', QuillImageDropAndPaste);
 
 Quill.register('formats/link', Link);
 
@@ -81,6 +83,7 @@ class BaseEditor extends Component {
       toolbar: {
         container: `#${this.toolBarId}`,
       },
+      imageDropAndPaste: true,
       // imageDrop: true,
     };
   }
