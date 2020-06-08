@@ -68,18 +68,6 @@ class Version extends Component {
             </div>
           </div>
           <div className="c7n-backlog-versionChoice">
-            <div
-              className="c7n-backlog-versionItems primary"
-              style={{
-                background: BacklogStore.getChosenVersion === 'all' ? 'rgba(140, 158, 254, 0.16)' : '',
-              }}
-              role="none"
-              onClick={() => {
-                this.handleClickVersion('all');
-              }}
-            >
-              所有问题
-            </div>
             <DragDropContext
               onDragEnd={(result) => {
                 const { destination, source, draggableId } = result;

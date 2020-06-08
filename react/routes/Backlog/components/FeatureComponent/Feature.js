@@ -90,18 +90,6 @@ class Feature extends Component {
             </div>
           </div>
           <div className="c7n-backlog-epicChoice">
-            <div
-              className="c7n-backlog-epicItems-first primary"
-              style={{
-                background: BacklogStore.getChosenFeature === 'all' ? 'rgba(140, 158, 254, 0.16)' : '',
-              }}
-              role="none"
-              onClick={() => {
-                this.handleClickFeature('all');
-              }}
-            >
-              所有问题
-            </div>
             <Select
               onChange={this.handlePiChange}
               value={selectedPiId}
