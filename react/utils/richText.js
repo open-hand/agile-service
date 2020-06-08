@@ -138,11 +138,6 @@ export function handleFileUpload(propFileList, func, config) {
       func(newFileList);
     })
     .catch((error) => {
-      if (error.response) {
-        Choerodon.prompt(error.response.data.message);
-      } else {
-        Choerodon.prompt(error.message);
-      }
       const temp = propFileList.slice();
       temp.forEach((one) => {
         if (!one.url) {
