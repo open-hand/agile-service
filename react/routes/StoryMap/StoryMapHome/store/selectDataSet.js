@@ -1,4 +1,5 @@
 import { getProjectId } from '@/utils/common';
+import _ from 'lodash';
 
 export default function SelectDataSet(StoryMapStore) {
   return {
@@ -28,6 +29,15 @@ export default function SelectDataSet(StoryMapStore) {
         lookupAxiosConfig: () => ({
           url: `/agile/v1/projects/${getProjectId()}/sprint/names`,
           method: 'post',
+          transformResponse: (data) => {
+            if (Array.isArray(data)) {
+              return data;
+            } else {
+              const newData = JSON.parse(data) || [];
+              const newDataGroupByStatus = _.groupBy(newData, 'statusCode');
+              return [...(newDataGroupByStatus.started || []), ...(newDataGroupByStatus.sprint_planning || []), ...(newDataGroupByStatus.closed || [])];
+            }
+          },
         }),
         textField: 'sprintName',
         valueField: 'sprintId',
