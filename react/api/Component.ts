@@ -7,6 +7,7 @@ class ComponentApi {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }
+
   loadComponents(pagination: any, filters: object, componentId: number) {
     const { current, pageSize } = pagination;
     const page = current;
@@ -14,14 +15,13 @@ class ComponentApi {
     if (componentId) {
       // return axios.post(`${this.prefix}/component/query_all?componentId=${componentId}&page=${page}&size=${size}&no_issue_test=true`, filters);
       return axios.post(`${this.prefix}/component/query_all`, filters, {
-       params: {
-        componentId,
-        page,
-        size,
-        no_issue_test: true,
-       }
+        params: {
+          componentId,
+          page,
+          size,
+          no_issue_test: true,
+        },
       });
-
     }
     return axios.post(`${this.prefix}/component/query_all?no_issue_test=true&page=${page}&size=${size}`, filters);
   }

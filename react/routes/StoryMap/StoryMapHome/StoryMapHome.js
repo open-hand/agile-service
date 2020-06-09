@@ -1,16 +1,18 @@
 /* eslint-disable no-nested-ternary */
 import React, {
-  Fragment, useEffect, useRef,
+  Fragment, useEffect, useRef, useMemo,
 } from 'react';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
 import { Button } from 'choerodon-ui';
+import { Select, DataSet } from 'choerodon-ui/pro';
 import { DragDropContextProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { observer } from 'mobx-react-lite';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import HeaderLine from '@/components/HeaderLine';
+import SelectDataSet from './store/selectDataSet';
 import Minimap from '../../../components/MiniMap';
 import Empty from '../../../components/Empty';
 import epicPic from './emptyStory.svg';
@@ -33,14 +35,14 @@ const HEX = {
 };
 
 const StoryMapHome = observer(() => {
+  const selectDataSet = useMemo(() => new DataSet(SelectDataSet(StoryMapStore)), []);
+
   const handleRefresh = () => {
     StoryMapStore.getStoryMap();
   };
   const ref = useRef(null);
   StoryMapStore.setMiniMapRef(ref);
-  // useEffect(() => {
-  //   StoryMapStore.setMiniMapRef(ref);
-  // }, [ref]);
+  
   useEffect(() => {
     handleRefresh();
     return () => { StoryMapStore.clear(); };
@@ -110,8 +112,10 @@ const StoryMapHome = observer(() => {
     }
   };
 
-  const { loading, selectedIssueMap } = StoryMapStore;
-
+  const {
+    loading, selectedIssueMap,
+  } = StoryMapStore;
+  const isEmpty = StoryMapStore.getIsEmpty;
   /**
    * 打开问题详情时设置样式 用以显示全部地图
    */
@@ -122,8 +126,9 @@ const StoryMapHome = observer(() => {
       ref.current.source.style.width = '';
     }
   }, [selectedIssueMap.size]);
+
   const { isInProgram } = IsInProgramStore; // 判断是否为项目群下的子项目 是则不显示史诗
-  const isEmpty = StoryMapStore.getIsEmpty;
+  
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.getElementsByClassName('c7nagile-StoryMap')[0], onFullScreenChange);
   return (
     <Page
@@ -133,12 +138,6 @@ const StoryMapHome = observer(() => {
       ]}
     >
       <Header title="故事地图">
-        {/* <Button
-          icon="refresh"
-          onClick={handleRefresh}
-        >
-            刷新
-        </Button> */}
         {!isInProgram && isEmpty && !loading ? <Button onClick={handleCreateEpicClick} icon="playlist_add">创建史诗</Button> : null}
         {!StoryMapStore.isFullScreen && (
           <Button
@@ -153,6 +152,41 @@ const StoryMapHome = observer(() => {
         </Button>
         <HeaderLine />
         <SwitchSwimLine />
+        <Select
+          className="c7nagile-StoryMap-header-componentSelect"
+          style={{ marginRight: 30, marginLeft: 20 }}
+          dataSet={selectDataSet}
+          name="components"
+          placeholder="模块"
+          dropdownMatchSelectWidth={false}
+          searchable
+          multiple
+          maxTagCount={2}
+          maxTagTextLength={10} 
+          maxTagPlaceholder={restValues => `+${restValues.length}...`}
+        />
+        <Select
+          className="c7nagile-StoryMap-header-sprintSelect"
+          dataSet={selectDataSet}
+          name="sprints"
+          placeholder="冲刺"
+          multiple
+          searchable
+          dropdownMatchSelectWidth={false}
+          maxTagCount={2}
+          maxTagTextLength={10} 
+          maxTagPlaceholder={restValues => `+${restValues.length}...`}
+          optionRenderer={({ record, text }) => (
+            <div style={{ display: 'inline-block' }}>
+              {text}
+              {
+                record.get('statusCode') === 'started' && (
+                  <div className="c7nagile-StoryMap-header-sprintSelect-option-active">活跃</div>
+                )
+              }
+            </div>
+          )}
+        />
       </Header>
       <Breadcrumb />
       <Content style={{

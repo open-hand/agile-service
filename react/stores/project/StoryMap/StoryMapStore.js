@@ -4,13 +4,15 @@ import {
 } from 'mobx';
 import { Choerodon } from '@choerodon/boot';
 import {
-  find, findIndex, max, remove, groupBy, sortBy,
+  find, findIndex, remove, sortBy,
 } from 'lodash';
 import { getProjectId } from '@/utils/common';
 import {
   getStoryMap, getSideIssueList, createWidth, changeWidth, sort,
 } from '../../../api/StoryMapApi';
-import { loadIssueTypes, loadVersions, loadPriorities } from '../../../api/NewIssueApi';
+import {
+  loadIssueTypes, loadVersions, loadPriorities, 
+} from '../../../api/NewIssueApi';
 
 class StoryMapStore {
   @observable swimLine = localStorage.getItem('agile.StoryMap.SwimLine') || 'none';
@@ -39,6 +41,8 @@ class StoryMapStore {
     advancedSearchArgs: {
       versionList: [],
       statusList: [],
+      components: [],
+      sprints: [],
     },
   }
 
@@ -69,6 +73,8 @@ class StoryMapStore {
       advancedSearchArgs: {
         versionList: [],
         statusList: [],
+        components: [],
+        sprints: [],
       },
     };
     this.versionList = [];

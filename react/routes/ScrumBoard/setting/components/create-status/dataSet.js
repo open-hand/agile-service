@@ -1,6 +1,5 @@
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import { Choerodon } from '@choerodon/boot';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
 
 export default function DataSetFactory(setCategoryCode) {
   return {
