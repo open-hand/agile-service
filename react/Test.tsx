@@ -1,6 +1,7 @@
 import React from 'react';
 import { TextField } from 'choerodon-ui/pro';
 import TextEditToggle from '@/components/TextEditTogglePro';
+import SelectUser from '@/components/SelectUser';
 
 const Test = () => (
   <div>
@@ -11,7 +12,7 @@ const Test = () => (
             resolve();
           }, 2000);
         });
-        console.log(data);
+        // console.log(data);
       }}
       initValue="第一个"
       renderText={text => text}
@@ -28,7 +29,7 @@ const Test = () => (
             resolve();
           }, 2000);
         });
-        console.log(data);
+        // console.log(data);
       }}
       initValue="第二个"
       renderText={text => text}
@@ -38,7 +39,18 @@ const Test = () => (
       }}
       />
     </TextEditToggle>
+    <TextEditToggle
+      onSubmit={(data) => {
+        // console.log(data);
+      }}
+      initValue={undefined}
+      renderText={text => <span>user</span>}
+    >
+      <SelectUser />
+    </TextEditToggle>
+      
   </div>
 );
+
 
 export default Test;
