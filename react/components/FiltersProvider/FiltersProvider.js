@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { userApi, componentApi } from '@/api';
+import { sprintApi } from '@/api';
 import {
-  loadIssueTypes, loadStatusList, loadPriorities, loadLabels, loadVersions, loadEpics, loadSprints,
+  loadIssueTypes, loadStatusList, loadPriorities, loadLabels, loadVersions, loadEpics,
 } from '../../api/NewIssueApi';
 
 const requests = {
@@ -29,7 +30,7 @@ const requests = {
   sprint: {
     textField: 'sprintName',
     valueField: 'sprintId',
-    request: loadSprints,
+    request: sprintApi.loadSprints,
   },
   version: {
     textField: 'name',

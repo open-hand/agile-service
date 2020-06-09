@@ -7,12 +7,10 @@ import { getSubProjects } from '@/api/CommonApi';
 import {
   loadEpics, loadProgramEpics, loadIssueTypes, loadPriorities,
   loadLabels, loadVersions,
-  loadStatusList, loadIssuesInLink, loadFeaturesInLink, loadSprints,
-  loadSprintsByTeam,
+  loadStatusList, loadIssuesInLink, loadFeaturesInLink,
 } from '@/api/NewIssueApi';
 import { issueLinkTypeApi } from '@/api/IssueLinkType';
-import { featureApi, piApi } from '@/api';
-import { getTeamSprints } from '@/api/PIApi';
+import { featureApi, piApi, sprintApi } from '@/api';
 import { Tooltip } from 'choerodon-ui/pro';
 import UserHead from '../UserHead';
 import TypeTag from '../TypeTag';
@@ -405,7 +403,7 @@ export default {
       filterOption,
       loadWhenMount: true,
     },
-    request: ({ filter, page }, statusList = ['sprint_planning', 'started']) => loadSprints(statusList),
+    request: ({ filter, page }, statusList = ['sprint_planning', 'started']) => sprintApi.loadSprints(statusList),
     render: sprint => (
       <Option key={sprint.sprintId} value={sprint.sprintId}>
         {sprint.sprintName}
@@ -418,7 +416,7 @@ export default {
       filterOption,
       loadWhenMount: true,
     },
-    request: ({ filter, page }, { teamId, piId }) => loadSprintsByTeam(teamId, piId),
+    request: ({ filter, page }, { teamId, piId }) => sprintApi.loadSprintsByTeam(teamId, piId),
     render: sprint => (
       <Option key={sprint.sprintId} value={sprint.sprintId}>
         {sprint.sprintName}
@@ -496,7 +494,7 @@ export default {
       onFilterChange: false,
       loadWhenMount: true,
     },
-    request: ({ filter, page }, { piId, teamIds }) => getTeamSprints(piId, teamIds),
+    request: ({ filter, page }, { piId, teamIds }) => sprintApi.getTeamSprints(piId, teamIds),
     render: team => (
       <OptGroup label={team.projectVO.name} key={team.projectVO.id}>
         {(team.sprints || []).map(sprint => (
