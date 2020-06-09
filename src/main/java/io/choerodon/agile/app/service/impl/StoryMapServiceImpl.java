@@ -61,10 +61,8 @@ public class StoryMapServiceImpl implements StoryMapService {
     public JSONObject queryStoryMap(Long projectId, Long organizationId, SearchVO searchVO) {
         JSONObject result = new JSONObject(true);
         List<Long> epicIds = new ArrayList<>();
-        Long sprintId = (Long) Optional.ofNullable(searchVO.getOtherArgs()).map(map -> map.get("sprint")).orElse(null);
-
         // get project epic
-        List<Long> projectEpicIds = storyMapMapper.selectEpicIdsByProject(projectId, sprintId);
+        List<Long> projectEpicIds = storyMapMapper.selectEpicIdsByProject(projectId, searchVO.getAdvancedSearchArgs());
         if (projectEpicIds != null && !projectEpicIds.isEmpty()) {
             epicIds.addAll(projectEpicIds);
         }
@@ -72,11 +70,11 @@ public class StoryMapServiceImpl implements StoryMapService {
         if (epicIds.isEmpty()) {
             result.put("epics", new ArrayList<>());
         } else {
-            List<EpicWithInfoDTO> epicWithInfoDTOList = storyMapMapper.selectEpicList(projectId, epicIds, sprintId);
+            List<EpicWithInfoDTO> epicWithInfoDTOList = storyMapMapper.selectEpicList(projectId, epicIds, searchVO.getAdvancedSearchArgs());
             result.put("epics", epicWithInfoDTOList);
         }
 
-        result.put("storyList", !epicIds.isEmpty() ? storyMapMapper.selectStoryList(projectId, epicIds, sprintId, searchVO) : new ArrayList<>());
+        result.put("storyList", !epicIds.isEmpty() ? storyMapMapper.selectStoryList(projectId, epicIds, searchVO) : new ArrayList<>());
         result.put("storyMapWidth", setStoryMapWidth(projectId));
         return result;
     }

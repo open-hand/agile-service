@@ -7,8 +7,14 @@
         from agile_issue ai
         where ai.project_id = #{projectId}
         and ai.type_code = 'issue_epic'
-        <if test="sprintId != null">
-            AND ai.sprint_id = #{sprintId}
+        <if test="advancedSearchArgs != null">
+            <if test="advancedSearchArgs.components != null and advancedSearchArgs.components.size > 0">
+                AND EXISTS(select 1 from agile_issue_component aic where aic.project_id = ai.project_id AND aic.component_id IN
+                <foreach collection="advancedSearchArgs.components" open="(" close=")" separator="," item="componentId">
+                    #{componentId}
+                </foreach>
+                )
+            </if>
         </if>
         order by ai.issue_id desc
     </select>
@@ -42,8 +48,14 @@
                  close=")">
             #{epicId}
         </foreach>
-        <if test="sprintId != null">
-            AND ai.sprint_id = #{sprintId}
+        <if test="advancedSearchArgs != null">
+            <if test="advancedSearchArgs.components != null and advancedSearchArgs.components.size > 0">
+                AND EXISTS(select 1 from agile_issue_component aic where aic.project_id = ai.project_id AND aic.component_id IN
+                <foreach collection="advancedSearchArgs.components" open="(" close=")" separator="," item="componentId">
+                    #{componentId}
+                </foreach>
+                )
+            </if>
         </if>
         order by ai.issue_id desc
     </select>
@@ -107,8 +119,22 @@
                 #{statusId}
             </foreach>
         </if>
-        <if test="sprintId != null">
-            AND ai.sprint_id = #{sprintId}
+        <if test="searchVO != null">
+            <if test="searchVO.advancedSearchArgs != null">
+                <if test="searchVO.advancedSearchArgs.components != null and searchVO.advancedSearchArgs.components.size > 0">
+                    AND EXISTS(select 1 from agile_issue_component aic where aic.project_id = ai.project_id AND aic.component_id IN
+                    <foreach collection="searchVO.advancedSearchArgs.components" open="(" close=")" separator="," item="componentId">
+                        #{componentId}
+                    </foreach>
+                    )
+                </if>
+                <if test="searchVO.advancedSearchArgs.sprints != null and searchVO.advancedSearchArgs.sprints.size > 0">
+                    AND ai.sprint_id IN
+                    <foreach collection="searchVO.advancedSearchArgs.sprints" open="(" close=")" separator="," item="sprintId">
+                        #{sprintId}
+                    </foreach>
+                </if>
+            </if>
         </if>
         order by ai.issue_id
     </select>
