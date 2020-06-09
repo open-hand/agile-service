@@ -188,9 +188,6 @@ class BacklogStore {
     return data;
   }
 
-  axiosDeleteSprint(id, isCurrentPi = false) {
-    return axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${isCurrentPi ? 'sub_project/' : ''}${id}`);
-  }
 
   axiosGetColorLookupValue() {
     return axios.get('/agile/v1/lookup_values/epic_color');
@@ -234,10 +231,6 @@ class BacklogStore {
 
   axiosStartSprint(data, isCurrentPi = false) {
     return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${isCurrentPi ? 'sub_project/' : ''}start`, data);
-  }
-
-  axiosCloseSprint(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/complete`, data);
   }
 
   axiosGetSprintCompleteMessage(sprintId) {
@@ -317,14 +310,6 @@ class BacklogStore {
     this.isDragging = data;
   }
 
-  axiosCreateSprint(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint`, data);
-  }
-
-  axiosUpdateIssuesToSprint(sprintId, data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/to_sprint/${sprintId}`, data);
-  }
-
   axiosUpdateIssue(data) {
     return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issues`, data);
   }
@@ -398,9 +383,6 @@ class BacklogStore {
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version`);
   }
 
-  axiosGetNotDoneSprintByPiId(piId) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/sub_project/list?pi_id=${piId}`);
-  }
 
   @action setSprintData({ backlogData, sprintData }) {
     this.issueMap.set('0', backlogData.backLogIssue ? backlogData.backLogIssue : []);
@@ -1117,7 +1099,7 @@ class BacklogStore {
           </div>
         ),
         onOk() {
-          return this.axiosDeleteSprint(data.sprintId, isCurrentPi).then((res) => {
+          return sprintApi.delete(data.sprintId, isCurrentPi).then((res) => {
             this.refresh();
           }).catch((error) => {
           });
@@ -1127,7 +1109,7 @@ class BacklogStore {
         okType: 'danger',
       });
     } else {
-      this.axiosDeleteSprint(data.sprintId, isCurrentPi).then((res) => {
+      sprintApi.delete(data.sprintId, isCurrentPi).then((res) => {
         this.refresh();
       }).catch((error) => {
       });

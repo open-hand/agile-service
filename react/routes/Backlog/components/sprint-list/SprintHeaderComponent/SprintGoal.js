@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import { Input } from 'choerodon-ui';
 import TextEditToggle from '@/components/TextEditToggle';
 import { getProjectId } from '@/utils/common';
+import { sprintApi } from '@/api';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
 const { Text, Edit } = TextEditToggle;
@@ -18,7 +19,7 @@ const { Text, Edit } = TextEditToggle;
       sprintId,
       sprintGoal: value,
     };
-    BacklogStore.axiosUpdateSprint(req).then((res) => {
+    sprintApi.updateSprint(req).then((res) => {
       BacklogStore.updateSprint(sprintId, {
         objectVersionNumber: res.objectVersionNumber,
         sprintGoal: res.sprintGoal,

@@ -91,25 +91,6 @@ export function loadProgramEpics() {
   );
 }
 
-/**
- * 根据冲刺状态获取冲刺，["started", "sprint_planning", "closed"]
- * @param {*} arr
- */
-export function loadSprints(arr = []) {
-  const projectId = AppState.currentMenuType.id;
-  return axios.post(`/agile/v1/projects/${projectId}/sprint/names`, arr);
-}
-
-export function loadSprint(sprintId = '') {
-  const projectId = AppState.currentMenuType.id;
-  return axios.get(`/agile/v1/projects/${projectId}/sprint/${sprintId}`);
-}
-
-export function loadSprintIssues(sprintId, status, page = 1, size = 99999) {
-  const orgId = AppState.currentMenuType.organizationId;
-  const projectId = AppState.currentMenuType.id;
-  return axios.get(`/agile/v1/projects/${projectId}/sprint/${sprintId}/issues?organizationId=${orgId}&status=${status}&page=${page}&size=${size}`);
-}
 
 export function loadChartData(id, type) {
   const projectId = AppState.currentMenuType.id;
@@ -407,10 +388,6 @@ export function getTestExecute(issueId) {
   return axios.get(`/test/v1/projects/${projectId}/defect/query_by_bug?bugId=${issueId}`);
 }
 
-export function loadSprintsByTeam(teamId, piId) {
-  const projectId = AppState.currentMenuType.id;
-  return axios.get(`/agile/v1/projects/${projectId}/sprint/sub_project/${teamId}/list_by_team_id?piId=${piId}`);
-}
 export function getHistoryPI(issueId) {
   const projectId = AppState.currentMenuType.id;
   return axios.get(`/agile/v1/projects/${projectId}/pi/${issueId}/list_feature_pi_log`);

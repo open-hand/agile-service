@@ -36,7 +36,7 @@ class SprintName extends Component {
         sprintId,
         sprintName: value,
       };
-      BacklogStore.axiosUpdateSprint(req).then((res) => {
+      sprintApi.updateSprint(req).then((res) => {
         if (res.failed) {
           Choerodon.prompt('冲刺名称已存在');          
           return;

@@ -4,8 +4,9 @@ import { withRouter } from 'react-router-dom';
 import { Select, Tooltip } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
 import _ from 'lodash';
+import { sprintApi } from '@/api';
 import TextEditToggle from '../../../../TextEditToggle';
-import { loadSprints, updateIssue } from '../../../../../api/NewIssueApi';
+import { updateIssue } from '../../../../../api/NewIssueApi';
 
 const { Option } = Select;
 const { Text, Edit } = TextEditToggle;
@@ -26,7 +27,7 @@ const { Text, Edit } = TextEditToggle;
   }
 
   loadIssueSprints = () => {
-    loadSprints(['sprint_planning', 'started']).then((res) => {
+    sprintApi.loadSprints(['sprint_planning', 'started']).then((res) => {
       this.setState({
         originSprints: res,
         selectLoading: false,

@@ -8,6 +8,7 @@ import { stores } from '@choerodon/boot';
 import _ from 'lodash';
 import moment from 'moment';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
+import { sprintApi } from '@/api';
 import WorkCalendar from '@/components/WorkCalendar';
 import { catchFailed } from '@/utils/common';
 import IsInProgramStore from '../../../../stores/common/program/IsInProgramStore';
@@ -57,7 +58,7 @@ class StartSprint extends Component {
           objectVersionNumber: data.objectVersionNumber,
           workDates,
         };
-        BacklogStore.axiosStartSprint(newData, IsInProgramStore.isShowFeature).then(res => catchFailed(res)).then((res) => {
+        sprintApi.start(newData, IsInProgramStore.isShowFeature).then(res => catchFailed(res)).then((res) => {
           modal.close();
           BacklogStore.refresh();
         }).catch((error) => {
