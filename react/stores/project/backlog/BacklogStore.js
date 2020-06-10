@@ -9,8 +9,9 @@ import {
 import { store, stores } from '@choerodon/boot';
 import { Modal } from 'choerodon-ui';
 import Moment from 'moment';
-import { featureApi, sprintApi, piApi } from '@/api';
-import { sort } from '@/api/StoryMapApi';
+import {
+  featureApi, sprintApi, piApi, storyMapApi, 
+} from '@/api';
 import { getProjectId } from '@/utils/common';
 import { extendMoment } from 'moment-range';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
@@ -750,7 +751,7 @@ class BacklogStore {
       before,
       referenceIssueId,
     };
-    sort(sortVO).then(
+    storyMapApi.sort(sortVO).then(
       action('fetchSuccess', (res) => {
         if (!res.message) {
           this.axiosGetEpic().then((epics) => {
@@ -782,7 +783,7 @@ class BacklogStore {
       before,
       referenceIssueId,
     };
-    sort(sortVO).then(
+    storyMapApi.sort(sortVO).then(
       action('fetchSuccess', (res) => {
         if (!res.message) {
           featureApi.getByPiIdInSubProject(this.selectedPiId, this.selectedSprintId).then((data) => {

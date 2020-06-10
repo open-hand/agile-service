@@ -1,4 +1,4 @@
-import { stores, axios } from '@choerodon/boot';
+import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
 
 interface IWorkCalendar {
