@@ -4,6 +4,7 @@ import {
 import { find } from 'lodash';
 import axios from 'axios';
 import { store, stores, Choerodon } from '@choerodon/boot';
+import { workCalendarApi } from '@/api';
 
 const { AppState } = stores;
 
@@ -774,15 +775,6 @@ class ScrumBoardStore {
     });
   }
 
-  axiosDeleteCalendarData(calendarId) {
-    const proId = AppState.currentMenuType.id;
-    return axios.delete(`/agile/v1/projects/${proId}/work_calendar_ref/${calendarId}`);
-  }
-
-  axiosCreateCalendarData(sprintId, data) {
-    const proId = AppState.currentMenuType.id;
-    return axios.post(`/agile/v1/projects/${proId}/work_calendar_ref/sprint/${sprintId}`, data);
-  }
 
   @action setWorkDate(data) {
     if (data.sprintId) {
@@ -797,8 +789,7 @@ class ScrumBoardStore {
 
   // 获取项目层工作日历
   axiosGetCalendarData = (year) => {
-    const proId = AppState.currentMenuType.id;
-    return axios.get(`/agile/v1/projects/${proId}/work_calendar_ref/sprint?year=${year}`).then((data) => {
+    workCalendarApi.getCalendar(year).then((data) => {
       if (data) {
         this.setWorkDate(data);
       } else {

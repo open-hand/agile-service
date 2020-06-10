@@ -17,22 +17,22 @@ interface USprint {
   endDate?: string
 }
 interface CloseSprint {
-  incompleteIssuesDestination:number,
-  projectId:number,
-  sprintId:number,
+  incompleteIssuesDestination: number,
+  projectId: number,
+  sprintId: number,
 }
 interface StartSprint {
-  endDate:string,
+  endDate: string,
   startDate: string,
   projectId: number,
   sprintGoal: string,
   sprintId: number,
   sprintName: string,
   objectVersionNumber: number,
-  workDates:Array<any>,
+  workDates: Array<any>,
 }
 interface advancedSearch {
-  advancedSearchArgs:object,
+  advancedSearchArgs: object,
 }
 class SprintApi {
   get prefix() {
@@ -80,12 +80,28 @@ class SprintApi {
   loadSprints(arr: Array<string> = []) {
     return axios.post(`${this.prefix}/sprint/names`, arr);
   }
+
   /**
    * 根据冲刺id加载冲刺
    * @param sprintId 
    */
   loadSprint(sprintId: number) {
     return axios.get(`${this.prefix}/sprint/${sprintId}`);
+  }
+
+  /**
+   * 根据冲刺id查询sprint名及此冲刺下issue统计信息
+   * @param sprintId 
+   */
+  loadSprintAndCountIssue(sprintId: number) {
+    return axios.get(`${this.prefix}/sprint/${sprintId}/names`);
+  }
+
+  /**
+   * 查询未关闭的冲刺
+   */
+  loadUncloseSprint() {
+    return axios.get(`${this.prefix}/sprint/unclosed`);
   }
 
   /**
@@ -104,10 +120,11 @@ class SprintApi {
         organizationId,
         status,
         page,
-        size
+        size,
       },
     });
   }
+
   /**
    * 根据团队id及PI id 加载冲刺列表
    * @param teamId 
@@ -120,9 +137,11 @@ class SprintApi {
         url: `${this.prefix}/sprint/sub_project/${teamId}/list_by_team_id`,
         params: {
           piId,
-        }
-      });
+        },
+      },
+    );
   }
+
   /**
    * 按团队Ids和piId查询冲刺
    * @param {*} piId 
@@ -136,8 +155,9 @@ class SprintApi {
         piId,
         teamIds: teamIds.join(','),
       },
-    })
+    });
   }
+
   /**
    * 更新冲刺部分字段
    * @param data 
@@ -150,13 +170,15 @@ class SprintApi {
       data,
     });
   }
+
   /**
    * 完成冲刺
    * @param data 
    */
-  complete(data:CloseSprint){
+  complete(data: CloseSprint) {
     return axios.post(`${this.prefix}/sprint/complete`, data);
   }
+
   /**
    * 开启冲刺
    * @param data 
@@ -165,31 +187,122 @@ class SprintApi {
   start(data: StartSprint, isCurrentPi = false) {
     return axios.post(`${this.prefix}/sprint/${isCurrentPi ? 'sub_project/' : ''}start`, data);
   }
+
   /**
    * 删除冲刺
    * @param sprintId 
    * @param isCurrentPi 删除的冲刺是否为项目群下的子项目 
    */
-  delete(sprintId:number, isCurrentPi = false) {
+  delete(sprintId: number, isCurrentPi = false) {
     return axios.delete(`${this.prefix}/sprint/${isCurrentPi ? 'sub_project/' : ''}${sprintId}`);
   }
+
   /**
-   * 联合查询sprint及其issue // 待测试
+   * 联合查询sprint及其issue 
+   * @param quickFilterIds 快速查询ids
+   * @param assigneeFilterIds 经办人搜索ids
+   * @param filter  过滤条件
    */
-  getSprintAndIssues = (quickFilterIds:Array<number>,assigneeFilterIds:Array<number>,filter:advancedSearch) => {
+  getSprintAndIssues(quickFilterIds: Array<number>, assigneeFilterIds: Array<number>, filter: advancedSearch) {
     const organizationId = getOrganizationId();
     return axios({
-      method:'post',
-      url:`${this.prefix}/sprint/issues`,
-      data:filter,
-      params:{
+      method: 'post',
+      url: `${this.prefix}/sprint/issues`,
+      data: filter,
+      params: {
         organizationId,
         quickFilterIds,
-        [assigneeFilterIds.length>0?'assigneeFilterIds':'']:assigneeFilterIds,
-      }
+        [assigneeFilterIds.length > 0 ? 'assigneeFilterIds' : '']: assigneeFilterIds,
+      },
+    });
+  }
+
+  /**
+   * 根据冲刺id查询冲刺的时间范围内非工作日(包含周六周天)
+   * @param sprintId 
+   */
+  getRestDays(sprintId: number) {
+    return axios.get(`${this.prefix}/sprint/query_non_workdays/${sprintId}/${getOrganizationId()}`);
+  }
+
+  /**
+   * 根据冲刺id查询经办人分布状况
+   * @param sprintId 
+   */
+  getAssigneeDistribute(sprintId: number) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/iterative_worktable/assignee_id`,
+      params: {
+        sprintId,
+      },
+    });
+  }
+
+  /**
+   * 根据冲刺id查询问题类型分布状况
+   * @param sprintId 
+   */
+  getIssueTypeDistribute(sprintId: number) {
+    const organizationId = getOrganizationId();
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/iterative_worktable/issue_type`,
+      params: {
+        sprintId,
+        organizationId,
+      },
+    });
+  }
+
+  /**
+   * 根据冲刺id查询优先级分布状况
+   * @param sprintId 
+   */
+  getPriorityDistribute(sprintId:number) {
+    const organizationId = getOrganizationId();
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/iterative_worktable/priority`,
+      params: {
+        sprintId,
+        organizationId,
+      },
+    });
+  }
+
+  /**
+   * 冲刺id联合组织id查询冲刺基本信息  
+   * @param sprintId 
+   */
+  getSprintCombineOrgId(sprintId:number) {
+    const organizationId = getOrganizationId();
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/iterative_worktable/sprint/${organizationId}`,
+      params: {
+        sprintId,
+      },
+    });
+  }
+
+  /**
+   * 根据冲刺id查询状态分布状况
+   * @param sprintId 
+   */
+  getStatusDistribute(sprintId:number) {
+    const organizationId = getOrganizationId();
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/iterative_worktable/status`,
+      params: {
+        organizationId,
+        sprintId,
+      },
     });
   }
 }
 
 const sprintApi = new SprintApi();
+// eslint-disable-next-line import/prefer-default-export
 export { sprintApi };

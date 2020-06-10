@@ -9,6 +9,7 @@ import {
   Dropdown, Icon, Menu, Spin, Checkbox,
 } from 'choerodon-ui';
 import { stores, axios } from '@choerodon/boot';
+import { sprintApi } from '@/api';
 import EmptyBlockDashboard from '../../../../components/EmptyBlockDashboard';
 import pic from '../EmptyPics/no_sprint.svg';
 import lineLegend from './Line.svg';
@@ -259,7 +260,7 @@ class BurnDown extends Component {
   loadSprints(sprintId, unit) {
     const projectId = AppState.currentMenuType.id;
     this.setState({ loading: true });
-    axios.post(`/agile/v1/projects/${projectId}/sprint/names`, ['started', 'closed'])
+    sprintApi.loadSprints(['started', 'closed'])
       .then((res) => {
         if (res && res.length) {
           const sprint = res.find(v => v.sprintId === sprintId);
@@ -272,9 +273,7 @@ class BurnDown extends Component {
   }
 
   getRestDays = (sprintId, unit) => {
-    const projectId = AppState.currentMenuType.id;
-    const orgId = AppState.currentMenuType.organizationId;
-    axios.get(`/agile/v1/projects/${projectId}/sprint/query_non_workdays/${sprintId}/${orgId}`).then((res) => {
+    sprintApi.getRestDays(sprintId).then((res) => {
       if (res) {
         this.setState({
           restDays: res.map(date => moment(date).format('YYYY-MM-DD')),

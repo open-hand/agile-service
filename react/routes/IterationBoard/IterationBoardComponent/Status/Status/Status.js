@@ -3,6 +3,7 @@ import { stores, axios } from '@choerodon/boot';
 import ReactEcharts from 'echarts-for-react';
 import { Spin } from 'choerodon-ui';
 import _ from 'lodash';
+import { sprintApi } from '@/api';
 import EmptyBlockDashboard from '../../../../../components/EmptyBlockDashboard';
 import pic from '../../EmptyPics/no_sprint.svg';
 import pic2 from '../../EmptyPics/no_version.svg';
@@ -109,10 +110,8 @@ class Status extends Component {
   }
 
   loadStatus(sprintId) {
-    const projectId = AppState.currentMenuType.id;
-    const orgId = AppState.currentMenuType.organizationId;
     this.setState({ loading: true });
-    axios.get(`/agile/v1/projects/${projectId}/iterative_worktable/status?organizationId=${orgId}&sprintId=${sprintId}`)
+    sprintApi.getStatusDistribute(sprintId)
       .then((res) => {
         const statusInfo = this.transformStatus(res);
         this.setState({

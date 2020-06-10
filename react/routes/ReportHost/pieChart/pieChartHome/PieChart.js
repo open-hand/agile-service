@@ -13,6 +13,7 @@ import {
   Button, Select, Icon, Spin, Tooltip,
 } from 'choerodon-ui';
 import './pie.less';
+import { sprintApi } from '@/api';
 import SwitchChart from '../../Component/switchChart';
 import VersionReportStore from '../../../../stores/project/versionReport/VersionReport';
 import NoDataComponent from '../../Component/noData';
@@ -29,6 +30,7 @@ class ReleaseDetail extends Component {
     this.state = {
       type: '',
       value: '',
+      // eslint-disable-next-line react/no-unused-state
       showOtherTooltip: false,
       sprintAndVersion: {
         sprint: [],
@@ -60,7 +62,7 @@ class ReleaseDetail extends Component {
     const value = this.getSelectDefaultValue();
     await VersionReportStore.getPieDatas(AppState.currentMenuType.id, value);
     await axios.all([
-      axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/names`, ['started', 'closed']),
+      sprintApi.loadSprints(['started', 'closed']),
       axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/names`),
     ])
       .then(axios.spread((sprints, versions) => {
@@ -81,6 +83,7 @@ class ReleaseDetail extends Component {
     pieChart.on('mouseout', (params) => {
       if (params.data.name === '其它') {
         this.setState({
+          // eslint-disable-next-line react/no-unused-state
           showOtherTooltip: false,
         });
       }
@@ -189,6 +192,7 @@ class ReleaseDetail extends Component {
               if (value.data.name === null) {
                 return '未分配';
               }
+              return '';
             },
           },
           itemStyle: {
@@ -369,6 +373,7 @@ class ReleaseDetail extends Component {
         );
       }
     }
+    return '';
   }
 
   renderChooseDimension = () => {
@@ -396,6 +401,7 @@ class ReleaseDetail extends Component {
               if (currentChooseDimension === 'sprint') {
                 return <Option key={item.sprintId} value={item.sprintId}>{item.sprintName}</Option>;
               }
+              return '';
             })
           }
         </Select>

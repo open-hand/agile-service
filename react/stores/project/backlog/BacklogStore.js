@@ -224,19 +224,6 @@ class BacklogStore {
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/${issueId}${orgId ? `?organizationId=${orgId}` : ''}`);
   }
 
-
-  axiosGetOpenSprintDetail(sprintId) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${sprintId}`);
-  }
-
-  axiosStartSprint(data, isCurrentPi = false) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${isCurrentPi ? 'sub_project/' : ''}start`, data);
-  }
-
-  axiosGetSprintCompleteMessage(sprintId) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${sprintId}/names`);
-  }
-
   axiosEasyCreateIssue(data) {
     return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues?applyType=agile`, data);
   }
@@ -255,10 +242,6 @@ class BacklogStore {
 
   @action setRecent(data) {
     this.recent = data;
-  }
-
-  axiosUpdateSprint(data, isCurrentPi = false) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint${isCurrentPi ? '/sub_project' : ''}`, data);
   }
 
   @action updateSprint(sprintId, newData) {
@@ -451,10 +434,7 @@ class BacklogStore {
     this.filterSprintAssign.delete(sprintId);
   }
 
-  axiosGetSprint = () => {
-    const orgId = AppState.currentMenuType.organizationId;
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/issues?organizationId=${orgId}&quickFilterIds=${this.quickFilters}${this.assigneeFilterIds.length > 0 ? `&assigneeFilterIds=${this.assigneeFilterIds}` : ''}`, this.filter);
-  }
+  axiosGetSprint = () => sprintApi.getSprintAndIssues(this.quickFilters, this.assigneeFilterIds, this.filter)
 
 
   handleVersionDrap = data => axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/drag`, data);

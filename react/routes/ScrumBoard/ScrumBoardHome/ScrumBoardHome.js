@@ -8,6 +8,7 @@ import {
 } from 'choerodon-ui';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
+import { sprintApi } from '@/api';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
@@ -120,13 +121,12 @@ class ScrumBoardHome extends Component {
    */
   handleFinishSprint = async () => {
     const sprintId = ScrumBoardStore.getSprintId;    
-    const completeMessage = await axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${sprintId}/names`);
-
+    const completeMessage = await sprintApi.loadSprintAndCountIssue(sprintId);
     CloseSprint({
       completeMessage,
       sprintId,
       afterClose: async () => {
-        const axiosGetSprintNotClosed = axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/names`, ['sprint_planning', 'started']);
+        const axiosGetSprintNotClosed = sprintApi.loadSprints(['sprint_planning', 'started']);
         await axiosGetSprintNotClosed.then((res) => {
           ScrumBoardStore.setSprintNotClosedArray(res);
           ScrumBoardStore.setSelectSprint(undefined);

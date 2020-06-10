@@ -6,6 +6,7 @@ import { Content, stores, axios } from '@choerodon/boot';
 import moment from 'moment';
 import _ from 'lodash';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import { sprintApi } from '@/api';
 import { NumericInput } from '../../../../../components/CommonComponent';
 
 const { Sidebar } = Modal;
@@ -842,7 +843,7 @@ class AddComponent extends Component {
     axios.get(`/agile/v1/projects/${projectId}/priority/list_by_org`).then(res => this.setState({ originPriorities: res }));
     axios.get(`/agile/v1/projects/${projectId}/schemes/query_status_by_project_id?apply_type=agile`).then(res => this.setState({ originStatus: res }));
     axios.get(`/agile/v1/projects/${projectId}/issues/epics/select_data`).then(res => this.setState({ originEpics: res }));
-    axios.post(`/agile/v1/projects/${projectId}/sprint/names`).then(res => this.setState({ originSprints: res }));
+    sprintApi.loadSprints().then(res => this.setState({ originSprints: res }));
     axios.get(`/agile/v1/projects/${projectId}/issue_labels`).then(res => this.setState({ originLabels: res }));
     axios.get(`/agile/v1/projects/${projectId}/component`).then(res => this.setState({ originComponents: res }));
     axios.post(`/agile/v1/projects/${projectId}/product_version/names`).then(res => this.setState({ originVersions: res }));

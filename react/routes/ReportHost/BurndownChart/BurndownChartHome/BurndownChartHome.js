@@ -10,6 +10,7 @@ import ReactEcharts from 'echarts-for-react';
 import _ from 'lodash';
 import Moment from 'moment';
 import { extendMoment } from 'moment-range';
+import { sprintApi } from '@/api';
 import BurndownChartStore from '../../../../stores/project/burndownChart/BurndownChartStore';
 import './BurndownChartHome.less';
 import NoDataComponent from '../../Component/noData';
@@ -81,7 +82,7 @@ class BurndownChartHome extends Component {
   }
 
   axiosGetRestDays = () => {
-    BurndownChartStore.axiosGetRestDays(this.state.defaultSprintId).then((res) => {
+    sprintApi.getRestDays(this.state.defaultSprintId).then((res) => {
       this.setState({
         restDays: res.map(date => moment(date).format('YYYY-MM-DD')),
       }, () => {
