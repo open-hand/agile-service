@@ -64,11 +64,6 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     }
 
     @Override
-    public ResponseEntity<List<ProjectRelationshipVO>> getProjUnderGroup(Long orgId, Long id, Boolean onlySelectEnable) {
-        throw new CommonException("error.projUnderGroup.get");
-    }
-
-    @Override
     public ResponseEntity<ProjectVO> getGroupInfoByEnableProject(Long organizationId, Long projectId) {
         throw new CommonException("error.groupInfo.get");
     }

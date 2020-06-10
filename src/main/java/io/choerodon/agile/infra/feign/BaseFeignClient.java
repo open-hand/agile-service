@@ -85,11 +85,6 @@ public interface BaseFeignClient {
             @PathVariable(name = "project_id") Long sourceId,
             @RequestBody(required = false) @Valid RoleAssignmentSearchVO roleAssignmentSearchVO);
 
-    @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/project_relations/{parent_id}")
-    ResponseEntity<List<ProjectRelationshipVO>> getProjUnderGroup(@PathVariable(name = "organization_id") Long orgId,
-                                                                  @PathVariable(name = "parent_id") Long id,
-                                                                  @RequestParam(name = "only_select_enable") Boolean onlySelectEnable);
-
     @GetMapping(value = "/choerodon/v1/organizations/{organization_id}/projects/{project_id}/program")
     ResponseEntity<ProjectVO> getGroupInfoByEnableProject(@PathVariable(name = "organization_id") Long organizationId,
                                                           @PathVariable(name = "project_id") Long projectId);
