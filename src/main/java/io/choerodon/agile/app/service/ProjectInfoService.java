@@ -2,12 +2,8 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.ProjectInfoFixVO;
 import io.choerodon.agile.api.vo.ProjectInfoVO;
-import io.choerodon.agile.api.vo.ProjectRelationshipVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
-import io.choerodon.agile.infra.dto.ProjectInfoDTO;
-import org.modelmapper.TypeToken;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,14 +42,6 @@ public interface ProjectInfoService {
      * @return ProjectInfoVO
      */
     ProjectInfoVO queryProjectInfoByProjectId(Long projectId);
-
-    /**
-     * 获取项目群关联的团队项目信息
-     *
-     * @param projectId
-     * @return
-     */
-    List<ProjectRelationshipVO> queryProgramTeamInfo(Long projectId);
 
     /**
      * 根据projectId更新issueMaxNum
