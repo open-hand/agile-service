@@ -46,7 +46,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
         BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
         try {
             batchUpdateFieldStatusVO.setStatus("doing");
-            batchUpdateFieldStatusVO.setKey(WEBSOCKET_BATCH_UPDATE_FIELD);
+            batchUpdateFieldStatusVO.setKey(WEBSOCKET_BATCH_UPDATE_FIELD+"-"+projectId);
             batchUpdateFieldStatusVO.setUserId(userId);
             batchUpdateFieldStatusVO.setProcess(0.0);
 //            notifyFeignClient.postWebSocket(WEBSOCKET_BATCH_UPDATE_FIELD, userId.toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
