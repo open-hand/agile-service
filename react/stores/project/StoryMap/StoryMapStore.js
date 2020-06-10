@@ -7,11 +7,9 @@ import {
   find, findIndex, remove, sortBy,
 } from 'lodash';
 import { getProjectId } from '@/utils/common';
+import { storyMapApi } from '@/api';
 import {
-  getStoryMap, getSideIssueList, createWidth, changeWidth, sort,
-} from '../../../api/StoryMapApi';
-import {
-  loadIssueTypes, loadVersions, loadPriorities, 
+  loadIssueTypes, loadVersions, loadPriorities,
 } from '../../../api/NewIssueApi';
 
 class StoryMapStore {
@@ -83,7 +81,7 @@ class StoryMapStore {
 
   getStoryMap = () => {
     this.setLoading(true);
-    Promise.all([getStoryMap(this.searchVO), loadIssueTypes(), loadVersions(), loadPriorities()]).then(([storyMapData, issueTypes, versionList, prioritys]) => {
+    Promise.all([storyMapApi.getStoryMap(this.searchVO), loadIssueTypes(), loadVersions(), loadPriorities()]).then(([storyMapData, issueTypes, versionList, prioritys]) => {
       let epicWithFeature = storyMapData.epics || storyMapData.epicWithFeature;
       const { featureWithoutEpic = [] } = storyMapData;
       epicWithFeature = sortBy(epicWithFeature, 'epicRank');
@@ -99,14 +97,14 @@ class StoryMapStore {
       this.initVersionList(versionList);
       this.initStoryData(newStoryMapData);
       this.setLoading(false);
-    }).catch((error) => {  
+    }).catch((error) => {
       Choerodon.prompt(error);
       this.setLoading(false);
     });
   }
 
   loadIssueList = () => {
-    getSideIssueList(this.sideSearchVO).then((res) => {
+    storyMapApi.getDemands(this.sideSearchVO).then((res) => {
       this.setIssueList(res.demandStoryList);
     });
   }
@@ -484,7 +482,7 @@ class StoryMapStore {
       type,
     };
     if (!targetWidth) {
-      createWidth(storyMapWidthVO).then((res) => {
+      storyMapApi.createWidth(storyMapWidthVO).then((res) => {
         if (res.failed) {
           this.setFeatureWidth({
             epicId,
@@ -502,7 +500,7 @@ class StoryMapStore {
         });
       });
     } else {
-      changeWidth(storyMapWidthVO).then((res) => {
+      storyMapApi.changeWidth(storyMapWidthVO).then((res) => {
         if (res.failed) {
           this.setFeatureWidth({
             epicId,
@@ -551,7 +549,7 @@ class StoryMapStore {
       referenceIssueId: destination.issueId,
     };
 
-    sort(sortVO).then(() => {
+    storyMapApi.sort(sortVO).then(() => {
       // this.getStoryMap();
       const [removed] = this.storyMapData.epicWithFeature.splice(sourceIndex, 1);
       this.storyMapData.epicWithFeature.splice(resultIndex, 0, removed);
