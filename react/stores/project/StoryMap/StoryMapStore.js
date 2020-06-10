@@ -37,10 +37,10 @@ class StoryMapStore {
 
   @observable searchVO = {
     advancedSearchArgs: {
-      versionList: [],
-      statusList: [],
       components: [],
       sprints: [],
+      prioritys: [],
+      isCompleted: undefined,
     },
   }
 
@@ -69,10 +69,10 @@ class StoryMapStore {
     this.storyData = {};
     this.searchVO = {
       advancedSearchArgs: {
-        versionList: [],
-        statusList: [],
         components: [],
         sprints: [],
+        prioritys: [],
+        isCompleted: undefined,
       },
     };
     this.versionList = [];
