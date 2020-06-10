@@ -62,7 +62,7 @@ public class StoryMapServiceImpl implements StoryMapService {
         JSONObject result = new JSONObject(true);
         List<Long> epicIds = new ArrayList<>();
         // get project epic
-        List<Long> projectEpicIds = storyMapMapper.selectEpicIdsByProject(projectId);
+        List<Long> projectEpicIds = storyMapMapper.selectEpicIdsByProject(projectId, searchVO.getAdvancedSearchArgs());
         if (projectEpicIds != null && !projectEpicIds.isEmpty()) {
             epicIds.addAll(projectEpicIds);
         }
@@ -70,7 +70,7 @@ public class StoryMapServiceImpl implements StoryMapService {
         if (epicIds.isEmpty()) {
             result.put("epics", new ArrayList<>());
         } else {
-            List<EpicWithInfoDTO> epicWithInfoDTOList = storyMapMapper.selectEpicList(projectId, epicIds);
+            List<EpicWithInfoDTO> epicWithInfoDTOList = storyMapMapper.selectEpicList(projectId, epicIds, searchVO.getAdvancedSearchArgs());
             result.put("epics", epicWithInfoDTOList);
         }
 
