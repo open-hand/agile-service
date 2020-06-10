@@ -4,6 +4,7 @@ import {
 import axios from 'axios';
 import _ from 'lodash';
 import { store, stores, Choerodon } from '@choerodon/boot';
+import { sprintApi } from '@/api';
 
 const { AppState } = stores;
 
@@ -398,7 +399,7 @@ class UserMapStore {
       });
   }
 
-  loadSprints = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/unclosed`)
+  loadSprints = () => sprintApi.loadUncloseSprint()
     .then((sprints) => {
       this.setSprints(sprints);
     });

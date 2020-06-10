@@ -12,7 +12,7 @@ import './Setting.less';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import SettingColumn from './components/setting-column';
 import SwimLanePage from './components/SwimLanePage/SwimLanePage';
-import WorkcalendarPage from './components/WorkCalendarPage/WorkCalendarPage';
+import WorkCalendarPage from './components/WorkCalendarPage/WorkCalendarPage';
 import EditBoardName from './components/EditBoardName/EditBoardName';
 import CreateStatus from './components/create-status';
 import CreateColumn from './components/create-column';
@@ -139,8 +139,8 @@ class Setting extends Component {
     });
   }
 
-  renderWorkcalendarPage = updateWorkDatePermission => (
-    <WorkcalendarPage selectedDateDisabled={!updateWorkDatePermission} />
+  renderWorkCalendarPage = updateWorkDatePermission => (
+    <WorkCalendarPage selectedDateDisabled={!updateWorkDatePermission} />
   )
 
   renderEditBoardName = editBoardNamePermission => (
@@ -230,7 +230,7 @@ class Setting extends Component {
               ? (
                 <TabPane tab="工作日历" key="3">
                   <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.work_calendar.update']}>
-                    {this.renderWorkcalendarPage}
+                    {this.renderWorkCalendarPage}
                   </Permission>
                 </TabPane>
               ) : null

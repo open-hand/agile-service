@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { stores, axios } from '@choerodon/boot';
 import { Spin } from 'choerodon-ui';
+import { sprintApi } from '@/api';
 import PriorityTag from '../../../../components/PriorityTag';
 import EmptyBlockDashboard from '../../../../components/EmptyBlockDashboard';
 import pic from '../EmptyPics/no_sprint.svg';
@@ -35,15 +36,12 @@ class Priority extends Component {
       });
     } else {
       this.setState({ loading: true });
-      const projectId = AppState.currentMenuType.id;
-      const orgId = AppState.currentMenuType.organizationId;
-      axios.get(`/agile/v1/projects/${projectId}/iterative_worktable/priority?organizationId=${orgId}&sprintId=${sprintId}`)
-        .then((res) => {
-          this.setState({
-            priorityInfo: res,
-            loading: false,
-          });
+      sprintApi.getPriorityDistribute(sprintId).then((res) => {
+        this.setState({
+          priorityInfo: res,
+          loading: false,
         });
+      });
     }
   }
 

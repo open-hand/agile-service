@@ -18,6 +18,8 @@ import StatusTag from '@/components/StatusTag';
 import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';
 import STATUS from '@/constants/STATUS';
+import { sprintApi } from '@/api';
+
 import NoDataComponent from '../Component/noData';
 import SwithChart from '../Component/switchChart';
 import './SprintReport.less';
@@ -115,7 +117,7 @@ class SprintReport extends Component {
   }
 
   axiosGetRestDays = () => {
-    BurndownChartStore.axiosGetRestDays(this.state.defaultSprint).then((res) => {
+    sprintApi.getRestDays(this.state.defaultSprint).then((res) => {
       this.setState({
         restDays: res.map(date => moment(date).format('YYYY-MM-DD')),
       }, () => {

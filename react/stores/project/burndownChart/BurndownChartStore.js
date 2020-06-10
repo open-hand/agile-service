@@ -3,6 +3,7 @@ import { store, stores } from '@choerodon/boot';
 import {
   observable, action, computed, toJS, 
 } from 'mobx';
+import { sprintApi } from '@/api';
 
 const { AppState } = stores;
 
@@ -20,10 +21,6 @@ class BurndownChartStore {
 
   @action setBurndownCoordinate(data) {
     this.burndownCoordinate = data;
-  }
-
-  axiosGetRestDays(sprintId) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/query_non_workdays/${sprintId}/${AppState.currentMenuType.organizationId}`);
   }
 
   axiosGetBurndownCoordinate(sprintId, type) {
@@ -47,7 +44,7 @@ class BurndownChartStore {
   }
 
   axiosGetSprintList() {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/names`, ['started', 'closed']);
+    return sprintApi.loadSprints(['started', 'closed']);
   }
 
   axiosGetBurndownChartData(id, type) {
