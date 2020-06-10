@@ -43,14 +43,15 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
     @Override
     public void asyncUpdateFields(Long projectId, String schemeCode, BatchUpdateFieldsValueVo batchUpdateFieldsValueVo,String applyType) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
+        String messageCode = WEBSOCKET_BATCH_UPDATE_FIELD+"-"+projectId;
         BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
         try {
             batchUpdateFieldStatusVO.setStatus("doing");
-            batchUpdateFieldStatusVO.setKey(WEBSOCKET_BATCH_UPDATE_FIELD+"-"+projectId);
+            batchUpdateFieldStatusVO.setKey(messageCode);
             batchUpdateFieldStatusVO.setUserId(userId);
             batchUpdateFieldStatusVO.setProcess(0.0);
 //            notifyFeignClient.postWebSocket(WEBSOCKET_BATCH_UPDATE_FIELD, userId.toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
-            messageClient.sendByUserId(userId, WEBSOCKET_BATCH_UPDATE_FIELD, JSON.toJSONString(batchUpdateFieldStatusVO));
+            messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
             if (Boolean.FALSE.equals(EnumUtil.contain(ObjectSchemeCode.class, schemeCode))) {
                 throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
             }
@@ -83,7 +84,7 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
         }
         finally {
 //            notifyFeignClient.postWebSocket(WEBSOCKET_BATCH_UPDATE_FIELD, userId.toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
-            messageClient.sendByUserId(userId, WEBSOCKET_BATCH_UPDATE_FIELD, JSON.toJSONString(batchUpdateFieldStatusVO));
+            messageClient.sendByUserId(userId, messageCode, JSON.toJSONString(batchUpdateFieldStatusVO));
         }
     }
 }
