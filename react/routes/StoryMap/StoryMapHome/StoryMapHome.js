@@ -27,6 +27,7 @@ import StoryMapStore from '../../../stores/project/StoryMap/StoryMapStore';
 import useFullScreen from '../../../common/useFullScreen';
 import './StoryMapHome.less';
 
+const { Option } = Select;
 const HEX = {
   'c7nagile-StoryMap-EpicCard': '#D9C2FB',
   'c7nagile-StoryMap-StoryCard': '#AEE9E0',
@@ -153,20 +154,13 @@ const StoryMapHome = observer(() => {
         <HeaderLine />
         <SwitchSwimLine />
         <Select
-          className="c7nagile-StoryMap-header-componentSelect"
-          style={{ marginRight: 30, marginLeft: 20 }}
+          className="c7nagile-StoryMap-header-select c7nagile-StoryMap-header-isCompletedSelect"
           dataSet={selectDataSet}
-          name="components"
-          placeholder="模块"
-          dropdownMatchSelectWidth={false}
-          searchable
-          multiple
-          maxTagCount={2}
-          maxTagTextLength={10} 
-          maxTagPlaceholder={restValues => `+${restValues.length}...`}
+          name="isCompleted"
+          placeholder="解决状态"
         />
         <Select
-          className="c7nagile-StoryMap-header-sprintSelect"
+          className="c7nagile-StoryMap-header-select c7nagile-StoryMap-header-sprintSelect"
           dataSet={selectDataSet}
           name="sprints"
           placeholder="冲刺"
@@ -174,7 +168,7 @@ const StoryMapHome = observer(() => {
           searchable
           dropdownMatchSelectWidth={false}
           maxTagCount={2}
-          maxTagTextLength={10} 
+          maxTagTextLength={8} 
           maxTagPlaceholder={restValues => `+${restValues.length}...`}
           optionRenderer={({ record, text }) => (
             <div style={{ display: 'inline-block' }}>
@@ -186,6 +180,32 @@ const StoryMapHome = observer(() => {
               }
             </div>
           )}
+        />
+        <Select
+          className="c7nagile-StoryMap-header-select c7nagile-StoryMap-header-prioritySelect"
+          style={{ marginRight: 30, marginLeft: 20 }}
+          dataSet={selectDataSet}
+          name="prioritys"
+          placeholder="优先级"
+          dropdownMatchSelectWidth={false}
+          searchable
+          multiple
+          maxTagCount={2}
+          maxTagTextLength={8} 
+          maxTagPlaceholder={restValues => `+${restValues.length}...`}
+        />
+        <Select
+          className="c7nagile-StoryMap-header-select c7nagile-StoryMap-header-componentSelect"
+          style={{ marginRight: 30, marginLeft: 20 }}
+          dataSet={selectDataSet}
+          name="components"
+          placeholder="模块"
+          dropdownMatchSelectWidth={false}
+          searchable
+          multiple
+          maxTagCount={2}
+          maxTagTextLength={8} 
+          maxTagPlaceholder={restValues => `+${restValues.length}...`}
         />
       </Header>
       <Breadcrumb />
