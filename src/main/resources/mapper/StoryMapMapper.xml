@@ -42,8 +42,11 @@
             ar.object_version_number as ar_object_version_number
         from agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
+        LEFT JOIN agile_issue_status ais ON ai.status_id = ais.status_id and ais.project_id = #{projectId}
         left join agile_rank ar on ar.project_id = #{projectId} and ai.issue_id = ar.issue_id and ar.type = 'epic'
-        where ai.issue_id in
+        where
+              ai.project_id = #{projectId}
+          AND ai.issue_id in
         <foreach collection="epicIds" item="epicId" open="(" separator=","
                  close=")">
             #{epicId}
@@ -55,6 +58,15 @@
                     #{componentId}
                 </foreach>
                 )
+            </if>
+            <if test='advancedSearchArgs.isCompleted != null'>
+                AND ais.is_completed = #{advancedSearchArgs.isCompleted}
+            </if>
+            <if test="advancedSearchArgs.prioritys != null">
+                AND ai.priority_id IN
+                <foreach collection="advancedSearchArgs.prioritys" open="(" close=")" separator="," item="priorityId">
+                    #{priorityId}
+                </foreach>
             </if>
         </if>
         order by ai.issue_id desc
@@ -86,6 +98,7 @@
         version_info.name as version_name
         from agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
+        LEFT JOIN agile_issue_status ais ON ai.status_id = ais.status_id and ais.project_id = #{projectId}
         left join (
             select avir.issue_id, apv.version_id, apv.name
             from agile_version_issue_rel avir, agile_product_version apv
@@ -134,6 +147,15 @@
                         #{sprintId}
                     </foreach>
                     )
+                </if>
+                <if test='searchVO.advancedSearchArgs.isCompleted != null'>
+                    AND ais.is_completed = #{searchVO.advancedSearchArgs.isCompleted}
+                </if>
+                <if test="searchVO.advancedSearchArgs.prioritys != null">
+                    AND ai.priority_id IN
+                    <foreach collection="searchVO.advancedSearchArgs.prioritys" open="(" close=")" separator="," item="priorityId">
+                        #{priorityId}
+                    </foreach>
                 </if>
             </if>
         </if>
