@@ -1,10 +1,23 @@
 .container {
   width: 100%;
   cursor: pointer;
+  outline: none;
+}
+
+.hidden {
+  display: none !important;
 }
 
 .disabled {
   cursor: auto;
+
+  .text:hover {
+    border-color: transparent;
+  }
+}
+
+.editor {
+  
 }
 
 .text {
@@ -14,6 +27,7 @@
   min-width: 0.5rem;
   display: flex;
   align-items: center;
+
   &:hover {
     border-color: rgba(0, 0, 0, 0.2);
     border-radius: 0.05rem;

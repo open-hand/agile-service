@@ -4,39 +4,15 @@ import { withRouter } from 'react-router-dom';
 import { Select, Tooltip } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
 import _ from 'lodash';
-import { sprintApi } from '@/api';
-import TextEditToggle from '../../../../TextEditToggle';
+import TextEditToggle from '@/components/TextEditTogglePro';
+import SelectSprint from '@/components/select/select-sprint';
 import { updateIssue } from '../../../../../api/NewIssueApi';
 
 const { Option } = Select;
-const { Text, Edit } = TextEditToggle;
 
 @inject('AppState')
 @observer class FieldSprint extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      originSprints: [],
-      selectLoading: true,
-      newSprintId: undefined,
-    };
-  }
-
-  componentDidMount() {
-    this.loadIssueSprints();
-  }
-
-  loadIssueSprints = () => {
-    sprintApi.loadSprints(['sprint_planning', 'started']).then((res) => {
-      this.setState({
-        originSprints: res,
-        selectLoading: false,
-      });
-    });
-  };
-
-  updateIssueSprint = () => {
-    const { newSprintId } = this.state;
+  updateIssueSprint = (newSprintId) => {
     const {
       store, onUpdate, reloadIssue,
     } = this.props;
@@ -63,7 +39,6 @@ const { Text, Edit } = TextEditToggle;
   };
 
   render() {
-    const { selectLoading, originSprints } = this.state;
     const { store, disabled } = this.props;
     const issue = store.getIssue;
     const { closeSprint = [], activeSprint = {} } = issue;
@@ -79,9 +54,8 @@ const { Text, Edit } = TextEditToggle;
         <div className="c7n-value-wrapper">
           <TextEditToggle
             disabled={disabled}
-            formKey="sprint"
             onSubmit={this.updateIssueSprint}
-            originData={sprintId}
+            initValue={sprintId}
             editExtraContent={
               closeSprint.length ? (
                 <div style={{ maxWidth: 170 }}>
@@ -92,59 +66,39 @@ const { Text, Edit } = TextEditToggle;
                 </div>
               ) : null
             }
+            editor={() => <SelectSprint />}
           >
-            <Text>
-              <Tooltip
-                placement="top"
-                title={`该问题经历迭代数${closeSprint.length + (sprintId ? 1 : 0)}`}
-              >
-                <div>
-                  {
-                    !closeSprint.length && !sprintId ? '无' : (
+            <Tooltip
+              placement="top"
+              title={`该问题经历迭代数${closeSprint.length + (sprintId ? 1 : 0)}`}
+            >
+              <div>
+                {
+                  !closeSprint.length && !sprintId ? '无' : (
+                    <div>
                       <div>
-                        <div>
-                          {_.map(closeSprint, 'sprintName').join(' , ')}
-                        </div>
-                        {
-                          sprintId && (
-                            <div
-                              style={{
-                                color: '#4d90fe',
-                                fontSize: '13px',
-                                lineHeight: '20px',
-                                display: 'inline-block',
-                                marginTop: closeSprint.length ? 5 : 0,
-                              }}
-                            >
-                              {activeSprint.sprintName}
-                            </div>
-                          )
-                        }
+                        {_.map(closeSprint, 'sprintName').join(' , ')}
                       </div>
-                    )
-                  }
-                </div>
-              </Tooltip>
-            </Text>
-            <Edit>
-              <Select
-                label="活跃冲刺"
-                getPopupContainer={() => document.getElementById('detail')}          
-                allowClear
-                loading={selectLoading}
-                onChange={(value) => {
-                  this.setState({
-                    newSprintId: value,
-                  });
-                }}
-              >
-                {originSprints.map(sprint => (
-                  <Option key={`${sprint.sprintId}`} value={sprint.sprintId}>
-                    <Tooltip placement="topRight" title={sprint.sprintName}>{sprint.sprintName}</Tooltip>
-                  </Option>
-                ))}
-              </Select>
-            </Edit>
+                      {
+                        sprintId && (
+                          <div
+                            style={{
+                              color: '#4d90fe',
+                              fontSize: '13px',
+                              lineHeight: '20px',
+                              display: 'inline-block',
+                              marginTop: closeSprint.length ? 5 : 0,
+                            }}
+                          >
+                            {activeSprint.sprintName}
+                          </div>
+                        )
+                      }
+                    </div>
+                  )
+                }
+              </div>
+            </Tooltip>
           </TextEditToggle>
         </div>
       </div>

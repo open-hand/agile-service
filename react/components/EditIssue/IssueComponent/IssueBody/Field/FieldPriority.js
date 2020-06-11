@@ -3,7 +3,7 @@ import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import SelectPriority from '@/components/select/select-priority';
-import TextEditTogglePro from '@/components/TextEditTogglePro';
+import TextEditToggle from '@/components/TextEditTogglePro';
 import { updateIssue } from '../../../../../api/NewIssueApi';
 
 
@@ -42,9 +42,13 @@ import { updateIssue } from '../../../../../api/NewIssueApi';
           </span>
         </div>
         <div className="c7n-value-wrapper">
-          <TextEditTogglePro 
+          <TextEditToggle
             disabled={disabled}
-            renderText={() => (priorityId ? (
+            editor={() => <SelectPriority priorityId={priorityId} />}
+            initValue={priorityId}
+            onSubmit={this.updateIssuePriority}
+          >
+            {priorityId ? (
               <div
                 className="c7n-level"
                 style={{
@@ -61,75 +65,8 @@ import { updateIssue } from '../../../../../api/NewIssueApi';
               <div>
                 无
               </div>
-            ))}
-            initValue={priorityId}
-            onSubmit={this.updateIssuePriority}
-          >
-            <SelectPriority priorityId={priorityId} />
-          </TextEditTogglePro>
-          {/* <TextEditToggle
-            disabled={disabled}
-            formKey="priority"
-            onSubmit={this.updateIssuePriority}
-            originData={priorityId}
-          >
-            <Text>
-              {
-                priorityId ? (
-                  <div
-                    className="c7n-level"
-                    style={{
-                      backgroundColor: `${colour}1F`,
-                      color: colour,
-                      borderRadius: '2px',
-                      padding: '0 8px',
-                      display: 'inline-block',
-                    }}
-                  >
-                    {name}
-                  </div>
-                ) : (
-                  <div>
-                    无
-                  </div>
-                )
-              }
-            </Text>
-            <Edit>
-              <Select
-                dropdownStyle={{ minWidth: 185 }}              
-                loading={selectLoading}
-                getPopupContainer={() => document.getElementById('detail')}
-                onChange={(value) => {
-                  this.setState({
-                    newPriorityId: value,
-                  });
-                }}
-                onFocus={() => {
-                  this.loadIssuePriorities();
-                }}
-              >
-                {
-                  originPriorities.filter(p => p.enable || p.id === priorityId).map(priority => (
-                    <Option key={priority.id} value={priority.id}>
-                      <div style={{ display: 'inline-flex', alignItems: 'center', padding: '2px' }}>
-                        <div
-                          className="c7n-level"
-                          style={{
-                            borderRadius: '2px',
-                            padding: '0 8px',
-                            display: 'inline-block',
-                          }}
-                        >
-                          {priority.name}
-                        </div>
-                      </div>
-                    </Option>
-                  ))
-                }
-              </Select>
-            </Edit>
-          </TextEditToggle> */}
+            )}
+          </TextEditToggle>
         </div>
       </div>
     );
