@@ -7,15 +7,6 @@
         from agile_issue ai
         where ai.project_id = #{projectId}
         and ai.type_code = 'issue_epic'
-        <if test="advancedSearchArgs != null">
-            <if test="advancedSearchArgs.components != null and advancedSearchArgs.components.size > 0">
-                AND EXISTS(select 1 from agile_component_issue_rel aic where aic.issue_id = ai.issue_id AND aic.component_id IN
-                <foreach collection="advancedSearchArgs.components" open="(" close=")" separator="," item="componentId">
-                    #{componentId}
-                </foreach>
-                )
-            </if>
-        </if>
         order by ai.issue_id desc
     </select>
 
@@ -50,39 +41,6 @@
                  close=")">
             #{epicId}
         </foreach>
-        <if test="advancedSearchArgs != null">
-            <if test="advancedSearchArgs.components != null and advancedSearchArgs.components.size > 0">
-                AND EXISTS(select 1 from agile_component_issue_rel aic where aic.issue_id = ai.issue_id AND aic.component_id IN
-                <foreach collection="advancedSearchArgs.components" open="(" close=")" separator="," item="componentId">
-                    #{componentId}
-                </foreach>
-                )
-            </if>
-            <if test='advancedSearchArgs.isCompleted != null
-                        and advancedSearchArgs.isCompleted
-                        and advancedSearchArgs.statusIdList != null
-                        and advancedSearchArgs.statusIdList.size > 0'>
-                AND ai.status_id IN
-                <foreach collection="advancedSearchArgs.statusIdList" item="statusId" separator="," open="(" close=")">
-                    #{statusId}
-                </foreach>
-            </if>
-            <if test='advancedSearchArgs.isCompleted != null
-                        and !advancedSearchArgs.isCompleted
-                        and advancedSearchArgs.statusIdList != null
-                        and advancedSearchArgs.statusIdList.size > 0'>
-                AND ai.status_id IN
-                <foreach collection="advancedSearchArgs.statusIdList" item="statusId" separator="," open="(" close=")">
-                    #{statusId}
-                </foreach>
-            </if>
-            <if test="advancedSearchArgs.prioritys != null and advancedSearchArgs.prioritys.size > 0">
-                AND ai.priority_id IN
-                <foreach collection="advancedSearchArgs.prioritys" open="(" close=")" separator="," item="priorityId">
-                    #{priorityId}
-                </foreach>
-            </if>
-        </if>
         order by ai.issue_id desc
     </select>
 
