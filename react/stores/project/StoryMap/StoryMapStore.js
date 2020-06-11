@@ -62,6 +62,12 @@ class StoryMapStore {
 
   @observable selectedIssueMap = observable.map({});
 
+  @observable hiddenColumnNoStory = false;
+
+  @action setHiddenColumnNoStory = (data) => {
+    this.hiddenColumnNoStory = data;
+  }
+
   miniMap = {};
 
   @action clear() {
@@ -77,6 +83,7 @@ class StoryMapStore {
     };
     this.versionList = [];
     this.selectedIssueMap.clear();
+    this.hiddenColumnNoStory = false;
   }
 
   getStoryMap = () => {

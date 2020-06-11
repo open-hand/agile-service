@@ -1,5 +1,8 @@
 .c7nagile-StoryMap {
   background: white;
+  &-fullScreenBtn {
+    margin-left: 0 !important;
+  }
   &-minimap {
     border-bottom: solid 0.01rem #D8D8D8;
     height: calc(~'100% - 0.5rem');
@@ -19,9 +22,6 @@
       border: 0.02rem solid gray;
       border-radius: 0.02rem;
     }
-  }
-  &-header-isCompletedSelect {
-    width: 100px;
   }
   &-header-sprintSelect {
     margin-left: 15px;
@@ -46,8 +46,12 @@
     }
   }
   &-header-select {
+    // width: 160px;
     .c7n-pro-select {
       border: none;
+      & > ul {
+        display: flex;
+      }
     }
     .c7n-pro-select:not(:last-child) {
       padding-right: 0.3rem;
@@ -61,5 +65,8 @@
     input::-webkit-input-placeholder {
       color: #000000;
     }
+  }
+  &-header-isCompletedSelect {
+    width: 100px;
   }
 }
