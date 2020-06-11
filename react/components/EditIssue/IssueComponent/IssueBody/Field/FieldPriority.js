@@ -67,69 +67,6 @@ import { updateIssue } from '../../../../../api/NewIssueApi';
           >
             <SelectPriority priorityId={priorityId} />
           </TextEditTogglePro>
-          {/* <TextEditToggle
-            disabled={disabled}
-            formKey="priority"
-            onSubmit={this.updateIssuePriority}
-            originData={priorityId}
-          >
-            <Text>
-              {
-                priorityId ? (
-                  <div
-                    className="c7n-level"
-                    style={{
-                      backgroundColor: `${colour}1F`,
-                      color: colour,
-                      borderRadius: '2px',
-                      padding: '0 8px',
-                      display: 'inline-block',
-                    }}
-                  >
-                    {name}
-                  </div>
-                ) : (
-                  <div>
-                    无
-                  </div>
-                )
-              }
-            </Text>
-            <Edit>
-              <Select
-                dropdownStyle={{ minWidth: 185 }}              
-                loading={selectLoading}
-                getPopupContainer={() => document.getElementById('detail')}
-                onChange={(value) => {
-                  this.setState({
-                    newPriorityId: value,
-                  });
-                }}
-                onFocus={() => {
-                  this.loadIssuePriorities();
-                }}
-              >
-                {
-                  originPriorities.filter(p => p.enable || p.id === priorityId).map(priority => (
-                    <Option key={priority.id} value={priority.id}>
-                      <div style={{ display: 'inline-flex', alignItems: 'center', padding: '2px' }}>
-                        <div
-                          className="c7n-level"
-                          style={{
-                            borderRadius: '2px',
-                            padding: '0 8px',
-                            display: 'inline-block',
-                          }}
-                        >
-                          {priority.name}
-                        </div>
-                      </div>
-                    </Option>
-                  ))
-                }
-              </Select>
-            </Edit>
-          </TextEditToggle> */}
         </div>
       </div>
     );
