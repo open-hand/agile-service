@@ -5,7 +5,6 @@ import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { Select, Button } from 'choerodon-ui/pro';
 import { SearchMatcher } from 'choerodon-ui/pro/lib/select/Select';
 import { debounce } from 'lodash';
-import types, { TypeConfig, LoadConfig, SelectType } from './types';
 import styles from './index.less';
 
 const { Option } = Select;
@@ -13,35 +12,44 @@ const { Option } = Select;
 function applyMiddleWares(data: any, middleWares: Array<Function>) {
   return middleWares.reduce((preData, middleWare) => middleWare(preData), data);
 }
-export { SelectType };
-
-interface SelectConfig {
-  requestArgs: any
+function noop(data: any) {
+  return data;
+}
+export interface LoadConfig {
+  filter?: string,
+  page?: number
+}
+export type Request = ({ filter, page }: LoadConfig) => Promise<any>
+export interface SelectConfig {
+  name: string
+  textField?: string
+  valueField?: string
+  render?: (item: any) => JSX.Element
+  request: Request
+  middleWare?: (item: any) => boolean,
+  paging?: boolean
+  props?: object
 }
 
-export default function useSelect(type: SelectType, selectConfig: SelectConfig = {} as SelectConfig) {
+export default function useSelect(config: SelectConfig) {
   const [data, setData] = useState([]);
   const [currentPage, setPage] = useState(1);
   const [canLoadMore, setCanLoadMore] = useState(false);
   const textRef = useRef<string>('');
-  const config = types.get(type);
-  if (!config) {
-    throw new Error('没有找到配置');
-  }
   const defaultRender = (item: any) => <Option value={item[valueField]}>{item[textField]}</Option>;
   const {
     textField = 'name',
     valueField = 'id',
     render = defaultRender,
     request,
+    middleWare = noop,
     paging = true,
     props,
-  } = config as TypeConfig;
-  const { requestArgs } = selectConfig;
+  } = config;
   // 不分页时，本地搜索
   const localSearch = !paging;
-  async function loadData({ filter = textRef.current, page = 1 }: LoadConfig = {} as LoadConfig) {
-    const res = await request({ filter, page }, requestArgs);
+  const loadData = async ({ filter = textRef.current, page = 1 }: LoadConfig = {} as LoadConfig) => {
+    const res = await request({ filter, page });
     batchedUpdates(() => {
       if (paging) {
         const { list, hasNextPage } = res;
@@ -52,13 +60,13 @@ export default function useSelect(type: SelectType, selectConfig: SelectConfig =
         setData(paging ? res.list : res);
       }
     });
-  }
+  };
   const searchData = useMemo(() => debounce((filter: string) => {
     loadData({ filter });
   }, 500), []);
   useEffect(() => {
     loadData({ filter: '' });
-  }, []);
+  }, [config]);
   const handleLoadMore = () => {
     loadData({ page: currentPage + 1 });
   };
@@ -100,7 +108,7 @@ export default function useSelect(type: SelectType, selectConfig: SelectConfig =
       }
     },
     searchMatcher: paging ? () => true : filterOptions,
-    children: data.map(render),
+    children: applyMiddleWares(data, [middleWare]).map(render),
     // @ts-ignore
     onOption: ({ record }) => {
       if (record.data.value === 'useSelect-load-more') {

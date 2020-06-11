@@ -1,63 +1,35 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
-import { Select } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
-import TextEditToggle from '../../../../TextEditToggle';
-import { loadPriorities, updateIssue } from '../../../../../api/NewIssueApi';
+import SelectPriority from '@/components/select/select-priority';
+import TextEditTogglePro from '@/components/TextEditTogglePro';
+import { updateIssue } from '../../../../../api/NewIssueApi';
 
-const { Option } = Select;
-const { Text, Edit } = TextEditToggle;
 
 @inject('AppState')
 @observer class FieldPriority extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      originPriorities: [],
-      selectLoading: true,
-      newPriorityId: undefined,
-    };
-  }
-
-  componentDidMount() {
-    this.loadIssuePriorities();
-  }
-
-  loadIssuePriorities = () => {
-    loadPriorities().then((res) => {
-      this.setState({
-        originPriorities: res,
-        selectLoading: false,
-      });
-    });
-  };
-
-  updateIssuePriority = () => {
-    const { newPriorityId } = this.state;
+  updateIssuePriority = (newPriorityId) => {
     const { store, onUpdate, reloadIssue } = this.props;
     const issue = store.getIssue;
-    const { priorityId, issueId, objectVersionNumber } = issue;
-    if (priorityId !== newPriorityId) {
-      const obj = {
-        issueId,
-        objectVersionNumber,
-        priorityId: newPriorityId,
-      };
-      updateIssue(obj)
-        .then(() => {
-          if (onUpdate) {
-            onUpdate();
-          }
-          if (reloadIssue) {
-            reloadIssue(issueId);
-          }
-        });
-    }
+    const { issueId, objectVersionNumber } = issue;
+    const obj = {
+      issueId,
+      objectVersionNumber,
+      priorityId: newPriorityId,
+    };
+    updateIssue(obj)
+      .then(() => {
+        if (onUpdate) {
+          onUpdate();
+        }
+        if (reloadIssue) {
+          reloadIssue(issueId);
+        }
+      });
   };
 
   render() {
-    const { selectLoading, originPriorities } = this.state;
     const { store, disabled } = this.props;
     const issue = store.getIssue;
     const { priorityId, priorityVO = {} } = issue;
@@ -70,7 +42,32 @@ const { Text, Edit } = TextEditToggle;
           </span>
         </div>
         <div className="c7n-value-wrapper">
-          <TextEditToggle
+          <TextEditTogglePro 
+            disabled={disabled}
+            renderText={() => (priorityId ? (
+              <div
+                className="c7n-level"
+                style={{
+                  backgroundColor: `${colour}1F`,
+                  color: colour,
+                  borderRadius: '2px',
+                  padding: '0 8px',
+                  display: 'inline-block',
+                }}
+              >
+                {name}
+              </div>
+            ) : (
+              <div>
+                无
+              </div>
+            ))}
+            initValue={priorityId}
+            onSubmit={this.updateIssuePriority}
+          >
+            <SelectPriority priorityId={priorityId} />
+          </TextEditTogglePro>
+          {/* <TextEditToggle
             disabled={disabled}
             formKey="priority"
             onSubmit={this.updateIssuePriority}
@@ -132,7 +129,7 @@ const { Text, Edit } = TextEditToggle;
                 }
               </Select>
             </Edit>
-          </TextEditToggle>
+          </TextEditToggle> */}
         </div>
       </div>
     );

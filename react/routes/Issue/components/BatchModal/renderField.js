@@ -3,8 +3,8 @@ import React from 'react';
 import {
   TextField, Select, DatePicker, TimePicker, DateTimePicker, CheckBox, NumberField, TextArea, UrlField,
 } from 'choerodon-ui/pro';
+import SelectUser from '@/components/select/select-user';
 
-import SelectUser from './select-user';
 
 const { Option } = Select;
 const singleList = ['radio', 'single'];
@@ -103,6 +103,7 @@ export default function renderField({ code, fieldType, fieldOptions }) {
     case 'member':
       return (
         <SelectUser
+          style={{ width: '100%' }}
           name={code}
         />
       );
