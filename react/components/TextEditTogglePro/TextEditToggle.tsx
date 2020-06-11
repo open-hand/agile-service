@@ -11,13 +11,14 @@ interface RenderProps {
 interface Props {
   disabled?: boolean
   editor: () => JSX.Element
+  editorExtraContent?: () => JSX.Element
   children: ({ value, editing }: RenderProps) => JSX.Element | JSX.Element
   onSubmit: (data: any) => void
   initValue: any
 }
 
 const TextEditToggle: React.FC<Props> = ({
-  disabled, editor, children: text, onSubmit, initValue,
+  disabled, editor, editorExtraContent, children: text, onSubmit, initValue,
 }) => {
   const [editing, setEditing] = useState(false);
   const dataRef = useRef(initValue);
@@ -54,6 +55,7 @@ const TextEditToggle: React.FC<Props> = ({
   };
   const renderEditor = () => {
     const editorElement = typeof editor === 'function' ? editor() : editor;
+    const extraContent = typeof editorExtraContent === 'function' ? editorExtraContent() : editorExtraContent;
     const editorProps: any = {
       // tabIndex: -1,
       defaultValue: initValue,
@@ -68,7 +70,12 @@ const TextEditToggle: React.FC<Props> = ({
         height: containerRef.current.getBoundingClientRect().height,
       };
     }
-    return cloneElement(editorElement, editorProps);
+    return (
+      <Fragment>
+        {cloneElement(editorElement, editorProps)}
+        {extraContent}
+      </Fragment>
+    );
   };
   const renderText = () => {
     const textElement = typeof text === 'function' ? text({ value: dataRef.current, editing }) : text;
