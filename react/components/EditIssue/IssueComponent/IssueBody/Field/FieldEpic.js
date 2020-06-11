@@ -4,9 +4,8 @@ import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { Select, Tooltip } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
-import { featureApi } from '@/api';
+import { featureApi, issueApi, epicApi } from '@/api';
 import TextEditToggle from '../../../../TextEditToggle';
-import { loadEpics, updateIssue } from '../../../../../api/NewIssueApi';
 import IsInProgramStore from '../../../../../stores/common/program/IsInProgramStore';
 
 const { Option } = Select;
@@ -34,7 +33,7 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
 
 
   init = () => {
-    loadEpics().then((res) => {
+    epicApi.loadEpicsForSelect().then((res) => {
       this.setState({
         originEpics: res,
         selectLoading: false,
@@ -76,7 +75,7 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
         objectVersionNumber,
         epicId: newEpicId || 0,
       };
-      updateIssue(obj)
+      issueApi.update(obj)
         .then(() => {
           if (IsInProgramStore.isInProgram) {
             featureApi.getByEpicId().then((data) => {
@@ -106,7 +105,7 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
         objectVersionNumber,
         featureId: newFeatureId || 0,
       };
-      updateIssue(obj)
+      issueApi.update(obj)
         .then(() => {
           if (IsInProgramStore.isInProgram) {
             featureApi.getByEpicId().then((data) => {

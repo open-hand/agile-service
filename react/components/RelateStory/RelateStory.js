@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { find, debounce } from 'lodash';
 import { Select, Form, Modal } from 'choerodon-ui';
+import { issueApi } from '@/api';
 import {
-  updateIssue, loadIssueTypes, loadLinkIssuesForBug, loadIssue,
+  loadIssueTypes,
 } from '@/api/NewIssueApi';
 import IssueOption from '../IssueOption';
 import './RelateStory.less';
@@ -63,7 +64,7 @@ class RelateStory extends Component {
         selectLoading: true,
       });
       const { filters } = this.state;
-      loadLinkIssuesForBug(1, 20, filters)
+      issueApi.loadStroyAndTask(1, 20, filters)
         .then((res) => {
           const storys = res.list;
           if (storys) {
@@ -71,7 +72,7 @@ class RelateStory extends Component {
             if (issue.relateIssueId) {
               if (!find(storys, { issueId: issue.relateIssueId })) {
                 if (!this.relateIssue) {
-                  loadIssue(issue.relateIssueId).then((story) => {
+                  issueApi.load(issue.relateIssueId).then((story) => {
                     if (story) {
                       this.relateIssue = story;
                       this.setState({
@@ -110,7 +111,7 @@ class RelateStory extends Component {
         const { relateIssueId } = values;
         this.setState({ createLoading: true });
         const { issueId, objectVersionNumber } = issue;
-        updateIssue({
+        issueApi.update({
           issueId,
           objectVersionNumber,
           relateIssueId: relateIssueId || 0,

@@ -3,14 +3,6 @@ import { getProjectId } from '@/utils/common';
 
 const { AppState } = stores;
 
-export function createIssue(issueObj, applyType = 'agile', projectId = AppState.currentMenuType.id) {
-  const issue = {
-    projectId,
-    ...issueObj,
-  };
-  return axios.post(`/agile/v1/projects/${projectId}/issues?applyType=${applyType}`, issue);
-}
-
 export function createIssueField(issueId, dto) {
   const projectId = AppState.currentMenuType.id;
   const orgId = AppState.currentMenuType.organizationId;
@@ -74,24 +66,6 @@ export function loadComponents() {
   );
 }
 
-export function loadEpics() {
-  const projectId = AppState.currentMenuType.id;
-  return axios.get(
-    `/agile/v1/projects/${projectId}/issues/epics/select_data`,
-  );
-}
-
-/**
- * 在项目群中获取史诗列表
- */
-export function loadProgramEpics() {
-  const projectId = AppState.currentMenuType.id;
-  return axios.get(
-    `/agile/v1/projects/${projectId}/issues/epics/select_program_data`,
-  );
-}
-
-
 export function loadChartData(id, type) {
   const projectId = AppState.currentMenuType.id;
   return axios.get(`/agile/v1/projects/${projectId}/reports/${id}/burn_down_report?type=${type}&ordinalType=asc`);
@@ -117,39 +91,10 @@ export function getDefaultPriority() {
   const proId = AppState.currentMenuType.id;
   return axios.get(`/agile/v1/projects/${proId}/priority/default`);
 }
-export function loadIssue(issueId, projectId = AppState.currentMenuType.id) {
-  const orgId = AppState.currentMenuType.organizationId;
-  return axios.get(`/agile/v1/projects/${projectId}/issues/${issueId}${orgId ? `?organizationId=${orgId}` : ''}`);
-}
 
-export function loadSubtask(issueId, projectId = AppState.currentMenuType.id) {
-  return axios.get(`agile/v1/projects/${projectId}/issues/sub_issue/${issueId}`);
-}
-
-export function updateIssue(data, projectId = AppState.currentMenuType.id) {
-  // if (type === 'sub_task') {
-  //   return axios.put(`agile/v1/projects/${projectId}/issues/sub_issue`, data);
-  // }
-  return axios.put(`/agile/v1/projects/${projectId}/issues`, data);
-}
 
 export function updateIssueWSJFDTO(data, projectId = AppState.currentMenuType.id) {
   return axios.post(`/agile/v1/projects/${projectId}/wsjf`, data);
-}
-
-export function updateStatus(transformId, issueId, objVerNum, applyType = 'agile', proId = AppState.currentMenuType.id) {
-  return axios.put(`/agile/v1/projects/${proId}/issues/update_status?applyType=${applyType}&transformId=${transformId}&issueId=${issueId}&objectVersionNumber=${objVerNum}`);
-}
-
-export function createSubIssue(obj, applyType, projectId = AppState.currentMenuType.id) {
-  return axios.post(`/agile/v1/projects/${projectId}/issues/sub_issue`, obj);
-}
-
-export function deleteIssue(issueId, createBy) {
-  if (createBy === AppState.userInfo.id) {
-    return axios.delete(`/agile/v1/projects/${getProjectId()}/issues/delete_self_issue/${issueId}`);
-  }  
-  return axios.delete(`/agile/v1/projects/${getProjectId()}/issues/${issueId}`);
 }
 
 export function deleteLink(issueLinkId, projectId = AppState.currentMenuType.id) {
@@ -190,71 +135,6 @@ export function updateWorklog(logId, worklog, projectId = AppState.currentMenuTy
 
 export function deleteWorklog(logId, projectId = AppState.currentMenuType.id) {
   return axios.delete(`agile/v1/projects/${projectId}/work_log/${logId}`);
-}
-
-export function updateIssueType(data, projectId = AppState.currentMenuType.id) {
-  const orgId = AppState.currentMenuType.organizationId;
-  const issueUpdateTypeVO = {
-    projectId,
-    ...data,
-  };
-  return axios.post(`/agile/v1/projects/${projectId}/issues/update_type?organizationId=${orgId}`, issueUpdateTypeVO);
-}
-
-export function transformedTask(data, projectId = AppState.currentMenuType.id) {
-  const orgId = AppState.currentMenuType.organizationId;
-  const issueUpdateTypeVO = {
-    projectId,
-    ...data,
-  };
-  return axios.post(`/agile/v1/projects/${projectId}/issues/transformed_task?organizationId=${orgId}`, issueUpdateTypeVO);
-}
-
-export function loadIssues(page = 1, size = 10, searchVO, orderField, orderType) {
-  const orgId = AppState.currentMenuType.organizationId;
-  const projectId = AppState.currentMenuType.id;
-  return axios.post(`/agile/v1/projects/${projectId}/issues/include_sub?page=${page}&size=${size}${orgId ? `&organizationId=${orgId}` : ''}`, searchVO, {
-    params: {
-      sort: `${orderField && orderType ? `${orderField},${orderType}` : ''}`,
-    },
-  });
-}
-/**
- * 关联问题时进行问题查询 (对于BUG管理问题)
- * @param {*} page 
- * @param {*} size 
- * @param {*} searchVO  
- */
-export function loadLinkIssuesForBug(page = 1, size = 10, searchVO) {
-  const orgId = AppState.currentMenuType.organizationId;
-  const projectId = AppState.currentMenuType.id;
-  return axios.post(`/agile/v1/projects/${projectId}/issues/query_story_task?page=${page}&size=${size}`, searchVO);
-}
-
-export function loadIssuesInLink(page = 1, size = 10, issueId, content) {
-  const projectId = AppState.currentMenuType.id;
-  if (issueId && content) {
-    return axios.get(`/agile/v1/projects/${projectId}/issues/agile/summary?issueId=${issueId}&self=false&content=${content}&page=${page}&size=${size}`);
-  } else if (issueId && !content) {
-    return axios.get(`/agile/v1/projects/${projectId}/issues/agile/summary?issueId=${issueId}&self=false&page=${page}&size=${size}`);
-  } else if (!issueId && content) {
-    return axios.get(`/agile/v1/projects/${projectId}/issues/agile/summary?self=false&content=${content}&page=${page}&size=${size}`);
-  } else {
-    return axios.get(`/agile/v1/projects/${projectId}/issues/agile/summary?self=false&page=${page}&size=${size}`);
-  }
-}
-
-export function loadFeaturesInLink(page = 1, size = 10, issueId, content) {
-  const projectId = AppState.currentMenuType.id;
-  if (issueId && content) {
-    return axios.get(`/agile/v1/projects/${projectId}/issues/agile/feature?issueId=${issueId}&self=false&content=${content}&page=${page}&size=${size}`);
-  } else if (issueId && !content) {
-    return axios.get(`/agile/v1/projects/${projectId}/issues/agile/feature?issueId=${issueId}&self=false&page=${page}&size=${size}`);
-  } else if (!issueId && content) {
-    return axios.get(`/agile/v1/projects/${projectId}/issues/agile/feature?self=false&content=${content}&page=${page}&size=${size}`);
-  } else {
-    return axios.get(`/agile/v1/projects/${projectId}/issues/agile/feature?self=false&page=${page}&size=${size}`);
-  }
 }
 
 export function createLink(issueId, issueLinkCreateVOList) {

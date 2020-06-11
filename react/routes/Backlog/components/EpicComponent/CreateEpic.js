@@ -4,6 +4,7 @@ import {
   Modal, Form, Input,
 } from 'choerodon-ui';
 import { Content, stores, axios } from '@choerodon/boot';
+import { epicApi } from '@/api';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 import { createIssueField } from '../../../../api/NewIssueApi';
 
@@ -74,7 +75,7 @@ class CreateEpic extends Component {
 
   checkEpicNameRepeat = (rule, value, callback) => {
     if (value && value.trim()) {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/check_epic_name?epicName=${value.trim()}`)
+      epicApi.checkName(value)
         .then((res) => {
           if (res) {
             callback('史诗名称重复');

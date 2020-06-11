@@ -9,9 +9,10 @@ import { throttle } from 'lodash';
 import './EditIssue.less';
 import useIsOwner from '@/hooks/useIsOwner';
 import { useIssueTypes } from '@/hooks';
+import { issueApi } from '@/api';
 import {
   loadBranchs, loadDatalogs, loadLinkIssues,
-  loadIssue, loadWorklogs, loadDocs, getFieldAndValue,
+  loadWorklogs, loadDocs, getFieldAndValue,
 } from '../../api/NewIssueApi';
 import {
   loadDatalogs as loadDatalogsProgram,
@@ -78,7 +79,7 @@ function EditIssue() {
     setIssueLoading(true);
     try {
       // 1. 加载详情
-      const issue = await (programId ? loadIssueProgram(id, programId) : loadIssue(id));
+      const issue = await (programId ? loadIssueProgram(id, programId) : issueApi.load(id));
       if (idRef.current !== id) {
         return;
       }

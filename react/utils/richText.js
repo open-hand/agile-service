@@ -2,7 +2,7 @@
 import { stores, Choerodon } from '@choerodon/boot';
 import { DeltaOperation } from 'react-quill';
 import _, { find, findIndex, chunk } from 'lodash';
-import { uploadImage, uploadFile } from '../api/FileApi';
+import { fileApi } from '@/api';
 
 const { AppState } = stores;
 const QuillDeltaToHtmlConverter = require('quill-delta-to-html');
@@ -72,7 +72,7 @@ export function beforeTextUpload(text, data, func, pro = 'description') {
   const send = data;
   const { imgBase, formData } = getImgInDelta(deltaOps);
   if (imgBase.length) {
-    uploadImage(formData).then((imgUrlList) => {
+    fileApi.uploadImage(formData).then((imgUrlList) => {
       replaceBase64ToUrl(imgUrlList, imgBase, deltaOps);
       const converter = new QuillDeltaToHtmlConverter(deltaOps, {});
       const html = converter.convert();
@@ -94,7 +94,7 @@ export function returnBeforeTextUpload(text, data, func, pro = 'description') {
   const send = data;
   const { imgBase, formData } = getImgInDelta(deltaOps);
   if (imgBase.length) {
-    return uploadImage(formData).then((imgUrlList) => {
+    return fileApi.uploadImage(formData).then((imgUrlList) => {
       replaceBase64ToUrl(imgUrlList, imgBase, deltaOps);
       const converter = new QuillDeltaToHtmlConverter(deltaOps, {});
       const html = converter.convert();
@@ -124,7 +124,7 @@ export function handleFileUpload(propFileList, func, config) {
     // file.name = encodeURI(encodeURI(file.name));
     formData.append('file', file);
   });
-  uploadFile(formData, config)
+  fileApi.uploadFile(formData, config.issueId)
     .then((response) => {
       const newFileList = [
         {

@@ -8,17 +8,18 @@ import {
 } from 'choerodon-ui';
 import moment from 'moment';
 import reactComponentDebounce from '@/components/DebounceComponent';
-import { featureApi } from '@/api';
+import { featureApi, epicApi } from '@/api';
 import {
   beforeTextUpload, handleFileUpload, validateFile, normFile, 
 } from '@/utils/richText';
 import {
   getProjectName, getProjectId,
 } from '@/utils/common';
+import { issueApi } from '@/api';
 import { UploadButton } from '../CommonComponent';
 import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 import {
-  createIssue, getFields, createFieldValue, loadIssue, loadIssueTypes,
+  getFields, createFieldValue, loadIssueTypes,
 } from '../../api/NewIssueApi';
 import SelectNumber from '../SelectNumber';
 import WYSIWYGEditor from '../WYSIWYGEditor';
@@ -48,7 +49,7 @@ const bugDefaultDes = [{ attributes: { bold: true }, insert: '步骤' }, { inser
 const defaultProps = {
   mode: 'default',
   applyType: 'agile',
-  request: createIssue,
+  request: issueApi.create,
   defaultTypeCode: 'story',
   title: '创建问题',
   contentTitle: `在项目“${getProjectName()}”中创建问题`,
@@ -100,7 +101,7 @@ class CreateIssue extends Component {
   setDefaultSprint = () => {
     const { mode, parentIssueId, relateIssueId } = this.props;
     if (['sub_task', 'sub_bug'].includes(mode)) {
-      loadIssue(parentIssueId || relateIssueId).then((res) => {
+      issueApi.load(parentIssueId || relateIssueId).then((res) => {
         const { form: { setFieldsValue } } = this.props;
         const { activeSprint } = res;
         if (activeSprint) {
@@ -383,7 +384,7 @@ class CreateIssue extends Component {
 
   checkEpicNameRepeat = (rule, value, callback) => {
     if (value && value.trim()) {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/check_epic_name?epicName=${value.trim()}`)
+      epicApi.checkName(value)
         .then((res) => {
           if (res) {
             callback('史诗名称重复');

@@ -4,8 +4,8 @@ import { withRouter } from 'react-router-dom';
 import { Input } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
 import { injectIntl } from 'react-intl';
+import { issueApi } from '@/api';
 import TextEditToggle from '../../../../TextEditToggle';
-import { updateIssue } from '../../../../../api/NewIssueApi';
 
 const { Text, Edit } = TextEditToggle;
 const { TextArea } = Input;
@@ -52,7 +52,7 @@ const { TextArea } = Input;
         };
       }
       if (obj) {
-        updateIssue(obj)
+        issueApi.update(obj)
           .then((res) => {
             if (res.failed && res.code === 'error.epic.duplicate.feature.summary') {
               Choerodon.prompt('史诗下有相同的特性概要');

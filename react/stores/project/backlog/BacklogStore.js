@@ -10,12 +10,11 @@ import { store, stores } from '@choerodon/boot';
 import { Modal } from 'choerodon-ui';
 import Moment from 'moment';
 import {
-  featureApi, sprintApi, piApi, storyMapApi, 
+  featureApi, sprintApi, piApi, storyMapApi, issueApi, epicApi, 
 } from '@/api';
 import { getProjectId } from '@/utils/common';
 import { extendMoment } from 'moment-range';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
-import { getPiNotDone } from '@/api/FeatureApi';
 
 const moment = extendMoment(Moment);
 const { AppState } = stores;
@@ -754,7 +753,7 @@ class BacklogStore {
     storyMapApi.sort(sortVO).then(
       action('fetchSuccess', (res) => {
         if (!res.message) {
-          this.axiosGetEpic().then((epics) => {
+          epicApi.loadEpics().then((epics) => {
             this.setEpicData(epics);
           });
         } else {
@@ -997,7 +996,7 @@ class BacklogStore {
 
   getPlanPi = async (sprintData = this.sprintData, setPiIdIf = true) => {
     if (IsInProgramStore.isInProgram) {
-      const notDonePiList = await getPiNotDone(['todo', 'doing'], IsInProgramStore.program.id);
+      const notDonePiList = await piApi.getPiByPiStatus(['todo', 'doing'], IsInProgramStore.program.id);
       // 为了可以对规划中的冲刺进行时间修改的限制，这里获取对应pi和冲刺
       const piIds = intersection(notDonePiList.map(pi => pi.id), uniq(sprintData.filter(sprint => sprint.planning).map(sprint => sprint.piId)));
       if (piIds.length > 0) {
@@ -1030,7 +1029,7 @@ class BacklogStore {
    * 加载史诗
    */
   loadEpic = () => {
-    this.axiosGetEpic().then((data3) => {
+    epicApi.loadEpics().then((data3) => {
       const newEpic = [...data3];
       for (let index = 0, len = newEpic.length; index < len; index += 1) {
         newEpic[index].expand = false;

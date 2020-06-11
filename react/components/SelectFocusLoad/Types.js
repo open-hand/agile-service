@@ -2,12 +2,14 @@
 import React from 'react';
 import { Select } from 'choerodon-ui';
 import { find } from 'lodash';
-import { userApi, componentApi } from '@/api';
+import {
+  userApi, componentApi, issueApi, epicApi, 
+} from '@/api';
 import { getSubProjects } from '@/api/CommonApi';
 import {
-  loadEpics, loadProgramEpics, loadIssueTypes, loadPriorities,
+  loadIssueTypes, loadPriorities,
   loadLabels, loadVersions,
-  loadStatusList, loadIssuesInLink, loadFeaturesInLink,
+  loadStatusList,
 } from '@/api/NewIssueApi';
 import { issueLinkTypeApi } from '@/api/IssueLinkType';
 import { featureApi, piApi, sprintApi } from '@/api';
@@ -138,7 +140,7 @@ export default {
     props: {
       filterOption,
     },
-    request: loadEpics,
+    request: epicApi.loadEpicsForSelect,
     render: epic => (
       <Option
         key={epic.issueId}
@@ -157,7 +159,7 @@ export default {
             input.toLowerCase(),
           ) >= 0,
     },
-    request: loadProgramEpics,
+    request: epicApi.loadProgramEpics,
     render: epic => (
       <Option
         key={epic.issueId}
@@ -235,7 +237,7 @@ export default {
       optionLabelProp: 'showName',
       getPopupContainer: triggerNode => triggerNode.parentNode,
     },
-    request: ({ filter, page }, issueId) => loadIssuesInLink(page, 20, issueId, filter),
+    request: ({ filter, page }, issueId) => issueApi.loadIssuesInLink(page, 20, issueId, filter),
     render: issue => (
       <Option
         key={issue.issueId}
@@ -280,7 +282,7 @@ export default {
       optionLabelProp: 'showName',
       getPopupContainer: triggerNode => triggerNode.parentNode,
     },
-    request: ({ filter, page }, issueId) => loadFeaturesInLink(page, 20, issueId, filter),
+    request: ({ filter, page }, issueId) => featureApi.loadFeaturesInLink(page, 20, issueId, filter),
     render: issue => (
       <Option
         key={issue.featureId}

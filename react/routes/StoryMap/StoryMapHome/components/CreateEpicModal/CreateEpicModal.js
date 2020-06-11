@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input } from 'choerodon-ui';
 import { Content, stores, axios } from '@choerodon/boot';
+import { epicApi } from '@/api';
 import { createIssueField } from '../../../../../api/NewIssueApi';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 
@@ -72,7 +73,7 @@ class CreateEpicModal extends Component {
 
   checkEpicNameRepeat = (rule, value, callback) => {
     if (value && value.trim()) {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/check_epic_name?epicName=${value.trim()}`)
+      epicApi.checkName(value)
         .then((res) => {
           if (res) {
             callback('史诗名称重复');

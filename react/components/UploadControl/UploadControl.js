@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Choerodon } from '@choerodon/boot';
 import { Upload, Button, Icon } from 'choerodon-ui';
-import { deleteFile } from '../../api/FileApi';
+import { fileApi } from '@/api';
 import './UploadControl.less';
 
 const propTypes = {
@@ -63,7 +63,7 @@ class UploadControl extends React.Component {
         const index = fileList.indexOf(file);
         const newFileList = fileList.slice();
         if (file.url) {
-          deleteFile(file.uid)
+          fileApi.deleteFile(file.uid)
             .then((response) => {
               if (response) {
                 newFileList.splice(index, 1);
@@ -97,7 +97,7 @@ class UploadControl extends React.Component {
           >
             <Button type={funcType || 'primary'}>
               <Icon type="file_upload" />
-              {'上传附件'}
+              上传附件
             </Button>
           </Upload>
         </div>

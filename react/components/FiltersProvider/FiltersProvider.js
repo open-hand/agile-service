@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { userApi, componentApi } from '@/api';
+import {
+  userApi, componentApi, issueApi, epicApi, 
+} from '@/api';
 import { sprintApi } from '@/api';
 import {
-  loadIssueTypes, loadStatusList, loadPriorities, loadLabels, loadVersions, loadEpics,
+  loadIssueTypes, loadStatusList, loadPriorities, loadLabels, loadVersions,
 } from '../../api/NewIssueApi';
 
 const requests = {
@@ -51,7 +53,7 @@ const requests = {
   epic: {
     textField: 'epicName',
     valueField: 'issueId',
-    request: loadEpics,
+    request: epicApi.loadEpicsForSelect,
   },
 };
 

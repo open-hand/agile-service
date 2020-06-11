@@ -4,8 +4,9 @@ import { withRouter } from 'react-router-dom';
 import { Select } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
 import _ from 'lodash';
+import { issueApi } from '@/api';
 import TextEditToggle from '../../../../TextEditToggle';
-import { loadVersions, updateIssue } from '../../../../../api/NewIssueApi';
+import { loadVersions } from '../../../../../api/NewIssueApi';
 
 const { Option } = Select;
 const { Text, Edit } = TextEditToggle;
@@ -75,7 +76,7 @@ const { Text, Edit } = TextEditToggle;
         versionIssueRelVOList: versionList,
         versionType: 'fix',
       };
-      updateIssue(obj)
+      issueApi.update(obj)
         .then(() => {
           if (onUpdate) {
             onUpdate();

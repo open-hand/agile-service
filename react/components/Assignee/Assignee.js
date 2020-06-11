@@ -4,8 +4,7 @@ import { stores } from '@choerodon/boot';
 import {
   Form, Select, Button,
 } from 'choerodon-ui';
-import { userApi } from '@/api';
-import { updateIssue } from '../../api/NewIssueApi';
+import { userApi, issueApi } from '@/api';
 import UserHead from '../UserHead';
 import './Assignee.less';
 
@@ -51,7 +50,7 @@ class Assignee extends Component {
           objectVersionNumber,
           assigneeId: assigneeId || null,
         };    
-        updateIssue(obj)
+        issueApi.update(obj)
           .then((res) => {       
             onOk();
             resolve();

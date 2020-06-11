@@ -6,3 +6,6 @@ export * from './IssueLinkType';
 export * from './Component';
 export * from './WorkCalendar'; 
 export * from './StoryMap';
+export * from './File';
+export * from './Issue';
+export * from './Epic';

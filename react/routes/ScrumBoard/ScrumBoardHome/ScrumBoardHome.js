@@ -8,7 +8,7 @@ import {
 } from 'choerodon-ui';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
-import { sprintApi } from '@/api';
+import { sprintApi, issueApi, epicApi } from '@/api';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
@@ -211,7 +211,7 @@ class ScrumBoardHome extends Component {
 
   refresh(defaultBoard, url, boardListData) {
     ScrumBoardStore.setSpinIf(true);
-    Promise.all([ScrumBoardStore.axiosGetIssueTypes(), ScrumBoardStore.axiosGetStateMachine(), ScrumBoardStore.axiosGetBoardData(defaultBoard.boardId), ScrumBoardStore.axiosGetAllEpicData()]).then(([issueTypes, stateMachineMap, defaultBoardData, epicData]) => {
+    Promise.all([ScrumBoardStore.axiosGetIssueTypes(), ScrumBoardStore.axiosGetStateMachine(), ScrumBoardStore.axiosGetBoardData(defaultBoard.boardId), epicApi.loadEpics()]).then(([issueTypes, stateMachineMap, defaultBoardData, epicData]) => {
       this.dataConverter.setSourceData(epicData, defaultBoardData);
       const renderDataMap = new Map([
         ['parent_child', this.dataConverter.getParentWithSubData],
