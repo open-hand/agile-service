@@ -14,6 +14,8 @@ import javax.persistence.*;
 @ModifyAudit
 @VersionAudit
 public class IssueStatusDTO extends AuditDomain {
+    public static final String FIELD_PROJECT_ID = "projectId";
+    public static final String FILED_IS_COMPLETED = "completed";
 
     @Id
     @GeneratedValue

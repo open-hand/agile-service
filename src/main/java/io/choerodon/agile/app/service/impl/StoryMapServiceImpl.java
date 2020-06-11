@@ -7,16 +7,20 @@ import io.choerodon.agile.app.assembler.StoryMapAssembler;
 import io.choerodon.agile.app.service.IssueAccessDataService;
 import io.choerodon.agile.app.service.StoryMapService;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.mapper.IssueStatusMapper;
 import io.choerodon.agile.infra.mapper.StoryMapMapper;
 import io.choerodon.agile.infra.mapper.StoryMapWidthMapper;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.app.service.VersionIssueRelService;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/5/31.
@@ -47,6 +51,8 @@ public class StoryMapServiceImpl implements StoryMapService {
     private StoryMapAssembler storyMapAssembler;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private IssueStatusMapper issueStatusMapper;
 
     protected List<StoryMapWidthVO> setStoryMapWidth(Long projectId) {
         List<StoryMapWidthDTO> storyMapWidthDTOList = storyMapWidthMapper.selectByProjectId(projectId);
@@ -61,6 +67,8 @@ public class StoryMapServiceImpl implements StoryMapService {
     public JSONObject queryStoryMap(Long projectId, Long organizationId, SearchVO searchVO) {
         JSONObject result = new JSONObject(true);
         List<Long> epicIds = new ArrayList<>();
+        // get project completed status
+        getStatusIdByIsCompleted(projectId, searchVO);
         // get project epic
         List<Long> projectEpicIds = storyMapMapper.selectEpicIdsByProject(projectId, searchVO.getAdvancedSearchArgs());
         if (projectEpicIds != null && !projectEpicIds.isEmpty()) {
@@ -77,6 +85,18 @@ public class StoryMapServiceImpl implements StoryMapService {
         result.put("storyList", !epicIds.isEmpty() ? storyMapMapper.selectStoryList(projectId, epicIds, searchVO) : new ArrayList<>());
         result.put("storyMapWidth", setStoryMapWidth(projectId));
         return result;
+    }
+
+    protected void getStatusIdByIsCompleted(Long projectId, SearchVO searchVO) {
+        Boolean completedFlag = (Boolean) Optional.ofNullable(searchVO.getAdvancedSearchArgs())
+                .map(map -> map.get("isCompleted")).orElse(null);
+        if (Objects.nonNull(completedFlag)){
+            List<IssueStatusDTO> statusIdList = issueStatusMapper.selectByCondition(Condition.builder(IssueStatusDTO.class)
+                    .andWhere(Sqls.custom().andEqualTo(IssueStatusDTO.FIELD_PROJECT_ID, projectId)
+                            .andEqualTo(IssueStatusDTO.FILED_IS_COMPLETED, completedFlag)).build());
+            searchVO.getAdvancedSearchArgs().put("statusIdList",
+                    statusIdList.stream().map(IssueStatusDTO::getStatusId).collect(Collectors.toList()));
+        }
     }
 
     @Override
