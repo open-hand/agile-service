@@ -68,15 +68,7 @@ public class StoryMapServiceImpl implements StoryMapService {
         JSONObject result = new JSONObject(true);
         List<Long> epicIds = new ArrayList<>();
         // get project completed status
-        Boolean completedFlag = (Boolean) Optional.ofNullable(searchVO.getAdvancedSearchArgs())
-                .map(map -> map.get("isCompleted")).orElse(null);
-        if (Objects.nonNull(completedFlag)){
-            List<IssueStatusDTO> completeStatusIdList = issueStatusMapper.selectByCondition(Condition.builder(IssueStatusDTO.class)
-                    .andWhere(Sqls.custom().andEqualTo(IssueStatusDTO.FIELD_PROJECT_ID, projectId)
-                            .andEqualTo(IssueStatusDTO.FILED_IS_COMPLETED, completedFlag)).build());
-            searchVO.getAdvancedSearchArgs().put("completeStatusIdList",
-                    completeStatusIdList.stream().map(IssueStatusDTO::getStatusId).collect(Collectors.toList()));
-        }
+        getStatusIdByIsCompleted(projectId, searchVO);
         // get project epic
         List<Long> projectEpicIds = storyMapMapper.selectEpicIdsByProject(projectId, searchVO.getAdvancedSearchArgs());
         if (projectEpicIds != null && !projectEpicIds.isEmpty()) {
@@ -93,6 +85,18 @@ public class StoryMapServiceImpl implements StoryMapService {
         result.put("storyList", !epicIds.isEmpty() ? storyMapMapper.selectStoryList(projectId, epicIds, searchVO) : new ArrayList<>());
         result.put("storyMapWidth", setStoryMapWidth(projectId));
         return result;
+    }
+
+    protected void getStatusIdByIsCompleted(Long projectId, SearchVO searchVO) {
+        Boolean completedFlag = (Boolean) Optional.ofNullable(searchVO.getAdvancedSearchArgs())
+                .map(map -> map.get("isCompleted")).orElse(null);
+        if (Objects.nonNull(completedFlag)){
+            List<IssueStatusDTO> statusIdList = issueStatusMapper.selectByCondition(Condition.builder(IssueStatusDTO.class)
+                    .andWhere(Sqls.custom().andEqualTo(IssueStatusDTO.FIELD_PROJECT_ID, projectId)
+                            .andEqualTo(IssueStatusDTO.FILED_IS_COMPLETED, completedFlag)).build());
+            searchVO.getAdvancedSearchArgs().put("statusIdList",
+                    statusIdList.stream().map(IssueStatusDTO::getStatusId).collect(Collectors.toList()));
+        }
     }
 
     @Override
