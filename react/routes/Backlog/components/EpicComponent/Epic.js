@@ -76,18 +76,6 @@ class Epic extends Component {
             </div>
           </div>
           <div className="c7n-backlog-epicChoice">
-            <div
-              className="c7n-backlog-epicItems-first primary"
-              style={{                
-                background: BacklogStore.getChosenEpic === 'all' ? 'rgba(140, 158, 254, 0.16)' : '',
-              }}
-              role="none"
-              onClick={() => {
-                this.handleClickEpic('all');
-              }}
-            >
-              所有问题
-            </div>
             <DragDropContext
               onDragEnd={(result) => {
                 const { destination, source } = result;
