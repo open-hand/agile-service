@@ -56,7 +56,7 @@ const { Option } = Select;
             disabled={disabled}
             onSubmit={this.updateIssueSprint}
             initValue={sprintId}
-            editExtraContent={
+            editorExtraContent={
               closeSprint.length ? (
                 <div style={{ maxWidth: 170 }}>
                   <span>已结束冲刺</span>
