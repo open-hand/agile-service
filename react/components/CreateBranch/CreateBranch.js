@@ -4,7 +4,7 @@ import {
   Modal, Form, Input, Select, Icon,
 } from 'choerodon-ui';
 import {
- stores, Content, axios, Choerodon 
+  stores, Content, axios, Choerodon, 
 } from '@choerodon/boot';
 import './CreateBranch.less';
 import './commom.less';
@@ -185,8 +185,7 @@ class CreateBranch extends Component {
                         if (res && !res.failed) {
                           this.setState({
                             branchs: res.list,
-                            branchsSize: res.total,
-                            // branchsShowMore: res.totalPages !== 1,
+                            branchsSize: res.numberOfElements,
                             branchsObj: res,
                             branchLoading: false,
                           });
@@ -204,8 +203,7 @@ class CreateBranch extends Component {
                         if (res && !res.failed) {
                           this.setState({
                             tags: res.list || [],
-                            tagsSize: res.pageSize,
-                            // tagsShowMore: res.totalPages !== 1,
+                            tagsSize: res.numberOfElements,
                             tagsObj: res,
                           });
                         } else {
@@ -222,7 +220,7 @@ class CreateBranch extends Component {
                       </Option>
                     ))}
                     {
-                      branchsObj.nextPage ? (
+                      branchsObj.number < branchsObj.totalPages ? (
                         <Option key="more">
                           <div
                             role="none"
@@ -266,7 +264,7 @@ class CreateBranch extends Component {
                       </Option>
                     ))}
                     {
-                      tagsObj.nextPage > 0 ? (
+                      tagsObj.number < tagsObj.totalPages ? (
                         <Option key="more">
                           <div
                             role="none"
@@ -287,8 +285,7 @@ class CreateBranch extends Component {
                                   if (res && !res.failed) {
                                     this.setState({
                                       tags: res.list || [],
-                                      tagsSize: res.pageSize,
-                                      // tagsShowMore: res.totalPages !== 1,
+                                      tagsSize: res.numberOfElements,
                                       tagsObj: res,
                                     });
                                   } else {
