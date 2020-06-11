@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { Icon, Button, Tooltip } from 'choerodon-ui';
 import StoryColumn from './StoryColumn';
@@ -47,7 +48,6 @@ class StoryCell extends Component {
     // const featureList = epicStorys.length > 0 ? featureCommonDTOList.concat([{ issueId: 'none' }]) : featureCommonDTOList;
     // 没有史诗不显示直接关联史诗的列
     const featureList = epicId === 0 ? featureCommonDTOList : featureCommonDTOList.concat([{ issueId: 'none' }]);
-
     return (
       !storyCollapse && !collapse && (
         <Cell epicIndex={epicIndex} lastCollapse={lastCollapse} collapse={collapse}>
@@ -64,18 +64,16 @@ class StoryCell extends Component {
                         const targetFeature = targetEpic.feature[feature.issueId] || {};
                         if (targetFeature) {
                           const storys = this.getStorys(targetFeature);
-                          // if (feature.issueId === 'none' && storys.length === 0) {
-                          //   return null;
-                          // }
                           return (
-                            <StoryColumn
-                              feature={feature}
-                              featureIndex={index}
-                              isLast={isLastColumn && index === featureList.length - 1}
-                              storys={storys}
-                              width={targetFeature.width}
-                              {...this.props}
-                            />
+                            (!StoryMapStore.hiddenColumnNoStory || storys.length > 0) ?
+                              <StoryColumn
+                                feature={feature}
+                                featureIndex={index}
+                                isLast={isLastColumn && index === featureList.length - 1}
+                                storys={storys}
+                                width={targetFeature.width}
+                                {...this.props}
+                              /> : ''
                           );
                         } else {
                           return null;

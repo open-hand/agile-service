@@ -3,6 +3,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Icon } from 'choerodon-ui';
 import { observer } from 'mobx-react';
+import { toJS } from 'mobx';
 import { DropTarget } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import Column from './Column';
@@ -164,30 +165,49 @@ class EpicCell extends Component {
       adding,
     } = epic;
     let subIssueNum = 0;
-    if (storys && feature) { 
-      subIssueNum = Math.max((epicId ? storys.length : storys.filter(story => !!story.featureId && Object.keys(feature).map(featureId => Number(featureId)).includes(Number(story.featureId))).length) + (epicId ? Object.keys(feature).length - 1 : Object.keys(feature).length), 0);// 减去none
+    let noEpicStoryLength =  0;
+    if (storys && feature) {
+      noEpicStoryLength =  storys.filter(story => !!story.featureId && Object.keys(feature).map(featureId => Number(featureId)).includes(Number(story.featureId))).length;
+      if(!StoryMapStore.hiddenColumnNoStory) {
+        subIssueNum = Math.max((epicId ? storys.length : noEpicStoryLength )+ (epicId ? Object.keys(feature).length - 1 : Object.keys(feature).length), 0);// 减去none
+      } else {
+      const featureArr = [];
+      for (let [key, value] of Object.entries(feature)) {
+        if(key !== 'none' && value.storys.length > 0) {
+          featureArr.push({
+            featureId: key,
+            ...value,
+          })
+        }
+      }
+        const hasStoryFeatureLength = featureArr.length;
+        subIssueNum = Math.max((epicId ? storys.length : noEpicStoryLength ) + hasStoryFeatureLength, 0);
+      }
     }
 
     return (
-      <Cell
-        saveRef={connectDropTarget}
-        epicIndex={index}
-        lastCollapse={lastCollapse}
-        collapse={collapse}
-        rowSpan={collapse ? '0' : '1'}
-        style={{
-          padding: CellPadding,
-          position: 'sticky',
-          top: 0,
-          zIndex: 6,
-          background: isOver ? 'rgb(240,240,240)' : 'white',
-          ...collapse ? {
-            borderLeft: lastCollapse ? 'none' : 'solid 1px #D8D8D8',
-            borderRight: 'solid 1px #D8D8D8',
-            boxShadow: 'rgb(216, 216, 216) 0px -1px 0px inset',
-          } : {},
-        }}
-      >
+      <React.Fragment>
+        {
+          !StoryMapStore.hiddenColumnNoStory || (epicId ? storys.length > 0 : noEpicStoryLength > 0) ? (
+            <Cell
+              saveRef={connectDropTarget}
+              epicIndex={index}
+              lastCollapse={lastCollapse}
+              collapse={collapse}
+              rowSpan={collapse ? '0' : '1'}
+              style={{
+                padding: CellPadding,
+                position: 'sticky',
+                top: 0,
+                zIndex: 6,
+                background: isOver ? 'rgb(240,240,240)' : 'white',
+                ...collapse ? {
+                  borderLeft: lastCollapse ? 'none' : 'solid 1px #D8D8D8',
+                  borderRight: 'solid 1px #D8D8D8',
+                  boxShadow: 'rgb(216, 216, 216) 0px -1px 0px inset',
+                } : {},
+              }}
+            >
 
         {!adding && (
           <span
@@ -275,6 +295,10 @@ class EpicCell extends Component {
 
         {collapse && <EpicDragCollapse epic={epic} index={index} subIssueNum={subIssueNum} onMouseDown={this.handleDragMouseDown} />}
       </Cell>
+          ) : ''
+        }
+      </React.Fragment>
+      
     );
   }
 }

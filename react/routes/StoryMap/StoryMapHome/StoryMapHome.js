@@ -6,7 +6,7 @@ import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
 import { Button } from 'choerodon-ui';
-import { Select, DataSet } from 'choerodon-ui/pro';
+import { Select, DataSet, CheckBox } from 'choerodon-ui/pro';
 import { DragDropContextProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { observer } from 'mobx-react-lite';
@@ -113,6 +113,11 @@ const StoryMapHome = observer(() => {
     }
   };
 
+  const handleCheckBoxChange = (value, oldValue) => {
+    console.log(value, oldValue);
+    StoryMapStore.setHiddenColumnNoStory(value);
+  };
+
   const {
     loading, selectedIssueMap,
   } = StoryMapStore;
@@ -140,6 +145,7 @@ const StoryMapHome = observer(() => {
     >
       <Header title="故事地图">
         {!isInProgram && isEmpty && !loading ? <Button onClick={handleCreateEpicClick} icon="playlist_add">创建史诗</Button> : null}
+        <CheckBox name="hiddenColumn" onChange={handleCheckBoxChange}>隐藏不包含故事的列</CheckBox>
         {!StoryMapStore.isFullScreen && (
           <Button
             icon="view_module"
@@ -148,7 +154,7 @@ const StoryMapHome = observer(() => {
             需求池
           </Button>
         )}
-        <Button onClick={toggleFullScreen} icon={isFullScreen ? 'fullscreen_exit' : 'zoom_out_map'}>
+        <Button className="c7nagile-StoryMap-fullScreenBtn" onClick={toggleFullScreen} icon={isFullScreen ? 'fullscreen_exit' : 'zoom_out_map'}>
           {isFullScreen ? '退出全屏' : '全屏'}
         </Button>
         <HeaderLine />
@@ -167,7 +173,7 @@ const StoryMapHome = observer(() => {
           multiple
           searchable
           dropdownMatchSelectWidth={false}
-          maxTagCount={2}
+          maxTagCount={1}
           maxTagTextLength={8} 
           maxTagPlaceholder={restValues => `+${restValues.length}...`}
           optionRenderer={({ record, text }) => (
@@ -183,27 +189,27 @@ const StoryMapHome = observer(() => {
         />
         <Select
           className="c7nagile-StoryMap-header-select c7nagile-StoryMap-header-prioritySelect"
-          style={{ marginRight: 30, marginLeft: 20 }}
+          // style={{ marginRight: 30, marginLeft: 20 }}
           dataSet={selectDataSet}
           name="prioritys"
           placeholder="优先级"
           dropdownMatchSelectWidth={false}
           searchable
           multiple
-          maxTagCount={2}
+          maxTagCount={1}
           maxTagTextLength={8} 
           maxTagPlaceholder={restValues => `+${restValues.length}...`}
         />
         <Select
           className="c7nagile-StoryMap-header-select c7nagile-StoryMap-header-componentSelect"
-          style={{ marginRight: 30, marginLeft: 20 }}
+          // style={{ marginRight: 30, marginLeft: 20 }}
           dataSet={selectDataSet}
           name="components"
           placeholder="模块"
           dropdownMatchSelectWidth={false}
           searchable
           multiple
-          maxTagCount={2}
+          maxTagCount={1}
           maxTagTextLength={8} 
           maxTagPlaceholder={restValues => `+${restValues.length}...`}
         />

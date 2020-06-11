@@ -42,18 +42,20 @@ class StoryRow extends Component {
           </tr>
         )}
         <tr style={{ ...storyCollapse ? { height: 0 } : {} }}>
-          {epicList.map((epic, index) => (
-            <StoryCell 
-              rowIndex={rowIndex}
-              epicIndex={index}
-              lastCollapse={index > 0 ? storyData[epicList[index - 1].issueId] && storyData[epicList[index - 1].issueId].collapse : false}
-              isLastColumn={index === epicWithFeature.length - 1}
-              showTitle={firstNotCollapseIndex === index}
-              epic={epic}
-              otherData={storyData[epic.issueId]}            
-              {...this.props}
-            />
-          ))}
+          {epicList.map((epic, index) => {
+            const otherData = storyData[epic.issueId];
+            return (!StoryMapStore.hiddenColumnNoStory || otherData.storys.length > 0) ? (
+              <StoryCell 
+                rowIndex={rowIndex}
+                epicIndex={index}
+                lastCollapse={index > 0 ? storyData[epicList[index - 1].issueId] && storyData[epicList[index - 1].issueId].collapse : false}
+                isLastColumn={index === epicWithFeature.length - 1}
+                showTitle={firstNotCollapseIndex === index}
+                epic={epic}
+                otherData={storyData[epic.issueId]}            
+                {...this.props}
+              />
+            ) : ''})}
         </tr>        
       </Fragment>
     );
