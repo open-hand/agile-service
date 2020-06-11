@@ -76,7 +76,7 @@
                     #{statusId}
                 </foreach>
             </if>
-            <if test="advancedSearchArgs.prioritys != null">
+            <if test="advancedSearchArgs.prioritys != null and advancedSearchArgs.prioritys.size > 0">
                 AND ai.priority_id IN
                 <foreach collection="advancedSearchArgs.prioritys" open="(" close=")" separator="," item="priorityId">
                     #{priorityId}
@@ -179,7 +179,7 @@
                         #{statusId}
                     </foreach>
                 </if>
-                <if test="searchVO.advancedSearchArgs.prioritys != null">
+                <if test="searchVO.advancedSearchArgs.prioritys != null and searchVO.advancedSearchArgs.prioritys.size > 0">
                     AND ai.priority_id IN
                     <foreach collection="searchVO.advancedSearchArgs.prioritys" open="(" close=")" separator="," item="priorityId">
                         #{priorityId}
