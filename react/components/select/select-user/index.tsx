@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { userApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
@@ -7,7 +7,7 @@ interface Props {
 
 }
 
-const SelectUser: React.FC<Props> = (otherProps) => {
+const SelectUser: React.FC<Props> = forwardRef((otherProps, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'user',
     textField: 'realName',
@@ -17,10 +17,11 @@ const SelectUser: React.FC<Props> = (otherProps) => {
   const props = useSelect(config);
   return (
     <Select
+      ref={ref}
       clearButton={false}
       {...props}
       {...otherProps}
     />
   );
-};
+});
 export default SelectUser;
