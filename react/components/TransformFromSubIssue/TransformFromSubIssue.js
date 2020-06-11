@@ -3,10 +3,9 @@ import { stores, axios } from '@choerodon/boot';
 import {
   Modal, Form, Select, Input,
 } from 'choerodon-ui';
+import { issueApi } from '@/api';
 import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
-import { transformedTask } from '../../api/NewIssueApi';
 import TypeTag from '../TypeTag';
-
 import './TransformFromSubIssue.less';
 
 const { AppState } = stores;
@@ -76,7 +75,7 @@ class TransformFromSubIssue extends Component {
         this.setState({
           loading: true,
         });
-        transformedTask(issueUpdateTypeVO)
+        issueApi.subtaskTransformTask(issueUpdateTypeVO)
           .then((res) => {
             this.setState({
               loading: false,

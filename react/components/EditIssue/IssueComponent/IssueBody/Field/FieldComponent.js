@@ -3,8 +3,8 @@ import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import _ from 'lodash';
+import { issueApi } from '@/api';
 import TextEditToggle from '../../../../TextEditToggle';
-import { updateIssue } from '../../../../../api/NewIssueApi';
 import SelectFocusLoad from '../../../../SelectFocusLoad';
 
 const { Text, Edit } = TextEditToggle;
@@ -44,7 +44,7 @@ const { Text, Edit } = TextEditToggle;
       objectVersionNumber,
       componentIssueRelVOList,
     };
-    updateIssue(obj)
+    issueApi.update(obj)
       .then(() => {
         if (onUpdate) {
           onUpdate();

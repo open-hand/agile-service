@@ -6,6 +6,7 @@ import {
   Dropdown, Menu, Input, Icon,
 } from 'choerodon-ui';
 import _ from 'lodash';
+import { epicApi } from '@/api';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 
 const { AppState } = stores;
@@ -98,7 +99,7 @@ class DraggableEpic extends Component {
         editName: false,
       });
     } else {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/check_epic_name?epicName=${value}&epicId=${item.issueId}`)
+      epicApi.checkName(value, item.issueId)
         .then((checkRes) => {
           if (checkRes) {
             Choerodon.prompt('史诗名称重复');

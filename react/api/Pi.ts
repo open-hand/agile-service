@@ -36,6 +36,22 @@ class PiApi {
       },
     });
   }
+
+  /**
+   * 子项目下,根据活跃的ART和PI状态查询PI
+   * @param data  状态列表，[todo、doing、done]
+   * @param programId 
+   */
+  getPiByPiStatus(data:Array<string>, programId:number) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/project_invoke_program/pi/query_pi_by_status`,
+      params: {
+        programId,
+      },
+      data,
+    });
+  }
 }
 
 const piApi = new PiApi();

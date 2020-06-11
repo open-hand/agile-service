@@ -3,8 +3,9 @@ import PropTypes from 'prop-types';
 import { Input } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
+import { issueApi } from '@/api';
 import Card from './Card';
-import { createIssue, createIssueField } from '../../../../../api/NewIssueApi';
+import { createIssueField } from '../../../../../api/NewIssueApi';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import clickOutSide from '../../../../../components/CommonComponent/ClickOutSide';
 
@@ -49,7 +50,7 @@ class CreateEpic extends Component {
           referenceIssueId: preEpic ? preEpic.issueId : 0,
         },
       };
-      createIssue(req).then((res) => {
+      issueApi.createIssue(req).then((res) => {
         if (res.failed) {
           if (res.code === 'error.epicName.exist') {
             Choerodon.prompt('史诗名称已存在');

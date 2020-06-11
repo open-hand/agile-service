@@ -4,8 +4,9 @@ import { withRouter } from 'react-router-dom';
 import { Select, Tooltip } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
 import _ from 'lodash';
+import { issueApi } from '@/api';
 import TextEditToggle from '../../../../TextEditToggle';
-import { loadVersions, updateIssue } from '../../../../../api/NewIssueApi';
+import { loadVersions } from '../../../../../api/NewIssueApi';
 
 const { Option } = Select;
 const { Text, Edit } = TextEditToggle;
@@ -75,7 +76,7 @@ const { Text, Edit } = TextEditToggle;
         versionIssueRelVOList: versionList,
         versionType: 'influence',
       };
-      updateIssue(obj)
+      issueApi.update(obj)
         .then(() => {
           if (onUpdate) {
             onUpdate();
@@ -106,7 +107,7 @@ const { Text, Edit } = TextEditToggle;
         <div className="c7n-property-wrapper">
           <Tooltip title="对于非当前版本所发现的缺陷进行版本选择">
             <span className="c7n-property">
-              {'影响的版本'}
+              影响的版本
             </span>
           </Tooltip>
         </div>
@@ -128,7 +129,7 @@ const { Text, Edit } = TextEditToggle;
                   </div>
                 ) : (
                   <div>
-                    {'无'}
+                    无
                   </div>
                 )
               }

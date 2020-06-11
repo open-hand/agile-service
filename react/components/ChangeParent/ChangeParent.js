@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import { stores, axios, Content } from '@choerodon/boot';
 import _ from 'lodash';
 import { Modal, Form, Select } from 'choerodon-ui';
-import { createLink, loadIssuesInLink } from '../../api/NewIssueApi';
+import { issueApi } from '@/api';
 import TypeTag from '../TypeTag';
-
 import './ChangeParent.less';
 
 const { AppState } = stores;
@@ -16,7 +15,7 @@ class ChangeParent extends Component {
   debounceFilterIssues = _.debounce((input) => {
     const { issueId } = this.props;
     this.setState({ selectLoading: true });
-    loadIssuesInLink(1, 20, issueId, input).then((res) => {
+    issueApi.loadIssuesInLink(1, 20, issueId, input).then((res) => {
       this.setState({
         originIssues: res.list,
         selectLoading: false,
@@ -60,7 +59,7 @@ class ChangeParent extends Component {
     const { issueId } = this.props;
     if (!sign) {
       this.setState({ selectLoading: true });
-      loadIssuesInLink(1, 20, issueId, input).then((res) => {
+      issueApi.loadIssuesInLink(1, 20, issueId, input).then((res) => {
         this.setState({
           originIssues: res.list,
           selectLoading: false,

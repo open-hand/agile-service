@@ -3,6 +3,7 @@ import {
 } from 'mobx';
 import { store, stores, axios } from '@choerodon/boot';
 import _ from 'lodash';
+import { issueApi, epicApi } from '@/api';
 
 const { AppState } = stores;
 const UNIT_STATUS = {
@@ -132,8 +133,7 @@ class EpicReportStore {
   }
 
   loadEpics() {
-    const orgId = AppState.currentMenuType.organizationId;
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/epics?organizationId=${orgId}`)
+    return epicApi.loadEpics()
       .then((res) => {
         this.setEpicFinishLoading(true);
         this.setEpics(res);

@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { Input } from 'choerodon-ui';
 import { getProjectId } from '@/utils/common';
+import { issueApi } from '@/api';
 import Card from '../Card';
 import './CreateStory.less';
-import { createIssue, createIssueField } from '../../../../../../api/NewIssueApi';
+import { createIssueField } from '../../../../../../api/NewIssueApi';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
 import clickOutSide from '../../../../../../components/CommonComponent/ClickOutSide';
 
@@ -54,7 +54,7 @@ class CreateStory extends Component {
           }],
         } : {},
       };
-      createIssue(req).then((res) => {
+      issueApi.createIssue(req).then((res) => {
         const dto = {
           schemeCode: 'agile_issue',
           context: res.typeCode,

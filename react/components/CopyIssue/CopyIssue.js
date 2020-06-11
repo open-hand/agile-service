@@ -6,6 +6,7 @@ import {
 } from 'choerodon-ui';
 
 import './CopyIssue.less';
+import { epicApi } from '@/api';
 
 const { AppState } = stores;
 const FormItem = Form.Item;
@@ -59,7 +60,7 @@ class CopyIssue extends Component {
 
   checkEpicNameRepeat = (rule, value, callback) => {
     if (value && value.trim()) {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/check_epic_name?epicName=${value.trim()}`)
+      epicApi.checkName(value)
         .then((res) => {
           if (res) {
             callback('史诗名称重复');
@@ -77,8 +78,7 @@ class CopyIssue extends Component {
       visible, onCancel, issueNum, issueSummary, issue,
     } = this.props;
     const { getFieldDecorator } = this.props.form;
-    console.log('this.props.issue：');
-    console.log(this.props.issue);
+
     return (
       <Modal
         className="c7n-copyIssue"

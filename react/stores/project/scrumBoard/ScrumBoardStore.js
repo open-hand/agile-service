@@ -227,10 +227,6 @@ class ScrumBoardStore {
     this.allEpicData = data;
   }
 
-  axiosGetAllEpicData() {
-    const orgId = AppState.currentMenuType.organizationId;
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/epics?organizationId=${orgId}`);
-  }
 
   @computed get getEpicData() {
     return toJS(this.epicData);

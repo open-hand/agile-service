@@ -6,7 +6,7 @@ import { injectIntl } from 'react-intl';
 import _ from 'lodash';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectSprint from '@/components/select/select-sprint';
-import { updateIssue } from '../../../../../api/NewIssueApi';
+import { sprintApi, issueApi } from '@/api';
 
 const { Option } = Select;
 
@@ -26,7 +26,7 @@ const { Option } = Select;
         objectVersionNumber,
         sprintId: newSprintId || 0,
       };
-      updateIssue(obj)
+      issueApi.update(obj)
         .then(() => {
           if (onUpdate) {
             onUpdate();

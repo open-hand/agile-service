@@ -3,8 +3,8 @@ import { observer } from 'mobx-react-lite';
 import { Dropdown, Menu, Icon } from 'choerodon-ui';
 import { find } from 'lodash';
 import { useIssueTypes } from '@/hooks';
+import { issueApi } from '@/api';
 import TypeTag from '../../TypeTag';
-import { updateIssueType, updateIssue } from '../../../api/NewIssueApi';
 import IsInProgramStore from '../../../stores/common/program/IsInProgramStore';
 import EditIssueContext from '../stores';
 import './IssueComponent.less';
@@ -34,7 +34,7 @@ const IssueType = observer(({
           featureType: type.item.props.value,
         },
       };
-      updateIssue(issueUpdateVO)
+      issueApi.update(issueUpdateVO)
         .then(() => {
           if (reloadIssue) {
             reloadIssue(issueId);
@@ -52,7 +52,7 @@ const IssueType = observer(({
         issueTypeId: value,
         featureType,
       };
-      updateIssueType(issueUpdateTypeVO)
+      issueApi.updateType(issueUpdateTypeVO)
         .then(() => {
           if (reloadIssue) {
             reloadIssue(issueId);

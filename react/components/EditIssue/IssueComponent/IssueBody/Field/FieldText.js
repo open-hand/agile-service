@@ -3,8 +3,8 @@ import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { Input } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
+import { issueApi } from '@/api';
 import TextEditToggle from '../../../../TextEditToggle';
-import { updateIssue } from '../../../../../api/NewIssueApi';
 
 const { Text, Edit } = TextEditToggle;
 const { TextArea } = Input;
@@ -54,7 +54,7 @@ const { TextArea } = Input;
         };
       }
       if (obj) {
-        updateIssue(obj)
+        issueApi.update(obj)
           .then(() => {
             if (onUpdate) {
               onUpdate();

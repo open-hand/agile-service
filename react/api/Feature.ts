@@ -5,6 +5,7 @@ class FeatureApi {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }
+
   /**
    * 在子项目查询项目群的所有特性
    * @param featureIds 接口额外要返回的特性
@@ -20,11 +21,12 @@ class FeatureApi {
           organizationId: getOrganizationId(),
           page,
           size: 10,
-          param: param
-        }
-      }
+          param,
+        },
+      },
     );
   }
+
   /**
    * 在子项目根据piId查询项目群的特性
    * @param piId 不传默认查询活跃PI
@@ -37,9 +39,11 @@ class FeatureApi {
           organizationId: getOrganizationId(),
           piId,
           sprintId,
-        }
-      });
+        },
+      },
+    );
   }
+
   /**
    * 根据史诗ID查询项目群的特性
    * @param epicId 可以不传
@@ -50,17 +54,19 @@ class FeatureApi {
       {
         params: {
           organizationId: getOrganizationId(),
-          epicId
-        }
-      }
+          epicId,
+        },
+      },
     );
   }
+
   /**
    * 查询特性的颜色
    */
   getColors() {
     return axios.get('/agile/v1/lookup_values/feature_color');
   }
+
   /**
    * 更新特性关联的团队或冲刺
    * @param data 
@@ -75,6 +81,7 @@ class FeatureApi {
   }) {
     return axios.post(`${this.prefix}/board_feature/feature_link_project`, data);
   }
+
   /**
    * 根据summary查询史诗下是否有同名特性
    * @param summary 
@@ -86,6 +93,7 @@ class FeatureApi {
       summary,
     });
   }
+
   /**
    * 根据id查询史诗下是否有同名特性
    * @param featureId 
@@ -97,7 +105,52 @@ class FeatureApi {
       featureIds: [featureId],
     });
   }
+
+  
+  /**
+   * 分页查询特性列表
+   * @param page 
+   * @param size 
+   * @param issueId 
+   * @param content 
+   */
+  loadFeaturesInLink(page: number = 1, size: number = 10, issueId: number, content: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/issues/agile/feature`,
+      params: {
+        page,
+        size,
+        self: false,
+        issueId,
+        content,
+      },
+    });
+    // if (issueId && content) {
+    //   return axios.get(`/agile/v1/projects/${projectId}/issues/agile/feature?issueId=${issueId}&self=false&content=${content}&page=${page}&size=${size}`);
+    // } else if (issueId && !content) {
+    //   return axios.get(`/agile/v1/projects/${projectId}/issues/agile/feature?issueId=${issueId}&self=false&page=${page}&size=${size}`);
+    // } else if (!issueId && content) {
+    //   return axios.get(`/agile/v1/projects/${projectId}/issues/agile/feature?self=false&content=${content}&page=${page}&size=${size}`);
+    // } else {
+    //   return axios.get(`/agile/v1/projects/${projectId}/issues/agile/feature?self=false&page=${page}&size=${size}`);
+    // }
+  }
+
+  /**
+   * 查询特性下拆分的故事
+   * @param issueId 
+   */
+  getSplitStory(issueId:number) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/issues/list_story_by_feature_id`,
+      params: {
+        issueId,
+      },
+    });
+  }
 }
 
-const featureApi = new FeatureApi()
+const featureApi = new FeatureApi();
 export { featureApi };

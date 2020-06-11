@@ -4,7 +4,7 @@ import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import SelectPriority from '@/components/select/select-priority';
 import TextEditToggle from '@/components/TextEditTogglePro';
-import { updateIssue } from '../../../../../api/NewIssueApi';
+import { issueApi } from '@/api';
 
 
 @inject('AppState')
@@ -18,7 +18,7 @@ import { updateIssue } from '../../../../../api/NewIssueApi';
       objectVersionNumber,
       priorityId: newPriorityId,
     };
-    updateIssue(obj)
+    issueApi.update(obj)
       .then(() => {
         if (onUpdate) {
           onUpdate();

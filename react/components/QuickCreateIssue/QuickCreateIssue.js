@@ -4,9 +4,10 @@ import {
   Button, Icon, Dropdown, Input, Menu, Form,
 } from 'choerodon-ui';
 import { getProjectId } from '@/utils/common';
+import { issueApi } from '@/api';
 import TypeTag from '../TypeTag';
 import { deBounce } from './Utils';
-import { createIssue, createIssueField } from '../../api/NewIssueApi';
+import { createIssueField } from '../../api/NewIssueApi';
 import './QuickCreateIssue.less';
 
 const debounceCallback = deBounce(500);
@@ -71,7 +72,7 @@ class QuickCreateIssue extends Component {
               this.setState({
                 loading: true,
               });
-              createIssue(issue).then((res) => {
+              issueApi.createIssue(issue).then((res) => {
                 this.setState({
                   loading: false,
                   create: false,

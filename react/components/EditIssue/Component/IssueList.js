@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Icon, Popconfirm, Tooltip } from 'choerodon-ui';
 import { stores, Permission } from '@choerodon/boot';
 import { withRouter } from 'react-router-dom';
-import { deleteIssue, updateIssue } from '../../../api/NewIssueApi';
+import { issueApi } from '@/api';
 import PriorityTag from '../../PriorityTag';
 import StatusTag from '../../StatusTag';
 import TypeTag from '../../TypeTag';
@@ -23,14 +23,14 @@ class IssueList extends Component {
       objectVersionNumber,
     };
     if (typeCode === 'sub_task') {
-      deleteIssue(issueId, createBy)
+      issueApi.delete(issueId, createBy)
         .then(() => {
           if (onRefresh) {
             onRefresh();
           }
         });
     } else {
-      updateIssue(data).then(() => {
+      issueApi.update(data).then(() => {
         if (onRefresh) {
           onRefresh();
         }

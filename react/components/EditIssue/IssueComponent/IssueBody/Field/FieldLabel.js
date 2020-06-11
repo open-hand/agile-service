@@ -3,9 +3,9 @@ import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import _ from 'lodash';
+import { issueApi } from '@/api';
 import SelectLabel from '@/components/select/select-label';
 import TextEditToggle from '@/components/TextEditTogglePro';
-import { updateIssue } from '../../../../../api/NewIssueApi';
 
 
 @inject('AppState')
@@ -47,7 +47,7 @@ import { updateIssue } from '../../../../../api/NewIssueApi';
         objectVersionNumber,
         labelIssueRelVOList: labelList,
       };
-      updateIssue(obj)
+      issueApi.update(obj)
         .then(() => {
           if (onUpdate) {
             onUpdate();
