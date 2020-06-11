@@ -1,7 +1,7 @@
 import React from 'react';
-import { TextField } from 'choerodon-ui/pro';
+import { TextField, TextArea } from 'choerodon-ui/pro';
 import TextEditToggle from '@/components/TextEditTogglePro';
-import SelectUser from '@/components/SelectUser';
+import SelectUser from '@/components/select/select-user';
 
 const Test = () => (
   <div>
@@ -34,9 +34,11 @@ const Test = () => (
       initValue="第二个"
       renderText={text => text}
     >
-      <TextField style={{
-        width: 100,
-      }}
+      <TextArea
+        style={{
+          width: 100,
+        }}
+        tabIndex={0}
       />
     </TextEditToggle>
     <TextEditToggle

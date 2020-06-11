@@ -1,9 +1,11 @@
 import React, {
   useState, useRef, cloneElement, useEffect,
 } from 'react';
-import { Output } from 'choerodon-ui/pro';
+import classNames from 'classnames';
+import styles from './TextEditToggle.less';
 
 interface Props {
+  disabled?: boolean
   children: JSX.Element
   onSubmit: (data: any) => void
   initValue: any
@@ -11,13 +13,22 @@ interface Props {
 }
 
 const TextEditToggle: React.FC<Props> = ({
-  children: editor, onSubmit, initValue, renderText,
+  disabled, children: editor, onSubmit, initValue, renderText,
 }) => {
   const [editing, setEditing] = useState(false);
   const dataRef = useRef(initValue);
+  const editorRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     dataRef.current = initValue;
   }, [initValue]);
+  useEffect(() => {
+    if (editing && editorRef.current) {
+      // console.log('focus', editorRef.current);
+      // @ts-ignore
+      // editorRef.current.focus();
+    }
+  });
   const hideEditor = () => {
     if (editing) {
       setEditing(false);
@@ -38,23 +49,40 @@ const TextEditToggle: React.FC<Props> = ({
     }
   };
   const getCellRenderer = () => {
-    const editorProps = {
+    const editorProps: any = {
+      // tabIndex: -1,
       defaultValue: initValue,
       onChange: handleChange,
       onBlur: handleEditorBlur,
+      ref: editorRef,
       autoFocus: true,
     };
-    return editing ? cloneElement(editor, editorProps) : renderText(dataRef.current);
+    if (containerRef.current) {
+      editorProps.style = {
+        width: containerRef.current.getBoundingClientRect().width,
+        height: containerRef.current.getBoundingClientRect().height,
+      };
+    }
+    return editing ? cloneElement(editor, editorProps) : <div className={styles.text}>{renderText(dataRef.current)}</div>;
   };
   const handleFocus = () => {
-    showEditor();
+    if (!disabled) {
+      showEditor();
+    }
   };
   return (
-    <Output
+    <div
+      ref={containerRef}
+      className={classNames(
+        styles.container,
+        { [styles.disabled]: disabled },
+      )}
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
       tabIndex={0}
-      renderer={getCellRenderer}
       onFocus={handleFocus}
-    />
+    >
+      {getCellRenderer()}
+    </div>
   );
 };
 
