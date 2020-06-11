@@ -1,32 +1,36 @@
 import React, {
-  useState, useRef, cloneElement, useEffect,
+  useState, useRef, cloneElement, useEffect, Fragment,
 } from 'react';
 import classNames from 'classnames';
 import styles from './TextEditToggle.less';
 
+interface RenderProps {
+  value: any
+  editing: boolean
+}
 interface Props {
   disabled?: boolean
-  children: JSX.Element
+  editor: () => JSX.Element
+  children: ({ value, editing }: RenderProps) => JSX.Element | JSX.Element
   onSubmit: (data: any) => void
   initValue: any
-  renderText: (text: any) => JSX.Element
 }
 
 const TextEditToggle: React.FC<Props> = ({
-  disabled, children: editor, onSubmit, initValue, renderText,
+  disabled, editor, children: text, onSubmit, initValue,
 }) => {
   const [editing, setEditing] = useState(false);
   const dataRef = useRef(initValue);
-  const editorRef = useRef(null);
+  const editorRef = useRef<JSX.Element>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     dataRef.current = initValue;
   }, [initValue]);
   useEffect(() => {
+    // 自动聚焦
     if (editing && editorRef.current) {
-      // console.log('focus', editorRef.current);
       // @ts-ignore
-      // editorRef.current.focus();
+      editorRef.current.focus();
     }
   });
   const hideEditor = () => {
@@ -48,14 +52,15 @@ const TextEditToggle: React.FC<Props> = ({
       await onSubmit(dataRef.current);
     }
   };
-  const getCellRenderer = () => {
+  const renderEditor = () => {
+    const editorElement = typeof editor === 'function' ? editor() : editor;
     const editorProps: any = {
       // tabIndex: -1,
       defaultValue: initValue,
       onChange: handleChange,
       onBlur: handleEditorBlur,
       ref: editorRef,
-      autoFocus: true,
+      // autoFocus: true,
     };
     if (containerRef.current) {
       editorProps.style = {
@@ -63,8 +68,31 @@ const TextEditToggle: React.FC<Props> = ({
         height: containerRef.current.getBoundingClientRect().height,
       };
     }
-    return editing ? cloneElement(editor, editorProps) : <div className={styles.text}>{renderText(dataRef.current)}</div>;
+    return cloneElement(editorElement, editorProps);
   };
+  const renderText = () => {
+    const textElement = typeof text === 'function' ? text({ value: dataRef.current, editing }) : text;
+    return textElement;
+  };
+  const getCellRenderer = () => (
+    <Fragment>
+      {/* 编辑器在没编辑的时候也会渲染，目的是提前加载数据 */}
+      {!disabled && (
+        <div className={classNames(styles.editor, {
+          [styles.hidden]: !editing,
+        })}
+        >
+          {renderEditor()}
+        </div>
+      )}
+      <div className={classNames(styles.text, {
+        [styles.hidden]: editing,
+      })}
+      >
+        {renderText()}
+      </div>
+    </Fragment>
+  );
   const handleFocus = () => {
     if (!disabled) {
       showEditor();

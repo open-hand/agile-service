@@ -3,7 +3,7 @@ import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import SelectPriority from '@/components/select/select-priority';
-import TextEditTogglePro from '@/components/TextEditTogglePro';
+import TextEditToggle from '@/components/TextEditTogglePro';
 import { updateIssue } from '../../../../../api/NewIssueApi';
 
 
@@ -42,9 +42,13 @@ import { updateIssue } from '../../../../../api/NewIssueApi';
           </span>
         </div>
         <div className="c7n-value-wrapper">
-          <TextEditTogglePro 
+          <TextEditToggle
             disabled={disabled}
-            renderText={() => (priorityId ? (
+            editor={() => <SelectPriority priorityId={priorityId} />}
+            initValue={priorityId}
+            onSubmit={this.updateIssuePriority}
+          >
+            {priorityId ? (
               <div
                 className="c7n-level"
                 style={{
@@ -61,12 +65,8 @@ import { updateIssue } from '../../../../../api/NewIssueApi';
               <div>
                 无
               </div>
-            ))}
-            initValue={priorityId}
-            onSubmit={this.updateIssuePriority}
-          >
-            <SelectPriority priorityId={priorityId} />
-          </TextEditTogglePro>
+            )}
+          </TextEditToggle>
         </div>
       </div>
     );
