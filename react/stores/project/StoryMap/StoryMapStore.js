@@ -86,6 +86,17 @@ class StoryMapStore {
     this.hiddenColumnNoStory = false;
   }
 
+  @action resetSearchVO() {
+    this.searchVO = {
+      advancedSearchArgs: {
+        components: [],
+        sprints: [],
+        prioritys: [],
+        isCompleted: undefined,
+      },
+    };
+  }
+
   getStoryMap = () => {
     this.setLoading(true);
     Promise.all([storyMapApi.getStoryMap(this.searchVO), loadIssueTypes(), versionApi.loadNamesByStatus(), loadPriorities()]).then(([storyMapData, issueTypes, versionList, prioritys]) => {
