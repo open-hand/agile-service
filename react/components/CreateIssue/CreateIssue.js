@@ -8,7 +8,7 @@ import {
 } from 'choerodon-ui';
 import moment from 'moment';
 import reactComponentDebounce from '@/components/DebounceComponent';
-import { featureApi, epicApi } from '@/api';
+import { featureApi, epicApi, fieldApi } from '@/api';
 import {
   beforeTextUpload, handleFileUpload, validateFile, normFile, 
 } from '@/utils/richText';
@@ -19,7 +19,7 @@ import { issueApi } from '@/api';
 import { UploadButton } from '../CommonComponent';
 import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 import {
-  getFields, createFieldValue, loadIssueTypes,
+  loadIssueTypes,
 } from '../../api/NewIssueApi';
 import SelectNumber from '../SelectNumber';
 import WYSIWYGEditor from '../WYSIWYGEditor';
@@ -138,7 +138,7 @@ class CreateIssue extends Component {
           });
         }
       });
-      createFieldValue(res.issueId, 'agile_issue', fieldList);
+      fieldApi.createFieldValue(res.issueId, 'agile_issue', fieldList);
       if (fileList && fileList.length > 0) {
         const config = {
           issueType: res.statusId,
@@ -174,7 +174,7 @@ class CreateIssue extends Component {
           context: defaultType.typeCode,
           pageCode: 'agile_issue_create',
         };
-        getFields(param).then((fields) => {
+        fieldApi.getFields(param).then((fields) => {
           this.setState({
             fields,
             originIssueTypes: res,
@@ -435,7 +435,7 @@ class CreateIssue extends Component {
                           context: typeCode,
                           pageCode: 'agile_issue_create',
                         };
-                        getFields(param, typeCode).then((res) => {
+                        fieldApi.getFields(param, typeCode).then((res) => {
                           this.setState({
                             fields: res,
                           });

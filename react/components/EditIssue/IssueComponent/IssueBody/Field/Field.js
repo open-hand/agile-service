@@ -8,10 +8,9 @@ import {
   Checkbox, Select, Input, TimePicker, Row, Col, Radio, DatePicker, InputNumber,
 } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
-import { userApi } from '@/api';
+import { userApi, fieldApi } from '@/api';
 import TextEditToggle from '../../../../TextEditToggle';
 import SelectFocusLoad from '../../../../SelectFocusLoad';
-import { updateFieldValue } from '../../../../../api/NewIssueApi';
 import UserHead from '../../../../UserHead';
 import './Field.less';
 
@@ -84,7 +83,7 @@ let sign = false;
         fieldType,
         value: newValue,
       };
-      updateFieldValue(issueId, fieldId, 'agile_issue', obj)
+      fieldApi.updateFieldValue(issueId, fieldId, 'agile_issue', obj)
         .then(() => {
           if (onUpdate) {
             onUpdate();
