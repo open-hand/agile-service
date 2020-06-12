@@ -235,7 +235,10 @@ public class BoardColumnServiceImpl implements BoardColumnService {
 
     @Override
     public void deleteProgramBoardColumn(Long projectId, Long columnId) {
-        BoardColumnDTO boardColumnDTO = boardColumnMapper.selectByPrimaryKey(columnId);
+        BoardColumnDTO boardColumn = new BoardColumnDTO();
+        boardColumn.setProjectId(projectId);
+        boardColumn.setColumnId(columnId);
+        BoardColumnDTO boardColumnDTO = boardColumnMapper.selectOne(boardColumn);
         BoardColumnValidator.checkDeleteColumn(boardColumnDTO);
         // 删除列
         if (boardColumnMapper.deleteByPrimaryKey(columnId) != 1) {
