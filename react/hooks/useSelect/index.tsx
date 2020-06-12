@@ -2,18 +2,37 @@ import React, {
   useState, useMemo, useEffect, useRef,
 } from 'react';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
-import { Select, Button } from 'choerodon-ui/pro';
+import { Button, DataSet } from 'choerodon-ui/pro';
 import { SearchMatcher } from 'choerodon-ui/pro/lib/select/Select';
+import { Renderer } from 'choerodon-ui/pro/lib/field/FormField';
 import { debounce } from 'lodash';
 import styles from './index.less';
 
-const { Option } = Select;
 
 function applyMiddleWares(data: any, middleWares: Array<Function>) {
   return middleWares.reduce((preData, middleWare) => middleWare(preData), data);
 }
 function noop(data: any) {
   return data;
+}
+/**
+ * 从对象中获取值，可以传一个key或路径，比如 date.str
+ * @param object 
+ * @param path 
+ */
+function getValueByPath(object: object, path: string) {
+  const paths: string[] = path.split('.');
+  let result = object;
+  while (paths.length > 0) {
+    const key = paths.shift();
+    if (Object.prototype.hasOwnProperty.call(object, key as string)) {
+      // @ts-ignore
+      result = result[key as string];
+    } else {
+      return undefined;
+    }
+  }
+  return result;
 }
 export interface LoadConfig {
   filter?: string,
@@ -22,9 +41,10 @@ export interface LoadConfig {
 export type Request = ({ filter, page }: LoadConfig) => Promise<any>
 export interface SelectConfig {
   name: string
-  textField?: string
-  valueField?: string
-  render?: (item: any) => JSX.Element
+  textField: string
+  valueField: string
+  optionRenderer?: (item: any) => JSX.Element
+  renderer?: (item: any) => JSX.Element
   request: Request
   middleWare?: (item: any) => boolean,
   paging?: boolean
@@ -36,11 +56,12 @@ export default function useSelect(config: SelectConfig) {
   const [currentPage, setPage] = useState(1);
   const [canLoadMore, setCanLoadMore] = useState(false);
   const textRef = useRef<string>('');
-  const defaultRender = (item: any) => <Option value={item[valueField]}>{item[textField]}</Option>;
+  const defaultRender = (item: any) => getValueByPath(item, textField);
   const {
     textField = 'name',
     valueField = 'id',
-    render = defaultRender,
+    optionRenderer = defaultRender,
+    renderer,
     request,
     middleWare = noop,
     paging = true,
@@ -93,6 +114,32 @@ export default function useSelect(config: SelectConfig) {
     }
     return name.toLowerCase().indexOf(text.toLowerCase()) >= 0;
   };
+  let finalData = applyMiddleWares(data, [middleWare]);
+  if (canLoadMore) {
+    finalData = [...finalData, { loadMoreButton: true }];
+  }
+  const loadMoreButton = (
+    <Button
+      onClick={(e) => {
+        e.stopPropagation();
+        handleLoadMore();
+      }}
+      style={{ margin: '-4px -12px', width: 'calc(100% + 24px)' }}
+    >
+      加载更多
+    </Button>
+  );
+  const options = new DataSet({ data: finalData, paging: false });
+  const renderOption: Renderer = ({ record }) => {
+    if (!record) {
+      return null;
+    }
+    if (record.get('loadMoreButton') === true) {
+      return loadMoreButton;
+    } else {
+      return optionRenderer(record.toData());
+    }
+  };
   const selectProps = {
     searchable: true,
     onInput: handleInput,
@@ -108,10 +155,23 @@ export default function useSelect(config: SelectConfig) {
       }
     },
     searchMatcher: paging ? () => true : filterOptions,
-    children: applyMiddleWares(data, [middleWare]).map(render),
+    valueField,
+    // 这里不传递textField，因为由useSelect来渲染
+    textField,
+    options,
+    // @ts-ignore
+    optionRenderer: renderOption,
+    // TODO: 考虑如何获取record，来渲染，例如用户
+    // renderer: renderer ? ({
+    //   // @ts-ignore
+    //   value, text, name, record, dataSet,
+    // }) => {
+
+    //   return (record ? renderer() : null);
+    // } : undefined,    
     // @ts-ignore
     onOption: ({ record }) => {
-      if (record.data.value === 'useSelect-load-more') {
+      if (record.get('loadMoreButton') === true) {
         return {
           className: styles.load_more,
         };
@@ -120,20 +180,5 @@ export default function useSelect(config: SelectConfig) {
     },
     ...props,
   };
-  if (canLoadMore) {
-    selectProps.children.push(
-      <Option value="useSelect-load-more" disabled className="test" style={{ padding: 0 }}>
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleLoadMore();
-          }}
-          style={{ margin: '-4px -12px', width: 'calc(100% + 24px)' }}
-        >
-          加载更多
-        </Button>
-      </Option>,
-    );
-  }
   return selectProps;
 }
