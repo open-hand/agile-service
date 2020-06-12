@@ -258,5 +258,5 @@ export function getCustomFields() {
 }
 export function batchUpdateIssue(data) {
   const projectId = AppState.currentMenuType.id;
-  return axios.post(`/agile/v1/projects/${projectId}/field_value/batch_update_fields_value?schemeCode=agile_issue`, data);
+  return axios.post(`/agile/v1/projects/${projectId}/field_value/batch_update_fields_value?schemeCode=agile_issue&applyType=agile`, data);
 }

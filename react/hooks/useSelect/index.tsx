@@ -102,15 +102,21 @@ export default function useSelect(config: SelectConfig) {
     record, text,
   }) => {
     // @ts-ignore
-    const { meaning } = record.data;
+    const meaning = optionRenderer === defaultRender ? getValueByPath(record.data, textField) : optionRenderer(record.data);
+    if (!meaning) {
+      return true;
+    }
     let name = '';
     // 一般情况，option的children是一个字符串
     if (typeof meaning === 'string') {
       name = meaning;
-    } else {
+    } else if (React.isValidElement(meaning)) {
       // 其他情况, children是一个元素,那么约定这个元素上的name属性进行搜索
+      // @ts-ignore
       // eslint-disable-next-line prefer-destructuring
       name = meaning.props.name;
+    } else {
+      return true;
     }
     return name.toLowerCase().indexOf(text.toLowerCase()) >= 0;
   };
