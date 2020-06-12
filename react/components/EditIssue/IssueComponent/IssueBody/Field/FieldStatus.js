@@ -26,6 +26,7 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
     <Select
       ref={ref}
       primitiveValue={false}
+      clearButton={false}
       {...props}
       {...otherProps}
     />
@@ -34,22 +35,24 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
 @inject('AppState')
 @observer class FieldStatus extends Component {
   updateIssueStatus = (transform) => {
-    const transformId = transform.id;
-    const {
-      store, onUpdate, reloadIssue, applyType,
-    } = this.props;
-    const issue = store.getIssue;
-    const { issueId, objectVersionNumber } = issue;
-    if (transformId) {
-      issueApi.updateStatus(transformId, issueId, objectVersionNumber, applyType)
-        .then(() => {
-          if (onUpdate) {
-            onUpdate();
-          }
-          if (reloadIssue) {
-            reloadIssue(issueId);
-          }
-        });
+    if (transform) {
+      const transformId = transform.id;
+      const {
+        store, onUpdate, reloadIssue, applyType,
+      } = this.props;
+      const issue = store.getIssue;
+      const { issueId, objectVersionNumber } = issue;
+      if (transformId) {
+        issueApi.updateStatus(transformId, issueId, objectVersionNumber, applyType)
+          .then(() => {
+            if (onUpdate) {
+              onUpdate();
+            }
+            if (reloadIssue) {
+              reloadIssue(issueId);
+            }
+          });
+      }
     }
   };
 

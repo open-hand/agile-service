@@ -6,23 +6,23 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 interface Props {
 }
 
-const SelectFeature: React.FC<Props> = forwardRef(({featureId, featureName, ...otherProps}, ref: React.Ref<Select>) => {
-    const config = useMemo((): SelectConfig => ({
-      name: 'feature',
-      textField: 'summary',
-      valueField: 'issueId',
-      request: () => featureApi.getByEpicId(),
-      middleWare: features => (features.find(item => item.issueId === featureId) || !featureId) ? features : [...features, { issueId: featureId, summary: featureName }],
-      paging: false,
-    }), []);
-    const props = useSelect(config);
-    return (
-      <Select
-        ref={ref}
-        clearButton={true}
-        {...props}
-        {...otherProps}
-      />
-    );
-  });
+const SelectFeature: React.FC<Props> = forwardRef(({ featureId, featureName, ...otherProps }, ref: React.Ref<Select>) => {
+  const config = useMemo((): SelectConfig => ({
+    name: 'feature',
+    textField: 'summary',
+    valueField: 'issueId',
+    request: () => featureApi.getByEpicId(),
+    middleWare: features => ((features.find(item => item.issueId === featureId) || !featureId) ? features : [...features, { issueId: featureId, summary: featureName }]),
+    paging: false,
+  }), []);
+  const props = useSelect(config);
+  return (
+    <Select
+      ref={ref}
+      clearButton
+      {...props}
+      {...otherProps}
+    />
+  );
+});
 export default SelectFeature;
