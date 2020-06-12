@@ -4,17 +4,11 @@ import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { Select, Tooltip } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
-<<<<<<< HEAD
 import { featureApi, issueApi, epicApi } from '@/api';
-import TextEditToggle from '../../../../TextEditToggle';
-=======
-import { featureApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectEpic from '@/components/select/select-epic';
 import SelectFeature from '@/components/select/select-feature';
 // import TextEditToggle from '../../../../TextEditToggle';
-import { loadEpics, updateIssue } from '../../../../../api/NewIssueApi';
->>>>>>> [IMP] 修改故事地图故事筛选的样式 & 更换全屏的方式 & 修改SelectEpic&SelectFeature
 import IsInProgramStore from '../../../../../stores/common/program/IsInProgramStore';
 
 const { Option } = Select;
@@ -105,17 +99,17 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
                   editor={<SelectFeature featureId={featureId} featureName={featureName} />}
                 >
                   {featureName ? (
-                      <div
-                        className="primary"
-                        style={{ wordBreak: 'break-word' }}
-                      >
-                        {featureName}
-                      </div>
-                    ) : (
-                      <div>
-                        无
-                      </div>
-                    )
+                    <div
+                      className="primary"
+                      style={{ wordBreak: 'break-word' }}
+                    >
+                      {featureName}
+                    </div>
+                  ) : (
+                    <div>
+                      无
+                    </div>
+                  )
                     }
                 </TextEditToggle>
               </div>
@@ -135,7 +129,7 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
               initValue={epicId || []}
               editor={<SelectEpic />}
             >
-                {
+              {
                   epicId ? (
                     <div
                       style={{
