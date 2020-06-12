@@ -5,14 +5,15 @@ import React, {
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
-import { Button } from 'choerodon-ui';
-import { Select, DataSet, CheckBox } from 'choerodon-ui/pro';
+import { Button, Icon } from 'choerodon-ui';
+import {
+  Select, DataSet, CheckBox, Modal, 
+} from 'choerodon-ui/pro';
 import { DragDropContextProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { observer } from 'mobx-react-lite';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import HeaderLine from '@/components/HeaderLine';
-import SelectDataSet from './store/selectDataSet';
 import Minimap from '../../../components/MiniMap';
 import Empty from '../../../components/Empty';
 import epicPic from './emptyStory.svg';
@@ -23,6 +24,8 @@ import SwitchSwimLine from './components/SwitchSwimLine';
 import CreateVersion from './components/CreateVersion';
 import CreateEpicModal from './components/CreateEpicModal';
 import IssueDetail from './components/IssueDetail';
+import StoryFilterDropDown from './components/StoryFilterDropDown';
+import StoryFilter from './components/StoryFilter';
 import StoryMapStore from '../../../stores/project/StoryMap/StoryMapStore';
 import useFullScreen from '../../../common/useFullScreen';
 import './StoryMapHome.less';
@@ -36,8 +39,6 @@ const HEX = {
 };
 
 const StoryMapHome = observer(() => {
-  const selectDataSet = useMemo(() => new DataSet(SelectDataSet(StoryMapStore)), []);
-
   const handleRefresh = () => {
     StoryMapStore.getStoryMap();
   };
@@ -114,7 +115,6 @@ const StoryMapHome = observer(() => {
   };
 
   const handleCheckBoxChange = (value, oldValue) => {
-    console.log(value, oldValue);
     StoryMapStore.setHiddenColumnNoStory(value);
   };
 
@@ -135,7 +135,7 @@ const StoryMapHome = observer(() => {
 
   const { isInProgram } = IsInProgramStore; // 判断是否为项目群下的子项目 是则不显示史诗
   
-  const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.getElementsByClassName('c7nagile-StoryMap')[0], onFullScreenChange);
+  const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => {}, 'c7nagile-StoryMap-fullScreen');
   return (
     <Page
       className="c7nagile-StoryMap"
@@ -145,7 +145,6 @@ const StoryMapHome = observer(() => {
     >
       <Header title="故事地图">
         {!isInProgram && isEmpty && !loading ? <Button onClick={handleCreateEpicClick} icon="playlist_add">创建史诗</Button> : null}
-        <CheckBox name="hiddenColumn" onChange={handleCheckBoxChange}>隐藏不包含故事的列</CheckBox>
         {!StoryMapStore.isFullScreen && (
           <Button
             icon="view_module"
@@ -154,65 +153,13 @@ const StoryMapHome = observer(() => {
             需求池
           </Button>
         )}
-        <Button className="c7nagile-StoryMap-fullScreenBtn" onClick={toggleFullScreen} icon={isFullScreen ? 'fullscreen_exit' : 'zoom_out_map'}>
+        <Button className="c7nagile-StoryMap-fullScreenBtn" onClick={() => { toggleFullScreen(); }} icon={isFullScreen ? 'fullscreen_exit' : 'zoom_out_map'}>
           {isFullScreen ? '退出全屏' : '全屏'}
         </Button>
         <HeaderLine />
         <SwitchSwimLine />
-        <Select
-          className="c7nagile-StoryMap-header-select c7nagile-StoryMap-header-isCompletedSelect"
-          dataSet={selectDataSet}
-          name="isCompleted"
-          placeholder="解决状态"
-        />
-        <Select
-          className="c7nagile-StoryMap-header-select c7nagile-StoryMap-header-sprintSelect"
-          dataSet={selectDataSet}
-          name="sprints"
-          placeholder="冲刺"
-          multiple
-          searchable
-          dropdownMatchSelectWidth={false}
-          maxTagCount={1}
-          maxTagTextLength={8} 
-          maxTagPlaceholder={restValues => `+${restValues.length}...`}
-          optionRenderer={({ record, text }) => (
-            <div style={{ display: 'inline-block' }}>
-              {text}
-              {
-                record.get('statusCode') === 'started' && (
-                  <div className="c7nagile-StoryMap-header-sprintSelect-option-active">活跃</div>
-                )
-              }
-            </div>
-          )}
-        />
-        <Select
-          className="c7nagile-StoryMap-header-select c7nagile-StoryMap-header-prioritySelect"
-          // style={{ marginRight: 30, marginLeft: 20 }}
-          dataSet={selectDataSet}
-          name="prioritys"
-          placeholder="优先级"
-          dropdownMatchSelectWidth={false}
-          searchable
-          multiple
-          maxTagCount={1}
-          maxTagTextLength={8} 
-          maxTagPlaceholder={restValues => `+${restValues.length}...`}
-        />
-        <Select
-          className="c7nagile-StoryMap-header-select c7nagile-StoryMap-header-componentSelect"
-          // style={{ marginRight: 30, marginLeft: 20 }}
-          dataSet={selectDataSet}
-          name="components"
-          placeholder="模块"
-          dropdownMatchSelectWidth={false}
-          searchable
-          multiple
-          maxTagCount={1}
-          maxTagTextLength={8} 
-          maxTagPlaceholder={restValues => `+${restValues.length}...`}
-        />
+        <StoryFilterDropDown />
+        <CheckBox name="hiddenColumn" onChange={handleCheckBoxChange}>隐藏无故事的列</CheckBox>
       </Header>
       <Breadcrumb />
       <Content style={{
