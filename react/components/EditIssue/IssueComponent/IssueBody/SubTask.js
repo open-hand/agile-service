@@ -6,8 +6,7 @@ import {
 } from 'choerodon-ui';
 import { stores, Choerodon } from '@choerodon/boot';
 import { useIssueTypes } from '@/hooks';
-import { issueApi } from '@/api';
-import { createIssueField } from '../../../../api/NewIssueApi';
+import { issueApi, fieldApi } from '@/api';
 import CreateSubTask from '../../../CreateIssue/CreateSubTask';
 import IssueList from '../../Component/IssueList';
 import EditIssueContext from '../../stores';
@@ -115,7 +114,7 @@ const SubTask = observer(({
             context: subIssueType && subIssueType.typeCode,
             pageCode: 'agile_issue_create',
           };
-          createIssueField(res.issueId, dto);
+          fieldApi.quickCreateDefault(res.issueId, dto);
           handleCancel();
           handleCreateSubIssue();
         })

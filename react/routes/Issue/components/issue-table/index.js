@@ -95,7 +95,6 @@ function IssueTable({ tableRef, onCreateIssue }) {
         })}
       >
         <Column
-          sortable
           align="left"
           name="issueId"
           width={320}

@@ -3,6 +3,7 @@ import {
 } from 'mobx';
 import axios from 'axios';
 import { store, stores } from '@choerodon/boot';
+import { versionApi } from '@/api';
 
 const { AppState } = stores;
 
@@ -106,17 +107,6 @@ class ReleaseStore {
     this.publicVersionDetail = data;
   }
 
-  axiosGetVersionStatusIssues(versionId, data = {}, statusCode) {
-    const orgId = AppState.currentMenuType.organizationId;
-    if (statusCode && statusCode !== '0') {
-      return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/${versionId}/issues?organizationId=${orgId}&statusCode=${statusCode}`, data);
-    } else {
-      return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/${versionId}/issues?organizationId=${orgId}`, data);
-    }
-  }
-
-  handleDataDrag = (projectId, data) => axios.put(`/agile/v1/projects/${projectId}/product_version/drag`, JSON.stringify(data));
-
   @computed get getVersionStatusIssues() {
     return toJS(this.versionStatusIssues);
   }
@@ -131,10 +121,6 @@ class ReleaseStore {
 
   @action setOriginIssue(data) {
     this.originIssue = data;
-  }
-
-  axiosGetVersionDetail(versionId) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/${versionId}`);
   }
 
   @computed get getVersionDetail() {
@@ -190,21 +176,7 @@ class ReleaseStore {
   }
 
   axiosGetVersionList(pageRequest) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/versions?page=${pageRequest.page}&size=${pageRequest.size}`, this.filters);
-  }
-
-  axiosDeleteVersion(data) {
-    let stringData = '';
-    // if (data.fixTargetVersionId) {
-    //   stringData += `fixTargetVersionId=${data.fixTargetVersionId}&`;
-    // }
-    // if (data.influenceTargetVersionId) {
-    //   stringData += `influenceTargetVersionId=${data.influenceTargetVersionId}`;
-    // }
-    if (data.targetVersionId) {
-      stringData += `targetVersionId=${data.targetVersionId}`;
-    }
-    return axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/delete/${data.versionId}?${stringData}`);
+    return versionApi.loadVersionList(pageRequest.page, pageRequest.size, this.filters);
   }
 
   async getSettings() {

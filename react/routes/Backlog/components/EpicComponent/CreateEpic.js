@@ -3,10 +3,11 @@ import { observer } from 'mobx-react';
 import {
   Modal, Form, Input,
 } from 'choerodon-ui';
-import { Content, stores, axios } from '@choerodon/boot';
-import { epicApi, issueApi } from '@/api';
+import { stores } from '@choerodon/boot';
+import {
+  epicApi, issueApi, fileApi, fieldApi, 
+} from '@/api';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
-import { createIssueField } from '../../../../api/NewIssueApi';
 
 const { AppState } = stores;
 const { Sidebar } = Modal;
@@ -57,7 +58,7 @@ class CreateEpic extends Component {
             context: res.typeCode,
             pageCode: 'agile_issue_create',
           };
-          createIssueField(res.issueId, dto);
+          fieldApi.quickCreateDefault(res.issueId, dto);
           this.setState({
             loading: false,
           });
