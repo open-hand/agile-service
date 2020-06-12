@@ -7,6 +7,7 @@ import {
 import { Content, stores, axios } from '@choerodon/boot';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import _ from 'lodash';
+import { fieldApi } from '@/api';
 import SelectFocusLoad from '../../../../../components/SelectFocusLoad';
 import { NumericInput } from '../../../../../components/CommonComponent';
 
@@ -390,7 +391,7 @@ const CreateFilter = (props) => {
    */
   const loadQuickFilterFiled = () => {
     const getPreDefinedField = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/fields`);
-    const getCustomField = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/field_value/list/custom_field`);
+    const getCustomField = () => fieldApi.getCustomFields();
     Promise.all([getPreDefinedField(), getCustomField()]).then(([preDefinedField, customField]) => {
       setQuickFilterFiled([...preDefinedField, ...IsInProgramStore.isInProgram ? [{ fieldCode: 'feature', type: 'long', name: '特性' }] : [], ...customField].map(field => ({ ...field, fieldCode: field.code || field.fieldCode, type: field.fieldType || field.type })) || []);
     });

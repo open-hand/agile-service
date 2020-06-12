@@ -4,11 +4,11 @@ import {
 import {
   stores, axios, Choerodon,
 } from '@choerodon/boot';
-import { getCustomFields } from '@/api/NewIssueApi';
 import {
   debounce, reverse, map, find, isEmpty,
 } from 'lodash';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import { fieldApi } from '@/api';
 
 export function getSystemFields() {
   const systemFields = [{
@@ -296,7 +296,7 @@ class IssueStore {
   @observable fields = []
 
   async loadCustomFields() {
-    const fields = await getCustomFields();
+    const fields = await fieldApi.getCustomFields();
     this.setFields(fields);
   }
 

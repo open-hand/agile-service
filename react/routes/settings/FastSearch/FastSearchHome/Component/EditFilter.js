@@ -7,7 +7,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import {
-  sprintApi, epicApi, featureApi, userApi, versionApi, 
+  sprintApi, epicApi, featureApi, userApi, versionApi, fieldApi, 
 } from '@/api';
 import { NumericInput } from '../../../../../components/CommonComponent';
 
@@ -300,7 +300,7 @@ class AddComponent extends Component {
     //   });
 
     const getPreDefinedField = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/fields`);
-    const getCustomField = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/field_value/list/custom_field`);
+    const getCustomField = () => fieldApi.getCustomFields();
     Promise.all([getPreDefinedField(), getCustomField()]).then(([preDefinedField, customField]) => {
       this.setState({
         quickFilterFiled: [...preDefinedField, ...IsInProgramStore.isInProgram ? [{ fieldCode: 'feature', type: 'long', name: '特性' }] : [], ...customField].map(field => ({ ...field, fieldCode: field.code || field.fieldCode, type: field.fieldType || field.type })) || [],
@@ -851,7 +851,7 @@ class AddComponent extends Component {
     versionApi.loadNamesByStatus().then(res => this.setState({ originVersions: res }));
     axios.get(`/agile/v1/projects/${projectId}/schemes/query_issue_types?apply_type=agile`).then(res => this.setState({ originTypes: res }));
     featureApi.getByEpicId().then(res => this.setState({ originFeatures: res }));
-    axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/field_value/list/custom_field`).then((res) => {
+    fieldApi.getCustomFields().then((res) => {
       const customFieldState = {};
       res.forEach((item) => {
         customFieldState[`origin${item.code}`] = item.fieldOptions || [];

@@ -9,15 +9,14 @@ import { throttle } from 'lodash';
 import './EditIssue.less';
 import useIsOwner from '@/hooks/useIsOwner';
 import { useIssueTypes } from '@/hooks';
-import { issueApi } from '@/api';
+import { issueApi, fieldApi } from '@/api';
 import {
   loadBranchs, loadDatalogs, loadLinkIssues,
-  loadWorklogs, loadDocs, getFieldAndValue,
+  loadWorklogs, loadDocs,
 } from '../../api/NewIssueApi';
 import {
   loadDatalogs as loadDatalogsProgram,
   loadIssue as loadIssueProgram,
-  getFieldAndValue as getFieldAndValueProgram,
 } from '../../api/QueryProgramApi';
 import RelateStory from '../RelateStory';
 import CopyIssue from '../CopyIssue';
@@ -93,7 +92,7 @@ function EditIssue() {
         context: issue.typeCode,
         pageCode: 'agile_issue_edit',
       };
-      const fields = await (programId ? getFieldAndValueProgram(id, param, programId) : getFieldAndValue(id, param));
+      const fields = await fieldApi.getFieldAndValue(id, param);
       setIssueLoading(false);
       store.setIssueFields(issue, fields);
       if (issueStore) {

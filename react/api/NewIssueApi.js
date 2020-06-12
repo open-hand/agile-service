@@ -13,16 +13,6 @@ export function loadLabels() {
     `/agile/v1/projects/${projectId}/issue_labels`,
   );
 }
-export function getFoundationHeader() {
-  const projectId = AppState.currentMenuType.id;
-  return axios.get(`/agile/v1/projects/${projectId}/field_value/list/getFields`, {
-    params: {
-      project_id: projectId * 1,
-      organizationId: AppState.currentMenuType.organizationId * 1,
-      schemeCode: 'agile_issue',
-    },
-  });
-}
 export function createCommit(commitObj, projectId = AppState.currentMenuType.id) {
   return axios.post(`/agile/v1/projects/${projectId}/issue_comment`, commitObj);
 }
@@ -182,45 +172,6 @@ export function cancelImport(id, ovn) {
   return axios.put(`/agile/v1/projects/${projectId}/excel/cancel?id=${id}&objectVersionNumber=${ovn}`);
 }
 
-/**
- * 加载字段配置
- * @returns {V|*}
- */
-export function getFields(dto) {
-  const projectId = AppState.currentMenuType.id;
-  const orgId = AppState.currentMenuType.organizationId;
-  return axios.post(`/agile/v1/projects/${projectId}/field_value/list?organizationId=${orgId}`, dto);
-}
-
-/**
- * 加载字段配置（包含值）
- * @returns {V|*}
- */
-export function getFieldAndValue(id, dto) {
-  const projectId = AppState.currentMenuType.id;
-  const orgId = AppState.currentMenuType.organizationId;
-  return axios.post(`/agile/v1/projects/${projectId}/field_value/list/${id}?organizationId=${orgId}`, dto);
-}
-
-/**
- * 更新Issue字段值
- * @returns {V|*}
- */
-export function updateFieldValue(id, fieldId, code, dto) {
-  const projectId = AppState.currentMenuType.id;
-  const orgId = AppState.currentMenuType.organizationId;
-  return axios.post(`/agile/v1/projects/${projectId}/field_value/update/${id}?organizationId=${orgId}&fieldId=${fieldId}&schemeCode=${code}`, dto);
-}
-
-/**
- * 新增Issue字段值
- * @returns {V|*}
- */
-export function createFieldValue(id, code, dto) {
-  const projectId = AppState.currentMenuType.id;
-  const orgId = AppState.currentMenuType.organizationId;
-  return axios.post(`/agile/v1/projects/${projectId}/field_value/${id}?organizationId=${orgId}&schemeCode=${code}`, dto);
-}
 export function getMyFilters() {
   const { userInfo: { id } } = AppState;
   const projectId = AppState.currentMenuType.id;
@@ -252,10 +203,7 @@ export function getHistoryPI(issueId) {
   const projectId = AppState.currentMenuType.id;
   return axios.get(`/agile/v1/projects/${projectId}/pi/${issueId}/list_feature_pi_log`);
 }
-export function getCustomFields() {
-  const projectId = AppState.currentMenuType.id;
-  return axios.get(`/agile/v1/projects/${projectId}/field_value/list/custom_field`);
-}
+
 export function batchUpdateIssue(data) {
   const projectId = AppState.currentMenuType.id;
   return axios.post(`/agile/v1/projects/${projectId}/field_value/batch_update_fields_value?schemeCode=agile_issue&applyType=agile`, data);

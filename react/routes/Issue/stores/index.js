@@ -5,7 +5,7 @@ import { set } from 'mobx';
 import { DataSet } from 'choerodon-ui/pro';
 import { inject } from 'mobx-react';
 import { injectIntl } from 'react-intl';
-import { getFoundationHeader } from '@/api/NewIssueApi';
+import { fieldApi } from '@/api';
 import IssueStore from '@/stores/project/issue/IssueStore';
 import IssueDataSet from './IssueDataSet';
 
@@ -20,7 +20,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
     const [fields, setFields] = useState([]);
     useEffect(() => {
       const loadData = async () => {
-        const Fields = await getFoundationHeader();
+        const Fields = await fieldApi.getFoundationHeader();
         setFields(Fields);
       };
       loadData();
