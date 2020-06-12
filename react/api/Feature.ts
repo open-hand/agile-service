@@ -1,6 +1,11 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 
+interface UFeatureColor {
+  colorCode: string,
+  issueId: number,
+  objectVersionNumber: number,
+}
 class FeatureApi {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
@@ -31,7 +36,7 @@ class FeatureApi {
    * 在子项目根据piId查询项目群的特性
    * @param piId 不传默认查询活跃PI
    */
-  getByPiIdInSubProject(piId?: number, sprintId?:number) {
+  getByPiIdInSubProject(piId?: number, sprintId?: number) {
     return axios.get(
       `${this.prefix}/issues/features`,
       {
@@ -83,6 +88,15 @@ class FeatureApi {
   }
 
   /**
+   * 更新特性颜色
+   * @param data 
+   */
+  updateColor(data: UFeatureColor) {
+    return axios.put(`${this.prefix}/issues/update_feature`, data);
+  }
+
+
+  /**
    * 根据summary查询史诗下是否有同名特性
    * @param summary 
    * @param epicId 
@@ -106,7 +120,7 @@ class FeatureApi {
     });
   }
 
-  
+
   /**
    * 分页查询特性列表
    * @param page 
@@ -141,7 +155,7 @@ class FeatureApi {
    * 查询特性下拆分的故事
    * @param issueId 
    */
-  getSplitStory(issueId:number) {
+  getSplitStory(issueId: number) {
     return axios({
       method: 'post',
       url: `${this.prefix}/issues/list_story_by_feature_id`,
@@ -149,6 +163,15 @@ class FeatureApi {
         issueId,
       },
     });
+  }
+
+  /**
+   * 将批量的issue加入到特性中
+   * @param featureId 
+   * @param issueIds 
+   */
+  addIssues(featureId: number, issueIds: Array<number>) {
+    return axios.post(`${this.prefix}/issues/to_feature/${featureId}`, issueIds);
   }
 }
 

@@ -219,14 +219,6 @@ class BacklogStore {
     this.sprintWidth = document.getElementsByClassName('c7n-backlog-sprint')[0].offsetWidth;
   }
 
-  axiosGetIssueDetail(issueId) {
-    const orgId = AppState.currentMenuType.organizationId;
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/${issueId}${orgId ? `?organizationId=${orgId}` : ''}`);
-  }
-
-  axiosEasyCreateIssue(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues?applyType=agile`, data);
-  }
 
   @computed get getOnlyMe() {
     return this.onlyMe;
@@ -265,18 +257,6 @@ class BacklogStore {
     return this.prevClickedIssue;
   }
 
-  axiosUpdateIssuesToVersion(versionId, ids) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/to_version/${versionId}`, ids);
-  }
-
-  axiosUpdateIssuesToEpic(epicId, ids) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/to_epic/${epicId}`, ids);
-  }
-
-  axiosUpdateIssuesToFeature(featureId, ids) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/to_feature/${featureId}`, ids);
-  }
-
   @computed get getIsLeaveSprint() {
     return this.isLeaveSprint;
   }
@@ -291,15 +271,6 @@ class BacklogStore {
 
   @action setIsDragging(data) {
     this.isDragging = data;
-  }
-
-  axiosUpdateIssue(data) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issues`, data);
-  }
-
-  // 更新特性颜色
-  axiosUpdateFeatureColor(data) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/update_feature`, data);
   }
 
   @computed get getChosenVersion() {
@@ -357,10 +328,6 @@ class BacklogStore {
     this.selectedSprintId = data;
   }
 
-
-  axiosGetEpic() {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/epics`);
-  }
 
   axiosGetVersion() {
     return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version`);
@@ -679,7 +646,7 @@ class BacklogStore {
     // this.multiSelected = observable.map();
     // this.clickIssueDetail = {};
     this.onBlurClick();
-    return axios.post(`agile/v1/projects/${AppState.currentMenuType.id}/issues/to_sprint/${destinationId}`, {
+    return sprintApi.addIssues(destinationId, {
       before: destinationIndex === 0,
       issueIds: modifiedArr,
       outsetIssueId: prevIssue ? prevIssue.issueId : 0,

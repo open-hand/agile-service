@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Draggable } from 'react-beautiful-dnd';
+import { issueApi, epicApi } from '@/api';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 import DraggableEpic from './DraggableEpic';
 
@@ -39,7 +40,7 @@ class EpicItem extends Component {
             if (BacklogStore.getIsDragging) {
               BacklogStore.toggleIssueDrag(false);
               e.currentTarget.style.border = 'none';
-              BacklogStore.axiosUpdateIssuesToEpic(
+              epicApi.addIssues(
                 item.issueId, BacklogStore.getIssueWithEpicOrVersion,
               ).then((res) => {
                 issueRefresh();

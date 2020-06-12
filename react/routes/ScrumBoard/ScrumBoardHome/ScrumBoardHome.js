@@ -439,7 +439,7 @@ class ScrumBoardHome extends Component {
                   objectVersionNumber: ScrumBoardStore.getUpdatedParentIssue.objectVersionNumber,
                   transformId: updateParentStatus || ScrumBoardStore.getTransformToCompleted[0].id,
                 };
-                ScrumBoardStore.axiosUpdateIssue(data).then((res) => {
+                issueApi.updateStatus(data).then((res) => {
                   ScrumBoardStore.setUpdateParent(false);
                   this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
                 }).catch((error) => {

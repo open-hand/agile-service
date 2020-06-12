@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import classnames from 'classnames';
 import { Menu, Icon, Dropdown } from 'choerodon-ui';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
+import { featureApi } from '@/api';
 
 
 @observer
@@ -65,7 +66,7 @@ class DraggableFeature extends Component {
                     issueId: item.issueId,
                     objectVersionNumber: item.objectVersionNumber,
                   };
-                  BacklogStore.axiosUpdateFeatureColor(inputData).then((res) => {
+                  featureApi.updateColor(inputData).then((res) => {
                     BacklogStore.updateFeature(res);
                     refresh();
                   }).catch((error) => {

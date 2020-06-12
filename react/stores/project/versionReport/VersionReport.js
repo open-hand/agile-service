@@ -1,8 +1,9 @@
+/* eslint-disable no-return-assign */
+/* eslint-disable no-param-reassign */
 import {
   observable, action, computed, toJS, 
 } from 'mobx';
 import { store, stores, axios } from '@choerodon/boot';
-import Item from 'choerodon-ui/lib/list/Item';
 import _ from 'lodash';
 
 const { AppState } = stores;
@@ -108,10 +109,6 @@ class VersionReportStore {
     this.versionList = data;
   }
 
-  axiosGetVersionList() {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/names`, ['version_planning', 'released']);
-  }
-
   getPieDatas = (projectId, type, sprintId, versionId, startDate, endDate) => {
     const orgId = AppState.currentMenuType.organizationId;
     this.changePieLoading(true);
@@ -122,6 +119,7 @@ class VersionReportStore {
           const colors = ['#9665E2', '#F0657D', '#FAD352', '#FF9915', '#45A3FC', '#3F51B5', '#47CBCA', '#59CB79', '#F953BA', '#D3D3D3'];
           if (len > 10) {
             for (let i = 10; i < len; i += 1) {
+              // eslint-disable-next-line no-bitwise
               colors.push(`#${(`00000${((Math.random() * 16777215 + 0.5) >> 0).toString(16)}`).slice(-6)}`);
             }
           }

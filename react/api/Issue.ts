@@ -15,7 +15,7 @@ interface IIssue {
   description?: string, // 描述
   epicId?: number, // 史诗id
   featureVO?: object, // 特性 {}
-  issueLinkCreateVOList?: Array<object>, // 关联的问题列表 [{linkTypeId: "4833", linkedIssueId: 275652, in: false}] // 问题链接
+  issueLinkCreateVOList?: Array<object>, // 关联的问题列表 [{linkTypeId: "4833", linkedIssueId: 275652, in: false}]//问题链接
   issueTypeId?: number, // 问题类型id
   labelIssueRelVOList?: Array<any>, // 标签列表 []
   parentIssueId?: number, // 父id 为0代表自己是父问题
@@ -25,7 +25,7 @@ interface IIssue {
   storyPoints?: number | string, // 故事点
   versionIssueRelVOList?: Array<object>, // 关联的版本信息 [{versionId: 1814, relationType: "fix"}] 
   wsjfVO?: object, // wsjf信息 {}
-  // [ propName : string ] : any, // 
+  // [ propName : string ] : any,//
 }
 interface UIssue {
   issueId: number,
@@ -39,10 +39,51 @@ interface UTypeAndStatus {
   projectId: number | string,
   typeCode: string,
   statusId?: number, // 状态id
-  parentIssueId?:number // 父id 
+  parentIssueId?: number// 父id 
+}
+interface UIssueParent {
+  issueId: number,
+  parentIssueId: number,
+  objectVersionNumber: number
 }
 interface SearchVO {
   advancedSearchArgs: object,
+}
+interface CopyCondition {
+  issueLink: boolean,
+  sprintValues: boolean,
+  subTask: boolean,
+  summary: string,
+  epicName?: string,
+}
+interface ExportSearch {
+  advancedSearchArgs?: {
+    issueTypeId?: number, // 问题类型id
+    reporterIds?: Array<number>, // 报告人id列表
+    statusId?: number, // 状态id
+    priorityId?: number, // 优先级id
+  },
+  otherArgs: {
+    customField: object, // 通用组件 （自定义）
+    assigneeId?: number, // 经办人id
+    issueIds?: Array<number>,
+    component?: any,
+    epic?: any,
+    feature?: any,
+    label?: any,
+    sprint?: any,
+    summary?: string,
+    version?: any,
+  },
+  searchArgs?: {
+    createStartDate: string,
+    createEndDate: string,
+    updateStartDate: string,
+    updateEndDate: string,
+  },
+  exportFieldCodes: Array<string>, // 导出的字段列表
+  quickFilterIds?: Array<number>,
+  contents?: string,
 }
 class IssueApi {
   get prefix() {
@@ -50,10 +91,10 @@ class IssueApi {
   }
 
   /**
-   * 创建问题 敏捷/测试
-   * @param issueObj 
-   * @param applyType 
-   */
+    * 创建问题 敏捷/测试
+    * @param issueObj 
+    * @param applyType 
+    */
   create = (issueObj: IIssue, applyType: string = 'agile') => axios({
     method: 'post',
     url: `${this.prefix}/issues`,
@@ -64,19 +105,19 @@ class IssueApi {
   });
 
   /**
-   * 更新问题
-   * @param issueObj 
-   * @param projectId 
-   */
+    * 更新问题
+    * @param issueObj 
+    * @param projectId 
+    */
   update = (issueObj: UIssue) => axios.put(`${this.prefix}/issues`, issueObj)
 
   /**
-   * 更新问题状态
-   * @param transformId 转换的状态id
-   * @param issueId  问题id
-   * @param objectVersionNumber 版本号
-   * @param applyType 应用类型
-   */
+    * 更新问题状态
+    * @param transformId 转换的状态id
+    * @param issueId  问题id
+    * @param objectVersionNumber 版本号
+    * @param applyType 应用类型
+    */
   updateStatus(transformId: number, issueId: number, objectVersionNumber: number, applyType = 'agile') {
     return axios({
       method: 'put',
@@ -91,13 +132,10 @@ class IssueApi {
   }
 
   /**
-   * 更新问题类型
-   * @param data 
-   */
+    * 更新问题类型
+    * @param data 
+    */
   updateType(data: UTypeAndStatus) {
-    const issueUpdateTypeVO = {
-      ...data,
-    };
     const organizationId = getOrganizationId();
     return axios({
       method: 'post',
@@ -111,9 +149,28 @@ class IssueApi {
   }
 
   /**
-   * 根据问题id加载问题
-   * @param issueId 
-   */
+    * 克隆问题
+    * @param issueId 
+    * @param applyType 
+    * @param copyCondition 
+    */
+  clone(issueId: number, applyType: string = 'agile', copyCondition: CopyCondition) {
+    const organizationId = getOrganizationId();
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/issues/${issueId}/clone_issue`,
+      data: copyCondition,
+      params: {
+        organizationId,
+        applyType,
+      },
+    });
+  }
+
+  /**
+    * 根据问题id加载问题
+    * @param issueId 
+    */
   load(issueId: number) {
     const organizationId = getOrganizationId();
     return axios({
@@ -126,10 +183,10 @@ class IssueApi {
   }
 
   /**
-   * 删除问题
-   * @param issueId // 问题id
-   * @param creatorId //问题创建者id
-   */
+    * 删除问题
+    * @param issueId//问题id
+    * @param creatorId//问题创建者id
+    */
   delete(issueId: number, creatorId: number) {
     if (creatorId === AppState.userInfo.id) {
       return axios.delete(`/agile/v1/projects/${getProjectId()}/issues/delete_self_issue/${issueId}`);
@@ -138,24 +195,43 @@ class IssueApi {
   }
 
   /**
-   * 创建子任务
-   * @param obj 
-   * @param applyType 
-   */
+    * 导出问题列表
+    * @param searchVO 
+    * @param sort 
+    */
+  export(searchVO: ExportSearch, sort?: string) {
+    const organizationId = getOrganizationId();
+    return axios({
+      url: `${this.prefix}/issues/export`,
+      method: 'post',
+      data: searchVO,
+      params: {
+        organizationId,
+        sort,
+      },
+      responseType: 'arraybuffer',
+    });
+  }
+
+  /**
+    * 创建子任务
+    * @param obj 
+    * @param applyType 
+    */
   createSubtask = (issueObj: object) => axios.post(`${this.prefix}/issues/sub_issue`, issueObj)
 
   /**
-   * 根据子任务问题id 进行加载这个子任务（废弃，不再使用）
-   * @param issueId 
-   */
+    * 根据子任务问题id 进行加载这个子任务（废弃，不再使用）
+    * @param issueId 
+    */
   loadSubtask(issueId: number) {
     return axios.get(`${this.prefix}/issues/sub_issue/${issueId}`);
   }
 
   /**
-   * 子任务转换为任务
-   * @param data 
-   */
+    * 子任务转换为任务
+    * @param data 
+    */
   subtaskTransformTask(data: UTypeAndStatus) {
     const organizationId = getOrganizationId();
     return axios({
@@ -169,10 +245,10 @@ class IssueApi {
   }
 
   /**
-   * 任务转换为子任务
-   * @param data 
-   */
-  taskTransformSubTask(data:UTypeAndStatus) {
+    * 任务转换为子任务
+    * @param data 
+    */
+  taskTransformSubTask(data: UTypeAndStatus) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'post',
@@ -185,12 +261,20 @@ class IssueApi {
   }
 
   /**
- * 查询故事和任务   关联问题时 (对于BUG管理问题)
- * @param {*} page 
- * @param {*} size 
- * @param {*} searchVO  
- */
-  loadStroyAndTask(page: number = 1, size: number = 10, searchVO: SearchVO) {
+    * 更改子任务所属的父任务
+    * @param issueUpdateParentIdVO 
+    */
+  subTaskChangeParent(issueUpdateParentIdVO: UIssueParent) {
+    axios.post(`${this.prefix}/issues/update_parent`, issueUpdateParentIdVO);
+  }
+
+  /**
+  * 查询故事和任务   关联问题时 (对于BUG管理问题)
+  * @param {*} page 
+  * @param {*} size 
+  * @param {*} searchVO  
+  */
+  loadStroyAndTask(page: number = 1, size: number = 10, searchVO?: SearchVO) {
     return axios({
       method: 'post',
       url: `${this.prefix}/issues/query_story_task`,
@@ -203,13 +287,13 @@ class IssueApi {
   }
 
   /**
-   * 分页搜索查询issue列表
-   * @param page 
-   * @param size 
-   * @param issueId 
-   * @param content 
-   */
-  loadIssuesInLink(page: number = 1, size: number = 10, issueId: number, content: string) {
+    * 分页搜索查询issue列表
+    * @param page 
+    * @param size 
+    * @param issueId 
+    * @param content 
+    */
+  loadIssuesInLink(page: number = 1, size: number = 10, issueId?: number, content?: string) {
     // console.log('loadIssuesInLink', issueId, content);
     return axios({
       method: 'get',
@@ -223,13 +307,13 @@ class IssueApi {
       },
     });
     // if (issueId && content) {
-    //   return axios.get(`${this.prefix}/issues/agile/summary?issueId=${issueId}&self=false&content=${content}&page=${page}&size=${size}`);
+    //  return axios.get(`${ this.prefix }/issues/agile/summary ? issueId = ${ issueId } & self=false & content=${ content } & page=${ page } & size=${ size }`);
     // } else if (issueId && !content) {
-    //   return axios.get(`${this.prefix}/issues/agile/summary?issueId=${issueId}&self=false&page=${page}&size=${size}`);
+    //  return axios.get(`${ this.prefix }/issues/agile/summary ? issueId = ${ issueId } & self=false & page=${ page } & size=${ size }`);
     // } else if (!issueId && content) {
-    //   return axios.get(`${this.prefix}/issues/agile/summary?self=false&content=${content}&page=${page}&size=${size}`);
+    //  return axios.get(`${ this.prefix }/issues/agile/summary ? self = false & content=${ content } & page=${ page } & size=${ size }`);
     // } else {
-    //   return axios.get(`${this.prefix}/issues/agile/summary?self=false&page=${page}&size=${size}`);
+    //  return axios.get(`${ this.prefix }/issues/agile/summary ? self = false & page=${ page } & size=${ size }`);
     // }
   }
 }

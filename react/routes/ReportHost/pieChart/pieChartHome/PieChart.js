@@ -13,7 +13,7 @@ import {
   Button, Select, Icon, Spin, Tooltip,
 } from 'choerodon-ui';
 import './pie.less';
-import { sprintApi } from '@/api';
+import { sprintApi, versionApi } from '@/api';
 import SwitchChart from '../../Component/switchChart';
 import VersionReportStore from '../../../../stores/project/versionReport/VersionReport';
 import NoDataComponent from '../../Component/noData';
@@ -63,7 +63,7 @@ class ReleaseDetail extends Component {
     await VersionReportStore.getPieDatas(AppState.currentMenuType.id, value);
     await axios.all([
       sprintApi.loadSprints(['started', 'closed']),
-      axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/names`),
+      versionApi.loadNamesByStatus(),
     ])
       .then(axios.spread((sprints, versions) => {
         this.setState({

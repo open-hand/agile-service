@@ -19,20 +19,6 @@ export function loadLabels() {
     `/agile/v1/projects/${projectId}/issue_labels`,
   );
 }
-
-export function loadVersions(arr = []) {
-  const projectId = AppState.currentMenuType.id;
-  return axios.post(`/agile/v1/projects/${projectId}/product_version/names`, arr);
-}
-
-export function createVersion(versionCreateVO) {
-  const projectId = AppState.currentMenuType.id;
-  return axios.post(`/agile/v1/projects/${projectId}/product_version`, versionCreateVO);
-}
-export function checkVersionNameRepeat(value) {
-  const projectId = AppState.currentMenuType.id;
-  return axios.get(`/agile/v1/projects/${projectId}/product_version/check?name=${value}`);
-}
 export function getFoundationHeader() {
   const projectId = AppState.currentMenuType.id;
   return axios.get(`/agile/v1/projects/${projectId}/field_value/list/getFields`, {

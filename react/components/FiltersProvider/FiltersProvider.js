@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  userApi, componentApi, issueApi, epicApi, 
+  userApi, componentApi, issueApi, epicApi, versionApi, 
 } from '@/api';
 import { sprintApi } from '@/api';
 import {
-  loadIssueTypes, loadStatusList, loadPriorities, loadLabels, loadVersions,
+  loadIssueTypes, loadStatusList, loadPriorities, loadLabels,
 } from '../../api/NewIssueApi';
 
 const requests = {
@@ -37,7 +37,7 @@ const requests = {
   version: {
     textField: 'name',
     valueField: 'versionId',
-    request: loadVersions,
+    request: versionApi.loadNamesByStatus.bind(versionApi),
   },
   label: {
     textField: 'labelName',

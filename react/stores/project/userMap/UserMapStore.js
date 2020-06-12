@@ -4,7 +4,7 @@ import {
 import axios from 'axios';
 import _ from 'lodash';
 import { store, stores, Choerodon } from '@choerodon/boot';
-import { sprintApi } from '@/api';
+import { sprintApi, versionApi } from '@/api';
 
 const { AppState } = stores;
 
@@ -404,8 +404,7 @@ class UserMapStore {
       this.setSprints(sprints);
     });
 
-  loadVersions = () => axios
-    .get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version`)
+  loadVersions = () => versionApi.loadAll()
     .then((versions) => {
       this.setVersions(versions);
     });

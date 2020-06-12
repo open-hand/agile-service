@@ -3,6 +3,7 @@ import {
 } from 'mobx';
 import { store, stores, axios } from '@choerodon/boot';
 import _ from 'lodash';
+import { versionApi } from '@/api';
 
 const { AppState } = stores;
 const UNIT_STATUS = {
@@ -132,7 +133,7 @@ class VersionReportStore {
   }
 
   loadVersions() {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/names`, ['version_planning', 'released'])
+    return versionApi.loadNamesByStatus(['version_planning', 'released'])
       .then((res) => {
         this.setVersionFinishLoading(true);
         this.setVersions(res);

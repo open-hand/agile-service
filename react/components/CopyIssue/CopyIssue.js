@@ -6,7 +6,7 @@ import {
 } from 'choerodon-ui';
 
 import './CopyIssue.less';
-import { epicApi } from '@/api';
+import { epicApi, issueApi } from '@/api';
 
 const { AppState } = stores;
 const FormItem = Form.Item;
@@ -47,7 +47,7 @@ class CopyIssue extends Component {
         this.setState({
           loading: true,
         });
-        axios.post(`/agile/v1/projects/${projectId}/issues/${issueId}/clone_issue?organizationId=${orgId}&applyType=${applyType}&orgId=${orgId}`, copyConditionVO)
+        issueApi.clone(issueId, applyType, copyConditionVO)
           .then((res) => {
             this.setState({
               loading: false,
