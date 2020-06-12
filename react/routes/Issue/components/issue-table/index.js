@@ -96,6 +96,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
       >
         <Column
           align="left"
+          lock="left"
           name="issueId"
           width={320}
           onCell={({ record }) => ({
