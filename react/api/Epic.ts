@@ -53,5 +53,5 @@ class EpicApi {
 }
 
 const epicApi = new EpicApi();
-// eslint-disable-next-line import/prefer-default-export
+
 export { epicApi };

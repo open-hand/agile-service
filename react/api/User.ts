@@ -57,5 +57,5 @@ class UserApi {
 }
 
 const userApi = new UserApi();
-// eslint-disable-next-line import/prefer-default-export
+
 export { userApi };

@@ -1,4 +1,5 @@
 import { axios } from '@choerodon/boot';
+
 class Api {
   isConfig: boolean;
 
