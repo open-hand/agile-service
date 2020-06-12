@@ -22,7 +22,8 @@ import TextEditToggle from '@/components/TextEditTogglePro';
     }
   };
 
-  updateIssueLabel = (newLabelIssueRelVOList) => {
+  updateIssueLabel = (labels) => {
+    const newLabelIssueRelVOList = labels || [];
     const originLabels = this.dataRef.current;
     const {
       store, onUpdate, reloadIssue, AppState,
