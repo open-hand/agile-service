@@ -7,6 +7,7 @@ import {
   Button, Menu, Icon, Spin, Tooltip,
 } from 'choerodon-ui';
 import { withRouter } from 'react-router-dom';
+import { versionApi } from '@/api';
 import DragSortingTable from '../ReleaseComponent/DragSortingTable';
 import AddRelease from '../ReleaseComponent/AddRelease';
 import ReleaseStore from '../../../stores/project/release/ReleaseStore';
@@ -71,7 +72,7 @@ class ReleaseHome extends Component {
           total: data.total,
         },
       });
-    }).catch((error) => {
+    }).catch(() => {
     });
   }
 
@@ -79,24 +80,24 @@ class ReleaseHome extends Component {
     const { pagination } = this.state;
     if (key === '0') {
       if (record.statusCode === 'version_planning') {
-        ReleaseStore.axiosGetPublicVersionDetail(record.versionId)
+        versionApi.loadPublicVersionDetail(record.versionId)
           .then((res) => {
             ReleaseStore.setPublicVersionDetail(res);
             ReleaseStore.setVersionDetail(record);
             this.setState({ publicVersion: true, release: record });
-          }).catch((error) => {
+          }).catch(() => {
           });
       } else {
-        ReleaseStore.axiosUnPublicRelease(
+        versionApi.revokePublish(
           record.versionId,
         ).then((res2) => {
           this.refresh(pagination);
-        }).catch((error) => {
+        }).catch(() => {
         });
       }
     }
     if (key === '4') {
-      ReleaseStore.axiosVersionIssueStatistics(record.versionId).then((res) => {
+      versionApi.loadNamesAndIssueBeforeDel(record.versionId).then((res) => {
         this.setState({
           versionDelInfo: {
             versionName: record.name,
@@ -106,7 +107,7 @@ class ReleaseHome extends Component {
         }, () => {
           ReleaseStore.setDeleteReleaseVisible(true);
         });
-      }).catch((error) => {
+      }).catch(() => {
       });
     }
     if (key === '5') {
@@ -116,21 +117,21 @@ class ReleaseHome extends Component {
           selectItem: record,
           editRelease: true,
         });
-      }).catch((error) => {
+      }).catch(() => {
       });
     }
     if (key === '3') {
       if (record.statusCode === 'archived') {
         // 撤销归档
-        ReleaseStore.axiosUnFileVersion(record.versionId).then((res) => {
+        versionApi.revokeArchived(record.versionId).then((res) => {
           this.refresh(pagination);
-        }).catch((error) => {
+        }).catch(() => {
         });
       } else {
         // 归档
-        ReleaseStore.axiosFileVersion(record.versionId).then((res) => {
+        versionApi.archived(record.versionId).then((res) => {
           this.refresh(pagination);
-        }).catch((error) => {
+        }).catch(() => {
         });
       }
     }
@@ -183,7 +184,7 @@ class ReleaseHome extends Component {
                   </span>
                 </Tooltip>
               </Menu.Item>
-            </Permission>            
+            </Permission>
           )
         }
         <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus']} key="3">
@@ -239,10 +240,6 @@ class ReleaseHome extends Component {
       release,
     } = this.state;
     const deleteReleaseVisible = ReleaseStore.getDeleteReleaseVisible;
-    const menu = AppState.currentMenuType;
-    const {
-      type, id: projectId, organizationId: orgId, name, 
-    } = menu;
     const versionData = ReleaseStore.getVersionList.length > 0 ? ReleaseStore.getVersionList : [];
     const versionColumn = [{
       title: '版本',

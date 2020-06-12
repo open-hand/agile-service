@@ -98,44 +98,12 @@ class ReleaseStore {
     };
   }
 
-  axiosFileVersion(id) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/${id}/archived`);
-  }
-
-  axiosUnFileVersion(id) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/${id}/revoke_archived`);
-  }
-
-  axiosMergeVersion(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/merge`, data);
-  }
-
-  axiosPublicRelease(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/release`, data);
-  }
-
-  axiosUnPublicRelease(versionId) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/${versionId}/revoke_release`);
-  }
-
   @computed get getPublicVersionDetail() {
     return toJS(this.publicVersionDetail);
   }
 
   @action setPublicVersionDetail(data) {
     this.publicVersionDetail = data;
-  }
-
-  axiosVersionIssueStatistics(id) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/${id}/names`);
-  }
-
-  axiosGetPublicVersionDetail(versionId) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/${versionId}/plan_names`);
-  }
-
-  axiosUpdateVersion(versionId, data) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/update/${versionId}`, data);
   }
 
   axiosGetVersionStatusIssues(versionId, data = {}, statusCode) {
@@ -221,10 +189,6 @@ class ReleaseStore {
     return this.deleteReleaseVisible;
   }
 
-  axiosAddRelease(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version`, data);
-  }
-
   axiosGetVersionList(pageRequest) {
     return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/versions?page=${pageRequest.page}&size=${pageRequest.size}`, this.filters);
   }
@@ -241,14 +205,6 @@ class ReleaseStore {
       stringData += `targetVersionId=${data.targetVersionId}`;
     }
     return axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/delete/${data.versionId}?${stringData}`);
-  }
-
-  axiosGetVersionListWithoutPage() {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/names`, ['version_planning']);
-  }
-
-  axiosCheckName(proId, name) {
-    return axios.get(`/agile/v1/projects/${proId}/product_version/check?name=${name}`);
   }
 
   async getSettings() {

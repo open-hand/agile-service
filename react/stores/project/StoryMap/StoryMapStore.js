@@ -7,9 +7,9 @@ import {
   find, findIndex, remove, sortBy,
 } from 'lodash';
 import { getProjectId } from '@/utils/common';
-import { storyMapApi } from '@/api';
+import { storyMapApi, versionApi } from '@/api';
 import {
-  loadIssueTypes, loadVersions, loadPriorities,
+  loadIssueTypes, loadPriorities,
 } from '../../../api/NewIssueApi';
 
 class StoryMapStore {
@@ -88,7 +88,7 @@ class StoryMapStore {
 
   getStoryMap = () => {
     this.setLoading(true);
-    Promise.all([storyMapApi.getStoryMap(this.searchVO), loadIssueTypes(), loadVersions(), loadPriorities()]).then(([storyMapData, issueTypes, versionList, prioritys]) => {
+    Promise.all([storyMapApi.getStoryMap(this.searchVO), loadIssueTypes(), versionApi.loadNamesByStatus(), loadPriorities()]).then(([storyMapData, issueTypes, versionList, prioritys]) => {
       let epicWithFeature = storyMapData.epics || storyMapData.epicWithFeature;
       const { featureWithoutEpic = [] } = storyMapData;
       epicWithFeature = sortBy(epicWithFeature, 'epicRank');

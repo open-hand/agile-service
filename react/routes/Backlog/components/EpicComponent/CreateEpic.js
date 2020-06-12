@@ -4,7 +4,7 @@ import {
   Modal, Form, Input,
 } from 'choerodon-ui';
 import { Content, stores, axios } from '@choerodon/boot';
-import { epicApi } from '@/api';
+import { epicApi, issueApi } from '@/api';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 import { createIssueField } from '../../../../api/NewIssueApi';
 
@@ -51,7 +51,7 @@ class CreateEpic extends Component {
         this.setState({
           loading: true,
         });
-        BacklogStore.axiosEasyCreateIssue(req).then((res) => {
+        issueApi.create(req).then((res) => {
           const dto = {
             schemeCode: 'agile_issue',
             context: res.typeCode,

@@ -2,7 +2,8 @@ import {
   observable, action, computed, runInAction,
 } from 'mobx';
 import { stores } from '@choerodon/boot';
-import { getProjectsInProgram, getProjectIsShowFeature, getIsOwner } from '@/api/CommonApi';
+import { getProjectsInProgram, getIsOwner } from '@/api/CommonApi';
+import { commonApi } from '@/api';
 
 const { AppState } = stores;
 /**
@@ -77,7 +78,7 @@ class IsInProgramStore {
 
 
   loadIsShowFeature = async () => {
-    const artInfo = await getProjectIsShowFeature();
+    const artInfo = await commonApi.getIsShowFeature();
     runInAction(() => {
       this.setArtInfo(artInfo);
       this.setIsShowFeature(Boolean(artInfo));

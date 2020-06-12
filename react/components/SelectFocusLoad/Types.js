@@ -3,12 +3,12 @@ import React from 'react';
 import { Select } from 'choerodon-ui';
 import { find } from 'lodash';
 import {
-  userApi, componentApi, issueApi, epicApi, 
+  userApi, componentApi, issueApi, epicApi, versionApi, 
 } from '@/api';
 import { getSubProjects } from '@/api/CommonApi';
 import {
   loadIssueTypes, loadPriorities,
-  loadLabels, loadVersions,
+  loadLabels,
   loadStatusList,
 } from '@/api/NewIssueApi';
 import { issueLinkTypeApi } from '@/api/IssueLinkType';
@@ -389,7 +389,7 @@ export default {
       filterOption: false,
       loadWhenMount: true,
     },
-    request: ({ filter, page }, statusList = ['version_planning']) => loadVersions(statusList),
+    request: ({ filter, page }, statusList = ['version_planning']) => versionApi.loadNamesByStatus(statusList),
     render: version => (
       <Option
         key={version.versionId}

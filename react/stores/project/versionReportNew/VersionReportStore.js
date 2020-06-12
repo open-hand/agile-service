@@ -1,6 +1,9 @@
-import { observable, action, computed, toJS } from 'mobx';
+import {
+  observable, action, computed, toJS, 
+} from 'mobx';
 import { store, stores, axios } from '@choerodon/boot';
 import _ from 'lodash';
+import { versionApi } from '@/api';
 
 const { AppState } = stores;
 const UNIT_STATUS = {
@@ -26,14 +29,23 @@ const UNIT2NAME = {
 @store('VersionReportStore')
 class VersionReportStore {
   @observable tableLoading = false;
+
   @observable tableData = [];
+
   @observable chartLoading = false;
+
   @observable chartData = [];
+
   @observable beforeCurrentUnit = 'story_point';
+
   @observable currentUnit = 'story_point';
+
   @observable versions = [];
+
   @observable versionFinishLoading = false;
+
   @observable currentVersionId = undefined;
+
   @observable reload = false;
 
   loadEpicAndChartAndTableData() {
@@ -47,7 +59,7 @@ class VersionReportStore {
   }
 
   loadVersions() {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/names`, ['version_planning', 'released'])
+    return versionApi.loadNamesByStatus(['version_planning', 'released'])
       .then((res) => {
         this.setVersionFinishLoading(true);
         this.setVersions(res);

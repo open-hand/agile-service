@@ -6,6 +6,7 @@ import {
 import moment from 'moment';
 import axios from 'axios';
 import { Content, stores } from '@choerodon/boot';
+import { versionApi } from '@/api';
 import ReleaseStore from '../../../stores/project/release/ReleaseStore';
 
 const { Sidebar } = Modal;
@@ -57,9 +58,9 @@ class EditRelease extends Component {
           projectId: AppState.currentMenuType.id,
           startDate: value.startDate ? `${moment(value.startDate).format('YYYY-MM-DD')} 00:00:00` : null,
           expectReleaseDate: value.expectReleaseDate ? `${moment(value.expectReleaseDate).format('YYYY-MM-DD')} 00:00:00` : null,
-          versionId: ReleaseStore.getVersionDetail.versionId,
+          // versionId: ReleaseStore.getVersionDetail.versionId,
         };
-        ReleaseStore.axiosUpdateVersion(
+        versionApi.update(
           ReleaseStore.getVersionDetail.versionId, newData,
         ).then((res) => {
           this.setState({
@@ -82,7 +83,7 @@ class EditRelease extends Component {
     const proId = AppState.currentMenuType.id;
     const data = JSON.parse(JSON.stringify(ReleaseStore.getVersionDetail));
     if (value && value.trim() && data.name !== value.trim()) {
-      ReleaseStore.axiosCheckName(proId, value.trim()).then((res) => {
+      versionApi.checkName(value.trim()).then((res) => {
         if (res) {
           callback('版本名称重复');
         } else {

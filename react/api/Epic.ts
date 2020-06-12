@@ -41,6 +41,15 @@ class EpicApi {
   loadProgramEpics = () => axios.get(
     `${this.prefix}/issues/epics/select_program_data`,
   )
+
+  /**
+   * 将批量的issue加入到史诗中
+   * @param epicId 
+   * @param issueIds 
+   */
+  addIssues(epicId: number, issueIds: Array<number>) {
+    return axios.post(`${this.prefix}/issues/to_epic/${epicId}`, issueIds);
+  }
 }
 
 const epicApi = new EpicApi();

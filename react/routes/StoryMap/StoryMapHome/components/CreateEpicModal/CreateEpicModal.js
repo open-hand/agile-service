@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input } from 'choerodon-ui';
 import { Content, stores, axios } from '@choerodon/boot';
-import { epicApi } from '@/api';
+import { epicApi, issueApi } from '@/api';
 import { createIssueField } from '../../../../../api/NewIssueApi';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 
@@ -49,7 +49,7 @@ class CreateEpicModal extends Component {
         this.setState({
           loading: true,
         });
-        axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues?applyType=agile`, data)
+        issueApi.create(data)
           .then((res) => {
             const dto = {
               schemeCode: 'agile_issue',

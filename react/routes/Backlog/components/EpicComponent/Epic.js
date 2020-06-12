@@ -133,7 +133,7 @@ class Epic extends Component {
                 if (BacklogStore.getIsDragging) {
                   BacklogStore.toggleIssueDrag(false);
                   e.currentTarget.style.border = 'none';
-                  BacklogStore.axiosUpdateIssuesToEpic(
+                  epicApi.addIssues(
                     0, BacklogStore.getIssueWithEpicOrVersion,
                   ).then(() => {
                     issueRefresh();

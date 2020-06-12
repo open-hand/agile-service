@@ -5,12 +5,14 @@ class UserApi {
   get prefix() {
     return `/iam/choerodon/v1/projects/${getProjectId()}`;
   }
+
   /**
    * 查询当前用户信息
    */
   getSelf() {
     return axios.get('/iam/choerodon/v1/users/self');
   }
+
   /**
  * 根据用户id查询用户信息
  * @param userId 
@@ -18,6 +20,7 @@ class UserApi {
   getById(userId: number) {
     return axios.get(`${this.prefix}/users?id=${userId}`);
   }
+
   /**
    * 在项目层查询用户列表（不包括离职用户）
    * @param param 模糊搜索
@@ -30,10 +33,11 @@ class UserApi {
         param,
         id: userId,
         page: page || 1,
-        size: 20
-      }
+        size: 20,
+      },
     });
   }
+
   /**
    * 在项目层查询用户列表（包括离职用户）
    * @param param 
@@ -46,11 +50,12 @@ class UserApi {
         param,
         id: userId,
         page: page || 1,
-        size: 20
-      }
+        size: 20,
+      },
     });
   }
 }
 
 const userApi = new UserApi();
+// eslint-disable-next-line import/prefer-default-export
 export { userApi };

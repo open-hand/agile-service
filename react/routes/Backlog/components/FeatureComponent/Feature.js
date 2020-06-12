@@ -3,9 +3,8 @@ import { observer } from 'mobx-react';
 import { Icon } from 'choerodon-ui';
 import { Select } from 'choerodon-ui';
 import { find, min } from 'lodash';
-import { toJS } from 'mobx';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
-import { featureApi } from '@/api';
+import { featureApi, issueApi } from '@/api';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 import { QuickSearchEvent } from '../../../../components/QuickSearch';
 import FeatureItem from './FeatureItem';
@@ -208,7 +207,7 @@ class Feature extends Component {
                 if (BacklogStore.getIsDragging) {
                   BacklogStore.toggleIssueDrag(false);
                   e.currentTarget.style.border = 'none';
-                  BacklogStore.axiosUpdateIssuesToFeature(
+                  featureApi.addIssues(
                     0, BacklogStore.getIssueWithEpicOrVersion,
                   ).then(() => {
                     issueRefresh();

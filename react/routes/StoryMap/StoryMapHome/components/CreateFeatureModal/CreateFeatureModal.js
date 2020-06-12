@@ -4,6 +4,7 @@ import {
   Modal, Form, Input, Select,
 } from 'choerodon-ui';
 import { Content, stores, axios } from '@choerodon/boot';
+import { issueApi } from '@/api';
 import { createIssueField } from '../../../../../api/NewIssueApi';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 
@@ -60,7 +61,7 @@ class CreateFeatureModal extends Component {
         this.setState({
           loading: true,
         });
-        axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues?applyType=agile`, req).then((res) => {
+        issueApi.create(req).then((res) => {
           const dto = {
             schemeCode: 'agile_issue',
             context: res.typeCode,

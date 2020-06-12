@@ -834,11 +834,6 @@ class ScrumBoardStore {
     return axios.get(`/agile/v1/projects/${projectId}/schemes/query_transforms_map?apply_type=agile`);
   }
 
-  axiosUpdateIssue(data) {
-    const proId = AppState.currentMenuType.id;
-    const { issueId, objectVersionNumber, transformId } = data;
-    return axios.put(`/agile/v1/projects/${proId}/issues/update_status?applyType=agile&transformId=${transformId}&issueId=${issueId}&objectVersionNumber=${objectVersionNumber}`);
-  }
 
   // 校验看板名称是否重复
   checkBoardNameRepeat = (proId, name) => axios.get(

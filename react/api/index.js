@@ -9,3 +9,5 @@ export * from './StoryMap';
 export * from './File';
 export * from './Issue';
 export * from './Epic';
+export * from './Common';
+export * from './Version';

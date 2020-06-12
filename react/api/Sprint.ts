@@ -34,6 +34,12 @@ interface StartSprint {
 interface advancedSearch {
   advancedSearchArgs: object,
 }
+interface MoveIssueCardsInfo {
+  before: boolean, // 是否移动到前面
+  issueIds: Array<number>, // 待移动的问题ids
+  outsetIssueId: number, // 移动参照问题id 0代表无问题
+  rankIndex: number, // 是否生成移动日志
+}
 class SprintApi {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
@@ -259,7 +265,7 @@ class SprintApi {
    * 根据冲刺id查询优先级分布状况
    * @param sprintId 
    */
-  getPriorityDistribute(sprintId:number) {
+  getPriorityDistribute(sprintId: number) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'get',
@@ -275,7 +281,7 @@ class SprintApi {
    * 冲刺id联合组织id查询冲刺基本信息  
    * @param sprintId 
    */
-  getSprintCombineOrgId(sprintId:number) {
+  getSprintCombineOrgId(sprintId: number) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'get',
@@ -290,7 +296,7 @@ class SprintApi {
    * 根据冲刺id查询状态分布状况
    * @param sprintId 
    */
-  getStatusDistribute(sprintId:number) {
+  getStatusDistribute(sprintId: number) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'get',
@@ -300,6 +306,15 @@ class SprintApi {
         sprintId,
       },
     });
+  }
+
+  /**
+   * 将批量的issue加入到冲刺中
+   * @param sprintId 
+   * @param issueIds 
+   */
+  addIssues(sprintId: number, moveCardsInfo: MoveIssueCardsInfo) {
+    return axios.post(`${this.prefix}/issues/to_sprint/${sprintId}`, moveCardsInfo);
   }
 }
 
