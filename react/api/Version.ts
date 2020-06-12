@@ -18,9 +18,29 @@ interface PublishVersion {
   versionId: number,
   releaseDate: string,
 }
+interface AdvancedSearch {
+  advancedSearchArgs?: object,
+  searchArgs?: object,
+  content?: string,
+}
+interface DragVersionData {
+  afterSequence?: number | null,
+  beforeSequence?: number | null,
+  objectVersionNumber: number,
+  versionId: number
+}
 class VersionApi {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
+  }
+
+
+  /**
+   * 根据版本id查询版本详情及issue统计信息
+   * @param versionId 
+   */
+  load(versionId: number) {
+    return axios.get(`${this.prefix}/product_version/${versionId}`);
   }
 
   /**
@@ -28,6 +48,25 @@ class VersionApi {
    */
   loadAll() {
     return axios.get(`${this.prefix}/product_version`);
+  }
+
+  /**
+   * 查找此项目下版本信息列表
+   * @param page 
+   * @param size 
+   * @param filters 
+   * 
+   */
+  loadVersionList(page: number = 1, size: number = 20, filters: AdvancedSearch) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/product_version/versions`,
+      data: filters,
+      params: {
+        page,
+        size,
+      },
+    });
   }
 
   /**
@@ -114,8 +153,31 @@ class VersionApi {
    * @param versionId 
    * @param data 
    */
-  update(versionId: number, data:UVersionVO) {
+  update(versionId: number, data: UVersionVO) {
     return axios.put(`${this.prefix}/product_version/update/${versionId}`, data);
+  }
+
+  /**
+   * 根据版本id删除版本
+   * @param versionId 
+   * @param targetVersionId 要移动到的目标版本id 
+   */
+  delete(versionId: number, targetVersionId?: number) {
+    return axios({
+      method: 'delete',
+      url: `${this.prefix}/product_version/delete/${versionId}`,
+      params: {
+        targetVersionId,
+      },
+    });
+  }
+
+  /**
+   * 拖拽版本
+   * @param dragVersionData 
+   */
+  drag(dragVersionData: DragVersionData) {
+    return axios.put(`${this.prefix}/product_version/drag`, dragVersionData);
   }
 
   /**

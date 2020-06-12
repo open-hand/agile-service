@@ -5,10 +5,9 @@ import {
 } from 'choerodon-ui';
 import { find } from 'lodash';
 import { getProjectId } from '@/utils/common';
-import { issueApi } from '@/api';
+import { issueApi, fieldApi } from '@/api';
 import TypeTag from '../../../../../../components/TypeTag';
 import Card from '../Card';
-import { createIssueField } from '../../../../../../api/NewIssueApi';
 import clickOutSide from '../../../../../../components/CommonComponent/ClickOutSide';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';
 
@@ -49,14 +48,14 @@ class CreateFeature extends Component {
         priorityCode: `priority-${defaultPriority.id}`,
         priorityId: defaultPriority.id,
       };
-      issueApi.createIssue(req).then((res) => {
+      issueApi.create(req).then((res) => {
         const dto = {
           schemeCode: 'agile_issue',
           context: res.typeCode,
           pageCode: 'agile_issue_create',
         };
         onCreate({ ...res, featureType });
-        createIssueField(res.issueId, dto);
+        fieldApi.quickCreateDefault(res.issueId, dto);
       }).finally(() => {
         this.canAdd = true;
       });

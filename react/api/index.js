@@ -11,3 +11,5 @@ export * from './Issue';
 export * from './Epic';
 export * from './Common';
 export * from './Version';
+export * from './Status';
+export * from './Field';

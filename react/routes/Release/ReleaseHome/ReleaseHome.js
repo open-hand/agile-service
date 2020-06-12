@@ -111,7 +111,7 @@ class ReleaseHome extends Component {
       });
     }
     if (key === '5') {
-      ReleaseStore.axiosGetVersionDetail(record.versionId).then((res) => {
+      versionApi.load(record.versionId).then((res) => {
         ReleaseStore.setVersionDetail(res);
         this.setState({
           selectItem: record,
@@ -161,7 +161,7 @@ class ReleaseHome extends Component {
   handleDrag = (res, postData) => {
     const { pagination } = this.state;
     ReleaseStore.setVersionList(res);
-    ReleaseStore.handleDataDrag(AppState.currentMenuType.id, postData)
+    versionApi.drag(postData)
       .then(() => {
         this.refresh(pagination);
       }).catch((error) => {

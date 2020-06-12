@@ -7,6 +7,7 @@ import {
   Button, Table, Menu, Dropdown, Icon, Modal, Radio, Select,
 } from 'choerodon-ui';
 import _ from 'lodash';
+import { versionApi } from '@/api';
 import ReleaseStore from '../../../stores/project/release/ReleaseStore';
 
 const { AppState } = stores;
@@ -41,21 +42,13 @@ class DeleteReleaseWithIssue extends Component {
 
   handleOk() {
     const {
-      versionDelInfo, onCancel, refresh, 
+      versionDelInfo, onCancel, refresh,
     } = this.props;
     const {
       distributed, targetVersionId,
     } = this.state;
-    const data2 = {
-      projectId: AppState.currentMenuType.id,
-      versionId: versionDelInfo.versionId,
-    };
-    if (versionDelInfo.agileIssueCount) {
-      if (distributed) {
-        data2.targetVersionId = targetVersionId;
-      }
-    }
-    ReleaseStore.axiosDeleteVersion(data2).then((data) => {
+    versionApi.delete(versionDelInfo.versionId,
+      (versionDelInfo.agileIssueCount && distributed) ? targetVersionId : undefined).then((data) => {
       onCancel();
       refresh();
     }).catch((error) => {
@@ -64,7 +57,7 @@ class DeleteReleaseWithIssue extends Component {
 
   render() {
     const {
-      visible, versionDelInfo, onCancel, 
+      visible, versionDelInfo, onCancel,
     } = this.props;
     return (
       <Modal
@@ -86,7 +79,7 @@ class DeleteReleaseWithIssue extends Component {
                   <Icon
                     type="error"
                     style={{
-                      display: 'inline-block', marginRight: 10, marginTop: -3, color: 'red', 
+                      display: 'inline-block', marginRight: 10, marginTop: -3, color: 'red',
                     }}
                   />
                   {'此版本有'}

@@ -17,6 +17,7 @@ import StateStore from '../../../../stores/organization/state';
 import { getByteLen, getStageMap, getStageList } from '@/utils/stateMachine';
 
 import './EditStateMachine.less';
+import { statusApi } from '@/api';
 
 const prefixCls = 'issue-state-machine';
 const { AppState } = stores;
@@ -572,7 +573,7 @@ class EditStateMachine extends Component {
 
   loadStateList = () => {
     const { organizationId, nodeData } = this.state;
-    StateStore.loadAllState(organizationId).then((data) => {
+    statusApi.loadAll().then((data) => {
       if (data && data.failed) {
         Choerodon.prompt(data.message);
       } else {
@@ -1141,6 +1142,7 @@ class EditStateMachine extends Component {
       type,
       state,
     });
+    console.log('type:'+type);
     if (type === 'state') {
       this.loadStateList();
     }
@@ -1281,11 +1283,10 @@ class EditStateMachine extends Component {
     form.validateFieldsAndScroll((err, data) => {
       if (!err) {
         const postData = data;
-        postData.organizationId = organizationId;
         this.setState({
           submitting: true,
         });
-        StateStore.createState(organizationId, postData)
+        statusApi.create(postData)
           .then((res) => {
             if (res && res.failed) {
               Choerodon.prompt(res.message);
