@@ -319,5 +319,5 @@ class SprintApi {
 }
 
 const sprintApi = new SprintApi();
-// eslint-disable-next-line import/prefer-default-export
+
 export { sprintApi };

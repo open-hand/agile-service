@@ -155,5 +155,5 @@ class StoryMapApi {
 }
 
 const storyMapApi = new StoryMapApi();
-// eslint-disable-next-line import/prefer-default-export
+
 export { storyMapApi };

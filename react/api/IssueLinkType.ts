@@ -1,5 +1,6 @@
 import { getProjectId } from '@/utils/common';
-import Api from './Api'
+import Api from './Api';
+
 interface ILinkTypeQuery {
   page?: number,
   size?: number,
@@ -14,6 +15,7 @@ class IssueLinkTypeApi extends Api {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }
+
   getAll({
     page = 1,
     size = 999,
@@ -30,9 +32,9 @@ class IssueLinkTypeApi extends Api {
       params: {
         page,
         size,
-        issueLinkTypeId
-      }
-    })
+        issueLinkTypeId,
+      },
+    });
   }
 }
 

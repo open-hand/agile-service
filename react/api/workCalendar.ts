@@ -47,5 +47,5 @@ class WorkCalendarApi {
 }
 
 const workCalendarApi = new WorkCalendarApi();
-// eslint-disable-next-line import/prefer-default-export
+
 export { workCalendarApi };

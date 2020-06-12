@@ -33,5 +33,5 @@ class CommonApi {
 }
 
 const commonApi = new CommonApi();
-// eslint-disable-next-line import/prefer-default-export
+
 export { commonApi };

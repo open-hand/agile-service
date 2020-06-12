@@ -129,5 +129,5 @@ class VersionApi {
 }
 
 const versionApi = new VersionApi();
-// eslint-disable-next-line import/prefer-default-export
+
 export { versionApi };

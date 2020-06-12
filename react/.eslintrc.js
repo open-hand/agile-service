@@ -117,6 +117,7 @@ module.exports = {
     'no-console': 'error',
     'no-unused-vars': 'warn',
     'no-restricted-syntax': 'off',
+    'import/prefer-default-export': 'off',
     'react/sort-comp': 'off',
     'react/forbid-prop-types': 'off',
     'react/destructuring-assignment': 'off',

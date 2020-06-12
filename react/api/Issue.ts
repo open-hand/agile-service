@@ -318,5 +318,5 @@ class IssueApi {
   }
 }
 const issueApi = new IssueApi();
-// eslint-disable-next-line import/prefer-default-export
+
 export { issueApi };

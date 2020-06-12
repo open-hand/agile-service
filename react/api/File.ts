@@ -50,5 +50,5 @@ class FileApi {
 }
 
 const fileApi = new FileApi();
-// eslint-disable-next-line import/prefer-default-export
+
 export { fileApi };
