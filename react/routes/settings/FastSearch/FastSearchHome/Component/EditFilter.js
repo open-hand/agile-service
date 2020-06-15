@@ -7,7 +7,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import {
-  sprintApi, epicApi, featureApi, userApi, versionApi, fieldApi, 
+  sprintApi, epicApi, featureApi, userApi, versionApi, fieldApi, issueLabelApi, 
 } from '@/api';
 import { NumericInput } from '../../../../../components/CommonComponent';
 
@@ -846,7 +846,7 @@ class AddComponent extends Component {
     axios.get(`/agile/v1/projects/${projectId}/schemes/query_status_by_project_id?apply_type=agile`).then(res => this.setState({ originStatus: res }));
     epicApi.loadEpicsForSelect().then(res => this.setState({ originEpics: res }));
     sprintApi.loadSprints().then(res => this.setState({ originSprints: res }));
-    axios.get(`/agile/v1/projects/${projectId}/issue_labels`).then(res => this.setState({ originLabels: res }));
+    issueLabelApi.loads().then(res => this.setState({ originLabels: res }));
     axios.get(`/agile/v1/projects/${projectId}/component`).then(res => this.setState({ originComponents: res }));
     versionApi.loadNamesByStatus().then(res => this.setState({ originVersions: res }));
     axios.get(`/agile/v1/projects/${projectId}/schemes/query_issue_types?apply_type=agile`).then(res => this.setState({ originTypes: res }));

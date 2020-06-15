@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Tooltip } from 'choerodon-ui';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
-import { changeIssuePI } from '@/api/PIApi';
 import TextEditToggle from '@/components/TextEditToggle';
 import { piApi } from '@/api';
 
@@ -16,7 +15,7 @@ class FieldPI extends Component {
     const issue = store.getIssue;
     const { issueId, activePi } = issue;
     const { id } = activePi || {};
-    await changeIssuePI(issueId, id || 0, value || 0);    
+    await piApi.addFeatures([issueId], id || 0, value || 0);
     if (onUpdate) {
       onUpdate();
     }    

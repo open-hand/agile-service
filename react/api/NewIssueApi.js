@@ -3,27 +3,6 @@ import { getProjectId } from '@/utils/common';
 
 const { AppState } = stores;
 
-export function loadIssueTypes(applyType) {
-  const projectId = AppState.currentMenuType.id;
-  return axios.get(`/agile/v1/projects/${projectId}/schemes/query_issue_types_with_sm_id?apply_type=${applyType || 'agile'}`);
-}
-export function loadLabels() {
-  const projectId = AppState.currentMenuType.id;
-  return axios.get(
-    `/agile/v1/projects/${projectId}/issue_labels`,
-  );
-}
-export function createCommit(commitObj, projectId = AppState.currentMenuType.id) {
-  return axios.post(`/agile/v1/projects/${projectId}/issue_comment`, commitObj);
-}
-
-export function updateCommit(commitObj, projectId = AppState.currentMenuType.id) {
-  return axios.post(`/agile/v1/projects/${projectId}/issue_comment/update`, commitObj);
-}
-
-export function deleteCommit(commitId, projectId = AppState.currentMenuType.id) {
-  return axios.delete(`/agile/v1/projects/${projectId}/issue_comment/${commitId}`);
-}
 
 export function loadComponents() {
   const projectId = AppState.currentMenuType.id;

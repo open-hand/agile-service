@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { commonApi } from '@/api';
 import Loading from '../Loading';
-import { getProjectsInProgram } from '../../api/CommonApi';
 
 class IsInProgram extends Component {
   state = {
@@ -13,7 +13,7 @@ class IsInProgram extends Component {
     this.setState({
       loading: true,
     });
-    getProjectsInProgram().then((res) => {
+    commonApi.getProjectsInProgram().then((res) => {
       this.setState({
         program: res,
         loading: false,

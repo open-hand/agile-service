@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import { find, debounce } from 'lodash';
 import { Select, Form, Modal } from 'choerodon-ui';
-import { issueApi } from '@/api';
-import {
-  loadIssueTypes,
-} from '@/api/NewIssueApi';
+import { issueApi, issueTypeApi } from '@/api';
+
 import IssueOption from '../IssueOption';
 import './RelateStory.less';
 
@@ -128,7 +126,7 @@ class RelateStory extends Component {
     this.setState({
       selectLoading: true,
     });
-    loadIssueTypes().then((issueTypes) => {
+    issueTypeApi.loadIssueTypes().then((issueTypes) => {
       const types = issueTypes.filter(type => type.typeCode === 'story' || type.typeCode === 'task');
       if (types) {
         this.types = types;

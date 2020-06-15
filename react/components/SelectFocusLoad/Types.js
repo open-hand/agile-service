@@ -3,12 +3,10 @@ import React from 'react';
 import { Select } from 'choerodon-ui';
 import { find } from 'lodash';
 import {
-  userApi, componentApi, issueApi, epicApi, versionApi, 
+  userApi, componentApi, issueApi, epicApi, versionApi, issueTypeApi, commonApi, issueLabelApi, 
 } from '@/api';
-import { getSubProjects } from '@/api/CommonApi';
 import {
-  loadIssueTypes, loadPriorities,
-  loadLabels,
+  loadPriorities,
   loadStatusList,
 } from '@/api/NewIssueApi';
 import { issueLinkTypeApi } from '@/api/IssueLinkType';
@@ -50,7 +48,7 @@ const issue_type_program = {
   props: {
     filterOption,
   },
-  request: () => new Promise(resolve => loadIssueTypes('program').then((issueTypes) => {
+  request: () => new Promise(resolve => issueTypeApi.loadIssueTypes('program').then((issueTypes) => {
     // const defaultType = find(issueTypes, { typeCode: 'feature' }).id;
     resolve(issueTypes);
   })),
@@ -183,7 +181,7 @@ export default {
     ),
   },
   issue_type: {
-    request: () => loadIssueTypes('agile'),
+    request: () => issueTypeApi.loadIssueTypes('agile'),
     render: issueType => (
       <Option
         key={issueType.id}
@@ -196,7 +194,7 @@ export default {
   },
   issue_type_program_feature_epic: {
     ...issue_type_program,
-    request: () => new Promise(resolve => loadIssueTypes('program').then((issueTypes) => {
+    request: () => new Promise(resolve => issueTypeApi.loadIssueTypes('program').then((issueTypes) => {
       const featureTypes = [{
         id: 'business',
         name: '特性',
@@ -361,7 +359,7 @@ export default {
       filterOption: false,
       loadWhenMount: true,
     },
-    request: loadLabels,
+    request: issueLabelApi.loads.bind(issueLabelApi),
     render: label => (
       <Option key={label.labelName} value={label.labelName}>
         {label.labelName}
@@ -375,7 +373,7 @@ export default {
       filterOption,
       loadWhenMount: true,
     },
-    request: loadLabels,
+    request: issueLabelApi.loads.bind(issueLabelApi),
     render: label => (
       <Option key={label.labelId} value={label.labelId}>
         {label.labelName}
@@ -482,7 +480,7 @@ export default {
       onFilterChange: false,
       loadWhenMount: true,
     },
-    request: () => getSubProjects(true),
+    request: () => commonApi.getSubProjects(true),
     render: pro => (
       <Option key={pro.projectId} value={pro.projectId} name={pro.projName}>
         <Tooltip title={pro.projName}>{pro.projName}</Tooltip>
