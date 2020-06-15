@@ -1,11 +1,11 @@
 import {
   useContext, createContext, 
 } from 'react';
-import { getDefaultPriority } from '@/api/NewIssueApi';
+import { priorityApi } from '@/api';
 
 const DefaultPriorityContext = createContext({
   data: null,
-  refresh: getDefaultPriority,
+  refresh: priorityApi.getDefaultByProject.bind(priorityApi),
 });
 export { DefaultPriorityContext };
 

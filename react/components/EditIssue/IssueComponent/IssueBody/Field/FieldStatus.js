@@ -4,9 +4,8 @@ import { withRouter } from 'react-router-dom';
 import { Select } from 'choerodon-ui/pro';
 import { injectIntl } from 'react-intl';
 import STATUS from '@/constants/STATUS';
-import { issueApi } from '@/api';
+import { issueApi, statusApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
-import { loadStatus } from '@/api/NewIssueApi';
 import useSelect from '@/hooks/useSelect';
 
 const { Option } = Select;
@@ -16,7 +15,7 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
   } = statusArgs;
   const config = useMemo(() => ({
     name: 'status',
-    request: () => loadStatus(statusId, issueId, typeId, applyType, projectId),
+    request: () => statusApi.loadTransformStatusByIssue(statusId, issueId, typeId, applyType, projectId),
     paging: false,    
     textField: 'statusVO.name',
     valueField: 'endStatusId',

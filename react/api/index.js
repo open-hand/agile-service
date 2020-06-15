@@ -15,3 +15,5 @@ export * from './Status';
 export * from './Field';
 export * from './IssueType';
 export * from './IssueLabel';
+export * from './IssueLink';
+export * from './Priority';

@@ -3,7 +3,6 @@ import { stores, axios } from '@choerodon/boot';
 import _ from 'lodash';
 import { Modal, Form, Select } from 'choerodon-ui';
 import { issueApi } from '@/api';
-import { createLink } from '../../api/NewIssueApi';
 import TypeTag from '../TypeTag';
 
 import './TransformSubIssue.less';

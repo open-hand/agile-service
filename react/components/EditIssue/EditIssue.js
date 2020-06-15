@@ -9,9 +9,9 @@ import { throttle } from 'lodash';
 import './EditIssue.less';
 import useIsOwner from '@/hooks/useIsOwner';
 import { useIssueTypes } from '@/hooks';
-import { issueApi, fieldApi } from '@/api';
+import { issueApi, fieldApi, issueLinkApi } from '@/api';
 import {
-  loadBranchs, loadDatalogs, loadLinkIssues,
+  loadBranchs, loadDatalogs,
   loadWorklogs, loadDocs,
 } from '../../api/NewIssueApi';
 import {
@@ -103,7 +103,7 @@ function EditIssue() {
         loadDocs(id),
         programId || applyType === 'program' ? null : loadWorklogs(id),
         programId ? loadDatalogsProgram(id, programId) : loadDatalogs(id),
-        programId || applyType === 'program' ? null : loadLinkIssues(id),
+        programId || applyType === 'program' ? null : issueLinkApi.loadByIssueAndApplyType(id),
         programId || applyType === 'program' ? null : loadBranchs(id),
       ]);
       if (idRef.current !== id) {

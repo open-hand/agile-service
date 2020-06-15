@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { stores, axios } from '@choerodon/boot';
 import _ from 'lodash';
 import { Select, Form, Modal } from 'choerodon-ui';
-import { issueLinkTypeApi } from '@/api';
-import { createLink, createFeatureLink } from '../../api/NewIssueApi';
+import { issueLinkTypeApi, issueLinkApi } from '@/api';
+import { createFeatureLink } from '../../api/NewIssueApi';
 import SelectFocusLoad from '../SelectFocusLoad';
 import './CreateLinkTask.less';
 
@@ -113,7 +113,7 @@ class CreateLinkTask extends Component {
             }
           });
           this.setState({ createLoading: true });
-          createLink(issueId, labelIssueRelVOList)
+          issueLinkApi.create(issueId, labelIssueRelVOList)
             .then((res) => {
               this.setState({ createLoading: false });
               onOk();

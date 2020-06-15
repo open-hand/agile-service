@@ -1,12 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  userApi, componentApi, issueApi, epicApi, versionApi, issueTypeApi, issueLabelApi, 
+  userApi, componentApi, epicApi, versionApi, issueTypeApi, issueLabelApi, priorityApi, statusApi, 
 } from '@/api';
 import { sprintApi } from '@/api';
-import {
-  loadStatusList, loadPriorities,
-} from '../../api/NewIssueApi';
 
 const requests = {
   issueType: {
@@ -17,12 +14,12 @@ const requests = {
   issueStatus: {
     textField: 'name',
     valueField: 'id',
-    request: loadStatusList,
+    request: statusApi.loadByProject.bind(statusApi),
   },
   priority: {
     textField: 'name',
     valueField: 'id',
-    request: loadPriorities,
+    request: priorityApi.loadByProject.bind(priorityApi),
   },
   user: {
     textField: 'name',

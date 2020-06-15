@@ -10,6 +10,7 @@ import {
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
+import { priorityApi } from '@/api';
 import PriorityCreate from '../priorityCreate';
 import PriorityEdit from '../priorityEdit';
 import BodyRow from './bodyRow';
@@ -67,7 +68,10 @@ class PriorityList extends Component {
 
     PriorityStore.setPriorityList(priorityListAfterDrag);
     // 更新顺序
-    PriorityStore.reOrder(orgId).then(() => {
+    priorityApi.sort(PriorityStore.getPriorityList.map(item => ({
+      id: item.id,
+      sequence: item.sequence,
+    }))).then(() => {
       PriorityStore.loadPriorityList(orgId);
     });
   };
@@ -176,7 +180,7 @@ class PriorityList extends Component {
     const { intl, PriorityStore } = this.props;
     const orgId = AppState.currentMenuType.organizationId;
     const that = this;
-    const count = await PriorityStore.checkDelete(orgId, priority.id);
+    const count = await priorityApi.checkBeforeDel(priority.id);
     const priorityList = PriorityStore.getPriorityList.filter(item => item.id !== priority.id);
     confirm({
       title: intl.formatMessage({ id: 'priority.delete.title' }),
@@ -247,7 +251,7 @@ class PriorityList extends Component {
     const { priorityId } = this.state;
     const orgId = AppState.currentMenuType.organizationId;
     try {
-      await PriorityStore.deletePriorityById(orgId, id, priorityId || defaultId);
+      await priorityApi.delete(id, priorityId || defaultId);
       PriorityStore.loadPriorityList(orgId);
     } catch (err) {
       message.error('删除失败');
@@ -286,7 +290,7 @@ class PriorityList extends Component {
     const { PriorityStore } = this.props;
     const orgId = AppState.currentMenuType.organizationId;
     try {
-      await PriorityStore.enablePriority(orgId, priority.id, !priority.enable);
+      await priorityApi.updateStatus(priority.id, !priority.enable);
       PriorityStore.loadPriorityList(orgId);
     } catch (err) {
       message.error('修改状态失败');

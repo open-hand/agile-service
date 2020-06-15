@@ -262,22 +262,6 @@ class SprintApi {
   }
 
   /**
-   * 根据冲刺id查询优先级分布状况
-   * @param sprintId 
-   */
-  getPriorityDistribute(sprintId: number) {
-    const organizationId = getOrganizationId();
-    return axios({
-      method: 'get',
-      url: `${this.prefix}/iterative_worktable/priority`,
-      params: {
-        sprintId,
-        organizationId,
-      },
-    });
-  }
-
-  /**
    * 冲刺id联合组织id查询冲刺基本信息  
    * @param sprintId 
    */

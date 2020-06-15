@@ -1,14 +1,16 @@
 import React, { Component, Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
 import {
-  Page, Header, Content, stores, Breadcrumb, Choerodon, Permission, axios,
+  Page, Header, Content, stores, Breadcrumb, Choerodon, Permission, 
 } from '@choerodon/boot';
 import {
   Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
 } from 'choerodon-ui';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
-import { sprintApi, issueApi, epicApi } from '@/api';
+import {
+  sprintApi, issueApi, epicApi, issueTypeApi, statusApi, 
+} from '@/api';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
@@ -140,12 +142,12 @@ class ScrumBoardHome extends Component {
 
   changeState = (name, value) => {
     if (name === 'judgeUpdateParent') {
-      ScrumBoardStore.loadTransforms(value.statusId, value.id, value.typeId).then((types) => {
+      statusApi.loadTransformStatusByIssue(value.statusId, value.id, value.typeId).then((types) => {
         this.matchStatus(types);
         this.setState({
           [name]: value,
         });
-      }).catch((e) => {
+      }).catch(() => {
         Choerodon.prompt('查询状态失败，请重试！');
       });
     }
@@ -211,7 +213,7 @@ class ScrumBoardHome extends Component {
 
   refresh(defaultBoard, url, boardListData) {
     ScrumBoardStore.setSpinIf(true);
-    Promise.all([ScrumBoardStore.axiosGetIssueTypes(), ScrumBoardStore.axiosGetStateMachine(), ScrumBoardStore.axiosGetBoardData(defaultBoard.boardId), epicApi.loadEpics()]).then(([issueTypes, stateMachineMap, defaultBoardData, epicData]) => {
+    Promise.all([issueTypeApi.loadIssueTypes(), ScrumBoardStore.axiosGetStateMachine(), ScrumBoardStore.axiosGetBoardData(defaultBoard.boardId), epicApi.loadEpics()]).then(([issueTypes, stateMachineMap, defaultBoardData, epicData]) => {
       this.dataConverter.setSourceData(epicData, defaultBoardData);
       const renderDataMap = new Map([
         ['parent_child', this.dataConverter.getParentWithSubData],
@@ -442,7 +444,7 @@ class ScrumBoardHome extends Component {
                 issueApi.updateStatus(data).then((res) => {
                   ScrumBoardStore.setUpdateParent(false);
                   this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
-                }).catch((error) => {
+                }).catch(() => {
                 });
               }}
               disableOk={!ScrumBoardStore.getTransformToCompleted.length}
