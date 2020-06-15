@@ -89,7 +89,7 @@ import SelectComponent from '@/components/select/select-component';
               ? (
                 <div>
                   <p className="primary" style={{ wordBreak: 'break-word', marginTop: 2 }}>
-                    {this.transToArr(componentIssueRelVOList, 'name', 'array')}
+                    {this.transToArr(componentIssueRelVOList, 'name', 'array').join(',')}
                   </p>
                 </div>
               ) : (
