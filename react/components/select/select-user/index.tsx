@@ -25,7 +25,7 @@ const SelectUser: React.FC<Props> = forwardRef(({ selectedUser, ...otherProps },
     valueField: 'id',
     request: ({ filter, page }) => userApi.getAllInProject(filter, page),
     middleWare: (data) => {
-      if (selectedUser && !find(data, { id: selectedUser.id })) {
+      if (selectedUser && selectedUser.id && !find(data, { id: selectedUser.id })) {
         return [selectedUser, ...data];
       } else {
         return data;
