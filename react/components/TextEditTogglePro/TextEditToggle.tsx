@@ -47,11 +47,14 @@ const TextEditToggle: React.FC<Props> = ({
   const handleChange = (value: any) => {
     dataRef.current = value;
   };
-  const handleEditorBlur = async () => {
-    hideEditor();
-    if (dataRef.current !== initValue) {
-      await onSubmit(dataRef.current);
-    }
+  const handleEditorBlur = () => {
+    // 延缓submit，因为有时候blur之后才会onchange，保证拿到的值是最新的
+    setTimeout(() => {
+      hideEditor();
+      if (dataRef.current !== initValue) {
+        onSubmit(dataRef.current);
+      }
+    });
   };
   const renderEditor = () => {
     const editorElement = typeof editor === 'function' ? editor() : editor;
