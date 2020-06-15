@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { epicApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
@@ -6,7 +6,7 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 interface Props {
 }
 
-const SelectEpic: React.FC<Props> = (otherProps) => {
+const SelectEpic: React.FC<Props> = forwardRef((otherProps, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'epic',
     textField: 'epicName',
@@ -17,10 +17,11 @@ const SelectEpic: React.FC<Props> = (otherProps) => {
   const props = useSelect(config);
   return (
     <Select
+      ref={ref}
       clearButton
       {...props}
       {...otherProps}
     />
   );
-};
+});
 export default SelectEpic;

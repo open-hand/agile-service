@@ -1,9 +1,12 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { featureApi } from '@/api';
+import { find } from 'lodash';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 
 interface Props {
+  featureId?: number,
+  featureName?: string,
 }
 
 const SelectFeature: React.FC<Props> = forwardRef(({ featureId, featureName, ...otherProps }, ref: React.Ref<Select>) => {
@@ -12,7 +15,7 @@ const SelectFeature: React.FC<Props> = forwardRef(({ featureId, featureName, ...
     textField: 'summary',
     valueField: 'issueId',
     request: () => featureApi.getByEpicId(),
-    middleWare: features => ((features.find(item => item.issueId === featureId) || !featureId) ? features : [...features, { issueId: featureId, summary: featureName }]),
+    middleWare: features => ((find(features, item => item.issueId === featureId) || !featureId) ? features : [...features, { issueId: featureId, summary: featureName }]),
     paging: false,
   }), []);
   const props = useSelect(config);

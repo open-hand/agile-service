@@ -4,13 +4,14 @@ import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import _ from 'lodash';
 import { issueApi } from '@/api';
-import TextEditToggle from '../../../../TextEditToggle';
-import SelectFocusLoad from '../../../../SelectFocusLoad';
+import TextEditToggle from '@/components/TextEditTogglePro';
+import SelectComponent from '@/components/select/select-component';
 
-const { Text, Edit } = TextEditToggle;
 
 @inject('AppState')
 @observer class FieldComponent extends Component {
+  dataRef = React.createRef();
+
   transToArr = (arr, pro, type = 'string') => {
     if (!arr.length) {
       return type === 'string' ? '无' : [];
@@ -26,33 +27,38 @@ const { Text, Edit } = TextEditToggle;
       store, onUpdate, reloadIssue, AppState,
     } = this.props;
     const issue = store.getIssue;
-    const { issueId, objectVersionNumber } = issue;
-    const componentIssueRelVOList = [];
-    newComponents.forEach((label) => {
-      const target = _.find(this.componentList, { name: label });
-      if (target) {
-        componentIssueRelVOList.push(target);
-      } else {
-        componentIssueRelVOList.push({
-          name: label,
-          projectId: AppState.currentMenuType.id,
-        });
-      }
-    });
-    const obj = {
-      issueId,
-      objectVersionNumber,
-      componentIssueRelVOList,
-    };
-    issueApi.update(obj)
-      .then(() => {
-        if (onUpdate) {
-          onUpdate();
-        }
-        if (reloadIssue) {
-          reloadIssue(issueId);
+    const { issueId, objectVersionNumber, componentIssueRelVOList } = issue;
+    const newComponentIssueRelVOList = newComponents || [];
+    const originComponents = this.dataRef.current;
+
+    if (JSON.stringify(componentIssueRelVOList) !== JSON.stringify(newComponentIssueRelVOList)) {
+      const componentList = [];
+      newComponentIssueRelVOList.forEach((component) => {
+        const target = _.find(originComponents, { name: component });
+        if (target) {
+          componentList.push(target);
+        } else {
+          componentList.push({
+            name: component,
+            projectId: AppState.currentMenuType.id,
+          });
         }
       });
+      const obj = {
+        issueId,
+        objectVersionNumber,
+        componentIssueRelVOList: componentList,
+      };
+      issueApi.update(obj)
+        .then(() => {
+          if (onUpdate) {
+            onUpdate();
+          }
+          if (reloadIssue) {
+            reloadIssue(issueId);
+          }
+        });
+    }
   };
 
   render() {
@@ -69,35 +75,29 @@ const { Text, Edit } = TextEditToggle;
         <div className="c7n-value-wrapper">
           <TextEditToggle
             disabled={disabled}
-            formKey="component"
             onSubmit={this.updateIssueComponents}
-            originData={componentIssueRelVOList.map(component => component.name)}
-          >
-            <Text>
-              {componentIssueRelVOList && componentIssueRelVOList.length
-                ? (
-                  <div>
-                    <p className="primary" style={{ wordBreak: 'break-word', marginTop: 2 }}>
-                      {this.transToArr(componentIssueRelVOList, 'name')}
-                    </p>
-                  </div>
-                ) : (
-                  <div>
-                    无
-                  </div>
-                )
-              }
-            </Text>
-            <Edit>
-              <SelectFocusLoad
-                type="component"
-                dropdownMatchSelectWidth={false}
-                mode="multiple"
+            initValue={this.transToArr(componentIssueRelVOList, 'name', 'array')}
+            editor={(
+              <SelectComponent
+                dataRef={this.dataRef}
                 getPopupContainer={() => document.getElementById('detail')} 
-                saveList={(componentList) => { this.componentList = componentList; }}
                 style={{ marginTop: 0, paddingTop: 0 }}
               />
-            </Edit>
+          )}
+          >
+            {componentIssueRelVOList && componentIssueRelVOList.length
+              ? (
+                <div>
+                  <p className="primary" style={{ wordBreak: 'break-word', marginTop: 2 }}>
+                    {this.transToArr(componentIssueRelVOList, 'name', 'array')}
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  无
+                </div>
+              )
+              }
           </TextEditToggle>
         </div>
       </div>
