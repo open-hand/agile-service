@@ -67,12 +67,6 @@ function EditIssue() {
   const container = useRef();
   const idRef = useRef();
   const loadIssueDetail = async (paramIssueId) => {
-    if (FieldVersionRef.current) {
-      FieldVersionRef.current.loadIssueVersions();
-    }
-    if (FieldFixVersionRef.current) {
-      FieldFixVersionRef.current.loadIssueVersions();
-    }
     const id = paramIssueId || currentIssueId;
     idRef.current = id;
     setIssueLoading(true);
