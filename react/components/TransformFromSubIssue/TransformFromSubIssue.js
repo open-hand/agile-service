@@ -3,7 +3,7 @@ import { stores, axios } from '@choerodon/boot';
 import {
   Modal, Form, Select, Input,
 } from 'choerodon-ui';
-import { issueApi } from '@/api';
+import { issueApi, issueTypeApi } from '@/api';
 import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 import TypeTag from '../TypeTag';
 import './TransformFromSubIssue.less';
@@ -102,8 +102,7 @@ class TransformFromSubIssue extends Component {
   };
 
   axiosGetIssueTypes() {
-    const proId = AppState.currentMenuType.id;
-    axios.get(`/agile/v1/projects/${proId}/schemes/query_issue_types_with_sm_id?apply_type=agile`)
+    issueTypeApi.loadIssueTypes()
       .then((data) => {
         this.setState({
           selectLoading: false,

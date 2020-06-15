@@ -26,10 +26,11 @@ class CommonApi {
   }
 
   /**
-   * 查询此项目是否展示特性字段
+   * 查询此项目是否展示特性字段 
+   * 
    */
   getIsShowFeature() {
-    return axios.get(`${this.prefix}/art/isArtDoding`);
+    return axios.get(`${this.prefix}/art/isArtDoding`); // 多次请求待优化
   }
 
 

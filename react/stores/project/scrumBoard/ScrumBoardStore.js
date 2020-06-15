@@ -4,7 +4,7 @@ import {
 import { find } from 'lodash';
 import axios from 'axios';
 import { store, stores, Choerodon } from '@choerodon/boot';
-import { workCalendarApi } from '@/api';
+import { workCalendarApi, statusApi } from '@/api';
 
 const { AppState } = stores;
 
@@ -389,10 +389,7 @@ class ScrumBoardStore {
 
 
   setTransFromData(parentIssue, parentId) {
-    const projectId = AppState.currentMenuType.id;
-    axios.get(
-      `/agile/v1/projects/${projectId}/schemes/query_transforms?current_status_id=${parentIssue.statusId}&issue_id=${parentIssue.issueId}&issue_type_id=${parentIssue.issueTypeId}&apply_type=agile`,
-    ).then(
+    statusApi.loadTransformStatusByIssue(parentIssue.statusId, parentIssue.issueId, parentIssue.issueTypeId).then(
       action('fetchSuccess', (res) => {
         this.updatedParentIssue = this.interconnectedData.get(parentId);
         this.translateToCompleted = res.filter(transform => transform.statusVO.type === 'done');
@@ -804,21 +801,8 @@ class ScrumBoardStore {
     this.issueTypes = data;
   }
 
-  axiosGetIssueTypes() {
-    const proId = AppState.currentMenuType.id;
-    return axios.get(`/agile/v1/projects/${proId}/schemes/query_issue_types_with_sm_id?apply_type=agile`);
-  }
-
-  loadTransforms = (statusId, issueId, typeId) => {
-    const projectId = AppState.currentMenuType.id;
-    return axios.get(
-      `/agile/v1/projects/${projectId}/schemes/query_transforms?current_status_id=${statusId}&issue_id=${issueId}&issue_type_id=${typeId}&apply_type=agile`,
-    );
-  }
-
   loadStatus = () => {
-    const projectId = AppState.currentMenuType.id;
-    axios.get(`/agile/v1/projects/${projectId}/schemes/query_status_by_project_id?apply_type=agile`).then((data) => {
+    statusApi.loadByProject().then((data) => {
       if (data && !data.failed) {
         this.setStatusList(data);
       } else {

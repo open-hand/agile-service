@@ -7,7 +7,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import {
-  sprintApi, epicApi, featureApi, userApi, versionApi, fieldApi, issueLabelApi, 
+  sprintApi, epicApi, featureApi, userApi, versionApi, fieldApi, issueLabelApi, priorityApi, statusApi, 
 } from '@/api';
 import { NumericInput } from '../../../../../components/CommonComponent';
 
@@ -842,8 +842,8 @@ class AddComponent extends Component {
     const projectId = AppState.currentMenuType.id;
     const orgId = AppState.currentMenuType.organizationId;
     userApi.getAllInProject().then(res => this.setState({ originUsers: res.list }));
-    axios.get(`/agile/v1/projects/${projectId}/priority/list_by_org`).then(res => this.setState({ originPriorities: res }));
-    axios.get(`/agile/v1/projects/${projectId}/schemes/query_status_by_project_id?apply_type=agile`).then(res => this.setState({ originStatus: res }));
+    priorityApi.loadByProject().then(res => this.setState({ originPriorities: res }));
+    statusApi.loadByProject().then(res => this.setState({ originStatus: res }));
     epicApi.loadEpicsForSelect().then(res => this.setState({ originEpics: res }));
     sprintApi.loadSprints().then(res => this.setState({ originSprints: res }));
     issueLabelApi.loads().then(res => this.setState({ originLabels: res }));

@@ -10,7 +10,7 @@ import { store, stores } from '@choerodon/boot';
 import { Modal } from 'choerodon-ui';
 import Moment from 'moment';
 import {
-  featureApi, sprintApi, piApi, storyMapApi, issueApi, epicApi, 
+  featureApi, sprintApi, piApi, storyMapApi, issueApi, epicApi, priorityApi, issueTypeApi, 
 } from '@/api';
 import { getProjectId } from '@/utils/common';
 import { extendMoment } from 'moment-range';
@@ -416,22 +416,12 @@ class BacklogStore {
     return this.issueTypes;
   }
 
-  axiosGetIssueTypes() {
-    const proId = AppState.currentMenuType.id;
-    return axios.get(`/agile/v1/projects/${proId}/schemes/query_issue_types_with_sm_id?apply_type=agile`);
-  }
-
   @computed get getDefaultPriority() {
     return this.defaultPriority;
   }
 
   @action setDefaultPriority(data) {
     this.defaultPriority = data;
-  }
-
-  axiosGetDefaultPriority() {
-    const proId = AppState.currentMenuType.id;
-    return axios.get(`/agile/v1/projects/${proId}/priority/default`);
   }
 
   @action setSpinIf(data) {
@@ -953,8 +943,8 @@ class BacklogStore {
   getSprint = async (setPiIdIf) => {
     const [quickSearch, issueTypes, priorityArr, backlogData] = await Promise.all([
       this.axiosGetQuickSearchList(),
-      this.axiosGetIssueTypes(),
-      this.axiosGetDefaultPriority(),
+      issueTypeApi.loadIssueTypes(),
+      priorityApi.getDefaultByProject(),
       this.axiosGetSprint(),
     ]);
     await this.getPlanPi(backlogData.sprintData, setPiIdIf);

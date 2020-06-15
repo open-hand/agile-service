@@ -3,12 +3,9 @@ import React from 'react';
 import { Select } from 'choerodon-ui';
 import { find } from 'lodash';
 import {
-  userApi, componentApi, issueApi, epicApi, versionApi, issueTypeApi, commonApi, issueLabelApi, 
+  userApi, componentApi, issueApi, epicApi, versionApi, issueTypeApi, commonApi, issueLabelApi, priorityApi, statusApi, 
 } from '@/api';
-import {
-  loadPriorities,
-  loadStatusList,
-} from '@/api/NewIssueApi';
+
 import { issueLinkTypeApi } from '@/api/IssueLinkType';
 import { featureApi, piApi, sprintApi } from '@/api';
 import { Tooltip } from 'choerodon-ui/pro';
@@ -99,13 +96,13 @@ export default {
           }
         });
         resolve(extraList);
-      }).catch((err) => {
+      }).catch(() => {
         resolve(extraList);
       });
     }),
   },
   issue_status: {
-    request: () => loadStatusList('agile'),
+    request: () => statusApi.loadByProject('agile'),
     render: status => (
       <Option
         key={status.id}
@@ -117,7 +114,7 @@ export default {
     ),
   },
   status_program: {
-    request: () => new Promise(resolve => loadStatusList('program').then((statusList) => {
+    request: () => new Promise(resolve => statusApi.loadByProject('program').then((statusList) => {
       resolve(statusList);
     })),
     render: status => (
@@ -325,7 +322,7 @@ export default {
       filterOption: false,
       loadWhenMount: true,
     },
-    request: loadPriorities,
+    request: priorityApi.loadByProject.bind(priorityApi),
     getDefaultValue: priorities => find(priorities, { default: true }).id,
     render: priority => (
       <Option key={priority.id} value={priority.id}>

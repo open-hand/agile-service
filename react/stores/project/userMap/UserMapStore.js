@@ -4,7 +4,7 @@ import {
 import axios from 'axios';
 import _ from 'lodash';
 import { store, stores, Choerodon } from '@choerodon/boot';
-import { sprintApi, versionApi } from '@/api';
+import { sprintApi, versionApi, priorityApi } from '@/api';
 
 const { AppState } = stores;
 
@@ -639,17 +639,6 @@ class UserMapStore {
     this.issueTypes = data;
   }
 
-  axiosGetIssueTypes() {
-    const proId = AppState.currentMenuType.id;
-    return axios.get(`/agile/v1/projects/${proId}/schemes/query_issue_types_with_sm_id?apply_type=agile`).then((data) => {
-      if (data && !data.failed) {
-        this.setIssueTypes(data);
-      } else {
-        this.setIssueTypes([]);
-      }
-    });
-  }
-
   @computed get getDefaultPriority() {
     return this.defaultPriority;
   }
@@ -659,8 +648,7 @@ class UserMapStore {
   }
 
   axiosGetDefaultPriority() {
-    const proId = AppState.currentMenuType.id;
-    return axios.get(`/agile/v1/projects/${proId}/priority/default`).then((data) => {
+    return priorityApi.getDefaultByProject().then((data) => {
       if (data && !data.failed) {
         this.setDefaultPriority(data);
       } else {

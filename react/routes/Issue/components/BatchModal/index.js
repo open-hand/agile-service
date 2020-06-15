@@ -9,9 +9,9 @@ import {
 } from '@choerodon/boot';
 import { find } from 'lodash';
 import { getProjectId, getOrganizationId } from '@/utils/common';
-import { batchUpdateIssue } from '@/api/NewIssueApi';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import WSProvider from '@choerodon/master/lib/containers/components/c7n/tools/ws/WSProvider';
+import { fieldApi } from '@/api';
 import useFields from './useFields';
 import renderField from './renderField';
 import styles from './index.less';
@@ -281,7 +281,7 @@ function BatchModal({
     const data = getData();
     const issueIds = tableDataSet.selected.map(record => record.get('issueId'));
     const res = { issueIds, ...formatFields(fieldData, data, dataSet) };
-    await batchUpdateIssue(res);
+    await fieldApi.batchUpdateIssue(res);
     setLoading(true);
   };
 

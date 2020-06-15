@@ -27,7 +27,7 @@ class StateStore {
 
   loadStateList = (orgId, page, size, sort = { field: 'id', order: 'desc' }, param) => {
     this.setIsLoading(true);
-    return statusApi.loadStatusList(page, size, sort, param).then((data) => {
+    return statusApi.loadList(page, size, sort, param).then((data) => {
       this.setStateList(data.list);
       if (data && data.failed) {
         Choerodon.prompt(data.message);

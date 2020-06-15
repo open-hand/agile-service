@@ -6,9 +6,17 @@ interface IFiled {
   pageCode: string, // "agile_issue_create"
   schemeCode: string, // "agile_issue"
 }
-interface UIssueFiled{
-  fieldType:string,
+interface UIssueFiled {
+  fieldType: string,
   value: any,
+}
+interface BathUpdateCustom extends UIssueFiled {
+  fieldId: number,
+}
+interface BathUpdateField {
+  customFields: Array<BathUpdateCustom> | [],
+  issueIds: Array<number>,
+  predefinedFields: Array<any>,
 }
 class FieldApi {
   get prefix() {
@@ -97,7 +105,7 @@ class FieldApi {
    * @param schemeCode 
    * @param dto  更新的值
    */
-  updateFieldValue(issueId:number, fieldId:number, schemeCode:string, dto:UIssueFiled) {
+  updateFieldValue(issueId: number, fieldId: number, schemeCode: string, dto: UIssueFiled) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'post',
@@ -110,6 +118,25 @@ class FieldApi {
       data: dto,
     });
   }
+
+  /**
+   * 批量更新问题字段
+   * @param data 
+   * @param schemeCode 
+   * @param applyType 
+   */
+  batchUpdateIssue(data: BathUpdateField, schemeCode = 'agile_issue', applyType = 'agile') {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/field_value/batch_update_fields_value`,
+      params: {
+        schemeCode,
+        applyType,
+      },
+      data,
+    });
+  }
+
 
   /**
    * 项目层，获取自定义字段表头

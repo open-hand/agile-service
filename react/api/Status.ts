@@ -11,38 +11,42 @@ interface UpdateData extends IStatus {
     objectVersionNumber: number
 }
 class StatusApi {
-  get prefix() {
+  get orgPrefix() {
     return `/agile/v1/organizations/${getOrganizationId()}`;
   }
 
+  get prefix() {
+    return `/agile/v1/projects/${getProjectId()}`;
+  }
+
   /**
-         * 创建状态
-         * @param map 
-         */
+    * 创建状态
+    * @param map 
+    */
   create(data: IStatus) {
-    return axios.post(`${this.prefix}/status`, data);
+    return axios.post(`${this.orgPrefix}/status`, data);
   }
 
   /**
-     * 根据状态id加载状态
-     * @param statusId 
-     */
+    * 根据状态id加载状态
+    * @param statusId 
+    */
   load(statusId: number) {
-    return axios.get(`${this.prefix}/status/${statusId}`);
+    return axios.get(`${this.orgPrefix}/status/${statusId}`);
   }
 
 
   /**
-         * 加载状态列表
-         * @param page 
-         * @param size 
-         * @param sort 
-         * @param filters 
-         */
-  loadStatusList(page: number = 1, size: number = 20, sort: string, filters: object) {
+    * 加载状态列表 
+    * @param page 
+    * @param size 
+    * @param sort 
+    * @param filters 
+    */
+  loadList(page: number = 1, size: number = 20, sort: string, filters: object) {
     return axios({
       method: 'post',
-      url: `${this.prefix}/status/list`,
+      url: `${this.orgPrefix}/status/list`,
       params: {
         page,
         size,
@@ -53,10 +57,42 @@ class StatusApi {
   }
 
   /**
+   * 加载当前项目下所有状态
+   * @param applyType 
+   */
+  loadByProject(applyType = 'agile') {
+    return axios.get({
+      method: 'get',
+      url: `${this.prefix}/schemes/query_status_by_project_id`,
+      params: { apply_type: applyType },
+    });
+  }
+
+  /**
+   * 根据issueId查询问题可以转换的全部的状态
+   * @param currentStatusId 当前问题状态id 
+   * @param issueId 问题id
+   * @param issueTypeId 问题类型id
+   * @param applyType 
+   */
+  loadTransformStatusByIssue(currentStatusId:number, issueId:number, issueTypeId:string, applyType:string = 'agile') {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/schemes/query_transforms`,
+      params: {
+        current_status_id: currentStatusId,
+        issue_id: issueId,
+        issue_type_id: issueTypeId,
+        apply_type: applyType,
+      },
+    });
+  }
+
+  /**
    * 查询该组织下所有状态
    */
   loadAll() {
-    return axios.get(`${this.prefix}/status/query_all`);
+    return axios.get(`${this.orgPrefix}/status/query_all`);
   }
 
   /**
@@ -64,7 +100,7 @@ class StatusApi {
      * @param statusId 
      */
   delete(statusId: number) {
-    return axios.delete(`${this.prefix}/status/${statusId}`);
+    return axios.delete(`${this.orgPrefix}/status/${statusId}`);
   }
 
   /**
@@ -73,17 +109,17 @@ class StatusApi {
    * @param updateData 
    */
   update(statusId: number, updateData: UpdateData) {
-    return axios.put(`${this.prefix}/status/${statusId}`, updateData);
+    return axios.put(`${this.orgPrefix}/status/${statusId}`, updateData);
   }
 
   /**
-         * 检查状态名是否重复
-         * @param name 
-         */
+    * 检查状态名是否重复
+    * @param name 
+    */
   checkName(name: string) {
     return axios({
       method: 'get',
-      url: `${this.prefix}/status/check_name`,
+      url: `${this.orgPrefix}/status/check_name`,
       params: {
         name,
       },

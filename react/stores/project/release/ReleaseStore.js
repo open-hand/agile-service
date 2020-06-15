@@ -3,7 +3,7 @@ import {
 } from 'mobx';
 import axios from 'axios';
 import { store, stores } from '@choerodon/boot';
-import { versionApi } from '@/api';
+import { versionApi, priorityApi, statusApi } from '@/api';
 
 const { AppState } = stores;
 
@@ -192,9 +192,9 @@ class ReleaseStore {
 
   loadType = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/schemes/query_issue_types?apply_type=agile`);
 
-  loadStatus = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/schemes/query_status_by_project_id?apply_type=agile`);
+  loadStatus = () => statusApi.loadByProject();
 
-  loadPriorities = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/priority/list_by_org`);
+  loadPriorities = () => priorityApi.loadByProject();
 }
 
 const releaseStore = new ReleaseStore();
