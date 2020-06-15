@@ -10,6 +10,7 @@ interface RenderProps {
 }
 interface Props {
   disabled?: boolean
+  alwaysRender?: boolean // 查看模式也挂载编辑器
   editor: () => JSX.Element
   editorExtraContent?: () => JSX.Element
   children: ({ value, editing }: RenderProps) => JSX.Element | JSX.Element
@@ -18,8 +19,8 @@ interface Props {
 }
 
 const TextEditToggle: React.FC<Props> = ({
-  disabled, editor, editorExtraContent, children: text, onSubmit, initValue,
-}) => {
+  disabled, editor, editorExtraContent, children: text, onSubmit, initValue, alwaysRender = true,
+} = {}as Props) => {
   const [editing, setEditing] = useState(false);
   const dataRef = useRef(initValue);
   const editorRef = useRef<JSX.Element>(null);
@@ -50,14 +51,20 @@ const TextEditToggle: React.FC<Props> = ({
   const handleEditorBlur = () => {
     // 延缓submit，因为有时候blur之后才会onchange，保证拿到的值是最新的
     setTimeout(() => {
-      hideEditor();
-      if (dataRef.current !== initValue) {
-        onSubmit(dataRef.current);
+      // @ts-ignore
+      if (editorRef.current.isValid) {
+        hideEditor();
+        if (dataRef.current !== initValue) {
+          onSubmit(dataRef.current);
+        }
       }
     });
   };
   const renderEditor = () => {
     const editorElement = typeof editor === 'function' ? editor() : editor;
+    if (!editing && !alwaysRender) {
+      return null;
+    }
     const extraContent = typeof editorExtraContent === 'function' ? editorExtraContent() : editorExtraContent;
     const editorProps: any = {
       // tabIndex: -1,
@@ -86,7 +93,7 @@ const TextEditToggle: React.FC<Props> = ({
   };
   const getCellRenderer = () => (
     <Fragment>
-      {/* 编辑器在没编辑的时候也会渲染，目的是提前加载数据 */}
+      {/* 在没编辑的时候也会渲染，目的是提前加载数据 */}
       {!disabled && (
         <div className={classNames(styles.editor, {
           [styles.hidden]: !editing,
