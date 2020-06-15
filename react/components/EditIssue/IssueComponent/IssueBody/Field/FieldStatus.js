@@ -37,11 +37,15 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
   updateIssueStatus = (transform) => {
     if (transform) {
       const transformId = transform.id;
+      
       const {
         store, onUpdate, reloadIssue, applyType,
       } = this.props;
       const issue = store.getIssue;
-      const { issueId, objectVersionNumber } = issue;
+      const { issueId, statusId, objectVersionNumber } = issue;
+      if (statusId === transform.endStatusId) {
+        return;
+      }
       if (transformId) {
         issueApi.updateStatus(transformId, issueId, objectVersionNumber, applyType)
           .then(() => {
