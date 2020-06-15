@@ -2,7 +2,6 @@ import {
   observable, action, computed, runInAction,
 } from 'mobx';
 import { stores } from '@choerodon/boot';
-import { getProjectsInProgram, getIsOwner } from '@/api/CommonApi';
 import { commonApi } from '@/api';
 
 const { AppState } = stores;
@@ -24,7 +23,7 @@ class IsInProgramStore {
 
   refresh = async () => {
     if (AppState.currentMenuType.category !== 'PROGRAM' && AppState.currentMenuType.type === 'project') {
-      const program = await getProjectsInProgram();
+      const program = await commonApi.getProjectsInProgram();
       const hasProgram = Boolean(program);
       this.setIsInProgram(hasProgram);
       this.setProgram(program);
@@ -60,7 +59,7 @@ class IsInProgramStore {
   }
 
   getIsOwner = async () => {
-    const isOwner = await getIsOwner();
+    const isOwner = await commonApi.getUserRolesInProject();
     this.setIsOwner(isOwner);
   }
 

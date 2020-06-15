@@ -8,7 +8,9 @@ import {
 } from 'choerodon-ui';
 import moment from 'moment';
 import reactComponentDebounce from '@/components/DebounceComponent';
-import { featureApi, epicApi, fieldApi } from '@/api';
+import {
+  featureApi, epicApi, fieldApi, issueTypeApi, 
+} from '@/api';
 import {
   beforeTextUpload, handleFileUpload, validateFile, normFile, 
 } from '@/utils/richText';
@@ -18,9 +20,6 @@ import {
 import { issueApi } from '@/api';
 import { UploadButton } from '../CommonComponent';
 import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
-import {
-  loadIssueTypes,
-} from '../../api/NewIssueApi';
 import SelectNumber from '../SelectNumber';
 import WYSIWYGEditor from '../WYSIWYGEditor';
 import TypeTag from '../TypeTag';
@@ -166,7 +165,7 @@ class CreateIssue extends Component {
 
   loadIssueTypes = () => {
     const { applyType } = this.props;
-    loadIssueTypes(applyType).then((res) => {
+    issueTypeApi.loadIssueTypes(applyType).then((res) => {
       if (res && res.length) {
         const defaultType = this.getDefaultType(res);
         const param = {

@@ -1,18 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  userApi, componentApi, issueApi, epicApi, versionApi, 
+  userApi, componentApi, issueApi, epicApi, versionApi, issueTypeApi, issueLabelApi, 
 } from '@/api';
 import { sprintApi } from '@/api';
 import {
-  loadIssueTypes, loadStatusList, loadPriorities, loadLabels,
+  loadStatusList, loadPriorities,
 } from '../../api/NewIssueApi';
 
 const requests = {
   issueType: {
     textField: 'name',
     valueField: 'id',
-    request: loadIssueTypes,
+    request: issueTypeApi.loadIssueTypes.bind(issueTypeApi),
   },
   issueStatus: {
     textField: 'name',
@@ -42,7 +42,7 @@ const requests = {
   label: {
     textField: 'labelName',
     valueField: 'labelId',
-    request: loadLabels,
+    request: () => issueLabelApi.loads(),
   },
   component: {
     isContent: true,

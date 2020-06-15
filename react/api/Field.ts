@@ -21,7 +21,16 @@ class FieldApi {
      * @param dto 
      */
   quickCreateDefault(issueId: number, dto: IFiled) {
-    return axios.post(`${this.prefix}/field_value/quick_create/${issueId}`, dto);
+    const organizationId = getOrganizationId();
+
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/field_value/quick_create/${issueId}`,
+      data: dto,
+      params: {
+        organizationId,
+      },
+    });
   }
 
   /**

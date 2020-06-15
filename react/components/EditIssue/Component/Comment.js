@@ -3,11 +3,11 @@ import { Icon, Popconfirm } from 'choerodon-ui';
 import {
   text2Delta, beforeTextUpload,
 } from '@/utils/richText';
+import { issueCommentApi } from '@/api/IssueComment';
 import UserHead from '../../UserHead';
 import WYSIWYGEditor from '../../WYSIWYGEditor';
 import WYSIWYGViewer from '../../WYSIWYGViewer';
 import { DatetimeAgo } from '../../CommonComponent';
-import { deleteCommit, updateCommit } from '../../../api/NewIssueApi';
 import './Comment.less';
 
 
@@ -26,7 +26,7 @@ class Comment extends Component {
 
   handleDeleteCommit = (commentId) => {
     const { onDeleteComment } = this.props;
-    deleteCommit(commentId)
+    issueCommentApi.delete(commentId)
       .then(() => {
         if (onDeleteComment) {
           onDeleteComment();
@@ -52,7 +52,7 @@ class Comment extends Component {
 
   updateComment = (comment) => {
     const { onUpdateComment } = this.props;
-    updateCommit(comment).then(() => {
+    issueCommentApi.update(comment).then(() => {
       this.setState({
         editCommentId: undefined,
         editComment: undefined,

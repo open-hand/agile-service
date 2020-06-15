@@ -52,6 +52,18 @@ class PiApi {
       data,
     });
   }
+  
+  
+  addFeatures(issueIds:Array<number>, sourceId:number = 0, destinationId:number = 0,
+    before:boolean = false, outsetIssueId:number = 0, rankIndex:number = 0) {
+    return axios.post(`${this.prefix}/pi/to_pi/${destinationId}`, {
+      before,
+      issueIds,
+      outsetIssueId,
+      rankIndex,
+      currentPiId: sourceId,
+    });
+  }
 }
 
 const piApi = new PiApi();

@@ -13,3 +13,5 @@ export * from './Common';
 export * from './Version';
 export * from './Status';
 export * from './Field';
+export * from './IssueType';
+export * from './IssueLabel';
