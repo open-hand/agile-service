@@ -9,10 +9,11 @@ import { throttle } from 'lodash';
 import './EditIssue.less';
 import useIsOwner from '@/hooks/useIsOwner';
 import { useIssueTypes } from '@/hooks';
-import { issueApi, fieldApi, issueLinkApi } from '@/api';
+import {
+  issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, 
+} from '@/api';
 import {
   loadBranchs, loadDatalogs,
-  loadWorklogs, loadDocs,
 } from '../../api/NewIssueApi';
 import {
   loadDatalogs as loadDatalogsProgram,
@@ -100,8 +101,8 @@ function EditIssue() {
         linkIssues,
         branches,
       ] = await Promise.all([
-        loadDocs(id),
-        programId || applyType === 'program' ? null : loadWorklogs(id),
+        knowledgeApi.loadByIssue(id),
+        programId || applyType === 'program' ? null : workLogApi.loadByIssue(id),
         programId ? loadDatalogsProgram(id, programId) : loadDatalogs(id),
         programId || applyType === 'program' ? null : issueLinkApi.loadByIssueAndApplyType(id),
         programId || applyType === 'program' ? null : loadBranchs(id),

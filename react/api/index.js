@@ -17,3 +17,6 @@ export * from './IssueType';
 export * from './IssueLabel';
 export * from './IssueLink';
 export * from './Priority';
+export * from './WorkLog';
+export * from './PersonalFilter';
+export * from './Knowledge';

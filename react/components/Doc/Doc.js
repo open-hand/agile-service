@@ -7,6 +7,7 @@ import {
 import './Doc.less';
 import { produce } from 'immer';
 import { getOrganizationId } from '@/utils/common';
+import { knowledgeApi } from '@/api';
 
 const { AppState } = stores;
 const { Sidebar } = Modal;
@@ -92,7 +93,7 @@ class Doc extends Component {
           });
         }
       });
-      axios.post(`/agile/v1/projects/${proId}/knowledge_relation`, postData).then(() => {
+      knowledgeApi.createRelationForIssue(postData).then(() => {
         this.setState({
           createLoading: false,
         });
