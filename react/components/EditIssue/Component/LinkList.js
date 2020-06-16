@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { Icon, Popconfirm, Tooltip } from 'choerodon-ui';
-import { issueLinkApi } from '@/api';
+import { issueLinkApi, featureApi } from '@/api';
 import UserHead from '../../UserHead';
-import { deleteFeatureLink } from '../../../api/NewIssueApi';
 import PriorityTag from '../../PriorityTag';
 import StatusTag from '../../StatusTag';
 import TypeTag from '../../TypeTag';
@@ -21,7 +20,7 @@ class LinkList extends Component {
           onRefresh();
         });
     } else {
-      deleteFeatureLink(linkId)
+      featureApi.deleteLink(linkId)
         .then(() => {
           onRefresh();
         });

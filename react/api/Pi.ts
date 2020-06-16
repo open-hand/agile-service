@@ -52,7 +52,15 @@ class PiApi {
       data,
     });
   }
-  
+
+  /**
+   * 查询feature 关联过的特性记录(PI历程)
+   * @param issueId 
+   */
+  getFeatureLog(issueId:number) {
+    return axios.get(`${this.prefix}/pi/${issueId}/list_feature_pi_log`);
+  }
+
   /**
    * 批量将feature加入到pi中
    * @param issueIds 

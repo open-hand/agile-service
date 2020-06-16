@@ -6,9 +6,32 @@ interface UFeatureColor {
   issueId: number,
   objectVersionNumber: number,
 }
+interface IFeatureLink {
+  piId: number,
+  boardFeatureId: number,
+  dependBoardFeatureIds: Array<number>,
+  type: string,
+  forward: boolean,
+}
 class FeatureApi {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
+  }
+
+  /**
+   * 批量创建特性关联
+   * @param data 
+   */
+  createLink(data:IFeatureLink) {
+    return axios.post(`${this.prefix}/board_depend/batch_create_depend`, data);
+  }
+
+  /**
+   * 刪除特性关联
+   * @param featureDependId 
+   */
+  deleteLink(featureDependId:number) {
+    return axios.delete(`${this.prefix}/board_depend/${featureDependId}`);
   }
 
   /**
@@ -31,6 +54,7 @@ class FeatureApi {
       },
     );
   }
+
 
   /**
    * 在子项目根据piId查询项目群的特性
@@ -165,6 +189,7 @@ class FeatureApi {
     });
   }
 
+  
   /**
    * 将批量的issue加入到特性中
    * @param featureId 
