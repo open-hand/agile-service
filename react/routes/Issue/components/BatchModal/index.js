@@ -173,10 +173,6 @@ function BatchModal({
       name: 'featureId',
       type: 'number',
       label: '所属特性',
-      lookupAxiosConfig: () => ({
-        url: `/agile/v1/projects/${getProjectId()}/issues/feature/select_data?organizationId=${getOrganizationId()}`,
-        method: 'get',
-      }),
       valueField: 'issueId',
       textField: 'summary',
     }] : [{
