@@ -39,8 +39,8 @@ class Cache {
         this.flushCallback(cacheKey);
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(error);
+      // 失败时删除
+      this.cached.delete(cacheKey);
     }
   }
 
