@@ -214,6 +214,70 @@ class IssueApi {
   }
 
   /**
+ * 导入issue
+ * @param data
+ * @returns {*}
+ */
+  import(data:any) {
+    // const headers = {
+    //   'content-type': 'multipart/form-data',
+    // };
+    const organizationId = getOrganizationId();
+    const userId = AppState.getUserId;
+    return axios({
+      headers: { 'Content-Type': 'multipart/form-data' },
+      method: 'post',
+      url: `${this.prefix}/excel/import`,
+      params: {
+        organizationId,
+        userId,
+      },
+      data,
+    });
+  }
+
+  /**
+ * 取消导入
+ * @param id 导入id
+ */
+  cancelImport(id:number, objectVersionNumber:number) {
+    return axios({
+      method: 'put',
+      url: `${this.prefix}/excel/cancel`,
+      params: {
+        id,
+        objectVersionNumber,
+      },
+    });
+  }
+
+  /**
+ * 查询最新的导入记录
+ * @returns {V|*}
+ */
+  loadLastImport() {
+    return axios.get(`${this.prefix}/excel/latest`);
+  }
+
+  /**
+ *下载导入模板
+ *
+ * @export
+ * @returns 
+ */
+  downloadTemplateForImport() {
+    const organizationId = getOrganizationId();
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/excel/download`,
+      params: {
+        organizationId,
+      },
+      responseType: 'arraybuffer',
+    });
+  }
+
+  /**
     * 创建子任务
     * @param obj 
     * @param applyType 

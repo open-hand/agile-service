@@ -53,7 +53,15 @@ class PiApi {
     });
   }
   
-  
+  /**
+   * 批量将feature加入到pi中
+   * @param issueIds 
+   * @param sourceId 
+   * @param destinationId pi Id
+   * @param before 
+   * @param outsetIssueId 
+   * @param rankIndex 
+   */
   addFeatures(issueIds:Array<number>, sourceId:number = 0, destinationId:number = 0,
     before:boolean = false, outsetIssueId:number = 0, rankIndex:number = 0) {
     return axios.post(`${this.prefix}/pi/to_pi/${destinationId}`, {

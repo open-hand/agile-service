@@ -5,12 +5,18 @@ const { exec } = require('child_process')
 const rimraf = require('rimraf');
 const babel = require('gulp-babel');
 const through2 = require('through2');
+const ts = require('gulp-typescript');
 const alias = require('./alias').gulp;
 const cwd = process.cwd();
 const libDir = path.join(cwd, 'lib');
 
 function compileAssets() {
   return gulp.src(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)']).pipe(gulp.dest(libDir));
+}
+function getTypeScriptConfig(path) {
+  const tsProject = ts.createProject('tsconfig.json');
+  return tsProject.src().pipe(tsProject()).pipe(gulp.dest(libDir));
+
 }
 function getBabelCommonConfig() {
   const plugins = [
@@ -49,6 +55,7 @@ function getBabelCommonConfig() {
   ];
   return {
     presets: [
+      '@babel/preset-typescript',
       '@babel/preset-react',
       ['@babel/preset-env', {
         modules: false,
@@ -114,9 +121,12 @@ gulp.task('watch', async () => {
   const source = [
     'react/**/*.js',
     'react/**/*.jsx',
+    'react/**/*.ts',
+    'react/**/*.tsx',
   ];
   await Promise.all([
-  babelify(gulp.src(source).pipe(watch(source))).on('data', updateFileTask),
-  gulp.src(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)']).pipe(watch(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)'])).pipe(gulp.dest(libDir)).on('data', updateFileTask)
+    getTypeScriptConfig(),
+    babelify(gulp.src(source).pipe(watch(source))).on('data', updateFileTask),
+    gulp.src(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)']).pipe(watch(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)'])).pipe(gulp.dest(libDir)).on('data', updateFileTask)
   ])
 })

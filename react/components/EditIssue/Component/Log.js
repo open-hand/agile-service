@@ -3,11 +3,11 @@ import { Icon, Popconfirm } from 'choerodon-ui';
 import {
   text2Delta, beforeTextUpload,
 } from '@/utils/richText';
+import { workLogApi } from '@/api';
 import UserHead from '../../UserHead';
 import WYSIWYGEditor from '../../WYSIWYGEditor';
 import WYSIWYGViewer from '../../WYSIWYGViewer';
 import { DatetimeAgo } from '../../CommonComponent';
-import { deleteWorklog, updateWorklog } from '../../../api/NewIssueApi';
 import './Log.less';
 
 
@@ -23,7 +23,7 @@ class Log extends Component {
 
   updateLog = (log) => {
     const { onUpdateLog } = this.props;
-    updateWorklog(log.logId, log).then((res) => {
+    workLogApi.update(log.logId, log).then((res) => {
       this.setState({
         editLogId: undefined,
         editLog: undefined,
@@ -34,7 +34,7 @@ class Log extends Component {
 
   handleDeleteLog(logId) {
     const { onDeleteLog } = this.props;
-    deleteWorklog(logId)
+    workLogApi.delete(logId)
       .then((res) => {
         onDeleteLog();
       });

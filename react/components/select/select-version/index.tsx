@@ -7,7 +7,6 @@ interface Props {
   dataRef: React.RefObject<Array<any>>
   statusArr: Array<string>
 }
-
 const SelectVersion: React.FC<Props> = forwardRef(({ dataRef, statusArr = [], ...otherProps }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'version',
