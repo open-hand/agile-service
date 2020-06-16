@@ -61,7 +61,7 @@ class StatusApi {
    * @param applyType 
    */
   loadByProject(applyType = 'agile') {
-    return axios.get({
+    return axios({
       method: 'get',
       url: `${this.prefix}/schemes/query_status_by_project_id`,
       params: { apply_type: applyType },

@@ -1,7 +1,9 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
+import './Cache';
+import Api from './Api';
 
-class UserApi {
+class UserApi extends Api {
   get prefix() {
     return `/iam/choerodon/v1/projects/${getProjectId()}`;
   }
@@ -28,13 +30,16 @@ class UserApi {
    * @param id 根据id查询
    */
   getAllInProject(param?: string, page?: number, userId?: number) {
-    return axios.get(`${this.prefix}/users`, {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/users`,
       params: {
         param,
         id: userId,
         page: page || 1,
         size: 20,
       },
+      cache: true,
     });
   }
 
@@ -45,13 +50,16 @@ class UserApi {
    * @param userId 
    */
   getAllInProjectIncludesLeaveUsers(param?: string, page?: number, userId?: number) {
-    return axios.get(`/agile/v1/projects/${getProjectId()}/issues/users`, {
+    return this.request({
+      method: 'get',
+      url: `/agile/v1/projects/${getProjectId()}/issues/users`, 
       params: {
         param,
         id: userId,
         page: page || 1,
         size: 20,
       },
+      cache: true,
     });
   }
 }
