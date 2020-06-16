@@ -372,15 +372,15 @@ const CreateFilter = (props) => {
         name: 'name',
       },
       feature: {
-        url: `/agile/v1/projects/${projectId}/issues/feature/select_data?organizationId=${organizationId}`,
-        prop: '',
+        url: `/agile/v1/projects/${projectId}/issues/feature/all?organizationId=${organizationId}&page=0&size=0&param=`,
+        prop: 'content',
         id: 'issueId',
         name: 'summary',
       },
     };
     axios[filter === 'sprint'
       || filter === 'influence_version'
-      || filter === 'fix_version' ? 'post' : 'get'](OPTION_FILTER[filter].url)
+      || filter === 'fix_version' || filter === 'feature' ? 'post' : 'get'](OPTION_FILTER[filter].url, filter === 'feature' ? [] : undefined)
       .then((res) => {
         setTemp(OPTION_FILTER[filter].prop === '' ? res : res[OPTION_FILTER[filter].prop]);
       });
@@ -591,8 +591,8 @@ const CreateFilter = (props) => {
         name: 'name',
       },
       feature: {
-        url: `/agile/v1/projects/${projectId}/issues/feature/select_data?organizationId=${organizationId}`,
-        props: '',
+        url: `/agile/v1/projects/${projectId}/issues/feature/all?organizationId=${organizationId}&page=0&size=0&param=`,
+        props: 'content',
         id: 'issueId',
         name: 'summary',
       },

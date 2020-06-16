@@ -17,7 +17,7 @@ class FeatureApi {
    * @param param 搜索
    * @param page 第几页
    */
-  queryAllInSubProject(featureIds: number[], param: string, page: number = 1) {
+  queryAllInSubProject(featureIds: number[], param: string, page: number = 1, size: number) {
     return axios.post(
       `${this.prefix}/issues/feature/all`,
       featureIds || [],
@@ -25,7 +25,7 @@ class FeatureApi {
         params: {
           organizationId: getOrganizationId(),
           page,
-          size: 10,
+          size: !size && size === 0 ? 0 : (size || 10),
           param,
         },
       },
