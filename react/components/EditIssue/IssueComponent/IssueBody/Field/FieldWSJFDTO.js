@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
+import { wsjfApi } from '@/api';
 import TextEditToggle from '../../../../TextEditToggle';
-import { updateIssueWSJFDTO } from '../../../../../api/NewIssueApi';
 import SelectNumber from '../../../../SelectNumber';
 
 const { Text, Edit } = TextEditToggle;
@@ -23,7 +23,7 @@ const { Text, Edit } = TextEditToggle;
       ...wsjf,
       [fieldCode]: value === '' ? null : value,
     };
-    updateIssueWSJFDTO(obj)
+    wsjfApi.update(obj)
       .then(() => {
         if (onUpdate) {
           onUpdate();

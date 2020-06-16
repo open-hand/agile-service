@@ -31,7 +31,7 @@ const { TabPane } = Tabs;
 function IssueBody(props) {
   const {
     prefixCls, disabled, store, isOnlyAgileProject, applyType,
-  } = useContext(EditIssueContext);  
+  } = useContext(EditIssueContext);
   const issue = store.getIssue;
   const {
     issueId, issueNum, typeCode, issueTypeVO = {},
@@ -41,7 +41,7 @@ function IssueBody(props) {
   const workLogShow = store.getWorkLogShow;
   return (
     <section className={`${prefixCls}-body`} id="scroll-area" style={{ position: 'relative' }}>
-      <div style={{ paddingRight: 20 }}>      
+      <div style={{ paddingRight: 20 }}>
         <div className="line-justify" style={{ marginBottom: 10, alignItems: 'flex-start' }}>
           <FieldSummary
             {...props}
@@ -50,26 +50,26 @@ function IssueBody(props) {
           />
           <div style={{ flexShrink: 0, color: 'rgba(0, 0, 0, 0.65)' }}>
             {!disabled && (
-            <IssueDropDown {...props} />
+              <IssueDropDown {...props} />
             )}
           </div>
         </div>
         {/* 故事点 */}
         <div className="line-start">
           {
-          issueId && ['story', 'feature'].indexOf(typeCode) !== -1 ? (
-            <div style={{ display: 'flex', marginRight: 25 }}>
-              <FieldStoryPoint {...props} field={{ fieldCode: 'storyPoints', fieldName: '故事点' }} />
-            </div>
-          ) : null
-        }
+            issueId && ['story', 'feature'].indexOf(typeCode) !== -1 ? (
+              <div style={{ display: 'flex', marginRight: 25 }}>
+                <FieldStoryPoint {...props} field={{ fieldCode: 'storyPoints', fieldName: '故事点' }} />
+              </div>
+            ) : null
+          }
           {
-          issueId && ['issue_epic', 'feature'].indexOf(typeCode) === -1 ? (
-            <div style={{ display: 'flex' }}>
-              <FieldStoryPoint {...props} field={{ fieldCode: 'remainingTime', fieldName: '剩余预估时间' }} />
-            </div>
-          ) : null
-        }
+            issueId && ['issue_epic', 'feature'].indexOf(typeCode) === -1 ? (
+              <div style={{ display: 'flex' }}>
+                <FieldStoryPoint {...props} field={{ fieldCode: 'remainingTime', fieldName: '剩余预估时间' }} />
+              </div>
+            ) : null
+          }
         </div>
       </div>
       <Tabs defaultActiveKey="1">
@@ -86,7 +86,7 @@ function IssueBody(props) {
             ? <IssueDoc {...props} /> : ''
           }
 
-          {issueTypeVO.typeCode && ['issue_epic', 'sub_task', 'feature'].indexOf(issueTypeVO.typeCode) === -1 
+          {issueTypeVO.typeCode && ['issue_epic', 'sub_task', 'feature'].indexOf(issueTypeVO.typeCode) === -1
             ? <SubTask {...props} /> : ''
           }
 
@@ -111,7 +111,7 @@ function IssueBody(props) {
         }
         <TabPane tab="评论" key="2">
           <IssueCommit {...props} />
-        </TabPane>       
+        </TabPane>
         <TabPane tab="记录" key="3">
           {!disabled && issueTypeVO.typeCode === 'feature' && <IssuePIHistory {...props} />}
           {issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1

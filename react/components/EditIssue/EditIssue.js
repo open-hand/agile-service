@@ -10,11 +10,9 @@ import './EditIssue.less';
 import useIsOwner from '@/hooks/useIsOwner';
 import { useIssueTypes } from '@/hooks';
 import {
-  issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, 
+  issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, devOpsApi, 
 } from '@/api';
-import {
-  loadBranchs, loadDatalogs,
-} from '../../api/NewIssueApi';
+
 import {
   loadDatalogs as loadDatalogsProgram,
   loadIssue as loadIssueProgram,
@@ -103,9 +101,9 @@ function EditIssue() {
       ] = await Promise.all([
         knowledgeApi.loadByIssue(id),
         programId || applyType === 'program' ? null : workLogApi.loadByIssue(id),
-        programId ? loadDatalogsProgram(id, programId) : loadDatalogs(id),
+        programId ? loadDatalogsProgram(id, programId) : dataLogApi.loadByIssue(id),
         programId || applyType === 'program' ? null : issueLinkApi.loadByIssueAndApplyType(id),
-        programId || applyType === 'program' ? null : loadBranchs(id),
+        programId || applyType === 'program' ? null : devOpsApi.countBranchs(id),
       ]);
       if (idRef.current !== id) {
         return;

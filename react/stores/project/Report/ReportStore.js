@@ -2,9 +2,7 @@ import { observable, action, computed } from 'mobx';
 import { store } from '@choerodon/boot';
 import _ from 'lodash';
 import { sprintApi } from '@/api';
-import {
-  loadChartData,
-} from '../../../api/NewIssueApi';
+import { reportApi } from '@/api/Report';
 
 @store('ReportStore')
 class ReportStore {
@@ -98,7 +96,7 @@ class ReportStore {
   }
 
   getChartData() {
-    loadChartData(this.currentSprint.sprintId, 'issueCount').then((res) => {
+    reportApi.loadSprintBurnDown(this.currentSprint.sprintId, 'issueCount').then((res) => {
       const data = res;
       const newData = [];
       for (let index = 0, len = data.length; index < len; index += 1) {

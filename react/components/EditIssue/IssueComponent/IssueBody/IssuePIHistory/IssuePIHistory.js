@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from 'choerodon-ui';
-import { getHistoryPI } from '@/api/NewIssueApi';
+import { piApi } from '@/api';
 import HistoryItem from './HistoryItem';
 
 
@@ -10,7 +10,7 @@ function IssuePIHistory(props) {
   const [data, setData] = useState([]);
   useEffect(() => {
     const loadData = async () => {
-      const Data = await getHistoryPI(store.getIssue.issueId);
+      const Data = await piApi.getFeatureLog(store.getIssue.issueId);
       setData(Data.reverse());
     };
     loadData();
@@ -25,7 +25,7 @@ function IssuePIHistory(props) {
       </div>
       <div>
         {(expand ? data : data.slice(0, 3)).map(item => <HistoryItem data={item} featureType={featureType} />)}
-      </div>      
+      </div>
       {data.length >= 3 && (
         <Button
           icon={expand ? 'baseline-arrow_drop_up' : 'baseline-arrow_right'}
