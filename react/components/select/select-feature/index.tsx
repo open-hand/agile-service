@@ -14,9 +14,9 @@ const SelectFeature: React.FC<Props> = forwardRef(({ featureId, featureName, ...
     name: 'feature',
     textField: 'summary',
     valueField: 'issueId',
-    request: () => featureApi.getByEpicId(),
+    request: ({ filter, page }) => featureApi.getByEpicId(undefined, filter, page),
     middleWare: features => ((find(features, item => item.issueId === featureId) || !featureId) ? features : [...features, { issueId: featureId, summary: featureName }]),
-    paging: false,
+    paging: true,
   }), []);
   const props = useSelect(config);
   return (

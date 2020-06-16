@@ -77,16 +77,22 @@ class FeatureApi {
    * 根据史诗ID查询项目群的特性
    * @param epicId 可以不传
    */
-  getByEpicId(epicId?: number) {
-    return axios.get(
-      `${this.prefix}/issues/feature/select_data`,
-      {
+  getByEpicId(epicId?: number, searchName?: string, page: number = 1, size: number = 10) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/issues/feature/select_data`,
+      data: {
         params: {
-          organizationId: getOrganizationId(),
           epicId,
         },
       },
-    );
+      params: {
+        organizationId: Number(getOrganizationId()),
+        param: searchName,
+        page,
+        size,
+      },
+    });
   }
 
   /**

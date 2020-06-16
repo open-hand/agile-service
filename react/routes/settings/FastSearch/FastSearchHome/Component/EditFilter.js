@@ -442,9 +442,6 @@ class AddComponent extends Component {
         </Option>,
       );
     }
-    if (filter === 'feature') {
-      console.log(filter, OPTION_FILTER[filter].state, arr);
-    }
     return arr;
   };
 
