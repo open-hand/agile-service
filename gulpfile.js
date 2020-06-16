@@ -13,11 +13,6 @@ const libDir = path.join(cwd, 'lib');
 function compileAssets() {
   return gulp.src(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)']).pipe(gulp.dest(libDir));
 }
-function getTypeScriptConfig(path) {
-  const tsProject = ts.createProject('tsconfig.json');
-  return tsProject.src().pipe(tsProject()).pipe(gulp.dest(libDir));
-
-}
 function getBabelCommonConfig() {
   const plugins = [
     [
@@ -125,7 +120,6 @@ gulp.task('watch', async () => {
     'react/**/*.tsx',
   ];
   await Promise.all([
-    getTypeScriptConfig(),
     babelify(gulp.src(source).pipe(watch(source))).on('data', updateFileTask),
     gulp.src(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)']).pipe(watch(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)'])).pipe(gulp.dest(libDir)).on('data', updateFileTask)
   ])
