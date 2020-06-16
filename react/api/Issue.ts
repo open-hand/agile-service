@@ -183,6 +183,23 @@ class IssueApi {
   }
 
   /**
+   * 项目层中加载问题（项目群）
+   * @param issueId 问题id
+   * @param programId 项目群id
+   */
+  loadUnderProgram(issueId:number, programId:number) {
+    const organizationId = getOrganizationId();
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/project_invoke_program/issue/${issueId}`,
+      params: {
+        programId,
+        organizationId,
+      },
+    });
+  }
+
+  /**
     * 删除问题
     * @param issueId//问题id
     * @param creatorId//问题创建者id

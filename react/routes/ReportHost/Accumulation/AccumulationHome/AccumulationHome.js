@@ -11,6 +11,7 @@ import {
 import _ from 'lodash';
 import moment from 'moment';
 import ReactEcharts from 'echarts-for-react';
+import { quickFilterApi } from '@/api';
 import ScrumBoardStore from '../../../../stores/project/scrumBoard/ScrumBoardStore';
 import AccumulationStore from '../../../../stores/project/accumulation/AccumulationStore';
 import AccumulationFilter from '../AccumulationComponent/AccumulationFilter';
@@ -43,7 +44,7 @@ class AccumulationHome extends Component {
       linkFromParamUrl,
     });
 
-    AccumulationStore.axiosGetFilterList().then((data) => {
+    quickFilterApi.loadAll().then((data) => {
       const newData = _.clone(data);
       for (let index = 0, len = newData.length; index < len; index += 1) {
         newData[index].check = false;

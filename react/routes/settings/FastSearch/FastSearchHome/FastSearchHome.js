@@ -8,6 +8,7 @@ import { Modal } from 'choerodon-ui/pro';
 import {
   TabPage as Page, Header, Content, stores, axios, Breadcrumb,
 } from '@choerodon/boot';
+import { quickFilterApi } from '@/api';
 import CreateFilter from './Component/CreateFilter';
 import EditFilter from './Component/EditFilter';
 import DeleteFilter from './Component/DeleteFilter';
@@ -120,22 +121,14 @@ class Search extends Component {
     axios
       .put(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/drag`, postData)
       .then(() => {
-        axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/query_all`, {
-          contents: [
-          ],
-          filterName: '',
-        }).then((res) => {
+        quickFilterApi.loadAll({ contents: [], filterName: '' }).then((res) => {
           this.setState({
             filters: res,
           });
         });
       })
       .catch(() => {
-        axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/query_all`, {
-          contents: [
-          ],
-          filterName: '',
-        }).then((ress) => {
+        quickFilterApi.loadAll({ contents: [], filterName: '' }).then((ress) => {
           this.setState({
             filters: ress,
           });
@@ -159,21 +152,20 @@ class Search extends Component {
     });
   }
   
-  loadFilters(page = 0, size = 10) {
+  loadFilters() {
     const { filterName, barFilters } = this.state;
     this.setState({
       loading: true,
     });
-    axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/query_all`, {
+    quickFilterApi.loadAll({
       contents: barFilters,
       filterName,
+    }).then((res) => {
+      this.setState({
+        filters: res,
+        loading: false,
+      });
     })
-      .then((res) => {
-        this.setState({
-          filters: res,
-          loading: false,
-        });
-      })
       .catch((error) => { });
   }
 

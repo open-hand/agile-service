@@ -7,7 +7,7 @@ import {
 import { Permission, stores } from '@choerodon/boot';
 import moment from 'moment';
 import classnames from 'classnames';
-import { sprintApi } from '@/api';
+import { sprintApi, workCalendarApi } from '@/api';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import CloseSprint from '@/components/close-sprint';
@@ -41,7 +41,7 @@ function SprintButton({
   const openStartSprint = async () => {
     if (!disableStart) {
       const year = moment().year();
-      const workSetting = await BacklogStore.axiosGetWorkSetting(year);
+      const workSetting = await workCalendarApi.getWorkSetting(year);
       const sprintDetail = await sprintApi.loadSprint(data.sprintId);
       StartSprint({
         workSetting,

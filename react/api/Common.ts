@@ -66,6 +66,13 @@ class CommonApi {
     const roles = await axios.get(`/iam/choerodon/v1/projects/${getProjectId()}/role_members/users/${userId}`);
     return roles.some((role: { code: string; [propName: string] : any }) => role.code === 'project-admin');
   }
+
+  /**
+   * 根据type code查询其下的value值
+   */
+  loadLookupValue(typeCode:string) {
+    return axios.get(`/agile/v1/lookup_values/${typeCode}`);
+  }
 }
 
 const commonApi = new CommonApi();

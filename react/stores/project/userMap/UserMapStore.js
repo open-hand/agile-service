@@ -4,7 +4,9 @@ import {
 import axios from 'axios';
 import _ from 'lodash';
 import { store, stores, Choerodon } from '@choerodon/boot';
-import { sprintApi, versionApi, priorityApi } from '@/api';
+import {
+  sprintApi, versionApi, priorityApi, quickFilterApi, 
+} from '@/api';
 
 const { AppState } = stores;
 
@@ -422,10 +424,7 @@ class UserMapStore {
         }
         axios.all([
           axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/storymap/epics?organizationId=${orgId}&showDoneEpic=${this.showDoneEpic}`),
-          axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/query_all`, {
-            contents: [],
-            filterName: '',
-          }),
+          quickFilterApi.loadAll(),
           axios.get(axiosGetIssue),
         ])
           .then(
