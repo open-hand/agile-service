@@ -25,7 +25,7 @@ class FieldPI extends Component {
 
 
   render() {
-    const { store, hasPermission } = this.props;
+    const { store, hasPermission, disabled } = this.props;
     const issue = store.getIssue;
     const { activePi, closePi } = issue;
     const {
@@ -40,7 +40,7 @@ class FieldPI extends Component {
         </div>
         <div className="c7n-value-wrapper">
           <TextEditToggle
-            disabled={!hasPermission && statusCode === 'doing'}
+            disabled={(disabled) || (!hasPermission && statusCode === 'doing')}
             formKey="pi"
             onSubmit={this.updateIssuePI}
             originData={id}
