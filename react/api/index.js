@@ -23,3 +23,4 @@ export * from './Knowledge';
 export * from './Wsjf';
 export * from './DataLog';
 export * from './DevOps';
+export * from './QuickFilter';

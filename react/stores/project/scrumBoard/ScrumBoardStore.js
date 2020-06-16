@@ -244,13 +244,6 @@ class ScrumBoardStore {
     this.quickSearchList = data;
   }
 
-  axiosGetQuickSearchList() {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/query_all`, {
-      contents: [],
-      filterName: '',
-    });
-  }
-
   @computed get getSwimLaneCode() {
     return this.swimlaneBasedCode;
   }
@@ -758,10 +751,8 @@ class ScrumBoardStore {
   }
 
   // 查询组织层工作日历设置
-  axiosGetWorkSetting(year) {
-    const proId = AppState.currentMenuType.id;
-    const orgId = AppState.currentMenuType.organizationId;
-    return axios.get(`/iam/choerodon/v1/projects/${proId}/time_zone_work_calendars/time_zone_detail/${orgId}?year=${year}`).then((data) => {
+  axiosGetWorkSetting(year) {  
+    return workCalendarApi.getWorkSetting(year).then((data) => {
       if (data) {
         this.setWorkSetting(data);
       }

@@ -141,13 +141,6 @@ class AccumulationStore {
   @action setFilterList(data) {
     this.filterList = data;
   }
-
-  axiosGetFilterList() {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/query_all`, {
-      contents: [],
-      filterName: '',
-    });
-  }
 }
 
 const accumulationStore = new AccumulationStore();

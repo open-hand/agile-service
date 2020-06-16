@@ -3,7 +3,7 @@ import { observer, inject } from 'mobx-react';
 import { axios, Choerodon } from '@choerodon/boot';
 import { Select } from 'choerodon-ui';
 import EventEmitter from 'wolfy87-eventemitter';
-import { sprintApi } from '@/api';
+import { sprintApi, quickFilterApi } from '@/api';
 import './QuickSearch.less';
 import BacklogStore from '../../stores/project/backlog/BacklogStore';
 import ScrumBoardStore from '../../stores/project/scrumBoard/ScrumBoardStore';
@@ -33,11 +33,7 @@ class QuickSearch extends Component {
     QuickSearchEvent.addListener('setSelectQuickSearch', this.setSelectQuickSearch);
     QuickSearchEvent.addListener('unSelectStory', this.unSelectStory);
     const { AppState } = this.props;
-    const axiosGetFilter = axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/query_all`, {
-      contents: [
-      ],
-      filterName: '',
-    });
+    const axiosGetFilter = quickFilterApi.loadAll();
     const axiosGetUser = axios.get(`/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=40`);
     const axiosGetSprintNotClosed = sprintApi.loadSprints(['sprint_planning', 'started']);
     Promise.all([axiosGetFilter, axiosGetUser, axiosGetSprintNotClosed]).then((res = []) => {

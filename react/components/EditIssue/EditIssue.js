@@ -12,11 +12,6 @@ import { useIssueTypes } from '@/hooks';
 import {
   issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, devOpsApi, 
 } from '@/api';
-
-import {
-  loadDatalogs as loadDatalogsProgram,
-  loadIssue as loadIssueProgram,
-} from '../../api/QueryProgramApi';
 import RelateStory from '../RelateStory';
 import CopyIssue from '../CopyIssue';
 import ResizeAble from '../ResizeAble';
@@ -71,7 +66,7 @@ function EditIssue() {
     setIssueLoading(true);
     try {
       // 1. 加载详情
-      const issue = await (programId ? loadIssueProgram(id, programId) : issueApi.load(id));
+      const issue = await (programId ? issueApi.loadUnderProgram(id, programId) : issueApi.load(id));
       if (idRef.current !== id) {
         return;
       }
@@ -101,7 +96,7 @@ function EditIssue() {
       ] = await Promise.all([
         knowledgeApi.loadByIssue(id),
         programId || applyType === 'program' ? null : workLogApi.loadByIssue(id),
-        programId ? loadDatalogsProgram(id, programId) : dataLogApi.loadByIssue(id),
+        programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.loadByIssue(id),
         programId || applyType === 'program' ? null : issueLinkApi.loadByIssueAndApplyType(id),
         programId || applyType === 'program' ? null : devOpsApi.countBranchs(id),
       ]);

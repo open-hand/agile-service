@@ -10,7 +10,7 @@ import { store, stores } from '@choerodon/boot';
 import { Modal } from 'choerodon-ui';
 import Moment from 'moment';
 import {
-  featureApi, sprintApi, piApi, storyMapApi, issueApi, epicApi, priorityApi, issueTypeApi, 
+  featureApi, sprintApi, piApi, storyMapApi, issueApi, epicApi, priorityApi, issueTypeApi, commonApi, versionApi, quickFilterApi, 
 } from '@/api';
 import { getProjectId } from '@/utils/common';
 import { extendMoment } from 'moment-range';
@@ -135,10 +135,6 @@ class BacklogStore {
     this.projectInfo = data;
   }
 
-  axiosGetProjectInfo() {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/project_info`);
-  }
-
   @computed get getQuickFilters() {
     return toJS(this.quickFilters);
   }
@@ -190,7 +186,7 @@ class BacklogStore {
 
 
   axiosGetColorLookupValue() {
-    return axios.get('/agile/v1/lookup_values/epic_color');
+    return commonApi.loadLookupValue('epic_color');
   }
 
   @computed get getColorLookupValue() {
@@ -367,13 +363,6 @@ class BacklogStore {
     this.quickSearchList = data;
   }
 
-  axiosGetQuickSearchList() {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/query_all`, {
-      contents: [],
-      filterName: '',
-    });
-  }
-
   @observable assigneeFilterIds = [];
 
   @computed get getAssigneeFilterIds() {
@@ -402,15 +391,6 @@ class BacklogStore {
   }
 
   axiosGetSprint = () => sprintApi.getSprintAndIssues(this.quickFilters, this.assigneeFilterIds, this.filter)
-
-
-  handleVersionDrap = data => axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/drag`, data);
-
-  axiosGetWorkSetting(year) {
-    const proId = AppState.currentMenuType.id;
-    const orgId = AppState.currentMenuType.organizationId;
-    return axios.get(`/iam/choerodon/v1/projects/${proId}/time_zone_work_calendars/time_zone_detail/${orgId}?year=${year}`);
-  }
 
   @computed get getIssueTypes() {
     return this.issueTypes;
@@ -789,7 +769,7 @@ class BacklogStore {
       versionId,
       objectVersionNumber,
     };
-    this.handleVersionDrap(req).then(
+    versionApi.drag(req).then(
       action('fetchSuccess', (res) => {
         if (!res.message) {
           this.axiosGetVersion().then((versions) => {
@@ -942,7 +922,7 @@ class BacklogStore {
    */
   getSprint = async (setPiIdIf) => {
     const [quickSearch, issueTypes, priorityArr, backlogData] = await Promise.all([
-      this.axiosGetQuickSearchList(),
+      quickFilterApi.loadAll(),
       issueTypeApi.loadIssueTypes(),
       priorityApi.getDefaultByProject(),
       this.axiosGetSprint(),

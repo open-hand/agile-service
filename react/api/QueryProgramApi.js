@@ -5,20 +5,6 @@ import { getProjectId, getOrganizationId } from '@/utils/common';
 export function getRoadMapInProject(programId) {
   return axios.get(`/agile/v1/projects/${getProjectId()}/project_invoke_program/road_map?programId=${programId}&organizationId=${getOrganizationId()}`);
 }
-export function loadIssue(issueId, programId) {
-  return axios.get(`/agile/v1/projects/${getProjectId()}/project_invoke_program/issue/${issueId}?programId=${programId}&organizationId=${getOrganizationId()}`);
-}
-export function loadDatalogs(issueId, programId) {
-  return axios.get(`agile/v1/projects/${getProjectId()}/project_invoke_program/datalog?programId=${programId}&issueId=${issueId}`);
-}
-
-export function getBoard(programId, filter) {
-  return axios.post(`/agile/v1/projects/${getProjectId()}/project_invoke_program/query_board_info?programId=${programId}`, filter);
-}
-export function getBoardList(programId) {
-  return axios.get(`/agile/v1/projects/${getProjectId()}/project_invoke_program/board?programId=${programId}`);
-}
-
 export function loadBoardData(boardId, quickSearchObj = {}, programId) {
   const {
     onlyMe, onlyStory, quickSearchArray, assigneeFilterIds,
@@ -39,7 +25,6 @@ export function getPIList(programId) {
 export function getPIAims(piId, programId) {
   return axios.get(`/agile/v1/projects/${getProjectId()}/pi_objective/list_by_project?piId=${piId}&programId=${programId}`);
 }
-
 /**
  * 获取活跃ART
  * @param programId
@@ -47,7 +32,6 @@ export function getPIAims(piId, programId) {
 export function getActiveArt(programId) {
   return axios.get(`/agile/v1/projects/${getProjectId()}/project_invoke_program/art/active?programId=${programId}`);
 }
-
 /**
  * 获取ART日历
  * @param id
@@ -63,4 +47,12 @@ export function getArtCalendar(id, programId) {
  */
 export function getBacklogInProject(programId) {
   return axios.post(`/agile/v1/projects/${getProjectId()}/project_invoke_program/pi/backlog_pi_list?programId=${programId}&organizationId=${getOrganizationId()}`, { advancedSearchArgs: {} });
+}
+
+
+export function getBoard(programId, filter) {
+  return axios.post(`/agile/v1/projects/${getProjectId()}/project_invoke_program/query_board_info?programId=${programId}`, filter);
+}
+export function getBoardList(programId) {
+  return axios.get(`/agile/v1/projects/${getProjectId()}/project_invoke_program/board?programId=${programId}`);
 }

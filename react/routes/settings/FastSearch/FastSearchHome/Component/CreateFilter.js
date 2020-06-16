@@ -7,7 +7,7 @@ import {
 import { Content, stores, axios } from '@choerodon/boot';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import _ from 'lodash';
-import { fieldApi } from '@/api';
+import { fieldApi, quickFilterApi } from '@/api';
 import SelectFocusLoad from '../../../../../components/SelectFocusLoad';
 import { NumericInput } from '../../../../../components/CommonComponent';
 
@@ -390,7 +390,7 @@ const CreateFilter = (props) => {
    * 加载属性列表
    */
   const loadQuickFilterFiled = () => {
-    const getPreDefinedField = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/fields`);
+    const getPreDefinedField = () => quickFilterApi.loadField();
     const getCustomField = () => fieldApi.getCustomFields();
     Promise.all([getPreDefinedField(), getCustomField()]).then(([preDefinedField, customField]) => {
       setQuickFilterFiled([...preDefinedField, ...IsInProgramStore.isInProgram ? [{ fieldCode: 'feature', type: 'long', name: '特性' }] : [], ...customField].map(field => ({ ...field, fieldCode: field.code || field.fieldCode, type: field.fieldType || field.type })) || []);
@@ -467,7 +467,7 @@ const CreateFilter = (props) => {
           relationOperations: o,
         };
         setLoading(true);
-        axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter`, obj)
+        quickFilterApi.create(obj)
           .then((res) => {
             setLoading(false);
             props.onOk();
@@ -486,7 +486,7 @@ const CreateFilter = (props) => {
    */
   const checkSearchNameRepeat = (rule, value, callback) => {
     if (value && value.trim()) {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/check_name?quickFilterName=${value}`)
+      quickFilterApi.checkName(value.trim())
         .then((res) => {
           if (res) {
             callback('快速搜索名称重复');

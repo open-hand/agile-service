@@ -1,5 +1,5 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId } from '@/utils/common';
+import { getProjectId, getOrganizationId } from '@/utils/common';
 
 interface IWorkCalendar {
   status: number,
@@ -22,6 +22,21 @@ class WorkCalendarApi {
     return axios({
       method: 'get',
       url: `${this.prefix}/work_calendar_ref/sprint`,
+      params: {
+        year,
+      },
+    });
+  }
+
+  /**
+ * 获取冲刺有关于组织层时区设置
+ * @param {*} year 
+ */
+  getWorkSetting(year:number) {
+    const orgId = getOrganizationId();
+    return axios({
+      method: 'get',
+      url: `/iam/choerodon/v1/projects/${getProjectId()}/time_zone_work_calendars/time_zone_detail/${orgId}`,
       params: {
         year,
       },

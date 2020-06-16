@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Modal } from 'choerodon-ui/pro';
 import { Select } from 'choerodon-ui';
-import { stores, axios } from '@choerodon/boot';
+import { stores } from '@choerodon/boot';
 import { sprintApi } from '@/api';
 import _ from 'lodash';
 

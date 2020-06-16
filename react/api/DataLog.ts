@@ -19,6 +19,22 @@ class DataLogApi {
       },
     });
   }
+
+  /**
+   * 项目层下查询问题记录 (项目群)
+   * @param issueId 
+   * @param programId 项目群id
+   */
+  loadUnderProgram(issueId:number, programId:number) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/project_invoke_program/datalog`,
+      params: {
+        programId,
+        issueId,
+      },
+    });
+  }
 }
 
 const dataLogApi = new DataLogApi();
