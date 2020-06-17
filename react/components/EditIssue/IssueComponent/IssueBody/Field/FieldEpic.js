@@ -126,8 +126,8 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
             <TextEditToggle
               disabled={featureId || disabled}
               onSubmit={this.updateIssueEpic}
-              initValue={epicId || []}
-              editor={<SelectEpic />}
+              initValue={epicId || null}
+              editor={({ submit }) => <SelectEpic onChange={submit} />}
             >
               {
                   epicId ? (

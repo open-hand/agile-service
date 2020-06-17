@@ -58,7 +58,7 @@ const EditorMap = new Map([
     }
   };
 
-  renderEditor = () => {
+  renderEditor = ({ submit }) => {
     const { field } = this.props;
     const { value, fieldType, required } = field;
     const Editor = EditorMap.get(fieldType);
@@ -78,12 +78,12 @@ const EditorMap = new Map([
                 </Option>
               ));
           return (
-            <Editor required={required} multiple={fieldType === 'multiple'}>
+            <Editor required={required} multiple={fieldType === 'multiple'} onChange={(fieldType === 'single') ? submit : undefined}>
               {options}
             </Editor>
           );
         }
-        default: return <Editor required={required} />;
+        default: return <Editor required={required} onChange={(fieldType === 'member') ? submit : undefined} />;
       }
     }
     return null;
@@ -108,7 +108,7 @@ const EditorMap = new Map([
             alwaysRender={!['time', 'date', 'datetime'].includes(fieldType)}
             onSubmit={this.updateIssueField}
             initValue={this.transform(fieldType, value)}
-            editor={() => this.renderEditor()}
+            editor={this.renderEditor}
           >
             <div style={{ maxWidth: 200, wordBreak: 'break-all', whiteSpace: 'pre-line' }}>
               {fieldType === 'member' && valueStr

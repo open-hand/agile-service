@@ -44,7 +44,7 @@ import { issueApi } from '@/api';
         <div className="c7n-value-wrapper">
           <TextEditToggle
             disabled={disabled}
-            editor={() => <SelectPriority priorityId={priorityId} />}
+            editor={({ submit }) => <SelectPriority priorityId={priorityId} onChange={submit} />}
             initValue={priorityId}
             onSubmit={this.updateIssuePriority}
           >

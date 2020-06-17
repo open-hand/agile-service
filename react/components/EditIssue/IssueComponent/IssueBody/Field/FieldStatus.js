@@ -16,7 +16,7 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
   const config = useMemo(() => ({
     name: 'status',
     request: () => statusApi.loadTransformStatusByIssue(statusId, issueId, typeId, applyType, projectId),
-    paging: false,    
+    paging: false,
     textField: 'statusVO.name',
     valueField: 'endStatusId',
   }), [JSON.stringify(statusArgs)]);
@@ -36,7 +36,7 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
   updateIssueStatus = (transform) => {
     if (transform) {
       const transformId = transform.id;
-      
+
       const {
         store, onUpdate, reloadIssue, applyType,
       } = this.props;
@@ -81,11 +81,13 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
           <TextEditToggle
             disabled={disabled}
             onSubmit={this.updateIssueStatus}
-            initValue={statusId}
-            editor={() => (
-              <SelectStatus statusArgs={{
-                statusId, issueId, typeId, applyType, projectId,
-              }}
+            initValue={statusId}            
+            editor={({ submit }) => (
+              <SelectStatus
+                statusArgs={{
+                  statusId, issueId, typeId, applyType, projectId,
+                }}
+                onChange={submit}
               />
             )}
           >

@@ -51,14 +51,17 @@ import './Field.less';
             disabled={disabled}
             onSubmit={this.updateIssueAssignee}
             initValue={assigneeId}
-            editor={() => (
-              <SelectUser selectedUser={{
-                id: assigneeId,
-                loginName: assigneeLoginName,
-                realName: assigneeRealName,
-                imageUrl: assigneeImageUrl,
-                name: assigneeName,
-              }}
+            editor={({ submit }) => (
+              <SelectUser
+                clearButton
+                onChange={submit}
+                selectedUser={{
+                  id: assigneeId,
+                  loginName: assigneeLoginName,
+                  realName: assigneeRealName,
+                  imageUrl: assigneeImageUrl,
+                  name: assigneeName,
+                }}
               />
             )}
           >
