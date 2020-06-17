@@ -102,7 +102,7 @@ class TransformFromSubIssue extends Component {
   };
 
   axiosGetIssueTypes() {
-    issueTypeApi.loadIssueTypes()
+    issueTypeApi.loadAllWithStateMachineId()
       .then((data) => {
         this.setState({
           selectLoading: false,

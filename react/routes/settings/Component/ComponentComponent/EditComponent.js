@@ -49,7 +49,7 @@ const EditComponent = (props) => {
           name: name.trim(),
         };
         setCreateLoading(true);
-        componentApi.updateComponent(component.componentId, editComponent)
+        componentApi.update(component.componentId, editComponent)
           .then((res) => {
             setCreateLoading(false);
             props.modal.close();
@@ -99,7 +99,7 @@ const EditComponent = (props) => {
   };
 
   const localLoadComponent = (componentId) => {
-    componentApi.loadComponent(componentId)
+    componentApi.load(componentId)
       .then((res) => {
         const {
           defaultAssigneeRole, description, managerId, name,

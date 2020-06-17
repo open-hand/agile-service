@@ -7,7 +7,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import {
-  sprintApi, epicApi, featureApi, userApi, versionApi, fieldApi, issueLabelApi, priorityApi, statusApi, 
+  sprintApi, epicApi, featureApi, userApi, versionApi, fieldApi, issueLabelApi, priorityApi, statusApi, quickFilterApi, commonApi, componentApi, issueTypeApi, 
 } from '@/api';
 import { NumericInput } from '../../../../../components/CommonComponent';
 
@@ -258,7 +258,7 @@ class AddComponent extends Component {
   checkSearchNameRepeat = (rule, value, callback) => {
     const { originFilterName } = this.state;
     if (value && value.trim() && value.trim() !== originFilterName) {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/check_name?quickFilterName=${value}`)
+      quickFilterApi.checkName(value.trim())
         .then((res) => {
           if (res) {
             callback('快速搜索名称重复');
@@ -273,26 +273,25 @@ class AddComponent extends Component {
 
   loadFilter = (id) => {
     const { filterId } = this.props;
-    axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/${id || filterId}`)
-      .then((res) => {
-        if (res && res.description) {
-          const description = res.description.split('+').slice(0, -3).join('+') || '';
-          const obj = JSON.parse(res.description.split('+').slice(-1));
-          this.setState({
-            arr: this.transformInit(obj.arr || []),
-            o: obj.o || [],
-            origin: {
-              ...res,
-              description,
-            },
-            originFilterName: res.name,
-          });
-        }
-      });
+    quickFilterApi.load(id || filterId).then((res) => {
+      if (res && res.description) {
+        const description = res.description.split('+').slice(0, -3).join('+') || '';
+        const obj = JSON.parse(res.description.split('+').slice(-1));
+        this.setState({
+          arr: this.transformInit(obj.arr || []),
+          o: obj.o || [],
+          origin: {
+            ...res,
+            description,
+          },
+          originFilterName: res.name,
+        });
+      }
+    });
   };
 
   loadQuickFilterFiled = () => {
-    const getPreDefinedField = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/fields`);
+    const getPreDefinedField = () => quickFilterApi.loadField();
     const getCustomField = () => fieldApi.getCustomFields();
     Promise.all([getPreDefinedField(), getCustomField()]).then(([preDefinedField, customField]) => {
       this.setState({
@@ -821,7 +820,7 @@ class AddComponent extends Component {
         this.setState({
           loading: true,
         });
-        axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/${filterId}`, obj)
+        quickFilterApi.update(filterId, obj)
           .then((res) => {
             this.setState({
               loading: false,
@@ -840,9 +839,9 @@ class AddComponent extends Component {
     epicApi.loadEpicsForSelect().then(res => this.setState({ originEpics: res }));
     sprintApi.loadSprints().then(res => this.setState({ originSprints: res }));
     issueLabelApi.loads().then(res => this.setState({ originLabels: res }));
-    axios.get(`/agile/v1/projects/${projectId}/component`).then(res => this.setState({ originComponents: res }));
+    componentApi.loadAll().then(res => this.setState({ originComponents: res }));
     versionApi.loadNamesByStatus().then(res => this.setState({ originVersions: res }));
-    axios.get(`/agile/v1/projects/${projectId}/schemes/query_issue_types?apply_type=agile`).then(res => this.setState({ originTypes: res }));
+    issueTypeApi.loadAll().then(res => this.setState({ originTypes: res }));
     featureApi.queryAllInSubProject([], undefined, 1, 0).then(res => this.setState({ originFeatures: res.content }));
     fieldApi.getCustomFields().then((res) => {
       const customFieldState = {};

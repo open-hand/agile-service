@@ -21,7 +21,7 @@ class Version extends Component {
   }
 
   versionRefresh = () => {
-    BacklogStore.axiosGetVersion().then((res) => {
+    versionApi.loadAll().then((res) => {
       BacklogStore.setVersionData(res);
     });
   };

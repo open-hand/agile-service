@@ -54,7 +54,7 @@ class VersionItem extends Component {
       versionId,
       description: value,
     };
-    BacklogStore.axiosUpdateVerison(versionId, req).then((res) => {
+    versionApi.update(versionId, req).then((res) => {
       BacklogStore.updateVersion(res, 'description');
     }).catch(() => {
     });
@@ -89,7 +89,7 @@ class VersionItem extends Component {
               versionId,
               name: value,
             };
-            BacklogStore.axiosUpdateVerison(versionId, verisonData).then((res) => {
+            versionApi.update(versionId, verisonData).then((res) => {
               if (res && res.failed) {
                 this.setState({
                   editName: false,
@@ -132,7 +132,7 @@ class VersionItem extends Component {
       versionId,
       [type]: date ? `${date} 00:00:00` : null,
     };
-    BacklogStore.axiosUpdateVerison(versionId, req).then((res) => {
+    versionApi.update(versionId, req).then((res) => {
       BacklogStore.updateVersion(res, 'date');
       // const originData = _.clone(BacklogStore.getVersionData);
       // originData[index][type] = res[type];

@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import {
   observable, action, computed, toJS,
 } from 'mobx';
@@ -237,10 +236,6 @@ class BacklogStore {
     Object.assign(sprint, newData);
   }
 
-  axiosUpdateVerison(versionId, data) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/update/${versionId}`, data);
-  }
-
   @computed get getClickIssueDetail() {
     return this.clickIssueDetail;
   }
@@ -323,12 +318,6 @@ class BacklogStore {
   @action setSelectedSprintId(data) {
     this.selectedSprintId = data;
   }
-
-
-  axiosGetVersion() {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version`);
-  }
-
 
   @action setSprintData({ backlogData, sprintData }) {
     this.issueMap.set('0', backlogData.backLogIssue ? backlogData.backLogIssue : []);
@@ -772,7 +761,7 @@ class BacklogStore {
     versionApi.drag(req).then(
       action('fetchSuccess', (res) => {
         if (!res.message) {
-          this.axiosGetVersion().then((versions) => {
+          versionApi.loadAll().then((versions) => {
             this.setVersionData(versions);
           });
         } else {
@@ -923,7 +912,7 @@ class BacklogStore {
   getSprint = async (setPiIdIf) => {
     const [quickSearch, issueTypes, priorityArr, backlogData] = await Promise.all([
       quickFilterApi.loadAll(),
-      issueTypeApi.loadIssueTypes(),
+      issueTypeApi.loadAllWithStateMachineId(),
       priorityApi.getDefaultByProject(),
       this.axiosGetSprint(),
     ]);
@@ -952,7 +941,7 @@ class BacklogStore {
    * 加载版本数据
    */
   loadVersion = () => {
-    this.axiosGetVersion().then((data2) => {
+    versionApi.loadAll().then((data2) => {
       const newVersion = [...data2];
       for (let index = 0, len = newVersion.length; index < len; index += 1) {
         newVersion[index].expand = false;

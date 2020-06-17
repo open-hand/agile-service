@@ -126,7 +126,7 @@ class RelateStory extends Component {
     this.setState({
       selectLoading: true,
     });
-    issueTypeApi.loadIssueTypes().then((issueTypes) => {
+    issueTypeApi.loadAllWithStateMachineId().then((issueTypes) => {
       const types = issueTypes.filter(type => type.typeCode === 'story' || type.typeCode === 'task');
       if (types) {
         this.types = types;

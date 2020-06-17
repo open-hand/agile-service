@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
+import { versionApi } from '@/api';
 import EditIssue from '../../../../components/EditIssue';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 
@@ -72,7 +73,7 @@ class IssueDetail extends Component {
           refresh();
         }}
         onCreateVersion={() => {
-          BacklogStore.axiosGetVersion().then((data2) => {
+          versionApi.loadAll().then((data2) => {
             const newVersion = [...data2];
             for (let index = 0, len = newVersion.length; index < len; index += 1) {
               newVersion[index].expand = false;

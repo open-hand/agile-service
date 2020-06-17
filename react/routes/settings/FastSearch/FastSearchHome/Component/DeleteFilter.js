@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 import { Icon } from 'choerodon-ui';
 import { Content, stores, axios } from '@choerodon/boot';
+import { quickFilterApi } from '@/api';
 
 const { AppState } = stores;
 
@@ -18,11 +19,10 @@ const DeleteComponent = (props) => {
 
   const deleteFilter = () => {
     setLoading(true);
-    axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/${filter.filterId}`)
-      .then((res) => {
-        setLoading(false);
-        props.onOk();
-      })
+    quickFilterApi.delete(filter.filterId).then((res) => {
+      setLoading(false);
+      props.onOk();
+    })
       .catch((error) => {
         setLoading(false);
       });
