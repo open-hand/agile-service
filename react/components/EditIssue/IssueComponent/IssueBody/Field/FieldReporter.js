@@ -52,14 +52,17 @@ import './Field.less';
             disabled={disabled || (reporterId !== loginUserId && !hasPermission)}
             onSubmit={this.updateIssueReporter}
             initValue={reporterId}
-            editor={() => (
-              <SelectUser selectedUser={{
-                id: reporterId,
-                loginName: reporterLoginName,
-                realName: reporterRealName,
-                avatar: reporterImageUrl,
-                name: reporterName,
-              }}
+            editor={({ submit }) => (
+              <SelectUser
+                clearButton
+                onChange={submit}
+                selectedUser={{
+                  id: reporterId,
+                  loginName: reporterLoginName,
+                  realName: reporterRealName,
+                  avatar: reporterImageUrl,
+                  name: reporterName,
+                }}
               />
             )}
           >

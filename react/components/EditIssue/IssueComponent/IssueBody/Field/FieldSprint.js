@@ -66,7 +66,7 @@ const { Option } = Select;
                 </div>
               ) : null
             }
-            editor={() => <SelectSprint />}
+            editor={({ submit }) => <SelectSprint onChange={submit} />}
           >
             <Tooltip
               placement="top"
