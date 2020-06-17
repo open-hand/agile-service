@@ -9,7 +9,7 @@ const requests = {
   issueType: {
     textField: 'name',
     valueField: 'id',
-    request: issueTypeApi.loadIssueTypes.bind(issueTypeApi),
+    request: issueTypeApi.loadAllWithStateMachineId.bind(issueTypeApi),
   },
   issueStatus: {
     textField: 'name',

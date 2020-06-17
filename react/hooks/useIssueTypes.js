@@ -7,7 +7,7 @@ const IssueTypeContext = createContext({
   data: [],
   refresh: async () => {
     const type = AppState.currentMenuType.category === 'PROGRAM' ? 'program' : 'agile';
-    const data = await issueTypeApi.loadIssueTypes(type);
+    const data = await issueTypeApi.loadAllWithStateMachineId(type);
     return data;
   },
 });

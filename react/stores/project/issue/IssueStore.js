@@ -2,7 +2,7 @@ import {
   observable, action, computed, toJS,
 } from 'mobx';
 import {
-  stores, axios, Choerodon,
+  stores, Choerodon,
 } from '@choerodon/boot';
 import {
   debounce, reverse, map, find, isEmpty,

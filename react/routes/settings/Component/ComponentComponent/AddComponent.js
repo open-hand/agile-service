@@ -39,7 +39,7 @@ function AddComponent(props) {
           managerId: managerId ? JSON.parse(managerId).id || 0 : 0,
           name: name.trim(),
         };
-        componentApi.createComponent(component)
+        componentApi.create(component)
           .then((res) => {
             props.modal.close();
             props.onOk();

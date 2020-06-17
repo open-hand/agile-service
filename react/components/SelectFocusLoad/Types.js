@@ -45,7 +45,7 @@ const issue_type_program = {
   props: {
     filterOption,
   },
-  request: () => new Promise(resolve => issueTypeApi.loadIssueTypes('program').then((issueTypes) => {
+  request: () => new Promise(resolve => issueTypeApi.loadAllWithStateMachineId('program').then((issueTypes) => {
     // const defaultType = find(issueTypes, { typeCode: 'feature' }).id;
     resolve(issueTypes);
   })),
@@ -178,7 +178,7 @@ export default {
     ),
   },
   issue_type: {
-    request: () => issueTypeApi.loadIssueTypes('agile'),
+    request: () => issueTypeApi.loadAllWithStateMachineId('agile'),
     render: issueType => (
       <Option
         key={issueType.id}
@@ -191,7 +191,7 @@ export default {
   },
   issue_type_program_feature_epic: {
     ...issue_type_program,
-    request: () => new Promise(resolve => issueTypeApi.loadIssueTypes('program').then((issueTypes) => {
+    request: () => new Promise(resolve => issueTypeApi.loadAllWithStateMachineId('program').then((issueTypes) => {
       const featureTypes = [{
         id: 'business',
         name: '特性',

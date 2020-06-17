@@ -118,8 +118,7 @@ class Search extends Component {
     this.setState({
       filters: data,
     });
-    axios
-      .put(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/drag`, postData)
+    quickFilterApi.drag(postData)
       .then(() => {
         quickFilterApi.loadAll({ contents: [], filterName: '' }).then((res) => {
           this.setState({

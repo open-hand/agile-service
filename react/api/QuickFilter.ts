@@ -14,9 +14,23 @@ interface IQuickFilter {
     quickFilterValueVOList?: Array<any>, // 快速搜索值
     relationOperations?: Array<string>, // 多个搜索表达式之间的关系
 }
+interface UQuickFilter extends IQuickFilter{
+  objectVersionNumber:number,
+}
+interface DragQuickFilter{
+
+}
 class QuickFilterApi {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
+  }
+
+  /**
+   * 根据快速过滤id加载
+   * @param filterId 
+   */
+  load(filterId:number) {
+    return axios.get(`${this.prefix}/quick_filter/${filterId}`);
   }
 
   /**
@@ -44,6 +58,30 @@ class QuickFilterApi {
    */
   create(data:IQuickFilter) {
     return axios.post(`${this.prefix}/quick_filter`, data);
+  }
+
+  /**
+   * 更新快速筛选
+   * @param data 
+   */
+  update(filterId:number, data:UQuickFilter) {
+    return axios.put(`${this.prefix}/quick_filter/${filterId}`, data);
+  }
+
+  /**
+   * 删除快速筛选
+   * @param filterId 
+   */
+  delete(filterId:number) {
+    return axios.delete(`${this.prefix}/quick_filter/${filterId}`);
+  }
+
+  /**
+   * 拖拽对筛选排序
+   * @param data 
+   */
+  drag(data:DragQuickFilter) {
+    return axios.put(`${this.prefix}/quick_filter/drag`, data);
   }
 
   /**

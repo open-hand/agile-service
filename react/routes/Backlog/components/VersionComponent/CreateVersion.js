@@ -72,7 +72,7 @@ class CreateVersion extends Component {
           } else {
             form.resetFields();
             onCancel();
-            store.axiosGetVersion().then((data) => {
+            versionApi.loadAll().then((data) => {
               store.setVersionData(data);
             }).catch((error) => {
             });
