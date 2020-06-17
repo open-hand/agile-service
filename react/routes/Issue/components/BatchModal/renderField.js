@@ -16,7 +16,7 @@ export default function renderField({ code, fieldType, fieldOptions }) {
       return <Select style={{ width: '100%' }} multiple name={code} searchable searchMatcher="name" />;
     }
     case 'featureId': {
-      return <SelectFeature style={{ width: '100%' }} />;
+      return <SelectFeature name={code} style={{ width: '100%' }} />;
     }
     default: break;
   }
