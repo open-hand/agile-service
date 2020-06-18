@@ -17,12 +17,13 @@ interface Props {
   editor: (editorRender: EditorRender) => JSX.Element
   editorExtraContent?: () => JSX.Element
   children: ({ value, editing }: RenderProps) => JSX.Element | JSX.Element
+  className?: string
   onSubmit: (data: any) => void
   initValue: any
 }
 
 const TextEditToggle: React.FC<Props> = ({
-  disabled, editor, editorExtraContent, children: text, onSubmit, initValue, alwaysRender = true,
+  disabled, editor, editorExtraContent, children: text, className, onSubmit, initValue, alwaysRender = true,
 } = {} as Props) => {
   const [editing, setEditing] = useState(false);
   const editingRef = useRef(editing);
@@ -61,6 +62,9 @@ const TextEditToggle: React.FC<Props> = ({
     setTimeout(() => {
       // @ts-ignore
       if (editingRef.current && editorRef.current.isValid) {
+        if (containerRef.current) {
+          containerRef.current.blur();
+        }
         hideEditor();
         if (dataRef.current !== initValue) {
           onSubmit(dataRef.current);
@@ -74,10 +78,10 @@ const TextEditToggle: React.FC<Props> = ({
       return null;
     }
     const extraContent = typeof editorExtraContent === 'function' ? editorExtraContent() : editorExtraContent;
-    const originOnChange = editorElement.props.onChange;
+    const originProps = editorElement.props;
     const editorProps: any = {
       defaultValue: initValue,
-      onChange: handleChange(originOnChange),
+      onChange: handleChange(originProps.onChange),
       onBlur: handleEditorBlur,
       ref: editorRef,
     };
@@ -85,6 +89,7 @@ const TextEditToggle: React.FC<Props> = ({
       editorProps.style = {
         width: containerRef.current.getBoundingClientRect().width,
         height: containerRef.current.getBoundingClientRect().height,
+        ...originProps.style,
       };
     }
     return (
@@ -128,6 +133,7 @@ const TextEditToggle: React.FC<Props> = ({
       className={classNames(
         styles.container,
         { [styles.disabled]: disabled },
+        className,
       )}
       // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
       tabIndex={0}
