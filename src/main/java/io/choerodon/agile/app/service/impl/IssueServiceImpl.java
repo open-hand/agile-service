@@ -50,6 +50,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -2186,5 +2187,55 @@ public class IssueServiceImpl implements IssueService {
             throw new CommonException("error.created.user.illegal");
         }
         deleteIssue(projectId, issueId);
+    }
+
+    @Override
+    public Page<IssueListFieldKVVO> queryBackLogIssuesByPersonal(Long organizationId, Long projectId,PageRequest pageRequest) {
+        if (ObjectUtils.isEmpty(organizationId)) {
+            throw new CommonException("error.organizationId.iss.null");
+        }
+        List<Long> projectIds = new ArrayList<>();
+        List<ProjectVO> projects = new ArrayList<>();
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        if (ObjectUtils.isEmpty(projectId)) {
+            List<ProjectVO> projectVOS = baseFeignClient.queryProjects(userId, false).getBody();
+            if (!CollectionUtils.isEmpty(projectVOS)) {
+                projectVOS.stream().filter(v -> organizationId.equals(v.getOrganizationId()))
+                        .forEach(obj -> {
+                            projectIds.add(obj.getId());
+                            projects.add(obj);
+                        });
+
+            }
+        } else {
+            ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+            projects.add(projectVO);
+            projectIds.add(projectId);
+        }
+        if (CollectionUtils.isEmpty(projectIds)) {
+            return new Page<>();
+        }
+        Page<IssueDTO> parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryParentIssueByProjectIdsAndUserId(projectIds, userId));
+        List<IssueDTO> parentIssuesDTOS = parentPage.getContent();
+        if (CollectionUtils.isEmpty(parentIssuesDTOS)) {
+            return new Page<>();
+        }
+        List<Long> parentIssues = parentIssuesDTOS.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+        List<IssueDTO> allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId);
+        Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+        Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
+        Map<Long, ProjectVO> projectVOMap = projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
+        List<IssueListFieldKVVO> list = new ArrayList<>();
+        allIssue.forEach(v -> {
+            IssueListFieldKVVO issueListFieldKVVO = new IssueListFieldKVVO();
+            modelMapper.map(v,issueListFieldKVVO);
+            issueListFieldKVVO.setIssueTypeVO(issueTypeDTOMap.get(v.getIssueTypeId()));
+            issueListFieldKVVO.setStatusVO(statusMapDTOMap.get(v.getStatusId()));
+            issueListFieldKVVO.setPriorityVO(priorityMap.get(v.getPriorityId()));
+            issueListFieldKVVO.setProjectVO(projectVOMap.get(v.getProjectId()));
+            list.add(issueListFieldKVVO);
+        });
+        return PageUtil.buildPageInfoWithPageInfoList(parentPage,list);
     }
 }
