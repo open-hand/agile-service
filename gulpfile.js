@@ -1,11 +1,13 @@
 const merge2 = require('merge2');
 const path = require('path');
 const gulp = require('gulp');
-const watch = require('gulp-watch');
+const { watch } = require('gulp');
 const { exec } = require('child_process');
 const rimraf = require('rimraf');
 const babel = require('gulp-babel');
 const sourcemaps = require('gulp-sourcemaps');
+const cached = require('gulp-cached');
+const remember = require('gulp-remember');
 const argv = require('minimist')(process.argv.slice(2));
 const ts = require('gulp-typescript');
 const alias = require('./alias').gulp;
@@ -75,7 +77,7 @@ function compileTS() {
   const assets = gulp.src(['react/**/*.@(jpg|png|gif|svg|scss|less|css|html|ico)']);
   let error = 0;
   const source = ['react/**/*.tsx', 'react/**/*.ts'];
-  const tsResult = gulp.src(source).pipe(
+  const tsResult = gulp.src(source).pipe(cached('typescript')).pipe(
     ts(tsConfig, {
       error(e) {
         tsDefaultReporter.error(e);
@@ -96,51 +98,43 @@ function compileTS() {
 }
 function compileJS() {
   const source = ['react/**/*.jsx', 'react/**/*.js'];
-  return babelify(gulp.src(source));
+  return babelify(gulp.src(source).pipe(cached('javascript')));
 }
-gulp.task('compile-ts', (done) => {
+function clear(done) {
   rimraf.sync(libDir);
+  done();
+}
+gulp.task('compile-ts', (done) => { 
   compileTS()
+    .pipe(remember('typescript'))
     .pipe(gulp.dest(libDir))
     .on('finish', done);
 });
 gulp.task('compile-js', (done) => {
-  compileJS()
+  compileJS()  
+    .pipe(remember('javascript'))
     .pipe(gulp.dest(libDir))
     .on('finish', done);
 });
 gulp.task(
   'compile',
-  gulp.parallel(
+  gulp.series(
+    clear,
     'compile-ts',
     'compile-js',
   ),
 );
 
-
-function updateFile() {
-  let timer;
-  return function () {
-    if (timer) {
-      clearTimeout(timer);
-    }
-    timer = setTimeout(() => {
-      // eslint-disable-next-line no-console
-      console.log('content update');
-      exec('yalc publish --push');
-    }, 1500);
-  };
+function yalc(done) {
+  exec('yalc publish --push');
+  done();
 }
-const updateFileTask = updateFile();
-gulp.task('watch', async () => {
-  const source = [
-    'react/**/*.js',
-    'react/**/*.jsx',
-    'react/**/*.ts',
-    'react/**/*.tsx',
-  ];
-  await Promise.all([
-    babelify(gulp.src(source).pipe(watch(source))).on('data', updateFileTask),
-    gulp.src(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)']).pipe(watch(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)'])).pipe(gulp.dest(libDir)).on('data', updateFileTask),
-  ]);
+gulp.task('watch', () => {
+  const source = ['react/**/*', 'react/**/*'];
+  rimraf.sync(libDir);
+  watch(source, { ignoreInitial: false }, gulp.series(
+    'compile-ts',
+    'compile-js', 
+    yalc,
+  ));
 });
