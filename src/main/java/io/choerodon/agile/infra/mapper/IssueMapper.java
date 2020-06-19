@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.IssueIdSprintIdVO;
+import io.choerodon.agile.api.vo.IssueVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -481,4 +482,21 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      * @return
      */
     Set<Long> selectReporterIdsByProjectId(@Param("projectId") Long projectId);
+
+    /**
+     * 查询个人未完成故事，任务和bug
+     * @param projectIds
+     * @param userId
+     * @return
+     */
+    List<Long> queryAgencyProblemsParentIssue(@Param("projectIds") List<Long> projectIds, @Param("userId") Long userId);
+
+    /**
+     * 查询个人在所有子项目中未完成的问题
+     * @param projectIds
+     * @param parentIssues
+     * @param userId
+     * @return
+     */
+    List<IssueDTO> listAgencyProblems(@Param("projectIds") List<Long> projectIds,@Param("parentIssues") List<Long> parentIssues,@Param("userId") Long userId);
 }

@@ -2187,4 +2187,35 @@ public class IssueServiceImpl implements IssueService {
         }
         deleteIssue(projectId, issueId);
     }
+
+    @Override
+    public Page<IssueListFieldKVVO> queryAgencyProblems(Long organizationId, Long projectId,PageRequest pageRequest) {
+        if (ObjectUtils.isEmpty(organizationId)) {
+            throw new CommonException("error.organizationId.iss.null");
+        }
+        List<Long> projectIds = new ArrayList<>();
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        if (ObjectUtils.isEmpty(projectId)) {
+            List<ProjectVO> projectVOS = baseFeignClient.queryProjects(userId, false).getBody();
+            if (!CollectionUtils.isEmpty(projectVOS)) {
+                projectIds.addAll(projectVOS.stream().filter(v -> organizationId.equals(v.getOrganizationId())).map(ProjectVO::getId).collect(Collectors.toList()));
+            }
+        } else {
+            projectIds.add(projectId);
+        }
+        if (CollectionUtils.isEmpty(projectIds)) {
+            return new Page<>();
+        }
+        Page<Long> parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryAgencyProblemsParentIssue(projectIds, userId));
+        List<Long> parentIssues = parentPage.getContent();
+        if (CollectionUtils.isEmpty(parentIssues)) {
+            return new Page<>();
+        }
+        List<IssueDTO> allIssue = issueMapper.listAgencyProblems(projectIds,parentIssues, userId);
+        Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
+        Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
+        Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
+        return PageUtil.buildPageInfoWithPageInfoList(parentPage,
+                issueAssembler.issueDoToIssueListFieldKVDTO(allIssue, priorityMap, statusMapDTOMap, issueTypeDTOMap, new HashMap<>()));
+    }
 }
