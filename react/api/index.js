@@ -25,3 +25,5 @@ export * from './DataLog';
 export * from './DevOps';
 export * from './QuickFilter';
 export * from './StateMachine';
+export * from './Report';
+export * from './Project';

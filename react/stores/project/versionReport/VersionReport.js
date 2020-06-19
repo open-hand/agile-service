@@ -3,10 +3,10 @@
 import {
   observable, action, computed, toJS, 
 } from 'mobx';
-import { store, stores, axios } from '@choerodon/boot';
+import { store, stores } from '@choerodon/boot';
 import _ from 'lodash';
+import { reportApi } from '@/api';
 
-const { AppState } = stores;
 
 @store('VersionReportStore')
 class VersionReportStore {
@@ -85,10 +85,6 @@ class VersionReportStore {
     this.reportData = data;
   }
 
-  axiosGetReportData(versionId, type) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/${versionId}?type=${type}`);
-  }
-
   @computed get getIssues() {
     return toJS(this.issues);
   }
@@ -97,9 +93,6 @@ class VersionReportStore {
     this.issues[type][type2] = data;
   }
 
-  axiosGetIssues(versionId, data, util) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/${versionId}/issues?status=${data.status}&type=${util}&page=${data.page}&size=${data.size}`);
-  }
 
   @computed get getVersionList() {
     return toJS(this.versionList);
@@ -110,9 +103,8 @@ class VersionReportStore {
   }
 
   getPieDatas = (projectId, type, sprintId, versionId, startDate, endDate) => {
-    const orgId = AppState.currentMenuType.organizationId;
     this.changePieLoading(true);
-    axios.get(`/agile/v1/projects/${projectId}/reports/pie_chart?organizationId=${orgId}&orgId=${orgId}&fieldName=${type}${sprintId ? `&sprintId=${sprintId}` : ''}${versionId ? `&versionId=${versionId}` : ''}${startDate ? `&startDate=${startDate}` : ''}${endDate ? `&endDate=${endDate}` : ''}`)
+    reportApi.loadPie(type, sprintId, versionId, startDate, endDate)
       .then((data) => {
         const len = data.length;
         if (len) {

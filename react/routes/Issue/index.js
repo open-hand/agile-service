@@ -4,12 +4,13 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import { withRouter } from 'react-router-dom';
 import {
-  Header, Content, Page, Breadcrumb, axios,
+  Header, Content, Page, Breadcrumb,
 } from '@choerodon/boot';
 import { Button } from 'choerodon-ui';
 import queryString from 'querystring';
 import { map } from 'lodash';
 import CreateIssue from '@/components/CreateIssue';
+import { projectApi } from '@/api/Project';
 import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
 import Search from './components/search';
@@ -90,7 +91,7 @@ const Issue = withRouter(observer(() => {
     setUrlFilter(null);
   };
   const getProjectInfo = () => {
-    axios.get(`/agile/v1/projects/${projectId}/project_info`).then((res) => {
+    projectApi.loadInfo().then((res) => {
       IssueStore.setProjectInfo(res);
       initFilter();
     });

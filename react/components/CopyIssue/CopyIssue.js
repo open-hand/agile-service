@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { stores, axios, Content } from '@choerodon/boot';
+import { stores } from '@choerodon/boot';
 import _ from 'lodash';
 import {
   Modal, Form, Input, Checkbox,

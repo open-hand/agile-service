@@ -8,8 +8,8 @@ import { extendMoment } from 'moment-range';
 import {
   Dropdown, Icon, Menu, Spin, Checkbox,
 } from 'choerodon-ui';
-import { stores, axios } from '@choerodon/boot';
-import { sprintApi } from '@/api';
+import { stores } from '@choerodon/boot';
+import { sprintApi, reportApi } from '@/api';
 import EmptyBlockDashboard from '../../../../components/EmptyBlockDashboard';
 import pic from '../EmptyPics/no_sprint.svg';
 import lineLegend from './Line.svg';
@@ -289,84 +289,83 @@ class BurnDown extends Component {
   };
 
   loadChartData(sprintId, unit = 'remainingEstimatedTime') {
-    axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/${sprintId}/burn_down_report/coordinate?type=${unit}&ordinalType=asc`)
-      .then((res) => {
-        const dataDates = Object.keys(res.coordinate);
-        const [dataMinDate, dataMaxDate] = [dataDates[0], dataDates[dataDates.length - 1]];
-        const { sprint: { endDate } } = this.state;
-        const sprintMaxDate = endDate.split(' ')[0];
-        const maxDate = moment(dataMaxDate).isBefore(moment(sprintMaxDate))
-          ? sprintMaxDate : dataMaxDate;
-        let allDate;
-        let rest = [];
-        if (moment(maxDate).isBefore(sprintMaxDate)) {
-          const result = this.getBetweenDateStr(dataMinDate, sprintMaxDate);
-          allDate = result.result;
-          rest = result.rest;
-        } else if (moment(dataMinDate).isSame(maxDate)) {
-          allDate = [dataMinDate];
-        } else {
-          const result = this.getBetweenDateStr(dataMinDate, maxDate);
-          allDate = result.result;
-          rest = result.rest;
-        }
-        const xData = allDate;
-        const markAreaData = [];
-        let exportAxisData = [res.expectCount];
-        const { restDayShow } = this.state;
+    reportApi.loadBurnDownCoordinate(sprintId, unit).then((res) => {
+      const dataDates = Object.keys(res.coordinate);
+      const [dataMinDate, dataMaxDate] = [dataDates[0], dataDates[dataDates.length - 1]];
+      const { sprint: { endDate } } = this.state;
+      const sprintMaxDate = endDate.split(' ')[0];
+      const maxDate = moment(dataMaxDate).isBefore(moment(sprintMaxDate))
+        ? sprintMaxDate : dataMaxDate;
+      let allDate;
+      let rest = [];
+      if (moment(maxDate).isBefore(sprintMaxDate)) {
+        const result = this.getBetweenDateStr(dataMinDate, sprintMaxDate);
+        allDate = result.result;
+        rest = result.rest;
+      } else if (moment(dataMinDate).isSame(maxDate)) {
+        allDate = [dataMinDate];
+      } else {
+        const result = this.getBetweenDateStr(dataMinDate, maxDate);
+        allDate = result.result;
+        rest = result.rest;
+      }
+      const xData = allDate;
+      const markAreaData = [];
+      let exportAxisData = [res.expectCount];
+      const { restDayShow } = this.state;
 
-        // 如果展示非工作日，期望为一条连续斜线
-        if (!restDayShow) {
-          if (allDate.length) {
-            exportAxisData = [
-              ['', res.expectCount],
-              [allDate[allDate.length - 1].split(' ')[0].slice(5).replace('-', '/'), 0],
-            ];
+      // 如果展示非工作日，期望为一条连续斜线
+      if (!restDayShow) {
+        if (allDate.length) {
+          exportAxisData = [
+            ['', res.expectCount],
+            [allDate[allDate.length - 1].split(' ')[0].slice(5).replace('-', '/'), 0],
+          ];
+        }
+      }
+
+      // fix on 916, the crash of endless loop, when dataMinDate and maxDate is same.
+
+      // const xData = this.getBetweenDateStr(dataMinDate, maxDate);
+      const xDataFormat = _.map(xData, item => item.slice(5).replace('-', '/'));
+      const yAxis = xData.map((data, index) => {
+        // 显示非工作日，则非工作日期望为水平线
+        if (restDayShow) {
+          // 工作日天数
+          const countWorkDay = (allDate.length - rest.length) || 1;
+          // 日工作量
+          const dayAmount = res.expectCount / countWorkDay;
+          if (rest.includes(allDate[index])) {
+            // 非工作日
+            markAreaData.push([
+              {
+                xAxis: index === 0 ? '' : allDate[index - 1].split(' ')[0].slice(5).replace('-', '/'),
+              },
+              {
+                xAxis: allDate[index].split(' ')[0].slice(5).replace('-', '/'),
+              },
+            ]);
+            exportAxisData[index + 1] = exportAxisData[index];
+          } else {
+            // 工作量取整
+            exportAxisData[index + 1] = (exportAxisData[index] - dayAmount) < 0 ? 0 : exportAxisData[index] - dayAmount;
           }
         }
-
-        // fix on 916, the crash of endless loop, when dataMinDate and maxDate is same.
-
-        // const xData = this.getBetweenDateStr(dataMinDate, maxDate);
-        const xDataFormat = _.map(xData, item => item.slice(5).replace('-', '/'));
-        const yAxis = xData.map((data, index) => {
-          // 显示非工作日，则非工作日期望为水平线
-          if (restDayShow) {
-            // 工作日天数
-            const countWorkDay = (allDate.length - rest.length) || 1;
-            // 日工作量
-            const dayAmount = res.expectCount / countWorkDay;
-            if (rest.includes(allDate[index])) {
-              // 非工作日
-              markAreaData.push([
-                {
-                  xAxis: index === 0 ? '' : allDate[index - 1].split(' ')[0].slice(5).replace('-', '/'),
-                },
-                {
-                  xAxis: allDate[index].split(' ')[0].slice(5).replace('-', '/'),
-                },
-              ]);
-              exportAxisData[index + 1] = exportAxisData[index];
-            } else {
-              // 工作量取整
-              exportAxisData[index + 1] = (exportAxisData[index] - dayAmount) < 0 ? 0 : exportAxisData[index] - dayAmount;
-            }
-          }
-          if (dataDates.includes(data)) return res.coordinate[data];
-          if (moment(data).isAfter(moment())) return null;
-          res.coordinate[data] = res.coordinate[xData[index - 1]];
-          return res.coordinate[xData[index - 1]];
-        });
-        yAxis.unshift(res.expectCount);
-        this.setState({
-          expectCount: res.expectCount,
-          xAxis: ['', ...xDataFormat],
-          yAxis,
-          loading: false,
-          exportAxis: exportAxisData,
-          markAreaData,
-        });
+        if (dataDates.includes(data)) return res.coordinate[data];
+        if (moment(data).isAfter(moment())) return null;
+        res.coordinate[data] = res.coordinate[xData[index - 1]];
+        return res.coordinate[xData[index - 1]];
       });
+      yAxis.unshift(res.expectCount);
+      this.setState({
+        expectCount: res.expectCount,
+        xAxis: ['', ...xDataFormat],
+        yAxis,
+        loading: false,
+        exportAxis: exportAxisData,
+        markAreaData,
+      });
+    });
   }
 
   handleChangeUnit({ key }) {

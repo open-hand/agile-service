@@ -3,7 +3,7 @@ import {
 } from 'mobx';
 import { store, stores, axios } from '@choerodon/boot';
 import _ from 'lodash';
-import { issueApi, epicApi } from '@/api';
+import { issueApi, epicApi, reportApi } from '@/api';
 
 const { AppState } = stores;
 const UNIT_STATUS = {
@@ -144,7 +144,7 @@ class EpicReportStore {
   loadChartData(epicId = this.currentEpicId, unit = this.currentUnit) {
     this.setChartLoading(true);
     this.setReload(true);
-    axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/burn_down_coordinate_type/${epicId}?type=Epic`)
+    reportApi.loadEpicOrVersionBurnDownCoordinate(epicId, 'Epic')
       .then((res) => {
         this.setBeforeCurrentUnit(unit);
         this.setChartDataOrigin(res);
@@ -156,12 +156,10 @@ class EpicReportStore {
 
   loadTableData(epicId = this.currentEpicId) {
     this.setTableLoading(true);
-    const orgId = AppState.currentMenuType.organizationId;
-    axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/burn_down_report_type/${epicId}?organizationId=${orgId}&type=Epic`)
-      .then((res) => {
-        this.setTableData(res);
-        this.setTableLoading(false);
-      });
+    reportApi.loadEpicOrVersionBurnDown(epicId, 'Epic').then((res) => {
+      this.setTableData(res);
+      this.setTableLoading(false);
+    });
   }
 
   @action setTableLoading(data) {

@@ -23,10 +23,6 @@ class BurndownChartStore {
     this.burndownCoordinate = data;
   }
 
-  axiosGetBurndownCoordinate(sprintId, type) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/${sprintId}/burn_down_report/coordinate?type=${type}`);
-  }
-
   @computed get getSprintList() {
     return toJS(this.sprintList);
   }
@@ -45,14 +41,6 @@ class BurndownChartStore {
 
   axiosGetSprintList() {
     return sprintApi.loadSprints(['started', 'closed']);
-  }
-
-  axiosGetBurndownChartData(id, type) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/${id}/burn_down_coordinate?type=${type}`);
-  }
-
-  axiosGetBurndownChartReport(id, type) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/${id}/burn_down_report?type=${type}&ordinalType=asc`);
   }
 }
 

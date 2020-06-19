@@ -11,7 +11,7 @@ import {
 import _ from 'lodash';
 import moment from 'moment';
 import ReactEcharts from 'echarts-for-react';
-import { quickFilterApi } from '@/api';
+import { quickFilterApi, reportApi, projectApi } from '@/api';
 import ScrumBoardStore from '../../../../stores/project/scrumBoard/ScrumBoardStore';
 import AccumulationStore from '../../../../stores/project/accumulation/AccumulationStore';
 import AccumulationFilter from '../AccumulationComponent/AccumulationFilter';
@@ -104,7 +104,7 @@ class AccumulationHome extends Component {
         sprintData: res2.currentSprint,
       });
       AccumulationStore.setColumnData(data2);
-      AccumulationStore.axiosGetProjectInfo().then((res) => {
+      projectApi.loadInfo().then((res) => {
         AccumulationStore.setProjectInfo(res);
         AccumulationStore.setStartDate(moment().subtract(2, 'months'));
         AccumulationStore.setEndDate(moment());
@@ -146,7 +146,7 @@ class AccumulationHome extends Component {
         quickFilterIds.push(filterList[index3].filterId);
       }
     }
-    AccumulationStore.axiosGetAccumulationData({
+    reportApi.loadCumulativeData({
       columnIds,
       endDate,
       quickFilterIds,

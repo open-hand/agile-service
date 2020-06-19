@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import {
-  stores, Content, axios, Choerodon, 
+  stores, Content, Choerodon, 
 } from '@choerodon/boot';
 import { map, find } from 'lodash';
 import {
