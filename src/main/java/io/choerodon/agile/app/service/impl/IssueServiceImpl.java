@@ -2190,7 +2190,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
-    public Page<IssueListFieldKVVO> queryBackLogIssues(Long organizationId, Long projectId,PageRequest pageRequest) {
+    public Page<IssueListFieldKVVO> queryBackLogIssuesByPersonal(Long organizationId, Long projectId,PageRequest pageRequest) {
         if (ObjectUtils.isEmpty(organizationId)) {
             throw new CommonException("error.organizationId.iss.null");
         }
@@ -2215,13 +2215,13 @@ public class IssueServiceImpl implements IssueService {
         if (CollectionUtils.isEmpty(projectIds)) {
             return new Page<>();
         }
-        Page<IssueDTO> parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryBackLogIssuesParentIssue(projectIds, userId));
+        Page<IssueDTO> parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryParentIssueByProjectIdsAndUserId(projectIds, userId));
         List<IssueDTO> parentIssuesDTOS = parentPage.getContent();
         if (CollectionUtils.isEmpty(parentIssuesDTOS)) {
             return new Page<>();
         }
         List<Long> parentIssues = parentIssuesDTOS.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-        List<IssueDTO> allIssue = issueMapper.listBackLogIssues(projectIds,parentIssues, userId);
+        List<IssueDTO> allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId);
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);

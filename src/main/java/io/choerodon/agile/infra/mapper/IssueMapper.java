@@ -489,7 +489,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      * @param userId
      * @return
      */
-    List<IssueDTO> queryBackLogIssuesParentIssue(@Param("projectIds") List<Long> projectIds, @Param("userId") Long userId);
+    List<IssueDTO> queryParentIssueByProjectIdsAndUserId(@Param("projectIds") List<Long> projectIds, @Param("userId") Long userId);
 
     /**
      * 查询个人在所有子项目中未完成的问题
@@ -498,5 +498,5 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      * @param userId
      * @return
      */
-    List<IssueDTO> listBackLogIssues(@Param("projectIds") List<Long> projectIds,@Param("parentIssues") List<Long> parentIssues,@Param("userId") Long userId);
+    List<IssueDTO> listIssuesByParentIssueIdsAndUserId(@Param("projectIds") List<Long> projectIds,@Param("parentIssues") List<Long> parentIssues,@Param("userId") Long userId);
 }
