@@ -72,7 +72,6 @@ import styles from './FieldSummary.less';
       <div className="line-start" style={{ width: '100%', fontSize: 20, fontWeight: 500 }}>
         <TextEditToggle
           className={styles.summary}
-          style={{ width: '100%' }}
           disabled={disabled}
           onSubmit={this.updateIssueField}
           initValue={value}

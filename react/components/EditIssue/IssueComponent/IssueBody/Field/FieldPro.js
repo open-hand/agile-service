@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import moment from 'moment';
 import SelectUser from '@/components/select/select-user';
 import {
-  Select, NumberField, DatePicker, DateTimePicker, TimePicker,
+  Select, NumberField, DatePicker, DateTimePicker, TimePicker, SelectBox,
 } from 'choerodon-ui/pro';
 import { fieldApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
@@ -14,6 +14,8 @@ const EditorMap = new Map([
   ['member', SelectUser],
   ['single', Select],
   ['multiple', Select],
+  ['radio', SelectBox],
+  ['checkbox', SelectBox],
   ['number', NumberField],
   ['time', TimePicker],
   ['date', DatePicker],
@@ -58,7 +60,7 @@ const EditorMap = new Map([
     }
   };
 
-  renderEditor = ({ submit }) => {
+  renderEditor = () => {
     const { field } = this.props;
     const { value, fieldType, required } = field;
     const Editor = EditorMap.get(fieldType);
@@ -67,23 +69,25 @@ const EditorMap = new Map([
       switch (fieldType) {
         case 'single':
         case 'multiple':
+        case 'radio':
+        case 'checkbox':
         {
           const options = field.fieldOptions && field.fieldOptions.length > 0
               && field.fieldOptions.filter(option => option.enabled || (value && value.indexOf(option.id) !== -1)).map(item => (
-                <Option
+                <Editor.Option
                   value={item.id}
                   key={item.id}
                 >
                   {item.value}
-                </Option>
+                </Editor.Option>
               ));
           return (
-            <Editor required={required} multiple={fieldType === 'multiple'} onChange={(fieldType === 'single') ? submit : undefined}>
+            <Editor required={required} multiple={fieldType === 'multiple' || fieldType === 'checkbox'}>
               {options}
             </Editor>
           );
         }
-        default: return <Editor required={required} onChange={(fieldType === 'member') ? submit : undefined} />;
+        default: return <Editor required={required} />;
       }
     }
     return null;
@@ -92,9 +96,17 @@ const EditorMap = new Map([
   render() {
     const { field, disabled } = this.props;
     const {
-      fieldName, value, fieldType, valueStr, 
+      fieldName, value, fieldType, valueStr,
     } = field;
-
+    const submitTrigger = ['blur'];
+    const submitOnChange = ['member', 'single', 'radio'].includes(fieldType);
+    if (submitOnChange) {
+      submitTrigger.push('change');
+    }
+    const submitOnOut = ['radio', 'checkbox'].includes(fieldType);
+    if (submitOnOut) {
+      submitTrigger.push('click');
+    }
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -109,6 +121,7 @@ const EditorMap = new Map([
             onSubmit={this.updateIssueField}
             initValue={this.transform(fieldType, value)}
             editor={this.renderEditor}
+            submitTrigger={submitTrigger}
           >
             <div style={{ maxWidth: 200, wordBreak: 'break-all', whiteSpace: 'pre-line' }}>
               {fieldType === 'member' && valueStr
