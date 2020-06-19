@@ -82,7 +82,8 @@ import styles from './FieldSummary.less';
               autoSize
               maxLength="44"
               required
-              validationRenderer={() => '请输入概要'}
+              validationRenderer={() => '请输入概要。'}
+              labelLayout="float"
             />
           )}
         >
