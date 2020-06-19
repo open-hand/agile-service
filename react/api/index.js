@@ -24,3 +24,4 @@ export * from './Wsjf';
 export * from './DataLog';
 export * from './DevOps';
 export * from './QuickFilter';
+export * from './StateMachine';
