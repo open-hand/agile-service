@@ -3,14 +3,15 @@ import { observer } from 'mobx-react';
 import moment from 'moment';
 import SelectUser from '@/components/select/select-user';
 import {
-  Select, NumberField, DatePicker, DateTimePicker, TimePicker, SelectBox,
+  TextField, TextArea, Select, NumberField, DatePicker, DateTimePicker, TimePicker, SelectBox,
 } from 'choerodon-ui/pro';
 import { fieldApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import UserHead from '@/components/UserHead';
 
-const { Option } = Select;
 const EditorMap = new Map([
+  ['text', TextArea],
+  ['input', TextField],
   ['member', SelectUser],
   ['single', Select],
   ['multiple', Select],
@@ -82,10 +83,13 @@ const EditorMap = new Map([
                 </Editor.Option>
               ));
           return (
-            <Editor required={required} multiple={fieldType === 'multiple' || fieldType === 'checkbox'}>
+            <Editor vertical required={required} multiple={fieldType === 'multiple' || fieldType === 'checkbox'}>
               {options}
             </Editor>
           );
+        }
+        case 'text': {
+          return <Editor required={required} autoSize />;
         }
         default: return <Editor required={required} />;
       }

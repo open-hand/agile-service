@@ -16,13 +16,7 @@ const IssueField = observer((props) => {
   const {
     store, applyType, saveFieldVersionRef, saveFieldFixVersionRef,
   } = useContext(EditIssueContext);
-  const renderNormalField = (field) => {
-    if (['member', 'single', 'multiple', 'radio', 'checkbox', 'number', 'time', 'date', 'datetime'].includes(field.fieldType)) {
-      return (<FieldPro {...props} field={field} />);
-    } else {
-      return (<Field {...props} field={field} />);
-    }
-  };
+  const renderNormalField = field => (<FieldPro {...props} field={field} />);
   const getFieldComponent = (field) => {
     const issue = store.getIssue;
     const activePiTeams = issue.activePiTeams || [];
