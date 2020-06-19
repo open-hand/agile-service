@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { stores, axios } from '@choerodon/boot';
 import _ from 'lodash';
 import { Select, Form, Modal } from 'choerodon-ui';
 import { issueLinkTypeApi, issueLinkApi, featureApi } from '@/api';
@@ -7,7 +6,6 @@ import SelectFocusLoad from '../SelectFocusLoad';
 import './CreateLinkTask.less';
 
 
-const { AppState } = stores;
 const { Sidebar } = Modal;
 const { Option } = Select;
 const FormItem = Form.Item;

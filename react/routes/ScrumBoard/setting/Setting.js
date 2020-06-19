@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Page, Header, Content, stores, axios, Permission, Breadcrumb,
+  Page, Header, Content, stores, Permission, Breadcrumb,
 } from '@choerodon/boot';
 import moment from 'moment';
 import {

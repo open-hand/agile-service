@@ -1,7 +1,7 @@
 import {
   observable, action, computed, toJS, 
 } from 'mobx';
-import { store, stores, axios } from '@choerodon/boot';
+import { store, stores } from '@choerodon/boot';
 
 const { AppState } = stores;
 

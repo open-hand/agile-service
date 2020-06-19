@@ -36,6 +36,22 @@ class IssueLinkTypeApi extends Api {
       },
     });
   }
+
+  /**
+   * 检查issueLinkType 是否重名
+   * @param issueLinkTypeName 
+   * @param issueLinkTypeId 
+   */
+  checkName(issueLinkTypeName:string, issueLinkTypeId?:number) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/issue_link_types/check_name`,
+      params: {
+        issueLinkTypeName,
+        issueLinkTypeId,
+      },
+    });
+  }
 }
 
 const issueLinkTypeApi = new IssueLinkTypeApi();

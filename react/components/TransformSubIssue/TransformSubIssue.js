@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { stores, axios } from '@choerodon/boot';
+import { stores } from '@choerodon/boot';
 import _ from 'lodash';
 import { Modal, Form, Select } from 'choerodon-ui';
-import { issueApi } from '@/api';
+import { issueApi, statusApi } from '@/api';
 import TypeTag from '../TypeTag';
 
 import './TransformSubIssue.less';
@@ -73,24 +73,20 @@ class TransformSubIssue extends Component {
       selectLoading: true,
     });
     const { issueTypes } = this.props;
-    const proId = AppState.currentMenuType.id;
     const issueTypeData = issueTypes;
     const subTask = issueTypeData.find(t => t.typeCode === 'sub_task');
     if (subTask) {
-      axios.get(`/agile/v1/projects/${proId}/schemes/query_status_by_issue_type_id?issue_type_id=${subTask.id}&apply_type=agile`)
-        .then((res) => {
-          this.setState({
-            selectLoading: false,
-            originStatus: res,
-          });
+      statusApi.loadAllForIssueType(subTask.id).then((res) => {
+        this.setState({
+          selectLoading: false,
+          originStatus: res,
         });
-
-      axios.get(`/agile/v1/projects/${proId}/status/query_first_status?organizationId=${AppState.currentMenuType.organizationId}&applyType=agile&issueTypeId=${subTask.id}`)
-        .then((res) => {
-          this.setState({
-            selectDefaultValue: res,
-          });
+      });
+      statusApi.loadFirstInWorkFlow(subTask.id).then((res) => {
+        this.setState({
+          selectDefaultValue: res,
         });
+      });
     } else {
       this.setState({
         selectLoading: false,

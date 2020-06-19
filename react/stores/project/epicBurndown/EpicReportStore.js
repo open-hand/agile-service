@@ -1,11 +1,10 @@
 import {
   observable, action, computed,  
 } from 'mobx';
-import { store, stores, axios } from '@choerodon/boot';
+import { store } from '@choerodon/boot';
 import _ from 'lodash';
-import { issueApi, epicApi, reportApi } from '@/api';
+import { epicApi, reportApi } from '@/api';
 
-const { AppState } = stores;
 const UNIT_STATUS = {
   issue_count: {
     committed: undefined,

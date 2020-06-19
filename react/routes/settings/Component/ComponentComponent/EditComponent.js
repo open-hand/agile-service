@@ -6,7 +6,7 @@ import {
   Form, Input, Select, Button,
 } from 'choerodon-ui';
 import {
-  Content, stores, axios, Choerodon, 
+  Content, stores, Choerodon, 
 } from '@choerodon/boot';
 import _ from 'lodash';
 import { userApi, componentApi } from '@/api';
@@ -118,14 +118,13 @@ const EditComponent = (props) => {
 
   const checkComponentNameRepeat = (rule, value, callback) => {
     if (value && value.trim() && value.trim() !== name) {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/component/check_name?componentName=${value}`)
-        .then((res) => {
-          if (res) {
-            callback('模块名称重复');
-          } else {
-            callback();
-          }
-        });
+      componentApi.checkName(value.trim()).then((res) => {
+        if (res) {
+          callback('模块名称重复');
+        } else {
+          callback();
+        }
+      });
     } else {
       callback();
     }

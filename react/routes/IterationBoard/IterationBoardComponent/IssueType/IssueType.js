@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { stores, axios } from '@choerodon/boot';
+import { stores } from '@choerodon/boot';
 import ReactEcharts from 'echarts-for-react';
 import { Icon, Spin } from 'choerodon-ui';
 import { sprintApi } from '@/api';
@@ -7,7 +7,6 @@ import pic from './no_issue.png';
 import EmptyBlockDashboard from '../../../../components/EmptyBlockDashboard';
 import './IssueType.less';
 
-const { AppState } = stores;
 
 class IssueType extends Component {
   constructor(props) {

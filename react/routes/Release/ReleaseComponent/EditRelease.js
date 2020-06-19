@@ -4,9 +4,8 @@ import {
   Modal, Form, Input, DatePicker, Button,
 } from 'choerodon-ui';
 import moment from 'moment';
-import axios from 'axios';
-import { Content, stores } from '@choerodon/boot';
-import { versionApi } from '@/api';
+import { stores } from '@choerodon/boot';
+import { versionApi, permissionApi } from '@/api';
 import ReleaseStore from '../../../stores/project/release/ReleaseStore';
 
 const { Sidebar } = Modal;
@@ -34,7 +33,7 @@ class EditRelease extends Component {
   }
 
   componentDidMount() {
-    axios.post(`/iam/choerodon/v1/permissions/menus/check-permissions?projectId=${AppState.currentMenuType.id}`, ['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion']).then((res) => {
+    permissionApi.check(['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion']).then((res) => {
       this.setState({
         editPermission: res.find(item => item.code === 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion').approve,
       });

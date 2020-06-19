@@ -2,7 +2,7 @@ import React, {
   Component, useState, useEffect, useImperativeHandle,
 } from 'react';
 import { Icon } from 'choerodon-ui';
-import { Content, stores, axios } from '@choerodon/boot';
+import { stores } from '@choerodon/boot';
 import { quickFilterApi } from '@/api';
 
 const { AppState } = stores;

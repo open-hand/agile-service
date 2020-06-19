@@ -27,3 +27,4 @@ export * from './QuickFilter';
 export * from './StateMachine';
 export * from './Report';
 export * from './Project';
+export * from './Permission';

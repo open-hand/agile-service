@@ -4,7 +4,7 @@ import {
   Modal, Form, Input, DatePicker, 
 } from 'choerodon-ui';
 import {
-  Content, stores, axios, Choerodon, 
+  Content, stores, Choerodon, 
 } from '@choerodon/boot';
 import moment from 'moment';
 import { versionApi } from '@/api';

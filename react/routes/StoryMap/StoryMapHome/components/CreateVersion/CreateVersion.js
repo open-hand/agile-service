@@ -22,17 +22,6 @@ class CreateVersion extends Component {
         this.setState({
           loading: true,
         });
-        // if (type === 'sprint') {
-        //   // 创建冲刺
-        //   axios.post(`/agile/v1/projects/${projectId}/sprint/create?sprintName=${name}`)
-        //     .then((res) => {
-        //       this.setState({ loading: false });
-        //       onOk();
-        //     })
-        //     .catch((error) => {
-        //       this.setState({ loading: false });
-        //     });
-        // } else {
         // 创建版本
         const versionCreateVO = {
           name,

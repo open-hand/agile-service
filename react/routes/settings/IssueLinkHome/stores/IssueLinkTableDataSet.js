@@ -7,7 +7,7 @@ export default ({ id, formatMessage }) => {
     if (record && (record.pristineData.linkName === value)) {
       return;
     }
-    const res = await axios.get(`agile/v1/projects/${id}/issue_link_types/check_name?issueLinkTypeName=${value}&issueLinkTypeId=`);
+    const res = await issueLinkTypeApi.checkName(value);
     if (!res) {
       // eslint-disable-next-line consistent-return
       return formatMessage({ id: 'issue_link.checkName.repet' });
