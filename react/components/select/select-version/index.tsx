@@ -4,7 +4,7 @@ import { versionApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 
 interface Props {
-  dataRef: React.RefObject<Array<any>>
+  dataRef: React.MutableRefObject<Array<any>>
   statusArr: Array<string>
 }
 const SelectVersion: React.FC<Props> = forwardRef(({ dataRef, statusArr = [], ...otherProps }, ref: React.Ref<Select>) => {

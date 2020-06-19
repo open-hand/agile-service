@@ -1,24 +1,28 @@
+const merge2 = require('merge2');
 const path = require('path');
 const gulp = require('gulp');
-var watch = require('gulp-watch');
-const { exec } = require('child_process')
+const watch = require('gulp-watch');
+const { exec } = require('child_process');
 const rimraf = require('rimraf');
 const babel = require('gulp-babel');
-const through2 = require('through2');
+const sourcemaps = require('gulp-sourcemaps');
+const argv = require('minimist')(process.argv.slice(2));
+const ts = require('gulp-typescript');
 const alias = require('./alias').gulp;
+
 const cwd = process.cwd();
 const libDir = path.join(cwd, 'lib');
+const tsDefaultReporter = ts.reporter.defaultReporter();
 
-function compileAssets() {
-  return gulp.src(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)']).pipe(gulp.dest(libDir));
-}
+const tsConfig = require('./getTSCommonConfig')();
+
 function getBabelCommonConfig() {
   const plugins = [
     [
       'babel-plugin-module-resolver',
       {
         alias,
-      }
+      },
     ],
     '@babel/plugin-proposal-export-default-from',
     '@babel/plugin-proposal-export-namespace-from',
@@ -49,7 +53,6 @@ function getBabelCommonConfig() {
   ];
   return {
     presets: [
-      '@babel/preset-typescript',
       '@babel/preset-react',
       ['@babel/preset-env', {
         modules: false,
@@ -59,58 +62,76 @@ function getBabelCommonConfig() {
   };
 }
 
-function babelify(js, dir = '') {
+function babelify(js) {
   const babelConfig = getBabelCommonConfig();
-  const stream = js.pipe(babel(babelConfig));
-  return stream
-    // eslint-disable-next-line func-names
-    .pipe(through2.obj(function (file, encoding, next) {
-      const matches = file.path.match(/(routes|dashboard|guide|entry|entrywithoutsider)\.nunjucks\.(js|jsx)/);
-      if (matches) {
-        const content = file.contents.toString(encoding);
-        file.contents = Buffer.from(content
-          .replace(`'{{ ${matches[1]} }}'`, `{{ ${matches[1]} }}`)
-          // eslint-disable-next-line quotes
-          .replace(`'{{ home }}'`, '{{ home }}')
-          // eslint-disable-next-line quotes
-          .replace(`'{{ master }}'`, '{{ master }}'));
-      }
-      this.push(file);
-      next();
-    }))
-    .pipe(gulp.dest(path.join(libDir, dir)));
+  const stream = js
+    .pipe(sourcemaps.init())
+    .pipe(babel(babelConfig))
+    .pipe(sourcemaps.write('.'));
+  return stream;
 }
 
-function compileFile() {
-  const source = [
-    'react/**/*.js',
-    'react/**/*.jsx',
-  ];
+function compileTS() {
+  const assets = gulp.src(['react/**/*.@(jpg|png|gif|svg|scss|less|css|html|ico)']);
+  let error = 0;
+  const source = ['react/**/*.tsx', 'react/**/*.ts'];
+  const tsResult = gulp.src(source).pipe(
+    ts(tsConfig, {
+      error(e) {
+        tsDefaultReporter.error(e);
+        error = 1;
+      },
+      finish: tsDefaultReporter.finish,
+    }),
+  );
+  function check() {
+    if (error && !argv['ignore-error']) {
+      process.exit(1);
+    }
+  }
+
+  tsResult.on('finish', check);
+  tsResult.on('end', check);
+  return merge2([babelify(tsResult.js), tsResult.dts, assets]);
+}
+function compileJS() {
+  const source = ['react/**/*.jsx', 'react/**/*.js'];
   return babelify(gulp.src(source));
 }
-
-async function compile() {
+gulp.task('compile-ts', (done) => {
   rimraf.sync(libDir);
-  await compileAssets();
-  await compileFile();
-}
-
-gulp.task('compile', () => {
-  return compile();
+  compileTS()
+    .pipe(gulp.dest(libDir))
+    .on('finish', done);
 });
+gulp.task('compile-js', (done) => {
+  compileJS()
+    .pipe(gulp.dest(libDir))
+    .on('finish', done);
+});
+gulp.task(
+  'compile',
+  gulp.parallel(
+    'compile-ts',
+    'compile-js',
+  ),
+);
+
+
 function updateFile() {
   let timer;
   return function () {
     if (timer) {
-      clearTimeout(timer)
+      clearTimeout(timer);
     }
     timer = setTimeout(() => {
-      console.log('content update')
-      exec('yalc publish --push')
+      // eslint-disable-next-line no-console
+      console.log('content update');
+      exec('yalc publish --push');
     }, 1500);
-  }
+  };
 }
-const updateFileTask = updateFile()
+const updateFileTask = updateFile();
 gulp.task('watch', async () => {
   const source = [
     'react/**/*.js',
@@ -120,6 +141,6 @@ gulp.task('watch', async () => {
   ];
   await Promise.all([
     babelify(gulp.src(source).pipe(watch(source))).on('data', updateFileTask),
-    gulp.src(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)']).pipe(watch(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)'])).pipe(gulp.dest(libDir)).on('data', updateFileTask)
-  ])
-})
+    gulp.src(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)']).pipe(watch(['react/**/*.@(jpg|png|gif|svg|scss|less|html|ico)'])).pipe(gulp.dest(libDir)).on('data', updateFileTask),
+  ]);
+});

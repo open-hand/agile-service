@@ -2,7 +2,7 @@ import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
 
 interface ISearchQuickFilter {
-    contents: Array<string> | [],
+    contents: Array<string>,
     filterName: string
 }
 interface IQuickFilter {
