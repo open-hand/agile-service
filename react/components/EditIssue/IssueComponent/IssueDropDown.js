@@ -23,7 +23,6 @@ const IssueDropDown = ({
     issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi,
   } = issue;
   const disableFeatureDeleteWhilePiDoing = typeCode === 'feature' && activePi && activePi.statusCode === 'doing';
-  console.log(typeCode, activePi, isOwner);
   const handleDeleteIssue = () => {
     confirm({
       width: 560,
