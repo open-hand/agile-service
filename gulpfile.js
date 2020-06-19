@@ -67,9 +67,9 @@ function getBabelCommonConfig() {
 function babelify(js) {
   const babelConfig = getBabelCommonConfig();
   const stream = js
-    .pipe(sourcemaps.init())
-    .pipe(babel(babelConfig))
-    .pipe(sourcemaps.write('.'));
+    // .pipe(sourcemaps.init())
+    .pipe(babel(babelConfig));
+    // .pipe(sourcemaps.write('.'));
   return stream;
 }
 

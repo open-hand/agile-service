@@ -13,7 +13,8 @@ const SelectComponent: React.FC<Props> = forwardRef(({ dataRef, ...otherProps },
     textField: 'name',
     valueField: 'name',
     request: () => componentApi.loadAllComponents(),
-    middleWare: (components) => { 
+    middleWare: (components) => {
+      // @ts-ignore
       const data = components.content || [];
       Object.assign(dataRef, {
         current: data,
