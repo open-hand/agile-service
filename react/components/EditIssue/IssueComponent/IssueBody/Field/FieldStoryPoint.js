@@ -3,10 +3,9 @@ import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import { issueApi } from '@/api';
-import TextEditToggle from '../../../../TextEditToggle';
-import SelectNumber from '../../../../SelectNumber';
+import SelectNumber from '@/components/select/select-number';
+import TextEditToggle from '@/components/TextEditTogglePro';
 
-const { Text, Edit } = TextEditToggle;
 @inject('AppState')
 @observer class FieldStoryPoint extends Component {
   updateIssueField = (value) => {
@@ -53,16 +52,14 @@ const { Text, Edit } = TextEditToggle;
             formKey={fieldName}
             disabled={typeCode === 'feature' || disabled}
             onSubmit={this.updateIssueField}
-            originData={value ? String(value) : undefined}
+            initValue={value ? String(value) : undefined}
+            editor={({ submit }) => (
+              <SelectNumber onChange={submit} />
+            )}
           >
-            <Text>
-              <div style={{ whiteSpace: 'nowrap' }}>
-                {value ? `${value} ${fieldCode === 'storyPoints' ? '点' : '小时'}` : '无'}
-              </div>
-            </Text>
-            <Edit>
-              <SelectNumber getPopupContainer={() => document.body} autoFocus />
-            </Edit>
+            <div style={{ whiteSpace: 'nowrap' }}>
+              {value ? `${value} ${fieldCode === 'storyPoints' ? '点' : '小时'}` : '无'}
+            </div>
           </TextEditToggle>
         </div>
       </div>

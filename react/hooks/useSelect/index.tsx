@@ -46,7 +46,7 @@ export interface SelectConfig {
   optionRenderer?: (item: any) => JSX.Element
   renderer?: (item: any) => JSX.Element
   request: Request
-  middleWare?: (item: any) => boolean,
+  middleWare?: (items: any[]) => any[],
   paging?: boolean
   props?: object
 }

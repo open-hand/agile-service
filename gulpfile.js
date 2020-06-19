@@ -5,7 +5,6 @@ const { exec } = require('child_process')
 const rimraf = require('rimraf');
 const babel = require('gulp-babel');
 const through2 = require('through2');
-const ts = require('gulp-typescript');
 const alias = require('./alias').gulp;
 const cwd = process.cwd();
 const libDir = path.join(cwd, 'lib');
