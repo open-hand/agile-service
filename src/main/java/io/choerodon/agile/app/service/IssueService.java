@@ -339,5 +339,5 @@ public interface IssueService {
      * @param projectId
      * @return
      */
-    Page<IssueListFieldKVVO> queryAgencyProblems(Long organizationId, Long projectId,PageRequest pageRequest);
+    Page<IssueListFieldKVVO> queryBackLogIssues(Long organizationId, Long projectId,PageRequest pageRequest);
 }
