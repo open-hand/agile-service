@@ -14,7 +14,7 @@ interface BathUpdateCustom extends UIssueFiled {
   fieldId: number,
 }
 interface BathUpdateField {
-  customFields: Array<BathUpdateCustom> | [],
+  customFields: Array<BathUpdateCustom>,
   issueIds: Array<number>,
   predefinedFields: Array<any>,
 }

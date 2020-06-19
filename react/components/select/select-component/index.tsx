@@ -4,7 +4,7 @@ import { componentApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 
 interface Props {
-  dataRef: React.RefObject<Array<any>>
+  dataRef: React.MutableRefObject<any>
 }
 
 const SelectComponent: React.FC<Props> = forwardRef(({ dataRef, ...otherProps }, ref: React.Ref<Select>) => {
@@ -15,8 +15,9 @@ const SelectComponent: React.FC<Props> = forwardRef(({ dataRef, ...otherProps },
     request: () => componentApi.loadAllComponents(),
     middleWare: (components) => { 
       const data = components.content || [];
-      // eslint-disable-next-line no-param-reassign
-      dataRef.current = data;
+      Object.assign(dataRef, {
+        current: data,
+      });
       return data;
     },
     paging: false,
