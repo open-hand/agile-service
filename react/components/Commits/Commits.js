@@ -4,7 +4,7 @@ import _ from 'lodash';
 import {
   Modal, Table, Tooltip, Popover, Button, Icon, 
 } from 'choerodon-ui';
-import { stores, Content, axios } from '@choerodon/boot';
+import { stores, Content } from '@choerodon/boot';
 import { devOpsApi } from '@/api';
 
 const { AppState } = stores;

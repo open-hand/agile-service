@@ -96,10 +96,10 @@ class FeatureApi {
   }
 
   /**
-   * 查询特性的颜色
+   * 查询特性类型
    */
-  getColors() {
-    return axios.get('/agile/v1/lookup_values/feature_color');
+  getType() {
+    return axios.get(`${this.prefix}/board_depend/list_feature_depend_type`);
   }
 
   /**

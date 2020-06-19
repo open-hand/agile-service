@@ -1,8 +1,7 @@
 import { observable, action, computed } from 'mobx';
 import { store } from '@choerodon/boot';
 import _ from 'lodash';
-import { sprintApi } from '@/api';
-import { reportApi } from '@/api/Report';
+import { sprintApi, reportApi } from '@/api';
 
 @store('ReportStore')
 class ReportStore {

@@ -1,11 +1,10 @@
 import {
   observable, action, computed, toJS, 
 } from 'mobx';
-import { store, stores, axios } from '@choerodon/boot';
+import { store } from '@choerodon/boot';
 import _ from 'lodash';
-import { versionApi } from '@/api';
+import { versionApi, reportApi } from '@/api';
 
-const { AppState } = stores;
 const UNIT_STATUS = {
   issue_count: {
     committed: undefined,
@@ -144,7 +143,7 @@ class VersionReportStore {
   loadChartData(versionId = this.currentVersionId, unit = this.currentUnit) {
     this.setChartLoading(true);
     this.setReload(true);
-    axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/burn_down_coordinate_type/${versionId}?type=Version`)
+    reportApi.loadEpicOrVersionBurnDownCoordinate(versionId, 'Version')
       .then((res) => {
         this.setBeforeCurrentUnit(unit);
         this.setChartDataOrigin(res);
@@ -156,12 +155,10 @@ class VersionReportStore {
 
   loadTableData(versionId = this.currentVersionId) {
     this.setTableLoading(true);
-    const orgId = AppState.currentMenuType.organizationId;
-    axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/burn_down_report_type/${versionId}?organizationId=${orgId}&type=Version`)
-      .then((res) => {
-        this.setTableData(res);
-        this.setTableLoading(false);
-      });
+    reportApi.loadEpicOrVersionBurnDown(versionId, 'Version').then((res) => {
+      this.setTableData(res);
+      this.setTableLoading(false);
+    });
   }
 
   @action setTableLoading(data) {

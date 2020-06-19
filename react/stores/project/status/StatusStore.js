@@ -1,4 +1,6 @@
-import { observable, action, computed, toJS } from 'mobx';
+import {
+  observable, action, computed, toJS, 
+} from 'mobx';
 import { store, stores, axios } from '@choerodon/boot';
 
 const { AppState } = stores;
@@ -12,14 +14,9 @@ class StatusStore {
     }
 
   @action setStatusList(data) {
-      this.statusList = data;
-    }
-
-    axiosGetStatusList(data) {
-      return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issue_status/statuses?page=${data.current - 1}&size=${data.pageSize}`);
-    }
+    this.statusList = data;
+  }
 }
 
 const statusStore = new StatusStore();
 export default statusStore;
-

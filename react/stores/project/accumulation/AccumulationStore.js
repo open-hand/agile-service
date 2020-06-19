@@ -78,10 +78,6 @@ class AccumulationStore {
     this.projectInfo = data;
   }
 
-  axiosGetProjectInfo() {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/project_info`);
-  }
-
   @computed get getBoardList() {
     return toJS(this.boardList);
   }
@@ -96,10 +92,6 @@ class AccumulationStore {
 
   @action setAccumulationData(data) {
     this.accumulationData = data;
-  }
-
-  axiosGetAccumulationData(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/cumulative_flow_diagram`, data);
   }
 
   @computed get getStartDate() {

@@ -56,6 +56,7 @@ class StatusApi {
     });
   }
 
+
   /**
    * 加载当前项目下所有状态
    * @param applyType 
@@ -122,6 +123,20 @@ class StatusApi {
       url: `${this.orgPrefix}/status/check_name`,
       params: {
         name,
+      },
+    });
+  }
+
+  /**
+   * 校验是否能新增状态 [敏捷]
+   * @param applyType 
+   */
+  checkCanCreateStatus(applyType = 'agile') {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/schemes/check_create_status_for_agile`,
+      params: {
+        applyType,
       },
     });
   }

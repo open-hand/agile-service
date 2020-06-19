@@ -41,14 +41,13 @@ class CreateLinkTask extends Component {
         this.transform(res.list);
       });
     } else {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board_depend/list_feature_depend_type`)
-        .then((res) => {
-          this.setState({
-            selectLoading: false,
-            originLinks: res,
-          });
-          this.transform(res);
+      featureApi.getType().then((res) => {
+        this.setState({
+          selectLoading: false,
+          originLinks: res,
         });
+        this.transform(res);
+      });
     }
   }
 

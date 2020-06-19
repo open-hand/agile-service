@@ -1,5 +1,5 @@
 import {
-  observable, action, computed, toJS, 
+  observable, action, computed, toJS,
 } from 'mobx';
 import { find } from 'lodash';
 import axios from 'axios';
@@ -180,10 +180,9 @@ class ScrumBoardStore {
   }
 
   axiosCanAddStatus() {
-    axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/schemes/check_create_status_for_agile?applyType=agile`)
-      .then((data) => {
-        this.setCanAddStatus(data);
-      })
+    statusApi.checkCanCreateStatus().then((data) => {
+      this.setCanAddStatus(data);
+    })
       .catch((e) => {
         Choerodon.prompt(e.message);
       });
@@ -414,7 +413,7 @@ class ScrumBoardStore {
   }
 
   findStatusById(columnId, statusId) {
-    const data = this.boardData;       
+    const data = this.boardData;
     const column = find(data, { columnId });
     const status = find(column.subStatusDTOS, { statusId });
     return status;
@@ -446,7 +445,7 @@ class ScrumBoardStore {
   @computed get getClickIssueDetail() {
     return this.clickIssueDetail;
   }
-  
+
   /**
    * 
    * @param {*} parentIssueId 
@@ -751,7 +750,7 @@ class ScrumBoardStore {
   }
 
   // 查询组织层工作日历设置
-  axiosGetWorkSetting(year) {  
+  axiosGetWorkSetting(year) {
     return workCalendarApi.getWorkSetting(year).then((data) => {
       if (data) {
         this.setWorkSetting(data);
