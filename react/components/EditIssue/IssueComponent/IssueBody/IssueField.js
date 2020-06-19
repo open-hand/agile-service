@@ -17,7 +17,7 @@ const IssueField = observer((props) => {
     store, applyType, saveFieldVersionRef, saveFieldFixVersionRef,
   } = useContext(EditIssueContext);
   const renderNormalField = (field) => {
-    if (['member', 'single', 'multiple', 'number', 'time', 'date', 'datetime'].includes(field.fieldType)) {
+    if (['member', 'single', 'multiple', 'radio', 'checkbox', 'number', 'time', 'date', 'datetime'].includes(field.fieldType)) {
       return (<FieldPro {...props} field={field} />);
     } else {
       return (<Field {...props} field={field} />);

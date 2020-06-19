@@ -2,6 +2,7 @@ import React, {
   useState, useRef, cloneElement, useEffect, Fragment,
 } from 'react';
 import classNames from 'classnames';
+import useClickOut from '@/hooks/useClickOut';
 import styles from './TextEditToggle.less';
 
 interface RenderProps {
@@ -11,8 +12,14 @@ interface RenderProps {
 interface EditorRender {
   submit: () => void
 }
+enum Action {
+  click = 'click', // clickout提交
+  blur = 'blur', // 失焦提交
+  change = 'change'// change提交
+}
 interface Props {
   disabled?: boolean
+  submitTrigger?: Action[] // 触发提交的动作
   alwaysRender?: boolean // 查看模式也挂载编辑器
   editor: (editorRender: EditorRender) => JSX.Element
   editorExtraContent?: () => JSX.Element
@@ -23,13 +30,18 @@ interface Props {
 }
 
 const TextEditToggle: React.FC<Props> = ({
-  disabled, editor, editorExtraContent, children: text, className, onSubmit, initValue, alwaysRender = true,
+  disabled, submitTrigger = [Action.blur], editor, editorExtraContent, children: text, className, onSubmit, initValue, alwaysRender = true,
 } = {} as Props) => {
   const [editing, setEditing] = useState(false);
   const editingRef = useRef(editing);
   const dataRef = useRef(initValue);
   const editorRef = useRef<JSX.Element>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const handleClickOut = () => {
+    if (submitTrigger.includes(Action.click)) {
+      submit();
+    }
+  };
+  const containerRef = useClickOut<HTMLDivElement>(handleClickOut);
   editingRef.current = editing;
   useEffect(() => {
     dataRef.current = initValue;
@@ -56,8 +68,16 @@ const TextEditToggle: React.FC<Props> = ({
     if (originOnChange) {
       originOnChange(value);
     }
+    if (submitTrigger.includes(Action.change)) {
+      submit();
+    }
   };
   const handleEditorBlur = () => {
+    if (submitTrigger.includes(Action.blur)) {
+      submit();
+    }
+  };
+  const submit = () => {    
     // 延缓submit，因为有时候blur之后才会onchange，保证拿到的值是最新的
     setTimeout(() => {
       // @ts-ignore
@@ -73,7 +93,7 @@ const TextEditToggle: React.FC<Props> = ({
     });
   };
   const renderEditor = () => {
-    const editorElement = typeof editor === 'function' ? editor({ submit: handleEditorBlur }) : editor;
+    const editorElement = typeof editor === 'function' ? editor({ submit }) : editor;
     if (!editing && !alwaysRender) {
       return null;
     }
@@ -107,9 +127,10 @@ const TextEditToggle: React.FC<Props> = ({
     <Fragment>
       {/* 在没编辑的时候也会渲染，目的是提前加载数据 */}
       {!disabled && (
-        <div className={classNames(styles.editor, {
-          [styles.hidden]: !editing,
-        })}
+        <div
+          className={classNames(styles.editor, {
+            [styles.hidden]: !editing,
+          })}          
         >
           {renderEditor()}
         </div>

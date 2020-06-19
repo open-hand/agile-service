@@ -81,13 +81,13 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
           <TextEditToggle
             disabled={disabled}
             onSubmit={this.updateIssueStatus}
-            initValue={statusId}            
-            editor={({ submit }) => (
+            initValue={statusId}
+            submitTrigger={['blur', 'change']}
+            editor={() => (
               <SelectStatus
                 statusArgs={{
                   statusId, issueId, typeId, applyType, projectId,
                 }}
-                onChange={submit}
               />
             )}
           >
