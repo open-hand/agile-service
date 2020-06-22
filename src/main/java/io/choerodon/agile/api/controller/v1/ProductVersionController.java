@@ -154,7 +154,7 @@ public class ProductVersionController {
     public ResponseEntity<VersionMessageVO> queryReleaseMessageByVersionId(@ApiParam(value = "项目id", required = true)
                                                                             @PathVariable(name = "project_id") Long projectId,
                                                                            @ApiParam(value = "versionId", required = true)
-                                                                            @PathVariable Long versionId) {
+                                                                            @PathVariable @Encrypt Long versionId) {
         return Optional.ofNullable(productVersionService.queryReleaseMessageByVersionId(projectId, versionId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(QUERY_PLAN_VERSION_NAME_ERROR));
@@ -215,7 +215,7 @@ public class ProductVersionController {
     public ResponseEntity<VersionMessageVO> queryDeleteMessageByVersionId(@ApiParam(value = "项目id", required = true)
                                                                            @PathVariable(name = "project_id") Long projectId,
                                                                           @ApiParam(value = "versionId", required = true)
-                                                                           @PathVariable Long versionId) {
+                                                                           @PathVariable @Encrypt Long versionId) {
         return Optional.ofNullable(productVersionService.queryDeleteMessageByVersionId(projectId, versionId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(QUERY_VERSION_NAME_ERROR));

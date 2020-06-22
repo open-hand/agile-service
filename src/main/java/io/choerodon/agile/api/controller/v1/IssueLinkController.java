@@ -38,7 +38,7 @@ public class IssueLinkController {
                                                                  @ApiParam(value = "issueId", required = true)
                                                                   @PathVariable Long issueId,
                                                                  @ApiParam(value = "issueLink创建对象", required = true)
-                                                                  @RequestBody @EncryptDTO List<IssueLinkCreateVO> issueLinkCreateVOList) {
+                                                                  @RequestBody  List<IssueLinkCreateVO> issueLinkCreateVOList) {
         return Optional.ofNullable(issueLinkService.createIssueLinkList(issueLinkCreateVOList, issueId, projectId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.IssueLink.createIssueLink"));

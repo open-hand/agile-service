@@ -220,17 +220,10 @@ public class ReportController {
     public ResponseEntity<List<BurnDownReportCoordinateVO>> queryBurnDownCoordinateByType(@ApiParam(value = "项目id", required = true)
                                                                                            @PathVariable(name = "project_id") Long projectId,
                                                                                           @ApiParam(value = "id", required = true)
-                                                                                           @PathVariable String id,
+                                                                                           @PathVariable Long id,
                                                                                           @ApiParam(value = "类型:Epic/Version", required = true)
                                                                                            @RequestParam String type) {
-        Boolean typeCondition = "Epic".equals(type);
-        Long decryptId = null;
-        if (typeCondition) {
-            decryptId = EncryptionUtils.decrypt(id, EncryptionConstant.AGILE_ISSUE);
-        } else {
-            decryptId = EncryptionUtils.decrypt(id, EncryptionConstant.FD_PRODUCT_VERSION);
-        }
-        return Optional.ofNullable(reportService.queryBurnDownCoordinateByType(projectId, decryptId, type))
+        return Optional.ofNullable(reportService.queryBurnDownCoordinateByType(projectId, id, type))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.report.queryBurnDownCoordinateByType"));
     }
@@ -241,19 +234,12 @@ public class ReportController {
     public ResponseEntity<BurnDownReportVO> queryBurnDownReportByType(@ApiParam(value = "项目id", required = true)
                                                                        @PathVariable(name = "project_id") Long projectId,
                                                                       @ApiParam(value = "id", required = true)
-                                                                       @PathVariable String id,
+                                                                       @PathVariable Long id,
                                                                       @ApiParam(value = "类型:Epic/Version", required = true)
                                                                        @RequestParam String type,
                                                                       @ApiParam(value = "组织id", required = true)
                                                                        @RequestParam Long organizationId) {
-        Boolean typeCondition = "Epic".equals(type);
-        Long decryptId = null;
-        if (typeCondition) {
-            decryptId = EncryptionUtils.decrypt(id, EncryptionConstant.AGILE_ISSUE);
-        } else {
-            decryptId = EncryptionUtils.decrypt(id, EncryptionConstant.FD_PRODUCT_VERSION);
-        }
-        return Optional.ofNullable(reportService.queryBurnDownReportByType(projectId, decryptId, type, organizationId))
+        return Optional.ofNullable(reportService.queryBurnDownReportByType(projectId, id, type, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.report.queryBurnDownReportByType"));
     }

@@ -75,7 +75,7 @@ public class SprintController {
     public ResponseEntity<Boolean> deleteSprint(@ApiParam(value = "项目id", required = true)
                                                 @PathVariable(name = "project_id") Long projectId,
                                                 @ApiParam(value = "sprintId", required = true)
-                                                @PathVariable Long sprintId) {
+                                                @PathVariable @Encrypt Long sprintId) {
         return Optional.ofNullable(sprintService.deleteSprint(projectId, sprintId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.NO_CONTENT))
                 .orElseThrow(() -> new CommonException(DELETE_ERROR));

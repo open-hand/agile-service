@@ -41,7 +41,7 @@ public class IssueStatusController {
                                                       @ApiParam(value = "apply type", required = true)
                                                        @RequestParam String applyType,
                                                       @ApiParam(value = "issue status object", required = true)
-                                                       @RequestBody IssueStatusVO issueStatusVO) {
+                                                       @RequestBody @EncryptDTO IssueStatusVO issueStatusVO) {
         return Optional.ofNullable(issueStatusService.create(projectId, applyType, issueStatusVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.status.create"));

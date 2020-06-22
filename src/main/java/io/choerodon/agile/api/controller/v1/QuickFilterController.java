@@ -9,6 +9,8 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,9 +53,9 @@ public class QuickFilterController {
     public ResponseEntity<QuickFilterVO> update(@ApiParam(value = "项目id", required = true)
                                                  @PathVariable(name = "project_id") Long projectId,
                                                 @ApiParam(value = "filter id", required = true)
-                                                 @PathVariable Long filterId,
+                                                 @PathVariable @Encrypt Long filterId,
                                                 @ApiParam(value = "quick filter object", required = true)
-                                                 @RequestBody QuickFilterVO quickFilterVO) {
+                                                 @RequestBody @EncryptDTO QuickFilterVO quickFilterVO) {
         return Optional.ofNullable(quickFilterService.update(projectId, filterId, quickFilterVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.quickFilter.update"));
@@ -65,7 +67,7 @@ public class QuickFilterController {
     public ResponseEntity<QuickFilterVO> deleteById(@ApiParam(value = "项目id", required = true)
                                                      @PathVariable(name = "project_id") Long projectId,
                                                     @ApiParam(value = "filter id", required = true)
-                                                     @PathVariable Long filterId) {
+                                                     @PathVariable @Encrypt Long filterId) {
         quickFilterService.deleteById(projectId, filterId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -76,7 +78,7 @@ public class QuickFilterController {
     public ResponseEntity<QuickFilterVO> queryById(@ApiParam(value = "项目id", required = true)
                                                     @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "filter id", required = true)
-                                                    @PathVariable Long filterId) {
+                                                    @PathVariable @Encrypt Long filterId) {
         return Optional.ofNullable(quickFilterService.queryById(projectId, filterId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.quickFilter.get"));
@@ -110,7 +112,7 @@ public class QuickFilterController {
     public ResponseEntity<QuickFilterVO> dragFilter(@ApiParam(value = "项目id", required = true)
                                                      @PathVariable(name = "project_id") Long projectId,
                                                     @ApiParam(value = "排序对象", required = true)
-                                                     @RequestBody QuickFilterSequenceVO quickFilterSequenceVO) {
+                                                     @RequestBody @Encrypt QuickFilterSequenceVO quickFilterSequenceVO) {
         return Optional.ofNullable(quickFilterService.dragFilter(projectId, quickFilterSequenceVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException(DRAG_ERROR));

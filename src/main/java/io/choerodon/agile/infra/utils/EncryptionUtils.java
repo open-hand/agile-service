@@ -11,6 +11,7 @@ import org.hzero.starter.keyencrypt.core.EncryptProperties;
 import org.hzero.starter.keyencrypt.core.EncryptionService;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -35,6 +36,11 @@ public class EncryptionUtils {
         Optional<Map<String, Object>> adMapOptional = Optional.ofNullable(search).map(SearchVO::getAdvancedSearchArgs);
         if (adMapOptional.isPresent()){
             decryptAd(search, adMapOptional);
+        }
+
+        Optional<Map<String, Object>> searchArgs = Optional.ofNullable(search).map(SearchVO::getSearchArgs);
+        if (searchArgs.isPresent()){
+            decryptAd(search, searchArgs);
         }
     }
 
@@ -206,10 +212,74 @@ public class EncryptionUtils {
             search.getAdvancedSearchArgs().put("prioritys",
                     temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
         }
-        // assigneeId
-        tempStr = adMapOptional.map(ad -> (String)(ad.get("assigneeId"))).orElse(null);
+
+        // issueTypeId
+        tempStr = adMapOptional.map(ad -> (String)(ad.get("issueTypeId"))).orElse(null);
         if (StringUtils.isNotBlank(tempStr)){
-            search.getAdvancedSearchArgs().put("assigneeId", encryptionService.decrypt(tempStr, EncryptionConstant.BLANK_KEY));
+            handlerPrimaryKey(tempStr,"issueTypeId",search);
+        }
+
+        // priorityId
+        tempStr = adMapOptional.map(ad -> (String)(ad.get("priorityId"))).orElse(null);
+        if (StringUtils.isNotBlank(tempStr)){
+            handlerPrimaryKey(tempStr,"priorityId",search);
+        }
+
+        // statusId
+        tempStr = adMapOptional.map(ad -> (String)(ad.get("statusId"))).orElse(null);
+        if (StringUtils.isNotBlank(tempStr)){
+            handlerPrimaryKey(tempStr,"statusId",search);
+        }
+
+        // component
+        tempStr = adMapOptional.map(ad -> (String)(ad.get("component"))).orElse(null);
+        if (StringUtils.isNotBlank(tempStr)){
+            handlerPrimaryKey(tempStr,"component",search);
+        }
+
+        // version
+        tempStr = adMapOptional.map(ad -> (String)(ad.get("version"))).orElse(null);
+        if (StringUtils.isNotBlank(tempStr)){
+            handlerPrimaryKey(tempStr,"version",search);
+        }
+
+        // sprint
+        tempStr = adMapOptional.map(ad -> (String)(ad.get("sprint"))).orElse(null);
+        if (StringUtils.isNotBlank(tempStr)){
+            handlerPrimaryKey(tempStr,"sprint",search);
+        }
+
+        // issueIds
+        tempStr = adMapOptional.map(ad -> (String)(ad.get("issueIds"))).orElse(null);
+        if (StringUtils.isNotBlank(tempStr)){
+            handlerPrimaryKey(tempStr,"issueIds",search);
+        }
+
+        // label
+        tempStr = adMapOptional.map(ad -> (String)(ad.get("label"))).orElse(null);
+        if (StringUtils.isNotBlank(tempStr)){
+            handlerPrimaryKey(tempStr,"label",search);
+        }
+
+        // componentIds
+        tempStr = adMapOptional.map(ad -> (String)(ad.get("componentIds"))).orElse(null);
+        if (StringUtils.isNotBlank(tempStr)){
+            handlerPrimaryKey(tempStr,"componentIds",search);
+        }
+    }
+
+    public static void handlerPrimaryKey(String tempStr,String key,SearchVO search){
+        JsonNode jsonNode = null;
+        try {
+            jsonNode = objectMapper.readTree(tempStr);
+            if (jsonNode.isArray()) {
+                List list = objectMapper.readValue(tempStr, List.class);
+                search.getAdvancedSearchArgs().put(key, decryptList(list,EncryptionConstant.BLANK_KEY));
+            } else {
+                search.getAdvancedSearchArgs().put(key, encryptionService.decrypt(tempStr, EncryptionConstant.BLANK_KEY));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

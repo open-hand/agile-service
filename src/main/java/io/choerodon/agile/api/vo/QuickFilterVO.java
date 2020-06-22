@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
 public class QuickFilterVO {
 
     @ApiModelProperty(value = "主键id")
+    @Encrypt
     private Long filterId;
 
     @ApiModelProperty(value = "项目id")
