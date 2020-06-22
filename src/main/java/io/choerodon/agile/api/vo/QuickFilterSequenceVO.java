@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.infra.utils.StringUtil;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
 

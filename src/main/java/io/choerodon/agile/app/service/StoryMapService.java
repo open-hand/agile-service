@@ -1,6 +1,5 @@
 package io.choerodon.agile.app.service;
 
-import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.StoryMapDragVO;
 import io.choerodon.agile.api.vo.StoryMapVO;
