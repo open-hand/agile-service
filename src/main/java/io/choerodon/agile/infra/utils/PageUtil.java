@@ -19,8 +19,6 @@ public class PageUtil {
         result.setSize(page.getSize());
         result.setTotalElements(page.getTotalElements());
         result.setContent(list);
-        result.setTotalPages(page.getTotalPages());
-        result.setNumberOfElements(page.getNumberOfElements());
         return result;
     }
 
