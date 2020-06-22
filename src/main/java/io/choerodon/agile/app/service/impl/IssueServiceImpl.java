@@ -2209,6 +2209,9 @@ public class IssueServiceImpl implements IssueService {
             }
         } else {
             ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+            if (!organizationId.equals(projectVO.getOrganizationId())) {
+                throw new CommonException("error.organization.illegal");
+            }
             projects.add(projectVO);
             projectIds.add(projectId);
         }
