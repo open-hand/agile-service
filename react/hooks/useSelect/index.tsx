@@ -6,6 +6,7 @@ import { Button, DataSet } from 'choerodon-ui/pro';
 import { SearchMatcher } from 'choerodon-ui/pro/lib/select/Select';
 import { Renderer } from 'choerodon-ui/pro/lib/field/FormField';
 import { debounce } from 'lodash';
+import FragmentForSearch from './FragmentForSearch';
 import styles from './index.less';
 
 
@@ -46,7 +47,7 @@ export interface SelectConfig {
   optionRenderer?: (item: any) => JSX.Element
   renderer?: (item: any) => JSX.Element
   request: Request
-  middleWare?: (items: any[]) => any[],
+  middleWare?: (item: any) => boolean,
   paging?: boolean
   props?: object
 }
@@ -188,3 +189,4 @@ export default function useSelect(config: SelectConfig) {
   };
   return selectProps;
 }
+export { FragmentForSearch };
