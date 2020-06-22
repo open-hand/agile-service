@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/8/23.
@@ -9,6 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class SprintUnClosedVO {
 
     @ApiModelProperty(value = "冲刺id")
+    @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/
     private Long sprintId;
 
     @ApiModelProperty(value = "冲刺名称")

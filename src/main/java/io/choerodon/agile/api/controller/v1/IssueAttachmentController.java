@@ -1,13 +1,14 @@
 package io.choerodon.agile.api.controller.v1;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.IssueAttachmentVO;
 import io.choerodon.agile.app.service.IssueAttachmentService;
-import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ public class IssueAttachmentController {
     public ResponseEntity<List<IssueAttachmentVO>> uploadAttachment(@ApiParam(value = "项目id", required = true)
                                                                       @PathVariable(name = "project_id") Long projectId,
                                                                     @ApiParam(value = "issue id", required = true)
-                                                                      @RequestParam Long issueId,
+                                                                      @RequestParam @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ Long issueId,
                                                                     HttpServletRequest request) {
         return Optional.ofNullable(issueAttachmentService.create(projectId, issueId, request))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
@@ -47,7 +48,7 @@ public class IssueAttachmentController {
     public ResponseEntity deleteAttachment(@ApiParam(value = "项目id", required = true)
                                             @PathVariable(name = "project_id") Long projectId,
                                             @ApiParam(value = "附件id", required = true)
-                                            @PathVariable Long issueAttachmentId) {
+                                            @PathVariable @Encrypt/*(EncryptionConstant.AGILE_ISSUE_ATTACHMENT)*/ Long issueAttachmentId) {
         issueAttachmentService.delete(projectId, issueAttachmentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

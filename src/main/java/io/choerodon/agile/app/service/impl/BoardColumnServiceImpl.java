@@ -208,6 +208,9 @@ public class BoardColumnServiceImpl implements BoardColumnService {
     @Override
     public void delete(Long projectId, Long columnId) {
         BoardColumnDTO boardColumnDTO = boardColumnMapper.selectByPrimaryKey(columnId);
+        if (!boardColumnDTO.getProjectId().equals(projectId)) {
+            throw new CommonException("error.project.id.illegal");
+        }
         BoardColumnValidator.checkDeleteColumn(boardColumnDTO);
         // 删除列
         if (boardColumnMapper.deleteByPrimaryKey(columnId) != 1) {

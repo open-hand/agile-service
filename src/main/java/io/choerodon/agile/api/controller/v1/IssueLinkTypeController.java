@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.IssueLinkTypeCreateVO;
 import io.choerodon.agile.api.vo.IssueLinkTypeSearchVO;
 import io.choerodon.agile.api.validator.IssueLinkTypeValidator;
 import io.choerodon.agile.api.vo.IssueLinkTypeVO;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -14,6 +15,8 @@ import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import io.choerodon.agile.app.service.IssueLinkTypeService;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.InitRoleCode;
 import springfox.documentation.annotations.ApiIgnore;
 
 /**
@@ -60,7 +62,7 @@ public class IssueLinkTypeController {
     public ResponseEntity<IssueLinkTypeVO> queryIssueLinkType(@ApiParam(value = "项目id", required = true)
                                                                @PathVariable(name = "project_id") Long projectId,
                                                               @ApiParam(value = "linkTypeId", required = true)
-                                                               @PathVariable(name = "linkTypeId") Long linkTypeId) {
+                                                               @PathVariable(name = "linkTypeId") @Encrypt/*(EncryptionConstant.AGILE_ISSUE_LINK_TYPE)*/ Long linkTypeId) {
         return Optional.ofNullable(issueLinkTypeService.queryIssueLinkType(projectId, linkTypeId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueLinkType.queryIssueLinkType"));
@@ -72,7 +74,7 @@ public class IssueLinkTypeController {
     public ResponseEntity<IssueLinkTypeVO> createIssueLinkType(@ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
                                                                @ApiParam(value = "创建issueLinkType对象", required = true)
-                                                                @RequestBody IssueLinkTypeCreateVO issueLinkTypeCreateVO) {
+                                                                @RequestBody @EncryptDTO IssueLinkTypeCreateVO issueLinkTypeCreateVO) {
         issueLinkTypeValidator.verifyCreateData(issueLinkTypeCreateVO, projectId);
         issueLinkTypeValidator.verifyIssueLinkTypeName(projectId, issueLinkTypeCreateVO.getLinkName(), null);
         return Optional.ofNullable(issueLinkTypeService.createIssueLinkType(issueLinkTypeCreateVO))
@@ -86,7 +88,7 @@ public class IssueLinkTypeController {
     public ResponseEntity<IssueLinkTypeVO> updateIssueLinkType(@ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
                                                                @ApiParam(value = "issueLinkType", required = true)
-                                                                @RequestBody IssueLinkTypeVO issueLinkTypeVO) {
+                                                                @RequestBody @EncryptDTO IssueLinkTypeVO issueLinkTypeVO) {
         issueLinkTypeValidator.verifyUpdateData(issueLinkTypeVO, projectId);
         issueLinkTypeValidator.verifyIssueLinkTypeName(projectId, issueLinkTypeVO.getLinkName(), issueLinkTypeVO.getLinkTypeId());
         return Optional.ofNullable(issueLinkTypeService.updateIssueLinkType(issueLinkTypeVO))
@@ -100,9 +102,9 @@ public class IssueLinkTypeController {
     public ResponseEntity deleteIssueLinkType(@ApiParam(value = "项目id", required = true)
                                               @PathVariable(name = "project_id") Long projectId,
                                               @ApiParam(value = "issueLinkType", required = true)
-                                              @PathVariable(name = "issueLinkTypeId") Long issueLinkTypeId,
+                                              @PathVariable(name = "issueLinkTypeId")@Encrypt/*(EncryptionConstant.AGILE_ISSUE_LINK_TYPE)*/ Long issueLinkTypeId,
                                               @ApiParam(value = "转移到其他的类型上，如果为空则不转移，直接删除")
-                                              @RequestParam(required = false) Long toIssueLinkTypeId) {
+                                              @RequestParam(required = false) @Encrypt/*(EncryptionConstant.AGILE_ISSUE_LINK_TYPE)*/ Long toIssueLinkTypeId) {
         issueLinkTypeValidator.verifyDeleteData(issueLinkTypeId, toIssueLinkTypeId, projectId);
         issueLinkTypeService.deleteIssueLinkType(issueLinkTypeId, toIssueLinkTypeId, projectId);
         return new ResponseEntity(HttpStatus.OK);
@@ -116,7 +118,7 @@ public class IssueLinkTypeController {
                                                  @ApiParam(value = "issue_link_type_name", required = true)
                                                  @RequestParam(name = "issueLinkTypeName") String issueLinkTypeName,
                                                  @ApiParam(value = "issue_link_type_id", required = false)
-                                                 @RequestParam(name = "issueLinkTypeId", required = false) Long issueLinkTypeId) {
+                                                 @RequestParam(name = "issueLinkTypeId", required = false) @Encrypt/*(EncryptionConstant.AGILE_ISSUE_LINK_TYPE)*/ Long issueLinkTypeId) {
         return new ResponseEntity<>(issueLinkTypeService.queryIssueLinkTypeName(projectId, issueLinkTypeName, issueLinkTypeId), HttpStatus.OK);
     }
 }

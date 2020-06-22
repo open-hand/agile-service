@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author shinan.chen
@@ -9,8 +11,10 @@ import io.swagger.annotations.ApiModelProperty;
  */
 public class FieldOptionVO extends AuditDomain {
     @ApiModelProperty(value = "字段选项id")
+    @Encrypt/*(EncryptionConstant.FD_FIELD_OPTION)*/
     private Long id;
     @ApiModelProperty(value = "字段id")
+    @Encrypt/*(EncryptionConstant.FD_OBJECT_SCHEME_FIELD)*/
     private Long fieldId;
     @ApiModelProperty(value = "选项值编码")
     private String code;

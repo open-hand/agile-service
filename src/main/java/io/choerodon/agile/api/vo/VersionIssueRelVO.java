@@ -1,8 +1,10 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.io.Serializable;
 
@@ -13,9 +15,11 @@ import java.io.Serializable;
 public class VersionIssueRelVO implements Serializable {
 
     @ApiModelProperty(value = "版本id")
+    @Encrypt/*(EncryptionConstant.FD_PRODUCT_VERSION)*/
     private Long versionId;
 
     @ApiModelProperty(value = "问题id")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long issueId;
 
     @ApiModelProperty(value = "版本名称")

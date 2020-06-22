@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author shinan.chen
@@ -8,6 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
  */
 public class ObjectSchemeVO {
     @ApiModelProperty(value = "对象方案id")
+    @Encrypt/*(EncryptionConstant.FD_OBJECT_SCHEME)*/
     private Long id;
     @ApiModelProperty(value = "名称")
     private String name;

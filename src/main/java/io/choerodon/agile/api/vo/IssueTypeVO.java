@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
 import com.google.common.base.MoreObjects;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
 
@@ -11,6 +13,7 @@ import javax.validation.constraints.NotNull;
  */
 public class IssueTypeVO {
     @ApiModelProperty(value = "问题类型id")
+    @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/
     private Long id;
     @ApiModelProperty(value = "名称")
     @NotNull(message = "error.name.null")

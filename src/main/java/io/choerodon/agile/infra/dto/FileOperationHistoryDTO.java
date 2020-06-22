@@ -1,8 +1,10 @@
 package io.choerodon.agile.infra.dto;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.persistence.*;
 
@@ -36,6 +38,7 @@ public class FileOperationHistoryDTO extends AuditDomain {
 
     @Id
     @GeneratedValue
+    @Encrypt/*(EncryptionConstant.AGILE_FILE_OPERATION_HISTORY)*/
     private Long id;
 
     private Long projectId;

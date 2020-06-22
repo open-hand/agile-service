@@ -35,7 +35,10 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
 
     @Override
     public PersonalFilterVO queryById(Long projectId, Long filterId) {
-        PersonalFilterDTO personalFilterDTO = personalFilterMapper.selectByPrimaryKey(filterId);
+        PersonalFilterDTO personalFilter = new PersonalFilterDTO();
+        personalFilter.setFilterId(filterId);
+        personalFilter.setProjectId(projectId);
+        PersonalFilterDTO personalFilterDTO = personalFilterMapper.selectByPrimaryKey(personalFilter);
         if (personalFilterDTO == null) {
             throw new CommonException(NOTFOUND_ERROR);
         }

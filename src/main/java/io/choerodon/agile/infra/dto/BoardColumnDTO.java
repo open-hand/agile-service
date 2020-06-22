@@ -1,13 +1,12 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.agile.infra.EncryptionConstant;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -22,13 +21,13 @@ public class BoardColumnDTO extends AuditDomain{
 
     @Id
     @GeneratedValue
-    @Encrypt(EncryptionConstant.AGILE_BOARD_COLUMN)
+    @Encrypt/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/
     private Long columnId;
 
     private String categoryCode;
 
     private String name;
-    @Encrypt(EncryptionConstant.AGILE_BOARD)
+    @Encrypt/*(EncryptionConstant.AGILE_BOARD)*/
     private Long boardId;
 
     private Long minNum;

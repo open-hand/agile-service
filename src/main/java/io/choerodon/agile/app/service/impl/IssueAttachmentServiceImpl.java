@@ -127,6 +127,9 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         if (issueAttachmentDTO == null) {
             throw new CommonException("error.attachment.get");
         }
+        if (!issueAttachmentDTO.getProjectId().equals(projectId)) {
+            throw new CommonException("error.project.id.does.not.correspond");
+        }
         Boolean result = iIssueAttachmentService.deleteBase(issueAttachmentDTO.getAttachmentId());
         String url = null;
         try {

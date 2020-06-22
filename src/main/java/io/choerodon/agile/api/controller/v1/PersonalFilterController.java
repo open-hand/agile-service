@@ -2,12 +2,15 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.PersonalFilterVO;
 import io.choerodon.agile.app.service.PersonalFilterService;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +35,7 @@ public class PersonalFilterController {
     public ResponseEntity<PersonalFilterVO> create(@ApiParam(value = "项目id", required = true)
                                                     @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "personal filter object", required = true)
-                                                    @RequestBody PersonalFilterVO personalFilterVO) {
+                                                    @RequestBody @EncryptDTO PersonalFilterVO personalFilterVO) {
         return Optional.ofNullable(personalFilterService.create(projectId, personalFilterVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));
@@ -44,9 +47,9 @@ public class PersonalFilterController {
     public ResponseEntity<PersonalFilterVO> update(@ApiParam(value = "项目id", required = true)
                                                     @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "filter id", required = true)
-                                                    @PathVariable Long filterId,
+                                                    @PathVariable  @Encrypt/*(EncryptionConstant.AGILE_PERSONAL_FILTER)*/ Long filterId,
                                                    @ApiParam(value = "personal filter object", required = true)
-                                                    @RequestBody PersonalFilterVO personalFilterVO) {
+                                                    @RequestBody @EncryptDTO PersonalFilterVO personalFilterVO) {
         return Optional.ofNullable(personalFilterService.update(projectId, filterId, personalFilterVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));
@@ -58,7 +61,7 @@ public class PersonalFilterController {
     public ResponseEntity<PersonalFilterVO> deleteById(@ApiParam(value = "项目id", required = true)
                                                         @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "filter id", required = true)
-                                                        @PathVariable Long filterId) {
+                                                        @PathVariable  @Encrypt/*(EncryptionConstant.AGILE_PERSONAL_FILTER)*/  Long filterId) {
         personalFilterService.deleteById(projectId, filterId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -82,7 +85,7 @@ public class PersonalFilterController {
     public ResponseEntity<PersonalFilterVO> queryById(@ApiParam(value = "项目id", required = true)
                                                        @PathVariable(name = "project_id") Long projectId,
                                                       @ApiParam(value = "filter id", required = true)
-                                                       @PathVariable Long filterId) {
+                                                       @PathVariable  @Encrypt/*(EncryptionConstant.AGILE_PERSONAL_FILTER)*/ Long filterId) {
         return Optional.ofNullable(personalFilterService.queryById(projectId, filterId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.personalFilter.queryById"));

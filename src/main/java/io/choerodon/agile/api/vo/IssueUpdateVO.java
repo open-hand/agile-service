@@ -1,9 +1,11 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.agile.infra.annotation.Update;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -15,12 +17,14 @@ import java.util.List;
 public class IssueUpdateVO {
 
     @ApiModelProperty(value = "问题主键id")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long issueId;
 
     @ApiModelProperty(value = "问题编号")
     private String issueNum;
 
     @ApiModelProperty(value = "状态id")
+    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
     private Long statusId;
 
     @ApiModelProperty(value = "问题概要")
@@ -39,12 +43,15 @@ public class IssueUpdateVO {
     private Long assigneeId;
 
     @ApiModelProperty(value = "史诗id")
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long epicId;
 
     @ApiModelProperty(value = "冲刺id")
+    @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/
     private Long sprintId;
 
     @ApiModelProperty(value = "父任务id")
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long parentIssueId;
 
     @ApiModelProperty(value = "故事点")
@@ -88,12 +95,14 @@ public class IssueUpdateVO {
     private String epicName;
 
     @ApiModelProperty(value = "优先级id")
+    @Encrypt/*(EncryptionConstant.FD_PRIORITY)*/
     private Long priorityId;
 
     @ApiModelProperty(value = "停留时间")
     private Date stayDate;
 
     @ApiModelProperty(value = "bug关联的故事id")
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long relateIssueId;
 
     public String getRank() {

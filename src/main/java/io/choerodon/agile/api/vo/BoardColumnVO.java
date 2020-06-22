@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.EncryptionConstant;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 public class BoardColumnVO {
 
     @ApiModelProperty(value = "列主键id")
-    @Encrypt(EncryptionConstant.AGILE_BOARD_COLUMN)
+    @Encrypt/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/
     private Long columnId;
 
     @ApiModelProperty(value = "列名称")
@@ -21,7 +21,7 @@ public class BoardColumnVO {
     private String name;
 
     @ApiModelProperty(value = "看板id")
-    @Encrypt(EncryptionConstant.AGILE_BOARD)
+    @Encrypt/*(EncryptionConstant.AGILE_BOARD)*/
     private Long boardId;
 
     @ApiModelProperty(value = "列问题数量最小值")
@@ -48,6 +48,7 @@ public class BoardColumnVO {
     private String colorCode;
 
     @ApiModelProperty(value = "状态id")
+    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
     private Long statusId;
 
     @ApiModelProperty(value = "版本号")

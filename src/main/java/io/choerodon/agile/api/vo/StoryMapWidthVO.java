@@ -1,18 +1,22 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/6/3.
  * Email: fuqianghuang01@gmail.com
  */
 
 public class StoryMapWidthVO {
-
+    @Encrypt/*(EncryptionConstant.AGILE_STORYMAP_WIDTH)*/
     private Long id;
 
     private String type;
 
     private Long projectId;
 
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long issueId;
 
     private Long width;

@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.agile.infra.utils.StringUtil;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -14,6 +16,7 @@ public class ReportIssueVO implements Serializable {
 
     private String issueNum;
 
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long issueId;
 
     private Date date;
@@ -26,6 +29,7 @@ public class ReportIssueVO implements Serializable {
 
     private Boolean statistical;
 
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private String parentIssueId;
 
     private String parentIssueNum;

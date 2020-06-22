@@ -2,8 +2,9 @@ package io.choerodon.agile.api.controller.v1;
 
 import com.alibaba.fastjson.JSONObject;
 
-import io.choerodon.agile.infra.dto.IssueNumDTO;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.agile.infra.dto.UserDTO;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.core.iam.ResourceLevel;
@@ -11,6 +12,8 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -76,7 +79,7 @@ public class IssueController {
                                                  @PathVariable(name = "project_id") Long projectId,
                                                  @ApiParam(value = "史诗名称", required = true)
                                                  @RequestParam String epicName,
-                                                 @RequestParam(required = false) Long epicId) {
+                                                 @RequestParam(required = false) @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ Long epicId) {
         return Optional.ofNullable(issueService.checkEpicName(projectId, epicName, epicId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.checkEpicName.get"));
@@ -101,10 +104,10 @@ public class IssueController {
     public ResponseEntity<IssueVO> updateIssue(@ApiParam(value = "项目id", required = true)
                                                 @PathVariable(name = "project_id") Long projectId,
                                                @ApiParam(value = "更新issue对象", required = true)
-                                                @RequestBody JSONObject issueUpdate) {
+                                                @RequestBody @Encrypt JSONObject issueUpdate) {
         issueValidator.verifyUpdateData(issueUpdate, projectId);
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
-        List<String> fieldList = verifyUpdateUtil.verifyUpdateData(issueUpdate, issueUpdateVO);
+        List<String> fieldList = verifyUpdateUtil.verifyUpdateData(issueUpdate,issueUpdateVO);
         return Optional.ofNullable(issueService.updateIssue(projectId, issueUpdateVO, fieldList))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.Issue.updateIssue"));
@@ -118,7 +121,7 @@ public class IssueController {
                                                      @ApiParam(value = "转换id", required = true)
                                                       @RequestParam Long transformId,
                                                      @ApiParam(value = "问题id", required = true)
-                                                      @RequestParam Long issueId,
+                                                      @RequestParam @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ Long issueId,
                                                      @ApiParam(value = "版本号", required = true)
                                                       @RequestParam Long objectVersionNumber,
                                                      @ApiParam(value = "应用类型", required = true)
@@ -134,7 +137,7 @@ public class IssueController {
     public ResponseEntity<IssueVO> queryIssue(@ApiParam(value = "项目id", required = true)
                                                @PathVariable(name = "project_id") Long projectId,
                                               @ApiParam(value = "issueId", required = true)
-                                               @PathVariable Long issueId,
+                                               @PathVariable @Encrypt Long issueId,
                                               @ApiParam(value = "组织id", required = true)
                                                @RequestParam(required = false) Long organizationId) {
         return Optional.ofNullable(issueService.queryIssue(projectId, issueId, organizationId))
@@ -150,7 +153,7 @@ public class IssueController {
                                                     @ApiParam(value = "组织id", required = true)
                                                      @RequestParam Long organizationId,
                                                     @ApiParam(value = "issueId", required = true)
-                                                     @PathVariable Long issueId) {
+                                                     @PathVariable @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ Long issueId) {
         return Optional.ofNullable(issueService.queryIssueSub(projectId, organizationId, issueId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.queryIssueSub"));
@@ -186,7 +189,7 @@ public class IssueController {
                                                                @ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
                                                                @ApiParam(value = "issueId")
-                                                                @RequestParam(required = false) Long issueId,
+                                                                @RequestParam(required = false) @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ Long issueId,
                                                                @ApiParam(value = "issueNum")
                                                                 @RequestParam(required = false) String issueNum,
                                                                @ApiParam(value = "only active sprint", required = true)
@@ -211,7 +214,7 @@ public class IssueController {
                                                                            @ApiParam(value = "项目id", required = true)
                                                                         @PathVariable(name = "project_id") Long projectId,
                                                                            @ApiParam(value = "issueId")
-                                                                        @RequestParam(required = false) Long issueId,
+                                                                        @RequestParam(required = false)  @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ Long issueId,
                                                                            @ApiParam(value = "issueNum")
                                                                         @RequestParam(required = false) String issueNum,
                                                                            @ApiParam(value = "是否包含自身", required = true)
@@ -240,7 +243,7 @@ public class IssueController {
     public ResponseEntity deleteIssue(@ApiParam(value = "项目id", required = true)
                                       @PathVariable(name = "project_id") Long projectId,
                                       @ApiParam(value = "issueId", required = true)
-                                      @PathVariable Long issueId) {
+                                      @PathVariable @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ Long issueId) {
         issueService.deleteIssue(projectId, issueId);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
@@ -251,7 +254,7 @@ public class IssueController {
     public ResponseEntity deleteSelfIssue(@ApiParam(value = "项目id", required = true)
                                       @PathVariable(name = "project_id") Long projectId,
                                       @ApiParam(value = "issueId", required = true)
-                                      @PathVariable Long issueId) {
+                                      @PathVariable @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ Long issueId) {
         issueService.deleteSelfIssue(projectId, issueId);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
@@ -262,7 +265,7 @@ public class IssueController {
     public ResponseEntity batchDeleteIssues(@ApiParam(value = "项目id", required = true)
                                             @PathVariable(name = "project_id") Long projectId,
                                             @ApiParam(value = "issue id", required = true)
-                                            @RequestBody List<Long> issueIds) {
+                                            @RequestBody @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/  List<Long> issueIds) {
         issueService.batchDeleteIssues(projectId, issueIds);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
@@ -273,9 +276,9 @@ public class IssueController {
     public ResponseEntity<List<IssueSearchVO>> batchIssueToVersion(@ApiParam(value = "项目id", required = true)
                                                                     @PathVariable(name = "project_id") Long projectId,
                                                                    @ApiParam(value = "versionId", required = true)
-                                                                    @PathVariable Long versionId,
+                                                                    @PathVariable @Encrypt Long versionId,
                                                                    @ApiParam(value = "issue id", required = true)
-                                                                    @RequestBody List<Long> issueIds) {
+                                                                    @RequestBody @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ List<Long> issueIds) {
         return Optional.ofNullable(issueService.batchIssueToVersion(projectId, versionId, issueIds))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.issue.batchToVersion"));
@@ -287,9 +290,9 @@ public class IssueController {
     public ResponseEntity batchIssueToVersionTest(@ApiParam(value = "项目id", required = true)
                                                   @PathVariable(name = "project_id") Long projectId,
                                                   @ApiParam(value = "versionId", required = true)
-                                                  @PathVariable Long versionId,
+                                                  @PathVariable @Encrypt Long versionId,
                                                   @ApiParam(value = "issue id", required = true)
-                                                  @RequestBody List<Long> issueIds) {
+                                                  @RequestBody @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ List<Long> issueIds) {
         issueService.batchIssueToVersionTest(projectId, versionId, issueIds);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
@@ -300,9 +303,9 @@ public class IssueController {
     public ResponseEntity<List<IssueSearchVO>> batchIssueToEpic(@ApiParam(value = "项目id", required = true)
                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                 @ApiParam(value = "epicId", required = true)
-                                                                 @PathVariable Long epicId,
+                                                                 @PathVariable @Encrypt  Long epicId,
                                                                 @ApiParam(value = "issue id", required = true)
-                                                                 @RequestBody List<Long> issueIds) {
+                                                                 @RequestBody @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ List<Long> issueIds) {
         return Optional.ofNullable(issueService.batchIssueToEpic(projectId, epicId, issueIds))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.issue.batchToEpic"));
@@ -315,9 +318,9 @@ public class IssueController {
     public ResponseEntity<List<IssueSearchVO>> batchIssueToSprint(@ApiParam(value = "项目id", required = true)
                                                                    @PathVariable(name = "project_id") Long projectId,
                                                                   @ApiParam(value = "sprintId", required = true)
-                                                                   @PathVariable Long sprintId,
+                                                                   @PathVariable @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/ Long sprintId,
                                                                   @ApiParam(value = "移卡信息", required = true)
-                                                                   @RequestBody MoveIssueVO moveIssueVO) {
+                                                                   @RequestBody @EncryptDTO MoveIssueVO moveIssueVO) {
         return Optional.ofNullable(issueService.batchIssueToSprint(projectId, sprintId, moveIssueVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.issue.batchToSprint"));
@@ -341,7 +344,7 @@ public class IssueController {
                                                        @ApiParam(value = "组织id", required = true)
                                                         @RequestParam Long organizationId,
                                                        @ApiParam(value = "修改类型信息", required = true)
-                                                        @RequestBody IssueUpdateTypeVO issueUpdateTypeVO) {
+                                                        @RequestBody @EncryptDTO IssueUpdateTypeVO issueUpdateTypeVO) {
         IssueConvertDTO issueConvertDTO = issueValidator.verifyUpdateTypeData(projectId, issueUpdateTypeVO);
         return Optional.ofNullable(issueService.updateIssueTypeCode(issueConvertDTO, issueUpdateTypeVO, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
@@ -356,7 +359,7 @@ public class IssueController {
                                                          @ApiParam(value = "组织id", required = true)
                                                           @RequestParam Long organizationId,
                                                          @ApiParam(value = "转换子任务信息", required = true)
-                                                          @RequestBody IssueTransformSubTask issueTransformSubTask) {
+                                                          @RequestBody @EncryptDTO  IssueTransformSubTask issueTransformSubTask) {
         issueValidator.verifyTransformedSubTask(issueTransformSubTask);
         return Optional.ofNullable(issueService.transformedSubTask(projectId, organizationId, issueTransformSubTask))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
@@ -371,7 +374,7 @@ public class IssueController {
                                                    @ApiParam(value = "组织id", required = true)
                                                     @RequestParam Long organizationId,
                                                    @ApiParam(value = "转换任务信息", required = true)
-                                                    @RequestBody IssueTransformTask issueTransformTask) {
+                                                    @RequestBody @EncryptDTO IssueTransformTask issueTransformTask) {
         IssueConvertDTO issueConvertDTO = issueValidator.verifyTransformedTask(projectId, issueTransformTask);
         return Optional.ofNullable(issueService.transformedTask(issueConvertDTO, issueTransformTask, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
@@ -404,7 +407,7 @@ public class IssueController {
     public ResponseEntity<IssueVO> cloneIssueByIssueId(@ApiParam(value = "项目id", required = true)
                                                         @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "issueId", required = true)
-                                                        @PathVariable(name = "issueId") Long issueId,
+                                                        @PathVariable(name = "issueId") @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ Long issueId,
                                                        @ApiParam(value = "组织id", required = true)
                                                         @RequestParam Long organizationId,
                                                        @ApiParam(value = "应用类型", required = true)
@@ -422,7 +425,7 @@ public class IssueController {
     public ResponseEntity<List<IssueInfoVO>> listByIssueIds(@ApiParam(value = "项目id", required = true)
                                                              @PathVariable(name = "project_id") Long projectId,
                                                             @ApiParam(value = "issue ids", required = true)
-                                                             @RequestBody List<Long> issueIds) {
+                                                             @RequestBody @Encrypt List<Long> issueIds) {
         return Optional.ofNullable(issueService.listByIssueIds(projectId, issueIds))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.issueNums.get"));
@@ -487,7 +490,7 @@ public class IssueController {
     public ResponseEntity<EpicDataVO> dragEpic(@ApiParam(value = "项目id", required = true)
                                                 @PathVariable(name = "project_id") Long projectId,
                                                @ApiParam(value = "排序对象", required = true)
-                                                @RequestBody EpicSequenceVO epicSequenceVO) {
+                                                @RequestBody @EncryptDTO EpicSequenceVO epicSequenceVO) {
         return Optional.ofNullable(issueService.dragEpic(projectId, epicSequenceVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.issueController.dragEpic"));
@@ -531,7 +534,7 @@ public class IssueController {
     public ResponseEntity<IssueVO> updateIssueParentId(@ApiParam(value = "项目id", required = true)
                                                         @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "issue parent id update vo", required = true)
-                                                        @RequestBody IssueUpdateParentIdVO issueUpdateParentIdVO) {
+                                                        @RequestBody @EncryptDTO IssueUpdateParentIdVO issueUpdateParentIdVO) {
         return Optional.ofNullable(issueService.issueParentIdUpdate(projectId, issueUpdateParentIdVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.issueParentId.update"));
@@ -637,7 +640,7 @@ public class IssueController {
     public ResponseEntity<List<IssueLinkVO>> queryIssues(@ApiParam(value = "项目id", required = true)
                                                          @PathVariable(name = "project_id") Long projectId,
                                                          @ApiParam(value = "issue编号", required = true)
-                                                         @RequestBody List<Long> issueIds) {
+                                                         @RequestBody @Encrypt List<Long> issueIds) {
         return Optional.ofNullable(issueService.queryIssueByIssueIds(projectId, issueIds))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.issue.queryIssueByIssueIds"));

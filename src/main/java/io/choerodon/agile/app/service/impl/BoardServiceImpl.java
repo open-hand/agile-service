@@ -96,6 +96,9 @@ public class BoardServiceImpl implements BoardService {
         if (boardName.equals(boardDTO.getName())) {
             return false;
         }
+        if (!projectId.equals(boardDTO.getProjectId())) {
+            throw new CommonException("error.project.id.illegal");
+        }
         BoardDTO check = new BoardDTO();
         check.setProjectId(projectId);
         check.setName(boardName);

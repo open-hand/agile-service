@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
 
@@ -10,16 +12,20 @@ import java.util.List;
  */
 public class StateMachineTransformVO {
     @ApiModelProperty(value = "转换id")
+    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_TRANSFORM)*/
     private Long id;
     @ApiModelProperty(value = "名称")
     private String name;
     @ApiModelProperty(value = "描述")
     private String description;
     @ApiModelProperty(value = "状态机id")
+    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/
     private Long stateMachineId;
     @ApiModelProperty(value = "起始节点id")
+    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_NODE)*/
     private Long startNodeId;
     @ApiModelProperty(value = "目标节点id")
+    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_NODE)*/
     private Long endNodeId;
     @ApiModelProperty(value = "页面路径")
     private String url;
@@ -34,6 +40,7 @@ public class StateMachineTransformVO {
     @ApiModelProperty(value = "组织id")
     private Long organizationId;
     @ApiModelProperty(value = "目标节点的状态id")
+    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
     private Long endStatusId;
     @ApiModelProperty(value = "起始节点对象")
     private StateMachineNodeVO startNodeVO;

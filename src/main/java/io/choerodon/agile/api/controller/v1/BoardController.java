@@ -3,11 +3,10 @@ package io.choerodon.agile.api.controller.v1;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.BoardService;
-import io.choerodon.agile.infra.EncryptionConstant;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -48,7 +47,7 @@ public class BoardController {
     public ResponseEntity<BoardVO> updateScrumBoard(@ApiParam(value = "项目id", required = true)
                                                      @PathVariable(name = "project_id") Long projectId,
                                                     @ApiParam(value = "agile board id", required = true)
-                                                     @PathVariable @Encrypt(EncryptionConstant.AGILE_BOARD) Long boardId,
+                                                     @PathVariable @Encrypt/*(EncryptionConstant.AGILE_BOARD)*/ Long boardId,
                                                     @ApiParam(value = "ScrumBoard对象", required = true)
                                                      @RequestBody @EncryptDTO BoardVO boardVO) {
         return Optional.ofNullable(boardService.update(projectId, boardId, boardVO))
@@ -62,7 +61,7 @@ public class BoardController {
     public ResponseEntity deleteScrumBoard(@ApiParam(value = "项目id", required = true)
                                            @PathVariable(name = "project_id") Long projectId,
                                            @ApiParam(value = "agile board id", required = true)
-                                           @PathVariable @Encrypt(EncryptionConstant.AGILE_BOARD) Long boardId) {
+                                           @PathVariable @Encrypt/*(EncryptionConstant.AGILE_BOARD)*/ Long boardId) {
         boardService.delete(projectId, boardId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -73,7 +72,7 @@ public class BoardController {
     public ResponseEntity<BoardVO> queryScrumBoardById(@ApiParam(value = "项目id", required = true)
                                                         @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "agile board id", required = true)
-                                                        @PathVariable @Encrypt(EncryptionConstant.AGILE_BOARD) Long boardId) {
+                                                        @PathVariable @Encrypt/*(EncryptionConstant.AGILE_BOARD)*/ Long boardId) {
         return Optional.ofNullable(boardService.queryScrumBoardById(projectId, boardId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.board.get"));
@@ -85,9 +84,9 @@ public class BoardController {
     public ResponseEntity<IssueMoveVO> move(@ApiParam(value = "项目id", required = true)
                                              @PathVariable(name = "project_id") Long projectId,
                                             @ApiParam(value = "issue id", required = true)
-                                             @PathVariable @Encrypt(EncryptionConstant.AGILE_ISSUE) Long issueId,
+                                             @PathVariable @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ Long issueId,
                                             @ApiParam(value = "转换id", required = true)
-                                             @RequestParam @Encrypt(EncryptionConstant.AGILE_BOARD) Long transformId,
+                                             @RequestParam @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_TRANSFORM)*/ Long transformId,
                                             @ApiParam(value = "issue move object", required = true)
                                              @RequestBody @EncryptDTO IssueMoveVO issueMoveVO) {
         return Optional.ofNullable(boardService.move(projectId, issueId, transformId, issueMoveVO, false))
@@ -112,7 +111,7 @@ public class BoardController {
     public ResponseEntity<UserSettingVO> queryUserSettingBoard(@ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
                                                                @ApiParam(value = "agile board id", required = true)
-                                                                @PathVariable Long boardId) {
+                                                                @PathVariable @Encrypt/*(EncryptionConstant.AGILE_BOARD)*/ Long boardId) {
         return Optional.ofNullable(boardService.queryUserSettingBoard(projectId, boardId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.userSettingBoard.get"));
@@ -124,7 +123,7 @@ public class BoardController {
     public ResponseEntity<UserSettingVO> updateUserSettingBoard(@ApiParam(value = "项目id", required = true)
                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                 @ApiParam(value = "agile board id", required = true)
-                                                                 @PathVariable Long boardId,
+                                                                 @PathVariable @Encrypt/*(EncryptionConstant.AGILE_BOARD)*/ Long boardId,
                                                                 @ApiParam(value = "swimlaneBasedCode", required = true)
                                                                  @RequestParam String swimlaneBasedCode) {
         return Optional.ofNullable(boardService.updateUserSettingBoard(projectId, boardId, swimlaneBasedCode))
@@ -138,7 +137,7 @@ public class BoardController {
     public ResponseEntity<JSONObject> queryByOptions(@ApiParam(value = "项目id", required = true)
                                                      @PathVariable(name = "project_id") Long projectId,
                                                      @ApiParam(value = "agile board id", required = true)
-                                                     @PathVariable Long boardId,
+                                                     @PathVariable  Long boardId,
                                                      @ApiParam(value = "search item，my problem", required = false)
                                                      @RequestParam(required = false) Long assigneeId,
                                                      @ApiParam(value = "search item，only story", required = false)
@@ -150,7 +149,7 @@ public class BoardController {
                                                      @ApiParam(value = "经办人搜索", required = false)
                                                      @RequestParam(required = false) List<Long> assigneeFilterIds,
                                                      @ApiParam(value = "冲刺id", required = false)
-                                                     @RequestParam(required = false) Long sprintId) {
+                                                     @RequestParam(required = false) @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/ Long sprintId) {
         return Optional.ofNullable(boardService.queryAllData(projectId, boardId, assigneeId, onlyStory, quickFilterIds, organizationId, assigneeFilterIds, sprintId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.board.get"));

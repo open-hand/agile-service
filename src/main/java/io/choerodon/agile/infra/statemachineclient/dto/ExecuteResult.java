@@ -3,6 +3,8 @@ package io.choerodon.agile.infra.statemachineclient.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author peng.jiang@hand-china.com
@@ -13,6 +15,7 @@ public class ExecuteResult {
 
     private Boolean isSuccess;
 
+    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
     private Long resultStatusId;
 
     private String errorMessage;

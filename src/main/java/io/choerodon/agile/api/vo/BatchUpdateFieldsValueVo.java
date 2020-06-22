@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
 import com.alibaba.fastjson.JSONObject;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
 
@@ -12,6 +14,7 @@ import java.util.List;
 public class BatchUpdateFieldsValueVo {
 
     @ApiModelProperty(value = "操作的issueId")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private List<Long> issueIds;
 
     @ApiModelProperty(value = "要修改的预定义字段的值")

@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.agile.infra.utils.StringUtil;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -12,7 +14,7 @@ import java.util.Date;
 public class ReportIssueConvertDTO {
 
     private String issueNum;
-
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long issueId;
 
     private Date date;
@@ -24,7 +26,7 @@ public class ReportIssueConvertDTO {
     private BigDecimal newValue;
 
     private Boolean statistical;
-
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private String parentIssueId;
 
     private String parentIssueNum;

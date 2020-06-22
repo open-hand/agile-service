@@ -4,12 +4,14 @@ import io.choerodon.agile.api.vo.IssueStatusVO;
 import io.choerodon.agile.api.vo.StatusAndIssuesVO;
 import io.choerodon.agile.api.vo.StatusMoveVO;
 import io.choerodon.agile.app.service.IssueStatusService;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +53,7 @@ public class IssueStatusController {
     public ResponseEntity deleteStatus(@ApiParam(value = "项目id", required = true)
                                        @PathVariable(name = "project_id") Long projectId,
                                        @ApiParam(value = "status id", required = true)
-                                       @PathVariable Long statusId,
+                                       @PathVariable @Encrypt/*(EncryptionConstant.FD_STATUS)*/ Long statusId,
                                        @ApiParam(value = "apply type", required = true)
                                        @RequestParam String applyType) {
         issueStatusService.deleteStatus(projectId, statusId, applyType);
@@ -64,7 +66,7 @@ public class IssueStatusController {
     public ResponseEntity<IssueStatusVO> createStatusByStateMachine(@ApiParam(value = "项目id", required = true)
                                                                      @PathVariable(name = "project_id") Long projectId,
                                                                     @ApiParam(value = "issue status object", required = true)
-                                                                     @RequestBody IssueStatusVO issueStatusVO) {
+                                                                     @RequestBody @EncryptDTO IssueStatusVO issueStatusVO) {
         return Optional.ofNullable(issueStatusService.createStatusByStateMachine(projectId, issueStatusVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.status.create"));
@@ -76,7 +78,7 @@ public class IssueStatusController {
     public ResponseEntity<List<StatusAndIssuesVO>> listUnCorrespondStatus(@ApiParam(value = "项目id", required = true)
                                                                            @PathVariable(name = "project_id") Long projectId,
                                                                           @ApiParam(value = "board id", required = true)
-                                                                           @RequestParam Long boardId,
+                                                                           @RequestParam @Encrypt/*(EncryptionConstant.AGILE_BOARD)*/ Long boardId,
                                                                           @ApiParam(value = "apply type", required = true)
                                                                            @RequestParam String applyType) {
         return Optional.ofNullable(issueStatusService.queryUnCorrespondStatus(projectId, boardId, applyType))
@@ -90,9 +92,9 @@ public class IssueStatusController {
     public ResponseEntity<IssueStatusVO> moveStatusToColumn(@ApiParam(value = "项目id", required = true)
                                                              @PathVariable(name = "project_id") Long projectId,
                                                             @ApiParam(value = "状态statusId", required = true)
-                                                             @PathVariable Long statusId,
+                                                             @PathVariable @Encrypt/*(EncryptionConstant.FD_STATUS)*/ Long statusId,
                                                             @ApiParam(value = "status move object", required = true)
-                                                             @RequestBody StatusMoveVO statusMoveVO) {
+                                                             @RequestBody @EncryptDTO StatusMoveVO statusMoveVO) {
         return Optional.ofNullable(issueStatusService.moveStatusToColumn(projectId, statusId, statusMoveVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException(ERROR_STATUS_GET));
@@ -104,9 +106,9 @@ public class IssueStatusController {
     public ResponseEntity<IssueStatusVO> moveStatusToUnCorrespond(@ApiParam(value = "项目id", required = true)
                                                                    @PathVariable(name = "project_id") Long projectId,
                                                                   @ApiParam(value = "状态id", required = true)
-                                                                   @PathVariable Long statusId,
+                                                                   @PathVariable @Encrypt/*(EncryptionConstant.FD_STATUS)*/ Long statusId,
                                                                   @ApiParam(value = "status move object", required = true)
-                                                                   @RequestBody StatusMoveVO statusMoveVO) {
+                                                                   @RequestBody @EncryptDTO StatusMoveVO statusMoveVO) {
         return Optional.ofNullable(issueStatusService.moveStatusToUnCorrespond(projectId, statusId, statusMoveVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException(ERROR_STATUS_GET));
@@ -128,7 +130,7 @@ public class IssueStatusController {
     public ResponseEntity<IssueStatusVO> updateStatus(@ApiParam(value = "项目id", required = true)
                                                        @PathVariable(name = "project_id") Long projectId,
                                                       @ApiParam(value = "状态", required = true)
-                                                       @RequestBody IssueStatusVO issueStatusVO) {
+                                                       @RequestBody @EncryptDTO IssueStatusVO issueStatusVO) {
         return Optional.ofNullable(issueStatusService.updateStatus(projectId, issueStatusVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.status.update"));

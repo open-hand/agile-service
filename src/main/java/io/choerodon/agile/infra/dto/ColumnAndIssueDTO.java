@@ -1,5 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.util.List;
 
 /**
@@ -8,9 +11,9 @@ import java.util.List;
  */
 
 public class ColumnAndIssueDTO {
-
+    @Encrypt/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/
     private Long columnId;
-
+    @Encrypt/*(EncryptionConstant.AGILE_BOARD)*/
     private Long boardId;
 
     private Long minNum;

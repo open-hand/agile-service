@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -7,7 +8,6 @@ import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.agile.api.validator.StateValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.ProjectConfigService;
@@ -16,6 +16,8 @@ import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,7 +63,7 @@ public class StatusController extends BaseController {
     @ApiOperation(value = "创建状态")
     @PostMapping("/organizations/{organization_id}/status")
     public ResponseEntity<StatusVO> create(@PathVariable("organization_id") Long organizationId,
-                                           @RequestBody StatusVO statusVO) {
+                                           @RequestBody @EncryptDTO StatusVO statusVO) {
         stateValidator.validate(statusVO);
         return new ResponseEntity<>(statusService.create(organizationId, statusVO), HttpStatus.CREATED);
     }
@@ -70,8 +72,8 @@ public class StatusController extends BaseController {
     @ApiOperation(value = "更新状态")
     @PutMapping(value = "/organizations/{organization_id}/status/{status_id}")
     public ResponseEntity<StatusVO> update(@PathVariable("organization_id") Long organizationId,
-                                           @PathVariable("status_id") Long statusId,
-                                           @RequestBody @Valid StatusVO statusVO) {
+                                           @PathVariable("status_id") @Encrypt/*(EncryptionConstant.FD_STATUS)*/ Long statusId,
+                                           @RequestBody @Valid @EncryptDTO StatusVO statusVO) {
         statusVO.setId(statusId);
         statusVO.setOrganizationId(organizationId);
         stateValidator.validate(statusVO);
@@ -82,7 +84,7 @@ public class StatusController extends BaseController {
     @ApiOperation(value = "删除状态")
     @DeleteMapping(value = "/organizations/{organization_id}/status/{status_id}")
     public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId,
-                                          @PathVariable("status_id") Long statusId) {
+                                          @PathVariable("status_id") @Encrypt/*(EncryptionConstant.FD_STATUS)*/ Long statusId) {
         return new ResponseEntity<>(statusService.delete(organizationId, statusId), HttpStatus.NO_CONTENT);
     }
 
@@ -90,7 +92,7 @@ public class StatusController extends BaseController {
     @ApiOperation(value = "根据id查询状态对象")
     @GetMapping(value = "/organizations/{organization_id}/status/{status_id}")
     public ResponseEntity<StatusVO> queryStatusById(@PathVariable("organization_id") Long organizationId,
-                                                        @PathVariable("status_id") Long statusId) {
+                                                        @PathVariable("status_id") @Encrypt/*(EncryptionConstant.FD_STATUS)*/ Long statusId) {
         return new ResponseEntity<>(statusService.queryStatusById(organizationId, statusId), HttpStatus.OK);
     }
 

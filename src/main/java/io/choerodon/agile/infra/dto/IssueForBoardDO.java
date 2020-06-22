@@ -2,6 +2,8 @@ package io.choerodon.agile.infra.dto;
 
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.PriorityVO;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
 
@@ -11,6 +13,7 @@ import java.util.Date;
  */
 public class IssueForBoardDO {
 
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long issueId;
 
     private String issueNum;
@@ -19,6 +22,7 @@ public class IssueForBoardDO {
 
     private String summary;
 
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long parentIssueId;
 
     private Long objectVersionNumber;
@@ -37,6 +41,7 @@ public class IssueForBoardDO {
 
     private Boolean ldap;
 
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long epicId;
 
     private String rank;
@@ -49,6 +54,7 @@ public class IssueForBoardDO {
 
     private PriorityVO priorityVO;
 
+    @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/
     private Long issueTypeId;
 
     private IssueTypeVO issueTypeVO;
@@ -56,7 +62,7 @@ public class IssueForBoardDO {
     private String featureType;
 
 //    private Long piId;
-
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long relateIssueId;
 
     public String getRank() {

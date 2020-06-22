@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
 
@@ -11,6 +13,7 @@ import javax.validation.constraints.NotNull;
 public class IssueStatusVO {
 
     @ApiModelProperty(value = "主键id")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE_STATUS)*/
     private Long id;
 
     @ApiModelProperty(value = "状态名称")
@@ -32,6 +35,7 @@ public class IssueStatusVO {
     private Boolean completed;
 
     @ApiModelProperty(value = "状态真实id")
+    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
     private Long statusId;
 
     @ApiModelProperty(value = "版本号")

@@ -7,6 +7,7 @@ import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class RankController {
     public ResponseEntity epicAndFeatureRank(@ApiParam(value = "项目id", required = true)
                                              @PathVariable(name = "project_id") Long projectId,
                                              @ApiParam(value = "epic and feature rank DTO", required = true)
-                                             @RequestBody RankVO rankVO) {
+                                             @RequestBody @EncryptDTO RankVO rankVO) {
         rankService.epicAndFeatureRank(projectId, rankVO);
         return new ResponseEntity(HttpStatus.CREATED);
     }

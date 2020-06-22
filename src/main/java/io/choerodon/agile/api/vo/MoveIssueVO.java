@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
 
@@ -10,17 +12,19 @@ import java.util.List;
 public class MoveIssueVO {
 
     @ApiModelProperty(value = "移动的问题集合")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private List<Long> issueIds;
 
     @ApiModelProperty(value = "是否在前面")
     private Boolean isBefore;
 
     @ApiModelProperty(value = "移动的参照问题id")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long outsetIssueId;
 
     @ApiModelProperty(value = "是否生成移动日志")
     private Boolean rankIndex;
-
+    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
     private Long updateStatusId;
 
     private String statusCategoryCode;

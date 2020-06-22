@@ -1,5 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.util.List;
 
 /**
@@ -9,7 +12,7 @@ import java.util.List;
 public class SubStatusDTO {
 
     private Long id;
-
+    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
     private Long statusId;
 
     private String name;

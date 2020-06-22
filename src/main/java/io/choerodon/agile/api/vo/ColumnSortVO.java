@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.EncryptionConstant;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -18,12 +18,12 @@ public class ColumnSortVO {
 
     @ApiModelProperty(value = "看板id")
     @NotNull(message = "board id不能为空")
-    @Encrypt(EncryptionConstant.AGILE_BOARD)
+    @Encrypt/*(EncryptionConstant.AGILE_BOARD)*/
     private Long boardId;
 
     @ApiModelProperty(value = "列id")
     @NotNull(message = "列id不能为空")
-    @Encrypt(EncryptionConstant.AGILE_BOARD_COLUMN)
+    @Encrypt/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/
     private Long columnId;
 
     @ApiModelProperty(value = "列顺序")

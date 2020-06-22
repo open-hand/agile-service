@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.base.BaseController;
@@ -10,6 +11,8 @@ import io.choerodon.agile.app.service.InstanceService;
 import io.choerodon.agile.infra.cache.InstanceCache;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.swagger.annotations.ApiOperation;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +40,8 @@ public class InstanceController extends BaseController {
     @PostMapping(value = "/start_instance")
     public ResponseEntity<ExecuteResult> startInstance(@PathVariable("organization_id") Long organizationId,
                                                        @RequestParam("service_code") String serviceCode,
-                                                       @RequestParam("state_machine_id") Long stateMachineId,
-                                                       @RequestBody InputDTO inputDTO) {
+                                                       @RequestParam("state_machine_id") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/ Long stateMachineId,
+                                                       @RequestBody @EncryptDTO InputDTO inputDTO) {
         ExecuteResult result = instanceService.startInstance(organizationId, serviceCode, stateMachineId, inputDTO);
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
@@ -48,10 +51,10 @@ public class InstanceController extends BaseController {
     @PostMapping(value = "/execute_transform")
     public ResponseEntity<ExecuteResult> executeTransform(@PathVariable("organization_id") Long organizationId,
                                                           @RequestParam("service_code") String serviceCode,
-                                                          @RequestParam("state_machine_id") Long stateMachineId,
-                                                          @RequestParam("current_status_id") Long currentStatusId,
-                                                          @RequestParam("transform_id") Long transformId,
-                                                          @RequestBody InputDTO inputDTO) {
+                                                          @RequestParam("state_machine_id") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/ Long stateMachineId,
+                                                          @RequestParam("current_status_id")  @Encrypt/*(EncryptionConstant.FD_STATUS)*/ Long currentStatusId,
+                                                          @RequestParam("transform_id") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_TRANSFORM)*/ Long transformId,
+                                                          @RequestBody @EncryptDTO  InputDTO inputDTO) {
         ExecuteResult result = instanceService.executeTransform(organizationId, serviceCode, stateMachineId, currentStatusId, transformId, inputDTO);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
@@ -61,9 +64,9 @@ public class InstanceController extends BaseController {
     @GetMapping(value = "/transform_list")
     public ResponseEntity<List<TransformInfo>> queryListTransform(@PathVariable("organization_id") Long organizationId,
                                                                   @RequestParam("service_code") String serviceCode,
-                                                                  @RequestParam("state_machine_id") Long stateMachineId,
-                                                                  @RequestParam("instance_id") Long instanceId,
-                                                                  @RequestParam("current_status_id") Long currentStateId) {
+                                                                  @RequestParam("state_machine_id") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/ Long stateMachineId,
+                                                                  @RequestParam("instance_id") @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ Long instanceId,
+                                                                  @RequestParam("current_status_id") @Encrypt/*(EncryptionConstant.FD_STATUS)*/ Long currentStateId) {
         return new ResponseEntity<>(instanceService.queryListTransform(organizationId, serviceCode, stateMachineId, instanceId, currentStateId), HttpStatus.OK);
     }
 
@@ -71,7 +74,7 @@ public class InstanceController extends BaseController {
     @ApiOperation(value = "获取状态机的初始状态")
     @GetMapping(value = "/query_init_status_id")
     public ResponseEntity<Long> queryInitStatusId(@PathVariable("organization_id") Long organizationId,
-                                                  @RequestParam("state_machine_id") Long stateMachineId) {
+                                                  @RequestParam("state_machine_id") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/ Long stateMachineId) {
         return new ResponseEntity<>(instanceService.queryInitStatusId(organizationId, stateMachineId), HttpStatus.OK);
     }
 
@@ -87,7 +90,7 @@ public class InstanceController extends BaseController {
     @ApiOperation(value = "创建实例时，获取状态机的初始转换，包括转换的configs")
     @GetMapping(value = "/query_init_transform")
     public ResponseEntity<StateMachineTransformVO> queryInitTransform(@PathVariable("organization_id") Long organizationId,
-                                                                      @RequestParam("state_machine_id") Long stateMachineId) {
+                                                                      @RequestParam("state_machine_id") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/ Long stateMachineId) {
         return new ResponseEntity<>(instanceService.queryInitTransform(organizationId, stateMachineId), HttpStatus.OK);
     }
 

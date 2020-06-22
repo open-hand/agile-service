@@ -5,8 +5,10 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * 敏捷开发Issue
@@ -17,6 +19,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class IssueVO {
 
     @ApiModelProperty(value = "问题主键id")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long issueId;
 
     @ApiModelProperty(value = "问题编号")
@@ -26,6 +29,7 @@ public class IssueVO {
     private String typeCode;
 
     @ApiModelProperty(value = "状态id")
+    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
     private Long statusId;
 
     @ApiModelProperty(value = "问题概要")
@@ -50,9 +54,11 @@ public class IssueVO {
     private Long projectId;
 
     @ApiModelProperty(value = "史诗id")
+    @Encrypt(ignoreValue = {"0"})
     private Long epicId;
 
     @ApiModelProperty(value = "父任务id")
+    @Encrypt(ignoreValue = {"0"})
     private Long parentIssueId;
 
     @ApiModelProperty(value = "故事点")
@@ -140,9 +146,11 @@ public class IssueVO {
     private String createrRealName;
 
     @ApiModelProperty(value = "优先级id")
+    @Encrypt/*(EncryptionConstant.FD_PRIORITY)*/
     private Long priorityId;
 
     @ApiModelProperty(value = "问题类型id")
+    @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/
     private Long issueTypeId;
 
     @ApiModelProperty(value = "优先级DTO")
@@ -176,6 +184,7 @@ public class IssueVO {
     private String reporterRealName;
 
     @ApiModelProperty(value = "缺陷关联的故事id")
+    @Encrypt(ignoreValue = {"0"})
     private Long relateIssueId;
 
     @ApiModelProperty(value = "缺陷关联的故事编号")

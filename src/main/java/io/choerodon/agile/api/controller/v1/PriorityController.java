@@ -3,6 +3,7 @@ package io.choerodon.agile.api.controller.v1;
 import io.choerodon.agile.api.validator.PriorityValidator;
 import io.choerodon.agile.api.vo.PriorityVO;
 import io.choerodon.agile.app.service.PriorityService;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.agile.infra.utils.ParamUtils;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
@@ -10,6 +11,8 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,7 +57,7 @@ public class PriorityController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建优先级")
     @PostMapping
-    public ResponseEntity<PriorityVO> create(@PathVariable("organization_id") Long organizationId, @RequestBody PriorityVO priorityVO) {
+    public ResponseEntity<PriorityVO> create(@PathVariable("organization_id") Long organizationId, @RequestBody @EncryptDTO PriorityVO priorityVO) {
         priorityValidator.createValidate(priorityVO);
         return new ResponseEntity<>(priorityService.create(organizationId, priorityVO), HttpStatus.OK);
     }
@@ -63,7 +66,7 @@ public class PriorityController {
     @ApiOperation(value = "更新优先级")
     @PutMapping(value = "/{priority_id}")
     public ResponseEntity<PriorityVO> update(@PathVariable("organization_id") Long organizationId, @PathVariable("priority_id") Long priorityId,
-                                             @RequestBody @Valid PriorityVO priorityVO) {
+                                             @RequestBody @Valid @EncryptDTO PriorityVO priorityVO) {
         priorityVO.setId(priorityId);
         priorityVO.setOrganizationId(organizationId);
         priorityValidator.updateValidate(priorityVO);
@@ -126,7 +129,7 @@ public class PriorityController {
     @GetMapping("/enable/{id}")
     public ResponseEntity<PriorityVO> enablePriority(@PathVariable("organization_id") Long organizationId,
                                                      @ApiParam(value = "id", required = true)
-                                                     @PathVariable Long id,
+                                                     @PathVariable @Encrypt/*(EncryptionConstant.FD_PRIORITY)*/ Long id,
                                                      @RequestParam(required = false) Boolean enable) {
         return new ResponseEntity<>(priorityService.enablePriority(organizationId, id, enable), HttpStatus.OK);
     }
@@ -136,15 +139,15 @@ public class PriorityController {
     @GetMapping("/check_delete/{id}")
     public ResponseEntity<Long> checkDelete(@PathVariable("organization_id") Long organizationId,
                                             @ApiParam(value = "id", required = true)
-                                            @PathVariable Long id) {
+                                            @PathVariable @Encrypt/*(EncryptionConstant.FD_PRIORITY)*/ Long id) {
         return new ResponseEntity<>(priorityService.checkDelete(organizationId, id), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除优先级")
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity delete(@PathVariable("organization_id") Long organizationId, @PathVariable("id") Long priorityId,
-                                 @RequestParam(required = false) Long changePriorityId) {
+    public ResponseEntity delete(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt/*(EncryptionConstant.FD_PRIORITY)*/  Long priorityId,
+                                 @RequestParam(required = false) @Encrypt/*(EncryptionConstant.FD_PRIORITY)*/ Long changePriorityId) {
         priorityService.delete(organizationId, priorityId, changePriorityId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

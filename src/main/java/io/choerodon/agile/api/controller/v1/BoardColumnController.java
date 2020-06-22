@@ -2,7 +2,7 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.ColumnSortVO;
 import io.choerodon.agile.api.vo.ColumnWithMaxMinNumVO;
-import io.choerodon.agile.infra.EncryptionConstant;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
@@ -40,7 +40,7 @@ public class BoardColumnController {
                                                            @ApiParam(value = "apply type", required = true)
                                                             @RequestParam String applyType,
                                                            @ApiParam(value = "board column对象", required = true)
-                                                            @RequestBody BoardColumnVO boardColumnVO) {
+                                                            @RequestBody @EncryptDTO BoardColumnVO boardColumnVO) {
         return Optional.ofNullable(boardColumnService.create(projectId, categoryCode, applyType, boardColumnVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.BoardColumn.create"));
@@ -52,9 +52,9 @@ public class BoardColumnController {
     public ResponseEntity<BoardColumnVO> updateBoardColumn(@ApiParam(value = "项目id", required = true)
                                                             @PathVariable(name = "project_id") Long projectId,
                                                            @ApiParam(value = "column id", required = true)
-                                                            @PathVariable @Encrypt(EncryptionConstant.AGILE_BOARD_COLUMN) Long columnId,
+                                                            @PathVariable @Encrypt/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/ Long columnId,
                                                            @ApiParam(value = "board id", required = true)
-                                                            @RequestParam @Encrypt(EncryptionConstant.AGILE_BOARD) Long boardId,
+                                                            @RequestParam @Encrypt/*(EncryptionConstant.AGILE_BOARD)*/ Long boardId,
                                                            @ApiParam(value = "board column对象", required = true)
                                                             @RequestBody @EncryptDTO BoardColumnVO boardColumnVO) {
         return Optional.ofNullable(boardColumnService.update(projectId, columnId, boardId, boardColumnVO))
@@ -79,7 +79,7 @@ public class BoardColumnController {
     public ResponseEntity columnSortByProgram(@ApiParam(value = "项目id", required = true)
                                               @PathVariable(name = "project_id") Long projectId,
                                               @ApiParam(value = "ColumnSort DTO", required = true)
-                                              @RequestBody ColumnSortVO columnSortVO) {
+                                              @RequestBody @EncryptDTO  ColumnSortVO columnSortVO) {
         boardColumnService.columnSortByProgram(projectId, columnSortVO);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -90,7 +90,7 @@ public class BoardColumnController {
     public ResponseEntity deleteBoardColumn(@ApiParam(value = "项目id", required = true)
                                             @PathVariable(name = "project_id") Long projectId,
                                             @ApiParam(value = "column id", required = true)
-                                            @PathVariable Long columnId) {
+                                            @PathVariable @Encrypt/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/ Long columnId) {
         boardColumnService.delete(projectId, columnId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -101,7 +101,7 @@ public class BoardColumnController {
     public ResponseEntity deleteProgramBoardColumn(@ApiParam(value = "项目id", required = true)
                                                    @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "column id", required = true)
-                                                   @PathVariable @Encrypt(EncryptionConstant.AGILE_BOARD_COLUMN) Long columnId) {
+                                                   @PathVariable @Encrypt/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/ Long columnId) {
         boardColumnService.deleteProgramBoardColumn(projectId, columnId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -112,7 +112,7 @@ public class BoardColumnController {
     public ResponseEntity<BoardColumnVO> queryBoardColumnById(@ApiParam(value = "项目id", required = true)
                                                                @PathVariable(name = "project_id") Long projectId,
                                                               @ApiParam(value = "column id", required = true)
-                                                               @PathVariable @Encrypt(EncryptionConstant.AGILE_BOARD_COLUMN) Long columnId) {
+                                                               @PathVariable @Encrypt/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/ Long columnId) {
         return Optional.ofNullable(boardColumnService.queryBoardColumnById(projectId, columnId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.BoardColumn.get"));
@@ -124,7 +124,7 @@ public class BoardColumnController {
     public ResponseEntity<BoardColumnVO> updateColumnContraint(@ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
                                                                @ApiParam(value = "column id", required = true)
-                                                                @PathVariable @Encrypt(EncryptionConstant.AGILE_BOARD_COLUMN) Long columnId,
+                                                                @PathVariable @Encrypt/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/ Long columnId,
                                                                @ApiParam(value = "ColumnWithMaxMinNumVO", required = true)
                                                                 @RequestBody @EncryptDTO ColumnWithMaxMinNumVO columnWithMaxMinNumVO) {
         return Optional.ofNullable(boardColumnService.updateColumnContraint(projectId, columnId, columnWithMaxMinNumVO))

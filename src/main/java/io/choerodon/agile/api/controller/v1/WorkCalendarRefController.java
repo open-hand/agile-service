@@ -4,12 +4,13 @@ import io.choerodon.agile.api.vo.SprintWorkCalendarVO;
 import io.choerodon.agile.api.vo.WorkCalendarRefCreateVO;
 import io.choerodon.agile.api.vo.WorkCalendarRefVO;
 import io.choerodon.agile.app.service.WorkCalendarRefService;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +37,7 @@ public class WorkCalendarRefController {
     public ResponseEntity<WorkCalendarRefVO> createSprintWorkCalendarRef(@ApiParam(value = "项目id", required = true)
                                                                           @PathVariable(name = "project_id") Long projectId,
                                                                          @ApiParam(value = "冲刺id", required = true)
-                                                                          @PathVariable(name = "sprint_id") Long sprintId,
+                                                                          @PathVariable(name = "sprint_id") @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/ Long sprintId,
                                                                          @ApiParam(value = "创建冲刺工作日对象", required = true)
                                                                           @RequestBody @Valid WorkCalendarRefCreateVO workCalendarRefCreateVO) {
         return Optional.ofNullable(workCalendarRefService.createWorkCalendarRef(projectId, sprintId, workCalendarRefCreateVO))
@@ -86,7 +87,7 @@ public class WorkCalendarRefController {
     public ResponseEntity deleteProjectWorkCalendarRef(@ApiParam(value = "项目id", required = true)
                                                        @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "calendar_id", required = true)
-                                                       @PathVariable(name = "calendar_id") Long calendarId) {
+                                                       @PathVariable(name = "calendar_id") @Encrypt/*(EncryptionConstant.AGILE_WORK_CALENDAR_REF)*/ Long calendarId) {
         workCalendarRefService.deleteWorkCalendarRef(projectId, calendarId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

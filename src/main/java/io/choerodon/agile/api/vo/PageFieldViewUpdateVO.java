@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author shinan.chen
@@ -8,6 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
  */
 public class PageFieldViewUpdateVO {
     @ApiModelProperty(value = "fieldId")
+    @Encrypt/*(EncryptionConstant.FD_OBJECT_SCHEME_FIELD)*/
     private Long fieldId;
     @ApiModelProperty(value = "字段类型")
     private String fieldType;

@@ -1,14 +1,16 @@
 package io.choerodon.agile.api.controller.v1;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
-import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldCreateVO;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldUpdateVO;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +46,7 @@ public class ObjectSchemeFieldController {
     public ResponseEntity<ObjectSchemeFieldDetailVO> create(@ApiParam(value = "组织id", required = true)
                                                              @PathVariable("organization_id") Long organizationId,
                                                             @ApiParam(value = "字段对象", required = true)
-                                                             @RequestBody @Valid ObjectSchemeFieldCreateVO fieldCreateDTO) {
+                                                             @RequestBody @Valid @EncryptDTO ObjectSchemeFieldCreateVO fieldCreateDTO) {
         return new ResponseEntity<>(objectSchemeFieldService.create(organizationId, null, fieldCreateDTO), HttpStatus.CREATED);
     }
 
@@ -54,7 +56,7 @@ public class ObjectSchemeFieldController {
     public ResponseEntity<ObjectSchemeFieldDetailVO> queryById(@ApiParam(value = "组织id", required = true)
                                                                 @PathVariable("organization_id") Long organizationId,
                                                                @ApiParam(value = "字段id", required = true)
-                                                                @PathVariable("field_id") Long fieldId) {
+                                                                @PathVariable("field_id") @Encrypt/*(EncryptionConstant.FD_OBJECT_SCHEME_FIELD)*/ Long fieldId) {
         return new ResponseEntity<>(objectSchemeFieldService.queryById(organizationId, null, fieldId), HttpStatus.OK);
     }
 
@@ -63,7 +65,7 @@ public class ObjectSchemeFieldController {
     @DeleteMapping(value = "/{field_id}")
     public ResponseEntity delete(@ApiParam(value = "组织id", required = true)
                                  @PathVariable("organization_id") Long organizationId,
-                                 @PathVariable("field_id") Long fieldId) {
+                                 @PathVariable("field_id") @Encrypt/*(EncryptionConstant.FD_OBJECT_SCHEME_FIELD)*/ Long fieldId) {
         objectSchemeFieldService.delete(organizationId, null, fieldId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -74,8 +76,8 @@ public class ObjectSchemeFieldController {
     public ResponseEntity<ObjectSchemeFieldDetailVO> update(@ApiParam(value = "组织id", required = true)
                                                              @PathVariable("organization_id") Long organizationId,
                                                             @ApiParam(value = "字段id", required = true)
-                                                             @PathVariable("field_id") Long fieldId,
-                                                            @RequestBody @Valid ObjectSchemeFieldUpdateVO updateDTO) {
+                                                             @PathVariable("field_id") @Encrypt/*(EncryptionConstant.FD_OBJECT_SCHEME_FIELD)*/ Long fieldId,
+                                                            @RequestBody @Valid @EncryptDTO ObjectSchemeFieldUpdateVO updateDTO) {
         return new ResponseEntity<>(objectSchemeFieldService.update(organizationId, null, fieldId, updateDTO), HttpStatus.CREATED);
     }
 

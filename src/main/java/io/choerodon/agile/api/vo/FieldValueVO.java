@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
 
@@ -11,14 +13,18 @@ import java.util.Date;
  */
 public class FieldValueVO extends AuditDomain {
     @ApiModelProperty(value = "字段值id")
+    @Encrypt/*(EncryptionConstant.FD_FIELD_VALUE)*/
     private Long id;
     @ApiModelProperty(value = "实例对象id")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long instanceId;
     @ApiModelProperty(value = "字段id")
+    @Encrypt/*(EncryptionConstant.FD_OBJECT_SCHEME_FIELD)*/
     private Long fieldId;
     @ApiModelProperty(value = "字段类型")
     private String fieldType;
     @ApiModelProperty(value = "字段选项id")
+    @Encrypt/*(EncryptionConstant.FD_FIELD_OPTION)*/
     private Long optionId;
     @ApiModelProperty(value = "字段选项值")
     private String optionValue;

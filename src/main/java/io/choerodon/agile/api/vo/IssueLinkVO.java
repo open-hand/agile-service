@@ -1,8 +1,10 @@
 package io.choerodon.agile.api.vo;
 
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * 敏捷开发Issue链接
@@ -13,12 +15,15 @@ import io.swagger.annotations.ApiModelProperty;
 public class IssueLinkVO {
 
     @ApiModelProperty(value = "问题id")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long issueId;
 
     @ApiModelProperty(value = "问题链接类型id")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE_LINK_TYPE)*/
     private Long linkTypeId;
 
     @ApiModelProperty(value = "被链接的问题id")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long linkedIssueId;
 
     @ApiModelProperty(value = "问题链接类型名称")
@@ -36,6 +41,7 @@ public class IssueLinkVO {
     private String typeCode;
 
     @ApiModelProperty(value = "问题链接id")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE_LINK)*/
     private Long linkId;
 
     @ApiModelProperty(value = "经办人id")

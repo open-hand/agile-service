@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
@@ -10,12 +12,14 @@ import io.swagger.annotations.ApiModelProperty;
 public class IssueSubListVO {
 
     @ApiModelProperty(value = "问题主键id")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long issueId;
 
     @ApiModelProperty(value = "问题编号")
     private String issueNum;
 
     @ApiModelProperty(value = "状态id")
+    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
     private Long statusId;
 
     @ApiModelProperty(value = "经办人id")
@@ -43,6 +47,7 @@ public class IssueSubListVO {
     private String imageUrl;
 
     @ApiModelProperty(value = "问题类型id")
+    @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/
     private Long issueTypeId;
 
     @ApiModelProperty(value = "优先级id")

@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.List;
 public class IssueSearchVO {
 
     @ApiModelProperty(value = "问题主键id")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long issueId;
 
     @ApiModelProperty(value = "问题编号")
@@ -41,6 +44,7 @@ public class IssueSearchVO {
     private Long projectId;
 
     @ApiModelProperty(value = "状态id")
+    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
     private Long statusId;
 
     @ApiModelProperty(value = "状态类别")
@@ -50,6 +54,7 @@ public class IssueSearchVO {
     private String statusName;
 
     @ApiModelProperty(value = "史诗id")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long epicId;
 
     @ApiModelProperty(value = "史诗名称")
@@ -71,6 +76,7 @@ public class IssueSearchVO {
     private List<String> versionNames;
 
     @ApiModelProperty(value = "冲刺id")
+    @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/
     private Long sprintId;
 
     @ApiModelProperty(value = "故事点")
@@ -95,6 +101,7 @@ public class IssueSearchVO {
     private IssueTypeVO issueTypeVO;
 
     @ApiModelProperty(value = "优先级id")
+    @Encrypt/*(EncryptionConstant.FD_PRIORITY)*/
     private Long priorityId;
 
     @ApiModelProperty(value = "经办人登录名称")
