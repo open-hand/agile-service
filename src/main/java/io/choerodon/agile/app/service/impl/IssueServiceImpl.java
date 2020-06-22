@@ -2237,6 +2237,17 @@ public class IssueServiceImpl implements IssueService {
             issueListFieldKVVO.setStatusVO(statusMapDTOMap.get(v.getStatusId()));
             issueListFieldKVVO.setPriorityVO(priorityMap.get(v.getPriorityId()));
             issueListFieldKVVO.setProjectVO(projectVOMap.get(v.getProjectId()));
+            // 设置父级issueId
+            Long parentId = null;
+            Long parentIssueId = v.getParentIssueId();
+            Long relateIssueId = v.getRelateIssueId();
+            if (!ObjectUtils.isEmpty(parentIssueId) && parentIssueId != 0) {
+                parentId = parentIssueId;
+            }
+            if (!ObjectUtils.isEmpty(relateIssueId) && relateIssueId != 0) {
+                parentId = relateIssueId;
+            }
+            issueListFieldKVVO.setParentId(parentId);
             list.add(issueListFieldKVVO);
         });
         return PageUtil.buildPageInfoWithPageInfoList(parentPage,list);
