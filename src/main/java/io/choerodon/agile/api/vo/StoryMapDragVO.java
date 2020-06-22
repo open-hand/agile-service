@@ -22,9 +22,11 @@ public class StoryMapDragVO {
     private Long versionId;
 
     @ApiModelProperty(value = "问题id列表，移动到史诗，配合epicId使用")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private List<Long> epicIssueIds;
 
     @ApiModelProperty(value = "问题id列表，移动到版本，配合versionId使用")
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private List<Long> versionIssueIds;
 
     @ApiModelProperty(value = "要删除的版本与问题关联数据")

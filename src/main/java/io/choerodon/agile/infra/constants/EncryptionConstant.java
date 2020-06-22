@@ -5,6 +5,9 @@ package io.choerodon.agile.infra.constants;
  * @date 2020-06-12 15:44
  */
 public class EncryptionConstant {
+
+    public static final String BLANK_KEY = "";
+
     // agile_ 开头的表
     public final static String AGILE_BOARD_COLUMN = "agile_aboard_column";
     public final static String AGILE_BOARD = "agile_aboard";
@@ -23,6 +26,7 @@ public class EncryptionConstant {
     public final static String AGILE_WORK_CALENDAR_REF = "agile_work_calendar_ref";
     public final static String AGILE_WORK_LOG = "agile_work_log";
     public final static String AGILE_FILE_OPERATION_HISTORY = "agile_file_operation_history";
+    public final static String AGILE_WIKI_RELATION = "agile_wiki_relation";
 
 
     // fd_ 开头的表
@@ -43,5 +47,10 @@ public class EncryptionConstant {
     public final static String FD_ISSUE_TYPE_SCHEME="fd_issue_type_scheme";
     public final static String FD_PRIORITY="fd_priority";
     public final static String FD_PRODUCT_VERSION="fd_product_version";
+
+    // kb_的表
+    public final static String KB_WORKSPACE = "kb_workspace";
+    public final static String TN_KB_KNOWLEDGE_BASE = "kb_knowledge_base";
+    public final static String TN_KB_WORKSPACE = "kb_workspace";
 
 }

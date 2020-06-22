@@ -2,18 +2,20 @@ package io.choerodon.agile.infra.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.hzero.starter.keyencrypt.core.EncryptProperties;
 import org.hzero.starter.keyencrypt.core.EncryptionService;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author zhaotianxin
@@ -24,6 +26,17 @@ public class EncryptionUtils {
     private static EncryptionService encryptionService = new EncryptionService(new EncryptProperties());
 
     private static ObjectMapper objectMapper = new ObjectMapper();
+
+    /**
+     * 解密serachVO
+     * @param search SearchVO
+     */
+    public static void decryptSearchVO(SearchVO search){
+        Optional<Map<String, Object>> adMapOptional = Optional.ofNullable(search).map(SearchVO::getAdvancedSearchArgs);
+        if (adMapOptional.isPresent()){
+            decryptAd(search, adMapOptional);
+        }
+    }
 
     /**
      * 对单个主键进行解密
@@ -145,6 +158,58 @@ public class EncryptionUtils {
             return ((Class) clz.getField("TYPE").get(null)).isPrimitive();
         } catch (Exception e) {
             return false;
+        }
+    }
+
+
+    /**
+     * 解密ad
+     * @param search SearchVO
+     * @param adMapOptional adMapOptional
+     */
+    @SuppressWarnings("unchecked")
+    private static void decryptAd(SearchVO search, Optional<Map<String, Object>> adMapOptional) {
+        List<String> temp;
+        String tempStr;// versionList
+        temp = adMapOptional.map(ad -> (List<String>)(ad.get("versionList"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)){
+            search.getAdvancedSearchArgs().put("versionList",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
+        }
+        // statusList
+        temp = adMapOptional.map(ad -> (List<String>)(ad.get("statusList"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)){
+            search.getAdvancedSearchArgs().put("statusList",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
+        }
+        // components
+        temp = adMapOptional.map(ad -> (List<String>)(ad.get("components"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)){
+            search.getAdvancedSearchArgs().put("components",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
+        }
+        // sprints
+        temp = adMapOptional.map(ad -> (List<String>)(ad.get("sprints"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)){
+            search.getAdvancedSearchArgs().put("sprints",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
+        }
+        // statusIdList
+        temp = adMapOptional.map(ad -> (List<String>)(ad.get("statusIdList"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)){
+            search.getAdvancedSearchArgs().put("statusIdList",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
+        }
+        // prioritys
+        temp = adMapOptional.map(ad -> (List<String>)(ad.get("prioritys"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)){
+            search.getAdvancedSearchArgs().put("prioritys",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
+        }
+        // assigneeId
+        tempStr = adMapOptional.map(ad -> (String)(ad.get("assigneeId"))).orElse(null);
+        if (StringUtils.isNotBlank(tempStr)){
+            search.getAdvancedSearchArgs().put("assigneeId", encryptionService.decrypt(tempStr, EncryptionConstant.BLANK_KEY));
         }
     }
 }

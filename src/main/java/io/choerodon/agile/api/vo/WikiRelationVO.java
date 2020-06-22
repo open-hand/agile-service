@@ -1,21 +1,26 @@
 package io.choerodon.agile.api.vo;
 
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/12/03.
  * Email: fuqianghuang01@gmail.com
  */
 public class WikiRelationVO {
 
+    @Encrypt/*(EncryptionConstant.AGILE_WIKI_RELATION)*/
     private Long id;
 
     private Long projectId;
 
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long issueId;
 
     private String wikiName;
 
     private String wikiUrl;
 
+    @Encrypt/*(EncryptionConstant.KB_WORKSPACE)*/
     private Long spaceId;
 
     private WorkSpaceVO workSpaceVO;

@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/11/30.
@@ -10,6 +11,7 @@ public class StatusCheckVO {
     @ApiModelProperty(value = "状态是否存在")
     private Boolean statusExist;
     @ApiModelProperty(value = "状态id")
+    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
     private Long id;
     @ApiModelProperty(value = "名称")
     private String name;

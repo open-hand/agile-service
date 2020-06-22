@@ -3,7 +3,9 @@ package io.choerodon.agile.api.controller.v1;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.StoryMapDragVO;
+import io.choerodon.agile.api.vo.StoryMapVO;
 import io.choerodon.agile.app.service.StoryMapService;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
@@ -32,12 +34,13 @@ public class StoryMapController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询故事地图整体")
     @PostMapping("/main")
-    public ResponseEntity<JSONObject> queryStoryMap(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<StoryMapVO> queryStoryMap(@ApiParam(value = "项目id", required = true)
                                                     @PathVariable(name = "project_id") Long projectId,
                                                     @ApiParam(value = "组织id", required = true)
                                                     @RequestParam Long organizationId,
                                                     @ApiParam(value = "search DTO", required = true)
                                                     @RequestBody SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
         return Optional.ofNullable(storyMapService.queryStoryMap(projectId, organizationId, searchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.storyMap.get"));
@@ -46,7 +49,7 @@ public class StoryMapController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询故事地图需求池")
     @PostMapping("/demand")
-    public ResponseEntity<JSONObject> queryStoryMapDemand(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<StoryMapVO> queryStoryMapDemand(@ApiParam(value = "项目id", required = true)
                                                           @PathVariable(name = "project_id") Long projectId,
                                                           @ApiParam(value = "search DTO", required = true)
                                                           @RequestBody SearchVO searchVO) {
@@ -58,12 +61,12 @@ public class StoryMapController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("故事地图移动卡片")
     @PostMapping(value = "/move")
-    public ResponseEntity storyMapMove(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void> storyMapMove(@ApiParam(value = "项目id", required = true)
                                        @PathVariable(name = "project_id") Long projectId,
                                        @ApiParam(value = "story map drag DTO", required = true)
                                        @RequestBody @EncryptDTO StoryMapDragVO storyMapDragVO) {
         storyMapService.storyMapMove(projectId, storyMapDragVO);
-        return new ResponseEntity(HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
 }
