@@ -2250,6 +2250,14 @@ public class IssueServiceImpl implements IssueService {
             issueListFieldKVVO.setParentId(parentId);
             list.add(issueListFieldKVVO);
         });
-        return PageUtil.buildPageInfoWithPageInfoList(parentPage,list);
+
+        Page<IssueListFieldKVVO> page = new Page<>();
+        page.setNumber(parentPage.getNumber());
+        page.setSize(parentPage.getSize());
+        page.setTotalElements(parentPage.getTotalElements());
+        page.setContent(list);
+        page.setTotalPages(parentPage.getTotalPages());
+        page.setNumberOfElements(parentPage.getNumberOfElements());
+        return page;
     }
 }
