@@ -60,6 +60,10 @@ class ScrumBoardHome extends Component {
   componentDidMount() {
     ScrumBoardStore.setSelectedBoardId('');
     this.getBoard();
+    const { state } = this.props.location;
+    if (state && state.issueId) {
+      ScrumBoardStore.setClickedIssue(state.issueId);
+    }
   }
 
   componentWillUnmount() {

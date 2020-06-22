@@ -1,5 +1,5 @@
 import {
-  observable, action, computed, toJS, 
+  observable, action, computed, toJS,
 } from 'mobx';
 import { find } from 'lodash';
 import axios from 'axios';
@@ -23,15 +23,9 @@ class ScrumBoardStore {
 
   @observable currentSprintExist = true;
 
-  @observable prevClick = {};
-
   @observable currentDrag = null;
 
-  @observable currentClick = 0;
-
   @observable translateToCompleted = [];
-
-  @observable clickedIssue = false;
 
   @observable moveOverRef = {};
 
@@ -286,16 +280,6 @@ class ScrumBoardStore {
     this.parentId = data;
   }
 
-  // @action resetClickedIssue() {
-  //   this.currentClick = null;
-  //   this.clickIssueDetail = {};
-  //   this.clickedIssue = false;
-  // }
-
-  @computed get getClickedIssue() {
-    return this.clickedIssue;
-  }
-
   @action setSelectedBoardId(data) {
     this.selectedBoardId = data;
   }
@@ -306,32 +290,21 @@ class ScrumBoardStore {
     }
   }
 
-  @action resetClickedIssue() {
-    this.currentClick = 0;
-    if (this.currentClickTarget) {
-      this.currentClickTarget.style.backgroundColor = '#fff';
+  clickIssueMap = observable.map();
+
+  @action setClickedIssue(issueId) {
+    if (!this.clickIssueMap.has(issueId)) {
+      this.clickIssueMap.clear();
+      this.clickIssueMap.set(issueId, true);
     }
-    this.currentClickTarget = null;
-    this.clickedIssue = false;
-    this.clickIssueDetail = null;
   }
 
-  @action setClickedIssue(issue, ref) {
-    this.currentClick = issue.issueId;
-    if (this.currentClickTarget && ref !== this.currentClickTarget) {
-      this.currentClickTarget.style.backgroundColor = '#fff';
-    }
-    this.currentClickTarget = ref;
-    this.clickIssueDetail = issue;
-    this.clickedIssue = true;
+  @action resetClickedIssue() {
+    this.clickIssueMap.clear();
   }
 
   @computed get getCurrentClickId() {
-    return this.currentClick;
-  }
-
-  @computed get prevClickId() {
-    return this.prevClick;
+    return [...this.clickIssueMap.keys()][0];
   }
 
   @action setMoveOverRef(data) {
@@ -427,7 +400,7 @@ class ScrumBoardStore {
   }
 
   findStatusById(columnId, statusId) {
-    const data = this.boardData;       
+    const data = this.boardData;
     const column = find(data, { columnId });
     const status = find(column.subStatusDTOS, { statusId });
     return status;
@@ -456,34 +429,10 @@ class ScrumBoardStore {
     this.IssueNumberCount = data;
   }
 
-  @computed get getClickIssueDetail() {
-    return this.clickIssueDetail;
-  }
-  
-  /**
-   * 
-   * @param {*} parentIssueId 
-   * @param {*} isSkipIssue  是否为跳转问题 
-   */
-  @action resetCurrentClick(parentIssueId, isSkipIssue = false) {
-    if (this.currentClickTarget && !isSkipIssue) {
-      this.currentClickTarget.style.backgroundColor = '#fff';
-    }
-    this.currentClickTarget = null;
-    this.currentClick = parentIssueId;
-    if (this.allDataMap.get(parentIssueId)) {
-      this.clickIssueDetail = this.allDataMap.get(parentIssueId);
-    }
-    // this.clickIssueDetail = this.allDataMap.get(parentIssueId);
-  }
-
   @action resetDataBeforeUnmount() {
     this.spinIf = true;
-    this.clickIssueDetail = {};
     this.swimLaneData = null;
     this.headerData = new Map();
-    this.clickedIssue = false;
-    // this.swimlaneBasedCode = null;
     this.quickSearchObj = {
       onlyMe: false,
       onlyStory: false,
@@ -878,7 +827,6 @@ class ScrumBoardStore {
   @action scrumBoardInit(AppStates, url = null, boardListData = null, { boardId, userDefaultBoard, columnConstraint }, { currentSprint, allColumnNum }, quickSearchList, issueTypes, stateMachineMap, canDragOn, statusColumnMap, allDataMap, mapStructure, statusMap, renderData, headerData) {
     this.boardData = [];
     this.spinIf = false;
-    // this.currentClick = 0;
     this.quickSearchList = [];
     this.sprintData = false;
     this.assigneer = [];
