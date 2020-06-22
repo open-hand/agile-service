@@ -26,7 +26,7 @@ public class WorkBenchController {
     @Autowired
     private IssueService issueService;
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
+    @Permission(level = ResourceLevel.ORGANIZATION,permissionPublic = true)
     @ApiOperation("查询工作台个人代办事项")
     @PostMapping("/personal/backlog_issues")
     public ResponseEntity<Page<IssueListFieldKVVO>> queryBackLogIssuesByPersonal(@ApiParam(value = "组织id", required = true)
