@@ -10,8 +10,13 @@ class PiApi {
    * 根据状态获取PI
    * @param statusList 
    */
-  getByStatus(statusList = ['todo', 'doing', 'done']) {
-    return axios.post(`${this.prefix}/pi/query_pi_by_status`, statusList);
+  async getPiListByStatus(statusList = ['todo', 'doing', 'done']) {
+    const res = await axios({
+      method: 'post',
+      url: `${this.prefix}/pi/query_pi_by_status`,
+      data: statusList,
+    });
+    return res.map((pi: { code: string, name: string}) => ({ ...pi, piName: `${pi.code}-${pi.name}` }));
   }
 
   /**
