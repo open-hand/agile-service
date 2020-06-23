@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  */
 public class EncryptionUtils {
 
-    private static EncryptionService encryptionService = new EncryptionService(new EncryptProperties());
+    static EncryptionService encryptionService = new EncryptionService(new EncryptProperties());
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
