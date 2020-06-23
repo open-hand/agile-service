@@ -2,9 +2,9 @@ import React, { useContext } from 'react';
 import {
   Dropdown, Menu, Button, Modal,
 } from 'choerodon-ui';
-import { Permission } from '@choerodon/boot';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import { issueApi } from '@/api';
+import useIsOwner from '@/hooks/useIsOwner';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
 
