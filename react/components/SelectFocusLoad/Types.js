@@ -441,7 +441,7 @@ export default {
       loadWhenMount: true,
       label: 'PI',
     },
-    request: () => piApi.getByStatus(),
+    request: () => piApi.getPiListByStatus(),
     render: pi => (
       <Option disabled={!IsInProgramStore.isOwner && pi.statusCode === 'doing'} key={pi.id} value={pi.id}>
         {pi.code ? `${pi.code}-${pi.name}` : pi.name}

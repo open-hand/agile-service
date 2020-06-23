@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Tooltip } from 'choerodon-ui';
-import SelectFocusLoad from '@/components/SelectFocusLoad';
-import TextEditToggle from '@/components/TextEditToggle';
+import SelectPI from '@/components/select/select-pi';
+import TextEditToggle from '@/components/TextEditTogglePro';
 import { piApi } from '@/api';
 
-const { Text, Edit } = TextEditToggle;
 @observer
 class FieldPI extends Component {
-  updateIssuePI = async (value, done) => {
+  updateIssuePI = async (value) => {
     const {
       store, onUpdate, reloadIssue, 
     } = this.props;
@@ -20,7 +19,6 @@ class FieldPI extends Component {
       onUpdate();
     }    
     await reloadIssue(issueId);
-    done();
   }
 
 
@@ -41,17 +39,23 @@ class FieldPI extends Component {
         <div className="c7n-value-wrapper">
           <TextEditToggle
             disabled={(disabled) || (!hasPermission && statusCode === 'doing')}
-            formKey="pi"
             onSubmit={this.updateIssuePI}
-            originData={id}
+            initValue={id}
+            editor={({ submit }) => (
+              <SelectPI 
+                statusList={['todo', 'doing']} 
+                multiple={false}
+                allowClear
+                onChange={submit}
+              />
+            )}
           >
-            <Text>
-              <Tooltip
-                placement="top"
-                title={`该特性经历PI数${closePi.length + (id ? 1 : 0)}`}
-              >
-                <div>
-                  {
+            <Tooltip
+              placement="top"
+              title={`该特性经历PI数${closePi.length + (id ? 1 : 0)}`}
+            >
+              <div>
+                {
                     !closePi.length && !id ? '无' : (
                       <div>
                         <div>
@@ -75,16 +79,8 @@ class FieldPI extends Component {
                       </div>
                     )
                   }
-                </div>
-              </Tooltip>
-            </Text>
-            <Edit>
-              <SelectFocusLoad
-                allowClear
-                type="all_pi"
-                request={() => piApi.getByStatus(['todo', 'doing'])}
-              />
-            </Edit>
+              </div>
+            </Tooltip>
           </TextEditToggle>
         </div>
       </div>
