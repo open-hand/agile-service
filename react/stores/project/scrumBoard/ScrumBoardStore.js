@@ -442,6 +442,7 @@ class ScrumBoardStore {
     };
     this.currentSprintExist = false;
     this.calanderCouldUse = false;
+    this.clickIssueMap.clear();
   }
 
   @computed get getDayRemain() {
