@@ -2,9 +2,9 @@ import React, { useState, useContext } from 'react';
 import { Button, Icon } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import { text2Delta, beforeTextUpload } from '@/utils/richText';
+import { issueCommentApi } from '@/api/IssueComment';
 import WYSIWYGEditor from '../../../WYSIWYGEditor';
 import Comment from '../../Component/Comment';
-import { createCommit } from '../../../../api/NewIssueApi';
 import EditIssueContext from '../../stores';
 
 function IssueCommit({
@@ -17,7 +17,7 @@ function IssueCommit({
   const delta = text2Delta(addCommitDes);
   const newCommit = (commit) => {
     const { issueId } = store.getIssue;
-    createCommit(commit).then(() => {
+    issueCommentApi.create(commit).then(() => {
       if (reloadIssue) {
         reloadIssue(issueId);
       }

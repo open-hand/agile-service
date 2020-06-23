@@ -8,8 +8,8 @@ import {
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
 import { text2Delta, returnBeforeTextUpload } from '@/utils/richText';
+import { issueApi } from '@/api';
 import FullEditor from '../../../FullEditor';
-import { updateIssue } from '../../../../api/NewIssueApi';
 import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
@@ -47,7 +47,7 @@ const IssueDes = ({ reloadIssue }) => {
     };
     const newValue = value || editDes;
     if (newValue) {
-      returnBeforeTextUpload(newValue, obj, updateIssue, 'description')
+      returnBeforeTextUpload(newValue, obj, issueApi.update, 'description')
         .then(() => {
           if (reloadIssue) {
             reloadIssue(issueId);

@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import { stores, axios, Content } from '@choerodon/boot';
+import { stores } from '@choerodon/boot';
 import _ from 'lodash';
 import {
   Modal, Form, Input, Checkbox,
 } from 'choerodon-ui';
 
 import './CopyIssue.less';
+import { epicApi, issueApi } from '@/api';
 
 const { AppState } = stores;
 const FormItem = Form.Item;
@@ -46,7 +47,7 @@ class CopyIssue extends Component {
         this.setState({
           loading: true,
         });
-        axios.post(`/agile/v1/projects/${projectId}/issues/${issueId}/clone_issue?organizationId=${orgId}&applyType=${applyType}&orgId=${orgId}`, copyConditionVO)
+        issueApi.clone(issueId, applyType, copyConditionVO)
           .then((res) => {
             this.setState({
               loading: false,
@@ -59,7 +60,7 @@ class CopyIssue extends Component {
 
   checkEpicNameRepeat = (rule, value, callback) => {
     if (value && value.trim()) {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/check_epic_name?epicName=${value.trim()}`)
+      epicApi.checkName(value)
         .then((res) => {
           if (res) {
             callback('史诗名称重复');
@@ -77,8 +78,7 @@ class CopyIssue extends Component {
       visible, onCancel, issueNum, issueSummary, issue,
     } = this.props;
     const { getFieldDecorator } = this.props.form;
-    console.log('this.props.issue：');
-    console.log(this.props.issue);
+
     return (
       <Modal
         className="c7n-copyIssue"

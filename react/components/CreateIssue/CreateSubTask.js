@@ -1,12 +1,12 @@
 import React from 'react';
 import { getProjectName } from '@/utils/common';
+import { issueApi } from '@/api';
 import CreateIssue from './CreateIssue';
-import { createSubIssue } from '../../api/NewIssueApi';
 
 const CreateSubTask = ({ ...props }) => (
   <CreateIssue
     mode="sub_task"
-    request={createSubIssue}
+    request={issueApi.createSubtask}
     defaultTypeCode="sub_task"
     title="创建子任务"
     contentTitle={`在项目“${getProjectName()}”中创建子任务`}

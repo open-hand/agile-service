@@ -4,9 +4,9 @@ import {
   Button, Icon, Dropdown, Input, Menu, Form,
 } from 'choerodon-ui';
 import { getProjectId } from '@/utils/common';
+import { issueApi, fieldApi } from '@/api';
 import TypeTag from '../TypeTag';
 import { deBounce } from './Utils';
-import { createIssue, createIssueField } from '../../api/NewIssueApi';
 import './QuickCreateIssue.less';
 
 const debounceCallback = deBounce(500);
@@ -71,7 +71,7 @@ class QuickCreateIssue extends Component {
               this.setState({
                 loading: true,
               });
-              createIssue(issue).then((res) => {
+              issueApi.create(issue).then((res) => {
                 this.setState({
                   loading: false,
                   create: false,
@@ -81,8 +81,7 @@ class QuickCreateIssue extends Component {
                   context: res.typeCode,
                   pageCode: 'agile_issue_create',
                 };
-                
-                createIssueField(res.issueId, dto);
+                fieldApi.quickCreateDefault(res.issueId, dto);
                 if (onCreate) {
                   onCreate(res);
                 }

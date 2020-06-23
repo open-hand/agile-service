@@ -2,11 +2,12 @@
 /* eslint-disable react/jsx-indent-props */
 /* eslint-disable indent */
 import React, { useEffect } from 'react';
-import { Choerodon } from '@choerodon/boot'
+import { Choerodon } from '@choerodon/boot';
 import { observer, inject } from 'mobx-react-lite';
 import { withRouter, Link } from 'react-router-dom';
 import { Form, Input, Breadcrumb as Bread } from 'choerodon-ui';
 import { injectIntl, FormattedMessage } from 'react-intl';
+import { stateMachineSchemeApi } from '@/api';
 
 const FormItem = Form.Item;
 
@@ -25,7 +26,7 @@ function EditStateMachineSchemeName(props) {
           ...data,
           objectVersionNumber,
         };
-        StateMachineSchemeStore.editStateMachineScheme(orgId, id, newData).then((res) => {
+        stateMachineSchemeApi.update(id, newData).then((res) => {
           Choerodon.prompt('保存成功');
           StateMachineSchemeStore.loadStateMachineSchemeList(orgId, {
             current: 1,
@@ -47,7 +48,7 @@ function EditStateMachineSchemeName(props) {
   }, []);
   const checkName = async (rule, value, callback) => {
     const orgId = AppState.currentMenuType.organizationId;
-    const res = await StateMachineSchemeStore.checkName(orgId, value);
+    const res = await stateMachineSchemeApi.checkName(value);
     if (res) {
       callback(intl.formatMessage({ id: 'priority.create.name.error' }));
     } else {

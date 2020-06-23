@@ -2,8 +2,8 @@ import {
   observable, action, computed, toJS,
 } from 'mobx';
 import { find } from 'lodash';
-import axios from 'axios';
 import { store, stores, Choerodon } from '@choerodon/boot';
+import { workCalendarApi, statusApi, boardApi } from '@/api';
 
 const { AppState } = stores;
 
@@ -173,10 +173,9 @@ class ScrumBoardStore {
   }
 
   axiosCanAddStatus() {
-    axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/schemes/check_create_status_for_agile?applyType=agile`)
-      .then((data) => {
-        this.setCanAddStatus(data);
-      })
+    statusApi.checkCanCreateStatus().then((data) => {
+      this.setCanAddStatus(data);
+    })
       .catch((e) => {
         Choerodon.prompt(e.message);
       });
@@ -220,10 +219,6 @@ class ScrumBoardStore {
     this.allEpicData = data;
   }
 
-  axiosGetAllEpicData() {
-    const orgId = AppState.currentMenuType.organizationId;
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/epics?organizationId=${orgId}`);
-  }
 
   @computed get getEpicData() {
     return toJS(this.epicData);
@@ -239,13 +234,6 @@ class ScrumBoardStore {
 
   @action setQuickSearchList(data) {
     this.quickSearchList = data;
-  }
-
-  axiosGetQuickSearchList() {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/query_all`, {
-      contents: [],
-      filterName: '',
-    });
   }
 
   @computed get getSwimLaneCode() {
@@ -365,10 +353,7 @@ class ScrumBoardStore {
 
 
   setTransFromData(parentIssue, parentId) {
-    const projectId = AppState.currentMenuType.id;
-    axios.get(
-      `/agile/v1/projects/${projectId}/schemes/query_transforms?current_status_id=${parentIssue.statusId}&issue_id=${parentIssue.issueId}&issue_type_id=${parentIssue.issueTypeId}&apply_type=agile`,
-    ).then(
+    statusApi.loadTransformStatusByIssue(parentIssue.statusId, parentIssue.issueId, parentIssue.issueTypeId).then(
       action('fetchSuccess', (res) => {
         this.updatedParentIssue = this.interconnectedData.get(parentId);
         this.translateToCompleted = res.filter(transform => transform.statusVO.type === 'done');
@@ -389,10 +374,6 @@ class ScrumBoardStore {
     return this.updatedParentIssue;
   }
 
-  axiosUpdateIssueStatus(id, data) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issue_status/${id}`, data);
-  }
-
   @action updateStatusLocal(columnId, data, res) {
     const status = this.findStatusById(columnId, data.statusId);
     status.completed = res.completed;
@@ -404,14 +385,6 @@ class ScrumBoardStore {
     const column = find(data, { columnId });
     const status = find(column.subStatusDTOS, { statusId });
     return status;
-  }
-
-  axiosCheckRepeatName(name) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board_column/check?statusName=${name}`);
-  }
-
-  axiosUpdateMaxMinNum(columnId, data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/board_column/${columnId}/column_contraint`, data);
   }
 
   @computed get getIssueNumberCount() {
@@ -427,6 +400,27 @@ class ScrumBoardStore {
 
   @action setIssueNumberCount(data) {
     this.IssueNumberCount = data;
+  }
+
+  @computed get getClickIssueDetail() {
+    return this.clickIssueDetail;
+  }
+
+  /**
+   * 
+   * @param {*} parentIssueId 
+   * @param {*} isSkipIssue  是否为跳转问题 
+   */
+  @action resetCurrentClick(parentIssueId, isSkipIssue = false) {
+    if (this.currentClickTarget && !isSkipIssue) {
+      this.currentClickTarget.style.backgroundColor = '#fff';
+    }
+    this.currentClickTarget = null;
+    this.currentClick = parentIssueId;
+    if (this.allDataMap.get(parentIssueId)) {
+      this.clickIssueDetail = this.allDataMap.get(parentIssueId);
+    }
+    // this.clickIssueDetail = this.allDataMap.get(parentIssueId);
   }
 
   @action resetDataBeforeUnmount() {
@@ -473,28 +467,12 @@ class ScrumBoardStore {
     this.sprintNotClosedArray = sprintNotClosedArray;
   }
 
-  axiosDeleteBoard() {
-    return axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/board/${this.selectedBoardId}`);
-  }
-
-  axiosUpdateBoardDefault(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/board/user_setting/${data.boardId}?swimlaneBasedCode=${data.swimlaneBasedCode}`, {});
-  }
-
-  axiosUpdateBoard(data) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/board/${this.selectedBoardId}`, data);
-  }
-
   @computed get getCurrentConstraint() {
     return this.currentConstraint;
   }
 
   @action setCurrentConstraint(data) {
     this.currentConstraint = data;
-  }
-
-  axiosGetLookupValue(code) {
-    return axios.get(`/agile/v1/lookup_values/${code}`);
   }
 
   @computed get getLookupValue() {
@@ -511,10 +489,6 @@ class ScrumBoardStore {
 
   @action setUnParentIds(data) {
     this.unParentIds = data;
-  }
-
-  axiosUpdateColumn(columnId, data, boardId) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/board_column/${columnId}?boardId=${boardId}`, data);
   }
 
   @computed get getSelectedBoard() {
@@ -550,20 +524,12 @@ class ScrumBoardStore {
     this.currentConstraint = columnConstraint;
   }
 
-  axiosGetBoardList() {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board`);
-  }
-
   @computed get getStatusCategory() {
     return toJS(this.statusCategory);
   }
 
   @action setStatusCategory(data) {
     this.statusCategory = data;
-  }
-
-  axiosGetStatusCategory() {
-    return axios.get('/agile/v1/lookup_values/status_category');
   }
 
   @computed get getParentIds() {
@@ -604,52 +570,18 @@ class ScrumBoardStore {
     return this.calanderCouldUse;
   }
 
-  axiosUpdateColumnSequence(boardId, data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/board_column/column_sort`, data);
-  }
-
-  axiosDeleteColumn(columnId) {
-    return axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/board_column/${columnId}`);
-  }
-
-  axiosAddColumn(categoryCode, data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/board_column?categoryCode=${categoryCode}&applyType=agile`, data);
-  }
-
-  axiosAddStatus(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issue_status?applyType=agile`, data);
-  }
-
-  // eslint-disable-next-line consistent-return
-  axiosGetBoardDataBySetting(boardId) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board/${boardId}/all_data/${AppState.currentMenuType.organizationId}`);
-  }
-
   axiosGetBoardData(boardId) {
     const {
       onlyMe, onlyStory, quickSearchArray, assigneeFilterIds, sprintId,
     } = this.quickSearchObj;
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board/${boardId}/all_data/${AppState.currentMenuType.organizationId}?${onlyMe ? `assigneeId=${AppState.getUserId}&` : ''}onlyStory=${onlyStory}&quickFilterIds=${quickSearchArray}${assigneeFilterIds.length > 0 ? `&assigneeFilterIds=${assigneeFilterIds}` : ''}${sprintId ? `&sprintId=${sprintId}` : ''}`);
-  }
-
-  axiosFilterBoardData(boardId, assign, recent) {
-    if (assign === 0) {
-      return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board/${boardId}/all_data/${AppState.currentMenuType.organizationId}?onlyStory=${recent}`);
-    } else {
-      return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board/${boardId}/all_data/${AppState.currentMenuType.organizationId}?assigneeId=${assign}&onlyStory=${recent}`);
-    }
-  }
-
-  axiosGetUnsetData(boardId) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issue_status/list_by_options?boardId=${boardId}&applyType=agile`);
-  }
-
-  axiosStatusCanBeDelete(code) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/schemes/check_remove_status_for_agile?status_id=${code}&applyType=agile`);
-  }
-
-  axiosDeleteStatus(code) {
-    return axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/issue_status/${code}?applyType=agile`);
+    return boardApi.load(boardId,
+      { 
+        onlyMe,
+        onlyStory,
+        quickFilterIds: quickSearchArray,
+        assigneeFilterIds,
+        sprintId,
+      });
   }
 
   updateIssue = (
@@ -686,16 +618,9 @@ class ScrumBoardStore {
       rankFlag: true,
     };
     const { id: transformId } = this.stateMachineMap[issueTypeId] ? this.stateMachineMap[issueTypeId][startStatus].find(issue => issue.endStatusId === parseInt(destinationStatus, 10)) : this.stateMachineMap[0][startStatus].find(issue => issue.endStatusId === parseInt(destinationStatus, 10));
-    return axios.post(`/agile/v1/projects/${proId}/board/issue/${issueId}/move?transformId=${transformId}`, data);
+    return boardApi.moveIssue(issueId, transformId, data);
   };
 
-  moveStatusToUnset(code, data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issue_status/${code}/move_to_uncorrespond`, data);
-  }
-
-  moveStatusToColumn(code, data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issue_status/${code}/move_to_column`, data);
-  }
 
   @computed get getDragStartItem() {
     return this.dragStartItem;
@@ -715,24 +640,13 @@ class ScrumBoardStore {
 
   // 查询组织层工作日历设置
   axiosGetWorkSetting(year) {
-    const proId = AppState.currentMenuType.id;
-    const orgId = AppState.currentMenuType.organizationId;
-    return axios.get(`/iam/choerodon/v1/projects/${proId}/time_zone_work_calendars/time_zone_detail/${orgId}?year=${year}`).then((data) => {
+    return workCalendarApi.getWorkSetting(year).then((data) => {
       if (data) {
         this.setWorkSetting(data);
       }
     });
   }
 
-  axiosDeleteCalendarData(calendarId) {
-    const proId = AppState.currentMenuType.id;
-    return axios.delete(`/agile/v1/projects/${proId}/work_calendar_ref/${calendarId}`);
-  }
-
-  axiosCreateCalendarData(sprintId, data) {
-    const proId = AppState.currentMenuType.id;
-    return axios.post(`/agile/v1/projects/${proId}/work_calendar_ref/sprint/${sprintId}`, data);
-  }
 
   @action setWorkDate(data) {
     if (data.sprintId) {
@@ -747,8 +661,7 @@ class ScrumBoardStore {
 
   // 获取项目层工作日历
   axiosGetCalendarData = (year) => {
-    const proId = AppState.currentMenuType.id;
-    return axios.get(`/agile/v1/projects/${proId}/work_calendar_ref/sprint?year=${year}`).then((data) => {
+    workCalendarApi.getCalendar(year).then((data) => {
       if (data) {
         this.setWorkDate(data);
       } else {
@@ -767,21 +680,8 @@ class ScrumBoardStore {
     this.issueTypes = data;
   }
 
-  axiosGetIssueTypes() {
-    const proId = AppState.currentMenuType.id;
-    return axios.get(`/agile/v1/projects/${proId}/schemes/query_issue_types_with_sm_id?apply_type=agile`);
-  }
-
-  loadTransforms = (statusId, issueId, typeId) => {
-    const projectId = AppState.currentMenuType.id;
-    return axios.get(
-      `/agile/v1/projects/${projectId}/schemes/query_transforms?current_status_id=${statusId}&issue_id=${issueId}&issue_type_id=${typeId}&apply_type=agile`,
-    );
-  }
-
   loadStatus = () => {
-    const projectId = AppState.currentMenuType.id;
-    axios.get(`/agile/v1/projects/${projectId}/schemes/query_status_by_project_id?apply_type=agile`).then((data) => {
+    statusApi.loadByProject().then((data) => {
       if (data && !data.failed) {
         this.setStatusList(data);
       } else {
@@ -791,30 +691,6 @@ class ScrumBoardStore {
       this.setStatusList([]);
     });
   };
-
-  axiosGetStateMachine = () => {
-    const projectId = AppState.currentMenuType.id;
-    return axios.get(`/agile/v1/projects/${projectId}/schemes/query_transforms_map?apply_type=agile`);
-  }
-
-  axiosUpdateIssue(data) {
-    const proId = AppState.currentMenuType.id;
-    const { issueId, objectVersionNumber, transformId } = data;
-    return axios.put(`/agile/v1/projects/${proId}/issues/update_status?applyType=agile&transformId=${transformId}&issueId=${issueId}&objectVersionNumber=${objectVersionNumber}`);
-  }
-
-  // 校验看板名称是否重复
-  checkBoardNameRepeat = (proId, name) => axios.get(
-    `/agile/v1/projects/${proId}/board/check_name?boardName=${name}`,
-  );
-
-  // @action async scrumBoardInit(AppState, url) {
-  //   try {
-  //     const boardData = await this.axiosGetBoardList;
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // };
 
   @action setSpinIf(data) {
     // this.currentSprintExist = false;

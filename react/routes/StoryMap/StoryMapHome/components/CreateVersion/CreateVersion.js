@@ -3,7 +3,7 @@ import { Modal, Form, Input } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react';
 import { getProjectId } from '@/utils/common';
-import { createVersion, checkVersionNameRepeat } from '../../../../../api/NewIssueApi';
+import { versionApi } from '@/api';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 
 const FormItem = Form.Item;
@@ -22,17 +22,6 @@ class CreateVersion extends Component {
         this.setState({
           loading: true,
         });
-        // if (type === 'sprint') {
-        //   // 创建冲刺
-        //   axios.post(`/agile/v1/projects/${projectId}/sprint/create?sprintName=${name}`)
-        //     .then((res) => {
-        //       this.setState({ loading: false });
-        //       onOk();
-        //     })
-        //     .catch((error) => {
-        //       this.setState({ loading: false });
-        //     });
-        // } else {
         // 创建版本
         const versionCreateVO = {
           name,
@@ -40,7 +29,7 @@ class CreateVersion extends Component {
           releaseDate: null,
           startDate: null,
         };
-        createVersion(versionCreateVO).then((res) => {
+        versionApi.create(versionCreateVO).then((res) => {
           if (!res.failed) {
             resetFields();
             onOk(res);
@@ -50,7 +39,6 @@ class CreateVersion extends Component {
           this.setState({ loading: false });
         })
           .catch((error) => {
-            console.log(error);
             this.setState({ loading: false });
           });
         // }
@@ -64,7 +52,7 @@ class CreateVersion extends Component {
    * @memberof CreateVersion
    */
   checkVersionNameRepeat = (rule, value, callback) => {
-    checkVersionNameRepeat(value).then((res) => {
+    versionApi.checkName(value.trim()).then((res) => {
       if (res) {
         callback('版本名称重复');
       } else {

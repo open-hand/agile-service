@@ -34,7 +34,9 @@
         from agile_issue ai
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         left join agile_rank ar on ar.project_id = #{projectId} and ai.issue_id = ar.issue_id and ar.type = 'epic'
-        where ai.issue_id in
+        where
+              ai.project_id = #{projectId}
+          AND ai.issue_id in
         <foreach collection="epicIds" item="epicId" open="(" separator=","
                  close=")">
             #{epicId}
@@ -100,6 +102,48 @@
                      close=")">
                 #{statusId}
             </foreach>
+        </if>
+        <if test="searchVO != null">
+            <if test="searchVO.advancedSearchArgs != null">
+                <if test="searchVO.advancedSearchArgs.components != null and searchVO.advancedSearchArgs.components.size > 0">
+                    AND EXISTS(select 1 from agile_component_issue_rel aic where aic.issue_id = ai.issue_id AND aic.component_id IN
+                    <foreach collection="searchVO.advancedSearchArgs.components" open="(" close=")" separator="," item="componentId">
+                        #{componentId}
+                    </foreach>
+                    )
+                </if>
+                <if test="searchVO.advancedSearchArgs.sprints != null and searchVO.advancedSearchArgs.sprints.size > 0">
+                    AND EXISTS(select 1 from agile_issue_sprint_rel aisr where aisr.issue_id = ai.issue_id AND aisr.sprint_id IN
+                    <foreach collection="searchVO.advancedSearchArgs.sprints" open="(" close=")" separator="," item="sprintId">
+                        #{sprintId}
+                    </foreach>
+                    )
+                </if>
+                <if test='searchVO.advancedSearchArgs.isCompleted != null
+                        and searchVO.advancedSearchArgs.isCompleted
+                        and searchVO.advancedSearchArgs.statusIdList != null
+                        and searchVO.advancedSearchArgs.statusIdList.size > 0'>
+                    AND ai.status_id IN
+                    <foreach collection="searchVO.advancedSearchArgs.statusIdList" item="statusId" separator="," open="(" close=")">
+                        #{statusId}
+                    </foreach>
+                </if>
+                <if test='searchVO.advancedSearchArgs.isCompleted != null
+                        and !searchVO.advancedSearchArgs.isCompleted
+                        and searchVO.advancedSearchArgs.statusIdList != null
+                        and searchVO.advancedSearchArgs.statusIdList.size > 0'>
+                    AND ai.status_id IN
+                    <foreach collection="searchVO.advancedSearchArgs.statusIdList" item="statusId" separator="," open="(" close=")">
+                        #{statusId}
+                    </foreach>
+                </if>
+                <if test="searchVO.advancedSearchArgs.prioritys != null and searchVO.advancedSearchArgs.prioritys.size > 0">
+                    AND ai.priority_id IN
+                    <foreach collection="searchVO.advancedSearchArgs.prioritys" open="(" close=")" separator="," item="priorityId">
+                        #{priorityId}
+                    </foreach>
+                </if>
+            </if>
         </if>
         order by ai.issue_id
     </select>

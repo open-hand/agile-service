@@ -8,6 +8,7 @@ import {
   FieldSummary, FieldInput, FieldTeam, FieldProgramSprint,
 } from './Field';
 import EditIssueContext from '../../stores';
+import FieldPro from './Field/FieldPro';
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
 
@@ -15,6 +16,7 @@ const IssueField = observer((props) => {
   const {
     store, applyType, saveFieldVersionRef, saveFieldFixVersionRef,
   } = useContext(EditIssueContext);
+  const renderNormalField = field => (<FieldPro {...props} field={field} />);
   const getFieldComponent = (field) => {
     const issue = store.getIssue;
     const activePiTeams = issue.activePiTeams || [];
@@ -74,7 +76,7 @@ const IssueField = observer((props) => {
       case 'teams':
         return ([<FieldTeam {...props} field={field} />, <FieldProgramSprint {...props} field={field} key={teamIds} />]);
       default:
-        return (<Field {...props} field={field} />);
+        return renderNormalField(field);
     }
   };
   const issue = store.getIssue;

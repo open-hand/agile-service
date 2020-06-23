@@ -41,7 +41,7 @@ const DeleteComponent = (props) => {
     } else {
       localRelatedComponentId = relatedComponentId;
     }
-    await componentApi.deleteComponent(componentId, localRelatedComponentId);
+    await componentApi.delete(componentId, localRelatedComponentId);
     props.onOk();
     return true;
   };

@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import { axios, stores } from '@choerodon/boot';
 import './Remain.less';
 import { Spin } from 'choerodon-ui';
+import { sprintApi } from '@/api';
 import Progress from '../../../../../components/Progress';
 
-const { AppState } = stores;
 class Remain extends Component {
   constructor(props) {
     super(props);
@@ -35,9 +34,7 @@ class Remain extends Component {
       });
     } else {
       this.setState({ loading: true });
-      const projectId = AppState.currentMenuType.id;
-      const orgId = AppState.currentMenuType.organizationId;
-      axios.get(`/agile/v1/projects/${projectId}/iterative_worktable/sprint/${orgId}?sprintId=${sprintId}`)
+      sprintApi.getSprintCombineOrgId(sprintId)
         .then((res) => {
           this.setState({
             sprintInfo: res,

@@ -9,9 +9,9 @@ import {
 } from '@choerodon/boot';
 import { find } from 'lodash';
 import { getProjectId, getOrganizationId } from '@/utils/common';
-import { batchUpdateIssue } from '@/api/NewIssueApi';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import WSProvider from '@choerodon/master/lib/containers/components/c7n/tools/ws/WSProvider';
+import { fieldApi } from '@/api';
 import useFields from './useFields';
 import renderField from './renderField';
 import styles from './index.less';
@@ -173,10 +173,6 @@ function BatchModal({
       name: 'featureId',
       type: 'number',
       label: '所属特性',
-      lookupAxiosConfig: () => ({
-        url: `/agile/v1/projects/${getProjectId()}/issues/feature/select_data?organizationId=${getOrganizationId()}`,
-        method: 'get',
-      }),
       valueField: 'issueId',
       textField: 'summary',
     }] : [{
@@ -281,7 +277,7 @@ function BatchModal({
     const data = getData();
     const issueIds = tableDataSet.selected.map(record => record.get('issueId'));
     const res = { issueIds, ...formatFields(fieldData, data, dataSet) };
-    await batchUpdateIssue(res);
+    await fieldApi.batchUpdateIssue(res);
     setLoading(true);
   };
 
@@ -389,7 +385,7 @@ function BatchModal({
     <div style={{ padding: 15 }}>
       <WSProvider server={Choerodon.WEBSOCKET_SERVER}>
         <WSHandler
-          messageKey="agile-batch-update-field"
+          messageKey={`agile-batch-update-field-${getProjectId()}`}
           onMessage={handleMessage}
         >
           {render()}

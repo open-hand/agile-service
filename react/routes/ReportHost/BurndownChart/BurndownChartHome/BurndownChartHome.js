@@ -10,6 +10,7 @@ import ReactEcharts from 'echarts-for-react';
 import _ from 'lodash';
 import Moment from 'moment';
 import { extendMoment } from 'moment-range';
+import { sprintApi, reportApi } from '@/api';
 import BurndownChartStore from '../../../../stores/project/burndownChart/BurndownChartStore';
 import './BurndownChartHome.less';
 import NoDataComponent from '../../Component/noData';
@@ -81,7 +82,7 @@ class BurndownChartHome extends Component {
   }
 
   axiosGetRestDays = () => {
-    BurndownChartStore.axiosGetRestDays(this.state.defaultSprintId).then((res) => {
+    sprintApi.getRestDays(this.state.defaultSprintId).then((res) => {
       this.setState({
         restDays: res.map(date => moment(date).format('YYYY-MM-DD')),
       }, () => {
@@ -92,7 +93,7 @@ class BurndownChartHome extends Component {
 
   getChartCoordinate() {
     this.setState({ chartLoading: true });
-    BurndownChartStore.axiosGetBurndownCoordinate(this.state.defaultSprintId, this.state.select).then((res) => {
+    reportApi.loadBurnDownCoordinate(this.state.defaultSprintId, this.state.select).then((res) => {
       this.setState({
         chartLoading: false,
       });
@@ -185,8 +186,7 @@ class BurndownChartHome extends Component {
     this.setState({
       tableLoading: true,
     });
-    BurndownChartStore
-      .axiosGetBurndownChartReport(this.state.defaultSprintId, this.state.select).then((res) => {
+    reportApi.loadSprintBurnDown(this.state.defaultSprintId, this.state.select).then((res) => {
         const data = res;
         const newData = [];
         // 将操作日期相同的合并

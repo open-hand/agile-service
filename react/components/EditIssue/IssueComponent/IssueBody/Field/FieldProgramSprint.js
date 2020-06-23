@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { Select, Tooltip } from 'choerodon-ui';
 import { map, isEqual } from 'lodash';
 import { featureApi } from '@/api';
-import { getTeamSprints } from '@/api/PIApi';
+import { sprintApi } from '@/api';
 import TextEditToggle from '../../../../TextEditToggle';
 
 const { Option, OptGroup } = Select;
@@ -41,7 +41,7 @@ const { Text, Edit } = TextEditToggle;
     if (!id || teamIds.length === 0) {
       return;
     }
-    getTeamSprints(id, teamIds).then((res) => {
+    sprintApi.getTeamSprints(id, teamIds).then((res) => {
       this.setState({
         originSprints: res,
         selectLoading: false,

@@ -139,8 +139,9 @@ public class FieldValueController {
                                                    @PathVariable("project_id") Long projectId,
                                                    @ApiParam(value = "方案编码", required = true)
                                                    @RequestParam String schemeCode,
+                                                   @RequestParam String applyType,
                                                    @RequestBody  BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
-        issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo);
+        issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo,applyType);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

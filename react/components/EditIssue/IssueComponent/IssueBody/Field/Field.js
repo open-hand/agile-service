@@ -1,17 +1,14 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { Choerodon } from '@choerodon/boot';
-import { withRouter } from 'react-router-dom';
 import moment from 'moment';
 import _ from 'lodash';
 import {
   Checkbox, Select, Input, TimePicker, Row, Col, Radio, DatePicker, InputNumber,
 } from 'choerodon-ui';
-import { injectIntl } from 'react-intl';
-import { userApi } from '@/api';
+import { userApi, fieldApi } from '@/api';
 import TextEditToggle from '../../../../TextEditToggle';
 import SelectFocusLoad from '../../../../SelectFocusLoad';
-import { updateFieldValue } from '../../../../../api/NewIssueApi';
 import UserHead from '../../../../UserHead';
 import './Field.less';
 
@@ -22,7 +19,7 @@ const { Text, Edit } = TextEditToggle;
 let sign = false;
 
 @inject('AppState')
-@observer class IssueField extends Component {
+@observer class Field extends Component {
   debounceFilterIssues = _.debounce((input) => {
     this.setState({ selectLoading: true });
     userApi.getAllInProject(input).then((res) => {
@@ -84,7 +81,7 @@ let sign = false;
         fieldType,
         value: newValue,
       };
-      updateFieldValue(issueId, fieldId, 'agile_issue', obj)
+      fieldApi.updateFieldValue(issueId, fieldId, 'agile_issue', obj)
         .then(() => {
           if (onUpdate) {
             onUpdate();
@@ -349,4 +346,4 @@ let sign = false;
   }
 }
 
-export default withRouter(injectIntl(IssueField));
+export default Field;

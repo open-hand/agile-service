@@ -7,6 +7,7 @@ import {
 import moment from 'moment';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import WorkCalendar from '@/components/WorkCalendar';
+import { workCalendarApi } from '@/api';
 
 const { AppState } = stores;
 const { Option } = Select;
@@ -17,11 +18,11 @@ class WorkCalendarPage extends Component {
     const { sprintId } = ScrumBoardStore.getWorkDate;
     const year = moment().year();
     if (data.calendarId) {
-      ScrumBoardStore.axiosDeleteCalendarData(data.calendarId).then(() => {
+      workCalendarApi.delete(data.calendarId).then(() => {
         ScrumBoardStore.axiosGetCalendarData(year);
       });
     } else {
-      ScrumBoardStore.axiosCreateCalendarData(sprintId, data).then(() => {
+      workCalendarApi.create(sprintId, data).then(() => {
         ScrumBoardStore.axiosGetCalendarData(year);
       });
     }

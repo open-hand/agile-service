@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import { stores, axios } from '@choerodon/boot';
+import { stores } from '@choerodon/boot';
 import ReactEcharts from 'echarts-for-react';
 import { Icon, Spin } from 'choerodon-ui';
+import { sprintApi } from '@/api';
 import pic from './no_issue.png';
 import EmptyBlockDashboard from '../../../../components/EmptyBlockDashboard';
 import './IssueType.less';
 
-const { AppState } = stores;
 
 class IssueType extends Component {
   constructor(props) {
@@ -163,24 +163,21 @@ class IssueType extends Component {
   }
 
   loadIssueTypeData(sprintId) {
-    const projectId = AppState.currentMenuType.id;
-    const orgId = AppState.currentMenuType.organizationId;
     this.setState({
       loading: true,
     });
-    axios.get(`/agile/v1/projects/${projectId}/iterative_worktable/issue_type?organizationId=${orgId}&sprintId=${sprintId}`)
-      .then((res) => {
-        if (res && res.length) {
-          this.setState({
-            loading: false,
-            issueTypeInfo: res,
-          });
-        } else {
-          this.setState({
-            loading: false,
-          });
-        }
-      });
+    sprintApi.getIssueTypeDistribute(sprintId).then((res) => {
+      if (res && res.length) {
+        this.setState({
+          loading: false,
+          issueTypeInfo: res,
+        });
+      } else {
+        this.setState({
+          loading: false,
+        });
+      }
+    });
   }
 
 

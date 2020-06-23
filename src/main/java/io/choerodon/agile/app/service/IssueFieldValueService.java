@@ -18,6 +18,6 @@ public interface IssueFieldValueService {
      * @param schemeCode
      * @param batchUpdateFieldsValueVo
      */
-    void asyncUpdateFields(Long projectId, String schemeCode, BatchUpdateFieldsValueVo batchUpdateFieldsValueVo);
+    void asyncUpdateFields(Long projectId, String schemeCode, BatchUpdateFieldsValueVo batchUpdateFieldsValueVo,String applyType);
 
 }

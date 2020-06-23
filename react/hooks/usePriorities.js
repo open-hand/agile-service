@@ -1,11 +1,11 @@
 import {
   useContext, createContext, 
 } from 'react';
-import { loadPriorities } from '@/api/NewIssueApi';
+import { priorityApi } from '@/api';
 
 const PriorityContext = createContext({
   data: [],
-  refresh: loadPriorities,
+  refresh: priorityApi.loadByProject.bind(priorityApi),
 });
 export { PriorityContext };
 

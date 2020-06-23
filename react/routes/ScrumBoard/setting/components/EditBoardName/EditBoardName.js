@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import {
-  stores, axios, Content, Choerodon, 
+  stores, Content, Choerodon, 
 } from '@choerodon/boot';
 import { withRouter } from 'react-router-dom';
 import {
   Form, Input, Button, Spin,
 } from 'choerodon-ui';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
+import { boardApi } from '@/api';
 
 const { AppState } = stores;
 const FormItem = Form.Item;
@@ -38,19 +39,18 @@ class EditBoardName extends Component {
     if (initialBoardName === value) {
       callback();
     }
-    ScrumBoardStore.checkBoardNameRepeat(proId, value)
-      .then((res) => {
-        if (res) {
-          callback('看板名称重复');
-        } else {
-          this.setState(
-            {
-              boardName: value,
-            },
-          );
-          callback();
-        }
-      });
+    boardApi.checkName(value).then((res) => {
+      if (res) {
+        callback('看板名称重复');
+      } else {
+        this.setState(
+          {
+            boardName: value,
+          },
+        );
+        callback();
+      }
+    });
   };
 
   handleUpdateBoardName = () => {
@@ -71,15 +71,14 @@ class EditBoardName extends Component {
           loading: true,
           lastBoardName: value.boardName,
         });
-        axios.put(`/agile/v1/projects/${data.projectId}/board/${data.boardId}?boardName=${encodeURIComponent(data.name)}`, data)
-          .then((res) => {
-            this.setState({
-              loading: false,
-            });
-            ScrumBoardStore.setBoardList(ScrumBoardStore.getSelectedBoard, res);
-            Choerodon.prompt('保存成功');
-            // history.push(`/agile/scrumboard?type=project&id=${data.projectId}&name=${encodeURIComponent(AppState.currentMenuType.name)}&organizationId=${AppState.currentMenuType.organizationId}`);
+        boardApi.update(data.boardId, data).then((res) => {
+          this.setState({
+            loading: false,
           });
+          ScrumBoardStore.setBoardList(ScrumBoardStore.getSelectedBoard, res);
+          Choerodon.prompt('保存成功');
+          // history.push(`/agile/scrumboard?type=project&id=${data.projectId}&name=${encodeURIComponent(AppState.currentMenuType.name)}&organizationId=${AppState.currentMenuType.organizationId}`);
+        });
       }
     });
   }

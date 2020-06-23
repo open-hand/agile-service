@@ -196,7 +196,7 @@ public class FieldValueServiceImpl implements FieldValueService {
     }
 
     @Override
-    public void handlerPredefinedFields(Long projectId, List<Long> issueIds, JSONObject predefinedFields,BatchUpdateFieldStatusVO batchUpdateFieldStatusVO) {
+    public void handlerPredefinedFields(Long projectId, List<Long> issueIds, JSONObject predefinedFields,BatchUpdateFieldStatusVO batchUpdateFieldStatusVO,String appleType) {
         List<IssueDTO> issueDTOS = issueMapper.listIssueInfoByIssueIds(projectId, issueIds);
         if (CollectionUtils.isEmpty(issueDTOS)) {
             throw new CommonException("error.issues.null");
@@ -243,12 +243,12 @@ public class FieldValueServiceImpl implements FieldValueService {
             }
             // 修改issue的状态
             if (!ObjectUtils.isEmpty(statusId)) {
-                List<TransformVO> transformVOS = projectConfigService.queryTransformsByProjectId(projectId, v.getStatusId(), v.getIssueId(), v.getIssueTypeId(), "agile");
+                List<TransformVO> transformVOS = projectConfigService.queryTransformsByProjectId(projectId, v.getStatusId(), v.getIssueId(), v.getIssueTypeId(), appleType);
                 if (!CollectionUtils.isEmpty(transformVOS)) {
                     Map<Long, TransformVO> map = transformVOS.stream().collect(Collectors.toMap(TransformVO::getEndStatusId, Function.identity()));
                     TransformVO transformVO = map.get(statusId);
                     if (!ObjectUtils.isEmpty(transformVO)) {
-                        issueService.updateIssueStatus(projectId, v.getIssueId(), transformVO.getId(), transformVO.getStatusVO().getObjectVersionNumber(), "agile");
+                        issueService.updateIssueStatus(projectId, v.getIssueId(), transformVO.getId(), transformVO.getStatusVO().getObjectVersionNumber(), appleType);
                     }
                 }
             }

@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import { Content, Choerodon } from '@choerodon/boot';
 import { Select } from 'choerodon-ui';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
+import { boardApi } from '@/api';
 
 const { Option } = Select;
 
@@ -17,12 +18,8 @@ class SwimLanePage extends Component {
 
   handleSave(select) {
     const { selectValue, selectedValue } = this.state;
-    const data = {
-      // objectVersionNumber: select.objectVersionNumber,
-      boardId: select.boardId,
-      swimlaneBasedCode: selectValue || ScrumBoardStore.getSwimLaneCode,
-    };
-    ScrumBoardStore.axiosUpdateBoardDefault(data).then((res) => {
+ 
+    boardApi.updateUserSetting(select.boardId, selectValue || ScrumBoardStore.getSwimLaneCode).then((res) => {
       ScrumBoardStore.setSwimLaneCode(selectedValue);
       Choerodon.prompt('保存成功');
     }).catch((error) => {

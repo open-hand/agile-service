@@ -40,15 +40,7 @@ export function configTheme({
     maxTagPlaceholder: renderPlaceHolder,
   };
 }
-// 捕获failed异常错误code
-export function catchFailed(res) {
-  const { failed } = res;
-  if (failed) {
-    throw res.message;
-  } else {
-    return res;
-  }
-}
+
 
 // 获取文件名后缀
 export function getFileSuffix(fileName) {
