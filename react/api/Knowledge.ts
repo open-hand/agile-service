@@ -1,5 +1,5 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId } from '@/utils/common';
+import { getProjectId, getOrganizationId } from '@/utils/common';
 
 interface IIssueRelation {
   issueId:number,
@@ -27,6 +27,20 @@ class KnowledgeApi {
    */
   loadByIssue(issueId: number) {
     return axios.get(`${this.prefix}/knowledge_relation/issue/${issueId}`);
+  }
+
+  /**
+   * 查询当前项目下可用的知识库中的全部文档
+   */
+  loadAllCurrentProject() {
+    const organizationId = getOrganizationId();
+    return axios({
+      method: 'get',
+      url: `/knowledge/v1/projects/${getProjectId()}/work_space/all_space`,
+      params: {
+        organizationId,
+      },
+    });
   }
 
   /**

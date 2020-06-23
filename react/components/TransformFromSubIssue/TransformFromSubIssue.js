@@ -1,14 +1,12 @@
 import React, { Component } from 'react';
-import { stores, axios } from '@choerodon/boot';
 import {
   Modal, Form, Select, Input,
 } from 'choerodon-ui';
-import { issueApi, issueTypeApi } from '@/api';
+import { issueApi, issueTypeApi, statusApi } from '@/api';
 import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 import TypeTag from '../TypeTag';
 import './TransformFromSubIssue.less';
 
-const { AppState } = stores;
 const { Sidebar } = Modal;
 const FormItem = Form.Item;
 const { Option } = Select;
@@ -39,15 +37,13 @@ class TransformFromSubIssue extends Component {
       selectLoading: true,
     });
     const { issueTypeId } = this.state;
-    const proId = AppState.currentMenuType.id;
     if (issueTypeId) {
-      axios.get(`/agile/v1/projects/${proId}/schemes/query_status_by_issue_type_id?issue_type_id=${issueTypeId}&apply_type=agile`)
-        .then((res) => {
-          this.setState({
-            selectLoading: false,
-            originStatus: res,
-          });
+      statusApi.loadAllForIssueType(issueTypeId).then((res) => {
+        this.setState({
+          selectLoading: false,
+          originStatus: res,
         });
+      });
     } else {
       this.setState({
         selectLoading: false,

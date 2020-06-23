@@ -1,9 +1,14 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
+import { getOrganizationId } from '@/utils/common';
 
 class IssueTypeApi {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
+  }
+
+  get OrgPrefix() {
+    return `/agile/v1/organizations/${getOrganizationId()}`;
   }
 
   /**
@@ -30,6 +35,20 @@ class IssueTypeApi {
       url: `${this.prefix}/schemes/query_issue_types`,
       params: {
         apply_type: applyType,
+      },
+    });
+  }
+
+  /**
+   * 根据方案id查询所有问题类型及关联的方案
+   * @param schemeId 
+   */
+  loadAllByScheme(schemeId:number) {
+    return axios({
+      method: 'get',
+      url: `${this.OrgPrefix}/issue_type/query_issue_type_with_state_machine`,
+      params: {
+        schemeId,
       },
     });
   }

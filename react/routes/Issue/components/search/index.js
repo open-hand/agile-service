@@ -2,7 +2,6 @@
 import React, {
   useContext, useEffect, useState, Fragment,
 } from 'react';
-import { axios } from '@choerodon/boot';
 import queryString from 'querystring';
 import { withRouter } from 'react-router-dom';
 import {

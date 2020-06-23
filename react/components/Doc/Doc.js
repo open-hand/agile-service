@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
-import { stores, axios, Choerodon } from '@choerodon/boot';
+import { stores, Choerodon } from '@choerodon/boot';
 import {
   Modal,
   Table,
 } from 'choerodon-ui';
 import './Doc.less';
 import { produce } from 'immer';
-import { getOrganizationId } from '@/utils/common';
 import { knowledgeApi } from '@/api';
 
 const { AppState } = stores;
@@ -30,12 +29,10 @@ class Doc extends Component {
   }
 
   loadDoc = async () => {
-    const menu = AppState.currentMenuType;
-    const { id: proId } = menu;
     this.setState({
       loading: true,
     });
-    const newData = await axios.get(`/knowledge/v1/projects/${proId}/work_space/all_space?organizationId=${getOrganizationId()}&orgId=${getOrganizationId()}`);
+    const newData = await knowledgeApi.loadAllCurrentProject();
     if (newData && !newData.failed) {
       this.setState({
         data: newData,

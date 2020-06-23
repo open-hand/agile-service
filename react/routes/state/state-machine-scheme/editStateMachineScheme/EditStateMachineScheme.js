@@ -19,6 +19,7 @@ import {
 } from '@choerodon/boot';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import queryString from 'query-string';
+import { stateMachineSchemeApi } from '@/api';
 import Graph from '../../../../components/Graph';
 import './EditStateMachineScheme.less';
 
@@ -236,13 +237,7 @@ class EditStateMachineScheme extends Component {
       loading: true,
     });
     const schemeVOS = StateMachineSchemeStore.getSchemeVOS;
-
-    StateMachineSchemeStore.saveStateMachine(
-      organizationId,
-      schemeId,
-      stateMachineId,
-      schemeVOS,
-    ).then(() => {
+    stateMachineSchemeApi.createConfig(schemeId, stateMachineId, schemeVOS).then(() => {
       this.setState({
         loading: false,
         machineId: false,
@@ -255,9 +250,7 @@ class EditStateMachineScheme extends Component {
   // 删除行
   handleDelete = (deleteId) => {
     const { schemeId } = this.state;
-    const { StateMachineSchemeStore } = this.props;
-    const { organizationId } = AppState.currentMenuType;
-    StateMachineSchemeStore.deleteStateMachine(organizationId, schemeId, deleteId).then(() => {
+    stateMachineSchemeApi.deleteConfig(schemeId, deleteId).then(() => {
       this.refresh();
     });
   };
@@ -431,9 +424,8 @@ class EditStateMachineScheme extends Component {
   confirmDelete = () => {
     const { schemeId } = this.state;
     const { StateMachineSchemeStore } = this.props;
-    const { organizationId } = AppState.currentMenuType;
     StateMachineSchemeStore.setIsMachineDeleteVisible(false);
-    StateMachineSchemeStore.deleteDraft(organizationId, schemeId).then(() => {
+    stateMachineSchemeApi.deleteDraft(schemeId).then(() => {
       this.loadStateMachine();
     });
   };
@@ -609,7 +601,7 @@ class EditStateMachineScheme extends Component {
           [code]: this.state[code],
           objectVersionNumber,
         };
-        StateMachineSchemeStore.editStateMachineScheme(orgId, schemeId, data).then(() => {
+        stateMachineSchemeApi.update(schemeId, data).then(() => {
           this.refresh();
           this.setState({
             currentRae: undefined,
@@ -639,7 +631,7 @@ class EditStateMachineScheme extends Component {
       [code]: newName,
     });
     if (name !== newName) {
-      const res = await StateMachineSchemeStore.checkName(orgId, newName);
+      const res = await stateMachineSchemeApi.checkName(newName);
       if (res) {
         error = intl.formatMessage({ id: 'priority.create.name.error' });
       }

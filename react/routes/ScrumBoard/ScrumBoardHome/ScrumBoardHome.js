@@ -9,7 +9,7 @@ import {
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
 import {
-  sprintApi, issueApi, epicApi, issueTypeApi, statusApi, 
+  sprintApi, issueApi, epicApi, issueTypeApi, statusApi, boardApi, 
 } from '@/api';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
@@ -73,7 +73,7 @@ class ScrumBoardHome extends Component {
   getBoard = async () => {
     const { location } = this.props;
     const url = this.paramConverter(location.search);
-    const boardListData = await ScrumBoardStore.axiosGetBoardList();
+    const boardListData = await boardApi.loadAll();
     ScrumBoardStore.initBoardList(boardListData);
     const defaultBoard = boardListData.find(item => item.userDefault) || boardListData[0];
     if (defaultBoard.boardId) {
@@ -213,7 +213,7 @@ class ScrumBoardHome extends Component {
 
   refresh(defaultBoard, url, boardListData) {
     ScrumBoardStore.setSpinIf(true);
-    Promise.all([issueTypeApi.loadAllWithStateMachineId(), ScrumBoardStore.axiosGetStateMachine(), ScrumBoardStore.axiosGetBoardData(defaultBoard.boardId), epicApi.loadEpics()]).then(([issueTypes, stateMachineMap, defaultBoardData, epicData]) => {
+    Promise.all([issueTypeApi.loadAllWithStateMachineId(), statusApi.loadAllTransformForAllIssueType(), ScrumBoardStore.axiosGetBoardData(defaultBoard.boardId), epicApi.loadEpics()]).then(([issueTypes, stateMachineMap, defaultBoardData, epicData]) => {
       this.dataConverter.setSourceData(epicData, defaultBoardData);
       const renderDataMap = new Map([
         ['parent_child', this.dataConverter.getParentWithSubData],

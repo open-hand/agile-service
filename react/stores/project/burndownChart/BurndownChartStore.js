@@ -1,11 +1,9 @@
-import axios from 'axios';
-import { store, stores } from '@choerodon/boot';
+import { store } from '@choerodon/boot';
 import {
   observable, action, computed, toJS, 
 } from 'mobx';
 import { sprintApi } from '@/api';
 
-const { AppState } = stores;
 
 @store('BurndownChartStore')
 class BurndownChartStore {

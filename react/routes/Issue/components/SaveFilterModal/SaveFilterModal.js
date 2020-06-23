@@ -3,11 +3,10 @@ import { observer } from 'mobx-react';
 import {
   Modal, Form, Input,
 } from 'choerodon-ui';
-import { stores, axios, Choerodon } from '@choerodon/boot';
+import { Choerodon } from '@choerodon/boot';
 import IssueStore from '@/stores/project/issue/IssueStore';
 import { personalFilterApi } from '@/api';
 
-const { AppState } = stores;
 const FormItem = Form.Item;
 @observer
 class SaveFilterModal extends Component {

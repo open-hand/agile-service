@@ -30,6 +30,13 @@ class StateMachineApi {
   }
 
   /**
+   * 查询当前组织下所有状态机
+   */
+  loadAll() {
+    return axios.get(`${this.orgPrefix}/state_machine/query_all`);
+  }
+
+  /**
      * 根据stateId加载状态机和配置(活跃)
      * @param stateId 
      */

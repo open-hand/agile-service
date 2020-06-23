@@ -1,9 +1,10 @@
 import {
   observable, action, computed, toJS,
 } from 'mobx';
-import axios from 'axios';
 import { store, stores } from '@choerodon/boot';
-import { versionApi, priorityApi, statusApi } from '@/api';
+import {
+  versionApi, priorityApi, statusApi, issueTypeApi, 
+} from '@/api';
 
 const { AppState } = stores;
 
@@ -180,21 +181,15 @@ class ReleaseStore {
   }
 
   async getSettings() {
-    const type = await this.loadType();
+    const type = await issueTypeApi.loadAll();
     this.setIssueTypes(type);
 
-    const status = await this.loadStatus();
+    const status = await statusApi.loadByProject();
     this.setIssueStatus(status);
 
-    const priorities = await this.loadPriorities();
+    const priorities = await priorityApi.loadByProject();
     this.setIssuePriority(priorities);
   }
-
-  loadType = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/schemes/query_issue_types?apply_type=agile`);
-
-  loadStatus = () => statusApi.loadByProject();
-
-  loadPriorities = () => priorityApi.loadByProject();
 }
 
 const releaseStore = new ReleaseStore();

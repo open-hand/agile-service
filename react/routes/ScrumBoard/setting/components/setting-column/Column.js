@@ -7,6 +7,7 @@ import { Modal } from 'choerodon-ui/pro';
 import './Column.less';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import TextEditToggle from '@/components/TextEditToggle';
+import { boardApi, boardColumnApi } from '@/api';
 import StatusList from './StatusList';
 
 const { AppState } = stores;
@@ -22,7 +23,7 @@ class Column extends Component {
       children: '确定要删除该列？',
     }).then((button) => {
       if (button === 'ok') {
-        ScrumBoardStore.axiosDeleteColumn(data.columnId).then(() => {
+        boardColumnApi.delete(data.columnId).then(() => {
           refresh();
         }).catch((err) => {
         });
@@ -42,9 +43,7 @@ class Column extends Component {
       maxNum,
       minNum,
     };
-    ScrumBoardStore.axiosUpdateMaxMinNum(
-      propData.columnId, data,
-    ).then((res) => {
+    boardColumnApi.updateMaxMinNum(propData.columnId, data).then((res) => {
       const { failed } = res;
       if (!failed) {
         Choerodon.prompt('设置成功');
@@ -68,9 +67,7 @@ class Column extends Component {
       projectId: AppState.currentMenuType.id,
       boardId: ScrumBoardStore.getSelectedBoard,
     };
-    ScrumBoardStore.axiosUpdateColumn(
-      propData.columnId, data, ScrumBoardStore.getSelectedBoard,
-    ).then((res) => {
+    boardColumnApi.update(propData.columnId, ScrumBoardStore.getSelectedBoard, data).then((res) => {
       const originData = ScrumBoardStore.getBoardData;
       originData[index].objectVersionNumber = res.objectVersionNumber;
       originData[index].name = res.name;

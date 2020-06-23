@@ -107,6 +107,20 @@ class ComponentApi {
       },
     });
   }
+
+  /**
+   * 检查模块名称是否重复
+   * @param componentName 
+   */
+  checkName(componentName:string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/component/check_name`,
+      params: {
+        componentName,
+      },
+    });
+  }
 }
 
 const componentApi = new ComponentApi();

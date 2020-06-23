@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { stores, axios } from '@choerodon/boot';
 import ReactEcharts from 'echarts-for-react';
 import { Spin } from 'choerodon-ui';
 import _ from 'lodash';
@@ -9,7 +8,6 @@ import pic from '../../EmptyPics/no_sprint.svg';
 import pic2 from '../../EmptyPics/no_version.svg';
 import './Status.less';
 
-const { AppState } = stores;
 
 class Status extends Component {
   constructor(props) {

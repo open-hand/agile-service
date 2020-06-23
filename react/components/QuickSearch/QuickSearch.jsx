@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
-import { axios, Choerodon } from '@choerodon/boot';
+import { Choerodon } from '@choerodon/boot';
 import { Select } from 'choerodon-ui';
 import EventEmitter from 'wolfy87-eventemitter';
-import { sprintApi, quickFilterApi } from '@/api';
+import { sprintApi, quickFilterApi, userApi } from '@/api';
 import './QuickSearch.less';
 import BacklogStore from '../../stores/project/backlog/BacklogStore';
 import ScrumBoardStore from '../../stores/project/scrumBoard/ScrumBoardStore';
@@ -32,9 +32,8 @@ class QuickSearch extends Component {
     QuickSearchEvent.addListener('clearQuickSearchSelect', this.clearQuickSearch);
     QuickSearchEvent.addListener('setSelectQuickSearch', this.setSelectQuickSearch);
     QuickSearchEvent.addListener('unSelectStory', this.unSelectStory);
-    const { AppState } = this.props;
     const axiosGetFilter = quickFilterApi.loadAll();
-    const axiosGetUser = axios.get(`/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=40`);
+    const axiosGetUser = userApi.getAllInProject(undefined, undefined, undefined, 40);
     const axiosGetSprintNotClosed = sprintApi.loadSprints(['sprint_planning', 'started']);
     Promise.all([axiosGetFilter, axiosGetUser, axiosGetSprintNotClosed]).then((res = []) => {
       const resFilterData = res[0].map(item => ({
@@ -214,7 +213,7 @@ class QuickSearch extends Component {
                   onFilterChange={(value) => {
                     if (value) {
                       debounceCallback(() => {
-                        axios.get(`/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=40&param=${value}`).then((res) => {
+                        userApi.getAllInProject(value, 1, undefined, 40).then((res) => {
                           // Set 用于查询是否有 id 重复的，没有重复才往里加
                           const temp = new Set(userDataArray.map(item => item.id));
                           res.list.filter(item => item.enabled).forEach((item) => {

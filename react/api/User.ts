@@ -29,7 +29,7 @@ class UserApi extends Api {
    * @param page 
    * @param id 根据id查询
    */
-  getAllInProject(param?: string, page?: number, userId?: number) {
+  getAllInProject(param?: string, page?: number, userId?: number, size?: number) {
     return this.request({
       method: 'get',
       url: `${this.prefix}/users`,
@@ -37,7 +37,7 @@ class UserApi extends Api {
         param,
         id: userId,
         page: page || 1,
-        size: 20,
+        size: size || 20,
       },
       cache: true,
     });
@@ -52,7 +52,7 @@ class UserApi extends Api {
   getAllInProjectIncludesLeaveUsers(param?: string, page?: number, userId?: number) {
     return this.request({
       method: 'get',
-      url: `/agile/v1/projects/${getProjectId()}/issues/users`, 
+      url: `/agile/v1/projects/${getProjectId()}/issues/users`,
       params: {
         param,
         id: userId,

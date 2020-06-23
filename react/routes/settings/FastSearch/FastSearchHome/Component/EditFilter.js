@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {
   Modal, Form, Input, Select, Icon, Button, DatePicker, TimePicker,
 } from 'choerodon-ui';
-import { Content, stores, axios } from '@choerodon/boot';
+import { stores } from '@choerodon/boot';
 import moment from 'moment';
 import _ from 'lodash';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';

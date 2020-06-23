@@ -2,13 +2,13 @@ import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 
 interface IStatus {
-    name: string,
-    description?: string,
-    // organizationId: "4"
-    type: string, // 状态类型
+  name: string,
+  description?: string,
+  // organizationId: "4"
+  type: string, // 状态类型
 }
 interface UpdateData extends IStatus {
-    objectVersionNumber: number
+  objectVersionNumber: number
 }
 class StatusApi {
   get orgPrefix() {
@@ -76,7 +76,7 @@ class StatusApi {
    * @param issueTypeId 问题类型id
    * @param applyType 
    */
-  loadTransformStatusByIssue(currentStatusId:number, issueId:number, issueTypeId:string, applyType:string = 'agile') {
+  loadTransformStatusByIssue(currentStatusId: number, issueId: number, issueTypeId: string, applyType: string = 'agile') {
     return axios({
       method: 'get',
       url: `${this.prefix}/schemes/query_transforms`,
@@ -95,6 +95,51 @@ class StatusApi {
   loadAll() {
     return axios.get(`${this.orgPrefix}/status/query_all`);
   }
+
+  /**
+   * 根据问题类型id查询改问题类型下所有状态
+   * @param issueTypeId 
+   * @param applyType 
+   */
+  loadAllForIssueType(issueTypeId: number, applyType: string = 'agile') {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/schemes/query_status_by_issue_type_id`,
+      params: {
+        issue_type_id: issueTypeId,
+        apply_type: applyType,
+      },
+    });
+  }
+
+  /**
+   *查询工作流第一个状态 
+   * @param issueTypeId 
+   * @param applyType 
+   */
+  loadFirstInWorkFlow(issueTypeId: number, applyType: string = 'agile') {
+    const organizationId = getOrganizationId();
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/status/query_first_status`,
+      params: {
+        organizationId,
+        issueTypeId,
+        applyType,
+      },
+    });
+  }
+
+  /**
+   * 查询所有问题类型的全部状态的对应的转换
+   */
+  loadAllTransformForAllIssueType = (applyType = 'agile') => axios({
+    method: 'get',
+    url: `${this.prefix}/schemes/query_transforms_map`,
+    params: {
+      apply_type: applyType,
+    },
+  })
 
   /**
      * 删除状态
@@ -136,6 +181,21 @@ class StatusApi {
       method: 'get',
       url: `${this.prefix}/schemes/check_create_status_for_agile`,
       params: {
+        applyType,
+      },
+    });
+  }
+
+  /**
+   * 校验是否能删除状态 [敏捷]
+   * @param code 
+   */
+  checkCanDelStatus(statusId:number, applyType = 'agile') {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/schemes/check_remove_status_for_agile`,
+      params: {
+        status_id: statusId,
         applyType,
       },
     });

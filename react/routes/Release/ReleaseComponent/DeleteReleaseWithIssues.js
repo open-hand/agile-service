@@ -1,16 +1,11 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Page, Header, Content, stores, axios,
-} from '@choerodon/boot';
-import {
-  Button, Table, Menu, Dropdown, Icon, Modal, Radio, Select,
+  Icon, Modal, Radio, Select,
 } from 'choerodon-ui';
 import _ from 'lodash';
 import { versionApi } from '@/api';
-import ReleaseStore from '../../../stores/project/release/ReleaseStore';
 
-const { AppState } = stores;
 const RadioGroup = Radio.Group;
 const { Option } = Select;
 

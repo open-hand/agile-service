@@ -6,7 +6,7 @@ import {
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import {
-  TabPage as Page, Header, Content, stores, axios, Breadcrumb,
+  TabPage as Page, Header, Content, stores, Breadcrumb,
 } from '@choerodon/boot';
 import { quickFilterApi } from '@/api';
 import CreateFilter from './Component/CreateFilter';

@@ -3,13 +3,13 @@ import { observer } from 'mobx-react';
 import {
   Form, Input, Button, Icon, Tooltip, Modal,
 } from 'choerodon-ui';
-import { stores, axios, Choerodon } from '@choerodon/boot';
+import { stores, Choerodon } from '@choerodon/boot';
 import _ from 'lodash';
 import IssueStore from '@/stores/project/issue/IssueStore';
 import './FilterManage.less';
 import { personalFilterApi } from '@/api';
 
-const { AppState, HeaderStore } = stores;
+const { HeaderStore } = stores;
 const FormItem = Form.Item;
 const { confirm } = Modal;
 

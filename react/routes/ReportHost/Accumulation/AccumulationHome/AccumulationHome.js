@@ -11,7 +11,9 @@ import {
 import _ from 'lodash';
 import moment from 'moment';
 import ReactEcharts from 'echarts-for-react';
-import { quickFilterApi, reportApi, projectApi } from '@/api';
+import {
+  quickFilterApi, reportApi, projectApi, boardApi, 
+} from '@/api';
 import ScrumBoardStore from '../../../../stores/project/scrumBoard/ScrumBoardStore';
 import AccumulationStore from '../../../../stores/project/accumulation/AccumulationStore';
 import AccumulationFilter from '../AccumulationComponent/AccumulationFilter';
@@ -50,7 +52,7 @@ class AccumulationHome extends Component {
         newData[index].check = false;
       }
       AccumulationStore.setFilterList(newData);
-      ScrumBoardStore.axiosGetBoardList().then((res) => {
+      boardApi.loadAll().then((res) => {
         const newData2 = _.clone(res);
         let newIndex;
         for (let index = 0, len = newData2.length; index < len; index += 1) {
@@ -89,12 +91,7 @@ class AccumulationHome extends Component {
   }
 
   getColumnData(id, type) {
-    ScrumBoardStore.axiosGetBoardData(id, {
-      onlyMe: false,
-      onlyStory: false,
-      quickSearchArray: [],
-      assigneeFilterIds: [],
-    }).then((res2) => {
+    ScrumBoardStore.axiosGetBoardData(id).then((res2) => {
       const data2 = res2.columnsData.columns;
       for (let index = 0, len = data2.length; index < len; index += 1) {
         data2[index].check = true;

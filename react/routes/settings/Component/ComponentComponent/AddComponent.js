@@ -4,7 +4,7 @@ import {
   Form, Input, Select, message, Button,
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
-import { Content, stores, axios, Choerodon } from '@choerodon/boot';
+import { Content, stores, Choerodon } from '@choerodon/boot';
 import { componentApi } from '@/api';
 import _ from 'lodash';
 import UserHead from '../../../../components/UserHead';
@@ -96,8 +96,7 @@ function AddComponent(props) {
 
   const checkComponentNameRepeat = (rule, value, callback) => {
     if (value && value.trim()) {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/component/check_name?componentName=${value.trim()}`)
-        .then((res) => {
+      componentApi.checkName(value.trim()).then((res) => {
           if (res) {
             callback('模块名称重复');
           } else {

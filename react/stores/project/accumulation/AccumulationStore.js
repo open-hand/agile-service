@@ -1,10 +1,8 @@
-import axios from 'axios';
 import {
   observable, action, computed, toJS, 
 } from 'mobx';
-import { store, stores } from '@choerodon/boot';
+import { store } from '@choerodon/boot';
 
-const { AppState } = stores;
 
 @store('AccumulationStore')
 class AccumulationStore {

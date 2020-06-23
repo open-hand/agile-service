@@ -1,7 +1,7 @@
 import {
   observable, computed, action, runInAction, autorun, 
 } from 'mobx';
-import { axios, store } from '@choerodon/boot';
+import { store } from '@choerodon/boot';
 import { priorityApi } from '@/api';
 
 @store('PriorityStore')

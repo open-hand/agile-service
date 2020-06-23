@@ -1,5 +1,5 @@
 import { observable, action, computed } from 'mobx';
-import { axios, Choerodon } from '@choerodon/boot';
+import { Choerodon } from '@choerodon/boot';
 import querystring from 'query-string';
 import { statusApi } from '@/api';
 
