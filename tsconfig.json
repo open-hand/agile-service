@@ -9,6 +9,7 @@
     "noUnusedParameters": false,
     "noUnusedLocals": false,
     "noImplicitAny": true,
+    "allowJs": true,
     "allowSyntheticDefaultImports":true,
     "noEmitOnError":false,
     "target": "es6",

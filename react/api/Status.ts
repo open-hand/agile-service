@@ -131,6 +131,17 @@ class StatusApi {
   }
 
   /**
+   * 查询所有问题类型的全部状态的对应的转换
+   */
+  loadAllTransformForAllIssueType = (applyType = 'agile') => axios({
+    method: 'get',
+    url: `${this.prefix}/schemes/query_transforms_map`,
+    params: {
+      apply_type: applyType,
+    },
+  })
+
+  /**
      * 删除状态
      * @param statusId 
      */
@@ -170,6 +181,21 @@ class StatusApi {
       method: 'get',
       url: `${this.prefix}/schemes/check_create_status_for_agile`,
       params: {
+        applyType,
+      },
+    });
+  }
+
+  /**
+   * 校验是否能删除状态 [敏捷]
+   * @param code 
+   */
+  checkCanDelStatus(statusId:number, applyType = 'agile') {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/schemes/check_remove_status_for_agile`,
+      params: {
+        status_id: statusId,
         applyType,
       },
     });

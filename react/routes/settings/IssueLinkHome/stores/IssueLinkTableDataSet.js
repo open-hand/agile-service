@@ -1,5 +1,4 @@
 
-import { axios } from '@choerodon/boot';
 import { issueLinkTypeApiConfig, issueLinkTypeApi } from '@/api';
 
 export default ({ id, formatMessage }) => {

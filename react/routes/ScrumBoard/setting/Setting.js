@@ -9,6 +9,7 @@ import {
 } from 'choerodon-ui';
 import { withRouter } from 'react-router-dom';
 import './Setting.less';
+import { commonApi, boardApi } from '@/api';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import SettingColumn from './components/setting-column';
 import SwimLanePage from './components/SwimLanePage/SwimLanePage';
@@ -58,8 +59,8 @@ class Setting extends Component {
       history.push(`/agile/scrumboard?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`);
     } else {
       ScrumBoardStore.loadStatus();
-      ScrumBoardStore.axiosGetBoardDataBySetting(boardId).then((data) => {
-        ScrumBoardStore.axiosGetUnsetData(boardId).then((data2) => {
+      boardApi.load(boardId).then((data) => {
+        boardApi.loadNoColumnStatus(boardId).then((data2) => {
           const unsetColumn = {
             columnId: 0,
             name: '未对应的状态',
@@ -74,7 +75,7 @@ class Setting extends Component {
         });
       }).catch((error) => {
       });
-      ScrumBoardStore.axiosGetLookupValue('constraint').then((res) => {
+      commonApi.loadLookupValue('constraint').then((res) => {
         const oldLookup = ScrumBoardStore.getLookupValue;
         oldLookup.constraint = res.lookupValues;
         ScrumBoardStore.setLookupValue(oldLookup);
@@ -102,7 +103,7 @@ class Setting extends Component {
       className: 'scrumBoardMask',
       width: 520,
       onOk() {
-        ScrumBoardStore.axiosDeleteBoard().then((res) => {
+        boardApi.delete(ScrumBoardStore.getSelectedBoard).then((res) => {
           history.push(`/agile/scrumboard?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`);
         }).catch((error) => {
         });

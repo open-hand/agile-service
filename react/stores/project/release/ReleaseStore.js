@@ -1,7 +1,6 @@
 import {
   observable, action, computed, toJS,
 } from 'mobx';
-import axios from 'axios';
 import { store, stores } from '@choerodon/boot';
 import {
   versionApi, priorityApi, statusApi, issueTypeApi, 

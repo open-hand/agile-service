@@ -98,7 +98,7 @@ function EditIssue() {
         programId || applyType === 'program' ? null : workLogApi.loadByIssue(id),
         programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.loadByIssue(id),
         programId || applyType === 'program' ? null : issueLinkApi.loadByIssueAndApplyType(id),
-        programId || applyType === 'program' ? null : devOpsApi.countBranchs(id),
+        programId || applyType === 'program' ? null : devOpsApi.countBranches(id),
       ]);
       if (idRef.current !== id) {
         return;

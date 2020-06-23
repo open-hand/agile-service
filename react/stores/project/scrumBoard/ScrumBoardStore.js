@@ -2,9 +2,8 @@ import {
   observable, action, computed, toJS,
 } from 'mobx';
 import { find } from 'lodash';
-import axios from 'axios';
 import { store, stores, Choerodon } from '@choerodon/boot';
-import { workCalendarApi, statusApi } from '@/api';
+import { workCalendarApi, statusApi, boardApi } from '@/api';
 
 const { AppState } = stores;
 
@@ -402,10 +401,6 @@ class ScrumBoardStore {
     return this.updatedParentIssue;
   }
 
-  axiosUpdateIssueStatus(id, data) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issue_status/${id}`, data);
-  }
-
   @action updateStatusLocal(columnId, data, res) {
     const status = this.findStatusById(columnId, data.statusId);
     status.completed = res.completed;
@@ -417,14 +412,6 @@ class ScrumBoardStore {
     const column = find(data, { columnId });
     const status = find(column.subStatusDTOS, { statusId });
     return status;
-  }
-
-  axiosCheckRepeatName(name) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board_column/check?statusName=${name}`);
-  }
-
-  axiosUpdateMaxMinNum(columnId, data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/board_column/${columnId}/column_contraint`, data);
   }
 
   @computed get getIssueNumberCount() {
@@ -509,28 +496,12 @@ class ScrumBoardStore {
     this.sprintNotClosedArray = sprintNotClosedArray;
   }
 
-  axiosDeleteBoard() {
-    return axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/board/${this.selectedBoardId}`);
-  }
-
-  axiosUpdateBoardDefault(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/board/user_setting/${data.boardId}?swimlaneBasedCode=${data.swimlaneBasedCode}`, {});
-  }
-
-  axiosUpdateBoard(data) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/board/${this.selectedBoardId}`, data);
-  }
-
   @computed get getCurrentConstraint() {
     return this.currentConstraint;
   }
 
   @action setCurrentConstraint(data) {
     this.currentConstraint = data;
-  }
-
-  axiosGetLookupValue(code) {
-    return axios.get(`/agile/v1/lookup_values/${code}`);
   }
 
   @computed get getLookupValue() {
@@ -547,10 +518,6 @@ class ScrumBoardStore {
 
   @action setUnParentIds(data) {
     this.unParentIds = data;
-  }
-
-  axiosUpdateColumn(columnId, data, boardId) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/board_column/${columnId}?boardId=${boardId}`, data);
   }
 
   @computed get getSelectedBoard() {
@@ -586,20 +553,12 @@ class ScrumBoardStore {
     this.currentConstraint = columnConstraint;
   }
 
-  axiosGetBoardList() {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board`);
-  }
-
   @computed get getStatusCategory() {
     return toJS(this.statusCategory);
   }
 
   @action setStatusCategory(data) {
     this.statusCategory = data;
-  }
-
-  axiosGetStatusCategory() {
-    return axios.get('/agile/v1/lookup_values/status_category');
   }
 
   @computed get getParentIds() {
@@ -640,52 +599,18 @@ class ScrumBoardStore {
     return this.calanderCouldUse;
   }
 
-  axiosUpdateColumnSequence(boardId, data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/board_column/column_sort`, data);
-  }
-
-  axiosDeleteColumn(columnId) {
-    return axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/board_column/${columnId}`);
-  }
-
-  axiosAddColumn(categoryCode, data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/board_column?categoryCode=${categoryCode}&applyType=agile`, data);
-  }
-
-  axiosAddStatus(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issue_status?applyType=agile`, data);
-  }
-
-  // eslint-disable-next-line consistent-return
-  axiosGetBoardDataBySetting(boardId) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board/${boardId}/all_data/${AppState.currentMenuType.organizationId}`);
-  }
-
   axiosGetBoardData(boardId) {
     const {
       onlyMe, onlyStory, quickSearchArray, assigneeFilterIds, sprintId,
     } = this.quickSearchObj;
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board/${boardId}/all_data/${AppState.currentMenuType.organizationId}?${onlyMe ? `assigneeId=${AppState.getUserId}&` : ''}onlyStory=${onlyStory}&quickFilterIds=${quickSearchArray}${assigneeFilterIds.length > 0 ? `&assigneeFilterIds=${assigneeFilterIds}` : ''}${sprintId ? `&sprintId=${sprintId}` : ''}`);
-  }
-
-  axiosFilterBoardData(boardId, assign, recent) {
-    if (assign === 0) {
-      return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board/${boardId}/all_data/${AppState.currentMenuType.organizationId}?onlyStory=${recent}`);
-    } else {
-      return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board/${boardId}/all_data/${AppState.currentMenuType.organizationId}?assigneeId=${assign}&onlyStory=${recent}`);
-    }
-  }
-
-  axiosGetUnsetData(boardId) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issue_status/list_by_options?boardId=${boardId}&applyType=agile`);
-  }
-
-  axiosStatusCanBeDelete(code) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/schemes/check_remove_status_for_agile?status_id=${code}&applyType=agile`);
-  }
-
-  axiosDeleteStatus(code) {
-    return axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/issue_status/${code}?applyType=agile`);
+    return boardApi.load(boardId,
+      { 
+        onlyMe,
+        onlyStory,
+        quickFilterIds: quickSearchArray,
+        assigneeFilterIds,
+        sprintId,
+      });
   }
 
   updateIssue = (
@@ -722,16 +647,9 @@ class ScrumBoardStore {
       rankFlag: true,
     };
     const { id: transformId } = this.stateMachineMap[issueTypeId] ? this.stateMachineMap[issueTypeId][startStatus].find(issue => issue.endStatusId === parseInt(destinationStatus, 10)) : this.stateMachineMap[0][startStatus].find(issue => issue.endStatusId === parseInt(destinationStatus, 10));
-    return axios.post(`/agile/v1/projects/${proId}/board/issue/${issueId}/move?transformId=${transformId}`, data);
+    return boardApi.moveIssue(issueId, transformId, data);
   };
 
-  moveStatusToUnset(code, data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issue_status/${code}/move_to_uncorrespond`, data);
-  }
-
-  moveStatusToColumn(code, data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issue_status/${code}/move_to_column`, data);
-  }
 
   @computed get getDragStartItem() {
     return this.dragStartItem;
@@ -802,25 +720,6 @@ class ScrumBoardStore {
       this.setStatusList([]);
     });
   };
-
-  axiosGetStateMachine = () => {
-    const projectId = AppState.currentMenuType.id;
-    return axios.get(`/agile/v1/projects/${projectId}/schemes/query_transforms_map?apply_type=agile`);
-  }
-
-
-  // 校验看板名称是否重复
-  checkBoardNameRepeat = (proId, name) => axios.get(
-    `/agile/v1/projects/${proId}/board/check_name?boardName=${name}`,
-  );
-
-  // @action async scrumBoardInit(AppState, url) {
-  //   try {
-  //     const boardData = await this.axiosGetBoardList;
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // };
 
   @action setSpinIf(data) {
     // this.currentSprintExist = false;
