@@ -7,13 +7,13 @@ import {
 } from './CardComponent/index';
 import './StatusIssue.less';
 
-function getStyle({ draggableStyle, virtualStyle, isDragging }) {  
+function getStyle({ draggableStyle, virtualStyle, isDragging }) {
   const combined = {
     ...virtualStyle,
     ...draggableStyle,
   };
 
-  
+
   const grid = 8;
   const height = isDragging ? combined.height : combined.height - grid;
   const result = {
@@ -32,17 +32,30 @@ function getStyle({ draggableStyle, virtualStyle, isDragging }) {
 }
 // @observer
 class Card extends Component {
-  constructor(props) {
-    super(props);
-    this.ref = {};
+  constructor() {
+    super();
+    this.ref = React.createRef();
   }
 
+  scrollIntoView() {
+    const { selected } = this.props;
+    if (selected && this.ref && this.ref.current.scrollIntoViewIfNeeded) {
+      this.ref.current.scrollIntoViewIfNeeded();
+    }
+  }
+
+  componentDidMount() {
+    this.scrollIntoView();
+  }
+
+  componentDidUpdate() {
+    this.scrollIntoView();
+  }
   
   handleClick = (e) => {
     e.stopPropagation();
     const { issue } = this.props;
-    this.ref.style.backgroundColor = '#edeff6';
-    ScrumBoardStore.setClickedIssue(issue, this.ref);
+    ScrumBoardStore.setClickedIssue(issue.issueId);
   };
 
   myOnMouseDown = () => {
@@ -50,14 +63,9 @@ class Card extends Component {
     ScrumBoardStore.setWhichCanNotDragOn(issue.statusId, issue.issueTypeVO);
   };
 
-
-  editRef = (e) => {
-    this.ref = e;
-  };
-
   render() {
     const {
-      completed, issue, statusName, categoryCode, ...otherProps
+      completed, issue, statusName, categoryCode, selected, ...otherProps
     } = this.props;
     return (
       <div
@@ -65,9 +73,12 @@ class Card extends Component {
         role="none"
         onMouseDown={this.myOnMouseDown}
         onClick={e => this.handleClick(e)}
-        ref={this.editRef}
+        ref={this.ref}
         {...otherProps}
         key={issue.issueNum}
+        style={{
+          background: selected ? '#edeff6' : 'white',
+        }}
       >
         <div style={{ flexGrow: 1 }}>
           <div
@@ -79,7 +90,7 @@ class Card extends Component {
               <div
                 className="c7n-scrumboard-issueTop-left-type"
               >
-                <TypeTag data={issue.issueTypeVO} />            
+                <TypeTag data={issue.issueTypeVO} />
                 <IssueNum issueNum={issue.issueNum} completed={completed} />
                 <StayDay stayDay={issue.stayDay} completed={completed} />
               </div>
@@ -111,9 +122,10 @@ class Card extends Component {
     );
   }
 }
-function IssueItem({ 
-  completed, issue, isDragging, index, statusName, categoryCode, onClick, clicked, style, provided, ...otherProps 
+function IssueItem({
+  completed, issue, isDragging, index, statusName, categoryCode, onClick, clicked, style, provided, ...otherProps
 }) {
+  const selected = ScrumBoardStore.clickIssueMap.get(issue.issueId);
   return (
     <div
       key={issue.issueId}
@@ -128,7 +140,7 @@ function IssueItem({
         isDragging,
       })}
     >
-      <Card completed={completed} issue={issue} statusName={statusName} categoryCode={categoryCode} />
+      <Card completed={completed} issue={issue} statusName={statusName} categoryCode={categoryCode} selected={selected} />
     </div>
   );
 }

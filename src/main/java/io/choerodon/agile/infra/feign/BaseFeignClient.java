@@ -158,5 +158,11 @@ public interface BaseFeignClient {
 
     @GetMapping("/choerodon/v1/users/{id}/projects/{project_id}/check_is_owner")
     ResponseEntity<Boolean> checkIsProjectOwner(@PathVariable("id") Long id, @PathVariable("project_id") Long projectId);
+
+    @GetMapping("choerodon/v1/users/{id}/projects")
+    ResponseEntity<List<ProjectVO>> queryProjects( @PathVariable Long id,
+                                                          @RequestParam(required = false, name = "included_disabled")
+                                                          boolean includedDisabled);
+
 }
 

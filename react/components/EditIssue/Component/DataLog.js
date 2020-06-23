@@ -230,8 +230,8 @@ class DataLog extends Component {
       } else if (['timespent', 'Comment'].includes(field)) {
         return '';
       } else if (field === 'Attachment') {
-        const attachnewArr = oldString.split('_');
-        return ` 【${decodeURI(attachnewArr.slice(2, attachnewArr.length).join('_'))}】 `;
+        const attachnewArr = oldString.split('@');
+        return ` 【${decodeURI(attachnewArr.slice(1, attachnewArr.length).join('_'))}】 `;
       } else {
         return ` 【${oldString}】 `;
       }
@@ -325,8 +325,8 @@ class DataLog extends Component {
       //   return ` 【${TYPEARR[typeCode]}】 `;
       // }
       if (field === 'Attachment') {
-        const attachnewArr = newString.split('_');
-        return ` 【${decodeURI(attachnewArr.slice(2, attachnewArr.length).join('_'))}】 `;
+        const attachnewArr = newString.split('@');
+        return ` 【${decodeURI(attachnewArr.slice(1, attachnewArr.length).join('_'))}】 `;
       }
       // 自定义字段
       if (isCusLog) {

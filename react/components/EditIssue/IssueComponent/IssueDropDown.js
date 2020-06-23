@@ -15,6 +15,7 @@ const IssueDropDown = ({
   const {
     store, onUpdate, isOnlyAgileProject, applyType,
   } = useContext(EditIssueContext);
+  const [isOwner] = useIsOwner();
   const issue = store.getIssue;
   const {
     issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi,
@@ -98,21 +99,11 @@ const IssueDropDown = ({
         </Menu.Item>
       )}
       {
-        <Permission
-          service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
-          key="1"
-          noAccessChildren={(
-            <Menu.Item
-              disabled={disableFeatureDeleteWhilePiDoing ? true : loginUserId !== createdBy}
-            >
-              删除
-            </Menu.Item>
-          )}
+        <Menu.Item
+          disabled={disableFeatureDeleteWhilePiDoing && !isOwner ? true : (loginUserId !== createdBy && !isOwner)}
         >
-          <Menu.Item>
-            删除
-          </Menu.Item>
-        </Permission>
+          删除
+        </Menu.Item>
       }
       {
         ['sub_task', 'feature', 'issue_epic'].indexOf(typeCode) === -1 && !(typeCode === 'bug' && issue.relateIssueId) ? (

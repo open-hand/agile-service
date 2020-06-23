@@ -528,6 +528,7 @@ class BacklogStore {
     this.sprintData = [];
     this.clickIssueDetail = {};
     this.issueMap.clear();
+    this.selectedPiId = undefined;
     this.selectedSprintId = undefined;
   }
 

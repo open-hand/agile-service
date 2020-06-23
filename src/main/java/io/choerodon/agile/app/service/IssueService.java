@@ -332,4 +332,12 @@ public interface IssueService {
      * @param issueId
      */
     void deleteSelfIssue(Long projectId, Long issueId);
+
+    /**
+     * 个人工作台查询代办事项
+     * @param organizationId
+     * @param projectId
+     * @return
+     */
+    Page<IssueListFieldKVVO> queryBackLogIssuesByPersonal(Long organizationId, Long projectId,PageRequest pageRequest);
 }

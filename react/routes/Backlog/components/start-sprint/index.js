@@ -22,9 +22,10 @@ const format = 'YYYY-MM-DD';
 class StartSprint extends Component {
   constructor(props) {
     super(props);
+    const { data } = props;
     this.state = {
-      startDate: null,
-      endDate: null,
+      startDate: data.startDate,
+      endDate: data.endDate,
       showCalendar: false,
       workDates: [], // 冲刺自定义设置
     };
@@ -324,6 +325,11 @@ class StartSprint extends Component {
                     style={{ width: '100%' }}
                     label="结束日期"
                     format="YYYY-MM-DD HH:mm:ss"
+                    onChange={(date) => {
+                      this.setState({
+                        endDate: date,
+                      });
+                    }}
                     disabled={sprintDetail.type === 'ip' || parseInt(getFieldValue('duration'), 10) > 0}
                     disabledDate={(date) => {
                       if (date < moment()) {
@@ -342,7 +348,7 @@ class StartSprint extends Component {
                           // 选了开始时间之后，判断形成的时间段是否和其他重叠
                           return !BacklogStore.rangeCanChoose({ startDate, endDate: date, sprintId });
                         }
-                      }              
+                      }
                     }}
                     showTime
                   />,
@@ -398,8 +404,8 @@ class StartSprint extends Component {
               {showCalendar
                 ? (
                   <WorkCalendar
-                    startDate={startDate.format(format)}
-                    endDate={endDate.format(format)}
+                    startDate={moment.isMoment(startDate) ? startDate.format(format) : moment(startDate).format(format)}
+                    endDate={moment.isMoment(endDate) ? endDate.format(format) : moment(endDate).format(format)}
                     mode="BacklogComponent"
                     saturdayWork={saturdayWork}
                     sundayWork={sundayWork}
@@ -413,12 +419,12 @@ class StartSprint extends Component {
             </div>
           ) : ''
         }
-        {sprintType
+        {sprintType 
           ? (
             <div>
               <div style={{ marginBottom: 20 }}>
                 <span style={{ marginRight: 20 }}>
-                  {`此Sprint中有${this.getWorkDays(moment(), end)}个工作日`}
+                  {`此Sprint中有${this.getWorkDays(moment(), endDate)}个工作日`}
                 </span>
                 <Icon type="settings" style={{ verticalAlign: 'top' }} />
                 <a onClick={this.showWorkCalendar} role="none">
@@ -429,7 +435,7 @@ class StartSprint extends Component {
                 ? (
                   <WorkCalendar
                     startDate={moment().format(format)}
-                    endDate={moment(end).format(format)}
+                    endDate={moment.isMoment(endDate) ? endDate.format(format) : moment(endDate).format(format)}
                     mode="BacklogComponent"
                     saturdayWork={saturdayWork}
                     sundayWork={sundayWork}

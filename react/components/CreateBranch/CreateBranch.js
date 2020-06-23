@@ -218,7 +218,7 @@ class CreateBranch extends Component {
                       </Option>
                     ))}
                     {
-                      branchsObj.nextPage ? (
+                      branchsObj.number < branchsObj.totalPages ? (
                         <Option key="more">
                           <div
                             role="none"
@@ -261,7 +261,7 @@ class CreateBranch extends Component {
                       </Option>
                     ))}
                     {
-                      tagsObj.nextPage > 0 ? (
+                      tagsObj.number < tagsObj.totalPages ? (
                         <Option key="more">
                           <div
                             role="none"

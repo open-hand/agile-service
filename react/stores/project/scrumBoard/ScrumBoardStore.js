@@ -23,15 +23,9 @@ class ScrumBoardStore {
 
   @observable currentSprintExist = true;
 
-  @observable prevClick = {};
-
   @observable currentDrag = null;
 
-  @observable currentClick = 0;
-
   @observable translateToCompleted = [];
-
-  @observable clickedIssue = false;
 
   @observable moveOverRef = {};
 
@@ -274,16 +268,6 @@ class ScrumBoardStore {
     this.parentId = data;
   }
 
-  // @action resetClickedIssue() {
-  //   this.currentClick = null;
-  //   this.clickIssueDetail = {};
-  //   this.clickedIssue = false;
-  // }
-
-  @computed get getClickedIssue() {
-    return this.clickedIssue;
-  }
-
   @action setSelectedBoardId(data) {
     this.selectedBoardId = data;
   }
@@ -294,32 +278,21 @@ class ScrumBoardStore {
     }
   }
 
-  @action resetClickedIssue() {
-    this.currentClick = 0;
-    if (this.currentClickTarget) {
-      this.currentClickTarget.style.backgroundColor = '#fff';
+  clickIssueMap = observable.map();
+
+  @action setClickedIssue(issueId) {
+    if (!this.clickIssueMap.has(issueId)) {
+      this.clickIssueMap.clear();
+      this.clickIssueMap.set(issueId, true);
     }
-    this.currentClickTarget = null;
-    this.clickedIssue = false;
-    this.clickIssueDetail = null;
   }
 
-  @action setClickedIssue(issue, ref) {
-    this.currentClick = issue.issueId;
-    if (this.currentClickTarget && ref !== this.currentClickTarget) {
-      this.currentClickTarget.style.backgroundColor = '#fff';
-    }
-    this.currentClickTarget = ref;
-    this.clickIssueDetail = issue;
-    this.clickedIssue = true;
+  @action resetClickedIssue() {
+    this.clickIssueMap.clear();
   }
 
   @computed get getCurrentClickId() {
-    return this.currentClick;
-  }
-
-  @computed get prevClickId() {
-    return this.prevClick;
+    return [...this.clickIssueMap.keys()][0];
   }
 
   @action setMoveOverRef(data) {
@@ -452,11 +425,8 @@ class ScrumBoardStore {
 
   @action resetDataBeforeUnmount() {
     this.spinIf = true;
-    this.clickIssueDetail = {};
     this.swimLaneData = null;
     this.headerData = new Map();
-    this.clickedIssue = false;
-    // this.swimlaneBasedCode = null;
     this.quickSearchObj = {
       onlyMe: false,
       onlyStory: false,
@@ -466,6 +436,7 @@ class ScrumBoardStore {
     };
     this.currentSprintExist = false;
     this.calanderCouldUse = false;
+    this.clickIssueMap.clear();
   }
 
   @computed get getDayRemain() {
@@ -733,7 +704,6 @@ class ScrumBoardStore {
   @action scrumBoardInit(AppStates, url = null, boardListData = null, { boardId, userDefaultBoard, columnConstraint }, { currentSprint, allColumnNum }, quickSearchList, issueTypes, stateMachineMap, canDragOn, statusColumnMap, allDataMap, mapStructure, statusMap, renderData, headerData) {
     this.boardData = [];
     this.spinIf = false;
-    // this.currentClick = 0;
     this.quickSearchList = [];
     this.sprintData = false;
     this.assigneer = [];

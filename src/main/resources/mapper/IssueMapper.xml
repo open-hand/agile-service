@@ -1016,6 +1016,116 @@
         and reporter_id is not null
     </select>
 
+    <select id="queryParentIssueByProjectIdsAndUserId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+        select DISTINCT ai.* from (
+            (
+              select ai.issue_id,ai.project_id,ai.last_update_date from agile_issue_sprint_rel aisr,agile_issue ai,agile_issue_status ais
+                where
+                aisr.project_id in
+                <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                    #{projectId}
+                </foreach>
+                AND aisr.sprint_id in (
+                    select sprint_id from agile_sprint asp
+                        where
+                        asp.project_id in
+                        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                            #{projectId}
+                        </foreach>
+                        AND asp.status_code = 'started'
+                )
+                AND ai.issue_id = aisr.issue_id
+                AND ai.type_code in ('story','bug','task')
+                AND (ai.parent_issue_id IS NULL OR ai.parent_issue_id = 0)
+                AND (ai.relate_issue_id IS NULL OR ai.relate_issue_id = 0)
+                AND ai.assignee_id = #{userId}
+                AND ais.project_id = ai.project_id
+                AND ais.status_id = ai.status_id
+                AND ais.is_completed != 1
+            )
+            UNION ALL
+            (
+                    select ai.issue_id,ai.project_id,ai.last_update_date from agile_issue ai
+                    where
+                    ai.project_id in
+                    <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                        #{projectId}
+                    </foreach>
+                    AND ai.issue_id in (
+                        select IF(ai.type_code = 'bug',ai.relate_issue_id,ai.parent_issue_id) as issue_id from agile_issue_sprint_rel aisr,agile_issue ai,agile_issue_status ais
+                        where
+                        aisr.project_id in
+                        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                            #{projectId}
+                        </foreach>
+                        AND aisr.sprint_id in (
+                        select sprint_id from agile_sprint asp where
+                        asp.project_id in
+                        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                            #{projectId}
+                        </foreach>
+                        AND asp.status_code = 'started'
+                        )
+                        AND ai.issue_id = aisr.issue_id
+                        AND ai.type_code in ('sub_task','bug')
+                        AND ai.assignee_id = #{userId}
+                        AND ais.project_id = ai.project_id
+                        AND ais.status_id = ai.status_id
+                        AND ais.is_completed != 1
+                       )
+                    )
+                ) ai
+             order by ai.project_id ASC,ai.last_update_date DESC
+    </select>
+
+    <select id="listIssuesByParentIssueIdsAndUserId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+          SELECT
+            ai.issue_id, ai.summary,
+            ai.project_id, ai.type_code,
+            ai.issue_type_id,
+            CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num,
+            ai.reporter_id,
+            ai.last_update_date,
+            ai.priority_id,
+            ai.assignee_id,
+            ai.issue_type_id,
+            ai.status_id,
+            ai.parent_issue_id,
+            ai.type_code,
+            ai.relate_issue_id,
+            ai.last_update_date
+            FROM agile_issue ai
+            LEFT JOIN agile_project_info api ON ai.project_id = api.project_id,agile_issue_status ais
+            WHERE
+             ais.status_id = ai.status_id
+             AND ais.project_id = ai.project_id
+             AND ai.project_id in
+                <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                    #{projectId}
+                </foreach>
+             AND ((ai.issue_id in
+                <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
+                    #{parentIssue}
+                </foreach>)
+            OR
+            (
+                ai.type_code IN ('sub_task','bug')
+                    AND (ai.parent_issue_id in
+                        <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
+                        #{parentIssue}
+                        </foreach>
+                        OR
+                        ai.relate_issue_id in
+                        <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
+                            #{parentIssue}
+                        </foreach>
+                    )
+                    AND ai.assignee_id = #{userId}
+                    AND ais.is_completed != 1
+                   ))
+          order by ai.project_id ASC,ai.last_update_date desc
+    </select>
+
     <select id="queryIssueByOption" resultType="io.choerodon.agile.infra.dto.IssueNumDTO">
         SELECT
         ai.issue_id, ai.summary,
