@@ -1007,7 +1007,7 @@
     <select id="queryParentIssueByProjectIdsAndUserId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
         select DISTINCT ai.* from (
             (
-              select ai.issue_id,ai.last_update_date from agile_issue_sprint_rel aisr,agile_issue ai,agile_issue_status ais
+              select ai.issue_id,ai.project_id,ai.last_update_date from agile_issue_sprint_rel aisr,agile_issue ai,agile_issue_status ais
                 where
                 aisr.project_id in
                 <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
@@ -1033,7 +1033,7 @@
             )
             UNION ALL
             (
-                    select ai.issue_id,ai.last_update_date from agile_issue ai
+                    select ai.issue_id,ai.project_id,ai.last_update_date from agile_issue ai
                     where
                     ai.project_id in
                     <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
@@ -1063,7 +1063,7 @@
                        )
                     )
                 ) ai
-             order by ai.last_update_date DESC
+             order by ai.project_id ASC,ai.last_update_date DESC
     </select>
 
     <select id="listIssuesByParentIssueIdsAndUserId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
@@ -1111,7 +1111,7 @@
                     AND ai.assignee_id = #{userId}
                     AND ais.is_completed != 1
                    ))
-          order by ai.last_update_date desc
+          order by ai.project_id ASC,ai.last_update_date desc
     </select>
 
     <select id="queryIssueByOption" resultType="io.choerodon.agile.infra.dto.IssueNumDTO">
