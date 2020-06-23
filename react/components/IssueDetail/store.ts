@@ -1,4 +1,5 @@
 import { observable, action, computed } from 'mobx';
+import { issueApi } from '@/api';
 import type { Events } from './index';
 
 export enum IssueEvents {
@@ -6,7 +7,10 @@ export enum IssueEvents {
   delete = 'delete',
   clone = 'clone'
 }
-
+interface Issue {
+  issueId: number
+  summary: string
+}
 class IssueDetailStore {
   loading: boolean = false;
 
@@ -47,6 +51,19 @@ class IssueDetailStore {
   fireEvent(eventKey: IssueEvents, payload: any) {
     if (this.events[eventKey]) {
       this.events[eventKey].call(null, payload);
+    }
+  }
+
+  @observable issue: Issue | null = null;
+
+  @action
+  async load() {
+    const issueId = this.selected;
+    if (issueId) {
+      this.loading = true;
+      const issue = await issueApi.load(issueId);
+      this.issue = issue;
+      this.loading = false;
     }
   }
 }

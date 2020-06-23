@@ -4,9 +4,10 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import { Animate } from 'choerodon-ui';
 import CloseButton from './components/close-button';
+import IssueNum from './components/issue-num';
+import Container from './Container';
 import store from './store';
 import IssueDetailContext from './context';
-import styles from './index.less';
 
 
 export function useIssueDetailStore() {
@@ -22,17 +23,18 @@ interface Issue {
 export type Events = { [key: string]: Function };
 interface Props {
   events: Events
+  projectId?: number
 }
 
-const IssueDetail: React.FC<Props> = ({ events }) => {
-  const { visible } = store;
-  const { selected } = store;
+const IssueDetail: React.FC<Props> = ({ events, projectId }) => {
+  const { visible, selected } = store;
   useEffect(() => {
     store.initEvents(events);
   }, [events]);
   useEffect(() => {
     // eslint-disable-next-line no-console
     console.log('changed', selected);
+    store.load();
   }, [selected]);
   return (
     <Animate
@@ -42,14 +44,8 @@ const IssueDetail: React.FC<Props> = ({ events }) => {
     >
       {
         visible ? (
-          <IssueDetailContext.Provider value={{ store }}>
-            <div
-              className={styles.container}
-            >
-              issuedetail
-              {selected}
-              <CloseButton />
-            </div>
+          <IssueDetailContext.Provider value={{ store, projectId }}>
+            <Container />            
           </IssueDetailContext.Provider>
         ) : null
       }
