@@ -1,15 +1,27 @@
 
 import React from 'react';
-import { TextArea } from 'choerodon-ui/pro';
-import IssueDetail from '@/components/IssueDetail';
-import TextEditToggle from '@/components/TextEditTogglePro';
+import { Button } from 'choerodon-ui/pro';
+import IssueDetail, { useIssueDetailStore } from '@/components/IssueDetail';
 
-const Test = () => (
-  <div>
-    {/* <IssueDetail issueId={5} /> */}
-    <TextEditToggle initValue="ssss" editor={() => <TextArea />}>
-      <span>ssss</span>
-    </TextEditToggle>
-  </div>
-);
+const Test = () => {
+  const store = useIssueDetailStore();
+  return (
+    <div>
+      <Button onClick={() => {
+        store.select(271250);
+      }}
+      >
+        打开详情
+      </Button>
+      <Button onClick={() => {
+        store.select(271246);
+      }}
+      >
+        打开详情2
+      </Button>
+      <IssueDetail />
+    </div>
+  );
+};
+
 export default Test;
