@@ -10,12 +10,18 @@ interface Props {
 }
 
 const SelectFeature: React.FC<Props> = forwardRef(({ featureId, featureName, ...otherProps }, ref: React.Ref<Select>) => {
-  const config = useMemo((): SelectConfig => ({
+  const config = useMemo((): SelectConfig<Issue> => ({
     name: 'feature',
     textField: 'summary',
     valueField: 'issueId',
     request: ({ filter, page }) => featureApi.getByEpicId(undefined, filter, page),
-    middleWare: features => ((find(features, item => item.issueId === featureId) || !featureId) ? features : [...features, { issueId: featureId, summary: featureName }]),
+    middleWare: (features) => {
+      if (featureId && featureName) {
+        return (find(features, item => item.issueId === featureId) || !featureId) ? features : [...features, { issueId: featureId, summary: featureName }];
+      } else {
+        return features;
+      }
+    },
     paging: true,
   }), []);
   const props = useSelect(config);

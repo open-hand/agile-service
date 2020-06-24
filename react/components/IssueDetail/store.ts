@@ -7,10 +7,6 @@ export enum IssueEvents {
   delete = 'delete',
   clone = 'clone'
 }
-interface Issue {
-  issueId: number
-  summary: string
-}
 class IssueDetailStore {
   loading: boolean = false;
 

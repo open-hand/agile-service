@@ -9,11 +9,11 @@ import { debounce } from 'lodash';
 import FragmentForSearch from './FragmentForSearch';
 import styles from './index.less';
 
-
-function applyMiddleWares(data: any, middleWares: Array<Function>) {
+type MiddleWare<T> = (data: T[]) => T[];
+function applyMiddleWares<T>(data: T[], middleWares: MiddleWare<T>[]): T[] {
   return middleWares.reduce((preData, middleWare) => middleWare(preData), data);
 }
-function noop(data: any) {
+function noop<T>(data: T) {
   return data;
 }
 /**
@@ -39,25 +39,25 @@ export interface LoadConfig {
   filter?: string,
   page?: number
 }
-export type Request = ({ filter, page }: LoadConfig) => Promise<any>
-export interface SelectConfig {
+export type Request = <T>({ filter, page }: LoadConfig) => Promise<T[] | { list: T[], hasNextPage: boolean }>
+export interface SelectConfig<T = {}> {
   name: string
   textField: string
   valueField: string
-  optionRenderer?: (item: any) => JSX.Element
-  renderer?: (item: any) => JSX.Element
+  optionRenderer?: (item: T) => JSX.Element
+  renderer?: (item: T) => JSX.Element
   request: Request
-  middleWare?: (item: any) => boolean,
+  middleWare?: MiddleWare<T>,
   paging?: boolean
   props?: object
 }
 
-export default function useSelect(config: SelectConfig) {
-  const [data, setData] = useState([]);
+export default function useSelect<T extends {}>(config: SelectConfig<T>) {
+  const [data, setData] = useState<T[]>([]);
   const [currentPage, setPage] = useState(1);
   const [canLoadMore, setCanLoadMore] = useState(false);
   const textRef = useRef<string>('');
-  const defaultRender = (item: any) => getValueByPath(item, textField);
+  const defaultRender = (item: T) => getValueByPath(item, textField);
   const {
     textField = 'name',
     valueField = 'id',
@@ -71,15 +71,15 @@ export default function useSelect(config: SelectConfig) {
   // 不分页时，本地搜索
   const localSearch = !paging;
   const loadData = async ({ filter = textRef.current, page = 1 }: LoadConfig = {} as LoadConfig) => {
-    const res = await request({ filter, page });
+    const res = await request<T>({ filter, page });
     batchedUpdates(() => {
       if (paging) {
-        const { list, hasNextPage } = res;
+        const { list, hasNextPage } = res as { list: T[], hasNextPage: boolean };
         setData(page > 1 ? data.concat(list) : list);
         setPage(page);
         setCanLoadMore(hasNextPage);
       } else {
-        setData(paging ? res.list : res);
+        setData(res as T[]);
       }
     });
   };
@@ -121,7 +121,7 @@ export default function useSelect(config: SelectConfig) {
     }
     return name.toLowerCase().indexOf(text.toLowerCase()) >= 0;
   };
-  let finalData = applyMiddleWares(data, [middleWare]);
+  let finalData: Array<T | { loadMoreButton: boolean }> = applyMiddleWares<T>(data, [middleWare]);
   if (canLoadMore) {
     finalData = [...finalData, { loadMoreButton: true }];
   }
