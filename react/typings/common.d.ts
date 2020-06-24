@@ -12,3 +12,8 @@ interface Issue {
   issueId: number
   summary: string
 }
+
+interface PI {
+  code: string
+  name: string
+}

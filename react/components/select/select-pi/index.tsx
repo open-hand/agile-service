@@ -28,7 +28,7 @@ interface Props extends SelectProps {
 const SelectPI: React.FC<Props> = forwardRef(({
   statusList, multiple, ...otherProps 
 }, ref: React.Ref<Select>) => {
-  const config = useMemo((): SelectConfig => ({
+  const config = useMemo((): SelectConfig<PI> => ({
     name: 'all_pi',
     textField: 'piName',
     valueField: 'id',
