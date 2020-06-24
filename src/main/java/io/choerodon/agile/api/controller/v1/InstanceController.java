@@ -41,7 +41,7 @@ public class InstanceController extends BaseController {
     public ResponseEntity<ExecuteResult> startInstance(@PathVariable("organization_id") Long organizationId,
                                                        @RequestParam("service_code") String serviceCode,
                                                        @RequestParam("state_machine_id") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/ Long stateMachineId,
-                                                       @RequestBody @EncryptDTO InputDTO inputDTO) {
+                                                       @RequestBody  InputDTO inputDTO) {
         ExecuteResult result = instanceService.startInstance(organizationId, serviceCode, stateMachineId, inputDTO);
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
@@ -54,7 +54,7 @@ public class InstanceController extends BaseController {
                                                           @RequestParam("state_machine_id") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/ Long stateMachineId,
                                                           @RequestParam("current_status_id")  @Encrypt/*(EncryptionConstant.FD_STATUS)*/ Long currentStatusId,
                                                           @RequestParam("transform_id") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_TRANSFORM)*/ Long transformId,
-                                                          @RequestBody @EncryptDTO  InputDTO inputDTO) {
+                                                          @RequestBody   InputDTO inputDTO) {
         ExecuteResult result = instanceService.executeTransform(organizationId, serviceCode, stateMachineId, currentStatusId, transformId, inputDTO);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

@@ -35,7 +35,7 @@ public class WorkLogController {
     public ResponseEntity<WorkLogVO> createWorkLog(@ApiParam(value = "项目id", required = true)
                                                     @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "work log object", required = true)
-                                                    @RequestBody @EncryptDTO WorkLogVO workLogVO) {
+                                                    @RequestBody  WorkLogVO workLogVO) {
         return Optional.ofNullable(workLogService.createWorkLog(projectId, workLogVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.workLog.create"));
@@ -49,7 +49,7 @@ public class WorkLogController {
                                                    @ApiParam(value = "log id", required = true)
                                                     @PathVariable Long logId,
                                                    @ApiParam(value = "work log object", required = true)
-                                                    @RequestBody @EncryptDTO WorkLogVO workLogVO) {
+                                                    @RequestBody  WorkLogVO workLogVO) {
         return Optional.ofNullable(workLogService.updateWorkLog(projectId, logId, workLogVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.workLog.update"));

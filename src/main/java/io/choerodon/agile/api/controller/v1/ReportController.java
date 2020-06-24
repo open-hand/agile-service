@@ -81,7 +81,7 @@ public class ReportController {
     public ResponseEntity<List<CumulativeFlowDiagramVO>> queryCumulativeFlowDiagram(@ApiParam(value = "项目id", required = true)
                                                                                      @PathVariable(name = "project_id") Long projectId,
                                                                                     @ApiParam(value = "过滤条件", required = true)
-                                                                                     @RequestBody @EncryptDTO CumulativeFlowFilterVO cumulativeFlowFilterVO) {
+                                                                                     @RequestBody  CumulativeFlowFilterVO cumulativeFlowFilterVO) {
         return Optional.ofNullable(reportService.queryCumulativeFlowDiagram(projectId, cumulativeFlowFilterVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.report.queryCumulativeFlowDiagram"));
@@ -220,7 +220,7 @@ public class ReportController {
     public ResponseEntity<List<BurnDownReportCoordinateVO>> queryBurnDownCoordinateByType(@ApiParam(value = "项目id", required = true)
                                                                                            @PathVariable(name = "project_id") Long projectId,
                                                                                           @ApiParam(value = "id", required = true)
-                                                                                           @PathVariable Long id,
+                                                                                           @PathVariable @Encrypt Long id,
                                                                                           @ApiParam(value = "类型:Epic/Version", required = true)
                                                                                            @RequestParam String type) {
         return Optional.ofNullable(reportService.queryBurnDownCoordinateByType(projectId, id, type))

@@ -20,6 +20,7 @@ public class IssueCreateVO {
     private String summary;
 
     @ApiModelProperty(value = "优先级code")
+    @Encrypt
     private String priorityCode;
 
     @ApiModelProperty(value = "描述")

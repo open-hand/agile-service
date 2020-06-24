@@ -40,7 +40,7 @@ public class BoardColumnController {
                                                            @ApiParam(value = "apply type", required = true)
                                                             @RequestParam String applyType,
                                                            @ApiParam(value = "board column对象", required = true)
-                                                            @RequestBody @EncryptDTO BoardColumnVO boardColumnVO) {
+                                                            @RequestBody  BoardColumnVO boardColumnVO) {
         return Optional.ofNullable(boardColumnService.create(projectId, categoryCode, applyType, boardColumnVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.BoardColumn.create"));
@@ -56,7 +56,7 @@ public class BoardColumnController {
                                                            @ApiParam(value = "board id", required = true)
                                                             @RequestParam @Encrypt/*(EncryptionConstant.AGILE_BOARD)*/ Long boardId,
                                                            @ApiParam(value = "board column对象", required = true)
-                                                            @RequestBody @EncryptDTO BoardColumnVO boardColumnVO) {
+                                                            @RequestBody  BoardColumnVO boardColumnVO) {
         return Optional.ofNullable(boardColumnService.update(projectId, columnId, boardId, boardColumnVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.BoardColumn.update"));
@@ -68,7 +68,7 @@ public class BoardColumnController {
     public ResponseEntity columnSort(@ApiParam(value = "项目id", required = true)
                                      @PathVariable(name = "project_id") Long projectId,
                                      @ApiParam(value = "ColumnSort DTO", required = true)
-                                     @RequestBody @EncryptDTO ColumnSortVO columnSortVO) {
+                                     @RequestBody  ColumnSortVO columnSortVO) {
         boardColumnService.columnSort(projectId, columnSortVO);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -79,7 +79,7 @@ public class BoardColumnController {
     public ResponseEntity columnSortByProgram(@ApiParam(value = "项目id", required = true)
                                               @PathVariable(name = "project_id") Long projectId,
                                               @ApiParam(value = "ColumnSort DTO", required = true)
-                                              @RequestBody @EncryptDTO  ColumnSortVO columnSortVO) {
+                                              @RequestBody   ColumnSortVO columnSortVO) {
         boardColumnService.columnSortByProgram(projectId, columnSortVO);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -126,7 +126,7 @@ public class BoardColumnController {
                                                                @ApiParam(value = "column id", required = true)
                                                                 @PathVariable @Encrypt/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/ Long columnId,
                                                                @ApiParam(value = "ColumnWithMaxMinNumVO", required = true)
-                                                                @RequestBody @EncryptDTO ColumnWithMaxMinNumVO columnWithMaxMinNumVO) {
+                                                                @RequestBody  ColumnWithMaxMinNumVO columnWithMaxMinNumVO) {
         return Optional.ofNullable(boardColumnService.updateColumnContraint(projectId, columnId, columnWithMaxMinNumVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.MaxAndMinNum.update"));

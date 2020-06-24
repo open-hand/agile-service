@@ -44,7 +44,7 @@ public class IssueCommentController {
     public ResponseEntity<IssueCommentVO> createIssueComment(@ApiParam(value = "项目id", required = true)
                                                               @PathVariable(name = "project_id") Long projectId,
                                                              @ApiParam(value = "创建issue评论对象", required = true)
-                                                              @RequestBody @EncryptDTO IssueCommentCreateVO issueCommentCreateVO) {
+                                                              @RequestBody  IssueCommentCreateVO issueCommentCreateVO) {
         issueCommentValidator.verifyCreateData(issueCommentCreateVO);
         return Optional.ofNullable(issueCommentService.createIssueComment(projectId, issueCommentCreateVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))

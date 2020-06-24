@@ -59,7 +59,7 @@ public class StateMachineSchemeController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建状态机方案")
     @PostMapping
-    public ResponseEntity<StateMachineSchemeVO> create(@PathVariable("organization_id") Long organizationId, @RequestBody @EncryptDTO StateMachineSchemeVO schemeDTO) {
+    public ResponseEntity<StateMachineSchemeVO> create(@PathVariable("organization_id") Long organizationId, @RequestBody  StateMachineSchemeVO schemeDTO) {
         schemeValidator.createValidate(schemeDTO);
         return new ResponseEntity<>(schemeService.create(organizationId, schemeDTO), HttpStatus.OK);
     }
@@ -68,7 +68,7 @@ public class StateMachineSchemeController {
     @ApiOperation(value = "更新状态机方案")
     @PutMapping(value = "/{scheme_id}")
     public ResponseEntity<StateMachineSchemeVO> update(@PathVariable("organization_id") Long organizationId, @PathVariable("scheme_id") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_SCHEME)*/ Long schemeId,
-                                                       @RequestBody @EncryptDTO StateMachineSchemeVO schemeDTO) {
+                                                       @RequestBody  StateMachineSchemeVO schemeDTO) {
         schemeValidator.updateValidate(schemeDTO);
         return new ResponseEntity<>(schemeService.update(organizationId, schemeId, schemeDTO), HttpStatus.OK);
     }

@@ -87,7 +87,7 @@ public class ProjectObjectSchemeFieldController {
                                                              @RequestParam Long organizationId,
                                                             @ApiParam(value = "字段id", required = true)
                                                              @PathVariable("field_id") @Encrypt/*(EncryptionConstant.FD_OBJECT_SCHEME_FIELD)*/ Long fieldId,
-                                                            @RequestBody @Valid @EncryptDTO ObjectSchemeFieldUpdateVO updateDTO) {
+                                                            @RequestBody @Valid  ObjectSchemeFieldUpdateVO updateDTO) {
         return new ResponseEntity<>(objectSchemeFieldService.update(organizationId, projectId, fieldId, updateDTO), HttpStatus.CREATED);
     }
 

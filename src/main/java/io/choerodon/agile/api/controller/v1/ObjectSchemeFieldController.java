@@ -46,7 +46,7 @@ public class ObjectSchemeFieldController {
     public ResponseEntity<ObjectSchemeFieldDetailVO> create(@ApiParam(value = "组织id", required = true)
                                                              @PathVariable("organization_id") Long organizationId,
                                                             @ApiParam(value = "字段对象", required = true)
-                                                             @RequestBody @Valid @EncryptDTO ObjectSchemeFieldCreateVO fieldCreateDTO) {
+                                                             @RequestBody @Valid  ObjectSchemeFieldCreateVO fieldCreateDTO) {
         return new ResponseEntity<>(objectSchemeFieldService.create(organizationId, null, fieldCreateDTO), HttpStatus.CREATED);
     }
 
@@ -77,7 +77,7 @@ public class ObjectSchemeFieldController {
                                                              @PathVariable("organization_id") Long organizationId,
                                                             @ApiParam(value = "字段id", required = true)
                                                              @PathVariable("field_id") @Encrypt/*(EncryptionConstant.FD_OBJECT_SCHEME_FIELD)*/ Long fieldId,
-                                                            @RequestBody @Valid @EncryptDTO ObjectSchemeFieldUpdateVO updateDTO) {
+                                                            @RequestBody @Valid  ObjectSchemeFieldUpdateVO updateDTO) {
         return new ResponseEntity<>(objectSchemeFieldService.update(organizationId, null, fieldId, updateDTO), HttpStatus.CREATED);
     }
 

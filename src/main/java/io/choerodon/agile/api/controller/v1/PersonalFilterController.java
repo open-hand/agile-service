@@ -35,7 +35,7 @@ public class PersonalFilterController {
     public ResponseEntity<PersonalFilterVO> create(@ApiParam(value = "项目id", required = true)
                                                     @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "personal filter object", required = true)
-                                                    @RequestBody @EncryptDTO PersonalFilterVO personalFilterVO) {
+                                                    @RequestBody  PersonalFilterVO personalFilterVO) {
         return Optional.ofNullable(personalFilterService.create(projectId, personalFilterVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));
@@ -49,7 +49,7 @@ public class PersonalFilterController {
                                                    @ApiParam(value = "filter id", required = true)
                                                     @PathVariable  @Encrypt/*(EncryptionConstant.AGILE_PERSONAL_FILTER)*/ Long filterId,
                                                    @ApiParam(value = "personal filter object", required = true)
-                                                    @RequestBody @EncryptDTO PersonalFilterVO personalFilterVO) {
+                                                    @RequestBody  PersonalFilterVO personalFilterVO) {
         return Optional.ofNullable(personalFilterService.update(projectId, filterId, personalFilterVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));

@@ -54,7 +54,7 @@ public class ProjectPageFieldController {
                                                         @ApiParam(value = "页面编码", required = true)
                                                          @RequestParam String pageCode,
                                                         @ApiParam(value = "调整顺序对象", required = true)
-                                                         @RequestBody @EncryptDTO AdjustOrderVO adjustOrder) {
+                                                         @RequestBody  AdjustOrderVO adjustOrder) {
         return new ResponseEntity<>(pageFieldService.adjustFieldOrder(organizationId, projectId, pageCode, adjustOrder), HttpStatus.CREATED);
     }
 

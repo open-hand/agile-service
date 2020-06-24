@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.ProjectConfigService;
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.agile.infra.dto.IssueConvertDTO;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.mapper.*;
@@ -97,8 +99,9 @@ public class IssueValidator {
         if (issueUpdate.get(ISSUE_ID) == null) {
             throw new CommonException(ERROR_ISSUE_ID_NOT_FOUND);
         }
+        Long issueId = EncryptionUtils.decrypt(issueUpdate.get(ISSUE_ID).toString(), EncryptionConstant.BLANK_KEY);
         IssueDTO issueDTO = new IssueDTO();
-        issueDTO.setIssueId(Long.parseLong(issueUpdate.get(ISSUE_ID).toString()));
+        issueDTO.setIssueId(issueId);
         issueDTO.setProjectId(projectId);
         issueDTO = issueMapper.selectByPrimaryKey(issueDTO);
         if (issueDTO == null) {
@@ -113,7 +116,7 @@ public class IssueValidator {
             throw new CommonException("error.IssueRule.EpicName");
         }
         //修改状态要有当前状态
-        if (issueUpdate.get(STATUS_ID) != null && issueStatusMapper.selectByPrimaryKey(Long.parseLong(issueUpdate.get(STATUS_ID).toString())) == null) {
+        if (issueUpdate.get(STATUS_ID) != null && issueStatusMapper.selectByPrimaryKey(EncryptionUtils.decrypt(issueUpdate.get(STATUS_ID).toString(),EncryptionConstant.BLANK_KEY)) == null) {
             throw new CommonException("error.IssueRule.statusId");
         }
 

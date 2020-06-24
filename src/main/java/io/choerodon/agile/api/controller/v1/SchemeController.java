@@ -104,7 +104,7 @@ public class SchemeController extends BaseController {
     @PostMapping(value = "/schemes/create_status_for_agile")
     public ResponseEntity<StatusVO> createStatusForAgile(@PathVariable("project_id") Long projectId,
                                                          @RequestParam String applyType,
-                                                         @RequestBody @EncryptDTO StatusVO statusVO) {
+                                                         @RequestBody  StatusVO statusVO) {
         return new ResponseEntity<>(projectConfigService.createStatusForAgile(projectId, applyType, statusVO), HttpStatus.OK);
     }
 

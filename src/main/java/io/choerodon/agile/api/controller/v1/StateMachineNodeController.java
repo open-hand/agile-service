@@ -36,7 +36,7 @@ public class StateMachineNodeController extends BaseController {
     @PostMapping
     public ResponseEntity<List<StateMachineNodeVO>> create(@PathVariable("organization_id") Long organizationId,
                                                            @RequestParam("stateMachineId") Long stateMachineId,
-                                                           @RequestBody @EncryptDTO StateMachineNodeVO nodeDTO) {
+                                                           @RequestBody  StateMachineNodeVO nodeDTO) {
         nodeValidator.createValidate(nodeDTO);
         return new ResponseEntity<>(nodeService.create(organizationId, stateMachineId, nodeDTO), HttpStatus.CREATED);
     }
@@ -47,7 +47,7 @@ public class StateMachineNodeController extends BaseController {
     public ResponseEntity<List<StateMachineNodeVO>> update(@PathVariable("organization_id") Long organizationId,
                                                            @PathVariable("node_id") Long nodeId,
                                                            @RequestParam("stateMachineId") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/ Long stateMachineId,
-                                                           @RequestBody @EncryptDTO StateMachineNodeVO nodeDTO) {
+                                                           @RequestBody  StateMachineNodeVO nodeDTO) {
         nodeValidator.updateValidate(nodeDTO);
         return new ResponseEntity<>(nodeService.update(organizationId, stateMachineId, nodeId, nodeDTO), HttpStatus.CREATED);
     }

@@ -33,7 +33,7 @@ public class StoryMapWidthController {
     public ResponseEntity<StoryMapWidthVO> create(@ApiParam(value = "项目id", required = true)
                                                           @PathVariable(name = "project_id") Long projectId,
                                                   @ApiParam(value = "故事地图宽度DTO", required = true)
-                                                          @RequestBody @EncryptDTO StoryMapWidthVO storyMapWidthVO) {
+                                                          @RequestBody  StoryMapWidthVO storyMapWidthVO) {
         return Optional.ofNullable(storyMapWidthService.create(projectId, storyMapWidthVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.storyMapWidth.create"));
@@ -45,7 +45,7 @@ public class StoryMapWidthController {
     public ResponseEntity<StoryMapWidthVO> update(@ApiParam(value = "项目id", required = true)
                                                    @PathVariable(name = "project_id") Long projectId,
                                                   @ApiParam(value = "故事地图宽度DTO", required = true)
-                                                   @RequestBody @EncryptDTO StoryMapWidthVO storyMapWidthVO) {
+                                                   @RequestBody  StoryMapWidthVO storyMapWidthVO) {
         return Optional.ofNullable(storyMapWidthService.update(projectId, storyMapWidthVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.storyMapWidth.update"));

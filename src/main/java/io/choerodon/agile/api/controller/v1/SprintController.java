@@ -63,7 +63,7 @@ public class SprintController {
     public ResponseEntity<SprintDetailVO> updateSprint(@ApiParam(value = "项目id", required = true)
                                                        @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "冲刺DTO对象", required = true)
-                                                       @RequestBody @Valid @EncryptDTO SprintUpdateVO sprintUpdateVO) {
+                                                       @RequestBody @Valid  SprintUpdateVO sprintUpdateVO) {
         return Optional.ofNullable(sprintService.updateSprint(projectId, sprintUpdateVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException(UPDATE_ERROR));
@@ -117,7 +117,7 @@ public class SprintController {
     public ResponseEntity<SprintDetailVO> startSprint(@ApiParam(value = "项目id", required = true)
                                                       @PathVariable(name = "project_id") Long projectId,
                                                       @ApiParam(value = "冲刺DTO对象", required = true)
-                                                      @RequestBody @Valid @EncryptDTO SprintUpdateVO sprintUpdateVO) {
+                                                      @RequestBody @Valid  SprintUpdateVO sprintUpdateVO) {
         return Optional.ofNullable(sprintService.startSprint(projectId, sprintUpdateVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(OPEN_ERROR));
@@ -129,7 +129,7 @@ public class SprintController {
     public ResponseEntity<Boolean> completeSprint(@ApiParam(value = "项目id", required = true)
                                                   @PathVariable(name = "project_id") Long projectId,
                                                   @ApiParam(value = "完成冲刺对象", required = true)
-                                                  @RequestBody @Valid @EncryptDTO SprintCompleteVO sprintCompleteVO) {
+                                                  @RequestBody @Valid  SprintCompleteVO sprintCompleteVO) {
         return Optional.ofNullable(sprintService.completeSprint(projectId, sprintCompleteVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(CLOSE_ERROR));

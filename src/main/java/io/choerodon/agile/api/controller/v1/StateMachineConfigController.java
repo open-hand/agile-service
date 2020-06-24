@@ -32,7 +32,7 @@ public class StateMachineConfigController extends BaseController {
     public ResponseEntity<StateMachineConfigVO> create(@PathVariable("organization_id") Long organizationId,
                                                        @PathVariable("state_machine_id") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/ Long stateMachineId,
                                                        @RequestParam("transform_id") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_TRANSFORM)*/ Long transformId,
-                                                       @RequestBody @EncryptDTO StateMachineConfigVO configDTO) {
+                                                       @RequestBody  StateMachineConfigVO configDTO) {
         return new ResponseEntity<>(configService.create(organizationId, stateMachineId, transformId, configDTO), HttpStatus.CREATED);
     }
 

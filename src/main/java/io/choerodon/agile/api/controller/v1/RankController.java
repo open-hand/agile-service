@@ -30,7 +30,7 @@ public class RankController {
     public ResponseEntity epicAndFeatureRank(@ApiParam(value = "项目id", required = true)
                                              @PathVariable(name = "project_id") Long projectId,
                                              @ApiParam(value = "epic and feature rank DTO", required = true)
-                                             @RequestBody @EncryptDTO RankVO rankVO) {
+                                             @RequestBody  RankVO rankVO) {
         rankService.epicAndFeatureRank(projectId, rankVO);
         return new ResponseEntity(HttpStatus.CREATED);
     }

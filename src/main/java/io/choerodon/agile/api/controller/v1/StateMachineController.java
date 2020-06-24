@@ -51,7 +51,7 @@ public class StateMachineController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建状态机")
     @PostMapping
-    public ResponseEntity<StateMachineVO> create(@PathVariable("organization_id") Long organizationId, @RequestBody @EncryptDTO StateMachineVO stateMachineVO) {
+    public ResponseEntity<StateMachineVO> create(@PathVariable("organization_id") Long organizationId, @RequestBody  StateMachineVO stateMachineVO) {
         stateMachineValidator.createValidate(stateMachineVO);
         return new ResponseEntity<>(stateMachineService.create(organizationId, stateMachineVO), HttpStatus.CREATED);
     }
@@ -61,7 +61,7 @@ public class StateMachineController {
     @PutMapping(value = "/{state_machine_id}")
     public ResponseEntity<StateMachineVO> update(@PathVariable("organization_id") Long organizationId,
                                                  @PathVariable("state_machine_id") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/ Long stateMachineId,
-                                                 @RequestBody @EncryptDTO StateMachineVO stateMachineVO) {
+                                                 @RequestBody  StateMachineVO stateMachineVO) {
         stateMachineValidator.updateValidate(stateMachineVO);
         return new ResponseEntity<>(stateMachineService.update(organizationId, stateMachineId, stateMachineVO), HttpStatus.CREATED);
     }

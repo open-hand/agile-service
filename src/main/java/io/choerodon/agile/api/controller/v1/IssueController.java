@@ -105,7 +105,7 @@ public class IssueController {
                                                 @PathVariable(name = "project_id") Long projectId,
                                                @ApiParam(value = "更新issue对象", required = true)
                                                 @RequestBody @Encrypt JSONObject issueUpdate) {
-//        issueValidator.verifyUpdateData(issueUpdate, projectId);
+        issueValidator.verifyUpdateData(issueUpdate, projectId);
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
         List<String> fieldList = verifyUpdateUtil.verifyUpdateData(issueUpdate,issueUpdateVO);
         return Optional.ofNullable(issueService.updateIssue(projectId, issueUpdateVO, fieldList))
@@ -137,7 +137,7 @@ public class IssueController {
     public ResponseEntity<IssueVO> queryIssue(@ApiParam(value = "项目id", required = true)
                                                @PathVariable(name = "project_id") Long projectId,
                                               @ApiParam(value = "issueId", required = true)
-                                               @PathVariable  Long issueId,
+                                               @PathVariable @Encrypt Long issueId,
                                               @ApiParam(value = "组织id", required = true)
                                                @RequestParam(required = false) Long organizationId) {
         return Optional.ofNullable(issueService.queryIssue(projectId, issueId, organizationId))
@@ -173,6 +173,7 @@ public class IssueController {
                                                                @RequestBody(required = false) SearchVO searchVO,
                                                                          @ApiParam(value = "查询参数", required = true)
                                                                @RequestParam(required = false) Long organizationId) {
+        EncryptionUtils.decryptSearchVO(searchVO);
         return Optional.ofNullable(issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.listIssueWithSub"));
@@ -320,7 +321,7 @@ public class IssueController {
                                                                   @ApiParam(value = "sprintId", required = true)
                                                                    @PathVariable @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/ Long sprintId,
                                                                   @ApiParam(value = "移卡信息", required = true)
-                                                                   @RequestBody @EncryptDTO MoveIssueVO moveIssueVO) {
+                                                                   @RequestBody  MoveIssueVO moveIssueVO) {
         return Optional.ofNullable(issueService.batchIssueToSprint(projectId, sprintId, moveIssueVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.issue.batchToSprint"));
@@ -344,7 +345,7 @@ public class IssueController {
                                                        @ApiParam(value = "组织id", required = true)
                                                         @RequestParam Long organizationId,
                                                        @ApiParam(value = "修改类型信息", required = true)
-                                                        @RequestBody @EncryptDTO IssueUpdateTypeVO issueUpdateTypeVO) {
+                                                        @RequestBody  IssueUpdateTypeVO issueUpdateTypeVO) {
         IssueConvertDTO issueConvertDTO = issueValidator.verifyUpdateTypeData(projectId, issueUpdateTypeVO);
         return Optional.ofNullable(issueService.updateIssueTypeCode(issueConvertDTO, issueUpdateTypeVO, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
@@ -359,7 +360,7 @@ public class IssueController {
                                                          @ApiParam(value = "组织id", required = true)
                                                           @RequestParam Long organizationId,
                                                          @ApiParam(value = "转换子任务信息", required = true)
-                                                          @RequestBody @EncryptDTO  IssueTransformSubTask issueTransformSubTask) {
+                                                          @RequestBody   IssueTransformSubTask issueTransformSubTask) {
         issueValidator.verifyTransformedSubTask(issueTransformSubTask);
         return Optional.ofNullable(issueService.transformedSubTask(projectId, organizationId, issueTransformSubTask))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
@@ -374,7 +375,7 @@ public class IssueController {
                                                    @ApiParam(value = "组织id", required = true)
                                                     @RequestParam Long organizationId,
                                                    @ApiParam(value = "转换任务信息", required = true)
-                                                    @RequestBody @EncryptDTO IssueTransformTask issueTransformTask) {
+                                                    @RequestBody  IssueTransformTask issueTransformTask) {
         IssueConvertDTO issueConvertDTO = issueValidator.verifyTransformedTask(projectId, issueTransformTask);
         return Optional.ofNullable(issueService.transformedTask(issueConvertDTO, issueTransformTask, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
@@ -397,6 +398,7 @@ public class IssueController {
                              @RequestBody(required = false) SearchVO searchVO,
                              HttpServletRequest request,
                              HttpServletResponse response) {
+        EncryptionUtils.decryptSearchVO(searchVO);
         issueService.exportIssues(projectId, searchVO, request, response, organizationId, pageRequest.getSort());
     }
 
@@ -445,6 +447,7 @@ public class IssueController {
                                                                                      @RequestParam Long organizationId,
                                                                                         @ApiParam(value = "查询参数", required = true)
                                                                                      @RequestBody(required = false) SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
         return Optional.ofNullable(issueService.listIssueWithoutSubToTestComponent(projectId, searchVO, pageRequest, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.listIssueWithoutSubToTestComponent"));
@@ -465,6 +468,7 @@ public class IssueController {
                                                                                              @RequestParam Long organizationId,
                                                                                                 @ApiParam(value = "查询参数", required = true)
                                                                                              @RequestBody(required = false) SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
         return Optional.ofNullable(issueService.listIssueWithLinkedIssues(projectId, searchVO, pageable, organizationId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.Issue.listIssueWithBlockedIssues"));
@@ -490,7 +494,7 @@ public class IssueController {
     public ResponseEntity<EpicDataVO> dragEpic(@ApiParam(value = "项目id", required = true)
                                                 @PathVariable(name = "project_id") Long projectId,
                                                @ApiParam(value = "排序对象", required = true)
-                                                @RequestBody @EncryptDTO EpicSequenceVO epicSequenceVO) {
+                                                @RequestBody  EpicSequenceVO epicSequenceVO) {
         return Optional.ofNullable(issueService.dragEpic(projectId, epicSequenceVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.issueController.dragEpic"));
@@ -534,7 +538,7 @@ public class IssueController {
     public ResponseEntity<IssueVO> updateIssueParentId(@ApiParam(value = "项目id", required = true)
                                                         @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "issue parent id update vo", required = true)
-                                                        @RequestBody @EncryptDTO IssueUpdateParentIdVO issueUpdateParentIdVO) {
+                                                        @RequestBody  IssueUpdateParentIdVO issueUpdateParentIdVO) {
         return Optional.ofNullable(issueService.issueParentIdUpdate(projectId, issueUpdateParentIdVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.issueParentId.update"));
@@ -557,6 +561,7 @@ public class IssueController {
                                                              @PathVariable(name = "project_id") Long projectId,
                                                              @ApiParam(value = "查询参数", required = true)
                                                              @RequestBody SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
         return Optional.ofNullable(issueService.queryIssueIdsByOptions(projectId, searchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.issueIds.get"));

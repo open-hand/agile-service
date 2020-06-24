@@ -55,7 +55,7 @@ public class QuickFilterController {
                                                 @ApiParam(value = "filter id", required = true)
                                                  @PathVariable @Encrypt Long filterId,
                                                 @ApiParam(value = "quick filter object", required = true)
-                                                 @RequestBody @EncryptDTO QuickFilterVO quickFilterVO) {
+                                                 @RequestBody  QuickFilterVO quickFilterVO) {
         return Optional.ofNullable(quickFilterService.update(projectId, filterId, quickFilterVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.quickFilter.update"));

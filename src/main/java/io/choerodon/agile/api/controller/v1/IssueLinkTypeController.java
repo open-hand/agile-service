@@ -74,7 +74,7 @@ public class IssueLinkTypeController {
     public ResponseEntity<IssueLinkTypeVO> createIssueLinkType(@ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
                                                                @ApiParam(value = "创建issueLinkType对象", required = true)
-                                                                @RequestBody @EncryptDTO IssueLinkTypeCreateVO issueLinkTypeCreateVO) {
+                                                                @RequestBody  IssueLinkTypeCreateVO issueLinkTypeCreateVO) {
         issueLinkTypeValidator.verifyCreateData(issueLinkTypeCreateVO, projectId);
         issueLinkTypeValidator.verifyIssueLinkTypeName(projectId, issueLinkTypeCreateVO.getLinkName(), null);
         return Optional.ofNullable(issueLinkTypeService.createIssueLinkType(issueLinkTypeCreateVO))
@@ -88,7 +88,7 @@ public class IssueLinkTypeController {
     public ResponseEntity<IssueLinkTypeVO> updateIssueLinkType(@ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
                                                                @ApiParam(value = "issueLinkType", required = true)
-                                                                @RequestBody @EncryptDTO IssueLinkTypeVO issueLinkTypeVO) {
+                                                                @RequestBody  IssueLinkTypeVO issueLinkTypeVO) {
         issueLinkTypeValidator.verifyUpdateData(issueLinkTypeVO, projectId);
         issueLinkTypeValidator.verifyIssueLinkTypeName(projectId, issueLinkTypeVO.getLinkName(), issueLinkTypeVO.getLinkTypeId());
         return Optional.ofNullable(issueLinkTypeService.updateIssueLinkType(issueLinkTypeVO))

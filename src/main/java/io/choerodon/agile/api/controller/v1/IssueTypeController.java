@@ -50,7 +50,7 @@ public class IssueTypeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建问题类型")
     @PostMapping
-    public ResponseEntity<IssueTypeVO> create(@PathVariable("organization_id") Long organizationId, @RequestBody @Valid @EncryptDTO IssueTypeVO issueTypeVO) {
+    public ResponseEntity<IssueTypeVO> create(@PathVariable("organization_id") Long organizationId, @RequestBody @Valid  IssueTypeVO issueTypeVO) {
         return new ResponseEntity<>(issueTypeService.create(organizationId, issueTypeVO), HttpStatus.OK);
     }
 
@@ -58,7 +58,7 @@ public class IssueTypeController extends BaseController {
     @ApiOperation(value = "修改问题类型")
     @PutMapping(value = "/{id}")
     public ResponseEntity<IssueTypeVO> update(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/  Long issueTypeId,
-                                              @RequestBody @Valid @EncryptDTO IssueTypeVO issueTypeVO) {
+                                              @RequestBody @Valid  IssueTypeVO issueTypeVO) {
         issueTypeVO.setId(issueTypeId);
         issueTypeVO.setOrganizationId(organizationId);
         return new ResponseEntity<>(issueTypeService.update(issueTypeVO), HttpStatus.OK);

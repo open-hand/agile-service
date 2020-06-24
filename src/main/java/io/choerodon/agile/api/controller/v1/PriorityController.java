@@ -57,7 +57,7 @@ public class PriorityController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建优先级")
     @PostMapping
-    public ResponseEntity<PriorityVO> create(@PathVariable("organization_id") Long organizationId, @RequestBody @EncryptDTO PriorityVO priorityVO) {
+    public ResponseEntity<PriorityVO> create(@PathVariable("organization_id") Long organizationId, @RequestBody  PriorityVO priorityVO) {
         priorityValidator.createValidate(priorityVO);
         return new ResponseEntity<>(priorityService.create(organizationId, priorityVO), HttpStatus.OK);
     }
@@ -66,7 +66,7 @@ public class PriorityController {
     @ApiOperation(value = "更新优先级")
     @PutMapping(value = "/{priority_id}")
     public ResponseEntity<PriorityVO> update(@PathVariable("organization_id") Long organizationId, @PathVariable("priority_id") Long priorityId,
-                                             @RequestBody @Valid @EncryptDTO PriorityVO priorityVO) {
+                                             @RequestBody @Valid  PriorityVO priorityVO) {
         priorityVO.setId(priorityId);
         priorityVO.setOrganizationId(organizationId);
         priorityValidator.updateValidate(priorityVO);

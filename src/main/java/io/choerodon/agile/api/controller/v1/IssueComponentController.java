@@ -44,7 +44,7 @@ public class IssueComponentController {
     public ResponseEntity<IssueComponentVO> createComponent(@ApiParam(value = "项目id", required = true)
                                                              @PathVariable(name = "project_id") Long projectId,
                                                             @ApiParam(value = "components对象", required = true)
-                                                             @RequestBody @EncryptDTO IssueComponentVO issueComponentVO) {
+                                                             @RequestBody  IssueComponentVO issueComponentVO) {
         return Optional.ofNullable(issueComponentService.create(projectId, issueComponentVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.component.create"));
@@ -58,7 +58,7 @@ public class IssueComponentController {
                                                             @ApiParam(value = "component id", required = true)
                                                              @PathVariable Long id,
                                                             @ApiParam(value = "components对象", required = true)
-                                                             @RequestBody @EncryptDTO IssueComponentVO issueComponentVO) {
+                                                             @RequestBody  IssueComponentVO issueComponentVO) {
         return Optional.ofNullable(issueComponentService.update(projectId, id, issueComponentVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.component.update"));

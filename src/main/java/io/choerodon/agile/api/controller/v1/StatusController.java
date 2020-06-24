@@ -63,7 +63,7 @@ public class StatusController extends BaseController {
     @ApiOperation(value = "创建状态")
     @PostMapping("/organizations/{organization_id}/status")
     public ResponseEntity<StatusVO> create(@PathVariable("organization_id") Long organizationId,
-                                           @RequestBody @EncryptDTO StatusVO statusVO) {
+                                           @RequestBody  StatusVO statusVO) {
         stateValidator.validate(statusVO);
         return new ResponseEntity<>(statusService.create(organizationId, statusVO), HttpStatus.CREATED);
     }
@@ -73,7 +73,7 @@ public class StatusController extends BaseController {
     @PutMapping(value = "/organizations/{organization_id}/status/{status_id}")
     public ResponseEntity<StatusVO> update(@PathVariable("organization_id") Long organizationId,
                                            @PathVariable("status_id") @Encrypt/*(EncryptionConstant.FD_STATUS)*/ Long statusId,
-                                           @RequestBody @Valid @EncryptDTO StatusVO statusVO) {
+                                           @RequestBody @Valid  StatusVO statusVO) {
         statusVO.setId(statusId);
         statusVO.setOrganizationId(organizationId);
         stateValidator.validate(statusVO);

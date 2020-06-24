@@ -37,7 +37,7 @@ public class WikiRelationController {
     public ResponseEntity<Void> create(@ApiParam(value = "项目id", required = true)
                                  @PathVariable(name = "project_id") Long projectId,
                                  @ApiParam(value = "knowledge relation vo list", required = true)
-                                 @RequestBody @EncryptDTO List<WikiRelationVO> wikiRelationVOList) {
+                                 @RequestBody  List<WikiRelationVO> wikiRelationVOList) {
         wikiRelationService.create(projectId, wikiRelationVOList);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

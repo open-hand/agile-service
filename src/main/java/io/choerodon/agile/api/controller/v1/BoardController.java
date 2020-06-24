@@ -49,7 +49,7 @@ public class BoardController {
                                                     @ApiParam(value = "agile board id", required = true)
                                                      @PathVariable @Encrypt/*(EncryptionConstant.AGILE_BOARD)*/ Long boardId,
                                                     @ApiParam(value = "ScrumBoard对象", required = true)
-                                                     @RequestBody @EncryptDTO BoardVO boardVO) {
+                                                     @RequestBody  BoardVO boardVO) {
         return Optional.ofNullable(boardService.update(projectId, boardId, boardVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.board.update"));
@@ -88,7 +88,7 @@ public class BoardController {
                                             @ApiParam(value = "转换id", required = true)
                                              @RequestParam @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_TRANSFORM)*/ Long transformId,
                                             @ApiParam(value = "issue move object", required = true)
-                                             @RequestBody @EncryptDTO IssueMoveVO issueMoveVO) {
+                                             @RequestBody  IssueMoveVO issueMoveVO) {
         return Optional.ofNullable(boardService.move(projectId, issueId, transformId, issueMoveVO, false))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.issue.update"));
@@ -137,13 +137,13 @@ public class BoardController {
     public ResponseEntity<JSONObject> queryByOptions(@ApiParam(value = "项目id", required = true)
                                                      @PathVariable(name = "project_id") Long projectId,
                                                      @ApiParam(value = "agile board id", required = true)
-                                                     @PathVariable  Long boardId,
+                                                     @PathVariable @Encrypt Long boardId,
                                                      @ApiParam(value = "search item，my problem", required = false)
                                                      @RequestParam(required = false) Long assigneeId,
                                                      @ApiParam(value = "search item，only story", required = false)
                                                      @RequestParam(required = false) Boolean onlyStory,
                                                      @ApiParam(value = "quick filter", required = false)
-                                                     @RequestParam(required = false) List<Long> quickFilterIds,
+                                                     @RequestParam(required = false) @Encrypt List<Long> quickFilterIds,
                                                      @ApiParam(value = "组织id", required = true)
                                                      @PathVariable(name = "organization_id") Long organizationId,
                                                      @ApiParam(value = "经办人搜索", required = false)

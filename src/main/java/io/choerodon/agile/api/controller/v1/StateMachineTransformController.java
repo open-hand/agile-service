@@ -37,7 +37,7 @@ public class StateMachineTransformController extends BaseController {
     @PostMapping
     public ResponseEntity<StateMachineTransformVO> create(@PathVariable("organization_id") Long organizationId,
                                                           @RequestParam @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/ Long stateMachineId,
-                                                          @RequestBody @EncryptDTO StateMachineTransformVO transformDTO) {
+                                                          @RequestBody  StateMachineTransformVO transformDTO) {
         transformValidator.createValidate(transformDTO);
         return new ResponseEntity<>(transformService.create(organizationId, stateMachineId, transformDTO), HttpStatus.CREATED);
     }
@@ -48,7 +48,7 @@ public class StateMachineTransformController extends BaseController {
     public ResponseEntity<StateMachineTransformVO> update(@PathVariable("organization_id") Long organizationId,
                                                           @PathVariable("transform_id")  @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_TRANSFORM)*/ Long transformId,
                                                           @RequestParam @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/  Long stateMachineId,
-                                                          @RequestBody @EncryptDTO StateMachineTransformVO transformDTO) {
+                                                          @RequestBody  StateMachineTransformVO transformDTO) {
         transformValidator.updateValidate(transformDTO);
         return new ResponseEntity<>(transformService.update(organizationId, stateMachineId, transformId, transformDTO), HttpStatus.CREATED);
     }

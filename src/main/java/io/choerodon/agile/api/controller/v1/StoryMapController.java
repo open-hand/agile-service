@@ -64,7 +64,7 @@ public class StoryMapController {
     public ResponseEntity<Void> storyMapMove(@ApiParam(value = "项目id", required = true)
                                        @PathVariable(name = "project_id") Long projectId,
                                        @ApiParam(value = "story map drag DTO", required = true)
-                                       @RequestBody @EncryptDTO StoryMapDragVO storyMapDragVO) {
+                                       @RequestBody  StoryMapDragVO storyMapDragVO) {
         storyMapService.storyMapMove(projectId, storyMapDragVO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

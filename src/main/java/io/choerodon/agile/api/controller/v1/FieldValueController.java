@@ -75,7 +75,7 @@ public class FieldValueController {
                                             @ApiParam(value = "方案编码", required = true)
                                             @RequestParam String schemeCode,
                                             @ApiParam(value = "自定义字段列表（包含值）", required = true)
-                                            @RequestBody List<PageFieldViewCreateVO> createDTOs) {
+                                            @RequestBody  List<PageFieldViewCreateVO> createDTOs) {
         fieldValueService.createFieldValues(organizationId, projectId, instanceId, schemeCode, createDTOs);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -109,7 +109,7 @@ public class FieldValueController {
                                                                @ApiParam(value = "方案编码", required = true)
                                                                @RequestParam String schemeCode,
                                                                @ApiParam(value = "值对象列表", required = true)
-                                                               @RequestBody @EncryptDTO PageFieldViewUpdateVO updateDTO) {
+                                                               @RequestBody  PageFieldViewUpdateVO updateDTO) {
         return new ResponseEntity<>(fieldValueService.updateFieldValue(organizationId, projectId, instanceId, fieldId, schemeCode, updateDTO), HttpStatus.OK);
     }
 
@@ -141,7 +141,7 @@ public class FieldValueController {
                                                    @ApiParam(value = "方案编码", required = true)
                                                    @RequestParam String schemeCode,
                                                    @RequestParam String appleType,
-                                                   @RequestBody @EncryptDTO BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
+                                                   @RequestBody  BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
         issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo,appleType);
         return new ResponseEntity<>(HttpStatus.OK);
     }

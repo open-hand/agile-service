@@ -74,7 +74,7 @@ public class ProductVersionController {
     public ResponseEntity<ProductVersionDetailVO> updateVersion(@ApiParam(value = "项目id", required = true)
                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                 @ApiParam(value = "versionId", required = true)
-                                                                 @PathVariable Long versionId,
+                                                                 @PathVariable @Encrypt Long versionId,
                                                                 @ApiParam(value = "version信息", required = true)
                                                                  @RequestBody JSONObject versionUpdateDTO) {
         ProductVersionUpdateVO productVersionUpdate = new ProductVersionUpdateVO();
@@ -259,7 +259,7 @@ public class ProductVersionController {
     public ResponseEntity<ProductVersionPageVO> dragVersion(@ApiParam(value = "项目id", required = true)
                                                              @PathVariable(name = "project_id") Long projectId,
                                                             @ApiParam(value = "排序对象", required = true)
-                                                             @RequestBody @EncryptDTO VersionSequenceVO versionSequenceVO) {
+                                                             @RequestBody  VersionSequenceVO versionSequenceVO) {
         return Optional.ofNullable(productVersionService.dragVersion(projectId, versionSequenceVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException(DRAG_ERROR));
