@@ -66,9 +66,9 @@ class SettingColumn extends Component {
       }, draggableId, 
     } = result;
     const sourceType = sourceDroppableId.split(',')[0];
-    const sourceColumnId = Number(sourceDroppableId.split(',')[1]);
+    const sourceColumnId = sourceDroppableId.split(',')[1];
     const destinationType = destinationDroppableId.split(',')[0];
-    const destinationColumnId = Number(destinationDroppableId.split(',')[1]);
+    const destinationColumnId = destinationDroppableId.split(',')[1];
     const [statusCode, statusObjectVersionNumber] = draggableId.split(',');
     if (sourceColumnId === destinationColumnId && sourceIndex === destinationIndex) {
       return;

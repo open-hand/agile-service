@@ -104,7 +104,7 @@ export default withRouter(observer(({
       const quickFilterIds = newSelectedQuickFilters.map(filter => filter.key.split('-')[1]);
       IssueStore.handleFilterChange('quickFilterIds', quickFilterIds);
     } else if (type === 'my') {
-      const targetMyFilter = find(filters, { filterId: Number(id) });
+      const targetMyFilter = find(filters, { filterId: id });
       const filterObject = flattenObject(JSON.parse(targetMyFilter.filterJson));
       // 先清除筛选
       IssueStore.clearAllFilter();

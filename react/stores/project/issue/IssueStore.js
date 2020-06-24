@@ -476,7 +476,7 @@ class IssueStore {
   }
 
   getFieldCodeById(id) {
-    const field = find(this.fields, { id: Number(id) });
+    const field = find(this.fields, { id });
     return field ? field.code : undefined;
   }
 }
