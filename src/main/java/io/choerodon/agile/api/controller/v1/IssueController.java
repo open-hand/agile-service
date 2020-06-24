@@ -105,7 +105,7 @@ public class IssueController {
                                                 @PathVariable(name = "project_id") Long projectId,
                                                @ApiParam(value = "更新issue对象", required = true)
                                                 @RequestBody @Encrypt JSONObject issueUpdate) {
-        issueValidator.verifyUpdateData(issueUpdate, projectId);
+//        issueValidator.verifyUpdateData(issueUpdate, projectId);
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
         List<String> fieldList = verifyUpdateUtil.verifyUpdateData(issueUpdate,issueUpdateVO);
         return Optional.ofNullable(issueService.updateIssue(projectId, issueUpdateVO, fieldList))
@@ -137,7 +137,7 @@ public class IssueController {
     public ResponseEntity<IssueVO> queryIssue(@ApiParam(value = "项目id", required = true)
                                                @PathVariable(name = "project_id") Long projectId,
                                               @ApiParam(value = "issueId", required = true)
-                                               @PathVariable @Encrypt Long issueId,
+                                               @PathVariable  Long issueId,
                                               @ApiParam(value = "组织id", required = true)
                                                @RequestParam(required = false) Long organizationId) {
         return Optional.ofNullable(issueService.queryIssue(projectId, issueId, organizationId))

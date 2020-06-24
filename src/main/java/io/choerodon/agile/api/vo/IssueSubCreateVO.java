@@ -40,11 +40,11 @@ public class IssueSubCreateVO {
     private Long projectId;
 
     @ApiModelProperty(value = "冲刺id")
-    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_SPRINT)*/
+    @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/
     private Long sprintId;
 
     @ApiModelProperty(value = "父任务id")
-    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long parentIssueId;
 
     @ApiModelProperty(value = "问题类型id")

@@ -66,7 +66,7 @@ public class VerifyUpdateUtil {
             if (ObjectUtils.isEmpty(fieldAnnotation)) {
                 field.set(objectUpdate, v == null ? null : Long.valueOf(v.toString()));
             } else {
-                EncryptionUtils.decrypt(v.toString(), fieldAnnotation.value());
+                field.set(objectUpdate,EncryptionUtils.decrypt(v.toString(), fieldAnnotation.value()));
             }
         } else if (field.getType() == Date.class) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -93,22 +93,22 @@ public class VerifyUpdateUtil {
                     field.set(objectUpdate, JSON.parseArray(json, forName));
                 }
             } else {
-                JSONArray jsonArray = JSON.parseArray(v.toString());
+                JSONArray jsonArray = JSONObject.parseArray(JSON.toJSONString(v));
                 List list = new ArrayList();
-                jsonArray.forEach(objValue -> {
+                for (Object objValue:jsonArray) {
                     JSONObject jsonObject = JSON.parseObject(objValue.toString());
+                    Object obj = forName.newInstance();
                     jsonObject.forEach((String k, Object value) -> {
                         try {
                             Field field1 = forName.getDeclaredField(k);
-                            Object obj = forName.newInstance();
                             field1.setAccessible(true);
                             handleFieldType(field1,obj,value,false);
-                            list.add(obj);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     });
-                });
+                    list.add(obj);
+                }
                 field.set(objectUpdate, list);
             }
             flag = false;

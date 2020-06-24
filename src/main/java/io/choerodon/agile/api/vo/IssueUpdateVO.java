@@ -43,7 +43,7 @@ public class IssueUpdateVO {
     private Long assigneeId;
 
     @ApiModelProperty(value = "史诗id")
-    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long epicId;
 
     @ApiModelProperty(value = "冲刺id")
@@ -51,7 +51,7 @@ public class IssueUpdateVO {
     private Long sprintId;
 
     @ApiModelProperty(value = "父任务id")
-    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long parentIssueId;
 
     @ApiModelProperty(value = "故事点")
@@ -102,7 +102,7 @@ public class IssueUpdateVO {
     private Date stayDate;
 
     @ApiModelProperty(value = "bug关联的故事id")
-    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long relateIssueId;
 
     public String getRank() {
