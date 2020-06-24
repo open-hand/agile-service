@@ -1,29 +1,14 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
-import { Input } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
 import { issueApi } from '@/api';
-import TextEditToggle from '../../../../TextEditToggle';
-
-const { Text, Edit } = TextEditToggle;
-const { TextArea } = Input;
+import TextEditToggle from '@/components/TextEditTogglePro';
+import TextArea from '@/components/TextArea';
 
 @inject('AppState')
 @observer class FieldText extends Component {
-  constructor(props) {
-    super(props);
-    this.TextEditToggle = undefined;
-    this.state = {
-      newValue: undefined,
-    };
-  }
-
-  componentDidMount() {
-  }
-
-  updateIssueField = () => {
-    const { newValue } = this.state;
+  updateIssueField = (newValue) => {
     const {
       store, onUpdate, reloadIssue, field, feature,
     } = this.props;
@@ -33,7 +18,7 @@ const { TextArea } = Input;
       issueId, objectVersionNumber, [fieldCode]: value, featureVO = {},
     } = issue;
     const { id, objectVersionNumber: featureObjNum } = featureVO || {};
-    if (value !== newValue.trim()) {
+    if (value !== (newValue || '').trim()) {
       let obj = false;
       if (feature) {
         obj = {
@@ -43,14 +28,14 @@ const { TextArea } = Input;
             id,
             issueId,
             objectVersionNumber: featureObjNum,
-            [fieldCode]: newValue.trim(),
+            [fieldCode]: (newValue || '').trim(),
           },
         };
-      } else if (newValue.trim()) {
+      } else if ((newValue || '').trim()) {
         obj = {
           issueId,
           objectVersionNumber,
-          [fieldCode]: newValue.trim(),
+          [fieldCode]: (newValue || '').trim(),
         };
       }
       if (obj) {
@@ -75,7 +60,6 @@ const { TextArea } = Input;
     const issue = store.getIssue;
     const { featureVO = {} } = issue;
     const value = feature ? featureVO[fieldCode] : issue[fieldCode];
-
     return (
       <div className="line-start mt-10">
         {showTitle
@@ -90,44 +74,24 @@ const { TextArea } = Input;
         <div className="c7n-value-wrapper">
           <TextEditToggle
             disabled={disabled}
-            saveRef={(e) => {
-              this.TextEditToggle = e;
-            }}
-            formKey={fieldCode}
             onSubmit={this.updateIssueField}
-            originData={value}
-          >
-            <Text>
-              <div style={{
-                ...textStyle,
-                maxWidth: feature ? 200 : '',
-                wordBreak: 'break-all',
-                whiteSpace: 'pre-line',
-              }}
-              >
-                {value || '无'}
-              </div>
-            </Text>
-            <Edit>
+            initValue={value}
+            editor={(
               <TextArea
-                style={{ minWidth: 150 }}
-                autosize
-                autoFocus
+                autoSize
                 maxLength={feature ? 100 : 44}
-                size="small"
-                onChange={(e) => {
-                  this.setState({
-                    newValue: e.target.value,
-                  });
-                }}
-                // onPressEnter={() => {
-                //   if (this.TextEditToggle && this.TextEditToggle.leaveEditing) {
-                //     this.updateIssueField();
-                //     this.TextEditToggle.leaveEditing();
-                //   }
-                // }}
               />
-            </Edit>
+            )}
+          >
+            <div style={{
+              ...textStyle,
+              maxWidth: feature ? 200 : '',
+              wordBreak: 'break-all',
+              whiteSpace: 'pre-line',
+            }}
+            >
+              {value || '无'}
+            </div>
           </TextEditToggle>
         </div>
       </div>
