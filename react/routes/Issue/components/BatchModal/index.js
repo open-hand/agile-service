@@ -367,7 +367,7 @@ function BatchModal({
       </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button onClick={onCancel}>取消</Button>
+        <Button onClick={onCancel} disabled={loading}>取消</Button>
         <Button
           disabled={Object.keys(getData()).length === 0}
           color="blue"

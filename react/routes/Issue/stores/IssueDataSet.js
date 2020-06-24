@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Button } from 'choerodon-ui';
+import { Button, Icon } from 'choerodon-ui';
 import IssueStore from '@/stores/project/issue/IssueStore';
 import Modal from '../components/Modal';
 import BatchModal from '../components/BatchModal';
@@ -13,12 +13,20 @@ function Header({ dataSet, close }) {
       <div style={{ fontSize: '16px' }}>
         项已选中
       </div>
+      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
+        <Icon type="mode_edit" />
+        <span style={{ marginLeft: 6 }}>批量修改</span>        
+      </div>
+      <div style={{
+        width: 1, height: '100%', margin: '0px 8px 0 15px', background: '#95A5FF', 
+      }}
+      />
       <Button
         icon="close"
-        shape="circle"
-        style={{ color: 'white', marginLeft: 'auto' }}
+        shape="circle" 
+        style={{ color: 'white', marginRight: -5 }}         
         onClick={close}
-      />
+      />      
     </Fragment>
   );
 }
