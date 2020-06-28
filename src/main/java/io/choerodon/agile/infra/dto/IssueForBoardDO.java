@@ -22,7 +22,7 @@ public class IssueForBoardDO {
 
     private String summary;
 
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt(ignoreValue = "0")/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long parentIssueId;
 
     private Long objectVersionNumber;
@@ -41,11 +41,12 @@ public class IssueForBoardDO {
 
     private Boolean ldap;
 
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt(ignoreValue = "0")/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long epicId;
 
     private String rank;
 
+    @Encrypt
     private Long priorityId;
 
     private Date stayDate;
@@ -62,7 +63,7 @@ public class IssueForBoardDO {
     private String featureType;
 
 //    private Long piId;
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt(ignoreValue = "0")/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long relateIssueId;
 
     public String getRank() {

@@ -291,7 +291,7 @@ public class IssueController {
     public ResponseEntity batchIssueToVersionTest(@ApiParam(value = "项目id", required = true)
                                                   @PathVariable(name = "project_id") Long projectId,
                                                   @ApiParam(value = "versionId", required = true)
-                                                  @PathVariable @Encrypt Long versionId,
+                                                  @PathVariable @Encrypt(ignoreValue = {"0"}) Long versionId,
                                                   @ApiParam(value = "issue id", required = true)
                                                   @RequestBody @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ List<Long> issueIds) {
         issueService.batchIssueToVersionTest(projectId, versionId, issueIds);
@@ -304,7 +304,7 @@ public class IssueController {
     public ResponseEntity<List<IssueSearchVO>> batchIssueToEpic(@ApiParam(value = "项目id", required = true)
                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                 @ApiParam(value = "epicId", required = true)
-                                                                 @PathVariable @Encrypt  Long epicId,
+                                                                 @PathVariable @Encrypt(ignoreValue = {"0"})  Long epicId,
                                                                 @ApiParam(value = "issue id", required = true)
                                                                  @RequestBody @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ List<Long> issueIds) {
         return Optional.ofNullable(issueService.batchIssueToEpic(projectId, epicId, issueIds))
@@ -319,7 +319,7 @@ public class IssueController {
     public ResponseEntity<List<IssueSearchVO>> batchIssueToSprint(@ApiParam(value = "项目id", required = true)
                                                                    @PathVariable(name = "project_id") Long projectId,
                                                                   @ApiParam(value = "sprintId", required = true)
-                                                                   @PathVariable @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/ Long sprintId,
+                                                                   @PathVariable @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_SPRINT)*/ Long sprintId,
                                                                   @ApiParam(value = "移卡信息", required = true)
                                                                    @RequestBody  MoveIssueVO moveIssueVO) {
         return Optional.ofNullable(issueService.batchIssueToSprint(projectId, sprintId, moveIssueVO))

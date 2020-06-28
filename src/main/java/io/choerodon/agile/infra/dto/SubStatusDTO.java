@@ -10,7 +10,7 @@ import java.util.List;
  * Email: fuqianghuang01@gmail.com
  */
 public class SubStatusDTO {
-
+    @Encrypt
     private Long id;
     @Encrypt/*(EncryptionConstant.FD_STATUS)*/
     private Long statusId;

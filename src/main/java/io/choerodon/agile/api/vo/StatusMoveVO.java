@@ -14,11 +14,11 @@ public class StatusMoveVO {
     private Integer position;
 
     @ApiModelProperty(value = "目标列的id")
-    @Encrypt/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/
     private Long columnId;
 
     @ApiModelProperty(value = "原始列的id")
-    @Encrypt/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/
     private Long originColumnId;
 
     @ApiModelProperty(value = "版本号")

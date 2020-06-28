@@ -51,7 +51,7 @@ public class IssueSubVO {
     private Long projectId;
 
     @ApiModelProperty(value = "父任务id")
-    @Encrypt
+    @Encrypt(ignoreValue = {"0"})
     private Long parentIssueId;
 
     @ApiModelProperty(value = "故事点")

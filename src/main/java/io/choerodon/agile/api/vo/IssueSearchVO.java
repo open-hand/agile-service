@@ -54,7 +54,7 @@ public class IssueSearchVO {
     private String statusName;
 
     @ApiModelProperty(value = "史诗id")
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long epicId;
 
     @ApiModelProperty(value = "史诗名称")
@@ -70,13 +70,14 @@ public class IssueSearchVO {
     private String priorityName;
 
     @ApiModelProperty(value = "版本id集合")
+    @Encrypt
     private List<Long> versionIds;
 
     @ApiModelProperty(value = "版本名称集合")
     private List<String> versionNames;
 
     @ApiModelProperty(value = "冲刺id")
-    @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_SPRINT)*/
     private Long sprintId;
 
     @ApiModelProperty(value = "故事点")

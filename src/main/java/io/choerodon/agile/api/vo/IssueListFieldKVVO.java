@@ -71,7 +71,7 @@ public class IssueListFieldKVVO {
     private String epicName;
 
     @ApiModelProperty(value = "史诗id")
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long epicId;
 
     @ApiModelProperty(value = "史诗颜色")
@@ -80,6 +80,7 @@ public class IssueListFieldKVVO {
     @ApiModelProperty(value = "故事点")
     private BigDecimal storyPoints;
 
+    @Encrypt(ignoreValue = {"0"})
     private Long parentId;
 
     @ApiModelProperty(value = "如果问题类型是特性，返回特性类别:business、enabler")

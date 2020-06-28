@@ -54,11 +54,11 @@ public class IssueVO {
     private Long projectId;
 
     @ApiModelProperty(value = "史诗id")
-    @Encrypt
+    @Encrypt(ignoreValue = {"0"})
     private Long epicId;
 
     @ApiModelProperty(value = "父任务id")
-    @Encrypt
+    @Encrypt(ignoreValue = {"0"})
     private Long parentIssueId;
 
     @ApiModelProperty(value = "故事点")
@@ -184,7 +184,7 @@ public class IssueVO {
     private String reporterRealName;
 
     @ApiModelProperty(value = "缺陷关联的故事id")
-    @Encrypt
+    @Encrypt(ignoreValue = {"0"})
     private Long relateIssueId;
 
     @ApiModelProperty(value = "缺陷关联的故事编号")

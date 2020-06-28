@@ -19,12 +19,12 @@ public class MoveIssueVO {
     private Boolean isBefore;
 
     @ApiModelProperty(value = "移动的参照问题id")
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long outsetIssueId;
 
     @ApiModelProperty(value = "是否生成移动日志")
     private Boolean rankIndex;
-    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.FD_STATUS)*/
     private Long updateStatusId;
 
     private String statusCategoryCode;

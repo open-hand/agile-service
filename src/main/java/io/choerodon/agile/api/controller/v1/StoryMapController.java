@@ -53,6 +53,7 @@ public class StoryMapController {
                                                           @PathVariable(name = "project_id") Long projectId,
                                                           @ApiParam(value = "search DTO", required = true)
                                                           @RequestBody SearchVO searchVO) {
+        EncryptionUtils.decryptSearchVO(searchVO);
         return Optional.ofNullable(storyMapService.queryStoryMapDemand(projectId, searchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.storyMapDemand.get"));

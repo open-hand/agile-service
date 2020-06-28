@@ -20,7 +20,6 @@ public class IssueCreateVO {
     private String summary;
 
     @ApiModelProperty(value = "优先级code")
-    @Encrypt
     private String priorityCode;
 
     @ApiModelProperty(value = "描述")
@@ -36,15 +35,15 @@ public class IssueCreateVO {
     private Long projectId;
 
     @ApiModelProperty(value = "史诗id")
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long epicId;
 
     @ApiModelProperty(value = "冲刺id")
-    @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_SPRINT)*/
     private Long sprintId;
 
     @ApiModelProperty(value = "优先级id")
-    @Encrypt/*(EncryptionConstant.FD_PRIORITY)*/
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.FD_PRIORITY)*/
     private Long priorityId;
 
     @ApiModelProperty(value = "问题类型id")
@@ -75,9 +74,9 @@ public class IssueCreateVO {
     @ApiModelProperty(value = "故事点")
     private BigDecimal storyPoints;
 
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long relateIssueId;
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long parentIssueId;
 
     private RankVO rankVO;

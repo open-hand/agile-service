@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.infra.annotation.Update;
 import io.choerodon.core.exception.CommonException;
+import org.apache.commons.lang.ArrayUtils;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -13,10 +14,7 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author dinghuang123@gmail.com
@@ -66,7 +64,17 @@ public class VerifyUpdateUtil {
             if (ObjectUtils.isEmpty(fieldAnnotation)) {
                 field.set(objectUpdate, v == null ? null : Long.valueOf(v.toString()));
             } else {
-                field.set(objectUpdate,EncryptionUtils.decrypt(v.toString(), fieldAnnotation.value()));
+                String[] ignoreValue = fieldAnnotation.ignoreValue();
+                if(ArrayUtils.isEmpty(ignoreValue)){
+                    field.set(objectUpdate,EncryptionUtils.decrypt(v.toString(), fieldAnnotation.value()));
+                }
+                else {
+                    if(Arrays.asList(ignoreValue).contains(v)){
+                        field.set(objectUpdate, v == null ? null : Long.valueOf(v.toString()));
+                    } else {
+                        field.set(objectUpdate,EncryptionUtils.decrypt(v.toString(), fieldAnnotation.value()));
+                    }
+                }
             }
         } else if (field.getType() == Date.class) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -83,7 +91,8 @@ public class VerifyUpdateUtil {
                 if (forName.newInstance() instanceof Long) {
                     Encrypt declaredAnnotation = field.getDeclaredAnnotation(Encrypt.class);
                     if (!ObjectUtils.isEmpty(declaredAnnotation)) {
-                        field.set(objectUpdate, EncryptionUtils.decryptList(JSON.parseArray(v.toString(), String.class), declaredAnnotation.value()));
+                        String[] ignoreValue = declaredAnnotation.ignoreValue();
+                        field.set(objectUpdate, EncryptionUtils.decryptList(JSON.parseArray(v.toString(), String.class), declaredAnnotation.value(),ignoreValue));
                     } else {
                         String json = JSON.toJSONString(v);
                         field.set(objectUpdate, JSON.parseArray(json, forName));
