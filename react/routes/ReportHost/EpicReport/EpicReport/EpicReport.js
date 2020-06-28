@@ -486,7 +486,7 @@ class EpicReport extends Component {
               onClick={() => {
                 const { history } = this.props;
                 const urlParams = AppState.currentMenuType;
-                history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${issueNum}&paramIssueId=${record.issueId}&paramUrl=reporthost/EpicReport`);
+                history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${issueNum}&paramIssueId=${encodeURIComponent(record.issueId)}&paramUrl=reporthost/EpicReport`);
               }}
             >
               {issueNum}
@@ -711,7 +711,7 @@ class EpicReport extends Component {
                               }}
                               role="none"
                               onClick={() => {
-                                history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramType=epic&paramId=${ES.currentEpicId}&paramName=${encodeURIComponent(`${ES.epics.find(x => x.issueId === ES.currentEpicId).epicName}下的问题`)}&paramUrl=reporthost/EpicReport`);
+                                history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramType=epic&paramId=${encodeURIComponent(ES.currentEpicId)}&paramName=${encodeURIComponent(`${ES.epics.find(x => x.issueId === ES.currentEpicId).epicName}下的问题`)}&paramUrl=reporthost/EpicReport`);
                               }}
                             >
                               在“问题管理”中查看

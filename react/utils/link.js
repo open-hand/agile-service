@@ -32,22 +32,22 @@ export function issueLink(issueId, typeCode, issueName = null) {
   if (typeCode === 'issue_test' || typeCode === 'issue_auto_test') {
     return encodeURI(`/testManager/IssueManage/testCase/${issueId}?type=${type}&id=${projectId}&name=${name}&category=${category}&organizationId=${organizationId}&orgId=${organizationId}`);
   } else if (issueName) {
-    return encodeURI(`/agile/work-list/issue?type=${type}&id=${projectId}&name=${name}&category=${category}&organizationId=${organizationId}&paramIssueId=${issueId}&paramName=${issueName}&orgId=${organizationId}`);
+    return encodeURI(`/agile/work-list/issue?type=${type}&id=${projectId}&name=${name}&category=${category}&organizationId=${organizationId}&paramIssueId=${encodeURIComponent(issueId)}&paramName=${issueName}&orgId=${organizationId}`);
   } else {
-    return encodeURI(`/agile/work-list/issue?type=${type}&id=${projectId}&name=${name}&category=${category}&organizationId=${organizationId}&paramIssueId=${issueId}&orgId=${organizationId}`);
+    return encodeURI(`/agile/work-list/issue?type=${type}&id=${projectId}&name=${name}&category=${category}&organizationId=${organizationId}&paramIssueId=${encodeURIComponent(issueId)}&orgId=${organizationId}`);
   }
 }
 export function toIssueInProject({
   issueId, issueNum, projectId, projectName, category,
 }) {
-  return encodeURI(`/agile/work-list/issue?type=${'project'}&id=${projectId}&name=${projectName}&category=${category}&organizationId=${getOrganizationId()}&paramIssueId=${issueId}&paramName=${issueNum}`);
+  return encodeURI(`/agile/work-list/issue?type=${'project'}&id=${projectId}&name=${projectName}&category=${category}&organizationId=${getOrganizationId()}&paramIssueId=${encodeURIComponent(issueId)}&paramName=${issueNum}`);
 }
 export function programIssueLink(issueId, issueName, projectId) {
   const menu = AppState.currentMenuType;
   const {
     type, id, name, organizationId, category,
   } = menu;
-  return encodeURI(`/program/feature?type=${type}&id=${projectId || id}&name=${name}&category=${category}&organizationId=${organizationId}&paramIssueId=${issueId}&paramName=${issueName}&orgId=${organizationId}`);
+  return encodeURI(`/program/feature?type=${type}&id=${projectId || id}&name=${name}&category=${category}&organizationId=${organizationId}&paramIssueId=${encodeURIComponent(issueId)}&paramName=${issueName}&orgId=${organizationId}`);
 }
 export function testExecuteLink(executeId) {
   const menu = AppState.currentMenuType;

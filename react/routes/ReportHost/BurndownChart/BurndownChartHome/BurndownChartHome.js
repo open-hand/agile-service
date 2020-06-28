@@ -634,9 +634,9 @@ class BurndownChartHome extends Component {
                   const { history } = this.props;
                   const urlParams = AppState.currentMenuType;
                   if (item.parentIssueId) {
-                    history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${item.issueNum}&paramIssueId=${item.parentIssueId}&paramOpenIssueId=${item.issueId}&paramUrl=reporthost/burndownchart`);
+                    history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${item.issueNum}&paramIssueId=${encodeURIComponent(item.parentIssueId)}&paramOpenIssueId=${encodeURIComponent(item.issueId)}&paramUrl=reporthost/burndownchart`);
                   } else {
-                    history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${item.issueNum}&paramIssueId=${item.issueId}&paramOpenIssueId=${item.issueId}&paramUrl=reporthost/burndownchart`);
+                    history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${item.issueNum}&paramIssueId=${encodeURIComponent(item.issueId)}&paramOpenIssueId=${encodeURIComponent(item.issueId)}&paramUrl=reporthost/burndownchart`);
                   }
                 }}
               >
