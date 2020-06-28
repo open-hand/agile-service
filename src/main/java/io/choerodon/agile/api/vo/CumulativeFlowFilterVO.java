@@ -28,6 +28,7 @@ public class CumulativeFlowFilterVO {
     private List<Long> quickFilterIds;
 
     @ApiModelProperty(value = "看板列id集合")
+    @Encrypt
     private List<Long> columnIds;
 
     public List<Long> getQuickFilterIds() {

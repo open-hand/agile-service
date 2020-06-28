@@ -10,6 +10,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.hzero.starter.keyencrypt.core.EncryptProperties;
 import org.hzero.starter.keyencrypt.core.EncryptionService;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -330,5 +331,17 @@ public class EncryptionUtils {
             }
         }
         return map;
+    }
+    public static Map<String, Object> encryptMapKey(Map<Long, ? extends Object> map) {
+        Map<String, Object> result = new HashMap<>();
+        if (!ObjectUtils.isEmpty(map)) {
+            for (Map.Entry<Long, ? extends Object> entry : map.entrySet()) {
+                Long key = entry.getKey();
+                Object value = entry.getValue();
+                String encryptKey = encryptionService.encrypt(key.toString(), EncryptionConstant.BLANK_KEY);
+                result.put(encryptKey, value);
+            }
+        }
+        return result;
     }
 }

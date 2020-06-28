@@ -234,7 +234,7 @@ public class ReportController {
     public ResponseEntity<BurnDownReportVO> queryBurnDownReportByType(@ApiParam(value = "项目id", required = true)
                                                                        @PathVariable(name = "project_id") Long projectId,
                                                                       @ApiParam(value = "id", required = true)
-                                                                       @PathVariable Long id,
+                                                                       @PathVariable @Encrypt Long id,
                                                                       @ApiParam(value = "类型:Epic/Version", required = true)
                                                                        @RequestParam String type,
                                                                       @ApiParam(value = "组织id", required = true)

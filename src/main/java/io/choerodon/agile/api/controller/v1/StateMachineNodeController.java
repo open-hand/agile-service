@@ -35,7 +35,7 @@ public class StateMachineNodeController extends BaseController {
     @ApiOperation(value = "创建节点（草稿）")
     @PostMapping
     public ResponseEntity<List<StateMachineNodeVO>> create(@PathVariable("organization_id") Long organizationId,
-                                                           @RequestParam("stateMachineId") Long stateMachineId,
+                                                           @RequestParam("stateMachineId") @Encrypt Long stateMachineId,
                                                            @RequestBody  StateMachineNodeVO nodeDTO) {
         nodeValidator.createValidate(nodeDTO);
         return new ResponseEntity<>(nodeService.create(organizationId, stateMachineId, nodeDTO), HttpStatus.CREATED);

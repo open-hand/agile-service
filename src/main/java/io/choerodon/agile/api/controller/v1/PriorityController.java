@@ -65,7 +65,8 @@ public class PriorityController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更新优先级")
     @PutMapping(value = "/{priority_id}")
-    public ResponseEntity<PriorityVO> update(@PathVariable("organization_id") Long organizationId, @PathVariable("priority_id") Long priorityId,
+    public ResponseEntity<PriorityVO> update(@PathVariable("organization_id") Long organizationId,
+                                             @PathVariable("priority_id") @Encrypt Long priorityId,
                                              @RequestBody @Valid  PriorityVO priorityVO) {
         priorityVO.setId(priorityId);
         priorityVO.setOrganizationId(organizationId);
