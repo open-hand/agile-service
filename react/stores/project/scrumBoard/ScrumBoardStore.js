@@ -42,8 +42,6 @@ class ScrumBoardStore {
 
   @observable dragStartItem = {};
 
-  @observable otherIssue = [];
-
   @observable dragStart = false;
 
   @observable swimLaneData = new Map();

@@ -6,6 +6,7 @@ import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import StatusCouldDragOn from './StatusCouldDragOn';
 import Card from './Card';
 import { VIRTUAL_LIMIT } from './constant';
+
 @observer
 export default class StatusProvider extends Component {
   getStatus({

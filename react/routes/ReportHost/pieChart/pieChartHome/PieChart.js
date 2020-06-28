@@ -192,7 +192,7 @@ class ReleaseDetail extends Component {
               if (value.data.name === null) {
                 return '未分配';
               }
-              return '';
+              return value.data.name;
             },
           },
           itemStyle: {
