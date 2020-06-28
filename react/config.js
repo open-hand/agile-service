@@ -1,3 +1,5 @@
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+
 const config = {
   local: true,
   // use for c7n start
@@ -11,5 +13,9 @@ const config = {
   ],
   dashboard: {},
   resourcesLevel: ['site', 'origanization', 'project', 'user'],
+  webpackConfig(configs) {
+    configs.plugins.push(new ForkTsCheckerWebpackPlugin());
+    return configs;
+  },
 };
 module.exports = config;
