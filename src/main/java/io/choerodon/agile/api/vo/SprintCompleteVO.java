@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
 
@@ -17,6 +18,7 @@ public class SprintCompleteVO {
 
     @ApiModelProperty(value = "当前的冲刺id")
     @NotNull(message = SPRINT_ID_NULL_ERROR)
+    @Encrypt
     private Long sprintId;
 
     @ApiModelProperty(value = "未完成问题将移动的目标冲刺id")

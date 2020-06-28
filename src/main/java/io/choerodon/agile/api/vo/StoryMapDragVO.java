@@ -18,7 +18,7 @@ public class StoryMapDragVO {
     private Long epicId;
 
     @ApiModelProperty(value = "要关联的版本id")
-    @Encrypt/*(EncryptionConstant.FD_PRODUCT_VERSION)*/
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.FD_PRODUCT_VERSION)*/
     private Long versionId;
 
     @ApiModelProperty(value = "问题id列表，移动到史诗，配合epicId使用")
