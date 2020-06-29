@@ -4,6 +4,7 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { FragmentForSearch } from '@/hooks/useSelect';
 import { piApi } from '@/api';
+import type { PI } from '@/common/types';
 import styles from './index.less';
 
 const renderPi = (pi: any) => {

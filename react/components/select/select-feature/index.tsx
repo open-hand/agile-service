@@ -3,6 +3,7 @@ import { Select } from 'choerodon-ui/pro';
 import { featureApi } from '@/api';
 import { find } from 'lodash';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
+import type { Issue } from '@/common/types';
 
 interface Props {
   featureId?: number,

@@ -1,4 +1,4 @@
-interface User {
+export interface User {
   email: string
   enabled?: boolean
   id: number
@@ -8,12 +8,12 @@ interface User {
   realName: string
 }
 
-interface Issue {
+export interface Issue {
   issueId: number
   summary: string
 }
 
-interface PI {
+export interface PI {
   code: string
   name: string
 }

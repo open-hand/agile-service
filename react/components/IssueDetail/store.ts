@@ -1,5 +1,6 @@
 import { observable, action, computed } from 'mobx';
 import { issueApi } from '@/api';
+import type { Issue } from '@/common/types';
 import type { Events } from './index';
 
 export enum IssueEvents {

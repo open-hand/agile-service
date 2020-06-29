@@ -3,7 +3,7 @@ import { Select } from 'choerodon-ui/pro';
 import { find } from 'lodash';
 import { userApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
-
+import type { User } from '@/common/types';
 
 interface Props {
   // 由于用户是分页的，有时候已选的用户不在第一页，这时候传id过来，会直接显示id，这里多传一个用户过来，放到options里

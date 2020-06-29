@@ -49,6 +49,7 @@
     "choerodon-ui": "0.8.65",
     "eslint-config-airbnb": "^17.1.1",
     "eslint-plugin-react-hooks": "^4.0.4",
+    "fork-ts-checker-webpack-plugin": "^5.0.5",
     "gulp": "^4.0.2",
     "gulp-cached": "^1.1.1",
     "gulp-remember": "^1.0.1",
