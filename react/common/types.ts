@@ -8,7 +8,7 @@ export interface User {
   realName: string
 }
 
-interface Issue {
+export interface Issue {
   issueId: string
   summary: string
 }
