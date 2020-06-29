@@ -60,7 +60,7 @@ public class IssueLinkTypeController {
     public ResponseEntity<IssueLinkTypeVO> queryIssueLinkType(@ApiParam(value = "项目id", required = true)
                                                                @PathVariable(name = "project_id") Long projectId,
                                                               @ApiParam(value = "linkTypeId", required = true)
-                                                               @PathVariable(name = "linkTypeId")  Long linkTypeId) {
+                                                               @PathVariable(name = "linkTypeId") @Encrypt Long linkTypeId) {
         return Optional.ofNullable(issueLinkTypeService.queryIssueLinkType(projectId, linkTypeId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueLinkType.queryIssueLinkType"));
@@ -100,7 +100,7 @@ public class IssueLinkTypeController {
     public ResponseEntity deleteIssueLinkType(@ApiParam(value = "项目id", required = true)
                                               @PathVariable(name = "project_id") Long projectId,
                                               @ApiParam(value = "issueLinkType", required = true)
-                                              @PathVariable(name = "issueLinkTypeId") Long issueLinkTypeId,
+                                              @PathVariable(name = "issueLinkTypeId")@Encrypt  Long issueLinkTypeId,
                                               @ApiParam(value = "转移到其他的类型上，如果为空则不转移，直接删除")
                                               @RequestParam(required = false) @Encrypt/*(EncryptionConstant.AGILE_ISSUE_LINK_TYPE)*/ Long toIssueLinkTypeId) {
         issueLinkTypeValidator.verifyDeleteData(issueLinkTypeId, toIssueLinkTypeId, projectId);

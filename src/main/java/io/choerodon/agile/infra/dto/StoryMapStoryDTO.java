@@ -18,7 +18,7 @@ public class StoryMapStoryDTO {
 
     private String summary;
 
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
     private Long epicId;
 
     private Boolean completed;

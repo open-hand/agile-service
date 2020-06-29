@@ -236,15 +236,17 @@ public class EncryptionUtils {
         }
 
         // issueTypeId
-        tempStr = adMapOptional.map(ad -> (String) (ad.get("issueTypeId"))).orElse(null);
-        if (StringUtils.isNotBlank(tempStr)) {
-            handlerPrimaryKey(tempStr, "issueTypeId", search.getAdvancedSearchArgs());
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("issueTypeId"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getAdvancedSearchArgs().put("issueTypeId",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
         }
 
         // statusId
-        tempStr = adMapOptional.map(ad -> (String) (ad.get("statusId"))).orElse(null);
-        if (StringUtils.isNotBlank(tempStr)) {
-            handlerPrimaryKey(tempStr, "statusId", search.getAdvancedSearchArgs());
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("statusId"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getAdvancedSearchArgs().put("statusId",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
         }
 
         // priorityId
@@ -265,27 +267,31 @@ public class EncryptionUtils {
         List<String> temp;
         String tempStr;// versionList
         // priorityId
-        tempStr = adMapOptional.map(ad -> (String) (ad.get("priorityId"))).orElse(null);
-        if (StringUtils.isNotBlank(tempStr)) {
-            handlerPrimaryKey(tempStr, "priorityId", search.getOtherArgs());
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("priorityId"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("priorityId",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
         }
 
         // component
-        tempStr = adMapOptional.map(ad -> (String) (ad.get("component"))).orElse(null);
-        if (StringUtils.isNotBlank(tempStr)) {
-            handlerPrimaryKey(tempStr, "component", search.getOtherArgs());
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("component"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("component",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
         }
 
         // version
-        tempStr = adMapOptional.map(ad -> (String) (ad.get("version"))).orElse(null);
-        if (StringUtils.isNotBlank(tempStr)) {
-            handlerPrimaryKey(tempStr, "version", search.getOtherArgs());
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("version"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("version",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
         }
 
         // sprint
-        tempStr = adMapOptional.map(ad -> (String) (ad.get("sprint"))).orElse(null);
-        if (StringUtils.isNotBlank(tempStr)) {
-            handlerPrimaryKey(tempStr, "sprint", search.getOtherArgs());
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("sprint"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("sprint",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
         }
 
         // issueIds
@@ -295,16 +301,40 @@ public class EncryptionUtils {
         }
 
         // label
-        tempStr = adMapOptional.map(ad -> (String) (ad.get("label"))).orElse(null);
-        if (StringUtils.isNotBlank(tempStr)) {
-            handlerPrimaryKey(tempStr, "label", search.getOtherArgs());
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("label"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("label",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
         }
 
         // componentIds
-        tempStr = adMapOptional.map(ad -> (String) (ad.get("componentIds"))).orElse(null);
-        if (StringUtils.isNotBlank(tempStr)) {
-            handlerPrimaryKey(tempStr, "componentIds", search.getOtherArgs());
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("componentIds"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("componentIds",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
         }
+
+        // feature
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("feature"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("feature",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
+        }
+
+        // epic
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("epic"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("epic",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
+        }
+
+        // customField
+        Object ob = adMapOptional.map(ad -> (Object) (ad.get("customField"))).orElse(null);
+        if (!ObjectUtils.isEmpty(ob)) {
+            search.getOtherArgs().put("feature",handlerCustomField(ob,false));
+        }
+
+
     }
 
     public static void handlerPrimaryKey(String tempStr, String key, Map<String, Object> map) {
