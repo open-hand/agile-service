@@ -1,9 +1,12 @@
 package io.choerodon.agile.app.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.PersonalFilterVO;
 import io.choerodon.agile.app.service.PersonalFilterService;
+import io.choerodon.agile.app.service.QuickFilterFieldService;
 import io.choerodon.agile.infra.dto.PersonalFilterDTO;
 import io.choerodon.agile.infra.mapper.PersonalFilterMapper;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -33,6 +36,7 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
     @Autowired
     private ModelMapper modelMapper;
 
+
     @Override
     public PersonalFilterVO queryById(Long projectId, Long filterId) {
         PersonalFilterDTO personalFilter = new PersonalFilterDTO();
@@ -42,6 +46,7 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
         if (personalFilterDTO == null) {
             throw new CommonException(NOTFOUND_ERROR);
         }
+        personalFilterDTO.setFilterJson(EncryptionUtils.handlerPersonFilterJson(personalFilterDTO.getFilterJson(),true));
         PersonalFilterVO personalFilterVO = modelMapper.map(personalFilterDTO, PersonalFilterVO.class);
         return personalFilterVO;
     }
@@ -58,6 +63,7 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
         }
         personalFilterVO.setUserId(userId);
         personalFilterVO.setProjectId(projectId);
+        personalFilterVO.setFilterJson(EncryptionUtils.handlerPersonFilterJson(personalFilterVO.getFilterJson(),false));
         PersonalFilterDTO personalFilterDTO = modelMapper.map(personalFilterVO, PersonalFilterDTO.class);
         if (personalFilterMapper.insert(personalFilterDTO) != 1) {
             throw new CommonException(INSERT_ERROR);
@@ -69,6 +75,7 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
     public PersonalFilterVO update(Long projectId, Long filterId, PersonalFilterVO personalFilterVO) {
         personalFilterVO.setFilterId(filterId);
         PersonalFilterDTO personalFilterDTO = modelMapper.map(personalFilterVO, PersonalFilterDTO.class);
+        personalFilterDTO.setFilterJson(EncryptionUtils.handlerPersonFilterJson(personalFilterDTO.getFilterJson(),false));
         if (personalFilterMapper.updateByPrimaryKeySelective(personalFilterDTO) != 1) {
             throw new CommonException(UPDATE_ERROR);
         }
@@ -90,6 +97,7 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
     public List<PersonalFilterVO> listByProjectId(Long projectId, Long userId, String searchStr) {
         List<PersonalFilterVO> list = modelMapper.map(personalFilterMapper.queryByProjectIdAndUserId(projectId, userId, searchStr), new TypeToken<List<PersonalFilterVO>>() {
         }.getType());
+        list.forEach(v -> v.setFilterJson(EncryptionUtils.handlerPersonFilterJson(v.getFilterJson(),true)));
         return list;
     }
 
@@ -102,6 +110,4 @@ public class PersonalFilterServiceImpl implements PersonalFilterService {
         List<PersonalFilterDTO> list = personalFilterMapper.select(personalFilterDTO);
         return list != null && !list.isEmpty();
     }
-
-
 }

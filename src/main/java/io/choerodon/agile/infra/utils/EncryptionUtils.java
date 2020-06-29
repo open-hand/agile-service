@@ -1,7 +1,10 @@
 package io.choerodon.agile.infra.utils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.infra.constants.EncryptionConstant;
 import org.apache.commons.lang.ArrayUtils;
@@ -17,6 +20,8 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -29,7 +34,11 @@ public class EncryptionUtils {
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
-    private static String[] IGNORE_VALUES = {"0"};
+    public static String[] FIELD_VALUE = {"component_id", "version_id", "label_id", "sprint_id","status_id","epic_id","priority_id"};
+
+    public static String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version"};
+
+    public static String[] IGNORE_VALUES = {"0"};
 
     /**
      * 解密serachVO
@@ -304,7 +313,7 @@ public class EncryptionUtils {
             jsonNode = objectMapper.readTree(tempStr);
             if (jsonNode.isArray()) {
                 List list = objectMapper.readValue(tempStr, List.class);
-                map.put(key, decryptList(list, EncryptionConstant.BLANK_KEY,IGNORE_VALUES));
+                map.put(key, decryptList(list, EncryptionConstant.BLANK_KEY, IGNORE_VALUES));
             } else {
                 map.put(key, encryptionService.decrypt(tempStr, EncryptionConstant.BLANK_KEY));
             }
@@ -315,23 +324,144 @@ public class EncryptionUtils {
 
     public static List<String> encryptList(List<Long> parentIds) {
         List<String> list = new ArrayList<>();
-        if(!CollectionUtils.isEmpty(parentIds)){
-            parentIds.forEach(v -> list.add(encryptionService.encrypt(v.toString(),EncryptionConstant.BLANK_KEY)));
+        if (!CollectionUtils.isEmpty(parentIds)) {
+            parentIds.forEach(v -> list.add(encryptionService.encrypt(v.toString(), EncryptionConstant.BLANK_KEY)));
         }
-        return  list;
+        return list;
     }
 
-    public static Map<String,List<String>> encryptMap(Map<Long, List<Long>> parentWithSubs) {
-        Map<String,List<String>> map = new HashMap<>();
-        if(!parentWithSubs.isEmpty()){
+    public static Map<String, List<String>> encryptMap(Map<Long, List<Long>> parentWithSubs) {
+        Map<String, List<String>> map = new HashMap<>();
+        if (!parentWithSubs.isEmpty()) {
             Iterator<Map.Entry<Long, List<Long>>> iterator = parentWithSubs.entrySet().iterator();
             while (iterator.hasNext()) {
                 Map.Entry<Long, List<Long>> next = iterator.next();
-                map.put(encryptionService.encrypt(next.getKey().toString(),EncryptionConstant.BLANK_KEY),encryptList(next.getValue()));
+                map.put(encryptionService.encrypt(next.getKey().toString(), EncryptionConstant.BLANK_KEY), encryptList(next.getValue()));
             }
         }
         return map;
     }
+
+    public static String handlerFilterEncryptList(String value, boolean encrypt) {
+        StringBuilder build = new StringBuilder("(");
+        String[] split = subString(value);
+        if (!ArrayUtils.isEmpty(split)) {
+            List<String> list = Arrays.asList(split);
+            for (String s : list) {
+                build.append(encrypt ? encryptionService.encrypt(s, EncryptionConstant.BLANK_KEY) : decrypt(s, EncryptionConstant.BLANK_KEY));
+                if (list.indexOf(s) != (list.size() - 1)) {
+                    build.append(",");
+                }
+            }
+        }
+        build.append(")");
+        return build.toString();
+    }
+
+    public static String[] subString(String value) {
+        String regEx = "[()]";
+        Pattern compile = Pattern.compile(regEx);
+        Matcher matcher = compile.matcher(value);
+        String replace = matcher.replaceAll("").trim();
+        String[] split = replace.split(",");
+        return split;
+    }
+
+
+
+
+
+    public static String handlerPersonFilterJson(String filterJson, boolean encrypt) {
+        try {
+            SearchVO searchVO = objectMapper.readValue(filterJson, SearchVO.class);
+            Map<String, Object> adMapOptional = searchVO.getAdvancedSearchArgs();
+            if (!ObjectUtils.isEmpty(adMapOptional)) {
+                searchVO.setAdvancedSearchArgs(handlerOtherArgs(adMapOptional, encrypt));
+            }
+            Map<String, Object> oAMap = searchVO.getOtherArgs();
+            if (!ObjectUtils.isEmpty(oAMap)) {
+                searchVO.setOtherArgs(handlerOtherArgs(oAMap, encrypt));
+            }
+            objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+            return objectMapper.writeValueAsString(searchVO);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static Map<String, Object> handlerOtherArgs(Map<String, Object> map, boolean encrypt) {
+        List<String> temp;
+        List<String> list = Arrays.asList(FILTER_FIELD);
+        Map<String, Object> map1 = new HashMap<>();
+        Iterator<Map.Entry<String, Object>> iterator = map.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Object> next = iterator.next();
+            Object object;
+            if (list.contains(next.getKey())) {
+                List<String> value = null;
+                try {
+                    value = objectMapper.readValue(next.getValue().toString(),new TypeReference<List<String>>() { });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (!CollectionUtils.isEmpty(value)) {
+                    object = value.stream().map(v -> encrypt ? encryptionService.encrypt(v, EncryptionConstant.BLANK_KEY) : encryptionService.decrypt(v, EncryptionConstant.BLANK_KEY)).collect(Collectors.toList());
+                }
+                else {
+                    object = new ArrayList<>();
+                }
+            } else if ("customField".equals(next.getKey())) {
+                object = handlerCustomField(next.getValue(), encrypt);
+            } else {
+                object = next.getValue();
+            }
+            map1.put(next.getKey(), object);
+        }
+        return map1;
+    }
+
+    private static Object handlerCustomField(Object value, Boolean encrypt) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(objectMapper));
+            ObjectNode objectNode = (ObjectNode) jsonNode;
+            Map<String, Object> nodeTree = new HashMap<>();
+            Iterator<Map.Entry<String, JsonNode>> fields = objectNode.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> next = fields.next();
+                JsonNode nextValue = next.getValue();
+                Map<String, Object> map = new HashMap<>();
+                List<Object> objects = new ArrayList<>();
+                for (JsonNode node : nextValue) {
+                    Map<String, Object> nodeObjValue = new HashMap<>();
+                    String fieldId = node.get("fieldId").textValue();
+                    nodeObjValue.put("fieldId", encrypt ? encryptionService.encrypt(fieldId, EncryptionConstant.BLANK_KEY) : encryptionService.decrypt(fieldId, EncryptionConstant.BLANK_KEY));
+                    JsonNode value1 = node.get("value");
+                    if ("option".equals(next.getKey())) {
+                        List<String> list = new ArrayList<>();
+                        if (value1.isArray()) {
+                            value1.forEach(v -> {
+                                list.add(v.isNumber() ? v.textValue() : (encrypt ? encryptionService.encrypt(v.textValue(), EncryptionConstant.BLANK_KEY) : encryptionService.decrypt(v.textValue(), EncryptionConstant.BLANK_KEY)));
+                            });
+                        }
+                        nodeObjValue.put("value", list);
+                    } else {
+                        nodeObjValue.put("value", value1.textValue());
+                    }
+
+                    objects.add(nodeObjValue);
+                }
+                map.put(next.getKey(), objects);
+
+                nodeTree.put(next.getKey(), map);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static Map<String, Object> encryptMapKey(Map<Long, ? extends Object> map) {
         Map<String, Object> result = new HashMap<>();
         if (!ObjectUtils.isEmpty(map)) {
