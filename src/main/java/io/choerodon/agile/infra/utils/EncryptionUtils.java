@@ -330,6 +330,14 @@ public class EncryptionUtils {
         return list;
     }
 
+    public static List<String> encryptListToStr(List<String> ids) {
+        List<String> list = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(ids)) {
+            ids.forEach(v -> list.add(encryptionService.encrypt(v, EncryptionConstant.BLANK_KEY)));
+        }
+        return list;
+    }
+
     public static Map<String, List<String>> encryptMap(Map<Long, List<Long>> parentWithSubs) {
         Map<String, List<String>> map = new HashMap<>();
         if (!parentWithSubs.isEmpty()) {
@@ -373,17 +381,32 @@ public class EncryptionUtils {
 
     public static String handlerPersonFilterJson(String filterJson, boolean encrypt) {
         try {
-            SearchVO searchVO = objectMapper.readValue(filterJson, SearchVO.class);
-            Map<String, Object> adMapOptional = searchVO.getAdvancedSearchArgs();
-            if (!ObjectUtils.isEmpty(adMapOptional)) {
-                searchVO.setAdvancedSearchArgs(handlerOtherArgs(adMapOptional, encrypt));
+            JsonNode jsonNode = objectMapper.readTree(filterJson);
+            ObjectNode objectNode = objectMapper.createObjectNode();
+            if (!ObjectUtils.isEmpty(jsonNode.get("advancedSearchArgs"))) {
+                Map<String, Object> adMapOptional = objectMapper.readValue(objectMapper.writeValueAsString(jsonNode.get("advancedSearchArgs")), new TypeReference<Map<String, Object>>() {
+                });
+                objectNode.set("advancedSearchArgs",objectMapper.readTree(objectMapper.writeValueAsString(handlerOtherArgs(adMapOptional, encrypt))));
+            } else {
+                objectNode.set("advancedSearchArgs",objectMapper.readTree(objectMapper.writeValueAsString(new HashMap())));
             }
-            Map<String, Object> oAMap = searchVO.getOtherArgs();
-            if (!ObjectUtils.isEmpty(oAMap)) {
-                searchVO.setOtherArgs(handlerOtherArgs(oAMap, encrypt));
+            if (!ObjectUtils.isEmpty(jsonNode.get("otherArgs"))) {
+                Map<String, Object> oAMap = objectMapper.readValue(objectMapper.writeValueAsString(jsonNode.get("otherArgs")),new TypeReference<Map<String,Object>>(){});
+                objectNode.set("otherArgs",objectMapper.readTree(objectMapper.writeValueAsString(handlerOtherArgs(oAMap, encrypt))));
             }
-            objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-            return objectMapper.writeValueAsString(searchVO);
+            else {
+                objectNode.put("otherArgs", objectMapper.readTree(objectMapper.writeValueAsString(new HashMap())));
+            }
+            if(!ObjectUtils.isEmpty(jsonNode.get("quickFilterIds"))){
+               List<String> list =  objectMapper.readValue(objectMapper.writeValueAsString(jsonNode.get("quickFilterIds")),new TypeReference<List<String>>() {});
+               if(encrypt){
+                   objectNode.set("quickFilterIds",objectMapper.readTree(objectMapper.writeValueAsString(encryptListToStr(list))));
+               }
+               else {
+                   objectNode.set("quickFilterIds",objectMapper.readTree(objectMapper.writeValueAsString(decryptList(list,EncryptionConstant.BLANK_KEY,null))));
+               }
+            }
+            return objectMapper.writeValueAsString(objectNode);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -401,7 +424,7 @@ public class EncryptionUtils {
             if (list.contains(next.getKey())) {
                 List<String> value = null;
                 try {
-                    value = objectMapper.readValue(next.getValue().toString(),new TypeReference<List<String>>() { });
+                    value = objectMapper.readValue(objectMapper.writeValueAsString(next.getValue()),new TypeReference<List<String>>() { });
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -423,14 +446,13 @@ public class EncryptionUtils {
 
     private static Object handlerCustomField(Object value, Boolean encrypt) {
         try {
-            JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(objectMapper));
+            JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(value));
             ObjectNode objectNode = (ObjectNode) jsonNode;
-            Map<String, Object> nodeTree = new HashMap<>();
             Iterator<Map.Entry<String, JsonNode>> fields = objectNode.fields();
+            Map<String, Object> map = new HashMap<>();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> next = fields.next();
                 JsonNode nextValue = next.getValue();
-                Map<String, Object> map = new HashMap<>();
                 List<Object> objects = new ArrayList<>();
                 for (JsonNode node : nextValue) {
                     Map<String, Object> nodeObjValue = new HashMap<>();
@@ -448,14 +470,11 @@ public class EncryptionUtils {
                     } else {
                         nodeObjValue.put("value", value1.textValue());
                     }
-
                     objects.add(nodeObjValue);
                 }
                 map.put(next.getKey(), objects);
-
-                nodeTree.put(next.getKey(), map);
             }
-
+            return map;
         } catch (IOException e) {
             e.printStackTrace();
         }
