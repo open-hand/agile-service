@@ -90,7 +90,8 @@ public class StateMachineSchemeController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建方案配置")
     @PostMapping(value = "/create_config/{scheme_id}/{state_machine_id}")
-    public ResponseEntity<StateMachineSchemeVO> createConfig(@PathVariable("organization_id") Long organizationId, @PathVariable("scheme_id") Long schemeId,
+    public ResponseEntity<StateMachineSchemeVO> createConfig(@PathVariable("organization_id") Long organizationId,
+                                                             @PathVariable("scheme_id") @Encrypt Long schemeId,
                                                              @PathVariable("state_machine_id") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/ Long stateMachineId,
                                                              @RequestBody List<StateMachineSchemeConfigVO> schemeDTOs) {
         return new ResponseEntity<>(configService.create(organizationId, schemeId, stateMachineId, schemeDTOs), HttpStatus.OK);
