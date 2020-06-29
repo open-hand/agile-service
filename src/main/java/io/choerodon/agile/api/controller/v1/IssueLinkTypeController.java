@@ -6,7 +6,6 @@ import io.choerodon.agile.api.vo.IssueLinkTypeCreateVO;
 import io.choerodon.agile.api.vo.IssueLinkTypeSearchVO;
 import io.choerodon.agile.api.validator.IssueLinkTypeValidator;
 import io.choerodon.agile.api.vo.IssueLinkTypeVO;
-import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -16,7 +15,6 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
-import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,7 +60,7 @@ public class IssueLinkTypeController {
     public ResponseEntity<IssueLinkTypeVO> queryIssueLinkType(@ApiParam(value = "项目id", required = true)
                                                                @PathVariable(name = "project_id") Long projectId,
                                                               @ApiParam(value = "linkTypeId", required = true)
-                                                               @PathVariable(name = "linkTypeId") @Encrypt/*(EncryptionConstant.AGILE_ISSUE_LINK_TYPE)*/ Long linkTypeId) {
+                                                               @PathVariable(name = "linkTypeId")  Long linkTypeId) {
         return Optional.ofNullable(issueLinkTypeService.queryIssueLinkType(projectId, linkTypeId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueLinkType.queryIssueLinkType"));
@@ -102,7 +100,7 @@ public class IssueLinkTypeController {
     public ResponseEntity deleteIssueLinkType(@ApiParam(value = "项目id", required = true)
                                               @PathVariable(name = "project_id") Long projectId,
                                               @ApiParam(value = "issueLinkType", required = true)
-                                              @PathVariable(name = "issueLinkTypeId")@Encrypt/*(EncryptionConstant.AGILE_ISSUE_LINK_TYPE)*/ Long issueLinkTypeId,
+                                              @PathVariable(name = "issueLinkTypeId") Long issueLinkTypeId,
                                               @ApiParam(value = "转移到其他的类型上，如果为空则不转移，直接删除")
                                               @RequestParam(required = false) @Encrypt/*(EncryptionConstant.AGILE_ISSUE_LINK_TYPE)*/ Long toIssueLinkTypeId) {
         issueLinkTypeValidator.verifyDeleteData(issueLinkTypeId, toIssueLinkTypeId, projectId);
