@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.PriorityService;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.infra.constants.EncryptionConstant;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
@@ -68,9 +69,10 @@ public class SchemeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询项目下所有问题类型所有状态对应的转换")
     @GetMapping(value = "/schemes/query_transforms_map")
-    public ResponseEntity<Map<Long, Map<Long, List<TransformVO>>>> queryTransformsMapByProjectId(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<Map<String, Map<String, List<?>>>> queryTransformsMapByProjectId(@PathVariable("project_id") Long projectId,
                                                                                                  @RequestParam("apply_type") String applyType) {
-        return new ResponseEntity<>(projectConfigService.queryTransformsMapByProjectId(projectId, applyType), HttpStatus.OK);
+
+        return new ResponseEntity<>(EncryptionUtils.encryptMapValueMap(projectConfigService.queryTransformsMapByProjectId(projectId, applyType)), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

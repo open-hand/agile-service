@@ -3,7 +3,6 @@ package io.choerodon.agile.infra.utils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.infra.constants.EncryptionConstant;
@@ -510,6 +509,22 @@ public class EncryptionUtils {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static <T> Map<String, Map<String, List<?>>> encryptMapValueMap(Map<Long, Map<Long, List<T>>> map) {
+        Map<String, Map<String, List<?>>> mapHashMap = new HashMap<>();
+        if(!ObjectUtils.isEmpty(map)){
+            for (Map.Entry<Long,Map<Long,List<T>>> entry : map.entrySet()) {
+                Long key = entry.getKey();
+                Map<Long, List<T>> value = entry.getValue();
+                Map<String,List<?>> stringListMap = new HashMap<>();
+                for(Map.Entry<Long,List<T>> entry1 : value.entrySet()){
+                    stringListMap.put(encryptionService.encrypt(entry1.getKey().toString(),EncryptionConstant.BLANK_KEY),entry1.getValue());
+                }
+                mapHashMap.put(encryptionService.encrypt(key.toString(),EncryptionConstant.BLANK_KEY),stringListMap);
+            }
+        }
+        return mapHashMap;
     }
 
     public static Map<String, Object> encryptMapKey(Map<Long, ? extends Object> map) {
