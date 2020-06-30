@@ -73,9 +73,10 @@ public class ReportServiceImpl implements ReportService {
     @Autowired
     private StatusService statusService;
 
-    private static final String STORY_POINTS = "storyPoints";
-    private static final String REMAINING_ESTIMATED_TIME = "remainingEstimatedTime";
-    private static final String ISSUE_COUNT = "issueCount";
+    public static final String STORY_POINTS = "storyPoints";
+    public static final String REMAINING_ESTIMATED_TIME = "remainingEstimatedTime";
+    public static final String ISSUE_COUNT = "issueCount";
+    public static final String COORDINATE = "coordinate";
     private static final String SPRINT_PLANNING_CODE = "sprint_planning";
     private static final String REPORT_SPRINT_ERROR = "error.report.sprintError";
     private static final String REPORT_FILTER_ERROR = "error.cumulativeFlowDiagram.filter";
@@ -251,7 +252,7 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
         });
-        jsonObject.put("coordinate", report);
+        jsonObject.put(ReportServiceImpl.COORDINATE, report);
         //需要返回给前端期望值（开启冲刺的和）
         jsonObject.put("expectCount", handleExpectCount(reportIssueConvertDTOList));
         return jsonObject;
