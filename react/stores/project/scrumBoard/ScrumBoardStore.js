@@ -615,7 +615,7 @@ class ScrumBoardStore {
       sprintId: this.sprintId,
       rankFlag: true,
     };
-    const { id: transformId } = this.stateMachineMap[issueTypeId] ? this.stateMachineMap[issueTypeId][startStatus].find(issue => issue.endStatusId === parseInt(destinationStatus, 10)) : this.stateMachineMap[0][startStatus].find(issue => issue.endStatusId === parseInt(destinationStatus, 10));
+    const { id: transformId } = this.stateMachineMap[issueTypeId] ? this.stateMachineMap[issueTypeId][startStatus].find(issue => issue.endStatusId === destinationStatus) : this.stateMachineMap[0][startStatus].find(issue => issue.endStatusId === destinationStatus);
     return boardApi.moveIssue(issueId, transformId, data);
   };
 
@@ -797,7 +797,7 @@ class ScrumBoardStore {
     this.currentDrag = data;
   }
 
-  @action setWhichCanNotDragOn(statusId, { id: typeId }) {
+  @action setWhichCanNotDragOn(statusId, { id: typeId }) {    
     [...this.canDragOn.keys()].forEach((status) => {
       if (this.stateMachineMap[typeId]) {
         if (this.stateMachineMap[typeId][statusId].find(issue => issue.endStatusId === status)) {
