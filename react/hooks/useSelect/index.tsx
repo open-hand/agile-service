@@ -39,14 +39,14 @@ export interface LoadConfig {
   filter?: string,
   page?: number
 }
-export type Request = <T>({ filter, page }: LoadConfig) => Promise<T[] | { list: T[], hasNextPage: boolean }>
+
 export interface SelectConfig<T = {}> {
   name: string
   textField: string
   valueField: string
   optionRenderer?: (item: T) => JSX.Element
   renderer?: (item: T) => JSX.Element
-  request: Request
+  request: ({ filter, page }: LoadConfig) => Promise<T[] | { list: T[], hasNextPage: boolean }>
   middleWare?: MiddleWare<T>,
   paging?: boolean
   props?: object
@@ -71,7 +71,7 @@ export default function useSelect<T extends {}>(config: SelectConfig<T>) {
   // 不分页时，本地搜索
   const localSearch = !paging;
   const loadData = async ({ filter = textRef.current, page = 1 }: LoadConfig = {} as LoadConfig) => {
-    const res = await request<T>({ filter, page });
+    const res = await request({ filter, page });
     batchedUpdates(() => {
       if (paging) {
         const { list, hasNextPage } = res as { list: T[], hasNextPage: boolean };

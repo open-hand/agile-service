@@ -1,11 +1,9 @@
 import React, {
-  Component, useState, useEffect, useContext,
+  useState, useEffect, useContext,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { withRouter, Link } from 'react-router-dom';
 import {
   Table, Button, Modal, Form, Select, Input, Tooltip, Menu,
-  Breadcrumb as Bread,
 } from 'choerodon-ui';
 import { FormattedMessage } from 'react-intl';
 import {
@@ -18,7 +16,6 @@ import './StateList.less';
 import TableDropMenu from '../../../common/TableDropMenu';
 
 const { Sidebar, info } = Modal;
-const { Item } = Bread;
 const FormItem = Form.Item;
 const { TextArea } = Input;
 const { Option } = Select;
@@ -331,8 +328,8 @@ function StateList(props) {
     filters: stageList.filter(s => s.code !== 'none').map(s => ({ text: s.name, value: s.code })),
     render: record => (
       <div>
-        <div className="issue-state-block" style={{ backgroundColor: stageMap[record].colour }} />
-        <span style={{ verticalAlign: 'middle' }}>{stageMap[record].name}</span>
+        <div className="issue-state-block" style={{ backgroundColor: stageMap[record]?.colour }} />
+        <span style={{ verticalAlign: 'middle' }}>{stageMap[record]?.name}</span>
       </div>
     ),
   },
