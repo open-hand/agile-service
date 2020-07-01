@@ -2921,5 +2921,19 @@
         </foreach>
 
     </select>
+    <select id="selectIssueBysprint" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+        SELECT
+            ai.issue_id,
+            ais.is_completed AS completed,
+            ai.reporter_id,
+            ai.assignee_id,
+            ai.created_by
+        FROM
+            agile_issue ai
+                JOIN agile_issue_sprint_rel aisr ON aisr.sprint_id = #{sprintId} AND ai.issue_id = aisr.issue_id
+                JOIN agile_issue_status ais ON ai.status_id = ais.status_id AND ai.project_id = ais.project_id
+        WHERE ai.project_id = #{projectId}
+        AND ai.type_code = 'bug'
+    </select>
 
 </mapper>

@@ -171,7 +171,6 @@ public class IssueDTO extends AuditDomain {
 
     @Transient
     private String resolution;
-
     public String getResolution() {
         return resolution;
     }

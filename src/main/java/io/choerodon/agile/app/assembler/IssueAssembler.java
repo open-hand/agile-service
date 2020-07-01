@@ -8,12 +8,15 @@ import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.*;
 
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
+import rx.Observable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -140,6 +143,64 @@ public class IssueAssembler extends AbstractAssembler {
             issueListFieldKVDTOList.add(issueListFieldKVVO);
         });
         return issueListFieldKVDTOList;
+    }
+
+    /**
+     * issueDTO转换为IssueCountVO
+     * @param issueList issueList
+     * @param priority 在priority内的user优先排序
+     * @return IssueCountVO
+     */
+    public IssueCountVO issueDTOToIssueCountVO(List<IssueDTO> issueList, Set<Long> priority){
+        IssueCountVO issueCount = new IssueCountVO();
+        Set<Long> userIdList = new HashSet<>();
+        rx.Observable.from(priority)
+                .mergeWith(Observable.from(issueList.stream().map(IssueDTO::getCreatedBy).collect(Collectors.toSet())))
+                .toList().subscribe(userIdList::addAll);
+        Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(new ArrayList<>(userIdList), true);
+        // 设置提出人list
+        issueCount.setCreatedList(sortAndConvertCreated(issueList, priority, userMap));
+        // 设置已解决list
+        issueCount.setCompletedList(sortAndConvertAssignee(issueList, userMap));
+        return issueCount;
+    }
+
+    /**
+     * 过滤掉未完成的issue再进行排序
+     * @param issueList 待排序list
+     * @return 坐标点list
+     */
+    private List<Map.Entry<String, Integer>> sortAndConvertAssignee(List<IssueDTO> issueList, Map<Long, UserMessageDTO> userMap) {
+        return issueList.stream()
+                .filter(issue -> BooleanUtils.isTrue(issue.getCompleted()))
+                .collect(Collectors.groupingBy(IssueDTO::getAssigneeId)).entrySet()
+                .stream().sorted(Map.Entry.comparingByKey())
+                .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
+                .collect(Collectors.toList());
+    }
+
+
+    /**
+     * 创建人是经办人或报告人时，排在前面
+     * @param issueList 待排序list
+     * @param priority 优先set
+     * @param userMap 用户map
+     * @return 坐标点list
+     */
+    private List<Map.Entry<String, Integer>> sortAndConvertCreated(List<IssueDTO> issueList, Set<Long> priority, Map<Long, UserMessageDTO> userMap) {
+        List<Map.Entry<String, Integer>> list = new ArrayList<>(issueList.size());
+        Map<Boolean, List<IssueDTO>> group = issueList.stream().collect(Collectors.groupingBy(issue -> priority.contains(issue.getCreatedBy())));
+        list.addAll(Optional.ofNullable(group.get(Boolean.TRUE)).orElse(Collections.emptyList())
+                .stream().collect(Collectors.groupingBy(IssueDTO::getCreatedBy)).entrySet()
+                .stream().sorted(Map.Entry.comparingByKey())
+                .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
+                .collect(Collectors.toList()));
+        list.addAll(Optional.ofNullable(group.get(Boolean.FALSE)).orElse(Collections.emptyList())
+                .stream().collect(Collectors.groupingBy(IssueDTO::getCreatedBy)).entrySet()
+                .stream().sorted(Map.Entry.comparingByKey())
+                .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
+                .collect(Collectors.toList()));
+        return list;
     }
 
     private void setParentId(IssueListFieldKVVO issueListFieldKVVO, IssueDTO issue) {
