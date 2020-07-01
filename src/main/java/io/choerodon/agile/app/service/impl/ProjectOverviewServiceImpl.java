@@ -84,11 +84,11 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
         // 优先排序set
         Set<Long> priority = issueList.stream().map(IssueDTO::getAssigneeId).collect(Collectors.toSet());
         // userid-name Map
-        List<Long> userIdList = new ArrayList<>();
+        Set<Long> userIdList = new HashSet<>();
         Observable.from(priority)
                 .mergeWith(Observable.from(issueList.stream().map(IssueDTO::getCreatedBy).collect(Collectors.toSet())))
                 .toList().subscribe(userIdList::addAll);
-        Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(userIdList, true);
+        Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(new ArrayList<>(userIdList), true);
         priority.addAll(issueList.stream().map(IssueDTO::getReporterId).collect(Collectors.toSet()));
         // 设置提出人list
         issueCount.setCreatedList(sortAndConvertCreated(issueList, priority, userMap));
