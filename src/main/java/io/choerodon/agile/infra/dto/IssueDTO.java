@@ -4,9 +4,6 @@ import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.choerodon.agile.infra.utils.StringUtil;
-import org.hzero.common.HZeroCacheKey;
-import org.hzero.core.cache.CacheValue;
-import org.hzero.core.cache.Cacheable;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -174,29 +171,6 @@ public class IssueDTO extends AuditDomain {
 
     @Transient
     private String resolution;
-
-    @Transient
-    private String createdName;
-
-    @Transient
-    private String assigneeName;
-
-    public String getAssigneeName() {
-        return assigneeName;
-    }
-
-    public void setAssigneeName(String assigneeName) {
-        this.assigneeName = assigneeName;
-    }
-
-    public String getCreatedName() {
-        return createdName;
-    }
-
-    public void setCreatedName(String createdName) {
-        this.createdName = createdName;
-    }
-
     public String getResolution() {
         return resolution;
     }

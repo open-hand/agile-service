@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * @author jiaxu.cui@hand-china.com 2020/6/29 下午3:21
  */
 @RestController
-@RequestMapping(value = "/v1/projects/{project_id}/dashboard")
+@RequestMapping(value = "/v1/projects/{project_id}/project_overview")
 public class ProjectOverviewController {
 
     @Autowired
@@ -48,7 +48,7 @@ public class ProjectOverviewController {
 
     @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("查看项目统计")
-    @GetMapping("/{sprintId}/project-statistics")
+    @GetMapping("/{sprintId}/project_statistics")
     public ResponseEntity<BoardColumnVO> selectTaskRankBysprint(@ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
                                                                 @ApiParam(value = "冲刺Id", required = true)
@@ -59,7 +59,7 @@ public class ProjectOverviewController {
 
     @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("查看每人每日工作量")
-    @GetMapping("/{sprintId}/one-jobs")
+    @GetMapping("/{sprintId}/one_jobs")
     public ResponseEntity<BoardColumnVO> selectOneJobsBysprint(@ApiParam(value = "项目id", required = true)
                                                                @PathVariable(name = "project_id") Long projectId,
                                                                @ApiParam(value = "冲刺Id", required = true)
