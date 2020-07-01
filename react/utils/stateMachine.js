@@ -85,5 +85,35 @@ export function getStageMap() {
       name: '无阶段',
       colour: '#EFEFEF',
     },
+    reject: {
+      id: 'reject',
+      code: 'reject',
+      name: '拒绝',
+      colour: '#F44336',
+    },
+    wait_confirm: {
+      id: 'wait_confirm',
+      code: 'wait_confirm',
+      name: '待审核',
+      colour: '#F67F5A',
+    },
+    publish: {
+      id: 'publish',
+      code: 'publish',
+      name: '已发布',
+      colour: '#ffb100',
+    },
+    developed: {
+      id: 'developed',
+      code: 'developed',
+      name: '开发完成',
+      colour: '#00bfa5',
+    },
+    planning: {
+      id: 'planning',
+      code: 'planning',
+      name: '规划中',
+      colour: '#4d90fe',
+    },
   };
 }
