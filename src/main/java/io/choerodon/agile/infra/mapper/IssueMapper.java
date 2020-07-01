@@ -1,12 +1,11 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.IssueIdSprintIdVO;
-import io.choerodon.agile.api.vo.IssueVO;
+import io.choerodon.agile.api.vo.IssueOverviewVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
-import org.hzero.core.cache.ProcessCacheValue;
 
 import java.util.Date;
 import java.util.List;
@@ -501,5 +500,7 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      */
     List<IssueDTO> listIssuesByParentIssueIdsAndUserId(@Param("projectIds") List<Long> projectIds,@Param("parentIssues") List<Long> parentIssues,@Param("userId") Long userId);
 
-    List<IssueDTO> selectIssueBysprint(@Param("projectId") Long projectId, @Param("sprintId") Long sprintId);
+    List<IssueOverviewVO> selectIssueBysprint(@Param("projectId") Long projectId,
+                                              @Param("sprintId") Long sprintId,
+                                              @Param("statusSet") Set<String> statusSet);
 }

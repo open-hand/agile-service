@@ -5,11 +5,13 @@ import com.google.common.collect.Lists;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.enums.StatusType;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.*;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.hzero.core.base.BaseConstants;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
@@ -151,11 +153,11 @@ public class IssueAssembler extends AbstractAssembler {
      * @param priority 在priority内的user优先排序
      * @return IssueCountVO
      */
-    public IssueCountVO issueDTOToIssueCountVO(List<IssueDTO> issueList, Set<Long> priority){
+    public IssueCountVO issueDTOToIssueCountVO(List<IssueOverviewVO> issueList, Set<Long> priority){
         IssueCountVO issueCount = new IssueCountVO();
         Set<Long> userIdList = new HashSet<>();
         rx.Observable.from(priority)
-                .mergeWith(Observable.from(issueList.stream().map(IssueDTO::getCreatedBy).collect(Collectors.toSet())))
+                .mergeWith(Observable.from(issueList.stream().map(IssueOverviewVO::getCreatedBy).collect(Collectors.toSet())))
                 .toList().subscribe(userIdList::addAll);
         Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(new ArrayList<>(userIdList), true);
         // 设置提出人list
@@ -170,10 +172,10 @@ public class IssueAssembler extends AbstractAssembler {
      * @param issueList 待排序list
      * @return 坐标点list
      */
-    private List<Map.Entry<String, Integer>> sortAndConvertAssignee(List<IssueDTO> issueList, Map<Long, UserMessageDTO> userMap) {
+    private List<Map.Entry<String, Integer>> sortAndConvertAssignee(List<IssueOverviewVO> issueList, Map<Long, UserMessageDTO> userMap) {
         return issueList.stream()
                 .filter(issue -> BooleanUtils.isTrue(issue.getCompleted()))
-                .collect(Collectors.groupingBy(IssueDTO::getAssigneeId)).entrySet()
+                .collect(Collectors.groupingBy(IssueOverviewVO::getAssigneeId)).entrySet()
                 .stream().sorted(Map.Entry.comparingByKey())
                 .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
                 .collect(Collectors.toList());
@@ -187,16 +189,16 @@ public class IssueAssembler extends AbstractAssembler {
      * @param userMap 用户map
      * @return 坐标点list
      */
-    private List<Map.Entry<String, Integer>> sortAndConvertCreated(List<IssueDTO> issueList, Set<Long> priority, Map<Long, UserMessageDTO> userMap) {
+    private List<Map.Entry<String, Integer>> sortAndConvertCreated(List<IssueOverviewVO> issueList, Set<Long> priority, Map<Long, UserMessageDTO> userMap) {
         List<Map.Entry<String, Integer>> list = new ArrayList<>(issueList.size());
-        Map<Boolean, List<IssueDTO>> group = issueList.stream().collect(Collectors.groupingBy(issue -> priority.contains(issue.getCreatedBy())));
+        Map<Boolean, List<IssueOverviewVO>> group = issueList.stream().collect(Collectors.groupingBy(issue -> priority.contains(issue.getCreatedBy())));
         list.addAll(Optional.ofNullable(group.get(Boolean.TRUE)).orElse(Collections.emptyList())
-                .stream().collect(Collectors.groupingBy(IssueDTO::getCreatedBy)).entrySet()
+                .stream().collect(Collectors.groupingBy(IssueOverviewVO::getCreatedBy)).entrySet()
                 .stream().sorted(Map.Entry.comparingByKey())
                 .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
                 .collect(Collectors.toList()));
         list.addAll(Optional.ofNullable(group.get(Boolean.FALSE)).orElse(Collections.emptyList())
-                .stream().collect(Collectors.groupingBy(IssueDTO::getCreatedBy)).entrySet()
+                .stream().collect(Collectors.groupingBy(IssueOverviewVO::getCreatedBy)).entrySet()
                 .stream().sorted(Map.Entry.comparingByKey())
                 .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
                 .collect(Collectors.toList()));
@@ -589,5 +591,19 @@ public class IssueAssembler extends AbstractAssembler {
             });
         }
         return  issueLinkVOList;
+    }
+
+    public SprintStatisticsVO issueDTOToSprintStatisticsVO(List<IssueOverviewVO> issueList) {
+        SprintStatisticsVO sprintStatistics = new SprintStatisticsVO();
+        Map<Boolean, List<IssueOverviewVO>> group = issueList.stream()
+                .collect(Collectors.groupingBy(issue -> BooleanUtils.isTrue(issue.getCompleted())));
+        sprintStatistics.setTotal(issueList.size());
+        sprintStatistics.setCompletedCount(Optional.ofNullable(group.get(Boolean.TRUE)).map(List::size).orElse(BaseConstants.Digital.ZERO));
+        sprintStatistics.setUncompletedCount(Optional.ofNullable(group.get(Boolean.FALSE)).map(List::size).orElse(BaseConstants.Digital.ZERO));
+        sprintStatistics.setTodoCount(Optional.ofNullable(group.get(Boolean.FALSE)).map(list -> list.stream()
+                .filter(issue -> Objects.equals(StatusType.TODO, issue.getCategoryCode())).count()).orElse(0L).intValue());
+        sprintStatistics.setUnassignCount(Optional.ofNullable(group.get(Boolean.FALSE)).map(list -> list.stream()
+                .filter(issue -> Objects.isNull(issue.getAssigneeId())).count()).orElse(0L).intValue());
+        return sprintStatistics;
     }
 }

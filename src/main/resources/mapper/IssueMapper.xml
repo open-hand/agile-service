@@ -2921,10 +2921,11 @@
         </foreach>
 
     </select>
-    <select id="selectIssueBysprint" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="selectIssueBysprint" resultType="io.choerodon.agile.api.vo.IssueOverviewVO">
         SELECT
             ai.issue_id,
             ais.is_completed AS completed,
+            ais.category_code,
             ai.reporter_id,
             ai.assignee_id,
             ai.created_by
@@ -2933,7 +2934,13 @@
                 JOIN agile_issue_sprint_rel aisr ON aisr.sprint_id = #{sprintId} AND ai.issue_id = aisr.issue_id
                 JOIN agile_issue_status ais ON ai.status_id = ais.status_id AND ai.project_id = ais.project_id
         WHERE ai.project_id = #{projectId}
-        AND ai.type_code = 'bug'
+          <if test="statusSet != null and statusSet.size > 0">
+              AND ai.type_code IN
+                <foreach collection="statusSet" item="status" close="(" open=")" separator=",">
+                    #{status}
+                </foreach>
+          </if>
+
     </select>
 
 </mapper>
