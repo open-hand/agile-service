@@ -593,17 +593,22 @@ public class IssueAssembler extends AbstractAssembler {
         return  issueLinkVOList;
     }
 
+    /**
+     *  issueDTO转换SprintStatisticsVO
+     * @param issueList issueList
+     * @return SprintStatisticsVO
+     */
     public SprintStatisticsVO issueDTOToSprintStatisticsVO(List<IssueOverviewVO> issueList) {
         SprintStatisticsVO sprintStatistics = new SprintStatisticsVO();
         Map<Boolean, List<IssueOverviewVO>> group = issueList.stream()
                 .collect(Collectors.groupingBy(issue -> BooleanUtils.isTrue(issue.getCompleted())));
         sprintStatistics.setTotal(issueList.size());
-        sprintStatistics.setCompletedCount(Optional.ofNullable(group.get(Boolean.TRUE)).map(List::size).orElse(BaseConstants.Digital.ZERO));
-        sprintStatistics.setUncompletedCount(Optional.ofNullable(group.get(Boolean.FALSE)).map(List::size).orElse(BaseConstants.Digital.ZERO));
-        sprintStatistics.setTodoCount(Optional.ofNullable(group.get(Boolean.FALSE)).map(list -> list.stream()
-                .filter(issue -> Objects.equals(StatusType.TODO, issue.getCategoryCode())).count()).orElse(0L).intValue());
-        sprintStatistics.setUnassignCount(Optional.ofNullable(group.get(Boolean.FALSE)).map(list -> list.stream()
-                .filter(issue -> Objects.isNull(issue.getAssigneeId())).count()).orElse(0L).intValue());
+        sprintStatistics.setCompletedCount(group.get(Boolean.TRUE).size());
+        sprintStatistics.setUncompletedCount(group.get(Boolean.FALSE).size());
+        sprintStatistics.setTodoCount(Long.valueOf(group.get(Boolean.FALSE).stream()
+                .filter(issue -> Objects.equals(StatusType.TODO, issue.getCategoryCode())).count()).intValue());
+        sprintStatistics.setUnassignCount(Long.valueOf(group.get(Boolean.FALSE).stream()
+                .filter(issue -> Objects.isNull(issue.getAssigneeId())).count()).intValue());
         return sprintStatistics;
     }
 }
