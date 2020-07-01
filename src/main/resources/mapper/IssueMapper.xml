@@ -2936,7 +2936,7 @@
         WHERE ai.project_id = #{projectId}
           <if test="statusSet != null and statusSet.size > 0">
               AND ai.type_code IN
-                <foreach collection="statusSet" item="status" close="(" open=")" separator=",">
+                <foreach collection="statusSet" item="status" close=")" open="(" separator=",">
                     #{status}
                 </foreach>
           </if>
