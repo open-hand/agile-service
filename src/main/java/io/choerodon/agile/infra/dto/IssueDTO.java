@@ -23,7 +23,7 @@ import java.util.List;
 @Table(name = "agile_issue")
 @ModifyAudit
 @VersionAudit
-public class IssueDTO extends AuditDomain implements Cacheable {
+public class IssueDTO extends AuditDomain {
 
     /***/
     @Id
@@ -176,13 +176,9 @@ public class IssueDTO extends AuditDomain implements Cacheable {
     private String resolution;
 
     @Transient
-    @CacheValue(db = 1,key = HZeroCacheKey.USER, primaryKey = "createdBy",searchKey = "realName",
-            structure = CacheValue.DataStructure.MAP_OBJECT)
     private String createdName;
 
     @Transient
-    @CacheValue(db = 1,key = HZeroCacheKey.USER, primaryKey = "createdBy",searchKey = "realName",
-            structure = CacheValue.DataStructure.MAP_OBJECT)
     private String assigneeName;
 
     public String getAssigneeName() {
