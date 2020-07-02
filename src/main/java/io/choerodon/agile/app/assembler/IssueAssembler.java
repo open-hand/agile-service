@@ -10,8 +10,8 @@ import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.*;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.hzero.core.base.BaseConstants;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
@@ -20,7 +20,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import rx.Observable;
 
+import java.text.DateFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -611,4 +613,15 @@ public class IssueAssembler extends AbstractAssembler {
                 .filter(issue -> Objects.isNull(issue.getAssigneeId())).count()).intValue());
         return sprintStatistics;
     }
+
+    public List<Map.Entry<String, Integer>> convertBugEntry(List<ReportIssueConvertDTO> reportIssueConvertDTOList, DateFormat df, Function<ReportIssueConvertDTO, Boolean> func){
+        Map<Date, List<ReportIssueConvertDTO>> group = reportIssueConvertDTOList.stream()
+                .filter(func::apply).collect(Collectors.groupingBy(bug1 -> DateUtils.truncate(bug1.getDate(), Calendar.DAY_OF_MONTH)));
+        return group.entrySet().stream().sorted(Map.Entry.comparingByKey())
+                .map(entry -> new ImmutablePair<>(df.format(entry.getKey()),
+                        Long.valueOf(entry.getValue().stream()
+                                .map(v -> v.getNewValue().subtract(v.getOldValue()).intValue()).count()).intValue()))
+                .collect(Collectors.toList());
+    }
+
 }

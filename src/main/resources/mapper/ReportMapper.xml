@@ -30,6 +30,9 @@
                               GROUP BY
                                   adl.issue_id)
         AND adl5.new_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$'
+        <if test="bugFlag">
+            AND exists(SELECT 1 FROM agile_issue ai WHERE ai.type_code = 'bug' AND ai.issue_id = adl5.issue_id)
+        </if>
         UNION
         SELECT aisr2.issue_id
         FROM
@@ -37,6 +40,9 @@
         WHERE
             aisr2.creation_date &lt;= #{sprintDTO.startDate}
             AND aisr2.sprint_id = #{sprintDTO.sprintId}
+        <if test="bugFlag">
+            AND exists(SELECT 1 FROM agile_issue ai WHERE ai.type_code = 'bug' AND ai.issue_id = aisr2.issue_id)
+        </if>
     </select>
 
     <select id="queryValueBeforeSprintStart" resultType="io.choerodon.agile.infra.dto.ReportIssueDTO">
@@ -102,7 +108,9 @@
             adl2.creation_date &lt;= #{sprintDTO.actualEndDate}
             AND adl2.new_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$'
             AND (adl2.old_value is null or not (adl2.old_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$'))
-
+        <if test="bugFlag">
+            AND exists(SELECT 1 FROM agile_issue ai WHERE ai.type_code = 'bug' AND ai.issue_id = adl2.issue_id)
+        </if>
     </select>
 
     <select id="queryAddIssueValueDuringSprint" resultType="io.choerodon.agile.infra.dto.ReportIssueDTO">
@@ -943,6 +951,9 @@
             adl2.creation_date &lt;= #{sprintDTO.actualEndDate}
             AND adl2.old_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$'
             AND (adl2.new_value is null or not (adl2.new_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$' ))
+        <if test="bugFlag">
+            AND exists(SELECT 1 FROM agile_issue ai WHERE ai.type_code = 'bug' AND ai.issue_id = adl2.issue_id)
+        </if>
     </select>
 
 

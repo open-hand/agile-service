@@ -127,4 +127,12 @@ public interface ReportService {
      * 修复累积流图
      */
     void fixCumulativeFlowDiagram();
+
+    /**
+     * 插件迭代bug统计趋势
+     * @param projectId 项目id
+     * @param sprintId 冲刺id
+     * @return 趋势
+     */
+    IssueCountVO selectBugBysprint(Long projectId, Long sprintId);
 }

@@ -15,6 +15,7 @@ import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -223,7 +224,7 @@ public class ReportServiceImpl implements ReportService {
                     queryStoryPointsOrRemainingEstimatedTime(sprintConvertDTO, reportIssueConvertDTOList, FIELD_TIMEESTIMATE);
                     break;
                 case ISSUE_COUNT:
-                    queryIssueCount(sprintConvertDTO, reportIssueConvertDTOList);
+                    queryIssueCount(sprintConvertDTO, reportIssueConvertDTOList, false);
                     break;
                 default:
                     queryStoryPointsOrRemainingEstimatedTime(sprintConvertDTO, reportIssueConvertDTOList, FIELD_STORY_POINTS);
@@ -681,7 +682,7 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    private void queryIssueCount(SprintConvertDTO sprintConvertDTO, List<ReportIssueConvertDTO> reportIssueConvertDTOList) {
+    private void queryIssueCount(SprintConvertDTO sprintConvertDTO, List<ReportIssueConvertDTO> reportIssueConvertDTOList, boolean bugFlag) {
         SprintDTO sprintDTO = modelMapper.map(sprintConvertDTO, SprintDTO.class);
         //获取冲刺开启前的issue
         List<Long> issueIdBeforeSprintList;
@@ -691,11 +692,11 @@ public class ReportServiceImpl implements ReportService {
         List<Long> issueIdRemoveList;
         //异步任务
         CompletableFuture<List<Long>> task1 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO), pool);
+                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO, bugFlag), pool);
         CompletableFuture<List<Long>> task2 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO), pool);
+                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO, bugFlag), pool);
         CompletableFuture<List<Long>> task3 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO), pool);
+                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO, bugFlag), pool);
         issueIdBeforeSprintList = task1.join();
         issueIdAddList = task2.join();
         issueIdRemoveList = task3.join();
@@ -725,11 +726,11 @@ public class ReportServiceImpl implements ReportService {
         List<Long> issueIdRemoveList;
         //异步任务
         CompletableFuture<List<Long>> task1 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO), pool);
+                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO, false), pool);
         CompletableFuture<List<Long>> task2 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO), pool);
+                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO, false), pool);
         CompletableFuture<List<Long>> task3 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO), pool);
+                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO, false), pool);
         issueIdBeforeSprintList = task1.join();
         issueIdAddList = task2.join();
         issueIdRemoveList = task3.join();
@@ -1379,6 +1380,32 @@ public class ReportServiceImpl implements ReportService {
         List<ReportIssueConvertDTO> reportIssueConvertDTOList = getBurnDownReport(projectId, sprintId, type);
         return handleSameDay(reportIssueConvertDTOList.stream().filter(reportIssueConvertDTO -> !"endSprint".equals(reportIssueConvertDTO.getType())).
                 sorted(Comparator.comparing(ReportIssueConvertDTO::getDate)).collect(Collectors.toList()));
+    }
+
+    @Override
+    public IssueCountVO selectBugBysprint(Long projectId, Long sprintId) {
+        List<ReportIssueConvertDTO> reportIssueConvertDTOList = getBurnDownReport(projectId, sprintId, ISSUE_COUNT);
+        IssueCountVO issueCount = new IssueCountVO();
+        DateFormat bf = new SimpleDateFormat("yyyy-MM-dd");
+        // 新增bug统计
+        issueCount.setCreatedList(issueAssembler.convertBugEntry(reportIssueConvertDTOList, bf,
+                bug -> bug.getStatistical() && StringUtils.equalsAny(bug.getType(),
+                "startSprint", "endSprint", "addDuringSprint", "removeDoneDuringSprint")));
+        // 解决bug统计
+        issueCount.setCompletedList(issueAssembler.convertBugEntry(reportIssueConvertDTOList, bf, bug -> {
+            if (Objects.equals(bug.getType(), "startSprint") && !bug.getStatistical()) {
+                return true;
+            } else if (Objects.equals(bug.getType(), "endSprint") && !bug.getStatistical()) {
+                bug.setNewValue(BigDecimal.ONE);
+                bug.setOldValue(BigDecimal.ZERO);
+                return true;
+            } else if (StringUtils.equals(bug.getType(), "addDoneDuringSprint") && bug.getStatistical()) {
+                return true;
+            } else {
+                return false;
+            }
+        }));
+        return issueCount;
     }
 
     private BigDecimal calculateStoryPoints(List<IssueBurnDownReportDTO> issueDOS) {
