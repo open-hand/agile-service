@@ -2,9 +2,10 @@ import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { commonApi } from '@/api';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 
-interface Props {
-  projectDataRef: React.RefObject<Array<any>>
+interface Props extends SelectProps {
+  projectDataRef?: React.RefObject<Array<any>>
 }
 
 const SelectTeam: React.FC<Props> = forwardRef(({ projectDataRef, ...otherProps }, ref: React.Ref<Select>) => {
