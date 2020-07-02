@@ -942,9 +942,6 @@
             adl2.creation_date &lt;= #{sprintDTO.actualEndDate}
             AND adl2.old_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$'
             AND (adl2.new_value is null or not (adl2.new_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$' ))
-        <if test="bugFlag">
-            AND exists(SELECT 1 FROM agile_issue ai WHERE ai.type_code = 'bug' AND ai.issue_id = adl2.issue_id)
-        </if>
     </select>
 
 
