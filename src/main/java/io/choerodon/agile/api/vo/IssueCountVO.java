@@ -9,11 +9,11 @@ import java.util.Map;
 public class IssueCountVO {
 
     /**
-     * 创建list List<Map.Entry<用户名，数量>>
+     * 创建list List<Map.Entry<用户名/时间，数量>>
      */
     List<Map.Entry<String, Integer>> createdList;
     /**
-     * 已解决(完成)list List<Map.Entry<用户名，数量>>
+     * 已解决(完成)list List<Map.Entry<用户名/时间，数量>>
      */
     List<Map.Entry<String, Integer>> completedList;
 

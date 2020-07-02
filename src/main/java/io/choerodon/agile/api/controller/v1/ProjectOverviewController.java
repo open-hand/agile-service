@@ -5,6 +5,7 @@ import io.choerodon.agile.api.vo.IssueCountVO;
 import io.choerodon.agile.api.vo.SprintStatisticsVO;
 import io.choerodon.agile.api.vo.UncompletedCountVO;
 import io.choerodon.agile.app.service.ProjectOverviewService;
+import io.choerodon.agile.app.service.ReportService;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
@@ -23,6 +24,8 @@ public class ProjectOverviewController {
 
     @Autowired
     private ProjectOverviewService projectOverviewService;
+    @Autowired
+    private ReportService reportService;
 
     @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("查询冲刺未完成情况")
@@ -33,8 +36,6 @@ public class ProjectOverviewController {
                                                            @PathVariable Long sprintId) {
         return Results.success(projectOverviewService.selectUncompletedBySprint(projectId, sprintId));
     }
-
-    // 燃尽图 https://api.choerodon.com.cn/agile/v1/projects/1528/reports/7264/burn_down_report/coordinate?type=remainingEstimatedTime
 
     @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("查看缺陷提出与解决情况")
@@ -57,6 +58,15 @@ public class ProjectOverviewController {
         return Results.success(projectOverviewService.selectSprintStatistics(projectId, sprintId));
     }
 
+    @Permission(level = ResourceLevel.PROJECT)
+    @ApiOperation("查看缺陷累计趋势")
+    @GetMapping("/{sprintId}/issue_count")
+    public ResponseEntity<IssueCountVO> selectBugBysprint(@ApiParam(value = "项目id", required = true)
+                                                           @PathVariable(name = "project_id") Long projectId,
+                                                           @ApiParam(value = "冲刺Id", required = true)
+                                                           @PathVariable Long sprintId) {
+        return Results.success(reportService.selectBugBysprint(projectId, sprintId));
+    }
 
     @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("查看每人每日工作量")

@@ -4,31 +4,27 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONObject;
-import io.choerodon.agile.api.vo.IssueCountVO;
-import io.choerodon.agile.api.vo.IssueOverviewVO;
-import io.choerodon.agile.api.vo.SprintStatisticsVO;
-import io.choerodon.agile.api.vo.UncompletedCountVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.IssueAssembler;
 import io.choerodon.agile.app.service.ProjectOverviewService;
 import io.choerodon.agile.app.service.ReportService;
 import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.dto.IssueDTO;
 import io.choerodon.agile.infra.dto.SprintDTO;
 import io.choerodon.agile.infra.enums.InitIssueType;
 import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.mapper.ReportMapper;
 import io.choerodon.agile.infra.mapper.SprintMapper;
-import org.apache.commons.collections4.SetUtils;
 import org.hzero.core.base.BaseConstants;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import rx.Observable;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/6/29 下午3:51
@@ -46,12 +42,17 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
     private IssueMapper issueMapper;
     @Autowired
     private IssueAssembler issueAssembler;
+    @Autowired
+    private ReportMapper reportMapper;
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     @SuppressWarnings("unchecked")
     public UncompletedCountVO selectUncompletedBySprint(Long projectId, Long sprintId) {
         UncompletedCountVO uncompletedCount = new UncompletedCountVO();
-        DateFormat sf = new SimpleDateFormat(BaseConstants.Pattern.DATETIME);
+        DateFormat df = new SimpleDateFormat(BaseConstants.Pattern.DATETIME);
+        DateTimeFormatter ldf = DateTimeFormatter.ofPattern(BaseConstants.Pattern.DATETIME);
         JSONObject jObject;
         jObject = reportService.queryBurnDownCoordinate(projectId, sprintId, ReportServiceImpl.STORY_POINTS);
         uncompletedCount.setStoryPoints(Optional.ofNullable(jObject.get(ReportServiceImpl.COORDINATE))
@@ -74,9 +75,12 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
         }
         Date endDate = Objects.nonNull(sprint.getActualEndDate()) ? sprint.getActualEndDate() : sprint.getEndDate();
         Date startDate = sprint.getStartDate();
-        Duration remaining = Duration.between(LocalDateTime.now(), LocalDate.parse(sf.format(endDate)));
-        Duration total = Duration.between(LocalDate.parse(sf.format(startDate)), LocalDate.parse(sf.format(endDate)));
+        Duration remaining = Duration.between(LocalDateTime.now(), LocalDateTime.parse(df.format(endDate),ldf));
+        Duration total = Duration.between(LocalDateTime.parse(df.format(startDate),ldf), LocalDateTime.parse(df.format(endDate),ldf));
         uncompletedCount.setRemainingDays(Integer.valueOf(Long.valueOf(remaining.toDays()).toString()));
+        if (uncompletedCount.getRemainingDays() < 0){
+            uncompletedCount.setRemainingDays(0);
+        }
         uncompletedCount.setTotalDays(Integer.valueOf(Long.valueOf(total.toDays()).toString()));
         return uncompletedCount;
     }

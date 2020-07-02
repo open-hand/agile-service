@@ -2931,16 +2931,15 @@
             ai.created_by
         FROM
             agile_issue ai
-                JOIN agile_issue_sprint_rel aisr ON aisr.sprint_id = #{sprintId} AND ai.issue_id = aisr.issue_id
-                JOIN agile_issue_status ais ON ai.status_id = ais.status_id AND ai.project_id = ais.project_id
+        JOIN agile_issue_sprint_rel aisr ON aisr.sprint_id = #{sprintId} AND ai.issue_id = aisr.issue_id
+        JOIN agile_issue_status ais ON ai.status_id = ais.status_id AND ai.project_id = ais.project_id
         WHERE ai.project_id = #{projectId}
           <if test="statusSet != null and statusSet.size > 0">
               AND ai.type_code IN
-                <foreach collection="statusSet" item="status" close="(" open=")" separator=",">
+                <foreach collection="statusSet" item="status" close=")" open="(" separator=",">
                     #{status}
                 </foreach>
           </if>
-
     </select>
 
 </mapper>
