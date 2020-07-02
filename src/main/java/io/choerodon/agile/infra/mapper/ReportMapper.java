@@ -50,7 +50,7 @@ public interface ReportMapper {
      * @param sprintDTO sprintDTO
      * @return issueIds
      */
-    List<Long> queryIssueIdsBeforeSprintStart(@Param("sprintDTO") SprintDTO sprintDTO, @Param("bugFlag") boolean bugFlag);
+    List<Long> queryIssueIdsBeforeSprintStart(@Param("sprintDTO") SprintDTO sprintDTO);
 
     /**
      * 获取冲刺期间加入的issue
@@ -58,7 +58,7 @@ public interface ReportMapper {
      * @param sprintDTO sprintDTO
      * @return issueIdList
      */
-    List<Long> queryAddIssueIdsDuringSprint(@Param("sprintDTO") SprintDTO sprintDTO, @Param("bugFlag") boolean bugFlag);
+    List<Long> queryAddIssueIdsDuringSprint(@Param("sprintDTO") SprintDTO sprintDTO);
 
     /**
      * 获取冲刺期间移除的issue(不包含子任务和epic)
@@ -212,7 +212,7 @@ public interface ReportMapper {
      * @param sprintDTO sprintDTO
      * @return Long
      */
-    List<Long> queryRemoveIssueIdsDuringSprint(@Param("sprintDTO") SprintDTO sprintDTO, @Param("bugFlag") boolean bugFlag);
+    List<Long> queryRemoveIssueIdsDuringSprint(@Param("sprintDTO") SprintDTO sprintDTO);
 
     /**
      * 判断issue是否在冲刺外
@@ -410,4 +410,28 @@ public interface ReportMapper {
     Set<Long> queryRemoveIssueIds();
 
     ReportIssueDTO queryLastResolutionBeforeMoveOutSprint(@Param("projectId") Long projectId, @Param("issueId") Long issueId, @Param("outDate") Date outDate);
+
+    /**
+     * 获取冲刺开启前的bug
+     *
+     * @param sprintDTO sprintDTO
+     * @return issueIds
+     */
+    List<Long> queryBugIdsBeforeSprintStart(@Param("sprintDTO") SprintDTO sprintDTO);
+
+    /**
+     * 获取冲刺期间加入的bug
+     *
+     * @param sprintDTO sprintDTO
+     * @return issueIdList
+     */
+    List<Long> queryAddBugIdsDuringSprint(@Param("sprintDTO") SprintDTO sprintDTO);
+
+    /**
+     * 冲刺期间移出的issue
+     *
+     * @param sprintDTO sprintDTO
+     * @return Long
+     */
+    List<Long> queryRemoveBugIdsDuringSprint(@Param("sprintDTO") SprintDTO sprintDTO);
 }

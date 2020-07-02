@@ -224,7 +224,7 @@ public class ReportServiceImpl implements ReportService {
                     queryStoryPointsOrRemainingEstimatedTime(sprintConvertDTO, reportIssueConvertDTOList, FIELD_TIMEESTIMATE);
                     break;
                 case ISSUE_COUNT:
-                    queryIssueCount(sprintConvertDTO, reportIssueConvertDTOList, false);
+                    queryIssueCount(sprintConvertDTO, reportIssueConvertDTOList);
                     break;
                 default:
                     queryStoryPointsOrRemainingEstimatedTime(sprintConvertDTO, reportIssueConvertDTOList, FIELD_STORY_POINTS);
@@ -682,7 +682,7 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    private void queryIssueCount(SprintConvertDTO sprintConvertDTO, List<ReportIssueConvertDTO> reportIssueConvertDTOList, boolean bugFlag) {
+    private void queryIssueCount(SprintConvertDTO sprintConvertDTO, List<ReportIssueConvertDTO> reportIssueConvertDTOList) {
         SprintDTO sprintDTO = modelMapper.map(sprintConvertDTO, SprintDTO.class);
         //获取冲刺开启前的issue
         List<Long> issueIdBeforeSprintList;
@@ -692,11 +692,11 @@ public class ReportServiceImpl implements ReportService {
         List<Long> issueIdRemoveList;
         //异步任务
         CompletableFuture<List<Long>> task1 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO, bugFlag), pool);
+                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO), pool);
         CompletableFuture<List<Long>> task2 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO, bugFlag), pool);
+                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO), pool);
         CompletableFuture<List<Long>> task3 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO, bugFlag), pool);
+                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO), pool);
         issueIdBeforeSprintList = task1.join();
         issueIdAddList = task2.join();
         issueIdRemoveList = task3.join();
@@ -726,11 +726,11 @@ public class ReportServiceImpl implements ReportService {
         List<Long> issueIdRemoveList;
         //异步任务
         CompletableFuture<List<Long>> task1 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO, false), pool);
+                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO), pool);
         CompletableFuture<List<Long>> task2 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO, false), pool);
+                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO), pool);
         CompletableFuture<List<Long>> task3 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO, false), pool);
+                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO), pool);
         issueIdBeforeSprintList = task1.join();
         issueIdAddList = task2.join();
         issueIdRemoveList = task3.join();
@@ -1384,7 +1384,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public IssueCountVO selectBugBysprint(Long projectId, Long sprintId) {
-        List<ReportIssueConvertDTO> reportIssueConvertDTOList = getBurnDownReport(projectId, sprintId, ISSUE_COUNT);
+        List<ReportIssueConvertDTO> reportIssueConvertDTOList = queryBugCount(projectId, sprintId);
         IssueCountVO issueCount = new IssueCountVO();
         DateFormat bf = new SimpleDateFormat("yyyy-MM-dd");
         // 新增bug统计
@@ -1406,6 +1406,45 @@ public class ReportServiceImpl implements ReportService {
             }
         }));
         return issueCount;
+    }
+
+    private List<ReportIssueConvertDTO> queryBugCount(Long projectId, Long sprintId) {
+        List<ReportIssueConvertDTO> reportIssueConvertDTOList = new ArrayList<>();
+        SprintDTO sprintDTO = new SprintDTO();
+        sprintDTO.setSprintId(sprintId);
+        sprintDTO.setProjectId(projectId);
+        sprintMapper.selectOne(sprintDTO);
+        //获取冲刺开启前的issue
+        List<Long> issueIdBeforeSprintList;
+        //获取当前冲刺期间加入的issue
+        List<Long> issueIdAddList;
+        //获取当前冲刺期间移除的issue
+        List<Long> issueIdRemoveList;
+        //异步任务
+        CompletableFuture<List<Long>> task1 = CompletableFuture
+                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO), pool);
+        CompletableFuture<List<Long>> task2 = CompletableFuture
+                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO), pool);
+        CompletableFuture<List<Long>> task3 = CompletableFuture
+                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO), pool);
+        issueIdBeforeSprintList = task1.join();
+        issueIdAddList = task2.join();
+        issueIdRemoveList = task3.join();
+        //获取冲刺开启前的bug统计
+        handleIssueCountBeforeSprint(sprintDTO, reportIssueConvertDTOList, issueIdBeforeSprintList);
+        //获取当前冲刺期间加入的bug
+        handleAddIssueCountDuringSprint(sprintDTO, reportIssueConvertDTOList, issueIdAddList);
+        //获取当前冲刺期间移除的bug
+        handleRemoveCountDuringSprint(sprintDTO, reportIssueConvertDTOList, issueIdRemoveList);
+        //获取冲刺结束时的bug
+        handleIssueCountAfterSprint(sprintDTO, reportIssueConvertDTOList);
+        //获取冲刺期间所有操作到的bug
+        List<Long> issueAllList = getAllIssueDuringSprint(issueIdBeforeSprintList, issueIdAddList, issueIdRemoveList);
+        //获取当前冲刺期间移动到done状态的bug
+        handleAddDoneIssueCountDuringSprint(sprintDTO, reportIssueConvertDTOList, issueAllList);
+        //获取当前冲刺期间移出done状态的bug
+        handleRemoveDoneIssueCountDuringSprint(sprintDTO, reportIssueConvertDTOList, issueAllList);
+        return reportIssueConvertDTOList;
     }
 
     private BigDecimal calculateStoryPoints(List<IssueBurnDownReportDTO> issueDOS) {
