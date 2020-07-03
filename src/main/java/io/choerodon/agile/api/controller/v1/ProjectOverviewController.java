@@ -39,7 +39,7 @@ public class ProjectOverviewController {
     @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("查看缺陷提出与解决情况")
     @GetMapping("/{sprintId}/issue")
-    public ResponseEntity<IssueCountVO> selectIssueCountBysprint(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<List<IssueCompletedStatusVO>> selectIssueCountBysprint(@ApiParam(value = "项目id", required = true)
                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                  @ApiParam(value = "冲刺Id", required = true)
                                                                  @PathVariable Long sprintId) {

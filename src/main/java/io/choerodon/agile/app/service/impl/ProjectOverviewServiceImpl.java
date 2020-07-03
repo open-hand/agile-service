@@ -86,12 +86,13 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
     }
 
     @Override
-    public IssueCountVO selectIssueCountBysprint(Long projectId, Long sprintId) {
+    public List<IssueCompletedStatusVO> selectIssueCountBysprint(Long projectId, Long sprintId) {
         List<IssueOverviewVO> issueList = Optional.ofNullable(issueMapper.selectIssueBysprint(projectId, sprintId,
                 Collections.singleton(InitIssueType.BUG.getTypeCode()))).orElse(Collections.emptyList());
         // 优先排序set
         Set<Long> priority = issueList.stream().map(IssueOverviewVO::getAssigneeId).collect(Collectors.toSet());
         priority.addAll(issueList.stream().map(IssueOverviewVO::getReporterId).collect(Collectors.toSet()));
+        priority.remove(null);
         // issueDTO转换IssueCountVO
         return issueAssembler.issueDTOToIssueCountVO(issueList, priority);
     }

@@ -159,18 +159,36 @@ public class IssueAssembler extends AbstractAssembler {
      * @param priority 在priority内的user优先排序
      * @return IssueCountVO
      */
-    public IssueCountVO issueDTOToIssueCountVO(List<IssueOverviewVO> issueList, Set<Long> priority){
+    public List<IssueCompletedStatusVO> issueDTOToIssueCountVO(List<IssueOverviewVO> issueList, Set<Long> priority){
         IssueCountVO issueCount = new IssueCountVO();
         Set<Long> userIdList = new HashSet<>();
         rx.Observable.from(priority)
                 .mergeWith(Observable.from(issueList.stream().map(IssueOverviewVO::getCreatedBy).collect(Collectors.toSet())))
                 .toList().subscribe(userIdList::addAll);
         Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(new ArrayList<>(userIdList), true);
-        // 设置提出人list
-        issueCount.setCreatedList(sortAndConvertCreated(issueList, priority, userMap));
-        // 设置已解决list
-        issueCount.setCompletedList(sortAndConvertAssignee(issueList, userMap));
-        return issueCount;
+        // 设置提出list
+        List<Map.Entry<String, Integer>> createdlist = sortAndConvertCreated(issueList, priority, userMap);
+        // 设置已解决Map
+        Map<String, Integer> assigneeMap = sortAndConvertAssignee(issueList, userMap);
+        List<IssueCompletedStatusVO> result = createdlist.stream()
+                .map(entry -> new IssueCompletedStatusVO(entry.getKey(), entry.getValue())).collect(Collectors.toList());
+        result.addAll(priority.stream()
+                .map(userId -> userMap.get(userId).getRealName())
+                .filter(realName -> !createdlist.stream().map(Map.Entry::getKey).collect(Collectors.toSet())
+                        .contains(realName)).map(IssueCompletedStatusVO::new)
+                .collect(Collectors.toList()));
+        // 设置同一工作人的已解决问题数，并移除掉
+        for (IssueCompletedStatusVO issue : result) {
+            if (assigneeMap.containsKey(issue.getWorker())){
+                issue.setCompleted(assigneeMap.get(issue.getWorker()));
+                assigneeMap.remove(issue.getWorker());
+            }
+        }
+        // 将剩余的人（即仅解决bug无创建bug的人）加入list
+        result.addAll(assigneeMap.entrySet().stream()
+                .map(entry -> new IssueCompletedStatusVO(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList()));
+        return result;
     }
 
     /**
@@ -178,13 +196,13 @@ public class IssueAssembler extends AbstractAssembler {
      * @param issueList 待排序list
      * @return 坐标点list
      */
-    private List<Map.Entry<String, Integer>> sortAndConvertAssignee(List<IssueOverviewVO> issueList, Map<Long, UserMessageDTO> userMap) {
+    private Map<String, Integer> sortAndConvertAssignee(List<IssueOverviewVO> issueList, Map<Long, UserMessageDTO> userMap) {
         return issueList.stream()
                 .filter(issue -> BooleanUtils.isTrue(issue.getCompleted()) && Objects.nonNull(issue.getAssigneeId()))
                 .collect(Collectors.groupingBy(IssueOverviewVO::getAssigneeId)).entrySet()
                 .stream().sorted(Map.Entry.comparingByKey())
                 .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
     }
 
 
@@ -198,12 +216,12 @@ public class IssueAssembler extends AbstractAssembler {
     private List<Map.Entry<String, Integer>> sortAndConvertCreated(List<IssueOverviewVO> issueList, Set<Long> priority, Map<Long, UserMessageDTO> userMap) {
         List<Map.Entry<String, Integer>> list = new ArrayList<>(issueList.size());
         Map<Boolean, List<IssueOverviewVO>> group = issueList.stream().collect(Collectors.groupingBy(issue -> priority.contains(issue.getCreatedBy())));
-        list.addAll(Optional.ofNullable(group.get(Boolean.TRUE)).orElse(Collections.emptyList())
+        list.addAll(group.getOrDefault(Boolean.TRUE, Collections.emptyList())
                 .stream().collect(Collectors.groupingBy(IssueOverviewVO::getCreatedBy)).entrySet()
                 .stream().sorted(Map.Entry.comparingByKey())
                 .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
                 .collect(Collectors.toList()));
-        list.addAll(Optional.ofNullable(group.get(Boolean.FALSE)).orElse(Collections.emptyList())
+        list.addAll(group.getOrDefault(Boolean.FALSE, Collections.emptyList())
                 .stream().collect(Collectors.groupingBy(IssueOverviewVO::getCreatedBy)).entrySet()
                 .stream().sorted(Map.Entry.comparingByKey())
                 .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))

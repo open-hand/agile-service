@@ -2,10 +2,7 @@ package io.choerodon.agile.app.service;
 
 import java.util.List;
 
-import io.choerodon.agile.api.vo.IssueCountVO;
-import io.choerodon.agile.api.vo.OneJobVO;
-import io.choerodon.agile.api.vo.SprintStatisticsVO;
-import io.choerodon.agile.api.vo.UncompletedCountVO;
+import io.choerodon.agile.api.vo.*;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/6/29 下午3:51
@@ -26,7 +23,7 @@ public interface ProjectOverviewService {
      * @param sprintId 冲刺id
      * @return bug情况统计
      */
-    IssueCountVO selectIssueCountBysprint(Long projectId, Long sprintId);
+    List<IssueCompletedStatusVO> selectIssueCountBysprint(Long projectId, Long sprintId);
 
     /**
      * 查看迭代统计
