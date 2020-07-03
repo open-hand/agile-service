@@ -11,6 +11,24 @@ public class IssueOverviewVO extends AuditDomain {
     private Long reporterId;
     private Long assigneeId;
     private String categoryCode;
+    private String typeCode;
+    private Integer storyPoints;
+
+    public Integer getStoryPoints() {
+        return storyPoints;
+    }
+
+    public void setStoryPoints(Integer storyPoints) {
+        this.storyPoints = storyPoints;
+    }
+
+    public String getTypeCode() {
+        return typeCode;
+    }
+
+    public void setTypeCode(String typeCode) {
+        this.typeCode = typeCode;
+    }
 
     public Long getIssueId() {
         return issueId;
