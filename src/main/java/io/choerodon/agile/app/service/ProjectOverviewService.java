@@ -1,6 +1,9 @@
 package io.choerodon.agile.app.service;
 
+import java.util.List;
+
 import io.choerodon.agile.api.vo.IssueCountVO;
+import io.choerodon.agile.api.vo.OneJobVO;
 import io.choerodon.agile.api.vo.SprintStatisticsVO;
 import io.choerodon.agile.api.vo.UncompletedCountVO;
 
@@ -29,7 +32,15 @@ public interface ProjectOverviewService {
      * 查看迭代统计
      * @param projectId 项目id
      * @param sprintId 冲刺id
-     * @return bug情况统计
+     * @return sprint情况统计
      */
     SprintStatisticsVO selectSprintStatistics(Long projectId, Long sprintId);
+
+    /**
+     * 查看每人每日工作量
+     * @param projectId 项目id
+     * @param sprintId 冲刺id
+     * @return 工作量统计
+     */
+    List<OneJobVO> selectOneJobsBysprint(Long projectId, Long sprintId);
 }

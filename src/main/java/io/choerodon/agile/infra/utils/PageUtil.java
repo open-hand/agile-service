@@ -64,6 +64,7 @@ public class PageUtil {
     }
 
     public static int getBegin(int page, int size) {
+        page++;
         page = page <= 1 ? 1 : page;
         return (page - 1) * size;
     }

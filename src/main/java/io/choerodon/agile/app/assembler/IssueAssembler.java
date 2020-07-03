@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.enums.StatusType;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -12,6 +13,7 @@ import io.choerodon.agile.infra.dto.*;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.hzero.core.base.BaseConstants;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
@@ -21,7 +23,9 @@ import org.springframework.util.ObjectUtils;
 import rx.Observable;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -176,7 +180,7 @@ public class IssueAssembler extends AbstractAssembler {
      */
     private List<Map.Entry<String, Integer>> sortAndConvertAssignee(List<IssueOverviewVO> issueList, Map<Long, UserMessageDTO> userMap) {
         return issueList.stream()
-                .filter(issue -> BooleanUtils.isTrue(issue.getCompleted()))
+                .filter(issue -> BooleanUtils.isTrue(issue.getCompleted()) && Objects.nonNull(issue.getAssigneeId()))
                 .collect(Collectors.groupingBy(IssueOverviewVO::getAssigneeId)).entrySet()
                 .stream().sorted(Map.Entry.comparingByKey())
                 .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
@@ -622,6 +626,92 @@ public class IssueAssembler extends AbstractAssembler {
                         Long.valueOf(entry.getValue().stream()
                                 .map(v -> v.getNewValue().subtract(v.getOldValue()).intValue()).count()).intValue()))
                 .collect(Collectors.toList());
+    }
+
+    public List<OneJobVO> issueToOneJob(List<IssueOverviewVO> issueList, List<WorkLogDTO> workLogList, List<DataLogDTO> dataLogList){
+        List<Long> userIdList = issueList.stream().map(IssueOverviewVO::getCreatedBy).collect(Collectors.toList());
+        userIdList.addAll(workLogList.stream().map(WorkLogDTO::getCreatedBy).collect(Collectors.toList()));
+        userIdList.addAll(dataLogList.stream().map(DataLogDTO::getCreatedBy).collect(Collectors.toList()));
+        DateFormat df = new SimpleDateFormat(BaseConstants.Pattern.DATE);
+        Map<Long, UserMessageDTO> userMessageDOMap = userService.queryUsersMap(userIdList, true);
+        // issue类型map
+        Map<Long, IssueOverviewVO> issueTypeMap = issueList.stream().collect(Collectors.toMap(IssueOverviewVO::getIssueId,
+                a -> a));
+        // 每日每人bug提出数量
+        Map<Date, Map<Long, List<IssueOverviewVO>>> dateOneBugMap = groupByList(issueList,
+                IssueOverviewVO::getCreationDate, IssueOverviewVO::getCreatedBy,
+                issue -> issue.setCreationDate(DateUtils.truncate(issue.getCreationDate(),
+                        Calendar.DAY_OF_MONTH)));
+        // 每日每人工时
+        Map<Date, Map<Long, List<WorkLogDTO>>> dateOneWorkMap = groupByList(workLogList,
+                WorkLogDTO::getStartDate, WorkLogDTO::getCreatedBy,
+                issue -> issue.setCreationDate(DateUtils.truncate(issue.getCreationDate(),
+                                Calendar.DAY_OF_MONTH)));
+        // 计算任务，故事，解决bug
+        Map<Date, List<DataLogDTO>> creationMap = getcreationMap(dataLogList);
+        Map<Date, OneJobVO> oneJobMap = creationMap.entrySet().stream().map(entry -> new ImmutablePair<>(entry.getKey()
+                , dataLogListToOneJob(entry.getKey(), entry.getValue(), issueTypeMap, dateOneBugMap, dateOneWorkMap, userMessageDOMap)))
+                .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
+        return oneJobMap.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(entry -> {
+            List<JobVO> jobList = entry.getValue().getJobList();
+            entry.getValue().setTotal(new JobVO(jobList));
+            entry.getValue().setWorkDate(df.format(entry.getValue().getWorkDateSource()));
+            return entry.getValue();
+        }).collect(Collectors.toList());
+    }
+
+    private Map<Date, List<DataLogDTO>> getcreationMap(List<DataLogDTO> dataLogList) {
+        return dataLogList.stream()
+                    .peek(log -> log.setCreationDate(DateUtils.truncate(log.getCreationDate(), Calendar.DAY_OF_MONTH)))
+                    // 按照日志的创建日期分组
+                    .collect(Collectors.groupingBy(DataLogDTO::getCreationDate))
+                    .entrySet().stream()
+                    // 按照issueId去重，取logId最大值,即当天的最后解决记录
+                    .map(entry -> new ImmutablePair<>(entry.getKey(), entry.getValue().stream()
+                            .collect(Collectors.groupingBy(DataLogDTO::getIssueId)).values()
+                            .stream().map(list -> list.stream()
+                                    .max(Comparator.comparingLong(DataLogDTO::getLogId))
+                                    .orElse(null)).filter(Objects::nonNull).collect(Collectors.toList())))
+                    .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
+    }
+
+    private <T, K1, K2> Map<K1, Map<K2, List<T>>> groupByList(List<T> list,
+                                                              Function<T, K1> k1,
+                                                              Function<T, K2> k2,
+                                                              Consumer<? super T> action){
+        return list.stream().peek(action)
+                .collect(Collectors.groupingBy(k1)).entrySet().stream()
+                .map(entry -> new ImmutablePair<>(entry.getKey(), entry.getValue().stream()
+                        .collect(Collectors.groupingBy(k2))))
+                .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
+    }
+
+    private OneJobVO dataLogListToOneJob(Date workDate, List<DataLogDTO> list, Map<Long, IssueOverviewVO> issueTypeMap,
+                                         Map<Date, Map<Long, List<IssueOverviewVO>>> dateOneBugMap,
+                                         Map<Date, Map<Long, List<WorkLogDTO>>> dateOneWorkMap,
+                                         Map<Long, UserMessageDTO> userMessageDOMap){
+        Map<Long, List<DataLogDTO>> workerGroup = list.stream().collect(Collectors.groupingBy(DataLogDTO::getCreatedBy));
+        List<JobVO> jobList = new ArrayList<>(workerGroup.size());
+        for (Map.Entry<Long, List<DataLogDTO>> entry : workerGroup.entrySet()) {
+            Map<String, List<DataLogDTO>> typeMap =
+                    entry.getValue().stream().collect(Collectors.groupingBy(log -> issueTypeMap.get(log.getIssueId()).getTypeCode()));
+            JobVO job = new JobVO();
+            job.setWorker(userMessageDOMap.get(entry.getKey()).getRealName());
+            job.setTaskCount(typeMap.getOrDefault(IssueTypeCode.TASK.value(), Collections.emptyList()).size()
+                    + typeMap.getOrDefault(IssueTypeCode.SUB_TASK.value(), Collections.emptyList()).size());
+            job.setStoryCount(typeMap.getOrDefault(IssueTypeCode.STORY.value(), Collections.emptyList()).size());
+            job.setStoryPointCount(typeMap.getOrDefault(IssueTypeCode.STORY.value(), Collections.emptyList())
+                    .stream().map(points -> issueTypeMap.get(points.getIssueId()).getStoryPoints())
+                    .reduce(BaseConstants.Digital.ZERO, Integer::sum));
+            job.setBugFixCount(typeMap.getOrDefault(IssueTypeCode.BUG.value(), Collections.emptyList()).size());
+            job.setBugCreatedCount(dateOneBugMap.getOrDefault(workDate, Collections.emptyMap()).getOrDefault(entry.getKey(), Collections.emptyList()).size());
+            job.setWorkTime(dateOneWorkMap.getOrDefault(workDate, Collections.emptyMap()).getOrDefault(entry.getKey(), Collections.emptyList()).size());
+            jobList.add(job);
+        }
+        OneJobVO oneJob = new OneJobVO();
+        oneJob.setJobList(jobList);
+        oneJob.setWorkDateSource(workDate);
+        return oneJob;
     }
 
 }

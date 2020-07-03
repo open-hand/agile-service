@@ -8,4 +8,19 @@
         WHERE issue_id = #{issueId} and project_id = #{projectId} order by creation_date desc
     </select>
 
+    <select id="selectWorkTimeBySpring" resultType="io.choerodon.agile.infra.dto.WorkLogDTO">
+        SELECT
+            awl.log_id,
+            awl.work_time,
+            awl.start_date,
+            awl.created_by
+        FROM
+            agile_work_log awl
+        JOIN agile_issue_sprint_rel aisr ON awl.issue_id = aisr.issue_id AND aisr.project_id = #{projectId}
+        WHERE
+            aisr.sprint_id = #{sprintId}
+        AND awl.start_date >= #{startDate}
+        AND awl.start_date &lt;= #{endDate}
+    </select>
+
 </mapper>

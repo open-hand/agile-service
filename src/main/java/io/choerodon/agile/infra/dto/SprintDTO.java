@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Created by jian_zhang02@163.com on 2018/5/14.
@@ -30,6 +31,10 @@ public class SprintDTO extends AuditDomain {
     private String statusCode;
     @NotNull
     private Long projectId;
+
+    public Date getRealEndDate(){
+        return Objects.isNull(this.actualEndDate) ? this.endDate : this.actualEndDate;
+    }
 
     public Long getSprintId() {
         return sprintId;

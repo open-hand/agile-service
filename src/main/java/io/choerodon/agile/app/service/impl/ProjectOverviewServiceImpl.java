@@ -3,8 +3,6 @@ package io.choerodon.agile.app.service.impl;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,13 +13,14 @@ import io.choerodon.agile.app.assembler.IssueAssembler;
 import io.choerodon.agile.app.service.ProjectOverviewService;
 import io.choerodon.agile.app.service.ReportService;
 import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.DataLogDTO;
 import io.choerodon.agile.infra.dto.SprintDTO;
+import io.choerodon.agile.infra.dto.WorkLogDTO;
 import io.choerodon.agile.infra.enums.InitIssueType;
-import io.choerodon.agile.infra.mapper.IssueMapper;
-import io.choerodon.agile.infra.mapper.ReportMapper;
-import io.choerodon.agile.infra.mapper.SprintMapper;
+import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.DateUtil;
+import io.choerodon.core.oauth.DetailsHelper;
 import org.hzero.core.base.BaseConstants;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,9 +42,13 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
     @Autowired
     private IssueAssembler issueAssembler;
     @Autowired
-    private ReportMapper reportMapper;
+    private WorkLogMapper workLogMapper;
     @Autowired
-    private ModelMapper modelMapper;
+    private DataLogMapper dataLogMapper;
+    @Autowired
+    private WorkCalendarRefMapper workCalendarRefMapper;
+    @Autowired
+    private DateUtil dateUtil;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -66,22 +69,19 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
         uncompletedCount.setIssueCount(Optional.ofNullable(jObject.get(ReportServiceImpl.COORDINATE))
                 .map(map -> ((TreeMap<String, BigDecimal>)map).lastEntry())
                 .map(Map.Entry::getValue).orElse(BigDecimal.ZERO));
-        SprintDTO sprint = new SprintDTO();
-        sprint.setProjectId(projectId);
-        sprint.setSprintId(sprintId);
-        sprint = sprintMapper.selectOne(sprint);
+        SprintDTO sprint = safeSelectSprint(projectId, sprintId);
         if (Objects.isNull(sprint)) {
             return uncompletedCount;
         }
-        Date endDate = Objects.nonNull(sprint.getActualEndDate()) ? sprint.getActualEndDate() : sprint.getEndDate();
-        Date startDate = sprint.getStartDate();
-        Duration remaining = Duration.between(LocalDateTime.now(), LocalDateTime.parse(df.format(endDate),ldf));
-        Duration total = Duration.between(LocalDateTime.parse(df.format(startDate),ldf), LocalDateTime.parse(df.format(endDate),ldf));
-        uncompletedCount.setRemainingDays(Integer.valueOf(Long.valueOf(remaining.toDays()).toString()));
-        if (uncompletedCount.getRemainingDays() < 0){
-            uncompletedCount.setRemainingDays(0);
+        if (sprint.getEndDate() != null) {
+            uncompletedCount.setRemainingDays(dateUtil.getDaysBetweenDifferentDate(sprint.getStartDate(), sprint.getEndDate(),
+                    workCalendarRefMapper.queryHolidayBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()),
+                    workCalendarRefMapper.queryWorkBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()), DetailsHelper.getUserDetails().getTenantId()));
+
+        uncompletedCount.setTotalDays(dateUtil.getDaysBetweenDifferentDate(new Date(), sprint.getEndDate(),
+                workCalendarRefMapper.queryHolidayBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()),
+                workCalendarRefMapper.queryWorkBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()), DetailsHelper.getUserDetails().getTenantId()));
         }
-        uncompletedCount.setTotalDays(Integer.valueOf(Long.valueOf(total.toDays()).toString()));
         return uncompletedCount;
     }
 
@@ -98,16 +98,40 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
 
     @Override
     public SprintStatisticsVO selectSprintStatistics(Long projectId, Long sprintId) {
+        List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId);
+        return issueAssembler.issueDTOToSprintStatisticsVO(issueList);
+    }
+
+    @Override
+    public List<OneJobVO> selectOneJobsBysprint(Long projectId, Long sprintId) {
+        SprintDTO sprint = safeSelectSprint(projectId,sprintId);
+        List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId);
+        List<WorkLogDTO> workLogList = workLogMapper.selectWorkTimeBySpring(projectId, sprintId,
+                sprint.getStartDate(), sprint.getRealEndDate());
+        List<DataLogDTO> dataLogList = dataLogMapper.selectResolutionIssueBySprint(projectId,
+                issueList.stream().map(IssueOverviewVO::getIssueId).collect(Collectors.toSet()),
+                sprint.getStartDate(), sprint.getRealEndDate());
+
+        return issueAssembler.issueToOneJob(issueList, workLogList, dataLogList);
+    }
+
+    private List<IssueOverviewVO> selectIssueBysprint(Long projectId, Long sprintId) {
         Set<String> statusSet = new HashSet<>();
         statusSet.add(InitIssueType.BUG.getTypeCode());
         statusSet.add(InitIssueType.TASK.getTypeCode());
         statusSet.add(InitIssueType.SUB_TASK.getTypeCode());
         statusSet.add(InitIssueType.STORY.getTypeCode());
-        List<IssueOverviewVO> issueList = Optional.ofNullable(issueMapper.selectIssueBysprint(projectId, sprintId, statusSet))
+        return Optional.ofNullable(issueMapper.selectIssueBysprint(projectId, sprintId, statusSet))
                 .orElse(Collections.emptyList());
-
-        return issueAssembler.issueDTOToSprintStatisticsVO(issueList);
     }
 
+
+    private SprintDTO safeSelectSprint(Long projectId, Long sprintId) {
+        SprintDTO sprint = new SprintDTO();
+        sprint.setProjectId(projectId);
+        sprint.setSprintId(sprintId);
+        sprint = sprintMapper.selectOne(sprint);
+        return sprint;
+    }
 
 }

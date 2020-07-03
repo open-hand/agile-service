@@ -4,6 +4,7 @@ import io.choerodon.agile.infra.dto.WorkLogDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -20,4 +21,9 @@ public interface WorkLogMapper extends BaseMapper<WorkLogDTO> {
      * @return WorkLogDTO
      */
     List<WorkLogDTO> queryByIssueId(@Param("issueId") Long issueId, @Param("projectId") Long projectId);
+
+    List<WorkLogDTO> selectWorkTimeBySpring(@Param("projectId") Long projectId,
+                                            @Param("sprintId") Long springId,
+                                            @Param("startDate") Date startDate,
+                                            @Param("endDate") Date endDate);
 }

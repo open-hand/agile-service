@@ -1,9 +1,8 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.api.vo.BoardColumnVO;
-import io.choerodon.agile.api.vo.IssueCountVO;
-import io.choerodon.agile.api.vo.SprintStatisticsVO;
-import io.choerodon.agile.api.vo.UncompletedCountVO;
+import java.util.List;
+
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.ProjectOverviewService;
 import io.choerodon.agile.app.service.ReportService;
 import io.choerodon.core.iam.ResourceLevel;
@@ -71,10 +70,10 @@ public class ProjectOverviewController {
     @Permission(level = ResourceLevel.PROJECT)
     @ApiOperation("查看每人每日工作量")
     @GetMapping("/{sprintId}/one_jobs")
-    public ResponseEntity<BoardColumnVO> selectOneJobsBysprint(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<List<OneJobVO>> selectOneJobsBysprint(@ApiParam(value = "项目id", required = true)
                                                                @PathVariable(name = "project_id") Long projectId,
-                                                               @ApiParam(value = "冲刺Id", required = true)
+                                                                @ApiParam(value = "冲刺Id", required = true)
                                                                @PathVariable Long sprintId) {
-        return Results.success();
+        return Results.success(projectOverviewService.selectOneJobsBysprint(projectId, sprintId));
     }
 }
