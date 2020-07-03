@@ -105,7 +105,7 @@ class StateMachineSchemeApi {
        * @param stateMachineId 
        */
   deleteConfig(schemeId: number, stateMachineId: number) {
-    axios({
+    return axios({
       method: 'delete',
       url: `${this.orgPrefix}/state_machine_scheme/delete_config/${schemeId}/${stateMachineId}`,
     });
