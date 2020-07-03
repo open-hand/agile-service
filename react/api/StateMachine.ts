@@ -98,7 +98,7 @@ class StateMachineApi {
   updateNode(stateMachineId:number, nodeId:number, node:any) {
     return axios({
       method: 'put',
-      url: `${this.orgPrefix}/state_machine_node/undefine`,
+      url: `${this.orgPrefix}/state_machine_node/${nodeId}`,
       params: {
         stateMachineId,
       },
