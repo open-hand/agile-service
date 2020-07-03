@@ -100,7 +100,7 @@ const TextEditToggle: React.FC<Props> = ({
     const extraContent = typeof editorExtraContent === 'function' ? editorExtraContent() : editorExtraContent;
     const originProps = editorElement.props;
     const editorProps: any = {
-      defaultValue: initValue,
+      value: initValue,
       onChange: handleChange(originProps.onChange),
       onBlur: handleEditorBlur,
       ref: editorRef,
