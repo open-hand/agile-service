@@ -5,9 +5,9 @@ import styles from './index.less';
 
 const TextAreaWithLengthInfo: React.ForwardRefRenderFunction<TextArea<{}>, TextAreaProps> = (props, ref) => {
   const {
-    onInput, defaultValue, ...restProps
+    onInput, value: propsValue, defaultValue, ...restProps
   } = props;
-  const [value, setValue] = useState(defaultValue || '');
+  const [value, setValue] = useState(propsValue || defaultValue || '');
   const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
     const { value: v } = event.target;
     setValue(v);
@@ -17,7 +17,7 @@ const TextAreaWithLengthInfo: React.ForwardRefRenderFunction<TextArea<{}>, TextA
   };
   return (
     <div>
-      <TextArea ref={ref} defaultValue={defaultValue} onInput={handleInput} {...restProps} />
+      <TextArea ref={ref} defaultValue={propsValue || defaultValue} onInput={handleInput} {...restProps} />
       {props.maxLength && <span className={styles.length_info}>{`${value.length}/${props.maxLength}`}</span>}
     </div>
   );
