@@ -19,10 +19,12 @@ const TypeTag = ({
       name = '使能';
     }
   }
-  
+  if (icon === 'agile-backlog') {
+    icon = 'highlight';
+  }
   return (
     <div className="c7n-typeTag" style={style}>
-      {icon === 'characteristic' ? (
+      {icon === 'characteristic' || icon === 'highlight' ? (
         <Icon
           className="c7n-typeTag-icon-normal"
           style={{
