@@ -160,7 +160,6 @@ public class IssueAssembler extends AbstractAssembler {
      * @return IssueCountVO
      */
     public List<IssueCompletedStatusVO> issueDTOToIssueCountVO(List<IssueOverviewVO> issueList, Set<Long> priority){
-        IssueCountVO issueCount = new IssueCountVO();
         Set<Long> userIdList = new HashSet<>();
         rx.Observable.from(priority)
                 .mergeWith(Observable.from(issueList.stream().map(IssueOverviewVO::getCreatedBy).collect(Collectors.toSet())))
