@@ -626,11 +626,11 @@ public class IssueAssembler extends AbstractAssembler {
         Map<Boolean, List<IssueOverviewVO>> group = issueList.stream()
                 .collect(Collectors.groupingBy(issue -> BooleanUtils.isTrue(issue.getCompleted())));
         sprintStatistics.setTotal(issueList.size());
-        sprintStatistics.setCompletedCount(group.get(Boolean.TRUE).size());
-        sprintStatistics.setUncompletedCount(group.get(Boolean.FALSE).size());
-        sprintStatistics.setTodoCount(Long.valueOf(group.get(Boolean.FALSE).stream()
+        sprintStatistics.setCompletedCount(group.getOrDefault(Boolean.TRUE, Collections.emptyList()).size());
+        sprintStatistics.setUncompletedCount(group.getOrDefault(Boolean.FALSE, Collections.emptyList()).size());
+        sprintStatistics.setTodoCount(Long.valueOf(group.getOrDefault(Boolean.FALSE, Collections.emptyList()).stream()
                 .filter(issue -> Objects.equals(StatusType.TODO, issue.getCategoryCode())).count()).intValue());
-        sprintStatistics.setUnassignCount(Long.valueOf(group.get(Boolean.FALSE).stream()
+        sprintStatistics.setUnassignCount(Long.valueOf(group.getOrDefault(Boolean.FALSE, Collections.emptyList()).stream()
                 .filter(issue -> Objects.isNull(issue.getAssigneeId())).count()).intValue());
         return sprintStatistics;
     }
