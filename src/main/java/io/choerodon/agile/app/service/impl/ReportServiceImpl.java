@@ -1410,10 +1410,10 @@ public class ReportServiceImpl implements ReportService {
 
     private List<ReportIssueConvertDTO> queryBugCount(Long projectId, Long sprintId) {
         List<ReportIssueConvertDTO> reportIssueConvertDTOList = new ArrayList<>();
-        SprintDTO sprintDTO = new SprintDTO();
-        sprintDTO.setSprintId(sprintId);
-        sprintDTO.setProjectId(projectId);
-        sprintMapper.selectOne(sprintDTO);
+        SprintDTO query = new SprintDTO();
+        query.setSprintId(sprintId);
+        query.setProjectId(projectId);
+        SprintDTO sprintDTO = sprintMapper.selectOne(query);
         //获取冲刺开启前的issue
         List<Long> issueIdBeforeSprintList;
         //获取当前冲刺期间加入的issue
