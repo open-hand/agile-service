@@ -35,11 +35,11 @@ public class BaseFieldUtil {
      * @param primaryKey 主键值
      * @param projectId 项目id
      */
-    public static void updateIssueLastUpdateInfo(Long primaryKey, Long projectId){
+    public static IssueDTO updateIssueLastUpdateInfo(Long primaryKey, Long projectId){
         if (Objects.isNull(issueMapper)){
             issueMapper = ApplicationContextHelper.getContext().getBean(IssueMapper.class);
         }
-        updateLastUpdateInfo(issueMapper, IssueDTO.class, primaryKey, null, projectId);
+        return updateLastUpdateInfo(issueMapper, IssueDTO.class, primaryKey, null, projectId);
     }
 
 
@@ -52,7 +52,7 @@ public class BaseFieldUtil {
      * @param projectId 项目id
      * @param <T> 实体类
      */
-    public static <T extends AuditDomain> void updateLastUpdateInfo(BaseMapper<T> mapper,
+    public static <T extends AuditDomain> T updateLastUpdateInfo(BaseMapper<T> mapper,
                                                                     Class<T> clazz,
                                                                     Long primaryKey,
                                                                     Long organizationId,
@@ -84,5 +84,6 @@ public class BaseFieldUtil {
             throw new CommonException(BaseConstants.ErrorCode.DATA_NOT_EXISTS);
         }
         mapper.updateOptional(update);
+        return update;
     }
 }

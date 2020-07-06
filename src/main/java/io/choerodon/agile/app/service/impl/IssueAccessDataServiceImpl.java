@@ -19,7 +19,7 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class IssueAccessDataServiceImpl implements IssueAccessDataService {
 
-    private static final String UPDATE_ERROR = "error.Issue.update";
+    public static final String UPDATE_ERROR = "error.Issue.update";
     private static final String INSERT_ERROR = "error.Issue.create";
     private static final String DELETE_ERROR = "error.Issue.delete";
 
