@@ -15,10 +15,10 @@ class IssueTypeApi {
    * 加载全部问题类型（带关联的状态机id)
    * @param applyType 
    */
-  loadAllWithStateMachineId(applyType: string = 'agile') {
+  loadAllWithStateMachineId(applyType: string = 'agile', projectId?: number) {
     return axios({
       method: 'get',
-      url: `${this.prefix}/schemes/query_issue_types_with_sm_id`,
+      url: `/agile/v1/projects/${projectId || getProjectId()}/schemes/query_issue_types_with_sm_id`,
       params: {
         apply_type: applyType,
       },
