@@ -1422,11 +1422,11 @@ public class ReportServiceImpl implements ReportService {
         List<Long> issueIdRemoveList;
         //异步任务
         CompletableFuture<List<Long>> task1 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO), pool);
+                .supplyAsync(() -> reportMapper.queryBugIdsBeforeSprintStart(sprintDTO), pool);
         CompletableFuture<List<Long>> task2 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO), pool);
+                .supplyAsync(() -> reportMapper.queryAddBugIdsDuringSprint(sprintDTO), pool);
         CompletableFuture<List<Long>> task3 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO), pool);
+                .supplyAsync(() -> reportMapper.queryRemoveBugIdsDuringSprint(sprintDTO), pool);
         issueIdBeforeSprintList = task1.join();
         issueIdAddList = task2.join();
         issueIdRemoveList = task3.join();
