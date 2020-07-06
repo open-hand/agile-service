@@ -45,11 +45,11 @@ class FieldApi {
  * 加载字段配置
  * @returns {V|*}
  */
-  getFields(dto: IFiled) {
+  getFields(dto: IFiled, projectId?:number) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'post',
-      url: `${this.prefix}/field_value/list`,
+      url: `/agile/v1/projects/${projectId || getProjectId()}/field_value/list`,
       params: {
         organizationId,
       },
