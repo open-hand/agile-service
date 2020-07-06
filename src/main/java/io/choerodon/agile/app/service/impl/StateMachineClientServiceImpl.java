@@ -14,6 +14,7 @@ import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.agile.infra.mapper.RankMapper;
+import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.RankUtil;
@@ -153,6 +154,9 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         issueConvertDTO.setApplyType(applyType);
         issueService.handleInitIssue(issueConvertDTO, initStatusId, projectInfo);
         Long issueId = issueAccessDataService.create(issueConvertDTO).getIssueId();
+        if (Objects.nonNull(issueConvertDTO.getRelateIssueId()) && Objects.equals(issueConvertDTO.getRelateIssueId(), 0L)){
+            BaseFieldUtil.updateIssueLastUpdateInfo(issueConvertDTO.getRelateIssueId(), issueConvertDTO.getProjectId());
+        }
         // 创建史诗，初始化排序
         if ("issue_epic".equals(issueCreateVO.getTypeCode())) {
             initRank(issueCreateVO, issueId, "epic");

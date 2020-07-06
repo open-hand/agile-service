@@ -8,6 +8,7 @@ import io.choerodon.agile.app.assembler.IssueLinkAssembler;
 import io.choerodon.agile.app.service.IssueLinkService;
 import io.choerodon.agile.infra.dto.IssueLinkDTO;
 import io.choerodon.agile.infra.mapper.IssueLinkMapper;
+import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -45,6 +46,8 @@ public class IssueLinkServiceImpl implements IssueLinkService {
             issueLinkValidator.verifyCreateData(issueLinkDTO);
             if (issueLinkValidator.checkUniqueLink(issueLinkDTO)) {
                 create(issueLinkDTO);
+                BaseFieldUtil.updateIssueLastUpdateInfo(issueLinkDTO.getIssueId(), issueLinkDTO.getProjectId());
+                BaseFieldUtil.updateIssueLastUpdateInfo(issueLinkDTO.getLinkedIssueId(), issueLinkDTO.getProjectId());
             }
         });
         return listIssueLinkByIssueId(issueId, projectId, false);
@@ -53,6 +56,9 @@ public class IssueLinkServiceImpl implements IssueLinkService {
 
     @Override
     public void deleteIssueLink(Long issueLinkId) {
+        IssueLinkDTO issueLinkDTO = issueLinkMapper.selectByPrimaryKey(issueLinkId);
+        BaseFieldUtil.updateIssueLastUpdateInfo(issueLinkDTO.getIssueId(), issueLinkDTO.getProjectId());
+        BaseFieldUtil.updateIssueLastUpdateInfo(issueLinkDTO.getLinkedIssueId(), issueLinkDTO.getProjectId());
         delete(issueLinkId);
     }
 

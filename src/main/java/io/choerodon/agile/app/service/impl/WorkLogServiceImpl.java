@@ -12,6 +12,7 @@ import io.choerodon.agile.infra.dto.IssueDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.WorkLogMapper;
+import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -153,6 +154,7 @@ public class WorkLogServiceImpl implements WorkLogService {
         if (workLogMapper.updateByPrimaryKeySelective(workLogDTO) != 1) {
             throw new CommonException("error.workLog.update");
         }
+        BaseFieldUtil.updateIssueLastUpdateInfo(workLogDTO.getIssueId(), workLogDTO.getProjectId());
         return workLogMapper.selectByPrimaryKey(workLogDTO.getLogId());
     }
 

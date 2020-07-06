@@ -591,6 +591,12 @@ public class IssueServiceImpl implements IssueService {
                 issueConvertDTO.setOriginSprintId(originIssue.getSprintId());
             }
         }
+        IssueDTO issueDTO = issueMapper.selectOne(modelMapper.map(issueConvertDTO, IssueDTO.class));
+        if (Objects.isNull(issueDTO)){
+            throw new CommonException(IssueAccessDataServiceImpl.UPDATE_ERROR);
+        }
+        issueConvertDTO.setObjectVersionNumber(BaseFieldUtil
+                .updateIssueLastUpdateInfo(issueDTO.getRelateIssueId(), projectId).getObjectVersionNumber());
         issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
     }
 
@@ -1004,6 +1010,7 @@ public class IssueServiceImpl implements IssueService {
                 issueLinkValidator.verifyCreateData(issueLinkDTO);
                 if (issueLinkValidator.checkUniqueLink(issueLinkDTO)) {
                     issueLinkService.create(issueLinkDTO);
+                    BaseFieldUtil.updateIssueLastUpdateInfo(issueLinkDTO.getLinkedIssueId(), issueLinkDTO.getProjectId());
                 }
             });
         }
