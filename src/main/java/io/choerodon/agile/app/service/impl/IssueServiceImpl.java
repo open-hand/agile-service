@@ -1004,6 +1004,7 @@ public class IssueServiceImpl implements IssueService {
                 issueLinkValidator.verifyCreateData(issueLinkDTO);
                 if (issueLinkValidator.checkUniqueLink(issueLinkDTO)) {
                     issueLinkService.create(issueLinkDTO);
+                    BaseFieldUtil.updateIssueLastUpdateInfo(issueLinkDTO.getLinkedIssueId(), issueLinkDTO.getProjectId());
                 }
             });
         }

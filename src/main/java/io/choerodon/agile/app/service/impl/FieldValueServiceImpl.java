@@ -128,7 +128,7 @@ public class FieldValueServiceImpl implements FieldValueService {
         //处理字段日志
         FieldValueUtil.handleDataLog(organizationId, projectId, instanceId, fieldId, updateDTO.getFieldType(), schemeCode, oldFieldValues, newFieldValues);
         // 更新issue更新时间
-        BaseFieldUtil.updateIssueLastUpdateInfo(issueMapper, instanceId, projectId);
+        BaseFieldUtil.updateIssueLastUpdateInfo(instanceId, projectId);
         return modelMapper.map(fieldValueMapper.queryList(projectId, instanceId, schemeCode, fieldId), new TypeToken<List<FieldValueVO>>() {
         }.getType());
     }

@@ -8,6 +8,7 @@ import io.choerodon.agile.app.service.WikiRelationService;
 import io.choerodon.agile.infra.dto.WikiRelationDTO;
 import io.choerodon.agile.infra.feign.KnowledgebaseClient;
 import io.choerodon.agile.infra.mapper.WikiRelationMapper;
+import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -61,6 +62,7 @@ public class WikiRelationServiceImpl implements WikiRelationService {
             for (WikiRelationDTO wikiRelationDTO : wikiRelationDTOList) {
                 if (!checkRepeat(wikiRelationDTO)) {
                     iWikiRelationService.createBase(wikiRelationDTO);
+                    BaseFieldUtil.updateIssueLastUpdateInfo(wikiRelationDTO.getIssueId(), wikiRelationDTO.getProjectId());
                 }
             }
         }
@@ -103,5 +105,6 @@ public class WikiRelationServiceImpl implements WikiRelationService {
         wikiRelationDTO.setProjectId(projectId);
         wikiRelationDTO.setId(id);
         iWikiRelationService.deleteBase(wikiRelationDTO);
+        BaseFieldUtil.updateIssueLastUpdateInfo(wikiRelationDTO.getIssueId(), projectId);
     }
 }

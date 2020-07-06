@@ -6,6 +6,8 @@ import java.util.Objects;
 import javax.persistence.Id;
 
 import io.choerodon.agile.infra.dto.IssueDTO;
+import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.common.BaseMapper;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -26,14 +28,18 @@ public class BaseFieldUtil {
     protected static String FIELD_ORGANIZATION_ID = "organizationId";
     protected static String FIELD_PROJECT_ID = "projectId";
 
+    private static IssueMapper issueMapper;
+
     /**
      * 更新issue的最后更新时间，最后更新人
-     * @param mapper {@link BaseMapper<IssueDTO>}
      * @param primaryKey 主键值
      * @param projectId 项目id
      */
-    public static void updateIssueLastUpdateInfo(BaseMapper<IssueDTO> mapper, Long primaryKey, Long projectId){
-        updateLastUpdateInfo(mapper, IssueDTO.class, primaryKey, null, projectId);
+    public static void updateIssueLastUpdateInfo(Long primaryKey, Long projectId){
+        if (Objects.isNull(issueMapper)){
+            issueMapper = ApplicationContextHelper.getContext().getBean(IssueMapper.class);
+        }
+        updateLastUpdateInfo(issueMapper, IssueDTO.class, primaryKey, null, projectId);
     }
 
 
