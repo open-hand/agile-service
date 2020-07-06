@@ -30,12 +30,10 @@ public class BaseFieldUtil {
      * 更新issue的最后更新时间，最后更新人
      * @param mapper {@link BaseMapper<IssueDTO>}
      * @param primaryKey 主键值
-     * @param organizationId 组织id
      * @param projectId 项目id
      */
-    public static void updateIssueLastUpdateInfo(BaseMapper<IssueDTO> mapper, Long primaryKey,
-                                                 Long organizationId, Long projectId){
-        updateLastUpdateInfo(mapper, IssueDTO.class, primaryKey, organizationId, projectId);
+    public static void updateIssueLastUpdateInfo(BaseMapper<IssueDTO> mapper, Long primaryKey, Long projectId){
+        updateLastUpdateInfo(mapper, IssueDTO.class, primaryKey, null, projectId);
     }
 
 
@@ -56,31 +54,29 @@ public class BaseFieldUtil {
         Assert.notNull(primaryKey, BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(Objects.nonNull(organizationId) || Objects.nonNull(projectId),
                 BaseConstants.ErrorCode.DATA_INVALID);
-
         Field[] fields = FieldUtils.getFieldsWithAnnotation(clazz, Id.class);
         if (fields.length != 1){
-            throw new CommonException("主键注解字段有误，请检查");
+            throw new CommonException(BaseConstants.ErrorCode.ERROR);
         }
-        Field orgField = FieldUtils.getField(clazz, FIELD_ORGANIZATION_ID);
-        Field projectField = FieldUtils.getField(clazz, FIELD_PROJECT_ID);
         T t;
         try {
             t = clazz.newInstance();
             FieldUtils.writeField(t, fields[0].getName(), primaryKey, true);
             if(Objects.nonNull(organizationId)){
-                FieldUtils.writeField(t, orgField.getName(), organizationId, true);
+                FieldUtils.writeField(t, FIELD_ORGANIZATION_ID, organizationId, true);
             }
             if (Objects.nonNull(projectId)){
-                FieldUtils.writeField(t, projectField.getName(), projectId, true);
+                FieldUtils.writeField(t, FIELD_PROJECT_ID, projectId, true);
             }
         } catch (InstantiationException | IllegalAccessException e) {
             LOGGER.error("无法实例化对象，请检查, e.message: [{}], e.trace: [{}]", e.getMessage(), e.getStackTrace());
-            throw new CommonException("无法实例化对象，请检查");
+            throw new CommonException(BaseConstants.ErrorCode.ERROR);
         }
-        int count = mapper.updateOptional(t);
-        if (count != 1){
-            LOGGER.error("更新数据库失败,请检查。实体对象: [{}]数据影响条数: [{}]", t, count);
-            throw new CommonException("更新数据库失败,请检查。");
+        T update = mapper.selectOne(t);
+        if (Objects.isNull(update)){
+            LOGGER.error("数据不存在,请检查。实体对象: [{}] ", t);
+            throw new CommonException(BaseConstants.ErrorCode.DATA_NOT_EXISTS);
         }
+        mapper.updateOptional(update);
     }
 }
