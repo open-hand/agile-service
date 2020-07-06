@@ -662,7 +662,7 @@ public class IssueAssembler extends AbstractAssembler {
         // 每日每人工时
         Map<Date, Map<Long, List<WorkLogDTO>>> dateOneWorkMap = groupByList(workLogList,
                 WorkLogDTO::getStartDate, WorkLogDTO::getCreatedBy,
-                issue -> issue.setCreationDate(DateUtils.truncate(issue.getCreationDate(),
+                issue -> issue.setStartDate(DateUtils.truncate(issue.getStartDate(),
                                 Calendar.DAY_OF_MONTH)));
         // 计算任务，故事，解决bug
         Map<Date, List<DataLogDTO>> creationMap = getcreationMap(dataLogList);
