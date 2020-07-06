@@ -32,10 +32,6 @@ public class SprintDTO extends AuditDomain {
     @NotNull
     private Long projectId;
 
-    public Date getRealEndDate(){
-        return Objects.isNull(this.actualEndDate) ? this.endDate : this.actualEndDate;
-    }
-
     public Long getSprintId() {
         return sprintId;
     }

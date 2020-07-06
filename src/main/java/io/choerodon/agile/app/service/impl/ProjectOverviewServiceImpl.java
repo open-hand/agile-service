@@ -54,8 +54,6 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
     @SuppressWarnings("unchecked")
     public UncompletedCountVO selectUncompletedBySprint(Long projectId, Long sprintId) {
         UncompletedCountVO uncompletedCount = new UncompletedCountVO();
-        DateFormat df = new SimpleDateFormat(BaseConstants.Pattern.DATETIME);
-        DateTimeFormatter ldf = DateTimeFormatter.ofPattern(BaseConstants.Pattern.DATETIME);
         JSONObject jObject;
         jObject = reportService.queryBurnDownCoordinate(projectId, sprintId, ReportServiceImpl.STORY_POINTS);
         uncompletedCount.setStoryPoints(Optional.ofNullable(jObject.get(ReportServiceImpl.COORDINATE))
@@ -108,12 +106,15 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
     @Override
     public List<OneJobVO> selectOneJobsBysprint(Long projectId, Long sprintId) {
         SprintDTO sprint = safeSelectSprint(projectId,sprintId);
+        if (Objects.isNull(sprint.getActualEndDate())){
+            sprint.setActualEndDate(new Date());
+        }
         List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId);
         List<WorkLogDTO> workLogList = workLogMapper.selectWorkTimeBySpring(projectId, sprintId,
-                sprint.getStartDate(), sprint.getRealEndDate());
+                sprint.getStartDate(), sprint.getActualEndDate());
         List<DataLogDTO> dataLogList = dataLogMapper.selectResolutionIssueBySprint(projectId,
                 issueList.stream().map(IssueOverviewVO::getIssueId).collect(Collectors.toSet()),
-                sprint.getStartDate(), sprint.getRealEndDate());
+                sprint.getStartDate(), sprint.getActualEndDate());
 
         return issueAssembler.issueToOneJob(issueList, workLogList, dataLogList);
     }
