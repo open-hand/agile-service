@@ -146,6 +146,12 @@ function BatchModal({
   const [fields, Field] = useFields();
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const userFields = fieldData.filter(field => field.fieldType === 'member').map(field => ({
+    name: field.code,
+    type: 'number',
+    textField: 'realName',
+    valueField: 'id',
+  }));
   const dataSet = useMemo(() => new DataSet({
     fields: [{
       name: 'statusId',
@@ -261,7 +267,7 @@ function BatchModal({
       }),
       valueField: 'versionId',
       textField: 'name',
-    }],
+    }, ...userFields],
   }), []);
   const getData = () => {
     const temp = dataSet.current ? dataSet.current.toData() : {};
