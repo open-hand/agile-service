@@ -85,11 +85,11 @@ class FieldApi {
    * @param dto 自定义字段列表
    * @returns {V|*}
    */
-  createFieldValue(issueId: number, schemeCode: string, dto?: Array<any>) {
+  createFieldValue(issueId: number, schemeCode: string, dto?: Array<any>, projectId?:number) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'post',
-      url: `${this.prefix}/field_value/${issueId}`,
+      url: `/agile/v1/projects/${projectId || getProjectId()}/field_value/${issueId}`,
       params: {
         organizationId,
         schemeCode,
