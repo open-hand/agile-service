@@ -1390,7 +1390,7 @@ public class ReportServiceImpl implements ReportService {
         // 新增bug统计
         issueCount.setCreatedList(issueAssembler.convertBugEntry(reportIssueConvertDTOList, bf,
                 bug -> bug.getStatistical() && StringUtils.equalsAny(bug.getType(),
-                "startSprint", "endSprint", "addDuringSprint", "removeDoneDuringSprint")));
+                "startSprint", "endSprint", "addDuringSprint")));
         // 解决bug统计
         issueCount.setCompletedList(issueAssembler.convertBugEntry(reportIssueConvertDTOList, bf, bug -> {
             if (Objects.equals(bug.getType(), "startSprint") && !bug.getStatistical()) {
@@ -1414,6 +1414,9 @@ public class ReportServiceImpl implements ReportService {
         query.setSprintId(sprintId);
         query.setProjectId(projectId);
         SprintDTO sprintDTO = sprintMapper.selectOne(query);
+        if (Objects.isNull(sprintDTO.getActualEndDate())){
+            sprintDTO.setActualEndDate(new Date());
+        }
         //获取冲刺开启前的issue
         List<Long> issueIdBeforeSprintList;
         //获取当前冲刺期间加入的issue
