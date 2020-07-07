@@ -43,7 +43,7 @@ public class IssueAccessDataServiceImpl implements IssueAccessDataService {
         if (issueMapper.updateOptional(issueDTO, fieldList) != 1) {
             throw new CommonException(UPDATE_ERROR);
         }
-        if (!Objects.equals(issueInDB.getRelateIssueId(), 0L)){
+        if (Objects.nonNull(issueInDB.getRelateIssueId()) && !Objects.equals(issueInDB.getRelateIssueId(), 0L)){
             BaseFieldUtil.updateIssueLastUpdateInfo(issueInDB.getRelateIssueId(), issueInDB.getProjectId());
         }
         return modelMapper.map(issueMapper.selectByPrimaryKey(issueDTO.getIssueId()), IssueConvertDTO.class);
