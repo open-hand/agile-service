@@ -91,8 +91,10 @@ public class IssueLinkServiceImpl implements IssueLinkService {
     public int deleteByIssueId(Long issueId) {
         // 更新关联的issue的最后更新时间，更新人
         List<IssueLinkDTO> issueLinkList = issueLinkMapper.selectByCondition(Condition.builder(IssueLinkDTO.class)
-                .andWhere(Sqls.custom().orEqualTo(IssueLinkDTO.FIELD_ISSUE_ID, issueId)
-                        .orEqualTo(IssueLinkDTO.FIELD_LINKED_ISSUE_ID, issueId)).build());
+                .orWhere(Sqls.custom().andEqualTo(IssueLinkDTO.FIELD_ISSUE_ID, issueId)
+                        .andNotEqualTo(IssueLinkDTO.FIELD_ISSUE_ID, 0L))
+                .orWhere(Sqls.custom().andEqualTo(IssueLinkDTO.FIELD_LINKED_ISSUE_ID, issueId)
+                        .andNotEqualTo(IssueLinkDTO.FIELD_LINKED_ISSUE_ID, 0L)).build());
         issueLinkList.forEach(link -> BaseFieldUtil.updateIssueLastUpdateInfo(link.getIssueId(), link.getProjectId()));
         issueLinkList.forEach(link -> BaseFieldUtil.updateIssueLastUpdateInfo(link.getLinkedIssueId(), link.getProjectId()));
         return issueLinkMapper.deleteByIssueId(issueId);
