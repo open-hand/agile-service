@@ -23,7 +23,7 @@ import CreateBranch from '../../../CreateBranch';
 import DailyLog from '../../../DailyLog';
 import IssueWSJF from './IssueWSJF';
 import EditIssueContext from '../../stores';
-
+import { InjectedComponent } from '../../injectComponent';
 import './IssueBody.less';
 
 const { TabPane } = Tabs;
@@ -100,6 +100,7 @@ function IssueBody(props) {
             ? <IssueLink {...props} /> : ''
           }
           {store.testExecutes.length > 0 ? <IssueTestExecute {...props} /> : null}
+          <InjectedComponent.Backlog {...props} />
         </TabPane>
         {
           !disabled && issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
