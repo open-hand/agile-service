@@ -105,6 +105,7 @@ public class WorkLogServiceImpl implements WorkLogService {
                     break;
             }
         }
+        BaseFieldUtil.updateIssueLastUpdateInfo(workLogVO.getIssueId(), projectId);
         WorkLogDTO res = iWorkLogService.createBase(modelMapper.map(workLogVO, WorkLogDTO.class));
         return queryWorkLogById(res.getProjectId(), res.getLogId());
     }
@@ -114,6 +115,7 @@ public class WorkLogServiceImpl implements WorkLogService {
         WorkLogValidator.checkUpdateWorkLog(workLogVO);
         workLogVO.setProjectId(projectId);
         WorkLogDTO res = updateBase(modelMapper.map(workLogVO, WorkLogDTO.class));
+        BaseFieldUtil.updateIssueLastUpdateInfo(res.getIssueId(), res.getProjectId());
         return queryWorkLogById(res.getProjectId(), res.getLogId());
     }
 
@@ -154,7 +156,6 @@ public class WorkLogServiceImpl implements WorkLogService {
         if (workLogMapper.updateByPrimaryKeySelective(workLogDTO) != 1) {
             throw new CommonException("error.workLog.update");
         }
-        BaseFieldUtil.updateIssueLastUpdateInfo(workLogDTO.getIssueId(), workLogDTO.getProjectId());
         return workLogMapper.selectByPrimaryKey(workLogDTO.getLogId());
     }
 
