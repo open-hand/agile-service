@@ -20,7 +20,6 @@ import io.choerodon.agile.infra.enums.InitIssueType;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.DateUtil;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.hzero.core.base.BaseConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,8 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class ProjectOverviewServiceImpl implements ProjectOverviewService {
-    @Autowired
-    private UserService userService;
     @Autowired
     private ReportService reportService;
     @Autowired

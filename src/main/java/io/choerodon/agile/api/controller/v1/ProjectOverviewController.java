@@ -26,7 +26,7 @@ public class ProjectOverviewController {
     @Autowired
     private ReportService reportService;
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询冲刺未完成情况")
     @GetMapping("/{sprintId}/uncompleted")
     public ResponseEntity<UncompletedCountVO> selectUncompletedBySprint(@ApiParam(value = "项目id", required = true)
@@ -36,7 +36,7 @@ public class ProjectOverviewController {
         return Results.success(projectOverviewService.selectUncompletedBySprint(projectId, sprintId));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查看缺陷提出与解决情况")
     @GetMapping("/{sprintId}/issue")
     public ResponseEntity<List<IssueCompletedStatusVO>> selectIssueCountBysprint(@ApiParam(value = "项目id", required = true)
@@ -47,7 +47,7 @@ public class ProjectOverviewController {
     }
 
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查看迭代统计")
     @GetMapping("/{sprintId}/sprint_statistics")
     public ResponseEntity<SprintStatisticsVO> selectSprintStatistics(@ApiParam(value = "项目id", required = true)
@@ -57,7 +57,7 @@ public class ProjectOverviewController {
         return Results.success(projectOverviewService.selectSprintStatistics(projectId, sprintId));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查看缺陷累计趋势")
     @GetMapping("/{sprintId}/issue_count")
     public ResponseEntity<IssueCountVO> selectBugBysprint(@ApiParam(value = "项目id", required = true)
@@ -67,7 +67,7 @@ public class ProjectOverviewController {
         return Results.success(reportService.selectBugBysprint(projectId, sprintId));
     }
 
-    @Permission(level = ResourceLevel.PROJECT)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查看每人每日工作量")
     @GetMapping("/{sprintId}/one_jobs")
     public ResponseEntity<List<OneJobVO>> selectOneJobsBysprint(@ApiParam(value = "项目id", required = true)
