@@ -41,6 +41,7 @@ public class IIssueCommentServiceImpl implements IIssueCommentService {
         if (issueCommentMapper.updateOptional(issueCommentDTO, fieldList) != 1) {
             throw new CommonException(UPDATE_ERROR);
         }
+        issueCommentDTO = issueCommentMapper.selectByPrimaryKey(issueCommentDTO.getCommentId());
         BaseFieldUtil.updateIssueLastUpdateInfo(issueCommentDTO.getIssueId(), issueCommentDTO.getProjectId());
         return modelMapper.map(issueCommentMapper.selectByPrimaryKey(issueCommentDTO.getCommentId()), IssueCommentDTO.class);
     }
