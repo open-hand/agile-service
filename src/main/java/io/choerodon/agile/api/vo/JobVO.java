@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -16,8 +17,8 @@ public class JobVO {
         this.bugFixCount = jobList.stream().map(JobVO::getBugFixCount).reduce(BaseConstants.Digital.ZERO, Integer::sum);
         this.taskCount = jobList.stream().map(JobVO::getTaskCount).reduce(BaseConstants.Digital.ZERO, Integer::sum);
         this.storyCount = jobList.stream().map(JobVO::getStoryCount).reduce(BaseConstants.Digital.ZERO, Integer::sum);
-        this.storyPointCount = jobList.stream().map(JobVO::getStoryPointCount).reduce(BaseConstants.Digital.ZERO, Integer::sum);
-        this.workTime = jobList.stream().map(JobVO::getWorkTime).reduce(BaseConstants.Digital.ZERO, Integer::sum);
+        this.storyPointCount = jobList.stream().map(JobVO::getStoryPointCount).reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
+        this.workTime = jobList.stream().map(JobVO::getWorkTime).reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
     }
 
     public JobVO() {
@@ -26,10 +27,10 @@ public class JobVO {
     private String worker;
     private Integer taskCount;
     private Integer storyCount;
-    private Integer storyPointCount;
+    private BigDecimal storyPointCount;
     private Integer bugCreatedCount;
     private Integer bugFixCount;
-    private Integer workTime;
+    private BigDecimal workTime;
 
     public String getWorker() {
         return worker;
@@ -55,14 +56,6 @@ public class JobVO {
         this.storyCount = storyCount;
     }
 
-    public Integer getStoryPointCount() {
-        return storyPointCount;
-    }
-
-    public void setStoryPointCount(Integer storyPointCount) {
-        this.storyPointCount = storyPointCount;
-    }
-
     public Integer getBugCreatedCount() {
         return bugCreatedCount;
     }
@@ -79,11 +72,19 @@ public class JobVO {
         this.bugFixCount = bugFixCount;
     }
 
-    public Integer getWorkTime() {
+    public BigDecimal getStoryPointCount() {
+        return storyPointCount;
+    }
+
+    public void setStoryPointCount(BigDecimal storyPointCount) {
+        this.storyPointCount = storyPointCount;
+    }
+
+    public BigDecimal getWorkTime() {
         return workTime;
     }
 
-    public void setWorkTime(Integer workTime) {
+    public void setWorkTime(BigDecimal workTime) {
         this.workTime = workTime;
     }
 }

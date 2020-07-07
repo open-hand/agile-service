@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import rx.Observable;
 
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -650,6 +651,8 @@ public class IssueAssembler extends AbstractAssembler {
         userIdList.addAll(workLogList.stream().map(WorkLogDTO::getCreatedBy).collect(Collectors.toList()));
         userIdList.addAll(dataLogList.stream().map(DataLogDTO::getCreatedBy).collect(Collectors.toList()));
         DateFormat df = new SimpleDateFormat(BaseConstants.Pattern.DATE);
+        // 生成基准时间-用户轴
+        Map<Date, Set<Long>> timeUserLine = generateTimeUserLine(issueList, workLogList, dataLogList);
         Map<Long, UserMessageDTO> userMessageDOMap = userService.queryUsersMap(userIdList, true);
         // issue类型map
         Map<Long, IssueOverviewVO> issueTypeMap = issueList.stream().collect(Collectors.toMap(IssueOverviewVO::getIssueId,
@@ -666,8 +669,8 @@ public class IssueAssembler extends AbstractAssembler {
                                 Calendar.DAY_OF_MONTH)));
         // 计算任务，故事，解决bug
         Map<Date, List<DataLogDTO>> creationMap = getcreationMap(dataLogList);
-        Map<Date, OneJobVO> oneJobMap = creationMap.entrySet().stream().map(entry -> new ImmutablePair<>(entry.getKey()
-                , dataLogListToOneJob(entry.getKey(), entry.getValue(), issueTypeMap, dateOneBugMap, dateOneWorkMap, userMessageDOMap)))
+        Map<Date, OneJobVO> oneJobMap = timeUserLine.entrySet().stream().map(entry -> new ImmutablePair<>(entry.getKey()
+                , dataLogListToOneJob(entry.getKey(), entry.getValue(), creationMap, issueTypeMap, dateOneBugMap, dateOneWorkMap, userMessageDOMap)))
                 .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
         return oneJobMap.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(entry -> {
             List<JobVO> jobList = entry.getValue().getJobList();
@@ -675,6 +678,49 @@ public class IssueAssembler extends AbstractAssembler {
             entry.getValue().setWorkDate(df.format(entry.getValue().getWorkDateSource()));
             return entry.getValue();
         }).collect(Collectors.toList());
+    }
+
+    /**
+     * 生成基准轴
+     * @param issueList issueList
+     * @param workLogList workLogList
+     * @param dataLogList dataLogList
+     * @return 基准轴map
+     */
+    private Map<Date, Set<Long>> generateTimeUserLine(List<IssueOverviewVO> issueList, List<WorkLogDTO> workLogList, List<DataLogDTO> dataLogList) {
+        Map<Date, Set<Long>> timeUserLine = new HashMap<>();
+        convertTimeUserMap(issueList, timeUserLine, issue ->
+                        issue.setCreationDate(DateUtils.truncate(issue.getCreationDate(),Calendar.DAY_OF_MONTH)),
+                IssueOverviewVO::getCreationDate, IssueOverviewVO::getCreatedBy);
+        convertTimeUserMap(dataLogList, timeUserLine, issue ->
+                        issue.setCreationDate(DateUtils.truncate(issue.getCreationDate(),Calendar.DAY_OF_MONTH)),
+                 DataLogDTO::getCreationDate, DataLogDTO::getCreatedBy);
+        convertTimeUserMap(workLogList, timeUserLine, issue ->
+                issue.setStartDate(DateUtils.truncate(issue.getStartDate(),Calendar.DAY_OF_MONTH)),
+                WorkLogDTO::getStartDate, WorkLogDTO::getCreatedBy);
+        return timeUserLine;
+    }
+
+    /**
+     * 将list转换为时间-用户map
+     * @param list list
+     * @param dateFunc 时间转换函数
+     * @param userFunc 用户转换函数
+     * @param <T> 待转换类型
+     * @return Map
+     */
+    private <T> void convertTimeUserMap(List<T> list, Map<Date, Set<Long>> timeUserLine, Consumer<? super T> action,
+                                        Function<T, Date> dateFunc, Function<T, Long> userFunc){
+        Map<Date, Set<Long>> createdLog = list.stream().peek(action).collect(Collectors.groupingBy(dateFunc))
+                .entrySet().stream().map(entry -> new ImmutablePair<>(entry.getKey(),
+                        entry.getValue().stream().map(userFunc).collect(Collectors.toSet())))
+                .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
+        Set<Long> temp;
+        for (Map.Entry<Date, Set<Long>> entry : createdLog.entrySet()) {
+            temp = timeUserLine.getOrDefault(entry.getKey(), new HashSet<>());
+            temp.addAll(entry.getValue());
+            timeUserLine.put(entry.getKey(), temp);
+        }
     }
 
     private Map<Date, List<DataLogDTO>> getcreationMap(List<DataLogDTO> dataLogList) {
@@ -703,26 +749,32 @@ public class IssueAssembler extends AbstractAssembler {
                 .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
     }
 
-    private OneJobVO dataLogListToOneJob(Date workDate, List<DataLogDTO> list, Map<Long, IssueOverviewVO> issueTypeMap,
+    private OneJobVO dataLogListToOneJob(Date workDate, Set<Long> userSet, Map<Date, List<DataLogDTO>> creationMap,
+                                         Map<Long, IssueOverviewVO> issueTypeMap,
                                          Map<Date, Map<Long, List<IssueOverviewVO>>> dateOneBugMap,
                                          Map<Date, Map<Long, List<WorkLogDTO>>> dateOneWorkMap,
                                          Map<Long, UserMessageDTO> userMessageDOMap){
-        Map<Long, List<DataLogDTO>> workerGroup = list.stream().collect(Collectors.groupingBy(DataLogDTO::getCreatedBy));
-        List<JobVO> jobList = new ArrayList<>(workerGroup.size());
-        for (Map.Entry<Long, List<DataLogDTO>> entry : workerGroup.entrySet()) {
+        // 根据日期取日志集合然后按照创建人分组
+        Map<Long, List<DataLogDTO>> creationGroup = creationMap.getOrDefault(workDate, Collections.emptyList())
+                .stream().collect(Collectors.groupingBy(DataLogDTO::getCreatedBy));
+        List<JobVO> jobList = new ArrayList<>(creationGroup.size());
+        for (Long userId : userSet) {
+            // 取当前用户对应的解决issue集合，将集合按照issueType分组
             Map<String, List<DataLogDTO>> typeMap =
-                    entry.getValue().stream().collect(Collectors.groupingBy(log -> issueTypeMap.get(log.getIssueId()).getTypeCode()));
+                    creationGroup.getOrDefault(userId, Collections.emptyList())
+                            .stream().collect(Collectors.groupingBy(log -> issueTypeMap.get(log.getIssueId()).getTypeCode()));
             JobVO job = new JobVO();
-            job.setWorker(userMessageDOMap.get(entry.getKey()).getRealName());
+            job.setWorker(userMessageDOMap.get(userId).getRealName());
             job.setTaskCount(typeMap.getOrDefault(IssueTypeCode.TASK.value(), Collections.emptyList()).size()
                     + typeMap.getOrDefault(IssueTypeCode.SUB_TASK.value(), Collections.emptyList()).size());
             job.setStoryCount(typeMap.getOrDefault(IssueTypeCode.STORY.value(), Collections.emptyList()).size());
             job.setStoryPointCount(typeMap.getOrDefault(IssueTypeCode.STORY.value(), Collections.emptyList())
                     .stream().map(points -> issueTypeMap.get(points.getIssueId()).getStoryPoints())
-                    .reduce(BaseConstants.Digital.ZERO, Integer::sum));
+                    .reduce(BigDecimal::add).orElse(BigDecimal.ZERO));
             job.setBugFixCount(typeMap.getOrDefault(IssueTypeCode.BUG.value(), Collections.emptyList()).size());
-            job.setBugCreatedCount(dateOneBugMap.getOrDefault(workDate, Collections.emptyMap()).getOrDefault(entry.getKey(), Collections.emptyList()).size());
-            job.setWorkTime(dateOneWorkMap.getOrDefault(workDate, Collections.emptyMap()).getOrDefault(entry.getKey(), Collections.emptyList()).size());
+            job.setBugCreatedCount(dateOneBugMap.getOrDefault(workDate, Collections.emptyMap()).getOrDefault(userId, Collections.emptyList()).size());
+            job.setWorkTime(dateOneWorkMap.getOrDefault(workDate, Collections.emptyMap()).getOrDefault(userId, Collections.emptyList())
+                    .stream().map(WorkLogDTO::getWorkTime).reduce(BigDecimal::add).orElse(BigDecimal.ZERO));
             jobList.add(job);
         }
         OneJobVO oneJob = new OneJobVO();

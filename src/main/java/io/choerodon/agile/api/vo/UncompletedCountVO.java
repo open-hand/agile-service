@@ -2,14 +2,17 @@ package io.choerodon.agile.api.vo;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * @author jiaxu.cui@hand-china.com 2020/6/30 下午1:46
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UncompletedCountVO {
 
     private BigDecimal storyPoints;
     private BigDecimal remainingEstimatedTime;
-    private BigDecimal issueCount;
+    private Integer issueCount;
     private Integer remainingDays;
     private Integer totalDays;
 
@@ -29,11 +32,11 @@ public class UncompletedCountVO {
         this.remainingEstimatedTime = remainingEstimatedTime;
     }
 
-    public BigDecimal getIssueCount() {
+    public Integer getIssueCount() {
         return issueCount;
     }
 
-    public void setIssueCount(BigDecimal issueCount) {
+    public void setIssueCount(Integer issueCount) {
         this.issueCount = issueCount;
     }
 
