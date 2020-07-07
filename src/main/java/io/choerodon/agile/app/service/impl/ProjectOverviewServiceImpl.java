@@ -1,18 +1,13 @@
 package io.choerodon.agile.app.service.impl;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.IssueAssembler;
 import io.choerodon.agile.app.service.ProjectOverviewService;
 import io.choerodon.agile.app.service.ReportService;
-import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.DataLogDTO;
 import io.choerodon.agile.infra.dto.SprintDTO;
 import io.choerodon.agile.infra.dto.WorkLogDTO;
@@ -20,6 +15,8 @@ import io.choerodon.agile.infra.enums.InitIssueType;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.DateUtil;
 import io.choerodon.core.oauth.DetailsHelper;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,19 +48,17 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
     @SuppressWarnings("unchecked")
     public UncompletedCountVO selectUncompletedBySprint(Long projectId, Long sprintId) {
         UncompletedCountVO uncompletedCount = new UncompletedCountVO();
-        JSONObject jObject;
-        jObject = reportService.queryBurnDownCoordinate(projectId, sprintId, ReportServiceImpl.STORY_POINTS);
-        uncompletedCount.setStoryPoints(Optional.ofNullable(jObject.get(ReportServiceImpl.COORDINATE))
-                .map(map -> ((TreeMap<String, BigDecimal>)map).lastEntry())
-                .map(Map.Entry::getValue).orElse(BigDecimal.ZERO));
-        jObject = reportService.queryBurnDownCoordinate(projectId, sprintId, ReportServiceImpl.REMAINING_ESTIMATED_TIME);
-        uncompletedCount.setRemainingEstimatedTime(Optional.ofNullable(jObject.get(ReportServiceImpl.COORDINATE))
-                .map(map -> ((TreeMap<String, BigDecimal>)map).lastEntry())
-                .map(Map.Entry::getValue).orElse(BigDecimal.ZERO));
-        jObject = reportService.queryBurnDownCoordinate(projectId, sprintId, ReportServiceImpl.ISSUE_COUNT);
-        uncompletedCount.setIssueCount(Optional.ofNullable(jObject.get(ReportServiceImpl.COORDINATE))
-                .map(map -> ((TreeMap<String, BigDecimal>)map).lastEntry())
-                .map(Map.Entry::getValue).orElse(BigDecimal.ZERO));
+        List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId).stream()
+                .filter(issue -> BooleanUtils.isFalse(issue.getCompleted())).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(issueList)){
+            return null;
+        }
+        uncompletedCount.setStoryPoints(issueList.stream()
+                .filter(issue -> Objects.equals(issue.getTypeCode(), InitIssueType.STORY.getTypeCode()))
+                .map(IssueOverviewVO::getStoryPoints).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add));
+        uncompletedCount.setRemainingEstimatedTime(issueList.stream()
+                .map(IssueOverviewVO::getRemainingTime).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add));
+        uncompletedCount.setIssueCount(issueList.size());
         SprintDTO sprint = safeSelectSprint(projectId, sprintId);
         if (Objects.isNull(sprint)) {
             return uncompletedCount;

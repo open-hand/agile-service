@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import java.math.BigDecimal;
+
 import io.choerodon.mybatis.domain.AuditDomain;
 
 /**
@@ -12,14 +14,23 @@ public class IssueOverviewVO extends AuditDomain {
     private Long assigneeId;
     private String categoryCode;
     private String typeCode;
-    private Integer storyPoints;
+    private BigDecimal storyPoints;
+    private BigDecimal remainingTime;
 
-    public Integer getStoryPoints() {
+    public BigDecimal getStoryPoints() {
         return storyPoints;
     }
 
-    public void setStoryPoints(Integer storyPoints) {
+    public void setStoryPoints(BigDecimal storyPoints) {
         this.storyPoints = storyPoints;
+    }
+
+    public BigDecimal getRemainingTime() {
+        return remainingTime;
+    }
+
+    public void setRemainingTime(BigDecimal remainingTime) {
+        this.remainingTime = remainingTime;
     }
 
     public String getTypeCode() {
