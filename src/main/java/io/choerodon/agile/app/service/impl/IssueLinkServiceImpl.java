@@ -10,6 +10,8 @@ import io.choerodon.agile.infra.dto.IssueLinkDTO;
 import io.choerodon.agile.infra.mapper.IssueLinkMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.core.exception.CommonException;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author dinghuang123@gmail.com
@@ -84,6 +89,14 @@ public class IssueLinkServiceImpl implements IssueLinkService {
 
     @Override
     public int deleteByIssueId(Long issueId) {
+        // 更新关联的issue的最后更新时间，更新人
+        List<IssueLinkDTO> issueLinkList = issueLinkMapper.selectByCondition(Condition.builder(IssueLinkDTO.class)
+                .orWhere(Sqls.custom().andEqualTo(IssueLinkDTO.FIELD_ISSUE_ID, issueId)
+                        .andNotEqualTo(IssueLinkDTO.FIELD_ISSUE_ID, 0L))
+                .orWhere(Sqls.custom().andEqualTo(IssueLinkDTO.FIELD_LINKED_ISSUE_ID, issueId)
+                        .andNotEqualTo(IssueLinkDTO.FIELD_LINKED_ISSUE_ID, 0L)).build());
+        issueLinkList.forEach(link -> BaseFieldUtil.updateIssueLastUpdateInfo(link.getIssueId(), link.getProjectId()));
+        issueLinkList.forEach(link -> BaseFieldUtil.updateIssueLastUpdateInfo(link.getLinkedIssueId(), link.getProjectId()));
         return issueLinkMapper.deleteByIssueId(issueId);
     }
 

@@ -595,8 +595,6 @@ public class IssueServiceImpl implements IssueService {
         if (Objects.isNull(issueDTO)){
             throw new CommonException(IssueAccessDataServiceImpl.UPDATE_ERROR);
         }
-        issueConvertDTO.setObjectVersionNumber(BaseFieldUtil
-                .updateIssueLastUpdateInfo(issueDTO.getRelateIssueId(), projectId).getObjectVersionNumber());
         issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
     }
 
