@@ -750,13 +750,14 @@ public class IssueAssembler extends AbstractAssembler {
             job.setStoryCount(typeMap.getOrDefault(IssueTypeCode.STORY.value(), Collections.emptyList()).size());
             job.setStoryPointCount(typeMap.getOrDefault(IssueTypeCode.STORY.value(), Collections.emptyList())
                     .stream().map(points -> issueTypeMap.get(points.getIssueId()).getStoryPoints())
-                    .reduce(BigDecimal::add).orElse(BigDecimal.ZERO));
+                    .filter(Objects::nonNull).reduce(BigDecimal::add).orElse(BigDecimal.ZERO));
             job.setBugFixCount(typeMap.getOrDefault(IssueTypeCode.BUG.value(), Collections.emptyList()).size());
             job.setBugCreatedCount(dateOneBugMap.getOrDefault(workDate, Collections.emptyMap())
                     .getOrDefault(userId, Collections.emptyList()).size());
             job.setWorkTime(dateOneWorkMap.getOrDefault(workDate, Collections.emptyMap())
                     .getOrDefault(userId, Collections.emptyList())
-                    .stream().map(WorkLogDTO::getWorkTime).reduce(BigDecimal::add).orElse(BigDecimal.ZERO));
+                    .stream().map(WorkLogDTO::getWorkTime).filter(Objects::nonNull)
+                    .reduce(BigDecimal::add).orElse(BigDecimal.ZERO));
             jobList.add(job);
         }
         OneJobVO oneJob = new OneJobVO();
