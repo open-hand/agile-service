@@ -434,7 +434,7 @@ class CreateIssue extends Component {
                           context: typeCode,
                           pageCode: 'agile_issue_create',
                         };
-                        fieldApi.getFields(param, typeCode).then((res) => {
+                        fieldApi.getFields(param).then((res) => {
                           this.setState({
                             fields: res,
                           });
