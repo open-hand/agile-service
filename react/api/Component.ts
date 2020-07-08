@@ -19,7 +19,6 @@ class ComponentApi {
     const page = current;
     const size = pageSize;
     if (componentId) {
-      // return axios.post(`${this.prefix}/component/query_all?componentId=${componentId}&page=${page}&size=${size}&no_issue_test=true`, filters);
       return axios.post(`${this.prefix}/component/query_all`, filters, {
         params: {
           componentId,
@@ -32,12 +31,12 @@ class ComponentApi {
     return axios.post(`${this.prefix}/component/query_all?no_issue_test=true&page=${page}&size=${size}`, filters);
   }
 
-  loadAllComponents() {
+  loadAllComponents(filter?: string, projectId?: number) {
     return axios.post(
-      `${this.prefix}/component/query_all?size=${999}&page=${1}`, {
+      `/agile/v1/projects/${projectId || getProjectId()}/component/query_all?size=${999}&page=${1}`, {
         advancedSearchArgs: {},
         searchArgs: {},
-        content: '',
+        content: filter,
       },
     );
   }

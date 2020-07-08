@@ -73,8 +73,8 @@ class VersionApi {
    * 根据状态查询版本名
    * @param statusArr 
    */
-  loadNamesByStatus(statusArr: Array<string> = []) {
-    return axios.post(`${this.prefix}/product_version/names`, statusArr);
+  loadNamesByStatus(statusArr: Array<string> = [], projectId?: number) {
+    return axios.post(`/agile/v1/projects/${projectId || getProjectId()}/product_version/names`, statusArr);
   }
 
   /**

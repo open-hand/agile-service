@@ -374,11 +374,10 @@ class IssueApi {
     * @param issueId 
     * @param content 
     */
-  loadIssuesInLink(page: number = 1, size: number = 10, issueId?: number, content?: string) {
-    // console.log('loadIssuesInLink', issueId, content);
+  loadIssuesInLink(page: number = 1, size: number = 10, issueId?: number, content?: string, projectId?: number) {
     return axios({
       method: 'get',
-      url: `${this.prefix}/issues/agile/summary`,
+      url: `/agile/v1/projects/${projectId || getProjectId()}/issues/agile/summary`,
       params: {
         page,
         size,
@@ -387,15 +386,6 @@ class IssueApi {
         self: false,
       },
     });
-    // if (issueId && content) {
-    //  return axios.get(`${ this.prefix }/issues/agile/summary ? issueId = ${ issueId } & self=false & content=${ content } & page=${ page } & size=${ size }`);
-    // } else if (issueId && !content) {
-    //  return axios.get(`${ this.prefix }/issues/agile/summary ? issueId = ${ issueId } & self=false & page=${ page } & size=${ size }`);
-    // } else if (!issueId && content) {
-    //  return axios.get(`${ this.prefix }/issues/agile/summary ? self = false & content=${ content } & page=${ page } & size=${ size }`);
-    // } else {
-    //  return axios.get(`${ this.prefix }/issues/agile/summary ? self = false & page=${ page } & size=${ size }`);
-    // }
   }
 }
 const issueApi = new IssueApi();

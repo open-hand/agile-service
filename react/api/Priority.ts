@@ -40,9 +40,9 @@ class PriorityApi {
   /**
      * 根据项目id查询组织优先级
      */
-  loadByProject() {
+  loadByProject(projectId?:number) {
     // 进行一层处理，过滤掉禁用的优先级
-    return axios.get(`${this.prefix}/priority/list_by_org`).then((data: any) => Array.isArray(data) && data.filter(v => v.enable));
+    return axios.get(`/agile/v1/projects/${projectId || getProjectId()}/priority/list_by_org`).then((data: any) => Array.isArray(data) && data.filter(v => v.enable));
   }
 
   /**

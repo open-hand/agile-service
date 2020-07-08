@@ -20,7 +20,7 @@ const filterOption = (input, option) => option.props.children && typeof (option.
 const filterOptionByName = (input, option) => option.props.name && typeof (option.props.name) === 'string' && option.props.name.toLowerCase().indexOf(
   input.toLowerCase(),
 ) >= 0;
-function transform(links) {
+export function transform(links) {
   // split active and passive
   const active = links.map(link => ({
     name: link.outWard,
@@ -322,7 +322,7 @@ export default {
       filterOption: false,
       loadWhenMount: true,
     },
-    request: priorityApi.loadByProject.bind(priorityApi),
+    request: priorityApi.loadByProject,
     getDefaultValue: priorities => find(priorities, { default: true }).id,
     render: priority => (
       <Option key={priority.id} value={priority.id}>
@@ -356,7 +356,7 @@ export default {
       filterOption: false,
       loadWhenMount: true,
     },
-    request: issueLabelApi.loads.bind(issueLabelApi),
+    request: issueLabelApi.loads,
     render: label => (
       <Option key={label.labelName} value={label.labelName}>
         {label.labelName}
