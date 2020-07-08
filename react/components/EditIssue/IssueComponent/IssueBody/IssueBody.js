@@ -100,7 +100,7 @@ function IssueBody(props) {
             ? <IssueLink {...props} /> : ''
           }
           {store.testExecutes.length > 0 ? <IssueTestExecute {...props} /> : null}
-          {issueTypeVO.typeCode !== 'issue_epic' && <InjectedComponent.Backlog {...props} />}
+          {['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
         </TabPane>
         {
           !disabled && issueTypeVO.typeCode && issueTypeVO.typeCode === 'feature'
