@@ -322,7 +322,7 @@ export default {
       filterOption: false,
       loadWhenMount: true,
     },
-    request: priorityApi.loadByProject,
+    request: priorityApi.loadByProject.bind(priorityApi),
     getDefaultValue: priorities => find(priorities, { default: true }).id,
     render: priority => (
       <Option key={priority.id} value={priority.id}>
