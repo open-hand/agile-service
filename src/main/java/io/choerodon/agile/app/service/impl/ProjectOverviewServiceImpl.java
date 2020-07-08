@@ -108,7 +108,7 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
                 issueList.stream().map(IssueOverviewVO::getIssueId).collect(Collectors.toSet()),
                 sprint.getStartDate(), sprint.getActualEndDate());
 
-        return issueAssembler.issueToOneJob(issueList, workLogList, dataLogList);
+        return issueAssembler.issueToOneJob(sprint, issueList, workLogList, dataLogList);
     }
 
     private List<IssueOverviewVO> selectIssueBysprint(Long projectId, Long sprintId) {
