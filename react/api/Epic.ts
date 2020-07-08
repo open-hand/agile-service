@@ -31,8 +31,8 @@ class EpicApi {
   /**
    * 查询当前项目下的史诗，供下拉列表使用
    */
-  loadEpicsForSelect = () => axios.get(
-    `${this.prefix}/issues/epics/select_data`,
+  loadEpicsForSelect = (projectId?:number) => axios.get(
+    `/agile/v1/projects/${projectId || getProjectId()}/issues/epics/select_data`,
   )
 
   /**

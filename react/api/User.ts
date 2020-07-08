@@ -29,17 +29,17 @@ class UserApi extends Api {
    * @param page 
    * @param id 根据id查询
    */
-  getAllInProject(param?: string, page?: number, userId?: number, size?: number) {
+  getAllInProject(param?: string, page?: number, userId?: number, size?: number, projectId?: number) {
     return this.request({
       method: 'get',
-      url: `${this.prefix}/users`,
+      url: `/iam/choerodon/v1/projects/${projectId || getProjectId()}/users`,
       params: {
         param,
         id: userId,
         page: page || 1,
         size: size || 20,
       },
-      cache: true,
+      // cache: true,
     });
   }
 

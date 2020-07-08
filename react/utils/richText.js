@@ -117,14 +117,14 @@ export function returnBeforeTextUpload(text, data, func, pro = 'description') {
  * @param {function} func 回调
  * @param {{issueType:string,issueId:number,fileName:string}} config 附件上传的额外信息
  */
-export function handleFileUpload(propFileList, func, config) {
+export function handleFileUpload(propFileList, func, config, projectId) {
   const fileList = propFileList.filter(i => !i.url);
   const formData = new FormData();
   fileList.forEach((file) => {
     // file.name = encodeURI(encodeURI(file.name));
     formData.append('file', file);
   });
-  fileApi.uploadFile(formData, config.issueId)
+  fileApi.uploadFile(formData, config.issueId, projectId)
     .then((response) => {
       const newFileList = [
         {

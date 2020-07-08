@@ -24,9 +24,9 @@ class IssueLinkTypeApi extends Api {
       contents: [],
       linkName: '',
     },
-  }: ILinkTypeQuery = {}) {
+  }: ILinkTypeQuery = {}, projectId?: number) {
     return this.request({
-      url: `${this.prefix}/issue_link_types/query_all`,
+      url: `/agile/v1/projects/${projectId || getProjectId()}/issue_link_types/query_all`,
       method: 'POST',
       data: filter,
       params: {

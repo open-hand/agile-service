@@ -83,8 +83,8 @@ class SprintApi {
  * 根据冲刺状态数组获取冲刺，["started", "sprint_planning", "closed"]，不论是普通项目还是子项目都可以
  * @param {*} arr
  */
-  loadSprints(arr: Array<string> = []) {
-    return axios.post(`${this.prefix}/sprint/names`, arr);
+  loadSprints(arr: Array<string> = [], projectId?:number) {
+    return axios.post(`/agile/v1/projects/${projectId || getProjectId()}/sprint/names`, arr);
   }
 
   /**
