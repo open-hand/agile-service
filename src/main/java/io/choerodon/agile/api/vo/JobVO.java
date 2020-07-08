@@ -9,7 +9,7 @@ import org.hzero.core.base.BaseConstants;
 /**
  * @author jiaxu.cui@hand-china.com 2020/7/3 上午10:46
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class JobVO {
 
     public JobVO(List<JobVO> jobList) {
@@ -25,12 +25,12 @@ public class JobVO {
     }
 
     private String worker;
-    private Integer taskCount;
-    private Integer storyCount;
-    private BigDecimal storyPointCount;
-    private Integer bugCreatedCount;
-    private Integer bugFixCount;
-    private BigDecimal workTime;
+    private Integer taskCount = 0;
+    private Integer storyCount = 0;
+    private BigDecimal storyPointCount = BigDecimal.ZERO;
+    private Integer bugCreatedCount = 0;
+    private Integer bugFixCount = 0;
+    private BigDecimal workTime = BigDecimal.ZERO;
 
     public String getWorker() {
         return worker;
