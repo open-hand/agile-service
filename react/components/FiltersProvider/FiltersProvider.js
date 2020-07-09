@@ -50,7 +50,7 @@ const requests = {
   epic: {
     textField: 'epicName',
     valueField: 'issueId',
-    request: epicApi.loadEpicsForSelect,
+    request: () => epicApi.loadEpicsForSelect,
   },
 };
 
