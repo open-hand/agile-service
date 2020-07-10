@@ -22,7 +22,7 @@ class IsInProgramStore {
 
 
   refresh = async () => {
-    if (AppState.currentMenuType.category !== 'PROGRAM' && AppState.currentMenuType.type === 'project') {
+    if (AppState.currentMenuType?.category !== 'PROGRAM' && AppState.currentMenuType?.type === 'project') {
       const program = await commonApi.getProjectsInProgram();
       const hasProgram = Boolean(program);
       this.setIsInProgram(hasProgram);

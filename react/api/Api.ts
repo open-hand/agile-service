@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { AxiosRequestConfig } from 'axios';
+import { getProjectId, getOrganizationId } from '@/utils/common';
 import globalCache from './Cache';
 
 interface RequestConfig extends AxiosRequestConfig {
@@ -39,11 +40,11 @@ class Api {
   }
 
   get projectId() {
-    return 0;
+    return getProjectId();
   }
 
   get orgId() {
-    return 0;
+    return getOrganizationId();
   }
 
   /**
@@ -52,17 +53,15 @@ class Api {
    * @param value 要覆盖的值
    */
   overwrite(Property: string, value: any) {
-    // 以当前this为模板，创建一个
+    // 以当前this为模板，创建一个新对象
     const temp = Object.create(this);
-    // 拷贝属性,保证两个值是相同的
-    // 设置本次特殊值getter
     // 不直接temp[Property] = value;的原因是，如果这个属性只有getter，会报错
     Object.defineProperty(temp, Property, {
       get() {
         return value;
       },
     });
-    
+    // 返回新对象
     return temp;
   }
 
