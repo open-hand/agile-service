@@ -660,7 +660,8 @@ public class IssueAssembler extends AbstractAssembler {
         Map<Long, IssueOverviewVO> issueTypeMap = issueList.stream().collect(Collectors.toMap(IssueOverviewVO::getIssueId,
                 a -> a));
         // 每日每人bug提出数量
-        Map<Date, Map<Long, List<IssueOverviewVO>>> dateOneBugMap = groupByList(issueList,
+        Map<Date, Map<Long, List<IssueOverviewVO>>> dateOneBugMap = groupByList(
+                issueList.stream().filter(issue -> IssueTypeCode.isBug(issue.getTypeCode())).collect(Collectors.toList()),
                 IssueOverviewVO::getCreationDate, IssueOverviewVO::getCreatedBy,
                 issue -> issue.setCreationDate(DateUtils.truncate(issue.getCreationDate(),
                         Calendar.DAY_OF_MONTH)));
