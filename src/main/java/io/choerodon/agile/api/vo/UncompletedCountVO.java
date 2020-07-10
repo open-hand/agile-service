@@ -10,11 +10,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UncompletedCountVO {
 
-    private BigDecimal storyPoints;
-    private BigDecimal remainingEstimatedTime;
-    private Integer issueCount;
-    private Integer remainingDays;
-    private Integer totalDays;
+    private BigDecimal storyPoints = BigDecimal.ZERO;
+    private BigDecimal remainingEstimatedTime = BigDecimal.ZERO;
+    private Integer issueCount = 0;
+    private Integer remainingDays = 0;
+    private Integer totalDays = 0;
 
     public BigDecimal getStoryPoints() {
         return storyPoints;
