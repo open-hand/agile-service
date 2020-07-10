@@ -51,7 +51,7 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
         List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId).stream()
                 .filter(issue -> BooleanUtils.isFalse(issue.getCompleted())).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(issueList)){
-            return null;
+            return new UncompletedCountVO();
         }
         uncompletedCount.setStoryPoints(issueList.stream()
                 .filter(issue -> Objects.equals(issue.getTypeCode(), InitIssueType.STORY.getTypeCode()))
