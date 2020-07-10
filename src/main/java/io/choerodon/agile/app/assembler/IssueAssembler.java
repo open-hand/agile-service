@@ -646,7 +646,7 @@ public class IssueAssembler extends AbstractAssembler {
                 .collect(Collectors.toList());
     }
 
-    public List<OneJobVO> issueToOneJob(SprintDTO sprint, List<IssueOverviewVO> issueList, List<WorkLogDTO> workLogList, List<DataLogDTO> dataLogList){
+    public List<OneJobVO> issueToOneJob(SprintDTO sprint, List<IssueOverviewVO> issueList, List<WorkLogDTO> workLogList, List<DataLogDTO> resolutionLogList, List<DataLogDTO> assigneeLogList){
         // 生成迭代经办人，报告人list
         Set<Long> userSet = issueList.stream().map(IssueOverviewVO::getAssigneeId).collect(Collectors.toSet());
         userSet.addAll(issueList.stream().map(IssueOverviewVO::getReporterId).collect(Collectors.toSet()));
@@ -670,8 +670,10 @@ public class IssueAssembler extends AbstractAssembler {
                 WorkLogDTO::getStartDate, WorkLogDTO::getCreatedBy,
                 issue -> issue.setStartDate(DateUtils.truncate(issue.getStartDate(),
                                 Calendar.DAY_OF_MONTH)));
+        // 每日issue最后经办人
+        Map<Date, Map<Long, DataLogDTO>> assigneeMap = getAssigneeMap(assigneeLogList, issueTypeMap);
         // 计算任务，故事，解决bug
-        Map<Date, List<DataLogDTO>> creationMap = getcreationMap(dataLogList);
+        Map<Date, List<DataLogDTO>> creationMap = getcreationMap(resolutionLogList, assigneeMap, issueTypeMap);
         Map<Date, OneJobVO> oneJobMap = timeUserLine.entrySet().stream().map(entry -> new ImmutablePair<>(entry.getKey()
                 , dataLogListToOneJob(entry.getKey(), entry.getValue(),
                 creationMap, issueTypeMap, dateOneBugMap, dateOneWorkMap, userMessageDOMap)))
@@ -704,7 +706,9 @@ public class IssueAssembler extends AbstractAssembler {
         return timeUserLine;
     }
 
-    private Map<Date, List<DataLogDTO>> getcreationMap(List<DataLogDTO> dataLogList) {
+    private Map<Date, List<DataLogDTO>> getcreationMap(List<DataLogDTO> dataLogList,
+                                                       Map<Date, Map<Long, DataLogDTO>> assigneeMap,
+                                                       Map<Long, IssueOverviewVO> issueTypeMap) {
         return dataLogList.stream()
                     .peek(log -> log.setCreationDate(DateUtils.truncate(log.getCreationDate(), Calendar.DAY_OF_MONTH)))
                     // 按照日志的创建日期分组
@@ -715,8 +719,44 @@ public class IssueAssembler extends AbstractAssembler {
                             .collect(Collectors.groupingBy(DataLogDTO::getIssueId)).values()
                             .stream().map(list -> list.stream()
                                     .max(Comparator.comparingLong(DataLogDTO::getLogId))
+                                    .map(log -> {
+                                        DataLogDTO assignee = assigneeMap.get(entry.getKey()).getOrDefault(log.getIssueId(), new DataLogDTO());
+                                        if (Objects.isNull(assignee.getNewValue())){
+                                            log.setCreatedBy(issueTypeMap.get(log.getIssueId()).getCreatedBy());
+                                        }else {
+                                            log.setCreatedBy(Long.parseLong(assignee.getNewValue()));
+                                        }
+                                        return log;
+                                    })
                                     .orElse(null)).filter(Objects::nonNull).collect(Collectors.toList())))
                     .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
+    }
+
+    /**
+     * 返回值 Map<日期, Map<issueId, assigneeId>>
+     * @param assigneeLogList 经办人日志
+     * @param issueTypeMap id-实体映射
+     * @return Map
+     */
+    private Map<Date, Map<Long, DataLogDTO>> getAssigneeMap(List<DataLogDTO> assigneeLogList, Map<Long, IssueOverviewVO> issueTypeMap) {
+        return assigneeLogList.stream()
+                .peek(log -> log.setCreationDate(DateUtils.truncate(log.getCreationDate(), Calendar.DAY_OF_MONTH)))
+                // 按照日志的创建日期分组
+                .collect(Collectors.groupingBy(DataLogDTO::getCreationDate))
+                .entrySet().stream()
+                // 按照issueId去重，取logId最大值,即当天的经办人记录，
+                // 如果无经办人则说明issue从创建就没更换过经办人，此时复制issueId, 直接取issue上的人。
+                .map(entry -> new ImmutablePair<>(entry.getKey(), entry.getValue().stream()
+                        .collect(Collectors.groupingBy(DataLogDTO::getIssueId)).entrySet()
+                        .stream().map(e1 -> new ImmutablePair<>(e1.getKey(), e1.getValue().stream()
+                                .max(Comparator.comparingLong(DataLogDTO::getLogId))
+                                .orElseGet(() -> {
+                                    DataLogDTO log = new DataLogDTO();
+                                    log.setIssueId(e1.getKey());
+                                    return log;
+                                })
+                                )).collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight))))
+                .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
     }
 
     private <T, K1, K2> Map<K1, Map<K2, List<T>>> groupByList(List<T> list,
