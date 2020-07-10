@@ -102,12 +102,14 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
             sprint.setActualEndDate(new Date());
         }
         List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId);
+        if (CollectionUtils.isEmpty(issueList)){
+            return Collections.emptyList();
+        }
         List<WorkLogDTO> workLogList = workLogMapper.selectWorkTimeBySpring(projectId, sprintId,
                 sprint.getStartDate(), sprint.getActualEndDate());
         List<DataLogDTO> dataLogList = dataLogMapper.selectResolutionIssueBySprint(projectId,
                 issueList.stream().map(IssueOverviewVO::getIssueId).collect(Collectors.toSet()),
                 sprint.getStartDate(), sprint.getActualEndDate());
-
         return issueAssembler.issueToOneJob(sprint, issueList, workLogList, dataLogList);
     }
 
