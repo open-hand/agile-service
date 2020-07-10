@@ -45,7 +45,6 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
     private DateUtil dateUtil;
 
     @Override
-    @SuppressWarnings("unchecked")
     public UncompletedCountVO selectUncompletedBySprint(Long projectId, Long sprintId) {
         UncompletedCountVO uncompletedCount = new UncompletedCountVO();
         List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId).stream()
