@@ -84,6 +84,7 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
         Set<Long> priority = issueList.stream().map(IssueOverviewVO::getAssigneeId).collect(Collectors.toSet());
         priority.addAll(issueList.stream().map(IssueOverviewVO::getReporterId).collect(Collectors.toSet()));
         priority.remove(null);
+        priority.remove(0L);
         // issueDTO转换IssueCountVO
         return issueAssembler.issueDTOToIssueCountVO(bugList, priority);
     }

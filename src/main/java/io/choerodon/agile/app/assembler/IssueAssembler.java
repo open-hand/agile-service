@@ -652,6 +652,7 @@ public class IssueAssembler extends AbstractAssembler {
         userSet.addAll(issueList.stream().map(IssueOverviewVO::getReporterId).collect(Collectors.toSet()));
         // 移除经办人为null的情况
         userSet.remove(null);
+        userSet.remove(0L);
         DateFormat df = new SimpleDateFormat(BaseConstants.Pattern.DATE);
         // 生成基准时间-用户轴
         Map<Date, Set<Long>> timeUserLine = generateTimeUserLine(sprint, userSet);
