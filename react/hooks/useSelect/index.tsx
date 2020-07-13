@@ -181,6 +181,7 @@ export default function useSelect<T extends {}>(config: SelectConfig<T>) {
       if (record.get('loadMoreButton') === true) {
         return {
           className: styles.load_more,
+          disabled: true,
         };
       }
       return {};
