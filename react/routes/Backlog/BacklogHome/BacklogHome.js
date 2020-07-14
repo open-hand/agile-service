@@ -26,6 +26,7 @@ const createCurrentPiSprintKey = Modal.key();
 class BacklogHome extends Component {
   componentDidMount() {
     const { BacklogStore } = this.props;
+    BacklogStore.resetData();
     BacklogStore.refresh();
     if (IsInProgramStore.isShowFeature) {
       BacklogStore.loadPiInfoAndSprint();
