@@ -25,13 +25,14 @@ const IssueDes = ({ reloadIssue }) => {
     setEditDesShow(false);
   }, [description]);
 
-  const updateIssueDes = async () => {
+  const updateIssueDes = async (value) => {
     const { issueId, objectVersionNumber } = store.getIssue;
     const obj = {
       issueId,
       objectVersionNumber,
     };
-    await returnBeforeTextUpload(editDes, obj, issueApi.update, 'description');
+    const newValue = value || editDes;
+    await returnBeforeTextUpload(newValue, obj, issueApi.update, 'description');
     setEditDesShow(false);
     setFullEdit(false);
     if (reloadIssue) {
