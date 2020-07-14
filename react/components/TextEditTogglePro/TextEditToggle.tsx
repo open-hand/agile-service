@@ -33,6 +33,7 @@ const TextEditToggle: React.FC<Props> = ({
   disabled, submitTrigger = [Action.blur], editor, editorExtraContent, children: text, className, onSubmit, initValue, alwaysRender = true,
 } = {} as Props) => {
   const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(initValue);
   const editingRef = useRef(editing);
   const dataRef = useRef(initValue);
   const editorRef = useRef<JSX.Element>(null);
@@ -45,6 +46,7 @@ const TextEditToggle: React.FC<Props> = ({
   editingRef.current = editing;
   useEffect(() => {
     dataRef.current = initValue;
+    setValue(initValue);
   }, [initValue]);
   useEffect(() => {
     // 自动聚焦
@@ -63,10 +65,11 @@ const TextEditToggle: React.FC<Props> = ({
       setEditing(true);
     }
   };
-  const handleChange = (originOnChange: Function | undefined) => (value: any) => {
-    dataRef.current = value;
+  const handleChange = (originOnChange: Function | undefined) => (newValue: any) => {
+    dataRef.current = newValue;
+    setValue(newValue);
     if (originOnChange) {
-      originOnChange(value);
+      originOnChange(newValue);
     }
     if (submitTrigger.includes(Action.change)) {
       submit();
@@ -100,7 +103,7 @@ const TextEditToggle: React.FC<Props> = ({
     const extraContent = typeof editorExtraContent === 'function' ? editorExtraContent() : editorExtraContent;
     const originProps = editorElement.props;
     const editorProps: any = {
-      value: initValue,
+      value,
       onChange: handleChange(originProps.onChange),
       onBlur: handleEditorBlur,
       ref: editorRef,
