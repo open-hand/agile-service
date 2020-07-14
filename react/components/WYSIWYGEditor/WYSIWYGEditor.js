@@ -68,14 +68,16 @@ class WYSIWYGEditor extends Component {
   }
 
   handleSave = async () => {
-    this.setState({
-      isFullScreen: false,
+    this.setState({      
       loading: true,
     });
     const { handleSave } = this.props;
     if (handleSave) {
       try {
         await handleSave(this.value);
+        this.setState({
+          isFullScreen: false,
+        });
       } finally {
         this.setState({
           loading: false,
