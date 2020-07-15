@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -12,6 +14,7 @@ import java.math.BigDecimal;
 
 public class PriorityVO implements Serializable{
     @ApiModelProperty(value = "优先级id")
+    @Encrypt
     private Long id;
     @ApiModelProperty(value = "名称")
     private String name;

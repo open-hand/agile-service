@@ -1,14 +1,19 @@
 package io.choerodon.agile.infra.statemachineclient.dto;
 
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 /**
  * @author peng.jiang@hand-china.com
  * @author dinghuang123@gmail.com
  * @since 2018/10/23
  */
 public class StateMachineConfigDTO {
-
+    @Encrypt
     private Long id;
+    @Encrypt
     private Long transformId;
+    @Encrypt
     private Long stateMachineId;
     private String code;
     private String type;

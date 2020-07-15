@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
@@ -10,6 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class WorkCalendarRefVO {
 
     @ApiModelProperty(value = "日历主键id")
+    @Encrypt
     private Long calendarId;
 
     @ApiModelProperty(value = "日期")

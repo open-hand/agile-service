@@ -1,11 +1,13 @@
 package io.choerodon.agile.infra.dto;
 
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/25.
  * Email: fuqianghuang01@gmail.com
  */
 public class ColumnIssueNumDTO {
-
+    @Encrypt
     private Long columnId;
 
     private Long issueCount;

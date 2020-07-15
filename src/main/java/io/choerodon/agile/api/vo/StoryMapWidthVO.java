@@ -1,18 +1,22 @@
 package io.choerodon.agile.api.vo;
 
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/6/3.
  * Email: fuqianghuang01@gmail.com
  */
 
 public class StoryMapWidthVO {
-
+    @Encrypt
     private Long id;
 
     private String type;
 
     private Long projectId;
 
+    @Encrypt
     private Long issueId;
 
     private Long width;

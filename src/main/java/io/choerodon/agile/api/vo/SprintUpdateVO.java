@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -16,6 +18,7 @@ public class SprintUpdateVO {
     private static final String OBJECT_VERSION_NUMBER_NULL_ERROR = "error.objectVersionNumber.NotNull";
 
     @ApiModelProperty(value = "冲刺id")
+    @Encrypt
     private Long sprintId;
 
     @ApiModelProperty(value = "冲刺名称")

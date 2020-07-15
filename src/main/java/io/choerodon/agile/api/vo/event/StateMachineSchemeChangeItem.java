@@ -3,6 +3,8 @@ package io.choerodon.agile.api.vo.event;
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.StateMachineWithStatusVO;
 
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.util.List;
 
 /**
@@ -10,9 +12,12 @@ import java.util.List;
  * @date 2018/11/22
  */
 public class StateMachineSchemeChangeItem {
+    @Encrypt
     private Long issueTypeId;
     private Long issueCount;
+    @Encrypt
     private Long oldStateMachineId;
+    @Encrypt
     private Long newStateMachineId;
     private IssueTypeVO issueTypeVO;
     private StateMachineWithStatusVO oldStateMachine;

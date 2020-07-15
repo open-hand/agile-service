@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.List;
 public class SprintInfoVO {
 
     @ApiModelProperty(value = "冲刺id")
+    @Encrypt
     private Long sprintId;
 
     @ApiModelProperty(value = "冲刺名称")

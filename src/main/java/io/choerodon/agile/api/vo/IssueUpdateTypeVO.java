@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
@@ -10,6 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class IssueUpdateTypeVO {
 
     @ApiModelProperty(value = "问题主键id")
+    @Encrypt
     private Long issueId;
 
     @ApiModelProperty(value = "史诗名称")
@@ -25,6 +28,7 @@ public class IssueUpdateTypeVO {
     private Long projectId;
 
     @ApiModelProperty(value = "问题类型id")
+    @Encrypt
     private Long issueTypeId;
 
     public Long getIssueId() {

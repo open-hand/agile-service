@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
 
@@ -20,6 +22,7 @@ public class EpicSequenceVO {
 
     @ApiModelProperty(value = "史诗id")
     @NotNull(message = EPIC_ID_NOT_NULL_ERROR)
+    @Encrypt
     private Long epicId;
 
     @ApiModelProperty(value = "版本号")

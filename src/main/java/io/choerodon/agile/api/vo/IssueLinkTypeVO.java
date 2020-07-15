@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
@@ -10,6 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class IssueLinkTypeVO {
 
     @ApiModelProperty(value = "问题链接类型id")
+    @Encrypt
     private Long linkTypeId;
 
     @ApiModelProperty(value = "链接名称")

@@ -1,5 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.util.Date;
 
 /**
@@ -7,7 +10,7 @@ import java.util.Date;
  * Email: fuqianghuang01@gmail.com
  */
 public class SprintCalendarDTO {
-
+    @Encrypt
     private Long sprintId;
 
     private String sprintName;

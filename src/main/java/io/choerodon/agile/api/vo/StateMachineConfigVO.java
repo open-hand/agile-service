@@ -1,16 +1,21 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
  */
 public class StateMachineConfigVO {
     @ApiModelProperty(value = "状态机配置id")
+    @Encrypt
     private Long id;
     @ApiModelProperty(value = "转换id")
+    @Encrypt
     private Long transformId;
     @ApiModelProperty(value = "状态机id")
+    @Encrypt
     private Long stateMachineId;
     @ApiModelProperty(value = "配置编码")
     private String code;

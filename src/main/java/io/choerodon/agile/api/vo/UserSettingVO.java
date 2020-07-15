@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
@@ -9,6 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class UserSettingVO {
 
     @ApiModelProperty(value = "设置主键id")
+    @Encrypt
     private Long settingId;
 
     @ApiModelProperty(value = "用户泳道类型")

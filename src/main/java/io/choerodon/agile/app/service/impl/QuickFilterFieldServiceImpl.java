@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.QuickFilterFieldVO;
 import io.choerodon.agile.app.service.QuickFilterFieldService;
+import io.choerodon.agile.infra.dto.QuickFilterFieldDTO;
 import io.choerodon.agile.infra.mapper.QuickFilterFieldMapper;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -25,6 +26,11 @@ public class QuickFilterFieldServiceImpl implements QuickFilterFieldService {
     @Override
     public List<QuickFilterFieldVO> list(Long projectId) {
         return modelMapper.map(quickFilterFieldMapper.selectAll(), new TypeToken<List<QuickFilterFieldVO>>(){}.getType());
+    }
+
+    @Override
+    public QuickFilterFieldDTO selectByFieldCode(String fieldCode) {
+        return quickFilterFieldMapper.selectByPrimaryKey(fieldCode);
     }
 
 }

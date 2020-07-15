@@ -14,6 +14,7 @@ import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 
 import io.choerodon.agile.app.service.IssueLinkTypeService;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.InitRoleCode;
 import springfox.documentation.annotations.ApiIgnore;
 
 /**
@@ -60,7 +60,7 @@ public class IssueLinkTypeController {
     public ResponseEntity<IssueLinkTypeVO> queryIssueLinkType(@ApiParam(value = "项目id", required = true)
                                                                @PathVariable(name = "project_id") Long projectId,
                                                               @ApiParam(value = "linkTypeId", required = true)
-                                                               @PathVariable(name = "linkTypeId") Long linkTypeId) {
+                                                               @PathVariable(name = "linkTypeId") @Encrypt Long linkTypeId) {
         return Optional.ofNullable(issueLinkTypeService.queryIssueLinkType(projectId, linkTypeId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueLinkType.queryIssueLinkType"));
@@ -100,9 +100,9 @@ public class IssueLinkTypeController {
     public ResponseEntity deleteIssueLinkType(@ApiParam(value = "项目id", required = true)
                                               @PathVariable(name = "project_id") Long projectId,
                                               @ApiParam(value = "issueLinkType", required = true)
-                                              @PathVariable(name = "issueLinkTypeId") Long issueLinkTypeId,
+                                              @PathVariable(name = "issueLinkTypeId")@Encrypt  Long issueLinkTypeId,
                                               @ApiParam(value = "转移到其他的类型上，如果为空则不转移，直接删除")
-                                              @RequestParam(required = false) Long toIssueLinkTypeId) {
+                                              @RequestParam(required = false) @Encrypt Long toIssueLinkTypeId) {
         issueLinkTypeValidator.verifyDeleteData(issueLinkTypeId, toIssueLinkTypeId, projectId);
         issueLinkTypeService.deleteIssueLinkType(issueLinkTypeId, toIssueLinkTypeId, projectId);
         return new ResponseEntity(HttpStatus.OK);
@@ -116,7 +116,7 @@ public class IssueLinkTypeController {
                                                  @ApiParam(value = "issue_link_type_name", required = true)
                                                  @RequestParam(name = "issueLinkTypeName") String issueLinkTypeName,
                                                  @ApiParam(value = "issue_link_type_id", required = false)
-                                                 @RequestParam(name = "issueLinkTypeId", required = false) Long issueLinkTypeId) {
+                                                 @RequestParam(name = "issueLinkTypeId", required = false) @Encrypt Long issueLinkTypeId) {
         return new ResponseEntity<>(issueLinkTypeService.queryIssueLinkTypeName(projectId, issueLinkTypeName, issueLinkTypeId), HttpStatus.OK);
     }
 }

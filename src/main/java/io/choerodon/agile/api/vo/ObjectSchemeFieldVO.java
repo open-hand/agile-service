@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author shinan.chen
@@ -8,6 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
  */
 public class ObjectSchemeFieldVO {
     @ApiModelProperty(value = "字段id")
+    @Encrypt
     private Long id;
     @ApiModelProperty(value = "字段编码")
     private String code;

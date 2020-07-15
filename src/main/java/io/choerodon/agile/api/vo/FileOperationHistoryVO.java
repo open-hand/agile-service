@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/25.
@@ -10,6 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class FileOperationHistoryVO {
 
     @ApiModelProperty(value = "主键id")
+    @Encrypt
     private Long id;
 
     @ApiModelProperty(value = "项目id")

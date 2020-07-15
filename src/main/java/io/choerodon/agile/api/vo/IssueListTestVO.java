@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -14,6 +16,7 @@ import java.util.Date;
 public class IssueListTestVO implements Serializable {
 
     @ApiModelProperty(value = "问题主键id")
+    @Encrypt
     private Long issueId;
 
     @ApiModelProperty(value = "问题编号")
@@ -32,6 +35,7 @@ public class IssueListTestVO implements Serializable {
     private Long projectId;
 
     @ApiModelProperty(value = "问题类型id")
+    @Encrypt
     private Long issueTypeId;
 
     @ApiModelProperty(value = "经办人名称")

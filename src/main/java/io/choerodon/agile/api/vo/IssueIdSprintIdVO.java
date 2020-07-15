@@ -1,13 +1,16 @@
 package io.choerodon.agile.api.vo;
 
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 /**
  * @author shinan.chen
  * @since 2019/5/27
  */
 public class IssueIdSprintIdVO {
-
+    @Encrypt
     private Long issueId;
     private String typeCode;
+    @Encrypt
     private Long sprintId;
 
     public Long getIssueId() {
