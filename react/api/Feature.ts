@@ -77,10 +77,10 @@ class FeatureApi {
    * 根据史诗ID查询项目群的特性
    * @param epicId 可以不传
    */
-  getByEpicId(epicId?: number, searchName?: string, page: number = 1, size: number = 10) {
+  getByEpicId(epicId?: number, searchName?: string, page: number = 1, size: number = 10, projectId?: number) {
     return axios({
       method: 'post',
-      url: `${this.prefix}/issues/feature/select_data`,
+      url: `/agile/v1/projects/${projectId || getProjectId()}/issues/feature/select_data`,
       data: {
         params: {
           epicId,

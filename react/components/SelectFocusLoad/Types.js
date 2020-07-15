@@ -46,7 +46,6 @@ const issue_type_program = {
     filterOption,
   },
   request: () => new Promise(resolve => issueTypeApi.loadAllWithStateMachineId('program').then((issueTypes) => {
-    // const defaultType = find(issueTypes, { typeCode: 'feature' }).id;
     resolve(issueTypes);
   })),
   render: issueType => (
