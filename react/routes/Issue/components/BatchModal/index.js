@@ -9,9 +9,9 @@ import {
 } from '@choerodon/boot';
 import { find } from 'lodash';
 import { getProjectId, getOrganizationId } from '@/utils/common';
-import { batchUpdateIssue } from '@/api/NewIssueApi';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import WSProvider from '@choerodon/master/lib/containers/components/c7n/tools/ws/WSProvider';
+import { fieldApi } from '@/api';
 import useFields from './useFields';
 import renderField from './renderField';
 import styles from './index.less';
@@ -146,6 +146,12 @@ function BatchModal({
   const [fields, Field] = useFields();
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const userFields = fieldData.filter(field => field.fieldType === 'member').map(field => ({
+    name: field.code,
+    type: 'number',
+    textField: 'realName',
+    valueField: 'id',
+  }));
   const dataSet = useMemo(() => new DataSet({
     fields: [{
       name: 'statusId',
@@ -173,10 +179,6 @@ function BatchModal({
       name: 'featureId',
       type: 'number',
       label: '所属特性',
-      lookupAxiosConfig: () => ({
-        url: `/agile/v1/projects/${getProjectId()}/issues/feature/select_data?organizationId=${getOrganizationId()}`,
-        method: 'get',
-      }),
       valueField: 'issueId',
       textField: 'summary',
     }] : [{
@@ -265,7 +267,7 @@ function BatchModal({
       }),
       valueField: 'versionId',
       textField: 'name',
-    }],
+    }, ...userFields],
   }), []);
   const getData = () => {
     const temp = dataSet.current ? dataSet.current.toData() : {};
@@ -281,7 +283,7 @@ function BatchModal({
     const data = getData();
     const issueIds = tableDataSet.selected.map(record => record.get('issueId'));
     const res = { issueIds, ...formatFields(fieldData, data, dataSet) };
-    await batchUpdateIssue(res);
+    await fieldApi.batchUpdateIssue(res);
     setLoading(true);
   };
 
@@ -371,7 +373,7 @@ function BatchModal({
       </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button onClick={onCancel}>取消</Button>
+        <Button onClick={onCancel} disabled={loading}>取消</Button>
         <Button
           disabled={Object.keys(getData()).length === 0}
           color="blue"

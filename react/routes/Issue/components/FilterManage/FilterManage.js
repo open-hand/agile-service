@@ -3,12 +3,13 @@ import { observer } from 'mobx-react';
 import {
   Form, Input, Button, Icon, Tooltip, Modal,
 } from 'choerodon-ui';
-import { stores, axios, Choerodon } from '@choerodon/boot';
+import { stores, Choerodon } from '@choerodon/boot';
 import _ from 'lodash';
 import IssueStore from '@/stores/project/issue/IssueStore';
 import './FilterManage.less';
+import { personalFilterApi } from '@/api';
 
-const { AppState, HeaderStore } = stores;
+const { HeaderStore } = stores;
 const FormItem = Form.Item;
 const { confirm } = Modal;
 
@@ -30,7 +31,7 @@ class FilterManage extends Component {
     }
   }
 
-  checkMyFilterNameRepeat = filterName => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/personal_filter/check_name?userId=${AppState.userInfo.id}&name=${filterName}`)
+  checkMyFilterNameRepeat = filterName => personalFilterApi.checkName(filterName);
 
   handleFNIBlurOrPressEnter = (filter, filterField) => {
     const editFilterInfo = IssueStore.getEditFilterInfo;
@@ -40,14 +41,13 @@ class FilterManage extends Component {
         const myFilters = IssueStore.getMyFilters;
         IssueStore.setLoading(true);
         const updateData = {
-          filterId: filter.filterId,
           objectVersionNumber: _.find(myFilters, item => item.filterId === filter.filterId).objectVersionNumber,
           // name: form.getFieldValue(filterField),
           name: value[filterField],
-          projectId: AppState.currentMenuType.id,
-          userId: AppState.userInfo.id,
+          // projectId: AppState.currentMenuType.id,
+          // userId: AppState.userInfo.id,
         };
-        axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/personal_filter/${filter.filterId}`, updateData).then((res) => {
+        personalFilterApi.update(filter.filterId, updateData).then((res) => {
           IssueStore.axiosGetMyFilterList();
           Choerodon.prompt('修改成功');
         }).catch(() => {
@@ -84,7 +84,7 @@ class FilterManage extends Component {
 
   deleteFilter = (filter) => {
     IssueStore.setLoading(true);
-    axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/personal_filter/${filter.filterId}`)
+    personalFilterApi.delete(filter.filterId)
       .then((res) => {
         IssueStore.axiosGetMyFilterList().then(() => {
           if (IssueStore.getMyFilters.length === 0) {

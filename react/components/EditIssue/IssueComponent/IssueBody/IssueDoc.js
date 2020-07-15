@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Icon, Button, Tooltip } from 'choerodon-ui';
-import { deleteDoc, loadDocs } from '../../../../api/NewIssueApi';
+import { knowledgeApi } from '@/api';
 import Doc from '../../../Doc';
 import DocItem from '../../Component/DocItem';
 import EditIssueContext from '../../stores';
@@ -13,14 +13,14 @@ const IssueDoc = observer(({ reloadIssue }) => {
   const { issueId } = store.getIssue;
   const docs = store.getDoc;
   const onDeleteDoc = async (id) => {
-    await deleteDoc(id);
-    const res = await loadDocs(issueId);
+    await knowledgeApi.deleteRelationForIssue(id);
+    const res = await knowledgeApi.loadByIssue(issueId);
     store.setDoc(res || []);
   };
 
   const onDocCreate = async () => {
     setAddDocShow(false);
-    const res = await loadDocs(issueId);
+    const res = await knowledgeApi.loadByIssue(issueId);
     store.setDoc(res || []);
     if (reloadIssue) {
       reloadIssue();

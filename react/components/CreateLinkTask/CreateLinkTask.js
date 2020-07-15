@@ -1,14 +1,11 @@
 import React, { Component } from 'react';
-import { stores, axios } from '@choerodon/boot';
 import _ from 'lodash';
 import { Select, Form, Modal } from 'choerodon-ui';
-import { issueLinkTypeApi } from '@/api';
-import { createLink, createFeatureLink } from '../../api/NewIssueApi';
+import { issueLinkTypeApi, issueLinkApi, featureApi } from '@/api';
 import SelectFocusLoad from '../SelectFocusLoad';
 import './CreateLinkTask.less';
 
 
-const { AppState } = stores;
 const { Sidebar } = Modal;
 const { Option } = Select;
 const FormItem = Form.Item;
@@ -42,14 +39,13 @@ class CreateLinkTask extends Component {
         this.transform(res.list);
       });
     } else {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board_depend/list_feature_depend_type`)
-        .then((res) => {
-          this.setState({
-            selectLoading: false,
-            originLinks: res,
-          });
-          this.transform(res);
+      featureApi.getType().then((res) => {
+        this.setState({
+          selectLoading: false,
+          originLinks: res,
         });
+        this.transform(res);
+      });
     }
   }
 
@@ -113,7 +109,7 @@ class CreateLinkTask extends Component {
             }
           });
           this.setState({ createLoading: true });
-          createLink(issueId, labelIssueRelVOList)
+          issueLinkApi.create(issueId, labelIssueRelVOList)
             .then((res) => {
               this.setState({ createLoading: false });
               onOk();
@@ -128,7 +124,7 @@ class CreateLinkTask extends Component {
             forward: linkTypeId.split('+')[1],
           };
           this.setState({ createLoading: true });
-          createFeatureLink(postData)
+          featureApi.createLink(postData)
             .then((res) => {
               this.setState({ createLoading: false });
               onOk();

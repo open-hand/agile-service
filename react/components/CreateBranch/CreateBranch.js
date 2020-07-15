@@ -4,8 +4,9 @@ import {
   Modal, Form, Input, Select, Icon,
 } from 'choerodon-ui';
 import {
- stores, Content, axios, Choerodon 
+  stores, Content, Choerodon,
 } from '@choerodon/boot';
+import { devOpsApi } from '@/api';
 import './CreateBranch.less';
 import './commom.less';
 
@@ -64,18 +65,16 @@ class CreateBranch extends Component {
         this.setState({
           confirmLoading: true,
         });
-        axios.post(`/devops/v1/projects/${projectId}/app_service/${applicationId}/git/branch`, devopsBranchVO)
-          .then((res) => {
-            this.setState({
-              confirmLoading: false,
-            });
-            onOk();
-          })
-          .catch((error) => {
-            this.setState({
-              confirmLoading: false,
-            });
+        devOpsApi.createBranch(applicationId, devopsBranchVO).then((res) => {
+          this.setState({
+            confirmLoading: false,
           });
+          onOk();
+        }).catch((error) => {
+          this.setState({
+            confirmLoading: false,
+          });
+        });
       }
     });
   };
@@ -96,14 +95,13 @@ class CreateBranch extends Component {
 
   onApplicationNameChange = () => {
     // this.setState({ selectLoading: true });
-    axios.get(`/devops/v1/projects/${AppState.currentMenuType.id}/app_service/list_by_active`)
-      .then((res) => {
-        this.setState({
-          originApps: res,
-          selectLoading: false,
-          branchLoading: true,
-        });
+    devOpsApi.loadActiveService().then((res) => {
+      this.setState({
+        originApps: res,
+        selectLoading: false,
+        branchLoading: true,
       });
+    });
   };
 
   render() {
@@ -175,43 +173,41 @@ class CreateBranch extends Component {
                     this.setState({
                       branchsInput: input,
                     });
-                    axios.post(`/devops/v1/projects/${AppState.currentMenuType.id}/app_service/${form.getFieldValue('app')}/git/page_branch_by_options?page=1&size=5&sort=creation_date,asc`, {
+                    devOpsApi.loadBranchesByService(form.getFieldValue('app'), undefined, undefined, {
                       searchParam: {
                         branchName: input,
                       },
                       param: '',
-                    })
-                      .then((res) => {
-                        if (res && !res.failed) {
-                          this.setState({
-                            branchs: res.list,
-                            branchsSize: res.total,
-                            // branchsShowMore: res.totalPages !== 1,
-                            branchsObj: res,
-                            branchLoading: false,
-                          });
-                        } else {
-                          Choerodon.prompt(res.message);
-                        }
-                      });
-                    axios.post(`/devops/v1/projects/${AppState.currentMenuType.id}/app_service/${form.getFieldValue('app')}/git/page_tags_by_options?page=1&size=5`, {
+                    }).then((res) => {
+                      if (res && !res.failed) {
+                        this.setState({
+                          branchs: res.list,
+                          branchsSize: res.total,
+                          // branchsShowMore: res.totalPages !== 1,
+                          branchsObj: res,
+                          branchLoading: false,
+                        });
+                      } else {
+                        Choerodon.prompt(res.message);
+                      }
+                    });
+                    devOpsApi.loadTagsByService(form.getFieldValue('app'), undefined, undefined, {
                       searchParam: {
                         tagName: input,
                       },
                       param: '',
-                    })
-                      .then((res) => {
-                        if (res && !res.failed) {
-                          this.setState({
-                            tags: res.list || [],
-                            tagsSize: res.pageSize,
-                            // tagsShowMore: res.totalPages !== 1,
-                            tagsObj: res,
-                          });
-                        } else {
-                          Choerodon.prompt(res.message);
-                        }
-                      });
+                    }).then((res) => {
+                      if (res && !res.failed) {
+                        this.setState({
+                          tags: res.list || [],
+                          tagsSize: res.pageSize,
+                          // tagsShowMore: res.totalPages !== 1,
+                          tagsObj: res,
+                        });
+                      } else {
+                        Choerodon.prompt(res.message);
+                      }
+                    });
                   }}
                 >
                   <OptGroup label="分支" key="branchGroup">
@@ -222,7 +218,7 @@ class CreateBranch extends Component {
                       </Option>
                     ))}
                     {
-                      branchsObj.nextPage ? (
+                      branchsObj.number < branchsObj.totalPages ? (
                         <Option key="more">
                           <div
                             role="none"
@@ -233,23 +229,22 @@ class CreateBranch extends Component {
                             }}
                             onClick={(e) => {
                               e.stopPropagation();
-                              axios.post(`/devops/v1/projects/${AppState.currentMenuType.id}/app_service/${form.getFieldValue('app')}/git/page_branch_by_options?page=1&size=${branchsSize + 5}&sort=creation_date,asc`, {
+                              devOpsApi.loadBranchesByService(form.getFieldValue('app'), 1, branchsSize + 5, {
                                 searchParam: {
                                   branchName: branchsInput,
                                 },
                                 param: null,
-                              })
-                                .then((res) => {
-                                  if (res && !res.failed) {
-                                    this.setState({
-                                      branchs: res.list || [],
-                                      branchsSize: res.pageSize,
-                                      branchsObj: res,
-                                    });
-                                  } else {
-                                    Choerodon.prompt(res.message);
-                                  }
-                                });
+                              }).then((res) => {
+                                if (res && !res.failed) {
+                                  this.setState({
+                                    branchs: res.list || [],
+                                    branchsSize: res.pageSize,
+                                    branchsObj: res,
+                                  });
+                                } else {
+                                  Choerodon.prompt(res.message);
+                                }
+                              });
                             }}
                           >
                             查看更多
@@ -266,7 +261,7 @@ class CreateBranch extends Component {
                       </Option>
                     ))}
                     {
-                      tagsObj.nextPage > 0 ? (
+                      tagsObj.number < tagsObj.totalPages ? (
                         <Option key="more">
                           <div
                             role="none"
@@ -277,24 +272,23 @@ class CreateBranch extends Component {
                             }}
                             onClick={(e) => {
                               e.stopPropagation();
-                              axios.post(`/devops/v1/projects/${AppState.currentMenuType.id}/app_service/${form.getFieldValue('app')}/git/page_tags_by_options?page=1&size=${tagsSize + 5}`, {
+                              devOpsApi.loadTagsByService(form.getFieldValue('app'), 1, tagsSize + 5, { 
                                 searchParam: {
                                   tagName: branchsInput,
                                 },
-                                param: null,
-                              })
-                                .then((res) => {
-                                  if (res && !res.failed) {
-                                    this.setState({
-                                      tags: res.list || [],
-                                      tagsSize: res.pageSize,
-                                      // tagsShowMore: res.totalPages !== 1,
-                                      tagsObj: res,
-                                    });
-                                  } else {
-                                    Choerodon.prompt(res.message);
-                                  }
-                                });
+                                param: null, 
+                              }).then((res) => {
+                                if (res && !res.failed) {
+                                  this.setState({
+                                    tags: res.list || [],
+                                    tagsSize: res.pageSize,
+                                    // tagsShowMore: res.totalPages !== 1,
+                                    tagsObj: res,
+                                  });
+                                } else {
+                                  Choerodon.prompt(res.message);
+                                }
+                              });
                             }}
                           >
                             查看更多

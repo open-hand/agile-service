@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.app.service.IssueAccessDataService;
 import io.choerodon.agile.infra.dto.BatchRemoveSprintDTO;
 import io.choerodon.agile.infra.annotation.DataLog;
+import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.mapper.IssueMapper;
@@ -14,12 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class IssueAccessDataServiceImpl implements IssueAccessDataService {
 
-    private static final String UPDATE_ERROR = "error.Issue.update";
+    public static final String UPDATE_ERROR = "error.Issue.update";
     private static final String INSERT_ERROR = "error.Issue.create";
     private static final String DELETE_ERROR = "error.Issue.delete";
 
@@ -35,11 +37,13 @@ public class IssueAccessDataServiceImpl implements IssueAccessDataService {
     @DataLog(type = "issue")
     public IssueConvertDTO update(IssueConvertDTO issueConvertDTO, String[] fieldList) {
         IssueDTO issueDTO = modelMapper.map(issueConvertDTO, IssueDTO.class);
+        IssueDTO issueInDB = issueMapper.selectByPrimaryKey(issueDTO.getIssueId());
 //        Criteria criteria = new Criteria();
 //        criteria.update(fieldList);
         if (issueMapper.updateOptional(issueDTO, fieldList) != 1) {
             throw new CommonException(UPDATE_ERROR);
         }
+        BaseFieldUtil.updateIssueLastUpdateInfo(issueInDB.getRelateIssueId(), issueInDB.getProjectId());
         return modelMapper.map(issueMapper.selectByPrimaryKey(issueDTO.getIssueId()), IssueConvertDTO.class);
     }
 

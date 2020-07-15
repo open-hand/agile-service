@@ -1,31 +1,17 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
-import { Select } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
 import _ from 'lodash';
 import { issueApi } from '@/api';
-import TextEditToggle from '../../../../TextEditToggle';
-import { loadVersions } from '../../../../../api/NewIssueApi';
+import TextEditToggle from '@/components/TextEditTogglePro';
+import SelectVersion from '@/components/select/select-version';
 
-const { Option } = Select;
-const { Text, Edit } = TextEditToggle;
 
 @inject('AppState')
 @observer class FieldFixVersion extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      originVersions: [],
-      selectLoading: true,
-      newVersion: [],
-    };
-  }
-
-  componentDidMount() {
-    this.loadIssueVersions();
-  }
-
+  dataRef = React.createRef();
+ 
   transToArr = (arr, pro, type = 'string') => {
     if (!arr.length) {
       return type === 'string' ? '无' : [];
@@ -36,17 +22,8 @@ const { Text, Edit } = TextEditToggle;
     }
   };
 
-  loadIssueVersions = () => {
-    loadVersions(['version_planning']).then((res) => {
-      this.setState({
-        originVersions: res,
-        selectLoading: false,
-      });
-    });
-  };
-
-  updateIssueFixVersion = () => {
-    const { newVersion, originVersions } = this.state;
+  updateIssueFixVersion = (newVersion) => {
+    const originVersions = this.dataRef.current;
     const {
       store, onUpdate, reloadIssue, AppState, onCreateVersion,
     } = this.props;
@@ -57,7 +34,7 @@ const { Text, Edit } = TextEditToggle;
     if (JSON.stringify(fixVersions) !== JSON.stringify(newVersion)) {
       const versionList = [];
       let newSign = false;
-      newVersion.forEach((version) => {
+      (newVersion || []).forEach((version) => {
         const target = _.find(originVersions, { name: version });
         if (target) {
           versionList.push(target);
@@ -93,9 +70,8 @@ const { Text, Edit } = TextEditToggle;
   };
 
   render() {
-    const { selectLoading, originVersions } = this.state;
     const {
-      store, hasPermission, disabled, saveRef, 
+      store, disabled, saveRef, 
     } = this.props;
     saveRef(this);
     const issue = store.getIssue;
@@ -114,9 +90,8 @@ const { Text, Edit } = TextEditToggle;
         <div className="c7n-value-wrapper">
           <TextEditToggle
             disabled={disabled}            
-            formKey="fixVersion"
             onSubmit={this.updateIssueFixVersion}
-            originData={this.transToArr(fixVersions, 'name', 'array')}
+            initValue={this.transToArr(fixVersions, 'name', 'array')}
             editExtraContent={
               fixVersionsFixed.length ? (
                 <div style={{ maxWidth: 170 }}>
@@ -127,9 +102,9 @@ const { Text, Edit } = TextEditToggle;
                 </div>
               ) : null
             }
+            editor={<SelectVersion dataRef={this.dataRef} statusArr={['version_planning']} />}
           >
-            <Text>
-              {
+            {
                 fixVersionsFixed.length || fixVersions.length ? (
                   <div>
                     <div style={{ color: '#000' }}>
@@ -145,38 +120,6 @@ const { Text, Edit } = TextEditToggle;
                   </div>
                 )
               }
-            </Text>
-            <Edit>
-              <Select
-                label="未发布版本"
-                mode="multiple"
-                loading={selectLoading}
-                tokenSeparators={[',']}
-                getPopupContainer={() => document.getElementById('detail')}
-                style={{ width: '100%', marginTop: 0, paddingTop: 0 }}
-                onChange={(value) => {
-                  const versions = value.filter(v => v && v.trim()).map((item) => {
-                    if (_.find(originVersions, { name: item })) {
-                      return item;
-                    } else {
-                      return item.trim().substr(0, 15);
-                    }
-                  });
-                  this.setState({
-                    newVersion: versions,
-                  });
-                }}
-              >
-                {originVersions.map(version => (
-                  <Option
-                    key={version.name}
-                    value={version.name}
-                  >
-                    {version.name}
-                  </Option>
-                ))}
-              </Select>
-            </Edit>
           </TextEditToggle>
         </div>
       </div>

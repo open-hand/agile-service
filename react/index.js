@@ -10,8 +10,8 @@ import 'moment/locale/en-nz';
 import moment from 'moment';
 import AgileProvider from '@/components/AgileProvider';
 import RunWhenProjectChange from '@/common/RunWhenProjectChange';
-import IsInProgramStore from './stores/common/program/IsInProgramStore';
 import Test from './Test';
+import IsInProgramStore from './stores/common/program/IsInProgramStore';
 import './style/index.less';
 
 const ScrumBoard = React.lazy(() => import('./routes/ScrumBoard'));

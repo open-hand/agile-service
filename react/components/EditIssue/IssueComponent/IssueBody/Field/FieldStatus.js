@@ -1,84 +1,75 @@
-import React, { Component } from 'react';
+import React, { Component, useMemo, forwardRef } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
-import { Select } from 'choerodon-ui';
+import { Select } from 'choerodon-ui/pro';
 import { injectIntl } from 'react-intl';
 import STATUS from '@/constants/STATUS';
-import { issueApi } from '@/api';
-import TextEditToggle from '../../../../TextEditToggle';
-import { loadStatus } from '../../../../../api/NewIssueApi';
+import { issueApi, statusApi } from '@/api';
+import TextEditToggle from '@/components/TextEditTogglePro';
+import useSelect from '@/hooks/useSelect';
 
 const { Option } = Select;
-const { Text, Edit } = TextEditToggle;
-
+const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
+  const {
+    statusId, issueId, typeId, applyType, projectId,
+  } = statusArgs;
+  const config = useMemo(() => ({
+    name: 'status',
+    request: () => statusApi.loadTransformStatusByIssue(statusId, issueId, typeId, applyType, projectId),
+    paging: false,
+    textField: 'statusVO.name',
+    valueField: 'endStatusId',
+  }), [JSON.stringify(statusArgs)]);
+  const props = useSelect(config);
+  return (
+    <Select
+      ref={ref}
+      primitiveValue={false}
+      clearButton={false}
+      {...props}
+      {...otherProps}
+    />
+  );
+});
 @inject('AppState')
 @observer class FieldStatus extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      originStatus: [],
-      selectLoading: true,
-      transformId: undefined,
-    };
-  }
+  updateIssueStatus = (transform) => {
+    if (transform) {
+      const transformId = transform.id;
 
-  componentDidMount() {
-    this.loadIssueStatus();
-  }
-
-  loadIssueStatus = () => {
-    const {
-      store, projectId, applyType, disabled, 
-    } = this.props;
-    if (disabled) {
-      return;
-    }
-    const issue = store.getIssue;
-    const {
-      issueTypeVO = {},
-      issueId,
-      statusId,
-      activePi = {},
-    } = issue;
-    const typeId = issueTypeVO.id;
-    loadStatus(statusId, issueId, typeId, applyType, projectId).then((res) => {
-      this.setState({
-        originStatus: res,
-        selectLoading: false,
-      });
-    });
-  }
-
-  updateIssueStatus = () => {
-    const { transformId } = this.state;
-    const {
-      store, onUpdate, reloadIssue, applyType, 
-    } = this.props;
-    const issue = store.getIssue;
-    const { issueId, objectVersionNumber } = issue;
-    if (transformId) {
-      issueApi.updateStatus(transformId, issueId, objectVersionNumber, applyType)
-        .then(() => {
-          if (onUpdate) {
-            onUpdate();
-          }
-          if (reloadIssue) {
-            reloadIssue(issueId);
-          }
-          this.loadIssueStatus();
-          this.setState({
-            transformId: undefined,
+      const {
+        store, onUpdate, reloadIssue, applyType,
+      } = this.props;
+      const issue = store.getIssue;
+      const { issueId, statusId, objectVersionNumber } = issue;
+      if (statusId === transform.endStatusId) {
+        return;
+      }
+      if (transformId) {
+        issueApi.updateStatus(transformId, issueId, objectVersionNumber, applyType)
+          .then(() => {
+            if (onUpdate) {
+              onUpdate();
+            }
+            if (reloadIssue) {
+              reloadIssue(issueId);
+            }
           });
-        });
+      }
     }
   };
 
   render() {
-    const { selectLoading, originStatus } = this.state;
-    const { store, disabled } = this.props;
+    const {
+      store, disabled, projectId, applyType,
+    } = this.props;
     const issue = store.getIssue;
-    const { statusVO = {}, statusId } = issue;
+    const {
+      statusVO = {}, statusId, issueTypeVO = {},
+      issueId,
+    } = issue;
     const { type, name } = statusVO;
+    const typeId = issueTypeVO.id;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -89,54 +80,37 @@ const { Text, Edit } = TextEditToggle;
         <div className="c7n-value-wrapper">
           <TextEditToggle
             disabled={disabled}
-            formKey="status"
             onSubmit={this.updateIssueStatus}
-            originData={statusId}            
-          >
-            <Text>
-              {
-                statusId ? (
-                  <div
-                    style={{
-                      background: STATUS[type],
-                      color: '#fff',
-                      borderRadius: '2px',
-                      padding: '0 8px',
-                      display: 'inline-block',
-                      margin: '2px auto 2px 0',
-                    }}
-                  >
-                    {name}
-                  </div>
-                ) : (
-                  <div>
-                    无
-                  </div>
-                )
-              }
-            </Text>
-            <Edit>
-              <Select
-                // style={{ width: 150 }}
-                loading={selectLoading}
-                getPopupContainer={() => document.getElementById('detail')}
-                onChange={(value, item) => {
-                  this.setState({
-                    transformId: item.key,
-                  });
+            initValue={statusId}
+            submitTrigger={['blur', 'change']}
+            editor={() => (
+              <SelectStatus
+                statusArgs={{
+                  statusId, issueId, typeId, applyType, projectId,
                 }}
-              >
-                {
-                  originStatus && originStatus.length
-                    ? originStatus.map(transform => (transform.statusVO ? (
-                      <Option key={transform.id} value={transform.endStatusId}>
-                        {transform.statusVO.name}
-                      </Option>
-                    ) : ''))
-                    : null
-                }
-              </Select>
-            </Edit>
+              />
+            )}
+          >
+            {
+              statusId ? (
+                <div
+                  style={{
+                    background: STATUS[type],
+                    color: '#fff',
+                    borderRadius: '2px',
+                    padding: '0 8px',
+                    display: 'inline-block',
+                    margin: '2px auto 2px 0',
+                  }}
+                >
+                  {name}
+                </div>
+              ) : (
+                <div>
+                  无
+                </div>
+              )
+            }
           </TextEditToggle>
         </div>
       </div>

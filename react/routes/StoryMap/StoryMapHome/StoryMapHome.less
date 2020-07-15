@@ -1,3 +1,8 @@
+body.c7nagile-StoryMap-fullScreen {
+  .page-header, #menu {
+    display: none;
+  }
+}
 .c7nagile-StoryMap {
   background: white;
   &-fullScreenBtn {
@@ -22,51 +27,5 @@
       border: 0.02rem solid gray;
       border-radius: 0.02rem;
     }
-  }
-  &-header-sprintSelect {
-    margin-left: 15px;
-    &-option-active {
-      display: inline-block;
-      font-size: 0.13rem;
-      margin-left: 0.05rem;
-      padding: 0.01rem 0.1rem;
-      white-space: nowrap;
-      height: 0.21rem;
-      line-height: 0.21rem;
-      color: #00bfa5;    
-      background: rgba(0, 191, 165, 0.08); 
-      }
-  }
-  &-header-select.c7n-pro-select-focused {
-    .c7n-pro-select-placeholder {
-      color: #bfbfbf;
-    }
-    input::-webkit-input-placeholder {
-      color: #bfbfbf;
-    }
-  }
-  &-header-select {
-    // width: 160px;
-    .c7n-pro-select {
-      border: none;
-      & > ul {
-        display: flex;
-      }
-    }
-    .c7n-pro-select:not(:last-child) {
-      padding-right: 0.3rem;
-    }
-    .c7n-pro-select-inner-button.c7n-pro-select-clear-button {
-      right: 0.15rem;
-    }
-    .c7n-pro-select-placeholder {
-      color: #000000;
-    }
-    input::-webkit-input-placeholder {
-      color: #000000;
-    }
-  }
-  &-header-isCompletedSelect {
-    width: 100px;
   }
 }

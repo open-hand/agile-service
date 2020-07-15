@@ -12,6 +12,7 @@ import io.choerodon.agile.infra.dto.IssueDTO;
 import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.WorkLogMapper;
+import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -104,6 +105,7 @@ public class WorkLogServiceImpl implements WorkLogService {
                     break;
             }
         }
+        BaseFieldUtil.updateIssueLastUpdateInfo(workLogVO.getIssueId(), projectId);
         WorkLogDTO res = iWorkLogService.createBase(modelMapper.map(workLogVO, WorkLogDTO.class));
         return queryWorkLogById(res.getProjectId(), res.getLogId());
     }
@@ -113,6 +115,7 @@ public class WorkLogServiceImpl implements WorkLogService {
         WorkLogValidator.checkUpdateWorkLog(workLogVO);
         workLogVO.setProjectId(projectId);
         WorkLogDTO res = updateBase(modelMapper.map(workLogVO, WorkLogDTO.class));
+        BaseFieldUtil.updateIssueLastUpdateInfo(res.getIssueId(), res.getProjectId());
         return queryWorkLogById(res.getProjectId(), res.getLogId());
     }
 

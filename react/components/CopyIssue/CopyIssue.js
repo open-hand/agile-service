@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import { stores, axios, Content } from '@choerodon/boot';
+import { stores } from '@choerodon/boot';
 import _ from 'lodash';
 import {
   Modal, Form, Input, Checkbox,
 } from 'choerodon-ui';
 
 import './CopyIssue.less';
-import { epicApi } from '@/api';
+import { epicApi, issueApi } from '@/api';
 
 const { AppState } = stores;
 const FormItem = Form.Item;
@@ -47,7 +47,7 @@ class CopyIssue extends Component {
         this.setState({
           loading: true,
         });
-        axios.post(`/agile/v1/projects/${projectId}/issues/${issueId}/clone_issue?organizationId=${orgId}&applyType=${applyType}&orgId=${orgId}`, copyConditionVO)
+        issueApi.clone(issueId, applyType, copyConditionVO)
           .then((res) => {
             this.setState({
               loading: false,

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, {
   useContext, useRef, useEffect, useState,
 } from 'react';
@@ -22,7 +23,7 @@ const AgileProvider = contexts => function AgileDataProvider({ children, project
     const [data, setData] = useState(initData);
     
     const loadData = async (...args) => {
-      if (AppState.currentMenuType.type === 'project') {
+      if (AppState.currentMenuType?.type === 'project') {
         const res = await refresh(...args);
         dataRef.current.set(context, { data: res, refresh: loadData });
         setData(res);

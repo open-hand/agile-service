@@ -1,14 +1,16 @@
 import React, { Component, Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
 import {
-  Page, Header, Content, stores, Breadcrumb, Choerodon, Permission, axios,
+  Page, Header, Content, stores, Breadcrumb, Choerodon, Permission, 
 } from '@choerodon/boot';
 import {
   Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
 } from 'choerodon-ui';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
-import { sprintApi, issueApi, epicApi } from '@/api';
+import {
+  sprintApi, issueApi, epicApi, issueTypeApi, statusApi, boardApi, 
+} from '@/api';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
@@ -61,6 +63,10 @@ class ScrumBoardHome extends Component {
   componentDidMount() {
     ScrumBoardStore.setSelectedBoardId('');
     this.getBoard();
+    const { state } = this.props.location;
+    if (state && state.issueId) {
+      ScrumBoardStore.setClickedIssue(state.issueId);
+    }
   }
 
   componentWillUnmount() {
@@ -71,7 +77,7 @@ class ScrumBoardHome extends Component {
   getBoard = async () => {
     const { location } = this.props;
     const url = this.paramConverter(location.search);
-    const boardListData = await ScrumBoardStore.axiosGetBoardList();
+    const boardListData = await boardApi.loadAll();
     ScrumBoardStore.initBoardList(boardListData);
     const defaultBoard = boardListData.find(item => item.userDefault) || boardListData[0];
     if (defaultBoard.boardId) {
@@ -140,12 +146,12 @@ class ScrumBoardHome extends Component {
 
   changeState = (name, value) => {
     if (name === 'judgeUpdateParent') {
-      ScrumBoardStore.loadTransforms(value.statusId, value.id, value.typeId).then((types) => {
+      statusApi.loadTransformStatusByIssue(value.statusId, value.id, value.typeId).then((types) => {
         this.matchStatus(types);
         this.setState({
           [name]: value,
         });
-      }).catch((e) => {
+      }).catch(() => {
         Choerodon.prompt('查询状态失败，请重试！');
       });
     }
@@ -211,7 +217,7 @@ class ScrumBoardHome extends Component {
 
   refresh(defaultBoard, url, boardListData) {
     ScrumBoardStore.setSpinIf(true);
-    Promise.all([ScrumBoardStore.axiosGetIssueTypes(), ScrumBoardStore.axiosGetStateMachine(), ScrumBoardStore.axiosGetBoardData(defaultBoard.boardId), epicApi.loadEpics()]).then(([issueTypes, stateMachineMap, defaultBoardData, epicData]) => {
+    Promise.all([issueTypeApi.loadAllWithStateMachineId(), statusApi.loadAllTransformForAllIssueType(), ScrumBoardStore.axiosGetBoardData(defaultBoard.boardId), epicApi.loadEpics()]).then(([issueTypes, stateMachineMap, defaultBoardData, epicData]) => {
       this.dataConverter.setSourceData(epicData, defaultBoardData);
       const renderDataMap = new Map([
         ['parent_child', this.dataConverter.getParentWithSubData],
@@ -439,10 +445,10 @@ class ScrumBoardHome extends Component {
                   objectVersionNumber: ScrumBoardStore.getUpdatedParentIssue.objectVersionNumber,
                   transformId: updateParentStatus || ScrumBoardStore.getTransformToCompleted[0].id,
                 };
-                ScrumBoardStore.axiosUpdateIssue(data).then((res) => {
+                issueApi.updateStatus(data).then((res) => {
                   ScrumBoardStore.setUpdateParent(false);
                   this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
-                }).catch((error) => {
+                }).catch(() => {
                 });
               }}
               disableOk={!ScrumBoardStore.getTransformToCompleted.length}

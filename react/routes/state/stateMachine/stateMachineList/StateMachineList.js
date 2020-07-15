@@ -10,6 +10,7 @@ import {
   Content, Header, TabPage as Page, stores, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import './StateMachineList.less';
+import { stateMachineApi } from '@/api';
 import TableDropMenu from '../../../../common/TableDropMenu';
 
 const { AppState } = stores;
@@ -148,7 +149,7 @@ class StateMachineList extends Component {
   loadStateMachine = (page = 1, size = 10, sort = { field: 'id', order: 'desc' }, param = {}) => {
     const { StateMachineStore } = this.props;
     const { organizationId } = this.state;
-    StateMachineStore.loadStateMachineList(organizationId, sort, { page, size, ...param })
+    StateMachineStore.loadStateMachineList(sort, { page, size, ...param })
       .then((data) => {
         this.setState({
           statesMachineList: data.list,
@@ -201,7 +202,7 @@ class StateMachineList extends Component {
           submitting: true,
         });
         if (type === 'create') {
-          StateMachineStore.createStateMachine(organizationId, postData)
+          stateMachineApi.create(postData)
             .then((res) => {
               if (res) {
                 this.loadStateMachine(page, pageSize, sorter, tableParam);
@@ -219,7 +220,7 @@ class StateMachineList extends Component {
         } else {
           const { objectVersionNumber } = this.state;
           postData.objectVersionNumber = objectVersionNumber;
-          StateMachineStore.updateStateMachine(organizationId, id, postData)
+          stateMachineApi.update(id, postData)
             .then((res) => {
               if (res) {
                 this.loadStateMachine(page, pageSize, sorter, tableParam);
@@ -251,7 +252,7 @@ class StateMachineList extends Component {
     const {
       organizationId, deleteId, page, pageSize, sorter, tableParam,
     } = this.state;
-    StateMachineStore.deleteStateMachine(organizationId, deleteId)
+    stateMachineApi.delete(deleteId)
       .then((data) => {
         if (data) {
           message.success(intl.formatMessage({ id: 'deleteSuccess' }));
@@ -285,7 +286,7 @@ class StateMachineList extends Component {
   checkName = async (rule, value, callback) => {
     const { StateMachineStore, intl } = this.props;
     const orgId = AppState.currentMenuType.organizationId;
-    const res = await StateMachineStore.checkName(orgId, value);
+    const res = await stateMachineApi.checkName(value);
     if (res) {
       callback(intl.formatMessage({ id: 'priority.create.name.error' }));
     } else {

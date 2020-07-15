@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { stores, axios, Content } from '@choerodon/boot';
+import { stores } from '@choerodon/boot';
 import _ from 'lodash';
 import { Modal, Form, Select } from 'choerodon-ui';
 import { issueApi } from '@/api';
@@ -38,7 +38,6 @@ class ChangeParent extends Component {
     } = this.props;
     form.validateFields((err, values) => {
       if (!err) {
-        const projectId = AppState.currentMenuType.id;
         const parentIssueId = values.issues;
         const issueUpdateParentIdVO = {
           issueId,
@@ -46,11 +45,10 @@ class ChangeParent extends Component {
           objectVersionNumber,
         };
         this.setState({ loading: true });
-        axios.post(`/agile/v1/projects/${projectId}/issues/update_parent`, issueUpdateParentIdVO)
-          .then((res) => {
-            this.setState({ loading: false });
-            onOk();
-          });
+        issueApi.subTaskChangeParent(issueUpdateParentIdVO).then((res) => {
+          this.setState({ loading: false });
+          onOk();
+        });
       }
     });
   };

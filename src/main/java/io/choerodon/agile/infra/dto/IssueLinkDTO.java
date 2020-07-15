@@ -18,6 +18,9 @@ import javax.persistence.*;
 @VersionAudit
 public class IssueLinkDTO extends AuditDomain {
 
+    public static final String FIELD_ISSUE_ID = "issueId";
+    public static final String FIELD_LINKED_ISSUE_ID = "linkedIssueId";
+
     /***/
     @Id
     @GeneratedValue

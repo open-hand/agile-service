@@ -18,8 +18,7 @@ import StatusTag from '@/components/StatusTag';
 import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';
 import STATUS from '@/constants/STATUS';
-import { sprintApi } from '@/api';
-
+import { sprintApi, reportApi } from '@/api';
 import NoDataComponent from '../Component/noData';
 import SwithChart from '../Component/switchChart';
 import './SprintReport.less';
@@ -127,7 +126,7 @@ class SprintReport extends Component {
   };
 
   getChartCoordinate() {
-    BurndownChartStore.axiosGetBurndownCoordinate(this.state.defaultSprint, this.state.select).then((res) => {
+    reportApi.loadBurnDownCoordinate(this.state.defaultSprint, this.state.select).then((res) => {
       const keys = Object.keys(res.coordinate);
       let [minDate, maxDate] = [keys[0], keys[0]];
       for (let a = 1, len = keys.length; a < len; a += 1) {
@@ -218,36 +217,14 @@ class SprintReport extends Component {
     this.setState({
       loading: true,
     });
-    BurndownChartStore
-      .axiosGetBurndownChartReport(this.state.defaultSprint, this.state.select).then((res) => {
-        const data = res;
-        const newData = [];
-        for (let index = 0, len = data.length; index < len; index += 1) {
-          if (!_.some(newData, { date: data[index].date })) {
-            newData.push({
-              date: data[index].date,
-              issues: [{
-                issueId: data[index].issueId,
-                issueNum: data[index].issueNum,
-                newValue: data[index].newValue,
-                oldValue: data[index].oldValue,
-                statistical: data[index].statistical,
-                parentIssueId: data[index].parentIssueId,
-                parentIssueNum: data[index].parentIssueNum,
-              }],
-              type: data[index].type,
-            });
-          } else {
-            let index2;
-            for (let i = 0, len2 = newData.length; i < len2; i += 1) {
-              if (newData[i].date === data[index].date) {
-                index2 = i;
-              }
-            }
-            if (newData[index2].type.indexOf(data[index].type) === -1) {
-              newData[index2].type += `-${data[index].type}`;
-            }
-            newData[index2].issues = [...newData[index2].issues, {
+    reportApi.loadSprintBurnDown(this.state.defaultSprint, this.state.select).then((res) => {
+      const data = res;
+      const newData = [];
+      for (let index = 0, len = data.length; index < len; index += 1) {
+        if (!_.some(newData, { date: data[index].date })) {
+          newData.push({
+            date: data[index].date,
+            issues: [{
               issueId: data[index].issueId,
               issueNum: data[index].issueNum,
               newValue: data[index].newValue,
@@ -255,29 +232,50 @@ class SprintReport extends Component {
               statistical: data[index].statistical,
               parentIssueId: data[index].parentIssueId,
               parentIssueNum: data[index].parentIssueNum,
-            }];
-          }
-        }
-        for (let index = 0, dataLen = newData.length; index < dataLen; index += 1) {
-          let rest = 0;
-          if (newData[index].type !== 'endSprint') {
-            if (index > 0) {
-              rest = newData[index - 1].rest;
+            }],
+            type: data[index].type,
+          });
+        } else {
+          let index2;
+          for (let i = 0, len2 = newData.length; i < len2; i += 1) {
+            if (newData[i].date === data[index].date) {
+              index2 = i;
             }
           }
-          for (let i = 0, len = newData[index].issues.length; i < len; i += 1) {
-            if (newData[index].issues[i].statistical) {
-              rest += newData[index].issues[i].newValue - newData[index].issues[i].oldValue;
-            }
+          if (newData[index2].type.indexOf(data[index].type) === -1) {
+            newData[index2].type += `-${data[index].type}`;
           }
-          newData[index].rest = rest;
+          newData[index2].issues = [...newData[index2].issues, {
+            issueId: data[index].issueId,
+            issueNum: data[index].issueNum,
+            newValue: data[index].newValue,
+            oldValue: data[index].oldValue,
+            statistical: data[index].statistical,
+            parentIssueId: data[index].parentIssueId,
+            parentIssueNum: data[index].parentIssueNum,
+          }];
         }
-        BurndownChartStore.setBurndownList(newData);
-        this.setState({
-          loading: false,
-        });
-      }).catch((error) => {
+      }
+      for (let index = 0, dataLen = newData.length; index < dataLen; index += 1) {
+        let rest = 0;
+        if (newData[index].type !== 'endSprint') {
+          if (index > 0) {
+            rest = newData[index - 1].rest;
+          }
+        }
+        for (let i = 0, len = newData[index].issues.length; i < len; i += 1) {
+          if (newData[index].issues[i].statistical) {
+            rest += newData[index].issues[i].newValue - newData[index].issues[i].oldValue;
+          }
+        }
+        newData[index].rest = rest;
+      }
+      BurndownChartStore.setBurndownList(newData);
+      this.setState({
+        loading: false,
       });
+    }).catch((error) => {
+    });
   }
 
   getMaxY() {
@@ -543,7 +541,7 @@ class SprintReport extends Component {
               className="primary"
               style={{
                 display: 'block',
-                minWidth: '85px',                
+                minWidth: '85px',
                 cursor: 'pointer',
               }}
               role="none"
@@ -637,7 +635,7 @@ class SprintReport extends Component {
           </div>
         ),
       },
-    ];   
+    ];
 
     const urlParams = AppState.currentMenuType;
     return (
@@ -645,7 +643,7 @@ class SprintReport extends Component {
         <Header
           title="冲刺报告图"
           backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
-        
+
         >
           <SwithChart
             history={this.props.history}

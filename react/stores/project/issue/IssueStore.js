@@ -2,13 +2,13 @@ import {
   observable, action, computed, toJS,
 } from 'mobx';
 import {
-  stores, axios, Choerodon,
+  stores, Choerodon,
 } from '@choerodon/boot';
-import { getCustomFields } from '@/api/NewIssueApi';
 import {
   debounce, reverse, map, find, isEmpty,
 } from 'lodash';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import { fieldApi, personalFilterApi } from '@/api';
 
 export function getSystemFields() {
   const systemFields = [{
@@ -274,9 +274,9 @@ class IssueStore {
 
 
   axiosGetMyFilterList = () => {
-    const { userInfo: { id } } = AppState;
+    // const { userInfo: { id } } = AppState;
     this.setLoading(true);
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/personal_filter/query_all/${id}`).then((myFilters) => {
+    return personalFilterApi.loadAll().then((myFilters) => {
       this.setLoading(false);
       const reverseMyFilters = reverse(myFilters);
       this.setMyFilters(reverseMyFilters);
@@ -296,7 +296,7 @@ class IssueStore {
   @observable fields = []
 
   async loadCustomFields() {
-    const fields = await getCustomFields();
+    const fields = await fieldApi.getCustomFields();
     this.setFields(fields);
   }
 

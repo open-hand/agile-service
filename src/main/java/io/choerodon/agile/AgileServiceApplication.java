@@ -8,11 +8,6 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-/**
- * 敏捷开发服务入口类
- *
- * @author dinghuang123@gmail.com
- */
 @EnableChoerodonResourceServer
 @EnableAsync
 @EnableEurekaClient

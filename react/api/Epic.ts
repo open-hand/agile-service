@@ -31,8 +31,8 @@ class EpicApi {
   /**
    * 查询当前项目下的史诗，供下拉列表使用
    */
-  loadEpicsForSelect = () => axios.get(
-    `${this.prefix}/issues/epics/select_data`,
+  loadEpicsForSelect = (projectId?:number) => axios.get(
+    `/agile/v1/projects/${projectId || getProjectId()}/issues/epics/select_data`,
   )
 
   /**
@@ -41,8 +41,17 @@ class EpicApi {
   loadProgramEpics = () => axios.get(
     `${this.prefix}/issues/epics/select_program_data`,
   )
+
+  /**
+   * 将批量的issue加入到史诗中
+   * @param epicId 
+   * @param issueIds 
+   */
+  addIssues(epicId: number, issueIds: Array<number>) {
+    return axios.post(`${this.prefix}/issues/to_epic/${epicId}`, issueIds);
+  }
 }
 
 const epicApi = new EpicApi();
-// eslint-disable-next-line import/prefer-default-export
+
 export { epicApi };

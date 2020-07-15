@@ -1,4 +1,4 @@
-// eslint-disable-next-line import/prefer-default-export
+
 export function deBounce(delay) {
   let timeout;
   return (fn, that) => {

@@ -2,7 +2,7 @@ import React, {
   useState, useEffect, useContext,
 } from 'react';
 import {
-  Icon, Button, Tooltip,  
+  Icon, Button, Tooltip,
 } from 'choerodon-ui';
 
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
@@ -20,43 +20,24 @@ const IssueDes = ({ reloadIssue }) => {
   const [editDes, setEditDes] = useState('');
   const { store, disabled } = useContext(EditIssueContext);
   const { description, typeCode } = store.getIssue;
-  useEffect(() => {    
+  useEffect(() => {
     setEditDes(description);
     setEditDesShow(false);
   }, [description]);
 
-  // 校验描述是否为空
-  const verifyDes = (delta) => {
-    let result = false;
-    if (delta && delta.length) {
-      delta.forEach((item) => {
-        if (!result && item.insert && (item.insert.image || item.insert.trim())) {
-          result = true;
-        }
-      });
-    }
-    return result;
-  };
-
-  const updateIssueDes = (value) => {
-    // if (verifyDes(value || editDes)) {
+  const updateIssueDes = async (value) => {
     const { issueId, objectVersionNumber } = store.getIssue;
     const obj = {
       issueId,
       objectVersionNumber,
     };
     const newValue = value || editDes;
-    if (newValue) {
-      returnBeforeTextUpload(newValue, obj, issueApi.update, 'description')
-        .then(() => {
-          if (reloadIssue) {
-            reloadIssue(issueId);
-          }
-        });
-    }
+    await returnBeforeTextUpload(newValue, obj, issueApi.update, 'description');
     setEditDesShow(false);
     setFullEdit(false);
-    // }
+    if (reloadIssue) {
+      reloadIssue(issueId);
+    }
   };
 
   const renderDes = () => {
@@ -73,7 +54,7 @@ const IssueDes = ({ reloadIssue }) => {
               width: '100%',
               position: 'absolute',
               top: 0,
-              bottom: 0,         
+              bottom: 0,
             }}
             >
               <WYSIWYGEditor
@@ -84,16 +65,13 @@ const IssueDes = ({ reloadIssue }) => {
                   height: '100%', width: '100%',
                 }}
                 onChange={(value) => {
-                  setEditDes(value);                 
+                  setEditDes(value);
                 }}
                 handleDelete={() => {
                   setEditDesShow(false);
-                  setEditDes(description);                  
+                  setEditDes(description);
                 }}
-                handleSave={() => {
-                  setEditDesShow(false);                             
-                  updateIssueDes();
-                }}
+                handleSave={updateIssueDes}
               />
             </div>
           </div>
@@ -114,8 +92,8 @@ const IssueDes = ({ reloadIssue }) => {
   };
 
 
-  const callback = (value) => { 
-    updateIssueDes(value);   
+  const callback = (value) => {
+    updateIssueDes(value);
   };
 
   return (

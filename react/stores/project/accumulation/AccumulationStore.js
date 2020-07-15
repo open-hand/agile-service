@@ -1,10 +1,8 @@
-import axios from 'axios';
 import {
   observable, action, computed, toJS, 
 } from 'mobx';
-import { store, stores } from '@choerodon/boot';
+import { store } from '@choerodon/boot';
 
-const { AppState } = stores;
 
 @store('AccumulationStore')
 class AccumulationStore {
@@ -78,10 +76,6 @@ class AccumulationStore {
     this.projectInfo = data;
   }
 
-  axiosGetProjectInfo() {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/project_info`);
-  }
-
   @computed get getBoardList() {
     return toJS(this.boardList);
   }
@@ -96,10 +90,6 @@ class AccumulationStore {
 
   @action setAccumulationData(data) {
     this.accumulationData = data;
-  }
-
-  axiosGetAccumulationData(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/cumulative_flow_diagram`, data);
   }
 
   @computed get getStartDate() {
@@ -140,13 +130,6 @@ class AccumulationStore {
 
   @action setFilterList(data) {
     this.filterList = data;
-  }
-
-  axiosGetFilterList() {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/query_all`, {
-      contents: [],
-      filterName: '',
-    });
   }
 }
 

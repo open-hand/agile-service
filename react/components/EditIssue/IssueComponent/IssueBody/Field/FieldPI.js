@@ -1,32 +1,29 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Tooltip } from 'choerodon-ui';
-import SelectFocusLoad from '@/components/SelectFocusLoad';
-import { changeIssuePI } from '@/api/PIApi';
-import TextEditToggle from '@/components/TextEditToggle';
+import SelectPI from '@/components/select/select-pi';
+import TextEditToggle from '@/components/TextEditTogglePro';
 import { piApi } from '@/api';
 
-const { Text, Edit } = TextEditToggle;
 @observer
 class FieldPI extends Component {
-  updateIssuePI = async (value, done) => {
+  updateIssuePI = async (value) => {
     const {
       store, onUpdate, reloadIssue, 
     } = this.props;
     const issue = store.getIssue;
     const { issueId, activePi } = issue;
     const { id } = activePi || {};
-    await changeIssuePI(issueId, id || 0, value || 0);    
+    await piApi.addFeatures([issueId], id || 0, value || 0);
     if (onUpdate) {
       onUpdate();
     }    
     await reloadIssue(issueId);
-    done();
   }
 
 
   render() {
-    const { store, hasPermission } = this.props;
+    const { store, hasPermission, disabled } = this.props;
     const issue = store.getIssue;
     const { activePi, closePi } = issue;
     const {
@@ -41,18 +38,24 @@ class FieldPI extends Component {
         </div>
         <div className="c7n-value-wrapper">
           <TextEditToggle
-            disabled={!hasPermission && statusCode === 'doing'}
-            formKey="pi"
+            disabled={(disabled) || (!hasPermission && statusCode === 'doing')}
             onSubmit={this.updateIssuePI}
-            originData={id}
+            initValue={id}
+            editor={({ submit }) => (
+              <SelectPI 
+                statusList={['todo', 'doing']} 
+                multiple={false}
+                allowClear
+                onChange={submit}
+              />
+            )}
           >
-            <Text>
-              <Tooltip
-                placement="top"
-                title={`该特性经历PI数${closePi.length + (id ? 1 : 0)}`}
-              >
-                <div>
-                  {
+            <Tooltip
+              placement="top"
+              title={`该特性经历PI数${closePi.length + (id ? 1 : 0)}`}
+            >
+              <div>
+                {
                     !closePi.length && !id ? '无' : (
                       <div>
                         <div>
@@ -76,16 +79,8 @@ class FieldPI extends Component {
                       </div>
                     )
                   }
-                </div>
-              </Tooltip>
-            </Text>
-            <Edit>
-              <SelectFocusLoad
-                allowClear
-                type="all_pi"
-                request={() => piApi.getByStatus(['todo', 'doing'])}
-              />
-            </Edit>
+              </div>
+            </Tooltip>
           </TextEditToggle>
         </div>
       </div>

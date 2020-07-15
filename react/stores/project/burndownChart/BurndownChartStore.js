@@ -1,11 +1,9 @@
-import axios from 'axios';
-import { store, stores } from '@choerodon/boot';
+import { store } from '@choerodon/boot';
 import {
   observable, action, computed, toJS, 
 } from 'mobx';
 import { sprintApi } from '@/api';
 
-const { AppState } = stores;
 
 @store('BurndownChartStore')
 class BurndownChartStore {
@@ -21,10 +19,6 @@ class BurndownChartStore {
 
   @action setBurndownCoordinate(data) {
     this.burndownCoordinate = data;
-  }
-
-  axiosGetBurndownCoordinate(sprintId, type) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/${sprintId}/burn_down_report/coordinate?type=${type}`);
   }
 
   @computed get getSprintList() {
@@ -45,14 +39,6 @@ class BurndownChartStore {
 
   axiosGetSprintList() {
     return sprintApi.loadSprints(['started', 'closed']);
-  }
-
-  axiosGetBurndownChartData(id, type) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/${id}/burn_down_coordinate?type=${type}`);
-  }
-
-  axiosGetBurndownChartReport(id, type) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/${id}/burn_down_report?type=${type}&ordinalType=asc`);
   }
 }
 

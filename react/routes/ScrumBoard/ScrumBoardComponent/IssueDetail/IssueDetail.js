@@ -14,20 +14,18 @@ class IssueDetail extends Component {
   }
 
   handleResetClicked = (data) => {
-    if (ScrumBoardStore.getCurrentClickId !== data.issueId) {
-      // 确认当前跳转点击
-      ScrumBoardStore.resetCurrentClick(data.issueId);
-    }
+    ScrumBoardStore.setClickedIssue(data.issueId);
   }
 
   render() {
     const { refresh } = this.props;
+    const issueId = ScrumBoardStore.getCurrentClickId;
     return (
       <EditIssue
-        visible={ScrumBoardStore.getClickedIssue}
+        visible={issueId}
         forwardedRef={this.EditIssue}
         backUrl="scrumboard"
-        issueId={ScrumBoardStore.getCurrentClickId}
+        issueId={issueId}
         onCancel={() => {
           ScrumBoardStore.resetClickedIssue();
         }}
@@ -40,7 +38,7 @@ class IssueDetail extends Component {
           refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
         }}
         resetIssue={(parentIssueId) => {
-          ScrumBoardStore.resetCurrentClick(parentIssueId);
+          ScrumBoardStore.setClickedIssue(parentIssueId);
         }}
       />
     );

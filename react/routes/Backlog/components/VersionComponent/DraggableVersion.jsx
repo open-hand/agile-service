@@ -4,11 +4,12 @@ import _ from 'lodash';
 import moment from 'moment';
 import classnames from 'classnames';
 import {
-  stores, Permission, axios, Choerodon, 
+  stores, Permission, Choerodon, 
 } from '@choerodon/boot';
 import {
   Icon, Dropdown, Menu, Input,
 } from 'choerodon-ui';
+import { versionApi } from '@/api';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 import EasyEdit from '../../../../components/EasyEdit/EasyEdit';
 
@@ -53,9 +54,9 @@ class VersionItem extends Component {
       versionId,
       description: value,
     };
-    BacklogStore.axiosUpdateVerison(versionId, req).then((res) => {
+    versionApi.update(versionId, req).then((res) => {
       BacklogStore.updateVersion(res, 'description');
-    }).catch((error) => {
+    }).catch(() => {
     });
   }
 
@@ -74,7 +75,7 @@ class VersionItem extends Component {
         editName: false,
       });
     } else {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/check?name=${value}`)
+      versionApi.checkName(value.trim())
         .then((checkRes) => {
           if (checkRes) {
             Choerodon.prompt('版本名称重复');
@@ -88,7 +89,7 @@ class VersionItem extends Component {
               versionId,
               name: value,
             };
-            BacklogStore.axiosUpdateVerison(versionId, verisonData).then((res) => {
+            versionApi.update(versionId, verisonData).then((res) => {
               if (res && res.failed) {
                 this.setState({
                   editName: false,
@@ -105,7 +106,7 @@ class VersionItem extends Component {
                 // originData[index].objectVersionNumber = res.objectVersionNumber;
                 // BacklogStore.setVersionData(originData);
               }
-            }).catch((error) => {
+            }).catch(() => {
               this.setState({
                 editName: false,
               });
@@ -131,7 +132,7 @@ class VersionItem extends Component {
       versionId,
       [type]: date ? `${date} 00:00:00` : null,
     };
-    BacklogStore.axiosUpdateVerison(versionId, req).then((res) => {
+    versionApi.update(versionId, req).then((res) => {
       BacklogStore.updateVersion(res, 'date');
       // const originData = _.clone(BacklogStore.getVersionData);
       // originData[index][type] = res[type];
@@ -169,8 +170,6 @@ class VersionItem extends Component {
       item, index, handleClickVersion, draggableSnapshot, draggableProvided,
     } = this.props;
     const { editName, expand } = this.state;
-    const menu = AppState.currentMenuType;
-    const { type, id: projectId, organizationId: orgId } = menu;
     return (
       <div
         ref={draggableProvided.innerRef}

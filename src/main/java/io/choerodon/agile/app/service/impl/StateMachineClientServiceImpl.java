@@ -14,6 +14,7 @@ import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.agile.infra.mapper.RankMapper;
+import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.RankUtil;
@@ -153,6 +154,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         issueConvertDTO.setApplyType(applyType);
         issueService.handleInitIssue(issueConvertDTO, initStatusId, projectInfo);
         Long issueId = issueAccessDataService.create(issueConvertDTO).getIssueId();
+        BaseFieldUtil.updateIssueLastUpdateInfo(issueConvertDTO.getRelateIssueId(), issueConvertDTO.getProjectId());
         // 创建史诗，初始化排序
         if ("issue_epic".equals(issueCreateVO.getTypeCode())) {
             initRank(issueCreateVO, issueId, "epic");
@@ -200,7 +202,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         //初始化subIssue
         issueService.handleInitSubIssue(subIssueConvertDTO, initStatusId, projectInfo);
         Long issueId = issueAccessDataService.create(subIssueConvertDTO).getIssueId();
-
+        BaseFieldUtil.updateIssueLastUpdateInfo(issueSubCreateVO.getParentIssueId(), issueSubCreateVO.getProjectId());
         CreateSubIssuePayload createSubIssuePayload = new CreateSubIssuePayload(issueSubCreateVO, subIssueConvertDTO, projectInfo);
         InputDTO inputDTO = new InputDTO(issueId, JSON.toJSONString(createSubIssuePayload));
         //通过状态机客户端创建实例, 反射验证/条件/后置动作

@@ -122,6 +122,9 @@ public class IssueListFieldKVVO {
     @ApiModelProperty(value = "自定义字段kv")
     private Map<String, Object> foundationFieldValue;
 
+    @ApiModelProperty(value = "项目信息")
+    private ProjectVO projectVO;
+
     public List<IssueSprintVO> getIssueSprintVOS() {
         return issueSprintVOS;
     }
@@ -398,5 +401,13 @@ public class IssueListFieldKVVO {
     @Override
     public String toString() {
         return StringUtil.getToString(this);
+    }
+
+    public ProjectVO getProjectVO() {
+        return projectVO;
+    }
+
+    public void setProjectVO(ProjectVO projectVO) {
+        this.projectVO = projectVO;
     }
 }

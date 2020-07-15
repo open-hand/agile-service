@@ -5,11 +5,14 @@ import { withRouter } from 'react-router-dom';
 import { Select, Tooltip } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
 import { featureApi, issueApi, epicApi } from '@/api';
-import TextEditToggle from '../../../../TextEditToggle';
+import TextEditToggle from '@/components/TextEditTogglePro';
+import SelectEpic from '@/components/select/select-epic';
+import SelectFeature from '@/components/select/select-feature';
+// import TextEditToggle from '../../../../TextEditToggle';
 import IsInProgramStore from '../../../../../stores/common/program/IsInProgramStore';
 
 const { Option } = Select;
-const { Text, Edit } = TextEditToggle;
+// const { Text, Edit } = TextEditToggle;
 
 const filterOption = (input, option) => option.props.name && option.props.name.toLowerCase().indexOf(
   input.toLowerCase(),
@@ -17,45 +20,7 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
 
 @inject('AppState')
 @observer class FieldEpic extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      originEpics: [],
-      originFeatures: [],
-      selectLoading: true,
-      newFeatureId: undefined,
-    };
-  }
-
-  componentDidMount() {
-    this.init();
-  }
-
-
-  init = () => {
-    epicApi.loadEpicsForSelect().then((res) => {
-      this.setState({
-        originEpics: res,
-        selectLoading: false,
-      });
-    });
-    if (IsInProgramStore.isInProgram) {
-      featureApi.getByEpicId().then((data) => {
-        const { store } = this.props;
-        const issue = store.getIssue;
-        const {
-          featureId, featureName,
-        } = issue;
-        this.setState({
-          originFeatures: (data.find(item => item.issueId === featureId) || !featureId) ? data : [...data, { issueId: featureId, summary: featureName }],
-          selectLoading: false,
-        });
-      });
-    }
-  };
-
   updateIssueEpic = async (newEpicId, done) => {
-    // const { newEpicId } = this.state;
     const { store, onUpdate, reloadIssue } = this.props;
     const issue = store.getIssue;
     const {
@@ -77,13 +42,6 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
       };
       issueApi.update(obj)
         .then(() => {
-          if (IsInProgramStore.isInProgram) {
-            featureApi.getByEpicId().then((data) => {
-              this.setState({
-                originFeatures: data,
-              });
-            });
-          }
           if (onUpdate) {
             onUpdate();
           }
@@ -94,8 +52,7 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
     }
   };
 
-  updateIssueFeature = () => {
-    const { newFeatureId } = this.state;
+  updateIssueFeature = (newFeatureId) => {
     const { store, onUpdate, reloadIssue } = this.props;
     const issue = store.getIssue;
     const { featureId = 1, issueId, objectVersionNumber } = issue;
@@ -107,13 +64,6 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
       };
       issueApi.update(obj)
         .then(() => {
-          if (IsInProgramStore.isInProgram) {
-            featureApi.getByEpicId().then((data) => {
-              this.setState({
-                originFeatures: data,
-              });
-            });
-          }
           if (onUpdate) {
             onUpdate();
           }
@@ -125,9 +75,6 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
   };
 
   render() {
-    const {
-      selectLoading, originEpics, originFeatures,
-    } = this.state;
     const { store, disabled } = this.props;
     const issue = store.getIssue;
     const {
@@ -147,48 +94,28 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
               <div className="c7n-value-wrapper">
                 <TextEditToggle
                   disabled={disabled}
-                  formKey="feature"
                   onSubmit={this.updateIssueFeature}
-                  originData={featureId || []}
+                  initValue={featureId || []}
+                  editor={<SelectFeature featureId={featureId} featureName={featureName} />}
                 >
-                  <Text>
-                    {featureName ? (
-                      <div
-                        className="primary"
-                        style={{ wordBreak: 'break-word' }}
-                      >
-                        {featureName}
-                      </div>
-                    ) : (
-                      <div>
-                        无
-                      </div>
-                    )
-                    }
-                  </Text>
-                  <Edit>
-                    <Select
-                      getPopupContainer={() => document.getElementById('detail')}
-                      allowClear
-                      loading={selectLoading}
-                      onChange={(value) => {
-                        this.setState({
-                          newFeatureId: value,
-                        });
-                      }}
-                      filter
-                      filterOption={filterOption}
-                      dropdownClassName="c7n-agile-featureField-SelectDropDown"
+                  {featureName ? (
+                    <div
+                      className="primary"
+                      style={{ wordBreak: 'break-word' }}
                     >
-                      {originFeatures.map(feature => <Option name={feature.summary} key={`${feature.issueId}`} value={feature.issueId}><Tooltip title={feature.summary}>{feature.summary}</Tooltip></Option>)}
-                    </Select>
-                  </Edit>
+                      {featureName}
+                    </div>
+                  ) : (
+                    <div>
+                      无
+                    </div>
+                  )
+                    }
                 </TextEditToggle>
               </div>
             </div>
           ) : ''
         }
-
         <div className="line-start mt-10">
           <div className="c7n-property-wrapper">
             <span className="c7n-property">
@@ -198,12 +125,11 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
           <div className="c7n-value-wrapper">
             <TextEditToggle
               disabled={featureId || disabled}
-              formKey="epic"
               onSubmit={this.updateIssueEpic}
-              originData={epicId || []}
+              initValue={epicId || null}
+              editor={({ submit }) => <SelectEpic onChange={submit} />}
             >
-              <Text>
-                {
+              {
                   epicId ? (
                     <div
                       style={{
@@ -228,19 +154,6 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
                     </div>
                   )
                 }
-              </Text>
-              <Edit>
-                <Select
-                  getPopupContainer={() => document.getElementById('detail')}
-                  allowClear
-                  loading={selectLoading}
-                  filter
-                  filterOption={filterOption}
-                  dropdownClassName="c7n-agile-epicField-SelectDropDown"
-                >
-                  {originEpics.map(epic => <Option name={epic.epicName} key={`${epic.issueId}`} value={epic.issueId}><Tooltip title={epic.epicName}>{epic.epicName}</Tooltip></Option>)}
-                </Select>
-              </Edit>
             </TextEditToggle>
           </div>
         </div>

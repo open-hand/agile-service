@@ -2,11 +2,10 @@ import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
-import TextEditToggle from '../../../../TextEditToggle';
-import { updateIssueWSJFDTO } from '../../../../../api/NewIssueApi';
-import SelectNumber from '../../../../SelectNumber';
+import { wsjfApi } from '@/api';
+import SelectNumber from '@/components/select/select-number';
+import TextEditToggle from '@/components/TextEditTogglePro';
 
-const { Text, Edit } = TextEditToggle;
 @inject('AppState')
 @observer class FieldWSJFDTO extends Component {
   updateIssueWSJFField = (value) => {  
@@ -23,7 +22,7 @@ const { Text, Edit } = TextEditToggle;
       ...wsjf,
       [fieldCode]: value === '' ? null : value,
     };
-    updateIssueWSJFDTO(obj)
+    wsjfApi.update(obj)
       .then(() => {
         if (onUpdate) {
           onUpdate();
@@ -53,16 +52,22 @@ const { Text, Edit } = TextEditToggle;
             formKey={fieldName}
             disabled={field.disabled || disabled}
             onSubmit={this.updateIssueWSJFField}
-            originData={value ? String(value) : undefined}
+            initValue={value ? String(value) : undefined}
+            editor={({ submit }) => (
+              <SelectNumber
+                getPopupContainer={() => document.body} 
+                selectNumbers={['1', '2', '3', '5', '8', '13', '20']} 
+                onChange={submit}
+                pattern={/^[1-9]\d{0,2}$/} 
+                validationRenderer={() => (
+                  <span>请输入小于3位的整数</span>
+                )} 
+              />
+            )}
           >
-            <Text>
-              <div style={{ whiteSpace: 'nowrap' }}>
-                {(value || value === 0) ? value : '无'}
-              </div>
-            </Text>
-            <Edit>
-              <SelectNumber getPopupContainer={() => document.body} autoFocus selectNumbers={['1', '2', '3', '5', '8', '13', '20']} />
-            </Edit>
+            <div style={{ whiteSpace: 'nowrap' }}>
+              {(value || value === 0) ? value : '无'}
+            </div>
           </TextEditToggle>
         </div>
       </div>

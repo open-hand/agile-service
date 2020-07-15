@@ -4,18 +4,30 @@ import com.google.common.collect.Lists;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.enums.StatusType;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.*;
 
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.hzero.core.base.BaseConstants;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
+import rx.Observable;
 
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -140,6 +152,81 @@ public class IssueAssembler extends AbstractAssembler {
             issueListFieldKVDTOList.add(issueListFieldKVVO);
         });
         return issueListFieldKVDTOList;
+    }
+
+    /**
+     * issueDTO转换为IssueCountVO
+     * @param issueList issueList
+     * @param priority 在priority内的user优先排序
+     * @return IssueCountVO
+     */
+    public List<IssueCompletedStatusVO> issueDTOToIssueCountVO(List<IssueOverviewVO> issueList, Set<Long> priority){
+        Set<Long> userIdList = new HashSet<>();
+        rx.Observable.from(priority)
+                .mergeWith(Observable.from(issueList.stream().map(IssueOverviewVO::getCreatedBy).collect(Collectors.toSet())))
+                .toList().subscribe(userIdList::addAll);
+        Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(new ArrayList<>(userIdList), true);
+        // 设置提出list
+        List<Map.Entry<String, Integer>> createdlist = sortAndConvertCreated(issueList, priority, userMap);
+        // 设置已解决Map
+        Map<String, Integer> assigneeMap = sortAndConvertAssignee(issueList, userMap);
+        List<IssueCompletedStatusVO> result = createdlist.stream()
+                .map(entry -> new IssueCompletedStatusVO(entry.getKey(), entry.getValue())).collect(Collectors.toList());
+        result.addAll(priority.stream()
+                .map(userId -> userMap.get(userId).getRealName())
+                .filter(realName -> !createdlist.stream().map(Map.Entry::getKey).collect(Collectors.toSet())
+                        .contains(realName)).map(IssueCompletedStatusVO::new)
+                .collect(Collectors.toList()));
+        // 设置同一工作人的已解决问题数，并移除掉
+        for (IssueCompletedStatusVO issue : result) {
+            if (assigneeMap.containsKey(issue.getWorker())){
+                issue.setCompleted(assigneeMap.get(issue.getWorker()));
+                assigneeMap.remove(issue.getWorker());
+            }
+        }
+        // 将剩余的人（即仅解决bug无创建bug的人）加入list
+        result.addAll(assigneeMap.entrySet().stream()
+                .map(entry -> new IssueCompletedStatusVO(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList()));
+        return result;
+    }
+
+    /**
+     * 过滤掉未完成的issue再进行排序
+     * @param issueList 待排序list
+     * @return 坐标点list
+     */
+    private Map<String, Integer> sortAndConvertAssignee(List<IssueOverviewVO> issueList, Map<Long, UserMessageDTO> userMap) {
+        return issueList.stream()
+                .filter(issue -> BooleanUtils.isTrue(issue.getCompleted()) && Objects.nonNull(issue.getAssigneeId()))
+                .collect(Collectors.groupingBy(IssueOverviewVO::getAssigneeId)).entrySet()
+                .stream().sorted(Map.Entry.comparingByKey())
+                .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
+                .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
+    }
+
+
+    /**
+     * 创建人是经办人或报告人时，排在前面
+     * @param issueList 待排序list
+     * @param priority 优先set
+     * @param userMap 用户map
+     * @return 坐标点list
+     */
+    private List<Map.Entry<String, Integer>> sortAndConvertCreated(List<IssueOverviewVO> issueList, Set<Long> priority, Map<Long, UserMessageDTO> userMap) {
+        List<Map.Entry<String, Integer>> list = new ArrayList<>(issueList.size());
+        Map<Boolean, List<IssueOverviewVO>> group = issueList.stream().collect(Collectors.groupingBy(issue -> priority.contains(issue.getCreatedBy())));
+        list.addAll(group.getOrDefault(Boolean.TRUE, Collections.emptyList())
+                .stream().collect(Collectors.groupingBy(IssueOverviewVO::getCreatedBy)).entrySet()
+                .stream().sorted(Map.Entry.comparingByKey())
+                .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
+                .collect(Collectors.toList()));
+        list.addAll(group.getOrDefault(Boolean.FALSE, Collections.emptyList())
+                .stream().collect(Collectors.groupingBy(IssueOverviewVO::getCreatedBy)).entrySet()
+                .stream().sorted(Map.Entry.comparingByKey())
+                .map(entry -> new ImmutablePair<>(userMap.get(entry.getKey()).getRealName(), entry.getValue().size()))
+                .collect(Collectors.toList()));
+        return list;
     }
 
     private void setParentId(IssueListFieldKVVO issueListFieldKVVO, IssueDTO issue) {
@@ -529,4 +616,196 @@ public class IssueAssembler extends AbstractAssembler {
         }
         return  issueLinkVOList;
     }
+
+    /**
+     *  issueDTO转换SprintStatisticsVO
+     * @param issueList issueList
+     * @return SprintStatisticsVO
+     */
+    public SprintStatisticsVO issueDTOToSprintStatisticsVO(List<IssueOverviewVO> issueList) {
+        SprintStatisticsVO sprintStatistics = new SprintStatisticsVO();
+        Map<Boolean, List<IssueOverviewVO>> group = issueList.stream()
+                .collect(Collectors.groupingBy(issue -> BooleanUtils.isTrue(issue.getCompleted())));
+        sprintStatistics.setTotal(issueList.size());
+        sprintStatistics.setCompletedCount(group.getOrDefault(Boolean.TRUE, Collections.emptyList()).size());
+        sprintStatistics.setUncompletedCount(group.getOrDefault(Boolean.FALSE, Collections.emptyList()).size());
+        sprintStatistics.setTodoCount(Long.valueOf(group.getOrDefault(Boolean.FALSE, Collections.emptyList()).stream()
+                .filter(issue -> Objects.equals(StatusType.TODO, issue.getCategoryCode())).count()).intValue());
+        sprintStatistics.setUnassignCount(Long.valueOf(group.getOrDefault(Boolean.FALSE, Collections.emptyList()).stream()
+                .filter(issue -> Objects.isNull(issue.getAssigneeId())).count()).intValue());
+        return sprintStatistics;
+    }
+
+    public List<Map.Entry<String, Integer>> convertBugEntry(List<ReportIssueConvertDTO> reportIssueConvertDTOList, DateFormat df, Function<ReportIssueConvertDTO, Boolean> func){
+        Map<Date, List<ReportIssueConvertDTO>> group = reportIssueConvertDTOList.stream()
+                .filter(func::apply).collect(Collectors.groupingBy(bug1 -> DateUtils.truncate(bug1.getDate(), Calendar.DAY_OF_MONTH)));
+        return group.entrySet().stream().sorted(Map.Entry.comparingByKey())
+                .map(entry -> new ImmutablePair<>(df.format(entry.getKey()),
+                        Long.valueOf(entry.getValue().stream()
+                                .map(v -> v.getNewValue().subtract(v.getOldValue()).intValue()).count()).intValue()))
+                .collect(Collectors.toList());
+    }
+
+    public List<OneJobVO> issueToOneJob(SprintDTO sprint, List<IssueOverviewVO> issueList, List<WorkLogDTO> workLogList, List<DataLogDTO> resolutionLogList, List<DataLogDTO> assigneeLogList){
+        // 生成迭代经办人，报告人list
+        Set<Long> userSet = issueList.stream().map(IssueOverviewVO::getAssigneeId).collect(Collectors.toSet());
+        userSet.addAll(issueList.stream().map(IssueOverviewVO::getReporterId).collect(Collectors.toSet()));
+        // 移除经办人为null的情况
+        userSet.remove(null);
+        userSet.remove(0L);
+        DateFormat df = new SimpleDateFormat(BaseConstants.Pattern.DATE);
+        // 生成基准时间-用户轴
+        Map<Date, Set<Long>> timeUserLine = generateTimeUserLine(sprint, userSet);
+        Map<Long, UserMessageDTO> userMessageDOMap = userService.queryUsersMap(new ArrayList<>(userSet), true);
+        // issue类型map
+        Map<Long, IssueOverviewVO> issueTypeMap = issueList.stream().collect(Collectors.toMap(IssueOverviewVO::getIssueId,
+                a -> a));
+        // 每日每人bug提出数量
+        Map<Date, Map<Long, List<IssueOverviewVO>>> dateOneBugMap = groupByList(
+                issueList.stream().filter(issue -> IssueTypeCode.isBug(issue.getTypeCode())).collect(Collectors.toList()),
+                IssueOverviewVO::getCreationDate, IssueOverviewVO::getCreatedBy,
+                issue -> issue.setCreationDate(DateUtils.truncate(issue.getCreationDate(),
+                        Calendar.DAY_OF_MONTH)));
+        // 每日每人工时
+        Map<Date, Map<Long, List<WorkLogDTO>>> dateOneWorkMap = groupByList(workLogList,
+                WorkLogDTO::getStartDate, WorkLogDTO::getCreatedBy,
+                issue -> issue.setStartDate(DateUtils.truncate(issue.getStartDate(),
+                                Calendar.DAY_OF_MONTH)));
+        // 每日issue最后经办人
+        Map<Date, Map<Long, DataLogDTO>> assigneeMap = getAssigneeMap(assigneeLogList, issueTypeMap);
+        // 计算任务，故事，解决bug
+        Map<Date, List<DataLogDTO>> creationMap = getcreationMap(resolutionLogList, assigneeMap, issueTypeMap);
+        Map<Date, OneJobVO> oneJobMap = timeUserLine.entrySet().stream().map(entry -> new ImmutablePair<>(entry.getKey()
+                , dataLogListToOneJob(entry.getKey(), entry.getValue(),
+                creationMap, issueTypeMap, dateOneBugMap, dateOneWorkMap, userMessageDOMap)))
+                .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
+        return oneJobMap.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(entry -> {
+            List<JobVO> jobList = entry.getValue().getJobList();
+            entry.getValue().setTotal(new JobVO(jobList));
+            entry.getValue().setWorkDate(df.format(entry.getValue().getWorkDateSource()));
+            return entry.getValue();
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * 生成基准轴
+     * @param sprint sprint
+     * @param userSet userSet
+     * @return 基准轴map
+     */
+    private Map<Date, Set<Long>> generateTimeUserLine(SprintDTO sprint, Set<Long> userSet) {
+        Map<Date, Set<Long>> timeUserLine = new HashMap<>();
+        // 生成迭代的开始时间与结束时间
+        Date temp = DateUtils.truncate(sprint.getStartDate(), Calendar.DAY_OF_MONTH);
+        Date now = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
+        // 渲染基础时间轴，包含从迭代开始到目前的所有日期, 迭代所有涉及到的经办人和报告人
+        while (!temp.equals(now)){
+            timeUserLine.put(temp, new HashSet<>(userSet));
+            temp = DateUtils.addDays(temp, 1);
+        }
+        timeUserLine.put(now, new HashSet<>(userSet));
+        return timeUserLine;
+    }
+
+    private Map<Date, List<DataLogDTO>> getcreationMap(List<DataLogDTO> dataLogList,
+                                                       Map<Date, Map<Long, DataLogDTO>> assigneeMap,
+                                                       Map<Long, IssueOverviewVO> issueTypeMap) {
+        return dataLogList.stream()
+                    .peek(log -> log.setCreationDate(DateUtils.truncate(log.getCreationDate(), Calendar.DAY_OF_MONTH)))
+                    // 按照日志的创建日期分组
+                    .collect(Collectors.groupingBy(DataLogDTO::getCreationDate))
+                    .entrySet().stream()
+                    // 按照issueId去重，取logId最大值,即当天的最后解决记录
+                    .map(entry -> new ImmutablePair<>(entry.getKey(), entry.getValue().stream()
+                            .collect(Collectors.groupingBy(DataLogDTO::getIssueId)).values()
+                            .stream().map(list -> list.stream()
+                                    .max(Comparator.comparingLong(DataLogDTO::getLogId))
+                                    .map(log -> {
+                                        DataLogDTO assignee = assigneeMap.get(entry.getKey()).getOrDefault(log.getIssueId(), new DataLogDTO());
+                                        if (Objects.isNull(assignee.getNewValue())){
+                                            log.setCreatedBy(issueTypeMap.get(log.getIssueId()).getCreatedBy());
+                                        }else {
+                                            log.setCreatedBy(Long.parseLong(assignee.getNewValue()));
+                                        }
+                                        return log;
+                                    })
+                                    .orElse(null)).filter(Objects::nonNull).collect(Collectors.toList())))
+                    .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
+    }
+
+    /**
+     * 返回值 Map<日期, Map<issueId, assigneeId>>
+     * @param assigneeLogList 经办人日志
+     * @param issueTypeMap id-实体映射
+     * @return Map
+     */
+    private Map<Date, Map<Long, DataLogDTO>> getAssigneeMap(List<DataLogDTO> assigneeLogList, Map<Long, IssueOverviewVO> issueTypeMap) {
+        return assigneeLogList.stream()
+                .peek(log -> log.setCreationDate(DateUtils.truncate(log.getCreationDate(), Calendar.DAY_OF_MONTH)))
+                // 按照日志的创建日期分组
+                .collect(Collectors.groupingBy(DataLogDTO::getCreationDate))
+                .entrySet().stream()
+                // 按照issueId去重，取logId最大值,即当天的经办人记录，
+                // 如果无经办人则说明issue从创建就没更换过经办人，此时复制issueId, 直接取issue上的人。
+                .map(entry -> new ImmutablePair<>(entry.getKey(), entry.getValue().stream()
+                        .collect(Collectors.groupingBy(DataLogDTO::getIssueId)).entrySet()
+                        .stream().map(e1 -> new ImmutablePair<>(e1.getKey(), e1.getValue().stream()
+                                .max(Comparator.comparingLong(DataLogDTO::getLogId))
+                                .orElseGet(() -> {
+                                    DataLogDTO log = new DataLogDTO();
+                                    log.setIssueId(e1.getKey());
+                                    return log;
+                                })
+                                )).collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight))))
+                .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
+    }
+
+    private <T, K1, K2> Map<K1, Map<K2, List<T>>> groupByList(List<T> list,
+                                                              Function<T, K1> k1,
+                                                              Function<T, K2> k2,
+                                                              Consumer<? super T> action){
+        return list.stream().peek(action)
+                .collect(Collectors.groupingBy(k1)).entrySet().stream()
+                .map(entry -> new ImmutablePair<>(entry.getKey(), entry.getValue().stream()
+                        .collect(Collectors.groupingBy(k2))))
+                .collect(Collectors.toMap(ImmutablePair::getLeft, ImmutablePair::getRight));
+    }
+
+    private OneJobVO dataLogListToOneJob(Date workDate, Set<Long> userSet, Map<Date, List<DataLogDTO>> creationMap,
+                                         Map<Long, IssueOverviewVO> issueTypeMap,
+                                         Map<Date, Map<Long, List<IssueOverviewVO>>> dateOneBugMap,
+                                         Map<Date, Map<Long, List<WorkLogDTO>>> dateOneWorkMap,
+                                         Map<Long, UserMessageDTO> userMessageDOMap){
+        // 根据日期取日志集合然后按照创建人分组
+        Map<Long, List<DataLogDTO>> creationGroup = creationMap.getOrDefault(workDate, Collections.emptyList())
+                .stream().collect(Collectors.groupingBy(DataLogDTO::getCreatedBy));
+        List<JobVO> jobList = new ArrayList<>(creationGroup.size());
+        for (Long userId : userSet) {
+            // 取当前用户对应的解决issue集合，将集合按照issueType分组
+            Map<String, List<DataLogDTO>> typeMap =
+                    creationGroup.getOrDefault(userId, Collections.emptyList())
+                            .stream().collect(Collectors.groupingBy(log -> issueTypeMap.get(log.getIssueId()).getTypeCode()));
+            JobVO job = new JobVO();
+            job.setWorker(userMessageDOMap.get(userId).getRealName());
+            job.setTaskCount(typeMap.getOrDefault(IssueTypeCode.TASK.value(), Collections.emptyList()).size()
+                    + typeMap.getOrDefault(IssueTypeCode.SUB_TASK.value(), Collections.emptyList()).size());
+            job.setStoryCount(typeMap.getOrDefault(IssueTypeCode.STORY.value(), Collections.emptyList()).size());
+            job.setStoryPointCount(typeMap.getOrDefault(IssueTypeCode.STORY.value(), Collections.emptyList())
+                    .stream().map(points -> issueTypeMap.get(points.getIssueId()).getStoryPoints())
+                    .filter(Objects::nonNull).reduce(BigDecimal::add).orElse(BigDecimal.ZERO));
+            job.setBugFixCount(typeMap.getOrDefault(IssueTypeCode.BUG.value(), Collections.emptyList()).size());
+            job.setBugCreatedCount(dateOneBugMap.getOrDefault(workDate, Collections.emptyMap())
+                    .getOrDefault(userId, Collections.emptyList()).size());
+            job.setWorkTime(dateOneWorkMap.getOrDefault(workDate, Collections.emptyMap())
+                    .getOrDefault(userId, Collections.emptyList())
+                    .stream().map(WorkLogDTO::getWorkTime).filter(Objects::nonNull)
+                    .reduce(BigDecimal::add).orElse(BigDecimal.ZERO));
+            jobList.add(job);
+        }
+        OneJobVO oneJob = new OneJobVO();
+        oneJob.setJobList(jobList);
+        oneJob.setWorkDateSource(workDate);
+        return oneJob;
+    }
+
 }

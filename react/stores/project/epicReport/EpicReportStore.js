@@ -1,11 +1,10 @@
 import {
   observable, action, computed,  
 } from 'mobx';
-import { store, stores, axios } from '@choerodon/boot';
+import { store } from '@choerodon/boot';
 import _ from 'lodash';
-import { issueApi, epicApi } from '@/api';
+import { epicApi, reportApi } from '@/api';
 
-const { AppState } = stores;
 const UNIT_STATUS = {
   issue_count: {
     committed: undefined,
@@ -70,33 +69,30 @@ class EpicReportStore {
   loadChartData(epicId = this.currentEpicId, unit = this.currentUnit) {
     this.setChartLoading(true);
     this.setReload(true);
-    axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/epic_chart?epicId=${epicId}&type=${unit}`)
-      .then((res) => {
-        this.setBeforeCurrentUnit(unit);
-        const data = res.map(item => ({
-          ...item,
-          allRemainTimes: item.allRemainTimes || 0,
-          allStoryPoints: item.allStoryPoints || 0,
-          completedRemainTimes: item.completedRemainTimes || 0,
-          completedStoryPoints: item.completedStoryPoints || 0,
-          issueCompletedCount: item.issueCompletedCount || 0,
-          issueCount: item.issueCount || 0,
-          unEstimateIssueCount: item.unEstimateIssueCount || 0,
-        }));
-        this.setChartData(data);
-        this.setChartLoading(false);
-        this.setReload(false);
-      });
+    reportApi.loadEpicChart(epicId, unit).then((res) => {
+      this.setBeforeCurrentUnit(unit);
+      const data = res.map(item => ({
+        ...item,
+        allRemainTimes: item.allRemainTimes || 0,
+        allStoryPoints: item.allStoryPoints || 0,
+        completedRemainTimes: item.completedRemainTimes || 0,
+        completedStoryPoints: item.completedStoryPoints || 0,
+        issueCompletedCount: item.issueCompletedCount || 0,
+        issueCount: item.issueCount || 0,
+        unEstimateIssueCount: item.unEstimateIssueCount || 0,
+      }));
+      this.setChartData(data);
+      this.setChartLoading(false);
+      this.setReload(false);
+    });
   }
 
   loadTableData(epicId = this.currentEpicId) {
     this.setTableLoading(true);
-    const orgId = AppState.currentMenuType.organizationId;
-    axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/epic_issue_list?organizationId=${orgId}&epicId=${epicId}`)
-      .then((res) => {
-        this.setTableData(res);
-        this.setTableLoading(false);
-      });
+    reportApi.loadIssuesForEpic(epicId).then((res) => {
+      this.setTableData(res);
+      this.setTableLoading(false);
+    });
   }
 
   @action setTableLoading(data) {

@@ -4,6 +4,7 @@ import io.choerodon.agile.app.service.IIssueAttachmentService;
 import io.choerodon.agile.infra.dto.IssueAttachmentDTO;
 import io.choerodon.agile.infra.dto.TestCaseAttachmentDTO;
 import io.choerodon.agile.infra.feign.CustomFileRemoteService;
+import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.vo.IssueAttachmentVO;
@@ -73,6 +74,7 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
         issueAttachmentDTO.setUrl(url);
         issueAttachmentDTO.setCommentId(1L);
         iIssueAttachmentService.createBase(issueAttachmentDTO);
+        BaseFieldUtil.updateIssueLastUpdateInfo(issueAttachmentDTO.getIssueId(), issueAttachmentDTO.getProjectId());
     }
 
     @Override
@@ -131,6 +133,7 @@ public class IssueAttachmentServiceImpl implements IssueAttachmentService {
             throw new CommonException("error.project.id.does.not.correspond");
         }
         Boolean result = iIssueAttachmentService.deleteBase(issueAttachmentDTO.getAttachmentId());
+        BaseFieldUtil.updateIssueLastUpdateInfo(issueAttachmentDTO.getIssueId(), issueAttachmentDTO.getProjectId());
         String url = null;
         try {
             url = URLDecoder.decode(issueAttachmentDTO.getUrl(), "UTF-8");

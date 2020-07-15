@@ -1,9 +1,37 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 
+interface UFeatureColor {
+  colorCode: string,
+  issueId: number,
+  objectVersionNumber: number,
+}
+interface IFeatureLink {
+  piId: number,
+  boardFeatureId: number,
+  dependBoardFeatureIds: Array<number>,
+  type: string,
+  forward: boolean,
+}
 class FeatureApi {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
+  }
+
+  /**
+   * 批量创建特性关联
+   * @param data 
+   */
+  createLink(data:IFeatureLink) {
+    return axios.post(`${this.prefix}/board_depend/batch_create_depend`, data);
+  }
+
+  /**
+   * 刪除特性关联
+   * @param featureDependId 
+   */
+  deleteLink(featureDependId:number) {
+    return axios.delete(`${this.prefix}/board_depend/${featureDependId}`);
   }
 
   /**
@@ -12,7 +40,7 @@ class FeatureApi {
    * @param param 搜索
    * @param page 第几页
    */
-  queryAllInSubProject(featureIds: number[], param: string, page: number = 1) {
+  queryAllInSubProject(featureIds: number[], param: string, page: number = 1, size: number) {
     return axios.post(
       `${this.prefix}/issues/feature/all`,
       featureIds || [],
@@ -20,18 +48,19 @@ class FeatureApi {
         params: {
           organizationId: getOrganizationId(),
           page,
-          size: 10,
+          size: !size && size === 0 ? 0 : (size || 10),
           param,
         },
       },
     );
   }
 
+
   /**
    * 在子项目根据piId查询项目群的特性
    * @param piId 不传默认查询活跃PI
    */
-  getByPiIdInSubProject(piId?: number, sprintId?:number) {
+  getByPiIdInSubProject(piId?: number, sprintId?: number) {
     return axios.get(
       `${this.prefix}/issues/features`,
       {
@@ -48,23 +77,29 @@ class FeatureApi {
    * 根据史诗ID查询项目群的特性
    * @param epicId 可以不传
    */
-  getByEpicId(epicId?: number) {
-    return axios.get(
-      `${this.prefix}/issues/feature/select_data`,
-      {
+  getByEpicId(epicId?: number, searchName?: string, page: number = 1, size: number = 10) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/issues/feature/select_data`,
+      data: {
         params: {
-          organizationId: getOrganizationId(),
           epicId,
         },
       },
-    );
+      params: {
+        organizationId: Number(getOrganizationId()),
+        param: searchName,
+        page,
+        size,
+      },
+    });
   }
 
   /**
-   * 查询特性的颜色
+   * 查询特性类型
    */
-  getColors() {
-    return axios.get('/agile/v1/lookup_values/feature_color');
+  getType() {
+    return axios.get(`${this.prefix}/board_depend/list_feature_depend_type`);
   }
 
   /**
@@ -81,6 +116,15 @@ class FeatureApi {
   }) {
     return axios.post(`${this.prefix}/board_feature/feature_link_project`, data);
   }
+
+  /**
+   * 更新特性颜色
+   * @param data 
+   */
+  updateColor(data: UFeatureColor) {
+    return axios.put(`${this.prefix}/issues/update_feature`, data);
+  }
+
 
   /**
    * 根据summary查询史诗下是否有同名特性
@@ -106,7 +150,7 @@ class FeatureApi {
     });
   }
 
-  
+
   /**
    * 分页查询特性列表
    * @param page 
@@ -141,7 +185,7 @@ class FeatureApi {
    * 查询特性下拆分的故事
    * @param issueId 
    */
-  getSplitStory(issueId:number) {
+  getSplitStory(issueId: number) {
     return axios({
       method: 'post',
       url: `${this.prefix}/issues/list_story_by_feature_id`,
@@ -149,6 +193,16 @@ class FeatureApi {
         issueId,
       },
     });
+  }
+
+  
+  /**
+   * 将批量的issue加入到特性中
+   * @param featureId 
+   * @param issueIds 
+   */
+  addIssues(featureId: number, issueIds: Array<number>) {
+    return axios.post(`${this.prefix}/issues/to_feature/${featureId}`, issueIds);
   }
 }
 

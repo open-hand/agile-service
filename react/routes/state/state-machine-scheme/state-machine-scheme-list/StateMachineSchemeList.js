@@ -4,29 +4,15 @@ import React, {
 import { observer, inject } from 'mobx-react-lite';
 import { withRouter, Link } from 'react-router-dom';
 import {
-  Table,
-  Button,
-  Modal,
-  Form,
-  Select,
-  Input,
-  Icon,
-  Tooltip,
-  message,
-  Menu,
-  Breadcrumb as Bread,
+  Table, Modal, Form, Input, Icon, message, Menu, Breadcrumb as Bread,
 } from 'choerodon-ui';
 import { Modal as ProModal } from 'choerodon-ui/pro';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import {
-  Content,
-  Header,
-  TabPage as Page,
-  Permission,
-  Breadcrumb,
+  Content, TabPage as Page, Breadcrumb,
 } from '@choerodon/boot';
-
 import './StateMachineSchemeList.less';
+import { stateMachineSchemeApi } from '@/api';
 import TypeTag from '../../../../components/TypeTag/TypeTag';
 import Store from '../stores';
 import TableDropMenu from '../../../../common/TableDropMenu';
@@ -156,8 +142,7 @@ function StateMachineSchemeList(props) {
   };
 
   const confirmDelete = (schemeId) => {
-    const { organizationId } = AppState.currentMenuType;
-    stateMachineSchemeStore.deleteStateMachineScheme(organizationId, schemeId).then((data) => {
+    stateMachineSchemeApi.deleteDraft(schemeId).then((data) => {
       if (data) {
         message.success(intl.formatMessage({ id: 'deleteSuccess' }));
       } else {
@@ -174,7 +159,7 @@ function StateMachineSchemeList(props) {
 
   const checkName = async (rule, value, callback) => {
     const orgId = AppState.currentMenuType.organizationId;
-    const res = await stateMachineSchemeStore.checkName(orgId, value);
+    const res = await stateMachineSchemeApi.checkName(value);
     if (res) {
       callback(intl.formatMessage({ id: 'priority.create.name.error' }));
     } else {

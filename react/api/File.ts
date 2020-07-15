@@ -12,12 +12,12 @@ class FileApi {
     * @param {*} data
     * @param {*} config
     */
-  uploadFile(data: FormData, issueId: number) {
+  uploadFile(data: FormData, issueId: number, projectId?: number) {
     const headers = { 'content-type': 'multipart/form-data' };
     return axios({
       headers,
       method: 'post',
-      url: `${this.prefix}/issue_attachment`,
+      url: `/agile/v1/projects/${projectId || getProjectId()}/issue_attachment`,
       data,
       params: {
         // projectId,
@@ -50,5 +50,5 @@ class FileApi {
 }
 
 const fileApi = new FileApi();
-// eslint-disable-next-line import/prefer-default-export
+
 export { fileApi };

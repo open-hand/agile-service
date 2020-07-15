@@ -17,7 +17,7 @@ export default observer(() => {
           BacklogStore.setNewIssueVisible(false);
           // 创建issue后刷新
           if (res) {
-            BacklogStore.refresh(false, res);
+            BacklogStore.refresh(false, false);
           }      
         }}
       />

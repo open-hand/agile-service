@@ -3,14 +3,12 @@ import { observer } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import { featureApi } from '@/api';
-import TextEditToggle from '../../../../TextEditToggle';
-import SelectFocusLoad from '../../../../SelectFocusLoad';
-
-const { Text, Edit } = TextEditToggle;
+import TextEditToggle from '@/components/TextEditTogglePro';
+import SelectTeam from '@/components/select/select-team';
 
 @observer
 class FieldTeam extends Component {
-  handleSubmit = async (teamIds, done) => {
+  handleSubmit = async (teamIds = []) => {
     const {
       store, onUpdate, reloadIssue,
     } = this.props;
@@ -18,8 +16,8 @@ class FieldTeam extends Component {
     const { issueId } = issue;
     const activePiTeams = issue.activePiTeams || [];
     const originTeamIds = activePiTeams.map(team => team.id);
-    const addTeams = teamIds.filter(teamId => !originTeamIds.includes(teamId));
-    const removeTeams = originTeamIds.filter(teamId => !teamIds.includes(teamId));
+    const addTeams = teamIds ? teamIds.filter(teamId => !originTeamIds.includes(teamId)) : [];
+    const removeTeams = teamIds ? originTeamIds.filter(teamId => !teamIds.includes(teamId)) : originTeamIds;
     await featureApi.updateTeamAndSprint({
       piId: issue.activePi ? issue.activePi.id : null,
       deleteSprintIds: [],
@@ -32,7 +30,6 @@ class FieldTeam extends Component {
       onUpdate();
     }
     await reloadIssue(issueId);
-    done();
   }
 
   render() {
@@ -49,26 +46,21 @@ class FieldTeam extends Component {
         </div>
         <div className="c7n-value-wrapper">
           <TextEditToggle          
-            formKey="team"
             disabled={disabled}
             onSubmit={this.handleSubmit}
-            originData={teamIds}
-          >
-            <Text>
-              {activePiTeams.length > 0 ? activePiTeams.map(team => team.name).join(' 、 ') : '无'}
-            </Text>
-            <Edit>
-              <SelectFocusLoad
+            initValue={teamIds}
+            editor={(
+              <SelectTeam
+                multiple
                 label="团队"
                 style={{
                   width: '100%',
                   minWidth: 150,
                 }}
-                loadWhenMount
-                mode="multiple"
-                type="sub_project"
               />
-            </Edit>
+            )}
+          >
+            {activePiTeams.length > 0 ? activePiTeams.map(team => team.name).join(' 、 ') : '无'}
           </TextEditToggle>
         </div>
       </div>

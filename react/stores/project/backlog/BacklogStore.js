@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import {
   observable, action, computed, toJS,
 } from 'mobx';
@@ -10,7 +9,7 @@ import { store, stores } from '@choerodon/boot';
 import { Modal } from 'choerodon-ui';
 import Moment from 'moment';
 import {
-  featureApi, sprintApi, piApi, storyMapApi, issueApi, epicApi, 
+  featureApi, sprintApi, piApi, storyMapApi, issueApi, epicApi, priorityApi, issueTypeApi, commonApi, versionApi, quickFilterApi, 
 } from '@/api';
 import { getProjectId } from '@/utils/common';
 import { extendMoment } from 'moment-range';
@@ -135,10 +134,6 @@ class BacklogStore {
     this.projectInfo = data;
   }
 
-  axiosGetProjectInfo() {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/project_info`);
-  }
-
   @computed get getQuickFilters() {
     return toJS(this.quickFilters);
   }
@@ -190,7 +185,7 @@ class BacklogStore {
 
 
   axiosGetColorLookupValue() {
-    return axios.get('/agile/v1/lookup_values/epic_color');
+    return commonApi.loadLookupValue('epic_color');
   }
 
   @computed get getColorLookupValue() {
@@ -219,14 +214,6 @@ class BacklogStore {
     this.sprintWidth = document.getElementsByClassName('c7n-backlog-sprint')[0].offsetWidth;
   }
 
-  axiosGetIssueDetail(issueId) {
-    const orgId = AppState.currentMenuType.organizationId;
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/${issueId}${orgId ? `?organizationId=${orgId}` : ''}`);
-  }
-
-  axiosEasyCreateIssue(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues?applyType=agile`, data);
-  }
 
   @computed get getOnlyMe() {
     return this.onlyMe;
@@ -249,10 +236,6 @@ class BacklogStore {
     Object.assign(sprint, newData);
   }
 
-  axiosUpdateVerison(versionId, data) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/update/${versionId}`, data);
-  }
-
   @computed get getClickIssueDetail() {
     return this.clickIssueDetail;
   }
@@ -263,18 +246,6 @@ class BacklogStore {
 
   @computed get getPrevClickedIssue() {
     return this.prevClickedIssue;
-  }
-
-  axiosUpdateIssuesToVersion(versionId, ids) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/to_version/${versionId}`, ids);
-  }
-
-  axiosUpdateIssuesToEpic(epicId, ids) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/to_epic/${epicId}`, ids);
-  }
-
-  axiosUpdateIssuesToFeature(featureId, ids) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/to_feature/${featureId}`, ids);
   }
 
   @computed get getIsLeaveSprint() {
@@ -291,15 +262,6 @@ class BacklogStore {
 
   @action setIsDragging(data) {
     this.isDragging = data;
-  }
-
-  axiosUpdateIssue(data) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issues`, data);
-  }
-
-  // 更新特性颜色
-  axiosUpdateFeatureColor(data) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/update_feature`, data);
   }
 
   @computed get getChosenVersion() {
@@ -357,16 +319,6 @@ class BacklogStore {
     this.selectedSprintId = data;
   }
 
-
-  axiosGetEpic() {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/epics`);
-  }
-
-  axiosGetVersion() {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version`);
-  }
-
-
   @action setSprintData({ backlogData, sprintData }) {
     this.issueMap.set('0', backlogData.backLogIssue ? backlogData.backLogIssue : []);
     const { backLogIssue, backlogIssueCount } = backlogData;
@@ -400,13 +352,6 @@ class BacklogStore {
     this.quickSearchList = data;
   }
 
-  axiosGetQuickSearchList() {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/query_all`, {
-      contents: [],
-      filterName: '',
-    });
-  }
-
   @observable assigneeFilterIds = [];
 
   @computed get getAssigneeFilterIds() {
@@ -436,22 +381,8 @@ class BacklogStore {
 
   axiosGetSprint = () => sprintApi.getSprintAndIssues(this.quickFilters, this.assigneeFilterIds, this.filter)
 
-
-  handleVersionDrap = data => axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/drag`, data);
-
-  axiosGetWorkSetting(year) {
-    const proId = AppState.currentMenuType.id;
-    const orgId = AppState.currentMenuType.organizationId;
-    return axios.get(`/iam/choerodon/v1/projects/${proId}/time_zone_work_calendars/time_zone_detail/${orgId}?year=${year}`);
-  }
-
   @computed get getIssueTypes() {
     return this.issueTypes;
-  }
-
-  axiosGetIssueTypes() {
-    const proId = AppState.currentMenuType.id;
-    return axios.get(`/agile/v1/projects/${proId}/schemes/query_issue_types_with_sm_id?apply_type=agile`);
   }
 
   @computed get getDefaultPriority() {
@@ -460,11 +391,6 @@ class BacklogStore {
 
   @action setDefaultPriority(data) {
     this.defaultPriority = data;
-  }
-
-  axiosGetDefaultPriority() {
-    const proId = AppState.currentMenuType.id;
-    return axios.get(`/agile/v1/projects/${proId}/priority/default`);
   }
 
   @action setSpinIf(data) {
@@ -602,6 +528,7 @@ class BacklogStore {
     this.sprintData = [];
     this.clickIssueDetail = {};
     this.issueMap.clear();
+    this.selectedPiId = undefined;
     this.selectedSprintId = undefined;
   }
 
@@ -679,7 +606,7 @@ class BacklogStore {
     // this.multiSelected = observable.map();
     // this.clickIssueDetail = {};
     this.onBlurClick();
-    return axios.post(`agile/v1/projects/${AppState.currentMenuType.id}/issues/to_sprint/${destinationId}`, {
+    return sprintApi.addIssues(destinationId, {
       before: destinationIndex === 0,
       issueIds: modifiedArr,
       outsetIssueId: prevIssue ? prevIssue.issueId : 0,
@@ -832,10 +759,10 @@ class BacklogStore {
       versionId,
       objectVersionNumber,
     };
-    this.handleVersionDrap(req).then(
+    versionApi.drag(req).then(
       action('fetchSuccess', (res) => {
         if (!res.message) {
-          this.axiosGetVersion().then((versions) => {
+          versionApi.loadAll().then((versions) => {
             this.setVersionData(versions);
           });
         } else {
@@ -985,9 +912,9 @@ class BacklogStore {
    */
   getSprint = async (setPiIdIf) => {
     const [quickSearch, issueTypes, priorityArr, backlogData] = await Promise.all([
-      this.axiosGetQuickSearchList(),
-      this.axiosGetIssueTypes(),
-      this.axiosGetDefaultPriority(),
+      quickFilterApi.loadAll(),
+      issueTypeApi.loadAllWithStateMachineId(),
+      priorityApi.getDefaultByProject(),
       this.axiosGetSprint(),
     ]);
     await this.getPlanPi(backlogData.sprintData, setPiIdIf);
@@ -1015,7 +942,7 @@ class BacklogStore {
    * 加载版本数据
    */
   loadVersion = () => {
-    this.axiosGetVersion().then((data2) => {
+    versionApi.loadAll().then((data2) => {
       const newVersion = [...data2];
       for (let index = 0, len = newVersion.length; index < len; index += 1) {
         newVersion[index].expand = false;

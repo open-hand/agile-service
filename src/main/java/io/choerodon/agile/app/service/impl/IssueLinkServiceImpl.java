@@ -8,7 +8,10 @@ import io.choerodon.agile.app.assembler.IssueLinkAssembler;
 import io.choerodon.agile.app.service.IssueLinkService;
 import io.choerodon.agile.infra.dto.IssueLinkDTO;
 import io.choerodon.agile.infra.mapper.IssueLinkMapper;
+import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.core.exception.CommonException;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +48,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
             issueLinkValidator.verifyCreateData(issueLinkDTO);
             if (issueLinkValidator.checkUniqueLink(issueLinkDTO)) {
                 create(issueLinkDTO);
+                BaseFieldUtil.updateIssueLastUpdateInfoForIssueLink(issueLinkDTO.getProjectId(), issueLinkDTO);
             }
         });
         return listIssueLinkByIssueId(issueId, projectId, false);
@@ -53,6 +57,8 @@ public class IssueLinkServiceImpl implements IssueLinkService {
 
     @Override
     public void deleteIssueLink(Long issueLinkId) {
+        IssueLinkDTO issueLinkDTO = issueLinkMapper.selectByPrimaryKey(issueLinkId);
+        BaseFieldUtil.updateIssueLastUpdateInfoForIssueLink(issueLinkDTO.getProjectId(), issueLinkDTO);
         delete(issueLinkId);
     }
 
@@ -78,6 +84,7 @@ public class IssueLinkServiceImpl implements IssueLinkService {
 
     @Override
     public int deleteByIssueId(Long issueId) {
+        BaseFieldUtil.updateIssueLastUpdateInfoForALLIssueLink(issueLinkMapper, issueId);
         return issueLinkMapper.deleteByIssueId(issueId);
     }
 

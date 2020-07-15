@@ -4,13 +4,8 @@ import {
   Modal, Button, Icon, Progress,
 } from 'choerodon-ui';
 import FileSaver from 'file-saver';
-import {
-  exportExcelTmpl,
-  importIssue,
-  cancelImport,
-  queryImportHistory,
-} from '@/api/NewIssueApi';
 import './ImportIssue.less';
+import { issueApi } from '@/api';
 
 const { AppState } = stores;
 
@@ -26,7 +21,7 @@ class ImportIssue extends Component {
   };
 
   loadLatestImport = () => {
-    queryImportHistory().then((res) => {
+    issueApi.loadLastImport().then((res) => {
       if (res) {
         this.setState({
           latestInfo: res,
@@ -48,13 +43,13 @@ class ImportIssue extends Component {
   onCancel = () => {
     const { historyId, ovn } = this.state;
     if (historyId) {
-      cancelImport(historyId, ovn);
+      issueApi.cancelImport(historyId, ovn);
     }
     this.finish();
   };
 
   exportExcel = () => {
-    exportExcelTmpl().then((excel) => {
+    issueApi.downloadTemplateForImport().then((excel) => {
       const blob = new Blob([excel], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const fileName = '问题导入模板.xlsx';
       FileSaver.saveAs(blob, fileName);
@@ -82,7 +77,7 @@ class ImportIssue extends Component {
       uploading: true,
       fileName: file.name,
     });
-    importIssue(formData).then((res) => {
+    issueApi.import(formData).then((res) => {
       this.changeStep(1);
       // this.uploadInput.value = '';
       this.setState({

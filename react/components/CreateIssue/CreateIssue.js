@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import {
-  stores, Content, axios, Choerodon, 
+  stores, Content, Choerodon, 
 } from '@choerodon/boot';
 import { map, find } from 'lodash';
 import {
@@ -8,7 +8,9 @@ import {
 } from 'choerodon-ui';
 import moment from 'moment';
 import reactComponentDebounce from '@/components/DebounceComponent';
-import { featureApi, epicApi } from '@/api';
+import {
+  featureApi, epicApi, fieldApi, issueTypeApi, 
+} from '@/api';
 import {
   beforeTextUpload, handleFileUpload, validateFile, normFile, 
 } from '@/utils/richText';
@@ -18,9 +20,6 @@ import {
 import { issueApi } from '@/api';
 import { UploadButton } from '../CommonComponent';
 import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
-import {
-  getFields, createFieldValue, loadIssueTypes,
-} from '../../api/NewIssueApi';
 import SelectNumber from '../SelectNumber';
 import WYSIWYGEditor from '../WYSIWYGEditor';
 import TypeTag from '../TypeTag';
@@ -138,7 +137,7 @@ class CreateIssue extends Component {
           });
         }
       });
-      createFieldValue(res.issueId, 'agile_issue', fieldList);
+      fieldApi.createFieldValue(res.issueId, 'agile_issue', fieldList);
       if (fileList && fileList.length > 0) {
         const config = {
           issueType: res.statusId,
@@ -166,7 +165,7 @@ class CreateIssue extends Component {
 
   loadIssueTypes = () => {
     const { applyType } = this.props;
-    loadIssueTypes(applyType).then((res) => {
+    issueTypeApi.loadAllWithStateMachineId(applyType).then((res) => {
       if (res && res.length) {
         const defaultType = this.getDefaultType(res);
         const param = {
@@ -174,7 +173,7 @@ class CreateIssue extends Component {
           context: defaultType.typeCode,
           pageCode: 'agile_issue_create',
         };
-        getFields(param).then((fields) => {
+        fieldApi.getFields(param).then((fields) => {
           this.setState({
             fields,
             originIssueTypes: res,
@@ -435,7 +434,7 @@ class CreateIssue extends Component {
                           context: typeCode,
                           pageCode: 'agile_issue_create',
                         };
-                        getFields(param, typeCode).then((res) => {
+                        fieldApi.getFields(param).then((res) => {
                           this.setState({
                             fields: res,
                           });

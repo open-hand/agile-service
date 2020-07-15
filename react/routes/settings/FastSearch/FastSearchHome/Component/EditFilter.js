@@ -2,11 +2,13 @@ import React, { Component } from 'react';
 import {
   Modal, Form, Input, Select, Icon, Button, DatePicker, TimePicker,
 } from 'choerodon-ui';
-import { Content, stores, axios } from '@choerodon/boot';
+import { stores } from '@choerodon/boot';
 import moment from 'moment';
 import _ from 'lodash';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
-import { sprintApi } from '@/api';
+import {
+  sprintApi, epicApi, featureApi, userApi, versionApi, fieldApi, issueLabelApi, priorityApi, statusApi, quickFilterApi, commonApi, componentApi, issueTypeApi, 
+} from '@/api';
 import { NumericInput } from '../../../../../components/CommonComponent';
 
 const { Sidebar } = Modal;
@@ -256,7 +258,7 @@ class AddComponent extends Component {
   checkSearchNameRepeat = (rule, value, callback) => {
     const { originFilterName } = this.state;
     if (value && value.trim() && value.trim() !== originFilterName) {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/check_name?quickFilterName=${value}`)
+      quickFilterApi.checkName(value.trim())
         .then((res) => {
           if (res) {
             callback('快速搜索名称重复');
@@ -271,34 +273,26 @@ class AddComponent extends Component {
 
   loadFilter = (id) => {
     const { filterId } = this.props;
-    axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/${id || filterId}`)
-      .then((res) => {
-        if (res && res.description) {
-          const description = res.description.split('+').slice(0, -3).join('+') || '';
-          const obj = JSON.parse(res.description.split('+').slice(-1));
-          this.setState({
-            arr: this.transformInit(obj.arr || []),
-            o: obj.o || [],
-            origin: {
-              ...res,
-              description,
-            },
-            originFilterName: res.name,
-          });
-        }
-      });
+    quickFilterApi.load(id || filterId).then((res) => {
+      if (res && res.description) {
+        const description = res.description.split('+').slice(0, -3).join('+') || '';
+        const obj = JSON.parse(res.description.split('+').slice(-1));
+        this.setState({
+          arr: this.transformInit(obj.arr || []),
+          o: obj.o || [],
+          origin: {
+            ...res,
+            description,
+          },
+          originFilterName: res.name,
+        });
+      }
+    });
   };
 
   loadQuickFilterFiled = () => {
-    // axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/fields`)
-    //   .then((res) => {
-    //     this.setState({
-    //       quickFilterFiled: res,
-    //     });
-    //   });
-
-    const getPreDefinedField = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/fields`);
-    const getCustomField = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/field_value/list/custom_field`);
+    const getPreDefinedField = () => quickFilterApi.loadField();
+    const getCustomField = () => fieldApi.getCustomFields();
     Promise.all([getPreDefinedField(), getCustomField()]).then(([preDefinedField, customField]) => {
       this.setState({
         quickFilterFiled: [...preDefinedField, ...IsInProgramStore.isInProgram ? [{ fieldCode: 'feature', type: 'long', name: '特性' }] : [], ...customField].map(field => ({ ...field, fieldCode: field.code || field.fieldCode, type: field.fieldType || field.type })) || [],
@@ -409,10 +403,11 @@ class AddComponent extends Component {
         state: 'originTypes',
       },
       feature: {
-        url: `/agile/v1/projects/${projectId}/issues/feature/select_data?organizationId=${orgId}`,
+        url: `/agile/v1/projects/${projectId}/issues/feature/all?organizationId=${orgId}&page=0&size=0&param=`,
         prop: '',
         id: 'issueId',
         name: 'summary',
+        state: 'originFeatures',
       },
     };
 
@@ -657,7 +652,7 @@ class AddComponent extends Component {
         state: 'originTypes',
       },
       feature: {
-        url: `/agile/v1/projects/${projectId}/issues/feature/select_data?organizationId=${orgId}`,
+        url: `/agile/v1/projects/${projectId}/issues/feature/all?organizationId=${orgId}&page=0&size=0&param=`,
         prop: '',
         id: 'issueId',
         name: 'summary',
@@ -825,7 +820,7 @@ class AddComponent extends Component {
         this.setState({
           loading: true,
         });
-        axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/${filterId}`, obj)
+        quickFilterApi.update(filterId, obj)
           .then((res) => {
             this.setState({
               loading: false,
@@ -838,54 +833,23 @@ class AddComponent extends Component {
 
   loadQuickFilter() {
     const projectId = AppState.currentMenuType.id;
-    const orgId = AppState.currentMenuType.organizationId;
-    axios.get(`/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`).then(res => this.setState({ originUsers: res.list }));
-    axios.get(`/agile/v1/projects/${projectId}/priority/list_by_org`).then(res => this.setState({ originPriorities: res }));
-    axios.get(`/agile/v1/projects/${projectId}/schemes/query_status_by_project_id?apply_type=agile`).then(res => this.setState({ originStatus: res }));
-    axios.get(`/agile/v1/projects/${projectId}/issues/epics/select_data`).then(res => this.setState({ originEpics: res }));
+    userApi.getAllInProject().then(res => this.setState({ originUsers: res.list }));
+    priorityApi.loadByProject().then(res => this.setState({ originPriorities: res }));
+    statusApi.loadByProject().then(res => this.setState({ originStatus: res }));
+    epicApi.loadEpicsForSelect().then(res => this.setState({ originEpics: res }));
     sprintApi.loadSprints().then(res => this.setState({ originSprints: res }));
-    axios.get(`/agile/v1/projects/${projectId}/issue_labels`).then(res => this.setState({ originLabels: res }));
-    axios.get(`/agile/v1/projects/${projectId}/component`).then(res => this.setState({ originComponents: res }));
-    axios.post(`/agile/v1/projects/${projectId}/product_version/names`).then(res => this.setState({ originVersions: res }));
-    axios.get(`/agile/v1/projects/${projectId}/schemes/query_issue_types?apply_type=agile`).then(res => this.setState({ originTypes: res }));
-    axios.get(`/agile/v1/projects/${projectId}/issues/feature/select_data?organizationId=${orgId}`).then(res => this.setState({ originFeatures: res }));
-    axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/field_value/list/custom_field`).then((res) => {
+    issueLabelApi.loads().then(res => this.setState({ originLabels: res }));
+    componentApi.loadAll().then(res => this.setState({ originComponents: res }));
+    versionApi.loadNamesByStatus().then(res => this.setState({ originVersions: res }));
+    issueTypeApi.loadAll().then(res => this.setState({ originTypes: res }));
+    featureApi.queryAllInSubProject([], undefined, 1, 0).then(res => this.setState({ originFeatures: res.content }));
+    fieldApi.getCustomFields().then((res) => {
       const customFieldState = {};
       res.forEach((item) => {
         customFieldState[`origin${item.code}`] = item.fieldOptions || [];
       });
       this.setState(customFieldState);
     });
-    // const getUsers = () => axios.get(`/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`);
-    // const getPriority = () => axios.get(`/agile/v1/projects/${projectId}/priority/list_by_org`);
-    // const getStatus = () => axios.get(`/agile/v1/projects/${projectId}/schemes/query_status_by_project_id?apply_type=agile`);
-    // const getEpics = () => axios.get(`/agile/v1/projects/${projectId}/issues/epics/select_data`);
-    // const getSprints = () => axios.post(`/agile/v1/projects/${projectId}/sprint/names`);
-    // const getLabels = () => axios.get(`/agile/v1/projects/${projectId}/issue_labels`);
-    // const getComponents = () => axios.get(`/agile/v1/projects/${projectId}/component`);
-    // const getVersions = () => axios.post(`/agile/v1/projects/${projectId}/product_version/names`);
-    // const getIssueTypes = () => axios.get(`/agile/v1/projects/${projectId}/schemes/query_issue_types?apply_type=agile`);
-    // const getFeatures = () => axios.get(`/agile/v1/projects/${projectId}/issues/feature/select_data?organizationId=${orgId}`);
-    // const getCustomFields = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/field_value/list/custom_field`);
-    // Promise.all([getUsers(), getPriority(), getStatus(), getEpics(), getSprints(), getLabels(), getComponents(), getVersions(), getIssueTypes(), getFeatures(), getCustomFields()]).then((res) => {
-    //   this.setState({ 
-    //     originUsers: res[0].list, 
-    //     originPriorities: res[1],
-    //     originStatus: res[2],
-    //     originEpics: res[3],
-    //     originSprints: res[4],
-    //     originLabels: res[5],
-    //     originComponents: res[6],
-    //     originVersions: res[7],
-    //     originTypes: res[8],
-    //     originFeatures: res[9],
-    //   });
-    //   res[10].forEach((item) => {
-    //     this.setState({
-    //       [`origin${item.code}`]: item.fieldOptions || [],
-    //     });
-    //   });
-    // });
   }
 
   renderOperation(filter, index) {

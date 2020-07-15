@@ -7,10 +7,9 @@ import {
   find, findIndex, remove, sortBy,
 } from 'lodash';
 import { getProjectId } from '@/utils/common';
-import { storyMapApi } from '@/api';
 import {
-  loadIssueTypes, loadVersions, loadPriorities,
-} from '../../../api/NewIssueApi';
+  storyMapApi, versionApi, issueTypeApi, priorityApi, 
+} from '@/api';
 
 class StoryMapStore {
   @observable swimLine = localStorage.getItem('agile.StoryMap.SwimLine') || 'none';
@@ -86,9 +85,20 @@ class StoryMapStore {
     this.hiddenColumnNoStory = false;
   }
 
+  @action resetSearchVO() {
+    this.searchVO = {
+      advancedSearchArgs: {
+        components: [],
+        sprints: [],
+        prioritys: [],
+        isCompleted: undefined,
+      },
+    };
+  }
+
   getStoryMap = () => {
     this.setLoading(true);
-    Promise.all([storyMapApi.getStoryMap(this.searchVO), loadIssueTypes(), loadVersions(), loadPriorities()]).then(([storyMapData, issueTypes, versionList, prioritys]) => {
+    Promise.all([storyMapApi.getStoryMap(this.searchVO), issueTypeApi.loadAllWithStateMachineId(), versionApi.loadNamesByStatus(), priorityApi.loadByProject()]).then(([storyMapData, issueTypes, versionList, prioritys]) => {
       let epicWithFeature = storyMapData.epics || storyMapData.epicWithFeature;
       const { featureWithoutEpic = [] } = storyMapData;
       epicWithFeature = sortBy(epicWithFeature, 'epicRank');

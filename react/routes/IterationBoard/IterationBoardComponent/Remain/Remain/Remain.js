@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
-import { axios, stores } from '@choerodon/boot';
 import './Remain.less';
 import { Spin } from 'choerodon-ui';
 import { sprintApi } from '@/api';
 import Progress from '../../../../../components/Progress';
 
-const { AppState } = stores;
 class Remain extends Component {
   constructor(props) {
     super(props);

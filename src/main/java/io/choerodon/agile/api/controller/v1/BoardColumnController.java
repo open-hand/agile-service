@@ -132,5 +132,4 @@ public class BoardColumnController {
                 .orElseThrow(() -> new CommonException("error.MaxAndMinNum.update"));
     }
 
-
 }

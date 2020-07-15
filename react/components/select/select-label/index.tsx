@@ -1,7 +1,7 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
-import { loadLabels } from '@/api/NewIssueApi';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
+import { issueLabelApi } from '@/api';
 
 interface Props {
   dataRef: React.RefObject<Array<any>>
@@ -12,7 +12,7 @@ const SelectLabel: React.FC<Props> = forwardRef(({ dataRef, ...otherProps }, ref
     name: 'label',
     textField: 'labelName',
     valueField: 'labelName',
-    request: () => loadLabels(),
+    request: () => issueLabelApi.loads(),
     middleWare: (data) => {
       // @ts-ignore
       // eslint-disable-next-line no-param-reassign

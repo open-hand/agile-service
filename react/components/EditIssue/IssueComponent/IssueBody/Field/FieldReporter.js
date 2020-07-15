@@ -3,12 +3,10 @@ import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import { issueApi } from '@/api';
-import TextEditToggle from '../../../../TextEditToggle';
-import SelectFocusLoad from '../../../../SelectFocusLoad';
+import TextEditToggle from '@/components/TextEditTogglePro';
+import SelectUser from '@/components/select/select-user';
 import UserHead from '../../../../UserHead';
 import './Field.less';
-
-const { Text, Edit } = TextEditToggle;
 
 @inject('AppState')
 @observer class FieldStatus extends Component {
@@ -52,51 +50,39 @@ const { Text, Edit } = TextEditToggle;
         <div className="c7n-value-wrapper">
           <TextEditToggle
             disabled={disabled || (reporterId !== loginUserId && !hasPermission)}
-            formKey="reporter"
             onSubmit={this.updateIssueReporter}
-            originData={reporterId || []}
-            className="reporter"
-          >
-            <Text>
-              {
-                reporterId ? (
-                  <UserHead
-                    user={{
-                      id: reporterId,
-                      loginName: reporterLoginName,
-                      realName: reporterRealName,
-                      avatar: reporterImageUrl,
-                      name: reporterName,
-                    }}
-                  />
-                ) : (
-                  <div>
-                    无
-                  </div>
-                )
-              }
-            </Text>
-            <Edit>
-              <SelectFocusLoad
-                type="user"
-                defaultOption={{
+            initValue={reporterId}
+            editor={({ submit }) => (
+              <SelectUser
+                clearButton
+                onChange={submit}
+                selectedUser={{
                   id: reporterId,
                   loginName: reporterLoginName,
                   realName: reporterRealName,
                   avatar: reporterImageUrl,
                   name: reporterName,
                 }}
-                defaultOpen
-                allowClear
-                dropdownStyle={{ width: 'auto' }}
-                dropdownMatchSelectWidth
-                getPopupContainer={() => document.getElementById('detail')}
-                dropdownAlign={{     
-                  points: ['tl', 'bl'],   
-                  overflow: { adjustX: true },
-                }}
               />
-            </Edit>
+            )}
+          >
+            {
+              reporterId ? (
+                <UserHead
+                  user={{
+                    id: reporterId,
+                    loginName: reporterLoginName,
+                    realName: reporterRealName,
+                    avatar: reporterImageUrl,
+                    name: reporterName,
+                  }}
+                />
+              ) : (
+                <div>
+                  无
+                </div>
+              )
+            }
           </TextEditToggle>
         </div>
       </div>

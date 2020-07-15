@@ -2,7 +2,6 @@
 import React, {
   useContext, useEffect, useState, Fragment,
 } from 'react';
-import { axios } from '@choerodon/boot';
 import queryString from 'querystring';
 import { withRouter } from 'react-router-dom';
 import {
@@ -15,6 +14,7 @@ import {
 import { observer } from 'mobx-react-lite';
 import IssueStore from '@/stores/project/issue/IssueStore';
 import { getParams } from '@/utils/link';
+import { quickFilterApi } from '@/api';
 import SummaryField from './custom-fields/field/SummaryField';
 import Store from '../../stores';
 import CustomFields from './custom-fields';
@@ -74,10 +74,7 @@ export default withRouter(observer(({
   const [selectedQuickFilters, setSelectedQuickFilters] = useState([]);
   const loadFilters = async () => {
     IssueStore.axiosGetMyFilterList();
-    const QuickFilters = await axios.post(`/agile/v1/projects/${projectId}/quick_filter/query_all`, {
-      contents: [],
-      filterName: '',
-    });
+    const QuickFilters = await quickFilterApi.loadAll();
     setQuickFilters(QuickFilters);
   };
 
