@@ -1,7 +1,7 @@
 package io.choerodon.agile.api.vo.event;
 
 import io.choerodon.agile.api.vo.StateMachineConfigVO;
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -13,15 +13,15 @@ import java.util.List;
  * @date 2018/10/8
  */
 public class TransformInfo {
-    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_TRANSFORM)*/
+    @Encrypt
     private Long id;
     private String name;
     private String description;
-    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/
+    @Encrypt
     private Long stateMachineId;
-    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
+    @Encrypt
     private Long startStatusId;
-    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
+    @Encrypt
     private Long endStatusId;
     private String url;
     private String type;

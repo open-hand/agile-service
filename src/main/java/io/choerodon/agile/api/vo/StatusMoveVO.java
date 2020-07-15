@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -14,11 +14,11 @@ public class StatusMoveVO {
     private Integer position;
 
     @ApiModelProperty(value = "目标列的id")
-    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/
+    @Encrypt(ignoreValue = {"0"})
     private Long columnId;
 
     @ApiModelProperty(value = "原始列的id")
-    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/
+    @Encrypt(ignoreValue = {"0"})
     private Long originColumnId;
 
     @ApiModelProperty(value = "版本号")

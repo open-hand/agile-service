@@ -8,19 +8,19 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class WikiRelationVO {
 
-    @Encrypt/*(EncryptionConstant.AGILE_WIKI_RELATION)*/
+    @Encrypt
     private Long id;
 
     private Long projectId;
 
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt
     private Long issueId;
 
     private String wikiName;
 
     private String wikiUrl;
 
-    @Encrypt/*(EncryptionConstant.KB_WORKSPACE)*/
+    @Encrypt
     private Long spaceId;
 
     private WorkSpaceVO workSpaceVO;

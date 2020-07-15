@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -15,10 +15,10 @@ public class RankVO {
 
     private Boolean before;
 
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt
     private Long referenceIssueId;
 
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt
     private Long issueId;
 
     private Long objectVersionNumber;

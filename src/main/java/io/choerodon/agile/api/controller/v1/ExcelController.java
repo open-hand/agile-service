@@ -2,7 +2,7 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.FileOperationHistoryVO;
 import io.choerodon.agile.app.service.ExcelService;
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.agile.infra.utils.ExcelUtil;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
@@ -65,7 +65,7 @@ public class ExcelController {
     public ResponseEntity cancelImport(@ApiParam(value = "项目id", required = true)
                                        @PathVariable(name = "project_id") Long projectId,
                                        @ApiParam(value = "file history id", required = true)
-                                       @RequestParam @Encrypt/*(EncryptionConstant.AGILE_FILE_OPERATION_HISTORY)*/ Long id,
+                                       @RequestParam @Encrypt Long id,
                                        @ApiParam(value = "objectVersionNumber", required = true)
                                        @RequestParam Long objectVersionNumber) {
         excelService.cancelImport(projectId, id, objectVersionNumber);

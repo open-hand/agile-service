@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -16,7 +16,7 @@ public class ReportIssueVO implements Serializable {
 
     private String issueNum;
 
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt
     private Long issueId;
 
     private Date date;
@@ -29,7 +29,7 @@ public class ReportIssueVO implements Serializable {
 
     private Boolean statistical;
 
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt
     private String parentIssueId;
 
     private String parentIssueNum;

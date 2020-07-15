@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public class VelocitySprintVO implements Serializable {
 
     @ApiModelProperty(value = "冲刺id")
-    @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/
+    @Encrypt
     private Long sprintId;
 
     @ApiModelProperty(value = "冲刺名称")

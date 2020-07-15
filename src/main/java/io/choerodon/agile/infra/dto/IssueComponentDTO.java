@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -28,7 +28,7 @@ public class IssueComponentDTO extends AuditDomain {
 
     @Id
     @GeneratedValue
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE_COMPONENT)*/
+    @Encrypt
     private Long componentId;
 
     private Long projectId;

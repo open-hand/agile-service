@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -10,16 +10,16 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class StateMachineSchemeConfigVO {
     @ApiModelProperty(value = "状态机方案配置id")
-    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_SCHEME_CONFIG)*/
+    @Encrypt
     private Long id;
     @ApiModelProperty(value = "状态机方案id")
-    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_SCHEME)*/
+    @Encrypt
     private Long schemeId;
     @ApiModelProperty(value = "问题类型id")
-    @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/
+    @Encrypt
     private Long issueTypeId;
     @ApiModelProperty(value = "状态机id")
-    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/
+    @Encrypt
     private Long stateMachineId;
     @ApiModelProperty(value = "是否默认配置")
     private Boolean isDefault;

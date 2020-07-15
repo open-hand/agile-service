@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -19,7 +19,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class IssueVO {
 
     @ApiModelProperty(value = "问题主键id")
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt
     private Long issueId;
 
     @ApiModelProperty(value = "问题编号")
@@ -29,7 +29,7 @@ public class IssueVO {
     private String typeCode;
 
     @ApiModelProperty(value = "状态id")
-    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
+    @Encrypt
     private Long statusId;
 
     @ApiModelProperty(value = "问题概要")
@@ -146,11 +146,11 @@ public class IssueVO {
     private String createrRealName;
 
     @ApiModelProperty(value = "优先级id")
-    @Encrypt/*(EncryptionConstant.FD_PRIORITY)*/
+    @Encrypt
     private Long priorityId;
 
     @ApiModelProperty(value = "问题类型id")
-    @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/
+    @Encrypt
     private Long issueTypeId;
 
     @ApiModelProperty(value = "优先级DTO")

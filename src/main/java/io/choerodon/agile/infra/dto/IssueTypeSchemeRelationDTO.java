@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -8,7 +8,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  * Email: fuqianghuang01@gmail.com
  */
 public class IssueTypeSchemeRelationDTO {
-    @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE_SCHEME)*/
+    @Encrypt
     private Long issueTypeSchemeId;
 
     private String issueTypeSchemeName;

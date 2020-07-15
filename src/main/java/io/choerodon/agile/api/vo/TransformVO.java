@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -10,20 +10,20 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class TransformVO {
     @ApiModelProperty(value = "转换id")
-    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_TRANSFORM)*/
+    @Encrypt
     private Long id;
     @ApiModelProperty(value = "转换名称")
     private String name;
     @ApiModelProperty(value = "转换所属状态机id")
-    @Encrypt/*(EncryptionConstant.FD_OBJECT_SCHEME)*/
+    @Encrypt
     private Long stateMachineId;
     @ApiModelProperty(value = "终点状态")
-    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
+    @Encrypt
     private Long endStatusId;
     @ApiModelProperty(value = "转换类型")
     private String type;
     @ApiModelProperty(value = "开始节点id")
-    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_NODE)*/
+    @Encrypt
     private Long startNodeId;
     @ApiModelProperty(value = "目标状态类型")
     private String statusType;

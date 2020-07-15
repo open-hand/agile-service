@@ -12,7 +12,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,7 +65,7 @@ public class StoryMapController {
     public ResponseEntity<Void> storyMapMove(@ApiParam(value = "项目id", required = true)
                                        @PathVariable(name = "project_id") Long projectId,
                                        @ApiParam(value = "story map drag DTO", required = true)
-                                       @RequestBody  StoryMapDragVO storyMapDragVO) {
+                                       @RequestBody StoryMapDragVO storyMapDragVO) {
         storyMapService.storyMapMove(projectId, storyMapDragVO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

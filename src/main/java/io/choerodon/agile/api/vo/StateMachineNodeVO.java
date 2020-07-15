@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -11,13 +11,13 @@ import java.util.List;
  */
 public class StateMachineNodeVO {
     @ApiModelProperty(value = "状态机节点id")
-    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_NODE)*/
+    @Encrypt
     private Long id;
     @ApiModelProperty(value = "状态机id")
-    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/
+    @Encrypt
     private Long stateMachineId;
     @ApiModelProperty(value = "节点对应的状态id")
-    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
+    @Encrypt
     private Long statusId;
     @ApiModelProperty(value = "X轴位置")
     private Long positionX;
@@ -32,7 +32,7 @@ public class StateMachineNodeVO {
     @ApiModelProperty(value = "节点类型（node_init/node_start/node_custom）")
     private String type;
     @ApiModelProperty(value = "全部转换到当前节点的转换id")
-    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_TRANSFORM)*/
+    @Encrypt
     private Long allStatusTransformId;
     @ApiModelProperty(value = "组织id")
     private Long organizationId;

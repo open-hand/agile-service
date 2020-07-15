@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -9,13 +9,13 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class StateMachineConfigVO {
     @ApiModelProperty(value = "状态机配置id")
-    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_CONFIG)*/
+    @Encrypt
     private Long id;
     @ApiModelProperty(value = "转换id")
-    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_TRANSFORM)*/
+    @Encrypt
     private Long transformId;
     @ApiModelProperty(value = "状态机id")
-    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/
+    @Encrypt
     private Long stateMachineId;
     @ApiModelProperty(value = "配置编码")
     private String code;

@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.validator.IssueCommentValidator;
 import io.choerodon.agile.app.service.IssueCommentService;
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.agile.infra.utils.VerifyUpdateUtil;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
@@ -12,7 +12,7 @@ import io.choerodon.core.exception.CommonException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
-import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +44,7 @@ public class IssueCommentController {
     public ResponseEntity<IssueCommentVO> createIssueComment(@ApiParam(value = "项目id", required = true)
                                                               @PathVariable(name = "project_id") Long projectId,
                                                              @ApiParam(value = "创建issue评论对象", required = true)
-                                                              @RequestBody  IssueCommentCreateVO issueCommentCreateVO) {
+                                                              @RequestBody IssueCommentCreateVO issueCommentCreateVO) {
         issueCommentValidator.verifyCreateData(issueCommentCreateVO);
         return Optional.ofNullable(issueCommentService.createIssueComment(projectId, issueCommentCreateVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
@@ -72,7 +72,7 @@ public class IssueCommentController {
     public ResponseEntity<List<IssueCommentVO>> queryIssueCommentList(@ApiParam(value = "项目id", required = true)
                                                                        @PathVariable(name = "project_id") Long projectId,
                                                                       @ApiParam(value = "issueId", required = true)
-                                                                       @PathVariable @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ Long issueId) {
+                                                                       @PathVariable @Encrypt Long issueId) {
         return Optional.ofNullable(issueCommentService.queryIssueCommentList(projectId, issueId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueComment.queryIssueCommentList"));
@@ -84,7 +84,7 @@ public class IssueCommentController {
     public ResponseEntity deleteIssueComment(@ApiParam(value = "项目id", required = true)
                                              @PathVariable(name = "project_id") Long projectId,
                                              @ApiParam(value = "commentId", required = true)
-                                             @PathVariable @Encrypt/*(EncryptionConstant.AGILE_ISSUE_COMMENT)*/ Long commentId) {
+                                             @PathVariable @Encrypt Long commentId) {
         issueCommentService.deleteIssueComment(projectId, commentId);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }

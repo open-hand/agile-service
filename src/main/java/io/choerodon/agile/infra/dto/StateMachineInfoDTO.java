@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -9,7 +9,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 
 public class StateMachineInfoDTO {
-    @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE)*/
+    @Encrypt
     private Long stateMachineId;
 
     private String stateMachineName;

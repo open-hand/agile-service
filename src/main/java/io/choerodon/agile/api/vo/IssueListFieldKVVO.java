@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.infra.utils.StringUtil;
@@ -18,7 +18,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class IssueListFieldKVVO {
 
     @ApiModelProperty(value = "问题主键id")
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt
     private Long issueId;
 
     @ApiModelProperty(value = "问题编号")
@@ -40,7 +40,7 @@ public class IssueListFieldKVVO {
     private Long projectId;
 
     @ApiModelProperty(value = "问题类型id")
-    @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/
+    @Encrypt
     private Long issueTypeId;
 
     @ApiModelProperty(value = "经办人名称")
@@ -71,7 +71,7 @@ public class IssueListFieldKVVO {
     private String epicName;
 
     @ApiModelProperty(value = "史诗id")
-    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt(ignoreValue = {"0"})
     private Long epicId;
 
     @ApiModelProperty(value = "史诗颜色")

@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 public class BoardVO {
 
     @ApiModelProperty(value = "看板id")
-    @Encrypt/*(EncryptionConstant.AGILE_BOARD)*/
+    @Encrypt
     private Long boardId;
 
     @ApiModelProperty(value = "看板名称")

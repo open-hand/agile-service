@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -18,7 +18,7 @@ import javax.persistence.*;
 public class ObjectSchemeFieldDTO extends AuditDomain {
     @Id
     @GeneratedValue
-    @Encrypt/*(EncryptionConstant.FD_OBJECT_SCHEME_FIELD)*/
+    @Encrypt
     private Long id;
     private String code;
     private String name;

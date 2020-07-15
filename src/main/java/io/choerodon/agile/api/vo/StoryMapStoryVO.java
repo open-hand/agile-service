@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -11,25 +11,25 @@ import java.util.List;
  */
 public class StoryMapStoryVO {
 
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt
     private Long issueId;
 
     private String issueNum;
 
     private String summary;
 
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt
     private Long epicId;
 
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt
     private Long featureId;
 
     private Boolean completed;
 
-    @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/
+    @Encrypt
     private Long issueTypeId;
 
-    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
+    @Encrypt
     private Long statusId;
 
     private IssueTypeVO issueTypeVO;

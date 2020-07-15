@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldCreateVO;
@@ -10,7 +10,7 @@ import io.choerodon.agile.app.service.ObjectSchemeFieldService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
-import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,7 +56,7 @@ public class ObjectSchemeFieldController {
     public ResponseEntity<ObjectSchemeFieldDetailVO> queryById(@ApiParam(value = "组织id", required = true)
                                                                 @PathVariable("organization_id") Long organizationId,
                                                                @ApiParam(value = "字段id", required = true)
-                                                                @PathVariable("field_id") @Encrypt/*(EncryptionConstant.FD_OBJECT_SCHEME_FIELD)*/ Long fieldId) {
+                                                                @PathVariable("field_id") @Encrypt Long fieldId) {
         return new ResponseEntity<>(objectSchemeFieldService.queryById(organizationId, null, fieldId), HttpStatus.OK);
     }
 
@@ -65,7 +65,7 @@ public class ObjectSchemeFieldController {
     @DeleteMapping(value = "/{field_id}")
     public ResponseEntity delete(@ApiParam(value = "组织id", required = true)
                                  @PathVariable("organization_id") Long organizationId,
-                                 @PathVariable("field_id") @Encrypt/*(EncryptionConstant.FD_OBJECT_SCHEME_FIELD)*/ Long fieldId) {
+                                 @PathVariable("field_id") @Encrypt Long fieldId) {
         objectSchemeFieldService.delete(organizationId, null, fieldId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -76,7 +76,7 @@ public class ObjectSchemeFieldController {
     public ResponseEntity<ObjectSchemeFieldDetailVO> update(@ApiParam(value = "组织id", required = true)
                                                              @PathVariable("organization_id") Long organizationId,
                                                             @ApiParam(value = "字段id", required = true)
-                                                             @PathVariable("field_id") @Encrypt/*(EncryptionConstant.FD_OBJECT_SCHEME_FIELD)*/ Long fieldId,
+                                                             @PathVariable("field_id") @Encrypt Long fieldId,
                                                             @RequestBody @Valid  ObjectSchemeFieldUpdateVO updateDTO) {
         return new ResponseEntity<>(objectSchemeFieldService.update(organizationId, null, fieldId, updateDTO), HttpStatus.CREATED);
     }

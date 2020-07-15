@@ -1,6 +1,5 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.base.BaseController;
@@ -32,7 +31,7 @@ public class ConfigCodeController extends BaseController {
     @ApiOperation(value = "获取未配置的条件，验证，后置动作等列表")
     @GetMapping(value = "/{transform_id}")
     public ResponseEntity<List<ConfigCodeVO>> queryByTransformId(@PathVariable("organization_id") Long organizationId,
-                                                                 @PathVariable("transform_id") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_TRANSFORM)*/ Long transformId,
+                                                                 @PathVariable("transform_id") @Encrypt Long transformId,
                                                                  @RequestParam String type) {
         return Optional.ofNullable(configCodeService.queryByTransformId(organizationId, transformId, type))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))

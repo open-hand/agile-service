@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -11,7 +11,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class PersonalFilterVO {
 
     @ApiModelProperty(value = "主键id")
-    @Encrypt/*(EncryptionConstant.AGILE_PERSONAL_FILTER)*/
+    @Encrypt
     private Long filterId;
 
     @ApiModelProperty(value = "项目id")

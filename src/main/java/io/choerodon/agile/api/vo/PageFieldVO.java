@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -10,13 +10,13 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class PageFieldVO {
     @ApiModelProperty(value = "id")
-    @Encrypt/*(EncryptionConstant.FD_PAGE_FIELD)*/
+    @Encrypt
     private Long id;
     @ApiModelProperty(value = "页面id")
-    @Encrypt/*(EncryptionConstant.FD_PAGE)*/
+    @Encrypt
     private Long pageId;
     @ApiModelProperty(value = "字段id")
-    @Encrypt/*(EncryptionConstant.FD_OBJECT_SCHEME_FIELD)*/
+    @Encrypt
     private Long fieldId;
     @ApiModelProperty(value = "是否显示")
     private Boolean display;

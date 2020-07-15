@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -19,13 +19,13 @@ import java.util.Date;
 public class FieldValueDTO extends AuditDomain {
     @Id
     @GeneratedValue
-    @Encrypt/*(EncryptionConstant.FD_FIELD_VALUE)*/
+    @Encrypt
     private Long id;
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt
     private Long instanceId;
-    @Encrypt/*(EncryptionConstant.FD_OBJECT_SCHEME_FIELD)*/
+    @Encrypt
     private Long fieldId;
-    @Encrypt/*(EncryptionConstant.FD_FIELD_OPTION)*/
+    @Encrypt
     private Long optionId;
     private String stringValue;
     private String numberValue;

@@ -11,7 +11,7 @@ import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
-import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +37,7 @@ public class WikiRelationController {
     public ResponseEntity<Void> create(@ApiParam(value = "项目id", required = true)
                                  @PathVariable(name = "project_id") Long projectId,
                                  @ApiParam(value = "knowledge relation vo list", required = true)
-                                 @RequestBody  List<WikiRelationVO> wikiRelationVOList) {
+                                 @RequestBody List<WikiRelationVO> wikiRelationVOList) {
         wikiRelationService.create(projectId, wikiRelationVOList);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -48,7 +48,7 @@ public class WikiRelationController {
     public ResponseEntity<KnowledgeRelationVO> queryByIssueId(@ApiParam(value = "项目id", required = true)
                                                      @PathVariable(name = "project_id") Long projectId,
                                                               @ApiParam(value = "issue id", required = true)
-                                                     @PathVariable @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ Long issueId) {
+                                                     @PathVariable @Encrypt Long issueId) {
         return Optional.ofNullable(wikiRelationService.queryByIssueId(projectId, issueId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.knowledgeRelationList.get"));

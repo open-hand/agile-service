@@ -40,23 +40,23 @@
         <dependency>
             <groupId>org.hzero.boot</groupId>
             <artifactId>hzero-boot-file</artifactId>
-            <version>1.5.0-SNAPSHOT</version>
+            <version>1.4.0.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.hzero.starter</groupId>
             <artifactId>hzero-starter-mybatis-mapper</artifactId>
-            <version>1.5.0-SNAPSHOT</version>
+            <version>1.4.0.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.hzero.starter</groupId>
             <artifactId>hzero-starter-feign-replay</artifactId>
-            <version>1.5.0-SNAPSHOT</version>
+            <version>1.4.0.RELEASE</version>
         </dependency>
 
         <dependency>
             <groupId>org.hzero.starter</groupId>
             <artifactId>hzero-starter-keyencrypt</artifactId>
-            <version>1.5.0-SNAPSHOT</version>
+            <version>1.4.0.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -96,7 +96,7 @@
         <dependency>
             <groupId>org.hzero.boot</groupId>
             <artifactId>hzero-boot-message</artifactId>
-            <version>1.5.0-SNAPSHOT</version>
+            <version>1.4.0.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -131,18 +131,18 @@
         <dependency>
             <groupId>org.hzero.starter</groupId>
             <artifactId>hzero-starter-core</artifactId>
-            <version>1.5.0-SNAPSHOT</version>
+            <version>1.4.0.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.hzero.starter</groupId>
             <artifactId>hzero-starter-metric</artifactId>
-            <version>1.5.0-SNAPSHOT</version>
+            <version>1.4.0.RELEASE</version>
         </dependency>
 
         <dependency>
             <groupId>org.hzero.starter</groupId>
             <artifactId>hzero-starter-redis</artifactId>
-            <version>1.5.0-SNAPSHOT</version>
+            <version>1.4.0.RELEASE</version>
         </dependency>
 
         <dependency>

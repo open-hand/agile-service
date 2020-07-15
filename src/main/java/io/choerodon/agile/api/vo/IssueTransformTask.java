@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -12,7 +12,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class IssueTransformTask {
 
     @ApiModelProperty(value = "问题主键id")
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt
     private Long issueId;
 
     @ApiModelProperty(value = "史诗名称")
@@ -28,11 +28,11 @@ public class IssueTransformTask {
     private Long projectId;
 
     @ApiModelProperty(value = "问题类型id")
-    @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/
+    @Encrypt
     private Long issueTypeId;
 
     @ApiModelProperty(value = "状态id")
-    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
+    @Encrypt
     private Long statusId;
 
     public Long getStatusId() {

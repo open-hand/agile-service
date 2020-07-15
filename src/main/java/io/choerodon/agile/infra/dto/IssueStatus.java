@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -11,7 +11,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class IssueStatus {
     private Integer issueNum;
     private String categoryCode;
-    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
+    @Encrypt
     private Long statusId;
 
     public Integer getIssueNum() {

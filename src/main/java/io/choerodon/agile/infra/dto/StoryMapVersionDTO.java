@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.dto;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
@@ -9,7 +9,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class StoryMapVersionDTO {
 
-    @Encrypt/*(EncryptionConstant.FD_PRODUCT_VERSION)*/
+    @Encrypt
     private Long versionId;
 
     private String name;

@@ -10,7 +10,7 @@ import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
-import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,7 +55,7 @@ public class QuickFilterController {
                                                 @ApiParam(value = "filter id", required = true)
                                                  @PathVariable @Encrypt Long filterId,
                                                 @ApiParam(value = "quick filter object", required = true)
-                                                 @RequestBody  QuickFilterVO quickFilterVO) {
+                                                 @RequestBody QuickFilterVO quickFilterVO) {
         return Optional.ofNullable(quickFilterService.update(projectId, filterId, quickFilterVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.quickFilter.update"));

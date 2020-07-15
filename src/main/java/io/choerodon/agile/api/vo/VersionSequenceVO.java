@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -20,7 +20,7 @@ public class VersionSequenceVO {
 
     @ApiModelProperty(value = "版本主键id")
     @NotNull(message = VERSION_ID_NOT_NULL_ERROR)
-    @Encrypt/*(EncryptionConstant.FD_PRODUCT_VERSION)*/
+    @Encrypt
     private Long versionId;
 
     @ApiModelProperty(value = "版本号")

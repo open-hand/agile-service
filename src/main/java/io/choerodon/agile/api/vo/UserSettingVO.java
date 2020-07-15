@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -11,7 +11,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class UserSettingVO {
 
     @ApiModelProperty(value = "设置主键id")
-    @Encrypt/*(EncryptionConstant.AGILE_USER_SETTING)*/
+    @Encrypt
     private Long settingId;
 
     @ApiModelProperty(value = "用户泳道类型")

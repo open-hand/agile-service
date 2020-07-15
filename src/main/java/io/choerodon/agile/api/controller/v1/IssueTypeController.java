@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -17,7 +17,7 @@ import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
-import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +43,7 @@ public class IssueTypeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id查询问题类型")
     @GetMapping(value = "/{id}")
-    public ResponseEntity<IssueTypeVO> queryIssueTypeById(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/ Long issueTypeId) {
+    public ResponseEntity<IssueTypeVO> queryIssueTypeById(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt Long issueTypeId) {
         return new ResponseEntity<>(issueTypeService.queryById(organizationId, issueTypeId), HttpStatus.OK);
     }
 
@@ -57,7 +57,7 @@ public class IssueTypeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "修改问题类型")
     @PutMapping(value = "/{id}")
-    public ResponseEntity<IssueTypeVO> update(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/  Long issueTypeId,
+    public ResponseEntity<IssueTypeVO> update(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt  Long issueTypeId,
                                               @RequestBody @Valid  IssueTypeVO issueTypeVO) {
         issueTypeVO.setId(issueTypeId);
         issueTypeVO.setOrganizationId(organizationId);
@@ -67,7 +67,7 @@ public class IssueTypeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除问题类型")
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/ Long issueTypeId) {
+    public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt Long issueTypeId) {
         return new ResponseEntity<>(issueTypeService.delete(organizationId, issueTypeId), HttpStatus.OK);
     }
 
@@ -90,7 +90,7 @@ public class IssueTypeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "校验问题类型是否可以删除")
     @GetMapping(value = "/check_delete/{id}")
-    public ResponseEntity<Map<String, Object>> checkDelete(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/ Long issueTypeId) {
+    public ResponseEntity<Map<String, Object>> checkDelete(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt Long issueTypeId) {
         return new ResponseEntity<>(issueTypeService.checkDelete(organizationId, issueTypeId), HttpStatus.OK);
     }
 
@@ -99,7 +99,7 @@ public class IssueTypeController extends BaseController {
     @GetMapping(value = "/check_name")
     public ResponseEntity<Boolean> checkName(@PathVariable("organization_id") Long organizationId,
                                              @RequestParam("name") String name,
-                                             @RequestParam(value = "id", required = false) @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/ Long id) {
+                                             @RequestParam(value = "id", required = false) @Encrypt Long id) {
         return new ResponseEntity<>(issueTypeService.checkName(organizationId, name, id), HttpStatus.OK);
     }
 
@@ -116,7 +116,7 @@ public class IssueTypeController extends BaseController {
     @ApiOperation(value = "查询所有问题类型及关联的方案")
     @GetMapping(value = "/query_issue_type_with_state_machine")
     public ResponseEntity<List<IssueTypeVO>> queryIssueTypeByStateMachineSchemeId(@PathVariable("organization_id") Long organizationId,
-                                                                                  @RequestParam("schemeId") @Encrypt/*(EncryptionConstant.FD_STATE_MACHINE_SCHEME)*/ Long schemeId) {
+                                                                                  @RequestParam("schemeId") @Encrypt Long schemeId) {
         return new ResponseEntity<>(issueTypeService.queryIssueTypeByStateMachineSchemeId(organizationId, schemeId), HttpStatus.OK);
     }
 

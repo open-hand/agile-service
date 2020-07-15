@@ -3,7 +3,7 @@ package io.choerodon.agile.api.controller.v1;
 import java.util.List;
 import java.util.Optional;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
@@ -35,7 +35,7 @@ public class IterativeWorktableController {
     public ResponseEntity<List<PriorityDistributeVO>> queryPriorityDistribute(@ApiParam(value = "项目id", required = true)
                                                                                @PathVariable(name = "project_id") Long projectId,
                                                                               @ApiParam(value = "冲刺id", required = true)
-                                                                               @RequestParam @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/ Long sprintId,
+                                                                               @RequestParam @Encrypt Long sprintId,
                                                                               @ApiParam(value = "组织id", required = true)
                                                                                @RequestParam Long organizationId) {
         return Optional.ofNullable(iterativeWorktableService.queryPriorityDistribute(projectId, sprintId, organizationId))
@@ -49,7 +49,7 @@ public class IterativeWorktableController {
     public ResponseEntity<List<StatusCategoryVO>> queryStatusCategoryDistribute(@ApiParam(value = "项目id", required = true)
                                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                                 @ApiParam(value = "冲刺id", required = true)
-                                                                                 @RequestParam @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/ Long sprintId,
+                                                                                 @RequestParam @Encrypt Long sprintId,
                                                                                 @ApiParam(value = "组织id", required = true)
                                                                                  @RequestParam Long organizationId) {
         return Optional.ofNullable(iterativeWorktableService.queryStatusCategoryDistribute(projectId, sprintId, organizationId))
@@ -63,7 +63,7 @@ public class IterativeWorktableController {
     public ResponseEntity<SprintInfoVO> querySprintInfo(@ApiParam(value = "项目id", required = true)
                                                          @PathVariable(name = "project_id") Long projectId,
                                                         @ApiParam(value = "冲刺id", required = true)
-                                                         @RequestParam @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/ Long sprintId,
+                                                         @RequestParam @Encrypt Long sprintId,
                                                         @ApiParam(value = "组织id", required = true)
                                                          @PathVariable(name = "organization_id") Long organizationId) {
         return Optional.ofNullable(iterativeWorktableService.querySprintInfo(projectId, sprintId, organizationId))
@@ -77,7 +77,7 @@ public class IterativeWorktableController {
     public ResponseEntity<List<AssigneeDistributeVO>> queryAssigneeDistribute(@ApiParam(value = "项目id", required = true)
                                                                                @PathVariable(name = "project_id") Long projectId,
                                                                               @ApiParam(value = "冲刺id", required = true)
-                                                                               @RequestParam @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/ Long sprintId) {
+                                                                               @RequestParam @Encrypt Long sprintId) {
         return Optional.ofNullable(iterativeWorktableService.queryAssigneeDistribute(projectId, sprintId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.queryAssigneeDistribute.get"));
@@ -89,7 +89,7 @@ public class IterativeWorktableController {
     public ResponseEntity<List<IssueTypeDistributeVO>> queryIssueTypeDistribute(@ApiParam(value = "项目id", required = true)
                                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                                 @ApiParam(value = "冲刺id", required = true)
-                                                                                 @RequestParam @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/ Long sprintId,
+                                                                                 @RequestParam @Encrypt Long sprintId,
                                                                                 @ApiParam(value = "组织id", required = true)
                                                                                  @RequestParam Long organizationId) {
         return Optional.ofNullable(iterativeWorktableService.queryIssueTypeDistribute(projectId, sprintId, organizationId))

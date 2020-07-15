@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -35,19 +35,19 @@ public class IssueCreateVO {
     private Long projectId;
 
     @ApiModelProperty(value = "史诗id")
-    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt(ignoreValue = {"0"})
     private Long epicId;
 
     @ApiModelProperty(value = "冲刺id")
-    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_SPRINT)*/
+    @Encrypt(ignoreValue = {"0"})
     private Long sprintId;
 
     @ApiModelProperty(value = "优先级id")
-    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.FD_PRIORITY)*/
+    @Encrypt(ignoreValue = {"0"})
     private Long priorityId;
 
     @ApiModelProperty(value = "问题类型id")
-    @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/
+    @Encrypt
     private Long issueTypeId;
 
     @ApiModelProperty(value = "关联的版本列表")
@@ -74,9 +74,9 @@ public class IssueCreateVO {
     @ApiModelProperty(value = "故事点")
     private BigDecimal storyPoints;
 
-    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt(ignoreValue = {"0"})
     private Long relateIssueId;
-    @Encrypt(ignoreValue = {"0"})/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt(ignoreValue = {"0"})
     private Long parentIssueId;
 
     private RankVO rankVO;

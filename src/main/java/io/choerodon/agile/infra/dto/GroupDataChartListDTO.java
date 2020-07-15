@@ -3,7 +3,7 @@ package io.choerodon.agile.infra.dto;
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.PriorityVO;
 import io.choerodon.agile.api.vo.StatusVO;
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.math.BigDecimal;
@@ -14,7 +14,7 @@ import java.math.BigDecimal;
  */
 public class GroupDataChartListDTO {
 
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt
     private Long issueId;
 
     private String issueNum;
@@ -37,7 +37,7 @@ public class GroupDataChartListDTO {
 
     private Long priorityId;
 
-    @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE)*/
+    @Encrypt
     private Long issueTypeId;
 
     private PriorityVO priorityVO;
@@ -46,7 +46,7 @@ public class GroupDataChartListDTO {
 
     private StatusVO statusMapVO;
 
-    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
+    @Encrypt
     private Long statusId;
 
     public Long getIssueId() {

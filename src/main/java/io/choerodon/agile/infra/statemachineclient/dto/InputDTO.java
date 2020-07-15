@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.statemachineclient.dto;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
  * @since 2018/11/8
  */
 public class InputDTO {
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt
     private Long instanceId;
     private String invokeCode;
     private String input;

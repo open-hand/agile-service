@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -17,7 +17,7 @@ import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
-import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +42,7 @@ public class IssueTypeSchemeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id查询问题类型方案")
     @GetMapping(value = "/{id}")
-    public ResponseEntity<IssueTypeSchemeVO> queryById(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE_SCHEME)*/ Long issueTypeSchemeId) {
+    public ResponseEntity<IssueTypeSchemeVO> queryById(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt Long issueTypeSchemeId) {
         return new ResponseEntity<>(issueTypeSchemeService.queryById(organizationId, issueTypeSchemeId), HttpStatus.OK);
     }
 
@@ -56,7 +56,7 @@ public class IssueTypeSchemeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "修改问题类型方案")
     @PutMapping(value = "/{id}")
-    public ResponseEntity<IssueTypeSchemeVO> update(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE_SCHEME)*/ Long issueTypeSchemeId,
+    public ResponseEntity<IssueTypeSchemeVO> update(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt Long issueTypeSchemeId,
                                                     @RequestBody @Valid  IssueTypeSchemeVO issueTypeSchemeVO) {
         issueTypeSchemeVO.setId(issueTypeSchemeId);
         issueTypeSchemeVO.setOrganizationId(organizationId);
@@ -66,14 +66,14 @@ public class IssueTypeSchemeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "校验问题类型方案是否可以删除")
     @GetMapping(value = "/check_delete/{id}")
-    public ResponseEntity<Map<String, Object>> checkDelete(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE_SCHEME)*/ Long issueTypeSchemeId) {
+    public ResponseEntity<Map<String, Object>> checkDelete(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt Long issueTypeSchemeId) {
         return new ResponseEntity<>(issueTypeSchemeService.checkDelete(organizationId, issueTypeSchemeId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除问题类型方案")
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE_SCHEME)*/ Long issueTypeSchemeId) {
+    public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId, @PathVariable("id") @Encrypt Long issueTypeSchemeId) {
         return new ResponseEntity<>(issueTypeSchemeService.delete(organizationId, issueTypeSchemeId), HttpStatus.OK);
     }
 
@@ -98,7 +98,7 @@ public class IssueTypeSchemeController extends BaseController {
     @GetMapping(value = "/check_name")
     public ResponseEntity<Boolean> checkName(@PathVariable("organization_id") Long organizationId,
                                              @RequestParam("name") String name,
-                                             @RequestParam(value = "id", required = false) @Encrypt/*(EncryptionConstant.FD_ISSUE_TYPE_SCHEME)*/ Long id) {
+                                             @RequestParam(value = "id", required = false) @Encrypt Long id) {
         return new ResponseEntity<>(issueTypeSchemeService.checkName(organizationId, name, id), HttpStatus.OK);
     }
 

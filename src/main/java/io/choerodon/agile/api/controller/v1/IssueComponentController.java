@@ -3,7 +3,7 @@ package io.choerodon.agile.api.controller.v1;
 import io.choerodon.agile.api.vo.ComponentForListVO;
 import io.choerodon.agile.api.vo.IssueVO;
 import io.choerodon.agile.api.vo.SearchVO;
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -17,7 +17,7 @@ import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
-import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +44,7 @@ public class IssueComponentController {
     public ResponseEntity<IssueComponentVO> createComponent(@ApiParam(value = "项目id", required = true)
                                                              @PathVariable(name = "project_id") Long projectId,
                                                             @ApiParam(value = "components对象", required = true)
-                                                             @RequestBody  IssueComponentVO issueComponentVO) {
+                                                             @RequestBody IssueComponentVO issueComponentVO) {
         return Optional.ofNullable(issueComponentService.create(projectId, issueComponentVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.component.create"));
@@ -58,7 +58,7 @@ public class IssueComponentController {
                                                             @ApiParam(value = "component id", required = true)
                                                              @PathVariable @Encrypt  Long id,
                                                             @ApiParam(value = "components对象", required = true)
-                                                             @RequestBody  IssueComponentVO issueComponentVO) {
+                                                             @RequestBody IssueComponentVO issueComponentVO) {
         return Optional.ofNullable(issueComponentService.update(projectId, id, issueComponentVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.component.update"));
@@ -70,9 +70,9 @@ public class IssueComponentController {
     public ResponseEntity deleteComponent(@ApiParam(value = "项目id", required = true)
                                           @PathVariable(name = "project_id") Long projectId,
                                           @ApiParam(value = "component id", required = true)
-                                          @PathVariable @Encrypt/*(EncryptionConstant.AGILE_ISSUE_COMPONENT)*/ Long id,
+                                          @PathVariable @Encrypt Long id,
                                           @ApiParam(value = "relate component id", required = false)
-                                          @RequestParam(required = false) @Encrypt/*(EncryptionConstant.AGILE_ISSUE_COMPONENT)*/ Long relateComponentId) {
+                                          @RequestParam(required = false) @Encrypt Long relateComponentId) {
         issueComponentService.delete(projectId, id, relateComponentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -83,7 +83,7 @@ public class IssueComponentController {
     public ResponseEntity<IssueComponentVO> queryComponentById(@ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
                                                                @ApiParam(value = "component id", required = true)
-                                                                @PathVariable @Encrypt/*(EncryptionConstant.AGILE_ISSUE_COMPONENT)*/ Long id) {
+                                                                @PathVariable @Encrypt Long id) {
         return Optional.ofNullable(issueComponentService.queryComponentsById(projectId, id))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.component.get"));
@@ -96,7 +96,7 @@ public class IssueComponentController {
     public ResponseEntity<Page<ComponentForListVO>> listByProjectId(@ApiParam(value = "项目id", required = true)
                                                                      @PathVariable(name = "project_id") Long projectId,
                                                                     @ApiParam(value = "当前模块id")
-                                                                     @RequestParam(required = false) @Encrypt/*(EncryptionConstant.AGILE_ISSUE_COMPONENT)*/ Long componentId,
+                                                                     @RequestParam(required = false) @Encrypt Long componentId,
                                                                     @ApiParam(value = "是否包含测试")
                                                                      @RequestParam(required = false, name = "no_issue_test", defaultValue = "false") Boolean noIssueTest,
                                                                     @ApiParam(value = "查询参数")
@@ -115,7 +115,7 @@ public class IssueComponentController {
     public ResponseEntity<List<ComponentForListVO>> listByProjectIdForTest(@ApiParam(value = "项目id", required = true)
                                                                             @PathVariable(name = "project_id") Long projectId,
                                                                            @ApiParam(value = "当前模块id")
-                                                                            @RequestParam(required = false) @Encrypt/*(EncryptionConstant.AGILE_ISSUE_COMPONENT)*/ Long componentId,
+                                                                            @RequestParam(required = false) @Encrypt Long componentId,
                                                                            @ApiParam(value = "是否包含测试")
                                                                             @RequestParam(required = false, name = "no_issue_test", defaultValue = "false")
                                                                                     Boolean noIssueTest) {
@@ -130,7 +130,7 @@ public class IssueComponentController {
     public ResponseEntity<List<IssueVO>> listByOptions(@ApiParam(value = "项目id", required = true)
                                                         @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "component id", required = true)
-                                                        @PathVariable @Encrypt/*(EncryptionConstant.AGILE_ISSUE_COMPONENT)*/ Long id) {
+                                                        @PathVariable @Encrypt Long id) {
         return Optional.ofNullable(issueComponentService.queryIssuesByComponentId(projectId, id))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.issues.get"));

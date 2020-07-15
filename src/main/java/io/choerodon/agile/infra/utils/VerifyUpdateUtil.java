@@ -60,22 +60,7 @@ public class VerifyUpdateUtil {
         if (field.getType() == String.class) {
             field.set(objectUpdate, v);
         } else if (field.getType() == Long.class) {
-            Encrypt fieldAnnotation = field.getDeclaredAnnotation(Encrypt.class);
-            if (ObjectUtils.isEmpty(fieldAnnotation)) {
-                field.set(objectUpdate, v == null ? null : Long.valueOf(v.toString()));
-            } else {
-                String[] ignoreValue = fieldAnnotation.ignoreValue();
-                if(ArrayUtils.isEmpty(ignoreValue)){
-                    field.set(objectUpdate,EncryptionUtils.decrypt(v.toString(), fieldAnnotation.value()));
-                }
-                else {
-                    if(Arrays.asList(ignoreValue).contains(v)){
-                        field.set(objectUpdate, v == null ? null : Long.valueOf(v.toString()));
-                    } else {
-                        field.set(objectUpdate,EncryptionUtils.decrypt(v.toString(), fieldAnnotation.value()));
-                    }
-                }
-            }
+            handlerDecryptionLong(field,objectUpdate,v);
         } else if (field.getType() == Date.class) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             field.set(objectUpdate, v != null ? sdf.parse(v.toString()) : null);
@@ -85,45 +70,68 @@ public class VerifyUpdateUtil {
             field.set(objectUpdate, v == null ? null : new BigDecimal(v.toString()));
         } else if (field.getType() == List.class) {
             //对象包含子对象是list的值设置
-            String className = field.getGenericType().getTypeName().substring(15, field.getGenericType().getTypeName().length() - 1);
-            Class<?> forName = Class.forName(className);
-            if (forName.isPrimitive() || EncryptionUtils.isWrapClass(forName) || forName.newInstance() instanceof String) {
-                if (forName.newInstance() instanceof Long) {
-                    Encrypt declaredAnnotation = field.getDeclaredAnnotation(Encrypt.class);
-                    if (!ObjectUtils.isEmpty(declaredAnnotation)) {
-                        String[] ignoreValue = declaredAnnotation.ignoreValue();
-                        field.set(objectUpdate, EncryptionUtils.decryptList(JSON.parseArray(v.toString(), String.class), declaredAnnotation.value(),ignoreValue));
-                    } else {
-                        String json = JSON.toJSONString(v);
-                        field.set(objectUpdate, JSON.parseArray(json, forName));
-                    }
-                } else {
-                    String json = JSON.toJSONString(v);
-                    field.set(objectUpdate, JSON.parseArray(json, forName));
-                }
-            } else {
-                JSONArray jsonArray = JSONObject.parseArray(JSON.toJSONString(v));
-                List list = new ArrayList();
-                for (Object objValue:jsonArray) {
-                    JSONObject jsonObject = JSON.parseObject(objValue.toString());
-                    Object obj = forName.newInstance();
-                    jsonObject.forEach((String k, Object value) -> {
-                        try {
-                            Field field1 = forName.getDeclaredField(k);
-                            field1.setAccessible(true);
-                            handleFieldType(field1,obj,value,false);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
-                    list.add(obj);
-                }
-                field.set(objectUpdate, list);
-            }
+            handlerListObject(field, objectUpdate, v);
             flag = false;
         }
         return flag;
     }
 
+    private void handlerDecryptionLong(Field field, Object objectUpdate, Object v) throws IllegalAccessException {
+        Encrypt fieldAnnotation = field.getDeclaredAnnotation(Encrypt.class);
+        if (ObjectUtils.isEmpty(fieldAnnotation)) {
+            field.set(objectUpdate, v == null ? null : Long.valueOf(v.toString()));
+        } else {
+            String[] ignoreValue = fieldAnnotation.ignoreValue();
+            if(ArrayUtils.isEmpty(ignoreValue)){
+                field.set(objectUpdate,EncryptionUtils.decrypt(v.toString(), fieldAnnotation.value()));
+            }
+            else {
+                if(Arrays.asList(ignoreValue).contains(v)){
+                    field.set(objectUpdate, v == null ? null : Long.valueOf(v.toString()));
+                } else {
+                    field.set(objectUpdate,EncryptionUtils.decrypt(v.toString(), fieldAnnotation.value()));
+                }
+            }
+        }
+    }
+
+    private void  handlerListObject(Field field, Object objectUpdate, Object v) throws
+            IllegalAccessException, ClassNotFoundException, InstantiationException {
+        String className = field.getGenericType().getTypeName().substring(15, field.getGenericType().getTypeName().length() - 1);
+        Class<?> forName = Class.forName(className);
+        if (forName.isPrimitive() || EncryptionUtils.isWrapClass(forName) || forName.newInstance() instanceof String) {
+            if (forName.newInstance() instanceof Long) {
+                Encrypt declaredAnnotation = field.getDeclaredAnnotation(Encrypt.class);
+                if (!ObjectUtils.isEmpty(declaredAnnotation)) {
+                    String[] ignoreValue = declaredAnnotation.ignoreValue();
+                    field.set(objectUpdate, EncryptionUtils.decryptList(JSON.parseArray(v.toString(), String.class), declaredAnnotation.value(),ignoreValue));
+                } else {
+                    String json = JSON.toJSONString(v);
+                    field.set(objectUpdate, JSON.parseArray(json, forName));
+                }
+            } else {
+                String json = JSON.toJSONString(v);
+                field.set(objectUpdate, JSON.parseArray(json, forName));
+            }
+        } else {
+            JSONArray jsonArray = JSONObject.parseArray(JSON.toJSONString(v));
+            List list = new ArrayList();
+            for (Object objValue : jsonArray) {
+                JSONObject jsonObject = JSON.parseObject(objValue.toString());
+                Object obj = forName.newInstance();
+                jsonObject.forEach((String k, Object value) -> {
+                    try {
+                        Field field1 = forName.getDeclaredField(k);
+                        field1.setAccessible(true);
+                        handleFieldType(field1, obj, value, false);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+                list.add(obj);
+            }
+            field.set(objectUpdate, list);
+        }
+    }
 
 }

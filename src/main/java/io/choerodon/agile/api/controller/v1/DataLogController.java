@@ -3,14 +3,14 @@ package io.choerodon.agile.api.controller.v1;
 import io.choerodon.agile.api.vo.DataLogCreateVO;
 import io.choerodon.agile.api.vo.DataLogVO;
 import io.choerodon.agile.app.service.DataLogService;
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
-import org.hzero.starter.keyencrypt.mvc.EncryptDTO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +36,7 @@ public class DataLogController {
     public ResponseEntity<DataLogVO> createDataLog(@ApiParam(value = "项目id", required = true)
                                                      @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "data log object", required = true)
-                                                     @RequestBody  DataLogCreateVO createVO) {
+                                                     @RequestBody DataLogCreateVO createVO) {
         return Optional.ofNullable(dataLogService.createDataLog(projectId, createVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.dataLog.create"));
@@ -48,7 +48,7 @@ public class DataLogController {
     public ResponseEntity<List<DataLogVO>> listByIssueId(@ApiParam(value = "项目id", required = true)
                                                           @PathVariable(name = "project_id") Long projectId,
                                                          @ApiParam(value = "issue id", required = true)
-                                                          @RequestParam @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/ Long issueId) {
+                                                          @RequestParam @Encrypt Long issueId) {
         return Optional.ofNullable(dataLogService.listByIssueId(projectId, issueId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.dataLogList.get"));

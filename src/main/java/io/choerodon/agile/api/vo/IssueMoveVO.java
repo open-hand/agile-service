@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -11,27 +11,27 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class IssueMoveVO {
 
     @ApiModelProperty(value = "问题主键id")
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt
     private Long issueId;
 
     @ApiModelProperty(value = "状态id")
-    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
+    @Encrypt
     private Long statusId;
 
     @ApiModelProperty(value = "冲刺id")
-    @Encrypt/*(EncryptionConstant.AGILE_SPRINT)*/
+    @Encrypt
     private Long sprintId;
 
     @ApiModelProperty(value = "看板主键id")
-    @Encrypt/*(EncryptionConstant.AGILE_BOARD)*/
+    @Encrypt
     private Long boardId;
 
     @ApiModelProperty(value = "新列id")
-    @Encrypt/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/
+    @Encrypt
     private Long columnId;
 
     @ApiModelProperty(value = "原始列id")
-    @Encrypt/*(EncryptionConstant.AGILE_BOARD_COLUMN)*/
+    @Encrypt
     private Long originColumnId;
 
     @ApiModelProperty(value = "版本号")
@@ -41,7 +41,7 @@ public class IssueMoveVO {
     private Boolean before;
 
     @ApiModelProperty(value = "与before一起用，以该问题为参照物")
-    @Encrypt/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt
     private Long outsetIssueId;
 
     @ApiModelProperty(value = "是否排序")

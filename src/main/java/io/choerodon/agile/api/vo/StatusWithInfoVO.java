@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.constants.EncryptionConstant;
+
 import io.choerodon.agile.infra.dto.StateMachineInfoDTO;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class StatusWithInfoVO {
     @ApiModelProperty(value = "状态id")
-    @Encrypt/*(EncryptionConstant.FD_STATUS)*/
+    @Encrypt
     private Long id;
     @ApiModelProperty(value = "名称")
     private String name;
