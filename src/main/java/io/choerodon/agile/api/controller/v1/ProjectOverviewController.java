@@ -10,6 +10,7 @@ import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.core.util.Results;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class ProjectOverviewController {
     public ResponseEntity<UncompletedCountVO> selectUncompletedBySprint(@ApiParam(value = "项目id", required = true)
                                                            @PathVariable(name = "project_id") Long projectId,
                                                            @ApiParam(value = "冲刺Id", required = true)
-                                                           @PathVariable Long sprintId) {
+                                                           @PathVariable @Encrypt Long sprintId) {
         return Results.success(projectOverviewService.selectUncompletedBySprint(projectId, sprintId));
     }
 
@@ -42,7 +43,7 @@ public class ProjectOverviewController {
     public ResponseEntity<List<IssueCompletedStatusVO>> selectIssueCountBysprint(@ApiParam(value = "项目id", required = true)
                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                  @ApiParam(value = "冲刺Id", required = true)
-                                                                 @PathVariable Long sprintId) {
+                                                                 @PathVariable @Encrypt Long sprintId) {
         return Results.success(projectOverviewService.selectIssueCountBysprint(projectId, sprintId));
     }
 
@@ -53,7 +54,7 @@ public class ProjectOverviewController {
     public ResponseEntity<SprintStatisticsVO> selectSprintStatistics(@ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
                                                                      @ApiParam(value = "冲刺Id", required = true)
-                                                                @PathVariable Long sprintId) {
+                                                                @PathVariable @Encrypt Long sprintId) {
         return Results.success(projectOverviewService.selectSprintStatistics(projectId, sprintId));
     }
 
@@ -63,7 +64,7 @@ public class ProjectOverviewController {
     public ResponseEntity<IssueCountVO> selectBugBysprint(@ApiParam(value = "项目id", required = true)
                                                            @PathVariable(name = "project_id") Long projectId,
                                                            @ApiParam(value = "冲刺Id", required = true)
-                                                           @PathVariable Long sprintId) {
+                                                           @PathVariable @Encrypt Long sprintId) {
         return Results.success(reportService.selectBugBysprint(projectId, sprintId));
     }
 
@@ -73,7 +74,7 @@ public class ProjectOverviewController {
     public ResponseEntity<List<OneJobVO>> selectOneJobsBysprint(@ApiParam(value = "项目id", required = true)
                                                                @PathVariable(name = "project_id") Long projectId,
                                                                 @ApiParam(value = "冲刺Id", required = true)
-                                                               @PathVariable Long sprintId) {
+                                                               @PathVariable @Encrypt Long sprintId) {
         return Results.success(projectOverviewService.selectOneJobsBysprint(projectId, sprintId));
     }
 }
