@@ -46,7 +46,6 @@ const issue_type_program = {
     filterOption,
   },
   request: () => new Promise(resolve => issueTypeApi.loadAllWithStateMachineId('program').then((issueTypes) => {
-    // const defaultType = find(issueTypes, { typeCode: 'feature' }).id;
     resolve(issueTypes);
   })),
   render: issueType => (
@@ -322,7 +321,7 @@ export default {
       filterOption: false,
       loadWhenMount: true,
     },
-    request: priorityApi.loadByProject.bind(priorityApi),
+    request: () => priorityApi.loadByProject(),
     getDefaultValue: priorities => find(priorities, { default: true }).id,
     render: priority => (
       <Option key={priority.id} value={priority.id}>
