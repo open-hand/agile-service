@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -13,6 +15,7 @@ import java.util.Date;
 public class WorkLogVO {
 
     @ApiModelProperty(value = "工作日志主键id")
+    @Encrypt
     private Long logId;
 
     @ApiModelProperty(value = "工作时间")
@@ -25,6 +28,7 @@ public class WorkLogVO {
     private String description;
 
     @ApiModelProperty(value = "问题id")
+    @Encrypt
     private Long issueId;
 
     @ApiModelProperty(value = "项目id")

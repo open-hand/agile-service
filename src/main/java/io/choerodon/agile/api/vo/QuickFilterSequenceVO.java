@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.infra.utils.StringUtil;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
 
@@ -14,6 +15,7 @@ public class QuickFilterSequenceVO {
     private static final String OBJECT_VERSION_NUMBER_NULL_ERROR = "error.objectVersionNumber.NotNull";
 
     @NotNull(message = FILTER_ID_NOT_NULL_ERROR)
+    @Encrypt
     private Long filterId;
 
     @NotNull(message = OBJECT_VERSION_NUMBER_NULL_ERROR)

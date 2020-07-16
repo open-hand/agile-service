@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -18,6 +19,7 @@ public class ProductVersionReleaseVO {
 
     @ApiModelProperty(value = "当前版本id")
     @NotNull(message = VERSION_ID_NULL_ERROR)
+    @Encrypt
     private Long versionId;
 
     @ApiModelProperty(value = "目标版本id")

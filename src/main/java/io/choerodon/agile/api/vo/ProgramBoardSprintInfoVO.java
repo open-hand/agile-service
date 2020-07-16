@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author shinan.chen
@@ -9,6 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class ProgramBoardSprintInfoVO {
 
     @ApiModelProperty(value = "冲刺id")
+    @Encrypt
     private Long sprintId;
     @ApiModelProperty(value = "冲刺名称")
     private String sprintName;

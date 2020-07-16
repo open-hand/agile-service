@@ -225,6 +225,9 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (issue == null) {
             throw new CommonException(ERROR_ISSUE_NOT_FOUND);
         }
+        if (!projectId.equals(issue.getProjectId())) {
+            throw new CommonException("error.project.id.illegal");
+        }
         //获取状态机id
         Long stateMachineId = projectConfigService.queryStateMachineId(projectId, applyType, issue.getIssueTypeId());
         if (stateMachineId == null) {
@@ -259,6 +262,9 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
         if (issue == null) {
             throw new CommonException(ERROR_ISSUE_NOT_FOUND);
+        }
+        if (!projectId.equals(issue.getProjectId())) {
+            throw new CommonException("error.project.id.illegal");
         }
         //获取状态机id
         Long stateMachineId = projectConfigService.queryStateMachineId(projectId, applyType, issue.getIssueTypeId());

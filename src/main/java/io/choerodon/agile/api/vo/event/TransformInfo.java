@@ -2,6 +2,8 @@ package io.choerodon.agile.api.vo.event;
 
 import io.choerodon.agile.api.vo.StateMachineConfigVO;
 
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.util.List;
 
 /**
@@ -11,11 +13,15 @@ import java.util.List;
  * @date 2018/10/8
  */
 public class TransformInfo {
+    @Encrypt
     private Long id;
     private String name;
     private String description;
+    @Encrypt
     private Long stateMachineId;
+    @Encrypt
     private Long startStatusId;
+    @Encrypt
     private Long endStatusId;
     private String url;
     private String type;

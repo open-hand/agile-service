@@ -2,14 +2,18 @@ package io.choerodon.agile.api.vo;
 
 import javax.validation.constraints.NotNull;
 
+
 import io.choerodon.agile.infra.utils.StringUtil;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 public class IssueUpdateParentIdVO {
 
     @NotNull(message = "issueId 不能为空")
+    @Encrypt
     private Long issueId;
 
     @NotNull(message = "parentIssueId 不能为空")
+    @Encrypt
     private Long parentIssueId;
 
     @NotNull(message = "objectVersionNumber 不能为空")

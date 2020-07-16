@@ -4,6 +4,8 @@ import io.choerodon.agile.api.vo.FieldDataLogCreateVO;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO;
 import io.choerodon.agile.api.vo.PageFieldViewVO;
 import io.choerodon.agile.app.service.FieldDataLogService;
+
+import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.agile.infra.dto.FieldOptionDTO;
 import io.choerodon.agile.infra.dto.FieldValueDTO;
 import io.choerodon.agile.infra.dto.PageFieldDTO;
@@ -330,10 +332,10 @@ public class FieldValueUtil {
                 switch (fieldType) {
                     case FieldType.CHECKBOX:
                     case FieldType.MULTIPLE:
-                        List<Integer> optionIds = (List<Integer>) value;
-                        for (Integer optionId : optionIds) {
+                        List<String> optionIds = (List<String>) value;
+                        for (String optionId : optionIds) {
                             FieldValueDTO oValue = new FieldValueDTO();
-                            oValue.setOptionId(Long.parseLong(String.valueOf(optionId)));
+                            oValue.setOptionId(EncryptionUtils.decrypt(optionId, EncryptionConstant.BLANK_KEY));
                             fieldValues.add(oValue);
                         }
                         break;
@@ -341,7 +343,7 @@ public class FieldValueUtil {
                     case FieldType.SINGLE:
                     case FieldType.MEMBER:
                         //人员/单选款/选择器（单选）处理为Long
-                        Long optionId = Long.parseLong(value.toString());
+                        Long optionId = EncryptionUtils.decrypt(value.toString(), EncryptionConstant.BLANK_KEY);
                         fieldValue.setOptionId(optionId);
                         fieldValues.add(fieldValue);
                         break;

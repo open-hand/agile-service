@@ -12,6 +12,7 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.DateUtil;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.agile.infra.utils.SendMsgUtil;
 import io.choerodon.core.exception.CommonException;
@@ -95,6 +96,9 @@ public class BoardServiceImpl implements BoardService {
         BoardDTO boardDTO = boardMapper.selectByPrimaryKey(boardId);
         if (boardName.equals(boardDTO.getName())) {
             return false;
+        }
+        if (!projectId.equals(boardDTO.getProjectId())) {
+            throw new CommonException("error.project.id.illegal");
         }
         BoardDTO check = new BoardDTO();
         check.setProjectId(projectId);
@@ -371,11 +375,11 @@ public class BoardServiceImpl implements BoardService {
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
         putDatasAndSort(columns, parentIds, assigneeIds, boardId, epicIds, condition, organizationId, parentWithSubs, statusMap, issueTypeDTOMap);
-        jsonObject.put("parentIds", parentIds);
+        jsonObject.put("parentIds", EncryptionUtils.encryptList(parentIds));
         jsonObject.put("parentIssues", getParentIssues(projectId, parentIds, statusMap, issueTypeDTOMap));
         jsonObject.put("assigneeIds", assigneeIds);
-        jsonObject.put("parentWithSubs", parentWithSubs);
-        jsonObject.put("parentCompleted", sortAndJudgeCompleted(projectId, parentIds));
+        jsonObject.put("parentWithSubs", EncryptionUtils.encryptMap(parentWithSubs));
+        jsonObject.put("parentCompleted", EncryptionUtils.encryptList(sortAndJudgeCompleted(projectId, parentIds)));
         jsonObject.put("epicInfo", !epicIds.isEmpty() ? boardColumnMapper.selectEpicBatchByIds(epicIds) : null);
         jsonObject.put("allColumnNum", getAllColumnNum(projectId, boardId, sprintId));
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);

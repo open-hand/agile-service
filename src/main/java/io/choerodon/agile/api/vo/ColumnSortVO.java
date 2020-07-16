@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
 
@@ -16,10 +18,12 @@ public class ColumnSortVO {
 
     @ApiModelProperty(value = "看板id")
     @NotNull(message = "board id不能为空")
+    @Encrypt
     private Long boardId;
 
     @ApiModelProperty(value = "列id")
     @NotNull(message = "列id不能为空")
+    @Encrypt
     private Long columnId;
 
     @ApiModelProperty(value = "列顺序")

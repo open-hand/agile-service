@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import io.choerodon.agile.api.vo.KnowledgeRelationVO;
 import io.choerodon.agile.api.vo.WikiRelationVO;
 import io.choerodon.agile.api.vo.WorkSpaceVO;
 import io.choerodon.agile.app.service.IWikiRelationService;
@@ -69,8 +70,7 @@ public class WikiRelationServiceImpl implements WikiRelationService {
     }
 
     @Override
-    public JSONObject queryByIssueId(Long projectId, Long issueId) {
-        JSONObject jsonObject = new JSONObject();
+    public KnowledgeRelationVO queryByIssueId(Long projectId, Long issueId) {
         WikiRelationDTO wikiRelationDTO = new WikiRelationDTO();
         wikiRelationDTO.setIssueId(issueId);
         List<WikiRelationDTO> wikiRelationDTOList = wikiRelationMapper.select(wikiRelationDTO);
@@ -85,8 +85,9 @@ public class WikiRelationServiceImpl implements WikiRelationService {
                 result.add(wikiRelationVO);
             }
         }
-        jsonObject.put("knowledgeRelationList", result);
-        return jsonObject;
+        KnowledgeRelationVO knowledgeRelation = new KnowledgeRelationVO();
+        knowledgeRelation.setKnowledgeRelationList(result);
+        return knowledgeRelation;
     }
 
     @Override

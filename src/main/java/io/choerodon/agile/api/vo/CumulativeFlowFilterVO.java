@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
 import java.util.List;
@@ -19,12 +21,14 @@ public class CumulativeFlowFilterVO {
     private Date endDate;
 
     @ApiModelProperty(value = "看板id")
+    @Encrypt
     private Long boardId;
 
     @ApiModelProperty(value = "快速搜索传值")
     private List<Long> quickFilterIds;
 
     @ApiModelProperty(value = "看板列id集合")
+    @Encrypt
     private List<Long> columnIds;
 
     public List<Long> getQuickFilterIds() {

@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/8/28.
@@ -10,6 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class UndistributedIssueVO {
 
     @ApiModelProperty(value = "问题主键id")
+    @Encrypt
     private Long issueId;
 
     @ApiModelProperty(value = "问题编号")

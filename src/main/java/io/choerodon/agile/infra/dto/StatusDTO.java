@@ -1,11 +1,12 @@
 package io.choerodon.agile.infra.dto;
 
+
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -18,6 +19,7 @@ import javax.persistence.Table;
 public class StatusDTO extends AuditDomain {
     @Id
     @GeneratedValue
+    @Encrypt
     private Long id;
     private String name;
     private String code;

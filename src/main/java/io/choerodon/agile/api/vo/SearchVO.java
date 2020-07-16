@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.choerodon.agile.infra.utils.StringUtil;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class SearchVO {
      * 关联查询参数
      */
     private Map<String, Object> otherArgs;
-
+    @Encrypt
     private List<Long> quickFilterIds;
 
     private List<Long> assigneeFilterIds;

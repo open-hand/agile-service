@@ -64,8 +64,8 @@ public class StoryMapServiceImpl implements StoryMapService {
     }
 
     @Override
-    public JSONObject queryStoryMap(Long projectId, Long organizationId, SearchVO searchVO) {
-        JSONObject result = new JSONObject(true);
+    public StoryMapVO queryStoryMap(Long projectId, Long organizationId, SearchVO searchVO) {
+        StoryMapVO storyMap = new StoryMapVO();
         List<Long> epicIds = new ArrayList<>();
         // get project completed status
         getStatusIdByIsCompleted(projectId, searchVO);
@@ -76,15 +76,14 @@ public class StoryMapServiceImpl implements StoryMapService {
         }
 
         if (epicIds.isEmpty()) {
-            result.put("epics", new ArrayList<>());
+            storyMap.setEpics(new ArrayList<>());
         } else {
             List<EpicWithInfoDTO> epicWithInfoDTOList = storyMapMapper.selectEpicList(projectId, epicIds, searchVO.getAdvancedSearchArgs());
-            result.put("epics", epicWithInfoDTOList);
+            storyMap.setEpics(epicWithInfoDTOList);
         }
-
-        result.put("storyList", !epicIds.isEmpty() ? storyMapMapper.selectStoryList(projectId, epicIds, searchVO) : new ArrayList<>());
-        result.put("storyMapWidth", setStoryMapWidth(projectId));
-        return result;
+        storyMap.setStoryList(!epicIds.isEmpty() ? storyMapMapper.selectStoryList(projectId, epicIds, searchVO) : new ArrayList<>());
+        storyMap.setStoryMapWidth(setStoryMapWidth(projectId));
+        return storyMap;
     }
 
     protected void getStatusIdByIsCompleted(Long projectId, SearchVO searchVO) {
@@ -100,11 +99,11 @@ public class StoryMapServiceImpl implements StoryMapService {
     }
 
     @Override
-    public JSONObject queryStoryMapDemand(Long projectId, SearchVO searchVO) {
-        JSONObject result = new JSONObject(true);
+    public StoryMapVO queryStoryMapDemand(Long projectId, SearchVO searchVO) {
+        StoryMapVO storyMap = new StoryMapVO();
         List<StoryMapStoryDTO> storyMapStoryDTOList = storyMapMapper.selectDemandStoryList(projectId, searchVO);
-        result.put("demandStoryList", storyMapAssembler.storyMapStoryDTOToVO(projectId, storyMapStoryDTOList));
-        return result;
+        storyMap.setDemandStoryList(storyMapAssembler.storyMapStoryDTOToVO(projectId, storyMapStoryDTOList));
+        return storyMap;
     }
 
     protected void dragToEpic(Long projectId, Long epicId, StoryMapDragVO storyMapDragVO) {

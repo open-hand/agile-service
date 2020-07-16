@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.List;
  * Created by jian_zhang02@163.com on 2018/5/16.
  */
 public class SprintSearchVO {
+    @Encrypt
     private Long sprintId;
     private String sprintName;
     private String sprintGoal;

@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -14,6 +16,7 @@ import java.util.List;
 public class IssueSubVO {
 
     @ApiModelProperty(value = "问题主键id")
+    @Encrypt
     private Long issueId;
 
     @ApiModelProperty(value = "问题编号")
@@ -23,6 +26,7 @@ public class IssueSubVO {
     private String typeCode;
 
     @ApiModelProperty(value = "状态id")
+    @Encrypt
     private Long statusId;
 
     @ApiModelProperty(value = "问题概要")
@@ -47,6 +51,7 @@ public class IssueSubVO {
     private Long projectId;
 
     @ApiModelProperty(value = "父任务id")
+    @Encrypt(ignoreValue = {"0"})
     private Long parentIssueId;
 
     @ApiModelProperty(value = "故事点")
@@ -107,9 +112,11 @@ public class IssueSubVO {
     private StatusVO statusMapVO;
 
     @ApiModelProperty(value = "问题类型id")
+    @Encrypt
     private Long issueTypeId;
 
     @ApiModelProperty(value = "优先级id")
+    @Encrypt
     private Long priorityId;
 
     @ApiModelProperty(value = "业务类型：agile、test等")
