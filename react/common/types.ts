@@ -9,7 +9,7 @@ export interface User {
 }
 
 export interface Issue {
-  issueId: number
+  issueId: string
   summary: string
 }
 

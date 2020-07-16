@@ -48,7 +48,7 @@ class SideIssueList extends Component {
   }
 
   setFilter = (field, values) => {
-    StoryMapStore.handleSideFilterChange(field, values.map(Number));
+    StoryMapStore.handleSideFilterChange(field, values);
   }
 
   render() {

@@ -181,10 +181,10 @@ class ScrumBoardHome extends Component {
       return;
     }
 
-    const [startStatus, startColumn] = source.droppableId.split(['/']).map(id => parseInt(id, 10));
+    const [startStatus, startColumn] = source.droppableId.split(['/']);
     const startStatusIndex = source.index;
 
-    const [destinationStatus, destinationColumn] = destination.droppableId.split(['/']).map(id => parseInt(id, 10));
+    const [destinationStatus, destinationColumn] = destination.droppableId.split(['/']);
     const destinationStatusIndex = destination.index;
 
     const issue = {

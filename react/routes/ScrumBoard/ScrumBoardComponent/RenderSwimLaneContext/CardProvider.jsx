@@ -17,7 +17,7 @@ class CardProvider extends React.Component {
     const { isUsingPlaceholder, draggingOverWith, draggingFromThisWith } = snapshot;
     const draggableId = draggingFromThisWith || draggingOverWith;
     const issueId = draggableId ? draggableId.split('/')[1] : undefined;
-    return isUsingPlaceholder && !find(data, { issueId: Number(issueId) });
+    return isUsingPlaceholder && !find(data, { issueId });
   };
 
   renderIssueItem = (data, { index, style }) => {

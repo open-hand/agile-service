@@ -713,15 +713,15 @@ class AddComponent extends Component {
       if (operation === 'in' || operation === 'notIn' || operation === 'not in') {
         const arr = value.slice(1, -1).split(',');
         return arr.map((v) => {
-          const priority = _.find(state[OPTION_FILTER[filter].state], { id: v * 1 });
+          const priority = _.find(state[OPTION_FILTER[filter].state], { id: v });
           return {
-            key: v * 1,
+            key: v,
             label: priority ? priority.name : v,
           };
         });
       } else {
         const k = value;
-        const priority = _.find(state[OPTION_FILTER[filter].state], { [OPTION_FILTER[filter].id]: k * 1 });
+        const priority = _.find(state[OPTION_FILTER[filter].state], { [OPTION_FILTER[filter].id]: k });
         return ({
           key: k,
           label: priority ? priority.name : k,
@@ -746,17 +746,17 @@ class AddComponent extends Component {
     } else if (operation === 'in' || operation === 'notIn' || operation === 'not in') {
       const arr = value.slice(1, -1).split(',');
       return arr.map(v => ({
-        key: v * 1,
+        key: v,
         label: _.find(state[OPTION_FILTER[filter].state],
-          { [OPTION_FILTER[filter].id]: v * 1 })
+          { [OPTION_FILTER[filter].id]: value })
           ? _.find(state[OPTION_FILTER[filter].state],
-            { [OPTION_FILTER[filter].id]: v * 1 })[OPTION_FILTER[filter].name]
+            { [OPTION_FILTER[filter].id]: v })[OPTION_FILTER[filter].name]
           : undefined,
       }));
     } else if (operation === 'like' || operation === 'not like') {
       return value;
     } else {
-      const k = value * 1;
+      const k = value;
       return ({
         key: k,
         label: _.find(state[OPTION_FILTER[filter].state],

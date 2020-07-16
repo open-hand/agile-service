@@ -89,7 +89,7 @@ export default ({
     }),
   },
   fields: [
-    { name: 'issueId', type: 'number', label: '概要' },
+    { name: 'issueId', type: 'string', label: '概要' },
     { name: 'issueTypeId', type: 'object', label: '问题类型' },
     { name: 'issueNum', type: 'string', label: '任务编号' },
     { name: 'priorityId', type: 'string', label: '优先级' },

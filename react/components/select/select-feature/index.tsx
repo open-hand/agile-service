@@ -6,7 +6,7 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { Issue } from '@/common/types';
 
 interface Props {
-  featureId?: number,
+  featureId?: string,
   featureName?: string,
 }
 

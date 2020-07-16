@@ -210,7 +210,7 @@ class SprintDetails extends Component {
     const { history } = this.props;
     const { sprintId } = this.state;
     const urlParams = AppState.currentMenuType;
-    history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${record.issueNum}&paramIssueId=${record.issueId}&paramUrl=iterationBoard/${sprintId}`);
+    history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${encodeURIComponent(urlParams.id)}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${record.issueNum}&paramIssueId=${encodeURIComponent(record.issueId)}&paramUrl=iterationBoard/${sprintId}`);
   }
 
   render() {

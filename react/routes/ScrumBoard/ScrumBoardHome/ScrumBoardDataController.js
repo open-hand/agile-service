@@ -224,7 +224,7 @@ export default class ScrumBoardDataController {
   convertDataWithStructure(data) {
     const structureMap = JSON.parse(JSON.stringify(this.statusStructureMap));
     Object.keys(structureMap).forEach((status) => {
-      structureMap[status] = _.sortBy(data.filter(issue => issue.statusId === status * 1), o => o.rank);
+      structureMap[status] = _.sortBy(data.filter(issue => issue.statusId === status), o => o.rank);
     });
     return structureMap;
   }
