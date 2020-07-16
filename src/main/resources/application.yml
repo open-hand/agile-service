@@ -50,6 +50,8 @@ mybatis:
   mapperLocations: classpath*:/mapper/*.xml
   configuration:
     mapUnderscoreToCamelCase: true
+    key-generator: snowflake
+
 feign:
   hystrix:
     enabled: true
