@@ -72,7 +72,7 @@ public class PersonalFilterController {
     public ResponseEntity<List<PersonalFilterVO>> listByProjectId(@ApiParam(value = "项目id", required = true)
                                                                    @PathVariable(name = "project_id") Long projectId,
                                                                   @ApiParam(value = "用户id", required = true)
-                                                                   @PathVariable Long userId,
+                                                                   @PathVariable @Encrypt Long userId,
                                                                   @RequestParam(name = "searchStr", required = false) String searchStr) {
         return Optional.ofNullable(personalFilterService.listByProjectId(projectId, userId, searchStr))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))

@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.dto;
 
 import io.choerodon.agile.infra.utils.StringUtil;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
 
@@ -10,6 +11,7 @@ import java.util.Date;
  */
 public class UserDTO {
 
+    @Encrypt
     private Long id;
 
     private String loginName;
