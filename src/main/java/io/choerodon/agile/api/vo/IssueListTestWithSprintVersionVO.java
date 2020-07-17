@@ -26,6 +26,7 @@ public class IssueListTestWithSprintVersionVO {
     private String summary;
 
     @ApiModelProperty(value = "经办人id")
+    @Encrypt
     private Long assigneeId;
 
     @ApiModelProperty(value = "项目id")

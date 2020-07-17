@@ -29,6 +29,7 @@ public class IssueListTestVO implements Serializable {
     private String summary;
 
     @ApiModelProperty(value = "经办人id")
+    @Encrypt
     private Long assigneeId;
 
     @ApiModelProperty(value = "项目id")

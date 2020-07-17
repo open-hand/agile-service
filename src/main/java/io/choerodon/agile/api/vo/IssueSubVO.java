@@ -33,6 +33,7 @@ public class IssueSubVO {
     private String summary;
 
     @ApiModelProperty(value = "报告人id")
+    @Encrypt
     private Long reporterId;
 
     @ApiModelProperty(value = "报告人名称")
@@ -42,6 +43,7 @@ public class IssueSubVO {
     private String description;
 
     @ApiModelProperty(value = "经办人id")
+    @Encrypt
     private Long assigneeId;
 
     @ApiModelProperty(value = "经办人名称")

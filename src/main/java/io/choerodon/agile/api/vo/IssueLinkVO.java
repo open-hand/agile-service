@@ -45,6 +45,7 @@ public class IssueLinkVO {
     private Long linkId;
 
     @ApiModelProperty(value = "经办人id")
+    @Encrypt
     private Long assigneeId;
 
     @ApiModelProperty(value = "经办人名称")
