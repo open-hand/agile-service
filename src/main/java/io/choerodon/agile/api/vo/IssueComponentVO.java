@@ -28,6 +28,7 @@ public class IssueComponentVO {
     private String description;
 
     @ApiModelProperty(value = "负责人id")
+    @Encrypt
     private Long managerId;
 
     @ApiModelProperty(value = "默认经办人")
