@@ -141,7 +141,7 @@ public class FieldValueController {
                                                    @ApiParam(value = "方案编码", required = true)
                                                    @RequestParam String schemeCode,
                                                    @RequestParam String applyType,
-                                                   @RequestBody  BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
+                                                   @RequestBody @Encrypt BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
         issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo,applyType);
         return new ResponseEntity<>(HttpStatus.OK);
     }
