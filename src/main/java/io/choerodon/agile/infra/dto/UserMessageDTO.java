@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.dto;
 
 import io.choerodon.agile.infra.utils.StringUtil;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
@@ -18,7 +19,7 @@ public class UserMessageDTO {
     private String email;
 
     private Boolean ldap;
-
+    @Encrypt
     private Long id;
 
     public UserMessageDTO(String name, String imageUrl, String email) {
