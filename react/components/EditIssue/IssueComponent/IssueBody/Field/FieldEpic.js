@@ -124,7 +124,7 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
           </div>
           <div className="c7n-value-wrapper">
             <TextEditToggle
-              disabled={featureId || disabled}
+              disabled={featureName || disabled}
               onSubmit={this.updateIssueEpic}
               initValue={issueEpicName ? epicId || null : null}
               editor={({ submit }) => <SelectEpic onChange={submit} />}
