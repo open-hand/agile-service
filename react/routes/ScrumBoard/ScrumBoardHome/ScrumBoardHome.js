@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
 import {
-  Page, Header, Content, stores, Breadcrumb, Choerodon, Permission, 
+  Page, Header, Content, stores, Breadcrumb, Choerodon, Permission,
 } from '@choerodon/boot';
 import {
   Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
@@ -9,7 +9,7 @@ import {
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
 import {
-  sprintApi, issueApi, epicApi, issueTypeApi, statusApi, boardApi, 
+  sprintApi, issueApi, epicApi, issueTypeApi, statusApi, boardApi,
 } from '@/api';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
@@ -126,7 +126,7 @@ class ScrumBoardHome extends Component {
    * @memberof ScrumBoardHome
    */
   handleFinishSprint = async () => {
-    const sprintId = ScrumBoardStore.getSprintId;    
+    const sprintId = ScrumBoardStore.getSprintId;
     const completeMessage = await sprintApi.loadSprintAndCountIssue(sprintId);
     CloseSprint({
       completeMessage,
@@ -188,10 +188,9 @@ class ScrumBoardHome extends Component {
     const destinationStatusIndex = destination.index;
 
     const issue = {
-      ...allDataMap.get(+issueId),
+      ...allDataMap.get(issueId),
       stayDay: 0,
     };
-
     const [type, parentId] = SwimLaneId.split('-');
 
     ScrumBoardStore.updateIssue(issue, startStatus, startStatusIndex, destinationStatus, destinationStatusIndex, SwimLaneId).then((data) => {
@@ -200,7 +199,7 @@ class ScrumBoardHome extends Component {
         ScrumBoardStore.setSwimLaneData(SwimLaneId, startStatus, startStatusIndex, SwimLaneId, destinationStatus, destinationStatusIndex, issue, true);
       } else {
         if (ScrumBoardStore.getSwimLaneCode === 'parent_child' && parentId !== 'other') {
-          ScrumBoardStore.judgeMoveParentToDone(destinationStatus, SwimLaneId, +parentId, ScrumBoardStore.getStatusMap.get(destinationStatus).categoryCode === 'done');
+          ScrumBoardStore.judgeMoveParentToDone(destinationStatus, SwimLaneId, parentId, ScrumBoardStore.getStatusMap.get(destinationStatus).categoryCode === 'done');
         }
         if (data.issueId === ScrumBoardStore.getCurrentClickId) {
           ScrumBoardStore.editRef.current.loadIssueDetail();
@@ -305,14 +304,14 @@ class ScrumBoardHome extends Component {
     } = this.state;
     const menu = AppState.currentMenuType;
     const { type, id: projectId, organizationId: orgId } = menu;
-    const currentSprintIsDoing = ScrumBoardStore.didCurrentSprintExist && ScrumBoardStore.sprintNotClosedArray.find(item => item.statusCode === 'started' && item.sprintId === ScrumBoardStore.sprintId); 
+    const currentSprintIsDoing = ScrumBoardStore.didCurrentSprintExist && ScrumBoardStore.sprintNotClosedArray.find(item => item.statusCode === 'started' && item.sprintId === ScrumBoardStore.sprintId);
     return (
       <Fragment>
-        <Header title="活跃冲刺">         
+        <Header title="活跃冲刺">
           <Select
             ref={(SelectBoard) => { this.SelectBoard = SelectBoard; }}
             className="SelectTheme primary autoWidth"
-              // value={ScrumBoardStore.getBoardList && ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard)}
+            // value={ScrumBoardStore.getBoardList && ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard)}
             value={ScrumBoardStore.getSelectedBoard}
             style={{
               marginRight: 15, fontWeight: 500, lineHeight: '28px',
@@ -322,7 +321,6 @@ class ScrumBoardHome extends Component {
               width: 200,
             }}
             onChange={(value) => {
-              // console.log('sleee', value, ScrumBoardStore.getBoardList.get(value));
               const selectedBoard = ScrumBoardStore.getBoardList.get(value);
               ScrumBoardStore.setSelectedBoard(value);
               ScrumBoardStore.setSwimLaneCode(selectedBoard.userDefaultBoard);
@@ -336,16 +334,16 @@ class ScrumBoardHome extends Component {
               </Permission>
             )}
           >
-  
+
             {// ScrumBoardStore.getSpinIf
-                [...ScrumBoardStore.getBoardList.values()].map(item => (
-                  <Option key={item.boardId} value={item.boardId}>
-                    <Tooltip title={item.name}>
-                      {item.name}
-                    </Tooltip>
-                  </Option>
-                ))
-              }
+              [...ScrumBoardStore.getBoardList.values()].map(item => (
+                <Option key={item.boardId} value={item.boardId}>
+                  <Tooltip title={item.name}>
+                    {item.name}
+                  </Tooltip>
+                </Option>
+              ))
+            }
           </Select>
           <ScrumBoardFullScreen />
           <HeaderLine />
@@ -365,25 +363,25 @@ class ScrumBoardHome extends Component {
           </Button>
           {
             currentSprintIsDoing && (
-            <Fragment>             
-              {this.renderRemainDate()}
-              <Permission
-                service={['choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish']}
-              >
-                <Button
-                  style={{
-                    marginLeft: 15,
-                  }}
-                  icon="alarm_on"
-                  onClick={this.handleFinishSprint}
+              <Fragment>
+                {this.renderRemainDate()}
+                <Permission
+                  service={['choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish']}
                 >
-                  完成冲刺
-                </Button>
-              </Permission>
-              {this.renderSwitchMode()}
-            </Fragment>
+                  <Button
+                    style={{
+                      marginLeft: 15,
+                    }}
+                    icon="alarm_on"
+                    onClick={this.handleFinishSprint}
+                  >
+                    完成冲刺
+                  </Button>
+                </Permission>
+                {this.renderSwitchMode()}
+              </Fragment>
             )
-          }          
+          }
         </Header>
         <Breadcrumb />
         <Content style={{ padding: 0, display: 'flex', flexDirection: 'column' }}>
@@ -427,7 +425,7 @@ class ScrumBoardHome extends Component {
               />
             </div>
           </Spin>
-        </Content>        
+        </Content>
         {
           ScrumBoardStore.getUpdateParent ? (
             <Modal
