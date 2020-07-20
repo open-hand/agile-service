@@ -273,7 +273,7 @@ function StateList(props) {
     // const { type, editState } = this.state;
     if (showType === 'create' || value !== (editState && editState.name)) {
       setSubmitting(true);
-      const res = await statusApi.checkName(orgId, value);
+      const res = await statusApi.checkName(value);
       setSubmitting(false);
       if (res && res.statusExist) {
         callback(intl.formatMessage({ id: 'priority.create.name.error' }));

@@ -3,7 +3,7 @@ import React from 'react';
 import { Select } from 'choerodon-ui';
 import { find } from 'lodash';
 import {
-  userApi, componentApi, issueApi, epicApi, versionApi, issueTypeApi, commonApi, issueLabelApi, priorityApi, statusApi, 
+  userApi, componentApi, issueApi, epicApi, versionApi, issueTypeApi, commonApi, issueLabelApi, priorityApi, statusApi,
 } from '@/api';
 
 import { issueLinkTypeApi } from '@/api/IssueLinkType';
@@ -264,7 +264,7 @@ export default {
                 {issue.summary}
               </p>
             </Tooltip>
-            
+
           </div>
         </div>
       </Option>
@@ -355,7 +355,7 @@ export default {
       filterOption: false,
       loadWhenMount: true,
     },
-    request: issueLabelApi.loads,
+    request: () => issueLabelApi.loads(),
     render: label => (
       <Option key={label.labelName} value={label.labelName}>
         {label.labelName}
@@ -369,7 +369,7 @@ export default {
       filterOption,
       loadWhenMount: true,
     },
-    request: issueLabelApi.loads.bind(issueLabelApi),
+    request: () => issueLabelApi.loads(),
     render: label => (
       <Option key={label.labelId} value={label.labelId}>
         {label.labelName}

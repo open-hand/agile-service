@@ -498,6 +498,7 @@ class CreateIssue extends Component {
                   type="user"
                   label="经办人"
                   style={{ flex: 1 }}
+                  loadWhenMount
                   getPopupContainer={triggerNode => triggerNode.parentNode}
                   allowClear
                 />,

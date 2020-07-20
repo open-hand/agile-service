@@ -303,8 +303,8 @@ class ScrumBoardStore {
 
   @action judgeMoveParentToDone(destinationStatus, swimLaneId, parentId, statusIsDone) {
     const completedStatusIssueLength = Object.keys(this.swimLaneData[swimLaneId])
-      .filter(statusId => this.statusMap.get(+statusId).completed === true)
-      .map(statusId => this.swimLaneData[swimLaneId][+statusId].length)
+      .filter(statusId => this.statusMap.get(statusId).completed === true)
+      .map(statusId => this.swimLaneData[swimLaneId][statusId].length)
       .reduce((accumulator, currentValue) => accumulator + currentValue);
     if (statusIsDone && completedStatusIssueLength === this.interconnectedData.get(parentId).subIssueData.length && this.interconnectedData.get(parentId).categoryCode !== 'done') {
       this.updatedParentIssue = this.interconnectedData.get(parentId);
@@ -355,7 +355,7 @@ class ScrumBoardStore {
       action('fetchSuccess', (res) => {
         this.updatedParentIssue = this.interconnectedData.get(parentId);
         this.translateToCompleted = res.filter(transform => transform.statusVO.type === 'done');
-        this.interconnectedData.set(+parentId, {
+        this.interconnectedData.set(parentId, {
           ...this.interconnectedData.get(parentId),
           canMoveToComplish: true,
         });
@@ -573,7 +573,7 @@ class ScrumBoardStore {
       onlyMe, onlyStory, quickSearchArray, assigneeFilterIds, sprintId,
     } = this.quickSearchObj;
     return boardApi.load(boardId,
-      { 
+      {
         onlyMe,
         onlyStory,
         quickFilterIds: quickSearchArray,
@@ -615,7 +615,8 @@ class ScrumBoardStore {
       sprintId: this.sprintId,
       rankFlag: true,
     };
-    const { id: transformId } = this.stateMachineMap[issueTypeId] ? this.stateMachineMap[issueTypeId][startStatus].find(issue => issue.endStatusId === destinationStatus) : this.stateMachineMap[0][startStatus].find(issue => issue.endStatusId === destinationStatus);
+    // Object.keys(this.stateMachineMap)[0] 若无问题类型状态机方案，则选用默认的
+    const { id: transformId } = this.stateMachineMap[issueTypeId] ? this.stateMachineMap[issueTypeId][startStatus].find(issue => issue.endStatusId === destinationStatus) : this.stateMachineMap[Object.keys(this.stateMachineMap)[0]][startStatus].find(issue => issue.endStatusId === destinationStatus);
     return boardApi.moveIssue(issueId, transformId, data);
   };
 
@@ -755,11 +756,11 @@ class ScrumBoardStore {
   @action resetHeaderData(startColumnId, destinationColumnId, issueType) {
     const startColumnData = this.headerData.get(startColumnId);
     const destinationColumnData = this.headerData.get(destinationColumnId);
-    this.headerData.set(+startColumnId, {
+    this.headerData.set(startColumnId, {
       ...startColumnData,
       columnIssueCount: startColumnData.columnIssueCount - 1,
     });
-    this.headerData.set(+destinationColumnId, {
+    this.headerData.set(destinationColumnId, {
       ...destinationColumnData,
       columnIssueCount: destinationColumnData.columnIssueCount + 1,
     });
@@ -772,8 +773,8 @@ class ScrumBoardStore {
     const startColumnCount = this.allColumnCount.get(startColumnId);
     const destinationColumnCount = this.allColumnCount.get(destinationColumnId);
     if ((this.currentConstraint === 'issue_without_sub_task' && issueType !== 'sub_task') || this.currentConstraint === 'issue') {
-      this.allColumnCount.set(+startColumnId, startColumnCount - 1);
-      this.allColumnCount.set(+destinationColumnId, destinationColumnCount + 1);
+      this.allColumnCount.set(startColumnId, startColumnCount - 1);
+      this.allColumnCount.set(destinationColumnId, destinationColumnCount + 1);
     }
   }
 
@@ -797,7 +798,7 @@ class ScrumBoardStore {
     this.currentDrag = data;
   }
 
-  @action setWhichCanNotDragOn(statusId, { id: typeId }) {    
+  @action setWhichCanNotDragOn(statusId, { id: typeId }) {
     [...this.canDragOn.keys()].forEach((status) => {
       if (this.stateMachineMap[typeId]) {
         if (this.stateMachineMap[typeId][statusId].find(issue => issue.endStatusId === status)) {
@@ -805,7 +806,8 @@ class ScrumBoardStore {
         } else {
           this.canDragOn.set(status, true);
         }
-      } else if (this.stateMachineMap[0][statusId].find(issue => issue.endStatusId === status)) {
+        // Object.keys(this.stateMachineMap)[0] 若无问题类型状态机方案，则选用默认的
+      } else if (this.stateMachineMap[Object.keys(this.stateMachineMap)[0]][statusId].find(issue => issue.endStatusId === status)) {
         this.canDragOn.set(status, false);
       } else {
         this.canDragOn.set(status, true);
@@ -875,7 +877,7 @@ class ScrumBoardStore {
   }
 
   @action rewriteObjNumber({ objectVersionNumber }, issueId, issue) {
-    this.allDataMap.set(+issueId, {
+    this.allDataMap.set(issueId, {
       ...issue,
       objectVersionNumber,
     });

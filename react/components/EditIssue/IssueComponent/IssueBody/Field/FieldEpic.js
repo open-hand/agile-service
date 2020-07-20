@@ -95,7 +95,7 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
                 <TextEditToggle
                   disabled={disabled}
                   onSubmit={this.updateIssueFeature}
-                  initValue={featureId || []}
+                  initValue={featureName ? featureId || [] : []}
                   editor={<SelectFeature featureId={featureId} featureName={featureName} />}
                 >
                   {featureName ? (
@@ -110,7 +110,7 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
                       无
                     </div>
                   )
-                    }
+                  }
                 </TextEditToggle>
               </div>
             </div>
@@ -126,34 +126,34 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
             <TextEditToggle
               disabled={featureId || disabled}
               onSubmit={this.updateIssueEpic}
-              initValue={epicId || null}
+              initValue={issueEpicName ? epicId || null : null}
               editor={({ submit }) => <SelectEpic onChange={submit} />}
             >
               {
-                  epicId ? (
-                    <div
-                      style={{
-                        color: epicColor,
-                        borderWidth: '1px',
-                        borderStyle: 'solid',
-                        borderColor: epicColor,
-                        borderRadius: '2px',
-                        fontSize: '13px',
-                        lineHeight: '20px',
-                        padding: '0 8px',
-                        display: 'inline-block',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {issueEpicName}
-                    </div>
-                  ) : (
-                    <div>
-                      无
-                    </div>
-                  )
-                }
+                issueEpicName ? (
+                  <div
+                    style={{
+                      color: epicColor,
+                      borderWidth: '1px',
+                      borderStyle: 'solid',
+                      borderColor: epicColor,
+                      borderRadius: '2px',
+                      fontSize: '13px',
+                      lineHeight: '20px',
+                      padding: '0 8px',
+                      display: 'inline-block',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {issueEpicName}
+                  </div>
+                ) : (
+                  <div>
+                    无
+                  </div>
+                )
+              }
             </TextEditToggle>
           </div>
         </div>
