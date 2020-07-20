@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import org.hzero.starter.keyencrypt.core.IEncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +41,8 @@ public class SchemeController extends BaseController {
     private PriorityService priorityService;
     @Autowired
     private ProjectUtil projectUtil;
+    @Autowired
+    private IEncryptionService encryptionService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询项目的问题类型列表")
@@ -152,7 +155,7 @@ public class SchemeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询工作流第一个状态")
     @GetMapping("/status/query_first_status")
-    public ResponseEntity<Long> queryWorkFlowFirstStatus(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<String> queryWorkFlowFirstStatus(@ApiParam(value = "项目id", required = true)
                                                          @PathVariable("project_id") Long projectId,
                                                          @ApiParam(value = "applyType", required = true)
                                                          @RequestParam String applyType,
@@ -161,6 +164,7 @@ public class SchemeController extends BaseController {
                                                          @ApiParam(value = "organizationId", required = true)
                                                          @RequestParam Long organizationId) {
         return Optional.ofNullable(projectConfigService.queryWorkFlowFirstStatus(projectId, applyType, issueTypeId, organizationId))
+                .map(initStatusId -> encryptionService.encrypt(initStatusId.toString(), EncryptionUtils.BLANK_KEY))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.firstStatus.get"));
     }

@@ -1,23 +1,19 @@
 package io.choerodon.agile.api.validator;
 
+import java.util.Objects;
+
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.ProjectConfigService;
-
-import io.choerodon.agile.infra.constants.EncryptionConstant;
-import io.choerodon.agile.infra.dto.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.EnumUtil;
-import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/8/9.
@@ -100,7 +96,7 @@ public class IssueValidator {
         if (issueUpdate.get(ISSUE_ID) == null) {
             throw new CommonException(ERROR_ISSUE_ID_NOT_FOUND);
         }
-        Long issueId = EncryptionUtils.decrypt(issueUpdate.get(ISSUE_ID).toString(), EncryptionConstant.BLANK_KEY);
+        Long issueId = EncryptionUtils.decrypt(issueUpdate.get(ISSUE_ID).toString(), EncryptionUtils.BLANK_KEY);
         IssueDTO issueDTO = new IssueDTO();
         issueDTO.setIssueId(issueId);
         issueDTO.setProjectId(projectId);
@@ -117,7 +113,7 @@ public class IssueValidator {
             throw new CommonException("error.IssueRule.EpicName");
         }
         //修改状态要有当前状态
-        if (issueUpdate.get(STATUS_ID) != null && issueStatusMapper.selectByPrimaryKey(EncryptionUtils.decrypt(issueUpdate.get(STATUS_ID).toString(), EncryptionConstant.BLANK_KEY)) == null) {
+        if (issueUpdate.get(STATUS_ID) != null && issueStatusMapper.selectByPrimaryKey(EncryptionUtils.decrypt(issueUpdate.get(STATUS_ID).toString(), EncryptionUtils.BLANK_KEY)) == null) {
             throw new CommonException("error.IssueRule.statusId");
         }
 

@@ -21,6 +21,7 @@ public class BatchUpdateFieldsValueVo {
     private JSONObject predefinedFields;
 
     @ApiModelProperty(value = "要修改的自定义字段的值")
+    @Encrypt
     private List<PageFieldViewUpdateVO> customFields;
 
     public List<Long> getIssueIds() {

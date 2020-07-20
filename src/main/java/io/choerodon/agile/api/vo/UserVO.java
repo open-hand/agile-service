@@ -2,6 +2,7 @@ package io.choerodon.agile.api.vo;
 
 import io.choerodon.core.exception.CommonException;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author dinghuang123@gmail.com
@@ -10,6 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class UserVO {
 
     @ApiModelProperty(value = "用户id")
+    @Encrypt
     private Long id;
 
     @ApiModelProperty(value = "组织id")
