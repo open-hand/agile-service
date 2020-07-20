@@ -93,17 +93,17 @@ class CreateLinkTask extends Component {
         if (issueType !== 'feature') {
           const { linkTypeId, issues } = values;
           const labelIssueRelVOList = _.map(issues, (issue) => {
-            const currentLinkType = _.find(originLinks, { linkTypeId: linkTypeId.split('+')[0] * 1 });
+            const currentLinkType = _.find(originLinks, { linkTypeId: linkTypeId.split('+')[0] });
             if (currentLinkType.outWard === linkTypeId.split('+')[1]) {
               return ({
-                linkTypeId: linkTypeId.split('+')[0] * 1,
-                linkedIssueId: issue * 1,
+                linkTypeId: linkTypeId.split('+')[0],
+                linkedIssueId: issue,
                 issueId,
               });
             } else {
               return ({
-                linkTypeId: linkTypeId.split('+')[0] * 1,
-                issueId: issue * 1,
+                linkTypeId: linkTypeId.split('+')[0],
+                issueId: issue,
                 linkedIssueId: issueId,
               });
             }
