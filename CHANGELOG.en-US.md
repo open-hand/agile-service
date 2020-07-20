@@ -27,7 +27,7 @@ All notable changes about agile-service will be documented in this file.
 ### Fixed
 
 - Fix the duplicate display of the sub text box picture paste of issue details.
-- Fixed create state interface permission check error.
+- Fix create state interface permission check error.
 
 
 ## [0.21.0] - 2020-03-06
