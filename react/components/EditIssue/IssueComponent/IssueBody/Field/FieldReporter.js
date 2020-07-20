@@ -51,18 +51,18 @@ import './Field.less';
           <TextEditToggle
             disabled={disabled || (reporterId !== loginUserId && !hasPermission)}
             onSubmit={this.updateIssueReporter}
-            initValue={reporterId}
+            initValue={reporterId || undefined}
             editor={({ submit }) => (
               <SelectUser
                 clearButton
                 onChange={submit}
-                selectedUser={{
+                selectedUser={reporterId ? {
                   id: reporterId,
                   loginName: reporterLoginName,
                   realName: reporterRealName,
                   avatar: reporterImageUrl,
                   name: reporterName,
-                }}
+                } : undefined}
               />
             )}
           >
