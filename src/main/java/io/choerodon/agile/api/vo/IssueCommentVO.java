@@ -22,6 +22,7 @@ public class IssueCommentVO {
     private Long commentId;
 
     @ApiModelProperty(value = "用户id")
+    @Encrypt
     private Long userId;
 
     @ApiModelProperty(value = "问题id")
