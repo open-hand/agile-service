@@ -18,6 +18,7 @@ public class PersonalFilterVO {
     private Long projectId;
 
     @ApiModelProperty(value = "用户id")
+    @Encrypt
     private Long userId;
 
     @ApiModelProperty(value = "过滤名称")

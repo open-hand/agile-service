@@ -33,9 +33,9 @@ public class PersonalFilterController {
     @ApiOperation("创建我的筛选")
     @PostMapping
     public ResponseEntity<PersonalFilterVO> create(@ApiParam(value = "项目id", required = true)
-                                                    @PathVariable(name = "project_id") Long projectId,
+                                                   @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "personal filter object", required = true)
-                                                    @RequestBody PersonalFilterVO personalFilterVO) {
+                                                   @RequestBody @Encrypt PersonalFilterVO personalFilterVO) {
         return Optional.ofNullable(personalFilterService.create(projectId, personalFilterVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));
@@ -45,11 +45,11 @@ public class PersonalFilterController {
     @ApiOperation("修改我的筛选")
     @PutMapping(value = "/{filterId}")
     public ResponseEntity<PersonalFilterVO> update(@ApiParam(value = "项目id", required = true)
-                                                    @PathVariable(name = "project_id") Long projectId,
+                                                   @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "filter id", required = true)
-                                                    @PathVariable  @Encrypt Long filterId,
+                                                   @PathVariable  @Encrypt Long filterId,
                                                    @ApiParam(value = "personal filter object", required = true)
-                                                    @RequestBody PersonalFilterVO personalFilterVO) {
+                                                   @RequestBody  @Encrypt PersonalFilterVO personalFilterVO) {
         return Optional.ofNullable(personalFilterService.update(projectId, filterId, personalFilterVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));
@@ -59,9 +59,9 @@ public class PersonalFilterController {
     @ApiOperation("删除我的筛选")
     @DeleteMapping(value = "/{filterId}")
     public ResponseEntity<PersonalFilterVO> deleteById(@ApiParam(value = "项目id", required = true)
-                                                        @PathVariable(name = "project_id") Long projectId,
+                                                       @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "filter id", required = true)
-                                                        @PathVariable  @Encrypt  Long filterId) {
+                                                       @PathVariable  @Encrypt Long filterId) {
         personalFilterService.deleteById(projectId, filterId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -70,9 +70,9 @@ public class PersonalFilterController {
     @ApiOperation("查询我的筛选列表")
     @GetMapping(value = "/query_all/{userId}")
     public ResponseEntity<List<PersonalFilterVO>> listByProjectId(@ApiParam(value = "项目id", required = true)
-                                                                   @PathVariable(name = "project_id") Long projectId,
+                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                   @ApiParam(value = "用户id", required = true)
-                                                                   @PathVariable @Encrypt Long userId,
+                                                                  @PathVariable @Encrypt Long userId,
                                                                   @RequestParam(name = "searchStr", required = false) String searchStr) {
         return Optional.ofNullable(personalFilterService.listByProjectId(projectId, userId, searchStr))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
@@ -83,9 +83,9 @@ public class PersonalFilterController {
     @ApiOperation("根据id查询我的筛选")
     @GetMapping(value = "/{filterId}")
     public ResponseEntity<PersonalFilterVO> queryById(@ApiParam(value = "项目id", required = true)
-                                                       @PathVariable(name = "project_id") Long projectId,
+                                                      @PathVariable(name = "project_id") Long projectId,
                                                       @ApiParam(value = "filter id", required = true)
-                                                       @PathVariable  @Encrypt Long filterId) {
+                                                      @PathVariable  @Encrypt Long filterId) {
         return Optional.ofNullable(personalFilterService.queryById(projectId, filterId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.personalFilter.queryById"));
