@@ -39,7 +39,7 @@ class UserApi extends Api {
         page: page || 1,
         size: size || 20,
       },
-      // cache: true,
+      cache: true,
     });
   }
 
