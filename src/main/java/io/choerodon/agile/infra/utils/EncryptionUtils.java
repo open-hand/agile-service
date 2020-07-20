@@ -252,7 +252,9 @@ public class EncryptionUtils {
 
         // priorityId
         tempStr = adMapOptional.map(ad -> {
-            if (ad.get("priorityId") instanceof String){
+            if (Objects.isNull(ad.get("priorityId"))){
+                return null;
+            }else if (ad.get("priorityId") instanceof String){
                 return (String) (ad.get("priorityId"));
             }else {
                 try {
