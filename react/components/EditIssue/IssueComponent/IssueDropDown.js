@@ -21,6 +21,18 @@ const IssueDropDown = ({
     issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi,
   } = issue;
   const disableFeatureDeleteWhilePiDoing = typeCode === 'feature' && activePi && activePi.statusCode === 'doing';
+  let disableDelete = true;
+  // 管理员什么时候都能删
+  if (isOwner) {
+    disableDelete = false;
+    // feature在doing的pi里不能删
+  } else if (disableFeatureDeleteWhilePiDoing) {
+    disableDelete = true;
+  } else {
+    // 可以删自己创建的
+    disableDelete = loginUserId !== createdBy;
+  }
+
   const handleDeleteIssue = () => {
     confirm({
       width: 560,
@@ -100,7 +112,8 @@ const IssueDropDown = ({
       )}
       {
         <Menu.Item
-          disabled={disableFeatureDeleteWhilePiDoing && !isOwner ? true : (loginUserId !== createdBy && !isOwner)}
+          key="1"
+          disabled={disableDelete}
         >
           删除
         </Menu.Item>
