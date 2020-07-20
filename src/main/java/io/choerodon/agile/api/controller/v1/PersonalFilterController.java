@@ -85,7 +85,7 @@ public class PersonalFilterController {
     public ResponseEntity<PersonalFilterVO> queryById(@ApiParam(value = "项目id", required = true)
                                                       @PathVariable(name = "project_id") Long projectId,
                                                       @ApiParam(value = "filter id", required = true)
-                                                      @PathVariable  @Encrypt Long filterId) {
+                                                      @PathVariable @Encrypt Long filterId) {
         return Optional.ofNullable(personalFilterService.queryById(projectId, filterId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.personalFilter.queryById"));

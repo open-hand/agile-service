@@ -36,7 +36,7 @@ public class IssueLinkController {
     public ResponseEntity<List<IssueLinkVO>> createIssueLinkList(@ApiParam(value = "项目id", required = true)
                                                                   @PathVariable(name = "project_id") Long projectId,
                                                                  @ApiParam(value = "issueId", required = true)
-                                                                  @PathVariable Long issueId,
+                                                                  @PathVariable @Encrypt Long issueId,
                                                                  @ApiParam(value = "issueLink创建对象", required = true)
                                                                   @RequestBody List<IssueLinkCreateVO> issueLinkCreateVOList) {
         return Optional.ofNullable(issueLinkService.createIssueLinkList(issueLinkCreateVOList, issueId, projectId))
