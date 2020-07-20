@@ -97,7 +97,7 @@ public class PersonalFilterController {
     public ResponseEntity<Boolean> checkName(@ApiParam(value = "项目id", required = true)
                                              @PathVariable(name = "project_id") Long projectId,
                                              @ApiParam(value = "用户id", required = true)
-                                             @RequestParam Long userId,
+                                             @RequestParam @Encrypt Long userId,
                                              @ApiParam(value = "name", required = true)
                                              @RequestParam String name) {
         return Optional.ofNullable(personalFilterService.checkName(projectId, userId, name))

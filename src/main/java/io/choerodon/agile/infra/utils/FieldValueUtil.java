@@ -1,11 +1,15 @@
 package io.choerodon.agile.infra.utils;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import io.choerodon.agile.api.vo.FieldDataLogCreateVO;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO;
 import io.choerodon.agile.api.vo.PageFieldViewVO;
 import io.choerodon.agile.app.service.FieldDataLogService;
-
-import io.choerodon.agile.infra.constants.EncryptionConstant;
 import io.choerodon.agile.infra.dto.FieldOptionDTO;
 import io.choerodon.agile.infra.dto.FieldValueDTO;
 import io.choerodon.agile.infra.dto.PageFieldDTO;
@@ -14,15 +18,9 @@ import io.choerodon.agile.infra.enums.FieldType;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.FieldOptionMapper;
-import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.springframework.util.CollectionUtils;
-
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author shinan.chen
@@ -130,6 +128,8 @@ public class FieldValueUtil {
                     } else {
                         valueStr = userMap.getOrDefault(value, new UserDTO());
                     }
+                    // 用户id加密
+                    value = EncryptionUtils.encrypt(values.get(0).getOptionId());
                     break;
                 default:
                     break;
@@ -335,7 +335,7 @@ public class FieldValueUtil {
                         List<String> optionIds = (List<String>) value;
                         for (String optionId : optionIds) {
                             FieldValueDTO oValue = new FieldValueDTO();
-                            oValue.setOptionId(EncryptionUtils.decrypt(optionId, EncryptionConstant.BLANK_KEY));
+                            oValue.setOptionId(EncryptionUtils.decrypt(optionId, EncryptionUtils.BLANK_KEY));
                             fieldValues.add(oValue);
                         }
                         break;
@@ -343,7 +343,7 @@ public class FieldValueUtil {
                     case FieldType.SINGLE:
                     case FieldType.MEMBER:
                         //人员/单选款/选择器（单选）处理为Long
-                        Long optionId = EncryptionUtils.decrypt(value.toString(), EncryptionConstant.BLANK_KEY);
+                        Long optionId = EncryptionUtils.decrypt(value.toString(), EncryptionUtils.BLANK_KEY);
                         fieldValue.setOptionId(optionId);
                         fieldValues.add(fieldValue);
                         break;

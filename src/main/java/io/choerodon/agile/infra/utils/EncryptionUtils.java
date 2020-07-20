@@ -1,32 +1,28 @@
 package io.choerodon.agile.infra.utils;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.choerodon.agile.api.vo.SearchVO;
-
-import io.choerodon.agile.infra.constants.EncryptionConstant;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.hzero.starter.keyencrypt.core.Encrypt;
-import org.hzero.starter.keyencrypt.core.EncryptProperties;
-import org.hzero.starter.keyencrypt.core.EncryptionService;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.core.exception.CommonException;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.hzero.starter.keyencrypt.core.EncryptProperties;
+import org.hzero.starter.keyencrypt.core.EncryptionService;
+import org.springframework.util.ObjectUtils;
 
 /**
  * @author zhaotianxin
@@ -43,6 +39,7 @@ public class EncryptionUtils {
     public static String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","featureTypeList","issueTypeList","epicList","piList","issueIds"};
 
     public static String[] IGNORE_VALUES = {"0"};
+    public static final String BLANK_KEY = "";
 
     /**
      * 解密serachVO
@@ -206,55 +203,65 @@ public class EncryptionUtils {
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("versionList"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getAdvancedSearchArgs().put("versionList",
-                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, BLANK_KEY))).collect(Collectors.toList()));
         }
         // statusList
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("statusList"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getAdvancedSearchArgs().put("statusList",
-                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, BLANK_KEY))).collect(Collectors.toList()));
         }
         // components
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("components"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getAdvancedSearchArgs().put("components",
-                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, BLANK_KEY))).collect(Collectors.toList()));
         }
         // sprints
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("sprints"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getAdvancedSearchArgs().put("sprints",
-                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, BLANK_KEY))).collect(Collectors.toList()));
         }
         // statusIdList
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("statusIdList"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getAdvancedSearchArgs().put("statusIdList",
-                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, BLANK_KEY))).collect(Collectors.toList()));
         }
         // prioritys
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("prioritys"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getAdvancedSearchArgs().put("prioritys",
-                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, BLANK_KEY))).collect(Collectors.toList()));
         }
 
         // issueTypeId
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("issueTypeId"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getAdvancedSearchArgs().put("issueTypeId",
-                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, BLANK_KEY))).collect(Collectors.toList()));
         }
 
         // statusId
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("statusId"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getAdvancedSearchArgs().put("statusId",
-                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY))).collect(Collectors.toList()));
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, BLANK_KEY))).collect(Collectors.toList()));
         }
 
         // priorityId
-        tempStr = adMapOptional.map(ad -> (String) (ad.get("priorityId"))).orElse(null);
+        tempStr = adMapOptional.map(ad -> {
+            if (ad.get("priorityId") instanceof String){
+                return (String) (ad.get("priorityId"));
+            }else {
+                try {
+                    return objectMapper.writeValueAsString(ad.get("priorityId"));
+                } catch (JsonProcessingException e) {
+                    throw new CommonException(e);
+                }
+            }
+        }).orElse(null);
         if (StringUtils.isNotBlank(tempStr)) {
             handlerPrimaryKey(tempStr, "priorityId", search.getAdvancedSearchArgs());
         }
@@ -274,63 +281,63 @@ public class EncryptionUtils {
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("priorityId"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("priorityId",
-                    temp.stream().map(item -> encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY)).collect(Collectors.toList()));
+                    temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // component
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("component"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("component",
-                    temp.stream().map(item -> encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY)).collect(Collectors.toList()));
+                    temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // version
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("version"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("version",
-                    temp.stream().map(item -> encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY)).collect(Collectors.toList()));
+                    temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // sprint
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("sprint"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("sprint",
-                    temp.stream().map(item -> encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY)).collect(Collectors.toList()));
+                    temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // issueIds
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("issueIds"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("issueIds",
-                    temp.stream().map(item -> encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY)).collect(Collectors.toList()));
+                    temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // label
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("label"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("label",
-                    temp.stream().map(item -> encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY)).collect(Collectors.toList()));
+                    temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // componentIds
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("componentIds"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("componentIds",
-                    temp.stream().map(item -> encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY)).collect(Collectors.toList()));
+                    temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // feature
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("feature"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("feature",
-                    temp.stream().map(item -> encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY)).collect(Collectors.toList()));
+                    temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // epic
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("epic"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("epic",
-                    temp.stream().map(item -> encryptionService.decrypt(item, EncryptionConstant.BLANK_KEY)).collect(Collectors.toList()));
+                    temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // customField
@@ -348,9 +355,9 @@ public class EncryptionUtils {
             jsonNode = objectMapper.readTree(tempStr);
             if (jsonNode.isArray()) {
                 List list = objectMapper.readValue(tempStr, List.class);
-                map.put(key, decryptList(list, EncryptionConstant.BLANK_KEY, IGNORE_VALUES));
+                map.put(key, decryptList(list, BLANK_KEY, IGNORE_VALUES));
             } else {
-                map.put(key, encryptionService.decrypt(tempStr, EncryptionConstant.BLANK_KEY));
+                map.put(key, encryptionService.decrypt(tempStr, BLANK_KEY));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -360,7 +367,7 @@ public class EncryptionUtils {
     public static List<String> encryptList(List<Long> parentIds) {
         List<String> list = new ArrayList<>();
         if (!CollectionUtils.isEmpty(parentIds)) {
-            parentIds.forEach(v -> list.add(encryptionService.encrypt(v.toString(), EncryptionConstant.BLANK_KEY)));
+            parentIds.forEach(v -> list.add(encryptionService.encrypt(v.toString(), BLANK_KEY)));
         }
         return list;
     }
@@ -368,7 +375,7 @@ public class EncryptionUtils {
     public static List<String> encryptListToStr(List<String> ids) {
         List<String> list = new ArrayList<>();
         if (!CollectionUtils.isEmpty(ids)) {
-            ids.forEach(v -> list.add(encryptionService.encrypt(v, EncryptionConstant.BLANK_KEY)));
+            ids.forEach(v -> list.add(encryptionService.encrypt(v, BLANK_KEY)));
         }
         return list;
     }
@@ -379,7 +386,7 @@ public class EncryptionUtils {
             Iterator<Map.Entry<Long, List<Long>>> iterator = parentWithSubs.entrySet().iterator();
             while (iterator.hasNext()) {
                 Map.Entry<Long, List<Long>> next = iterator.next();
-                map.put(encryptionService.encrypt(next.getKey().toString(), EncryptionConstant.BLANK_KEY), encryptList(next.getValue()));
+                map.put(encryptionService.encrypt(next.getKey().toString(), BLANK_KEY), encryptList(next.getValue()));
             }
         }
         return map;
@@ -391,7 +398,7 @@ public class EncryptionUtils {
         if (!ArrayUtils.isEmpty(split)) {
             List<String> list = Arrays.asList(split);
             for (String s : list) {
-                build.append(encrypt ? encryptionService.encrypt(s, EncryptionConstant.BLANK_KEY) : decrypt(s, EncryptionConstant.BLANK_KEY));
+                build.append(encrypt ? encryptionService.encrypt(s, BLANK_KEY) : decrypt(s, BLANK_KEY));
                 if (list.indexOf(s) != (list.size() - 1)) {
                     build.append(",");
                 }
@@ -438,7 +445,7 @@ public class EncryptionUtils {
                    objectNode.set("quickFilterIds",objectMapper.readTree(objectMapper.writeValueAsString(encryptListToStr(list))));
                }
                else {
-                   objectNode.set("quickFilterIds",objectMapper.readTree(objectMapper.writeValueAsString(decryptList(list,EncryptionConstant.BLANK_KEY,null))));
+                   objectNode.set("quickFilterIds",objectMapper.readTree(objectMapper.writeValueAsString(decryptList(list,BLANK_KEY,null))));
                }
             }
             return objectMapper.writeValueAsString(objectNode);
@@ -464,7 +471,7 @@ public class EncryptionUtils {
                     e.printStackTrace();
                 }
                 if (!CollectionUtils.isEmpty(value)) {
-                    object = value.stream().map(v -> encrypt ? encryptionService.encrypt(v, EncryptionConstant.BLANK_KEY) : encryptionService.decrypt(v, EncryptionConstant.BLANK_KEY)).collect(Collectors.toList());
+                    object = value.stream().map(v -> encrypt ? encryptionService.encrypt(v, BLANK_KEY) : encryptionService.decrypt(v, BLANK_KEY)).collect(Collectors.toList());
                 }
                 else {
                     object = new ArrayList<>();
@@ -492,13 +499,13 @@ public class EncryptionUtils {
                 for (JsonNode node : nextValue) {
                     Map<String, Object> nodeObjValue = new HashMap<>();
                     String fieldId = node.get("fieldId").textValue();
-                    nodeObjValue.put("fieldId", encrypt ? encryptionService.encrypt(fieldId, EncryptionConstant.BLANK_KEY) : encryptionService.decrypt(fieldId, EncryptionConstant.BLANK_KEY));
+                    nodeObjValue.put("fieldId", encrypt ? encryptionService.encrypt(fieldId, BLANK_KEY) : encryptionService.decrypt(fieldId, BLANK_KEY));
                     JsonNode value1 = node.get("value");
                     if ("option".equals(next.getKey())) {
                         List<String> list = new ArrayList<>();
                         if (value1.isArray()) {
                             value1.forEach(v -> {
-                                list.add(v.isNumber() ? v.textValue() : (encrypt ? encryptionService.encrypt(v.textValue(), EncryptionConstant.BLANK_KEY) : encryptionService.decrypt(v.textValue(), EncryptionConstant.BLANK_KEY)));
+                                list.add(v.isNumber() ? v.textValue() : (encrypt ? encryptionService.encrypt(v.textValue(), BLANK_KEY) : encryptionService.decrypt(v.textValue(), BLANK_KEY)));
                             });
                         }
                         nodeObjValue.put("value", list);
@@ -524,9 +531,9 @@ public class EncryptionUtils {
                 Map<Long, List<T>> value = entry.getValue();
                 Map<String,List<?>> stringListMap = new HashMap<>();
                 for(Map.Entry<Long,List<T>> entry1 : value.entrySet()){
-                    stringListMap.put(encryptionService.encrypt(entry1.getKey().toString(),EncryptionConstant.BLANK_KEY),entry1.getValue());
+                    stringListMap.put(encryptionService.encrypt(entry1.getKey().toString(),BLANK_KEY),entry1.getValue());
                 }
-                mapHashMap.put(encryptionService.encrypt(key.toString(),EncryptionConstant.BLANK_KEY),stringListMap);
+                mapHashMap.put(encryptionService.encrypt(key.toString(),BLANK_KEY),stringListMap);
             }
         }
         return mapHashMap;
@@ -538,10 +545,17 @@ public class EncryptionUtils {
             for (Map.Entry<Long, ? extends Object> entry : map.entrySet()) {
                 Long key = entry.getKey();
                 Object value = entry.getValue();
-                String encryptKey = encryptionService.encrypt(key.toString(), EncryptionConstant.BLANK_KEY);
+                String encryptKey = encryptionService.encrypt(key.toString(), BLANK_KEY);
                 result.put(encryptKey, value);
             }
         }
         return result;
+    }
+
+    public static String encrypt(Long value) {
+        if (Objects.isNull(value)){
+            return null;
+        }
+        return encryptionService.encrypt(value.toString(), BLANK_KEY);
     }
 }

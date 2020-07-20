@@ -440,12 +440,12 @@ public class IssueController {
     public ResponseEntity<Page<IssueListTestVO>> listIssueWithoutSubToTestComponent(@ApiIgnore
                                                                                      @ApiParam(value = "分页信息", required = true)
                                                                                      @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
-                                                                                             PageRequest pageRequest,
-                                                                                        @ApiParam(value = "项目id", required = true)
+                                                                                     PageRequest pageRequest,
+                                                                                     @ApiParam(value = "项目id", required = true)
                                                                                      @PathVariable(name = "project_id") Long projectId,
-                                                                                        @ApiParam(value = "组织id", required = true)
+                                                                                     @ApiParam(value = "组织id", required = true)
                                                                                      @RequestParam Long organizationId,
-                                                                                        @ApiParam(value = "查询参数", required = true)
+                                                                                     @ApiParam(value = "查询参数", required = true)
                                                                                      @RequestBody(required = false) SearchVO searchVO) {
         EncryptionUtils.decryptSearchVO(searchVO);
         return Optional.ofNullable(issueService.listIssueWithoutSubToTestComponent(projectId, searchVO, pageRequest, organizationId))
