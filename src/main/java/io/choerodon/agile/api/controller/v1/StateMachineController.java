@@ -41,7 +41,8 @@ public class StateMachineController {
     @GetMapping
     public ResponseEntity<Page<StateMachineListVO>> pagingQuery(@PathVariable("organization_id") Long organizationId,
                                                                 @ApiIgnore
-                                                                    @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
+                                                                @SortDefault(value = "id", direction = Sort.Direction.DESC)
+                                                                PageRequest pageRequest,
                                                                 @RequestParam(required = false) String name,
                                                                 @RequestParam(required = false) String description,
                                                                 @RequestParam(required = false) String[] param) {
