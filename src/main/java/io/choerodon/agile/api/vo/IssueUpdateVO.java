@@ -67,23 +67,18 @@ public class IssueUpdateVO {
     private String versionType;
 
     @ApiModelProperty(value = "关联的版本列表")
-    @Encrypt
     private List<VersionIssueRelVO> versionIssueRelVOList;
 
     @ApiModelProperty(value = "关联的标签列表")
-    @Encrypt
     private List<LabelIssueRelVO> labelIssueRelVOList;
 
     @ApiModelProperty(value = "关联的模块列表")
-    @Encrypt
     private List<ComponentIssueRelVO> componentIssueRelVOList;
 
     @ApiModelProperty(value = "关联的问题链接列表")
-    @Encrypt
     private List<IssueLinkVO> issueLinkVOList;
 
     @ApiModelProperty(value = "关联的附件列表")
-    @Encrypt
     private List<IssueAttachmentVO> issueAttachmentVOList;
 
     @ApiModelProperty(value = "版本号")

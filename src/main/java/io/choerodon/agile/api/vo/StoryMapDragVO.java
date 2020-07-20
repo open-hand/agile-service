@@ -30,7 +30,6 @@ public class StoryMapDragVO {
     private List<Long> versionIssueIds;
 
     @ApiModelProperty(value = "要删除的版本与问题关联数据")
-    @Encrypt
     private List<VersionIssueRelVO> versionIssueRelVOList;
 
     @ApiModelProperty(value = "特性id")
