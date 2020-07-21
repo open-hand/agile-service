@@ -22,6 +22,7 @@ public class SprintCompleteVO {
     private Long sprintId;
 
     @ApiModelProperty(value = "未完成问题将移动的目标冲刺id")
+    @Encrypt
     private Long incompleteIssuesDestination;
 
     public Long getProjectId() {
