@@ -36,7 +36,7 @@ public class EncryptionUtils {
 
     public static String[] FIELD_VALUE = {"component_id", "version_id", "label_id", "sprint_id","status_id","epic_id","priority_id"};
 
-    public static String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds"};
+    public static String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList"};
 
     public static String[] IGNORE_VALUES = {"0"};
     public static final String BLANK_KEY = "";
