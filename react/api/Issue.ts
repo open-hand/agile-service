@@ -346,7 +346,7 @@ class IssueApi {
     * @param issueUpdateParentIdVO 
     */
   subTaskChangeParent(issueUpdateParentIdVO: UIssueParent) {
-    axios.post(`${this.prefix}/issues/update_parent`, issueUpdateParentIdVO);
+    return axios.post(`${this.prefix}/issues/update_parent`, issueUpdateParentIdVO);
   }
 
   /**
