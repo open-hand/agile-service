@@ -45,11 +45,11 @@ public class WorkLogController {
     @ApiOperation("修改work log")
     @PatchMapping(value = "/{logId}")
     public ResponseEntity<WorkLogVO> updateWorkLog(@ApiParam(value = "项目id", required = true)
-                                                    @PathVariable(name = "project_id") Long projectId,
+                                                   @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "log id", required = true)
-                                                    @PathVariable Long logId,
+                                                   @PathVariable @Encrypt Long logId,
                                                    @ApiParam(value = "work log object", required = true)
-                                                    @RequestBody WorkLogVO workLogVO) {
+                                                   @RequestBody WorkLogVO workLogVO) {
         return Optional.ofNullable(workLogService.updateWorkLog(projectId, logId, workLogVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.workLog.update"));

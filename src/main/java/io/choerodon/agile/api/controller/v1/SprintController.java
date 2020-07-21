@@ -131,7 +131,7 @@ public class SprintController {
     public ResponseEntity<Boolean> completeSprint(@ApiParam(value = "项目id", required = true)
                                                   @PathVariable(name = "project_id") Long projectId,
                                                   @ApiParam(value = "完成冲刺对象", required = true)
-                                                  @RequestBody @Valid  SprintCompleteVO sprintCompleteVO) {
+                                                  @RequestBody @Valid SprintCompleteVO sprintCompleteVO) {
         return Optional.ofNullable(sprintService.completeSprint(projectId, sprintCompleteVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(CLOSE_ERROR));
