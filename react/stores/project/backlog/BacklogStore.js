@@ -778,12 +778,12 @@ class BacklogStore {
     if (data === 'unset') {
       delete this.filter.advancedSearchArgs.epicId;
       this.filter.advancedSearchArgs.noEpic = 'true';
-    } else if (typeof data === 'number') {
-      delete this.filter.advancedSearchArgs.noEpic;
-      this.filter.advancedSearchArgs.epicId = data;
-    } else {
+    } else if (data === 'all') {
       delete this.filter.advancedSearchArgs.noEpic;
       delete this.filter.advancedSearchArgs.epicId;
+    } else {
+      delete this.filter.advancedSearchArgs.noEpic;
+      this.filter.advancedSearchArgs.epicId = data;
     }
   }
 
@@ -792,12 +792,12 @@ class BacklogStore {
     if (data === 'unset') {
       delete this.filter.advancedSearchArgs.featureId;
       this.filter.advancedSearchArgs.noFeature = 'true';
-    } else if (typeof data === 'number') {
-      delete this.filter.advancedSearchArgs.noFeature;
-      this.filter.advancedSearchArgs.featureId = data;
-    } else {
+    } else if (data === 'all') {
       delete this.filter.advancedSearchArgs.noFeature;
       delete this.filter.advancedSearchArgs.featureId;
+    } else {
+      delete this.filter.advancedSearchArgs.noFeature;
+      this.filter.advancedSearchArgs.featureId = data;
     }
   }
 
@@ -806,13 +806,13 @@ class BacklogStore {
     if (data === 'unset') {
       delete this.filter.advancedSearchArgs.versionId;
       this.filter.advancedSearchArgs.noVersion = 'true';
-    } else if (typeof data === 'number') {
-      delete this.filter.advancedSearchArgs.noVersion;
-      this.filter.advancedSearchArgs.versionId = data;
-    } else {
+    } else if (data === 'all') {
       this.filterSelected = false;
       delete this.filter.advancedSearchArgs.noVersion;
       delete this.filter.advancedSearchArgs.versionId;
+    } else {
+      delete this.filter.advancedSearchArgs.noVersion;
+      this.filter.advancedSearchArgs.versionId = data;
     }
   }
 
