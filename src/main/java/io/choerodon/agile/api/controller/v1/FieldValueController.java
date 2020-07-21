@@ -6,6 +6,7 @@ import io.choerodon.agile.app.service.IssueFieldValueService;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
 import io.choerodon.agile.app.service.PageFieldService;
 
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
@@ -19,6 +20,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author shinan.chen
@@ -142,6 +146,12 @@ public class FieldValueController {
                                                    @RequestParam String schemeCode,
                                                    @RequestParam String applyType,
                                                    @RequestBody @Encrypt BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
+        if (Objects.nonNull(batchUpdateFieldsValueVo.getPredefinedFields())){
+            for (Map.Entry<String, Object> entry : batchUpdateFieldsValueVo.getPredefinedFields().entrySet()) {
+                batchUpdateFieldsValueVo.getPredefinedFields().put(entry.getKey(),
+                        EncryptionUtils.decrypt(String.valueOf(entry.getValue()), EncryptionUtils.BLANK_KEY));
+            }
+        }
         issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo,applyType);
         return new ResponseEntity<>(HttpStatus.OK);
     }
