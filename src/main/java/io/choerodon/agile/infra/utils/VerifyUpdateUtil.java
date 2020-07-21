@@ -100,7 +100,7 @@ public class VerifyUpdateUtil {
         String className = field.getGenericType().getTypeName().substring(15, field.getGenericType().getTypeName().length() - 1);
         Class<?> forName = Class.forName(className);
         if (forName.isPrimitive() || EncryptionUtils.isWrapClass(forName) || forName.newInstance() instanceof String) {
-            if (forName.newInstance() instanceof Long) {
+            if (forName == Long.class) {
                 Encrypt declaredAnnotation = field.getDeclaredAnnotation(Encrypt.class);
                 if (!ObjectUtils.isEmpty(declaredAnnotation)) {
                     String[] ignoreValue = declaredAnnotation.ignoreValue();
