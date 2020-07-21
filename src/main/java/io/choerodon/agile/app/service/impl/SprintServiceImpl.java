@@ -91,7 +91,7 @@ public class SprintServiceImpl implements SprintService {
     @Autowired
     private StatusService statusService;
 
-    private static final String ADVANCED_SEARCH_ARGS = "advancedSearchArgs";
+    public static final String ADVANCED_SEARCH_ARGS = "advancedSearchArgs";
     private static final String SPRINT_DATA = "sprintData";
     private static final String BACKLOG_DATA = "backlogData";
     private static final String CATEGORY_DONE_CODE = "done";
