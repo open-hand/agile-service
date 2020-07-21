@@ -34,7 +34,7 @@ class CloseSprint extends Component {
       sprintId, modal, afterClose,
     } = this.props;
     const data = {
-      incompleteIssuesDestination: parseInt(selectChose, 10),
+      incompleteIssuesDestination: selectChose,
       projectId: parseInt(AppState.currentMenuType.id, 10),
       sprintId,
     };
