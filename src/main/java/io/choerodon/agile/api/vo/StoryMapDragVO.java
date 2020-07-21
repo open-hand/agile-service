@@ -14,7 +14,7 @@ import java.util.List;
 public class StoryMapDragVO {
 
     @ApiModelProperty(value = "要关联的史诗id")
-    @Encrypt
+    @Encrypt(ignoreValue = {"0"})
     private Long epicId;
 
     @ApiModelProperty(value = "要关联的版本id")
@@ -31,18 +31,6 @@ public class StoryMapDragVO {
 
     @ApiModelProperty(value = "要删除的版本与问题关联数据")
     private List<VersionIssueRelVO> versionIssueRelVOList;
-
-    @ApiModelProperty(value = "特性id")
-    @Encrypt(ignoreValue = {"0"})
-    private Long featureId;
-
-    public Long getFeatureId() {
-        return featureId;
-    }
-
-    public void setFeatureId(Long featureId) {
-        this.featureId = featureId;
-    }
 
     public Long getEpicId() {
         return epicId;
