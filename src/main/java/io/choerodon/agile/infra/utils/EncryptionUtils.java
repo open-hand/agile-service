@@ -21,6 +21,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.hzero.starter.keyencrypt.core.EncryptProperties;
 import org.hzero.starter.keyencrypt.core.EncryptionService;
 import org.springframework.util.ObjectUtils;
@@ -39,7 +40,7 @@ public class EncryptionUtils {
 
     public static String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList"};
 
-    public static String[] IGNORE_VALUES = {"0"};
+    public static String[] IGNORE_VALUES = {"0", "none"};
     public static final String BLANK_KEY = "";
 
     /**
@@ -48,6 +49,9 @@ public class EncryptionUtils {
      * @param search SearchVO
      */
     public static void decryptSearchVO(SearchVO search) {
+        if (!EncryptContext.isEncrypt()){
+            return;
+        }
         Optional<Map<String, Object>> adMapOptional = Optional.ofNullable(search).map(SearchVO::getAdvancedSearchArgs);
         if (adMapOptional.isPresent()) {
             decryptAd(search, adMapOptional);
@@ -66,6 +70,9 @@ public class EncryptionUtils {
      */
     @SuppressWarnings("unchecked")
     public static void decryptSearchParamMap(Map<String, Object> search) {
+        if (!EncryptContext.isEncrypt()){
+            return;
+        }
         Optional<Map<String, Object>> adMapOptional = Optional.ofNullable((Map<String, Object>)search.get(SprintServiceImpl.ADVANCED_SEARCH_ARGS));
         if (!adMapOptional.isPresent()) {
             return;
