@@ -84,7 +84,7 @@ export default {
       const values = value instanceof Array ? value : [value];
       const requestQue = [];
       values.forEach((a) => {
-        if (a && typeof a === 'number' && !find(List, { id: a })) {
+        if (a && typeof a === 'string' && !find(List, { id: a })) {
           requestQue.push(userApi.getById(a));
         }
       });
