@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.app.service.impl.SprintServiceImpl;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -57,6 +58,31 @@ public class EncryptionUtils {
             decryptOa(search, searchArgs);
         }
     }
+
+    /**
+     * 解密serachVO
+     *
+     * @param search SearchVO
+     */
+    @SuppressWarnings("unchecked")
+    public static void decryptSearchParamMap(Map<String, Object> search) {
+        Optional<Map<String, Object>> adMapOptional = Optional.ofNullable((Map<String, Object>)search.get(SprintServiceImpl.ADVANCED_SEARCH_ARGS));
+        if (!adMapOptional.isPresent()) {
+            return;
+        }
+        for (Map.Entry<String, Object> entry : adMapOptional.get().entrySet()) {
+            if (entry.getValue() instanceof String){
+                ((Map<String, Object>) search.get(SprintServiceImpl.ADVANCED_SEARCH_ARGS))
+                        .put(entry.getKey(), decrypt((String)entry.getValue(), BLANK_KEY));
+            }
+            if (entry.getValue() instanceof Collection){
+                ((Map<String, Object>) search.get(SprintServiceImpl.ADVANCED_SEARCH_ARGS))
+                        .put(entry.getKey(), decryptList((List<String>) entry.getValue(), BLANK_KEY, new String[]{"0"}));
+            }
+
+        }
+    }
+
 
     /**
      * 对单个主键进行解密

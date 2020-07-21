@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
 
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.SprintService;
@@ -93,7 +94,8 @@ public class SprintController {
                                                                 @ApiParam(value = "quick filter")
                                                                 @RequestParam(required = false) @Encrypt List<Long> quickFilterIds,
                                                                 @ApiParam(value = "经办人搜索", required = false)
-                                                                @RequestParam(required = false) List<Long> assigneeFilterIds) {
+                                                                @RequestParam(required = false) @Encrypt List<Long> assigneeFilterIds) {
+        EncryptionUtils.decryptSearchParamMap(searchParamMap);
         return Optional.ofNullable(sprintService.queryByProjectId(projectId, searchParamMap, quickFilterIds, organizationId, assigneeFilterIds))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(QUERY_ERROR));
