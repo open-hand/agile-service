@@ -14,7 +14,7 @@ import java.util.List;
 public class StoryMapDragVO {
 
     @ApiModelProperty(value = "要关联的史诗id")
-    @Encrypt
+    @Encrypt(ignoreValue = {"0"})
     private Long epicId;
 
     @ApiModelProperty(value = "要关联的版本id")
