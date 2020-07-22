@@ -69,6 +69,16 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String RELATION_TYPE_FIX = "fix";
     protected static final String IMPORT_TEMPLATE_NAME = "导入模板";
 
+    protected static final String EPIC_CN = "史诗";
+
+    protected static final String STORY_CN = "故事";
+
+    protected static final String BUG_CN = "缺陷";
+
+    protected static final String TASK_CN = "任务";
+
+    protected static final String SUB_TASK_CN = "子任务";
+
     @Autowired
     protected StateMachineClientService stateMachineClientService;
 
@@ -274,6 +284,7 @@ public class ExcelServiceImpl implements ExcelService {
         //描述
         setDescription(issueCreateVO, row);
 
+        String typeName = getTypeName(row);
         if (isSubTask(row)) {
             //子任务是任务类型，无需设置故事点和史诗名
             String summary = row.getCell(5).toString();
@@ -285,7 +296,7 @@ public class ExcelServiceImpl implements ExcelService {
             issueCreateVO.setIssueTypeId(subTask.getId());
             //子任务的所属史诗模块和冲刺，保持与父节点统一
             Row parentRow = sheet.getRow(sonParentMap.get(rowNum));
-            setBelongsEpic(issueCreateVO, parentRow, theSecondColumnMap);
+            setBelongsEpic(issueCreateVO, parentRow, theSecondColumnMap, typeName);
             setComponent(issueCreateVO, parentRow, componentMap);
             setSprint(issueCreateVO, parentRow, sprintMap);
         } else {
@@ -294,26 +305,25 @@ public class ExcelServiceImpl implements ExcelService {
                 throw new CommonException("error.summary.null");
             }
             issueCreateVO.setSummary(summary);
-            String typeName = row.getCell(0).toString();
             IssueTypeVO issueType = issueTypeMap.get(typeName);
             if (issueType == null) {
                 return false;
             }
             issueCreateVO.setTypeCode(issueType.getTypeCode());
             issueCreateVO.setIssueTypeId(issueType.getId());
-            if ("史诗".equals(typeName)) {
+            if (EPIC_CN.equals(typeName)) {
                 //默认名称和概要相同
                 String epicName = row.getCell(12).toString();
                 issueCreateVO.setSummary(epicName);
                 issueCreateVO.setEpicName(epicName);
             } else {
-                if ("故事".equals(typeName)) {
+                if (STORY_CN.equals(typeName)) {
                     Cell storyPointCell = row.getCell(11);
                     if (!isCellEmpty(storyPointCell)) {
                         issueCreateVO.setStoryPoints(new BigDecimal(storyPointCell.toString()));
                     }
                 }
-                setBelongsEpic(issueCreateVO, row, theSecondColumnMap);
+                setBelongsEpic(issueCreateVO, row, theSecondColumnMap, typeName);
             }
             setComponent(issueCreateVO, row, componentMap);
             setSprint(issueCreateVO, row, sprintMap);
@@ -387,11 +397,13 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void setBelongsEpic(IssueCreateVO issueCreateVO, Row row,
-                                  Map<String, Long> theSecondColumnMap) {
+                                  Map<String, Long> theSecondColumnMap,
+                                  String typeName) {
         Cell cell = row.getCell(1);
         if (!isCellEmpty(cell)) {
             String belongsEpic = cell.toString();
-            if (StringUtils.hasText(belongsEpic)) {
+            //子任务不设置史诗
+            if (StringUtils.hasText(belongsEpic) && !SUB_TASK_CN.equals(typeName)) {
                 issueCreateVO.setEpicId(theSecondColumnMap.get(belongsEpic));
             }
         }
@@ -510,7 +522,7 @@ public class ExcelServiceImpl implements ExcelService {
                 errorMessage.put(0, "问题类型输入错误");
             }
             //如果是史诗的话，判断是否重复和字段长度
-            if ("史诗".equals(issueTypeCell.toString())) {
+            if (EPIC_CN.equals(issueTypeCell.toString())) {
                 Cell epicNameCell = row.getCell(12);
                 if (isCellEmpty(epicNameCell)) {
                     errorMessage.put(12, "史诗名称不能为空");
@@ -633,7 +645,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected boolean isSubTask(Row row) {
-        return "子任务".equals(getTypeName(row));
+        return SUB_TASK_CN.equals(getTypeName(row));
     }
 
     protected Boolean checkCanceled(Long projectId, Long fileOperationHistoryId, List<Long> importedIssueIds) {
@@ -762,9 +774,9 @@ public class ExcelServiceImpl implements ExcelService {
             //有子节点的故事和任务，要和子节点一块校验，有一个不合法，则全为错误的
             Set<Integer> set = parentSonMap.get(r);
             Boolean hasSonNodes = (set != null && !set.isEmpty());
-            if (("故事".equals(typeName)
-                    || "任务".equals(typeName)
-                    || "缺陷".equals(typeName))
+            if ((STORY_CN.equals(typeName)
+                    || TASK_CN.equals(typeName)
+                    || BUG_CN.equals(typeName))
                     && hasSonNodes) {
                 Map<String, Object> returnMap = batchCheck(projectId, sheet, issueTypeList, priorityList,
                         versionList, issueTypeMap, componentList, sprintList, r, illegalRow, set, columnNum,
@@ -880,7 +892,7 @@ public class ExcelServiceImpl implements ExcelService {
                 if (SUB_TASK.equals(typeCode)) {
                     issueCreate.setParentIssueId(parentId);
                 }
-                if (issueTypeMap.get("缺陷").getTypeCode().equals(typeCode)) {
+                if (issueTypeMap.get(BUG_CN).getTypeCode().equals(typeCode)) {
                     issueCreate.setRelateIssueId(parentId);
                 }
                 IssueVO result = stateMachineClientService.createIssue(issueCreate, APPLY_TYPE_AGILE);
@@ -955,7 +967,7 @@ public class ExcelServiceImpl implements ExcelService {
         for (Map.Entry<Integer, String> entry : allIssueType.entrySet()) {
             Integer key = entry.getKey();
             String value = entry.getValue();
-            if ("子任务".equals(value) || "子缺陷".equals(value)) {
+            if (SUB_TASK_CN.equals(value)) {
                 //无父节点
                 if (sonParentMap.get(key) == null) {
                     set.add(key);
@@ -981,11 +993,11 @@ public class ExcelServiceImpl implements ExcelService {
             Integer row = issueTypeLink.getRow();
             String type = issueTypeLink.getType();
             //故事下只有子任务
-            if ("故事".equals(type)) {
+            if (STORY_CN.equals(type)) {
                 storyRecursive(map, issueTypeLink, row);
             }
             //任务或缺陷下的子任务
-            if ("任务".equals(type) || "缺陷".equals(type)) {
+            if (TASK_CN.equals(type) || BUG_CN.equals(type)) {
                 taskRecursive(map, issueTypeLink, row);
             }
         }
@@ -997,7 +1009,7 @@ public class ExcelServiceImpl implements ExcelService {
             IssueTypeLinkDTO next = issueTypeLink.getNext();
             String nextType = next.getType();
             Integer nextRow = next.getRow();
-            if ("子任务".equals(nextType)) {
+            if (SUB_TASK_CN.equals(nextType)) {
                 processSonRow(map, row, nextRow);
                 taskRecursive(map, next, row);
             }
@@ -1021,7 +1033,7 @@ public class ExcelServiceImpl implements ExcelService {
             IssueTypeLinkDTO next = issueTypeLink.getNext();
             String nextType = next.getType();
             Integer nextRow = next.getRow();
-            if ("子缺陷".equals(nextType) || "子任务".equals(nextType)) {
+            if (SUB_TASK_CN.equals(nextType)) {
                 processSonRow(map, row, nextRow);
                 storyRecursive(map, next, row);
             }
@@ -1054,11 +1066,11 @@ public class ExcelServiceImpl implements ExcelService {
         return issueTypeLinks;
     }
 
-    private String getTypeName(Row row) {
+    protected String getTypeName(Row row) {
         Cell issueTypeCell = row.getCell(0);
         Cell subTaskCell = row.getCell(5);
         if (isCellEmpty(issueTypeCell) && !isCellEmpty(subTaskCell)) {
-            return "子任务";
+            return SUB_TASK_CN;
         } else if (!isCellEmpty(issueTypeCell)) {
             return issueTypeCell.toString();
         } else {
