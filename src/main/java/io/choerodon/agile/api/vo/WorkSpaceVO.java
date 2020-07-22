@@ -1,11 +1,13 @@
 package io.choerodon.agile.api.vo;
 
-public class WorkSpaceVO {
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
+public class WorkSpaceVO {
+    @Encrypt
     private Long id;
 
     private String name;
-
+    @Encrypt
     private Long baseId;
 
     public Long getId() {
