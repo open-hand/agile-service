@@ -377,7 +377,7 @@ public class BoardServiceImpl implements BoardService {
         putDatasAndSort(columns, parentIds, assigneeIds, boardId, epicIds, condition, organizationId, parentWithSubs, statusMap, issueTypeDTOMap);
         jsonObject.put("parentIds", EncryptionUtils.encryptList(parentIds));
         jsonObject.put("parentIssues", getParentIssues(projectId, parentIds, statusMap, issueTypeDTOMap));
-        jsonObject.put("assigneeIds", assigneeIds);
+        jsonObject.put("assigneeIds", EncryptionUtils.encryptList(assigneeIds));
         jsonObject.put("parentWithSubs", EncryptionUtils.encryptMap(parentWithSubs));
         jsonObject.put("parentCompleted", EncryptionUtils.encryptList(sortAndJudgeCompleted(projectId, parentIds)));
         jsonObject.put("epicInfo", !epicIds.isEmpty() ? boardColumnMapper.selectEpicBatchByIds(epicIds) : null);

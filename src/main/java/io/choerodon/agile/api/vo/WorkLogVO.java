@@ -44,6 +44,7 @@ public class WorkLogVO {
     private BigDecimal predictionTime;
 
     @ApiModelProperty(value = "用户id")
+    @Encrypt
     private Long createdBy;
 
     @ApiModelProperty(value = "用户名称")
