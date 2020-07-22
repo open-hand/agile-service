@@ -104,7 +104,7 @@ public class VerifyUpdateUtil {
                 Encrypt declaredAnnotation = field.getDeclaredAnnotation(Encrypt.class);
                 if (!ObjectUtils.isEmpty(declaredAnnotation)) {
                     String[] ignoreValue = declaredAnnotation.ignoreValue();
-                    field.set(objectUpdate, EncryptionUtils.decryptList(JSON.parseArray(v.toString(), String.class), declaredAnnotation.value(),ignoreValue));
+                    field.set(objectUpdate, EncryptionUtils.decryptList(JSON.parseArray(JSON.toJSONString(v), String.class), declaredAnnotation.value(),ignoreValue));
                 } else {
                     String json = JSON.toJSONString(v);
                     field.set(objectUpdate, JSON.parseArray(json, forName));
