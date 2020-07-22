@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.IssueCommentCreateVO;
 import io.choerodon.agile.infra.dto.IssueCommentDTO;
 import io.choerodon.agile.infra.mapper.IssueCommentMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,7 +40,8 @@ public class IssueCommentValidator {
             throw new CommonException("error.IssueCommentRule.commentId");
         }
         IssueCommentDTO issueCommentDTO = new IssueCommentDTO();
-        issueCommentDTO.setCommentId(Long.parseLong(issueCommentUpdate.get(COMMENT_ID).toString()));
+        issueCommentDTO.setCommentId(EncryptionUtils.decrypt(issueCommentUpdate.get(COMMENT_ID).toString(),
+                EncryptionUtils.BLANK_KEY));
         issueCommentDTO.setProjectId(projectId);
         if (issueCommentMapper.selectByPrimaryKey(issueCommentDTO) == null) {
             throw new CommonException("error.IssueCommentRule.issueComment");
