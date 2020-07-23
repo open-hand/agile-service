@@ -412,7 +412,6 @@ class EditStateMachine extends Component {
         const source = _.find(nodeData, item => item.statusId.toString() === startNodeId);
         const target = _.find(nodeData, item => item.statusId.toString() === endNodeId);
         const res = await stateMachineApi.checkTransferName(
-          orgId,
           source.id,
           target.id,
           id,
