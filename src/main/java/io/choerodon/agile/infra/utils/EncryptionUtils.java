@@ -9,11 +9,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.choerodon.agile.api.vo.SearchSourceVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.app.service.impl.SprintServiceImpl;
 import io.choerodon.core.exception.CommonException;
@@ -592,5 +594,27 @@ public class EncryptionUtils {
             return null;
         }
         return encryptionService.encrypt(value.toString(), BLANK_KEY);
+    }
+
+    public static String decryptSearchSourceVO(String filterJson) {
+        if (StringUtils.isBlank(filterJson)){
+            return filterJson;
+        }
+        try {
+            return JSON.toJSONString(objectMapper.readValue(filterJson, SearchSourceVO.class));
+        } catch (IOException e) {
+            throw new CommonException(e);
+        }
+    }
+
+    public static String encryptSearchSourceVO(String filterJson) {
+        if (StringUtils.isBlank(filterJson)){
+            return filterJson;
+        }
+        try {
+            return objectMapper.writeValueAsString(JSON.parseObject(filterJson, SearchSourceVO.class));
+        } catch (IOException e) {
+            throw new CommonException(e);
+        }
     }
 }
