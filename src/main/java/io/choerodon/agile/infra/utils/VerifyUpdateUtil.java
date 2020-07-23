@@ -73,6 +73,9 @@ public class VerifyUpdateUtil {
             handlerListObject(field, objectUpdate, v);
             flag = false;
         }
+        else {
+            field.set(objectUpdate,v);
+        }
         return flag;
     }
 
