@@ -39,7 +39,8 @@ const PROP = {
   Comment: '评论',
   'Feature Link': '特性',
   'Knowledge Relation': '知识文档',
-  SubTeam: '负责的子团队'
+  SubTeam: '负责的子团队',
+  'Backlog Link': '需求',
 };
 
 
@@ -55,6 +56,9 @@ class DataLog extends Component {
       }
       if (['Attachment'].includes(field)) {
         return '上传';
+      }
+      if(field === 'Backlog Link') {
+        return '关联';
       }
       return '更新';
     } else if ((oldValue || oldValue === 0) && (newValue || newValue === 0)) {
@@ -83,9 +87,15 @@ class DataLog extends Component {
           return '置为待办';
         }
       }
+      if(field === 'Backlog Link') {
+        if(_.difference(newString && newString.split(','), oldString && oldString.split(',')).length > 0) {
+          return '关联';
+        }
+        return '移除';
+      }
     } else if ((oldValue || oldValue === 0) && (!newValue && newValue !== 0)) {
       // yyy -> null
-      if (['Knowledge Relation', 'Feature Link', 'Epic Link', 'Sprint', 'Pi', 'assignee', 'reporter', 'labels', 'Component', 'Fix Version', 'Epic Child', 'Feature Child', 'resolution', 'SubTeam'].includes(field)) {
+      if (['Knowledge Relation', 'Feature Link', 'Epic Link', 'Sprint', 'Pi', 'assignee', 'reporter', 'labels', 'Component', 'Fix Version', 'Epic Child', 'Feature Child', 'resolution', 'SubTeam', 'Backlog Link'].includes(field)) {
         return '移除';
       }
       if (['Story Points', 'timeestimate'].includes(field)) {
@@ -140,6 +150,7 @@ class DataLog extends Component {
         }
         return '移除';
       }
+      
       // 自定义字段
       if (isCusLog) {
         return '将';
@@ -232,6 +243,8 @@ class DataLog extends Component {
       } else if (field === 'Attachment') {
         const attachnewArr = oldString.split('@');
         return ` 【${decodeURI(attachnewArr.slice(1, attachnewArr.length).join('_'))}】 `;
+      } else if(field === 'Backlog Link') {
+          return`【${ _.difference(oldString && oldString.split(','))}】`;
       } else {
         return ` 【${oldString}】 `;
       }
@@ -251,6 +264,7 @@ class DataLog extends Component {
         }
         return ` 【${oldString}】 `;
       }
+      
       // 自定义字段
       if (isCusLog) {
         return oldString ? ` 【${oldString}】 ` : ' 空 ';
@@ -328,6 +342,9 @@ class DataLog extends Component {
         const attachnewArr = newString.split('@');
         return ` 【${decodeURI(attachnewArr.slice(1, attachnewArr.length).join('_'))}】 `;
       }
+      if(field === 'Backlog Link') {
+        return `【${newString && newString.split(',')}】`;
+      }
       // 自定义字段
       if (isCusLog) {
         return ` 【${newString}】 `;
@@ -342,6 +359,13 @@ class DataLog extends Component {
       }
       if (field === 'status') {
         return '';
+      }
+      if(field === 'Backlog Link') {
+        if( _.difference(newString && newString.split(','), oldString && oldString.split(',')).length > 0) {
+          return `【${_.difference(newString && newString.split(','), oldString && oldString.split(',')).join(',')}】`
+        } else {
+          return `【${_.difference(oldString && oldString.split(','), newString && newString.split(',')).join(',')}】`;
+        }
       }
       // 自定义字段
       if (isCusLog) {
@@ -373,6 +397,7 @@ class DataLog extends Component {
         }
         return '';
       }
+      
       // 自定义字段
       if (isCusLog) {
         return newString ? ` 【${newString}】 ` : ' 空 ';
