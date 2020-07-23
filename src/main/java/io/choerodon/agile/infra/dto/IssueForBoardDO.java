@@ -27,6 +27,7 @@ public class IssueForBoardDO {
 
     private Long objectVersionNumber;
 
+    @Encrypt
     private Long assigneeId;
 
     private String assigneeName;
