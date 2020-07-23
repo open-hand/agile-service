@@ -22,7 +22,7 @@ public class IssueForBoardDO {
 
     private String summary;
 
-    @Encrypt(ignoreValue = "0")/*(EncryptionConstant.AGILE_ISSUE)*/
+    @Encrypt(ignoreValue = "0")
     private Long parentIssueId;
 
     private Long objectVersionNumber;
