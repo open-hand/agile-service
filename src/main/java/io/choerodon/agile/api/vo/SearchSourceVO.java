@@ -17,7 +17,7 @@ public class SearchSourceVO {
     private OtherArgs otherArgs;
     private SearchArgs searchArgs;
 
-    static class AdvancedSearchArgs{
+     class AdvancedSearchArgs{
         @Encrypt
         private List<Long> issueTypeId;
         @Encrypt
@@ -50,7 +50,7 @@ public class SearchSourceVO {
         }
     }
 
-    static class OtherArgs{
+     class OtherArgs{
         @Encrypt
         private List<Long> assigneeId;
         @Encrypt
@@ -111,7 +111,7 @@ public class SearchSourceVO {
             this.component = component;
         }
 
-        static class CustomField{
+         class CustomField{
 
             private Date date;
             private DateHms date_hms;
@@ -119,7 +119,7 @@ public class SearchSourceVO {
             private Option option;
             private String string;
             private Text text;
-            static class Number{
+             class Number{
                 @Encrypt
                 private Long fieldId;
                 private Long value;
@@ -140,7 +140,7 @@ public class SearchSourceVO {
                     this.value = value;
                 }
             }
-            static class Date{
+             class Date{
                 @Encrypt
                 private Long fieldId;
                 private java.util.Date value;
@@ -161,7 +161,7 @@ public class SearchSourceVO {
                     this.value = value;
                 }
             }
-            static class DateHms{
+             class DateHms{
                 @Encrypt
                 private Long fieldId;
                 private java.util.Date value;
@@ -182,7 +182,7 @@ public class SearchSourceVO {
                     this.value = value;
                 }
             }
-            static class Option{
+             class Option{
                 @Encrypt
                 private Long fieldId;
                 private java.lang.String value;
@@ -203,7 +203,7 @@ public class SearchSourceVO {
                     this.value = value;
                 }
             }
-            static class String{
+             class String{
                 @Encrypt
                 private Long fieldId;
                 private java.lang.String value;
@@ -224,7 +224,7 @@ public class SearchSourceVO {
                     this.value = value;
                 }
             }
-            static class Text{
+             class Text{
                 @Encrypt
                 private Long fieldId;
                 private java.lang.String value;
@@ -296,7 +296,7 @@ public class SearchSourceVO {
         }
     }
 
-    static class SearchArgs {
+     class SearchArgs {
         @JsonFormat(pattern = BaseConstants.Pattern.DATETIME)
         @DateTimeFormat(pattern = BaseConstants.Pattern.DATETIME)
         private Date createEndDate;
