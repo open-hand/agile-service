@@ -62,7 +62,7 @@ class Setting extends Component {
       boardApi.load(boardId).then((data) => {
         boardApi.loadNoColumnStatus(boardId).then((data2) => {
           const unsetColumn = {
-            columnId: 0,
+            columnId: '0',
             name: '未对应的状态',
             subStatusDTOS: data2,
           };
