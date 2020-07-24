@@ -25,6 +25,7 @@ import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.hzero.starter.keyencrypt.core.EncryptProperties;
 import org.hzero.starter.keyencrypt.core.EncryptionService;
 import org.modelmapper.ModelMapper;
@@ -78,11 +79,24 @@ public class QuickFilterServiceImpl implements QuickFilterService {
             }
         } else {
             if (NOT_IN.equals(operation)) {
-                sqlQuery.append(" issue_id not in ( select issue_id from agile_component_issue_rel where component_id in " + EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY) + " ) ");
+                sqlQuery.append(" issue_id not in ( select issue_id from agile_component_issue_rel where component_id in " + inSql(operation,value) + " ) ");
             } else {
-                sqlQuery.append(" issue_id in ( select issue_id from agile_component_issue_rel where " + field + " " + operation + " " + EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY) + " ) ");
+                sqlQuery.append(" issue_id in ( select issue_id from agile_component_issue_rel where " + field + " " + operation + " " + inSql(operation,value) + " ) ");
             }
         }
+    }
+
+    private String inSql(String operation,String value){
+        String sql = null;
+        if(NOT_IN.equals(operation) || "in".equals(operation)){
+            String[] split = EncryptionUtils.subString(value);
+            List<Long> list = EncryptionUtils.decryptList(Arrays.asList(split), EncryptionUtils.BLANK_KEY, null);
+            sql = "(" +StringUtils.join(list,",")+ ")";
+        }
+        else {
+            sql = EncryptionUtils.decrypt(value,EncryptionUtils.BLANK_KEY).toString();
+        }
+        return sql;
     }
 
     private void dealFixVersion(QuickFilterValueVO quickFilterValueVO, String field, String value, String operation, StringBuilder sqlQuery) {
@@ -94,9 +108,9 @@ public class QuickFilterServiceImpl implements QuickFilterService {
             }
         } else {
             if (NOT_IN.equals(operation)) {
-                sqlQuery.append(" issue_id not in ( select issue_id from agile_version_issue_rel where version_id in " + EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY) + " and relation_type = 'fix' ) ");
+                sqlQuery.append(" issue_id not in ( select issue_id from agile_version_issue_rel where version_id in " + inSql(operation,value) + " and relation_type = 'fix' ) ");
             } else {
-                sqlQuery.append(" issue_id in ( select issue_id from agile_version_issue_rel where " + field + " " + quickFilterValueVO.getOperation() + " " + EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY) + " and relation_type = 'fix' ) ");
+                sqlQuery.append(" issue_id in ( select issue_id from agile_version_issue_rel where " + field + " " + quickFilterValueVO.getOperation() + " " + inSql(operation,value) + " and relation_type = 'fix' ) ");
             }
         }
     }
@@ -110,9 +124,9 @@ public class QuickFilterServiceImpl implements QuickFilterService {
             }
         } else {
             if (NOT_IN.equals(operation)) {
-                sqlQuery.append(" issue_id not in ( select issue_id from agile_version_issue_rel where version_id in " + EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY) + " and relation_type = 'influence' ) ");
+                sqlQuery.append(" issue_id not in ( select issue_id from agile_version_issue_rel where version_id in " + inSql(operation,value) + " and relation_type = 'influence' ) ");
             } else {
-                sqlQuery.append(" issue_id in ( select issue_id from agile_version_issue_rel where " + field + " " + quickFilterValueVO.getOperation() + " " + EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY) + " and relation_type = 'influence' ) ");
+                sqlQuery.append(" issue_id in ( select issue_id from agile_version_issue_rel where " + field + " " + inSql(operation,value) + " " + EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY) + " and relation_type = 'influence' ) ");
             }
         }
     }
@@ -134,9 +148,9 @@ public class QuickFilterServiceImpl implements QuickFilterService {
             }
         } else {
             if (NOT_IN.equals(operation)) {
-                sqlQuery.append(" issue_id not in ( select issue_id from agile_label_issue_rel where label_id in " + EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY) + " ) ");
+                sqlQuery.append(" issue_id not in ( select issue_id from agile_label_issue_rel where label_id in " + inSql(operation,value) + " ) ");
             } else {
-                sqlQuery.append(" issue_id in ( select issue_id from agile_label_issue_rel where " + field + " " + operation + " " + EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY) + " ) ");
+                sqlQuery.append(" issue_id in ( select issue_id from agile_label_issue_rel where " + field + " " + operation + " " + inSql(operation,value) + " ) ");
             }
         }
     }
@@ -150,9 +164,9 @@ public class QuickFilterServiceImpl implements QuickFilterService {
             }
         } else {
             if (NOT_IN.equals(operation)) {
-                sqlQuery.append(" issue_id not in ( select issue_id from agile_issue_sprint_rel where sprint_id in " + value + " ) ");
+                sqlQuery.append(" issue_id not in ( select issue_id from agile_issue_sprint_rel where sprint_id in " + inSql(operation,value) + " ) ");
             } else {
-                sqlQuery.append(" issue_id in ( select issue_id from agile_issue_sprint_rel where " + field + " " + operation + " " + value + " ) ");
+                sqlQuery.append(" issue_id in ( select issue_id from agile_issue_sprint_rel where " + field + " " + operation + " " + inSql(operation,value) + " ) ");
             }
         }
     }
@@ -561,7 +575,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
         } else {
             if (!"'null'".equals(value)) {
                 String field = quickFilterFieldService.selectByFieldCode(fieldCode).getField();
-                if (Arrays.asList(EncryptionUtils.FIELD_VALUE).contains(field)) {
+                if (!Arrays.asList(EncryptionUtils.FIELD_VALUE).contains(field)) {
                     objectNode.put("value", handlerFilterEncryptList(value, encrypt));
                 }
             }

@@ -45,7 +45,7 @@ public class StateMachineNodeController extends BaseController {
     @ApiOperation(value = "更新节点（草稿）")
     @PutMapping(value = "/{node_id}")
     public ResponseEntity<List<StateMachineNodeVO>> update(@PathVariable("organization_id") Long organizationId,
-                                                           @PathVariable("node_id") Long nodeId,
+                                                           @PathVariable("node_id") @Encrypt Long nodeId,
                                                            @RequestParam("stateMachineId") @Encrypt Long stateMachineId,
                                                            @RequestBody StateMachineNodeVO nodeDTO) {
         nodeValidator.updateValidate(nodeDTO);
