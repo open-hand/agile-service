@@ -386,7 +386,12 @@ public class EncryptionUtils {
             search.getOtherArgs().put("customField",handlerCustomField(ob,false));
         }
 
-
+        // assigneeId
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("assigneeId"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getOtherArgs().put("assigneeId",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, BLANK_KEY))).collect(Collectors.toList()));
+        }
     }
 
     public static void handlerPrimaryKey(String tempStr, String key, Map<String, Object> map) {
