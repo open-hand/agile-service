@@ -37,7 +37,6 @@ public class PersonalFilterController {
                                                    @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "personal filter object", required = true)
                                                    @RequestBody @Encrypt PersonalFilterVO personalFilterVO) {
-        personalFilterVO.setFilterJson(EncryptionUtils.decryptSearchSourceVO(personalFilterVO.getFilterJson()));
         return Optional.ofNullable(personalFilterService.create(projectId, personalFilterVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.personalFilter.create"));
@@ -77,10 +76,6 @@ public class PersonalFilterController {
                                                                   @PathVariable @Encrypt Long userId,
                                                                   @RequestParam(name = "searchStr", required = false) String searchStr) {
         return Optional.ofNullable(personalFilterService.listByProjectId(projectId, userId, searchStr))
-                .map(list -> {
-                    list.forEach(personalFilterVO -> personalFilterVO.setFilterJson(EncryptionUtils.encryptSearchSourceVO(personalFilterVO.getFilterJson())));
-                    return list;
-                })
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.personalFilter.list"));
     }
