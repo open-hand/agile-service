@@ -1,5 +1,5 @@
 import React, {
-  useState, useMemo, useEffect, useRef,
+  useState, useMemo, useEffect, useRef, useImperativeHandle,
 } from 'react';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { Button, DataSet } from 'choerodon-ui/pro';
@@ -51,8 +51,10 @@ export interface SelectConfig<T = {}> {
   paging?: boolean
   props?: object
 }
-
-export default function useSelect<T extends {}>(config: SelectConfig<T>) {
+interface RefHandle {
+  refresh: (config?: LoadConfig) => void
+}
+export default function useSelect<T extends {}>(config: SelectConfig<T>, ref?: React.MutableRefObject<RefHandle>) {
   const [data, setData] = useState<T[]>([]);
   const [currentPage, setPage] = useState(1);
   const [canLoadMore, setCanLoadMore] = useState(false);
@@ -89,6 +91,9 @@ export default function useSelect<T extends {}>(config: SelectConfig<T>) {
   useEffect(() => {
     loadData({ filter: '' });
   }, [config]);
+  useImperativeHandle<Object, RefHandle>(ref, () => ({
+    refresh: loadData,
+  }));
   const handleLoadMore = () => {
     loadData({ page: currentPage + 1 });
   };
