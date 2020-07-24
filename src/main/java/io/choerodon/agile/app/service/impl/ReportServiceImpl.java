@@ -1389,8 +1389,9 @@ public class ReportServiceImpl implements ReportService {
         DateFormat bf = new SimpleDateFormat("yyyy-MM-dd");
         // 新增bug统计
         issueCount.setCreatedList(issueAssembler.convertBugEntry(reportIssueConvertDTOList, bf,
-                bug -> bug.getStatistical() && StringUtils.equalsAny(bug.getType(),
-                "startSprint", "endSprint", "addDuringSprint")));
+                bug -> StringUtils.equals(bug.getType(), "startSprint")
+                        || bug.getStatistical() && StringUtils.equalsAny(bug.getType(),
+                 "endSprint", "addDuringSprint")));
         // 解决bug统计
         issueCount.setCompletedList(issueAssembler.convertBugEntry(reportIssueConvertDTOList, bf, bug -> {
             if (Objects.equals(bug.getType(), "startSprint") && !bug.getStatistical()) {
