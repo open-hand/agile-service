@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -202,6 +204,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                         fieldOption.setIsDefault(false);
                     }
                 });
+                List<String> encryptList = EncryptionUtils.encryptListToStr(defaultIds);
+                fieldDetailDTO.setDefaultValue(StringUtils.join(encryptList.toArray(),","));
             } else {
                 fieldOptions.forEach(fieldOption -> {
                     fieldOption.setIsDefault(false);
