@@ -137,7 +137,7 @@ public class BoardController {
                                                      @ApiParam(value = "agile board id", required = true)
                                                      @PathVariable @Encrypt Long boardId,
                                                      @ApiParam(value = "search item，my problem", required = false)
-                                                     @RequestParam(required = false) Long assigneeId,
+                                                     @RequestParam(required = false) @Encrypt Long assigneeId,
                                                      @ApiParam(value = "search item，only story", required = false)
                                                      @RequestParam(required = false) Boolean onlyStory,
                                                      @ApiParam(value = "quick filter", required = false)
