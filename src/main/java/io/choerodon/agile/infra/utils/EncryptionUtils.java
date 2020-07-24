@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.choerodon.agile.api.vo.SearchSourceVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.app.service.impl.SprintServiceImpl;
+import io.choerodon.core.convertor.ApplicationContextHelper;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -37,6 +38,8 @@ public class EncryptionUtils {
     static EncryptionService encryptionService = new EncryptionService(new EncryptProperties());
 
     private static ObjectMapper objectMapper = new ObjectMapper();
+
+    private static ObjectMapper encryptMapper;
 
     public static String[] FIELD_VALUE = {"component_id", "version_id", "label_id", "sprint_id","status_id","epic_id","priority_id"};
 
@@ -600,8 +603,11 @@ public class EncryptionUtils {
         if (StringUtils.isBlank(filterJson)){
             return filterJson;
         }
+        if (Objects.isNull(encryptMapper)){
+            encryptMapper = ApplicationContextHelper.getContext().getBean(ObjectMapper.class);
+        }
         try {
-            return JSON.toJSONString(objectMapper.readValue(filterJson, SearchSourceVO.class));
+            return JSON.toJSONString(encryptMapper.readValue(filterJson, SearchSourceVO.class));
         } catch (IOException e) {
             throw new CommonException(e);
         }
@@ -612,7 +618,7 @@ public class EncryptionUtils {
             return filterJson;
         }
         try {
-            return objectMapper.writeValueAsString(JSON.parseObject(filterJson, SearchSourceVO.class));
+            return encryptMapper.writeValueAsString(JSON.parseObject(filterJson, SearchSourceVO.class));
         } catch (IOException e) {
             throw new CommonException(e);
         }
