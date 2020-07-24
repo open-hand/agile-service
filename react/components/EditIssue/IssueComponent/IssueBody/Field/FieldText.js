@@ -59,7 +59,8 @@ import TextArea from '@/components/TextArea';
     const { fieldCode, fieldName, textStyle } = field;
     const issue = store.getIssue;
     const { featureVO = {} } = issue;
-    const value = feature ? featureVO[fieldCode] : issue[fieldCode];
+
+    const value = feature ? featureVO && featureVO[fieldCode] : issue[fieldCode];
     return (
       <div className="line-start mt-10">
         {showTitle
