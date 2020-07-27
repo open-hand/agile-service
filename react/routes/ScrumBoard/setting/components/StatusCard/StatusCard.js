@@ -82,7 +82,7 @@ class StatusCard extends Component {
     if (this.findStatusCodeByStatusId(data.statusId) === 'create') {
       return [true, '初始化状态'];
     }
-    if (columnId === 0) {
+    if (columnId === '0') {
       if (data.issues.length === 0) {
         if (this.getStatusNumber() <= 1) {
           return [true, '应至少剩余一个状态'];

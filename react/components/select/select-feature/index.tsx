@@ -24,7 +24,7 @@ const SelectFeature: React.FC<Props> = forwardRef(({ featureId, featureName, ...
       }
     },
     paging: true,
-  }), []);
+  }), [featureId, featureName]);
   const props = useSelect(config);
   return (
     <Select
