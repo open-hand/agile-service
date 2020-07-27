@@ -5,7 +5,7 @@ import { Tooltip } from 'choerodon-ui';
 
 const { AppState } = stores;
 
-export const getProjectId = () => Number(AppState.currentMenuType ? AppState.currentMenuType.id : 0);
+export const getProjectId = () => (AppState.currentMenuType ? AppState.currentMenuType.id : 0);
 export const getProjectName = () => (AppState.currentMenuType ? AppState.currentMenuType.name : '');
 export const getOrganizationId = () => (AppState.currentMenuType ? AppState.currentMenuType.organizationId : 0);
 
