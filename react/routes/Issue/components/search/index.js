@@ -97,11 +97,11 @@ export default withRouter(observer(({
   };
   const handleSelect = (v) => {
     const { key: k } = v;
-    const [type, id] = k.split('-');
+    const [type, id] = k.split('|');
     if (type === 'quick') {
       const newSelectedQuickFilters = [...selectedQuickFilters, v];
       setSelectedQuickFilters([...selectedQuickFilters, v]);
-      const quickFilterIds = newSelectedQuickFilters.map(filter => filter.key.split('-')[1]);
+      const quickFilterIds = newSelectedQuickFilters.map(filter => filter.key.split('|')[1]);
       IssueStore.handleFilterChange('quickFilterIds', quickFilterIds);
     } else if (type === 'my') {
       const targetMyFilter = find(filters, { filterId: id });
@@ -133,7 +133,7 @@ export default withRouter(observer(({
       return;
     }
     const { key } = v;
-    const [type, id] = key.split('-');
+    const [type, id] = key.split('|');
     if (type === 'quick') {
       remove(selectedQuickFilters, { key });
       setSelectedQuickFilters([...selectedQuickFilters]);
@@ -141,7 +141,7 @@ export default withRouter(observer(({
       IssueStore.clearAllFilter();
       IssueStore.query();
     }
-    const quickFilterIds = selectedQuickFilters.map(filter => filter.key.split('-')[1]);
+    const quickFilterIds = selectedQuickFilters.map(filter => filter.key.split('|')[1]);
     IssueStore.handleFilterChange('quickFilterIds', quickFilterIds);
   };
   const isFilterSame = (obj, obj2) => {
@@ -163,7 +163,7 @@ export default withRouter(observer(({
   };
   const getMyFilterSelectValue = () => {
     const targetMyFilter = findSameFilter();
-    return targetMyFilter ? selectedQuickFilters.concat({ key: `my-${targetMyFilter.filterId}`, label: targetMyFilter.name }) : selectedQuickFilters;
+    return targetMyFilter ? selectedQuickFilters.concat({ key: `my|${targetMyFilter.filterId}`, label: targetMyFilter.name }) : selectedQuickFilters;
   };
   const handleClickSaveFilter = () => {
     IssueStore.setSaveFilterVisible(true);
@@ -208,13 +208,13 @@ export default withRouter(observer(({
             >
               <OptGroup key="quick" label="快速筛选">
                 {quickFilters.map(filter => (
-                  <Option value={`quick-${filter.filterId}`}>{filter.name}</Option>
+                  <Option value={`quick|${filter.filterId}`}>{filter.name}</Option>
                 ))}
               </OptGroup>
               <OptGroup key="my" label="我的筛选">
                 {
               filters.map(filter => (
-                <Option value={`my-${filter.filterId}`}>{filter.name}</Option>
+                <Option value={`my|${filter.filterId}`}>{filter.name}</Option>
               ))
             }
               </OptGroup>
