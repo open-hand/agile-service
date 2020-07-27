@@ -167,6 +167,11 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         field.setContext(Arrays.asList(fieldCreateDTO.getContext()).stream().collect(Collectors.joining(",")));
         field.setOrganizationId(organizationId);
         field.setProjectId(projectId);
+
+        String defaultValue = tryDecryptDefaultValue(field.getDefaultValue());
+        if (defaultValue != null) {
+            field.setDefaultValue(defaultValue);
+        }
         field = baseCreate(field);
         //创建pageField
         if (projectId != null) {
@@ -261,9 +266,22 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             }
             update.setContext(Arrays.asList(contexts).stream().collect(Collectors.joining(",")));
         }
+        String defaultValue = tryDecryptDefaultValue(update.getDefaultValue());
+        if (defaultValue != null) {
+            update.setDefaultValue(defaultValue);
+        }
         update.setId(fieldId);
         baseUpdate(update);
         return queryById(organizationId, projectId, fieldId);
+    }
+
+    private String tryDecryptDefaultValue(String defaultValue) {
+        try {
+            return EncryptionUtils.decrypt(defaultValue);
+        } catch (Exception e) {
+            //do nothing
+        }
+        return null;
     }
 
     @Override

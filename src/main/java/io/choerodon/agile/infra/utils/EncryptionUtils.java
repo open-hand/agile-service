@@ -111,6 +111,10 @@ public class EncryptionUtils {
         }
     }
 
+    public static String decrypt(String crypt) {
+        return encryptionService.decrypt(crypt, BLANK_KEY);
+    }
+
     /**
      * 解密List<String>形式的主键
      *
