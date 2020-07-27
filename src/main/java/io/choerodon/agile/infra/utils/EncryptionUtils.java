@@ -41,7 +41,7 @@ public class EncryptionUtils {
 
     private static ObjectMapper encryptMapper;
 
-    public static String[] FIELD_VALUE = {"remaining_time","story_points","creation_date"};
+    public static String[] FIELD_VALUE = {"remaining_time","story_points","creation_date","type_code"};
 
     public static String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList"};
 
