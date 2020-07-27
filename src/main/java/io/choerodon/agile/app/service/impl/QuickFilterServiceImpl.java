@@ -375,7 +375,12 @@ public class QuickFilterServiceImpl implements QuickFilterService {
                 sqlQuery.append(" unix_timestamp(" + field + ")" + " " + quickFilterValueVO.getOperation() + " " + "unix_timestamp('" + value + "') ");
                 break;
             default:
-                sqlQuery.append(" " + field + " " + quickFilterValueVO.getOperation() + " " + value + " ");
+                if(Arrays.asList(EncryptionUtils.FIELD_VALUE).contains(field)){
+                    sqlQuery.append(" " + field + " " + quickFilterValueVO.getOperation() + " " + value + " ");
+                }
+                else {
+                    sqlQuery.append(" " + field + " " + quickFilterValueVO.getOperation() + " " + inSql(operation,value) + " ");
+                }
                 break;
         }
     }
@@ -552,7 +557,12 @@ public class QuickFilterServiceImpl implements QuickFilterService {
                     }
                 }
             }
-            stringBuilder.append("]}");
+            stringBuilder.append("]");
+            JsonNode op = jsonNode.get("o");
+            if (!ObjectUtils.isEmpty(op)) {
+                stringBuilder.append(",\"o\":"+objectMapper.writeValueAsString(op));
+            }
+            stringBuilder.append("}");
         } catch (IOException e) {
             e.printStackTrace();
         }
