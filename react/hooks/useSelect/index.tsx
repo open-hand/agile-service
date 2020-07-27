@@ -51,9 +51,12 @@ export interface SelectConfig<T = {}> {
   paging?: boolean
   props?: object
 }
-interface RefHandle {
+
+
+export interface RefHandle {
   refresh: (config?: LoadConfig) => void
 }
+export type UseSelectRef = React.MutableRefObject<RefHandle>
 export default function useSelect<T extends {}>(config: SelectConfig<T>, ref?: React.MutableRefObject<RefHandle>) {
   const [data, setData] = useState<T[]>([]);
   const [currentPage, setPage] = useState(1);
