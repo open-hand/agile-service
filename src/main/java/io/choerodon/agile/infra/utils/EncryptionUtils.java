@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.utils;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -288,6 +289,13 @@ public class EncryptionUtils {
                     temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, BLANK_KEY))).collect(Collectors.toList()));
         }
 
+        // reporterIds
+        temp = adMapOptional.map(ad -> (List<String>) (ad.get("reporterIds"))).orElse(null);
+        if (CollectionUtils.isNotEmpty(temp)) {
+            search.getAdvancedSearchArgs().put("reporterIds",
+                    temp.stream().map(item -> Long.parseLong(encryptionService.decrypt(item, BLANK_KEY))).collect(Collectors.toList()));
+        }
+
         // priorityId
         tempStr = adMapOptional.map(ad -> {
             if (Objects.isNull(ad.get("priorityId"))){
@@ -537,6 +545,7 @@ public class EncryptionUtils {
             ObjectNode objectNode = (ObjectNode) jsonNode;
             Iterator<Map.Entry<String, JsonNode>> fields = objectNode.fields();
             Map<String, Object> map = new HashMap<>();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> next = fields.next();
                 JsonNode nextValue = next.getValue();
@@ -554,7 +563,14 @@ public class EncryptionUtils {
                             });
                         }
                         nodeObjValue.put("value", list);
-                    } else {
+                    } else if (StringUtils.contains(next.getKey(), "date")){
+                        try {
+                            nodeObjValue.put("startDate", sdf.parse(node.get("startDate").textValue()));
+                            nodeObjValue.put("endDate", sdf.parse(node.get("endDate").textValue()));
+                        } catch (ParseException e) {
+                            throw new CommonException(e);
+                        }
+                    }else {
                         nodeObjValue.put("value", value1.textValue());
                     }
                     objects.add(nodeObjValue);
