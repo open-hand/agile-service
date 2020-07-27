@@ -43,7 +43,7 @@ public class IssueLinkTypeController {
     public ResponseEntity<Page<IssueLinkTypeVO>> listIssueLinkType(@ApiParam(value = "项目id", required = true)
                                                                     @PathVariable(name = "project_id") Long projectId,
                                                                    @ApiParam(value = "不包含的issueLinkTypeId")
-                                                                    @RequestParam(required = false) Long issueLinkTypeId,
+                                                                    @RequestParam(required = false) @Encrypt Long issueLinkTypeId,
                                                                    @ApiParam(value = "查询参数")
                                                                     @RequestBody IssueLinkTypeSearchVO issueLinkTypeSearchVO,
                                                                    @ApiParam(value = "分页信息", required = true)

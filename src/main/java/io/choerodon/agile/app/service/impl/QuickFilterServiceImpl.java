@@ -431,6 +431,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
         quickFilterVO.setFilterId(filterId);
         QuickFilterDTO quickFilterDTO = modelMapper.map(quickFilterVO, QuickFilterDTO.class);
         quickFilterDTO.setSqlQuery(sqlQuery);
+        quickFilterDTO.setDescription(handlerFilterDescription(quickFilterVO.getDescription(),false));
         return updateBySelective(quickFilterDTO);
     }
 

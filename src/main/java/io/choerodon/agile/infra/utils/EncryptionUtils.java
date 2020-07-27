@@ -84,11 +84,14 @@ public class EncryptionUtils {
             return;
         }
         for (Map.Entry<String, Object> entry : adMapOptional.get().entrySet()) {
-            if (entry.getValue() instanceof String){
+            if (Objects.equals(entry.getValue(), "true") || Objects.equals(entry.getValue(), "false")) {
+                continue;
+            }
+            else if (entry.getValue() instanceof String){
                 ((Map<String, Object>) search.get(SprintServiceImpl.ADVANCED_SEARCH_ARGS))
                         .put(entry.getKey(), decrypt((String)entry.getValue(), BLANK_KEY));
             }
-            if (entry.getValue() instanceof Collection){
+            else if (entry.getValue() instanceof Collection){
                 ((Map<String, Object>) search.get(SprintServiceImpl.ADVANCED_SEARCH_ARGS))
                         .put(entry.getKey(), decryptList((List<String>) entry.getValue(), BLANK_KEY, new String[]{"0"}));
             }
