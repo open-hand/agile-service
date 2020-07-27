@@ -641,8 +641,8 @@ public class IssueAssembler extends AbstractAssembler {
                 .filter(func::apply).collect(Collectors.groupingBy(bug1 -> DateUtils.truncate(bug1.getDate(), Calendar.DAY_OF_MONTH)));
         return group.entrySet().stream().sorted(Map.Entry.comparingByKey())
                 .map(entry -> new ImmutablePair<>(df.format(entry.getKey()),
-                        Long.valueOf(entry.getValue().stream()
-                                .map(v -> v.getNewValue().subtract(v.getOldValue()).intValue()).count()).intValue()))
+                        entry.getValue().stream()
+                                .map(v -> v.getNewValue().subtract(v.getOldValue()).intValue()).reduce(Integer::sum).orElse(0)))
                 .collect(Collectors.toList());
     }
 
