@@ -146,12 +146,6 @@ public class FieldValueController {
                                                    @RequestParam String schemeCode,
                                                    @RequestParam String applyType,
                                                    @RequestBody @Encrypt BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
-        if (Objects.nonNull(batchUpdateFieldsValueVo.getPredefinedFields())){
-            for (Map.Entry<String, Object> entry : batchUpdateFieldsValueVo.getPredefinedFields().entrySet()) {
-                batchUpdateFieldsValueVo.getPredefinedFields().put(entry.getKey(),
-                        EncryptionUtils.decrypt(String.valueOf(entry.getValue()), EncryptionUtils.BLANK_KEY));
-            }
-        }
         issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo,applyType);
         return new ResponseEntity<>(HttpStatus.OK);
     }
