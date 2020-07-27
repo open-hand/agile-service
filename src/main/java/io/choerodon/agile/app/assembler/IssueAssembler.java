@@ -672,7 +672,7 @@ public class IssueAssembler extends AbstractAssembler {
                 issue -> issue.setStartDate(DateUtils.truncate(issue.getStartDate(),
                                 Calendar.DAY_OF_MONTH)));
         // 每日issue最后经办人
-        Map<Date, Map<Long, DataLogDTO>> assigneeMap = getAssigneeMap(assigneeLogList, issueTypeMap);
+        Map<Date, Map<Long, DataLogDTO>> assigneeMap = getAssigneeMap(assigneeLogList);
         // 计算任务，故事，解决bug
         Map<Date, List<DataLogDTO>> creationMap = getcreationMap(resolutionLogList, assigneeMap, issueTypeMap);
         Map<Date, OneJobVO> oneJobMap = timeUserLine.entrySet().stream().map(entry -> new ImmutablePair<>(entry.getKey()
@@ -721,7 +721,8 @@ public class IssueAssembler extends AbstractAssembler {
                             .stream().map(list -> list.stream()
                                     .max(Comparator.comparingLong(DataLogDTO::getLogId))
                                     .map(log -> {
-                                        DataLogDTO assignee = assigneeMap.get(entry.getKey()).getOrDefault(log.getIssueId(), new DataLogDTO());
+                                        DataLogDTO assignee = assigneeMap.getOrDefault(entry.getKey(), Collections.emptyMap())
+                                                .getOrDefault(log.getIssueId(), new DataLogDTO());
                                         if (Objects.isNull(assignee.getNewValue())){
                                             log.setCreatedBy(issueTypeMap.get(log.getIssueId()).getCreatedBy());
                                         }else {
@@ -736,10 +737,9 @@ public class IssueAssembler extends AbstractAssembler {
     /**
      * 返回值 Map<日期, Map<issueId, assigneeId>>
      * @param assigneeLogList 经办人日志
-     * @param issueTypeMap id-实体映射
      * @return Map
      */
-    private Map<Date, Map<Long, DataLogDTO>> getAssigneeMap(List<DataLogDTO> assigneeLogList, Map<Long, IssueOverviewVO> issueTypeMap) {
+    private Map<Date, Map<Long, DataLogDTO>> getAssigneeMap(List<DataLogDTO> assigneeLogList) {
         return assigneeLogList.stream()
                 .peek(log -> log.setCreationDate(DateUtils.truncate(log.getCreationDate(), Calendar.DAY_OF_MONTH)))
                 // 按照日志的创建日期分组
