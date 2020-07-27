@@ -34,10 +34,12 @@ class LinkList extends Component {
     } = this.props;
 
     const { typeCode } = issue;
-
     let deleteTipTitle = '确认要删除该问题链接吗？';
     if (type === 'test') {
       deleteTipTitle = '确认要删除该测试用例吗?';
+    }
+    if (typeCode !== 'feature') {
+      deleteTipTitle = '确认删除该问题的关联关系吗?';
     } else {
       deleteTipTitle = '确认要删除该特性关联关系吗?';
     }
