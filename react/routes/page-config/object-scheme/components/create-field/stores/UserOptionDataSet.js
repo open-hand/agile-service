@@ -15,7 +15,7 @@ export default ({
           const data = JSON.parse(response);
           if (data && data.content) {
             const oldIndex = findIndex(dataSet.toData(), item => item.id === p.userId);
-            const index = findIndex(data.list, item => item.id === p.userId);
+            const index = findIndex(data.content, item => item.id === p.userId);
             if (index === -1 && oldIndex !== -1) {
               data.content.unshift(dataSet.get(oldIndex).toData());
             }

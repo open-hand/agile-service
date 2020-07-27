@@ -24,7 +24,7 @@ const IssueHeader = (props) => {
         {/* 问题编号 */}
         <span style={{ marginLeft: 15 }} className={`${prefixCls}-IssueHeader-top-number`}>
           <IssueNumber
-            parentIssueId={parentIssueId || relateIssueId}
+            parentIssueId={relateIssueId || parentIssueId}
             resetIssue={resetIssue}
             reloadIssue={reloadIssue}
             urlParams={urlParams}
