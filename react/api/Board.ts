@@ -1,7 +1,7 @@
 import { axios, stores } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
 import { getOrganizationId } from '@/utils/common';
-import { service } from '@/routes/ScrumBoard/setting/Setting';
+import querystring from 'querystring';
 
 const { AppState } = stores;
 
@@ -24,6 +24,14 @@ interface UBoard {
   objectVersionNumber: number,
   projectId: number,
 }
+interface BoardSearchVO {
+  onlyMe?: boolean,
+  onlyStory?: boolean,
+  assigneeId?: number,
+  quickFilterIds?: Array<number>,
+  assigneeFilterIds?: Array<number>,
+  sprintId?: number,
+}
 /**
  * 迭代看板
  * @author dzc
@@ -33,14 +41,7 @@ class BoardApi {
     return `/agile/v1/projects/${getProjectId()}`;
   }
 
-  load(boardId: number, searchVO: {
-    onlyMe?: boolean,
-    onlyStory?: boolean,
-    assigneeId?: number,
-    quickFilterIds?: Array<number>,
-    assigneeFilterIds?: Array<number>,
-    sprintId?: number,
-  }) {
+  load(boardId: number, searchVO: BoardSearchVO) {
     return axios({
       method: 'get',
       url: `${this.prefix}/board/${boardId}/all_data/${getOrganizationId()}`,
@@ -48,6 +49,7 @@ class BoardApi {
         ...searchVO,
         assigneeId: searchVO && searchVO.onlyMe ? AppState.getUserId : '',
       },
+      paramsSerializer: (params: BoardSearchVO) => querystring.stringify(JSON.parse(JSON.stringify(params))),
     });
   }
 
