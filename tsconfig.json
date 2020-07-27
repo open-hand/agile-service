@@ -11,7 +11,6 @@
     "noImplicitAny": true,
     "allowJs": true,
     "allowSyntheticDefaultImports":true,
-    "noEmit":true,
     "noEmitOnError":false,
     "target": "es6",
     "lib": ["dom", "es2017"],
