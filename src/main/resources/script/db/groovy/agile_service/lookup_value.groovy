@@ -29,9 +29,9 @@ databaseChangeLog(logicalFilePath: 'lookup_value.groovy') {
         }
     }
 
-    changeSet(id: '2019-10-22-delete-lookup-value-dirty-data', author: 'shinan.chenX@gmail') {
-        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
-            "delete FROM lookup_value where value_code = 'feature'"
-        }
-    }
+//    changeSet(id: '2019-10-22-delete-lookup-value-dirty-data', author: 'shinan.chenX@gmail') {
+//        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
+//            "delete FROM lookup_value where value_code = 'feature'"
+//        }
+//    }
 }
