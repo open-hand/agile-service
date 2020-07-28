@@ -1,12 +1,15 @@
 package io.choerodon.agile.infra.utils;
 
 import java.lang.reflect.Field;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.persistence.Id;
 
 import io.choerodon.agile.infra.dto.IssueCommentDTO;
+import io.choerodon.agile.infra.dto.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.IssueDTO;
 import io.choerodon.agile.infra.dto.IssueLinkDTO;
 import io.choerodon.agile.infra.mapper.IssueCommentMapper;
@@ -24,6 +27,7 @@ import org.hzero.mybatis.util.Sqls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * 表基础字段处理工具类
@@ -138,5 +142,32 @@ public class BaseFieldUtil {
         }
         mapper.updateOptional(update);
         return update;
+    }
+
+    public static void updateIssueLastUpdateInfoForIssueLinks(IssueConvertDTO issueConvertDTO, List<IssueLinkDTO> issueLinkDTOS) {
+        if (Objects.isNull(issueMapper)){
+            issueMapper = ApplicationContextHelper.getContext().getBean(IssueMapper.class);
+        }
+        IssueDTO issueDTO = new IssueDTO();
+        issueDTO.setIssueId(issueConvertDTO.getIssueId());
+        issueDTO.setObjectVersionNumber(issueConvertDTO.getObjectVersionNumber());
+        if (ObjectUtils.isEmpty(issueMapper.selectOne(issueDTO))) {
+            throw new CommonException("error.issue.objectVersionNumber.illegal");
+        }
+        if (CollectionUtils.isEmpty(issueLinkDTOS)) {
+            return;
+        }
+        Set<Long> issueIds = new HashSet<>();
+        issueLinkDTOS.forEach(link -> {
+            if (!issueIds.contains(link.getIssueId())) {
+                issueIds.add(link.getIssueId());
+                updateIssueLastUpdateInfo(link.getIssueId(), link.getProjectId());
+            }
+            if (!issueIds.contains(link.getLinkedIssueId())) {
+                issueIds.add(link.getLinkedIssueId());
+                updateIssueLastUpdateInfo(link.getLinkedIssueId(), link.getProjectId());
+            }
+        });
+        issueConvertDTO.setObjectVersionNumber(issueConvertDTO.getObjectVersionNumber() + 1L);
     }
 }

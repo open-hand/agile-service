@@ -1635,7 +1635,10 @@ public class IssueServiceImpl implements IssueService {
                 }
                 issueValidator.verifySubTask(issueTransformSubTask.getParentIssueId());
                 //删除链接
-                issueLinkService.deleteByIssueId(issueConvertDTO.getIssueId());
+                List<IssueLinkDTO> issueLinkDTOS = issueLinkMapper.listIssueLinkByBatch(projectId, Arrays.asList(issueConvertDTO.getIssueId()));
+                if (!CollectionUtils.isEmpty(issueLinkDTOS)) {
+                    issueLinkService.deleteIssueLinkByIssueId(issueConvertDTO,issueLinkDTOS);
+                }
                 issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
                 Long sprintId = issueMapper.selectUnCloseSprintId(projectId, issueTransformSubTask.getParentIssueId());
                 List<Long> issueIds = new ArrayList<>();
