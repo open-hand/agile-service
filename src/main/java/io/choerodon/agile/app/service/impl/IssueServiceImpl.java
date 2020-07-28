@@ -706,8 +706,10 @@ public class IssueServiceImpl implements IssueService {
             IssueSprintRelDTO issueSprintRelDTO = new IssueSprintRelDTO();
             issueSprintRelDTO.setIssueId(issueId);
             issueSprintRelDTO.setSprintId(sprintId);
-            issueSprintRelDTO.setProjectId(projectId);
-            issueSprintRelService.createIssueSprintRel(issueSprintRelDTO);
+            if (issueSprintRelMapper.selectOne(issueSprintRelDTO) == null) {
+                issueSprintRelDTO.setProjectId(projectId);
+                issueSprintRelService.createIssueSprintRel(issueSprintRelDTO);
+            }
         }
     }
 
