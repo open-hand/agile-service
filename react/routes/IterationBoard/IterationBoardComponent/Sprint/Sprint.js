@@ -117,8 +117,8 @@ class Sprint extends Component {
                             user={{
                               id: user.assigneeId,
                               name: user.assigneeName,
-                              loginName: user.assigneeLoginName,
-                              realName: user.assigneeRealName,
+                              loginName: user.assigneeName,
+                              realName: user.assigneeName,
                               avatar: user.imageUrl,
                             }}
                             hiddenText
