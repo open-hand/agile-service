@@ -230,6 +230,7 @@ public class FieldValueUtil {
                 BaseFeignClient baseFeignClient = SpringBeanUtil.getBean(BaseFeignClient.class);
                 if (fieldDetail.getDefaultValue() != null && !"".equals(fieldDetail.getDefaultValue())) {
                     Long defaultValue = Long.valueOf(String.valueOf(fieldDetail.getDefaultValue()));
+                    fieldDetail.setDefaultValue(EncryptionUtils.encrypt(defaultValue));
                     List<UserDTO> list = baseFeignClient.listUsersByIds(Arrays.asList(defaultValue).toArray(new Long[1]), false).getBody();
                     if (!list.isEmpty()) {
                         fieldDetail.setDefaultValueObj(list.get(0));

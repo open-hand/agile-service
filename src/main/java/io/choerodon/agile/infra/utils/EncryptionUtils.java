@@ -190,14 +190,15 @@ public class EncryptionUtils {
                     field = clazz.getDeclaredField(fieldName);
                     field.setAccessible(true);
                     if (field.getType() == String.class) {
-                        field.set(object, valueNode.toString());
+                        field.set(object, valueNode.textValue());
                     } else if (field.getType() == Long.class) {
                         Encrypt encrypt = field.getAnnotation(Encrypt.class);
-                        String[] ignoreValues = encrypt.ignoreValue();
-                        if (encrypt != null && !StringUtils.isNumeric(valueNode.toString())) {
-                            field.set(object, decrypt(valueNode.toString(), encrypt.value()));
-                        } else if (encrypt != null && !ArrayUtils.isEmpty(ignoreValues) && Arrays.asList(ignoreValues).contains(valueNode.toString())) {
-                            field.set(object, Long.valueOf(valueNode.toString()));
+                        if (encrypt != null && !StringUtils.isNumeric(valueNode.textValue())) {
+                            field.set(object, decrypt(valueNode.textValue(), encrypt.value()));
+                        } else if (encrypt != null
+                                && !ArrayUtils.isEmpty(encrypt.ignoreValue())
+                                && Arrays.asList(encrypt.ignoreValue()).contains(valueNode.textValue())) {
+                            field.set(object, Long.valueOf(valueNode.textValue()));
                         } else {
                             field.set(object, valueNode == null ? null : Long.valueOf(valueNode.toString()));
                         }
