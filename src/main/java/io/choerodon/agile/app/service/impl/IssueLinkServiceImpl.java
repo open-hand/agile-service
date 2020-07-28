@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.IssueLinkVO;
 import io.choerodon.agile.api.validator.IssueLinkValidator;
 import io.choerodon.agile.app.assembler.IssueLinkAssembler;
 import io.choerodon.agile.app.service.IssueLinkService;
+import io.choerodon.agile.infra.dto.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.IssueLinkDTO;
 import io.choerodon.agile.infra.mapper.IssueLinkMapper;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
@@ -101,5 +102,11 @@ public class IssueLinkServiceImpl implements IssueLinkService {
         } else {
             return new ArrayList<>();
         }
+    }
+
+    @Override
+    public void deleteIssueLinkByIssueId(IssueConvertDTO issueConvertDTO, List<IssueLinkDTO> issueLinkDTOS) {
+        BaseFieldUtil.updateIssueLastUpdateInfoForIssueLinks(issueConvertDTO, issueLinkDTOS);
+        issueLinkMapper.deleteByIssueId(issueConvertDTO.getIssueId());
     }
 }
