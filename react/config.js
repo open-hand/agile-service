@@ -1,5 +1,4 @@
-/* eslint-disable */
-const alias = require('../alias').webpack;
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 const config = {
   local: true,
@@ -14,9 +13,8 @@ const config = {
   ],
   dashboard: {},
   resourcesLevel: ['site', 'origanization', 'project', 'user'],
-  webSocketServer: 'ws://notify.staging.saas.hand-china.com',
   webpackConfig(configs) {
-    configs.resolve.alias = alias;
+    configs.plugins.push(new ForkTsCheckerWebpackPlugin());
     return configs;
   },
 };

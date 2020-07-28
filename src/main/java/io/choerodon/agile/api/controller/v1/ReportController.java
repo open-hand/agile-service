@@ -3,20 +3,22 @@ package io.choerodon.agile.api.controller.v1;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.ReportService;
+
 import io.choerodon.agile.infra.dto.GroupDataChartDTO;
 import io.choerodon.agile.infra.dto.GroupDataChartListDTO;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
-import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -49,7 +51,7 @@ public class ReportController {
     public ResponseEntity<List<ReportIssueVO>> queryBurnDownReport(@ApiParam(value = "项目id", required = true)
                                                                     @PathVariable(name = "project_id") Long projectId,
                                                                    @ApiParam(value = "sprintId", required = true)
-                                                                    @PathVariable Long sprintId,
+                                                                    @PathVariable @Encrypt Long sprintId,
                                                                    @ApiParam(value = "类型(storyPoints、remainingEstimatedTime、issueCount)", required = true)
                                                                     @RequestParam String type,
                                                                    @ApiParam(value = "排序方式(asc,desc)", required = true)
@@ -65,7 +67,7 @@ public class ReportController {
     public ResponseEntity<JSONObject> queryBurnDownCoordinate(@ApiParam(value = "项目id", required = true)
                                                               @PathVariable(name = "project_id") Long projectId,
                                                               @ApiParam(value = "sprintId", required = true)
-                                                              @PathVariable Long sprintId,
+                                                              @PathVariable @Encrypt Long sprintId,
                                                               @ApiParam(value = "类型(storyPoints、remainingEstimatedTime、issueCount)", required = true)
                                                               @RequestParam String type) {
         return Optional.ofNullable(reportService.queryBurnDownCoordinate(projectId, sprintId, type))
@@ -92,7 +94,7 @@ public class ReportController {
     public ResponseEntity<Page<IssueListVO>> queryIssueByOptions(@ApiParam(value = "项目id", required = true)
                                                                   @PathVariable(name = "project_id") Long projectId,
                                                                  @ApiParam(value = "版本id", required = true)
-                                                                  @PathVariable Long versionId,
+                                                                  @PathVariable @Encrypt Long versionId,
                                                                  @ApiParam(value = "状态", required = true)
                                                                   @RequestParam String status,
                                                                  @ApiParam(value = "组织id", required = true)
@@ -113,7 +115,7 @@ public class ReportController {
     public ResponseEntity<Map<String, Object>> queryVersionLineChart(@ApiParam(value = "项目id", required = true)
                                                                      @PathVariable(name = "project_id") Long projectId,
                                                                      @ApiParam(value = "版本id", required = true)
-                                                                     @PathVariable Long versionId,
+                                                                     @PathVariable @Encrypt Long versionId,
                                                                      @ApiParam(value = "统计类型", required = true)
                                                                      @RequestParam String type) {
         return Optional.ofNullable(reportService.queryVersionLineChart(projectId, versionId, type))
@@ -148,9 +150,9 @@ public class ReportController {
                                                           @ApiParam(value = "结束时间 yyyy-MM-dd HH:mm:ss")
                                                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date endDate,
                                                           @ApiParam(value = "冲刺id")
-                                                           @RequestParam(required = false) Long sprintId,
+                                                           @RequestParam(required = false) @Encrypt Long sprintId,
                                                           @ApiParam(value = "版本id")
-                                                           @RequestParam(required = false) Long versionId) {
+                                                           @RequestParam(required = false) @Encrypt Long versionId) {
         return Optional.ofNullable(reportService.queryPieChart(projectId, fieldName, organizationId, startDate, endDate, sprintId, versionId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.report.queryPieChart"));
@@ -162,7 +164,7 @@ public class ReportController {
     public ResponseEntity<List<GroupDataChartDTO>> queryEpicChart(@ApiParam(value = "项目id", required = true)
                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                   @ApiParam(value = "epic id", required = true)
-                                                                 @RequestParam Long epicId,
+                                                                 @RequestParam @Encrypt Long epicId,
                                                                   @ApiParam(value = "统计类型", required = true)
                                                                  @RequestParam String type) {
         return Optional.ofNullable(reportService.queryEpicChart(projectId, epicId, type))
@@ -176,7 +178,7 @@ public class ReportController {
     public ResponseEntity<List<GroupDataChartListDTO>> queryEpicChartList(@ApiParam(value = "项目id", required = true)
                                                                          @PathVariable(name = "project_id") Long projectId,
                                                                           @ApiParam(value = "epic id", required = true)
-                                                                         @RequestParam Long epicId,
+                                                                         @RequestParam @Encrypt Long epicId,
                                                                           @ApiParam(value = "组织id", required = true)
                                                                          @RequestParam Long organizationId) {
         return Optional.ofNullable(reportService.queryEpicChartList(projectId, epicId, organizationId))
@@ -190,7 +192,7 @@ public class ReportController {
     public ResponseEntity<List<GroupDataChartDTO>> queryVersionChart(@ApiParam(value = "项目id", required = true)
                                                                     @PathVariable(name = "project_id") Long projectId,
                                                                      @ApiParam(value = "version id", required = true)
-                                                                    @RequestParam Long versionId,
+                                                                    @RequestParam @Encrypt Long versionId,
                                                                      @ApiParam(value = "统计类型", required = true)
                                                                     @RequestParam String type) {
         return Optional.ofNullable(reportService.queryVersionChart(projectId, versionId, type))
@@ -204,7 +206,7 @@ public class ReportController {
     public ResponseEntity<List<GroupDataChartListDTO>> queryVersionChartList(@ApiParam(value = "项目id", required = true)
                                                                             @PathVariable(name = "project_id") Long projectId,
                                                                              @ApiParam(value = "version id", required = true)
-                                                                            @RequestParam Long versionId,
+                                                                            @RequestParam @Encrypt Long versionId,
                                                                              @ApiParam(value = "组织id", required = true)
                                                                             @RequestParam Long organizationId) {
         return Optional.ofNullable(reportService.queryVersionChartList(projectId, versionId, organizationId))
@@ -218,7 +220,7 @@ public class ReportController {
     public ResponseEntity<List<BurnDownReportCoordinateVO>> queryBurnDownCoordinateByType(@ApiParam(value = "项目id", required = true)
                                                                                            @PathVariable(name = "project_id") Long projectId,
                                                                                           @ApiParam(value = "id", required = true)
-                                                                                           @PathVariable Long id,
+                                                                                           @PathVariable @Encrypt Long id,
                                                                                           @ApiParam(value = "类型:Epic/Version", required = true)
                                                                                            @RequestParam String type) {
         return Optional.ofNullable(reportService.queryBurnDownCoordinateByType(projectId, id, type))
@@ -232,7 +234,7 @@ public class ReportController {
     public ResponseEntity<BurnDownReportVO> queryBurnDownReportByType(@ApiParam(value = "项目id", required = true)
                                                                        @PathVariable(name = "project_id") Long projectId,
                                                                       @ApiParam(value = "id", required = true)
-                                                                       @PathVariable Long id,
+                                                                       @PathVariable @Encrypt Long id,
                                                                       @ApiParam(value = "类型:Epic/Version", required = true)
                                                                        @RequestParam String type,
                                                                       @ApiParam(value = "组织id", required = true)

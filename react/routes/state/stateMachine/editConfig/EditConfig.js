@@ -1,11 +1,17 @@
+/* eslint-disable react/no-unused-state */
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
-import { Table, Button, Modal, Form, Select, Input, Tooltip, Tabs, Radio, Card, Popconfirm, Spin } from 'choerodon-ui';
+import {
+  Table, Button, Modal, Form, Select, Input, Tooltip, Tabs, Radio, Card, Popconfirm, Spin, 
+} from 'choerodon-ui';
 import { injectIntl, FormattedMessage } from 'react-intl';
-import { Content, Header, Page, Permission, stores, Choerodon } from '@choerodon/boot';
+import {
+  Content, Header, Page, Permission, stores, Choerodon, 
+} from '@choerodon/boot';
 import _ from 'lodash';
 import './EditConfig.less';
+import { stateMachineApi } from '@/api';
 
 const prefixCls = 'issue-state-machine-config';
 const { AppState } = stores;
@@ -80,7 +86,9 @@ class EditConfig extends Component {
             <React.Fragment>
               {transferData && transferData.map(item => item.startNodeId === id && (
                 <div className={`${prefixCls}-text-transfer-item`} key={item.id}>
-                  {`${item.name}  >>>`} {
+                  {`${item.name}  >>>`} 
+                  {' '}
+                  {
                     nodeData && nodeData.map(node => node.id === item.endNodeId && (
                       <div className={`${prefixCls}-text-node`} key={`${item.id}-${node.id}`}>
                         {node.statusVO && node.statusVO.name}
@@ -99,16 +107,16 @@ class EditConfig extends Component {
         render: (test, record) => (
           <div>
             <Tooltip placement="top" title={<FormattedMessage id="stateMachine.transfer.add" />}>
-              <Button shape="circle" size={'small'} onClick={this.textTransferAdd.bind(this, record.id)}>
+              <Button shape="circle" size="small" onClick={this.textTransferAdd.bind(this, record.id)}>
                 <span className="icon icon-add" />
               </Button>
             </Tooltip>
             <Tooltip placement="top" title={<FormattedMessage id="delete" />}>
-              <Button shape="circle" size={'small'} onClick={this.textTransferDel.bind(this, record.id)}>
+              <Button shape="circle" size="small" onClick={this.textTransferDel.bind(this, record.id)}>
                 <span className="icon icon-delete" />
               </Button>
             </Tooltip>
-            <Permission service={[]} >
+            <Permission service={[]}>
               <Tooltip placement="bottom" title={<div>{!record.synchro ? <FormattedMessage id="app.synch" /> : <React.Fragment>{record.active ? <FormattedMessage id="edit" /> : <FormattedMessage id="app.start" />}</React.Fragment>}</div>}>
                 <span />
               </Tooltip>
@@ -120,14 +128,13 @@ class EditConfig extends Component {
   }
 
   getTransferById = (onLoad = false) => {
-    const { organizationId, id } = this.state;
-    const { StateMachineStore } = this.props;
+    const { id } = this.state;
     if (!onLoad) {
       this.setState({
         loading: true,
       });
     }
-    StateMachineStore.getTransferById(organizationId, id).then((data) => {
+    stateMachineApi.loadTransfer(id).then((data) => {
       this.setState({
         loading: false,
         isLoading: false,
@@ -251,14 +258,13 @@ class EditConfig extends Component {
   };
 
   getStateById = (onLoad = false) => {
-    const { organizationId, stateId } = this.state;
-    const { StateMachineStore } = this.props;
+    const { stateId } = this.state;
     if (!onLoad) {
       this.setState({
         loading: true,
       });
     }
-    StateMachineStore.getStateById(organizationId, stateId).then((data) => {
+    stateMachineApi.loadNode(stateId).then((data) => {
       this.setState({
         loading: false,
         isLoading: false,
@@ -362,6 +368,7 @@ class EditConfig extends Component {
       let equal = false;
       intoFigure.forEach((item) => {
         const x = item.x + item.w;
+        // eslint-disable-next-line no-shadow
         const y = item.y + item.h / 2;
 
         ctx.moveTo(x, y);
@@ -648,12 +655,10 @@ class EditConfig extends Component {
   };
 
   onDelete = (id) => {
-    const { StateMachineStore } = this.props;
-    const { organizationId } = this.state;
     this.setState({
       loading: true,
     });
-    StateMachineStore.deleteConfig(organizationId, id).then((data) => {
+    stateMachineApi.deleteConfig(id).then((data) => {
       if (data) {
         this.loadTarget(true);
       } else {
@@ -716,9 +721,8 @@ class EditConfig extends Component {
   };
 
   handleConditoinChange = (e) => {
-    const { StateMachineStore } = this.props;
-    const { organizationId, id } = this.state;
-    StateMachineStore.updateCondition(organizationId, id, e.target.value);
+    const { id } = this.state;
+    stateMachineApi.updateCondition(id, e.target.value);
   };
 
   render() {
@@ -766,28 +770,28 @@ class EditConfig extends Component {
                   <span className="icon icon-warning" />
                   <div className={`${prefixCls}-header-tip-text`}>
                     注意：此状态机正在被使用。你正在编辑 状态机草稿 ，如果修改后的草稿需要生效，请点击 发布 。删除草稿 后草稿备份为现在正在使用的状态机。
-                </div>
+                  </div>
                   <div className={`${prefixCls}-header-tip-action`}>
-                    <Button type="primary" funcType="raised" >发布</Button>
-                    <Button funcType="raised" className="delete" >删除状态</Button>
+                    <Button type="primary" funcType="raised">发布</Button>
+                    <Button funcType="raised" className="delete">删除状态</Button>
                   </div>
                 </div>
               )}
               <div className={`${prefixCls}-header-name`}>
                 {stateId ? <FormattedMessage id="stateMachine.state" /> : <FormattedMessage id="stateMachine.transfer" />}
                 :
-              {stateId ? targetData.statusVO && targetData.statusVO.name : targetData.name}
+                {stateId ? targetData.statusVO && targetData.statusVO.name : targetData.name}
                 {stateMachineData && stateMachineData.status === '2' && <span className={`${prefixCls}-header-name-state`}>草稿</span>}
               </div>
               <div className={`${prefixCls}-header-stateMachine`}>
                 <span><FormattedMessage id="stateMachine.title" /></span>
                 :
-              {stateMachineData.name}
+                {stateMachineData.name}
               </div>
               <div className={`${prefixCls}-header-page`}>
                 <span><FormattedMessage id="stateMachine.transfer.page" /></span>
                 :
-              {stateMachineData.page}
+                {stateMachineData.page}
               </div>
               <div className={`${prefixCls}-header-des`}>{stateMachineData.description}</div>
             </div>
@@ -838,7 +842,7 @@ class EditConfig extends Component {
                                   <div key={item.id} className={`${prefixCls}-tab-list`}>
                                     {item.codeDescription || ''}
                                     <Popconfirm title={<FormattedMessage id="stateMachine.transfer.deleteConfirm" />} onConfirm={() => this.onDelete(item.id)}>
-                                      <Button className="action" shape="circle" size={'small'}>
+                                      <Button className="action" shape="circle" size="small">
                                         <span className="icon icon-delete" />
                                       </Button>
                                     </Popconfirm>
@@ -882,7 +886,7 @@ class EditConfig extends Component {
                                 <div key={item.id} className={`${prefixCls}-tab-list`}>
                                   {item.codeDescription || ''}
                                   <Popconfirm title={<FormattedMessage id="stateMachine.transfer.deleteConfirm" />} onConfirm={() => this.onDelete(item.id)}>
-                                    <Button className="action" shape="circle" size={'small'}>
+                                    <Button className="action" shape="circle" size="small">
                                       <span className="icon icon-delete" />
                                     </Button>
                                   </Popconfirm>
@@ -926,7 +930,7 @@ class EditConfig extends Component {
                                 <div key={item.id} className={`${prefixCls}-tab-list`}>
                                   {item.codeDescription || ''}
                                   <Popconfirm title={<FormattedMessage id="stateMachine.transfer.deleteConfirm" />} onConfirm={() => this.onDelete(item.id)}>
-                                    <Button className="action" shape="circle" size={'small'}>
+                                    <Button className="action" shape="circle" size="small">
                                       <span className="icon icon-delete" />
                                     </Button>
                                   </Popconfirm>

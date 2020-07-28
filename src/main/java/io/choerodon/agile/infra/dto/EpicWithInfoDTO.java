@@ -1,7 +1,11 @@
 package io.choerodon.agile.infra.dto;
 
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 public class EpicWithInfoDTO {
 
+    @Encrypt
     private Long issueId;
 
     private String issueNum;

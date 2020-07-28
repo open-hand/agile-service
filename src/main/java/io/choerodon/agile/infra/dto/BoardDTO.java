@@ -1,8 +1,10 @@
 package io.choerodon.agile.infra.dto;
 
+
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.persistence.*;
 
@@ -17,6 +19,7 @@ public class BoardDTO extends AuditDomain {
 
     @Id
     @GeneratedValue
+    @Encrypt
     private Long boardId;
 
     private String name;

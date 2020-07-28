@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import io.choerodon.agile.api.vo.KnowledgeRelationVO;
 import io.choerodon.agile.api.vo.WikiRelationVO;
 import io.choerodon.agile.api.vo.WorkSpaceVO;
 import io.choerodon.agile.app.service.IWikiRelationService;
@@ -8,6 +9,7 @@ import io.choerodon.agile.app.service.WikiRelationService;
 import io.choerodon.agile.infra.dto.WikiRelationDTO;
 import io.choerodon.agile.infra.feign.KnowledgebaseClient;
 import io.choerodon.agile.infra.mapper.WikiRelationMapper;
+import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -61,14 +63,14 @@ public class WikiRelationServiceImpl implements WikiRelationService {
             for (WikiRelationDTO wikiRelationDTO : wikiRelationDTOList) {
                 if (!checkRepeat(wikiRelationDTO)) {
                     iWikiRelationService.createBase(wikiRelationDTO);
+                    BaseFieldUtil.updateIssueLastUpdateInfo(wikiRelationDTO.getIssueId(), wikiRelationDTO.getProjectId());
                 }
             }
         }
     }
 
     @Override
-    public JSONObject queryByIssueId(Long projectId, Long issueId) {
-        JSONObject jsonObject = new JSONObject();
+    public KnowledgeRelationVO queryByIssueId(Long projectId, Long issueId) {
         WikiRelationDTO wikiRelationDTO = new WikiRelationDTO();
         wikiRelationDTO.setIssueId(issueId);
         List<WikiRelationDTO> wikiRelationDTOList = wikiRelationMapper.select(wikiRelationDTO);
@@ -83,8 +85,9 @@ public class WikiRelationServiceImpl implements WikiRelationService {
                 result.add(wikiRelationVO);
             }
         }
-        jsonObject.put("knowledgeRelationList", result);
-        return jsonObject;
+        KnowledgeRelationVO knowledgeRelation = new KnowledgeRelationVO();
+        knowledgeRelation.setKnowledgeRelationList(result);
+        return knowledgeRelation;
     }
 
     @Override
@@ -103,5 +106,6 @@ public class WikiRelationServiceImpl implements WikiRelationService {
         wikiRelationDTO.setProjectId(projectId);
         wikiRelationDTO.setId(id);
         iWikiRelationService.deleteBase(wikiRelationDTO);
+        BaseFieldUtil.updateIssueLastUpdateInfo(wikiRelationDTO.getIssueId(), projectId);
     }
 }

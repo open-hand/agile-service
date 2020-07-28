@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Modal } from 'choerodon-ui/pro';
 import { Select } from 'choerodon-ui';
-import { stores, axios } from '@choerodon/boot';
+import { stores } from '@choerodon/boot';
+import { sprintApi } from '@/api';
 import _ from 'lodash';
 
 const { AppState } = stores;
@@ -33,13 +34,13 @@ class CloseSprint extends Component {
       sprintId, modal, afterClose,
     } = this.props;
     const data = {
-      incompleteIssuesDestination: parseInt(selectChose, 10),
+      incompleteIssuesDestination: selectChose,
       projectId: parseInt(AppState.currentMenuType.id, 10),
       sprintId,
     };
-    axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/complete`, data).then((res) => {
+    sprintApi.complete(data).then((res) => {
       modal.close();
-      console.log('completed');
+      // console.log('completed');
       if (afterClose) {
         afterClose();
       } 

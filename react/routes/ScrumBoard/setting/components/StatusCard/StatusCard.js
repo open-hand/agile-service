@@ -10,6 +10,7 @@ import { stores, Permission, Choerodon } from '@choerodon/boot';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import STATUS from '@/constants/STATUS';
 import './StatusCard.less';
+import { boardApi, statusApi } from '@/api';
 
 const { AppState } = stores;
 const { confirm, warning } = Modal;
@@ -26,7 +27,7 @@ class StatusCard extends Component {
   handleDeleteClick = async () => {
     const { data } = this.props;
     const deleteCode = data.statusId;
-    const canBeDeleted = await ScrumBoardStore.axiosStatusCanBeDelete(deleteCode);
+    const canBeDeleted = await statusApi.checkCanDelStatus(deleteCode);
     const that = this;
     if (canBeDeleted) {
       confirm({
@@ -58,7 +59,7 @@ class StatusCard extends Component {
     data[data.length - 1].subStatusDTOS.splice(deleteIndex, 1);
     ScrumBoardStore.setBoardData(data);    
     try {
-      await ScrumBoardStore.axiosDeleteStatus(deleteCode);
+      await boardApi.deleteStatus(deleteCode);
     } catch (err) {
       ScrumBoardStore.setBoardData(originData);
     }
@@ -81,7 +82,7 @@ class StatusCard extends Component {
     if (this.findStatusCodeByStatusId(data.statusId) === 'create') {
       return [true, '初始化状态'];
     }
-    if (columnId === 0) {
+    if (columnId === '0') {
       if (data.issues.length === 0) {
         if (this.getStatusNumber() <= 1) {
           return [true, '应至少剩余一个状态'];
@@ -106,10 +107,7 @@ class StatusCard extends Component {
       completed: !data.completed,
       projectId: AppState.currentMenuType.id,
     };
-
-    ScrumBoardStore.axiosUpdateIssueStatus(
-      data.id, clickData,
-    ).then((res) => {
+    boardApi.updateStatus(data.id, clickData).then((res) => {
       ScrumBoardStore.updateStatusLocal(columnId, data, res);
     }).catch((error) => {
       Choerodon.prompt(error.message, 'error');

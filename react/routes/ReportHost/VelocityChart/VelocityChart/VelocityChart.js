@@ -292,7 +292,7 @@ class VelocityChart extends Component {
                 `/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${
                   encodeURIComponent(urlParams.name)
                 }&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramType=sprint&paramId=${
-                  record.sprintId
+                  encodeURIComponent(record.sprintId)
                 }&paramName=${encodeURIComponent(`${sprintName}下的问题`)}&paramUrl=reporthost/velocityChart`,
               );
             }}

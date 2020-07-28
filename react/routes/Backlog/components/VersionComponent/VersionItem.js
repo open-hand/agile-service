@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Draggable } from 'react-beautiful-dnd';
+import { versionApi } from '@/api';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 import DraggableVersion from './DraggableVersion';
 
@@ -35,7 +36,7 @@ class VersionItem extends Component {
           BacklogStore.toggleIssueDrag(false);
           if (BacklogStore.getIsDragging) {
             e.currentTarget.style.border = 'none';
-            BacklogStore.axiosUpdateIssuesToVersion(
+            versionApi.addIssues(
               item.versionId, BacklogStore.getIssueWithEpicOrVersion,
             ).then((res) => {
               issueRefresh();

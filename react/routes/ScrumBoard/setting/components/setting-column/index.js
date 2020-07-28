@@ -5,6 +5,7 @@ import { Select } from 'choerodon-ui';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { last, cloneDeep, find } from 'lodash';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
+import { boardColumnApi, boardApi } from '@/api';
 import Column from './Column';
 import UnSetColumn from './UnSetColumn';
 import './index.less';
@@ -45,9 +46,7 @@ class SettingColumn extends Component {
       sequence: destinationIndex,
       objectVersionNumber: JSON.parse(draggableId).objectVersionNumber,
     };
-    ScrumBoardStore.axiosUpdateColumnSequence(
-      ScrumBoardStore.getSelectedBoard, data,
-    ).then((res) => {
+    boardColumnApi.updateSequence(data).then((res) => {
       refresh();
     }).catch((error) => {
       ScrumBoardStore.setBoardData(originBoardData);
@@ -67,9 +66,9 @@ class SettingColumn extends Component {
       }, draggableId, 
     } = result;
     const sourceType = sourceDroppableId.split(',')[0];
-    const sourceColumnId = Number(sourceDroppableId.split(',')[1]);
+    const sourceColumnId = sourceDroppableId.split(',')[1];
     const destinationType = destinationDroppableId.split(',')[0];
-    const destinationColumnId = Number(destinationDroppableId.split(',')[1]);
+    const destinationColumnId = destinationDroppableId.split(',')[1];
     const [statusCode, statusObjectVersionNumber] = draggableId.split(',');
     if (sourceColumnId === destinationColumnId && sourceIndex === destinationIndex) {
       return;
@@ -82,7 +81,7 @@ class SettingColumn extends Component {
     // 移动状态
     const [movedStatus] = sourceStatusList.splice(sourceIndex, 1);
     destinationStatusList.splice(destinationIndex, 0, movedStatus);
-    const request = destinationType === 'unset' ? ScrumBoardStore.moveStatusToUnset : ScrumBoardStore.moveStatusToColumn;
+    const request = destinationType === 'unset' ? boardApi.moveStatusToUnset.bind(boardApi) : boardApi.moveStatusToColumn.bind(boardApi);
     ScrumBoardStore.setBoardData(newState);
 
     request(statusCode, {
@@ -163,7 +162,7 @@ class SettingColumn extends Component {
               style={{ width: 512 }}
               onChange={(value) => {
                 const oldData = ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard);
-                ScrumBoardStore.axiosUpdateBoard({
+                boardApi.update(ScrumBoardStore.getSelectedBoard, {
                   boardId: ScrumBoardStore.getSelectedBoard,
                   columnConstraint: value,
                   projectId: AppState.currentMenuType.id,

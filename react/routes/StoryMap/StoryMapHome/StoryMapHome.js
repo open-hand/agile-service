@@ -1,11 +1,14 @@
 /* eslint-disable no-nested-ternary */
 import React, {
-  Fragment, useEffect, useRef,
+  Fragment, useEffect, useRef, useMemo,
 } from 'react';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
-import { Button } from 'choerodon-ui';
+import { Button, Icon } from 'choerodon-ui';
+import {
+  Select, DataSet, CheckBox, Modal, 
+} from 'choerodon-ui/pro';
 import { DragDropContextProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { observer } from 'mobx-react-lite';
@@ -21,10 +24,13 @@ import SwitchSwimLine from './components/SwitchSwimLine';
 import CreateVersion from './components/CreateVersion';
 import CreateEpicModal from './components/CreateEpicModal';
 import IssueDetail from './components/IssueDetail';
+import StoryFilterDropDown from './components/StoryFilterDropDown';
+import StoryFilter from './components/StoryFilter';
 import StoryMapStore from '../../../stores/project/StoryMap/StoryMapStore';
 import useFullScreen from '../../../common/useFullScreen';
 import './StoryMapHome.less';
 
+const { Option } = Select;
 const HEX = {
   'c7nagile-StoryMap-EpicCard': '#D9C2FB',
   'c7nagile-StoryMap-StoryCard': '#AEE9E0',
@@ -38,9 +44,7 @@ const StoryMapHome = observer(() => {
   };
   const ref = useRef(null);
   StoryMapStore.setMiniMapRef(ref);
-  // useEffect(() => {
-  //   StoryMapStore.setMiniMapRef(ref);
-  // }, [ref]);
+  
   useEffect(() => {
     handleRefresh();
     return () => { StoryMapStore.clear(); };
@@ -110,8 +114,14 @@ const StoryMapHome = observer(() => {
     }
   };
 
-  const { loading, selectedIssueMap } = StoryMapStore;
+  const handleCheckBoxChange = (value, oldValue) => {
+    StoryMapStore.setHiddenColumnNoStory(value);
+  };
 
+  const {
+    loading, selectedIssueMap,
+  } = StoryMapStore;
+  const isEmpty = StoryMapStore.getIsEmpty;
   /**
    * 打开问题详情时设置样式 用以显示全部地图
    */
@@ -122,9 +132,10 @@ const StoryMapHome = observer(() => {
       ref.current.source.style.width = '';
     }
   }, [selectedIssueMap.size]);
+
   const { isInProgram } = IsInProgramStore; // 判断是否为项目群下的子项目 是则不显示史诗
-  const isEmpty = StoryMapStore.getIsEmpty;
-  const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.getElementsByClassName('c7nagile-StoryMap')[0], onFullScreenChange);
+  
+  const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => {}, 'c7nagile-StoryMap-fullScreen');
   return (
     <Page
       className="c7nagile-StoryMap"
@@ -133,12 +144,6 @@ const StoryMapHome = observer(() => {
       ]}
     >
       <Header title="故事地图">
-        {/* <Button
-          icon="refresh"
-          onClick={handleRefresh}
-        >
-            刷新
-        </Button> */}
         {!isInProgram && isEmpty && !loading ? <Button onClick={handleCreateEpicClick} icon="playlist_add">创建史诗</Button> : null}
         {!StoryMapStore.isFullScreen && (
           <Button
@@ -148,11 +153,13 @@ const StoryMapHome = observer(() => {
             需求池
           </Button>
         )}
-        <Button onClick={toggleFullScreen} icon={isFullScreen ? 'fullscreen_exit' : 'zoom_out_map'}>
+        <Button className="c7nagile-StoryMap-fullScreenBtn" onClick={() => { toggleFullScreen(); }} icon={isFullScreen ? 'fullscreen_exit' : 'zoom_out_map'}>
           {isFullScreen ? '退出全屏' : '全屏'}
         </Button>
         <HeaderLine />
         <SwitchSwimLine />
+        <StoryFilterDropDown />
+        <CheckBox name="hiddenColumn" onChange={handleCheckBoxChange}>隐藏无故事的列</CheckBox>
       </Header>
       <Breadcrumb />
       <Content style={{

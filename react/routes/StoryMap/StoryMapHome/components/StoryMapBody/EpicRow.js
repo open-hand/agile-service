@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { observer } from 'mobx-react';
+import { toJS } from 'mobx';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import EpicCell from './EpicCell';
 

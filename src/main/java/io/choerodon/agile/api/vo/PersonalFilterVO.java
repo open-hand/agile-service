@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author shinan.chen
@@ -9,12 +11,14 @@ import io.swagger.annotations.ApiModelProperty;
 public class PersonalFilterVO {
 
     @ApiModelProperty(value = "主键id")
+    @Encrypt
     private Long filterId;
 
     @ApiModelProperty(value = "项目id")
     private Long projectId;
 
     @ApiModelProperty(value = "用户id")
+    @Encrypt
     private Long userId;
 
     @ApiModelProperty(value = "过滤名称")

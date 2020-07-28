@@ -154,7 +154,7 @@ public class UserServiceImpl implements UserService {
             return false;
         }
 
-        boolean  isProjectOwner = baseFeignClient.checkIsProjectOwner(projectId, userId).getBody();
+        boolean  isProjectOwner = baseFeignClient.checkIsProjectOwner(userId, projectId).getBody();
         if (ObjectUtils.isEmpty(isProjectOwner)) {
             return false;
         } else {

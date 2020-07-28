@@ -1,13 +1,16 @@
 import React, { Component, Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
 import {
-  Page, Header, Content, stores, Breadcrumb, Choerodon, Permission, axios,
+  Page, Header, Content, stores, Breadcrumb, Choerodon, Permission,
 } from '@choerodon/boot';
 import {
   Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
 } from 'choerodon-ui';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
+import {
+  sprintApi, issueApi, epicApi, issueTypeApi, statusApi, boardApi,
+} from '@/api';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
@@ -74,7 +77,7 @@ class ScrumBoardHome extends Component {
   getBoard = async () => {
     const { location } = this.props;
     const url = this.paramConverter(location.search);
-    const boardListData = await ScrumBoardStore.axiosGetBoardList();
+    const boardListData = await boardApi.loadAll();
     ScrumBoardStore.initBoardList(boardListData);
     const defaultBoard = boardListData.find(item => item.userDefault) || boardListData[0];
     if (defaultBoard.boardId) {
@@ -123,14 +126,13 @@ class ScrumBoardHome extends Component {
    * @memberof ScrumBoardHome
    */
   handleFinishSprint = async () => {
-    const sprintId = ScrumBoardStore.getSprintId;    
-    const completeMessage = await axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${sprintId}/names`);
-
+    const sprintId = ScrumBoardStore.getSprintId;
+    const completeMessage = await sprintApi.loadSprintAndCountIssue(sprintId);
     CloseSprint({
       completeMessage,
       sprintId,
       afterClose: async () => {
-        const axiosGetSprintNotClosed = axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/names`, ['sprint_planning', 'started']);
+        const axiosGetSprintNotClosed = sprintApi.loadSprints(['sprint_planning', 'started']);
         await axiosGetSprintNotClosed.then((res) => {
           ScrumBoardStore.setSprintNotClosedArray(res);
           ScrumBoardStore.setSelectSprint(undefined);
@@ -144,12 +146,12 @@ class ScrumBoardHome extends Component {
 
   changeState = (name, value) => {
     if (name === 'judgeUpdateParent') {
-      ScrumBoardStore.loadTransforms(value.statusId, value.id, value.typeId).then((types) => {
+      statusApi.loadTransformStatusByIssue(value.statusId, value.id, value.typeId).then((types) => {
         this.matchStatus(types);
         this.setState({
           [name]: value,
         });
-      }).catch((e) => {
+      }).catch(() => {
         Choerodon.prompt('查询状态失败，请重试！');
       });
     }
@@ -179,17 +181,16 @@ class ScrumBoardHome extends Component {
       return;
     }
 
-    const [startStatus, startColumn] = source.droppableId.split(['/']).map(id => parseInt(id, 10));
+    const [startStatus, startColumn] = source.droppableId.split(['/']);
     const startStatusIndex = source.index;
 
-    const [destinationStatus, destinationColumn] = destination.droppableId.split(['/']).map(id => parseInt(id, 10));
+    const [destinationStatus, destinationColumn] = destination.droppableId.split(['/']);
     const destinationStatusIndex = destination.index;
 
     const issue = {
-      ...allDataMap.get(+issueId),
+      ...allDataMap.get(issueId),
       stayDay: 0,
     };
-
     const [type, parentId] = SwimLaneId.split('-');
 
     ScrumBoardStore.updateIssue(issue, startStatus, startStatusIndex, destinationStatus, destinationStatusIndex, SwimLaneId).then((data) => {
@@ -198,7 +199,7 @@ class ScrumBoardHome extends Component {
         ScrumBoardStore.setSwimLaneData(SwimLaneId, startStatus, startStatusIndex, SwimLaneId, destinationStatus, destinationStatusIndex, issue, true);
       } else {
         if (ScrumBoardStore.getSwimLaneCode === 'parent_child' && parentId !== 'other') {
-          ScrumBoardStore.judgeMoveParentToDone(destinationStatus, SwimLaneId, +parentId, ScrumBoardStore.getStatusMap.get(destinationStatus).categoryCode === 'done');
+          ScrumBoardStore.judgeMoveParentToDone(destinationStatus, SwimLaneId, parentId, ScrumBoardStore.getStatusMap.get(destinationStatus).categoryCode === 'done');
         }
         if (data.issueId === ScrumBoardStore.getCurrentClickId) {
           ScrumBoardStore.editRef.current.loadIssueDetail();
@@ -215,7 +216,7 @@ class ScrumBoardHome extends Component {
 
   refresh(defaultBoard, url, boardListData) {
     ScrumBoardStore.setSpinIf(true);
-    Promise.all([ScrumBoardStore.axiosGetIssueTypes(), ScrumBoardStore.axiosGetStateMachine(), ScrumBoardStore.axiosGetBoardData(defaultBoard.boardId), ScrumBoardStore.axiosGetAllEpicData()]).then(([issueTypes, stateMachineMap, defaultBoardData, epicData]) => {
+    Promise.all([issueTypeApi.loadAllWithStateMachineId(), statusApi.loadAllTransformForAllIssueType(), ScrumBoardStore.axiosGetBoardData(defaultBoard.boardId), epicApi.loadEpics()]).then(([issueTypes, stateMachineMap, defaultBoardData, epicData]) => {
       this.dataConverter.setSourceData(epicData, defaultBoardData);
       const renderDataMap = new Map([
         ['parent_child', this.dataConverter.getParentWithSubData],
@@ -303,14 +304,14 @@ class ScrumBoardHome extends Component {
     } = this.state;
     const menu = AppState.currentMenuType;
     const { type, id: projectId, organizationId: orgId } = menu;
-    const currentSprintIsDoing = ScrumBoardStore.didCurrentSprintExist && ScrumBoardStore.sprintNotClosedArray.find(item => item.statusCode === 'started' && item.sprintId === ScrumBoardStore.sprintId); 
+    const currentSprintIsDoing = ScrumBoardStore.didCurrentSprintExist && ScrumBoardStore.sprintNotClosedArray.find(item => item.statusCode === 'started' && item.sprintId === ScrumBoardStore.sprintId);
     return (
       <Fragment>
-        <Header title="活跃冲刺">         
+        <Header title="活跃冲刺">
           <Select
             ref={(SelectBoard) => { this.SelectBoard = SelectBoard; }}
             className="SelectTheme primary autoWidth"
-              // value={ScrumBoardStore.getBoardList && ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard)}
+            // value={ScrumBoardStore.getBoardList && ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard)}
             value={ScrumBoardStore.getSelectedBoard}
             style={{
               marginRight: 15, fontWeight: 500, lineHeight: '28px',
@@ -320,7 +321,6 @@ class ScrumBoardHome extends Component {
               width: 200,
             }}
             onChange={(value) => {
-              // console.log('sleee', value, ScrumBoardStore.getBoardList.get(value));
               const selectedBoard = ScrumBoardStore.getBoardList.get(value);
               ScrumBoardStore.setSelectedBoard(value);
               ScrumBoardStore.setSwimLaneCode(selectedBoard.userDefaultBoard);
@@ -334,16 +334,16 @@ class ScrumBoardHome extends Component {
               </Permission>
             )}
           >
-  
+
             {// ScrumBoardStore.getSpinIf
-                [...ScrumBoardStore.getBoardList.values()].map(item => (
-                  <Option key={item.boardId} value={item.boardId}>
-                    <Tooltip title={item.name}>
-                      {item.name}
-                    </Tooltip>
-                  </Option>
-                ))
-              }
+              [...ScrumBoardStore.getBoardList.values()].map(item => (
+                <Option key={item.boardId} value={item.boardId}>
+                  <Tooltip title={item.name}>
+                    {item.name}
+                  </Tooltip>
+                </Option>
+              ))
+            }
           </Select>
           <ScrumBoardFullScreen />
           <HeaderLine />
@@ -363,25 +363,25 @@ class ScrumBoardHome extends Component {
           </Button>
           {
             currentSprintIsDoing && (
-            <Fragment>             
-              {this.renderRemainDate()}
-              <Permission
-                service={['choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish']}
-              >
-                <Button
-                  style={{
-                    marginLeft: 15,
-                  }}
-                  icon="alarm_on"
-                  onClick={this.handleFinishSprint}
+              <Fragment>
+                {this.renderRemainDate()}
+                <Permission
+                  service={['choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish']}
                 >
-                  完成冲刺
-                </Button>
-              </Permission>
-              {this.renderSwitchMode()}
-            </Fragment>
+                  <Button
+                    style={{
+                      marginLeft: 15,
+                    }}
+                    icon="alarm_on"
+                    onClick={this.handleFinishSprint}
+                  >
+                    完成冲刺
+                  </Button>
+                </Permission>
+                {this.renderSwitchMode()}
+              </Fragment>
             )
-          }          
+          }
         </Header>
         <Breadcrumb />
         <Content style={{ padding: 0, display: 'flex', flexDirection: 'column' }}>
@@ -425,7 +425,7 @@ class ScrumBoardHome extends Component {
               />
             </div>
           </Spin>
-        </Content>        
+        </Content>
         {
           ScrumBoardStore.getUpdateParent ? (
             <Modal
@@ -443,10 +443,10 @@ class ScrumBoardHome extends Component {
                   objectVersionNumber: ScrumBoardStore.getUpdatedParentIssue.objectVersionNumber,
                   transformId: updateParentStatus || ScrumBoardStore.getTransformToCompleted[0].id,
                 };
-                ScrumBoardStore.axiosUpdateIssue(data).then((res) => {
+                issueApi.updateStatus(data).then((res) => {
                   ScrumBoardStore.setUpdateParent(false);
                   this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
-                }).catch((error) => {
+                }).catch(() => {
                 });
               }}
               disableOk={!ScrumBoardStore.getTransformToCompleted.length}

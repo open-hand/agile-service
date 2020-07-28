@@ -9,9 +9,9 @@ import {
 } from '@choerodon/boot';
 import { find } from 'lodash';
 import { getProjectId, getOrganizationId } from '@/utils/common';
-import { batchUpdateIssue } from '@/api/NewIssueApi';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import WSProvider from '@choerodon/master/lib/containers/components/c7n/tools/ws/WSProvider';
+import { fieldApi } from '@/api';
 import useFields from './useFields';
 import renderField from './renderField';
 import styles from './index.less';
@@ -146,10 +146,16 @@ function BatchModal({
   const [fields, Field] = useFields();
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const userFields = fieldData.filter(field => field.fieldType === 'member').map(field => ({
+    name: field.code,
+    type: 'string',
+    textField: 'realName',
+    valueField: 'id',
+  }));
   const dataSet = useMemo(() => new DataSet({
     fields: [{
       name: 'statusId',
-      type: 'number',
+      type: 'string',
       label: '状态',
       lookupAxiosConfig: () => ({
         url: `/agile/v1/projects/${getProjectId()}/schemes/query_status_by_project_id?apply_type=${'agile'}`,
@@ -159,7 +165,7 @@ function BatchModal({
       textField: 'name',
     }, {
       name: 'sprintId',
-      type: 'number',
+      type: 'string',
       label: '冲刺',
       lookupAxiosConfig: () => ({
         url: `/agile/v1/projects/${getProjectId()}/sprint/names`,
@@ -171,17 +177,13 @@ function BatchModal({
     },
     ...isInProgram ? [{
       name: 'featureId',
-      type: 'number',
+      type: 'string',
       label: '所属特性',
-      lookupAxiosConfig: () => ({
-        url: `/agile/v1/projects/${getProjectId()}/issues/feature/select_data?organizationId=${getOrganizationId()}`,
-        method: 'get',
-      }),
       valueField: 'issueId',
       textField: 'summary',
     }] : [{
       name: 'epicId',
-      type: 'number',
+      type: 'string',
       label: '所属史诗',
       lookupAxiosConfig: () => ({
         url: `/agile/v1/projects/${getProjectId()}/issues/epics/select_data`,
@@ -191,7 +193,7 @@ function BatchModal({
       textField: 'epicName',
     }], {
       name: 'priorityId',
-      type: 'number',
+      type: 'string',
       label: '优先级',
       lookupAxiosConfig: () => ({
         url: `/agile/v1/projects/${getProjectId()}/priority/list_by_org`,
@@ -265,7 +267,7 @@ function BatchModal({
       }),
       valueField: 'versionId',
       textField: 'name',
-    }],
+    }, ...userFields],
   }), []);
   const getData = () => {
     const temp = dataSet.current ? dataSet.current.toData() : {};
@@ -281,7 +283,7 @@ function BatchModal({
     const data = getData();
     const issueIds = tableDataSet.selected.map(record => record.get('issueId'));
     const res = { issueIds, ...formatFields(fieldData, data, dataSet) };
-    await batchUpdateIssue(res);
+    await fieldApi.batchUpdateIssue(res);
     setLoading(true);
   };
 
@@ -371,7 +373,7 @@ function BatchModal({
       </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button onClick={onCancel}>取消</Button>
+        <Button onClick={onCancel} disabled={loading}>取消</Button>
         <Button
           disabled={Object.keys(getData()).length === 0}
           color="blue"
@@ -389,7 +391,7 @@ function BatchModal({
     <div style={{ padding: 15 }}>
       <WSProvider server={Choerodon.WEBSOCKET_SERVER}>
         <WSHandler
-          messageKey="agile-batch-update-field"
+          messageKey={`agile-batch-update-field-${getProjectId()}`}
           onMessage={handleMessage}
         >
           {render()}

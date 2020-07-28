@@ -111,4 +111,25 @@
         )
         AND adl.field IN ('summary', 'description', 'Attachment')
     </select>
+
+    <select id="selectResolutionIssueBySprint" resultType="io.choerodon.agile.infra.dto.DataLogDTO">
+        SELECT
+            adl.log_id,
+            adl.new_value,
+            adl.creation_date,
+            adl.created_by,
+            adl.issue_id
+        FROM
+            agile_data_log adl
+        WHERE
+        adl.project_id = #{projectId}
+        AND adl.issue_id IN
+        <foreach collection="issueIdList" open="(" close=")" item="issueId" separator=",">
+            #{issueId}
+        </foreach>
+        AND field = #{field}
+        AND adl.creation_date >= #{startDate}
+        AND adl.creation_date &lt;= #{endDate}
+        AND adl.new_value IS NOT NULL
+    </select>
 </mapper>

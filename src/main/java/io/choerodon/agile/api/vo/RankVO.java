@@ -1,5 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/6/24.
  * Email: fuqianghuang01@gmail.com
@@ -12,8 +15,10 @@ public class RankVO {
 
     private Boolean before;
 
+    @Encrypt
     private Long referenceIssueId;
 
+    @Encrypt
     private Long issueId;
 
     private Long objectVersionNumber;

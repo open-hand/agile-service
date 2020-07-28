@@ -1,5 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.util.List;
 
 /**
@@ -8,9 +11,9 @@ import java.util.List;
  */
 
 public class ColumnAndIssueDTO {
-
+    @Encrypt
     private Long columnId;
-
+    @Encrypt
     private Long boardId;
 
     private Long minNum;

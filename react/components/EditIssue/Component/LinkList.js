@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Icon, Popconfirm, Tooltip } from 'choerodon-ui';
+import { issueLinkApi, featureApi } from '@/api';
 import UserHead from '../../UserHead';
-import { deleteLink, deleteFeatureLink } from '../../../api/NewIssueApi';
 import PriorityTag from '../../PriorityTag';
 import StatusTag from '../../StatusTag';
 import TypeTag from '../../TypeTag';
@@ -15,12 +15,12 @@ class LinkList extends Component {
     const { onRefresh, issue } = this.props;
     const { typeCode } = issue;
     if (typeCode !== 'feature') {
-      deleteLink(linkId)
+      issueLinkApi.delete(linkId)
         .then(() => {
           onRefresh();
         });
     } else {
-      deleteFeatureLink(linkId)
+      featureApi.deleteLink(linkId)
         .then(() => {
           onRefresh();
         });
@@ -34,10 +34,12 @@ class LinkList extends Component {
     } = this.props;
 
     const { typeCode } = issue;
-
     let deleteTipTitle = '确认要删除该问题链接吗？';
     if (type === 'test') {
       deleteTipTitle = '确认要删除该测试用例吗?';
+    }
+    if (typeCode !== 'feature') {
+      deleteTipTitle = '确认删除该问题的关联关系吗?';
     } else {
       deleteTipTitle = '确认要删除该特性关联关系吗?';
     }
@@ -50,7 +52,7 @@ class LinkList extends Component {
           padding: '5px 0',
           cursor: 'pointer',
           borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-          borderTop: !i ? '1px solid rgba(0, 0, 0, 0.12)' : '',   
+          borderTop: !i ? '1px solid rgba(0, 0, 0, 0.12)' : '',
         }}
       >
         <Tooltip mouseEnterDelay={0.5} title={`任务类型： ${issue.typeCode}`}>
@@ -62,13 +64,13 @@ class LinkList extends Component {
         </Tooltip>
         <Tooltip title={`编号概要： ${issue.issueNum} ${issue.summary}`}>
           <div style={{
-            marginLeft: 8, marginRight: 12, flex: 1, overflow: 'hidden', 
+            marginLeft: 8, marginRight: 12, flex: 1, overflow: 'hidden',
           }}
           >
             <p
               className="primary"
               style={{
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, 
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
               }}
               role="none"
               onClick={() => {
@@ -81,43 +83,43 @@ class LinkList extends Component {
         </Tooltip>
         {
           typeCode !== 'feature' && (
-          <div style={{ marginRight: '8px', overflow: 'hidden' }}>
-            <Tooltip mouseEnterDelay={0.5} title={`优先级： ${issue.priorityVO.name}`}>
-              <div>
-                <PriorityTag
-                  priority={issue.priorityVO}
-                />
-              </div>
-            </Tooltip>
-          </div>
+            <div style={{ marginRight: '8px', overflow: 'hidden' }}>
+              <Tooltip mouseEnterDelay={0.5} title={`优先级： ${issue.priorityVO.name}`}>
+                <div>
+                  <PriorityTag
+                    priority={issue.priorityVO}
+                  />
+                </div>
+              </Tooltip>
+            </div>
           )
         }
         {
           typeCode === 'feature' && (
-          <div style={{ marginRight: '8px', overflow: 'hidden' }}>
-            <Tooltip mouseEnterDelay={0.5} title={`wsjf：${issue.wsjf}`}>
-              <span style={{
-                width: '30px',
-                height: '20px',
-                backgroundColor: '#EBEBEB',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '2px',
-                color: 'rgba(0, 0, 0, 0.85)',
-              }}
-              >
-                {(issue.wsjf || issue.wsjf === 0) ? issue.wsjf : '无'}
-              </span>
-            </Tooltip>
-          </div>
+            <div style={{ marginRight: '8px', overflow: 'hidden' }}>
+              <Tooltip mouseEnterDelay={0.5} title={`wsjf：${issue.wsjf}`}>
+                <span style={{
+                  width: '30px',
+                  height: '20px',
+                  backgroundColor: '#EBEBEB',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '2px',
+                  color: 'rgba(0, 0, 0, 0.85)',
+                }}
+                >
+                  {(issue.wsjf || issue.wsjf === 0) ? issue.wsjf : '无'}
+                </span>
+              </Tooltip>
+            </div>
           )
         }
         {
           typeCode !== 'feature' && showAssignee ? (
             <Tooltip mouseEnterDelay={0.5} title={`经办人： ${issue.assigneeName}`}>
               <div style={{
-                marginRight: 29, display: 'flex', justifyContent: 'flex-end', 
+                marginRight: 29, display: 'flex', justifyContent: 'flex-end',
               }}
               >
                 <div>
@@ -140,7 +142,7 @@ class LinkList extends Component {
           )
         } */}
         <div style={{
-          width: '48px', marginRight: '8px', display: 'flex', justifyContent: 'flex-end', 
+          width: '48px', marginRight: '8px', display: 'flex', justifyContent: 'flex-end',
         }}
         >
           <Tooltip mouseEnterDelay={0.5} title={`任务状态： ${typeCode !== 'feature' ? (issue.statusVO && issue.statusVO.name) : (issue.statusMapVO && issue.statusMapVO.name)}`}>

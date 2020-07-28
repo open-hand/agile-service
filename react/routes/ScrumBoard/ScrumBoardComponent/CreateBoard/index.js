@@ -3,11 +3,12 @@ import {
   Form, TextField, DataSet,
 } from 'choerodon-ui/pro';
 import { inject } from 'mobx-react';
-import { axios, Choerodon } from '@choerodon/boot';
+import { Choerodon } from '@choerodon/boot';
+import { boardApi } from '@/api';
 
 export default inject('AppState')(({ AppState, modal: { handleOk, close }, onCreate }) => {
   async function nameValidator(value, name, record) {
-    const isSame = await axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/board/check_name?boardName=${value}`);
+    const isSame = await boardApi.checkName(value);
     return isSame ? '看板名称已存在' : true;
   }
   const dataSet = useMemo(() => new DataSet({
@@ -22,7 +23,7 @@ export default inject('AppState')(({ AppState, modal: { handleOk, close }, onCre
     const isValidate = await dataSet.validate();
     if (isValidate) {
       const [values] = dataSet.toData();
-      const board = await axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/board?boardName=${values.name}`);
+      const board = await boardApi.create(values.name);
       if (!board.failed) {
         onCreate(board);
         close();

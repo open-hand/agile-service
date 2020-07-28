@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
+
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.SprintService;
@@ -8,11 +10,12 @@ import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,7 +64,7 @@ public class SprintController {
     public ResponseEntity<SprintDetailVO> updateSprint(@ApiParam(value = "项目id", required = true)
                                                        @PathVariable(name = "project_id") Long projectId,
                                                        @ApiParam(value = "冲刺DTO对象", required = true)
-                                                       @RequestBody @Valid SprintUpdateVO sprintUpdateVO) {
+                                                       @RequestBody @Valid  SprintUpdateVO sprintUpdateVO) {
         return Optional.ofNullable(sprintService.updateSprint(projectId, sprintUpdateVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException(UPDATE_ERROR));
@@ -73,7 +76,7 @@ public class SprintController {
     public ResponseEntity<Boolean> deleteSprint(@ApiParam(value = "项目id", required = true)
                                                 @PathVariable(name = "project_id") Long projectId,
                                                 @ApiParam(value = "sprintId", required = true)
-                                                @PathVariable Long sprintId) {
+                                                @PathVariable @Encrypt Long sprintId) {
         return Optional.ofNullable(sprintService.deleteSprint(projectId, sprintId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.NO_CONTENT))
                 .orElseThrow(() -> new CommonException(DELETE_ERROR));
@@ -89,9 +92,10 @@ public class SprintController {
                                                                 @ApiParam(value = "查询参数", required = false)
                                                                 @RequestBody(required = false) Map<String, Object> searchParamMap,
                                                                 @ApiParam(value = "quick filter")
-                                                                @RequestParam(required = false) List<Long> quickFilterIds,
+                                                                @RequestParam(required = false) @Encrypt List<Long> quickFilterIds,
                                                                 @ApiParam(value = "经办人搜索", required = false)
-                                                                @RequestParam(required = false) List<Long> assigneeFilterIds) {
+                                                                @RequestParam(required = false) @Encrypt List<Long> assigneeFilterIds) {
+        EncryptionUtils.decryptSearchParamMap(searchParamMap);
         return Optional.ofNullable(sprintService.queryByProjectId(projectId, searchParamMap, quickFilterIds, organizationId, assigneeFilterIds))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(QUERY_ERROR));
@@ -115,7 +119,7 @@ public class SprintController {
     public ResponseEntity<SprintDetailVO> startSprint(@ApiParam(value = "项目id", required = true)
                                                       @PathVariable(name = "project_id") Long projectId,
                                                       @ApiParam(value = "冲刺DTO对象", required = true)
-                                                      @RequestBody @Valid SprintUpdateVO sprintUpdateVO) {
+                                                      @RequestBody @Valid  SprintUpdateVO sprintUpdateVO) {
         return Optional.ofNullable(sprintService.startSprint(projectId, sprintUpdateVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(OPEN_ERROR));
@@ -139,7 +143,7 @@ public class SprintController {
     public ResponseEntity<SprintCompleteMessageVO> queryCompleteMessageBySprintId(@ApiParam(value = "项目id", required = true)
                                                                                   @PathVariable(name = "project_id") Long projectId,
                                                                                   @ApiParam(value = "冲刺id", required = true)
-                                                                                  @PathVariable Long sprintId) {
+                                                                                  @PathVariable @Encrypt Long sprintId) {
         return Optional.ofNullable(sprintService.queryCompleteMessageBySprintId(projectId, sprintId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(QUERY_SPRINT_MESSAGE_ERROR));
@@ -151,7 +155,7 @@ public class SprintController {
     public ResponseEntity<SprintDetailVO> querySprintById(@ApiParam(value = "项目id", required = true)
                                                           @PathVariable(name = "project_id") Long projectId,
                                                           @ApiParam(value = "冲刺id", required = true)
-                                                          @PathVariable Long sprintId) {
+                                                          @PathVariable @Encrypt Long sprintId) {
         return Optional.ofNullable(sprintService.querySprintById(projectId, sprintId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(QUERY_ERROR));
@@ -164,7 +168,7 @@ public class SprintController {
     public ResponseEntity<Page<IssueListVO>> queryIssueByOptions(@ApiParam(value = "项目id", required = true)
                                                                      @PathVariable(name = "project_id") Long projectId,
                                                                  @ApiParam(value = "冲刺id", required = true)
-                                                                     @PathVariable Long sprintId,
+                                                                     @PathVariable @Encrypt Long sprintId,
                                                                  @ApiParam(value = "状态", required = true)
                                                                      @RequestParam String status,
                                                                  @ApiParam(value = "组织id", required = true)
@@ -215,7 +219,7 @@ public class SprintController {
     public ResponseEntity<List<String>> queryNonWorkdays(@ApiParam(value = "项目id", required = true)
                                                          @PathVariable(name = "project_id") Long projectId,
                                                          @ApiParam(value = "冲刺", required = true)
-                                                         @PathVariable(name = "sprint_id") Long sprintId,
+                                                         @PathVariable(name = "sprint_id") @Encrypt Long sprintId,
                                                          @ApiParam(value = "组织id", required = true)
                                                          @PathVariable(name = "organization_id") Long organizationId) {
         return Optional.ofNullable(sprintService.queryNonWorkdays(projectId, sprintId, organizationId))

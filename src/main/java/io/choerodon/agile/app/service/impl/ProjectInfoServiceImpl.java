@@ -69,17 +69,6 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
         return modelMapper.map(projectInfoMapper.selectOne(projectInfoDTO), ProjectInfoVO.class);
     }
 
-    @Override
-    public List<ProjectRelationshipVO> queryProgramTeamInfo(Long projectId) {
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        List<ProjectRelationshipVO> projectRelationshipVOS = baseFeignClient.getProjUnderGroup(organizationId, projectId, true).getBody();
-        for (ProjectRelationshipVO relationshipVO : projectRelationshipVOS) {
-            Page<UserWithRoleVO> users = baseFeignClient.pagingQueryUsersWithProjectLevelRoles(0, 0, relationshipVO.getProjectId(), new RoleAssignmentSearchVO(), false).getBody();
-            relationshipVO.setUserCount(users.getSize());
-        }
-        return projectRelationshipVOS;
-    }
-
     /**
      * 更新MaxNum方法，在高并发的情况下，可能更新的maxNum已经不是最大的maxNum，因此不需要判断是否更新成功
      *

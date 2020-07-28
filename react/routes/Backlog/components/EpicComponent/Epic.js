@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Icon } from 'choerodon-ui';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
+import { issueApi, epicApi } from '@/api';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 import EpicItem from './EpicItem';
 import './Epic.less';
@@ -21,7 +22,7 @@ class Epic extends Component {
   }
 
   epicRefresh = () => {
-    Promise.all([BacklogStore.axiosGetEpic(), BacklogStore.axiosGetColorLookupValue()]).then(([epicList, lookupValues]) => {
+    Promise.all([epicApi.loadEpics(), BacklogStore.axiosGetColorLookupValue()]).then(([epicList, lookupValues]) => {
       BacklogStore.initEpicList(epicList, lookupValues);
     });
   };
@@ -76,18 +77,6 @@ class Epic extends Component {
             </div>
           </div>
           <div className="c7n-backlog-epicChoice">
-            <div
-              className="c7n-backlog-epicItems-first primary"
-              style={{                
-                background: BacklogStore.getChosenEpic === 'all' ? 'rgba(140, 158, 254, 0.16)' : '',
-              }}
-              role="none"
-              onClick={() => {
-                this.handleClickEpic('all');
-              }}
-            >
-              所有问题
-            </div>
             <DragDropContext
               onDragEnd={(result) => {
                 const { destination, source } = result;
@@ -144,7 +133,7 @@ class Epic extends Component {
                 if (BacklogStore.getIsDragging) {
                   BacklogStore.toggleIssueDrag(false);
                   e.currentTarget.style.border = 'none';
-                  BacklogStore.axiosUpdateIssuesToEpic(
+                  epicApi.addIssues(
                     0, BacklogStore.getIssueWithEpicOrVersion,
                   ).then(() => {
                     issueRefresh();

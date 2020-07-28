@@ -3,6 +3,7 @@ package io.choerodon.agile.api.vo;
 import io.choerodon.agile.infra.feign.vo.ProjectCategoryDTO;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class ProjectVO {
     @ApiModelProperty(value = "版本号")
     private String category;
     @ApiModelProperty("创建人")
+    @Encrypt
     private Long createdBy;
 
     public Long getId() {

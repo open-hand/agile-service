@@ -3,19 +3,20 @@ package io.choerodon.agile.api.controller.v1;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.ProductVersionService;
+
 import io.choerodon.agile.infra.utils.VerifyUpdateUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
-import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.CustomPageRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -73,7 +74,7 @@ public class ProductVersionController {
     public ResponseEntity<ProductVersionDetailVO> updateVersion(@ApiParam(value = "项目id", required = true)
                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                 @ApiParam(value = "versionId", required = true)
-                                                                 @PathVariable Long versionId,
+                                                                 @PathVariable @Encrypt Long versionId,
                                                                 @ApiParam(value = "version信息", required = true)
                                                                  @RequestBody JSONObject versionUpdateDTO) {
         ProductVersionUpdateVO productVersionUpdate = new ProductVersionUpdateVO();
@@ -89,9 +90,9 @@ public class ProductVersionController {
     public ResponseEntity<Boolean> deleteVersion(@ApiParam(value = "项目id", required = true)
                                                  @PathVariable(name = "project_id") Long projectId,
                                                  @ApiParam(value = "versionId", required = true)
-                                                 @PathVariable Long versionId,
+                                                 @PathVariable @Encrypt Long versionId,
                                                  @ApiParam(value = "更改的目标版本")
-                                                 @RequestParam(required = false, name = "targetVersionId") Long targetVersionId) {
+                                                 @RequestParam(required = false, name = "targetVersionId") @Encrypt Long targetVersionId) {
         return Optional.ofNullable(productVersionService.deleteVersion(projectId, versionId, targetVersionId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.NO_CONTENT))
                 .orElseThrow(() -> new CommonException(DELETE_ERROR));
@@ -141,7 +142,7 @@ public class ProductVersionController {
     public ResponseEntity<ProductVersionStatisticsVO> queryVersionStatisticsByVersionId(@ApiParam(value = "项目id", required = true)
                                                                                          @PathVariable(name = "project_id") Long projectId,
                                                                                         @ApiParam(value = "versionId", required = true)
-                                                                                         @PathVariable Long versionId) {
+                                                                                         @PathVariable @Encrypt Long versionId) {
         return Optional.ofNullable(productVersionService.queryVersionStatisticsByVersionId(projectId, versionId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(VERSION_STATISTICS_ERROR));
@@ -153,7 +154,7 @@ public class ProductVersionController {
     public ResponseEntity<VersionMessageVO> queryReleaseMessageByVersionId(@ApiParam(value = "项目id", required = true)
                                                                             @PathVariable(name = "project_id") Long projectId,
                                                                            @ApiParam(value = "versionId", required = true)
-                                                                            @PathVariable Long versionId) {
+                                                                            @PathVariable @Encrypt Long versionId) {
         return Optional.ofNullable(productVersionService.queryReleaseMessageByVersionId(projectId, versionId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(QUERY_PLAN_VERSION_NAME_ERROR));
@@ -177,7 +178,7 @@ public class ProductVersionController {
     public ResponseEntity<ProductVersionDetailVO> revokeReleaseVersion(@ApiParam(value = "项目id", required = true)
                                                                         @PathVariable(name = "project_id") Long projectId,
                                                                        @ApiParam(value = "版本id", required = true)
-                                                                        @PathVariable Long versionId) {
+                                                                        @PathVariable @Encrypt Long versionId) {
         return Optional.ofNullable(productVersionService.revokeReleaseVersion(projectId, versionId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(REVOKE_RELEASE_ERROR));
@@ -189,7 +190,7 @@ public class ProductVersionController {
     public ResponseEntity<ProductVersionDetailVO> archivedVersion(@ApiParam(value = "项目id", required = true)
                                                                    @PathVariable(name = "project_id") Long projectId,
                                                                   @ApiParam(value = "版本id", required = true)
-                                                                   @PathVariable Long versionId) {
+                                                                   @PathVariable @Encrypt Long versionId) {
         return Optional.ofNullable(productVersionService.archivedVersion(projectId, versionId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(ARCHIVED_ERROR));
@@ -202,7 +203,7 @@ public class ProductVersionController {
     public ResponseEntity<ProductVersionDetailVO> revokeArchivedVersion(@ApiParam(value = "项目id", required = true)
                                                                          @PathVariable(name = "project_id") Long projectId,
                                                                         @ApiParam(value = "版本id", required = true)
-                                                                         @PathVariable Long versionId) {
+                                                                         @PathVariable @Encrypt Long versionId) {
         return Optional.ofNullable(productVersionService.revokeArchivedVersion(projectId, versionId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(REVOKE_ARCHIVED_ERROR));
@@ -214,7 +215,7 @@ public class ProductVersionController {
     public ResponseEntity<VersionMessageVO> queryDeleteMessageByVersionId(@ApiParam(value = "项目id", required = true)
                                                                            @PathVariable(name = "project_id") Long projectId,
                                                                           @ApiParam(value = "versionId", required = true)
-                                                                           @PathVariable Long versionId) {
+                                                                           @PathVariable @Encrypt Long versionId) {
         return Optional.ofNullable(productVersionService.queryDeleteMessageByVersionId(projectId, versionId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException(QUERY_VERSION_NAME_ERROR));

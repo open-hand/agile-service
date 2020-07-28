@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.List;
 public class ProductVersionStatisticsVO {
 
     @ApiModelProperty(value = "版本主键id")
+    @Encrypt
     private Long versionId;
 
     @ApiModelProperty(value = "版本名称")

@@ -1,5 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.util.List;
 
 /**
@@ -8,20 +11,25 @@ import java.util.List;
  */
 public class StoryMapStoryVO {
 
+    @Encrypt
     private Long issueId;
 
     private String issueNum;
 
     private String summary;
 
+    @Encrypt
     private Long epicId;
 
+    @Encrypt
     private Long featureId;
 
     private Boolean completed;
 
+    @Encrypt
     private Long issueTypeId;
 
+    @Encrypt
     private Long statusId;
 
     private IssueTypeVO issueTypeVO;

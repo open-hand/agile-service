@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ public class ProgramBoardFilterVO {
     @ApiModelProperty(value = "只显示有依赖关系的公告板特性")
     private Boolean onlyDependFeature;
     @ApiModelProperty(value = "只筛选某些冲刺的公告板特性")
+    @Encrypt
     private List<Long> sprintIds;
     @ApiModelProperty(value = "只筛选某些团队的公告板特性")
     private List<Long> teamProjectIds;

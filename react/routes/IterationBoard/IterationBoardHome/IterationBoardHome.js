@@ -6,7 +6,7 @@ import {
 import {
   Row, Col, Radio, Tooltip, Icon,
 } from 'choerodon-ui';
-import { loadSprint } from '../../../api/NewIssueApi';
+import { sprintApi } from '@/api';
 import Assignee from '../IterationBoardComponent/Assignee';
 import BurnDown from '../IterationBoardComponent/BurnDown';
 import Sprint from '../IterationBoardComponent/Sprint';
@@ -39,7 +39,7 @@ class IterationBoardHome extends Component {
     const { match } = this.props;
     const sprintId = match.params.id;
     if (!sprintId) return;
-    loadSprint(sprintId)
+    sprintApi.loadSprint(sprintId)
       .then((res) => {
         this.setState({
           sprintId: res.sprintId,

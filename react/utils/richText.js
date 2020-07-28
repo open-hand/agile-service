@@ -2,7 +2,7 @@
 import { stores, Choerodon } from '@choerodon/boot';
 import { DeltaOperation } from 'react-quill';
 import _, { find, findIndex, chunk } from 'lodash';
-import { uploadImage, uploadFile } from '../api/FileApi';
+import { fileApi } from '@/api';
 
 const { AppState } = stores;
 const QuillDeltaToHtmlConverter = require('quill-delta-to-html');
@@ -72,7 +72,7 @@ export function beforeTextUpload(text, data, func, pro = 'description') {
   const send = data;
   const { imgBase, formData } = getImgInDelta(deltaOps);
   if (imgBase.length) {
-    uploadImage(formData).then((imgUrlList) => {
+    fileApi.uploadImage(formData).then((imgUrlList) => {
       replaceBase64ToUrl(imgUrlList, imgBase, deltaOps);
       const converter = new QuillDeltaToHtmlConverter(deltaOps, {});
       const html = converter.convert();
@@ -94,7 +94,7 @@ export function returnBeforeTextUpload(text, data, func, pro = 'description') {
   const send = data;
   const { imgBase, formData } = getImgInDelta(deltaOps);
   if (imgBase.length) {
-    return uploadImage(formData).then((imgUrlList) => {
+    return fileApi.uploadImage(formData).then((imgUrlList) => {
       replaceBase64ToUrl(imgUrlList, imgBase, deltaOps);
       const converter = new QuillDeltaToHtmlConverter(deltaOps, {});
       const html = converter.convert();
@@ -117,14 +117,14 @@ export function returnBeforeTextUpload(text, data, func, pro = 'description') {
  * @param {function} func 回调
  * @param {{issueType:string,issueId:number,fileName:string}} config 附件上传的额外信息
  */
-export function handleFileUpload(propFileList, func, config) {
+export function handleFileUpload(propFileList, func, config, projectId) {
   const fileList = propFileList.filter(i => !i.url);
   const formData = new FormData();
   fileList.forEach((file) => {
     // file.name = encodeURI(encodeURI(file.name));
     formData.append('file', file);
   });
-  uploadFile(formData, config)
+  fileApi.uploadFile(formData, config.issueId, projectId)
     .then((response) => {
       const newFileList = [
         {

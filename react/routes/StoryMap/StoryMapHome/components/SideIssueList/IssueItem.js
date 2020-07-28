@@ -5,8 +5,8 @@ import { Tooltip } from 'choerodon-ui';
 import { find } from 'lodash';
 import { DragSource } from 'react-dnd';
 import { issueLink } from '@/utils/link';
+import { storyMapApi } from '@/api';
 import TypeTag from '../../../../../components/TypeTag';
-import { storyMove } from '../../../../../api/StoryMapApi';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 
 import './IssueItem.less';
@@ -80,7 +80,7 @@ export default DragSource(
           storyMapDragVO.versionIssueRelVOList = storyMapVersionVOList.map(v => ({ ...v, issueId }));
         }
         // console.log(storyMapDragVO);
-        storyMove(storyMapDragVO).then(() => {
+        storyMapApi.move(storyMapDragVO).then(() => {
           // StoryMapStore.removeStoryFromStoryMap(story);
           StoryMapStore.getStoryMap();
           StoryMapStore.loadIssueList();

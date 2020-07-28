@@ -2,7 +2,6 @@
 import React, {
   useContext, useEffect, useState, Fragment,
 } from 'react';
-import { axios } from '@choerodon/boot';
 import queryString from 'querystring';
 import { withRouter } from 'react-router-dom';
 import {
@@ -15,6 +14,7 @@ import {
 import { observer } from 'mobx-react-lite';
 import IssueStore from '@/stores/project/issue/IssueStore';
 import { getParams } from '@/utils/link';
+import { quickFilterApi } from '@/api';
 import SummaryField from './custom-fields/field/SummaryField';
 import Store from '../../stores';
 import CustomFields from './custom-fields';
@@ -74,10 +74,7 @@ export default withRouter(observer(({
   const [selectedQuickFilters, setSelectedQuickFilters] = useState([]);
   const loadFilters = async () => {
     IssueStore.axiosGetMyFilterList();
-    const QuickFilters = await axios.post(`/agile/v1/projects/${projectId}/quick_filter/query_all`, {
-      contents: [],
-      filterName: '',
-    });
+    const QuickFilters = await quickFilterApi.loadAll();
     setQuickFilters(QuickFilters);
   };
 
@@ -100,14 +97,14 @@ export default withRouter(observer(({
   };
   const handleSelect = (v) => {
     const { key: k } = v;
-    const [type, id] = k.split('-');
+    const [type, id] = k.split('|');
     if (type === 'quick') {
       const newSelectedQuickFilters = [...selectedQuickFilters, v];
       setSelectedQuickFilters([...selectedQuickFilters, v]);
-      const quickFilterIds = newSelectedQuickFilters.map(filter => filter.key.split('-')[1]);
+      const quickFilterIds = newSelectedQuickFilters.map(filter => filter.key.split('|')[1]);
       IssueStore.handleFilterChange('quickFilterIds', quickFilterIds);
     } else if (type === 'my') {
-      const targetMyFilter = find(filters, { filterId: Number(id) });
+      const targetMyFilter = find(filters, { filterId: id });
       const filterObject = flattenObject(JSON.parse(targetMyFilter.filterJson));
       // 先清除筛选
       IssueStore.clearAllFilter();
@@ -136,7 +133,7 @@ export default withRouter(observer(({
       return;
     }
     const { key } = v;
-    const [type, id] = key.split('-');
+    const [type, id] = key.split('|');
     if (type === 'quick') {
       remove(selectedQuickFilters, { key });
       setSelectedQuickFilters([...selectedQuickFilters]);
@@ -144,7 +141,7 @@ export default withRouter(observer(({
       IssueStore.clearAllFilter();
       IssueStore.query();
     }
-    const quickFilterIds = selectedQuickFilters.map(filter => filter.key.split('-')[1]);
+    const quickFilterIds = selectedQuickFilters.map(filter => filter.key.split('|')[1]);
     IssueStore.handleFilterChange('quickFilterIds', quickFilterIds);
   };
   const isFilterSame = (obj, obj2) => {
@@ -166,7 +163,7 @@ export default withRouter(observer(({
   };
   const getMyFilterSelectValue = () => {
     const targetMyFilter = findSameFilter();
-    return targetMyFilter ? selectedQuickFilters.concat({ key: `my-${targetMyFilter.filterId}`, label: targetMyFilter.name }) : selectedQuickFilters;
+    return targetMyFilter ? selectedQuickFilters.concat({ key: `my|${targetMyFilter.filterId}`, label: targetMyFilter.name }) : selectedQuickFilters;
   };
   const handleClickSaveFilter = () => {
     IssueStore.setSaveFilterVisible(true);
@@ -211,13 +208,13 @@ export default withRouter(observer(({
             >
               <OptGroup key="quick" label="快速筛选">
                 {quickFilters.map(filter => (
-                  <Option value={`quick-${filter.filterId}`}>{filter.name}</Option>
+                  <Option value={`quick|${filter.filterId}`}>{filter.name}</Option>
                 ))}
               </OptGroup>
               <OptGroup key="my" label="我的筛选">
                 {
               filters.map(filter => (
-                <Option value={`my-${filter.filterId}`}>{filter.name}</Option>
+                <Option value={`my|${filter.filterId}`}>{filter.name}</Option>
               ))
             }
               </OptGroup>

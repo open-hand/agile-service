@@ -131,11 +131,14 @@ public class IssueComponentServiceImpl implements IssueComponentService {
 
     @Override
     public IssueComponentVO queryComponentsById(Long projectId, Long id) {
-        IssueComponentDTO issueComponentDTO = issueComponentMapper.selectByPrimaryKey(id);
-        if (issueComponentDTO == null) {
+        IssueComponentDTO issueComponentDTO = new IssueComponentDTO();
+        issueComponentDTO.setProjectId(projectId);
+        issueComponentDTO.setComponentId(id);
+        IssueComponentDTO issueComponent = issueComponentMapper.selectOne(issueComponentDTO);
+        if (issueComponent == null) {
             throw new CommonException("error.component.get");
         }
-        return modelMapper.map(issueComponentDTO, IssueComponentVO.class);
+        return modelMapper.map(issueComponent, IssueComponentVO.class);
     }
 
     @Override

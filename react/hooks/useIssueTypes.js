@@ -1,13 +1,13 @@
 import { createContext, useContext } from 'react';
 import { stores } from '@choerodon/boot';
-import { loadIssueTypes } from '@/api/NewIssueApi';
+import { issueTypeApi } from '@/api';
 
 const { AppState } = stores;
 const IssueTypeContext = createContext({
   data: [],
   refresh: async () => {
     const type = AppState.currentMenuType.category === 'PROGRAM' ? 'program' : 'agile';
-    const data = await loadIssueTypes(type);
+    const data = await issueTypeApi.loadAllWithStateMachineId(type);
     return data;
   },
 });

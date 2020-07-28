@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.dto;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.persistence.*;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
 public class StateMachineDTO extends AuditDomain {
     @Id
     @GeneratedValue
+    @Encrypt
     private Long id;
     private String name;
     private String description;

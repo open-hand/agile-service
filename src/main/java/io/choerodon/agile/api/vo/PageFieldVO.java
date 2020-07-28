@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author shinan.chen
@@ -8,10 +10,13 @@ import io.swagger.annotations.ApiModelProperty;
  */
 public class PageFieldVO {
     @ApiModelProperty(value = "id")
+    @Encrypt
     private Long id;
     @ApiModelProperty(value = "页面id")
+    @Encrypt
     private Long pageId;
     @ApiModelProperty(value = "字段id")
+    @Encrypt
     private Long fieldId;
     @ApiModelProperty(value = "是否显示")
     private Boolean display;

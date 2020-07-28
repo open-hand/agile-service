@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -165,6 +167,11 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         field.setContext(Arrays.asList(fieldCreateDTO.getContext()).stream().collect(Collectors.joining(",")));
         field.setOrganizationId(organizationId);
         field.setProjectId(projectId);
+
+        String defaultValue = tryDecryptDefaultValue(field.getDefaultValue());
+        if (defaultValue != null) {
+            field.setDefaultValue(defaultValue);
+        }
         field = baseCreate(field);
         //创建pageField
         if (projectId != null) {
@@ -202,6 +209,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                         fieldOption.setIsDefault(false);
                     }
                 });
+                List<String> encryptList = EncryptionUtils.encryptListToStr(defaultIds);
+                fieldDetailDTO.setDefaultValue(StringUtils.join(encryptList.toArray(),","));
             } else {
                 fieldOptions.forEach(fieldOption -> {
                     fieldOption.setIsDefault(false);
@@ -257,9 +266,22 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             }
             update.setContext(Arrays.asList(contexts).stream().collect(Collectors.joining(",")));
         }
+        String defaultValue = tryDecryptDefaultValue(update.getDefaultValue());
+        if (defaultValue != null) {
+            update.setDefaultValue(defaultValue);
+        }
         update.setId(fieldId);
         baseUpdate(update);
         return queryById(organizationId, projectId, fieldId);
+    }
+
+    private String tryDecryptDefaultValue(String defaultValue) {
+        try {
+            return EncryptionUtils.decrypt(defaultValue);
+        } catch (Exception e) {
+            //do nothing
+        }
+        return null;
     }
 
     @Override

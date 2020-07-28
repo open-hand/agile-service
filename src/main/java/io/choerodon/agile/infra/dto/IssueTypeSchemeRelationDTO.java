@@ -1,11 +1,14 @@
 package io.choerodon.agile.infra.dto;
 
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/11/29.
  * Email: fuqianghuang01@gmail.com
  */
 public class IssueTypeSchemeRelationDTO {
-
+    @Encrypt
     private Long issueTypeSchemeId;
 
     private String issueTypeSchemeName;

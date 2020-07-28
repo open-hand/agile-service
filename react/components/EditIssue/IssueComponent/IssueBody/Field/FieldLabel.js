@@ -1,29 +1,16 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
-import { Select } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
 import _ from 'lodash';
-import TextEditToggle from '../../../../TextEditToggle';
-import { loadLabels, updateIssue } from '../../../../../api/NewIssueApi';
+import { issueApi } from '@/api';
+import SelectLabel from '@/components/select/select-label';
+import TextEditToggle from '@/components/TextEditTogglePro';
 
-const { Option } = Select;
-const { Text, Edit } = TextEditToggle;
 
 @inject('AppState')
 @observer class FieldLabel extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      originLabels: [],
-      selectLoading: true,
-      newLabelIssueRelVOList: [],
-    };
-  }
-
-  componentDidMount() {
-    this.loadIssuePriorities();
-  }
+  dataRef = React.createRef();
 
   transToArr = (arr, pro, type = 'string') => {
     if (!arr.length) {
@@ -35,17 +22,9 @@ const { Text, Edit } = TextEditToggle;
     }
   };
 
-  loadIssuePriorities = () => {
-    loadLabels().then((res) => {
-      this.setState({
-        originLabels: res,
-        selectLoading: false,
-      });
-    });
-  };
-
-  updateIssuePriority = () => {
-    const { newLabelIssueRelVOList, originLabels } = this.state;
+  updateIssueLabel = (labels) => {
+    const newLabelIssueRelVOList = labels || [];
+    const originLabels = this.dataRef.current;
     const {
       store, onUpdate, reloadIssue, AppState,
     } = this.props;
@@ -69,7 +48,7 @@ const { Text, Edit } = TextEditToggle;
         objectVersionNumber,
         labelIssueRelVOList: labelList,
       };
-      updateIssue(obj)
+      issueApi.update(obj)
         .then(() => {
           if (onUpdate) {
             onUpdate();
@@ -77,13 +56,11 @@ const { Text, Edit } = TextEditToggle;
           if (reloadIssue) {
             reloadIssue(issueId);
           }
-          this.loadIssuePriorities();
         });
     }
   };
 
   render() {
-    const { selectLoading, originLabels } = this.state;
     const { store, disabled } = this.props;
     const issue = store.getIssue;
     const { labelIssueRelVOList = [] } = issue;
@@ -98,66 +75,40 @@ const { Text, Edit } = TextEditToggle;
         <div className="c7n-value-wrapper">
           <TextEditToggle
             disabled={disabled}
-            formKey="label"
-            onSubmit={this.updateIssuePriority}
-            originData={this.transToArr(labelIssueRelVOList, 'labelName', 'array')}
+            onSubmit={this.updateIssueLabel}
+            initValue={this.transToArr(labelIssueRelVOList, 'labelName', 'array')}
+            editor={() => <SelectLabel dataRef={this.dataRef} />}
           >
-            <Text>
-              {
-                labelIssueRelVOList.length > 0 ? (
-                  <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                    {
-                      this.transToArr(labelIssueRelVOList, 'labelName', 'array').map(label => (
-                        <div
-                          key={label}
-                          style={{
-                            color: '#000',
-                            borderRadius: '100px',
-                            fontSize: '13px',
-                            lineHeight: '24px',
-                            padding: '2px 12px',
-                            background: 'rgba(0, 0, 0, 0.08)',
-                            marginRight: '8px',
-                            marginTop: '2px',
-                            marginBottom: '2px',
-                          }}
-                        >
-                          {label}
-                        </div>
-                      ))
-                    }
-                  </div>
-                ) : (
-                  <div>
-                    无
-                  </div>
-                )
-              }
-            </Text>
-            <Edit>
-              <Select
-                mode="tags"
-                loading={selectLoading}
-                tokenSeparators={[',']}
-                getPopupContainer={() => document.getElementById('detail')}       
-                onChange={(value) => {
-                  this.setState({
-                    newLabelIssueRelVOList: value.map(
-                      item => item.substr(0, 10),
-                    ),
-                  });
-                }}
-              >
-                {originLabels.map(label => (
-                  <Option
-                    key={label.labelName}
-                    value={label.labelName}
-                  >
-                    {label.labelName}
-                  </Option>
-                ))}
-              </Select>
-            </Edit>
+            {
+              labelIssueRelVOList.length > 0 ? (
+                <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                  {
+                    this.transToArr(labelIssueRelVOList, 'labelName', 'array').map(label => (
+                      <div
+                        key={label}
+                        style={{
+                          color: '#000',
+                          borderRadius: '100px',
+                          fontSize: '13px',
+                          lineHeight: '24px',
+                          padding: '2px 12px',
+                          background: 'rgba(0, 0, 0, 0.08)',
+                          marginRight: '8px',
+                          marginTop: '2px',
+                          marginBottom: '2px',
+                        }}
+                      >
+                        {label}
+                      </div>
+                    ))
+                  }
+                </div>
+              ) : (
+                <div>
+                  无
+                </div>
+              )
+            }
           </TextEditToggle>
         </div>
       </div>

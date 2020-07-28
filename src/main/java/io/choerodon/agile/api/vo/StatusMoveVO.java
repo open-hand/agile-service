@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/16.
@@ -12,9 +14,11 @@ public class StatusMoveVO {
     private Integer position;
 
     @ApiModelProperty(value = "目标列的id")
+    @Encrypt(ignoreValue = {"0"})
     private Long columnId;
 
     @ApiModelProperty(value = "原始列的id")
+    @Encrypt(ignoreValue = {"0"})
     private Long originColumnId;
 
     @ApiModelProperty(value = "版本号")

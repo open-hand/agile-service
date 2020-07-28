@@ -1,27 +1,19 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
-import { Input } from 'choerodon-ui';
+import TextArea from '@/components/TextArea';
 import { Choerodon } from '@choerodon/boot';
 import { injectIntl } from 'react-intl';
-import TextEditToggle from '../../../../TextEditToggle';
-import { updateIssue } from '../../../../../api/NewIssueApi';
-
-const { Text, Edit } = TextEditToggle;
-const { TextArea } = Input;
+import { issueApi } from '@/api';
+import TextEditToggle from '@/components/TextEditTogglePro';
+import styles from './FieldSummary.less';
 
 @inject('AppState')
 @observer class FieldSummary extends Component {
-  constructor(props) {
-    super(props);
-    this.TextEditToggle = undefined;
-    this.state = {
-      newValue: undefined,
-    };
-  }
-
-  updateIssueField = () => {
-    const { newValue } = this.state;
+  updateIssueField = (newValue) => {
+    if (!newValue) {
+      return;
+    }
     const {
       store, onUpdate, reloadIssue, field, feature,
     } = this.props;
@@ -52,7 +44,7 @@ const { TextArea } = Input;
         };
       }
       if (obj) {
-        updateIssue(obj)
+        issueApi.update(obj)
           .then((res) => {
             if (res.failed && res.code === 'error.epic.duplicate.feature.summary') {
               Choerodon.prompt('史诗下有相同的特性概要');
@@ -79,39 +71,24 @@ const { TextArea } = Input;
     return (
       <div className="line-start" style={{ width: '100%', fontSize: 20, fontWeight: 500 }}>
         <TextEditToggle
-          style={{ width: '100%' }}
+          className={styles.summary}
           disabled={disabled}
-          saveRef={(e) => {
-            this.TextEditToggle = e;
-          }}
-          formKey={fieldCode}
           onSubmit={this.updateIssueField}
-          originData={value}
-        >
-          <Text>
-            <div style={{ wordBreak: 'break-all' }}>
-              {value || '无'}
-            </div>
-          </Text>
-          <Edit>
+          initValue={value}
+          alwaysRender={false}
+          editor={() => (
             <TextArea
-              autosize
-              autoFocus
+              autoSize
               maxLength="44"
-              style={{ fontSize: '20px', fontWeight: 500, padding: '0.04rem' }}
-              onChange={(e) => {
-                this.setState({
-                  newValue: e.target.value,
-                });
-              }}
-              onPressEnter={() => {
-                if (this.TextEditToggle && this.TextEditToggle.leaveEditing) {
-                  this.updateIssueField();
-                  this.TextEditToggle.leaveEditing();
-                }
-              }}
+              required
+              validationRenderer={() => '请输入概要。'}
+              labelLayout="float"
             />
-          </Edit>
+          )}
+        >
+          <div style={{ wordBreak: 'break-all' }}>
+            {value || '无'}
+          </div>
         </TextEditToggle>
       </div>
     );

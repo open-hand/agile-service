@@ -1,8 +1,8 @@
 package io.choerodon.agile.app.service;
 
-import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.StoryMapDragVO;
+import io.choerodon.agile.api.vo.StoryMapVO;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/5/31.
@@ -10,9 +10,9 @@ import io.choerodon.agile.api.vo.StoryMapDragVO;
  */
 public interface StoryMapService {
 
-    JSONObject queryStoryMap(Long projectId, Long organizationId, SearchVO searchVO);
+    StoryMapVO queryStoryMap(Long projectId, Long organizationId, SearchVO searchVO);
 
-    JSONObject queryStoryMapDemand(Long projectId, SearchVO searchVO);
+    StoryMapVO queryStoryMapDemand(Long projectId, SearchVO searchVO);
 
     void storyMapMove(Long projectId, StoryMapDragVO storyMapDragVO);
 

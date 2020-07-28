@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
 
@@ -12,6 +14,7 @@ import javax.validation.constraints.NotNull;
 public class IssueComponentVO {
 
     @ApiModelProperty(value = "主键id")
+    @Encrypt
     private Long componentId;
 
     @ApiModelProperty(value = "项目id")
@@ -25,6 +28,7 @@ public class IssueComponentVO {
     private String description;
 
     @ApiModelProperty(value = "负责人id")
+    @Encrypt(ignoreValue = "0")
     private Long managerId;
 
     @ApiModelProperty(value = "默认经办人")

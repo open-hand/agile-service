@@ -438,7 +438,7 @@ class EpicBurndown extends Component {
               onClick={() => {
                 const { history } = this.props;
                 const urlParams = AppState.currentMenuType;
-                history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${issueNum}&paramIssueId=${record.issueId}&paramUrl=reporthost/EpicBurndown`);
+                history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${issueNum}&paramIssueId=${encodeURIComponent(record.issueId)}&paramUrl=reporthost/EpicBurndown`);
               }}
             >
               {issueNum}
@@ -588,7 +588,7 @@ class EpicBurndown extends Component {
     let urlPush = `/agile/work-list/issue?type=${type}&id=${id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${organizationId}&orgId=${urlParams.organizationId}`;
     if (JSON.stringify(item) !== '{}') {
       if (linkType === 'epic') {
-        urlPush += `&paramName=${item.issueNum}&paramIssueId=${item.issueId}&paramUrl=reporthost/epicBurndown`;
+        urlPush += `&paramName=${item.issueNum}&paramIssueId=${encodeURIComponent(item.issueId)}&paramUrl=reporthost/epicBurndown`;
       }
       history.push(urlPush);
     }

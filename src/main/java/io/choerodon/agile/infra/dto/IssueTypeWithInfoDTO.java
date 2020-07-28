@@ -1,5 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.util.List;
 
 /**
@@ -7,7 +10,7 @@ import java.util.List;
  * Email: fuqianghuang01@gmail.com
  */
 public class IssueTypeWithInfoDTO {
-
+    @Encrypt
     private Long id;
 
     private String name;

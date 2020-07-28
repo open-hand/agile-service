@@ -2,13 +2,14 @@ package io.choerodon.agile.infra.dto;
 
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.StatusVO;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/01/24.
  * Email: fuqianghuang01@gmail.com
  */
 public class ParentIssueDTO {
-
+    @Encrypt
     private Long issueId;
 
     private String issueNum;
@@ -18,9 +19,9 @@ public class ParentIssueDTO {
     private IssueTypeVO issueTypeVO;
 
     private StatusVO statusVO;
-
+    @Encrypt
     private Long statusId;
-
+    @Encrypt
     private Long issueTypeId;
 
     private Long objectVersionNumber;

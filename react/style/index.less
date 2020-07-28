@@ -16,6 +16,10 @@
 #agile {
   --theme: #3F51B5; //这样可以在jsx中的style使用
   height: 100%;
+  .c7n-pro-select > ul > li>input[type="text"] { // 解决在pro组件下拉框 游览器默认样式导致的字显示一半
+    padding: 0;
+    font-size:.13rem;
+  }
 
   > div:first-child {
     width: 100%;

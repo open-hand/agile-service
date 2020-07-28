@@ -80,4 +80,10 @@ public interface DataLogMapper extends BaseMapper<DataLogDTO> {
                                                 @Param("oldPriorityName") String oldPriorityName, @Param("newPriorityName") String newPriorityName);
 
     List<DataLogFixVO> queryListByProjectId(Long projectId);
+
+    List<DataLogDTO> selectResolutionIssueBySprint(@Param("projectId") Long projectId,
+                                  @Param("issueIdList") Set<Long> issueIdList,
+                                  @Param("field") String field,
+                                  @Param("startDate") Date startDate,
+                                  @Param("endDate") Date endDate);
 }

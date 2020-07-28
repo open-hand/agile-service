@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
-import { stores, axios, Choerodon } from '@choerodon/boot';
+import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react';
 import classnames from 'classnames';
 import {
   Dropdown, Menu, Input, Icon,
 } from 'choerodon-ui';
 import _ from 'lodash';
+import { epicApi, issueApi } from '@/api';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 
-const { AppState } = stores;
 // @inject('AppState')
 @observer
 class DraggableEpic extends Component {
@@ -66,10 +66,10 @@ class DraggableEpic extends Component {
                     issueId: item.issueId,
                     objectVersionNumber: item.objectVersionNumber,
                   };
-                  BacklogStore.axiosUpdateIssue(inputData).then((res) => {
+                  issueApi.update(inputData).then((res) => {
                     BacklogStore.updateEpic(res);
                     refresh();
-                  }).catch((error) => {
+                  }).catch(() => {
                   });
                 }}
               />
@@ -98,7 +98,7 @@ class DraggableEpic extends Component {
         editName: false,
       });
     } else {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/check_epic_name?epicName=${value}&epicId=${item.issueId}`)
+      epicApi.checkName(value, item.issueId)
         .then((checkRes) => {
           if (checkRes) {
             Choerodon.prompt('史诗名称重复');
@@ -111,10 +111,10 @@ class DraggableEpic extends Component {
               issueId: item.issueId,
               epicName: value,
             };
-            BacklogStore.axiosUpdateIssue(req).then((res) => {
+            issueApi.update(req).then((res) => {
               BacklogStore.updateEpic(res);
               refresh();
-            }).catch((error) => {
+            }).catch(() => {
             });
           }
         });

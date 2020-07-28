@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
-import { axios, Choerodon } from '@choerodon/boot';
+import { Choerodon } from '@choerodon/boot';
 import { Select } from 'choerodon-ui';
 import EventEmitter from 'wolfy87-eventemitter';
-
+import { sprintApi, quickFilterApi, userApi } from '@/api';
 import './QuickSearch.less';
 import BacklogStore from '../../stores/project/backlog/BacklogStore';
 import ScrumBoardStore from '../../stores/project/scrumBoard/ScrumBoardStore';
@@ -32,14 +32,9 @@ class QuickSearch extends Component {
     QuickSearchEvent.addListener('clearQuickSearchSelect', this.clearQuickSearch);
     QuickSearchEvent.addListener('setSelectQuickSearch', this.setSelectQuickSearch);
     QuickSearchEvent.addListener('unSelectStory', this.unSelectStory);
-    const { AppState } = this.props;
-    const axiosGetFilter = axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/query_all`, {
-      contents: [
-      ],
-      filterName: '',
-    });
-    const axiosGetUser = axios.get(`/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=40`);
-    const axiosGetSprintNotClosed = axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/names`, ['sprint_planning', 'started']);
+    const axiosGetFilter = quickFilterApi.loadAll();
+    const axiosGetUser = userApi.getAllInProject(undefined, undefined, undefined, 40);
+    const axiosGetSprintNotClosed = sprintApi.loadSprints(['sprint_planning', 'started']);
     Promise.all([axiosGetFilter, axiosGetUser, axiosGetSprintNotClosed]).then((res = []) => {
       const resFilterData = res[0].map(item => ({
         label: item.name,
@@ -83,7 +78,7 @@ class QuickSearch extends Component {
   handleQuickSearchChange = (value, key) => {
     const { onQuickSearchChange } = this.props;
     const flattenValue = value.map(item => item.key);
-    const otherSearchId = flattenValue.filter(item => item >= 0);
+    const otherSearchId = flattenValue.filter(item => item !== -1 || item !== -2);
     this.setState({
       selectQuickSearch: value,
     });
@@ -159,7 +154,7 @@ class QuickSearch extends Component {
       selectQuickSearch,
       selectUsers,
     } = this.state;
-    
+
     const { sprintNotClosedArray, selectSprint } = ScrumBoardStore;
 
     // showRealQuickSearch 用于在待办事项中销毁组件
@@ -218,7 +213,7 @@ class QuickSearch extends Component {
                   onFilterChange={(value) => {
                     if (value) {
                       debounceCallback(() => {
-                        axios.get(`/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=40&param=${value}`).then((res) => {
+                        userApi.getAllInProject(value, 1, undefined, 40).then((res) => {
                           // Set 用于查询是否有 id 重复的，没有重复才往里加
                           const temp = new Set(userDataArray.map(item => item.id));
                           res.list.filter(item => item.enabled).forEach((item) => {
@@ -245,37 +240,37 @@ class QuickSearch extends Component {
                     ))
                   }
                 </Select>
-              
+
               )
             }
             {
               onSprintChange && sprintNotClosedArray && (
-              <Select
-                key="sprintSelect"
-                className="SelectTheme primary c7n-agile-sprintSearchSelect"
-                // style={{ width: 120 }}
-                placeholder="冲刺"
-                allowClear
-                dropdownMatchSelectWidth={false}
-                labelInValue
-                optionFilterProp="children"
-                value={selectSprint}
-                onChange={this.handleSprintChange}
-                getPopupContainer={triggerNode => triggerNode.parentNode}
-              >
-                {
-                  (sprintNotClosedArray || []).map(item => (
-                    <Option key={item.sprintId} value={item.sprintId} title={item.sprintName}>
-                      {item.sprintName}
-                      {
-                        item.statusCode === 'started' && (
-                          <div className="c7n-agile-sprintSearchSelect-option-active">活跃</div>
-                        )
-                      }
-                    </Option>
-                  ))
-                }
-              </Select>
+                <Select
+                  key="sprintSelect"
+                  className="SelectTheme primary c7n-agile-sprintSearchSelect"
+                  // style={{ width: 120 }}
+                  placeholder="冲刺"
+                  allowClear
+                  dropdownMatchSelectWidth={false}
+                  labelInValue
+                  optionFilterProp="children"
+                  value={selectSprint}
+                  onChange={this.handleSprintChange}
+                  getPopupContainer={triggerNode => triggerNode.parentNode}
+                >
+                  {
+                    (sprintNotClosedArray || []).map(item => (
+                      <Option key={item.sprintId} value={item.sprintId} title={item.sprintName}>
+                        {item.sprintName}
+                        {
+                          item.statusCode === 'started' && (
+                            <div className="c7n-agile-sprintSearchSelect-option-active">活跃</div>
+                          )
+                        }
+                      </Option>
+                    ))
+                  }
+                </Select>
               )
             }
           </React.Fragment>

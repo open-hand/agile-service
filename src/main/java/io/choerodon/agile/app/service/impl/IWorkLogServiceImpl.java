@@ -4,6 +4,7 @@ import io.choerodon.agile.app.service.IWorkLogService;
 import io.choerodon.agile.infra.annotation.DataLog;
 import io.choerodon.agile.infra.dto.WorkLogDTO;
 import io.choerodon.agile.infra.mapper.WorkLogMapper;
+import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ public class IWorkLogServiceImpl implements IWorkLogService {
         if (workLogMapper.delete(workLogDTO) != 1) {
             throw new CommonException("error.workLog.delete");
         }
+        BaseFieldUtil.updateIssueLastUpdateInfo(workLogDTO.getIssueId(), workLogDTO.getProjectId());
     }
 
 }

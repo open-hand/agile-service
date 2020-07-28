@@ -2,12 +2,14 @@ package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.WorkLogVO;
 import io.choerodon.agile.app.service.WorkLogService;
+
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,11 +45,11 @@ public class WorkLogController {
     @ApiOperation("修改work log")
     @PatchMapping(value = "/{logId}")
     public ResponseEntity<WorkLogVO> updateWorkLog(@ApiParam(value = "项目id", required = true)
-                                                    @PathVariable(name = "project_id") Long projectId,
+                                                   @PathVariable(name = "project_id") Long projectId,
                                                    @ApiParam(value = "log id", required = true)
-                                                    @PathVariable Long logId,
+                                                   @PathVariable @Encrypt Long logId,
                                                    @ApiParam(value = "work log object", required = true)
-                                                    @RequestBody WorkLogVO workLogVO) {
+                                                   @RequestBody WorkLogVO workLogVO) {
         return Optional.ofNullable(workLogService.updateWorkLog(projectId, logId, workLogVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.workLog.update"));
@@ -59,7 +61,7 @@ public class WorkLogController {
     public ResponseEntity deleteWorkLog(@ApiParam(value = "项目id", required = true)
                                         @PathVariable(name = "project_id") Long projectId,
                                         @ApiParam(value = "log id", required = true)
-                                        @PathVariable Long logId) {
+                                        @PathVariable @Encrypt Long logId) {
         workLogService.deleteWorkLog(projectId, logId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -70,7 +72,7 @@ public class WorkLogController {
     public ResponseEntity queryWorkLogById(@ApiParam(value = "项目id", required = true)
                                            @PathVariable(name = "project_id") Long projectId,
                                            @ApiParam(value = "log id", required = true)
-                                           @PathVariable Long logId) {
+                                           @PathVariable @Encrypt Long logId) {
         return Optional.ofNullable(workLogService.queryWorkLogById(projectId, logId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.workLog.get"));
@@ -82,7 +84,7 @@ public class WorkLogController {
     public ResponseEntity<List<WorkLogVO>> queryWorkLogListByIssueId(@ApiParam(value = "项目id", required = true)
                                                                       @PathVariable(name = "project_id") Long projectId,
                                                                      @ApiParam(value = "issue id", required = true)
-                                                                      @PathVariable Long issueId) {
+                                                                      @PathVariable @Encrypt Long issueId) {
         return Optional.ofNullable(workLogService.queryWorkLogListByIssueId(projectId, issueId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.workLogList.get"));

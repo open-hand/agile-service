@@ -1,5 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.util.List;
 
 /**
@@ -7,9 +10,9 @@ import java.util.List;
  * Email: fuqianghuang01@gmail.com
  */
 public class SubStatusDTO {
-
+    @Encrypt
     private Long id;
-
+    @Encrypt
     private Long statusId;
 
     private String name;

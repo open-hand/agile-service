@@ -4,13 +4,16 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+
 import io.swagger.annotations.ApiModelProperty;
 
 import io.choerodon.agile.infra.utils.StringUtil;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 public class IssueListTestWithSprintVersionVO {
 
     @ApiModelProperty(value = "问题主键id")
+    @Encrypt
     private Long issueId;
 
     @ApiModelProperty(value = "问题编号")
@@ -23,12 +26,14 @@ public class IssueListTestWithSprintVersionVO {
     private String summary;
 
     @ApiModelProperty(value = "经办人id")
+    @Encrypt
     private Long assigneeId;
 
     @ApiModelProperty(value = "项目id")
     private Long projectId;
 
     @ApiModelProperty(value = "问题类型id")
+    @Encrypt
     private Long issueTypeId;
 
     @ApiModelProperty(value = "经办人名称")

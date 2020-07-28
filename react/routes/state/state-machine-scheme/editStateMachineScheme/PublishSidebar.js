@@ -5,9 +5,11 @@ import {
 } from 'choerodon-ui';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { stores } from '@choerodon/boot';
+import { stateMachineSchemeApi } from '@/api';
 import TypeTag from '../../../../components/TypeTag/TypeTag';
 import StatusTag from '../../../../components/StatusTag/StatusTag';
 import './PublishSidebar.less';
+
 
 const { AppState } = stores;
 const { Sidebar } = Modal;
@@ -62,9 +64,7 @@ class PublishSidebar extends Component {
         oldStateMachineId: typeData.oldStateMachineId,
       });
     });
-    store.publishStateMachine(
-      organizationId, scheme.id, scheme.objectVersionNumber, data,
-    ).then((res) => {
+    stateMachineSchemeApi.publish(scheme.id, scheme.objectVersionNumber, data).then((res) => {
       if (res) {
         if (res.failed) {
           message.warn(intl.formatMessage({
@@ -102,7 +102,7 @@ class PublishSidebar extends Component {
         onClick={this.handlePublish}
         loading={this.state.loading}
       >
-        {<FormattedMessage id="stateMachineScheme.publish" />}
+        <FormattedMessage id="stateMachineScheme.publish" />
       </Button>
 
       <Button
@@ -110,7 +110,7 @@ class PublishSidebar extends Component {
         funcType="raised"
         onClick={this.handleCancel}
       >
-        {<FormattedMessage id="stateMachineScheme.cancel" />}
+        <FormattedMessage id="stateMachineScheme.cancel" />
       </Button>
     </Fragment>
   );

@@ -1,8 +1,9 @@
 import {
   observable, action, computed, toJS,
 } from 'mobx';
-import { store, stores, axios } from '@choerodon/boot';
+import { store, stores } from '@choerodon/boot';
 import _ from 'lodash';
+import { reportApi } from '@/api';
 
 const { AppState } = stores;
 const UNIT_STATUS = {
@@ -46,13 +47,12 @@ class VelocityChartStore {
   loadChartData(unit = this.currentUnit) {
     this.setChartLoading(true);
     this.setTableLoading(true);
-    axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/reports/velocity_chart?type=${unit}`)
-      .then((res) => {
-        this.setBeforeCurrentUnit(unit);
-        this.setChartData(res);
-        this.setChartLoading(false);
-        this.setTableLoading(false);
-      });
+    reportApi.loadVelocity(unit).then((res) => {
+      this.setBeforeCurrentUnit(unit);
+      this.setChartData(res);
+      this.setChartLoading(false);
+      this.setTableLoading(false);
+    });
   }
 
   @action setTableLoading(data) {

@@ -5,11 +5,14 @@ import io.choerodon.agile.app.service.FieldValueService;
 import io.choerodon.agile.app.service.IssueFieldValueService;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
 import io.choerodon.agile.app.service.PageFieldService;
+
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
-import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author shinan.chen
@@ -54,7 +59,7 @@ public class FieldValueController {
     public ResponseEntity<List<PageFieldViewVO>> queryPageFieldViewListWithInstanceId(@ApiParam(value = "项目id", required = true)
                                                                                       @PathVariable("project_id") Long projectId,
                                                                                       @ApiParam(value = "实例id", required = true)
-                                                                                      @PathVariable("instance_id") Long instanceId,
+                                                                                      @PathVariable("instance_id") @Encrypt Long instanceId,
                                                                                       @ApiParam(value = "组织id", required = true)
                                                                                       @RequestParam Long organizationId,
                                                                                       @ApiParam(value = "参数对象", required = true)
@@ -68,7 +73,7 @@ public class FieldValueController {
     public ResponseEntity createFieldValues(@ApiParam(value = "项目id", required = true)
                                             @PathVariable("project_id") Long projectId,
                                             @ApiParam(value = "实例id", required = true)
-                                            @PathVariable("instance_id") Long instanceId,
+                                            @PathVariable("instance_id") @Encrypt Long instanceId,
                                             @ApiParam(value = "组织id", required = true)
                                             @RequestParam Long organizationId,
                                             @ApiParam(value = "方案编码", required = true)
@@ -85,7 +90,7 @@ public class FieldValueController {
     public ResponseEntity createFieldValuesWithQuickCreate(@ApiParam(value = "项目id", required = true)
                                                            @PathVariable("project_id") Long projectId,
                                                            @ApiParam(value = "实例id", required = true)
-                                                           @PathVariable("instance_id") Long instanceId,
+                                                           @PathVariable("instance_id") @Encrypt Long instanceId,
                                                            @ApiParam(value = "组织id", required = true)
                                                            @RequestParam Long organizationId,
                                                            @ApiParam(value = "参数对象", required = true)
@@ -102,9 +107,9 @@ public class FieldValueController {
                                                                @ApiParam(value = "组织id", required = true)
                                                                @RequestParam Long organizationId,
                                                                @ApiParam(value = "实例id", required = true)
-                                                               @PathVariable("instance_id") Long instanceId,
+                                                               @PathVariable("instance_id") @Encrypt Long instanceId,
                                                                @ApiParam(value = "字段id", required = true)
-                                                               @RequestParam Long fieldId,
+                                                               @RequestParam @Encrypt Long fieldId,
                                                                @ApiParam(value = "方案编码", required = true)
                                                                @RequestParam String schemeCode,
                                                                @ApiParam(value = "值对象列表", required = true)
@@ -139,8 +144,9 @@ public class FieldValueController {
                                                    @PathVariable("project_id") Long projectId,
                                                    @ApiParam(value = "方案编码", required = true)
                                                    @RequestParam String schemeCode,
-                                                   @RequestBody  BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
-        issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo);
+                                                   @RequestParam String applyType,
+                                                   @RequestBody @Encrypt BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
+        issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo,applyType);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

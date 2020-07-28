@@ -95,10 +95,16 @@ function IssueTable({ tableRef, onCreateIssue }) {
         })}
       >
         <Column
-          sortable
           align="left"
+          lock="left"
           name="issueId"
           width={320}
+          header={() => (
+            <div>
+              <CollapseAll tableRef={tableRef} />
+              概要
+            </div>
+          )}
           onCell={({ record }) => ({
             onClick: () => {
               handleRowClick(record);
@@ -238,8 +244,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
             }}
           />
         ))}
-      </Table>
-      <CollapseAll tableRef={tableRef} />
+      </Table>      
     </div>
   );
 }

@@ -1,5 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 /**
  * Creator: ChangpingShi0213@gmail.com
  * Date:  15:00 2018/9/5
@@ -8,6 +11,7 @@ package io.choerodon.agile.infra.dto;
 public class IssueStatus {
     private Integer issueNum;
     private String categoryCode;
+    @Encrypt
     private Long statusId;
 
     public Integer getIssueNum() {

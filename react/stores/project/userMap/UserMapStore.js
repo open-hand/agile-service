@@ -4,6 +4,9 @@ import {
 import axios from 'axios';
 import _ from 'lodash';
 import { store, stores, Choerodon } from '@choerodon/boot';
+import {
+  sprintApi, versionApi, priorityApi, quickFilterApi, 
+} from '@/api';
 
 const { AppState } = stores;
 
@@ -398,13 +401,12 @@ class UserMapStore {
       });
   }
 
-  loadSprints = () => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/unclosed`)
+  loadSprints = () => sprintApi.loadUncloseSprint()
     .then((sprints) => {
       this.setSprints(sprints);
     });
 
-  loadVersions = () => axios
-    .get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version`)
+  loadVersions = () => versionApi.loadAll()
     .then((versions) => {
       this.setVersions(versions);
     });
@@ -422,10 +424,7 @@ class UserMapStore {
         }
         axios.all([
           axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/storymap/epics?organizationId=${orgId}&showDoneEpic=${this.showDoneEpic}`),
-          axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/query_all`, {
-            contents: [],
-            filterName: '',
-          }),
+          quickFilterApi.loadAll(),
           axios.get(axiosGetIssue),
         ])
           .then(
@@ -639,17 +638,6 @@ class UserMapStore {
     this.issueTypes = data;
   }
 
-  axiosGetIssueTypes() {
-    const proId = AppState.currentMenuType.id;
-    return axios.get(`/agile/v1/projects/${proId}/schemes/query_issue_types_with_sm_id?apply_type=agile`).then((data) => {
-      if (data && !data.failed) {
-        this.setIssueTypes(data);
-      } else {
-        this.setIssueTypes([]);
-      }
-    });
-  }
-
   @computed get getDefaultPriority() {
     return this.defaultPriority;
   }
@@ -659,8 +647,7 @@ class UserMapStore {
   }
 
   axiosGetDefaultPriority() {
-    const proId = AppState.currentMenuType.id;
-    return axios.get(`/agile/v1/projects/${proId}/priority/default`).then((data) => {
+    return priorityApi.getDefaultByProject().then((data) => {
       if (data && !data.failed) {
         this.setDefaultPriority(data);
       } else {

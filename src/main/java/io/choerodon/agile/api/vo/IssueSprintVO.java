@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.io.Serializable;
 
@@ -18,6 +20,7 @@ public class IssueSprintVO implements Serializable {
     private String statusCode;
 
     @ApiModelProperty(value = "冲刺id")
+    @Encrypt
     private Long sprintId;
 
     public String getSprintName() {

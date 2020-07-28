@@ -3,14 +3,14 @@ import { observer } from 'mobx-react';
 import {
   Modal, Form, Input,
 } from 'choerodon-ui';
-import { stores, axios, Choerodon } from '@choerodon/boot';
+import { Choerodon } from '@choerodon/boot';
 import IssueStore from '@/stores/project/issue/IssueStore';
+import { personalFilterApi } from '@/api';
 
-const { AppState } = stores;
 const FormItem = Form.Item;
 @observer
 class SaveFilterModal extends Component {
-  checkMyFilterNameRepeat = filterName => axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/personal_filter/check_name?userId=${AppState.userInfo.id}&name=${filterName}`)
+  checkMyFilterNameRepeat = filterName => personalFilterApi.checkName(filterName);
 
   checkMyFilterNameRepeatCreating = (rule, value, callback) => {
     this.checkMyFilterNameRepeat(value).then((res) => {
@@ -34,7 +34,7 @@ class SaveFilterModal extends Component {
           personalFilterSearchVO: searchDTO,
         };
         IssueStore.setLoading(true);
-        axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/personal_filter`, data)
+        personalFilterApi.create(data)
           .then((res) => {
             IssueStore.axiosGetMyFilterList();
             IssueStore.setSaveFilterVisible(false);

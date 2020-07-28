@@ -1,11 +1,15 @@
 package io.choerodon.agile.api.vo;
 
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.util.Date;
 
 /**
  * Created by jian_zhang02@163.com on 2018/5/15.
  */
 public class SprintDetailVO {
+    @Encrypt
     private Long sprintId;
     private Integer issueCount;
     private String sprintName;

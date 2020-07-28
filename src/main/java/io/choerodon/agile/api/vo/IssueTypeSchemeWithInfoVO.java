@@ -1,8 +1,10 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.choerodon.agile.infra.dto.IssueTypeWithInfoDTO;
 import io.choerodon.agile.infra.dto.ProjectWithInfoDTO;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
 
@@ -12,12 +14,14 @@ import java.util.List;
  */
 public class IssueTypeSchemeWithInfoVO {
     @ApiModelProperty(value = "问题类型方案id")
+    @Encrypt
     private Long id;
     @ApiModelProperty(value = "名称")
     private String name;
     @ApiModelProperty(value = "描述")
     private String description;
     @ApiModelProperty(value = "默认问题类型id")
+    @Encrypt
     private Long defaultIssueTypeId;
     @ApiModelProperty(value = "组织id")
     private Long organizationId;

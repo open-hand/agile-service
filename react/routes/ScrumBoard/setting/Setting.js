@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Page, Header, Content, stores, axios, Permission, Breadcrumb,
+  Page, Header, Content, stores, Permission, Breadcrumb,
 } from '@choerodon/boot';
 import moment from 'moment';
 import {
@@ -9,10 +9,11 @@ import {
 } from 'choerodon-ui';
 import { withRouter } from 'react-router-dom';
 import './Setting.less';
+import { commonApi, boardApi } from '@/api';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import SettingColumn from './components/setting-column';
 import SwimLanePage from './components/SwimLanePage/SwimLanePage';
-import WorkcalendarPage from './components/WorkCalendarPage/WorkCalendarPage';
+import WorkCalendarPage from './components/WorkCalendarPage/WorkCalendarPage';
 import EditBoardName from './components/EditBoardName/EditBoardName';
 import CreateStatus from './components/create-status';
 import CreateColumn from './components/create-column';
@@ -58,10 +59,10 @@ class Setting extends Component {
       history.push(`/agile/scrumboard?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`);
     } else {
       ScrumBoardStore.loadStatus();
-      ScrumBoardStore.axiosGetBoardDataBySetting(boardId).then((data) => {
-        ScrumBoardStore.axiosGetUnsetData(boardId).then((data2) => {
+      boardApi.load(boardId).then((data) => {
+        boardApi.loadNoColumnStatus(boardId).then((data2) => {
           const unsetColumn = {
-            columnId: 0,
+            columnId: '0',
             name: '未对应的状态',
             subStatusDTOS: data2,
           };
@@ -74,7 +75,7 @@ class Setting extends Component {
         });
       }).catch((error) => {
       });
-      ScrumBoardStore.axiosGetLookupValue('constraint').then((res) => {
+      commonApi.loadLookupValue('constraint').then((res) => {
         const oldLookup = ScrumBoardStore.getLookupValue;
         oldLookup.constraint = res.lookupValues;
         ScrumBoardStore.setLookupValue(oldLookup);
@@ -102,7 +103,7 @@ class Setting extends Component {
       className: 'scrumBoardMask',
       width: 520,
       onOk() {
-        ScrumBoardStore.axiosDeleteBoard().then((res) => {
+        boardApi.delete(ScrumBoardStore.getSelectedBoard).then((res) => {
           history.push(`/agile/scrumboard?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`);
         }).catch((error) => {
         });
@@ -139,8 +140,8 @@ class Setting extends Component {
     });
   }
 
-  renderWorkcalendarPage = updateWorkDatePermission => (
-    <WorkcalendarPage selectedDateDisabled={!updateWorkDatePermission} />
+  renderWorkCalendarPage = updateWorkDatePermission => (
+    <WorkCalendarPage selectedDateDisabled={!updateWorkDatePermission} />
   )
 
   renderEditBoardName = editBoardNamePermission => (
@@ -230,7 +231,7 @@ class Setting extends Component {
               ? (
                 <TabPane tab="工作日历" key="3">
                   <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.work_calendar.update']}>
-                    {this.renderWorkcalendarPage}
+                    {this.renderWorkCalendarPage}
                   </Permission>
                 </TabPane>
               ) : null

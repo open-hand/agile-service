@@ -1,19 +1,24 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
-import { Table, Button, Modal, Form, Select, Input, Tooltip, Tabs, Checkbox } from 'choerodon-ui';
+import {
+  Table, Button, Modal, Form, Select, Input, Tooltip, Tabs, Checkbox, 
+} from 'choerodon-ui';
 import { injectIntl, FormattedMessage } from 'react-intl';
-import { Content, Header, Page, Permission, stores } from '@choerodon/boot';
+import {
+  Content, Header, Page, Permission, stores, 
+} from '@choerodon/boot';
 import './EditConfigSelect.less';
+import { stateMachineApi } from '@/api';
 
 const prefixCls = 'issue-state-machine-config-select';
 const { AppState } = stores;
 
-const Sidebar = Modal.Sidebar;
+const { Sidebar } = Modal;
 const FormItem = Form.Item;
-const TextArea = Input.TextArea;
-const Option = Select.Option;
-const TabPane = Tabs.TabPane;
+const { TextArea } = Input;
+const { Option } = Select;
+const { TabPane } = Tabs;
 
 const formItemLayout = {
   labelCol: {
@@ -88,7 +93,9 @@ class EditConfigSelect extends Component {
 
   handleSubmit = () => {
     const { StateMachineStore } = this.props;
-    const { organizationId, id, configType, machineId, submitData } = this.state;
+    const {
+      organizationId, id, configType, machineId, submitData, 
+    } = this.state;
     if (submitData) {
       const data = {
         code: submitData.code,
@@ -99,7 +106,7 @@ class EditConfigSelect extends Component {
       this.setState({
         loading: true,
       });
-      StateMachineStore.addConfig(organizationId, machineId, data).then((res) => {
+      stateMachineApi.addConfig(machineId, data.transformId, data).then((res) => {
         this.setState({
           loading: false,
         });
@@ -124,7 +131,9 @@ class EditConfigSelect extends Component {
 
 
     const menu = AppState.currentMenuType;
-    const { type, id: projectId, organizationId: orgId, name } = menu;
+    const {
+      type, id: projectId, organizationId: orgId, name, 
+    } = menu;
     const cType = configType === 'state' ? 'state' : 'transfer';
     const rowSelection = {
       type: 'radio',

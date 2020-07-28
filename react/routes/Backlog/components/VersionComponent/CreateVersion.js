@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Modal, Form, Input, DatePicker, Icon,
+  Modal, Form, Input, DatePicker, 
 } from 'choerodon-ui';
 import {
-  Content, stores, axios, Choerodon, 
+  Content, stores, Choerodon, 
 } from '@choerodon/boot';
 import moment from 'moment';
-import ReleaseStore from '../../../../stores/project/release/ReleaseStore';
+import { versionApi } from '@/api';
 // import this.props.store from "../../../../stores/project/backlog/this.props.store";
 
 const { Sidebar } = Modal;
@@ -33,7 +33,7 @@ class CreateVersion extends Component {
    * @memberof CreateVersion
    */
   checkVersionNameRepeat = (rule, value, callback) => {
-    axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/check?name=${value}`)
+    versionApi.checkName(value.trim())
       .then((res) => {
         if (res) {
           callback('版本名称重复');
@@ -63,7 +63,7 @@ class CreateVersion extends Component {
         this.setState({
           loading: true,
         });
-        ReleaseStore.axiosAddRelease(req).then((res) => {
+        versionApi.create(req).then((res) => {
           this.setState({
             loading: false,
           });
@@ -72,7 +72,7 @@ class CreateVersion extends Component {
           } else {
             form.resetFields();
             onCancel();
-            store.axiosGetVersion().then((data) => {
+            versionApi.loadAll().then((data) => {
               store.setVersionData(data);
             }).catch((error) => {
             });

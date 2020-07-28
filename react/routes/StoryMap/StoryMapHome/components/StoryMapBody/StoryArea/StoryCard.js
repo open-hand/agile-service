@@ -4,7 +4,8 @@ import { Icon, Tooltip } from 'choerodon-ui';
 import { DragSource } from 'react-dnd';
 import { find } from 'lodash';
 import { observer } from 'mobx-react';
-import { storyMove } from '../../../../../../api/StoryMapApi';
+import { storyMapApi } from '@/api';
+
 import AutoScroll from '../../../../../../common/AutoScroll';
 import Card from '../Card';
 import './StoryCard.less';
@@ -59,7 +60,7 @@ class StoryCard extends Component {
         // 问题id列表，移动到特性，配合featureId使用
         featureIssueIds: [issueId],
       };
-      storyMove(storyMapDragVO).then(() => {
+      storyMapApi.move(storyMapDragVO).then(() => {
         StoryMapStore.removeStoryFromStoryMap(story);
         StoryMapStore.loadIssueList();
       });
@@ -72,7 +73,7 @@ class StoryCard extends Component {
         const removeVersion = find(storyMapVersionDTOList, { versionId: version.versionId });
         storyMapDragVO.versionIssueRelVOList = [{ ...removeVersion, issueId }];
       }
-      storyMove(storyMapDragVO).then(() => {
+      storyMapApi.move(storyMapDragVO).then(() => {
         StoryMapStore.removeStoryFromStoryMap(story, version.versionId);
         StoryMapStore.loadIssueList();
       });
@@ -200,7 +201,7 @@ export default DragSource(
       }
 
       // console.log(storyMapDragVO);
-      storyMove(storyMapDragVO).then(() => {
+      storyMapApi.move(storyMapDragVO).then(() => {
         StoryMapStore.setClickIssue(null);
         // StoryMapStore.removeStoryFromStoryMap(story);
         StoryMapStore.getStoryMap();

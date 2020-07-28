@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
-import {
-  Page, Header, Content, stores,
-} from '@choerodon/boot';
+import { observer } from 'mobx-react';
+import { stores } from '@choerodon/boot';
 import {
   Modal, Form, Radio, Select, DatePicker, Icon,
 } from 'choerodon-ui';
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
+import { versionApi } from '@/api';
 import ReleaseStore from '../../../stores/project/release/ReleaseStore';
 
 const { Sidebar } = Modal;
@@ -38,7 +37,7 @@ class PublicRelease extends Component {
             data.targetVersionId = values.moveVersion;
           }
         }
-        ReleaseStore.axiosPublicRelease(data).then((res) => {
+        versionApi.publish(data).then((res) => {
           onCancel();
           refresh();
         }).catch((error) => {
@@ -50,7 +49,7 @@ class PublicRelease extends Component {
   goIssue() {
     const { history } = this.props;
     const urlParams = AppState.currentMenuType;
-    history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramType=version&paramId=${ReleaseStore.getVersionDetail.versionId}&paramName=${encodeURIComponent(`版本${ReleaseStore.getVersionDetail.name}中的问题`)}&paramResolution=true&paramUrl=release`);
+    history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramType=version&paramId=${encodeURIComponent(ReleaseStore.getVersionDetail.versionId)}&paramName=${encodeURIComponent(`版本${ReleaseStore.getVersionDetail.name}中的问题`)}&paramResolution=true&paramUrl=release`);
   }
 
   renderRadioDisabled() {
@@ -114,14 +113,14 @@ class PublicRelease extends Component {
                             label="未解决的问题"
                           >
                             <Radio style={{ display: 'block', height: 20, marginTop: 10 }} value={1}>
-                              {'忽略并继续发布'}
+                              忽略并继续发布
                             </Radio>
                             <Radio
                               style={{ display: 'block', height: 20, marginTop: 10 }}
                               value={2}
                               disabled={this.renderRadioDisabled()}
                             >
-                              {'移动问题到版本'}
+                              移动问题到版本
                             </Radio>
                           </RadioGroup>,
                         )}

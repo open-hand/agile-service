@@ -5,10 +5,10 @@ import {
 } from 'choerodon-ui';
 import _ from 'lodash';
 import { withRouter } from 'react-router-dom';
+import { sprintApi } from '@/api';
 import TypeTag from '../../../../components/TypeTag';
 import PriorityTag from '../../../../components/PriorityTag';
 import StatusTag from '../../../../components/StatusTag';
-import { loadSprintIssues } from '../../../../api/NewIssueApi';
 import './SprintDetails.less';
 
 const { TabPane } = Tabs;
@@ -93,7 +93,7 @@ class SprintDetails extends Component {
       loading: true,
       done: true,
     });
-    loadSprintIssues(sprintId, 'done')
+    sprintApi.loadSprintIssues(sprintId, 'done')
       .then((res) => {
         this.setState({
           doneIssues: res.list,
@@ -115,7 +115,7 @@ class SprintDetails extends Component {
       loading: true,
       undo: true,
     });
-    loadSprintIssues(sprintId, 'unfinished')
+    sprintApi.loadSprintIssues(sprintId, 'unfinished')
       .then((res) => {
         this.setState({
           undoIssues: res.list,
@@ -136,7 +136,7 @@ class SprintDetails extends Component {
       loading: true,
       undoAndNotEstimated: true,
     });
-    loadSprintIssues(sprintId, 'unfinished')
+    sprintApi.loadSprintIssues(sprintId, 'unfinished')
       .then((res) => {
         this.setState({
           undoAndNotEstimatedIssues: res.list.filter(item => (item.storyPoints === 0 && item.typeCode === 'story') || (item.remainTime === null && item.typeCode === 'task')),
@@ -210,7 +210,7 @@ class SprintDetails extends Component {
     const { history } = this.props;
     const { sprintId } = this.state;
     const urlParams = AppState.currentMenuType;
-    history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${record.issueNum}&paramIssueId=${record.issueId}&paramUrl=iterationBoard/${sprintId}`);
+    history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${encodeURIComponent(urlParams.id)}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${record.issueNum}&paramIssueId=${encodeURIComponent(record.issueId)}&paramUrl=iterationBoard/${sprintId}`);
   }
 
   render() {

@@ -1,9 +1,7 @@
 import { observable, action, computed } from 'mobx';
 import { store } from '@choerodon/boot';
 import _ from 'lodash';
-import {
-  loadSprints, loadSprint, loadSprintIssues, loadChartData, 
-} from '../../../api/NewIssueApi';
+import { sprintApi, reportApi } from '@/api';
 
 @store('ReportStore')
 class ReportStore {
@@ -33,25 +31,25 @@ class ReportStore {
   };
 
   @observable donePagination = {
-    current: 1, 
-    pageSize: 10, 
+    current: 1,
+    pageSize: 10,
     total: undefined,
   };
 
   @observable todoPagination = {
-    current: 1, 
-    pageSize: 10, 
+    current: 1,
+    pageSize: 10,
     total: undefined,
-  }; 
+  };
 
   @observable removePagination = {
-    current: 1, 
-    pageSize: 10, 
+    current: 1,
+    pageSize: 10,
     total: undefined,
   }
 
   init() {
-    loadSprints(['started', 'closed'])
+    sprintApi.loadSprints(['started', 'closed'])
       .then((res) => {
         this.setSprints(res || []);
         if (res && res.length) {
@@ -67,7 +65,7 @@ class ReportStore {
 
   changeCurrentSprint(sprintId) {
     if (sprintId) {
-      loadSprint(sprintId)
+      sprintApi.loadSprint(sprintId)
         .then((res) => {
           this.setCurrentSprint(res || {});
           // ready to load when activeKey change
@@ -97,7 +95,7 @@ class ReportStore {
   }
 
   getChartData() {
-    loadChartData(this.currentSprint.sprintId, 'issueCount').then((res) => {
+    reportApi.loadSprintBurnDown(this.currentSprint.sprintId, 'issueCount').then((res) => {
       const data = res;
       const newData = [];
       for (let index = 0, len = data.length; index < len; index += 1) {
@@ -133,6 +131,7 @@ class ReportStore {
         let rest = 0;
         if (newData[index].type !== 'endSprint') {
           if (index > 0) {
+            // eslint-disable-next-line prefer-destructuring
             rest = newData[index - 1].rest;
           }
         }
@@ -153,7 +152,7 @@ class ReportStore {
 
   loadDoneIssues(page = 1, size = 10) {
     this.setLoading(true);
-    loadSprintIssues(this.currentSprint.sprintId, 'done', page, size)
+    sprintApi.loadSprintIssues(this.currentSprint.sprintId, 'done', page, size)
       .then((res) => {
         this.setDoneIssues(res.list);
         this.setDonePagination({
@@ -167,7 +166,7 @@ class ReportStore {
 
   loadTodoIssues(page = 1, size = 10) {
     this.setLoading(true);
-    loadSprintIssues(this.currentSprint.sprintId, 'unfinished', page, size)
+    sprintApi.loadSprintIssues(this.currentSprint.sprintId, 'unfinished', page, size)
       .then((res) => {
         this.setTodoIssues(res.list);
         this.setTodoPagination({
@@ -181,7 +180,7 @@ class ReportStore {
 
   loadRemoveIssues(page = 0, size = 10) {
     this.setLoading(true);
-    loadSprintIssues(this.currentSprint.sprintId, 'remove', page, size)
+    sprintApi.loadSprintIssues(this.currentSprint.sprintId, 'remove', page, size)
       .then((res) => {
         this.setRemoveIssues(res.list);
         this.setRemovePagination({
@@ -302,7 +301,7 @@ class ReportStore {
         action: '',
       });
     } else {
-      return STATUS_TIP[this.currentSprint.statusCode]; 
+      return STATUS_TIP[this.currentSprint.statusCode];
     }
   }
 }

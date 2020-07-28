@@ -4,13 +4,12 @@ import {
 } from 'mobx';
 import { Choerodon } from '@choerodon/boot';
 import {
-  find, findIndex, max, remove, groupBy, sortBy,
+  find, findIndex, remove, sortBy,
 } from 'lodash';
 import { getProjectId } from '@/utils/common';
 import {
-  getStoryMap, getSideIssueList, createWidth, changeWidth, sort,
-} from '../../../api/StoryMapApi';
-import { loadIssueTypes, loadVersions, loadPriorities } from '../../../api/NewIssueApi';
+  storyMapApi, versionApi, issueTypeApi, priorityApi, 
+} from '@/api';
 
 class StoryMapStore {
   @observable swimLine = localStorage.getItem('agile.StoryMap.SwimLine') || 'none';
@@ -37,8 +36,10 @@ class StoryMapStore {
 
   @observable searchVO = {
     advancedSearchArgs: {
-      versionList: [],
-      statusList: [],
+      components: [],
+      sprints: [],
+      prioritys: [],
+      isCompleted: undefined,
     },
   }
 
@@ -60,6 +61,12 @@ class StoryMapStore {
 
   @observable selectedIssueMap = observable.map({});
 
+  @observable hiddenColumnNoStory = false;
+
+  @action setHiddenColumnNoStory = (data) => {
+    this.hiddenColumnNoStory = data;
+  }
+
   miniMap = {};
 
   @action clear() {
@@ -67,17 +74,31 @@ class StoryMapStore {
     this.storyData = {};
     this.searchVO = {
       advancedSearchArgs: {
-        versionList: [],
-        statusList: [],
+        components: [],
+        sprints: [],
+        prioritys: [],
+        isCompleted: undefined,
       },
     };
     this.versionList = [];
     this.selectedIssueMap.clear();
+    this.hiddenColumnNoStory = false;
+  }
+
+  @action resetSearchVO() {
+    this.searchVO = {
+      advancedSearchArgs: {
+        components: [],
+        sprints: [],
+        prioritys: [],
+        isCompleted: undefined,
+      },
+    };
   }
 
   getStoryMap = () => {
     this.setLoading(true);
-    Promise.all([getStoryMap(this.searchVO), loadIssueTypes(), loadVersions(), loadPriorities()]).then(([storyMapData, issueTypes, versionList, prioritys]) => {
+    Promise.all([storyMapApi.getStoryMap(this.searchVO), issueTypeApi.loadAllWithStateMachineId(), versionApi.loadNamesByStatus(), priorityApi.loadByProject()]).then(([storyMapData, issueTypes, versionList, prioritys]) => {
       let epicWithFeature = storyMapData.epics || storyMapData.epicWithFeature;
       const { featureWithoutEpic = [] } = storyMapData;
       epicWithFeature = sortBy(epicWithFeature, 'epicRank');
@@ -93,14 +114,14 @@ class StoryMapStore {
       this.initVersionList(versionList);
       this.initStoryData(newStoryMapData);
       this.setLoading(false);
-    }).catch((error) => {  
+    }).catch((error) => {
       Choerodon.prompt(error);
       this.setLoading(false);
     });
   }
 
   loadIssueList = () => {
-    getSideIssueList(this.sideSearchVO).then((res) => {
+    storyMapApi.getDemands(this.sideSearchVO).then((res) => {
       this.setIssueList(res.demandStoryList);
     });
   }
@@ -478,7 +499,7 @@ class StoryMapStore {
       type,
     };
     if (!targetWidth) {
-      createWidth(storyMapWidthVO).then((res) => {
+      storyMapApi.createWidth(storyMapWidthVO).then((res) => {
         if (res.failed) {
           this.setFeatureWidth({
             epicId,
@@ -496,7 +517,7 @@ class StoryMapStore {
         });
       });
     } else {
-      changeWidth(storyMapWidthVO).then((res) => {
+      storyMapApi.changeWidth(storyMapWidthVO).then((res) => {
         if (res.failed) {
           this.setFeatureWidth({
             epicId,
@@ -545,7 +566,7 @@ class StoryMapStore {
       referenceIssueId: destination.issueId,
     };
 
-    sort(sortVO).then(() => {
+    storyMapApi.sort(sortVO).then(() => {
       // this.getStoryMap();
       const [removed] = this.storyMapData.epicWithFeature.splice(sourceIndex, 1);
       this.storyMapData.epicWithFeature.splice(resultIndex, 0, removed);

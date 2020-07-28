@@ -1,7 +1,9 @@
 package io.choerodon.agile.api.vo;
 
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
 
@@ -12,15 +14,19 @@ import java.util.List;
 public class StoryMapDragVO {
 
     @ApiModelProperty(value = "要关联的史诗id")
+    @Encrypt(ignoreValue = {"0"})
     private Long epicId;
 
     @ApiModelProperty(value = "要关联的版本id")
+    @Encrypt(ignoreValue = {"0"})
     private Long versionId;
 
     @ApiModelProperty(value = "问题id列表，移动到史诗，配合epicId使用")
+    @Encrypt
     private List<Long> epicIssueIds;
 
     @ApiModelProperty(value = "问题id列表，移动到版本，配合versionId使用")
+    @Encrypt
     private List<Long> versionIssueIds;
 
     @ApiModelProperty(value = "要删除的版本与问题关联数据")

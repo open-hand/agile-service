@@ -17,6 +17,7 @@ import StateStore from '../../../../stores/organization/state';
 import { getByteLen, getStageMap, getStageList } from '@/utils/stateMachine';
 
 import './EditStateMachine.less';
+import { statusApi, stateMachineApi } from '@/api';
 
 const prefixCls = 'issue-state-machine';
 const { AppState } = stores;
@@ -387,7 +388,7 @@ class EditStateMachine extends Component {
     const { StateMachineStore, intl } = this.props;
     const orgId = AppState.currentMenuType.organizationId;
     if (value && value.trim()) {
-      const res = await StateMachineStore.checkStateName(orgId, value);
+      const res = await statusApi.checkName(value);
       if (res && res.statusExist) {
         callback(intl.formatMessage({ id: 'priority.create.name.error' }));
       } else {
@@ -410,8 +411,7 @@ class EditStateMachine extends Component {
       } else {
         const source = _.find(nodeData, item => item.statusId.toString() === startNodeId);
         const target = _.find(nodeData, item => item.statusId.toString() === endNodeId);
-        const res = await StateMachineStore.checkTransferName(
-          orgId,
+        const res = await stateMachineApi.checkTransferName(
           source.id,
           target.id,
           id,
@@ -572,7 +572,7 @@ class EditStateMachine extends Component {
 
   loadStateList = () => {
     const { organizationId, nodeData } = this.state;
-    StateStore.loadAllState(organizationId).then((data) => {
+    statusApi.loadAll().then((data) => {
       if (data && data.failed) {
         Choerodon.prompt(data.message);
       } else {
@@ -598,7 +598,7 @@ class EditStateMachine extends Component {
     this.setState({
       isLoading: true,
     });
-    StateMachineStore.addStateMachineNode(organizationId, stateMachineData.id, node)
+    stateMachineApi.addNode(stateMachineData.id, node)
       .then((nodeData) => {
         if (nodeData && nodeData.failed) {
           Choerodon.prompt(nodeData.message);
@@ -625,8 +625,7 @@ class EditStateMachine extends Component {
     this.setState({
       isLoading: true,
     });
-    return StateMachineStore
-      .updateStateMachineNode(organizationId, data.id, stateMachineData.id, data);
+    return stateMachineApi.updateNode(stateMachineData.id, data.id, data)
   };
 
   addStateMachineTransfer = (data) => {
@@ -642,7 +641,7 @@ class EditStateMachine extends Component {
     this.setState({
       isLoading: true,
     });
-    StateMachineStore.addStateMachineTransfer(organizationId, stateMachineData.id, node)
+    stateMachineApi.addTransfer(stateMachineData.id, node)
       .then((item) => {
         if (item && item.failed) {
           Choerodon.prompt(item.message);
@@ -668,8 +667,7 @@ class EditStateMachine extends Component {
     this.setState({
       isLoading: true,
     });
-    return StateMachineStore
-      .updateStateMachineTransfer(organizationId, data.id, stateMachineData.id, data);
+    return stateMachineApi.updateTransfer(stateMachineData.id, data.id, data);
   };
 
   // DOUBLE CLICK NODE or TRANSFER
@@ -925,9 +923,7 @@ class EditStateMachine extends Component {
       stateMachineData, organizationId,
     } = this.state;
     const that = this;
-    StateMachineStore.checkDeleteNode(
-      organizationId, cell.statusId, stateMachineData.id,
-    ).then((data) => {
+    stateMachineApi.checkBeforeDeleteNode(cell.statusId, stateMachineData.id).then((data) => {
       if (data && !data.failed) {
         if (data.canDelete) {
           confirm({
@@ -994,10 +990,7 @@ class EditStateMachine extends Component {
           });
         });
       }
-
-      StateMachineStore.deleteStateMachineNode(
-        organizationId, cell.nodeId, stateMachineData.id,
-      ).then((data) => {
+      stateMachineApi.deleteNode(stateMachineData.id, cell.nodeId).then((data) => {
         this.setState({
           loading: false,
         });
@@ -1038,8 +1031,7 @@ class EditStateMachine extends Component {
       });
     } else {
       const targetNode = cell.target;
-      StateMachineStore
-        .deleteStateMachineTransfer(organizationId, cell.transferId, stateMachineData.id)
+      stateMachineApi.deleteTransfer(stateMachineData.id, cell.transferId)
         .then((data) => {
           this.setState({
             loading: false,
@@ -1192,19 +1184,18 @@ class EditStateMachine extends Component {
     this.setState({
       deleteLoading: true,
     });
-    StateMachineStore.deleteDraft(organizationId, stateMachineId)
-      .then((data) => {
-        this.setState({
-          deleteLoading: true,
-        });
-        if (data) {
-          history.push(`/agile/states/state-machine/edit/${stateMachineId}/state_machine_active?type=organization&id=${id}&name=${encodeURIComponent(name)}&organizationId=${organizationId}&orgId=${organizationId}`);
-        }
-      }).catch(() => {
-        this.setState({
-          deleteLoading: true,
-        });
+    stateMachineApi.deleteDraft(stateMachineId).then((data) => {
+      this.setState({
+        deleteLoading: true,
       });
+      if (data) {
+        history.push(`/agile/states/state-machine/edit/${stateMachineId}/state_machine_active?type=organization&id=${id}&name=${encodeURIComponent(name)}&organizationId=${organizationId}&orgId=${organizationId}`);
+      }
+    }).catch(() => {
+      this.setState({
+        deleteLoading: true,
+      });
+    });
   };
 
   handlePublish = () => {
@@ -1214,7 +1205,7 @@ class EditStateMachine extends Component {
     this.setState({
       publishLoading: true,
     });
-    StateMachineStore.publishStateMachine(organizationId, stateMachineData.id).then((data) => {
+    stateMachineApi.publish(stateMachineData.id).then((data) => {
       this.setState({
         publishLoading: false,
       });
@@ -1245,7 +1236,7 @@ class EditStateMachine extends Component {
       allChecked: e.target.checked,
     });
     if (e.target.checked) {
-      StateMachineStore.linkAllToNode(organizationId, selectedCell.nodeId, stateMachineData.id)
+      stateMachineApi.createAllTransferToNode(selectedCell.nodeId, stateMachineData.id)
         .then((item) => {
           transferData.push(item);
           selectedCell.allStatusTransformId = item.id;
@@ -1255,7 +1246,7 @@ class EditStateMachine extends Component {
           });
         });
     } else {
-      StateMachineStore.deleteAllToNode(organizationId, selectedCell.allStatusTransformId)
+      stateMachineApi.deleteAllTransferToNode(selectedCell.allStatusTransformId)
         .then(() => {
           const cells = [];
           cells.push(this.graph.getCell(`all${selectedCell.nodeId}`));
@@ -1281,11 +1272,10 @@ class EditStateMachine extends Component {
     form.validateFieldsAndScroll((err, data) => {
       if (!err) {
         const postData = data;
-        postData.organizationId = organizationId;
         this.setState({
           submitting: true,
         });
-        StateStore.createState(organizationId, postData)
+        statusApi.create(postData)
           .then((res) => {
             if (res && res.failed) {
               Choerodon.prompt(res.message);
@@ -1345,7 +1335,7 @@ class EditStateMachine extends Component {
           [code]: this.state[code],
           objectVersionNumber,
         };
-        StateMachineStore.updateStateMachine(orgId, id, data).then(() => {
+        stateMachineApi.update(id, data).then(() => {
           this.refresh();
           this.setState({
             currentRae: undefined,
@@ -1375,7 +1365,7 @@ class EditStateMachine extends Component {
       [code]: newName,
     });
     if (name !== newName && code === 'name') {
-      const res = await StateMachineStore.checkName(orgId, newName);
+      const res = await stateMachineApi.checkName(newName);
       if (res) {
         error = intl.formatMessage({ id: 'priority.create.name.error' });
       }
@@ -1402,6 +1392,11 @@ class EditStateMachine extends Component {
       })
     }
   };
+  getDisabled() {
+    const { stateMachineData } = this.state;
+    const { applyTypes = [] } = stateMachineData;
+    return applyTypes.includes('backlog')
+  }
   render() {
     const { intl } = this.props;
     const {
@@ -1421,15 +1416,16 @@ class EditStateMachine extends Component {
       isSelect,
     } = this.state;
     const dataSource = nodeData && nodeData.slice();
+    const disabled = this.getDisabled()
     _.remove(dataSource, item => item.statusId === 0);
     const menu = AppState.currentMenuType;
     const {
       type, id, organizationId: orgId, name,
     } = menu;
-
+    console.log(this.state)
     const graphHeader = (
       <React.Fragment>
-        <Button onClick={() => this.toolbarAdd('transfer')} className="graph-toolbar-button" icon="add"><FormattedMessage id="stateMachine.transfer.add" /></Button>
+        {!disabled && <Button onClick={() => this.toolbarAdd('transfer')} className="graph-toolbar-button" icon="add"><FormattedMessage id="stateMachine.transfer.add" /></Button>}
         <Checkbox defaultChecked onClick={this.handleCheckChange} className="graph-toolbar-checkbox"><FormattedMessage id="stateMachine.transfer.display" /></Checkbox>
       </React.Fragment>
     );
@@ -1500,9 +1496,9 @@ class EditStateMachine extends Component {
     const { headerBtnVisible } = this.state;
     return (
       <Page
-      service={[
-        'choerodon.code.organization.setting.issue.states.ps.state-machine',
-      ]}
+        service={[
+          'choerodon.code.organization.setting.issue.states.ps.state-machine',
+        ]}
       >
         <Header
           title={<FormattedMessage id={status === 'state_machine_active' ? 'stateMachine.edit.avtive' : 'stateMachine.edit'} />}
@@ -1568,7 +1564,7 @@ class EditStateMachine extends Component {
               </ReadAndEdit> */}
             </div>
             {/**  */}
-            {status && status === 'state_machine_active' && (
+            {status && status === 'state_machine_active' && !disabled && (
               <div className={`${prefixCls}-header-tip`}>
                 <span className="icon icon-warning" />
                 <div className={`${prefixCls}-header-tip-text`}>

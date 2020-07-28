@@ -4,7 +4,7 @@ import {
   Upload, Button, Icon, Tooltip,
 } from 'choerodon-ui';
 import { stores, Choerodon } from '@choerodon/boot';
-import { deleteFile } from '../../api/FileApi';
+import { fileApi } from '@/api';
 import SingleFileUpload from '../SingleFileUpload';
 import './UploadButtonNow.less';
 
@@ -25,7 +25,7 @@ function UploadButtonNow(props) {
     const index = fileList.indexOf(file);
     const newFileList = fileList.slice();
     if (onRemove) {
-      deleteFile(file.uid)
+      fileApi.deleteFile(file.uid)
         .then((response) => {
           if (response) {
             newFileList.splice(index, 1);

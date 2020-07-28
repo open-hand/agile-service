@@ -1,5 +1,8 @@
 package io.choerodon.agile.infra.dto;
 
+
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.util.List;
 
 /**
@@ -8,18 +11,22 @@ import java.util.List;
  */
 public class StoryMapStoryDTO {
 
+    @Encrypt
     private Long issueId;
 
     private String issueNum;
 
     private String summary;
 
+    @Encrypt(ignoreValue = {"0"})
     private Long epicId;
 
     private Boolean completed;
 
+    @Encrypt
     private Long issueTypeId;
 
+    @Encrypt
     private Long statusId;
 
     private List<StoryMapVersionDTO> storyMapVersionDTOList;

@@ -3,14 +3,18 @@ package io.choerodon.agile.api.controller.v1;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.PriorityService;
 import io.choerodon.agile.app.service.ProjectConfigService;
+
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
+import org.hzero.starter.keyencrypt.core.IEncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +41,8 @@ public class SchemeController extends BaseController {
     private PriorityService priorityService;
     @Autowired
     private ProjectUtil projectUtil;
+    @Autowired
+    private IEncryptionService encryptionService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询项目的问题类型列表")
@@ -56,9 +62,9 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "查询项目下某个问题类型拥有的转换（包含可以转换到的状态）")
     @GetMapping(value = "/schemes/query_transforms")
     public ResponseEntity<List<TransformVO>> queryTransformsByProjectId(@PathVariable("project_id") Long projectId,
-                                                                        @RequestParam("current_status_id") Long currentStatusId,
-                                                                        @RequestParam("issue_id") Long issueId,
-                                                                        @RequestParam("issue_type_id") Long issueTypeId,
+                                                                        @RequestParam("current_status_id") @Encrypt Long currentStatusId,
+                                                                        @RequestParam("issue_id") @Encrypt Long issueId,
+                                                                        @RequestParam("issue_type_id") @Encrypt Long issueTypeId,
                                                                         @RequestParam("apply_type") String applyType) {
         return new ResponseEntity<>(projectConfigService.queryTransformsByProjectId(projectId, currentStatusId, issueId, issueTypeId, applyType), HttpStatus.OK);
     }
@@ -66,16 +72,17 @@ public class SchemeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询项目下所有问题类型所有状态对应的转换")
     @GetMapping(value = "/schemes/query_transforms_map")
-    public ResponseEntity<Map<Long, Map<Long, List<TransformVO>>>> queryTransformsMapByProjectId(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<Map<String, Map<String, List<?>>>> queryTransformsMapByProjectId(@PathVariable("project_id") Long projectId,
                                                                                                  @RequestParam("apply_type") String applyType) {
-        return new ResponseEntity<>(projectConfigService.queryTransformsMapByProjectId(projectId, applyType), HttpStatus.OK);
+
+        return new ResponseEntity<>(EncryptionUtils.encryptMapValueMap(projectConfigService.queryTransformsMapByProjectId(projectId, applyType)), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询项目下某个问题类型的所有状态")
     @GetMapping(value = "/schemes/query_status_by_issue_type_id")
     public ResponseEntity<List<StatusVO>> queryStatusByIssueTypeId(@PathVariable("project_id") Long projectId,
-                                                                   @RequestParam("issue_type_id") Long issueTypeId,
+                                                                   @RequestParam("issue_type_id") @Encrypt Long issueTypeId,
                                                                    @RequestParam("apply_type") String applyType) {
         return new ResponseEntity<>(projectConfigService.queryStatusByIssueTypeId(projectId, issueTypeId, applyType), HttpStatus.OK);
     }
@@ -93,7 +100,7 @@ public class SchemeController extends BaseController {
     @GetMapping(value = "/schemes/query_state_machine_id")
     public ResponseEntity<Long> queryStateMachineId(@PathVariable("project_id") Long projectId,
                                                     @RequestParam("apply_type") String applyType,
-                                                    @RequestParam("issue_type_id") Long issueTypeId) {
+                                                    @RequestParam("issue_type_id") @Encrypt Long issueTypeId) {
         return new ResponseEntity<>(projectConfigService.queryStateMachineId(projectId, applyType, issueTypeId), HttpStatus.OK);
     }
 
@@ -118,7 +125,7 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "【敏捷】校验是否能删除状态")
     @GetMapping(value = "/schemes/check_remove_status_for_agile")
     public ResponseEntity<Boolean> checkRemoveStatusForAgile(@PathVariable("project_id") Long projectId,
-                                                             @RequestParam("status_id") Long statusId,
+                                                             @RequestParam("status_id") @Encrypt Long statusId,
                                                              @RequestParam String applyType) {
         return new ResponseEntity<>(projectConfigService.checkRemoveStatusForAgile(projectId, statusId, applyType), HttpStatus.OK);
     }
@@ -148,15 +155,16 @@ public class SchemeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询工作流第一个状态")
     @GetMapping("/status/query_first_status")
-    public ResponseEntity<Long> queryWorkFlowFirstStatus(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<String> queryWorkFlowFirstStatus(@ApiParam(value = "项目id", required = true)
                                                          @PathVariable("project_id") Long projectId,
                                                          @ApiParam(value = "applyType", required = true)
                                                          @RequestParam String applyType,
                                                          @ApiParam(value = "issueTypeId", required = true)
-                                                         @RequestParam Long issueTypeId,
+                                                         @RequestParam @Encrypt Long issueTypeId,
                                                          @ApiParam(value = "organizationId", required = true)
                                                          @RequestParam Long organizationId) {
         return Optional.ofNullable(projectConfigService.queryWorkFlowFirstStatus(projectId, applyType, issueTypeId, organizationId))
+                .map(initStatusId -> encryptionService.encrypt(initStatusId.toString(), EncryptionUtils.BLANK_KEY))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.firstStatus.get"));
     }

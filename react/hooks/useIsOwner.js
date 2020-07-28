@@ -1,10 +1,10 @@
 import { createContext, useContext } from 'react';
-import { getIsOwner } from '@/api/CommonApi';
+import { commonApi } from '@/api';
 
 const IsOwnerContext = createContext({
   data: false,
   refresh: async () => {
-    const isOwner = await getIsOwner();
+    const isOwner = await commonApi.getUserRolesInProject();
     return isOwner;
   },
 });

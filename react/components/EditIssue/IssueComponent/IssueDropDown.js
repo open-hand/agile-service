@@ -2,13 +2,11 @@ import React, { useContext } from 'react';
 import {
   Dropdown, Menu, Button, Modal,
 } from 'choerodon-ui';
-import { Permission } from '@choerodon/boot';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
+import { issueApi } from '@/api';
 import useIsOwner from '@/hooks/useIsOwner';
-
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
-import { deleteIssue } from '../../../api/NewIssueApi';
 
 const { confirm } = Modal;
 const IssueDropDown = ({
@@ -34,6 +32,7 @@ const IssueDropDown = ({
     // 可以删自己创建的
     disableDelete = loginUserId !== createdBy;
   }
+
   const handleDeleteIssue = () => {
     confirm({
       width: 560,
@@ -50,7 +49,7 @@ const IssueDropDown = ({
           </div>
         ),
       onOk() {
-        return deleteIssue(issueId, createdBy)
+        return issueApi.delete(issueId, createdBy)
           .then((res) => {
             if (onDeleteIssue) {
               onDeleteIssue();

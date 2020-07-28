@@ -1,8 +1,10 @@
 package io.choerodon.agile.api.vo;
 
 
+
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * 敏捷开发Issue标签
@@ -13,6 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class IssueLabelVO {
 
     @ApiModelProperty(value = "标签id")
+    @Encrypt
     private Long labelId;
 
     @ApiModelProperty(value = "标签名称")

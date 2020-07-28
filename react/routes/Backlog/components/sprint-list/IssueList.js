@@ -26,6 +26,7 @@ function IssueList({ data, sprintId }) {
       </Draggable>
     );
   }, [data]);
+
   return (
     <Droppable
       droppableId={String(sprintId)}
@@ -78,17 +79,17 @@ function IssueList({ data, sprintId }) {
               )}
             <div style={{ padding: '10px 0px 10px 33px', borderBottom: '0.01rem solid rgba(0, 0, 0, 0.12)' }}>
               <QuickCreateIssue
-                epicId={!isNaN(BacklogStore.getChosenEpic) ? BacklogStore.getChosenEpic : undefined}
-                versionIssueRelVOList={!isNaN(BacklogStore.getChosenVersion) ? [
+                epicId={BacklogStore.getChosenEpic !== 'all' && BacklogStore.getChosenEpic !== 'unset' ? BacklogStore.getChosenEpic : undefined}
+                versionIssueRelVOList={BacklogStore.getChosenVersion !== 'all' && BacklogStore.getChosenVersion !== 'unset' ? [
                   {
                     versionId: BacklogStore.getChosenVersion,
                   },
                 ] : undefined}
                 sprintId={sprintId}
-                chosenFeatureId={!isNaN(BacklogStore.getChosenFeature) ? BacklogStore.getChosenFeature : undefined}
+                chosenFeatureId={BacklogStore.getChosenFeature !== 'all' && BacklogStore.getChosenFeature !== 'unset' ? BacklogStore.getChosenFeature : undefined}
                 onCreate={(res) => {
                   BacklogStore.handleCreateIssue(res, String(sprintId));
-                  BacklogStore.refresh(false, res); // 更新侧边框 
+                  BacklogStore.refresh(false, false); // 更新侧边框 
                 }}
               />
             </div>

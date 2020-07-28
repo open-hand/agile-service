@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.math.BigDecimal;
 
@@ -10,6 +12,7 @@ import java.math.BigDecimal;
 public class AssigneeIssueVO {
 
     @ApiModelProperty(value = "冲刺id")
+    @Encrypt
     private Long sprintId;
 
     @ApiModelProperty(value = "经办人id")

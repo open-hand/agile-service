@@ -1,25 +1,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { userApi, componentApi } from '@/api';
 import {
-  loadIssueTypes, loadStatusList, loadPriorities, loadLabels, loadVersions, loadEpics, loadSprints,
-} from '../../api/NewIssueApi';
+  userApi, componentApi, epicApi, versionApi, issueTypeApi, issueLabelApi, priorityApi, statusApi, 
+} from '@/api';
+import { sprintApi } from '@/api';
 
 const requests = {
   issueType: {
     textField: 'name',
     valueField: 'id',
-    request: loadIssueTypes,
+    request: issueTypeApi.loadAllWithStateMachineId.bind(issueTypeApi),
   },
   issueStatus: {
     textField: 'name',
     valueField: 'id',
-    request: loadStatusList,
+    request: statusApi.loadByProject.bind(statusApi),
   },
   priority: {
     textField: 'name',
     valueField: 'id',
-    request: loadPriorities,
+    request: priorityApi.loadByProject.bind(priorityApi),
   },
   user: {
     textField: 'name',
@@ -29,17 +29,17 @@ const requests = {
   sprint: {
     textField: 'sprintName',
     valueField: 'sprintId',
-    request: loadSprints,
+    request: sprintApi.loadSprints,
   },
   version: {
     textField: 'name',
     valueField: 'versionId',
-    request: loadVersions,
+    request: versionApi.loadNamesByStatus.bind(versionApi),
   },
   label: {
     textField: 'labelName',
     valueField: 'labelId',
-    request: loadLabels,
+    request: () => issueLabelApi.loads(),
   },
   component: {
     isContent: true,
@@ -50,7 +50,7 @@ const requests = {
   epic: {
     textField: 'epicName',
     valueField: 'issueId',
-    request: loadEpics,
+    request: () => epicApi.loadEpicsForSelect(),
   },
 };
 

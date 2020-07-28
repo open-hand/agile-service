@@ -1,10 +1,11 @@
 import React, { Component, createRef } from 'react';
 import moment from 'moment';
 import { observer } from 'mobx-react';
-import { DatePicker, message, Form } from 'choerodon-ui';
+import { DatePicker, Form } from 'choerodon-ui';
 import TextEditToggle from '@/components/TextEditToggle';
-import { getProjectId, catchFailed } from '@/utils/common';
+import { getProjectId } from '@/utils/common';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
+import { sprintApi } from '@/api';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 
 const { Text, Edit } = TextEditToggle;
@@ -29,7 +30,8 @@ const FormItem = Form.Item;
       startDate,
       endDate,
     };
-    BacklogStore.axiosUpdateSprint(req, IsInProgramStore.isShowFeature).then(res => catchFailed(res)).then((res) => {
+    
+    sprintApi.updateSprint(req, IsInProgramStore.isShowFeature).then((res) => {
       BacklogStore.updateSprint(sprintId, {
         objectVersionNumber: res.objectVersionNumber,
         startDate: res.startDate,
@@ -43,8 +45,7 @@ const FormItem = Form.Item;
           BacklogStore.loadPiInfoAndSprint();
         }
       }
-    }).catch((error) => {
-      message.error(error);
+    }).catch(() => {
     });
   };
 

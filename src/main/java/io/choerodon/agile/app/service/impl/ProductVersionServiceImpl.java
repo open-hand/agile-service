@@ -173,6 +173,7 @@ public class ProductVersionServiceImpl implements ProductVersionService {
         if (!projectId.equals(versionUpdateVO.getProjectId())) {
             throw new CommonException(NOT_EQUAL_ERROR);
         }
+        versionUpdateVO.setVersionId(versionId);
         ProductVersionDTO productVersionDTO = productVersionUpdateAssembler.toTarget(versionUpdateVO, ProductVersionDTO.class);
         productVersionValidator.checkDate(productVersionDTO);
         productVersionValidator.judgeName(productVersionDTO.getProjectId(), productVersionDTO.getVersionId(), productVersionDTO.getName());

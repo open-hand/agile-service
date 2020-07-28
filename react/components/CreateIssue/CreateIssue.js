@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import {
-  stores, Content, axios, Choerodon, 
+  stores, Content, Choerodon, 
 } from '@choerodon/boot';
 import { map, find } from 'lodash';
 import {
@@ -8,18 +8,18 @@ import {
 } from 'choerodon-ui';
 import moment from 'moment';
 import reactComponentDebounce from '@/components/DebounceComponent';
-import { featureApi } from '@/api';
+import {
+  featureApi, epicApi, fieldApi, issueTypeApi, 
+} from '@/api';
 import {
   beforeTextUpload, handleFileUpload, validateFile, normFile, 
 } from '@/utils/richText';
 import {
   getProjectName, getProjectId,
 } from '@/utils/common';
+import { issueApi } from '@/api';
 import { UploadButton } from '../CommonComponent';
 import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
-import {
-  createIssue, getFields, createFieldValue, loadIssue, loadIssueTypes,
-} from '../../api/NewIssueApi';
 import SelectNumber from '../SelectNumber';
 import WYSIWYGEditor from '../WYSIWYGEditor';
 import TypeTag from '../TypeTag';
@@ -48,7 +48,7 @@ const bugDefaultDes = [{ attributes: { bold: true }, insert: '步骤' }, { inser
 const defaultProps = {
   mode: 'default',
   applyType: 'agile',
-  request: createIssue,
+  request: issueApi.create,
   defaultTypeCode: 'story',
   title: '创建问题',
   contentTitle: `在项目“${getProjectName()}”中创建问题`,
@@ -100,7 +100,7 @@ class CreateIssue extends Component {
   setDefaultSprint = () => {
     const { mode, parentIssueId, relateIssueId } = this.props;
     if (['sub_task', 'sub_bug'].includes(mode)) {
-      loadIssue(parentIssueId || relateIssueId).then((res) => {
+      issueApi.load(parentIssueId || relateIssueId).then((res) => {
         const { form: { setFieldsValue } } = this.props;
         const { activeSprint } = res;
         if (activeSprint) {
@@ -137,7 +137,7 @@ class CreateIssue extends Component {
           });
         }
       });
-      createFieldValue(res.issueId, 'agile_issue', fieldList);
+      fieldApi.createFieldValue(res.issueId, 'agile_issue', fieldList);
       if (fileList && fileList.length > 0) {
         const config = {
           issueType: res.statusId,
@@ -165,7 +165,7 @@ class CreateIssue extends Component {
 
   loadIssueTypes = () => {
     const { applyType } = this.props;
-    loadIssueTypes(applyType).then((res) => {
+    issueTypeApi.loadAllWithStateMachineId(applyType).then((res) => {
       if (res && res.length) {
         const defaultType = this.getDefaultType(res);
         const param = {
@@ -173,7 +173,7 @@ class CreateIssue extends Component {
           context: defaultType.typeCode,
           pageCode: 'agile_issue_create',
         };
-        getFields(param).then((fields) => {
+        fieldApi.getFields(param).then((fields) => {
           this.setState({
             fields,
             originIssueTypes: res,
@@ -383,7 +383,7 @@ class CreateIssue extends Component {
 
   checkEpicNameRepeat = (rule, value, callback) => {
     if (value && value.trim()) {
-      axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/check_epic_name?epicName=${value.trim()}`)
+      epicApi.checkName(value)
         .then((res) => {
           if (res) {
             callback('史诗名称重复');
@@ -434,7 +434,7 @@ class CreateIssue extends Component {
                           context: typeCode,
                           pageCode: 'agile_issue_create',
                         };
-                        getFields(param, typeCode).then((res) => {
+                        fieldApi.getFields(param).then((res) => {
                           this.setState({
                             fields: res,
                           });
@@ -498,6 +498,7 @@ class CreateIssue extends Component {
                   type="user"
                   label="经办人"
                   style={{ flex: 1 }}
+                  loadWhenMount
                   getPopupContainer={triggerNode => triggerNode.parentNode}
                   allowClear
                 />,

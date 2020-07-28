@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotNull;
 
@@ -15,10 +17,12 @@ public class ColumnWithMaxMinNumVO {
     private Long projectId;
 
     @ApiModelProperty(value = "看板id")
+    @Encrypt
     private Long boardId;
 
     @ApiModelProperty(value = "列id")
     @NotNull(message = "列id不能为空")
+    @Encrypt
     private Long columnId;
 
     @ApiModelProperty(value = "列问题数量最大值")

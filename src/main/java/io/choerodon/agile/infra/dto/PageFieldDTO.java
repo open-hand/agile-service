@@ -1,8 +1,10 @@
 package io.choerodon.agile.infra.dto;
 
+
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.persistence.*;
 
@@ -16,8 +18,11 @@ import javax.persistence.*;
 public class PageFieldDTO extends AuditDomain {
     @Id
     @GeneratedValue
+    @Encrypt
     private Long id;
+    @Encrypt
     private Long pageId;
+    @Encrypt
     private Long fieldId;
     @Column(name = "is_display")
     private Boolean display;

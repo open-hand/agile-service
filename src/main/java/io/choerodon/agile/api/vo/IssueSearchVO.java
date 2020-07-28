@@ -1,6 +1,8 @@
 package io.choerodon.agile.api.vo;
 
+
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.List;
 public class IssueSearchVO {
 
     @ApiModelProperty(value = "问题主键id")
+    @Encrypt
     private Long issueId;
 
     @ApiModelProperty(value = "问题编号")
@@ -23,12 +26,14 @@ public class IssueSearchVO {
     private String summary;
 
     @ApiModelProperty(value = "报告人id")
+    @Encrypt
     private Long reporterId;
 
     @ApiModelProperty(value = "描述")
     private String description;
 
     @ApiModelProperty(value = "经办人id")
+    @Encrypt
     private Long assigneeId;
 
     @ApiModelProperty(value = "经办人名称")
@@ -41,6 +46,7 @@ public class IssueSearchVO {
     private Long projectId;
 
     @ApiModelProperty(value = "状态id")
+    @Encrypt
     private Long statusId;
 
     @ApiModelProperty(value = "状态类别")
@@ -50,6 +56,7 @@ public class IssueSearchVO {
     private String statusName;
 
     @ApiModelProperty(value = "史诗id")
+    @Encrypt(ignoreValue = {"0"})
     private Long epicId;
 
     @ApiModelProperty(value = "史诗名称")
@@ -65,12 +72,14 @@ public class IssueSearchVO {
     private String priorityName;
 
     @ApiModelProperty(value = "版本id集合")
+    @Encrypt
     private List<Long> versionIds;
 
     @ApiModelProperty(value = "版本名称集合")
     private List<String> versionNames;
 
     @ApiModelProperty(value = "冲刺id")
+    @Encrypt(ignoreValue = {"0"})
     private Long sprintId;
 
     @ApiModelProperty(value = "故事点")
@@ -95,6 +104,7 @@ public class IssueSearchVO {
     private IssueTypeVO issueTypeVO;
 
     @ApiModelProperty(value = "优先级id")
+    @Encrypt
     private Long priorityId;
 
     @ApiModelProperty(value = "经办人登录名称")

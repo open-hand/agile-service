@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import {
   observable, action, computed, toJS,
 } from 'mobx';
@@ -9,12 +8,12 @@ import {
 import { store, stores } from '@choerodon/boot';
 import { Modal } from 'choerodon-ui';
 import Moment from 'moment';
-import { featureApi, sprintApi, piApi } from '@/api';
-import { sort } from '@/api/StoryMapApi';
+import {
+  featureApi, sprintApi, piApi, storyMapApi, issueApi, epicApi, priorityApi, issueTypeApi, commonApi, versionApi, quickFilterApi, 
+} from '@/api';
 import { getProjectId } from '@/utils/common';
 import { extendMoment } from 'moment-range';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
-import { getPiNotDone } from '@/api/FeatureApi';
 
 const moment = extendMoment(Moment);
 const { AppState } = stores;
@@ -135,10 +134,6 @@ class BacklogStore {
     this.projectInfo = data;
   }
 
-  axiosGetProjectInfo() {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/project_info`);
-  }
-
   @computed get getQuickFilters() {
     return toJS(this.quickFilters);
   }
@@ -188,12 +183,9 @@ class BacklogStore {
     return data;
   }
 
-  axiosDeleteSprint(id, isCurrentPi = false) {
-    return axios.delete(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${isCurrentPi ? 'sub_project/' : ''}${id}`);
-  }
 
   axiosGetColorLookupValue() {
-    return axios.get('/agile/v1/lookup_values/epic_color');
+    return commonApi.loadLookupValue('epic_color');
   }
 
   @computed get getColorLookupValue() {
@@ -222,31 +214,6 @@ class BacklogStore {
     this.sprintWidth = document.getElementsByClassName('c7n-backlog-sprint')[0].offsetWidth;
   }
 
-  axiosGetIssueDetail(issueId) {
-    const orgId = AppState.currentMenuType.organizationId;
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/${issueId}${orgId ? `?organizationId=${orgId}` : ''}`);
-  }
-
-
-  axiosGetOpenSprintDetail(sprintId) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${sprintId}`);
-  }
-
-  axiosStartSprint(data, isCurrentPi = false) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${isCurrentPi ? 'sub_project/' : ''}start`, data);
-  }
-
-  axiosCloseSprint(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/complete`, data);
-  }
-
-  axiosGetSprintCompleteMessage(sprintId) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/${sprintId}/names`);
-  }
-
-  axiosEasyCreateIssue(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues?applyType=agile`, data);
-  }
 
   @computed get getOnlyMe() {
     return this.onlyMe;
@@ -264,17 +231,9 @@ class BacklogStore {
     this.recent = data;
   }
 
-  axiosUpdateSprint(data, isCurrentPi = false) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint${isCurrentPi ? '/sub_project' : ''}`, data);
-  }
-
   @action updateSprint(sprintId, newData) {
     const sprint = find(this.sprintData, { sprintId });
     Object.assign(sprint, newData);
-  }
-
-  axiosUpdateVerison(versionId, data) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/update/${versionId}`, data);
   }
 
   @computed get getClickIssueDetail() {
@@ -287,18 +246,6 @@ class BacklogStore {
 
   @computed get getPrevClickedIssue() {
     return this.prevClickedIssue;
-  }
-
-  axiosUpdateIssuesToVersion(versionId, ids) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/to_version/${versionId}`, ids);
-  }
-
-  axiosUpdateIssuesToEpic(epicId, ids) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/to_epic/${epicId}`, ids);
-  }
-
-  axiosUpdateIssuesToFeature(featureId, ids) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/to_feature/${featureId}`, ids);
   }
 
   @computed get getIsLeaveSprint() {
@@ -315,23 +262,6 @@ class BacklogStore {
 
   @action setIsDragging(data) {
     this.isDragging = data;
-  }
-
-  axiosCreateSprint(data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint`, data);
-  }
-
-  axiosUpdateIssuesToSprint(sprintId, data) {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/to_sprint/${sprintId}`, data);
-  }
-
-  axiosUpdateIssue(data) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issues`, data);
-  }
-
-  // 更新特性颜色
-  axiosUpdateFeatureColor(data) {
-    return axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/update_feature`, data);
   }
 
   @computed get getChosenVersion() {
@@ -389,19 +319,6 @@ class BacklogStore {
     this.selectedSprintId = data;
   }
 
-
-  axiosGetEpic() {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/epics`);
-  }
-
-  axiosGetVersion() {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version`);
-  }
-
-  axiosGetNotDoneSprintByPiId(piId) {
-    return axios.get(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/sub_project/list?pi_id=${piId}`);
-  }
-
   @action setSprintData({ backlogData, sprintData }) {
     this.issueMap.set('0', backlogData.backLogIssue ? backlogData.backLogIssue : []);
     const { backLogIssue, backlogIssueCount } = backlogData;
@@ -435,13 +352,6 @@ class BacklogStore {
     this.quickSearchList = data;
   }
 
-  axiosGetQuickSearchList() {
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/quick_filter/query_all`, {
-      contents: [],
-      filterName: '',
-    });
-  }
-
   @observable assigneeFilterIds = [];
 
   @computed get getAssigneeFilterIds() {
@@ -469,27 +379,10 @@ class BacklogStore {
     this.filterSprintAssign.delete(sprintId);
   }
 
-  axiosGetSprint = () => {
-    const orgId = AppState.currentMenuType.organizationId;
-    return axios.post(`/agile/v1/projects/${AppState.currentMenuType.id}/sprint/issues?organizationId=${orgId}&quickFilterIds=${this.quickFilters}${this.assigneeFilterIds.length > 0 ? `&assigneeFilterIds=${this.assigneeFilterIds}` : ''}`, this.filter);
-  }
-
-
-  handleVersionDrap = data => axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/product_version/drag`, data);
-
-  axiosGetWorkSetting(year) {
-    const proId = AppState.currentMenuType.id;
-    const orgId = AppState.currentMenuType.organizationId;
-    return axios.get(`/iam/choerodon/v1/projects/${proId}/time_zone_work_calendars/time_zone_detail/${orgId}?year=${year}`);
-  }
+  axiosGetSprint = () => sprintApi.getSprintAndIssues(this.quickFilters, this.assigneeFilterIds, this.filter)
 
   @computed get getIssueTypes() {
     return this.issueTypes;
-  }
-
-  axiosGetIssueTypes() {
-    const proId = AppState.currentMenuType.id;
-    return axios.get(`/agile/v1/projects/${proId}/schemes/query_issue_types_with_sm_id?apply_type=agile`);
   }
 
   @computed get getDefaultPriority() {
@@ -498,11 +391,6 @@ class BacklogStore {
 
   @action setDefaultPriority(data) {
     this.defaultPriority = data;
-  }
-
-  axiosGetDefaultPriority() {
-    const proId = AppState.currentMenuType.id;
-    return axios.get(`/agile/v1/projects/${proId}/priority/default`);
   }
 
   @action setSpinIf(data) {
@@ -648,7 +536,7 @@ class BacklogStore {
     const that = this;
     return {
       get(sprintId) {
-        const filterAssignId = that.filterSprintAssign.get(Number(sprintId));
+        const filterAssignId = that.filterSprintAssign.get(sprintId);
         if (filterAssignId) {
           return that.issueMap.get(sprintId) ? that.issueMap.get(sprintId).filter(issue => issue.assigneeId === filterAssignId) : [];
         } else {
@@ -718,7 +606,7 @@ class BacklogStore {
     // this.multiSelected = observable.map();
     // this.clickIssueDetail = {};
     this.onBlurClick();
-    return axios.post(`agile/v1/projects/${AppState.currentMenuType.id}/issues/to_sprint/${destinationId}`, {
+    return sprintApi.addIssues(destinationId, {
       before: destinationIndex === 0,
       issueIds: modifiedArr,
       outsetIssueId: prevIssue ? prevIssue.issueId : 0,
@@ -789,10 +677,10 @@ class BacklogStore {
       before,
       referenceIssueId,
     };
-    sort(sortVO).then(
+    storyMapApi.sort(sortVO).then(
       action('fetchSuccess', (res) => {
         if (!res.message) {
-          this.axiosGetEpic().then((epics) => {
+          epicApi.loadEpics().then((epics) => {
             this.setEpicData(epics);
           });
         } else {
@@ -821,7 +709,7 @@ class BacklogStore {
       before,
       referenceIssueId,
     };
-    sort(sortVO).then(
+    storyMapApi.sort(sortVO).then(
       action('fetchSuccess', (res) => {
         if (!res.message) {
           featureApi.getByPiIdInSubProject(this.selectedPiId, this.selectedSprintId).then((data) => {
@@ -871,10 +759,10 @@ class BacklogStore {
       versionId,
       objectVersionNumber,
     };
-    this.handleVersionDrap(req).then(
+    versionApi.drag(req).then(
       action('fetchSuccess', (res) => {
         if (!res.message) {
-          this.axiosGetVersion().then((versions) => {
+          versionApi.loadAll().then((versions) => {
             this.setVersionData(versions);
           });
         } else {
@@ -890,12 +778,12 @@ class BacklogStore {
     if (data === 'unset') {
       delete this.filter.advancedSearchArgs.epicId;
       this.filter.advancedSearchArgs.noEpic = 'true';
-    } else if (typeof data === 'number') {
-      delete this.filter.advancedSearchArgs.noEpic;
-      this.filter.advancedSearchArgs.epicId = data;
-    } else {
+    } else if (data === 'all') {
       delete this.filter.advancedSearchArgs.noEpic;
       delete this.filter.advancedSearchArgs.epicId;
+    } else {
+      delete this.filter.advancedSearchArgs.noEpic;
+      this.filter.advancedSearchArgs.epicId = data;
     }
   }
 
@@ -904,12 +792,12 @@ class BacklogStore {
     if (data === 'unset') {
       delete this.filter.advancedSearchArgs.featureId;
       this.filter.advancedSearchArgs.noFeature = 'true';
-    } else if (typeof data === 'number') {
-      delete this.filter.advancedSearchArgs.noFeature;
-      this.filter.advancedSearchArgs.featureId = data;
-    } else {
+    } else if (data === 'all') {
       delete this.filter.advancedSearchArgs.noFeature;
       delete this.filter.advancedSearchArgs.featureId;
+    } else {
+      delete this.filter.advancedSearchArgs.noFeature;
+      this.filter.advancedSearchArgs.featureId = data;
     }
   }
 
@@ -918,13 +806,13 @@ class BacklogStore {
     if (data === 'unset') {
       delete this.filter.advancedSearchArgs.versionId;
       this.filter.advancedSearchArgs.noVersion = 'true';
-    } else if (typeof data === 'number') {
-      delete this.filter.advancedSearchArgs.noVersion;
-      this.filter.advancedSearchArgs.versionId = data;
-    } else {
+    } else if (data === 'all') {
       this.filterSelected = false;
       delete this.filter.advancedSearchArgs.noVersion;
       delete this.filter.advancedSearchArgs.versionId;
+    } else {
+      delete this.filter.advancedSearchArgs.noVersion;
+      this.filter.advancedSearchArgs.versionId = data;
     }
   }
 
@@ -1024,9 +912,9 @@ class BacklogStore {
    */
   getSprint = async (setPiIdIf) => {
     const [quickSearch, issueTypes, priorityArr, backlogData] = await Promise.all([
-      this.axiosGetQuickSearchList(),
-      this.axiosGetIssueTypes(),
-      this.axiosGetDefaultPriority(),
+      quickFilterApi.loadAll(),
+      issueTypeApi.loadAllWithStateMachineId(),
+      priorityApi.getDefaultByProject(),
       this.axiosGetSprint(),
     ]);
     await this.getPlanPi(backlogData.sprintData, setPiIdIf);
@@ -1035,7 +923,7 @@ class BacklogStore {
 
   getPlanPi = async (sprintData = this.sprintData, setPiIdIf = true) => {
     if (IsInProgramStore.isInProgram) {
-      const notDonePiList = await getPiNotDone(['todo', 'doing'], IsInProgramStore.program.id);
+      const notDonePiList = await piApi.getPiByPiStatus(['todo', 'doing'], IsInProgramStore.program.id);
       // 为了可以对规划中的冲刺进行时间修改的限制，这里获取对应pi和冲刺
       const piIds = intersection(notDonePiList.map(pi => pi.id), uniq(sprintData.filter(sprint => sprint.planning).map(sprint => sprint.piId)));
       if (piIds.length > 0) {
@@ -1054,7 +942,7 @@ class BacklogStore {
    * 加载版本数据
    */
   loadVersion = () => {
-    this.axiosGetVersion().then((data2) => {
+    versionApi.loadAll().then((data2) => {
       const newVersion = [...data2];
       for (let index = 0, len = newVersion.length; index < len; index += 1) {
         newVersion[index].expand = false;
@@ -1068,7 +956,7 @@ class BacklogStore {
    * 加载史诗
    */
   loadEpic = () => {
-    this.axiosGetEpic().then((data3) => {
+    epicApi.loadEpics().then((data3) => {
       const newEpic = [...data3];
       for (let index = 0, len = newEpic.length; index < len; index += 1) {
         newEpic[index].expand = false;
@@ -1118,7 +1006,7 @@ class BacklogStore {
           </div>
         ),
         onOk() {
-          return this.axiosDeleteSprint(data.sprintId, isCurrentPi).then((res) => {
+          return sprintApi.delete(data.sprintId, isCurrentPi).then((res) => {
             this.refresh();
           }).catch((error) => {
           });
@@ -1128,7 +1016,7 @@ class BacklogStore {
         okType: 'danger',
       });
     } else {
-      this.axiosDeleteSprint(data.sprintId, isCurrentPi).then((res) => {
+      sprintApi.delete(data.sprintId, isCurrentPi).then((res) => {
         this.refresh();
       }).catch((error) => {
       });

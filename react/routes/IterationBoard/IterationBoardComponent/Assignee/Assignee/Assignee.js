@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
 import { Spin } from 'choerodon-ui';
-import { stores, axios } from '@choerodon/boot';
 import ReactEcharts from 'echarts-for-react';
 import _ from 'lodash';
+import { sprintApi } from '@/api';
 import EmptyBlockDashboard from '../../../../../components/EmptyBlockDashboard';
 import pic from '../../EmptyPics/no_sprint.svg';
 import pic2 from '../../EmptyPics/no_version.svg';
 import './Assignee.less';
 
-const { AppState } = stores;
 
 class Assignee extends Component {
   constructor(props) {
@@ -72,9 +71,8 @@ class Assignee extends Component {
   }
 
   loadAssignee(sprintId) {
-    const projectId = AppState.currentMenuType.id;
     this.setState({ loading: true });
-    axios.get(`/agile/v1/projects/${projectId}/iterative_worktable/assignee_id?sprintId=${sprintId}`)
+    sprintApi.getAssigneeDistribute(sprintId)
       .then((res) => {
         const assigneeInfo = this.transformAssigneeInfo(res);
         this.setState({

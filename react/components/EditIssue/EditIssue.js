@@ -10,14 +10,8 @@ import './EditIssue.less';
 import useIsOwner from '@/hooks/useIsOwner';
 import { useIssueTypes } from '@/hooks';
 import {
-  loadBranchs, loadDatalogs, loadLinkIssues,
-  loadIssue, loadWorklogs, loadDocs, getFieldAndValue,
-} from '../../api/NewIssueApi';
-import {
-  loadDatalogs as loadDatalogsProgram,
-  loadIssue as loadIssueProgram,
-  getFieldAndValue as getFieldAndValueProgram,
-} from '../../api/QueryProgramApi';
+  issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, devOpsApi, 
+} from '@/api';
 import RelateStory from '../RelateStory';
 import CopyIssue from '../CopyIssue';
 import ResizeAble from '../ResizeAble';
@@ -67,18 +61,12 @@ function EditIssue() {
   const container = useRef();
   const idRef = useRef();
   const loadIssueDetail = async (paramIssueId) => {
-    if (FieldVersionRef.current) {
-      FieldVersionRef.current.loadIssueVersions();
-    }
-    if (FieldFixVersionRef.current) {
-      FieldFixVersionRef.current.loadIssueVersions();
-    }
     const id = paramIssueId || currentIssueId;
     idRef.current = id;
     setIssueLoading(true);
     try {
       // 1. 加载详情
-      const issue = await (programId ? loadIssueProgram(id, programId) : loadIssue(id));
+      const issue = await (programId ? issueApi.loadUnderProgram(id, programId) : issueApi.load(id));
       if (idRef.current !== id) {
         return;
       }
@@ -92,7 +80,7 @@ function EditIssue() {
         context: issue.typeCode,
         pageCode: 'agile_issue_edit',
       };
-      const fields = await (programId ? getFieldAndValueProgram(id, param, programId) : getFieldAndValue(id, param));
+      const fields = await fieldApi.getFieldAndValue(id, param);
       setIssueLoading(false);
       store.setIssueFields(issue, fields);
       if (issueStore) {
@@ -106,11 +94,11 @@ function EditIssue() {
         linkIssues,
         branches,
       ] = await Promise.all([
-        loadDocs(id),
-        programId || applyType === 'program' ? null : loadWorklogs(id),
-        programId ? loadDatalogsProgram(id, programId) : loadDatalogs(id),
-        programId || applyType === 'program' ? null : loadLinkIssues(id),
-        programId || applyType === 'program' ? null : loadBranchs(id),
+        knowledgeApi.loadByIssue(id),
+        programId || applyType === 'program' ? null : workLogApi.loadByIssue(id),
+        programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.loadByIssue(id),
+        programId || applyType === 'program' ? null : issueLinkApi.loadByIssueAndApplyType(id),
+        programId || applyType === 'program' ? null : devOpsApi.countBranches(id),
       ]);
       if (idRef.current !== id) {
         return;

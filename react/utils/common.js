@@ -5,7 +5,7 @@ import { Tooltip } from 'choerodon-ui';
 
 const { AppState } = stores;
 
-export const getProjectId = () => Number(AppState.currentMenuType ? AppState.currentMenuType.id : 0);
+export const getProjectId = () => (AppState.currentMenuType ? AppState.currentMenuType.id : 0);
 export const getProjectName = () => (AppState.currentMenuType ? AppState.currentMenuType.name : '');
 export const getOrganizationId = () => (AppState.currentMenuType ? AppState.currentMenuType.organizationId : 0);
 
@@ -40,15 +40,7 @@ export function configTheme({
     maxTagPlaceholder: renderPlaceHolder,
   };
 }
-// 捕获failed异常错误code
-export function catchFailed(res) {
-  const { failed } = res;
-  if (failed) {
-    throw res.message;
-  } else {
-    return res;
-  }
-}
+
 
 // 获取文件名后缀
 export function getFileSuffix(fileName) {

@@ -38,21 +38,21 @@ databaseChangeLog(logicalFilePath: 'fd_page_field.groovy') {
             column(name: "organization_id", type: "BIGINT UNSIGNED")
         }
     }
-    changeSet(id: '2019-10-22-delete-page-field-dirty-data', author: 'shinan.chenX@gmail') {
-        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
-            "delete FROM fd_object_scheme_field where code = 'benfitHypothesis'"
-        }
-        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
-            "delete FROM fd_object_scheme_field where code = 'acceptanceCritera'"
-        }
-        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
-            "delete FROM fd_object_scheme_field where code = 'featureType'"
-        }
-        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
-            "delete FROM fd_object_scheme_field where code = 'pi'"
-        }
-        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
-            "delete FROM fd_page_field where field_id NOT IN (select id from fd_object_scheme_field)"
-        }
-    }
+//    changeSet(id: '2019-10-22-delete-page-field-dirty-data', author: 'shinan.chenX@gmail') {
+//        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
+//            "delete FROM fd_object_scheme_field where code = 'benfitHypothesis'"
+//        }
+//        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
+//            "delete FROM fd_object_scheme_field where code = 'acceptanceCritera'"
+//        }
+//        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
+//            "delete FROM fd_object_scheme_field where code = 'featureType'"
+//        }
+//        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
+//            "delete FROM fd_object_scheme_field where code = 'pi'"
+//        }
+//        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
+//            "delete FROM fd_page_field where field_id NOT IN (select id from fd_object_scheme_field)"
+//        }
+//    }
 }

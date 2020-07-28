@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.Date;
 
@@ -11,6 +12,7 @@ import java.util.Date;
 
 public class DataLogVO {
     @ApiModelProperty(value = "日志主键id")
+    @Encrypt
     private Long logId;
     @ApiModelProperty(value = "项目id")
     private Long projectId;
@@ -27,14 +29,17 @@ public class DataLogVO {
     @ApiModelProperty(value = "日志新值")
     private String newString;
     @ApiModelProperty(value = "问题主键id")
+    @Encrypt
     private Long issueId;
     @ApiModelProperty(value = "最后更新用户id")
+    @Encrypt
     private Long lastUpdatedBy;
     @ApiModelProperty(value = "最后更新日期")
     private Date lastUpdateDate;
     @ApiModelProperty(value = "创建日期")
     private Date creationDate;
     @ApiModelProperty(value = "创建用户")
+    @Encrypt
     private Long createdBy;
     @ApiModelProperty(value = "用户名")
     private String name;

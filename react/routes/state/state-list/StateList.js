@@ -1,23 +1,21 @@
 import React, {
-  Component, useState, useEffect, useContext,
+  useState, useEffect, useContext,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { withRouter, Link } from 'react-router-dom';
 import {
   Table, Button, Modal, Form, Select, Input, Tooltip, Menu,
-  Breadcrumb as Bread,
 } from 'choerodon-ui';
 import { FormattedMessage } from 'react-intl';
 import {
   Content, Header, TabPage as Page, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import { getStageMap, getStageList } from '@/utils/stateMachine';
+import { statusApi } from '@/api';
 import Store from './stores';
 import './StateList.less';
 import TableDropMenu from '../../../common/TableDropMenu';
 
 const { Sidebar, info } = Modal;
-const { Item } = Bread;
 const FormItem = Form.Item;
 const { TextArea } = Input;
 const { Option } = Select;
@@ -104,9 +102,9 @@ function StateList(props) {
     });
   };
 
-  const showSideBar = (state, newid = '') => {
+  const showSideBar = (state, newId = '') => {
     if (state === 'edit') {
-      stateStore.loadStateById(orgId, newid).then((data) => {
+      statusApi.load(newId).then((data) => {
         if (data && data.failed) {
           Choerodon.prompt(data.message);
         } else {
@@ -146,7 +144,7 @@ function StateList(props) {
   };
 
   const handleDelete = () => {
-    stateStore.deleteState(orgId, deleteId).then((data) => {
+    statusApi.delete(deleteId).then((data) => {
       if (data && data.failed) {
         Choerodon.prompt(data.message);
       } else {
@@ -174,10 +172,9 @@ function StateList(props) {
     form.validateFieldsAndScroll((err, data) => {
       if (!err) {
         const postData = data;
-        postData.organizationId = orgId;
         setSubmitting(true);
         if (showType === 'create') {
-          stateStore.createState(orgId, postData)
+          statusApi.create(postData)
             .then((res) => {
               if (res && res.failed) {
                 // eslint-disable-next-line no-console
@@ -196,7 +193,7 @@ function StateList(props) {
               setSubmitting(false);
             });
         } else {
-          stateStore.updateState(orgId, editState.id, Object.assign(editState, postData))
+          statusApi.update(editState.id, Object.assign(editState, postData))
             .then((res) => {
               if (res && res.failed) {
                 Choerodon.prompt(res.message);
@@ -276,7 +273,7 @@ function StateList(props) {
     // const { type, editState } = this.state;
     if (showType === 'create' || value !== (editState && editState.name)) {
       setSubmitting(true);
-      const res = await stateStore.checkName(orgId, value);
+      const res = await statusApi.checkName(value);
       setSubmitting(false);
       if (res && res.statusExist) {
         callback(intl.formatMessage({ id: 'priority.create.name.error' }));
@@ -331,8 +328,8 @@ function StateList(props) {
     filters: stageList.filter(s => s.code !== 'none').map(s => ({ text: s.name, value: s.code })),
     render: record => (
       <div>
-        <div className="issue-state-block" style={{ backgroundColor: stageMap[record].colour }} />
-        <span style={{ verticalAlign: 'middle' }}>{stageMap[record].name}</span>
+        <div className="issue-state-block" style={{ backgroundColor: stageMap[record]?.colour }} />
+        <span style={{ verticalAlign: 'middle' }}>{stageMap[record]?.name}</span>
       </div>
     ),
   },

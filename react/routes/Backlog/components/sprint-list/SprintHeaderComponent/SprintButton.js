@@ -1,10 +1,13 @@
 /* eslint-disable eqeqeq */
 import React, { Fragment } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Icon, Dropdown, Menu } from 'choerodon-ui';
+import {
+  Icon, Dropdown, Menu,
+} from 'choerodon-ui';
 import { Permission, stores } from '@choerodon/boot';
 import moment from 'moment';
 import classnames from 'classnames';
+import { sprintApi, workCalendarApi } from '@/api';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import CloseSprint from '@/components/close-sprint';
@@ -34,11 +37,12 @@ function SprintButton({
   const issueList = BacklogStore.getIssueListBySprintId(sprintId);
   const hasActiveSprint = BacklogStore.getHasActiveSprint;
   const [disableStart, reason] = judgeDisabled([[hasActiveSprint, '已有活跃冲刺'], [!issueList || issueList.length === 0, '冲刺下没有问题'], [planning === true, '非当前PI下冲刺不可开启']]);
+
   const openStartSprint = async () => {
     if (!disableStart) {
       const year = moment().year();
-      const workSetting = await BacklogStore.axiosGetWorkSetting(year);
-      const sprintDetail = await BacklogStore.axiosGetOpenSprintDetail(data.sprintId);
+      const workSetting = await workCalendarApi.getWorkSetting(year);
+      const sprintDetail = await sprintApi.loadSprint(data.sprintId);
       StartSprint({
         workSetting,
         sprintDetail,
@@ -47,7 +51,7 @@ function SprintButton({
     }
   };
   const openCloseSprint = async () => {
-    const completeMessage = await BacklogStore.axiosGetSprintCompleteMessage(sprintId);
+    const completeMessage = await sprintApi.loadSprintAndCountIssue(sprintId);
     CloseSprint({
       completeMessage,
       sprintId,
@@ -67,7 +71,7 @@ function SprintButton({
   );
 
   const { type, id: projectId, organizationId: orgId } = AppState.currentMenuType;
-  
+
   return (
     <Fragment>
       {statusCode === 'started' ? (

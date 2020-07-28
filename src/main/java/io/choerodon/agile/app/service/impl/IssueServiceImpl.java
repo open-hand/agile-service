@@ -591,6 +591,10 @@ public class IssueServiceImpl implements IssueService {
                 issueConvertDTO.setOriginSprintId(originIssue.getSprintId());
             }
         }
+        IssueDTO issueDTO = issueMapper.selectOne(modelMapper.map(issueConvertDTO, IssueDTO.class));
+        if (Objects.isNull(issueDTO)){
+            throw new CommonException(IssueAccessDataServiceImpl.UPDATE_ERROR);
+        }
         issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
     }
 
@@ -1004,6 +1008,7 @@ public class IssueServiceImpl implements IssueService {
                 issueLinkValidator.verifyCreateData(issueLinkDTO);
                 if (issueLinkValidator.checkUniqueLink(issueLinkDTO)) {
                     issueLinkService.create(issueLinkDTO);
+                    BaseFieldUtil.updateIssueLastUpdateInfo(issueLinkDTO.getLinkedIssueId(), issueLinkDTO.getProjectId());
                 }
             });
         }
@@ -1630,7 +1635,10 @@ public class IssueServiceImpl implements IssueService {
                 }
                 issueValidator.verifySubTask(issueTransformSubTask.getParentIssueId());
                 //删除链接
-                issueLinkService.deleteByIssueId(issueConvertDTO.getIssueId());
+                List<IssueLinkDTO> issueLinkDTOS = issueLinkMapper.listIssueLinkByBatch(projectId, Arrays.asList(issueConvertDTO.getIssueId()));
+                if (!CollectionUtils.isEmpty(issueLinkDTOS)) {
+                    issueLinkService.deleteIssueLinkByIssueId(issueConvertDTO,issueLinkDTOS);
+                }
                 issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
                 Long sprintId = issueMapper.selectUnCloseSprintId(projectId, issueTransformSubTask.getParentIssueId());
                 List<Long> issueIds = new ArrayList<>();

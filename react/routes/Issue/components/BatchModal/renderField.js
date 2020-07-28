@@ -1,25 +1,24 @@
 import React from 'react';
 
 import {
-  TextField, Select, DatePicker, TimePicker, DateTimePicker, CheckBox, NumberField, TextArea, UrlField,
+  TextField, Select, DatePicker, TimePicker, DateTimePicker, NumberField, TextArea, UrlField,
 } from 'choerodon-ui/pro';
-
-import SelectUser from './select-user';
+import SelectUser from '@/components/select/select-user';
+import SelectFeature from '@/components/select/select-feature';
 
 const { Option } = Select;
 const singleList = ['radio', 'single'];
 
 
-function renderDefaultField({ code }) {
-  switch (code) {
-    case 'componentIssueRelVOList':
-      return <Select style={{ width: '100%' }} multiple name={code} searchable searchMatcher="name" />;
-    default: return null;
-  }
-}
 export default function renderField({ code, fieldType, fieldOptions }) {
-  if (['componentIssueRelVOList'].includes(code)) {
-    return renderDefaultField({ code });
+  switch (code) {
+    case 'componentIssueRelVOList': {
+      return <Select style={{ width: '100%' }} multiple name={code} searchable searchMatcher="name" />;
+    }
+    case 'featureId': {
+      return <SelectFeature name={code} style={{ width: '100%' }} />;
+    }
+    default: break;
   }
   switch (fieldType) {
     case 'time':
@@ -103,6 +102,7 @@ export default function renderField({ code, fieldType, fieldOptions }) {
     case 'member':
       return (
         <SelectUser
+          style={{ width: '100%' }}
           name={code}
         />
       );
