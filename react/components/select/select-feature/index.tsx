@@ -23,6 +23,11 @@ const SelectFeature: React.FC<Props> = forwardRef(({ featureId, featureName, ...
         return features;
       }
     },
+    optionRenderer: feature => (
+      <Tooltip title={feature.summary} placement="left">
+        {feature.summary}
+      </Tooltip>
+    ),
     paging: true,
   }), [featureId, featureName]);
   const props = useSelect(config);
@@ -32,11 +37,7 @@ const SelectFeature: React.FC<Props> = forwardRef(({ featureId, featureName, ...
       clearButton
       {...props}
       {...otherProps}
-      optionRenderer={({ text }) => (
-        <Tooltip title={text} placement="left">
-          {text}
-        </Tooltip>
-      )}
+      
     />
   );
 });
