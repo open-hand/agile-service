@@ -145,7 +145,7 @@ public class FieldValueController {
                                                    @RequestParam String schemeCode,
                                                    @RequestParam String applyType,
                                                    @RequestBody @Encrypt BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
-        issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo,applyType, (ServletRequestAttributes)RequestContextHolder.currentRequestAttributes());
+        issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo,applyType);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
