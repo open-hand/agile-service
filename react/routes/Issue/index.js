@@ -4,13 +4,14 @@ import React, {
 import { observer } from 'mobx-react-lite';
 import { withRouter } from 'react-router-dom';
 import {
-  Header, Content, Page, Breadcrumb,
+  Header, Content, Page, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import { Button } from 'choerodon-ui';
 import queryString from 'querystring';
 import { map } from 'lodash';
 import CreateIssue from '@/components/CreateIssue';
 import { projectApi } from '@/api/Project';
+import { issueApi } from '@/api';
 import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
 import Search from './components/search';
@@ -75,11 +76,21 @@ const Issue = withRouter(observer(() => {
     // this.paramName = decodeURI(paramName);
     // 单个任务跳转 => otherArgs 设置 issueId，将任务设定为展开模式
     if (paramIssueId) {
-      IssueStore.handleFilterChange('issueIds', [paramOpenIssueId || paramIssueId]);
+      let id = paramOpenIssueId || paramIssueId;
+      // 数字，说明没加密
+      // eslint-disable-next-line no-restricted-globals
+      if (!isNaN(id)) {
+        try {
+          id = await issueApi.encryptIssueId(id);
+        } catch (error) {
+          Choerodon.prompt(error.message, 'error');
+        }
+      }    
+      IssueStore.handleFilterChange('issueIds', [id]);
       IssueStore.handleFilterChange('contents', [`${IssueStore.getProjectInfo.projectCode}-${paramName.split('-')[paramName.split('-').length - 1]}`]);
       IssueStore.setClickedRow({
         selectedIssue: {
-          issueId: paramOpenIssueId || paramIssueId,
+          issueId: id,
         },
         expand: true,
       });

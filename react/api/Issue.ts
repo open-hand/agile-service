@@ -187,7 +187,7 @@ class IssueApi {
    * @param issueId 问题id
    * @param programId 项目群id
    */
-  loadUnderProgram(issueId:number, programId:number) {
+  loadUnderProgram(issueId: number, programId: number) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'get',
@@ -235,7 +235,7 @@ class IssueApi {
  * @param data
  * @returns {*}
  */
-  import(data:any) {
+  import(data: any) {
     // const headers = {
     //   'content-type': 'multipart/form-data',
     // };
@@ -257,7 +257,7 @@ class IssueApi {
  * 取消导入
  * @param id 导入id
  */
-  cancelImport(id:number, objectVersionNumber:number) {
+  cancelImport(id: number, objectVersionNumber: number) {
     return axios({
       method: 'put',
       url: `${this.prefix}/excel/cancel`,
@@ -384,6 +384,16 @@ class IssueApi {
         issueId,
         content,
         self: false,
+      },
+    });
+  }
+
+  encryptIssueId(issueId: number) {
+    return axios({
+      method: 'get',
+      url: `/agile/v1/projects/${getProjectId()}/encrypt`,
+      params: {
+        issueId,
       },
     });
   }
