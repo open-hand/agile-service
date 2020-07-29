@@ -217,8 +217,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 });
             }
             fieldDetailDTO.setFieldOptions(fieldOptions);
-            FieldValueUtil.handleDefaultValue(fieldDetailDTO);
         }
+        FieldValueUtil.handleDefaultValue(fieldDetailDTO);
         return fieldDetailDTO;
     }
 
