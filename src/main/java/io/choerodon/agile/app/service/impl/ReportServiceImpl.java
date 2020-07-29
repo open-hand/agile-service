@@ -1401,6 +1401,8 @@ public class ReportServiceImpl implements ReportService {
                 bug.setOldValue(BigDecimal.ZERO);
                 return true;
             } else if (StringUtils.equals(bug.getType(), "addDoneDuringSprint") && bug.getStatistical()) {
+                bug.setNewValue(BigDecimal.ONE);
+                bug.setOldValue(BigDecimal.ZERO);
                 return true;
             } else {
                 return false;
