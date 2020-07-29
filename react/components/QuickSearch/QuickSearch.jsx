@@ -78,7 +78,7 @@ class QuickSearch extends Component {
   handleQuickSearchChange = (value, key) => {
     const { onQuickSearchChange } = this.props;
     const flattenValue = value.map(item => item.key);
-    const otherSearchId = flattenValue.filter(item => item !== -1 || item !== -2);
+    const otherSearchId = flattenValue.filter(item => !(item === -1 || item === -2));
     this.setState({
       selectQuickSearch: value,
     });
