@@ -156,7 +156,7 @@ public class FieldValueUtil {
                 case FieldType.RADIO:
                 case FieldType.SINGLE:
                     if (view.getDefaultValue() != null && !"".equals(view.getDefaultValue())) {
-                        view.setDefaultValue(Long.valueOf(String.valueOf(view.getDefaultValue())));
+                        view.setDefaultValue(EncryptionUtils.encrypt(Long.valueOf(String.valueOf(view.getDefaultValue()))));
                     }
                     break;
                 case FieldType.DATETIME:
@@ -176,7 +176,7 @@ public class FieldValueUtil {
                 case FieldType.MEMBER:
                     if (view.getDefaultValue() != null && !"".equals(view.getDefaultValue())) {
                         Long defaultValue = Long.valueOf(String.valueOf(view.getDefaultValue()));
-                        view.setDefaultValue(defaultValue);
+                        view.setDefaultValue(EncryptionUtils.encrypt(defaultValue));
                         view.setDefaultValueObj(userMap.getOrDefault(defaultValue, new UserDTO()));
                     }
                     break;
@@ -199,9 +199,9 @@ public class FieldValueUtil {
         if (defaultValue != null && !"".equals(defaultValue)) {
             String[] defaultIdStrs = String.valueOf(defaultValue).split(",");
             if (defaultIdStrs != null) {
-                Long[] defaultIds = new Long[defaultIdStrs.length];
+                String[] defaultIds = new String[defaultIdStrs.length];
                 for (int i = 0; i < defaultIdStrs.length; i++) {
-                    defaultIds[i] = Long.valueOf(defaultIdStrs[i]);
+                    defaultIds[i] = EncryptionUtils.encrypt(Long.valueOf(defaultIdStrs[i]));
                 }
                 view.setDefaultValue(defaultIds);
             }
