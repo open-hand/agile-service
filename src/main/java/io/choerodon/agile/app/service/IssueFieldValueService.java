@@ -1,10 +1,7 @@
 package io.choerodon.agile.app.service;
 
-import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.BatchUpdateFieldsValueVo;
-import io.choerodon.agile.api.vo.PageFieldViewUpdateVO;
-
-import java.util.List;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * @author zhaotianxin
@@ -18,6 +15,6 @@ public interface IssueFieldValueService {
      * @param schemeCode
      * @param batchUpdateFieldsValueVo
      */
-    void asyncUpdateFields(Long projectId, String schemeCode, BatchUpdateFieldsValueVo batchUpdateFieldsValueVo,String applyType);
+    void asyncUpdateFields(Long projectId, String schemeCode, BatchUpdateFieldsValueVo batchUpdateFieldsValueVo,String applyType, ServletRequestAttributes requestAttributes);
 
 }
