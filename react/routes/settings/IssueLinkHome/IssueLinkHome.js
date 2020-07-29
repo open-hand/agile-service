@@ -48,10 +48,12 @@ function IssueLinkHome() {
       style: modelStyle,
       okText: formatMessage({ id: okTextId }),
       cancelText: formatMessage({ id: 'cancel' }),
-      onOk: async () => issueLinkTableDs.submit().then((res) => {
-        issueLinkTableDs.query();
-        return !!res;
-      }),      
+      onOk: async () => {
+        if (await issueLinkTableDs.validate()) {
+          return issueLinkTableDs.submit().then(res => !!res);
+        }
+        return false;
+      },
       afterClose: () => {
         issueLinkTableDs.reset();
       },
