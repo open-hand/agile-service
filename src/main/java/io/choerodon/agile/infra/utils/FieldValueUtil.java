@@ -68,13 +68,13 @@ public class FieldValueUtil {
                 case FieldType.CHECKBOX:
                 case FieldType.MULTIPLE:
                     values.stream().map(FieldValueDTO::getOptionId).collect(Collectors.toList()).toArray(longValues);
-                    value = longValues;
+                    value = EncryptionUtils.encryptList(Arrays.asList(longValues));
                     valueStr = values.stream().map(FieldValueDTO::getOptionValue).collect(Collectors.joining(", "));
                     break;
                 case FieldType.RADIO:
                 case FieldType.SINGLE:
                     //单选款/选择器（单选）获取为Long
-                    value = values.get(0).getOptionId();
+                    value = EncryptionUtils.encrypt(values.get(0).getOptionId());
                     valueStr = values.get(0).getOptionValue();
                     break;
                 case FieldType.DATETIME:
