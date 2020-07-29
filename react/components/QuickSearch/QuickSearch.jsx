@@ -78,7 +78,7 @@ class QuickSearch extends Component {
   handleQuickSearchChange = (value, key) => {
     const { onQuickSearchChange } = this.props;
     const flattenValue = value.map(item => item.key);
-    const otherSearchId = flattenValue.filter(item => item >= 0);
+    const otherSearchId = flattenValue.filter(item => item !== -1 || item !== -2);
     this.setState({
       selectQuickSearch: value,
     });
@@ -154,7 +154,7 @@ class QuickSearch extends Component {
       selectQuickSearch,
       selectUsers,
     } = this.state;
-    
+
     const { sprintNotClosedArray, selectSprint } = ScrumBoardStore;
 
     // showRealQuickSearch 用于在待办事项中销毁组件
@@ -240,37 +240,37 @@ class QuickSearch extends Component {
                     ))
                   }
                 </Select>
-              
+
               )
             }
             {
               onSprintChange && sprintNotClosedArray && (
-              <Select
-                key="sprintSelect"
-                className="SelectTheme primary c7n-agile-sprintSearchSelect"
-                // style={{ width: 120 }}
-                placeholder="冲刺"
-                allowClear
-                dropdownMatchSelectWidth={false}
-                labelInValue
-                optionFilterProp="children"
-                value={selectSprint}
-                onChange={this.handleSprintChange}
-                getPopupContainer={triggerNode => triggerNode.parentNode}
-              >
-                {
-                  (sprintNotClosedArray || []).map(item => (
-                    <Option key={item.sprintId} value={item.sprintId} title={item.sprintName}>
-                      {item.sprintName}
-                      {
-                        item.statusCode === 'started' && (
-                          <div className="c7n-agile-sprintSearchSelect-option-active">活跃</div>
-                        )
-                      }
-                    </Option>
-                  ))
-                }
-              </Select>
+                <Select
+                  key="sprintSelect"
+                  className="SelectTheme primary c7n-agile-sprintSearchSelect"
+                  // style={{ width: 120 }}
+                  placeholder="冲刺"
+                  allowClear
+                  dropdownMatchSelectWidth={false}
+                  labelInValue
+                  optionFilterProp="children"
+                  value={selectSprint}
+                  onChange={this.handleSprintChange}
+                  getPopupContainer={triggerNode => triggerNode.parentNode}
+                >
+                  {
+                    (sprintNotClosedArray || []).map(item => (
+                      <Option key={item.sprintId} value={item.sprintId} title={item.sprintName}>
+                        {item.sprintName}
+                        {
+                          item.statusCode === 'started' && (
+                            <div className="c7n-agile-sprintSearchSelect-option-active">活跃</div>
+                          )
+                        }
+                      </Option>
+                    ))
+                  }
+                </Select>
               )
             }
           </React.Fragment>

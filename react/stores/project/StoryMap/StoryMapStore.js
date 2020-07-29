@@ -597,6 +597,8 @@ class StoryMapStore {
     const { epicWithFeature, featureWithoutEpic } = this.storyMapData;
     if (epicWithFeature && featureWithoutEpic) {
       return featureWithoutEpic.length === 0 && epicWithFeature.filter(epic => epic.issueId).length === 0;
+    } else if (epicWithFeature) {
+      return epicWithFeature.filter(epic => epic.issueId).length === 0;
     }
     return false;
   }

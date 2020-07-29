@@ -84,11 +84,14 @@ public class EncryptionUtils {
             return;
         }
         for (Map.Entry<String, Object> entry : adMapOptional.get().entrySet()) {
-            if (entry.getValue() instanceof String){
+            if (Objects.equals(entry.getValue(), "true") || Objects.equals(entry.getValue(), "false")) {
+                continue;
+            }
+            else if (entry.getValue() instanceof String){
                 ((Map<String, Object>) search.get(SprintServiceImpl.ADVANCED_SEARCH_ARGS))
                         .put(entry.getKey(), decrypt((String)entry.getValue(), BLANK_KEY));
             }
-            if (entry.getValue() instanceof Collection){
+            else if (entry.getValue() instanceof Collection){
                 ((Map<String, Object>) search.get(SprintServiceImpl.ADVANCED_SEARCH_ARGS))
                         .put(entry.getKey(), decryptList((List<String>) entry.getValue(), BLANK_KEY, new String[]{"0"}));
             }
@@ -110,6 +113,10 @@ public class EncryptionUtils {
         } else {
             return Long.parseLong(encryptionService.decrypt(crypt, tableName));
         }
+    }
+
+    public static String decrypt(String crypt) {
+        return encryptionService.decrypt(crypt, BLANK_KEY);
     }
 
     /**
@@ -187,14 +194,15 @@ public class EncryptionUtils {
                     field = clazz.getDeclaredField(fieldName);
                     field.setAccessible(true);
                     if (field.getType() == String.class) {
-                        field.set(object, valueNode.toString());
+                        field.set(object, valueNode.textValue());
                     } else if (field.getType() == Long.class) {
                         Encrypt encrypt = field.getAnnotation(Encrypt.class);
-                        String[] ignoreValues = encrypt.ignoreValue();
-                        if (encrypt != null && !StringUtils.isNumeric(valueNode.toString())) {
-                            field.set(object, decrypt(valueNode.toString(), encrypt.value()));
-                        } else if (encrypt != null && !ArrayUtils.isEmpty(ignoreValues) && Arrays.asList(ignoreValues).contains(valueNode.toString())) {
-                            field.set(object, Long.valueOf(valueNode.toString()));
+                        if (encrypt != null && !StringUtils.isNumeric(valueNode.textValue())) {
+                            field.set(object, decrypt(valueNode.textValue(), encrypt.value()));
+                        } else if (encrypt != null
+                                && !ArrayUtils.isEmpty(encrypt.ignoreValue())
+                                && Arrays.asList(encrypt.ignoreValue()).contains(valueNode.textValue())) {
+                            field.set(object, Long.valueOf(valueNode.textValue()));
                         } else {
                             field.set(object, valueNode == null ? null : Long.valueOf(valueNode.toString()));
                         }

@@ -49,9 +49,9 @@ databaseChangeLog(logicalFilePath: 'fd_issue_type.groovy') {
         }
     }
 
-    changeSet(id: '2019-10-22-delete-issue-type-dirty-data', author: 'shinan.chenX@gmail') {
-        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
-            "delete FROM fd_issue_type where name = '特性'"
-        }
-    }
+//    changeSet(id: '2019-10-22-delete-issue-type-dirty-data', author: 'shinan.chenX@gmail') {
+//        sql(stripComments: true, splitStatements: false, endDelimiter: ';') {
+//            "delete FROM fd_issue_type where name = '特性'"
+//        }
+//    }
 }
