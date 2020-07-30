@@ -138,6 +138,12 @@ export default ({
               return userOptionDataSet;
             } 
           },
+          max: ({ record }) => {
+            const fieldType = record.get('fieldType');
+            if (fieldType === 'number') {
+              return Number.MAX_SAFE_INTEGER;
+            } 
+          },
         },
       },
       {
