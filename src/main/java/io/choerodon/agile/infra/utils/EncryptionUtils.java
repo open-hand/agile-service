@@ -509,6 +509,7 @@ public class EncryptionUtils {
                    objectNode.set("quickFilterIds",objectMapper.readTree(objectMapper.writeValueAsString(decryptList(list,BLANK_KEY,null))));
                }
             }
+            objectNode.set("searchArgs",jsonNode.get("searchArgs"));
             return objectMapper.writeValueAsString(objectNode);
         } catch (Exception e) {
             e.printStackTrace();
