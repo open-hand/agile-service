@@ -88,7 +88,7 @@ export default withRouter(observer(({
       paramType, paramIssueId, paramName, paramOpenIssueId, ...otherArgs
     } = getParams(location.search);
     setSelectedQuickFilters([]);
-    if (paramIssueId || paramChoose || paramType) {
+    if (paramOpenIssueId || paramIssueId || paramChoose || paramType) {
       history.replace(`/agile/work-list/issue?${queryString.stringify(otherArgs)}`);
     }
     onClear();
