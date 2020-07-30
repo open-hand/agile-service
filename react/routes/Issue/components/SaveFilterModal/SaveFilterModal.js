@@ -57,6 +57,7 @@ class SaveFilterModal extends Component {
         title="保存筛选"
         visible={saveFilterVisible}
         onOk={this.handleSaveFilterOk}
+        confirmLoading={IssueStore.loading}
         onCancel={() => {
           form.setFieldsValue({ filterName: '' });
           IssueStore.setSaveFilterVisible(false);

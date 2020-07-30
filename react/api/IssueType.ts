@@ -50,7 +50,8 @@ class IssueTypeApi {
       params: {
         schemeId,
       },
-    });
+      // @ts-ignore
+    }).then(res => res.filter(type => type.typeCode !== 'backlog'));
   }
 }
 
