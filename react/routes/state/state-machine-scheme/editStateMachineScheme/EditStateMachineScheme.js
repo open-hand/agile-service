@@ -659,6 +659,8 @@ class EditStateMachineScheme extends Component {
       getIsConnectVisible,
     } = StateMachineSchemeStore;
     // console.log(StateMachineSchemeStore);
+    const { viewVOS } = getStateMachine;
+    const isBacklog = viewVOS && viewVOS.some(view => view.stateMachineVO?.applyTypes?.includes('backlog'));
     return (
       <Page className="issue-state-machine-scheme-edit">
         <Header
@@ -672,14 +674,16 @@ class EditStateMachineScheme extends Component {
             <i className="icon-refresh icon" />
             <FormattedMessage id="refresh" />
           </Button> */}
-          <Button
-            type="primary"
-            icon="playlist_add"
-            onClick={this.handleAddStateMachine}
-            disabled={showStatus === 'original'}
-          >
-            <FormattedMessage id="stateMachineScheme.add" />
-          </Button>
+          {!isBacklog && (
+            <Button
+              type="primary"
+              icon="playlist_add"
+              onClick={this.handleAddStateMachine}
+              disabled={showStatus === 'original'}
+            >
+              <FormattedMessage id="stateMachineScheme.add" />
+            </Button>
+          )}
         </Header>
         {/* <Breadcrumb title="编辑状态机方案" /> */}
         <Breadcrumb custom>
