@@ -480,7 +480,7 @@ public class BoardServiceImpl implements BoardService {
     }
 
 
-    private JSONObject handleIssueMoveRank(Long projectId, IssueMoveVO issueMoveVO) {
+    protected JSONObject handleIssueMoveRank(Long projectId, IssueMoveVO issueMoveVO) {
         JSONObject jsonObject = new JSONObject();
         if (issueMoveVO.getRankFlag()) {
             String rank;
