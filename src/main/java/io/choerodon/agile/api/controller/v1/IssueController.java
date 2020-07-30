@@ -104,7 +104,7 @@ public class IssueController {
     public ResponseEntity<IssueVO> updateIssue(@ApiParam(value = "项目id", required = true)
                                                 @PathVariable(name = "project_id") Long projectId,
                                                @ApiParam(value = "更新issue对象", required = true)
-                                                @RequestBody @Encrypt JSONObject issueUpdate) {
+                                                @RequestBody JSONObject issueUpdate) {
         issueValidator.verifyUpdateData(issueUpdate, projectId);
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
         List<String> fieldList = verifyUpdateUtil.verifyUpdateData(issueUpdate,issueUpdateVO);
