@@ -15,6 +15,7 @@ import Store from './stores';
 import './StateList.less';
 import TableDropMenu from '../../../common/TableDropMenu';
 
+const backlogStates = ['backlog_pending_approval', 'backlog_rejected', 'backlog_create', 'backlog_planning', 'backlog_processing', 'backlog_developed', 'backlog_publish'];
 const { Sidebar, info } = Modal;
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -370,6 +371,7 @@ function StateList(props) {
     // const {
     //   statesList = [], initialTotal, total, type,
     // } = this.state;
+    const disabledEditName = editState && backlogStates.includes(editState.code);
     const { getFieldDecorator } = form;
     const formContent = (
       <div className="issue-region">
@@ -392,10 +394,20 @@ function StateList(props) {
                 autoFocus
                 label={<FormattedMessage id="state.name" />}
                 size="default"
+                disabled={disabledEditName}
                 maxLength={15}
               />,
             )}
-          </FormItem>
+            {disabledEditName && (
+            <span style={{
+              color: 'rgba(0,0,0,0.65)',
+              marginLeft: 2,
+            }}
+            >
+              状态被需求池使用，不可更改名称
+            </span>
+            )}
+          </FormItem>          
           <FormItem
             {...formItemLayout}
             className="issue-sidebar-form"
