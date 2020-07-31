@@ -50,7 +50,10 @@ function IssueLinkHome() {
       cancelText: formatMessage({ id: 'cancel' }),
       onOk: async () => {
         if (await issueLinkTableDs.validate()) {
-          return issueLinkTableDs.submit().then(res => !!res);
+          return issueLinkTableDs.submit().then((res) => {
+            issueLinkTableDs.query();
+            return !!res;
+          });
         }
         return false;
       },
