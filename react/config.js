@@ -2,6 +2,7 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 const config = {
   local: true,
+  entry: '@choerodon/master',
   // use for c7n start
   clientId: 'localhost', // 必须填入响应的客户端（本地开发）
   // port: 8080,
