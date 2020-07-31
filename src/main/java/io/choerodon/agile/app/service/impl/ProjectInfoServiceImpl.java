@@ -1,10 +1,8 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.ProjectInfoService;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
-import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
@@ -14,6 +12,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +65,12 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
     public ProjectInfoVO queryProjectInfoByProjectId(Long projectId) {
         ProjectInfoDTO projectInfoDTO = new ProjectInfoDTO();
         projectInfoDTO.setProjectId(projectId);
-        return modelMapper.map(projectInfoMapper.selectOne(projectInfoDTO), ProjectInfoVO.class);
+        ProjectInfoDTO dto = projectInfoMapper.selectOne(projectInfoDTO);
+        if (ObjectUtils.isEmpty(dto)) {
+            return null;
+        } else {
+            return modelMapper.map(dto, ProjectInfoVO.class);
+        }
     }
 
     /**
