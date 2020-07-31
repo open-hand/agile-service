@@ -39,8 +39,8 @@
     "wolfy87-eventemitter": "^5.2.8"
   },
   "devDependencies": {
-    "@choerodon/boot": "0.0.0-remove-master",
-    "@choerodon/master": "0.0.0-remove-master",
+    "@choerodon/boot": "0.21.5",
+    "@choerodon/master": "0.23.0",
     "@types/classnames": "^2.2.10",
     "@types/react": "^16.9.35",
     "@types/react-dom": "^16.9.8",
