@@ -23,6 +23,7 @@ public class ProductVersionReleaseVO {
     private Long versionId;
 
     @ApiModelProperty(value = "目标版本id")
+    @Encrypt
     private Long targetVersionId;
 
     @ApiModelProperty(value = "发布时间")
