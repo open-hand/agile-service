@@ -1,5 +1,4 @@
-
-
+/* eslint-disable */
 const fs = require('fs');
 const path = require('path');
 const assign = require('object-assign');
@@ -9,7 +8,8 @@ module.exports = function () {
   if (fs.existsSync(path.join(process.cwd(), 'tsconfig.json'))) {
     my = require(path.join(process.cwd(), 'tsconfig.json'));
   }
-  return assign({
+  return assign(my.compilerOptions, {
     declaration: true,
-  }, my.compilerOptions);
+    noEmit: false,
+  });
 };

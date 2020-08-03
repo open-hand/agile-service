@@ -104,14 +104,14 @@ function clear(done) {
   rimraf.sync(libDir);
   done();
 }
-gulp.task('compile-ts', (done) => { 
+gulp.task('compile-ts', (done) => {
   compileTS()
     .pipe(remember('typescript'))
     .pipe(gulp.dest(libDir))
     .on('finish', done);
 });
 gulp.task('compile-js', (done) => {
-  compileJS()  
+  compileJS()
     .pipe(remember('javascript'))
     .pipe(gulp.dest(libDir))
     .on('finish', done);
@@ -134,7 +134,7 @@ gulp.task('watch', () => {
   rimraf.sync(libDir);
   watch(source, { ignoreInitial: false }, gulp.series(
     'compile-ts',
-    'compile-js', 
+    'compile-js',
     yalc,
   ));
 });
