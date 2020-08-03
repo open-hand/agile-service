@@ -47,9 +47,10 @@ class BoardApi {
       url: `${this.prefix}/board/${boardId}/all_data/${getOrganizationId()}`,
       params: {
         ...searchVO,
+        quickFilterIds: searchVO.quickFilterIds?.join(',') || undefined,
+        assigneeFilterIds: searchVO.assigneeFilterIds?.join(',') || undefined,
         assigneeId: searchVO && searchVO.onlyMe ? AppState.getUserId : '',
       },
-      paramsSerializer: (params: BoardSearchVO) => querystring.stringify(JSON.parse(JSON.stringify(params))),
     });
   }
 
