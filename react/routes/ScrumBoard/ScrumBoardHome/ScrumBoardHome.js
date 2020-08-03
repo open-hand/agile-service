@@ -161,7 +161,7 @@ class ScrumBoardHome extends Component {
     const { headerStyle } = this.props;
     const { draggableId } = result;
     const [SwimLaneId, issueId] = draggableId.split(['/']);
-    headerStyle.changeStyle(style(SwimLaneId));
+    headerStyle.changeStyle(style(SwimLaneId.replace(/=/g, '')));
     ScrumBoardStore.setIsDragging(SwimLaneId, true);
   };
 

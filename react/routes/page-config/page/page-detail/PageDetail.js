@@ -26,7 +26,7 @@ function PageDetail(props) {
     pageStore, AppState,
   } = context;
   const {
-    name, type, id, organizationId: orgId,
+    name, type, id, organizationId: orgId, category,
   } = AppState.currentMenuType;
   const {
     pageDetailItem,
@@ -134,7 +134,7 @@ function PageDetail(props) {
       <Breadcrumb custom>
         <Item>{name}</Item>
         <Item>
-          <Link to={`/agile/page/scheme?type=${type}&id=${id}&name=${name}&category=AGILE&organizationId=${orgId}&orgId=${orgId}`}>页面</Link>
+          <Link to={`/agile/page/scheme?type=${type}&id=${id}&name=${name}&category=${category}&organizationId=${orgId}&orgId=${orgId}`}>页面</Link>
         </Item>
         <Item>{pageName}</Item>
       </Breadcrumb>

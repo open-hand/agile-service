@@ -369,7 +369,7 @@ function BatchModal({
       {loading && (
       <div style={{ color: 'rgba(254,71,87,1)', textAlign: 'center' }}>
         {loading === 'success' ? '修改成功' : ['正在修改，请稍等片刻', <span className={styles.dot}>…</span>]}      
-        <Progress value={Math.round(progress * 100)} />  
+        <Progress status="success" value={Math.round(progress * 100)} />  
       </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
