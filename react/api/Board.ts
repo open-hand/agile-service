@@ -47,9 +47,9 @@ class BoardApi {
       url: `${this.prefix}/board/${boardId}/all_data/${getOrganizationId()}`,
       params: {
         ...searchVO,
-        quickFilterIds: searchVO.quickFilterIds?.join(',') || undefined,
-        assigneeFilterIds: searchVO.assigneeFilterIds?.join(',') || undefined,
-        assigneeId: searchVO && searchVO.onlyMe ? AppState.getUserId : '',
+        quickFilterIds: searchVO?.quickFilterIds?.join(',') || undefined,
+        assigneeFilterIds: searchVO?.assigneeFilterIds?.join(',') || undefined,
+        assigneeId: searchVO?.onlyMe ? AppState.getUserId : '',
       },
     });
   }
