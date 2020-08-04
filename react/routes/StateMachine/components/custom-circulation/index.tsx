@@ -9,10 +9,11 @@ import Linkage from './components/linkage';
 import NotifySetting from './components/notify-setting';
 import UpdateField from './components/update-field';
 import styles from './index.less';
+import { TabComponentProps } from '../..';
 
 const { Column } = Table;
 
-const CustomCirculation: React.FC = () => {
+const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const customCirculationDataSet = useMemo(() => new DataSet(CustomCirculationDataSet), []);
 
   // @ts-ignore
@@ -64,9 +65,10 @@ const CustomCirculation: React.FC = () => {
 
   const renderAction = ({
   // @ts-ignore
-    value, text, name, record, dataSet, 
+    value, text, name, record, dataSet,
   }) => {
     const menu = (
+      // eslint-disable-next-line react/jsx-no-bind
       <Menu onClick={handleMenuClick.bind(this, record)}>
         <Menu.Item key="condition">流转条件</Menu.Item>
         <Menu.Item key="linkage">状态联动</Menu.Item>
@@ -84,6 +86,7 @@ const CustomCirculation: React.FC = () => {
   };
   return (
     <div className={`${styles.customCirculation} 111111`}>
+      {tab}
       <Table dataSet={customCirculationDataSet}>
         <Column name="state" />
         <Column name="fieldsInfo" />
