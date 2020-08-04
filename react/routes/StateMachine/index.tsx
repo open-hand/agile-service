@@ -2,6 +2,7 @@ import React, { useState, ReactNode } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { find } from 'lodash';
 import Status from './status';
+import StatusCirculation from './status-circulation';
 import CustomCirculation from './custom-circulation';
 
 export interface TabComponentProps<Params extends { [K in keyof Params]?: string } = {}> {
@@ -19,7 +20,7 @@ const tabs: ITab[] = [{
 }, {
   name: '状态与流转',
   key: 'status_change',
-  component: Status,
+  component: StatusCirculation,
 }, {
   name: '自定义流转',
   key: 'custom',
