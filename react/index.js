@@ -10,7 +10,6 @@ import 'moment/locale/en-nz';
 import moment from 'moment';
 import AgileProvider from '@/components/AgileProvider';
 import RunWhenProjectChange from '@/common/RunWhenProjectChange';
-import Test from './Test';
 import IsInProgramStore from './stores/common/program/IsInProgramStore';
 import './style/index.less';
 
@@ -24,16 +23,16 @@ const Priority = React.lazy(() => import('./routes/priority'));
 const State = React.lazy(() => import('./routes/state'));
 const PageConfig = React.lazy(() => import('./routes/page-config'));
 
-const CustomCirculation = React.lazy(() => import('./routes/StateMachine/components/custom-circulation'));
+const StateMachine = React.lazy(() => import('./routes/StateMachine'));
 // 敏捷设置
 const Settings = React.lazy(() => import('./routes/settings'));
 
 const { AppState } = stores;
 
 class Agile extends React.Component {
-  componentDidCatch(error, info) {
-    Choerodon.prompt(error.message);
-  }
+  // componentDidCatch(error, info) {
+  //   Choerodon.prompt(error.message);
+  // }
 
   componentDidMount() {
     if (process.env.NODE_ENV === 'development') {
@@ -72,8 +71,7 @@ class Agile extends React.Component {
               <Route path={`${match.url}/settings`} component={Settings} />
               <Route path={`${match.url}/states`} component={State} />
               <Route path={`${match.url}/priorities`} component={Priority} />
-              <Route path={`${match.url}/test`} component={Test} />
-              <Route path={`${match.url}/custom`} component={CustomCirculation} />
+              <Route path={`${match.url}/state-machine`} component={StateMachine} />
               <Route path="*" component={nomatch} />
             </Switch>
           </IntlProviderAsync>
