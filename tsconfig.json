@@ -12,6 +12,7 @@
     "allowJs": true,
     "allowSyntheticDefaultImports":true,
     "noEmitOnError":false,
+    "noEmit": true,
     "target": "es6",
     "lib": ["dom", "es2017"],
     "skipLibCheck": true,
