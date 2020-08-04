@@ -8,7 +8,7 @@ import SwimLaneHeader from './SwimLaneHeader';
 
 const { Panel } = Collapse;
 
-const getDefaultExpanded = issueArr => [...issueArr.map(issue => `swimlane_epic-${issue.epicId}`), 'swimlane_epic-other'];
+const getDefaultExpanded = issueArr => [...issueArr.map(issue => `swimlane_epic%${issue.epicId}`), 'swimlane_epic%other'];
 @observer
 class EpicRenderHeader extends Component {
   constructor(props) {
@@ -35,9 +35,9 @@ class EpicRenderHeader extends Component {
 
   getPanelKey = (key) => {
     if (key === 'other') {
-      return 'swimlane_epic-other';
+      return 'swimlane_epic%other';
     } else {
-      return `swimlane_epic-${key}`;
+      return `swimlane_epic%${key}`;
     }
   };
   
@@ -60,7 +60,7 @@ class EpicRenderHeader extends Component {
           />
         )}
       >
-        {active && children(key === 'other' ? parentIssue : parentIssue.subIssueData, key === 'other' ? 'swimlane_epic-unInterconnected' : `swimlane_epic-${parentIssue.epicId}`)}
+        {active && children(key === 'other' ? parentIssue : parentIssue.subIssueData, key === 'other' ? 'swimlane_epic%unInterconnected' : `swimlane_epic%${parentIssue.epicId}`)}
       </Panel>
     );
   };
