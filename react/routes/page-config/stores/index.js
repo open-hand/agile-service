@@ -14,6 +14,7 @@ export const PageConfigProvider = injectIntl(inject('AppState')(
       schemeCode: 'agile_issue',
     });
     const value = {
+      ...props,
       pageDetailItem,
       setPageDetailItem,
       pageDetailVisible,

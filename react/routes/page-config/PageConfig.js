@@ -7,6 +7,7 @@ import ObjectScheme from './object-scheme';
 
 import './pageConfig.less';
 import Store from './stores';
+import PageIssueType from './page-issue-type';
 
 const { AppState } = stores;
 
@@ -20,7 +21,8 @@ function PageConfig() {
         ? <PageDetail />
         : (
           <PageWrap cache noHeader={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.scheme`}>
-            <PageTab title="字段列表" tabKey={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.field`} component={withRouter(ObjectScheme)} alwaysShow />
+            <PageTab title="字段" tabKey={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.field`} component={withRouter(ObjectScheme)} alwaysShow />
+            <PageTab title="特性" tabKey={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.scheme111`} component={withRouter(PageIssueType)} alwaysShow />
             <PageTab title="页面管理" tabKey={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.scheme`} component={withRouter(PageHome)} alwaysShow />
           </PageWrap>
         )}
