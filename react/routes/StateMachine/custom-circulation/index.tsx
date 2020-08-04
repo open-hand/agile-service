@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
+import { Page, Header, Content } from '@choerodon/boot';
 import {
   Table, DataSet, Menu, Dropdown, Icon, Modal,
 } from 'choerodon-ui/pro';
-import CustomCirculationDataSet from './stores/CustomCirculationDataSet';
+import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import Condition from './components/condition';
 import Linkage from './components/linkage';
 import NotifySetting from './components/notify-setting';
@@ -13,12 +14,51 @@ import { TabComponentProps } from '../index';
 
 const { Column } = Table;
 
+interface ISetting {
+  width: number,
+  title: string,
+  children: JSX.Element,
+}
+interface ModalSettings {
+  condition: ISetting,
+  linkage: ISetting,
+  updateField: ISetting,
+  notifySetting: ISetting,
+}
 const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
-  const customCirculationDataSet = useMemo(() => new DataSet(CustomCirculationDataSet), []);
+  const customCirculationDataSet = useMemo(() => new DataSet({
+    fields: [
+      {
+        name: 'state',
+        label: '状态',
+        type: 'string' as FieldType,
+      },
+      {
+        name: 'fieldsInfo',
+        label: '状态流转附加字段信息',
+        type: 'array' as FieldType,
+      },
+      {
+        name: 'action',
+        label: '自定义操作',
+        type: 'string' as FieldType,
+      },
+    ],
+    data: [
+      {
+        state: '待处理',
+        fieldsInfo: [],
+      },
+      {
+        state: '处理中',
+        fieldsInfo: [],
+      },
+    ],
+  }), []);
 
   // @ts-ignore
-  const getModalSetting = (key, record) => {
-    const settings = {
+  const getModalSetting = (key: 'condition' | 'linkage' | 'updateField' | 'notifySetting', record) => {
+    const settings: ModalSettings = {
       condition: {
         width: 380,
         title: '流转条件',
@@ -44,12 +84,10 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         children: <NotifySetting record={record} />,
       },
     };
-    // @ts-ignore
     return settings[key];
   };
 
-  // @ts-ignore
-  const handleMenuClick = (record, e) => {
+  const handleMenuClick = (record: any, e: { key: 'condition' | 'linkage' | 'updateField' | 'notifySetting' }) => {
     const { title, width, children } = getModalSetting(e.key, record);
     Modal.open({
       className: `${styles[`customCirculation_${e.key}Modal`]}`,
@@ -85,14 +123,18 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     );
   };
   return (
-    <div className={`${styles.customCirculation} 111111`}>
-      {tab}
-      <Table dataSet={customCirculationDataSet}>
-        <Column name="state" />
-        <Column name="fieldsInfo" />
-        <Column name="action" renderer={renderAction} />
-      </Table>
-    </div>
+    <Page>
+      <Content>
+        {tab}
+        <div className={`${styles.customCirculation}`}>
+          <Table dataSet={customCirculationDataSet}>
+            <Column name="state" />
+            <Column name="fieldsInfo" />
+            <Column name="action" renderer={renderAction} />
+          </Table>
+        </div>
+      </Content>
+    </Page>
   );
 };
 
