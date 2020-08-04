@@ -9,7 +9,7 @@ import Linkage from './components/linkage';
 import NotifySetting from './components/notify-setting';
 import UpdateField from './components/update-field';
 import styles from './index.less';
-import { TabComponentProps } from '../..';
+import { TabComponentProps } from '../index';
 
 const { Column } = Table;
 
