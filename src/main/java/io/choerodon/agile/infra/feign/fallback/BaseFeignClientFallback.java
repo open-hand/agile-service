@@ -118,4 +118,9 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     public ResponseEntity<List<ProjectVO>> queryProjects(Long id, boolean includedDisabled) {
         throw new CommonException("error.query.project");
     }
+
+    @Override
+    public ResponseEntity<List<ProjectVO>> queryOrgProjects(Long organizationId, Long userId) {
+        throw new CommonException("error.list.projects");
+    }
 }

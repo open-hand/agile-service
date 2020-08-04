@@ -2208,9 +2208,9 @@ public class IssueServiceImpl implements IssueService {
         List<ProjectVO> projects = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
         if (ObjectUtils.isEmpty(projectId)) {
-            List<ProjectVO> projectVOS = baseFeignClient.queryProjects(userId, false).getBody();
+            List<ProjectVO> projectVOS = baseFeignClient.queryOrgProjects(organizationId,userId).getBody();
             if (!CollectionUtils.isEmpty(projectVOS)) {
-                projectVOS.stream().filter(v -> organizationId.equals(v.getOrganizationId()))
+                projectVOS.stream().filter(v -> !Objects.equals(v.getCategory(),"PROGRAM") && Boolean.TRUE.equals(v.getEnabled()))
                         .forEach(obj -> {
                             projectIds.add(obj.getId());
                             projects.add(obj);
