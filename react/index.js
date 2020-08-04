@@ -29,9 +29,9 @@ const Settings = React.lazy(() => import('./routes/settings'));
 const { AppState } = stores;
 
 class Agile extends React.Component {
-  // componentDidCatch(error, info) {
-  //   Choerodon.prompt(error.message);
-  // }
+  componentDidCatch(error, info) {
+    Choerodon.prompt(error.message);
+  }
 
   componentDidMount() {
     if (process.env.NODE_ENV === 'development') {
@@ -67,7 +67,7 @@ class Agile extends React.Component {
               <Route path={`${match.url}/page`} component={PageConfig} />
               {/* 页面类型 */}
               <Route path={`${match.url}/issue-type`} component={IssueType} />
-              <Route path={`${match.url}/settings`} component={Settings} />            
+              <Route path={`${match.url}/settings`} component={Settings} />
               <Route path={`${match.url}/states`} component={State} />
               <Route path={`${match.url}/priorities`} component={Priority} />
               <Route path={`${match.url}/test`} component={Test} />
