@@ -23,6 +23,8 @@ const IssueType = React.lazy(() => import('./routes/issueType'));
 const Priority = React.lazy(() => import('./routes/priority'));
 const State = React.lazy(() => import('./routes/state'));
 const PageConfig = React.lazy(() => import('./routes/page-config'));
+
+const CustomCirculation = React.lazy(() => import('./routes/StateMachine/components/custom-circulation'));
 // 敏捷设置
 const Settings = React.lazy(() => import('./routes/settings'));
 
@@ -71,6 +73,7 @@ class Agile extends React.Component {
               <Route path={`${match.url}/states`} component={State} />
               <Route path={`${match.url}/priorities`} component={Priority} />
               <Route path={`${match.url}/test`} component={Test} />
+              <Route path={`${match.url}/custom`} component={CustomCirculation} />
               <Route path="*" component={nomatch} />
             </Switch>
           </IntlProviderAsync>
