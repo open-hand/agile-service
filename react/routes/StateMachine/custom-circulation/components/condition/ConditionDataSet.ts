@@ -9,9 +9,9 @@ const memberOptionDataSet = new DataSet({
     { code: 'assigners', name: '被指定人' },
   ],
   fields: [
-    { 
+    {
       name: 'code',
-      type: 'string' as FieldType, 
+      type: 'string' as FieldType,
     },
     {
       name: 'name',

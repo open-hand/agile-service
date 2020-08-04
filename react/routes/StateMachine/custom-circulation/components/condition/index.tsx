@@ -12,7 +12,6 @@ import style from './index.less';
 // @ts-ignore
 const Condition = ({ modal, record }) => {
   const conditionDataSet = useMemo(() => new DataSet(ConditionDataSet), []);
-  
 
   useEffect(() => {
     const handleOk = async () => {
@@ -25,9 +24,8 @@ const Condition = ({ modal, record }) => {
       // console.log(data);
       if (validate || (member.length && member.find((item: string) => item !== 'assigners'))) {
         return true;
-      } else {
-        return false;
       }
+      return false;
     };
     modal.handleOk(handleOk);
   }, [conditionDataSet, modal]);
@@ -54,7 +52,7 @@ const Condition = ({ modal, record }) => {
         </Form>
       </div>
     </div>
-  ); 
+  );
 };
 
 export default observer(Condition);

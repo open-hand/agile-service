@@ -2,7 +2,7 @@ import React, { useState, ReactNode } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { find } from 'lodash';
 import Status from './status';
-import CustomCirculation from './components/custom-circulation';
+import CustomCirculation from './custom-circulation';
 
 export interface TabComponentProps<Params extends { [K in keyof Params]?: string } = {}> {
   tab: ReactNode
