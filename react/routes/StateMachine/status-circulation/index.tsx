@@ -5,7 +5,7 @@ import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { TabComponentProps } from '../index';
 
 const { Column } = Table;
-const Status: React.FC<TabComponentProps> = ({ tab }) => {
+const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const dataSet = useMemo(() => new DataSet({
     primaryKey: 'id',
     name: 'status',
@@ -16,7 +16,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
       {
         name: 'name',
         type: 'string' as FieldType,
-        label: '名称',
+        label: '待处理',
       },
       {
         name: 'stage',
@@ -38,7 +38,9 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
   return (
     <Page>
       <Header>
-        <Button icon="playlist_add">创建状态</Button>
+        <Button icon="playlist_add">添加已有状态</Button>
+        <Button icon="playlist_add">创建新的状态</Button>
+        <Button icon="settings">设置初始状态</Button>
       </Header>
       <Content>
         {tab}
@@ -52,4 +54,4 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
     </Page>
   );
 };
-export default Status;
+export default StatusCirculation;
