@@ -9,10 +9,10 @@ import SwimLaneHeader from './SwimLaneHeader';
 const { Panel } = Collapse;
 const getPanelKey = (mode, issue) => {
   const modeMap = new Map([
-    ['swimlane_none', 'swimlaneContext-all'],
-    ['assignee', `swimlaneContext-${issue.assigneeId || issue.type}`],
-    ['swimlane_epic', `swimlaneContext-${issue.epicId || issue.type}`],
-    ['parent_child', `swimlaneContext-${issue.issueId || issue.type || 'other'}`],
+    ['swimlane_none', 'swimlaneContext%all'],
+    ['assignee', `swimlaneContext%${issue.assigneeId || issue.type}`],
+    ['swimlane_epic', `swimlaneContext%${issue.epicId || issue.type}`],
+    ['parent_child', `swimlaneContext%${issue.issueId || issue.type || 'other'}`],
   ]);
   return modeMap.get(mode);
 };
@@ -88,12 +88,12 @@ class SwimLaneContext extends React.Component {
   keyConverter = (key, mode) => {
     const { epicPrefix } = this.props;
     const retMap = new Map([
-      ['parent_child', `parent_child-${key}`],
-      ['assignee', `assignee-${key}`],
-      ['swimlane_none', 'swimlane_none-other'],
+      ['parent_child', `parent_child%${key}`],
+      ['assignee', `assignee%${key}`],
+      ['swimlane_none', 'swimlane_none%other'],
     ]);
     if (epicPrefix) {
-      return `${epicPrefix}-${key}`;
+      return `${epicPrefix}%${key}`;
     }
     return retMap.get(mode);
   };

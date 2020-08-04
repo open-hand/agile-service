@@ -90,7 +90,7 @@ export default class ScrumBoardDataController {
             parentWithSubs,
             parentIssues,
             parentCompleted,
-            `swimlane_epic-${epicId}`,
+            `swimlane_epic%${epicId}`,
           ),
         },
       }]) : [],
@@ -101,7 +101,7 @@ export default class ScrumBoardDataController {
           parentWithSubs,
           parentIssues,
           parentCompleted,
-          'swimlane_epic-unInterconnected',
+          'swimlane_epic%unInterconnected',
         ),
       },
     };
@@ -214,10 +214,10 @@ export default class ScrumBoardDataController {
     const ret = {};
     if (interConnectedDataMap) {
       interConnectedDataMap.forEach((parentIssue) => {
-        ret[`${mode}-${parentIssue[identifyId]}`] = this.convertDataWithStructure(parentIssue.subIssueData);
+        ret[`${mode}%${parentIssue[identifyId]}`] = this.convertDataWithStructure(parentIssue.subIssueData);
       });
     }
-    ret[`${mode}-other`] = this.convertDataWithStructure(unInterConnectedDataMap);
+    ret[`${mode}%other`] = this.convertDataWithStructure(unInterConnectedDataMap);
     return ret;
   }
 
