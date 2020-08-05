@@ -16,7 +16,7 @@ interface Props {
   onSubmit: Function
   modal?: any
 }
-const SelectExistStatus: React.FC<Props> = ({
+const SetDefaultStatus: React.FC<Props> = ({
   modal, onSubmit,
 }) => {
   const dataSet = useMemo(() => new DataSet({
@@ -37,16 +37,9 @@ const SelectExistStatus: React.FC<Props> = ({
     },
     fields: [
       {
-        name: 'statusId',
+        name: 'defaultStatus',
         type: 'string' as FieldType,
         label: '状态名称',
-        required: true,
-      },
-      {
-        name: 'default',
-        type: 'boolean' as FieldType,
-        defaultValue: false,
-        label: '是否设置为初始状态?',
         required: true,
       },
     ],
@@ -66,25 +59,16 @@ const SelectExistStatus: React.FC<Props> = ({
   return (
     <>
       <Form dataSet={dataSet}>
-        <SelectStatus name="statusId" />
-        <SelectBox name="default">
-          <Option value>是</Option>
-          <Option value={false}>否</Option>
-        </SelectBox>
+        <SelectStatus name="defaultStatus" />
       </Form>
     </>
   );
 };
-const openSelectExistStatus = ({ onSubmit }: Pick<Props, 'onSubmit'>) => {
+const openSetDefaultStatus = ({ onSubmit }: Pick<Props, 'onSubmit'>) => {
   Modal.open({
-    title: '添加已有状态',
+    title: '设置初始状态',
     key,
-    drawer: true,
-    style: {
-      width: 380,
-    },
-
-    children: <SelectExistStatus onSubmit={onSubmit} />,
+    children: <SetDefaultStatus onSubmit={onSubmit} />,
   });
 };
-export default openSelectExistStatus;
+export default openSetDefaultStatus;

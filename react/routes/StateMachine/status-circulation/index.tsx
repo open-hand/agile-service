@@ -5,6 +5,7 @@ import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { TabComponentProps } from '../index';
 import openSelectExistStatus from '../components/select-exist-status';
 import openCreateStatus from '../components/create-status';
+import openSetDefaultStatus from '../components/set-default-status';
 
 const { Column } = Table;
 const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
@@ -64,7 +65,19 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         >
           创建新的状态
         </Button>
-        <Button icon="settings">设置初始状态</Button>
+        <Button
+          icon="settings"
+          onClick={() => {
+            openSetDefaultStatus({
+              onSubmit: () => {
+
+              },
+            });
+          }}
+        >
+          设置初始状态
+
+        </Button>
       </Header>
       <Content>
         {tab}
