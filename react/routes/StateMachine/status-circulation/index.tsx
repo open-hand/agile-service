@@ -3,6 +3,9 @@ import { Page, Header, Content } from '@choerodon/boot';
 import { Button, Table, DataSet } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { TabComponentProps } from '../index';
+import openSelectExistStatus from '../components/select-exist-status';
+import openCreateStatus from '../components/create-status';
+import openSetDefaultStatus from '../components/set-default-status';
 
 const { Column } = Table;
 const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
@@ -38,9 +41,43 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   return (
     <Page>
       <Header>
-        <Button icon="playlist_add">添加已有状态</Button>
-        <Button icon="playlist_add">创建新的状态</Button>
-        <Button icon="settings">设置初始状态</Button>
+        <Button
+          icon="playlist_add"
+          onClick={() => {
+            openSelectExistStatus({
+              onSubmit: () => {
+
+              },
+            });
+          }}
+        >
+          添加已有状态
+        </Button>
+        <Button
+          icon="playlist_add"
+          onClick={() => {
+            openCreateStatus({
+              onSubmit: () => {
+
+              },
+            });
+          }}
+        >
+          创建新的状态
+        </Button>
+        <Button
+          icon="settings"
+          onClick={() => {
+            openSetDefaultStatus({
+              onSubmit: () => {
+
+              },
+            });
+          }}
+        >
+          设置初始状态
+
+        </Button>
       </Header>
       <Content>
         {tab}

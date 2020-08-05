@@ -17,3 +17,8 @@ export interface PI {
   code: string
   name: string
 }
+
+export interface IStatus {
+  valueCode: 'todo' | 'doing' | 'done' | 'prepare'
+  name: string
+}

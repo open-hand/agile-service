@@ -3,6 +3,7 @@ import { Page, Header, Content } from '@choerodon/boot';
 import { Button, Table, DataSet } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { TabComponentProps } from '../index';
+import openCreateStatus from '../components/create-status';
 
 const { Column } = Table;
 const Status: React.FC<TabComponentProps> = ({ tab }) => {
@@ -35,10 +36,17 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
       },
     ],
   }), []);
+  const handleCreateStatusClick = () => {
+    openCreateStatus({
+      onSubmit: () => {
+        dataSet.query();
+      },
+    });
+  };
   return (
     <Page>
       <Header>
-        <Button icon="playlist_add">创建状态</Button>
+        <Button icon="playlist_add" onClick={handleCreateStatusClick}>创建状态</Button>
       </Header>
       <Content>
         {tab}
