@@ -5,7 +5,7 @@ import {
   Modal, Form, DataSet, SelectBox,
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { getProjectId } from '@/utils/common';
 import { IStatus } from '@/common/types';
 import SelectStatus from '../select-status';
 import './index.less';
