@@ -161,7 +161,7 @@ class ScrumBoardHome extends Component {
     const { headerStyle } = this.props;
     const { draggableId } = result;
     const [SwimLaneId, issueId] = draggableId.split(['/']);
-    headerStyle.changeStyle(style(SwimLaneId.replace(/=/g, '')));
+    headerStyle.changeStyle(style(SwimLaneId.replace(/[^\w]/g, '')));
     ScrumBoardStore.setIsDragging(SwimLaneId, true);
   };
 
@@ -191,7 +191,7 @@ class ScrumBoardHome extends Component {
       ...allDataMap.get(issueId),
       stayDay: 0,
     };
-    const [type, parentId] = SwimLaneId.split('-');
+    const [type, parentId] = SwimLaneId.split('%');
 
     ScrumBoardStore.updateIssue(issue, startStatus, startStatusIndex, destinationStatus, destinationStatusIndex, SwimLaneId).then((data) => {
       if (data.failed) {
@@ -443,7 +443,7 @@ class ScrumBoardHome extends Component {
                   objectVersionNumber: ScrumBoardStore.getUpdatedParentIssue.objectVersionNumber,
                   transformId: updateParentStatus || ScrumBoardStore.getTransformToCompleted[0].id,
                 };
-                issueApi.updateStatus(data).then((res) => {
+                issueApi.updateStatus(data.transformId, data.issueId, data.objectVersionNumber).then((res) => {
                   ScrumBoardStore.setUpdateParent(false);
                   this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
                 }).catch(() => {

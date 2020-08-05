@@ -32,7 +32,7 @@ export default class SwimLaneHeader extends Component {
           role="none"
           onClick={(e) => {
             e.stopPropagation();
-            ScrumBoardStore.setClickedIssue(parentIssue);
+            ScrumBoardStore.setClickedIssue(parentIssue.issueId);
           }}
         >
           {switchMap.get(mode)(parentIssue)}
