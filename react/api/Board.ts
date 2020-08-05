@@ -1,6 +1,6 @@
 import { axios, stores } from '@choerodon/boot';
-import { getProjectId } from '@/utils/common';
-import { getOrganizationId } from '@/utils/common';
+import { getProjectId, getOrganizationId } from '@/utils/common';
+
 import querystring from 'querystring';
 
 const { AppState } = stores;
@@ -63,7 +63,7 @@ class BoardApi {
 
   /**
    * 加载看板中未对应的状态
-   * @param boardId 
+   * @param boardId
    */
   loadNoColumnStatus(boardId: number, applyType: string = 'agile') {
     return axios({
@@ -78,7 +78,7 @@ class BoardApi {
 
   /**
    * 创建一个看板
-   * @param boardName 
+   * @param boardName
    */
   create(boardName: string) {
     return axios({
@@ -92,8 +92,8 @@ class BoardApi {
 
   /**
     * 更新看板
-    * @param boardId 
-    * @param data 
+    * @param boardId
+    * @param data
     */
   update(boardId: number, data: UBoard) {
     return axios({
@@ -105,8 +105,8 @@ class BoardApi {
 
   /**
     * 配置看板中状态卡片的更新 （目前用于设置是否完成）
-    * @param id 
-    * @param data 
+    * @param id
+    * @param data
     */
   updateStatus(id: number, data: ICardStatus) {
     return axios.put(`${this.prefix}/issue_status/${id}`, data);
@@ -114,8 +114,8 @@ class BoardApi {
 
   /**
       * 更新用户泳道设置
-      * @param boardId 
-      * @param swimlaneBasedCode 
+      * @param boardId
+      * @param swimlaneBasedCode
       */
   updateUserSetting(boardId: number, swimlaneBasedCode: string) {
     return axios({
@@ -129,16 +129,16 @@ class BoardApi {
 
   /**
          * 删除迭代看板
-         * @param boardId 
+         * @param boardId
          */
   delete(boardId: number) {
     return axios.delete(`${this.prefix}/board/${boardId}`);
   }
 
   /** 删除迭代看板中未对应的状态
-   * 
-   * @param statusId 
-   * @param applyType 
+   *
+   * @param statusId
+   * @param applyType
    */
   deleteStatus(statusId: number, applyType: string = 'agile') {
     return axios({
@@ -152,9 +152,9 @@ class BoardApi {
 
   /**
    * 移动迭代看板issue
-   * @param issueId 
-   * @param transformId 
-   * @param data 
+   * @param issueId
+   * @param transformId
+   * @param data
    */
   moveIssue(issueId: number, transformId: number, data: any) {
     return axios({
@@ -169,8 +169,8 @@ class BoardApi {
 
   /**
    * 移动状态到未对应列
-   * @param statusId 
-   * @param data 
+   * @param statusId
+   * @param data
    */
   moveStatusToUnset(statusId: number, data: UMoveStatus) {
     return axios.post(`${this.prefix}/issue_status/${statusId}/move_to_uncorrespond`, data);
@@ -178,8 +178,8 @@ class BoardApi {
 
   /**
    * 移动状态到列中
-   * @param code 
-   * @param data 
+   * @param code
+   * @param data
    */
   moveStatusToColumn(statusId: number, data: UMoveStatus) {
     return axios.post(`${this.prefix}/issue_status/${statusId}/move_to_column`, data);
@@ -187,7 +187,7 @@ class BoardApi {
 
   /**
     * 检查看板名称是否重复
-    * @param boardName 
+    * @param boardName
     */
   checkName(boardName: string) {
     return axios({

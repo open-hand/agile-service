@@ -10,7 +10,6 @@ import 'moment/locale/en-nz';
 import moment from 'moment';
 import AgileProvider from '@/components/AgileProvider';
 import RunWhenProjectChange from '@/common/RunWhenProjectChange';
-import Test from './Test';
 import IsInProgramStore from './stores/common/program/IsInProgramStore';
 import './style/index.less';
 
@@ -23,6 +22,8 @@ const IssueType = React.lazy(() => import('./routes/issueType'));
 const Priority = React.lazy(() => import('./routes/priority'));
 const State = React.lazy(() => import('./routes/state'));
 const PageConfig = React.lazy(() => import('./routes/page-config'));
+
+const StateMachine = React.lazy(() => import('./routes/StateMachine'));
 // 敏捷设置
 const Settings = React.lazy(() => import('./routes/settings'));
 
@@ -67,10 +68,10 @@ class Agile extends React.Component {
               <Route path={`${match.url}/page`} component={PageConfig} />
               {/* 页面类型 */}
               <Route path={`${match.url}/issue-type`} component={IssueType} />
-              <Route path={`${match.url}/settings`} component={Settings} />            
+              <Route path={`${match.url}/settings`} component={Settings} />
               <Route path={`${match.url}/states`} component={State} />
               <Route path={`${match.url}/priorities`} component={Priority} />
-              <Route path={`${match.url}/test`} component={Test} />
+              <Route path={`${match.url}/state-machine`} component={StateMachine} />
               <Route path="*" component={nomatch} />
             </Switch>
           </IntlProviderAsync>
