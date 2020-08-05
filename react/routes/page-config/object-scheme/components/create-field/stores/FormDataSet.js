@@ -4,7 +4,6 @@
 import moment from 'moment';
 import { remove } from 'lodash';
 
-
 function getLookupConfig(code) {
   return {
     url: `/agile/v1/lookup_values/${code}`,
@@ -14,12 +13,11 @@ function getLookupConfig(code) {
         const data = JSON.parse(response);
         if (data && data.lookupValues) {
           if (code === 'object_scheme_field_context') {
-            remove(data.lookupValues, item => item.valueCode === 'global');
+            remove(data.lookupValues, (item) => item.valueCode === 'global');
           }
           return data.lookupValues;
-        } else {
-          return data;
         }
+        return data;
       } catch (error) {
         return response;
       }
@@ -37,18 +35,17 @@ export default ({
     if (isEdit) return;
     if (!value) {
       return '';
-    } else if (!regex.test(value)) {
+    } if (!regex.test(value)) {
       return formatMessage({ id: 'field.code.rule' });
-    } else {
-      const prefix = type === 'project' ? 'pro_' : 'org_';
-      try {
-        const data = await store.checkCode(`${prefix}${value}`, schemeCode);
-        if (data) {
-          return formatMessage({ id: 'field.code.exist' });
-        }
-      } catch (error) {
-        return formatMessage({ id: 'network.error' });
+    }
+    const prefix = type === 'project' ? 'pro_' : 'org_';
+    try {
+      const data = await store.checkCode(`${prefix}${value}`, schemeCode);
+      if (data) {
+        return formatMessage({ id: 'field.code.exist' });
       }
+    } catch (error) {
+      return formatMessage({ id: 'network.error' });
     }
   }
   // eslint-disable-next-line consistent-return
@@ -56,14 +53,12 @@ export default ({
     if (isEdit && value === oldRecord.get('name')) return;
     if (!value) {
       return '';
-    } else {
-      const data = await store.checkName(value, schemeCode);
-      if (data) {
-        return formatMessage({ id: 'field.name.exist' });
-      }
+    }
+    const data = await store.checkName(value, schemeCode);
+    if (data) {
+      return formatMessage({ id: 'field.name.exist' });
     }
   }
-
 
   function handleUpdate({ record, name, value }) {
     if (name === 'check' && value) {
@@ -136,13 +131,13 @@ export default ({
             const fieldType = record.get('fieldType');
             if (fieldType === 'member') {
               return userOptionDataSet;
-            } 
+            }
           },
           max: ({ record }) => {
             const fieldType = record.get('fieldType');
             if (fieldType === 'number') {
               return Number.MAX_SAFE_INTEGER;
-            } 
+            }
           },
         },
       },

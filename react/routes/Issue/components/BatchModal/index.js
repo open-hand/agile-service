@@ -5,7 +5,7 @@ import {
   Form, Button, Select, DataSet, Row, Col, Progress,
 } from 'choerodon-ui/pro';
 import {
-  stores, WSHandler, Choerodon,  
+  stores, WSHandler, Choerodon,
 } from '@choerodon/boot';
 import { find } from 'lodash';
 import { getProjectId, getOrganizationId } from '@/utils/common';
@@ -113,7 +113,7 @@ function transformValue(dataSet, key, value, format) {
     return format(v, lookup);
   }
   if (Array.isArray(value)) {
-    return value.map(v => transform(v));
+    return value.map((v) => transform(v));
   }
   return transform(value);
 }
@@ -139,14 +139,14 @@ function formatFields(fieldData, data, dataSet) {
 }
 
 function BatchModal({
-  dataSet: tableDataSet, fields: customFields, onCancel, onEdit, 
+  dataSet: tableDataSet, fields: customFields, onCancel, onEdit,
 }) {
   const { isInProgram } = IsInProgramStore;
-  const fieldData = [...systemFields.values(), ...customFields].filter((f => (isInProgram ? f.code !== 'epicId' : f.code !== 'featureId')));
+  const fieldData = [...systemFields.values(), ...customFields].filter(((f) => (isInProgram ? f.code !== 'epicId' : f.code !== 'featureId')));
   const [fields, Field] = useFields();
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const userFields = fieldData.filter(field => field.fieldType === 'member').map(field => ({
+  const userFields = fieldData.filter((field) => field.fieldType === 'member').map((field) => ({
     name: field.code,
     type: 'string',
     textField: 'realName',
@@ -201,7 +201,7 @@ function BatchModal({
         transformResponse: (response) => {
           try {
             const data = JSON.parse(response);
-            return data.filter(v => v.enable);
+            return data.filter((v) => v.enable);
           } catch (error) {
             return response;
           }
@@ -281,7 +281,9 @@ function BatchModal({
   };
   const submit = async () => {
     const data = getData();
-    const issueIds = tableDataSet.selected.map(record => record.get('issueId'));
+    console.log('data：');
+    console.log(data);
+    const issueIds = tableDataSet.selected.map((record) => record.get('issueId'));
     const res = { issueIds, ...formatFields(fieldData, data, dataSet) };
     await fieldApi.batchUpdateIssue(res);
     setLoading(true);
@@ -299,7 +301,7 @@ function BatchModal({
           setLoading('success');
           setTimeout(() => {
             onEdit();
-          }, 2000); 
+          }, 2000);
           break;
         }
         case 'doing': {
@@ -312,11 +314,11 @@ function BatchModal({
           break;
         }
         default: break;
-      }      
+      }
     }
   };
   const render = () => (
-    <Fragment>
+    <>
       <Form
         className={styles.form}
         disabled={Boolean(loading)}
@@ -338,7 +340,7 @@ function BatchModal({
                     Field.set(key, field);
                   }}
                 >
-                  {fieldData.filter(field => (id === field.id) || !find(fields, { id: field.id })).map(field => (
+                  {fieldData.filter((field) => (id === field.id) || !find(fields, { id: field.id })).map((field) => (
                     <Option value={field.id}>
                       {field.name}
                     </Option>
@@ -350,7 +352,7 @@ function BatchModal({
                   {renderField(f)}
                 </Col>
               )}
-              <Col span={2}>                
+              <Col span={2}>
                 <Button
                   onClick={() => {
                     Field.remove(key);
@@ -368,8 +370,8 @@ function BatchModal({
       </Form>
       {loading && (
       <div style={{ color: 'rgba(254,71,87,1)', textAlign: 'center' }}>
-        {loading === 'success' ? '修改成功' : ['正在修改，请稍等片刻', <span className={styles.dot}>…</span>]}      
-        <Progress status="success" value={Math.round(progress * 100)} />  
+        {loading === 'success' ? '修改成功' : ['正在修改，请稍等片刻', <span className={styles.dot}>…</span>]}
+        <Progress status="success" value={Math.round(progress * 100)} />
       </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -385,7 +387,7 @@ function BatchModal({
           确定
         </Button>
       </div>
-    </Fragment>
+    </>
   );
   return (
     <div style={{ padding: 15 }}>

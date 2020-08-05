@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect } from 'react';
 import { Form, DataSet, Select } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import style from './index.less';
+import styles from './index.less';
 
 // @ts-ignore
 const Linkage = ({ modal, record }) => {
@@ -26,19 +26,19 @@ const Linkage = ({ modal, record }) => {
     }
   }, [linkageDataSet, modal]);
   return (
-    <div className={style.linkage}>
-      <div className={style.tip}>当工作项流转到此状态后，关联的父任务状态设置。</div>
+    <div className={styles.linkage}>
+      <div className={styles.tip}>当工作项流转到此状态后，关联的父任务状态设置。</div>
       <Form dataSet={linkageDataSet}>
         <div>
-          <p className={style.label}>父级为故事类型</p>
+          <p className={styles.label}>父级为故事类型</p>
           <Select name="story" />
         </div>
         <div>
-          <p className={style.label}>父级为任务类型</p>
+          <p className={styles.label}>父级为任务类型</p>
           <Select name="task" />
         </div>
         <div>
-          <p className={style.label}>父级为缺陷类型</p>
+          <p className={styles.label}>父级为缺陷类型</p>
           <Select name="bug" />
         </div>
       </Form>

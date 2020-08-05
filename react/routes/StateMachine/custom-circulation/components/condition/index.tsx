@@ -7,7 +7,7 @@ import {
 import { Divider } from 'choerodon-ui';
 import SelectUser from '@/components/select/select-user';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import style from './index.less';
+import styles from './index.less';
 
 interface Props {
   modal: any,
@@ -17,7 +17,6 @@ const Condition:React.FC<Props> = ({ modal, record }) => {
   const memberOptionDataSet = useMemo(() => new DataSet({
     data: [
       { code: 'owner', name: '项目所有者' },
-      { code: 'member', name: '项目成员' },
       { code: 'assigners', name: '被指定人' },
     ],
     fields: [
@@ -80,11 +79,11 @@ const Condition:React.FC<Props> = ({ modal, record }) => {
   const data = conditionDataSet.toData();
 
   return (
-    <div className={style.condition}>
-      <div className={style.tip}>当工作项流转到此状态应满足的条件设置。</div>
-      <div className={style.setting}>
+    <div className={styles.condition}>
+      <div className={styles.tip}>当工作项流转到此状态应满足的条件设置。</div>
+      <div className={styles.setting}>
         <Form dataSet={conditionDataSet}>
-          <p className={style.memberSelectTip}>移动工作项到此状态的成员为</p>
+          <p className={styles.memberSelectTip}>移动工作项到此状态的成员为</p>
           <Select name="member" />
           {
             // @ts-ignore
@@ -92,8 +91,8 @@ const Condition:React.FC<Props> = ({ modal, record }) => {
               <SelectUser name="assigners" />
             )
           }
-          <Divider className={style.divider} />
-          <div className={style.completeSetting}>
+          <Divider className={styles.divider} />
+          <div className={styles.completeSetting}>
             <CheckBox name="needCompleted" />
           </div>
         </Form>

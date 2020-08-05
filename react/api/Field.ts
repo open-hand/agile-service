@@ -24,9 +24,9 @@ class FieldApi {
   }
 
   /**
-     * 快速创建字段默认值 
-     * @param issueId 
-     * @param dto 
+     * 快速创建字段默认值
+     * @param issueId
+     * @param dto
      */
   quickCreateDefault(issueId: number, dto: IFiled) {
     const organizationId = getOrganizationId();
@@ -59,7 +59,7 @@ class FieldApi {
 
   /**
  * 加载字段配置（包含值）
- * @returns {V|*} 
+ * @returns {V|*}
  */
   getFieldAndValue(issueId: number, dto: IFiled) {
     const organizationId = getOrganizationId();
@@ -100,9 +100,9 @@ class FieldApi {
 
   /**
    * 更新Issue字段值
-   * @param issueId 
-   * @param fieldId 
-   * @param schemeCode 
+   * @param issueId
+   * @param fieldId
+   * @param schemeCode
    * @param dto  更新的值
    */
   updateFieldValue(issueId: number, fieldId: number, schemeCode: string, dto: UIssueFiled) {
@@ -121,9 +121,9 @@ class FieldApi {
 
   /**
    * 批量更新问题字段
-   * @param data 
-   * @param schemeCode 
-   * @param applyType 
+   * @param data
+   * @param schemeCode
+   * @param applyType
    */
   batchUpdateIssue(data: BathUpdateField, schemeCode = 'agile_issue', applyType = 'agile') {
     return axios({
@@ -136,7 +136,6 @@ class FieldApi {
       data,
     });
   }
-
 
   /**
    * 项目层，获取自定义字段表头

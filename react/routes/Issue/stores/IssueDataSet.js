@@ -8,26 +8,26 @@ import BatchModal from '../components/BatchModal';
 let modal;
 function Header({ dataSet, close }) {
   return (
-    <Fragment>
+    <>
       <div style={{ fontSize: '30px', fontWeight: 500, marginRight: 12 }}>{dataSet.selected.length}</div>
       <div style={{ fontSize: '16px' }}>
         项已选中
       </div>
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
         <Icon type="mode_edit" />
-        <span style={{ marginLeft: 6 }}>批量修改</span>        
+        <span style={{ marginLeft: 6 }}>批量修改</span>
       </div>
       <div style={{
-        width: 1, height: '100%', margin: '0px 8px 0 15px', background: '#95A5FF', 
+        width: 1, height: '100%', margin: '0px 8px 0 15px', background: '#95A5FF',
       }}
       />
       <Button
         icon="close"
-        shape="circle" 
-        style={{ color: 'white', marginRight: -5 }}         
+        shape="circle"
+        style={{ color: 'white', marginRight: -5 }}
         onClick={close}
-      />      
-    </Fragment>
+      />
+    </>
   );
 }
 const ObserverHeader = observer(Header);
@@ -82,7 +82,7 @@ export default ({
         ...params,
         organizationId,
       },
-      transformRequest: (data) => {
+      transformRequest: () => {
         const searchDTO = IssueStore.getCustomFieldFilters();
         return JSON.stringify(searchDTO);
       },
@@ -109,7 +109,7 @@ export default ({
   queryFields: [
     { name: 'issueTypeId', type: 'array', label: '问题类型' },
     // { name: 'service', type: 'string', label: service },
-    // { name: 'description', type: 'string', label: description },      
+    // { name: 'description', type: 'string', label: description },
   ],
   events: {
     select: handleSelect,

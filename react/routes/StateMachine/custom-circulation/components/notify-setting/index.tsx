@@ -3,7 +3,7 @@ import { DataSet, Form, Select } from 'choerodon-ui/pro';
 import SelectUser from '@/components/select/select-user';
 import { observer } from 'mobx-react-lite';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import style from './index.less';
+import styles from './index.less';
 
 // @ts-ignore
 const NotifySetting = ({ modal, record }) => {
@@ -89,7 +89,7 @@ const NotifySetting = ({ modal, record }) => {
   // @ts-ignore
   const { member } = data && data[0];
   return (
-    <div className={style.notify_setting}>
+    <div className={styles.notify_setting}>
       <Form dataSet={notifySettingDataSet}>
         <Select name="member" />
         {

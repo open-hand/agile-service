@@ -23,3 +23,11 @@ export interface IStatus {
   valueCode: 'todo' | 'doing' | 'done' | 'prepare'
   name: string
 }
+export interface Priority {
+  colour: string,
+  default: boolean
+  description: string,
+  enable: boolean,
+  id: string,
+  name: string,
+}
