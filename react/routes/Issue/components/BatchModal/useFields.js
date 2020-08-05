@@ -28,7 +28,7 @@ function reducer(state, action) {
         draft[index] = {
           key: action.payload.key,
           ...action.payload.value,
-        };       
+        };
       });
     }
     default: throw new Error();

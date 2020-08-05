@@ -18,12 +18,11 @@ const SelectFeature: React.FC<Props> = forwardRef(({ featureId, featureName, ...
     request: ({ filter, page }) => featureApi.getByEpicId(undefined, filter, page),
     middleWare: (features) => {
       if (featureId && featureName) {
-        return (find(features, item => item.issueId === featureId) || !featureId) ? features : [...features, { issueId: featureId, summary: featureName }];
-      } else {
-        return features;
+        return (find(features, (item) => item.issueId === featureId) || !featureId) ? features : [...features, { issueId: featureId, summary: featureName }];
       }
+      return features;
     },
-    optionRenderer: feature => (
+    optionRenderer: (feature) => (
       <Tooltip title={feature.summary} placement="left">
         {feature.summary}
       </Tooltip>
@@ -37,7 +36,7 @@ const SelectFeature: React.FC<Props> = forwardRef(({ featureId, featureName, ...
       clearButton
       {...props}
       {...otherProps}
-      
+
     />
   );
 });
