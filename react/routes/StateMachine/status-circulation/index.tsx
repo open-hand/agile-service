@@ -8,11 +8,11 @@ import openSetDefaultStatus from '../components/set-default-status';
 import Table from './Table';
 import { TabComponentProps } from '..';
 
-interface ColumnProps<T = Object> {
+interface ColumnProps {
   name: string,
-  lock: boolean | 'right',
+  lock?: boolean | 'right',
   renderHeader?: () => ReactNode | null,
-  renderer?: ((record: T) => ReactNode),
+  renderer?: ((record: Object) => ReactNode),
 }
 interface IStatusCirculation extends IStatus {
   to: string[];
@@ -135,7 +135,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     [to.id]: from.to.includes(to.id),
     name: from.name,
   }), {}));
-  const columns: ColumnProps<IStatusCirculation>[] = [{
+  const columns: ColumnProps[] = [{
     name: 'name',
     lock: true,
     renderHeader: () => null,
@@ -154,8 +154,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     lock: 'right',
     renderHeader: () => null,
     renderer: (() => 'delete'),
-  },
-  ];
+  }];
 
   return (
     <Page>
