@@ -1,47 +1,56 @@
-import React, { useMemo, ReactElement } from 'react';
+import React, { useMemo, ReactElement, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Table, DataSet, Icon } from 'choerodon-ui/pro/lib';
+import {
+  Table, DataSet, Icon, CheckBox,
+} from 'choerodon-ui/pro/lib';
 import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
+import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import OldSortTable from '../../../page/components/SortTable';
 import './index.less';
+import { usePageIssueTypeStore } from '../../stores';
 
 const { Column } = Table;
 const SortTable: React.FC<{ type: string, disabled: boolean | undefined }> = (
   { type, disabled, children },
 ) => {
-  const dataSet = useMemo(() => new DataSet({
-    autoQuery: true,
-    dataKey: 'content',
-    paging: false,
-    selection: undefined,
-    fields: [
-      { name: 'fieldName', label: '字段名称' },
-      { name: 'defaultValue', label: '默认值' },
-      { name: 'require', label: '是否必填' },
-      { name: 'fieldName', label: '是否加入到编辑页' },
-      { name: 'fieldName', label: '是否加入到创建页' },
+  const { sortTableDataSet } = usePageIssueTypeStore();
 
-    ],
-    transport: {
-      read: {
-        url: '/agile/v1/projects/1528/page_field/list?organizationId=7&pageCode=agile_issue_edit',
-        method: 'get',
-      },
-    },
-  }), []);
+  useEffect(() => {
+    console.log('disabled:', disabled);
+  }, [disabled]);
+  const renderFieldName = ({ value }: RenderProps) => (
+    <div>
+      {!disabled && <Icon type="baseline-drag_indicator" />}
+      <span>{value}</span>
+    </div>
+  );
+
+  function renderCheckBox({ value, name, record }: RenderProps) {
+    return (
+      <CheckBox
+        // disabled={disabled}
+        defaultChecked={value}
+        // value={value}
+        onChange={(val) => {
+          console.log('val', val, name);
+          record?.set(name as String, val);
+        }}
+      />
+    );
+  }
   return (
     <div className="c7n-page-issue-detail">
       <Table
-        dataSet={dataSet}
+        dataSet={sortTableDataSet}
         queryBar={'none' as TableQueryBarType}
-        dragRow
+        dragRow={!disabled}
         border={false}
       >
-        <Column name="fieldName" />
+        <Column name="fieldName" renderer={renderFieldName} />
         <Column name="defaultValue" />
-        <Column name="require" width={75} />
-        <Column name="fieldName" width={135} />
-        <Column name="fieldName" width={135} />
+        <Column name="require" width={75} renderer={renderCheckBox} />
+        <Column name="edit" width={135} renderer={renderCheckBox} />
+        <Column name="create" width={135} renderer={renderCheckBox} />
       </Table>
     </div>
   );

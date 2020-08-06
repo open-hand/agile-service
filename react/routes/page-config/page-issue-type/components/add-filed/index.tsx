@@ -1,11 +1,12 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import {
   Form, Select, DataSet, Modal,
 } from 'choerodon-ui/pro/lib';
 import { observer } from 'mobx-react-lite';
+import { IModalProps } from '@/common/types';
 
 const { Option } = Select;
-const AddFiled: React.FC<> = observer(() => {
+const AddFiled: React.FC<{ modal?: IModalProps }> = observer(({ modal }) => {
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     paging: false,
@@ -13,6 +14,15 @@ const AddFiled: React.FC<> = observer(() => {
       { name: 'field', label: '字段' },
     ],
   }), []);
+  async function handleSubmit() {
+    if (dataSet.validate()) {
+      return true;
+    }
+    return false;
+  }
+  useEffect(() => {
+    modal?.handleOk(handleSubmit);
+  }, []);
   return (
     <Form dataSet={dataSet}>
       <Select name="field">

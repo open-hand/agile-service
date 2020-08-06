@@ -1,11 +1,11 @@
 import React from 'react';
-import { PageConfigProvider } from '../stores';
+import PageIssueTypeProvider from './stores';
 import PageIssueType from './PageIssueType';
 
 export default function Index(props:any) {
   return (
-    <PageConfigProvider {...props}>
+    <PageIssueTypeProvider {...props}>
       <PageIssueType />
-    </PageConfigProvider>
+    </PageIssueTypeProvider>
   );
 }
