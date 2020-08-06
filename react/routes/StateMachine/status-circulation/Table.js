@@ -185,11 +185,26 @@ export default class Table extends React.PureComponent {
     );
   }
 
+  getColumnWidth=({ index, width }) => {
+    const {
+      columnWidth,
+    } = this.state;
+    const { columns } = this.props;
+    const { left, right } = this.getFixedColumns();
+    if (index < left.length || index > columns.length - right.length - 1) {
+      return columnWidth;
+    }
+    const MIN_WIDTH = 100;
+    const fixedWidth = (left.length + right.length) * columnWidth;
+    const remainWidth = width - fixedWidth;
+    const columnCount = columns.length - (left.length + right.length);
+    return Math.max(MIN_WIDTH, remainWidth / columnCount);
+  }
+
   renderColumns = ({
     width, height, scrollLeft, onScroll, rowCount,
   }) => {
     const {
-      columnWidth,
       overscanColumnCount,
       overscanRowCount,
       rowHeight,
@@ -208,7 +223,7 @@ export default class Table extends React.PureComponent {
         >
           <Grid
             className={styles.HeaderGrid}
-            columnWidth={columnWidth}
+            columnWidth={({ index }) => this.getColumnWidth({ index, width })}
             columnCount={columnCount}
             height={rowHeight}
             overscanColumnCount={overscanColumnCount}
@@ -229,7 +244,7 @@ export default class Table extends React.PureComponent {
         >
           <Grid
             className={styles.BodyGrid}
-            columnWidth={columnWidth}
+            columnWidth={({ index }) => this.getColumnWidth({ index, width })}
             columnCount={columnCount}
             height={height}
             onScroll={onScroll}
