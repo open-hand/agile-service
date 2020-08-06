@@ -4,7 +4,7 @@ import React from 'react';
 import { AutoSizer, Grid, ScrollSync } from 'react-virtualized';
 import PropTypes from 'prop-types';
 import scrollbarSize from 'dom-helpers/scrollbarSize';
-import styles from './Table.less';
+import styles from './index.less';
 
 const leftColor = '#000';
 const topColor = '#000';
@@ -17,7 +17,7 @@ export default class Table extends React.PureComponent {
     this.state = {
       columnWidth: 75,
       overscanColumnCount: 0,
-      overscanRowCount: 5,
+      overscanRowCount: 10,
       rowHeight: 40,
     };
   }
@@ -68,7 +68,7 @@ export default class Table extends React.PureComponent {
     const dataIndex = column.name;
     return (
       <div className={styles.cell} key={key} style={style}>
-        {column.renderer ? column.renderer(data[rowIndex]) : data[rowIndex][dataIndex]}
+        {column.renderer ? column.renderer(data[rowIndex], rowIndex) : data[rowIndex][dataIndex]}
       </div>
     );
   }
