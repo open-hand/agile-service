@@ -15,8 +15,10 @@ import { usePageIssueTypeStore } from './stores';
 function PageIssueType(params: any) {
   const { sortTableDataSet } = usePageIssueTypeStore();
   const [edit, setEdit] = useState<boolean>();
-  const [desValue, setDesValue] = useState<string>();
+  const [desValue, setDesValue] = useState<string[]>();
   const handleCancel = () => {
+    setDesValue([]);
+    sortTableDataSet.reset();
     setEdit(false);
   };
   async function handleSubmit() {

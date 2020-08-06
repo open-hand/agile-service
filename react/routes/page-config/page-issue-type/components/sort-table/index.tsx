@@ -28,7 +28,7 @@ const SortTable: React.FC<{ type: string, disabled: boolean | undefined }> = (
   function renderCheckBox({ value, name, record }: RenderProps) {
     return (
       <CheckBox
-        // disabled={disabled}
+        disabled={disabled}
         defaultChecked={value}
         // value={value}
         onChange={(val) => {
