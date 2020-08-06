@@ -215,6 +215,22 @@
         </dependency>
     </dependencies>
 
+    <repositories>
+        <repository>
+            <id>ChoerodonSnapshot</id>
+            <name>Choerodon-Snapshot Repository</name>
+            <url>https://nexus.choerodon.com.cn/repository/choerodon-snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+
+
     <build>
         <plugins>
             <plugin>
