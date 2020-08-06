@@ -1,38 +1,34 @@
-import React, { ReactNode } from 'react';
+import React, { useState } from 'react';
 import { Page, Header, Content } from '@choerodon/boot';
 import { Button } from 'choerodon-ui/pro';
 import { IStatus } from '@/common/types';
 import openSelectExistStatus from '../components/select-exist-status';
 import openCreateStatus from '../components/create-status';
 import openSetDefaultStatus from '../components/set-default-status';
-import Table from './Table';
+import StatusCirculationTable from './components/status-circulation-table';
 import { TabComponentProps } from '..';
 
-interface ColumnProps {
-  name: string,
-  lock?: boolean | 'right',
-  renderHeader?: () => ReactNode | null,
-  renderer?: ((record: Object) => ReactNode),
-}
-interface IStatusCirculation extends IStatus {
+export interface IStatusCirculation extends IStatus {
   to: string[];
+  default?: boolean
   [propName: string]: any
 }
 const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
-  const statusList: IStatusCirculation[] = [{
+  const [statusList, setStatusList] = useState<IStatusCirculation[]>([{
     id: '1',
     name: '待处理',
     valueCode: 'todo',
     to: ['1', '2'],
+    default: true,
   }, {
     id: '2',
     name: '待处理2',
-    valueCode: 'todo',
+    valueCode: 'doing',
     to: ['1', '2', '3'],
   }, {
     id: '3',
     name: '待处理3',
-    valueCode: 'todo',
+    valueCode: 'done',
     to: ['1', '2', '3'],
   }, {
     id: '4',
@@ -129,32 +125,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     name: '待处理22',
     valueCode: 'todo',
     to: ['1', '2', '3'],
-  }];
-  const data = statusList.map((from) => statusList.reduce((result, to) => ({
-    ...result,
-    [to.id]: from.to.includes(to.id),
-    name: from.name,
-  }), {}));
-  const columns: ColumnProps[] = [{
-    name: 'name',
-    lock: true,
-    renderHeader: () => null,
-  }, {
-    name: 'operate',
-    lock: true,
-    renderHeader: () => null,
-    renderer: (() => '可流转到'),
-  },
-  ...statusList.map((status) => ({
-    name: status.name,
-    renderer: ((record: IStatusCirculation) => <input type="checkbox" checked={record[status.id]} />),
-  })),
-  {
-    name: 'delete',
-    lock: 'right',
-    renderHeader: () => null,
-    renderer: (() => 'delete'),
-  }];
+  }]);
 
   return (
     <Page>
@@ -199,7 +170,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       </Header>
       <Content>
         {tab}
-        <Table data={data} columns={columns} />
+        <StatusCirculationTable data={statusList} />
       </Content>
     </Page>
   );
