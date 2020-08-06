@@ -1,5 +1,5 @@
 import React, { ReactNode, useMemo } from 'react';
-import { Button } from 'choerodon-ui/pro';
+import { Button, Modal } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import STATUS from '@/constants/STATUS';
 import Table from '../table';
@@ -17,6 +17,11 @@ interface ColumnProps {
 const StatusCirculationTable: React.FC = () => {
   const { store } = useStatusCirculationContext();
   const { statusList } = store;
+  const handleDeleteClick = (record:IStatusCirculation) => {
+    Modal.confirm({
+      title: '确认删除',
+    });
+  };
   const data = useMemo(() => statusList.map((from) => statusList.reduce((result, to) => ({
     ...result,
     ...from,
@@ -62,7 +67,7 @@ const StatusCirculationTable: React.FC = () => {
       ? <span className={styles.default_status}>初始状态</span>
       : (
         <div>
-          <Button icon="delete" />
+          <Button icon="delete" onClick={() => handleDeleteClick(record)} />
         </div>
       )
     )),
