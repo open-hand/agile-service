@@ -1,26 +1,29 @@
-import React, { useMemo } from 'react';
+import React, { ReactNode } from 'react';
 import { Page, Header, Content } from '@choerodon/boot';
-import {
-  Button, DataSet,
-} from 'choerodon-ui/pro';
-import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { Button } from 'choerodon-ui/pro';
 import { IStatus } from '@/common/types';
-import { ColumnProps } from 'choerodon-ui/pro/lib/table/Column';
 import openSelectExistStatus from '../components/select-exist-status';
 import openCreateStatus from '../components/create-status';
 import openSetDefaultStatus from '../components/set-default-status';
 import Table from './Table';
 import { TabComponentProps } from '..';
 
+interface ColumnProps<T = Object> {
+  name: string,
+  lock: boolean | 'right',
+  renderHeader?: () => ReactNode | null,
+  renderer?: ((record: T) => ReactNode),
+}
 interface IStatusCirculation extends IStatus {
-  to: string[]
+  to: string[];
+  [propName: string]: any
 }
 const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const statusList: IStatusCirculation[] = [{
     id: '1',
     name: '待处理',
     valueCode: 'todo',
-    to: ['1', '2', '3'],
+    to: ['1', '2'],
   }, {
     id: '2',
     name: '待处理2',
@@ -53,104 +56,107 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     to: ['1', '2', '3'],
   }, {
     id: '8',
-    name: '待处理7',
+    name: '待处理8',
     valueCode: 'todo',
     to: ['1', '2', '3'],
   }, {
     id: '9',
-    name: '待处理7',
+    name: '待处理9',
     valueCode: 'todo',
     to: ['1', '2', '3'],
   }, {
     id: '10',
-    name: '待处理7',
+    name: '待处理10',
     valueCode: 'todo',
     to: ['1', '2', '3'],
   }, {
     id: '11',
-    name: '待处理7',
+    name: '待处理11',
     valueCode: 'todo',
     to: ['1', '2', '3'],
   }, {
     id: '12',
-    name: '待处理7',
+    name: '待处理12',
     valueCode: 'todo',
     to: ['1', '2', '3'],
   }, {
     id: '13',
-    name: '待处理7',
+    name: '待处理13',
     valueCode: 'todo',
     to: ['1', '2', '3'],
   }, {
     id: '14',
-    name: '待处理7',
+    name: '待处理14',
     valueCode: 'todo',
     to: ['1', '2', '3'],
   }, {
     id: '15',
-    name: '待处理7',
+    name: '待处理15',
     valueCode: 'todo',
     to: ['1', '2', '3'],
   }, {
     id: '16',
-    name: '待处理7',
+    name: '待处理16',
     valueCode: 'todo',
     to: ['1', '2', '3'],
   }, {
     id: '17',
-    name: '待处理7',
+    name: '待处理17',
     valueCode: 'todo',
     to: ['1', '2', '3'],
   }, {
     id: '18',
-    name: '待处理7',
+    name: '待处理18',
     valueCode: 'todo',
     to: ['1', '2', '3'],
   }, {
     id: '19',
-    name: '待处理7',
+    name: '待处理19',
     valueCode: 'todo',
     to: ['1', '2', '3'],
   }, {
     id: '20',
-    name: '待处理7',
+    name: '待处理20',
     valueCode: 'todo',
     to: ['1', '2', '3'],
   }, {
     id: '21',
-    name: '待处理7',
+    name: '待处理21',
     valueCode: 'todo',
     to: ['1', '2', '3'],
   }, {
     id: '22',
-    name: '待处理7',
+    name: '待处理22',
     valueCode: 'todo',
     to: ['1', '2', '3'],
   }];
-  const columns: ColumnProps[] = [{ name: 'name', lock: true }, { name: 'operate', lock: true }].concat(statusList.map((status) => ({
-    name: status.name,
-    lock: false,
-    renderer: (() => <input type="checkbox" checked />),
-  })));
   const data = statusList.map((from) => statusList.reduce((result, to) => ({
     ...result,
-    [to.name]: from.to.includes(to.id),
+    [to.id]: from.to.includes(to.id),
     name: from.name,
-    operate: '可流转到',
   }), {}));
-  const dataSet = useMemo(() => new DataSet({
-    primaryKey: 'id',
-    name: 'status',
-    autoQuery: false,
-    paging: false,
-    selection: false,
-    data,
-    fields: statusList.map((status) => ({
-      name: status.name,
-      type: 'boolean' as FieldType,
-      label: status.name,
-    })),
-  }), []);
+  const columns: ColumnProps<IStatusCirculation>[] = [{
+    name: 'name',
+    lock: true,
+    renderHeader: () => null,
+  }, {
+    name: 'operate',
+    lock: true,
+    renderHeader: () => null,
+    renderer: (() => '可流转到'),
+  },
+  ...statusList.map((status) => ({
+    name: status.name,
+    renderer: ((record: IStatusCirculation) => <input type="checkbox" checked={record[status.id]} />),
+  })),
+  {
+    name: 'delete',
+    lock: 'right',
+    renderHeader: () => null,
+    renderer: (() => 'delete'),
+  },
+  ];
+
   return (
     <Page>
       <Header>
@@ -194,15 +200,6 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       </Header>
       <Content>
         {tab}
-        {/* <Table
-          autoHeight={{
-            type: 'maxHeight' as TableAutoHeightType,
-            diff: 80,
-          }}
-          key="user"
-          dataSet={dataSet}
-          columns={columns}
-        /> */}
         <Table data={data} columns={columns} />
       </Content>
     </Page>
