@@ -1,10 +1,12 @@
 import React, { ReactNode, useMemo } from 'react';
 import { Button } from 'choerodon-ui/pro';
+import { observer } from 'mobx-react-lite';
 import STATUS from '@/constants/STATUS';
 import Table from '../table';
-import { IStatusCirculation } from '../..';
+import { IStatusCirculation } from '../../StatusCirculationStore';
 import styles from './index.less';
 import './Checkbox.less';
+import { useStatusCirculationContext } from '../..';
 
 interface ColumnProps {
   name: string,
@@ -12,10 +14,9 @@ interface ColumnProps {
   renderHeader?: () => ReactNode | null,
   renderer?: ((record: Object) => ReactNode),
 }
-interface Props {
-  data: IStatusCirculation[]
-}
-const StatusCirculationTable: React.FC<Props> = ({ data: statusList }) => {
+const StatusCirculationTable: React.FC = () => {
+  const { store } = useStatusCirculationContext();
+  const { statusList } = store;
   const data = useMemo(() => statusList.map((from) => statusList.reduce((result, to) => ({
     ...result,
     ...from,
@@ -69,4 +70,4 @@ const StatusCirculationTable: React.FC<Props> = ({ data: statusList }) => {
 
   return <Table data={data} columns={columns} />;
 };
-export default StatusCirculationTable;
+export default observer(StatusCirculationTable);
