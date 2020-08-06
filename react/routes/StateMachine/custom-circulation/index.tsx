@@ -5,10 +5,13 @@ import {
   Table, DataSet, Menu, Dropdown, Icon, Modal,
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { Breadcrumb } from 'choerodon-ui';
 import Condition from './components/condition';
 import Linkage from './components/linkage';
 import NotifySetting from './components/notify-setting';
 import UpdateField from './components/update-field';
+import IssueTypeTab from '../components/issue-type-tab';
+import { useStateMachineContext } from '../context';
 import styles from './index.less';
 import { TabComponentProps } from '../index';
 
@@ -26,6 +29,7 @@ interface ModalSettings {
   notifySetting: ISetting,
 }
 const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
+  const { selectedType, setSelectedType } = useStateMachineContext();
   const customCirculationDataSet = useMemo(() => new DataSet({
     fields: [
       {
@@ -41,6 +45,13 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       {
         name: 'action',
         label: '自定义操作',
+        type: 'string' as FieldType,
+      },
+    ],
+    queryFields: [
+      {
+        name: 'state',
+        label: '状态',
         type: 'string' as FieldType,
       },
     ],
@@ -122,9 +133,14 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       </Dropdown>
     );
   };
+
+  console.log('CustomCirculation selectedType：');
+  console.log(selectedType);
   return (
     <Page>
       <Content>
+        <Breadcrumb />
+        <IssueTypeTab selectedType={selectedType} setSelectedType={setSelectedType} />
         {tab}
         <div className={`${styles.customCirculation}`}>
           <Table dataSet={customCirculationDataSet}>

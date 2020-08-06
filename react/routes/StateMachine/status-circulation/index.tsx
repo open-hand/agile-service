@@ -6,6 +6,8 @@ import openSelectExistStatus from '../components/select-exist-status';
 import openCreateStatus from '../components/create-status';
 import openSetDefaultStatus from '../components/set-default-status';
 import StatusCirculationTable from './components/status-circulation-table';
+import IssueTypeTab from '../components/issue-type-tab';
+import { useStateMachineContext } from '../context';
 import { TabComponentProps } from '..';
 
 export interface IStatusCirculation extends IStatus {
@@ -14,6 +16,7 @@ export interface IStatusCirculation extends IStatus {
   [propName: string]: any
 }
 const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
+  const { selectedType, setSelectedType } = useStateMachineContext();
   const [statusList, setStatusList] = useState<IStatusCirculation[]>([{
     id: '1',
     name: '待处理',
@@ -126,7 +129,8 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     valueCode: 'todo',
     to: ['1', '2', '3'],
   }]);
-
+  console.log('StatusCirculation selectedType：');
+  console.log(selectedType);
   return (
     <Page>
       <Header>
@@ -169,6 +173,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         </Button>
       </Header>
       <Content>
+        <IssueTypeTab selectedType={selectedType} setSelectedType={setSelectedType} />
         {tab}
         <StatusCirculationTable data={statusList} />
       </Content>

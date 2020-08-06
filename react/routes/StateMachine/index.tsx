@@ -1,10 +1,16 @@
 import React, { useState, ReactNode } from 'react';
 import { Tabs } from 'choerodon-ui';
+import { stores } from '@choerodon/boot';
 import { find } from 'lodash';
+import IsProgramContext from '@/hooks/useIsProgrom';
 import Status from './status';
 import StatusCirculation from './status-circulation';
 import CustomCirculation from './custom-circulation';
+import StateMachineContext from './context';
+import useSelectedType from './useSelectedType';
 
+const { AppState } = stores;
+const { currentMenuType: { category } } = AppState;
 export interface TabComponentProps<Params extends { [K in keyof Params]?: string } = {}> {
   tab: ReactNode
 }
@@ -29,7 +35,8 @@ const tabs: ITab[] = [{
 
 const { TabPane } = Tabs;
 const StateMachine: React.FC = (props) => {
-  const [activeKey, setActiveKey] = useState(tabs[1].key);
+  const [selectedType, handleChangeSelectedType] = useSelectedType();
+  const [activeKey, setActiveKey] = useState(tabs[2].key);
   const Component = find(tabs, { key: activeKey })?.component;
   const tabComponent = (
     <Tabs activeKey={activeKey} onChange={setActiveKey}>
@@ -37,9 +44,16 @@ const StateMachine: React.FC = (props) => {
     </Tabs>
   );
   return (
-    <>
-      {Component && <Component {...props} tab={tabComponent} />}
-    </>
+    <StateMachineContext.Provider value={{
+      selectedType,
+      setSelectedType: handleChangeSelectedType,
+    }}
+    >
+      <IsProgramContext.Provider value={{ isProgram: category === 'PROGRAM' }}>
+        {Component && <Component {...props} tab={tabComponent} />}
+      </IsProgramContext.Provider>
+    </StateMachineContext.Provider>
+
   );
 };
 

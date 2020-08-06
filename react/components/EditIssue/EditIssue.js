@@ -10,7 +10,7 @@ import './EditIssue.less';
 import useIsOwner from '@/hooks/useIsOwner';
 import { useIssueTypes } from '@/hooks';
 import {
-  issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, devOpsApi, 
+  issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, devOpsApi,
 } from '@/api';
 import RelateStory from '../RelateStory';
 import CopyIssue from '../CopyIssue';
@@ -24,7 +24,6 @@ import EditIssueContext from './stores';
 import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 // 项目加入群之后，不关联自己的史诗和特性，只能关联项目群的，不能改关联的史诗
 const { AppState } = stores;
-
 
 const defaultProps = {
   applyType: 'agile',
@@ -88,9 +87,9 @@ function EditIssue() {
       }
       // 3. 加载额外信息
       const [
-        doc, 
+        doc,
         workLogs,
-        dataLogs, 
+        dataLogs,
         linkIssues,
         branches,
       ] = await Promise.all([
@@ -109,7 +108,6 @@ function EditIssue() {
     }
   };
 
-
   const setQuery = (width = container.current.clientWidth) => {
     if (width <= 600) {
       container.current.setAttribute('max-width', '600px');
@@ -117,7 +115,7 @@ function EditIssue() {
       container.current.removeAttribute('max-width');
     }
   };
-  
+
   useEffect(() => {
     loadIssueDetail(currentIssueId);
     setQuery();
@@ -171,7 +169,6 @@ function EditIssue() {
       onChangeWidth(width);// 设置宽度
     }
   }, 150);
-
 
   const issue = store.getIssue;
   const {

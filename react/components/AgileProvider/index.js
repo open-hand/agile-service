@@ -16,12 +16,12 @@ function wrapWithContexts(contexts, values, children) {
     </Context.Provider>
   ), children);
 }
-const AgileProvider = contexts => function AgileDataProvider({ children, projectId }) {
+const AgileProvider = (contexts) => function AgileDataProvider({ children, projectId }) {
   const dataRef = useRef(new Map());
   contexts.forEach((context, index) => {
     const { data: initData, refresh } = useContext(context);
     const [data, setData] = useState(initData);
-    
+
     const loadData = async (...args) => {
       if (AppState.currentMenuType?.type === 'project') {
         const res = await refresh(...args);
@@ -32,14 +32,13 @@ const AgileProvider = contexts => function AgileDataProvider({ children, project
     // 初始化
     if (!dataRef.current.get(context)) {
       dataRef.current.set(context, { data, refresh: loadData });
-    }    
+    }
     useEffect(() => {
       loadData();
     }, [projectId]);
   });
   return wrapWithContexts(contexts, dataRef.current, children);
 };
-
 
 export default AgileProvider([
   IssueTypeContext,
