@@ -6,6 +6,9 @@ import {
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Breadcrumb } from 'choerodon-ui';
+import { useIssueTypes } from '@/hooks';
+import { find } from 'lodash';
+import { IIssueType } from '@/common/types';
 import Condition from './components/condition';
 import Linkage from './components/linkage';
 import NotifySetting from './components/notify-setting';
@@ -29,6 +32,7 @@ interface ModalSettings {
   notifySetting: ISetting,
 }
 const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
+  const [issueTypes] = useIssueTypes();
   const { selectedType, setSelectedType } = useStateMachineContext();
   const customCirculationDataSet = useMemo(() => new DataSet({
     fields: [
@@ -80,7 +84,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         width: 380,
         title: '状态联动',
         // @ts-ignore
-        children: <Linkage record={record} />,
+        children: <Linkage record={record} selectedType={selectedType} />,
       },
       updateField: {
         width: 740,
@@ -116,11 +120,18 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   // @ts-ignore
     value, text, name, record, dataSet,
   }) => {
+    const selectedTypeCode = find(issueTypes, (
+      item: IIssueType,
+    ) => item.id === selectedType)?.typeCode;
     const menu = (
       // eslint-disable-next-line react/jsx-no-bind
       <Menu onClick={handleMenuClick.bind(this, record)}>
         <Menu.Item key="condition">流转条件</Menu.Item>
-        <Menu.Item key="linkage">状态联动</Menu.Item>
+        {
+          (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug') && (
+            <Menu.Item key="linkage">状态联动</Menu.Item>
+          )
+        }
         <Menu.Item key="updateField">更新属性</Menu.Item>
         <Menu.Item key="notifySetting">通知设置</Menu.Item>
       </Menu>
@@ -134,8 +145,6 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     );
   };
 
-  console.log('CustomCirculation selectedType：');
-  console.log(selectedType);
   return (
     <Page>
       <Content>
