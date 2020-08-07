@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.vo;
 
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.util.Set;
 
 /**
@@ -7,6 +9,7 @@ import java.util.Set;
  * @date 2020-08-05 16:04
  */
 public class StatusAndTransformVO {
+    @Encrypt
     private Long id;
 
     private String name;
@@ -14,9 +17,9 @@ public class StatusAndTransformVO {
     private String code;
 
     private String type;
-
+    @Encrypt
     private Set<Long> canTransformStatus;
-
+    @Encrypt
     private Long stateMachineId;
 
     private Boolean defaultStatus;

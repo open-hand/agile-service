@@ -437,6 +437,7 @@ public class StateMachineServiceImpl implements StateMachineService {
             nodeIds.add(v.getId());
             StateMachineNodeDTO stateMachineNode = modelMapper.map(v, StateMachineNodeDTO.class);
             stateMachineNode.setId(null);
+            stateMachineNode.setOrganizationId(organizationId);
             stateMachineNode.setStateMachineId(stateMachineId);
             stateMachineNode.setCreatedBy(userId);
             stateMachineNode.setLastUpdatedBy(userId);

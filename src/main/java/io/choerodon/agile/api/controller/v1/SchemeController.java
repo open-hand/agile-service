@@ -173,8 +173,8 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "状态与流转列表")
     @GetMapping(value = "/status_transform/list")
     public ResponseEntity<List<StatusAndTransformVO>> statusTransformList(@PathVariable("project_id") Long projectId,
-                                                 @RequestParam Long issueTypeId,
-                                                 @RequestParam String applyType) {
+                                                                          @RequestParam @Encrypt Long issueTypeId,
+                                                                          @RequestParam String applyType) {
         return new ResponseEntity<>(projectConfigService.statusTransformList(projectId, issueTypeId, applyType), HttpStatus.OK);
     }
 
@@ -182,10 +182,10 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "设置状态机的默认状态")
     @PutMapping(value = "/status_transform/setting_default_status")
     public ResponseEntity settingDefaultStatus(@PathVariable("project_id") Long projectId,
-                                                                          @RequestParam Long issueTypeId,
-                                                                          @RequestParam Long stateMachineId,
-                                                                          @RequestParam Long statusId) {
-        projectConfigService.defaultStatus(projectId,issueTypeId,stateMachineId,statusId);
+                                               @RequestParam @Encrypt Long issueTypeId,
+                                               @RequestParam @Encrypt Long stateMachineId,
+                                               @RequestParam @Encrypt Long statusId) {
+        projectConfigService.defaultStatus(projectId, issueTypeId, stateMachineId, statusId);
         return new ResponseEntity(HttpStatus.OK);
     }
 }

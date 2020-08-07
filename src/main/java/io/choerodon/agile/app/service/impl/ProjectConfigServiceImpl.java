@@ -316,6 +316,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (index > 0) {
             Collections.swap(statusVOS, 0, index);
         }
+
         return statusVOS;
     }
 
@@ -373,6 +374,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (issueTypeSchemeId == null) {
             throw new CommonException("error.queryStateMachineId.issueTypeSchemeId.null");
         }
+
         if (stateMachineSchemeId == null) {
             throw new CommonException("error.queryStateMachineId.getStateMachineSchemeId.null");
         }

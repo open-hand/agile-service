@@ -36,6 +36,12 @@ public class StateMachineSchemeConfigDTO extends AuditDomain {
         this.organizationId = organizationId;
     }
 
+    public StateMachineSchemeConfigDTO(Long stateMachineId, Boolean isDefault, Long organizationId) {
+        this.stateMachineId = stateMachineId;
+        this.isDefault = isDefault;
+        this.organizationId = organizationId;
+    }
+
     public StateMachineSchemeConfigDTO(Long schemeId, Long issueTypeId, Long stateMachineId, Boolean isDefault, Long organizationId) {
         this.schemeId = schemeId;
         this.issueTypeId = issueTypeId;
