@@ -287,6 +287,13 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
         }
     }
 
+    @Override
+    public void baseUpdate(StateMachineNodeDTO olderDefaultNode) {
+        if (nodeDeployMapper.updateByPrimaryKeySelective(olderDefaultNode) != 1) {
+            throw new CommonException("error.update.state.machine.node");
+        }
+    }
+
     private void insertNodeAndTransformForDeploy(Long nodeDraftId, Long transformDraftId) {
         StateMachineNodeDraftDTO nodeDraft = nodeDraftMapper.selectByPrimaryKey(nodeDraftId);
         StateMachineTransformDraftDTO transformDraft = transformDraftMapper.selectByPrimaryKey(transformDraftId);

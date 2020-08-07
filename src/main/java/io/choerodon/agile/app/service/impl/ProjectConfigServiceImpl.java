@@ -5,26 +5,24 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.TransformInfo;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.NodeType;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.enums.SchemeType;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
-import io.choerodon.agile.infra.mapper.ColumnStatusRelMapper;
-import io.choerodon.agile.infra.mapper.IssueStatusMapper;
-import io.choerodon.agile.infra.mapper.IssueTypeMapper;
-import io.choerodon.agile.infra.mapper.ProjectConfigMapper;
+import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.exception.CommonException;
+import org.apache.commons.collections.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -71,6 +69,10 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private ColumnStatusRelMapper columnStatusRelMapper;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private StateMachineNodeMapper stateMachineNodeMapper;
+    @Autowired
+    private StateMachineNodeService stateMachineNodeService;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -283,6 +285,81 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             }
         }
         return resultMap;
+    }
+
+    @Override
+    public List<StatusAndTransformVO> statusTransformList(Long projectId, Long issueTypeId, String applyType) {
+        if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
+            throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
+        }
+        // 获取状态加Id
+        Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        // 查询当前状态机有哪些状态
+        List<StatusAndTransformVO> statusVOS = statusService.queryStatusByStateMachineId(organizationId, stateMachineId);
+        if (CollectionUtils.isEmpty(statusVOS)) {
+            return new ArrayList<>();
+        }
+        //状态机id->状态id->转换列表
+        Map<Long, Map<Long, List<TransformVO>>> statusMap = transformService.queryStatusTransformsMap(organizationId, Arrays.asList(stateMachineId));
+        Map<Long, List<TransformVO>> listMap = statusMap.get(stateMachineId);
+        int index = 0;
+        for (StatusAndTransformVO item : statusVOS) {
+            if (Boolean.TRUE.equals(item.getDefaultStatus())) {
+                index = statusVOS.indexOf(item);
+            }
+            List<TransformVO> transformVOS = listMap.get(item.getId());
+            if (!CollectionUtils.isEmpty(transformVOS)) {
+                item.setCanTransformStatus(transformVOS.stream().map(TransformVO::getEndStatusId).collect(Collectors.toSet()));
+            }
+        }
+        if (index > 0) {
+            Collections.swap(statusVOS, 0, index);
+        }
+        return statusVOS;
+    }
+
+
+    @Override
+    public void defaultStatus(Long projectId, Long issueTypeId, Long stateMachineId, Long statusId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        StateMachineNodeDTO stateMachineNodeDTO = new StateMachineNodeDTO(stateMachineId,statusId,organizationId);
+        StateMachineNodeDTO nodeDTO = stateMachineNodeMapper.selectOne(stateMachineNodeDTO);
+        if (ObjectUtils.isEmpty(nodeDTO)) {
+            throw new CommonException("error.state.machine.node.null");
+        }
+        // 查询状态机的原默认状态
+        stateMachineNodeDTO.setType(NodeType.INIT);
+        stateMachineNodeDTO.setStatusId(null);
+        List<StateMachineNodeDTO> nodes = stateMachineNodeMapper.select(stateMachineNodeDTO);
+        if (nodes.isEmpty()) {
+            throw new CommonException("error.queryInitStatusId.notFound");
+        }
+        StateMachineNodeDTO olderDefaultNode = nodes.get(0);
+        if (Objects.equals(olderDefaultNode.getStatusId(), statusId)) {
+            return;
+        }
+        // 更新
+        olderDefaultNode.setType(NodeType.CUSTOM);
+        stateMachineNodeService.baseUpdate(olderDefaultNode);
+        nodeDTO.setType(NodeType.INIT);
+        stateMachineNodeService.baseUpdate(nodeDTO);
+    }
+
+    private Long queryStateMachineIdAndCheck(Long projectId, String applyType, Long issueTypeId) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
+            throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
+        }
+        Long organizationId = projectUtil.getOrganizationId(projectId);
+        Long issueTypeSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.ISSUE_TYPE, applyType).getSchemeId();
+        Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
+        if (ObjectUtils.isEmpty(issueTypeSchemeId)) {
+            throw new CommonException("error.queryStateMachineId.issueTypeSchemeId.null");
+        }
+        if (ObjectUtils.isEmpty(stateMachineSchemeId)) {
+            throw new CommonException("error.queryStateMachineId.getStateMachineSchemeId.null");
+        }
+        return stateMachineSchemeConfigService.queryStatusMachineBySchemeIdAndIssueType(organizationId,stateMachineSchemeId,issueTypeId);
     }
 
     @Override

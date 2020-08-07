@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -413,6 +414,71 @@ public class StateMachineServiceImpl implements StateMachineService {
         //找到与状态机关联的状态机方案
         List<Long> schemeIds = stateMachineSchemeConfigService.querySchemeIdsByStateMachineId(false, organizationId, stateMachineId);
         return handleStateMachineChangeStatusBySchemeIds(organizationId, stateMachineId, null, schemeIds, changeStatus);
+    }
+
+    @Override
+    public Long copyStateMachine(Long organizationId, Long currentStateMachineId) {
+        StateMachineDTO stateMachineDTO = stateMachineMapper.queryById(organizationId, currentStateMachineId);
+        if (ObjectUtils.isEmpty(stateMachineDTO)) {
+            throw new CommonException("error.query.state.machine.null");
+        }
+        StateMachineDTO map = modelMapper.map(stateMachineDTO, StateMachineDTO.class);
+        map.setDefault(false);
+        map.setId(null);
+        map.setName(map.getName() + "copy");
+        stateMachineMapper.insert(map);
+        Long stateMachineId = map.getId();
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        List<StateMachineNodeVO> stateMachineNodeVOS = nodeService.queryByStateMachineId(organizationId, currentStateMachineId, false);
+        // 复制node
+        List<Long> nodeIds = new ArrayList<>();
+        List<StateMachineNodeDTO> nodeList = new ArrayList<>();
+        stateMachineNodeVOS.forEach(v -> {
+            nodeIds.add(v.getId());
+            StateMachineNodeDTO stateMachineNode = modelMapper.map(v, StateMachineNodeDTO.class);
+            stateMachineNode.setId(null);
+            stateMachineNode.setStateMachineId(stateMachineId);
+            stateMachineNode.setCreatedBy(userId);
+            stateMachineNode.setLastUpdatedBy(userId);
+            nodeList.add(stateMachineNode);
+        });
+        nodeDeployMapper.batchInsert(nodeList);
+        Map<Long, Long> nodeChangeMap = getChangeMap(nodeIds, nodeList.stream().map(StateMachineNodeDTO::getId).collect(Collectors.toList()));
+        // 复制transform
+        List<Long> transformIds = new ArrayList<>();
+        List<StateMachineTransformDTO> stateMachineTransformDTO = transformDeployMapper.queryByStateMachineIds(organizationId, Arrays.asList(currentStateMachineId));
+        List<StateMachineTransformDTO> newStateMachineTransformDTO = new ArrayList<>();
+        stateMachineTransformDTO.forEach(transform -> {
+            transformIds.add(transform.getId());
+            StateMachineTransformDTO transformCopy = modelMapper.map(transform, StateMachineTransformDTO.class);
+            transformCopy.setId(null);
+            transformCopy.setStateMachineId(stateMachineId);
+            transformCopy.setStartNodeId(transform.getStartNodeId() == 0 ? transform.getStartNodeId() : nodeChangeMap.get(transform.getStartNodeId()));
+            transformCopy.setEndNodeId(transform.getEndNodeId() == 0 ? transform.getEndNodeId() : nodeChangeMap.get(transform.getEndNodeId()));
+            transformCopy.setCreatedBy(userId);
+            transformCopy.setLastUpdatedBy(userId);
+            newStateMachineTransformDTO.add(transformCopy);
+        });
+        transformDeployMapper.batchInsert(newStateMachineTransformDTO);
+        Map<Long, Long> transformMap = getChangeMap(transformIds, newStateMachineTransformDTO.stream().map(StateMachineTransformDTO::getId).collect(Collectors.toList()));
+        // 更新node的all_status_transform_id字段
+        nodeList.forEach(node -> {
+            Long allStatusTransformId = node.getAllStatusTransformId();
+            if (!ObjectUtils.isEmpty(allStatusTransformId)) {
+                node.setAllStatusTransformId(transformMap.get(allStatusTransformId));
+                nodeDeployMapper.updateOptional(node, "allStatusTransformId");
+            }
+        });
+        return stateMachineId;
+    }
+
+    private Map<Long, Long> getChangeMap(List<Long> oldIds, List<Long> newIds) {
+        Map<Long, Long> map = new HashMap<>();
+        for (Long id:oldIds) {
+            int index = oldIds.indexOf(id);
+            map.put(id,newIds.get(index));
+        }
+        return map;
     }
 
     @Override

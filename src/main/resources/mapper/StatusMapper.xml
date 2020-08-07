@@ -120,4 +120,19 @@
         </foreach>
         )
     </select>
+
+    <select id="queryByStateMachineId" resultType="io.choerodon.agile.api.vo.StatusAndTransformVO">
+         select
+           fs.id,
+           fs.name,
+           fs.code,
+           fs.type,
+           smn.state_machine_id,
+           IF(smn.type = 'node_init',1,0) as defaultStatus
+         from fd_status fs,fd_state_machine_node smn
+         where fs.organization_id = #{organizationId}
+         AND smn.organization_id = fs.organization_id
+         AND smn.status_id = fs.id
+         AND smn.state_machine_id = #{stateMachineId}
+    </select>
 </mapper>

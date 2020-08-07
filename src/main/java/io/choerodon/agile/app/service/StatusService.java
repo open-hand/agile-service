@@ -99,4 +99,5 @@ public interface StatusService {
      */
     List<StatusVO> queryByStateMachineIds(Long organizationId, List<Long> stateMachineIds);
 
+    List<StatusAndTransformVO> queryStatusByStateMachineId(Long organizationId, Long stateMachineId);
 }

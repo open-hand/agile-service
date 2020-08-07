@@ -27,6 +27,23 @@ public class StateMachineSchemeConfigDTO extends AuditDomain {
     private Integer sequence;
     private Long organizationId;
 
+    public StateMachineSchemeConfigDTO() {
+    }
+
+    public StateMachineSchemeConfigDTO(Long schemeId, Long issueTypeId, Long organizationId) {
+        this.schemeId = schemeId;
+        this.issueTypeId = issueTypeId;
+        this.organizationId = organizationId;
+    }
+
+    public StateMachineSchemeConfigDTO(Long schemeId, Long issueTypeId, Long stateMachineId, Boolean isDefault, Long organizationId) {
+        this.schemeId = schemeId;
+        this.issueTypeId = issueTypeId;
+        this.stateMachineId = stateMachineId;
+        this.isDefault = isDefault;
+        this.organizationId = organizationId;
+    }
+
     public Long getId() {
         return id;
     }

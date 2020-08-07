@@ -1,11 +1,8 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.domain.PageInfo;
-import io.choerodon.agile.api.vo.StatusCheckVO;
-import io.choerodon.agile.api.vo.StatusSearchVO;
-import io.choerodon.agile.api.vo.StatusVO;
-import io.choerodon.agile.api.vo.StatusWithInfoVO;
 import io.choerodon.agile.app.service.StateMachineNodeService;
 import io.choerodon.agile.app.service.StatusService;
 import io.choerodon.agile.infra.cache.InstanceCache;
@@ -262,5 +259,10 @@ public class StatusServiceImpl implements StatusService {
             }.getType());
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public List<StatusAndTransformVO> queryStatusByStateMachineId(Long organizationId, Long stateMachineId) {
+        return statusMapper.queryByStateMachineId(organizationId,stateMachineId);
     }
 }
