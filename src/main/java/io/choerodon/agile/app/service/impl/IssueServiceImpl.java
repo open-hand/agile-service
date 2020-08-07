@@ -384,7 +384,7 @@ public class IssueServiceImpl implements IssueService {
                 filterSql = getQuickFilter(searchVO.getQuickFilterIds());
             }
             //处理未匹配的筛选
-            searchVO.handleOtherArgs();
+            issueAssembler.handleOtherArgs(searchVO);
             final String searchSql = filterSql;
             if (!handleSortField(pageRequest).equals("")) {
                 String fieldCode = handleSortField(pageRequest);

@@ -138,7 +138,7 @@ public class BoardController {
                                                      @PathVariable @Encrypt Long boardId,
                                                      @ApiParam(value = "组织id", required = true)
                                                      @PathVariable(name = "organization_id") Long organizationId,
-                                                     @Encrypt BoardQueryVO boardQuery) {
+                                                     @RequestBody BoardQueryVO boardQuery) {
         return Optional.ofNullable(boardService.queryAllData(projectId, boardId, organizationId, boardQuery))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.board.get"));

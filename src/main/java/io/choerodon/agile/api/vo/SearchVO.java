@@ -12,37 +12,6 @@ import java.util.Map;
  */
 public class SearchVO {
 
-    public void handleOtherArgs() {
-        Map<String, Object> args = this.otherArgs;
-        if (args != null) {
-            List<String> list = (List<String>) args.get("sprint");
-            if (list != null && list.contains("0")) {
-                args.put("sprintNull", true);
-            }
-            list = (List<String>) args.get("version");
-            if (list != null && list.contains("0")) {
-                args.put("versionNull", true);
-            }
-            list = (List<String>) args.get("component");
-            if (list != null && list.contains("0")) {
-                args.put("componentNull", true);
-            }
-            list = (List<String>) args.get("epic");
-            if (list != null && list.contains("0")) {
-                args.put("epicNull", true);
-            }
-            list = (List<String>) args.get("label");
-            if (list != null && list.contains("0")) {
-                args.put("labelNull", true);
-            }
-            list = (List<String>) args.get("assigneeId");
-            if (list != null && list.contains("0")) {
-                args.put("assigneeIdNull", true);
-            }
-        }
-    }
-
-
     private List<String> exportFieldCodes;
     /**
      * 输入查询参数

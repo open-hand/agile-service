@@ -25,15 +25,15 @@
 
     <sql id="selectIssueIdBysearchVO">
         SELECT
-        CASE WHEN search.type_code = 'sub_task' THEN search.parent_issue_id
-        WHEN search.type_code = 'bug' AND search.relate_issue_id IS NOT NULL AND search.relate_issue_id != 0 THEN search.relate_issue_id
-        ELSE search.issue_issue_id
-        END AS issue_id
+            CASE WHEN search.type_code = 'sub_task' THEN search.parent_issue_id
+            WHEN search.type_code = 'bug' AND search.relate_issue_id IS NOT NULL AND search.relate_issue_id != 0 THEN search.relate_issue_id
+            ELSE search.issue_issue_id
+            END AS issue_id
         FROM (
-        <include refid="io.choerodon.agile.infra.mapper.IssueMapper.queryIssueIdsListWithSubSql"/>
-        )search
+            <include refid="io.choerodon.agile.infra.mapper.IssueMapper.queryIssueIdsListWithSubSql"/>
+        ) search
         WHERE (
-        search.type_code != 'sub_task'
+            search.type_code != 'sub_task'
         OR search.parent_type_code != 'bug'
         OR search.parent_relate_issue_id IS NULL
         OR search.parent_relate_issue_id = 0
