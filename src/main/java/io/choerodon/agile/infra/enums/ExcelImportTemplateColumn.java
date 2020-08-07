@@ -6,11 +6,7 @@ package io.choerodon.agile.infra.enums;
  */
 public class ExcelImportTemplateColumn {
 
-    private ExcelImportTemplateColumn() {}
-
     public static class Issue {
-
-        private Issue() {}
 
         public static final int ISSUE_TYPE_COL = 0;
         public static final int EPIC_COL = 1;
