@@ -136,23 +136,10 @@ public class BoardController {
                                                      @PathVariable(name = "project_id") Long projectId,
                                                      @ApiParam(value = "agile board id", required = true)
                                                      @PathVariable @Encrypt Long boardId,
-                                                     @ApiParam(value = "search item，my problem")
-                                                     @RequestParam(required = false) @Encrypt Long assigneeId,
-                                                     @ApiParam(value = "search item，only story")
-                                                     @RequestParam(required = false) Boolean onlyStory,
-                                                     @ApiParam(value = "quick filter")
-                                                     @RequestParam(required = false) @Encrypt List<Long> quickFilterIds,
-                                                     @ApiParam(value = "personal filter")
-                                                     @RequestParam(required = false) @Encrypt List<Long> personalFilterIds,
-                                                     @ApiParam(value = "priority id")
-                                                     @RequestParam(required = false) @Encrypt List<Long> priorityIds,
                                                      @ApiParam(value = "组织id", required = true)
                                                      @PathVariable(name = "organization_id") Long organizationId,
-                                                     @ApiParam(value = "经办人搜索")
-                                                     @RequestParam(required = false) @Encrypt List<Long> assigneeFilterIds,
-                                                     @ApiParam(value = "冲刺id")
-                                                     @RequestParam(required = false) @Encrypt Long sprintId) {
-        return Optional.ofNullable(boardService.queryAllData(projectId, boardId, assigneeId, onlyStory, quickFilterIds, organizationId, assigneeFilterIds, sprintId, personalFilterIds, priorityIds))
+                                                     @Encrypt BoardQueryVO boardQuery) {
+        return Optional.ofNullable(boardService.queryAllData(projectId, boardId, organizationId, boardQuery))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.board.get"));
     }

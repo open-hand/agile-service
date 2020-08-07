@@ -354,30 +354,28 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public JSONObject queryAllData(Long projectId, Long boardId, Long assigneeId, Boolean onlyStory,
-                                   List<Long> quickFilterIds, Long organizationId, List<Long> assigneeFilterIds,
-                                   Long sprintId, List<Long> personalFilterIds, List<Long> priorityIds) {
+    public JSONObject queryAllData(Long projectId, Long boardId, Long organizationId, BoardQueryVO boardQuery) {
         JSONObject jsonObject = new JSONObject(true);
         //没有传冲刺id，则使用激活的冲刺
         SprintDTO currentSprint;
-        if (ObjectUtils.isEmpty(sprintId)) {
+        if (ObjectUtils.isEmpty(boardQuery.getSprintId())) {
             currentSprint = getActiveSprint(projectId);
             if (!ObjectUtils.isEmpty(currentSprint)) {
-                sprintId = currentSprint.getSprintId();
+                boardQuery.setSprintId(currentSprint.getSprintId());
             }
         } else {
-            currentSprint = sprintMapper.selectByPrimaryKey(sprintId);
+            currentSprint = sprintMapper.selectByPrimaryKey(boardQuery.getSprintId());
         }
         String filterSql = null;
-        if (quickFilterIds != null && !quickFilterIds.isEmpty()) {
-            filterSql = getQuickFilter(quickFilterIds);
+        if (boardQuery.getQuickFilterIds() != null && !boardQuery.getQuickFilterIds().isEmpty()) {
+            filterSql = getQuickFilter(boardQuery.getQuickFilterIds());
         }
-        List<SearchVO> searchList = getSearchVO(personalFilterIds);
+        List<SearchVO> searchList = getSearchVO(boardQuery.getPersonalFilterIds());
         List<Long> assigneeIds = new ArrayList<>();
         List<Long> parentIds = new ArrayList<>();
         List<Long> epicIds = new ArrayList<>();
-        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, sprintId, assigneeId, onlyStory, filterSql, assigneeFilterIds, searchList, priorityIds);
-        Boolean condition = assigneeId != null && onlyStory;
+        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, boardQuery.getSprintId(), boardQuery.getAssigneeId(), boardQuery.getOnlyStory(), filterSql, boardQuery.getAssigneeFilterIds(), searchList, boardQuery.getPriorityIds());
+        Boolean condition = boardQuery.getAssigneeId() != null && boardQuery.getOnlyStory();
         Map<Long, List<Long>> parentWithSubs = new HashMap<>();
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
@@ -388,7 +386,7 @@ public class BoardServiceImpl implements BoardService {
         jsonObject.put("parentWithSubs", EncryptionUtils.encryptMap(parentWithSubs));
         jsonObject.put("parentCompleted", EncryptionUtils.encryptList(sortAndJudgeCompleted(projectId, parentIds)));
         jsonObject.put("epicInfo", !epicIds.isEmpty() ? boardColumnMapper.selectEpicBatchByIds(epicIds) : null);
-        jsonObject.put("allColumnNum", getAllColumnNum(projectId, boardId, sprintId));
+        jsonObject.put("allColumnNum", getAllColumnNum(projectId, boardId, boardQuery.getSprintId()));
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
         Comparator<IssueForBoardDO> comparator = Comparator.comparing(IssueForBoardDO::getRank, nullsFirst(naturalOrder()));
         columns.forEach(columnAndIssueDTO ->

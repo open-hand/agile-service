@@ -98,21 +98,22 @@
         <if test='filterSql != null'>
             AND ai1.issue_id IN (${filterSql})
         </if>
+        <if test='assigneeFilterIds != null'>
+            AND ai1.assignee_id IN
+            <foreach collection="assigneeFilterIds" item="assigneeFilterId"
+                     open="(" close=")" separator=",">
+                #{assigneeFilterId}
+            </foreach>
+        </if>
         <if test='searchList != null and searchList.size > 0'>
             <foreach collection="searchList" item="searchVO">
                 AND ai1.issue_id IN (<include refid="selectIssueIdBysearchVO"/>)
             </foreach>
         </if>
         <if test='priorityIds != null and priorityIds.size > 0'>
-            AND ai1.priority_id IN <foreach collection="priorityIds" item="priorityId" open="(" close=")" separator=",">
-            #{priorityId}
-        </foreach>
-        </if>
-        <if test='assigneeFilterIds != null'>
-            AND ai1.assignee_id IN
-            <foreach collection="assigneeFilterIds" item="assigneeFilterId"
-                     open="(" close=")" separator=",">
-                #{assigneeFilterId}
+            AND ai1.priority_id IN
+            <foreach collection="priorityIds" item="priorityId" open="(" close=")" separator=",">
+                #{priorityId}
             </foreach>
         </if>
         ) ai ON ai.status_id = ais.status_id
