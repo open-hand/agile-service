@@ -1,6 +1,6 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId } from '@/utils/common';
-import { getOrganizationId } from '@/utils/common';
+import { getProjectId, getOrganizationId } from '@/utils/common';
+import { IIssueType } from '@/common/types';
 
 class IssueTypeApi {
   get prefix() {
@@ -13,9 +13,9 @@ class IssueTypeApi {
 
   /**
    * 加载全部问题类型（带关联的状态机id)
-   * @param applyType 
+   * @param applyType
    */
-  loadAllWithStateMachineId(applyType: string = 'agile', projectId?: number) {
+  loadAllWithStateMachineId(applyType: string = 'agile', projectId?: number):Promise<IIssueType[]> {
     return axios({
       method: 'get',
       url: `/agile/v1/projects/${projectId || getProjectId()}/schemes/query_issue_types_with_sm_id`,
@@ -27,7 +27,7 @@ class IssueTypeApi {
 
   /**
    * 加载全部问题类型
-   * @param applyType 
+   * @param applyType
    */
   loadAll(applyType:string = 'agile') {
     return axios({
@@ -41,7 +41,7 @@ class IssueTypeApi {
 
   /**
    * 根据方案id查询所有问题类型及关联的方案
-   * @param schemeId 
+   * @param schemeId
    */
   loadAllByScheme(schemeId:number) {
     return axios({
@@ -51,7 +51,7 @@ class IssueTypeApi {
         schemeId,
       },
       // @ts-ignore
-    }).then(res => res.filter(type => type.typeCode !== 'backlog'));
+    }).then((res) => res.filter((type) => type.typeCode !== 'backlog'));
   }
 }
 

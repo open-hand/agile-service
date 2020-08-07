@@ -22,16 +22,16 @@ const IssueTypeTab: React.FC<Props> = ({ selectedType, setSelectedType }) => {
     }
     setSelected(code);
   }, [setSelectedType]);
-  // @ts-ignore
+
   const types = !isProgram ? issueTypes.filter((item:IIssueType) => item.typeCode !== 'feature') : issueTypes;
 
   useEffect(() => {
     if (!selectedType) {
-      handleSelectType(types && types[0] && types[0].typeCode);
+      handleSelectType(types && types[0] && types[0].id);
     }
   }, [handleSelectType, selectedType, setSelectedType, types]);
 
-  console.log(selected, selectedType);
+  // console.log(selected, selectedType);
   return (
     <div className={styles.issueTypeTab}>
       {
@@ -39,7 +39,7 @@ const IssueTypeTab: React.FC<Props> = ({ selectedType, setSelectedType }) => {
           <span
             className={styles.issueTypeTabItem}
             role="none"
-            onClick={() => handleSelectType(item.typeCode)}
+            onClick={() => handleSelectType(item.id)}
           >
             {item.name}
           </span>

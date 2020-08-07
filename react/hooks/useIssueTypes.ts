@@ -1,9 +1,14 @@
 import { createContext, useContext } from 'react';
 import { stores } from '@choerodon/boot';
 import { issueTypeApi } from '@/api';
+import { IIssueType } from '@/common/types';
 
 const { AppState } = stores;
-const IssueTypeContext = createContext({
+interface Context {
+  data: IIssueType[]
+  refresh: () => Promise<IIssueType[]>
+}
+const IssueTypeContext = createContext<Context>({
   data: [],
   refresh: async () => {
     const type = AppState.currentMenuType.category === 'PROGRAM' ? 'program' : 'agile';
@@ -13,7 +18,7 @@ const IssueTypeContext = createContext({
 });
 export { IssueTypeContext };
 
-export default function useIssueTypes() {
-  const { data, refresh } = useContext(IssueTypeContext) || {};  
+export default function useIssueTypes():[Context['data'], Context['refresh']] {
+  const { data, refresh } = useContext(IssueTypeContext) || {};
   return [data, refresh];
 }
