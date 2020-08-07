@@ -19,13 +19,25 @@ class StatusTransformApi {
     return `/agile/v1/projects/${getProjectId()}`;
   }
 
-  loadList(issueTypeId: string) {
+  loadList(issueTypeId: string): Promise<IStatusCirculation[]> {
     return axios({
       method: 'get',
       url: `${this.prefix}/status_transform/list`,
       params: {
         applyType: 'agile',
         issueTypeId,
+      },
+    });
+  }
+
+  setDefaultStatus(issueTypeId:string, statusId:string, stateMachineId:string) {
+    return axios({
+      method: 'put',
+      url: `${this.prefix}/status_transform/default_status`,
+      params: {
+        issueTypeId,
+        statusId,
+        stateMachineId,
       },
     });
   }

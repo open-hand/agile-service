@@ -52,6 +52,8 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           icon="settings"
           onClick={() => {
             openSetDefaultStatus({
+              issueTypeId: selectedType,
+              statusList: store.statusList,
               onSubmit: () => {
 
               },

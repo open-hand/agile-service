@@ -2,55 +2,48 @@ import React, {
   useEffect, useMemo, useCallback,
 } from 'react';
 import {
-  Modal, Form, DataSet, SelectBox,
+  Modal, Form, DataSet, Select,
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { getProjectId, getOrganizationId } from '@/utils/common';
-import { IStatus } from '@/common/types';
-import SelectStatus from '../select-status';
+import { statusTransformApi, IStatusCirculation } from '@/api';
 import './index.less';
 
-const { Option } = SelectBox;
 const key = Modal.key();
 interface Props {
   onSubmit: Function
   modal?: any
+  issueTypeId: string
+  statusList: IStatusCirculation[]
 }
 const SetDefaultStatus: React.FC<Props> = ({
-  modal, onSubmit,
+  modal, onSubmit, issueTypeId, statusList,
 }) => {
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
-    transport: {
-      create: {
-        url: `/agile/v1/projects/${getProjectId()}/issue_status`,
-        method: 'post',
-        params: {
-          applyType: 'agile',
-        },
-        transformRequest: (([data]) => JSON.stringify({
-          ...data,
-          projectId: getProjectId(),
-          enable: true,
-        })),
-      },
-    },
     fields: [
       {
-        name: 'defaultStatus',
-        type: 'string' as FieldType,
+        name: 'status',
+        type: 'object' as FieldType,
         label: '状态名称',
         required: true,
+        textField: 'name',
+        valueField: 'id',
+        options: new DataSet({
+          data: statusList,
+        }),
       },
     ],
   }), []);
 
   const handleSubmit = useCallback(async () => {
-    const success = await dataSet.submit();
-    if (success) {
+    if (await dataSet.validate()) {
+      const status = dataSet.current?.get('status') as IStatusCirculation;
+      const { id, stateMachineId } = status;
+      await statusTransformApi.setDefaultStatus(issueTypeId, id, stateMachineId);
       onSubmit();
+      modal.close();
     }
-    return success;
+    return false;
   }, [dataSet, onSubmit]);
   useEffect(() => {
     modal.handleOk(handleSubmit);
@@ -59,16 +52,16 @@ const SetDefaultStatus: React.FC<Props> = ({
   return (
     <>
       <Form dataSet={dataSet}>
-        <SelectStatus name="defaultStatus" />
+        <Select name="status" />
       </Form>
     </>
   );
 };
-const openSetDefaultStatus = ({ onSubmit }: Pick<Props, 'onSubmit'>) => {
+const openSetDefaultStatus = (props: Omit<Props, 'modal'>) => {
   Modal.open({
     title: '设置初始状态',
     key,
-    children: <SetDefaultStatus onSubmit={onSubmit} />,
+    children: <SetDefaultStatus {...props} />,
   });
 };
 export default openSetDefaultStatus;

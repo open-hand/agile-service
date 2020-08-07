@@ -25,6 +25,7 @@ import HeaderLine from '../../../components/HeaderLine';
 import ScrumBoardFullScreen from '../ScrumBoardComponent/ScrumBoardFullScreen';
 import CreateBoard from '../ScrumBoardComponent/CreateBoard';
 import { service } from '../setting/Setting';
+import SelectPriority from './SelectPriority';
 
 const { Option } = Select;
 const { AppState } = stores;
@@ -32,7 +33,7 @@ const { AppState } = stores;
 const RadioGroup = Radio.Group;
 const RadioButton = Radio.Button;
 
-const style = swimLaneId => `
+const style = (swimLaneId) => `
   .${swimLaneId}.c7n-swimlaneContext-itemBodyColumn {
     background-color: rgba(140, 158, 255, 0.12) !important;
   }
@@ -63,6 +64,7 @@ class ScrumBoardHome extends Component {
   componentDidMount() {
     ScrumBoardStore.setSelectedBoardId('');
     this.getBoard();
+    // eslint-disable-next-line react/destructuring-assignment
     const { state } = this.props.location;
     if (state && state.issueId) {
       ScrumBoardStore.setClickedIssue(state.issueId);
@@ -79,7 +81,7 @@ class ScrumBoardHome extends Component {
     const url = this.paramConverter(location.search);
     const boardListData = await boardApi.loadAll();
     ScrumBoardStore.initBoardList(boardListData);
-    const defaultBoard = boardListData.find(item => item.userDefault) || boardListData[0];
+    const defaultBoard = boardListData.find((item) => item.userDefault) || boardListData[0];
     if (defaultBoard.boardId) {
       ScrumBoardStore.setSelectedBoardId(defaultBoard.boardId);
       this.refresh(defaultBoard, url, boardListData);
@@ -99,8 +101,18 @@ class ScrumBoardHome extends Component {
     return retObj;
   };
 
-  onQuickSearchChange = (onlyMeChecked = false, onlyStoryChecked = false, moreChecked) => {
-    ScrumBoardStore.addQuickSearchFilter(onlyMeChecked, onlyStoryChecked, moreChecked);
+  onQuickSearchChange = (
+    onlyMeChecked = false,
+    onlyStoryChecked = false,
+    moreChecked,
+    personalFilters,
+  ) => {
+    ScrumBoardStore.addQuickSearchFilter(
+      onlyMeChecked,
+      onlyStoryChecked,
+      moreChecked,
+      personalFilters,
+    );
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   };
 
@@ -193,10 +205,18 @@ class ScrumBoardHome extends Component {
     };
     const [type, parentId] = SwimLaneId.split('%');
 
-    ScrumBoardStore.updateIssue(issue, startStatus, startStatusIndex, destinationStatus, destinationStatusIndex, SwimLaneId).then((data) => {
+    ScrumBoardStore.updateIssue(issue,
+      startStatus,
+      startStatusIndex, destinationStatus,
+      destinationStatusIndex,
+      SwimLaneId).then((data) => {
       if (data.failed) {
         Choerodon.prompt(data.message);
-        ScrumBoardStore.setSwimLaneData(SwimLaneId, startStatus, startStatusIndex, SwimLaneId, destinationStatus, destinationStatusIndex, issue, true);
+        ScrumBoardStore.setSwimLaneData(SwimLaneId,
+          startStatus,
+          startStatusIndex,
+          SwimLaneId, destinationStatus,
+          destinationStatusIndex, issue, true);
       } else {
         if (ScrumBoardStore.getSwimLaneCode === 'parent_child' && parentId !== 'other') {
           ScrumBoardStore.judgeMoveParentToDone(destinationStatus, SwimLaneId, parentId, ScrumBoardStore.getStatusMap.get(destinationStatus).categoryCode === 'done');
@@ -205,37 +225,17 @@ class ScrumBoardHome extends Component {
           ScrumBoardStore.editRef.current.loadIssueDetail();
         }
         if (startColumn !== destinationColumn) {
-          ScrumBoardStore.resetHeaderData(startColumn, destinationColumn, issue.issueTypeVO.typeCode);
+          ScrumBoardStore.resetHeaderData(startColumn,
+            destinationColumn,
+            issue.issueTypeVO.typeCode);
         }
         ScrumBoardStore.rewriteObjNumber(data, issueId, issue);
         // ScrumBoardStore.resetHeaderData(startColumn,destinationColumn)
       }
     });
-    ScrumBoardStore.setSwimLaneData(SwimLaneId, startStatus, startStatusIndex, SwimLaneId, destinationStatus, destinationStatusIndex, issue, false);
+    ScrumBoardStore.setSwimLaneData(SwimLaneId, startStatus, startStatusIndex,
+      SwimLaneId, destinationStatus, destinationStatusIndex, issue, false);
   };
-
-  refresh(defaultBoard, url, boardListData) {
-    ScrumBoardStore.setSpinIf(true);
-    Promise.all([issueTypeApi.loadAllWithStateMachineId(), statusApi.loadAllTransformForAllIssueType(), ScrumBoardStore.axiosGetBoardData(defaultBoard.boardId), epicApi.loadEpics()]).then(([issueTypes, stateMachineMap, defaultBoardData, epicData]) => {
-      this.dataConverter.setSourceData(epicData, defaultBoardData);
-      const renderDataMap = new Map([
-        ['parent_child', this.dataConverter.getParentWithSubData],
-        ['swimlane_epic', this.dataConverter.getEpicData],
-        ['assignee', this.dataConverter.getAssigneeData],
-        ['swimlane_none', this.dataConverter.getAllData],
-        ['undefined', this.dataConverter.getAssigneeData],
-      ]);
-      const renderData = renderDataMap.get(defaultBoard.userDefaultBoard)();
-      const canDragOn = this.dataConverter.getCanDragOn();
-      const statusColumnMap = this.dataConverter.getStatusColumnMap();
-      const statusMap = this.dataConverter.getStatusMap();
-      const mapStructure = this.dataConverter.getMapStructure();
-      const allDataMap = this.dataConverter.getAllDataMap(defaultBoard.userDefaultBoard);
-      const headerData = this.dataConverter.getHeaderData();
-      ScrumBoardStore.scrumBoardInit(AppState, url, boardListData, defaultBoard, defaultBoardData, null, issueTypes, stateMachineMap, canDragOn, statusColumnMap, allDataMap, mapStructure, statusMap, renderData, headerData);
-    });
-  }
-
 
   handleToIterationBoard = () => {
     const { history } = this.props;
@@ -266,7 +266,7 @@ class ScrumBoardHome extends Component {
   }
 
   renderRemainDate = () => (
-    <Fragment>
+    <>
       <Icon type="av_timer" style={{ color: 'rgba(0,0,0,0.6)', marginLeft: 10 }} />
       <span style={{
         paddingLeft: 5,
@@ -277,7 +277,7 @@ class ScrumBoardHome extends Component {
       >
         {`${ScrumBoardStore.getDayRemain >= 0 ? `${ScrumBoardStore.getDayRemain} days剩余` : '无剩余时间'}`}
       </span>
-    </Fragment>
+    </>
   )
 
   renderSwitchMode = () => (
@@ -297,6 +297,43 @@ class ScrumBoardHome extends Component {
     </div>
   )
 
+  refresh = (defaultBoard, url, boardListData) => {
+    ScrumBoardStore.setSpinIf(true);
+    Promise.all([issueTypeApi.loadAllWithStateMachineId(),
+      statusApi.loadAllTransformForAllIssueType(),
+      ScrumBoardStore.axiosGetBoardData(defaultBoard.boardId),
+      epicApi.loadEpics()]).then(([issueTypes, stateMachineMap, defaultBoardData, epicData]) => {
+      this.dataConverter.setSourceData(epicData, defaultBoardData);
+      const renderDataMap = new Map([
+        ['parent_child', this.dataConverter.getParentWithSubData],
+        ['swimlane_epic', this.dataConverter.getEpicData],
+        ['assignee', this.dataConverter.getAssigneeData],
+        ['swimlane_none', this.dataConverter.getAllData],
+        ['undefined', this.dataConverter.getAssigneeData],
+      ]);
+      const renderData = renderDataMap.get(defaultBoard.userDefaultBoard)();
+      const canDragOn = this.dataConverter.getCanDragOn();
+      const statusColumnMap = this.dataConverter.getStatusColumnMap();
+      const statusMap = this.dataConverter.getStatusMap();
+      const mapStructure = this.dataConverter.getMapStructure();
+      const allDataMap = this.dataConverter.getAllDataMap(defaultBoard.userDefaultBoard);
+      const headerData = this.dataConverter.getHeaderData();
+      ScrumBoardStore.scrumBoardInit(
+        AppState,
+        url,
+        boardListData, defaultBoard, defaultBoardData, null,
+        issueTypes, stateMachineMap, canDragOn,
+        statusColumnMap, allDataMap, mapStructure, statusMap,
+        renderData, headerData,
+      );
+    });
+  }
+
+  handlePriorityChange = (value) => {
+    ScrumBoardStore.setPriority(value);
+    this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
+  }
+
   render() {
     const { history, HeaderStore } = this.props;
     const {
@@ -304,14 +341,13 @@ class ScrumBoardHome extends Component {
     } = this.state;
     const menu = AppState.currentMenuType;
     const { type, id: projectId, organizationId: orgId } = menu;
-    const currentSprintIsDoing = ScrumBoardStore.didCurrentSprintExist && ScrumBoardStore.sprintNotClosedArray.find(item => item.statusCode === 'started' && item.sprintId === ScrumBoardStore.sprintId);
+    const currentSprintIsDoing = ScrumBoardStore.didCurrentSprintExist && ScrumBoardStore.sprintNotClosedArray.find((item) => item.statusCode === 'started' && item.sprintId === ScrumBoardStore.sprintId);
     return (
-      <Fragment>
+      <>
         <Header title="活跃冲刺">
           <Select
             ref={(SelectBoard) => { this.SelectBoard = SelectBoard; }}
             className="SelectTheme primary autoWidth"
-            // value={ScrumBoardStore.getBoardList && ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard)}
             value={ScrumBoardStore.getSelectedBoard}
             style={{
               marginRight: 15, fontWeight: 500, lineHeight: '28px',
@@ -336,7 +372,7 @@ class ScrumBoardHome extends Component {
           >
 
             {// ScrumBoardStore.getSpinIf
-              [...ScrumBoardStore.getBoardList.values()].map(item => (
+              [...ScrumBoardStore.getBoardList.values()].map((item) => (
                 <Option key={item.boardId} value={item.boardId}>
                   <Tooltip title={item.name}>
                     {item.name}
@@ -363,7 +399,7 @@ class ScrumBoardHome extends Component {
           </Button>
           {
             currentSprintIsDoing && (
-              <Fragment>
+              <>
                 {this.renderRemainDate()}
                 <Permission
                   service={['choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish']}
@@ -379,7 +415,7 @@ class ScrumBoardHome extends Component {
                   </Button>
                 </Permission>
                 {this.renderSwitchMode()}
-              </Fragment>
+              </>
             )
           }
         </Header>
@@ -392,6 +428,7 @@ class ScrumBoardHome extends Component {
               onSprintChange={this.onSprintChange}
               style={{ height: 32, margin: '0 0 16px 16px' }}
             />
+            <SelectPriority onChange={this.handlePriorityChange} />
             {ScrumBoardStore.hasSetFilter && <Button type="primary" onClick={this.handleClearFilter}>清除筛选</Button>}
           </div>
           <Spin spinning={ScrumBoardStore.getSpinIf}>
@@ -400,9 +437,16 @@ class ScrumBoardHome extends Component {
                 <div className="c7n-scrumboard-header">
                   <StatusColumn />
                 </div>
-                {(!ScrumBoardStore.didCurrentSprintExist || ((!ScrumBoardStore.otherIssue || ScrumBoardStore.otherIssue.length === 0) && (!ScrumBoardStore.interconnectedData || ScrumBoardStore.interconnectedData.size === 0))) ? (
-                  <NoneSprint doingSprintExist={ScrumBoardStore.didCurrentSprintExist} hasSetFilter={ScrumBoardStore.hasSetFilter} quickSearchObj={ScrumBoardStore.quickSearchObj} />
-                )
+                {(!ScrumBoardStore.didCurrentSprintExist
+                  || ((!ScrumBoardStore.otherIssue || ScrumBoardStore.otherIssue.length === 0)
+                    && (!ScrumBoardStore.interconnectedData
+                      || ScrumBoardStore.interconnectedData.size === 0))) ? (
+                        <NoneSprint
+                          doingSprintExist={ScrumBoardStore.didCurrentSprintExist}
+                          hasSetFilter={ScrumBoardStore.hasSetFilter}
+                          quickSearchObj={ScrumBoardStore.quickSearchObj}
+                        />
+                  )
                   : (
                     <div
                       className="c7n-scrumboard-content"
@@ -421,7 +465,7 @@ class ScrumBoardHome extends Component {
                   )}
               </div>
               <IssueDetail
-                refresh={this.refresh.bind(this)}
+                refresh={this.refresh}
               />
             </div>
           </Spin>
@@ -443,7 +487,8 @@ class ScrumBoardHome extends Component {
                   objectVersionNumber: ScrumBoardStore.getUpdatedParentIssue.objectVersionNumber,
                   transformId: updateParentStatus || ScrumBoardStore.getTransformToCompleted[0].id,
                 };
-                issueApi.updateStatus(data.transformId, data.issueId, data.objectVersionNumber).then((res) => {
+                issueApi.updateStatus(data.transformId, data.issueId,
+                  data.objectVersionNumber).then((res) => {
                   ScrumBoardStore.setUpdateParent(false);
                   this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
                 }).catch(() => {
@@ -470,7 +515,7 @@ class ScrumBoardHome extends Component {
                   defaultValue={ScrumBoardStore.getTransformToCompleted.length ? ScrumBoardStore.getTransformToCompleted[0].id : '无'}
                 >
                   {
-                    ScrumBoardStore.getTransformToCompleted.map(item => (
+                    ScrumBoardStore.getTransformToCompleted.map((item) => (
                       <Option
                         key={item.id}
                         value={item.id}
@@ -484,11 +529,11 @@ class ScrumBoardHome extends Component {
             </Modal>
           ) : null
         }
-      </Fragment>
+      </>
     );
   }
 }
-export default props => (
+export default (props) => (
   <Page
     className="c7n-scrumboard-page"
     service={[...[

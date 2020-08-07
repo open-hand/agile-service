@@ -31,6 +31,8 @@ interface BoardSearchVO {
   quickFilterIds?: Array<number>,
   assigneeFilterIds?: Array<number>,
   sprintId?: number,
+  personalFilterIds?: string[]
+  priorityIds?:string[]
 }
 /**
  * 迭代看板
@@ -50,6 +52,8 @@ class BoardApi {
         quickFilterIds: searchVO?.quickFilterIds?.join(',') || undefined,
         assigneeFilterIds: searchVO?.assigneeFilterIds?.join(',') || undefined,
         assigneeId: searchVO?.onlyMe ? AppState.getUserId : '',
+        personalFilterIds: searchVO?.personalFilterIds?.join(',') || undefined,
+        priorityIds: searchVO?.priorityIds?.join(',') || undefined,
       },
     });
   }
