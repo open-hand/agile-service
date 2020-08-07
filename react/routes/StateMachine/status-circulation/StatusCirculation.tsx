@@ -65,7 +65,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         <IssueTypeTab selectedType={selectedType} setSelectedType={setSelectedType} />
         {tab}
         <div style={{ flex: 1 }}>
-          {/* <Loading loading={store.loading} /> */}
+          <Loading loading={store.loading} />
           <StatusCirculationTable />
         </div>
         <Save />

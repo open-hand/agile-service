@@ -1,13 +1,12 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { IStatus } from '@/common/types';
 import { IStatusCirculation } from '@/api';
 import StatusCirculationStore from '../../StatusCirculationStore';
 import './Checkbox.less';
 
 interface Props {
   store: StatusCirculationStore
-  status: IStatus
+  status: IStatusCirculation
   record: IStatusCirculation
 }
 const CheckBox: React.FC<Props> = ({ store, status, record }) => {

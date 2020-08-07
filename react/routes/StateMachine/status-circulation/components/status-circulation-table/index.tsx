@@ -28,7 +28,10 @@ const StatusCirculationTable: React.FC = () => {
     lock: true,
     renderHeader: () => null,
     renderer: ((record: IStatusCirculation) => (
-      <span style={{ color: STATUS[record.valueCode] }}>{record.name}</span>
+      <span style={{ color: STATUS[record.type] }}>
+        {record.name}
+        {record.defaultStatus && <span className={styles.default_status}>初始</span>}
+      </span>
     )),
   }, {
     name: 'operate',
@@ -38,7 +41,7 @@ const StatusCirculationTable: React.FC = () => {
   },
   ...statusList.map((status) => ({
     name: status.name,
-    renderHeader: () => <span style={{ color: STATUS[status.valueCode] }}>{status.name}</span>,
+    renderHeader: () => <span style={{ color: STATUS[status.type] }}>{status.name}</span>,
     renderer: ((record: IStatusCirculation) => (
       <Checkbox store={store} status={status} record={record} />
     )),
@@ -47,13 +50,10 @@ const StatusCirculationTable: React.FC = () => {
     name: 'delete',
     lock: 'right',
     renderHeader: () => null,
-    renderer: ((record: IStatusCirculation) => (record.default
-      ? <span className={styles.default_status}>初始状态</span>
-      : (
-        <div>
-          <Button icon="delete" onClick={() => handleDeleteClick(record)} />
-        </div>
-      )
+    renderer: ((record: IStatusCirculation) => (
+      <div>
+        <Button disabled={record.defaultStatus} icon="delete" onClick={() => handleDeleteClick(record)} />
+      </div>
     )),
   }], [statusList]);
 
