@@ -1,5 +1,6 @@
+/* eslint-disable max-len */
 import React, {
-  useContext, Fragment, useEffect,
+  useContext, Fragment,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import _, { map } from 'lodash';
@@ -33,20 +34,14 @@ function IssueTable({ tableRef, onCreateIssue }) {
       expand: true,
     });
     IssueStore.setFilterListVisible(false);
-    IssueStore.setEditFilterInfo(map(editFilterInfo,
-      (item) => Object.assign(item, { isEditing: false })));
+    IssueStore.setEditFilterInfo(map(editFilterInfo, (item) => Object.assign(item, { isEditing: false })));
   };
   const renderTag = (listField, nameField) => ({ record }) => {
     const list = record.get(listField);
     if (list) {
       if (list.length > 0) {
         return (
-          <Tooltip title={(
-            <div>
-              {_.map(list, (item) => item[nameField]).map((name) => <div>{name}</div>)}
-            </div>
-          )}
-          >
+          <Tooltip title={<div>{_.map(list, (item) => item[nameField]).map((name) => <div>{name}</div>)}</div>}>
             <div style={{ display: 'inline-flex', maxWidth: '100%' }}>
               <Tag
                 color="blue"
@@ -103,24 +98,14 @@ function IssueTable({ tableRef, onCreateIssue }) {
         <Column
           align="left"
           lock="left"
-          name="ss"
-          // width={320}
+          name="issueId"
+          width={320}
           header={() => (
             <div>
               <CollapseAll tableRef={tableRef} />
+              概要
             </div>
           )}
-        />
-        <Column
-          align="left"
-          lock="left"
-          name="issueId"
-          width={320}
-          // header={() => (
-          //   <div>
-          //     概要
-          //   </div>
-          // )}
           onCell={({ record }) => ({
             onClick: () => {
               handleRowClick(record);
