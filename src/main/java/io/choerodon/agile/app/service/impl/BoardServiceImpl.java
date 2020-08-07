@@ -356,7 +356,7 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public JSONObject queryAllData(Long projectId, Long boardId, Long assigneeId, Boolean onlyStory,
                                    List<Long> quickFilterIds, Long organizationId, List<Long> assigneeFilterIds,
-                                   Long sprintId, List<Long> personFilterIds, List<Long> priorityIds) {
+                                   Long sprintId, List<Long> personalFilterIds, List<Long> priorityIds) {
         JSONObject jsonObject = new JSONObject(true);
         //没有传冲刺id，则使用激活的冲刺
         SprintDTO currentSprint;
@@ -372,7 +372,7 @@ public class BoardServiceImpl implements BoardService {
         if (quickFilterIds != null && !quickFilterIds.isEmpty()) {
             filterSql = getQuickFilter(quickFilterIds);
         }
-        List<SearchVO> searchList = getSearchVO(personFilterIds);
+        List<SearchVO> searchList = getSearchVO(personalFilterIds);
         List<Long> assigneeIds = new ArrayList<>();
         List<Long> parentIds = new ArrayList<>();
         List<Long> epicIds = new ArrayList<>();

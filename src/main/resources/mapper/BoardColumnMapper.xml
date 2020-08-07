@@ -24,21 +24,19 @@
     </resultMap>
 
     <sql id="selectIssueIdBysearchVO">
-        select
-        case
-        when search.type_code = 'sub_task' then search.parent_issue_id
-        when search.type_code = 'bug' and search.relate_issue_id is not null and search.relate_issue_id != 0 then search.relate_issue_id
-        else search.issue_issue_id
-        end as issue_id
-        from (
+        SELECT
+        CASE WHEN search.type_code = 'sub_task' THEN search.parent_issue_id
+        WHEN search.type_code = 'bug' AND search.relate_issue_id IS NOT NULL AND search.relate_issue_id != 0 THEN search.relate_issue_id
+        ELSE search.issue_issue_id
+        END AS issue_id
+        FROM (
         <include refid="io.choerodon.agile.infra.mapper.IssueMapper.queryIssueIdsListWithSubSql"/>
         )search
-        where 1=1
-        and (
+        WHERE (
         search.type_code != 'sub_task'
-        or search.parent_type_code != 'bug'
-        or search.parent_relate_issue_id is null
-        or search.parent_relate_issue_id = 0
+        OR search.parent_type_code != 'bug'
+        OR search.parent_relate_issue_id IS NULL
+        OR search.parent_relate_issue_id = 0
         )
         <if test='searchVO.searchArgs != null'>
             <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
