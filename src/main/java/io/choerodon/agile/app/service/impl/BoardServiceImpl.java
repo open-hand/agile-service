@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.validator.BoardValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.StatusPayload;
+import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
@@ -19,6 +20,9 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hzero.core.base.BaseConstants;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/14.
@@ -82,6 +87,10 @@ public class BoardServiceImpl implements BoardService {
     private StatusService statusService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private PersonalFilterMapper personalFilterMapper;
+    @Autowired
+    private BoardAssembler boardAssembler;
 
     @Override
     public void create(Long projectId, String boardName) {
@@ -348,29 +357,28 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public JSONObject queryAllData(Long projectId, Long boardId, Long assigneeId, Boolean onlyStory,
-                                   List<Long> quickFilterIds, Long organizationId, List<Long> assigneeFilterIds,
-                                   Long sprintId) {
+    public JSONObject queryAllData(Long projectId, Long boardId, Long organizationId, BoardQueryVO boardQuery) {
         JSONObject jsonObject = new JSONObject(true);
         //没有传冲刺id，则使用激活的冲刺
         SprintDTO currentSprint;
-        if (ObjectUtils.isEmpty(sprintId)) {
+        if (ObjectUtils.isEmpty(boardQuery.getSprintId())) {
             currentSprint = getActiveSprint(projectId);
             if (!ObjectUtils.isEmpty(currentSprint)) {
-                sprintId = currentSprint.getSprintId();
+                boardQuery.setSprintId(currentSprint.getSprintId());
             }
         } else {
-            currentSprint = sprintMapper.selectByPrimaryKey(sprintId);
+            currentSprint = sprintMapper.selectByPrimaryKey(boardQuery.getSprintId());
         }
         String filterSql = null;
-        if (quickFilterIds != null && !quickFilterIds.isEmpty()) {
-            filterSql = getQuickFilter(quickFilterIds);
+        if (boardQuery.getQuickFilterIds() != null && !boardQuery.getQuickFilterIds().isEmpty()) {
+            filterSql = getQuickFilter(boardQuery.getQuickFilterIds());
         }
+        List<SearchVO> searchList = getSearchVO(boardQuery.getPersonalFilterIds());
         List<Long> assigneeIds = new ArrayList<>();
         List<Long> parentIds = new ArrayList<>();
         List<Long> epicIds = new ArrayList<>();
-        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, sprintId, assigneeId, onlyStory, filterSql, assigneeFilterIds);
-        Boolean condition = assigneeId != null && onlyStory;
+        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, boardQuery.getSprintId(), boardQuery.getAssigneeId(), boardQuery.getOnlyStory(), filterSql, boardQuery.getAssigneeFilterIds(), searchList, boardQuery.getPriorityIds());
+        Boolean condition = boardQuery.getAssigneeId() != null && boardQuery.getOnlyStory();
         Map<Long, List<Long>> parentWithSubs = new HashMap<>();
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
@@ -381,7 +389,7 @@ public class BoardServiceImpl implements BoardService {
         jsonObject.put("parentWithSubs", EncryptionUtils.encryptMap(parentWithSubs));
         jsonObject.put("parentCompleted", EncryptionUtils.encryptList(sortAndJudgeCompleted(projectId, parentIds)));
         jsonObject.put("epicInfo", !epicIds.isEmpty() ? boardColumnMapper.selectEpicBatchByIds(epicIds) : null);
-        jsonObject.put("allColumnNum", getAllColumnNum(projectId, boardId, sprintId));
+        jsonObject.put("allColumnNum", getAllColumnNum(projectId, boardId, boardQuery.getSprintId()));
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
         Comparator<IssueForBoardDO> comparator = Comparator.comparing(IssueForBoardDO::getRank, nullsFirst(naturalOrder()));
         columns.forEach(columnAndIssueDTO ->
@@ -412,6 +420,19 @@ public class BoardServiceImpl implements BoardService {
         //处理用户默认看板设置，保存最近一次的浏览
         handleUserSetting(boardId, projectId);
         return jsonObject;
+    }
+
+    private List<SearchVO> getSearchVO(List<Long> personFilterIds) {
+        if (CollectionUtils.isEmpty(personFilterIds)){
+            return Collections.emptyList();
+        }
+        List<PersonalFilterDTO> personalFilterList =
+                personalFilterMapper.selectByIds(StringUtils.join(personFilterIds, BaseConstants.Symbol.COMMA));
+        return personalFilterList.stream().map(filter -> {
+            SearchVO searchVO = JSON.parseObject(filter.getFilterJson(), SearchVO.class);
+            boardAssembler.handleOtherArgs(searchVO);
+            return searchVO;
+        }).collect(Collectors.toList());
     }
 
     private void handleUserSetting(Long boardId, Long projectId) {

@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.ColumnWithMaxMinNumVO;
+import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.event.RemoveStatusWithProject;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -14,13 +15,15 @@ import java.util.List;
  */
 public interface BoardColumnMapper extends BaseMapper<BoardColumnDTO> {
 
-    List selectColumnsByBoardId(@Param("projectId") Long projectId,
+    List<ColumnAndIssueDTO> selectColumnsByBoardId(@Param("projectId") Long projectId,
                                 @Param("boardId") Long boardId,
                                 @Param("sprintId") Long sprintId,
                                 @Param("assigneeId") Long assigneeId,
                                 @Param("onlyStory") Boolean onlyStory,
                                 @Param("filterSql") String filterSql,
-                                @Param("assigneeFilterIds") List<Long> assigneeFilterIds);
+                                @Param("assigneeFilterIds") List<Long> assigneeFilterIds,
+                                @Param("searchList") List<SearchVO> searchList,
+                                @Param("priorityIds") List<Long> priorityIds);
 
     void columnSort(@Param("boardId") Long boardId,
                     @Param("sequence") Integer sequence,
