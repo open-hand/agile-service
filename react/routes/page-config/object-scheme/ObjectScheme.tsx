@@ -10,6 +10,9 @@ import {
   TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 
+import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
+import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
+import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import Store from './stores';
 import TableDropMenu from '../../../common/TableDropMenu';
 import TypeTag from '../../../components/TypeTag';
@@ -19,7 +22,7 @@ import './ObjectScheme.less';
 
 const { Column } = Table;
 
-const showIcons = {
+const showIcons: any = {
   史诗: {
     icon: 'agile_epic',
     colour: '#743be7',
@@ -74,7 +77,6 @@ function ObjectScheme() {
     store,
   } = context;
 
-
   function handleRefresh() {
     schemeTableDataSet.query();
   }
@@ -109,7 +111,6 @@ function ObjectScheme() {
       handleRefresh();
     });
   }
-
 
   // 打开创建模态框
   function openCreateFieldModal() {
@@ -149,9 +150,9 @@ function ObjectScheme() {
     });
   }
 
-  const renderDropDown = ({ text, record }) => {
-    const system = record.get('system');
-    const projectId = record.get('projectId');
+  const renderDropDown = ({ text, record }: RenderProps) => {
+    const system = record?.get('system');
+    const projectId = record?.get('projectId');
     if (system) {
       return text;
     }
@@ -175,50 +176,56 @@ function ObjectScheme() {
     );
   };
 
-  const renderContextName = ({ text }) => (
-    <Fragment>
-      {text.split(',').map(name => (
-        showIcons[name] ? <TypeTag style={{ marginRight: 4 }} data={showIcons[name]} showName /> : name
+  const renderContextName = ({ text }: RenderProps) => (
+    <>
+      {text?.split(',').map((name: any) => (
+        showIcons[name] ? (
+          // @ts-ignore
+          <TypeTag
+            style={{ marginRight: 4 }}
+            data={showIcons[name]}
+            showName
+          />
+        ) : name
       ))}
-    </Fragment>
+    </>
   );
 
-  const renderFieldOrigin = ({ record }) => {
-    const system = record.get('system');
-    const projectId = record.get('projectId');
+  const renderFieldOrigin = ({ record }: RenderProps) => {
+    const system = record?.get('system');
+    const projectId = record?.get('projectId');
     if (system) {
       return <Tag style={{ color: 'rgba(0,0,0,0.65)', borderColor: '#d9d9d9', background: '#fafafa' }}>{formatMessage({ id: 'system' })}</Tag>;
-    } else {
-      return projectId
-        ? (
-          <Tag 
-            style={{
-              background: '#fafafa',
-              color: '#5CC2F2',
-              borderColor: '#5CC2F2',
-            }}
-          >
-            <span>{formatMessage({ id: 'project' })}</span>
-          </Tag>
-        )
-        : (
-          <Tag 
-            style={{
-              background: '#fafafa',
-              color: '#3f51b5',
-              borderColor: '#3f51b5',
-            }}
-          >
-            <span>{formatMessage({ id: 'organization' })}</span>
-          </Tag>
-        );
     }
+    return projectId
+      ? (
+        <Tag
+          style={{
+            background: '#fafafa',
+            color: '#5CC2F2',
+            borderColor: '#5CC2F2',
+          }}
+        >
+          <span>{formatMessage({ id: 'project' })}</span>
+        </Tag>
+      )
+      : (
+        <Tag
+          style={{
+            background: '#fafafa',
+            color: '#3f51b5',
+            borderColor: '#3f51b5',
+          }}
+        >
+          <span>{formatMessage({ id: 'organization' })}</span>
+        </Tag>
+      );
   };
 
-  const renderRequired = ({ record }) => {
-    const system = record.get('system');
-    const required = record.get('required');
-    const projectId = record.get('projectId');
+  const renderRequired = ({ record }: RenderProps) => {
+    const system = record?.get('system');
+    const required = record?.get('required');
+    const projectId = record?.get('projectId');
 
     return (
       <div>
@@ -230,7 +237,6 @@ function ObjectScheme() {
       </div>
     );
   };
-
 
   const service = AppState.currentMenuType.type === 'project' ? [
     'choerodon.code.project.setting.page.ps.field',
@@ -245,7 +251,7 @@ function ObjectScheme() {
     >
       <Header>
         <Button
-          funcType="flat"
+          funcType={'flat' as FuncType}
           onClick={openCreateFieldModal}
         >
           <Icon type="playlist_add icon" />
@@ -254,7 +260,7 @@ function ObjectScheme() {
       </Header>
       <Breadcrumb />
       <Content className={`${prefixCls}-detail-content`}>
-        <Table dataSet={schemeTableDataSet} queryBar="none" className={`${prefixCls}-detail-content-table`}>
+        <Table dataSet={schemeTableDataSet} queryBar={'none' as TableQueryBarType} className={`${prefixCls}-detail-content-table`}>
           <Column name="name" renderer={renderDropDown} />
           <Column name="contextName" renderer={renderContextName} width={330} />
           <Column name="fieldOrigin" renderer={renderFieldOrigin} header={formatMessage({ id: 'field.origin' })} />
@@ -265,6 +271,5 @@ function ObjectScheme() {
     </Page>
   );
 }
-
 
 export default observer(ObjectScheme);

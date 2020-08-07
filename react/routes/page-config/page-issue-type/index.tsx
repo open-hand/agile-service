@@ -1,6 +1,6 @@
 import React from 'react';
-import PageIssueTypeProvider from './stores';
 import PageIssueType from './PageIssueType';
+import PageIssueTypeProvider from './stores';
 
 export default function Index(props:any) {
   return (

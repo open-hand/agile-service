@@ -2,20 +2,27 @@ import React, { useState } from 'react';
 import {
   TabPage as Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
-import { Button } from 'choerodon-ui/pro/lib';
+import { Button, SelectBox } from 'choerodon-ui/pro/lib';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import { ViewMode } from 'choerodon-ui/pro/lib/radio/enum';
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
+import { observer, useObservable } from 'mobx-react-lite';
 import styles from './index.less';
 import IssueTypeWrap from './components/issue-type-wrap';
 import SortTable from './components/sort-table';
 import openAddFiled from './components/add-filed';
 import { usePageIssueTypeStore } from './stores';
+import './PageIssueType.less';
 
+const preCls = 'c7n-agile-page-config-page-issue-type';
+const { Option } = SelectBox;
 function PageIssueType(params: any) {
   const { sortTableDataSet } = usePageIssueTypeStore();
   const [edit, setEdit] = useState<boolean>();
+  const [currentType, setCurrentType] = useState<string>('feature');
   const [desValue, setDesValue] = useState<string[]>();
+  const current = useObservable({ val: 'feature' });
   const handleCancel = () => {
     setDesValue([]);
     sortTableDataSet.reset();
@@ -41,14 +48,23 @@ function PageIssueType(params: any) {
       </Header>
       <Breadcrumb />
       <Content>
+        <SelectBox mode={'button' as ViewMode} value={currentType} onChange={(val) => setCurrentType(val)} className={`${preCls}-select-box`}>
+          <Option value="epic">史诗</Option>
+          <Option value="feature">特性</Option>
+          <Option value="story">故事</Option>
+          <Option value="task">任务</Option>
+          <Option value="sub_task">子任务</Option>
+          <Option value="bug">缺陷</Option>
+          <Option value="demand">需求</Option>
+        </SelectBox>
         <div className={styles.top}>
 
+          <IssueTypeWrap title="字段配置">
+            <SortTable type={currentType} disabled={!edit} />
+          </IssueTypeWrap>
           <IssueTypeWrap title="描述信息">
             {edit ? <WYSIWYGEditor style={{ height: '100%' }} onChange={setDesValue} value={desValue} />
               : <WYSIWYGViewer data={desValue} />}
-          </IssueTypeWrap>
-          <IssueTypeWrap title="字段配置">
-            <SortTable type="feature" disabled={!edit} />
           </IssueTypeWrap>
 
         </div>
@@ -71,4 +87,4 @@ function PageIssueType(params: any) {
     </Page>
   );
 }
-export default PageIssueType;
+export default observer(PageIssueType);
