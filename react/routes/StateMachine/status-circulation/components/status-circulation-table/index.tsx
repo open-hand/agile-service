@@ -2,11 +2,11 @@ import React, { ReactNode, useMemo } from 'react';
 import { Button, Modal } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import STATUS from '@/constants/STATUS';
+import { IStatusCirculation } from '@/api';
 import Table from '../table';
-import { IStatusCirculation } from '../../StatusCirculationStore';
-import styles from './index.less';
-import './Checkbox.less';
 import { useStatusCirculationContext } from '../..';
+import Checkbox from './Checkbox';
+import styles from './index.less';
 
 interface ColumnProps {
   name: string,
@@ -17,16 +17,12 @@ interface ColumnProps {
 const StatusCirculationTable: React.FC = () => {
   const { store } = useStatusCirculationContext();
   const { statusList } = store;
-  const handleDeleteClick = (record:IStatusCirculation) => {
+  const handleDeleteClick = (record: IStatusCirculation) => {
     Modal.confirm({
       title: '确认删除',
     });
   };
-  const data = useMemo(() => statusList.map((from) => statusList.reduce((result, to) => ({
-    ...result,
-    ...from,
-    [to.id]: from.to.includes(to.id),
-  }), {})), [statusList]);
+  const { data } = store;
   const columns: ColumnProps[] = useMemo(() => [{
     name: 'name',
     lock: true,
@@ -44,19 +40,7 @@ const StatusCirculationTable: React.FC = () => {
     name: status.name,
     renderHeader: () => <span style={{ color: STATUS[status.valueCode] }}>{status.name}</span>,
     renderer: ((record: IStatusCirculation) => (
-      <div className="md-checkbox">
-        <input
-          type="checkbox"
-          disabled={status.id === record.id}
-          checked={record[status.id]}
-          onChange={(e) => {
-            console.log(e.target.checked);
-          }}
-          id={`checkbox-${status.id}-${record.id}`}
-        />
-        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-        <label htmlFor={`checkbox-${status.id}-${record.id}`} />
-      </div>
+      <Checkbox store={store} status={status} record={record} />
     )),
   })),
   {
@@ -73,6 +57,8 @@ const StatusCirculationTable: React.FC = () => {
     )),
   }], [statusList]);
 
-  return <Table data={data} columns={columns} />;
+  return (
+    <Table data={data} columns={columns} />
+  );
 };
 export default observer(StatusCirculationTable);

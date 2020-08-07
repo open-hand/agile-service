@@ -267,7 +267,7 @@ export default class Table extends React.PureComponent {
     return (
       <AutoSizer>
         {({ height: originHeight, width }) => {
-          const height = originHeight - 80;
+          const height = originHeight - 40;
           return (
             <ScrollSync>
               {({
