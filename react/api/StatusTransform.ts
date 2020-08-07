@@ -2,8 +2,14 @@ import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
 import { IStatus } from '@/common/types';
 
-export interface IStatusCirculation extends IStatus {
-  to: string[];
+export interface IStatusCirculation {
+  code: string
+  defaultStatus: boolean
+  id: string
+  name: string
+  stateMachineId: string
+  type: IStatus['valueCode']
+  canTransformStatus: string[];
   default?: boolean
   [propName: string]: any
 }
