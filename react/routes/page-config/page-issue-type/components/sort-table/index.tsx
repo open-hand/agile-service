@@ -1,4 +1,6 @@
-import React, { useMemo, ReactElement, useEffect } from 'react';
+import React, {
+  useMemo, ReactElement, useEffect, memo,
+} from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Table, DataSet, Icon, CheckBox,
@@ -16,8 +18,8 @@ const SortTable: React.FC<{ type: string, disabled: boolean | undefined }> = (
   const { sortTableDataSet } = usePageIssueTypeStore();
 
   useEffect(() => {
-    console.log('disabled:', disabled);
-  }, [disabled]);
+    console.log(type, 'disabled:', disabled);
+  }, [disabled, type]);
   const renderFieldName = ({ value }: RenderProps) => (
     <div>
       {!disabled && <Icon type="baseline-drag_indicator" />}
@@ -29,7 +31,7 @@ const SortTable: React.FC<{ type: string, disabled: boolean | undefined }> = (
     return (
       <CheckBox
         disabled={disabled}
-        defaultChecked={value}
+        checked={value}
         // value={value}
         onChange={(val) => {
           console.log('val', val, name);
@@ -37,13 +39,69 @@ const SortTable: React.FC<{ type: string, disabled: boolean | undefined }> = (
         }}
       />
     );
+    // return <input type="checkbox" checked={value} />;
   }
+  const getColumns = () => {
+    console.log('co');
+    return [
+      {
+        title: '字段名称',
+        dataIndex: 'fieldName',
+        width: '25%',
+      },
+      {
+        title: '默认值',
+        dataIndex: 'defaultValue',
+        // width: '25%',
+      },
+      {
+        title: '是否必填',
+        dataIndex: 'require',
+        width: '75px',
+      },
+      {
+        title: '是否加入到编辑页',
+        dataIndex: 'eidt',
+        width: '135px',
+        render: (value:any) => (
+          <CheckBox
+            disabled={disabled}
+            checked
+              // value={value}
+            onChange={(val) => {
+              console.log('val', val);
+              // record?.set(name as String, val);
+            }}
+          />
+        ),
+      },
+      {
+        title: '是否加入到创建页',
+        dataIndex: 'create',
+        width: '135px',
+      },
+    ];
+  };
   return (
     <div className="c7n-page-issue-detail">
+      {/* <OldSortTable
+        pagination={false}
+        columns={getColumns()}
+        dataSource={sortTableDataSet.toData().slice()}
+        filterBar={false}
+        handleDrag={() => { }}
+        hight={0}
+      /> */}
       <Table
         dataSet={sortTableDataSet}
         queryBar={'none' as TableQueryBarType}
         dragRow={!disabled}
+        //   rowDragRender={{
+        //     droppableProps: DroppableProps;
+        //     draggableProps: DraggableProps;
+        //     renderClone: (dragRenderProps: DragRenderClone) => ReactElement<any>;
+        //     renderIcon: (DragIconRender: any) => ReactElement<any>;
+        // }}
         border={false}
       >
         <Column name="fieldName" renderer={renderFieldName} />
@@ -55,4 +113,4 @@ const SortTable: React.FC<{ type: string, disabled: boolean | undefined }> = (
     </div>
   );
 };
-export default observer(SortTable);
+export default memo(observer(SortTable));
