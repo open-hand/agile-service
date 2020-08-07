@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Page, Header, Content } from '@choerodon/boot';
 import { Button } from 'choerodon-ui/pro';
@@ -16,11 +16,14 @@ import Save from './components/save';
 const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { store } = useStatusCirculationContext();
   const { selectedType, setSelectedType } = useStateMachineContext();
-  useEffect(() => {
+  const refresh = useCallback(() => {
     if (selectedType) {
       store.getStatusList(selectedType);
     }
   }, [selectedType, store]);
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
   return (
     <Page>
       <Header>
@@ -54,9 +57,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
             openSetDefaultStatus({
               issueTypeId: selectedType,
               statusList: store.statusList,
-              onSubmit: () => {
-
-              },
+              onSubmit: refresh,
             });
           }}
         >

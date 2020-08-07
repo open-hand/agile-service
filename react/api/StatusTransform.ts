@@ -33,7 +33,7 @@ class StatusTransformApi {
   setDefaultStatus(issueTypeId:string, statusId:string, stateMachineId:string) {
     return axios({
       method: 'put',
-      url: `${this.prefix}/status_transform/default_status`,
+      url: `${this.prefix}/status_transform/setting_default_status`,
       params: {
         issueTypeId,
         statusId,
