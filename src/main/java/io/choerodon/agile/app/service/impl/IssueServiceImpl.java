@@ -384,7 +384,7 @@ public class IssueServiceImpl implements IssueService {
                 filterSql = getQuickFilter(searchVO.getQuickFilterIds());
             }
             //处理未匹配的筛选
-            handleOtherArgs(searchVO);
+            searchVO.handleOtherArgs();
             final String searchSql = filterSql;
             if (!handleSortField(pageRequest).equals("")) {
                 String fieldCode = handleSortField(pageRequest);
@@ -472,6 +472,12 @@ public class IssueServiceImpl implements IssueService {
         } else return "";
     }
 
+    /**
+     * @see SearchVO#handleOtherArgs()
+     * @deprecated {@link io.choerodon.agile.api.vo.SearchVO#handleOtherArgs()}
+     * @param searchVO searchVO
+     */
+    @Deprecated
     protected void handleOtherArgs(SearchVO searchVO) {
         Map<String, Object> otherArgs = searchVO.getOtherArgs();
         if (otherArgs != null) {

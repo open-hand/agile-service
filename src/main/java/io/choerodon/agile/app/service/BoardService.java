@@ -21,7 +21,8 @@ public interface BoardService {
     BoardVO queryScrumBoardById(Long projectId, Long boardId);
 
     JSONObject queryAllData(Long projectId, Long boardId, Long assigneeId, Boolean onlyStory, List<Long> quickFilterIds,
-                            Long organizationId, List<Long> assigneeFilterIds, Long sprintId);
+                            Long organizationId, List<Long> assigneeFilterIds, Long sprintId, List<Long> personFilterIds,
+                            List<Long> priorityIds);
 
     void initBoard(Long projectId, String boardName, List<StatusPayload> statusPayloads);
 

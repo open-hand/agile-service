@@ -23,6 +23,37 @@
         </collection>
     </resultMap>
 
+    <sql id="selectIssueIdBysearchVO">
+        select
+        case
+        when search.type_code = 'sub_task' then search.parent_issue_id
+        when search.type_code = 'bug' and search.relate_issue_id is not null and search.relate_issue_id != 0 then search.relate_issue_id
+        else search.issue_issue_id
+        end as issue_id
+        from (
+        <include refid="io.choerodon.agile.infra.mapper.IssueMapper.queryIssueIdsListWithSubSql"/>
+        )search
+        where 1=1
+        and (
+        search.type_code != 'sub_task'
+        or search.parent_type_code != 'bug'
+        or search.parent_relate_issue_id is null
+        or search.parent_relate_issue_id = 0
+        )
+        <if test='searchVO.searchArgs != null'>
+            <if test='searchVO.searchArgs.issueNum != null and searchVO.searchArgs.issueNum != ""'>
+                AND search.issue_num LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.issueNum}) ,'%')
+            </if>
+        </if>
+        <if test='searchVO.contents != null and searchVO.contents.size != 0'>
+            <foreach collection="searchVO.contents" item="content" index="index">
+                AND (search.issue_num LIKE CONCAT(CONCAT('%', #{content}), '%') OR search.summary LIKE
+                CONCAT(CONCAT('%',
+                #{content}), '%'))
+            </foreach>
+        </if>
+    </sql>
+
     <select id="selectColumnsByBoardId" resultMap="BoardColumnAndIssues">
         SELECT
         abc.column_id AS abc_column_id,
@@ -68,6 +99,16 @@
         </if>
         <if test='filterSql != null'>
             AND ai1.issue_id IN (${filterSql})
+        </if>
+        <if test='searchList != null and searchList.size > 0'>
+            <foreach collection="searchList" item="searchVO">
+                AND ai1.issue_id IN (<include refid="selectIssueIdBysearchVO"/>)
+            </foreach>
+        </if>
+        <if test='priorityIds != null and priorityIds.size > 0'>
+            AND ai1.priority_id IN <foreach collection="priorityIds" item="priorityId" open="(" close=")" separator=",">
+            #{priorityId}
+        </foreach>
         </if>
         <if test='assigneeFilterIds != null'>
             AND ai1.assignee_id IN

@@ -19,6 +19,9 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hzero.core.base.BaseConstants;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/14.
@@ -82,6 +86,8 @@ public class BoardServiceImpl implements BoardService {
     private StatusService statusService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private PersonalFilterMapper personalFilterMapper;
 
     @Override
     public void create(Long projectId, String boardName) {
@@ -350,7 +356,7 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public JSONObject queryAllData(Long projectId, Long boardId, Long assigneeId, Boolean onlyStory,
                                    List<Long> quickFilterIds, Long organizationId, List<Long> assigneeFilterIds,
-                                   Long sprintId) {
+                                   Long sprintId, List<Long> personFilterIds, List<Long> priorityIds) {
         JSONObject jsonObject = new JSONObject(true);
         //没有传冲刺id，则使用激活的冲刺
         SprintDTO currentSprint;
@@ -366,10 +372,11 @@ public class BoardServiceImpl implements BoardService {
         if (quickFilterIds != null && !quickFilterIds.isEmpty()) {
             filterSql = getQuickFilter(quickFilterIds);
         }
+        List<SearchVO> searchList = getSearchVO(personFilterIds);
         List<Long> assigneeIds = new ArrayList<>();
         List<Long> parentIds = new ArrayList<>();
         List<Long> epicIds = new ArrayList<>();
-        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, sprintId, assigneeId, onlyStory, filterSql, assigneeFilterIds);
+        List<ColumnAndIssueDTO> columns = boardColumnMapper.selectColumnsByBoardId(projectId, boardId, sprintId, assigneeId, onlyStory, filterSql, assigneeFilterIds, searchList, priorityIds);
         Boolean condition = assigneeId != null && onlyStory;
         Map<Long, List<Long>> parentWithSubs = new HashMap<>();
         Map<Long, StatusVO> statusMap = statusService.queryAllStatusMap(organizationId);
@@ -412,6 +419,19 @@ public class BoardServiceImpl implements BoardService {
         //处理用户默认看板设置，保存最近一次的浏览
         handleUserSetting(boardId, projectId);
         return jsonObject;
+    }
+
+    private List<SearchVO> getSearchVO(List<Long> personFilterIds) {
+        if (CollectionUtils.isEmpty(personFilterIds)){
+            return Collections.emptyList();
+        }
+        List<PersonalFilterDTO> personalFilterList =
+                personalFilterMapper.selectByIds(StringUtils.join(personFilterIds, BaseConstants.Symbol.COMMA));
+        return personalFilterList.stream().map(filter -> {
+            SearchVO searchVO = JSON.parseObject(filter.getFilterJson(), SearchVO.class);
+            searchVO.handleOtherArgs();
+            return searchVO;
+        }).collect(Collectors.toList());
     }
 
     private void handleUserSetting(Long boardId, Long projectId) {
