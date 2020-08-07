@@ -16,11 +16,11 @@ const IssueTypeTab: React.FC<Props> = ({ selectedType, setSelectedType }) => {
   const [selected, setSelected] = useState(selectedType || '');
   const { isProgram } = useIsProgramContext();
   const [issueTypes] = useIssueTypes();
-  const handleSelectType = useCallback((code: string) => {
+  const handleSelectType = useCallback((id: string) => {
     if (setSelectedType) {
-      setSelectedType(code);
+      setSelectedType(id);
     }
-    setSelected(code);
+    setSelected(id);
   }, [setSelectedType]);
 
   const types = !isProgram ? issueTypes.filter((item:IIssueType) => item.typeCode !== 'feature') : issueTypes;
@@ -31,13 +31,12 @@ const IssueTypeTab: React.FC<Props> = ({ selectedType, setSelectedType }) => {
     }
   }, [handleSelectType, selectedType, setSelectedType, types]);
 
-  // console.log(selected, selectedType);
   return (
     <div className={styles.issueTypeTab}>
       {
         types.map((item: IIssueType) => (
           <span
-            className={styles.issueTypeTabItem}
+            className={`${styles.issueTypeTabItem} ${item.id === selected ? styles.selected : ''}`}
             role="none"
             onClick={() => handleSelectType(item.id)}
           >
