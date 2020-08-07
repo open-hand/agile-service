@@ -7,7 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.validator.BoardValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.StatusPayload;
-import io.choerodon.agile.app.assembler.IssueAssembler;
+import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
@@ -90,7 +90,7 @@ public class BoardServiceImpl implements BoardService {
     @Autowired
     private PersonalFilterMapper personalFilterMapper;
     @Autowired
-    private IssueAssembler issueAssembler;
+    private BoardAssembler boardAssembler;
 
     @Override
     public void create(Long projectId, String boardName) {
@@ -430,7 +430,7 @@ public class BoardServiceImpl implements BoardService {
                 personalFilterMapper.selectByIds(StringUtils.join(personFilterIds, BaseConstants.Symbol.COMMA));
         return personalFilterList.stream().map(filter -> {
             SearchVO searchVO = JSON.parseObject(filter.getFilterJson(), SearchVO.class);
-            issueAssembler.handleOtherArgs(searchVO);
+            boardAssembler.handleOtherArgs(searchVO);
             return searchVO;
         }).collect(Collectors.toList());
     }

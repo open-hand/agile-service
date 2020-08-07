@@ -169,6 +169,8 @@ public class IssueServiceImpl implements IssueService {
     private BaseFeignClient baseFeignClient;
     @Autowired
     private ProjectUtil projectUtil;
+    @Autowired
+    private BoardAssembler boardAssembler;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -384,7 +386,7 @@ public class IssueServiceImpl implements IssueService {
                 filterSql = getQuickFilter(searchVO.getQuickFilterIds());
             }
             //处理未匹配的筛选
-            issueAssembler.handleOtherArgs(searchVO);
+            boardAssembler.handleOtherArgs(searchVO);
             final String searchSql = filterSql;
             if (!handleSortField(pageRequest).equals("")) {
                 String fieldCode = handleSortField(pageRequest);
@@ -473,8 +475,8 @@ public class IssueServiceImpl implements IssueService {
     }
 
     /**
-     * @see SearchVO#handleOtherArgs()
-     * @deprecated {@link io.choerodon.agile.api.vo.SearchVO#handleOtherArgs()}
+     * @see BoardAssembler#handleOtherArgs(io.choerodon.agile.api.vo.SearchVO)
+     * @deprecated {@link io.choerodon.agile.app.assembler.BoardAssembler#handleOtherArgs(io.choerodon.agile.api.vo.SearchVO)}
      * @param searchVO searchVO
      */
     @Deprecated
