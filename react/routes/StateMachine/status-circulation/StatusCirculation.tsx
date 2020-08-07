@@ -2,7 +2,7 @@ import React, { useEffect, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Page, Header, Content } from '@choerodon/boot';
 import { Button } from 'choerodon-ui/pro';
-import { Loading } from '@/components';
+import Loading from '@/components/Loading';
 import openSelectExistStatus from '../components/select-exist-status';
 import openCreateStatus from '../components/create-status';
 import openSetDefaultStatus from '../components/set-default-status';
