@@ -13,6 +13,7 @@ import IssueTypeWrap from './components/issue-type-wrap';
 import SortTable from './components/sort-table';
 import openAddFiled from './components/add-filed';
 import { usePageIssueTypeStore } from './stores';
+import Switch from './components/switch';
 import './PageIssueType.less';
 
 const preCls = 'c7n-agile-page-config-page-issue-type';
@@ -48,7 +49,7 @@ function PageIssueType(params: any) {
       </Header>
       <Breadcrumb />
       <Content>
-        <SelectBox mode={'button' as ViewMode} value={currentType} onChange={(val) => setCurrentType(val)} className={`${preCls}-select-box`}>
+        <SelectBox mode={'button' as ViewMode} defaultValue="feature" onChange={(val) => setCurrentType(val)} className={`${preCls}-select-box`}>
           <Option value="epic">史诗</Option>
           <Option value="feature">特性</Option>
           <Option value="story">故事</Option>
@@ -58,12 +59,18 @@ function PageIssueType(params: any) {
           <Option value="demand">需求</Option>
         </SelectBox>
         <div className={styles.top}>
-
           <IssueTypeWrap title="字段配置">
-            <SortTable type={currentType} disabled={!edit} />
+            <SortTable disabled={!edit} />
           </IssueTypeWrap>
-          <IssueTypeWrap title="描述信息">
-            {edit ? <WYSIWYGEditor style={{ height: '100%' }} onChange={setDesValue} value={desValue} />
+          <IssueTypeWrap title="描述信息格式">
+            {edit ? (
+              <WYSIWYGEditor
+                style={{ height: '100%' }}
+                onChange={setDesValue}
+                value={desValue}
+                placeholder="您可以在此自定义描述信息格式"
+              />
+            )
               : <WYSIWYGViewer data={desValue} />}
           </IssueTypeWrap>
 
