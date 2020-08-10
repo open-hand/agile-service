@@ -131,7 +131,7 @@ public class BoardController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("all data , Refactoring")
-    @GetMapping(value = "/{boardId}/all_data/{organization_id}")
+    @PostMapping(value = "/{boardId}/all_data/{organization_id}")
     public ResponseEntity<JSONObject> queryByOptions(@ApiParam(value = "项目id", required = true)
                                                      @PathVariable(name = "project_id") Long projectId,
                                                      @ApiParam(value = "agile board id", required = true)
