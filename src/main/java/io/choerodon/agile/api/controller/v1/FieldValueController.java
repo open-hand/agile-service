@@ -6,7 +6,6 @@ import io.choerodon.agile.app.service.IssueFieldValueService;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
 import io.choerodon.agile.app.service.PageFieldService;
 
-import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
@@ -134,6 +133,16 @@ public class FieldValueController {
     public ResponseEntity<List<ObjectSchemeFieldDetailVO>> queryCustomFieldList(@ApiParam(value = "项目id", required = true)
                                                                                 @PathVariable("project_id") Long projectId) {
         return new ResponseEntity<>(objectSchemeFieldService.queryCustomFieldList(projectId), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "获取项目下的所有字段（系统字段和自定义字段）")
+    @GetMapping("/list/fields")
+    public ResponseEntity<List<ObjectSchemeFieldDetailVO>> listFieldsWithOptionals(@ApiParam(value = "项目id", required = true)
+                                                                                   @PathVariable("project_id") Long projectId,
+                                                                                   @RequestParam Long issueTypeId,
+                                                                                   @RequestParam Long organizationId) {
+        return new ResponseEntity<>(objectSchemeFieldService.listFieldsWithOptionals(projectId, issueTypeId, organizationId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

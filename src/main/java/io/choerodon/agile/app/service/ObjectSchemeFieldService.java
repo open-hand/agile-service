@@ -14,8 +14,6 @@ public interface ObjectSchemeFieldService {
 
     ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field, String[] contexts);
 
-    void baseDelete(Long fieldId);
-
     void baseUpdate(ObjectSchemeFieldDTO field);
 
     ObjectSchemeFieldDTO baseQueryById(Long organizationId, Long projectId, Long fieldId);
@@ -118,4 +116,24 @@ public interface ObjectSchemeFieldService {
      * @return
      */
     List<PageConfigVO> listConfigs(Long organizationId, Long projectId, String issueType);
+
+    /**
+     * 查询字段及字段配置
+     *
+     * @param projectId
+     * @param issueTypeId
+     * @param organizationId
+     * @return
+     */
+    List<ObjectSchemeFieldDetailVO> listFieldsWithOptionals(Long projectId, Long issueTypeId, Long organizationId);
+
+    /**
+     * 更新字段是否必输
+     *
+     * @param organizationId
+     * @param projectId
+     * @param fieldId
+     * @param required
+     */
+    void updateRequired(Long organizationId, Long projectId, Long fieldId, Boolean required);
 }

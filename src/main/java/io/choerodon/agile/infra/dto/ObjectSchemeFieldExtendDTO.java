@@ -27,6 +27,9 @@ public class ObjectSchemeFieldExtendDTO extends AuditDomain {
 
     private Long issueTypeId;
 
+    @Transient
+    private String issueTypeName;
+
     private Long fieldId;
 
     private String issueType;
@@ -41,6 +44,14 @@ public class ObjectSchemeFieldExtendDTO extends AuditDomain {
 
     @Column(name = "is_edited")
     private Boolean edited;
+
+    public String getIssueTypeName() {
+        return issueTypeName;
+    }
+
+    public void setIssueTypeName(String issueTypeName) {
+        this.issueTypeName = issueTypeName;
+    }
 
     public String getRank() {
         return rank;

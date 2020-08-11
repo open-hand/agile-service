@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.enums;
 import io.choerodon.core.exception.CommonException;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author shinan.chen
@@ -40,10 +41,28 @@ public class ObjectSchemeFieldContext {
         }
     }
 
-    public static void isIllegalIssueTypes(String issueType) {
+    public static void isIllegalIssueTypes(String[] context) {
+        for (String str : context) {
+            if (!Arrays.asList(ISSUE_TYPES).contains(str)) {
+                throw new CommonException("error.context.illegal");
+            }
+        }
+    }
+
+    public static void isIllegalIssueType(String issueType) {
         if (!Arrays.asList(ISSUE_TYPES).contains(issueType)) {
             throw new CommonException("error.issue.type.illegal");
         }
+    }
+
+    public static boolean containsAllIssueTypes(List<String> issueTypes) {
+        return issueTypes.contains(STORY)
+                && issueTypes.contains(EPIC)
+                && issueTypes.contains(BUG)
+                && issueTypes.contains(TASK)
+                && issueTypes.contains(SUB_TASK)
+                && issueTypes.contains(FEATURE)
+                && issueTypes.contains(BACKLOG);
     }
 
     public static boolean isGlobal(String[] context) {
