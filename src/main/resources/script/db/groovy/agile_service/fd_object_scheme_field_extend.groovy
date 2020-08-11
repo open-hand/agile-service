@@ -39,8 +39,5 @@ databaseChangeLog(logicalFilePath: 'fd_object_scheme_field_extend.groovy') {
             column(name: "LAST_UPDATED_BY", type: "BIGINT", defaultValue: "0")
             column(name: "LAST_UPDATE_DATE", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
-        createIndex(tableName: "fd_object_scheme_field_extend", indexName: "idx_object_scheme_field_project_id") {
-            column(name: "project_id")
-        }
     }
 }
