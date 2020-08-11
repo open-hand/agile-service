@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Page, Header, Content } from '@choerodon/boot';
 import { Button, Table, DataSet } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { statusApiConfig } from '@/api';
 import { TabComponentProps } from '../index';
 import openCreateStatus from '../components/create-status';
 
@@ -10,9 +11,12 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
   const dataSet = useMemo(() => new DataSet({
     primaryKey: 'id',
     name: 'status',
-    autoQuery: false,
-    pageSize: 10,
+    autoQuery: true,
+    paging: false,
     selection: false,
+    transport: {
+      read: statusApiConfig.loadByProject(),
+    },
     fields: [
       {
         name: 'name',

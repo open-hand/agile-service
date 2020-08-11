@@ -4,6 +4,9 @@ import {
 import { findIndex, find } from 'lodash';
 import { statusTransformApi, IStatusCirculation } from '@/api';
 import { IStatus } from '@/common/types';
+import takeLast from '@/utils/takeLast';
+
+const loadList = takeLast(statusTransformApi.loadList, statusTransformApi);
 
 type ChangeType = 'check' | 'nocheck';
 
@@ -24,11 +27,15 @@ class StatusCirculationStore {
 
   async getStatusList(issueTypeId: string) {
     this.loading = true;
-    const statusList = await statusTransformApi.loadList(issueTypeId);
-    runInAction(() => {
-      this.statusList = statusList;
+    try {
+      const statusList = await loadList(issueTypeId);
+      runInAction(() => {
+        this.statusList = statusList;
+        this.loading = false;
+      });
+    } catch (error) {
       this.loading = false;
-    });
+    }
   }
 
   @computed
