@@ -122,5 +122,14 @@ public class ObjectSchemeFieldController {
         return new ResponseEntity<>(objectSchemeFieldService.listConfigs(organizationId, null, issueType), HttpStatus.OK);
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询字段的页面配置数据")
+    @PostMapping(value = "/update_required")
+    public ResponseEntity updateRequired(@PathVariable("organization_id") Long organizationId,
+                                         @RequestParam @Encrypt Long fieldId,
+                                         @RequestParam Boolean required) {
+        objectSchemeFieldService.updateRequired(organizationId, null, fieldId, required);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
 }

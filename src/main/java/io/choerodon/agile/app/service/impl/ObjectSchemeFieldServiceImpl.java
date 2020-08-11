@@ -4,21 +4,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import org.apache.commons.lang.StringUtils;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
-import io.choerodon.agile.infra.enums.FieldType;
-import io.choerodon.agile.infra.enums.LookupType;
-import io.choerodon.agile.infra.enums.ObjectSchemeCode;
-import io.choerodon.agile.infra.enums.ObjectSchemeFieldContext;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.util.ObjectUtils;
 
@@ -32,11 +28,9 @@ import org.springframework.util.ObjectUtils;
 public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private static final String ERROR_FIELD_ILLEGAL = "error.field.illegal";
     private static final String ERROR_FIELD_CREATE = "error.field.create";
-    private static final String ERROR_FIELD_DELETE = "error.field.delete";
     private static final String ERROR_FIELD_NOTFOUND = "error.field.notFound";
     private static final String ERROR_FIELD_UPDATE = "error.field.update";
     private static final String ERROR_SCHEMECODE_ILLEGAL = "error.schemeCode.illegal";
-    private static final String ERROR_CONTEXT_ILLEGAL = "error.context.illegal";
     private static final String ERROR_FIELDTYPE_ILLEGAL = "error.fieldType.illegal";
     private static final String ERROR_FIELD_NAMEEXIST = "error.field.nameExist";
     private static final String ERROR_FIELD_CODEEXIST = "error.field.codeExist";
@@ -121,16 +115,11 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             String rank = objectSchemeFieldExtendMapper.selectMinRank(organizationId, projectId, ctx);
             if (ObjectUtils.isEmpty(rank)) {
                 minRank =  RankUtil.mid();
+            } else {
+                minRank = rank;
             }
         }
         return RankUtil.genPre(minRank);
-    }
-
-    @Override
-    public void baseDelete(Long fieldId) {
-        if (objectSchemeFieldMapper.deleteByPrimaryKey(fieldId) != 1) {
-            throw new CommonException(ERROR_FIELD_DELETE);
-        }
     }
 
     @Override
@@ -142,10 +131,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     @Override
     public ObjectSchemeFieldDTO baseQueryById(Long organizationId, Long projectId, Long fieldId) {
-        ObjectSchemeFieldDTO field = objectSchemeFieldMapper.queryById(fieldId);
-        if (field == null) {
-            throw new CommonException(ERROR_FIELD_NOTFOUND);
-        }
+        ObjectSchemeFieldDTO field = selectOneByFieldId(organizationId, projectId, fieldId);
         if (!field.getOrganizationId().equals(organizationId) && !field.getOrganizationId().equals(0L)) {
             throw new CommonException(ERROR_FIELD_ILLEGAL);
         }
@@ -153,6 +139,18 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             throw new CommonException(ERROR_FIELD_ILLEGAL);
         }
         return field;
+    }
+
+    private ObjectSchemeFieldDTO selectOneByFieldId(Long organizationId,
+                                                    Long projectId,
+                                                    Long fieldId) {
+        List<ObjectSchemeFieldDTO> dtoList =
+                objectSchemeFieldMapper.selectByOptions(organizationId, projectId, ObjectSchemeCode.AGILE_ISSUE, fieldId, null);
+        if (dtoList.isEmpty()) {
+            throw new CommonException(ERROR_FIELD_NOTFOUND);
+        } else {
+            return dtoList.get(0);
+        }
     }
 
     @Override
@@ -171,33 +169,51 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (!EnumUtil.contain(ObjectSchemeCode.class, schemeCode)) {
             throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
         }
-        ObjectSchemeFieldSearchVO searchDTO = new ObjectSchemeFieldSearchVO();
-        searchDTO.setSchemeCode(schemeCode);
-        List<ObjectSchemeFieldVO> fieldDTOS = modelMapper.map(listQuery(organizationId, projectId, searchDTO), new TypeToken<List<ObjectSchemeFieldVO>>() {
-        }.getType());
-        fillContextName(fieldDTOS);
+        List<ObjectSchemeFieldDTO> fields = objectSchemeFieldMapper.selectByOptions(organizationId, projectId, schemeCode, null, null);
+        List<ObjectSchemeFieldVO> fieldViews = new ArrayList<>();
+        fields.forEach(f -> {
+            ObjectSchemeFieldVO vo = modelMapper.map(f, ObjectSchemeFieldVO.class);
+            List<ObjectSchemeFieldExtendDTO> extendList = f.getExtendFields();
+            List<String> issueTypes = new ArrayList<>();
+            List<String> issueTypeNames = new ArrayList<>();
+            String requiredScope =
+                    processIssueTyeAndRequiredScope(issueTypes, issueTypeNames, true, extendList);
+            vo.setContext(String.join(",", issueTypes));
+            vo.setContextName(String.join(",", issueTypeNames));
+            vo.setRequiredScope(requiredScope);
+            fieldViews.add(vo);
+        });
         ObjectSchemeDTO select = new ObjectSchemeDTO();
         select.setSchemeCode(schemeCode);
         result.put("name", objectSchemeMapper.selectOne(select).getName());
-        result.put("content", fieldDTOS);
+        result.put("content", fieldViews);
         return result;
     }
 
-    /**
-     * 填充contextName
-     *
-     * @param fieldDTOS
-     */
-    private void fillContextName(List<ObjectSchemeFieldVO> fieldDTOS) {
-        LookupTypeWithValuesDTO typeWithValues = lookupValueMapper.queryLookupValueByCode(LookupType.CONTEXT);
-        Map<String, String> codeMap = typeWithValues.getLookupValues().stream().collect(Collectors.toMap(LookupValueDTO::getValueCode, LookupValueDTO::getName));
-        for (ObjectSchemeFieldVO fieldDTO : fieldDTOS) {
-            String[] contextCodes = fieldDTO.getContext().split(",");
-            List<String> contextNames = new ArrayList<>(contextCodes.length);
-            for (String contextCode : contextCodes) {
-                contextNames.add(codeMap.get(contextCode));
-            }
-            fieldDTO.setContextName(contextNames.stream().collect(Collectors.joining(",")));
+    private String processIssueTyeAndRequiredScope(List<String> issueTypes,
+                                                 List<String> issueTypeNames,
+                                                 boolean resetIssueType,
+                                                 List<ObjectSchemeFieldExtendDTO> extendList) {
+        boolean allIsRequired = true;
+        boolean allIsNotRequired = false;
+        for (ObjectSchemeFieldExtendDTO e: extendList) {
+            issueTypes.add(e.getIssueType());
+            issueTypeNames.add(e.getIssueTypeName());
+            allIsRequired = allIsRequired && e.getRequired();
+            allIsNotRequired = allIsNotRequired || e.getRequired();
+        }
+        if (resetIssueType && ObjectSchemeFieldContext.containsAllIssueTypes(issueTypes)) {
+            issueTypes.clear();
+            issueTypeNames.clear();
+            issueTypes.add(ObjectSchemeFieldContext.GLOBAL);
+            issueTypeNames.add("全部类型");
+        }
+        if (allIsRequired) {
+            return ObjectSchemeFieldRequiredScope.ALL.name();
+        } else if (allIsNotRequired) {
+            return ObjectSchemeFieldRequiredScope.NONE.name();
+        } else {
+            return ObjectSchemeFieldRequiredScope.PART.name();
         }
     }
 
@@ -245,8 +261,14 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     @Override
     public ObjectSchemeFieldDetailVO queryById(Long organizationId, Long projectId, Long fieldId) {
         ObjectSchemeFieldDTO field = baseQueryById(organizationId, projectId, fieldId);
+        List<ObjectSchemeFieldExtendDTO> extendList = field.getExtendFields();
+        List<String> issueTypes = new ArrayList<>();
+        List<String> issueTypeNames = new ArrayList<>();
+        String requiredScope =
+                processIssueTyeAndRequiredScope(issueTypes, issueTypeNames, false, extendList);
         ObjectSchemeFieldDetailVO fieldDetailDTO = modelMapper.map(field, ObjectSchemeFieldDetailVO.class);
-        fieldDetailDTO.setContext(field.getContext().split(","));
+        fieldDetailDTO.setContext(issueTypes.toArray(new String[issueTypes.size()]));
+        fieldDetailDTO.setRequiredScope(requiredScope);
         //获取字段选项，并设置默认值
         List<FieldOptionVO> fieldOptions = fieldOptionService.queryByFieldId(organizationId, fieldId);
         if (!fieldOptions.isEmpty()) {
@@ -287,9 +309,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (field.getSystem()) {
             throw new CommonException(ERROR_FIELD_ILLEGAL);
         }
-        baseDelete(fieldId);
-        //删除pageFields
-        pageFieldService.deleteByFieldId(fieldId);
+
+        objectSchemeFieldMapper.cascadeDelete(organizationId, projectId, fieldId);
         //删除字段值
         fieldValueService.deleteByFieldId(fieldId);
         //删除日志
@@ -308,14 +329,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         ObjectSchemeFieldDTO update = modelMapper.map(updateDTO, ObjectSchemeFieldDTO.class);
         //处理context
         String[] contexts = updateDTO.getContext();
-        if (contexts != null && contexts.length != 0) {
-            for (String context : contexts) {
-                if (!EnumUtil.contain(ObjectSchemeFieldContext.class, context)) {
-                    throw new CommonException(ERROR_CONTEXT_ILLEGAL);
-                }
-            }
-            update.setContext(Arrays.asList(contexts).stream().collect(Collectors.joining(",")));
-        }
+        updateFieldIssueType(organizationId, projectId, fieldId, contexts, updateDTO.getRequired());
         String defaultValue = tryDecryptDefaultValue(update.getDefaultValue());
         if (defaultValue != null) {
             update.setDefaultValue(defaultValue);
@@ -323,6 +337,129 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         update.setId(fieldId);
         baseUpdate(update);
         return queryById(organizationId, projectId, fieldId);
+    }
+
+    private void updateFieldIssueType(Long organizationId,
+                                      Long projectId,
+                                      Long fieldId,
+                                      String[] contexts,
+                                      Boolean required) {
+        if (ObjectUtils.isEmpty(contexts)) {
+            throw new CommonException("error.field.context.empty");
+        }
+        ObjectSchemeFieldContext.isIllegalIssueTypes(contexts);
+        List<String> contextList = Arrays.asList(contexts);
+        ObjectSchemeFieldDTO field =
+                selectOneByFieldId(organizationId, projectId, fieldId);
+        List<ObjectSchemeFieldExtendDTO> intersection = new ArrayList<>();
+        List<ObjectSchemeFieldExtendDTO> deleteList = new ArrayList<>();
+        Set<String> insertSet = new HashSet<>();
+        filterByIssueType(intersection, deleteList, insertSet, contextList, field);
+
+        dealWithExtendFields(organizationId, projectId, fieldId, required, intersection, deleteList, insertSet);
+    }
+
+    private void dealWithExtendFields(Long organizationId, Long projectId, Long fieldId, Boolean required, List<ObjectSchemeFieldExtendDTO> intersection, List<ObjectSchemeFieldExtendDTO> deleteList, Set<String> insertSet) {
+        boolean onProjectLevel = (projectId != null);
+        Map<String, Long> issueTypeMap = getIssueTypeMap(organizationId);
+        if (onProjectLevel) {
+            deleteList.forEach(d -> objectSchemeFieldExtendMapper.deleteByPrimaryKey(d));
+            insertSet.forEach(i -> insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, required, issueTypeMap, i, true, true));
+            intersection.forEach(i -> {
+                if (!Objects.equals(i.getRequired(), required)) {
+                    i.setRequired(required);
+                    if (objectSchemeFieldExtendMapper.updateByPrimaryKeySelective(i) != 1) {
+                        throw new CommonException("error.extend.field.update");
+                    }
+                }
+            });
+        } else {
+            //组织层新增或删除，项目层数据同时新增或删除
+            deleteList.forEach(d -> {
+                String issueType = d.getIssueType();
+                ObjectSchemeFieldExtendDTO target = new ObjectSchemeFieldExtendDTO();
+                target.setIssueType(issueType);
+                target.setOrganizationId(organizationId);
+                target.setFieldId(fieldId);
+                objectSchemeFieldExtendMapper.delete(target);
+            });
+            intersection.forEach(i ->
+                objectSchemeFieldExtendMapper.batchUpdateRequired(i.getIssueType(), organizationId, fieldId, required)
+            );
+            //查询该组织下已经配置过的项目，这些项目要级联创建字段类型
+            Set<Long> projectIds =
+                    objectSchemeFieldExtendMapper.selectProjectIdsByOrganizationId(organizationId);
+            insertSet.forEach(i -> {
+                insertObjectSchemeFieldExtend(organizationId, null, fieldId, required, issueTypeMap, i, true, true);
+                projectIds.forEach(p -> insertObjectSchemeFieldExtend(organizationId, p, fieldId, required, issueTypeMap, i, true, true));
+            });
+        }
+    }
+
+    private void filterByIssueType(List<ObjectSchemeFieldExtendDTO> intersection,
+                                   List<ObjectSchemeFieldExtendDTO> deleteList,
+                                   Set<String> insertSet,
+                                   List<String> contextList,
+                                   ObjectSchemeFieldDTO field) {
+        List<ObjectSchemeFieldExtendDTO> extendList = field.getExtendFields();
+        //交集
+        extendList.forEach(e -> {
+            if (contextList.contains(e.getIssueType())) {
+                intersection.add(e);
+            }
+        });
+        Set<String> intersectionIssueTypes =
+                intersection.stream().map(ObjectSchemeFieldExtendDTO::getIssueType).collect(Collectors.toSet());
+        //删除的类型
+        extendList.forEach(e -> {
+            if (!intersectionIssueTypes.contains(e.getIssueType())) {
+                deleteList.add(e);
+            }
+        });
+        //插入的类型
+        contextList.forEach(c -> {
+            if (!intersectionIssueTypes.contains(c)) {
+                insertSet.add(c);
+            }
+        });
+    }
+
+    private void insertObjectSchemeFieldExtend(Long organizationId,
+                                               Long projectId,
+                                               Long fieldId,
+                                               Boolean required,
+                                               Map<String, Long> issueTypeMap,
+                                               String issueType,
+                                               Boolean created,
+                                               Boolean edited) {
+        ObjectSchemeFieldExtendDTO dto = new ObjectSchemeFieldExtendDTO();
+        dto.setIssueType(issueType);
+        dto.setFieldId(fieldId);
+        dto.setOrganizationId(organizationId);
+
+        List<ObjectSchemeFieldExtendDTO> existedList;
+        if (ObjectUtils.isEmpty(projectId)) {
+            existedList = objectSchemeFieldExtendMapper.selectOrganizationExtendField(issueType, organizationId, fieldId);
+        } else {
+            dto.setProjectId(projectId);
+            existedList = objectSchemeFieldExtendMapper.select(dto);
+        }
+        if (existedList.isEmpty()) {
+            dto.setIssueTypeId(issueTypeMap.get(issueType));
+            dto.setRequired(required);
+            dto.setCreated(true);
+            dto.setEdited(true);
+            dto.setRank(getMinRank(organizationId, projectId, issueType,null));
+            objectSchemeFieldExtendMapper.insertSelective(dto);
+        } else {
+            ObjectSchemeFieldExtendDTO existedExtendField = existedList.get(0);
+            existedExtendField.setCreated(Optional.ofNullable(created).orElse(true));
+            existedExtendField.setRequired(required);
+            existedExtendField.setEdited(Optional.ofNullable(edited).orElse(true));
+            if (objectSchemeFieldExtendMapper.updateByPrimaryKeySelective(dto) != 1) {
+                throw new CommonException("error.extend.field.update");
+            }
+        }
     }
 
     private String tryDecryptDefaultValue(String defaultValue) {
@@ -388,6 +525,29 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     @Override
+    public List<ObjectSchemeFieldDetailVO> listFieldsWithOptionals(Long projectId, Long issueTypeId, Long organizationId) {
+        return objectSchemeFieldMapper.selectFieldsWithOptionals(organizationId, projectId, issueTypeId);
+    }
+
+    @Override
+    public void updateRequired(Long organizationId, Long projectId, Long fieldId, Boolean required) {
+        if (ObjectUtils.isEmpty(required)) {
+            throw new CommonException("error.field.required.null");
+        }
+        List<ObjectSchemeFieldExtendDTO> extendList =
+                objectSchemeFieldExtendMapper.selectOrganizationExtendField(null, organizationId, fieldId);
+        boolean onProjectLevel = (projectId != null);
+        if (onProjectLevel) {
+            //判断如果项目层没有数据，则创建数据
+            Map<String, Long> issueTypeMap = getIssueTypeMap(organizationId);
+            extendList.forEach(e ->
+                    insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, required, issueTypeMap, e.getIssueType(), e.getCreated(), e.getEdited()));
+        } else {
+            objectSchemeFieldExtendMapper.batchUpdateRequired(null, organizationId, fieldId, required);
+        }
+    }
+
+    @Override
     public ObjectSchemeFieldDTO selectById(Long fieldId) {
         return objectSchemeFieldMapper.selectByPrimaryKey(fieldId);
     }
@@ -399,7 +559,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         IssueTypeFieldVO issueTypeFieldVO = pageConfigUpdateVO.getIssueTypeFieldVO();
         Set<Long> deleteIds = pageConfigUpdateVO.getDeleteIds();
 
-        ObjectSchemeFieldContext.isIllegalIssueTypes(issueType);
+        ObjectSchemeFieldContext.isIllegalIssueType(issueType);
         if (!ObjectUtils.isEmpty(fields)) {
             updateFieldConfig(organizationId, projectId, issueType, fields);
         }

@@ -27,7 +27,7 @@ public class PageConfigVO {
 
     private String rank;
 
-    private String source;
+    private String createdLevel;
 
     private Long objectVersionNumber;
 
@@ -111,11 +111,11 @@ public class PageConfigVO {
         this.rank = rank;
     }
 
-    public String getSource() {
-        return source;
+    public String getCreatedLevel() {
+        return createdLevel;
     }
 
-    public void setSource(String source) {
-        this.source = source;
+    public void setCreatedLevel(String createdLevel) {
+        this.createdLevel = createdLevel;
     }
 }

@@ -6,6 +6,7 @@ import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -34,13 +35,13 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
      * @param fieldId
      * @return
      */
-
     List<ObjectSchemeFieldExtendDTO> selectOrganizationExtendField(@Param("issueType") String issueType,
                                                                    @Param("organizationId") Long organizationId,
                                                                    @Param("fieldId") Long fieldId);
 
     /**
      * 查询页面配置数据
+     *
      * @param organizationId
      * @param projectId
      * @param issueType
@@ -50,4 +51,24 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
                                    @Param("projectId") Long projectId,
                                    @Param("issueType") String issueType);
 
+    /**
+     * 批量更新组织下的required字段
+     *
+     * @param issueType
+     * @param organizationId
+     * @param fieldId
+     * @param required
+     */
+    void batchUpdateRequired(@Param("issueType") String issueType,
+                             @Param("organizationId") Long organizationId,
+                             @Param("fieldId") Long fieldId,
+                             @Param("required") Boolean required);
+
+    /**
+     * 查询配置过的项目集合
+     *
+     * @param organizationId
+     * @return
+     */
+    Set<Long> selectProjectIdsByOrganizationId(@Param("organizationId") Long organizationId);
 }

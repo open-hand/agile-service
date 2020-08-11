@@ -136,4 +136,16 @@ public class ProjectObjectSchemeFieldController {
         objectSchemeFieldService.config(organizationId, projectId, pageConfigUpdateVO);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询字段的页面配置数据")
+    @PostMapping(value = "/update_required")
+    public ResponseEntity updateRequired(@PathVariable("project_id") Long projectId,
+                                         @RequestParam @Encrypt Long fieldId,
+                                         @RequestParam Long organizationId,
+                                         @RequestParam Boolean required) {
+        objectSchemeFieldService.updateRequired(organizationId, projectId, fieldId, required);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
