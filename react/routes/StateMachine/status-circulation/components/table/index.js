@@ -15,7 +15,7 @@ export default class Table extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      columnWidth: 100,
+      columnWidth: 150,
       overscanColumnCount: 0,
       overscanRowCount: 10,
       rowHeight: 40,

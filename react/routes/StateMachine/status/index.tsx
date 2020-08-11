@@ -3,6 +3,8 @@ import { Page, Header, Content } from '@choerodon/boot';
 import { Button, Table, DataSet } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { statusApiConfig } from '@/api';
+import StatusTypeTag from '@/components/tag/status-type-tag';
+import { IStatus } from '@/common/types';
 import { TabComponentProps } from '../index';
 import openCreateStatus from '../components/create-status';
 
@@ -24,7 +26,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
         label: '名称',
       },
       {
-        name: 'stage',
+        name: 'type',
         type: 'intl' as FieldType,
         label: '阶段',
       },
@@ -56,7 +58,15 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
         {tab}
         <Table key="user" dataSet={dataSet}>
           <Column name="name" />
-          <Column name="stage" />
+          <Column
+            name="type"
+            renderer={({ record }) => (
+              <StatusTypeTag
+                mode="tag"
+                code={record?.get('type') as IStatus['valueCode']}
+              />
+            )}
+          />
           <Column name="use" />
           <Column name="operate" />
         </Table>
