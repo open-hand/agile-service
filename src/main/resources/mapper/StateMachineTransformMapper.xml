@@ -17,6 +17,16 @@
         WHERE start_node_id = #{nodeId} OR end_node_id = #{nodeId}
     </update>
 
+    <delete id="deleteByStateMachineIdAndNodeId">
+        DELETE FROM fd_state_machine_transform
+        WHERE
+        organization_id = #{organizationId}
+        AND state_machine_id = #{stateMachineId}
+        AND (
+           start_node_id = #{nodeId} OR end_node_id = #{nodeId}
+        )
+    </delete>
+
     <select id="queryByStartNodeIdOrType" resultType="io.choerodon.agile.infra.dto.StateMachineTransformDTO">
         SELECT *
         FROM fd_state_machine_transform

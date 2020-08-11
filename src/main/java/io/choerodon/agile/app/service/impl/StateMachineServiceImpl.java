@@ -83,6 +83,8 @@ public class StateMachineServiceImpl implements StateMachineService {
     private ModelMapper modelMapper;
     @Autowired
     private ColumnStatusRelMapper columnStatusRelMapper;
+    @Autowired
+    private IssueTypeMapper issueTypeMapper;
 
     @Override
     public Page<StateMachineListVO> pageQuery(Long organizationId, PageRequest pageRequest, String name, String description, String param) {
@@ -418,15 +420,16 @@ public class StateMachineServiceImpl implements StateMachineService {
     }
 
     @Override
-    public Long copyStateMachine(Long organizationId, Long currentStateMachineId) {
+    public Long copyStateMachine(Long organizationId, Long currentStateMachineId,Long issueTypeId) {
         StateMachineDTO stateMachineDTO = stateMachineMapper.queryById(organizationId, currentStateMachineId);
         if (ObjectUtils.isEmpty(stateMachineDTO)) {
             throw new CommonException("error.query.state.machine.null");
         }
         StateMachineDTO map = modelMapper.map(stateMachineDTO, StateMachineDTO.class);
+        IssueTypeDTO issueTypeDTO = issueTypeMapper.selectByPrimaryKey(issueTypeId);
         map.setDefault(false);
         map.setId(null);
-        map.setName(map.getName() + "copy");
+        map.setName(map.getName()+"-"+issueTypeDTO.getTypeCode());
         stateMachineMapper.insert(map);
         Long stateMachineId = map.getId();
         Long userId = DetailsHelper.getUserDetails().getUserId();

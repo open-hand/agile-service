@@ -84,4 +84,6 @@ public interface StateMachineNodeService {
     void createNodeAndTransformForAgile(Long organizationId, Long stateMachineId, StatusVO statusVO);
 
     void baseUpdate(StateMachineNodeDTO olderDefaultNode);
+
+    void baseCreate(StateMachineNodeDTO stateMachineNodeDTO);
 }

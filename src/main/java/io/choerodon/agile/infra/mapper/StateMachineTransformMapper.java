@@ -34,4 +34,6 @@ public interface StateMachineTransformMapper extends BaseMapper<StateMachineTran
     List<StateMachineTransformDTO> queryByStateMachineIds(@Param("organizationId") Long organizationId, @Param("stateMachineIds") List<Long> stateMachineIds);
 
     void batchInsert(@Param("list") List<StateMachineTransformDTO> newStateMachineTransformDTO);
+
+    int deleteByStateMachineIdAndNodeId(@Param("organizationId") Long organizationId, @Param("stateMachineId") Long stateMachineId,@Param("nodeId") Long nodeId);
 }

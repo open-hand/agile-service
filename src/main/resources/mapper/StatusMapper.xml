@@ -127,6 +127,7 @@
            fs.name,
            fs.code,
            fs.type,
+           smn.id as nodeId,
            smn.state_machine_id,
            IF(smn.type = 'node_init',1,0) as defaultStatus
          from fd_status fs,fd_state_machine_node smn

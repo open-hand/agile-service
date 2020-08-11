@@ -188,4 +188,48 @@ public class SchemeController extends BaseController {
         projectConfigService.defaultStatus(projectId, issueTypeId, stateMachineId, statusId);
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "改变问题类型的转换")
+    @PutMapping(value = "/status_transform/update")
+    public ResponseEntity<List<StateMachineTransformUpdateVO>> updateTransformByIssueTypeId(@PathVariable("project_id") Long projectId,
+                                               @RequestParam @Encrypt Long issueTypeId,
+                                               @RequestParam String applyType,
+                                               @RequestBody List<StateMachineTransformUpdateVO> list) {
+
+        return new ResponseEntity(projectConfigService.updateTransformByIssueTypeId(projectId, issueTypeId,applyType,list),HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "添加新状态")
+    @PostMapping(value = "/status/create")
+    public ResponseEntity<StatusVO> createStatus(@PathVariable("project_id") Long projectId,
+                                                 @RequestParam(required = false)@Encrypt Long issueTypeId,
+                                                 @RequestParam String applyType,
+                                                 @RequestBody StatusVO statusVO) {
+
+        return new ResponseEntity(projectConfigService.createStatus(projectId, issueTypeId,applyType, statusVO), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "关联已有状态")
+    @GetMapping(value = "/state_machine/link_status")
+    public ResponseEntity<StateMachineNodeVO> linkStatus(@PathVariable("project_id") Long projectId,
+                                                 @RequestParam @Encrypt Long issueTypeId,
+                                                 @RequestParam String applyType,
+                                                 @RequestParam @Encrypt Long statusId,
+                                                 @RequestParam Boolean defaultStatus) {
+        return new ResponseEntity(projectConfigService.linkStatus(projectId, issueTypeId,applyType, statusId,defaultStatus), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "删除状态机里面的node")
+    @DeleteMapping(value = "/state_machine_node/delete")
+    public ResponseEntity deleteNode(@PathVariable("project_id") Long projectId,
+                                                         @RequestParam @Encrypt Long issueTypeId,
+                                                         @RequestParam String applyType,
+                                                         @RequestParam  @Encrypt Long nodeId) {
+        projectConfigService.deleteNode(projectId, issueTypeId,applyType,nodeId);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }

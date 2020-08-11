@@ -73,6 +73,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private StateMachineNodeMapper stateMachineNodeMapper;
     @Autowired
     private StateMachineNodeService stateMachineNodeService;
+    @Autowired
+    private StateMachineTransformMapper stateMachineTransformMapper;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -345,6 +347,79 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         stateMachineNodeService.baseUpdate(olderDefaultNode);
         nodeDTO.setType(NodeType.INIT);
         stateMachineNodeService.baseUpdate(nodeDTO);
+    }
+
+    @Override
+    public List<StateMachineTransformUpdateVO> updateTransformByIssueTypeId(Long projectId, Long issueTypeId, String applyType, List<StateMachineTransformUpdateVO> list) {
+        Long stateMachine = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
+        if (CollectionUtils.isEmpty(list)) {
+            throw new CommonException("error.transform.null");
+        }
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        for (StateMachineTransformUpdateVO transformUpdateVO : list) {
+            if (ObjectUtils.isEmpty(transformUpdateVO.getEndNodeId()) || ObjectUtils.isEmpty(transformUpdateVO.getStartNodeId())) {
+                throw new CommonException("error.node.id.null");
+            }
+            if (Boolean.TRUE.equals(transformUpdateVO.getSelect())) {
+                transformService.createTransform(organizationId, stateMachine, transformUpdateVO);
+            } else {
+                transformService.deleteTransformByNodeId(organizationId, stateMachine, transformUpdateVO.getStartNodeId(), transformUpdateVO.getEndNodeId());
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public StatusVO createStatus(Long projectId, Long issueTypeId, String applyType, StatusVO statusVO) {
+        if (ObjectUtils.isEmpty(statusVO.getName()) && ObjectUtils.isEmpty(statusVO.getType())) {
+            throw new CommonException("error.status.name.or.type.null");
+        }
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        StatusCheckVO statusCheckVO = statusService.checkName(organizationId, statusVO.getName());
+        if (Boolean.TRUE.equals(statusCheckVO.getStatusExist())) {
+            throw new CommonException("error.status.name.exist");
+        }
+        // 创建状态
+        StatusVO status = statusService.create(organizationId, statusVO);
+        // 关联状态机
+        if (!ObjectUtils.isEmpty(issueTypeId)) {
+            linkStatus(projectId,issueTypeId,applyType,status.getId(),statusVO.getDefaultStatus());
+        }
+        return status;
+    }
+
+    @Override
+    public StateMachineNodeVO linkStatus(Long projectId, Long issueTypeId, String applyType, Long statusId, Boolean defaultStatus) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
+        StateMachineNodeDTO stateMachineNode = new StateMachineNodeDTO();
+        stateMachineNode.setStatusId(statusId);
+        stateMachineNode.setOrganizationId(organizationId);
+        stateMachineNode.setType(NodeType.CUSTOM);
+        stateMachineNode.setStateMachineId(stateMachineId);
+        // 校验是否已存在关联的状态
+        List<StateMachineNodeDTO> select = stateMachineNodeMapper.select(stateMachineNode);
+        if (CollectionUtils.isEmpty(select)) {
+            stateMachineNodeService.baseCreate(stateMachineNode);
+            if (Boolean.TRUE.equals(defaultStatus)) {
+                defaultStatus(projectId, issueTypeId, stateMachineId, statusId);
+            }
+        }
+        return modelMapper.map(stateMachineNode,StateMachineNodeVO.class);
+    }
+
+    @Override
+    public void deleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
+        // 删除当前node的转换
+        stateMachineTransformMapper.deleteByStateMachineIdAndNodeId(organizationId,stateMachineId,nodeId);
+        // 删除node
+        StateMachineNodeDTO stateMachineNodeDTO = new StateMachineNodeDTO();
+        stateMachineNodeDTO.setOrganizationId(organizationId);
+        stateMachineNodeDTO.setStateMachineId(stateMachineId);
+        stateMachineNodeDTO.setId(nodeId);
+        stateMachineNodeMapper.delete(stateMachineNodeDTO);
     }
 
     private Long queryStateMachineIdAndCheck(Long projectId, String applyType, Long issueTypeId) {

@@ -154,4 +154,48 @@ public interface ProjectConfigService {
      * @return
      */
     void defaultStatus(Long projectId, Long issueTypeId, Long stateMachineId, Long statusId);
+
+    /**
+     * 更新问题类型状态机的转换
+     *
+     * @param projectId
+     * @param issueTypeId
+     * @param applyType
+     * @param list
+     * @return
+     */
+    List<StateMachineTransformUpdateVO> updateTransformByIssueTypeId(Long projectId, Long issueTypeId,String applyType,List<StateMachineTransformUpdateVO> list);
+
+    /**
+     * 创建新状态
+     *
+     * @param projectId
+     * @param issueTypeId
+     * @param applyType
+     * @param statusVO
+     * @return
+     */
+    StatusVO createStatus(Long projectId, Long issueTypeId, String applyType, StatusVO statusVO);
+
+    /**
+     * 关联已有的状态
+     *
+     * @param projectId
+     * @param issueTypeId
+     * @param applyType
+     * @param statusId
+     * @param defaultStatus
+     * @return
+     */
+    StateMachineNodeVO linkStatus(Long projectId, Long issueTypeId, String applyType, Long statusId, Boolean defaultStatus);
+
+    /**
+     * 删除状态机里面的状态
+     *
+     * @param projectId
+     * @param issueTypeId
+     * @param applyType
+     * @param nodeId
+     */
+    void deleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId);
 }

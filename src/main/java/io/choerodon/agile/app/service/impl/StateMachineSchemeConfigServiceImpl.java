@@ -546,7 +546,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
                 return currentStateMachineId;
             }
             // 复制第一个的状态机的节点和转换
-            stateMachineId = stateMachineService.copyStateMachine(organizationId, currentStateMachineId);
+            stateMachineId = stateMachineService.copyStateMachine(organizationId, currentStateMachineId,issueTypeId);
             // 删除原来的配置
             configs.forEach(v -> configMapper.deleteByPrimaryKey(v.getId()));
             // 新增状态机方案配置
@@ -554,7 +554,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
         } else {
             // 复制默认状态机的节点和转换
             Long currentStateMachineId = configMapper.selectDefault(organizationId, stateMachineSchemeId).getStateMachineId();
-            stateMachineId = stateMachineService.copyStateMachine(organizationId, currentStateMachineId);
+            stateMachineId = stateMachineService.copyStateMachine(organizationId, currentStateMachineId,issueTypeId);
             insert(organizationId, stateMachineId, stateMachineSchemeId, issueTypeId,false);
         }
         return stateMachineId;
