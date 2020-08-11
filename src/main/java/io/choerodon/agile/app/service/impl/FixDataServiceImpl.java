@@ -19,6 +19,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -173,6 +174,7 @@ public class FixDataServiceImpl implements FixDataService {
                 continue;
             }
             List<StateMachineNodeVO> machineNodeVOS = stateMachineNodeVOS.stream().filter(v -> !NodeType.START.equals(v.getType())).collect(Collectors.toList());
+            Map<Long, StateMachineNodeVO> nodeVOMap = machineNodeVOS.stream().collect(Collectors.toMap(StateMachineNodeVO::getId, Function.identity()));
             // 将转换到所有转换为多个transform
             List<StateMachineTransformDTO> stateMachineTransformDTOS = stateMachineTransformMapper.queryByStateMachineIds(stateMachineDTO.getOrganizationId(), Arrays.asList(stateMachineDTO.getId()));
             List<StateMachineTransformDTO> allTransforms = stateMachineTransformDTOS.stream().filter(x -> x.getType().equals(TransformType.ALL)).collect(Collectors.toList());
@@ -190,11 +192,13 @@ public class FixDataServiceImpl implements FixDataService {
                 }
                 for (StateMachineNodeVO node : machineNodeVOS) {
                     if (Boolean.FALSE.equals(endNodes.contains(node.getId()))) {
+                        StateMachineNodeVO nodeVO = nodeVOMap.get(startNode);
+                        StateMachineNodeVO endNodeVO = nodeVOMap.get(node.getId());
                         StateMachineTransformDTO stateMachineTransformDTO = new StateMachineTransformDTO();
                         stateMachineTransformDTO.setOrganizationId(stateMachineDTO.getOrganizationId());
                         stateMachineTransformDTO.setStartNodeId(startNode);
                         stateMachineTransformDTO.setEndNodeId(node.getId());
-                        stateMachineTransformDTO.setName(startNode + "转换->" + node.getId());
+                        stateMachineTransformDTO.setName(nodeVO.getStatusVO().getName() + "转换到" + endNodeVO.getStatusVO().getName());
                         stateMachineTransformDTO.setStateMachineId(v.getStateMachineId());
                         stateMachineTransformDTO.setType(TransformType.CUSTOM);
                         stateMachineTransformDTO.setConditionStrategy("condition_all");
@@ -213,6 +217,7 @@ public class FixDataServiceImpl implements FixDataService {
     }
 
     private void fixStateMachineByIssueTypeId(){
+        LOGGER.info("开始修复问题类型的状态机");
         // 查询所有的项目
         List<Long> projectIds = projectInfoMapper.selectAll().stream().map(ProjectInfoDTO::getProjectId).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(projectIds)) {

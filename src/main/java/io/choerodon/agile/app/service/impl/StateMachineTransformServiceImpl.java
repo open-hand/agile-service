@@ -1,9 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.StateMachineNodeVO;
-import io.choerodon.agile.api.vo.StateMachineTransformVO;
-import io.choerodon.agile.api.vo.StatusVO;
-import io.choerodon.agile.api.vo.TransformVO;
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.StateMachineConfigService;
 import io.choerodon.agile.app.service.StateMachineNodeService;
 import io.choerodon.agile.app.service.StateMachineTransformService;
@@ -21,6 +18,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -304,5 +302,34 @@ public class StateMachineTransformServiceImpl implements StateMachineTransformSe
     @Override
     public StateMachineTransformDTO queryDeployTransformForAgile(Long organizationId, Long transformId) {
         return transformDeployMapper.queryById(organizationId, transformId);
+    }
+
+    @Override
+    public void createTransform(Long organizationId, Long stateMachineId, StateMachineTransformUpdateVO transformUpdateVO) {
+        // 校验是否存在
+        StateMachineTransformDTO stateMachineTransformDTO = new StateMachineTransformDTO();
+        stateMachineTransformDTO.setOrganizationId(organizationId);
+        stateMachineTransformDTO.setStateMachineId(stateMachineId);
+        stateMachineTransformDTO.setStartNodeId(transformUpdateVO.getStartNodeId());
+        stateMachineTransformDTO.setEndNodeId(transformUpdateVO.getEndNodeId());
+        List<StateMachineTransformDTO> select = transformDeployMapper.select(stateMachineTransformDTO);
+        if (CollectionUtils.isEmpty(select)) {
+            stateMachineTransformDTO.setType(TransformType.CUSTOM);
+            stateMachineTransformDTO.setConditionStrategy(TransformConditionStrategy.ALL);
+            stateMachineTransformDTO.setName(transformUpdateVO.getStartStatusName() + "转换到" + transformUpdateVO.getEndStatusName());
+            if (transformDeployMapper.insert(stateMachineTransformDTO) != 1) {
+                throw new CommonException("error.insert.transform");
+            }
+        }
+    }
+
+    @Override
+    public void deleteTransformByNodeId(Long organizationId, Long stateMachineId, Long startNodeId, Long endNodeId) {
+        StateMachineTransformDTO stateMachineTransformDTO = new StateMachineTransformDTO();
+        stateMachineTransformDTO.setOrganizationId(organizationId);
+        stateMachineTransformDTO.setStateMachineId(stateMachineId);
+        stateMachineTransformDTO.setStartNodeId(startNodeId);
+        stateMachineTransformDTO.setEndNodeId(endNodeId);
+        transformDeployMapper.delete(stateMachineTransformDTO);
     }
 }

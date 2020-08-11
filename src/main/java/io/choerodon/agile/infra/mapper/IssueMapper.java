@@ -503,4 +503,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<IssueOverviewVO> selectIssueBysprint(@Param("projectId") Long projectId,
                                               @Param("sprintId") Long sprintId,
                                               @Param("statusSet") Set<String> statusSet);
+
+    void updateStatusByStatusId(@Param("projectId")Long projectId,@Param("currentStatusId") Long currentStatusId,@Param("statusId") Long statusId);
+
+    List<Long> selectStatusIdByIssueType(@Param("projectId") Long projectId,@Param("issueTypeId") Long issueTypeId);
 }

@@ -223,7 +223,8 @@ public interface StateMachineService {
      * 复制状态机
      * @param organizationId
      * @param currentStateMachineId
+     * @param issueTypeId
      * @return
      */
-    Long copyStateMachine(Long organizationId, Long currentStateMachineId);
+    Long copyStateMachine(Long organizationId, Long currentStateMachineId,Long issueTypeId);
 }

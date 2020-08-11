@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.StateMachineTransformUpdateVO;
 import io.choerodon.agile.api.vo.StateMachineTransformVO;
 import io.choerodon.agile.api.vo.TransformVO;
 import io.choerodon.agile.infra.dto.StateMachineTransformDTO;
@@ -122,4 +123,8 @@ public interface StateMachineTransformService {
      * @return
      */
     StateMachineTransformDTO queryDeployTransformForAgile(Long organizationId, Long transformId);
+
+    void createTransform(Long organizationId, Long stateMachineId, StateMachineTransformUpdateVO transformUpdateVO);
+
+    void deleteTransformByNodeId(Long organizationId, Long stateMachineId, Long startNodeId, Long endNodeId);
 }

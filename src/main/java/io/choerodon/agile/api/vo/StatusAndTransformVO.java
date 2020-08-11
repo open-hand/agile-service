@@ -18,11 +18,15 @@ public class StatusAndTransformVO {
 
     private String type;
     @Encrypt
+    private Long nodeId;
+    @Encrypt
     private Set<Long> canTransformStatus;
     @Encrypt
     private Long stateMachineId;
 
     private Boolean defaultStatus;
+
+    private Boolean hasIssue;
 
     public Long getId() {
         return id;
@@ -78,5 +82,21 @@ public class StatusAndTransformVO {
 
     public void setDefaultStatus(Boolean defaultStatus) {
         this.defaultStatus = defaultStatus;
+    }
+
+    public Long getNodeId() {
+        return nodeId;
+    }
+
+    public void setNodeId(Long nodeId) {
+        this.nodeId = nodeId;
+    }
+
+    public Boolean getHasIssue() {
+        return hasIssue;
+    }
+
+    public void setHasIssue(Boolean hasIssue) {
+        this.hasIssue = hasIssue;
     }
 }

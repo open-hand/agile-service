@@ -5,9 +5,7 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.TransformInfo;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.enums.NodeType;
-import io.choerodon.agile.infra.enums.SchemeApplyType;
-import io.choerodon.agile.infra.enums.SchemeType;
+import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -73,6 +71,10 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private StateMachineNodeMapper stateMachineNodeMapper;
     @Autowired
     private StateMachineNodeService stateMachineNodeService;
+    @Autowired
+    private StateMachineTransformMapper stateMachineTransformMapper;
+    @Autowired
+    private IssueMapper issueMapper;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -300,6 +302,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (CollectionUtils.isEmpty(statusVOS)) {
             return new ArrayList<>();
         }
+        List<Long> issueUseStatusId = issueMapper.selectStatusIdByIssueType(projectId,issueTypeId);
         //状态机id->状态id->转换列表
         Map<Long, Map<Long, List<TransformVO>>> statusMap = transformService.queryStatusTransformsMap(organizationId, Arrays.asList(stateMachineId));
         Map<Long, List<TransformVO>> listMap = statusMap.get(stateMachineId);
@@ -312,6 +315,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             if (!CollectionUtils.isEmpty(transformVOS)) {
                 item.setCanTransformStatus(transformVOS.stream().map(TransformVO::getEndStatusId).collect(Collectors.toSet()));
             }
+
+            item.setHasIssue(issueUseStatusId.contains(item.getId()));
         }
         if (index > 0) {
             Collections.swap(statusVOS, 0, index);
@@ -345,6 +350,132 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         stateMachineNodeService.baseUpdate(olderDefaultNode);
         nodeDTO.setType(NodeType.INIT);
         stateMachineNodeService.baseUpdate(nodeDTO);
+    }
+
+    @Override
+    public List<StateMachineTransformUpdateVO> updateTransformByIssueTypeId(Long projectId, Long issueTypeId, String applyType, List<StateMachineTransformUpdateVO> list) {
+        Long stateMachine = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
+        if (CollectionUtils.isEmpty(list)) {
+            throw new CommonException("error.transform.null");
+        }
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        for (StateMachineTransformUpdateVO transformUpdateVO : list) {
+            if (ObjectUtils.isEmpty(transformUpdateVO.getEndNodeId()) || ObjectUtils.isEmpty(transformUpdateVO.getStartNodeId())) {
+                throw new CommonException("error.node.id.null");
+            }
+            if (Boolean.TRUE.equals(transformUpdateVO.getSelect())) {
+                transformService.createTransform(organizationId, stateMachine, transformUpdateVO);
+            } else {
+                transformService.deleteTransformByNodeId(organizationId, stateMachine, transformUpdateVO.getStartNodeId(), transformUpdateVO.getEndNodeId());
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public StatusVO createStatus(Long projectId, List<Long> issueTypeIds, String applyType, StatusVO statusVO) {
+        if (ObjectUtils.isEmpty(statusVO.getName()) && ObjectUtils.isEmpty(statusVO.getType())) {
+            throw new CommonException("error.status.name.or.type.null");
+        }
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        StatusCheckVO statusCheckVO = statusService.checkName(organizationId, statusVO.getName());
+        if (Boolean.TRUE.equals(statusCheckVO.getStatusExist())) {
+            throw new CommonException("error.status.name.exist");
+        }
+        // 创建状态
+        StatusVO status = statusService.create(organizationId, statusVO);
+        // 关联状态机
+        if (!CollectionUtils.isEmpty(issueTypeIds)) {
+            for (Long issueTypeId:issueTypeIds) {
+                linkStatus(projectId,issueTypeId,applyType,status.getId(),statusVO.getDefaultStatus());
+            }
+        }
+        return status;
+    }
+
+    @Override
+    public StateMachineNodeVO linkStatus(Long projectId, Long issueTypeId, String applyType, Long statusId, Boolean defaultStatus) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
+        StateMachineNodeDTO stateMachineNode = new StateMachineNodeDTO();
+        stateMachineNode.setStatusId(statusId);
+        stateMachineNode.setOrganizationId(organizationId);
+        stateMachineNode.setType(NodeType.CUSTOM);
+        stateMachineNode.setStateMachineId(stateMachineId);
+        // 校验是否已存在关联的状态
+        List<StateMachineNodeDTO> select = stateMachineNodeMapper.select(stateMachineNode);
+        if (CollectionUtils.isEmpty(select)) {
+            List<StateMachineNodeVO> stateMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(organizationId, stateMachineId, false);
+            stateMachineNodeService.baseCreate(stateMachineNode);
+            if (Boolean.TRUE.equals(defaultStatus)) {
+                defaultStatus(projectId, issueTypeId, stateMachineId, statusId);
+            }
+            // 默认可以全部流转到当前状态
+            transformAll(stateMachineNodeVOS,organizationId,statusId,stateMachineId,stateMachineNode.getId());
+        }
+        return modelMapper.map(stateMachineNode,StateMachineNodeVO.class);
+    }
+
+    private void transformAll(List<StateMachineNodeVO> stateMachineNodeVOS, Long organizationId, Long statusId, Long stateMachineId, Long nodeId) {
+        if (!CollectionUtils.isEmpty(stateMachineNodeVOS)) {
+            StatusVO statusVO = statusService.queryStatusById(organizationId, statusId);
+            List<StateMachineTransformDTO> list = new ArrayList<>();
+            List<StateMachineNodeVO> collect = stateMachineNodeVOS.stream().filter(v -> !NodeType.START.equals(v.getType())).collect(Collectors.toList());
+            for (StateMachineNodeVO stateMachineNodeVO : collect) {
+                String name = statusVO.getName() + "转换到" + stateMachineNodeVO.getStatusVO().getName();
+                StateMachineTransformDTO stateMachineTransform = new StateMachineTransformDTO(name, stateMachineId, nodeId, stateMachineNodeVO.getId(), TransformType.CUSTOM, TransformConditionStrategy.ALL, organizationId);
+                list.add(stateMachineTransform);
+                String name1 = stateMachineNodeVO.getStatusVO().getName()  + "转换到" + statusVO.getName();
+                StateMachineTransformDTO stateMachineTransformDTO = new StateMachineTransformDTO(name1, stateMachineId, stateMachineNodeVO.getId(), nodeId, TransformType.CUSTOM, TransformConditionStrategy.ALL, organizationId);
+                list.add(stateMachineTransformDTO);
+            }
+            stateMachineTransformMapper.batchInsert(list);
+        }
+    }
+
+    @Override
+    public void deleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId,Long statusId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
+        StateMachineNodeDTO stateMachineNodeDTO = new StateMachineNodeDTO();
+        stateMachineNodeDTO.setOrganizationId(organizationId);
+        stateMachineNodeDTO.setStateMachineId(stateMachineId);
+        // 校验当前node的状态有没有被项目下的issue使用
+        StateMachineNodeDTO machineNodeDTO = stateMachineNodeMapper.selectByPrimaryKey(nodeId);
+        Boolean checkIssueUse = checkIssueUse(projectId, machineNodeDTO.getStatusId());
+        if (Boolean.TRUE.equals(checkIssueUse)) {
+            // 将该问题类型下状态为当前状态的issue改为指定状态
+            updateIssueStatusByStatusId(projectId,machineNodeDTO.getStatusId(),statusId,stateMachineNodeDTO);
+        }
+        // 删除当前node的转换
+        stateMachineTransformMapper.deleteByStateMachineIdAndNodeId(organizationId,stateMachineId,nodeId);
+        // 删除node
+        stateMachineNodeDTO.setStatusId(null);
+        stateMachineNodeDTO.setId(nodeId);
+        stateMachineNodeMapper.delete(stateMachineNodeDTO);
+    }
+
+    private void updateIssueStatusByStatusId(Long projectId,Long currentStatusId,Long statusId,StateMachineNodeDTO stateMachineNodeDTO){
+        if (ObjectUtils.isEmpty(statusId)) {
+            throw new CommonException("error.status.has.using");
+        } else {
+            // 校验状态机node里面存在当前指定状态
+            stateMachineNodeDTO.setStatusId(statusId);
+            List<StateMachineNodeDTO> select = stateMachineNodeMapper.select(stateMachineNodeDTO);
+            if(CollectionUtils.isEmpty(select)){
+                throw new CommonException("error.status.id.illegal");
+            }
+            // 将关联的状态修改为指定状态
+            issueMapper.updateStatusByStatusId(projectId,currentStatusId,statusId);
+        }
+    }
+
+    private Boolean checkIssueUse(Long projectId, Long statusId) {
+        IssueDTO issueDTO = new IssueDTO();
+        issueDTO.setProjectId(projectId);
+        issueDTO.setStatusId(statusId);
+        List<IssueDTO> select = issueMapper.select(issueDTO);
+        return !CollectionUtils.isEmpty(select);
     }
 
     private Long queryStateMachineIdAndCheck(Long projectId, String applyType, Long issueTypeId) {
