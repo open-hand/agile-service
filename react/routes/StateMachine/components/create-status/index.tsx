@@ -8,7 +8,7 @@ import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { MAX_LENGTH_STATUS } from '@/constants/MAX_LENGTH';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import { IStatus } from '@/common/types';
-import StatusTag from './StatusTag';
+import StatusTypeTag from '@/components/tag/status-type-tag';
 
 import './index.less';
 
@@ -67,7 +67,7 @@ const CreateStatus: React.FC<Props> = ({
         unique: true,
       },
       {
-        name: 'categoryCode',
+        name: 'valueCode',
         type: 'string' as FieldType,
         label: '阶段',
         required: true,
@@ -112,8 +112,8 @@ const CreateStatus: React.FC<Props> = ({
       <Form dataSet={dataSet}>
         <TextField name="name" maxLength={MAX_LENGTH_STATUS} />
         <Select
-          name="categoryCode"
-          optionRenderer={({ record }) => (<StatusTag data={record?.toData()} />)}
+          name="valueCode"
+          optionRenderer={({ record }) => (<StatusTypeTag code={record?.get('valueCode') as IStatus['valueCode']} />)}
         // disabled={type && type !== null}
         />
         <SelectBox name="default">
