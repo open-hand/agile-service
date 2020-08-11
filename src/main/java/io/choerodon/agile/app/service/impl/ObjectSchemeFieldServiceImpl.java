@@ -250,7 +250,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         //获取字段选项，并设置默认值
         List<FieldOptionVO> fieldOptions = fieldOptionService.queryByFieldId(organizationId, fieldId);
         if (!fieldOptions.isEmpty()) {
-            if (field.getDefaultValue() != null) {
+            if (!ObjectUtils.isEmpty(field.getDefaultValue())) {
                 List<String> defaultIds = Arrays.asList(field.getDefaultValue().split(","));
                 fieldOptions.forEach(fieldOption -> {
                     if (defaultIds.contains(fieldOption.getId().toString())) {

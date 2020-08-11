@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -443,6 +444,9 @@ public class StateMachineServiceImpl implements StateMachineService {
             stateMachineNode.setLastUpdatedBy(userId);
             nodeList.add(stateMachineNode);
         });
+        if (CollectionUtils.isEmpty(nodeList)) {
+            return null;
+        }
         nodeDeployMapper.batchInsert(nodeList);
         Map<Long, Long> nodeChangeMap = getChangeMap(nodeIds, nodeList.stream().map(StateMachineNodeDTO::getId).collect(Collectors.toList()));
         // 复制transform

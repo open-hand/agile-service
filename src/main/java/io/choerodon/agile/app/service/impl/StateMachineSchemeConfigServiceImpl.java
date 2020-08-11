@@ -540,7 +540,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
             // 默认使用查询出来的第一个状态机
             Long currentStateMachineId = configs.get(0).getStateMachineId();
             // 校验在是否有其他问题类型共用一个状态机
-            StateMachineSchemeConfigDTO configDTO = new StateMachineSchemeConfigDTO(stateMachineId,false,organizationId);
+            StateMachineSchemeConfigDTO configDTO = new StateMachineSchemeConfigDTO(currentStateMachineId,false,organizationId);
             List<StateMachineSchemeConfigDTO> select = configMapper.select(configDTO);
             if (select.size() == 1) {
                 return currentStateMachineId;
