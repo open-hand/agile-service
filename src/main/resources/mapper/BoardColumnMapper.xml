@@ -98,7 +98,7 @@
         <if test='filterSql != null'>
             AND ai1.issue_id IN (${filterSql})
         </if>
-        <if test='assigneeFilterIds != null'>
+        <if test='assigneeFilterIds != null and assigneeFilterIds.size > 0'>
             AND ai1.assignee_id IN
             <foreach collection="assigneeFilterIds" item="assigneeFilterId"
                      open="(" close=")" separator=",">
