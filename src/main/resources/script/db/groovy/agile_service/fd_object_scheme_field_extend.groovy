@@ -20,13 +20,13 @@ databaseChangeLog(logicalFilePath: 'fd_object_scheme_field_extend.groovy') {
             column(name: 'field_id', type: 'BIGINT UNSIGNED', remarks: '字段id') {
                 constraints(nullable: false)
             }
-            column(name: 'is_required', type: 'TINYINT UNSIGNED(1)', remarks: '是否必填', defaultValue: "1") {
+            column(name: 'is_required', type: 'TINYINT UNSIGNED(3)', remarks: '是否必填', defaultValue: "1") {
                 constraints(nullable: false)
             }
-            column(name: 'is_created', type: 'TINYINT UNSIGNED(1)', remarks: '是否在创建页面显示', defaultValue: "1") {
+            column(name: 'is_created', type: 'TINYINT UNSIGNED(3)', remarks: '是否在创建页面显示', defaultValue: "1") {
                 constraints(nullable: false)
             }
-            column(name: 'is_edited', type: 'TINYINT UNSIGNED(1)', remarks: '是否在编辑页面显示', defaultValue: "1") {
+            column(name: 'is_edited', type: 'TINYINT UNSIGNED(3)', remarks: '是否在编辑页面显示', defaultValue: "1") {
                 constraints(nullable: false)
             }
             column(name: 'rank', type: 'VARCHAR(255)', remarks: 'rank排序值') {
