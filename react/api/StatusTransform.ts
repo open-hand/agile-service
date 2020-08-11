@@ -1,5 +1,5 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId } from '@/utils/common';
+import { getProjectId, getApplyType } from '@/utils/common';
 import { IStatus } from '@/common/types';
 
 export interface IStatusCirculation {
@@ -24,7 +24,7 @@ class StatusTransformApi {
       method: 'get',
       url: `${this.prefix}/status_transform/list`,
       params: {
-        applyType: 'agile',
+        applyType: getApplyType(),
         issueTypeId,
       },
     });
