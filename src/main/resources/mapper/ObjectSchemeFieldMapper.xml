@@ -114,4 +114,16 @@
         (osf.project_id = #{projectId} OR osf.project_id IS NULL)
         order by osf.id DESC
     </select>
+
+    <select id="selectByExtendIds" resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO">
+        select *
+        from fd_object_scheme_field t2
+        join (
+            select distinct field_id from fd_object_scheme_field_extend t1
+            where t1.id in
+            <foreach collection="extendIds" item="id" index="index" separator=",">
+                (#{id})
+            </foreach>
+        ) t3 on t2.id = t3.field_id
+    </select>
 </mapper>

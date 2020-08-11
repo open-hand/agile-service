@@ -4,8 +4,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.utils.EncryptionUtils;
+import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.*;
 import org.apache.commons.lang.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -19,12 +19,8 @@ import io.choerodon.agile.infra.enums.FieldType;
 import io.choerodon.agile.infra.enums.LookupType;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.enums.ObjectSchemeFieldContext;
-import io.choerodon.agile.infra.mapper.LookupValueMapper;
-import io.choerodon.agile.infra.mapper.ObjectSchemeFieldMapper;
-import io.choerodon.agile.infra.mapper.ObjectSchemeMapper;
-import io.choerodon.agile.infra.utils.EnumUtil;
-import io.choerodon.agile.infra.utils.FieldValueUtil;
 import io.choerodon.core.exception.CommonException;
+import org.springframework.util.ObjectUtils;
 
 
 /**
@@ -44,7 +40,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private static final String ERROR_FIELDTYPE_ILLEGAL = "error.fieldType.illegal";
     private static final String ERROR_FIELD_NAMEEXIST = "error.field.nameExist";
     private static final String ERROR_FIELD_CODEEXIST = "error.field.codeExist";
-    private static final String ERROR_FIELD_REQUIRED_NEED_DEFAULT_VALUE = "error.field.requiredNeedDefaultValue";
     @Autowired
     private ObjectSchemeFieldMapper objectSchemeFieldMapper;
     @Autowired
@@ -61,15 +56,74 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private FieldDataLogService fieldDataLogService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
+    @Autowired
+    private IssueTypeMapper issueTypeMapper;
+    @Autowired
+    private IssueTypeFieldMapper issueTypeFieldMapper;
 
     @Override
-    public ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field) {
+    public ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field, String[] contexts) {
+        Long organizationId = field.getOrganizationId();
+        Long projectId = field.getProjectId();
         field.setSystem(false);
         field.setRequired(false);
         if (objectSchemeFieldMapper.insert(field) != 1) {
             throw new CommonException(ERROR_FIELD_CREATE);
         }
+        Long fieldId = field.getId();
+        //  创建object_scheme_field_extend
+        Map<String, Long> issueTypeMap = getIssueTypeMap(organizationId);
+        if (ObjectSchemeFieldContext.isGlobal(contexts)) {
+            getInsertExtendList(organizationId, projectId, fieldId, ObjectSchemeFieldContext.ISSUE_TYPES, issueTypeMap);
+        } else {
+            getInsertExtendList(organizationId, projectId, fieldId, contexts, issueTypeMap);
+        }
         return objectSchemeFieldMapper.selectByPrimaryKey(field.getId());
+    }
+
+    private Map<String, Long> getIssueTypeMap(Long organizationId) {
+        IssueTypeDTO dto = new IssueTypeDTO();
+        dto.setOrganizationId(organizationId);
+        return issueTypeMapper.select(dto).stream().collect(Collectors.toMap(IssueTypeDTO::getTypeCode, IssueTypeDTO::getId));
+    }
+
+    private void getInsertExtendList(Long organizationId,
+                                     Long projectId,
+                                     Long fieldId,
+                                     String[] contexts,
+                                     Map<String, Long> issueTypeMap) {
+        String minRank = null;
+        for (String ctx : contexts) {
+            ObjectSchemeFieldExtendDTO dto = new ObjectSchemeFieldExtendDTO();
+            dto.setIssueType(ctx);
+            dto.setProjectId(projectId);
+            dto.setOrganizationId(organizationId);
+            dto.setFieldId(fieldId);
+            if (objectSchemeFieldExtendMapper.select(dto).isEmpty()) {
+                dto.setRequired(true);
+                dto.setCreated(true);
+                dto.setEdited(true);
+                dto.setIssueTypeId(
+                        Optional
+                                .ofNullable(issueTypeMap.get(ctx))
+                                .orElse(0L));
+                minRank = getMinRank(organizationId, projectId, ctx, minRank);
+                dto.setRank(minRank);
+                objectSchemeFieldExtendMapper.insert(dto);
+            }
+        }
+    }
+
+    private String getMinRank(Long organizationId, Long projectId, String ctx, String minRank) {
+        if (ObjectUtils.isEmpty(minRank)) {
+            String rank = objectSchemeFieldExtendMapper.selectMinRank(organizationId, projectId, ctx);
+            if (ObjectUtils.isEmpty(rank)) {
+                minRank =  RankUtil.mid();
+            }
+        }
+        return RankUtil.genPre(minRank);
     }
 
     @Override
@@ -158,11 +212,13 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (checkCode(organizationId, projectId, fieldCreateDTO.getCode(), fieldCreateDTO.getSchemeCode())) {
             throw new CommonException(ERROR_FIELD_CODEEXIST);
         }
-        for (String context : fieldCreateDTO.getContext()) {
-            if (!EnumUtil.contain(ObjectSchemeFieldContext.class, context)) {
-                throw new CommonException(ERROR_CONTEXT_ILLEGAL);
-            }
+
+        String[] contexts = fieldCreateDTO.getContext();
+        if (ObjectUtils.isEmpty(contexts)) {
+            throw new CommonException("error.filed.context.empty");
         }
+        ObjectSchemeFieldContext.isIllegalContexts(contexts);
+
         ObjectSchemeFieldDTO field = modelMapper.map(fieldCreateDTO, ObjectSchemeFieldDTO.class);
         field.setContext(Arrays.asList(fieldCreateDTO.getContext()).stream().collect(Collectors.joining(",")));
         field.setOrganizationId(organizationId);
@@ -172,13 +228,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (defaultValue != null) {
             field.setDefaultValue(defaultValue);
         }
-        field = baseCreate(field);
-        //创建pageField
-        if (projectId != null) {
-            pageFieldService.createByFieldWithPro(organizationId, projectId, field);
-        } else {
-            pageFieldService.createByFieldWithOrg(organizationId, field);
-        }
+        field = baseCreate(field, contexts);
 
         //处理字段选项
         if (fieldCreateDTO.getFieldOptions() != null) {
@@ -340,5 +390,161 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     @Override
     public ObjectSchemeFieldDTO selectById(Long fieldId) {
         return objectSchemeFieldMapper.selectByPrimaryKey(fieldId);
+    }
+
+    @Override
+    public void config(Long organizationId, Long projectId, PageConfigUpdateVO pageConfigUpdateVO) {
+        String issueType = pageConfigUpdateVO.getIssueType();
+        List<PageConfigUpdateVO.Field> fields = pageConfigUpdateVO.getFields();
+        IssueTypeFieldVO issueTypeFieldVO = pageConfigUpdateVO.getIssueTypeFieldVO();
+        Set<Long> deleteIds = pageConfigUpdateVO.getDeleteIds();
+
+        ObjectSchemeFieldContext.isIllegalIssueTypes(issueType);
+        if (!ObjectUtils.isEmpty(fields)) {
+            updateFieldConfig(organizationId, projectId, issueType, fields);
+        }
+        if (!ObjectUtils.isEmpty(projectId)
+                && !ObjectUtils.isEmpty(issueTypeFieldVO)
+                && !StringUtils.isEmpty(issueTypeFieldVO.getTemplate())) {
+            updateTemplate(organizationId, projectId, issueType, issueTypeFieldVO);
+        }
+        if (!ObjectUtils.isEmpty(deleteIds)) {
+            deleteFieldConfig(organizationId, projectId, deleteIds);
+        }
+    }
+
+    private void deleteFieldConfig(Long organizationId, Long projectId, Set<Long> deleteIds) {
+        boolean editOnProjectLevel = (projectId != null);
+        if (editOnProjectLevel) {
+            //项目层无法删除组织层的字段
+            List<ObjectSchemeFieldDTO> objectSchemeFieldList =
+                    objectSchemeFieldMapper.selectByExtendIds(deleteIds);
+            objectSchemeFieldList.forEach(o -> {
+                if (o.getProjectId() == null) {
+                    throw new CommonException("error.project.can.not.delete.organization.field");
+                }
+            });
+            ObjectSchemeFieldExtendDTO example = new ObjectSchemeFieldExtendDTO();
+            example.setOrganizationId(organizationId);
+            example.setProjectId(projectId);
+            deleteIds.forEach(d -> {
+                ObjectSchemeFieldExtendDTO extend =
+                        objectSchemeFieldExtendMapper.selectByPrimaryKey(d);
+                Long fieldId = extend.getFieldId();
+                example.setFieldId(fieldId);
+                if (objectSchemeFieldExtendMapper.select(example).size() <= 1) {
+                    //删除最后一个关联关系时，同时删除字段
+                    objectSchemeFieldMapper.deleteByPrimaryKey(fieldId);
+                }
+                objectSchemeFieldExtendMapper.deleteByPrimaryKey(d);
+            });
+        } else {
+            deleteIds.forEach(d -> {
+                ObjectSchemeFieldExtendDTO extend =
+                        objectSchemeFieldExtendMapper.selectByPrimaryKey(d);
+                Long fieldId = extend.getFieldId();
+                if (objectSchemeFieldExtendMapper
+                        .selectOrganizationExtendField(null, organizationId, fieldId).size() <= 1) {
+                    //删除最后一个关联关系时，同时删除字段
+                    objectSchemeFieldMapper.deleteByPrimaryKey(fieldId);
+                }
+                ObjectSchemeFieldExtendDTO target = new ObjectSchemeFieldExtendDTO();
+                target.setOrganizationId(organizationId);
+                target.setFieldId(fieldId);
+                target.setIssueTypeId(extend.getIssueTypeId());
+                target.setIssueType(extend.getIssueType());
+                objectSchemeFieldExtendMapper.delete(target);
+            });
+        }
+    }
+
+    @Override
+    public List<PageConfigVO> listConfigs(Long organizationId, Long projectId, String issueType) {
+        return objectSchemeFieldExtendMapper.listConfigs(organizationId, projectId, issueType);
+    }
+
+    private void updateTemplate(Long organizationId, Long projectId, String issueType, IssueTypeFieldVO issueTypeFieldVO) {
+        Map<String, Long> issueTypeMap = getIssueTypeMap(organizationId);
+        Long issueTypeId = issueTypeMap.get(issueType);
+        if (ObjectUtils.isEmpty(issueTypeId)) {
+            throw new CommonException("error.issue.type.not.existed", issueType);
+        }
+        IssueTypeFieldDTO dto = new IssueTypeFieldDTO();
+        dto.setProjectId(projectId);
+        dto.setIssueTypeId(issueTypeId);
+        List<IssueTypeFieldDTO> result = issueTypeFieldMapper.select(dto);
+        if (result.isEmpty()) {
+            //create
+            dto.setTemplate(issueTypeFieldVO.getTemplate());
+            issueTypeFieldMapper.insertSelective(dto);
+        } else {
+            //update
+            Long objectVersionNumber = issueTypeFieldVO.getObjectVersionNumber();
+            if (ObjectUtils.isEmpty(objectVersionNumber)) {
+                throw new CommonException("error.issueTypeField.objectVersionNumber.null");
+            }
+            IssueTypeFieldDTO target = result.get(0);
+            target.setObjectVersionNumber(objectVersionNumber);
+            target.setTemplate(issueTypeFieldVO.getTemplate());
+            if (issueTypeFieldMapper.updateByPrimaryKeySelective(target) != 1) {
+                throw new CommonException("error.issueTypeField.update");
+            }
+        }
+    }
+
+    private void updateFieldConfig(Long organizationId, Long projectId, String issueType, List<PageConfigUpdateVO.Field> fields) {
+        boolean onProjectLevel = (projectId != null);
+        Map<String, Long> issueTypeMap = getIssueTypeMap(organizationId);
+        fields.forEach(f -> {
+            Long fieldId = f.getFieldId();
+            if (ObjectUtils.isEmpty(f.getRequired())
+                    || ObjectUtils.isEmpty(f.getCreated())
+                    || ObjectUtils.isEmpty(f.getEdited())) {
+                throw new CommonException("error.page.config.field.selectBox.empty");
+            }
+            if (ObjectUtils.isEmpty(f.getObjectVersionNumber())) {
+                throw new CommonException("error.page.config.field.objectVersionNumber.null");
+            }
+            if (onProjectLevel) {
+                //查询字段配置是否存在，存在则更新不存在则创建
+                ObjectSchemeFieldExtendDTO dto = new ObjectSchemeFieldExtendDTO();
+                dto.setIssueType(issueType);
+                dto.setOrganizationId(organizationId);
+                dto.setFieldId(fieldId);
+                dto.setProjectId(projectId);
+                List<ObjectSchemeFieldExtendDTO> result = objectSchemeFieldExtendMapper.select(dto);
+                if (result.isEmpty()) {
+                    dto.setIssueTypeId(
+                            Optional
+                                    .ofNullable(issueTypeMap.get(issueType))
+                                    .orElse(0L));
+                    dto.setRequired(f.getRequired());
+                    dto.setCreated(f.getCreated());
+                    dto.setEdited(f.getEdited());
+                    objectSchemeFieldExtendMapper.insertSelective(dto);
+                } else {
+                    updateObjectSchemeFieldExtend(f, result);
+                }
+            } else {
+                List<ObjectSchemeFieldExtendDTO> result =
+                        objectSchemeFieldExtendMapper.selectOrganizationExtendField(issueType, organizationId, fieldId);
+                if (result.isEmpty()) {
+                    throw new CommonException("error.page.config.field.not.existed");
+                } else {
+                    updateObjectSchemeFieldExtend(f, result);
+                }
+            }
+        });
+    }
+
+    private void updateObjectSchemeFieldExtend(PageConfigUpdateVO.Field field, List<ObjectSchemeFieldExtendDTO> result) {
+        ObjectSchemeFieldExtendDTO target = result.get(0);
+        target.setRequired(field.getRequired());
+        target.setEdited(field.getEdited());
+        target.setCreated(field.getCreated());
+        target.setObjectVersionNumber(field.getObjectVersionNumber());
+        if (objectSchemeFieldExtendMapper.updateByPrimaryKeySelective(target) != 1) {
+            throw new CommonException("error.page.config.field.update");
+        }
     }
 }
