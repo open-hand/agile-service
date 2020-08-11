@@ -26,6 +26,8 @@ public class StatusAndTransformVO {
 
     private Boolean defaultStatus;
 
+    private Boolean hasIssue;
+
     public Long getId() {
         return id;
     }
@@ -88,5 +90,13 @@ public class StatusAndTransformVO {
 
     public void setNodeId(Long nodeId) {
         this.nodeId = nodeId;
+    }
+
+    public Boolean getHasIssue() {
+        return hasIssue;
+    }
+
+    public void setHasIssue(Boolean hasIssue) {
+        this.hasIssue = hasIssue;
     }
 }

@@ -170,12 +170,12 @@ public interface ProjectConfigService {
      * 创建新状态
      *
      * @param projectId
-     * @param issueTypeId
+     * @param issueTypeIds
      * @param applyType
      * @param statusVO
      * @return
      */
-    StatusVO createStatus(Long projectId, Long issueTypeId, String applyType, StatusVO statusVO);
+    StatusVO createStatus(Long projectId, List<Long> issueTypeIds, String applyType, StatusVO statusVO);
 
     /**
      * 关联已有的状态
@@ -196,6 +196,7 @@ public interface ProjectConfigService {
      * @param issueTypeId
      * @param applyType
      * @param nodeId
+     * @param statusId
      */
-    void deleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId);
+    void deleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId,Long statusId);
 }

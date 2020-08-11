@@ -204,11 +204,11 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "添加新状态")
     @PostMapping(value = "/status/create")
     public ResponseEntity<StatusVO> createStatus(@PathVariable("project_id") Long projectId,
-                                                 @RequestParam(required = false)@Encrypt Long issueTypeId,
+                                                 @RequestParam(required = false)@Encrypt List<Long> issueTypeIds,
                                                  @RequestParam String applyType,
                                                  @RequestBody StatusVO statusVO) {
 
-        return new ResponseEntity(projectConfigService.createStatus(projectId, issueTypeId,applyType, statusVO), HttpStatus.OK);
+        return new ResponseEntity(projectConfigService.createStatus(projectId, issueTypeIds,applyType, statusVO), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -228,8 +228,9 @@ public class SchemeController extends BaseController {
     public ResponseEntity deleteNode(@PathVariable("project_id") Long projectId,
                                                          @RequestParam @Encrypt Long issueTypeId,
                                                          @RequestParam String applyType,
-                                                         @RequestParam  @Encrypt Long nodeId) {
-        projectConfigService.deleteNode(projectId, issueTypeId,applyType,nodeId);
+                                                         @RequestParam  @Encrypt Long nodeId,
+                                                         @RequestParam(required = false)  @Encrypt Long statusId) {
+        projectConfigService.deleteNode(projectId, issueTypeId,applyType,nodeId,statusId);
         return new ResponseEntity(HttpStatus.OK);
     }
 }

@@ -2946,4 +2946,16 @@
           </if>
     </select>
 
+    <update id="updateStatusByStatusId">
+        update agile_issue set status_id = #{statusId}
+        where project_id = #{projectId} and status_id = #{currentStatusId}
+    </update>
+
+    <select id="selectStatusIdByIssueType" resultType="java.lang.Long">
+        select ai.status_id from agile_issue ai
+        where ai.project_id = #{projectId}
+        AND ai.issue_type_id = #{issueTypeId}
+        group by ai.status_id
+    </select>
+
 </mapper>
