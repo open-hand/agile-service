@@ -1,5 +1,5 @@
 import React, {
-  useEffect, useMemo, useCallback,
+  useEffect, useMemo, useCallback, useState,
 } from 'react';
 import {
   Modal, Form, DataSet, TextField, Select, SelectBox,
@@ -11,16 +11,21 @@ import { IStatus } from '@/common/types';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 
 import './index.less';
+import { useIssueTypes } from '@/hooks';
 
 const { Option } = SelectBox;
 const key = Modal.key();
 interface Props {
+  selectedIssueType?: string[]
   onSubmit: Function
   modal?: any
 }
 const CreateStatus: React.FC<Props> = ({
-  modal, onSubmit,
+  modal, onSubmit, selectedIssueType = [],
 }) => {
+  const [type, setType] = useState<IStatus['valueCode'] | null>(null);
+  const [issueTypes] = useIssueTypes();
+
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     transport: {
@@ -45,17 +50,17 @@ const CreateStatus: React.FC<Props> = ({
           name: unique[0].name,
         },
         data: null,
-        // transformResponse: (res) => {
-        //   const data = JSON.parse(res);
-        //   const { statusExist, type } = data;
-        //   // if (statusExist) {
-        // dataSet.current.set('categoryCode', type);
-        //   //   setCategoryCode(type);
-        //   // } else {
-        //   //   setCategoryCode(null);
-        //   // }
-        //   return true;
-        // },
+        transformResponse: (res) => {
+          const data = JSON.parse(res);
+          const { statusExist, type: newType } = data;
+          if (statusExist) {
+            dataSet.current?.set('valueCode', newType);
+            setType(newType);
+          } else {
+            setType(null);
+          }
+          return true;
+        },
       }),
     },
     fields: [
@@ -85,6 +90,7 @@ const CreateStatus: React.FC<Props> = ({
         required: true,
         textField: 'name',
         valueField: 'id',
+        multiple: true,
       },
       {
         name: 'default',
@@ -95,7 +101,16 @@ const CreateStatus: React.FC<Props> = ({
       },
     ],
   }), []);
-
+  useEffect(() => {
+    if (selectedIssueType?.length > 0) {
+      dataSet.current?.set('issueType', selectedIssueType);
+    }
+  }, [selectedIssueType]);
+  useEffect(() => {
+    if (type && type !== null) {
+      dataSet.current?.set('categoryCode', type);
+    }
+  }, [type]);
   const handleSubmit = useCallback(async () => {
     const success = await dataSet.submit();
     if (success) {
@@ -114,8 +129,15 @@ const CreateStatus: React.FC<Props> = ({
         <Select
           name="valueCode"
           optionRenderer={({ record }) => (<StatusTypeTag code={record?.get('valueCode') as IStatus['valueCode']} />)}
-        // disabled={type && type !== null}
+          disabled={type !== null}
         />
+        <Select name="issueType">
+          {issueTypes.map((issueType) => (
+            <Option value={issueType.id}>
+              {issueType.name}
+            </Option>
+          ))}
+        </Select>
         <SelectBox name="default">
           <Option value>是</Option>
           <Option value={false}>否</Option>
@@ -124,7 +146,7 @@ const CreateStatus: React.FC<Props> = ({
     </>
   );
 };
-const openCreateStatus = ({ onSubmit }: Pick<Props, 'onSubmit'>) => {
+const openCreateStatus = (props: Omit<Props, 'modal'>) => {
   Modal.open({
     title: '创建状态',
     key,
@@ -133,7 +155,7 @@ const openCreateStatus = ({ onSubmit }: Pick<Props, 'onSubmit'>) => {
       width: 380,
     },
 
-    children: <CreateStatus onSubmit={onSubmit} />,
+    children: <CreateStatus {...props} />,
   });
 };
 export default openCreateStatus;

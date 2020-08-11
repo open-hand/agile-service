@@ -12,8 +12,9 @@ const IssueTypeContext = createContext<Context>({
   data: [],
   refresh: async () => {
     const type = AppState.currentMenuType.category === 'PROGRAM' ? 'program' : 'agile';
+    const isProgram = type === 'program';
     const data = await issueTypeApi.loadAllWithStateMachineId(type);
-    return data;
+    return !isProgram ? data.filter((item:IIssueType) => item.typeCode !== 'feature') : data;
   },
 });
 export { IssueTypeContext };

@@ -40,6 +40,8 @@ const SelectExistStatus: React.FC<Props> = ({
         name: 'statusId',
         type: 'string' as FieldType,
         label: '状态名称',
+        textField: 'name',
+        valueField: 'id',
         required: true,
       },
       {
