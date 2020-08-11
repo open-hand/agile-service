@@ -5,6 +5,7 @@ import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { statusApiConfig } from '@/api';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import { IStatus } from '@/common/types';
+import { Popconfirm } from 'choerodon-ui';
 import { TabComponentProps } from '../index';
 import openCreateStatus from '../components/create-status';
 
@@ -68,7 +69,14 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
             )}
           />
           <Column name="use" />
-          <Column name="operate" />
+          <Column
+            name="operate"
+            renderer={({ record }) => (
+              <Popconfirm title={`确认删除状态“${record?.get('name')}”`}>
+                <Button icon="delete" />
+              </Popconfirm>
+            )}
+          />
         </Table>
       </Content>
     </Page>

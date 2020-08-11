@@ -1,7 +1,7 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
-import { issueLabelApi } from '@/api';
+import { statusApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 
 interface Props extends Partial<SelectProps> {
@@ -10,10 +10,10 @@ interface Props extends Partial<SelectProps> {
 
 const SelectStatus: React.FC<Props> = forwardRef(({ ...otherProps }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
-    name: 'label',
-    textField: 'labelName',
-    valueField: 'labelName',
-    request: () => issueLabelApi.loads(),
+    name: 'status',
+    textField: 'name',
+    valueField: 'id',
+    request: () => statusApi.loadByProject(),
     paging: false,
   }), []);
   const props = useSelect(config);

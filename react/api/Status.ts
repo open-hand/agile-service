@@ -1,5 +1,5 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
 import Api from './Api';
 
 interface IStatus {
@@ -60,7 +60,7 @@ class StatusApi extends Api {
    * 加载当前项目下所有状态
    * @param applyType
    */
-  loadByProject(applyType = 'agile') {
+  loadByProject(applyType = getApplyType()) {
     return this.request({
       method: 'get',
       url: `${this.prefix}/schemes/query_status_by_project_id`,
