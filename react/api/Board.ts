@@ -1,7 +1,6 @@
+import { omit } from 'lodash';
 import { axios, stores } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
-
-import querystring from 'querystring';
 
 const { AppState } = stores;
 
@@ -45,15 +44,11 @@ class BoardApi {
 
   load(boardId: number, searchVO: BoardSearchVO) {
     return axios({
-      method: 'get',
+      method: 'post',
       url: `${this.prefix}/board/${boardId}/all_data/${getOrganizationId()}`,
-      params: {
-        ...searchVO,
-        quickFilterIds: searchVO?.quickFilterIds?.join(',') || undefined,
-        assigneeFilterIds: searchVO?.assigneeFilterIds?.join(',') || undefined,
+      data: {
+        ...omit(searchVO, 'onlyMe'),
         assigneeId: searchVO?.onlyMe ? AppState.getUserId : '',
-        personalFilterIds: searchVO?.personalFilterIds?.join(',') || undefined,
-        priorityIds: searchVO?.priorityIds?.join(',') || undefined,
       },
     });
   }

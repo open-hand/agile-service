@@ -1,16 +1,17 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
+import Api from './Api';
 
 interface IStatus {
   name: string,
   description?: string,
   // organizationId: "4"
-  type: string, // 状态类型
+  type: string, // 阶段
 }
 interface UpdateData extends IStatus {
   objectVersionNumber: number
 }
-class StatusApi {
+class StatusApi extends Api {
   get orgPrefix() {
     return `/agile/v1/organizations/${getOrganizationId()}`;
   }
@@ -60,7 +61,7 @@ class StatusApi {
    * @param applyType
    */
   loadByProject(applyType = 'agile') {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/schemes/query_status_by_project_id`,
       params: { apply_type: applyType },
@@ -201,4 +202,5 @@ class StatusApi {
 }
 
 const statusApi = new StatusApi();
-export { statusApi };
+const statusApiConfig = new StatusApi(true);
+export { statusApi, statusApiConfig };

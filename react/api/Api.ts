@@ -34,9 +34,8 @@ class Api {
           callback: resolve,
         });
       });
-    } else {
-      return axios(AxiosConfig);
     }
+    return axios(AxiosConfig);
   }
 
   get projectId() {

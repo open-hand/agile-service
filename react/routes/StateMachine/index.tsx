@@ -53,7 +53,6 @@ const StateMachine: React.FC = (props) => {
         {Component && <Component {...props} tab={tabComponent} />}
       </IsProgramContext.Provider>
     </StateMachineContext.Provider>
-
   );
 };
 

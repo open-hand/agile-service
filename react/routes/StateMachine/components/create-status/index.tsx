@@ -69,7 +69,7 @@ const CreateStatus: React.FC<Props> = ({
       {
         name: 'categoryCode',
         type: 'string' as FieldType,
-        label: '状态类型',
+        label: '阶段',
         required: true,
         lookupAxiosConfig: () => ({
           url: '/agile/v1/lookup_values/status_category',
