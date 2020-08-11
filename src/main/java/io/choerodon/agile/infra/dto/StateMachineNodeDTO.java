@@ -32,6 +32,15 @@ public class StateMachineNodeDTO extends AuditDomain {
     @Transient
     private StatusDTO status;
 
+    public StateMachineNodeDTO() {
+    }
+
+    public StateMachineNodeDTO(Long stateMachineId, Long statusId, Long organizationId) {
+        this.stateMachineId = stateMachineId;
+        this.statusId = statusId;
+        this.organizationId = organizationId;
+    }
+
     public Long getId() {
         return id;
     }

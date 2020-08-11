@@ -134,4 +134,24 @@ public interface ProjectConfigService {
     Long queryWorkFlowFirstStatus(Long projectId, String applyType, Long issueTypeId, Long organizationId);
 
     Map<Long, Map<Long, List<TransformVO>>> queryTransformsMapByProjectId(Long projectId, String applyType);
+
+    /**
+     * 查询项目下问题类型的状态与流转列表
+     * @param projectId
+     * @param issueTypeId
+     * @param applyType
+     * @return
+     */
+    List<StatusAndTransformVO> statusTransformList(Long projectId, Long issueTypeId, String applyType);
+
+    /**
+     * 改变状态机默认状态
+     *
+     * @param projectId
+     * @param issueTypeId
+     * @param stateMachineId
+     * @param statusId
+     * @return
+     */
+    void defaultStatus(Long projectId, Long issueTypeId, Long stateMachineId, Long statusId);
 }

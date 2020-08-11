@@ -599,10 +599,6 @@ public class IssueServiceImpl implements IssueService {
                 issueConvertDTO.setOriginSprintId(originIssue.getSprintId());
             }
         }
-        IssueDTO issueDTO = issueMapper.selectOne(modelMapper.map(issueConvertDTO, IssueDTO.class));
-        if (Objects.isNull(issueDTO)){
-            throw new CommonException(IssueAccessDataServiceImpl.UPDATE_ERROR);
-        }
         issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
     }
 

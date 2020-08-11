@@ -530,4 +530,47 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
             }
         }
     }
+
+    @Override
+    public Long queryStatusMachineBySchemeIdAndIssueType(Long organizationId, Long stateMachineSchemeId, Long issueTypeId) {
+        StateMachineSchemeConfigDTO config = new StateMachineSchemeConfigDTO(stateMachineSchemeId,issueTypeId,organizationId);
+        List<StateMachineSchemeConfigDTO> configs = configMapper.select(config);
+        Long stateMachineId = null;
+        if (!configs.isEmpty()) {
+            // 默认使用查询出来的第一个状态机
+            Long currentStateMachineId = configs.get(0).getStateMachineId();
+            // 校验在是否有其他问题类型共用一个状态机
+            StateMachineSchemeConfigDTO configDTO = new StateMachineSchemeConfigDTO(currentStateMachineId,false,organizationId);
+            List<StateMachineSchemeConfigDTO> select = configMapper.select(configDTO);
+            if (select.size() == 1) {
+                return currentStateMachineId;
+            }
+            // 复制第一个的状态机的节点和转换
+            stateMachineId = stateMachineService.copyStateMachine(organizationId, currentStateMachineId);
+            // 删除原来的配置
+            configs.forEach(v -> configMapper.deleteByPrimaryKey(v.getId()));
+            // 新增状态机方案配置
+            insert(organizationId, stateMachineId, stateMachineSchemeId, issueTypeId, false);
+        } else {
+            // 复制默认状态机的节点和转换
+            Long currentStateMachineId = configMapper.selectDefault(organizationId, stateMachineSchemeId).getStateMachineId();
+            stateMachineId = stateMachineService.copyStateMachine(organizationId, currentStateMachineId);
+            insert(organizationId, stateMachineId, stateMachineSchemeId, issueTypeId,false);
+        }
+        return stateMachineId;
+    }
+
+    private void insert(Long organizationId, Long stateMachineId, Long stateMachineSchemeId, Long issueTypeId, boolean isDefault) {
+        StateMachineSchemeConfigDTO configDTO = new StateMachineSchemeConfigDTO();
+        configDTO.setOrganizationId(organizationId);
+        configDTO.setSchemeId(stateMachineSchemeId);
+        configDTO.setStateMachineId(stateMachineId);
+        configDTO.setDefault(isDefault);
+        configDTO.setSequence(0);
+        configDTO.setIssueTypeId(issueTypeId);
+        if (configMapper.insert(configDTO) != 1) {
+            throw new CommonException("error.insert.state.machine.scheme.config");
+        }
+    }
+
 }

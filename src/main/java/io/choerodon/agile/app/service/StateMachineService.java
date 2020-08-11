@@ -219,4 +219,11 @@ public interface StateMachineService {
 
     DeployStateMachinePayload handleStateMachineChangeStatusByStateMachineId(Long organizationId, Long stateMachineId, ChangeStatus changeStatus);
 
+    /**
+     * 复制状态机
+     * @param organizationId
+     * @param currentStateMachineId
+     * @return
+     */
+    Long copyStateMachine(Long organizationId, Long currentStateMachineId);
 }

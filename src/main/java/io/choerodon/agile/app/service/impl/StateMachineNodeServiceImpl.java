@@ -176,11 +176,12 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
      */
     @Override
     public Long getInitNode(Long organizationId, Long stateMachineId) {
-        StateMachineNodeDraftDTO node = new StateMachineNodeDraftDTO();
+        StateMachineNodeDTO node = new StateMachineNodeDTO();
         node.setType(NodeType.START);
         node.setStateMachineId(stateMachineId);
         node.setOrganizationId(organizationId);
-        List<StateMachineNodeDraftDTO> nodes = nodeDraftMapper.select(node);
+        // List<StateMachineNodeDraftDTO> nodes = nodeDraftMapper.select(node);
+        List<StateMachineNodeDTO> nodes = nodeDeployMapper.select(node);
         if (nodes.isEmpty()) {
             throw new CommonException("error.initNode.null");
         }
@@ -284,6 +285,13 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
             }
             //将节点和转换添加到发布中
             insertNodeAndTransformForDeploy(nodeDraft.getId(), transformDraft.getId());
+        }
+    }
+
+    @Override
+    public void baseUpdate(StateMachineNodeDTO olderDefaultNode) {
+        if (nodeDeployMapper.updateByPrimaryKeySelective(olderDefaultNode) != 1) {
+            throw new CommonException("error.update.state.machine.node");
         }
     }
 

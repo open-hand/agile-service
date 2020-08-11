@@ -41,4 +41,16 @@
             #{id}
         </foreach>
     </select>
+
+    <insert id="batchInsert" useGeneratedKeys="true" keyProperty="id">
+        insert into fd_state_machine_transform(name,description,state_machine_id
+        ,start_node_id,end_node_id,type,condition_strategy,organization_id,created_by,last_updated_by)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.name},#{item.description},#{item.stateMachineId}
+            ,#{item.startNodeId},#{item.endNodeId}
+            ,#{item.type},#{item.conditionStrategy}
+            ,#{item.organizationId},#{item.createdBy},#{item.lastUpdatedBy})
+        </foreach>
+    </insert>
 </mapper>

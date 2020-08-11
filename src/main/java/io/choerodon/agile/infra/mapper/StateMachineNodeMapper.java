@@ -39,4 +39,10 @@ public interface StateMachineNodeMapper extends BaseMapper<StateMachineNodeDTO> 
 
     List<StateMachineNodeDTO> queryByStateMachineIds(@Param("organizationId") Long organizationId, @Param("stateMachineIds") List<Long> stateMachineIds);
 
+    /**
+     * 批量插入node
+     * @param nodeList
+     * @return
+     */
+    int batchInsert(@Param("list") List<StateMachineNodeDTO> nodeList);
 }
