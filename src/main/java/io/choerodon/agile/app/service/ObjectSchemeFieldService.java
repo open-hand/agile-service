@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public interface ObjectSchemeFieldService {
 
-    ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field);
+    ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field, String[] contexts);
 
     void baseDelete(Long fieldId);
 
@@ -99,4 +99,23 @@ public interface ObjectSchemeFieldService {
     List<ObjectSchemeFieldDetailVO> queryCustomFieldList(Long projectId);
 
     ObjectSchemeFieldDTO selectById(Long fieldId);
+
+    /**
+     * 页面配置接口
+     *
+     * @param organizationId
+     * @param projectId
+     * @param pageConfigUpdateVO
+     */
+    void config(Long organizationId, Long projectId, PageConfigUpdateVO pageConfigUpdateVO);
+
+    /**
+     * 查询
+     *
+     * @param organizationId
+     * @param projectId
+     * @param issueType
+     * @return
+     */
+    List<PageConfigVO> listConfigs(Long organizationId, Long projectId, String issueType);
 }

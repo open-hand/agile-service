@@ -7,6 +7,7 @@ import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author shinan.chen
@@ -26,4 +27,10 @@ public interface ObjectSchemeFieldMapper extends BaseMapper<ObjectSchemeFieldDTO
     ObjectSchemeFieldDTO queryByFieldCode(@Param("organizationId") Long organizationId, @Param("projectId") Long projectId, @Param("fieldCode") String fieldCode);
 
     List<ObjectSchemeFieldDetailVO> selectCustomFieldList(@Param("organizationId") Long organizationId,@Param("projectId") Long projectId);
+
+    /**
+     * 根据fd_object_scheme_field_extend id查询字段
+     * @param extendIds
+     */
+    List<ObjectSchemeFieldDTO> selectByExtendIds(@Param("extendIds") Set<Long> extendIds);
 }

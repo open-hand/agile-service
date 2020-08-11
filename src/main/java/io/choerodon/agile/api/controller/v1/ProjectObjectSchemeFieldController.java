@@ -1,11 +1,9 @@
 package io.choerodon.agile.api.controller.v1;
 
 
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
-import io.choerodon.agile.api.vo.ObjectSchemeFieldCreateVO;
-import io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO;
-import io.choerodon.agile.api.vo.ObjectSchemeFieldUpdateVO;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -17,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -117,5 +116,24 @@ public class ProjectObjectSchemeFieldController {
                                              @ApiParam(value = "方案编码", required = true)
                                              @RequestParam String schemeCode) {
         return new ResponseEntity<>(objectSchemeFieldService.checkCode(organizationId, projectId, code, schemeCode), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询字段的页面配置数据")
+    @GetMapping(value = "/configs")
+    public ResponseEntity<List<PageConfigVO>> listConfigs(@PathVariable(name = "project_id") Long projectId,
+                                                          @RequestParam Long organizationId,
+                                                          @RequestParam String issueType) {
+        return new ResponseEntity<>(objectSchemeFieldService.listConfigs(organizationId, projectId, issueType), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "页面配置接口")
+    @PostMapping(value = "/configs")
+    public ResponseEntity<Boolean> config(@PathVariable(name = "project_id") Long projectId,
+                                          @RequestParam Long organizationId,
+                                          @RequestBody PageConfigUpdateVO pageConfigUpdateVO) {
+        objectSchemeFieldService.config(organizationId, projectId, pageConfigUpdateVO);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
