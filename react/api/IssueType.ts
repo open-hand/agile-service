@@ -1,8 +1,9 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import { IIssueType } from '@/common/types';
+import Api from './Api';
 
-class IssueTypeApi {
+class IssueTypeApi extends Api {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }
@@ -16,12 +17,13 @@ class IssueTypeApi {
    * @param applyType
    */
   loadAllWithStateMachineId(applyType: string = 'agile', projectId?: number):Promise<IIssueType[]> {
-    return axios({
+    return this.request({
       method: 'get',
       url: `/agile/v1/projects/${projectId || getProjectId()}/schemes/query_issue_types_with_sm_id`,
       params: {
         apply_type: applyType,
       },
+      cache: true,
     });
   }
 

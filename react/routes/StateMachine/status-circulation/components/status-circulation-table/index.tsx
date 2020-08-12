@@ -13,9 +13,7 @@ import DeleteStatus from './DeleteStatus';
 import styles from './index.less';
 
 const StatusCirculationTable: React.FC = () => {
-  const [dimensions, setDimensions] = useState<BoundingRect>({
-    height: -1,
-  } as BoundingRect);
+  const [height, setHeight] = useState<number>(0);
   const { store } = useStatusCirculationContext();
   const { selectedType } = useStateMachineContext();
   const { statusList, loading } = store;
@@ -73,12 +71,13 @@ const StatusCirculationTable: React.FC = () => {
       </div>
     )),
   }], [handleDeleteClick, statusColumns]);
-  const { height } = dimensions;
   return (
     <Measure
       bounds
       onResize={(contentRect) => {
-        setDimensions(contentRect.bounds as BoundingRect);
+        if (contentRect.bounds?.height !== height) {
+          setHeight(contentRect.bounds?.height || 0);
+        }
       }}
     >
       {({ measureRef }) => (
