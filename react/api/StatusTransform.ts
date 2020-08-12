@@ -33,6 +33,12 @@ export interface IStatusCreateLink {
   statusId: string
   defaultStatus: boolean
 }
+
+export interface ICondition {
+  type: 'specifier' | 'projectOwner',
+  userIds?: string[],
+}
+
 class StatusTransformApi extends Api {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
@@ -110,16 +116,59 @@ class StatusTransformApi extends Api {
   }
 
   /**
+   * 获取自定义状态流转列表
+   * @param issueTypeId
+   * @param page
+   * @param size
+   */
+  getCustomCirculationList(
+    issueTypeId: string, page: number = 0, size: number = 10, param: string,
+  ) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/status_transform_setting/list`,
+      params: {
+        issueTypeId,
+        applyType: getApplyType(),
+        page,
+        size,
+        param,
+      },
+    });
+  }
+
+  /**
    * 获取流转条件
    */
   getCondition(issueTypeId: string, statusId: string) {
     return axios({
       method: 'get',
-      url: `${this.prefix}/status_transform/setting_default_status`,
+      url: `${this.prefix}/status_transfer_setting/query_transfer`,
       params: {
         issueTypeId,
         statusId,
       },
+    });
+  }
+
+  /**
+   * 更新状态流转条件
+   * @param issueTypeId
+   * @param statusId
+   * @param objectVersionNumber
+   */
+  updateCondition(
+    issueTypeId: string, statusId: string, objectVersionNumber: number, data: ICondition[],
+  ) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/status_transfer_setting`,
+      params: {
+        issueTypeId,
+        statusId,
+        objectVersionNumber,
+      },
+      data,
     });
   }
 
@@ -174,5 +223,5 @@ class StatusTransformApi extends Api {
 }
 
 const statusTransformApi = new StatusTransformApi();
-const statusTransformApiConfig = new StatusTransformApi();
+const statusTransformApiConfig = new StatusTransformApi(true);
 export { statusTransformApi, statusTransformApiConfig };
