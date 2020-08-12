@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -48,6 +49,13 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
 
     @Override
     public void save(Long projectId, StatusNoticeSettingVO statusNoticeSettingVO) {
+        StatusDTO statusDTO = new StatusDTO();
+        statusDTO.setId(statusNoticeSettingVO.getStatusId());
+        statusDTO.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
+        statusDTO.setObjectVersionNumber(statusNoticeSettingVO.getObjectVersionNumber());
+        if (Objects.isNull(statusMapper.selectOne(statusDTO))){
+            throw new CommonException(BaseConstants.ErrorCode.DATA_INVALID);
+        }
         StatusNoticeSettingDTO noticeDTO = new StatusNoticeSettingDTO(projectId, statusNoticeSettingVO.getIssueTypeId(),
                 statusNoticeSettingVO.getStatusId());
         // 删除
@@ -65,9 +73,6 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
                 .map(userId -> new StatusNoticeSettingDTO(statusNoticeSettingVO, userId))
                 .collect(Collectors.toList()));
         saveList.forEach(statusNoticeSettingMapper::insertSelective);
-        StatusDTO statusDTO = new StatusDTO();
-        statusDTO.setId(statusNoticeSettingVO.getStatusId());
-        statusDTO.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
         int i = statusMapper.updateOptional(statusDTO);
         if (i != 1){
             throw new CommonException(BaseConstants.ErrorCode.OPTIMISTIC_LOCK);
