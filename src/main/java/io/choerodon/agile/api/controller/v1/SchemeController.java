@@ -6,7 +6,9 @@ import io.choerodon.agile.app.service.ProjectConfigService;
 
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.ProjectUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.exception.CommonException;
@@ -232,5 +234,16 @@ public class SchemeController extends BaseController {
                                                          @RequestParam(required = false)  @Encrypt Long statusId) {
         projectConfigService.deleteNode(projectId, issueTypeId,applyType,nodeId,statusId);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "自定义流转列表")
+    @GetMapping(value = "/status_transform_setting/list")
+    public ResponseEntity<Page<StatusSettingVO>> statusTransformSettingList(@PathVariable("project_id") Long projectId,
+                                                                            PageRequest pageRequest,
+                                                                            @RequestParam @Encrypt Long issueTypeId,
+                                                                            @RequestParam(required = false) String param,
+                                                                            @RequestParam String applyType) {
+        return new ResponseEntity<>(projectConfigService.statusTransformSettingList(projectId, issueTypeId,pageRequest,param, applyType), HttpStatus.OK);
     }
 }

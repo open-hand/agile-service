@@ -4,6 +4,7 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.TransformInfo;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.cache.InstanceCache;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
@@ -11,7 +12,10 @@ import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.ProjectUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -75,6 +79,14 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private StateMachineTransformMapper stateMachineTransformMapper;
     @Autowired
     private IssueMapper issueMapper;
+    @Autowired
+    private InstanceCache instanceCache;
+    @Autowired
+    private IssueStatusService issueStatusService;
+    @Autowired
+    private StatusMapper statusMapper;
+    @Autowired
+    private StatusTransferSettingService statusTransferSettingService;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -396,6 +408,18 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     @Override
     public StateMachineNodeVO linkStatus(Long projectId, Long issueTypeId, String applyType, Long statusId, Boolean defaultStatus) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        IssueStatusDTO issueStatusDTO = issueStatusMapper.selectByStatusId(projectId, statusId);
+        if (ObjectUtils.isEmpty(issueStatusDTO)) {
+            StatusVO statusVO = statusService.queryStatusById(organizationId, statusId);
+            issueStatusDTO = new IssueStatusDTO();
+            issueStatusDTO.setProjectId(projectId);
+            issueStatusDTO.setStatusId(statusId);
+            issueStatusDTO.setCompleted(false);
+            issueStatusDTO.setName(statusVO.getName());
+            issueStatusDTO.setCategoryCode(statusVO.getType());
+            issueStatusDTO.setEnable(false);
+            issueStatusService.insertIssueStatus(issueStatusDTO);
+        }
         Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
         StateMachineNodeDTO stateMachineNode = new StateMachineNodeDTO();
         stateMachineNode.setStatusId(statusId);
@@ -413,6 +437,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             // 默认可以全部流转到当前状态
             transformAll(stateMachineNodeVOS,organizationId,statusId,stateMachineId,stateMachineNode.getId());
         }
+        instanceCache.cleanStateMachine(stateMachineId);
         return modelMapper.map(stateMachineNode,StateMachineNodeVO.class);
     }
 
@@ -455,7 +480,33 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         stateMachineNodeMapper.delete(stateMachineNodeDTO);
     }
 
-    private void updateIssueStatusByStatusId(Long projectId,Long currentStatusId,Long statusId,StateMachineNodeDTO stateMachineNodeDTO){
+    @Override
+    public Page<StatusSettingVO> statusTransformSettingList(Long projectId, Long issueTypeId, PageRequest pageRequest, String param,String applyType) {
+        if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
+            throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
+        }
+        // 获取状态加Id
+        Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        Page<StatusSettingVO> page = PageHelper.doPageAndSort(pageRequest, () -> statusMapper.listStatusTransferByStateMachineId(organizationId, stateMachineId,param));
+        List<StatusSettingVO> list = page.getContent();
+        if (CollectionUtils.isEmpty(list)) {
+            return new Page<>();
+        }
+        List<Long> statusIds = list.stream().map(StatusSettingVO::getId).collect(Collectors.toList());
+        List<StatusTransferSettingVO> transferSettingVOS = statusTransferSettingService.listByStatusIds(projectId, issueTypeId, statusIds);
+        Map<Long, List<StatusTransferSettingVO>> transferSettingMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(transferSettingVOS)) {
+            transferSettingMap.putAll(transferSettingVOS.stream().collect(Collectors.groupingBy(StatusTransferSettingVO::getStatusId)));
+        }
+        for (StatusSettingVO statusSettingVO : list) {
+            statusSettingVO.setStatusTransferSettingVOS(transferSettingMap.get(statusSettingVO.getId()));
+        }
+        page.setContent(list);
+        return page;
+    }
+
+    private void updateIssueStatusByStatusId(Long projectId, Long currentStatusId, Long statusId, StateMachineNodeDTO stateMachineNodeDTO){
         if (ObjectUtils.isEmpty(statusId)) {
             throw new CommonException("error.status.has.using");
         } else {

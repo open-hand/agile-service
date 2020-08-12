@@ -2,6 +2,7 @@ package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.StatusAndTransformVO;
 import io.choerodon.agile.api.vo.StatusSearchVO;
+import io.choerodon.agile.api.vo.StatusSettingVO;
 import io.choerodon.agile.infra.dto.StatusDTO;
 import io.choerodon.agile.infra.dto.StatusWithInfoDTO;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -32,4 +33,6 @@ public interface StatusMapper extends BaseMapper<StatusDTO> {
     List<StatusDTO> queryByStateMachineIds(@Param("organizationId") Long organizationId, @Param("stateMachineIds") List<Long> stateMachineIds);
 
     List<StatusAndTransformVO> queryByStateMachineId(@Param("organizationId") Long organizationId,@Param("stateMachineId") Long stateMachineId);
+
+    List<StatusSettingVO> listStatusTransferByStateMachineId(@Param("organizationId") Long organizationId,@Param("stateMachineId") Long stateMachineId,@Param("param") String param);
 }
