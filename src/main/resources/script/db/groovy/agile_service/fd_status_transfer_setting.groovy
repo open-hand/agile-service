@@ -9,7 +9,7 @@ databaseChangeLog(logicalFilePath: 'fd_status_transfer_setting.groovy') {
             column(name: 'issue_type_id', type: 'BIGINT UNSIGNED', remarks: '问题类型Id') {
                 constraints(nullable: false)
             }
-            column(name: 'project_id', type: 'VARCHAR(255)', remarks: '项目id') {
+            column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
             column(name: 'status_id', type: 'BIGINT UNSIGNED', remarks: '状态Id') {
