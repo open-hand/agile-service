@@ -9,6 +9,7 @@ import { Breadcrumb } from 'choerodon-ui';
 import { useIssueTypes } from '@/hooks';
 import { find } from 'lodash';
 import { IIssueType } from '@/common/types';
+import { useIsProgramContext } from '@/hooks/useIsProgrom';
 import Condition from './components/condition';
 import Linkage from './components/linkage';
 import NotifySetting from './components/notify-setting';
@@ -32,9 +33,11 @@ interface ModalSettings {
   notifySetting: ISetting,
 }
 const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
+  const { isProgram } = useIsProgramContext();
   const [issueTypes] = useIssueTypes();
   const { selectedType, setSelectedType } = useStateMachineContext();
   const customCirculationDataSet = useMemo(() => new DataSet({
+    selection: false,
     fields: [
       {
         name: 'state',
@@ -90,7 +93,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         width: 740,
         title: '变更属性',
         // @ts-ignore
-        children: <UpdateField record={record} />,
+        children: <UpdateField record={record} isProgram={isProgram} />,
       },
       notifySetting: {
         width: 380,
