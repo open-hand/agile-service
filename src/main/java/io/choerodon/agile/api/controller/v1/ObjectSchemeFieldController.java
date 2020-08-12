@@ -134,9 +134,9 @@ public class ObjectSchemeFieldController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "拖动查询rank值接口")
-    @GetMapping(value = "/rank")
+    @PostMapping(value = "/rank")
     public ResponseEntity<String> queryRank(@PathVariable("organization_id") Long organizationId,
-                                              @RequestBody @Validated AdjustOrderVO adjustOrderVO) {
+                                            @RequestBody @Validated AdjustOrderVO adjustOrderVO) {
         return new ResponseEntity<>(objectSchemeFieldService.queryRank(organizationId, null, adjustOrderVO), HttpStatus.OK);
     }
 
