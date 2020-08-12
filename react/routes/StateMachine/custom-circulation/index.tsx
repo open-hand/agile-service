@@ -81,7 +81,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         width: 380,
         title: '流转条件',
         // @ts-ignore
-        children: <Condition record={record} />,
+        children: <Condition record={record} selectedType={selectedType} />,
       },
       linkage: {
         width: 380,
@@ -93,13 +93,13 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         width: 740,
         title: '变更属性',
         // @ts-ignore
-        children: <UpdateField record={record} isProgram={isProgram} />,
+        children: <UpdateField record={record} selectedType={selectedType} isProgram={isProgram} />,
       },
       notifySetting: {
         width: 380,
         title: '通知设置',
         // @ts-ignore
-        children: <NotifySetting record={record} />,
+        children: <NotifySetting record={record} selectedType={selectedType} />,
       },
     };
     return settings[key];

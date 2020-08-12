@@ -49,3 +49,18 @@ export interface IIssueType{
   stateMachineId: string,
   typeCode: string,
 }
+
+interface FieldOption {
+  id: string,
+  fieldId: string,
+  code: string,
+  value: string,
+}
+export interface IField {
+  code: string,
+  fieldOptions?: FieldOption[],
+  fieldType: string,
+  fieldTypeName?: string,
+  id: string,
+  name: string,
+}

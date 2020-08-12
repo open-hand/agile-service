@@ -108,6 +108,69 @@ class StatusTransformApi extends Api {
       },
     });
   }
+
+  /**
+   * 获取流转条件
+   */
+  getCondition(issueTypeId: string, statusId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/status_transform/setting_default_status`,
+      params: {
+        issueTypeId,
+        statusId,
+      },
+    });
+  }
+
+  /**
+   * 获取状态联动设置
+   * @param issueTypeId
+   * @param statusId
+   */
+
+  getLinkage(issueTypeId: string, statusId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/status_transform/setting_default_status`,
+      params: {
+        issueTypeId,
+        statusId,
+      },
+    });
+  }
+
+  /**
+   * 获取通知设置
+   * @param issueTypeId
+   * @param statusId
+   */
+  getNotifySetting(issueTypeId: string, statusId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/status_transform/setting_default_status`,
+      params: {
+        issueTypeId,
+        statusId,
+      },
+    });
+  }
+
+  /**
+   * 获取更新属性信息
+   * @param issueTypeId
+   * @param statusId
+   */
+  getUpdateFieldInfo(issueTypeId: string, statusId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/status_transform/setting_default_status`,
+      params: {
+        issueTypeId,
+        statusId,
+      },
+    });
+  }
 }
 
 const statusTransformApi = new StatusTransformApi();

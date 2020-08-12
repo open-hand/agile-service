@@ -7,13 +7,15 @@ import {
 import { Divider } from 'choerodon-ui';
 import SelectUser from '@/components/select/select-user';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { statusTransformApi } from '@/api';
 import styles from './index.less';
 
 interface Props {
   modal: any,
   record: any,
+  selectedType: string,
 }
-const Condition:React.FC<Props> = ({ modal, record }) => {
+const Condition:React.FC<Props> = ({ modal, record, selectedType }) => {
   const memberOptionDataSet = useMemo(() => new DataSet({
     data: [
       { code: 'owner', name: '项目所有者' },
@@ -52,14 +54,23 @@ const Condition:React.FC<Props> = ({ modal, record }) => {
         textField: 'realName',
         valueField: 'id',
       },
-      {
-        name: 'needCompleted',
-        label: '任务项子级需全部到达已解决状态',
-        type: 'boolean' as FieldType,
-      }],
+      // {
+      //   name: 'needCompleted',
+      //   label: '任务项子级需全部到达已解决状态',
+      //   type: 'boolean' as FieldType,
+      // },
+    ],
   }), [memberOptionDataSet]);
 
   useEffect(() => {
+    const { current } = conditionDataSet;
+    // @ts-ignore
+    statusTransformApi.getCondition(selectedType, record.get('id')).then((res) => {
+      current?.set('member', res.member);
+      if (res.assigners) {
+        current?.set('assigners', res.assigners);
+      }
+    });
     const handleOk = async () => {
       const data = conditionDataSet.toData();
       const validate = await conditionDataSet.validate();
@@ -91,10 +102,10 @@ const Condition:React.FC<Props> = ({ modal, record }) => {
               <SelectUser name="assigners" />
             )
           }
-          <Divider className={styles.divider} />
+          {/* <Divider className={styles.divider} />
           <div className={styles.completeSetting}>
             <CheckBox name="needCompleted" />
-          </div>
+          </div> */}
         </Form>
       </div>
     </div>
