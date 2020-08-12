@@ -12,6 +12,7 @@ import StatusTypeTag from '@/components/tag/status-type-tag';
 
 import './index.less';
 import { useIssueTypes } from '@/hooks';
+import { statusTransformApiConfig } from '@/api';
 
 const { Option } = SelectBox;
 const key = Modal.key();
@@ -29,17 +30,13 @@ const CreateStatus: React.FC<Props> = ({
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     transport: {
-      create: {
-        url: `/agile/v1/projects/${getProjectId()}/issue_status`,
-        method: 'post',
-        params: {
-          applyType: 'agile',
-        },
-        transformRequest: (([data]) => JSON.stringify({
-          ...data,
-          projectId: getProjectId(),
-          enable: true,
-        })),
+      create: ({ data: dataArray }) => {
+        const data = dataArray[0];
+        return statusTransformApiConfig.createStatus(data.issueTypeIds, {
+          name: data.name,
+          type: data.valueCode,
+          defaultStatus: data.default,
+        });
       },
       // 进行验证 当存在同名状态 将类别自动选择
       validate: ({ data: { unique } }) => ({
@@ -84,7 +81,7 @@ const CreateStatus: React.FC<Props> = ({
         valueField: 'valueCode',
       },
       {
-        name: 'issueType',
+        name: 'issueTypeIds',
         type: 'string' as FieldType,
         label: '问题类型',
         required: true,
@@ -103,7 +100,7 @@ const CreateStatus: React.FC<Props> = ({
   }), []);
   useEffect(() => {
     if (selectedIssueType?.length > 0) {
-      dataSet.current?.set('issueType', selectedIssueType);
+      dataSet.current?.set('issueTypeIds', selectedIssueType);
     }
   }, [selectedIssueType]);
   useEffect(() => {
@@ -112,11 +109,13 @@ const CreateStatus: React.FC<Props> = ({
     }
   }, [type]);
   const handleSubmit = useCallback(async () => {
-    const success = await dataSet.submit();
-    if (success) {
+    try {
+      await dataSet.submit();
       onSubmit();
+      return true;
+    } catch (error) {
+      return false;
     }
-    return success;
   }, [dataSet, onSubmit]);
   useEffect(() => {
     modal.handleOk(handleSubmit);
@@ -131,7 +130,7 @@ const CreateStatus: React.FC<Props> = ({
           optionRenderer={({ record }) => (<StatusTypeTag code={record?.get('valueCode') as IStatus['valueCode']} />)}
           disabled={type !== null}
         />
-        <Select name="issueType">
+        <Select name="issueTypeIds">
           {issueTypes.map((issueType) => (
             <Option value={issueType.id}>
               {issueType.name}

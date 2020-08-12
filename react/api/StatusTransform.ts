@@ -1,6 +1,7 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getApplyType } from '@/utils/common';
 import { IStatus } from '@/common/types';
+import Api from './Api';
 
 export interface IStatusCirculation {
   code: string
@@ -9,6 +10,7 @@ export interface IStatusCirculation {
   name: string
   nodeId: string
   stateMachineId: string
+  hasIssue: boolean
   type: IStatus['valueCode']
   canTransformStatus: string[];
   default?: boolean
@@ -21,8 +23,17 @@ export interface IUpdateTransform {
   endStatusName: string
   select: boolean
 }
-
-class StatusTransformApi {
+export interface IStatusCreate {
+  name: string
+  type: IStatus['valueCode']
+  defaultStatus: boolean
+}
+export interface IStatusCreateLink {
+  issueTypeId: string
+  statusId: string
+  defaultStatus: boolean
+}
+class StatusTransformApi extends Api {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }
@@ -61,7 +72,44 @@ class StatusTransformApi {
       data: nodes,
     });
   }
+
+  createStatus(issueTypeIds: string[], status: IStatusCreate) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/status/create`,
+      params: {
+        issueTypeIds: issueTypeIds.join(','),
+        applyType: getApplyType(),
+      },
+      data: status,
+    });
+  }
+
+  linkStatus(statusLink: IStatusCreateLink) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/state_machine/link_status`,
+      params: {
+        ...statusLink,
+        applyType: getApplyType(),
+      },
+    });
+  }
+
+  deleteStatusByIssueType(issueTypeId: string, nodeId: string, toStatusId?: string) {
+    return this.request({
+      method: 'delete',
+      url: `${this.prefix}/state_machine_node/delete`,
+      params: {
+        issueTypeId,
+        nodeId,
+        applyType: getApplyType(),
+        statusId: toStatusId,
+      },
+    });
+  }
 }
 
 const statusTransformApi = new StatusTransformApi();
-export { statusTransformApi };
+const statusTransformApiConfig = new StatusTransformApi();
+export { statusTransformApi, statusTransformApiConfig };

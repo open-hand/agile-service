@@ -96,6 +96,10 @@ class StatusCirculationStore {
     this.actions.clear();
   }
 
+  @action clearStatusActions(statusId:IStatus['id']) {
+    this.actions.delete(statusId);
+  }
+
   @computed
   get hasAction() {
     for (const actions of this.actions.values()) {
