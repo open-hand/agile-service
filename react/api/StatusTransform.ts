@@ -7,11 +7,19 @@ export interface IStatusCirculation {
   defaultStatus: boolean
   id: string
   name: string
+  nodeId: string
   stateMachineId: string
   type: IStatus['valueCode']
   canTransformStatus: string[];
   default?: boolean
   [propName: string]: any
+}
+export interface IUpdateTransform {
+  startNodeId: string
+  endNodeId: string
+  startStatusName: string
+  endStatusName: string
+  select: boolean
 }
 
 class StatusTransformApi {
@@ -30,7 +38,7 @@ class StatusTransformApi {
     });
   }
 
-  setDefaultStatus(issueTypeId:string, statusId:string, stateMachineId:string) {
+  setDefaultStatus(issueTypeId: string, statusId: string, stateMachineId: string) {
     return axios({
       method: 'put',
       url: `${this.prefix}/status_transform/setting_default_status`,
@@ -39,6 +47,18 @@ class StatusTransformApi {
         statusId,
         stateMachineId,
       },
+    });
+  }
+
+  batchUpdate(issueTypeId: string, nodes: IUpdateTransform[]) {
+    return axios({
+      method: 'put',
+      url: `${this.prefix}/status_transform/update`,
+      params: {
+        issueTypeId,
+        applyType: getApplyType(),
+      },
+      data: nodes,
     });
   }
 }

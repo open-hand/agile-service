@@ -23,14 +23,14 @@ const StatusCirculationTable: React.FC = () => {
     });
   };
   const { data } = store;
-  const statusColumns:ColumnsType<IStatusCirculation> = statusList.map((status) => ({
+  const statusColumns:ColumnsType<IStatusCirculation> = useMemo(() => statusList.map((status) => ({
     dataIndex: status.name,
     width: 150,
     title: () => <span style={{ color: STATUS[status.type] }}>{status.name}</span>,
     render: ((text: string, record) => (
       <Checkbox store={store} status={status} record={record} />
     )),
-  }));
+  })), [statusList, store]);
   const columns: ColumnsType<IStatusCirculation> = useMemo(() => [{
     dataIndex: 'name',
     width: 150,
@@ -61,7 +61,7 @@ const StatusCirculationTable: React.FC = () => {
         <Button disabled={record.defaultStatus} icon="delete" onClick={() => handleDeleteClick(record)} />
       </div>
     )),
-  }], [statusList]);
+  }], [statusColumns]);
   const { width, height } = dimensions;
   return (
     <Measure
