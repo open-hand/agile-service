@@ -1,0 +1,114 @@
+package io.choerodon.agile.app.service.impl;
+
+import io.choerodon.agile.api.vo.StatusTransferSettingCreateVO;
+import io.choerodon.agile.api.vo.StatusTransferSettingVO;
+import io.choerodon.agile.app.assembler.StatusTransferSettingAssembler;
+import io.choerodon.agile.app.service.StatusTransferSettingService;
+import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.StatusDTO;
+import io.choerodon.agile.infra.dto.StatusTransferSettingDTO;
+import io.choerodon.agile.infra.dto.UserDTO;
+import io.choerodon.agile.infra.mapper.StatusMapper;
+import io.choerodon.agile.infra.mapper.StatusTransferSettingMapper;
+import io.choerodon.core.exception.CommonException;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+/**
+ * @author zhaotianxin
+ * @date 2020-08-12 10:09
+ */
+@Service
+@Transactional(rollbackFor = Exception.class)
+public class StatusTransferSettingServiceImpl implements StatusTransferSettingService {
+    private static final String SPECIFIER = "specifier";
+    @Autowired
+    private StatusTransferSettingMapper statusTransferSettingMapper;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private StatusTransferSettingAssembler statusTransferSettingAssembler;
+    @Autowired
+    private StatusMapper statusMapper;
+
+    @Override
+    public void createOrUpdate(Long projectId, Long issueTypeId, Long statusId,Long objectVersionNumber,List<StatusTransferSettingCreateVO> list) {
+        List<StatusTransferSettingDTO> query = query(projectId, issueTypeId, statusId);
+        if (!CollectionUtils.isEmpty(query)) {
+            delete(projectId, issueTypeId, statusId);
+        }
+        if (!CollectionUtils.isEmpty(list)) {
+            for (StatusTransferSettingCreateVO settingCreateVO : list) {
+                if (SPECIFIER.equals(settingCreateVO.getType()) && !CollectionUtils.isEmpty(settingCreateVO.getUserIds())) {
+                    for (Long userId : settingCreateVO.getUserIds()) {
+                        StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO(issueTypeId, statusId, projectId, settingCreateVO.getType());
+                        statusTransferSettingDTO.setUserId(userId);
+                        baseInsert(statusTransferSettingDTO);
+                    }
+                } else {
+                    StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO(issueTypeId, statusId, projectId, settingCreateVO.getType());
+                    baseInsert(statusTransferSettingDTO);
+                }
+            }
+            StatusDTO statusDTO = new StatusDTO();
+            statusDTO.setId(statusId);
+            statusDTO.setObjectVersionNumber(objectVersionNumber);
+            String[] fieldList = {"objectVersionNumber"};
+            updateStatusVersionNumber(statusDTO,fieldList);
+        }
+    }
+
+    private void updateStatusVersionNumber(StatusDTO statusDTO, String[] fieldList) {
+        if (statusMapper.updateOptional(statusDTO, fieldList) != 1) {
+            throw new CommonException("error.update.status");
+        }
+    }
+    @Override
+    public List<StatusTransferSettingDTO> query(Long projectId, Long issueTypeId, Long statusId) {
+        StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO();
+        statusTransferSettingDTO.setStatusId(statusId);
+        statusTransferSettingDTO.setProjectId(projectId);
+        statusTransferSettingDTO.setIssueTypeId(issueTypeId);
+        return statusTransferSettingMapper.select(statusTransferSettingDTO);
+    }
+
+    @Override
+    public void delete(Long projectId, Long issueTypeId, Long statusId) {
+        StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO();
+        statusTransferSettingDTO.setStatusId(statusId);
+        statusTransferSettingDTO.setProjectId(projectId);
+        statusTransferSettingDTO.setIssueTypeId(issueTypeId);
+        statusTransferSettingMapper.delete(statusTransferSettingDTO);
+    }
+
+    @Override
+    public List<StatusTransferSettingVO> listByStatusIds(Long projectId, Long issueTypeId, List<Long> statusIds) {
+        if (CollectionUtils.isEmpty(statusIds)) {
+            throw new CommonException("error.statusIds.null");
+        }
+        List<StatusTransferSettingDTO> dtos = statusTransferSettingMapper.listByStatusId(projectId,issueTypeId,statusIds);
+        if(CollectionUtils.isEmpty(dtos)){
+           return new ArrayList<>();
+        }
+        Set<Long> userIds = dtos.stream().filter(v -> !ObjectUtils.isEmpty(v.getUserId())).map(StatusTransferSettingDTO::getUserId).collect(Collectors.toSet());
+        Map<Long,UserDTO> userDTOMap = new HashMap<>();
+        if(!CollectionUtils.isEmpty(userIds)){
+            List<UserDTO> userDTOS = userService.listUsersByIds(userIds.toArray(new Long[userIds.size()]));
+            userDTOMap.putAll(userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity())));
+        }
+        return statusTransferSettingAssembler.listDTOToVO(dtos,userDTOMap);
+    }
+
+    private void baseInsert(StatusTransferSettingDTO statusTransferSettingDTO) {
+        if (statusTransferSettingMapper.insertSelective(statusTransferSettingDTO) != 1) {
+            throw new CommonException("error.insert.status.transfer.setting");
+        }
+    }
+}

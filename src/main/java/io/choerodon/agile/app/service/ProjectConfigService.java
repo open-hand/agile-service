@@ -2,6 +2,8 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.ProjectConfigDTO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -199,4 +201,16 @@ public interface ProjectConfigService {
      * @param statusId
      */
     void deleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId,Long statusId);
+
+    /**
+     * 查询自定义流转列表
+     *
+     * @param projectId
+     * @param issueTypeId
+     * @param applyType
+     * @param pageRequest
+     * @param param
+     * @return
+     */
+    Page<StatusSettingVO> statusTransformSettingList(Long projectId, Long issueTypeId, PageRequest pageRequest, String param, String applyType);
 }

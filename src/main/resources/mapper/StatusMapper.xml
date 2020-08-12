@@ -136,4 +136,21 @@
          AND smn.status_id = fs.id
          AND smn.state_machine_id = #{stateMachineId}
     </select>
+
+    <select id="listStatusTransferByStateMachineId" resultType="io.choerodon.agile.api.vo.StatusSettingVO">
+         select
+           fs.id,
+           fs.name,
+           fs.code,
+           fs.type,
+           fs.object_version_number
+         from fd_status fs,fd_state_machine_node smn
+         where fs.organization_id = #{organizationId}
+         AND smn.organization_id = fs.organization_id
+         AND smn.status_id = fs.id
+         AND smn.state_machine_id = #{stateMachineId}
+         <if test="param != null">
+             fs.name LIKE CONCAT(CONCAT('%', #{param}), '%')
+         </if>
+    </select>
 </mapper>
