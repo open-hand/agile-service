@@ -36,7 +36,6 @@ function PriorityField({ onChange }) {
           setValue(Math.random());
         }
       }}
-      filter
       onChange={onChange}
       value={value}
       getPopupContainer={(triggerNode) => triggerNode.parentNode}

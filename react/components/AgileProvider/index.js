@@ -3,7 +3,6 @@ import React, {
   useContext, useRef, useEffect, useState,
 } from 'react';
 import { stores } from '@choerodon/boot';
-import { IssueTypeContext } from '@/hooks/useIssueTypes';
 import { DefaultPriorityContext } from '@/hooks/useDefaultPriority';
 import { PriorityContext } from '@/hooks/usePriorities';
 import { IsOwnerContext } from '@/hooks/useIsOwner';
@@ -41,7 +40,6 @@ const AgileProvider = (contexts) => function AgileDataProvider({ children, proje
 };
 
 export default AgileProvider([
-  IssueTypeContext,
   DefaultPriorityContext,
   PriorityContext,
   IsOwnerContext,
