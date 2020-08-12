@@ -7,9 +7,9 @@ databaseChangeLog(logicalFilePath: 'script/db/fd_ status_notice_setting.groovy')
             column(name: "issue_type_id", type: "bigint(20) unsigned",  remarks: "")  {constraints(nullable:"false")}
             column(name: "project_id", type: "bigint(20) unsigned",  remarks: "")  {constraints(nullable:"false")}
             column(name: "status_id", type: "bigint(20) unsigned",  remarks: "")  {constraints(nullable:"false")}
-            column(name: "user_type", type: "varchar(255)",  remarks: "")  {constraints(nullable:"false")}
+            column(name: "user_type", type: "varchar(255)",  remarks: "projectOwner, assignee, reporter, specifier")  {constraints(nullable:"false")}
             column(name: "user_id", type: "bigint(20) unsigned",  remarks: "")
-            column(name: "notice_type", type: "varchar(255)",  remarks: "projectOwner, assignee, reporter, specifier")  {constraints(nullable:"false")}
+            column(name: "notice_type", type: "varchar(255)",  remarks: "")  {constraints(nullable:"false")}
             column(name: "object_version_number", type: "bigint(20) unsigned",   defaultValue:"1",   remarks: "")
             column(name: "created_by", type: "bigint(20) unsigned",   defaultValue:"0",   remarks: "")
             column(name: "creation_date", type: "datetime",   defaultValueComputed:"CURRENT_TIMESTAMP",   remarks: "")
