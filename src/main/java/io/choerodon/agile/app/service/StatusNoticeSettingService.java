@@ -1,5 +1,7 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
+
 /**
  * 邮件通知应用服务
  *
@@ -7,4 +9,7 @@ package io.choerodon.agile.app.service;
  */
 public interface StatusNoticeSettingService {
 
+    StatusNoticeSettingVO detail(Long projectId, Long issueTypeId, Long statusId);
+
+    void save(Long projectId, StatusNoticeSettingVO StatusNoticeSettingVO);
 }

@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.infra.dto.StatusNoticeSettingDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 
 /**
@@ -7,6 +8,6 @@ import io.choerodon.mybatis.common.BaseMapper;
  *
  * @author choerodon@choerodon.cn 2020-08-12 11:41:01
  */
-public interface StatusNoticeSettingMapper extends BaseMapper<qwe.domain.entity.StatusNoticeSetting> {
+public interface StatusNoticeSettingMapper extends BaseMapper<StatusNoticeSettingDTO> {
 
 }
