@@ -2,7 +2,7 @@ import {
   observable, runInAction, action, computed,
 } from 'mobx';
 import { findIndex, find } from 'lodash';
-import { statusTransformApi, IStatusCirculation } from '@/api';
+import { statusTransformApi, IStatusCirculation, IUpdateTransform } from '@/api';
 import { IStatus } from '@/common/types';
 import takeLast from '@/utils/takeLast';
 
@@ -96,6 +96,10 @@ class StatusCirculationStore {
     this.actions.clear();
   }
 
+  @action clearStatusActions(statusId:IStatus['id']) {
+    this.actions.delete(statusId);
+  }
+
   @computed
   get hasAction() {
     for (const actions of this.actions.values()) {
@@ -104,6 +108,47 @@ class StatusCirculationStore {
       }
     }
     return false;
+  }
+
+  @computed
+  get statusMap() {
+    return this.statusList.reduce((map, status) => {
+      map.set(status.id, status);
+      return map;
+    }, new Map<IStatus['id'], IStatusCirculation>());
+  }
+
+  @computed
+  get needSubmitActions(): IUpdateTransform[] {
+    const result: IUpdateTransform[] = [];
+    const { statusMap } = this;
+    for (const [from, actions] of this.actions.entries()) {
+      if (actions && actions.length > 0) {
+        const fromStatus = statusMap.get(from);
+        if (fromStatus) {
+          actions.forEach((singleAction) => {
+            const { to, type } = singleAction;
+            const toStatus = statusMap.get(to);
+            if (toStatus) {
+              result.push({
+                startNodeId: fromStatus.nodeId,
+                endNodeId: toStatus.nodeId,
+                startStatusName: fromStatus.name,
+                endStatusName: toStatus.name,
+                select: type === 'check',
+              });
+            }
+          });
+        }
+      }
+    }
+    return result;
+  }
+
+  async batchUpdateStatusTransform(issueTypeId: string) {
+    await statusTransformApi.batchUpdate(issueTypeId, this.needSubmitActions);
+    this.clearActions();
+    this.getStatusList(issueTypeId);
   }
 }
 export default StatusCirculationStore;

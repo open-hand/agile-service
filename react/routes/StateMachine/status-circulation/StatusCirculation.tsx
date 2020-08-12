@@ -30,8 +30,9 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           icon="playlist_add"
           onClick={() => {
             openSelectExistStatus({
+              issueTypeId: selectedType,
               onSubmit: () => {
-
+                refresh();
               },
             });
           }}
@@ -44,7 +45,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
             openCreateStatus({
               selectedIssueType: [selectedType],
               onSubmit: () => {
-
+                refresh();
               },
             });
           }}

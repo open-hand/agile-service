@@ -5,8 +5,7 @@ import {
   Modal, Form, DataSet, SelectBox,
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { getProjectId } from '@/utils/common';
-import { IStatus } from '@/common/types';
+import { statusTransformApiConfig } from '@/api';
 import SelectStatus from '../select-status';
 import './index.less';
 
@@ -14,25 +13,22 @@ const { Option } = SelectBox;
 const key = Modal.key();
 interface Props {
   onSubmit: Function
+  issueTypeId: string
   modal?: any
 }
 const SelectExistStatus: React.FC<Props> = ({
-  modal, onSubmit,
+  modal, onSubmit, issueTypeId,
 }) => {
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     transport: {
-      create: {
-        url: `/agile/v1/projects/${getProjectId()}/issue_status`,
-        method: 'post',
-        params: {
-          applyType: 'agile',
-        },
-        transformRequest: (([data]) => JSON.stringify({
-          ...data,
-          projectId: getProjectId(),
-          enable: true,
-        })),
+      create: ({ data: dataArray }) => {
+        const data = dataArray[0];
+        return statusTransformApiConfig.linkStatus({
+          issueTypeId,
+          statusId: data.statusId,
+          defaultStatus: data.default,
+        });
       },
     },
     fields: [
@@ -55,11 +51,13 @@ const SelectExistStatus: React.FC<Props> = ({
   }), []);
 
   const handleSubmit = useCallback(async () => {
-    const success = await dataSet.submit();
-    if (success) {
+    try {
+      await dataSet.submit();
       onSubmit();
+      return true;
+    } catch (error) {
+      return false;
     }
-    return success;
   }, [dataSet, onSubmit]);
   useEffect(() => {
     modal.handleOk(handleSubmit);
@@ -77,7 +75,7 @@ const SelectExistStatus: React.FC<Props> = ({
     </>
   );
 };
-const openSelectExistStatus = ({ onSubmit }: Pick<Props, 'onSubmit'>) => {
+const openSelectExistStatus = (props: Omit<Props, 'modal'>) => {
   Modal.open({
     title: '添加已有状态',
     key,
@@ -86,7 +84,7 @@ const openSelectExistStatus = ({ onSubmit }: Pick<Props, 'onSubmit'>) => {
       width: 380,
     },
 
-    children: <SelectExistStatus onSubmit={onSubmit} />,
+    children: <SelectExistStatus {...props} />,
   });
 };
 export default openSelectExistStatus;
