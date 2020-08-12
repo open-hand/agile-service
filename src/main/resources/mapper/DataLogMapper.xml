@@ -128,7 +128,9 @@
             #{issueId}
         </foreach>
         AND field = #{field}
-        AND adl.creation_date >= #{startDate}
+        <if test="field == 'resolution'">
+          AND adl.creation_date >= #{startDate}
+        </if>
         AND adl.creation_date &lt;= #{endDate}
         AND adl.new_value IS NOT NULL
     </select>
