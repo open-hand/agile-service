@@ -40,6 +40,21 @@ class PageConfigApi {
   }
 
   /**
+   * 根据问题类型id查询字段
+   * @param issueTypeId
+   */
+  loadFieldsByType(issueTypeId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefixOrgOrPro}/field_value/list/fields`,
+      params: {
+        issueTypeId,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  /**
    * 根据问题类型加载页面配置
    * @param issueType
    */

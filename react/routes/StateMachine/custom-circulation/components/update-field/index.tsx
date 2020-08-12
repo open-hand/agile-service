@@ -8,29 +8,14 @@ import {
 import { getProjectId } from '@/utils/common';
 import { find } from 'lodash';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
-import { fieldApi } from '@/api';
+import { fieldApi, pageConfigApi } from '@/api';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { Priority } from '@/common/types';
+import { Priority, IField } from '@/common/types';
 import renderField from './renderField';
 import styles from './index.less';
 
 const { Option } = Select;
-
-interface FieldOption {
-  id: string,
-  fieldId: string,
-  code: string,
-  value: string,
-}
-interface IField {
-  code: string,
-  fieldOptions?: FieldOption[],
-  fieldType: string,
-  fieldTypeName?: string,
-  id: string,
-  name: string,
-}
 
 const systemFields = new Map([
   ['assigneeId', {
@@ -151,12 +136,24 @@ function formatFields(fieldData, data, dataSet) {
   return temp;
 }
 // @ts-ignore
-const UpdateField = ({ modal, isProgram }) => {
+const UpdateField = ({ modal, isProgram, selectedType }) => {
+  console.log('isProgram, selectedType：');
+  console.log(isProgram, selectedType);
   const [fieldData, setFieldData] = useState<IField[]>([]);
   const [updateCount, setUpdateCount] = useState<number>(0);
   useEffect(() => {
+    pageConfigApi.loadFieldsByType(selectedType).then((res: IField[]) => {
+      console.log('res：');
+      console.log(res);
+    });
+  }, [selectedType]);
+  useEffect(() => {
     const getCustomFields = async () => {
       const fields = await fieldApi.getCustomFields();
+      console.log('field Data：');
+      console.log([...(
+        isProgram ? programSystemFields.values() : systemFields.values()
+      ), ...fields]);
       setFieldData([...(
         isProgram ? programSystemFields.values() : systemFields.values()
       ), ...fields]);

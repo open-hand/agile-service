@@ -3,10 +3,11 @@ import { DataSet, Form, Select } from 'choerodon-ui/pro';
 import SelectUser from '@/components/select/select-user';
 import { observer } from 'mobx-react-lite';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { statusTransformApi } from '@/api';
 import styles from './index.less';
 
 // @ts-ignore
-const NotifySetting = ({ modal, record }) => {
+const NotifySetting = ({ modal, record, selectedType }) => {
   const memberOptionsDataSet = useMemo(() => new DataSet({
     data: [
       { code: 'owner', label: '项目所有者' },
@@ -66,6 +67,13 @@ const NotifySetting = ({ modal, record }) => {
   }), [memberOptionsDataSet, notifyMethodDataSet]);
 
   useEffect(() => {
+    const { current } = notifySettingDataSet;
+    // @ts-ignore
+    statusTransformApi.getNotifySetting(selectedType, record.get('id')).then((res) => {
+      current?.set('member', res.member);
+      current?.set('assigners', res.assigners);
+      current?.set('notifyMethod', res.notifyMethod);
+    });
     const handleOk = async () => {
       const validate = await notifySettingDataSet.validate();
       const data = notifySettingDataSet.toData();
