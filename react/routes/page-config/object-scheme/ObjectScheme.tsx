@@ -59,6 +59,12 @@ const showIcons: any = {
     typeCode: 'sub_task',
     name: '子任务',
   },
+  需求: {
+    icon: 'highlight',
+    colour: 'rgba(246,127,90,1)',
+    typeCode: 'backlog',
+    name: '需求',
+  },
 };
 
 const createModelKey = Modal.key();

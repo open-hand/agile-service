@@ -1,22 +1,23 @@
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 
-const SortTableDataSet = () => ({
-  autoQuery: true,
-  dataKey: 'content',
+const SortTableDataSet = (): DataSetProps => ({
+  autoQuery: false,
+  // dataKey: 'content',
   paging: false,
   selection: undefined,
   fields: [
     { name: 'fieldName', type: 'string' as FieldType, label: '字段名称' },
     { name: 'defaultValue', type: 'string' as FieldType, label: '默认值' },
-    { name: 'require', type: 'boolean' as FieldType, label: '必填' },
-    { name: 'edit', type: 'boolean' as FieldType, label: '加入到编辑页' },
-    { name: 'create', type: 'boolean' as FieldType, label: '加入到创建页' },
+    { name: 'required', type: 'boolean' as FieldType, label: '必填' },
+    { name: 'edited', type: 'boolean' as FieldType, label: '加入到编辑页' },
+    { name: 'created', type: 'boolean' as FieldType, label: '加入到创建页' },
   ],
-  transport: {
-    read: {
-      url: '/agile/v1/projects/1528/page_field/list?organizationId=7&pageCode=agile_issue_edit',
-      method: 'get',
+
+  events: {
+    update: ({ value }: { value: any }) => {
     },
   },
+
 });
 export default SortTableDataSet;
