@@ -23,6 +23,7 @@ const IssueTypeTab: React.FC<Props> = ({ selectedType, setSelectedType }) => {
     setSelected(id);
   }, [setSelectedType]);
 
+  // console.log(isProgram, issueTypes);
   const types = !isProgram ? issueTypes.filter((item:IIssueType) => item.typeCode !== 'feature') : issueTypes;
 
   useEffect(() => {

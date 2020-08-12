@@ -8,7 +8,6 @@ import {
 import { getProjectId } from '@/utils/common';
 import { find } from 'lodash';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import { fieldApi } from '@/api';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
@@ -90,6 +89,33 @@ const systemFields = new Map([
   }],
 ]);
 
+const programSystemFields = new Map([
+  ['reporterId', {
+    id: 'reporterId',
+    code: 'reporterId',
+    name: '报告人',
+    fieldType: 'member',
+  }],
+  ['teamProjectIds', {
+    id: 'teamProjectIds',
+    code: 'teamProjectIds',
+    name: '负责的子项目',
+    fieldType: 'multiple',
+  }],
+
+  ['benfitHypothesis', {
+    id: 'benfitHypothesis',
+    code: 'benfitHypothesis',
+    name: '特性价值',
+    fieldType: 'input',
+  }],
+  ['acceptanceCritera', {
+    id: 'acceptanceCritera',
+    code: 'acceptanceCritera',
+    name: '验收标准',
+    fieldType: 'input',
+  }],
+]);
 // @ts-ignore
 function transformValue(dataSet, key, value, format) {
   if (!value || !format) {
@@ -125,16 +151,18 @@ function formatFields(fieldData, data, dataSet) {
   return temp;
 }
 // @ts-ignore
-const UpdateField = ({ modal }) => {
+const UpdateField = ({ modal, isProgram }) => {
   const [fieldData, setFieldData] = useState<IField[]>([]);
   const [updateCount, setUpdateCount] = useState<number>(0);
   useEffect(() => {
     const getCustomFields = async () => {
       const fields = await fieldApi.getCustomFields();
-      setFieldData([...systemFields.values(), ...fields]);
+      setFieldData([...(
+        isProgram ? programSystemFields.values() : systemFields.values()
+      ), ...fields]);
     };
     getCustomFields();
-  }, []);
+  }, [isProgram]);
   const [fields, Field] = useFields();
   const [loading, setLoading] = useState(false);
 
@@ -275,16 +303,15 @@ const UpdateField = ({ modal }) => {
 
   const data = getData();
   const render = () => (
-    <>
-      <Form
-        className={styles.form}
+    <Form
+      className={styles.form}
         // disabled={Boolean(loading)}
-        dataSet={dataSet}
-        style={{
-          maxHeight: 400, overflowY: 'auto', overflowX: 'hidden',
-        }}
-      >
-        {
+      dataSet={dataSet}
+      style={{
+        maxHeight: 400, overflowY: 'auto', overflowX: 'hidden',
+      }}
+    >
+      {
           // @ts-ignore
         fields.map((f) => {
           const { key, id } = f;
@@ -337,18 +364,17 @@ const UpdateField = ({ modal }) => {
           );
         })
       }
-        <div>
-          <Button
+      <div>
+        <Button
             // @ts-ignore
-            onClick={Field.add}
-            icon="add"
-            color={'blue' as ButtonColor}
-          >
-            添加字段
-          </Button>
-        </div>
-      </Form>
-    </>
+          onClick={Field.add}
+          icon="add"
+          color={'blue' as ButtonColor}
+        >
+          添加字段
+        </Button>
+      </div>
+    </Form>
   );
   return (
     <div className={styles.updateField}>
