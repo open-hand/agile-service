@@ -548,6 +548,26 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     @Override
+    public String queryRank(Long organizationId, Long projectId, AdjustOrderVO adjustOrderVO) {
+        String issueType = adjustOrderVO.getIssueType();
+        ObjectSchemeFieldExtendDTO target = objectSchemeFieldExtendMapper.selectByPrimaryKey(adjustOrderVO.getOutsetFieldId());
+        if (ObjectUtils.isEmpty(target)) {
+            throw new CommonException("error.extend.field.not.existed");
+        }
+        String targetRank = target.getRank();
+        if (adjustOrderVO.getBefore()) {
+            return RankUtil.genNext(targetRank);
+        } else {
+            String previousRank = objectSchemeFieldExtendMapper.selectPreviousRank(organizationId, projectId, issueType, targetRank);
+            if (ObjectUtils.isEmpty(previousRank)) {
+                return RankUtil.genPre(targetRank);
+            } else {
+                return RankUtil.between(targetRank, previousRank);
+            }
+        }
+    }
+
+    @Override
     public ObjectSchemeFieldDTO selectById(Long fieldId) {
         return objectSchemeFieldMapper.selectByPrimaryKey(fieldId);
     }
@@ -619,8 +639,25 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     @Override
-    public List<PageConfigVO> listConfigs(Long organizationId, Long projectId, String issueType) {
-        return objectSchemeFieldExtendMapper.listConfigs(organizationId, projectId, issueType);
+    public PageConfigVO listConfigs(Long organizationId, Long projectId, String issueType) {
+        PageConfigVO result = new PageConfigVO();
+        List<PageConfigFieldVO> pageConfigFields = objectSchemeFieldExtendMapper.listConfigs(organizationId, projectId, issueType);
+        result.setFields(pageConfigFields);
+        if (!ObjectUtils.isEmpty(projectId)) {
+            Map<String, Long> issueTypeMap = getIssueTypeMap(organizationId);
+            Long issueTypeId = issueTypeMap.get(issueType);
+            if (ObjectUtils.isEmpty(issueTypeId)) {
+                throw new CommonException("error.issue.type.not.existed");
+            }
+            IssueTypeFieldDTO dto = new IssueTypeFieldDTO();
+            dto.setIssueTypeId(issueTypeId);
+            dto.setProjectId(projectId);
+            List<IssueTypeFieldDTO> list = issueTypeFieldMapper.select(dto);
+            if (!list.isEmpty()) {
+                result.setIssueTypeFieldVO(modelMapper.map(list.get(0), IssueTypeFieldVO.class));
+            }
+        }
+        return result;
     }
 
     private void updateTemplate(Long organizationId, Long projectId, String issueType, IssueTypeFieldVO issueTypeFieldVO) {

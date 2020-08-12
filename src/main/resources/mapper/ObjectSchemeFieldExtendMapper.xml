@@ -64,7 +64,7 @@
     </select>
 
 
-    <select id="listConfigs" resultType="io.choerodon.agile.api.vo.PageConfigVO">
+    <select id="listConfigs" resultType="io.choerodon.agile.api.vo.PageConfigFieldVO">
         select
         t4.id,
         t4.field_id,
@@ -111,5 +111,21 @@
         from fd_object_scheme_field_extend
         where organization_id = #{organizationId}
         and project_id is not null
+    </select>
+
+    <select id="selectPreviousRank" resultType="java.lang.String">
+        select max(rank)
+        from fd_object_scheme_field_extend
+        where organization_id = #{organizationId}
+        and issue_type = #{issueType}
+        <choose>
+            <when test="projectId != null">
+                and project_id = #{projectId}
+            </when>
+            <otherwise>
+                and project_id is null
+            </otherwise>
+        </choose>
+        and rank &lt; #{targetRank}
     </select>
 </mapper>

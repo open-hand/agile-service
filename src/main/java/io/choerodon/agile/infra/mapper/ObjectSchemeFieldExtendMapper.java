@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.agile.api.vo.PageConfigVO;
+import io.choerodon.agile.api.vo.PageConfigFieldVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -47,9 +47,9 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
      * @param issueType
      * @return
      */
-    List<PageConfigVO> listConfigs(@Param("organizationId") Long organizationId,
-                                   @Param("projectId") Long projectId,
-                                   @Param("issueType") String issueType);
+    List<PageConfigFieldVO> listConfigs(@Param("organizationId") Long organizationId,
+                                        @Param("projectId") Long projectId,
+                                        @Param("issueType") String issueType);
 
     /**
      * 批量更新组织下的required字段
@@ -71,4 +71,17 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
      * @return
      */
     Set<Long> selectProjectIdsByOrganizationId(@Param("organizationId") Long organizationId);
+
+    /**
+     * 查询targetRank之前最大的rank值
+     * @param organizationId
+     * @param projectId
+     * @param issueType
+     * @param targetRank
+     * @return
+     */
+    String selectPreviousRank(@Param("organizationId") Long organizationId,
+                              @Param("projectId") Long projectId,
+                              @Param("issueType") String issueType,
+                              @Param("targetRank") String targetRank);
 }

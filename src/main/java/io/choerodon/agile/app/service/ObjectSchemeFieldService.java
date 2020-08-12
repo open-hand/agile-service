@@ -21,6 +21,7 @@ public interface ObjectSchemeFieldService {
     List<ObjectSchemeFieldDTO> listQuery(Long organizationId, Long projectId, ObjectSchemeFieldSearchVO searchDTO);
 
     ObjectSchemeFieldDTO queryByFieldCode(Long organizationId, Long projectId, String fieldCode);
+
     /**
      * 组织层/项目层 获取字段列表
      *
@@ -115,7 +116,7 @@ public interface ObjectSchemeFieldService {
      * @param issueType
      * @return
      */
-    List<PageConfigVO> listConfigs(Long organizationId, Long projectId, String issueType);
+    PageConfigVO listConfigs(Long organizationId, Long projectId, String issueType);
 
     /**
      * 查询字段及字段配置
@@ -136,4 +137,14 @@ public interface ObjectSchemeFieldService {
      * @param required
      */
     void updateRequired(Long organizationId, Long projectId, Long fieldId, Boolean required);
+
+    /**
+     * 查询rank值
+     *
+     * @param organizationId
+     * @param projectId
+     * @param adjustOrderVO
+     * @return
+     */
+    String queryRank(Long organizationId, Long projectId, AdjustOrderVO adjustOrderVO);
 }

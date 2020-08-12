@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -121,9 +120,9 @@ public class ProjectObjectSchemeFieldController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询字段的页面配置数据")
     @GetMapping(value = "/configs")
-    public ResponseEntity<List<PageConfigVO>> listConfigs(@PathVariable(name = "project_id") Long projectId,
-                                                          @RequestParam Long organizationId,
-                                                          @RequestParam String issueType) {
+    public ResponseEntity<PageConfigVO> listConfigs(@PathVariable(name = "project_id") Long projectId,
+                                                    @RequestParam Long organizationId,
+                                                    @RequestParam String issueType) {
         return new ResponseEntity<>(objectSchemeFieldService.listConfigs(organizationId, projectId, issueType), HttpStatus.OK);
     }
 

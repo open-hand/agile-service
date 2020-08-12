@@ -75,7 +75,7 @@ public class FixDataServiceImpl implements FixDataService {
         int count = 0;
         for (Long projectId : projectIds) {
             ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
-            LOGGER.info("项目id:{}，项目信息:{}", projectId, project.toString());
+            LOGGER.info("项目id:{}，项目信息:{}", projectId, project);
             if (!project.getCode().equals("def-ops-proj") || !project.getCategory().equals(ProjectCategory.GENERAL) || !project.getCreatedBy().equals(0L)) {
                 LOGGER.info("项目id:{}，该项目不符合规定，跳过", projectId);
                 continue;
@@ -160,6 +160,11 @@ public class FixDataServiceImpl implements FixDataService {
 
         fixStateMachineByIssueTypeId();
         LOGGER.info("修复数据完成,耗时{}",System.currentTimeMillis() - l);
+    }
+
+    @Override
+    public void fixPage() {
+
     }
 
     private  void fixStateMachineTransform(){
