@@ -1,24 +1,40 @@
+/* eslint-disable no-param-reassign */
 import React, {
   useMemo, ReactElement, useEffect, memo, useState, PropsWithChildren,
 } from 'react';
-import { observer } from 'mobx-react-lite';
+import { observer, useObservable } from 'mobx-react-lite';
 import {
   Table, DataSet, Icon, CheckBox, Spin, Output,
 } from 'choerodon-ui/pro/lib';
 import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
+import { ColumnProps } from 'choerodon-ui/pro/lib/table/Column';
+import {
+  DropResult, ResponderProvided, DraggableProvided, DraggableStateSnapshot, DraggableRubric,
+} from 'react-beautiful-dnd';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import OldSortTable from '../../../page/components/SortTable';
 import './index.less';
 import { usePageIssueTypeStore } from '../../stores';
 
 const { Column } = Table;
 interface Props {
-  disabled: boolean | undefined
+  disabled: boolean | undefined,
+  org?: number,
+  dataStatus: { code: string },
+}
+interface DragRenderCloneProps {
+  provided: DraggableProvided, // DraggableProvided,
+  snapshot: DraggableStateSnapshot, // DraggableStateSnapshot,
+  rubric: DraggableRubric,
+  key: any,
+  record: Record,
+  column: ColumnProps[],
 }
 const prefixCls = 'c7n-page-issue-detail';
-const SortTable: React.FC<Props> = ({ disabled }) => {
+const SortTable: React.FC<Props> = ({ disabled, dataStatus, org = 23 }) => {
   const { sortTableDataSet } = usePageIssueTypeStore();
-
+  // const [dataStatus, setDataStatus] = useState<string>();
   const renderFieldName = ({ value }: RenderProps) => (
     <div>
       {!disabled && <Icon type="baseline-drag_indicator" />}
@@ -26,7 +42,9 @@ const SortTable: React.FC<Props> = ({ disabled }) => {
     </div>
   );
 
-  function renderCheckBox({ value, name, record }: RenderProps) {
+  function renderCheckBox({
+    value, name, record, dataSet,
+  }: RenderProps) {
     return (
       <CheckBox
         disabled={disabled}
@@ -35,6 +53,14 @@ const SortTable: React.FC<Props> = ({ disabled }) => {
         onChange={(val) => {
           console.log('val', val, name);
           record?.set(name as String, val);
+          // console.log('dataSet?.dirty', dataSet?.dirty);
+          if (dataStatus.code !== 'drag_update' && dataSet?.dirty) {
+            // setDataStatus('update');
+            dataStatus.code = 'update';
+          } else if (dataStatus.code !== 'drag_update' && !dataSet?.dirty) {
+            // setDataStatus('ready');
+            dataStatus.code = 'ready';
+          }
         }}
       />
     );
@@ -110,6 +136,30 @@ const SortTable: React.FC<Props> = ({ disabled }) => {
       },
     ];
   };
+  const renderClone = ({
+    provided,
+    snapshot,
+    key,
+    record,
+    column,
+  }: DragRenderCloneProps) => (
+    <tr
+      key={key}
+      {...provided.draggableProps}
+      {...provided.dragHandleProps}
+      style={provided.draggableProps.style}
+      className={`${prefixCls}-drag`}
+    >
+      {column.map((item: any) => (
+        <div className={`${prefixCls}-drag-item`}>
+          {item.renderer
+            ? item.renderer({ record, name: item.name, value: record.get(item.name) })
+            : record.get(item.name)}
+        </div>
+      ))}
+
+    </tr>
+  );
   return (
     <div className={prefixCls}>
       {/* <Spin dataSet={sortTableDataSet}>
@@ -127,33 +177,18 @@ const SortTable: React.FC<Props> = ({ disabled }) => {
         queryBar={'none' as TableQueryBarType}
         dragRow={!disabled}
         // @ts-ignore
+        onDragEnd={(
+          dataSet: DataSet, columns: ColumnProps[],
+          resultDrag: DropResult, provided: ResponderProvided,
+        ) => {
+          if (dataStatus.code !== 'drag_update') {
+            // setDataStatus('drag_update');
+            dataStatus.code = 'drag_update';
+          }
+        }}
         rowDragRender={{
-          renderClone: ({
-            provided,
-            snapshot,
-            key,
-            // @ts-ignore
-            record,
-            // @ts-ignore
-            column,
-          }) => (
-            <tr
-              key={key}
-              {...provided.draggableProps}
-              {...provided.dragHandleProps}
-              style={provided.draggableProps.style}
-              className={`${prefixCls}-drag`}
-            >
-              {column.map((item: any) => (
-                <div className={`${prefixCls}-drag-item`}>
-                  {item.renderer
-                    ? item.renderer({ record, name: item.name, value: record.get(item.name) })
-                    : record.get(item.name)}
-                </div>
-              ))}
-
-            </tr>
-          ),
+          // @ts-ignore
+          renderClone,
         }}
         // rowDragRender
         //   rowDragRender={{
@@ -169,9 +204,9 @@ const SortTable: React.FC<Props> = ({ disabled }) => {
       >
         <Column name="fieldName" renderer={renderFieldName} />
         <Column name="defaultValue" />
-        <Column name="require" width={70} renderer={renderCheckBox} />
-        <Column name="edit" width={130} renderer={renderCheckBox} />
-        <Column name="create" width={130} renderer={renderCheckBox} />
+        <Column name="required" width={70} renderer={renderCheckBox} />
+        <Column name="edited" width={130} renderer={renderCheckBox} />
+        <Column name="created" width={130} renderer={renderCheckBox} />
       </Table>
     </div>
   );

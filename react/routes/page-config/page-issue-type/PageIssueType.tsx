@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   TabPage as Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
-import { Button, SelectBox } from 'choerodon-ui/pro/lib';
+import { Button, SelectBox, Modal } from 'choerodon-ui/pro/lib';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { ViewMode } from 'choerodon-ui/pro/lib/radio/enum';
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
 import { observer, useObservable } from 'mobx-react-lite';
+import { pageConfigApi, PageConfigIssueType } from '@/api/PageConfig';
 import styles from './index.less';
 import IssueTypeWrap from './components/issue-type-wrap';
 import SortTable from './components/sort-table';
@@ -24,6 +25,8 @@ function PageIssueType(params: any) {
   const [currentType, setCurrentType] = useState<string>('feature');
   const [desValue, setDesValue] = useState<string[]>();
   const current = useObservable({ val: 'feature' });
+  const dataStatus = useObservable({ code: '' }); // 是否有更改内容
+
   const handleCancel = () => {
     setDesValue([]);
     sortTableDataSet.reset();
@@ -33,6 +36,33 @@ function PageIssueType(params: any) {
     console.log('save…………', desValue, sortTableDataSet.toData());
     return true;
   }
+  const loadData = () => {
+    pageConfigApi.loadByIssueType(currentType as PageConfigIssueType).then((res: object[]) => {
+      sortTableDataSet.loadData(res);
+    });
+  };
+  useEffect(() => {
+
+  }, []);
+  useEffect(() => {
+    if (edit && (dataStatus.code === 'update' || dataStatus.code === 'drag_update')) {
+      Modal.confirm({
+        title: '是否放弃更改？',
+        children: (
+          <div>
+            页面有未保存的内容，切换则放弃更改
+          </div>
+        ),
+        onOk: loadData(),
+      });
+    } else {
+      current.val = currentType;
+      loadData();
+    }
+  }, [currentType]);
+  const handleSelectBox = (val:any) => {
+
+  };
   return (
     <Page
       service={[
@@ -49,18 +79,18 @@ function PageIssueType(params: any) {
       </Header>
       <Breadcrumb />
       <Content>
-        <SelectBox mode={'button' as ViewMode} defaultValue="feature" onChange={(val) => setCurrentType(val)} className={`${preCls}-select-box`}>
+        <SelectBox mode={'button' as ViewMode} defaultValue="feature" value={current.val} onChange={setCurrentType} className={`${preCls}-select-box`}>
           <Option value="epic">史诗</Option>
           <Option value="feature">特性</Option>
           <Option value="story">故事</Option>
           <Option value="task">任务</Option>
           <Option value="sub_task">子任务</Option>
           <Option value="bug">缺陷</Option>
-          <Option value="demand">需求</Option>
+          <Option value="backlog">需求</Option>
         </SelectBox>
         <div className={styles.top}>
           <IssueTypeWrap title="字段配置">
-            <SortTable disabled={!edit} />
+            <SortTable disabled={!edit} dataStatus={dataStatus} />
           </IssueTypeWrap>
           <IssueTypeWrap title="描述信息格式">
             {edit ? (

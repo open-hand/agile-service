@@ -11,6 +11,8 @@ export const getOrganizationId = () => (AppState.currentMenuType
   ? AppState.currentMenuType.organizationId
   : 0);
 export const getApplyType = () => (AppState.currentMenuType.category === 'PROGRAM' ? 'program' : 'agile');
+export const getMenuType = () => (AppState.currentMenuType ? AppState.currentMenuType.type : '');
+
 // 选择主题
 export function configTheme({
   list = [],
