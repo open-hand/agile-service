@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import org.hzero.starter.keyencrypt.core.Encrypt;
+import java.util.List;
 
 /**
  * @author superlee
@@ -8,114 +8,23 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 public class PageConfigVO {
 
-    @Encrypt
-    private Long id;
+    private List<PageConfigFieldVO> fields;
 
-    private Long fieldId;
+    private IssueTypeFieldVO issueTypeFieldVO;
 
-    private String fieldName;
-
-    private String defaultValue;
-
-    private Boolean required;
-
-    private Boolean created;
-
-    private Boolean edited;
-
-    private String issueType;
-
-    private String rank;
-
-    private String createdLevel;
-
-    private Long objectVersionNumber;
-
-    public Long getObjectVersionNumber() {
-        return objectVersionNumber;
+    public List<PageConfigFieldVO> getFields() {
+        return fields;
     }
 
-    public void setObjectVersionNumber(Long objectVersionNumber) {
-        this.objectVersionNumber = objectVersionNumber;
+    public void setFields(List<PageConfigFieldVO> fields) {
+        this.fields = fields;
     }
 
-    public Long getId() {
-        return id;
+    public IssueTypeFieldVO getIssueTypeFieldVO() {
+        return issueTypeFieldVO;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getFieldId() {
-        return fieldId;
-    }
-
-    public void setFieldId(Long fieldId) {
-        this.fieldId = fieldId;
-    }
-
-    public String getFieldName() {
-        return fieldName;
-    }
-
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName;
-    }
-
-    public String getDefaultValue() {
-        return defaultValue;
-    }
-
-    public void setDefaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
-    }
-
-    public Boolean getRequired() {
-        return required;
-    }
-
-    public void setRequired(Boolean required) {
-        this.required = required;
-    }
-
-    public Boolean getCreated() {
-        return created;
-    }
-
-    public void setCreated(Boolean created) {
-        this.created = created;
-    }
-
-    public Boolean getEdited() {
-        return edited;
-    }
-
-    public void setEdited(Boolean edited) {
-        this.edited = edited;
-    }
-
-    public String getIssueType() {
-        return issueType;
-    }
-
-    public void setIssueType(String issueType) {
-        this.issueType = issueType;
-    }
-
-    public String getRank() {
-        return rank;
-    }
-
-    public void setRank(String rank) {
-        this.rank = rank;
-    }
-
-    public String getCreatedLevel() {
-        return createdLevel;
-    }
-
-    public void setCreatedLevel(String createdLevel) {
-        this.createdLevel = createdLevel;
+    public void setIssueTypeFieldVO(IssueTypeFieldVO issueTypeFieldVO) {
+        this.issueTypeFieldVO = issueTypeFieldVO;
     }
 }

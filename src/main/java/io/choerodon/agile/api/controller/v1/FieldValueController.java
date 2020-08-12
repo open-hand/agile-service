@@ -140,7 +140,7 @@ public class FieldValueController {
     @GetMapping("/list/fields")
     public ResponseEntity<List<ObjectSchemeFieldDetailVO>> listFieldsWithOptionals(@ApiParam(value = "项目id", required = true)
                                                                                    @PathVariable("project_id") Long projectId,
-                                                                                   @RequestParam Long issueTypeId,
+                                                                                   @RequestParam @Encrypt Long issueTypeId,
                                                                                    @RequestParam Long organizationId) {
         return new ResponseEntity<>(objectSchemeFieldService.listFieldsWithOptionals(projectId, issueTypeId, organizationId), HttpStatus.OK);
     }

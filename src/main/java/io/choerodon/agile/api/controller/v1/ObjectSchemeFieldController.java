@@ -12,10 +12,10 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -107,9 +107,9 @@ public class ObjectSchemeFieldController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "页面配置接口")
     @PostMapping(value = "/configs")
-    public ResponseEntity<Boolean> config(@ApiParam(value = "组织id", required = true)
-                                          @PathVariable("organization_id") Long organizationId,
-                                          @RequestBody PageConfigUpdateVO pageConfigUpdateVO) {
+    public ResponseEntity config(@ApiParam(value = "组织id", required = true)
+                                 @PathVariable("organization_id") Long organizationId,
+                                 @RequestBody PageConfigUpdateVO pageConfigUpdateVO) {
         objectSchemeFieldService.config(organizationId, null, pageConfigUpdateVO);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -117,7 +117,7 @@ public class ObjectSchemeFieldController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "查询字段的页面配置数据")
     @GetMapping(value = "/configs")
-    public ResponseEntity<List<PageConfigVO>> listConfigs(@PathVariable("organization_id") Long organizationId,
+    public ResponseEntity<PageConfigVO> listConfigs(@PathVariable("organization_id") Long organizationId,
                                                           @RequestParam String issueType) {
         return new ResponseEntity<>(objectSchemeFieldService.listConfigs(organizationId, null, issueType), HttpStatus.OK);
     }
@@ -130,6 +130,14 @@ public class ObjectSchemeFieldController {
                                          @RequestParam Boolean required) {
         objectSchemeFieldService.updateRequired(organizationId, null, fieldId, required);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "拖动查询rank值接口")
+    @PostMapping(value = "/rank")
+    public ResponseEntity<String> queryRank(@PathVariable("organization_id") Long organizationId,
+                                            @RequestBody @Validated AdjustOrderVO adjustOrderVO) {
+        return new ResponseEntity<>(objectSchemeFieldService.queryRank(organizationId, null, adjustOrderVO), HttpStatus.OK);
     }
 
 }
