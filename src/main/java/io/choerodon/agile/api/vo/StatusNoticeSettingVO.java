@@ -1,8 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import javax.validation.constraints.NotNull;
 
@@ -43,10 +41,10 @@ public class StatusNoticeSettingVO extends AuditDomain {
     @NotNull
     private Long statusId;
     @ApiModelProperty(value = "用户类型，projectOwner, assignee, reporter, specifier")
-    private List<String> userTypeList = new ArrayList<>();
+    private Set<String> userTypeList = new HashSet<>();
     @ApiModelProperty(value = "用户id")
     @Encrypt
-    private List<Long> userIdList = new ArrayList<>();
+    private Set<Long> userIdList = new HashSet<>();
     @ApiModelProperty(value = "通知类型")
     private String noticeType;
 
@@ -74,19 +72,19 @@ public class StatusNoticeSettingVO extends AuditDomain {
         this.statusId = statusId;
     }
 
-    public List<String> getUserTypeList() {
+    public Set<String> getUserTypeList() {
         return userTypeList;
     }
 
-    public void setUserTypeList(List<String> userTypeList) {
+    public void setUserTypeList(Set<String> userTypeList) {
         this.userTypeList = userTypeList;
     }
 
-    public List<Long> getUserIdList() {
+    public Set<Long> getUserIdList() {
         return userIdList;
     }
 
-    public void setUserIdList(List<Long> userIdList) {
+    public void setUserIdList(Set<Long> userIdList) {
         this.userIdList = userIdList;
     }
 
