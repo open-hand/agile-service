@@ -11,6 +11,7 @@ public class PageConfigFieldVO {
     @Encrypt
     private Long id;
 
+    @Encrypt
     private Long fieldId;
 
     private String fieldName;

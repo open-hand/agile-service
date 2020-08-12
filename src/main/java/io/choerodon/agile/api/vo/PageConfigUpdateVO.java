@@ -14,7 +14,7 @@ public class PageConfigUpdateVO {
 
     private String issueType;
 
-    private List<Field> fields;
+    private List<PageConfigFieldVO> fields;
 
     private IssueTypeFieldVO issueTypeFieldVO;
 
@@ -45,65 +45,11 @@ public class PageConfigUpdateVO {
         this.issueType = issueType;
     }
 
-    public List<Field> getFields() {
+    public List<PageConfigFieldVO> getFields() {
         return fields;
     }
 
-    public void setFields(List<Field> fields) {
+    public void setFields(List<PageConfigFieldVO> fields) {
         this.fields = fields;
     }
-
-    public static class Field {
-        @Encrypt
-        private Long fieldId;
-
-        private Boolean required;
-
-        private Boolean created;
-
-        private Boolean edited;
-
-        private Long objectVersionNumber;
-
-        public Long getObjectVersionNumber() {
-            return objectVersionNumber;
-        }
-
-        public void setObjectVersionNumber(Long objectVersionNumber) {
-            this.objectVersionNumber = objectVersionNumber;
-        }
-
-        public Long getFieldId() {
-            return fieldId;
-        }
-
-        public void setFieldId(Long fieldId) {
-            this.fieldId = fieldId;
-        }
-
-        public Boolean getRequired() {
-            return required;
-        }
-
-        public void setRequired(Boolean required) {
-            this.required = required;
-        }
-
-        public Boolean getCreated() {
-            return created;
-        }
-
-        public void setCreated(Boolean created) {
-            this.created = created;
-        }
-
-        public Boolean getEdited() {
-            return edited;
-        }
-
-        public void setEdited(Boolean edited) {
-            this.edited = edited;
-        }
-    }
-
 }

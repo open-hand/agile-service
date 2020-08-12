@@ -575,7 +575,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     @Override
     public void config(Long organizationId, Long projectId, PageConfigUpdateVO pageConfigUpdateVO) {
         String issueType = pageConfigUpdateVO.getIssueType();
-        List<PageConfigUpdateVO.Field> fields = pageConfigUpdateVO.getFields();
+        List<PageConfigFieldVO> fields = pageConfigUpdateVO.getFields();
         IssueTypeFieldVO issueTypeFieldVO = pageConfigUpdateVO.getIssueTypeFieldVO();
         Set<Long> deleteIds = pageConfigUpdateVO.getDeleteIds();
 
@@ -689,7 +689,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         }
     }
 
-    private void updateFieldConfig(Long organizationId, Long projectId, String issueType, List<PageConfigUpdateVO.Field> fields) {
+    private void updateFieldConfig(Long organizationId, Long projectId, String issueType, List<PageConfigFieldVO> fields) {
         boolean onProjectLevel = (projectId != null);
         Map<String, Long> issueTypeMap = getIssueTypeMap(organizationId);
         fields.forEach(f -> {
@@ -718,6 +718,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                     dto.setRequired(f.getRequired());
                     dto.setCreated(f.getCreated());
                     dto.setEdited(f.getEdited());
+                    dto.setRank(f.getRank());
                     objectSchemeFieldExtendMapper.insertSelective(dto);
                 } else {
                     updateObjectSchemeFieldExtend(f, result);
@@ -734,11 +735,12 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         });
     }
 
-    private void updateObjectSchemeFieldExtend(PageConfigUpdateVO.Field field, List<ObjectSchemeFieldExtendDTO> result) {
+    private void updateObjectSchemeFieldExtend(PageConfigFieldVO field, List<ObjectSchemeFieldExtendDTO> result) {
         ObjectSchemeFieldExtendDTO target = result.get(0);
         target.setRequired(field.getRequired());
         target.setEdited(field.getEdited());
         target.setCreated(field.getCreated());
+        target.setRank(field.getRank());
         target.setObjectVersionNumber(field.getObjectVersionNumber());
         if (objectSchemeFieldExtendMapper.updateByPrimaryKeySelective(target) != 1) {
             throw new CommonException("error.page.config.field.update");
