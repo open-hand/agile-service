@@ -8,6 +8,7 @@ import { IStatus } from '@/common/types';
 import { Popconfirm } from 'choerodon-ui';
 import { TabComponentProps } from '../index';
 import openCreateStatus from '../components/create-status';
+import styles from './index.less';
 
 const { Column } = Table;
 const Status: React.FC<TabComponentProps> = ({ tab }) => {
@@ -57,7 +58,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
       </Header>
       <Content>
         {tab}
-        <Table key="user" dataSet={dataSet}>
+        <Table key="user" dataSet={dataSet} className={styles.table}>
           <Column name="name" />
           <Column
             name="type"

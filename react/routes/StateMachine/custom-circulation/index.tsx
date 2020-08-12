@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Page, Header, Content } from '@choerodon/boot';
 import {
@@ -7,9 +7,11 @@ import {
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Breadcrumb } from 'choerodon-ui';
 import { useIssueTypes } from '@/hooks';
-import { find } from 'lodash';
-import { IIssueType } from '@/common/types';
+import { find, filter } from 'lodash';
+import { IIssueType, User } from '@/common/types';
 import { useIsProgramContext } from '@/hooks/useIsProgrom';
+import { statusTransformApiConfig } from '@/api';
+import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import Condition from './components/condition';
 import Linkage from './components/linkage';
 import NotifySetting from './components/notify-setting';
@@ -32,20 +34,38 @@ interface ModalSettings {
   updateField: ISetting,
   notifySetting: ISetting,
 }
+
+interface IStatusTransferSettingVOS {
+  id: string,
+  issueTypeId: string
+  projectId: number
+  statusId: string
+  user: null | User
+  userId: null | string
+  userType: 'projectOwner' | 'specifier'
+}
 const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   const { isProgram } = useIsProgramContext();
   const [issueTypes] = useIssueTypes();
   const { selectedType, setSelectedType } = useStateMachineContext();
   const customCirculationDataSet = useMemo(() => new DataSet({
+    autoQuery: false,
+    transport: {
+      read: ({ data, params }) => (
+        statusTransformApiConfig.getCustomCirculationList(
+          selectedType, params.page, params.size, data.name,
+        )
+      ),
+    },
     selection: false,
     fields: [
       {
-        name: 'state',
+        name: 'name',
         label: '状态',
         type: 'string' as FieldType,
       },
       {
-        name: 'fieldsInfo',
+        name: 'statusTransferSettingVOS',
         label: '状态流转附加字段信息',
         type: 'array' as FieldType,
       },
@@ -57,22 +77,12 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     ],
     queryFields: [
       {
-        name: 'state',
+        name: 'name',
         label: '状态',
         type: 'string' as FieldType,
       },
     ],
-    data: [
-      {
-        state: '待处理',
-        fieldsInfo: [],
-      },
-      {
-        state: '处理中',
-        fieldsInfo: [],
-      },
-    ],
-  }), []);
+  }), [selectedType]);
 
   // @ts-ignore
   const getModalSetting = (key: 'condition' | 'linkage' | 'updateField' | 'notifySetting', record) => {
@@ -81,7 +91,11 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         width: 380,
         title: '流转条件',
         // @ts-ignore
-        children: <Condition record={record} selectedType={selectedType} />,
+        children: <Condition
+          record={record}
+          selectedType={selectedType}
+          customCirculationDataSet={customCirculationDataSet}
+        />,
       },
       linkage: {
         width: 380,
@@ -148,6 +162,30 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     );
   };
 
+  const renderSetting = ({
+    // @ts-ignore
+    value, text, name, record, dataSet,
+  }) => {
+    const statusTransferSettingVOS = record.get('statusTransferSettingVOS');
+    if (statusTransferSettingVOS) {
+      const isProjectOwnerExist = find(statusTransferSettingVOS, (item: IStatusTransferSettingVOS) => item.userType === 'projectOwner');
+      const assigners = filter(statusTransferSettingVOS, (item: IStatusTransferSettingVOS) => item.userType === 'specifier')?.map((item: IStatusTransferSettingVOS) => item.user?.realName) || [];
+      return (
+        <span>
+          {
+          `移到工作项到此状态需为：${isProjectOwnerExist ? '项目所有者' : ''}${isProjectOwnerExist && assigners.length > 0 ? '、' : ''}${assigners.join('、')}`
+        }
+        </span>
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (selectedType) {
+      customCirculationDataSet.query();
+    }
+  }, [customCirculationDataSet, selectedType]);
+
   return (
     <Page>
       <Content>
@@ -155,10 +193,10 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         <IssueTypeTab selectedType={selectedType} setSelectedType={setSelectedType} />
         {tab}
         <div className={`${styles.customCirculation}`}>
-          <Table dataSet={customCirculationDataSet}>
-            <Column name="state" />
-            <Column name="fieldsInfo" />
-            <Column name="action" renderer={renderAction} />
+          <Table className={styles.table} dataSet={customCirculationDataSet}>
+            <Column name="name" width={200} />
+            <Column name="statusTransferSettingVOS" renderer={renderSetting} tooltip={'overflow' as TableColumnTooltip} />
+            <Column name="action" renderer={renderAction} width={200} />
           </Table>
         </div>
       </Content>

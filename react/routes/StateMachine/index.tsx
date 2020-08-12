@@ -8,6 +8,7 @@ import StatusCirculation from './status-circulation';
 import CustomCirculation from './custom-circulation';
 import StateMachineContext from './context';
 import useSelectedType from './useSelectedType';
+import styles from './index.less';
 
 const { AppState } = stores;
 const { currentMenuType: { category } } = AppState;
@@ -36,10 +37,10 @@ const tabs: ITab[] = [{
 const { TabPane } = Tabs;
 const StateMachine: React.FC = (props) => {
   const [selectedType, handleChangeSelectedType] = useSelectedType();
-  const [activeKey, setActiveKey] = useState(tabs[1].key);
+  const [activeKey, setActiveKey] = useState(tabs[2].key);
   const Component = find(tabs, { key: activeKey })?.component;
   const tabComponent = (
-    <Tabs activeKey={activeKey} onChange={setActiveKey}>
+    <Tabs className={styles.tabs} activeKey={activeKey} onChange={setActiveKey}>
       {tabs.map((tab) => <TabPane key={tab.key} tab={tab.name} />)}
     </Tabs>
   );

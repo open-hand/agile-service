@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { find } from 'lodash';
+import { find, filter, uniq } from 'lodash';
 import {
   Select, CheckBox, Form, DataSet,
 } from 'choerodon-ui/pro';
@@ -14,12 +14,29 @@ interface Props {
   modal: any,
   record: any,
   selectedType: string,
+  customCirculationDataSet: DataSet,
 }
-const Condition:React.FC<Props> = ({ modal, record, selectedType }) => {
+
+interface ICondition {
+  type: 'specifier' | 'projectOwner',
+  userIds?: string[],
+}
+
+interface IConditionInfo {
+  issueTypeId: string
+  lastUpdateDate: string
+  objectVersionNumber: number
+  statusId: string
+  userId: null | number[]
+  userType: 'projectOwner' | 'specifier',
+}
+const Condition:React.FC<Props> = ({
+  modal, record, selectedType, customCirculationDataSet,
+}) => {
   const memberOptionDataSet = useMemo(() => new DataSet({
     data: [
-      { code: 'owner', name: '项目所有者' },
-      { code: 'assigners', name: '被指定人' },
+      { code: 'projectOwner', name: '项目所有者' },
+      { code: 'specifier', name: '被指定人' },
     ],
     fields: [
       {
@@ -43,7 +60,6 @@ const Condition:React.FC<Props> = ({ modal, record, selectedType }) => {
         valueField: 'code',
         options: memberOptionDataSet,
         multiple: true,
-        required: true,
       },
       {
         name: 'assigners',
@@ -64,11 +80,13 @@ const Condition:React.FC<Props> = ({ modal, record, selectedType }) => {
 
   useEffect(() => {
     const { current } = conditionDataSet;
-    // @ts-ignore
-    statusTransformApi.getCondition(selectedType, record.get('id')).then((res) => {
-      current?.set('member', res.member);
-      if (res.assigners) {
-        current?.set('assigners', res.assigners);
+    statusTransformApi.getCondition(selectedType, record.get('id')).then((res: IConditionInfo[]) => {
+      if (res) {
+        current?.set('member', uniq(res.map((item) => item.userType)));
+        const assigners = filter(res, (item: IConditionInfo) => item.userType === 'specifier');
+        if (assigners) {
+          current?.set('assigners', assigners.map((item: IConditionInfo) => item.userId));
+        }
       }
     });
     const handleOk = async () => {
@@ -76,16 +94,28 @@ const Condition:React.FC<Props> = ({ modal, record, selectedType }) => {
       const validate = await conditionDataSet.validate();
       // @ts-ignore
       const { member, assigners, needCompleted } = data && data[0];
-      console.log(`validate： ${validate}`);
-      console.log('data：');
-      console.log(data);
-      if (validate || (member.length && member.findIndex((item: string) => item === 'assigners') === -1)) {
+      if (validate || (!member || !member.length) || (member.length && member.findIndex((item: string) => item === 'specifier') === -1)) {
+        const updateData: ICondition[] = [];
+        member.forEach((item: 'specifier' | 'projectOwner') => {
+          if (item === 'specifier') {
+            updateData.push({
+              type: item,
+              userIds: assigners,
+            });
+          } else {
+            updateData.push({
+              type: item,
+            });
+          }
+        });
+        await statusTransformApi.updateCondition(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
+        customCirculationDataSet.query();
         return true;
       }
       return false;
     };
     modal.handleOk(handleOk);
-  }, [conditionDataSet, modal]);
+  }, [conditionDataSet, customCirculationDataSet, modal, record, selectedType]);
 
   const data = conditionDataSet.toData();
 
@@ -98,7 +128,7 @@ const Condition:React.FC<Props> = ({ modal, record, selectedType }) => {
           <Select name="member" />
           {
             // @ts-ignore
-            data && data[0].member.find((item: string) => item === 'assigners') && (
+            data && data[0].member.find((item: string) => item === 'specifier') && (
               <SelectUser name="assigners" />
             )
           }
