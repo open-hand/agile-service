@@ -1,6 +1,6 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId, getApplyType } from '@/utils/common';
-import { IStatus } from '@/common/types';
+import { getProjectId, getApplyType, getOrganizationId } from '@/utils/common';
+import { IStatus, IField } from '@/common/types';
 import Api from './Api';
 
 export interface IStatusCirculation {
@@ -206,6 +206,31 @@ class StatusTransformApi extends Api {
       params: {
         issueTypeId,
         statusId,
+      },
+    });
+  }
+
+  getCustomMember(issueTypeId: string, schemeCode: string = 'agile_issue') {
+    const arr = [
+      { id: 'projectOwner', name: '项目所有者' },
+      { id: 'assignee', name: '经办人' },
+      { id: 'reporter', name: '报告人' },
+      { id: 'specifier', name: '指定人' },
+    ];
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/object_scheme_field/member_list`,
+      params: {
+        organizationId: getOrganizationId(),
+        issueTypeId,
+        schemeCode,
+      },
+      transformResponse: (res: IField) => {
+        if (typeof res === 'string') {
+          const data = JSON.parse(res);
+          return [...arr, ...data];
+        }
+        return res;
       },
     });
   }
