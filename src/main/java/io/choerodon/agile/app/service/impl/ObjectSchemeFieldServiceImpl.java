@@ -7,6 +7,7 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -565,6 +566,16 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 return RankUtil.between(targetRank, previousRank);
             }
         }
+    }
+
+    @Override
+    public List<ObjectSchemeFieldVO> selectMemberList(Long organizationId, Long projectId, String schemeCode) {
+        List<ObjectSchemeFieldDTO> list =
+                objectSchemeFieldMapper.selectMemberByOptions(organizationId, projectId, schemeCode, null, null);
+        if (CollectionUtils.isEmpty(list)){
+            return Collections.emptyList();
+        }
+        return list.stream().map(f -> modelMapper.map(f, ObjectSchemeFieldVO.class)).collect(Collectors.toList());
     }
 
     @Override

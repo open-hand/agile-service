@@ -16,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -156,5 +157,17 @@ public class ProjectObjectSchemeFieldController {
                                             @RequestParam Long organizationId,
                                             @RequestBody @Validated AdjustOrderVO adjustOrderVO) {
         return new ResponseEntity<>(objectSchemeFieldService.queryRank(organizationId, projectId, adjustOrderVO), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "根据方案编码获取人员自定义字段")
+    @GetMapping("/member_list")
+    public ResponseEntity<List<ObjectSchemeFieldVO>> selectMemberList(@ApiParam(value = "项目id", required = true)
+                                                                       @PathVariable("project_id") Long projectId,
+                                                                       @ApiParam(value = "组织id", required = true)
+                                                                       @RequestParam Long organizationId,
+                                                                       @ApiParam(value = "方案编码", required = true)
+                                                                       @RequestParam(required = false) String schemeCode) {
+        return new ResponseEntity<>(objectSchemeFieldService.selectMemberList(organizationId, projectId, schemeCode), HttpStatus.OK);
     }
 }
