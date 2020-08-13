@@ -122,7 +122,7 @@ public class SiteMsgUtil {
 
     public void sendChangeIssueStatus(Set<Long> userSet){
         MessageSender messageSender = handlerMessageSender(0L,null,new ArrayList<>(userSet),new HashMap<>());
-        messageSender.setMessageCode("ISSUE_CHANGE_STATUS");
+        messageSender.setMessageCode("ISSUECHANGESTATUS");
         messageClient.sendMessage(messageSender);
     }
 }
