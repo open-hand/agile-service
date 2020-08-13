@@ -4,7 +4,7 @@ import { User } from '@/common/types';
 
 interface Props {
   type: string,
-  id: string,
+  id: string | number,
   defaultUserId: string | number,
   isEdit: boolean,
 }

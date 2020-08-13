@@ -73,7 +73,7 @@ interface CurrentProject {
 }
 interface MenuType {
   category: string,
-  id: string | number,
+  id: string,
   name: string,
   orgId: string,
   organizationId: string,

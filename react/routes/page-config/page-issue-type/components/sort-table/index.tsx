@@ -13,6 +13,7 @@ import {
   DropResult, ResponderProvided, DraggableProvided, DraggableStateSnapshot, DraggableRubric,
 } from 'react-beautiful-dnd';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import { IFiledProps } from '@/api';
 import OldSortTable from '../../../page/components/SortTable';
 import './index.less';
 import { usePageIssueTypeStore } from '../../stores';
@@ -22,6 +23,7 @@ interface Props {
   disabled: boolean | undefined,
   org?: number,
   dataStatus: { code: string },
+  onDelete?: (data: IFiledProps) => void,
 }
 interface DragRenderCloneProps {
   provided: DraggableProvided, // DraggableProvided,
@@ -32,7 +34,7 @@ interface DragRenderCloneProps {
   column: ColumnProps[],
 }
 const prefixCls = 'c7n-page-issue-detail';
-const SortTable: React.FC<Props> = ({ disabled, dataStatus, org = 23 }) => {
+const SortTable: React.FC<Props> = ({ disabled, dataStatus, onDelete }) => {
   const { sortTableDataSet } = usePageIssueTypeStore();
   // const [dataStatus, setDataStatus] = useState<string>();
   const renderFieldName = ({ value }: RenderProps) => (
@@ -51,7 +53,6 @@ const SortTable: React.FC<Props> = ({ disabled, dataStatus, org = 23 }) => {
         checked={value}
         // value={value}
         onChange={(val) => {
-          console.log('val', val, name);
           record?.set(name as String, val);
           // console.log('dataSet?.dirty', dataSet?.dirty);
           if (dataStatus.code !== 'drag_update' && dataSet?.dirty) {
@@ -147,10 +148,8 @@ const SortTable: React.FC<Props> = ({ disabled, dataStatus, org = 23 }) => {
         disabled={disabled}
         style={{ marginLeft: 10 }}
         onClick={() => {
-            dataSet?.remove(record as Record);
-            console.log('dataSet', dataSet?.toData());
-            dataSet?.loadData(dataSet?.toData());
-            // dataSet?.query();
+          onDelete && onDelete(record?.toData());
+          // dataSet?.delete(record as Record);
         }}
       >
         <Icon type="delete" style={{ fontSize: 18 }} />
@@ -183,16 +182,14 @@ const SortTable: React.FC<Props> = ({ disabled, dataStatus, org = 23 }) => {
   );
   return (
     <div className={prefixCls}>
-      {/* <Spin dataSet={sortTableDataSet}>
-        <OldSortTable
-          pagination={false}
-          columns={getColumns()}
-          dataSource={sortTableDataSet.toData().slice()}
-          filterBar={false}
-          handleDrag={() => { }}
-          hight={300}
-        />
-      </Spin> */}
+      {/* <OldSortTable
+        pagination={false}
+        columns={getColumns()}
+        dataSource={sortTableDataSet.toData().slice()}
+        filterBar={false}
+        handleDrag={() => { }}
+        hight={300}
+      /> */}
       <Table
         dataSet={sortTableDataSet}
         queryBar={'none' as TableQueryBarType}
@@ -211,16 +208,7 @@ const SortTable: React.FC<Props> = ({ disabled, dataStatus, org = 23 }) => {
           // @ts-ignore
           renderClone,
         }}
-        // rowDragRender
-        //   rowDragRender={{
-        //     // droppableProps: DroppableProps;
-        //     draggableProps: {
-        //       children:(provided: DraggableProvided,
-        //         snapshot: DraggableStateSnapshot,
-        //         rubric:DraggableRubric)=>(<div {....provided.}></div>)
-        //     // renderClone: (dragRenderProps: DragRenderClone) => ReactElement<any>;
-        //     // renderIcon: (DragIconRender: any) => ReactElement<any>;
-        // }}
+
         border={false}
       >
         <Column name="fieldName" renderer={renderFieldName} />
@@ -232,12 +220,4 @@ const SortTable: React.FC<Props> = ({ disabled, dataStatus, org = 23 }) => {
     </div>
   );
 };
-export default memo(observer(SortTable),
-  (prevProps: Readonly<PropsWithChildren<Props>>,
-    nextProps: Readonly<PropsWithChildren<Props>>) => {
-    if (prevProps.disabled !== nextProps.disabled) {
-      return false;
-    }
-
-    return false;
-  });
+export default memo(observer(SortTable));

@@ -1,7 +1,7 @@
 import { useLocalStore } from 'mobx-react-lite';
 import { axios } from '@choerodon/boot';
 
-export default function useStore(type: string, id: string | number, orgId: number) {
+export default function useStore(type: string, id: string | number, orgId: string) {
   return useLocalStore(() => ({
     apiGetway: `/agile/v1/${type}s/${id}`,
     iamGetway: `/iam/choerodon/v1/${type}s/${id}`,

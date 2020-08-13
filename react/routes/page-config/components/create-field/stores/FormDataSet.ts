@@ -14,8 +14,10 @@ interface Props {
   store: Store,
   id: string,
   isEdit: boolean,
-  oldRecord: Record,
+  oldRecord?: Record,
   userOptionDataSet: DataSet,
+  localCheckCode?: (code: string) => Promise<boolean> | boolean,
+  localCheckName?: (name: string) => Promise<boolean> | boolean,
 }
 function getLookupConfig(code: string) {
   return {
@@ -40,7 +42,8 @@ function getLookupConfig(code: string) {
 const dateList = ['time', 'datetime', 'date'];
 
 const FormDataSet = ({
-  formatMessage, type, store, schemeCode, id, isEdit, oldRecord, userOptionDataSet,
+  formatMessage, type, store, schemeCode, id, isEdit,
+  oldRecord, userOptionDataSet, localCheckCode, localCheckName,
 }: Props): DataSetProps => {
   const regex = /^[0-9a-zA-Z_]+$/;
   async function checkCode(value: string): Promise<boolean | string | undefined> {
@@ -52,7 +55,10 @@ const FormDataSet = ({
     }
     const prefix = type === 'project' ? 'pro_' : 'org_';
     try {
-      const data = await store.checkCode(`${prefix}${value}`, schemeCode);
+      let data: boolean = await store.checkCode(`${prefix}${value}`, schemeCode);
+      if (!data && localCheckCode) {
+        data = await localCheckCode(`${prefix}${value}`);
+      }
       if (data) {
         return formatMessage({ id: 'field.code.exist' });
       }
@@ -62,14 +68,22 @@ const FormDataSet = ({
     return undefined;
   }
   async function checkName(value: string): Promise<boolean | string | undefined> {
-    if (isEdit && value === oldRecord.get('name')) return false;
+    if (isEdit && value === oldRecord?.get('name')) return false;
     if (!value) {
       return false;
     }
-    const data = await store.checkName(value, schemeCode);
-    if (data) {
-      return formatMessage({ id: 'field.name.exist' });
+    try {
+      let data: boolean = await store.checkName(value, schemeCode);
+      if (!data && localCheckName) {
+        data = await localCheckName(value);
+      }
+      if (data) {
+        return formatMessage({ id: 'field.name.exist' });
+      }
+    } catch (error) {
+      return formatMessage({ id: 'network.error' });
     }
+
     return undefined;
   }
 

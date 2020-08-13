@@ -12,27 +12,30 @@ import useStore from './useStore';
 interface Context {
   formatMessage: InjectedIntl['formatMessage'],
   AppState: AppStateProps,
-  isEdit: boolean,
-  type: string,
+  isEdit?: boolean,
+  onSubmitLocal: (data: any) => Promise<boolean> | boolean,
+  localCheckCode?: (code: string) => Promise<boolean> | boolean,
+  localCheckName?: (name: string) => Promise<boolean> | boolean,
   schemeCode: string,
-  record: Record,
+  record?: Record,
   formDataSet: DataSet,
   userOptionDataSet: DataSet,
   handleRefresh: () => void,
   modal: IModalProps,
 }
 const Store = createContext({} as Context);
+export type CreateFiledProps = Pick<Context, 'formatMessage' | 'isEdit' | 'onSubmitLocal' |
+  'localCheckCode' | 'localCheckName' | 'schemeCode' | 'handleRefresh' | 'record'>;
 export default Store;
-
-export const StoreProvider = inject('AppState')(
+export const StoreProvider: React.FC<Context> = inject('AppState')(
   (props) => {
     const {
-      formatMessage,
-      AppState: { currentMenuType: { type, id, organizationId } }, schemeCode, record,
+      formatMessage, AppState: { currentMenuType: { type, id, organizationId } },
+      schemeCode, record, localCheckCode, localCheckName,
     } = props;
     const isEdit = !!record;
     const store = useStore(type, id, organizationId);
-    const defaultUserId = isEdit && record.get('defaultValue');
+    const defaultUserId = isEdit && record?.get('defaultValue');
     const userOptionDataSet = new DataSet(UserOptionDataSet({
       type, id, defaultUserId, isEdit,
     }));
@@ -45,12 +48,14 @@ export const StoreProvider = inject('AppState')(
       isEdit,
       oldRecord: record,
       userOptionDataSet,
+      localCheckCode,
+      localCheckName,
     }));
 
     useEffect(() => {
       if (isEdit) {
         formDataSet.transport.read = () => ({
-          url: `/agile/v1/${type}s/${id}/object_scheme_field/${record.get('id')}?organizationId=${organizationId}`,
+          url: `/agile/v1/${type}s/${id}/object_scheme_field/${record?.get('id')}?organizationId=${organizationId}`,
           method: 'get',
           transformResponse: (response) => {
             try {

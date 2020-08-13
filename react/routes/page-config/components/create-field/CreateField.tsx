@@ -30,13 +30,14 @@ interface IFieldPostData extends FiledOptions {
   code: string,
   name: string,
   schemeCode: string,
+  check?: boolean,
   objectVersionNumber?: number,
   extraConfig: any,
 }
 function CreateField() {
   const ctx = useContext(Store);
   const {
-    formDataSet, formatMessage, modal,
+    formDataSet, formatMessage, modal, onSubmitLocal,
     AppState: { currentMenuType: { type, id, organizationId } },
     schemeCode, isEdit, handleRefresh, userOptionDataSet,
   } = ctx;
@@ -69,7 +70,24 @@ function CreateField() {
       disabled: currentValue === 'global' ? contextValue.length > 0 && contextValue.indexOf('global') < 0 : contextValue.indexOf('global') >= 0,
     };
   };
-
+  const dataTransformPostData = (fieldOption: FiledOptions) => {
+    const data = formDataSet.toData()[0] as IFieldPostData;
+    const prefix = type === 'project' ? 'pro_' : 'org_';
+    const { name, check } = data;
+    let { context } = data;
+    if (context && context.length === formDataSet.getField('context')?.options?.length) {
+      context = ['global'];
+    }
+    const postData: IFieldPostData = {
+      context,
+      code: `${prefix}${data.code}`,
+      name,
+      ...fieldOption,
+      schemeCode,
+      extraConfig: check,
+    };
+    return postData;
+  };
   // 创建或者编辑的提交操作
   async function handleOk() {
     const { current } = formDataSet;
@@ -110,34 +128,22 @@ function CreateField() {
     }
     // 防止使用dataSet提交时 忽略filedOptions
     formDataSet.current?.set('updateFieldOptions', obj.fieldOptions);
-    const url = isEdit ? `/agile/v1/${type}s/${id}/object_scheme_field/${current?.get('id')}?organizationId=${organizationId}` : `/agile/v1/${type}s/${id}/object_scheme_field?organizationId=${organizationId}`;
+    if (onSubmitLocal) {
+      return onSubmitLocal(dataTransformPostData(obj));
+    }
+    const url = isEdit ? `/agile/v1/${type}s/${id}/object_scheme_field/${formDataSet.current?.get('id')}?organizationId=${organizationId}` : `/agile/v1/${type}s/${id}/object_scheme_field?organizationId=${organizationId}`;
     const method = isEdit ? 'put' : 'post';
     formDataSet.transport[isEdit ? 'update' : 'create'] = ({ data: [data] }) => ({
       url,
       method,
       transformRequest: () => {
-        const prefix = type === 'project' ? 'pro_' : 'org_';
-        const { name, check } = data;
-        let { context } = data;
-        if (context && context.length === formDataSet.getField('context')?.options?.length) {
-          context = ['global'];
-        }
-        const postData: IFieldPostData = {
-          context,
-          code: `${prefix}${data.code}`,
-          name,
-          ...obj,
-          schemeCode,
-          extraConfig: check,
-        };
+        const postData: IFieldPostData = dataTransformPostData(obj);
         if (isEdit) {
-          postData.objectVersionNumber = current?.get('objectVersionNumber');
+          postData.objectVersionNumber = formDataSet.current?.get('objectVersionNumber');
         }
         return JSON.stringify(postData);
       },
     });
-
-    // return false;
     try {
       if ((await formDataSet.submit()) !== false) {
         handleRefresh();
