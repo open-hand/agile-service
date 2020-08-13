@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
 import io.choerodon.agile.app.service.StatusNoticeSettingService;
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,9 +28,9 @@ public class StatusNoticeSettingController extends BaseController {
     @ApiOperation(value = "消息通知明细")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/issue_type/{issue_type_id}/status/{status_id}")
-    public ResponseEntity<StatusNoticeSettingVO> detail(@PathVariable("project_id") Long projectId,
-                                                        @PathVariable("issue_type_id") Long issueTypeId,
-                                                        @PathVariable("status_id") Long statusId) {
+    public ResponseEntity<StatusNoticeSettingVO> detail(@PathVariable("project_id") @Encrypt Long projectId,
+                                                        @PathVariable("issue_type_id") @Encrypt Long issueTypeId,
+                                                        @PathVariable("status_id") @Encrypt Long statusId) {
         return Results.success(statusNoticeSettingService.detail(projectId, issueTypeId, statusId));
     }
 
