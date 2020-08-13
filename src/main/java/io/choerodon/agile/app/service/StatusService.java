@@ -104,4 +104,6 @@ public interface StatusService {
     Page<ProjectStatusVO> listStatusByProjectId(Long projectId, PageRequest pageRequest, StatusSearchVO statusSearchVO);
 
     void deleteStatus(Long projectId,Long statusId,String applyType,List<DeleteStatusTransferVO> statusTransferVOS);
+
+    List<Long> checkDeleteStatus(Long projectId, Long statusId);
 }
