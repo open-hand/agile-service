@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { Button, Modal, Spin } from 'choerodon-ui/pro';
-import Measure, { BoundingRect } from 'react-measure';
+import Measure from 'react-measure';
 import { observer } from 'mobx-react-lite';
 import STATUS from '@/constants/STATUS';
 import { IStatusCirculation } from '@/api';
