@@ -14,6 +14,7 @@ import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections.CollectionUtils;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -87,6 +89,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private StatusMapper statusMapper;
     @Autowired
     private StatusTransferSettingService statusTransferSettingService;
+    @Autowired
+    private IssueAccessDataService issueAccessDataService;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -467,10 +471,10 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         stateMachineNodeDTO.setStateMachineId(stateMachineId);
         // 校验当前node的状态有没有被项目下的issue使用
         StateMachineNodeDTO machineNodeDTO = stateMachineNodeMapper.selectByPrimaryKey(nodeId);
-        Boolean checkIssueUse = checkIssueUse(projectId, machineNodeDTO.getStatusId());
+        Boolean checkIssueUse = checkIssueUse(projectId,issueTypeId,machineNodeDTO.getStatusId());
         if (Boolean.TRUE.equals(checkIssueUse)) {
             // 将该问题类型下状态为当前状态的issue改为指定状态
-            updateIssueStatusByStatusId(projectId,machineNodeDTO.getStatusId(),statusId,stateMachineNodeDTO);
+            updateIssueStatusByStatusId(projectId,issueTypeId,applyType,machineNodeDTO.getStatusId(),statusId,stateMachineNodeDTO);
         }
         // 删除当前node的转换
         stateMachineTransformMapper.deleteByStateMachineIdAndNodeId(organizationId,stateMachineId,nodeId);
@@ -506,7 +510,42 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         return page;
     }
 
-    private void updateIssueStatusByStatusId(Long projectId, Long currentStatusId, Long statusId, StateMachineNodeDTO stateMachineNodeDTO){
+    @Override
+    public void handlerDeleteStatusByProject(Long projectId, String applyType, Long statusId, List<DeleteStatusTransferVO> statusTransferVOS) {
+        Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        List<StateMachineSchemeConfigVO> stateMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, stateMachineSchemeId);
+        Map<Long, DeleteStatusTransferVO> map = statusTransferVOS.stream().collect(Collectors.toMap(DeleteStatusTransferVO::getIssueTypeId, Function.identity()));
+        for (StateMachineSchemeConfigVO schemeConfigVO : stateMachineSchemeConfigVOS) {
+            // 查询状态的node
+            StateMachineNodeDTO stateMachineNodeDTO = new StateMachineNodeDTO();
+            stateMachineNodeDTO.setStatusId(statusId);
+            stateMachineNodeDTO.setStateMachineId(schemeConfigVO.getStateMachineId());
+            stateMachineNodeDTO.setOrganizationId(organizationId);
+            StateMachineNodeDTO machineNodeDTO = stateMachineNodeMapper.selectOne(stateMachineNodeDTO);
+            if (ObjectUtils.isEmpty(machineNodeDTO)) {
+                continue;
+            }
+            Long tansferStatusId = handlerTransferStatus(machineNodeDTO, map, schemeConfigVO);
+            // 删除node
+            deleteNode(projectId, schemeConfigVO.getIssueTypeId(), applyType, machineNodeDTO.getId(), tansferStatusId);
+        }
+    }
+
+    private Long handlerTransferStatus(StateMachineNodeDTO machineNodeDTO,Map<Long, DeleteStatusTransferVO> map,StateMachineSchemeConfigVO schemeConfigVO){
+        // 判断是不是默认状态
+        if (!Objects.equals(schemeConfigVO.getIssueTypeId(), 0L) && NodeType.INIT.equals(machineNodeDTO.getType())) {
+            throw new CommonException("error.node.is.default.status");
+        }
+        Long transferStatusId = null;
+        DeleteStatusTransferVO deleteStatusTransferVO = map.get(schemeConfigVO.getIssueTypeId());
+        if (!ObjectUtils.isEmpty(deleteStatusTransferVO)) {
+            transferStatusId = deleteStatusTransferVO.getStatusId();
+        }
+        return transferStatusId;
+    }
+
+    private void updateIssueStatusByStatusId(Long projectId, Long issueTypeId, String applyType, Long currentStatusId, Long statusId, StateMachineNodeDTO stateMachineNodeDTO){
         if (ObjectUtils.isEmpty(statusId)) {
             throw new CommonException("error.status.has.using");
         } else {
@@ -517,11 +556,15 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 throw new CommonException("error.status.id.illegal");
             }
             // 将关联的状态修改为指定状态
-            issueMapper.updateStatusByStatusId(projectId,currentStatusId,statusId);
+            Long userId = DetailsHelper.getUserDetails().getUserId();
+            issueAccessDataService.updateIssueStatusByIssueTypeId(projectId,applyType,issueTypeId,currentStatusId,statusId,userId);
         }
     }
 
-    private Boolean checkIssueUse(Long projectId, Long statusId) {
+    private Boolean checkIssueUse(Long projectId,Long issueTypeId,Long statusId) {
+        if (issueTypeId == 0) {
+            return false;
+        }
         IssueDTO issueDTO = new IssueDTO();
         issueDTO.setProjectId(projectId);
         issueDTO.setStatusId(statusId);

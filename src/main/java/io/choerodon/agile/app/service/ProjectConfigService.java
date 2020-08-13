@@ -213,4 +213,6 @@ public interface ProjectConfigService {
      * @return
      */
     Page<StatusSettingVO> statusTransformSettingList(Long projectId, Long issueTypeId, PageRequest pageRequest, String param, String applyType);
+
+    void handlerDeleteStatusByProject(Long projectId, String applyType, Long statusId, List<DeleteStatusTransferVO> statusTransferVOS);
 }

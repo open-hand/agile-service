@@ -19,4 +19,6 @@ public interface StatusTransferSettingService {
    void delete(Long projectId, Long issueTypeId, Long statusId);
 
    List<StatusTransferSettingVO> listByStatusIds(Long projectId, Long issueTypeId, List<Long> statusIds);
+
+    void checkStatusTransferSetting(Long projectId, Long issueTypeId, Long endStatusId);
 }
