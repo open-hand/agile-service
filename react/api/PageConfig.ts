@@ -7,31 +7,37 @@ export enum PageConfigIssueType {
   subTask = 'subTask',
   story = 'story',
   task = 'task',
-  epic = 'epic',
+  epic = 'issue_epic',
   demand = 'demand',
 }
 interface IFiled {
-  created: true
+  created: boolean,
   defaultValue: any,
-  edited: true
+  edited: boolean,
   fieldId: string,
   fieldName: string,
   id: string,
   issueType: PageConfigIssueType,
   objectVersionNumber: number,
   rank: string,
-  required: true
+  required: boolean,
   source: string,
 }
+export type IFiledProps = IFiled;
+interface IssueTypeFieldVO {
+  id: string,
+  template: string,
+  objectVersionNumber: number,
+}
+interface PageIssueType {
+  fields: IFiled[],
+  issueTypeFieldVO?: IssueTypeFieldVO,
+}
 type FiledUpdate = Required<Pick<IFiled, 'fieldId' | 'required' | 'created' | 'edited' | 'objectVersionNumber'>>;
-interface UIssueTypeConfig {
+export interface UIssueTypeConfig {
   issueType: PageConfigIssueType,
   fields: Array<FiledUpdate>,
-  issueTypeFieldVO: {
-    id: string,
-    template: string,
-    objectVersionNumber: number,
-  },
+  issueTypeFieldVO?: Partial<IssueTypeFieldVO>,
   deleteIds: string[],
 }
 class PageConfigApi {
@@ -58,7 +64,7 @@ class PageConfigApi {
    * 根据问题类型加载页面配置
    * @param issueType
    */
-  loadByIssueType(issueType: PageConfigIssueType) {
+  loadByIssueType(issueType: PageConfigIssueType): Promise<PageIssueType> {
     return axios({
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/configs`,
@@ -75,25 +81,39 @@ class PageConfigApi {
    */
   update(data: UIssueTypeConfig) {
     return axios({
-      method: 'put',
+      method: 'post',
       url: `${this.prefixOrgOrPro}/object_scheme_field/configs`,
       data,
+      params: {
+        organizationId: getOrganizationId(),
+      },
     });
   }
 
   /**
    * 更新字段是否必选
-   * @param filedId
+   * @param fieldId
    * @param required
    */
-  updateRequired(filedId:string, required:boolean) {
+  updateRequired(fieldId: string, required: boolean) {
     return axios({
       method: 'post',
       url: `${this.prefixOrgOrPro}/object_scheme_field/update_required`,
       params: {
-        filedId,
+        fieldId,
         required,
+        organizationId: getOrganizationId(),
       },
+    });
+  }
+
+  /**
+   * 查询字段的rank
+   */
+  loadRankValue() {
+    return axios({
+      method: 'post',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/rank`,
     });
   }
 }

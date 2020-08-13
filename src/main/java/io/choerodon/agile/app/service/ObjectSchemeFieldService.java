@@ -156,6 +156,8 @@ public interface ObjectSchemeFieldService {
      */
     String queryRank(Long organizationId, Long projectId, AdjustOrderVO adjustOrderVO);
 
+    List<ObjectSchemeFieldVO> selectMemberList(Long organizationId, Long projectId, String schemeCode);
+
     /**
      * 查询issueType下未配置的字段
      *

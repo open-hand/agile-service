@@ -1,13 +1,17 @@
 import React, { useMemo } from 'react';
-import { Page, Header, Content } from '@choerodon/boot';
+import {
+  Page, Header, Content, Breadcrumb,
+} from '@choerodon/boot';
 import { Button, Table, DataSet } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { statusApiConfig } from '@/api';
+import { statusTransformApiConfig, ITotalStatus } from '@/api';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import { IStatus } from '@/common/types';
-import { Popconfirm } from 'choerodon-ui';
+import { Popconfirm, Divider } from 'choerodon-ui';
+import { TableAutoHeightType } from 'choerodon-ui/pro/lib/table/enum';
 import { TabComponentProps } from '../index';
 import openCreateStatus from '../components/create-status';
+import openDeleteStatus from './DeleteStatus';
 import styles from './index.less';
 
 const { Column } = Table;
@@ -16,10 +20,9 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
     primaryKey: 'id',
     name: 'status',
     autoQuery: true,
-    paging: false,
     selection: false,
     transport: {
-      read: statusApiConfig.loadByProject(),
+      read: ({ params }) => statusTransformApiConfig.listStatus(params.page, params.size),
     },
     fields: [
       {
@@ -33,7 +36,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
         label: '阶段',
       },
       {
-        name: 'use',
+        name: 'usage',
         type: 'string' as FieldType,
         label: '使用情况',
       },
@@ -56,9 +59,19 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
       <Header>
         <Button icon="playlist_add" onClick={handleCreateStatusClick}>创建状态</Button>
       </Header>
+      <Breadcrumb />
+      <Divider className={styles.divider} />
       <Content>
         {tab}
-        <Table key="user" dataSet={dataSet} className={styles.table}>
+        <Table
+          key="user"
+          dataSet={dataSet}
+          className={styles.table}
+          autoHeight={{
+            type: 'maxHeight' as TableAutoHeightType,
+            diff: 100,
+          }}
+        >
           <Column name="name" />
           <Column
             name="type"
@@ -69,13 +82,21 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
               />
             )}
           />
-          <Column name="use" />
+          <Column name="usage" />
           <Column
             name="operate"
             renderer={({ record }) => (
-              <Popconfirm title={`确认删除状态“${record?.get('name')}”`}>
-                <Button icon="delete" />
-              </Popconfirm>
+              <Button
+                icon="delete"
+                onClick={() => {
+                  openDeleteStatus({
+                    onSubmit: () => {
+                      dataSet.query();
+                    },
+                    data: record?.toData() as ITotalStatus,
+                  });
+                }}
+              />
             )}
           />
         </Table>

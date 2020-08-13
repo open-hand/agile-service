@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { Button, Modal, Spin } from 'choerodon-ui/pro';
-import Measure, { BoundingRect } from 'react-measure';
+import Measure from 'react-measure';
 import { observer } from 'mobx-react-lite';
 import STATUS from '@/constants/STATUS';
 import { IStatusCirculation } from '@/api';
@@ -89,6 +89,9 @@ const StatusCirculationTable: React.FC = () => {
               scroll={{ x: 'max-content', y: height - 50 }}
               columns={statusColumns.length > 0 ? columns : []}
               pagination={false}
+              locale={{
+                emptyText: '暂无数据',
+              }}
             />
           </Spin>
         </div>

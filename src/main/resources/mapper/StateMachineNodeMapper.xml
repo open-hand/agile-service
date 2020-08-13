@@ -153,4 +153,19 @@
             ,#{item.allStatusTransformId},#{item.organizationId},#{item.createdBy},#{item.lastUpdatedBy})
         </foreach>
     </insert>
+
+    <select id="countIssueTypeByStatusIds" resultType="io.choerodon.agile.infra.dto.IssueCountDTO">
+        select fsmn.status_id as id,fit.name as name from fd_state_machine_scheme_config fsmsc
+        ,fd_state_machine_node fsmn,fd_issue_type fit
+        where fsmsc.organization_id = #{organizationId}
+        AND fsmsc.scheme_id = #{schemeId}
+        AND fsmsc.state_machine_id = fsmn.state_machine_id
+        AND fsmn.status_id in
+        <foreach collection="statusIds" item="statusId" open="(" close=")" separator=",">
+           #{statusId}
+        </foreach>
+        AND fit.id = fsmsc.issue_type_id
+        AND fsmsc.issue_type_id != 0
+        group by fsmn.status_id,fit.name
+    </select>
 </mapper>

@@ -150,7 +150,37 @@
          AND smn.status_id = fs.id
          AND smn.state_machine_id = #{stateMachineId}
          <if test="param != null">
-             fs.name LIKE CONCAT(CONCAT('%', #{param}), '%')
+            AND fs.name LIKE CONCAT(CONCAT('%', #{param}), '%')
+         </if>
+    </select>
+
+    <select id="listStatusByProjectId" resultType="io.choerodon.agile.api.vo.ProjectStatusVO">
+        select
+           fs.id,
+           fs.name,
+           fs.code,
+           fs.description,
+           fs.type,
+           fs.object_version_number
+         from fd_status fs,agile_issue_status ais
+         where fs.organization_id = #{organizationId}
+         AND ais.project_id = #{projectId}
+         AND fs.id = ais.status_id
+         <if test="statusSearchVO != null">
+             <if test="statusSearchVO.name != null">
+                 AND fs.name LIKE concat('%',#{statusSearchVO.name},'%')
+             </if>
+             <if test="statusSearchVO.type != null">
+                 AND fs.type LIKE concat('%',#{statusSearchVO.type},'%')
+             </if>
+             <if test="statusSearchVO.description != null">
+                 AND fs.description LIKE concat('%',#{statusSearchVO.description},'%')
+             </if>
+             <if test="statusSearchVO.param != null">
+                 AND ( fs.name LIKE concat('%',#{statusSearchVO.param},'%')
+                 OR fs.description LIKE concat('%',#{statusSearchVO.param},'%')
+                 )
+             </if>
          </if>
     </select>
 </mapper>

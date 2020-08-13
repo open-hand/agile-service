@@ -13,6 +13,7 @@ import {
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
+import { pageConfigApi } from '@/api/PageConfig';
 import Store from './stores';
 import TableDropMenu from '../../../common/TableDropMenu';
 import TypeTag from '../../../components/TypeTag';
@@ -21,7 +22,11 @@ import CreateField from './components/create-field';
 import './ObjectScheme.less';
 
 const { Column } = Table;
-
+enum RequireScopeType {
+  all = 'ALL',
+  part = 'PART',
+  none = 'NONE',
+}
 const showIcons: any = {
   史诗: {
     icon: 'agile_epic',
@@ -102,20 +107,24 @@ function ObjectScheme() {
   function handleCheckChange() {
     const record = schemeTableDataSet.current;
     const defaultValue = schemeTableDataSet.get('defaultValue');
-    const required = record.get('required');
+    const requiredScope = record.get('requiredScope');
+    const required = requiredScope !== RequireScopeType.all;
     if (record.get('system')) {
       return;
     }
-    if (!required && defaultValue) {
+    if (required && defaultValue) {
       Choerodon.prompt(formatMessage({ id: 'field.required.msg' }));
     }
     const field = {
       required: !required,
       objectVersionNumber: record.get('objectVersionNumber'),
     };
-    store.updateField(record.get('id'), field).then(() => {
+    pageConfigApi.updateRequired(record.get('id'), required).then(() => {
       handleRefresh();
     });
+    // store.updateField(record.get('id'), field).then(() => {
+    //   handleRefresh();
+    // });
   }
 
   // 打开创建模态框
@@ -230,13 +239,16 @@ function ObjectScheme() {
 
   const renderRequired = ({ record }: RenderProps) => {
     const system = record?.get('system');
-    const required = record?.get('required');
-    const projectId = record?.get('projectId');
+    // const required = record?.get('required');
+    const requiredScope = record?.get('requiredScope');
 
+    const projectId = record?.get('projectId');
+    // console.log('required', required);
     return (
       <div>
         <CheckBox
-          defaultChecked={required}
+          defaultChecked={requiredScope === 'ALL'}
+          indeterminate={requiredScope === 'PART'}
           disabled={system || (AppState.currentMenuType.type === 'project' && !projectId)}
           onChange={handleCheckChange}
         />

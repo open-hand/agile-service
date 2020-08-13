@@ -542,7 +542,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
             // 校验在是否有其他问题类型共用一个状态机
             StateMachineSchemeConfigDTO configDTO = new StateMachineSchemeConfigDTO(currentStateMachineId,false,organizationId);
             List<StateMachineSchemeConfigDTO> select = configMapper.select(configDTO);
-            if (select.size() == 1) {
+            if (select.size() <= 1) {
                 return currentStateMachineId;
             }
             // 复制第一个的状态机的节点和转换

@@ -39,6 +39,28 @@ export interface ICondition {
   userIds?: string[],
 }
 
+export interface IUpdateNotifySetting {
+  issueTypeId: string,
+  projectId: number,
+  statusId: string,
+  userTypeList: string[],
+  noticeTypeList: string[],
+  userIdList: string[],
+  objectVersionNumber: number,
+}
+
+export interface IStatusTransform {
+  issueTypeId: string
+  statusId: string
+}
+export interface ITotalStatus {
+  code: string
+  description: string | null
+  id: string
+  name: string
+  type: IStatus['valueCode']
+  usage: string | null
+}
 class StatusTransformApi extends Api {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
@@ -79,6 +101,17 @@ class StatusTransformApi extends Api {
     });
   }
 
+  listStatus(page: number, size: number) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/status/list_status`,
+      params: {
+        page,
+        size,
+      },
+    });
+  }
+
   createStatus(issueTypeIds: string[], status: IStatusCreate) {
     return this.request({
       method: 'post',
@@ -102,6 +135,29 @@ class StatusTransformApi extends Api {
     });
   }
 
+  checkStatusNeedTransform(statusId: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/status/status`,
+      params: {
+        applyType: getApplyType(),
+        statusId,
+      },
+    });
+  }
+
+  deleteStatus(statusId?: string, transforms: IStatusTransform[] = []) {
+    return this.request({
+      method: 'delete',
+      url: `${this.prefix}/status/delete_status`,
+      params: {
+        applyType: getApplyType(),
+        statusId,
+      },
+      data: transforms,
+    });
+  }
+
   deleteStatusByIssueType(issueTypeId: string, nodeId: string, toStatusId?: string) {
     return this.request({
       method: 'delete',
@@ -122,7 +178,7 @@ class StatusTransformApi extends Api {
    * @param size
    */
   getCustomCirculationList(
-    issueTypeId: string, page: number = 0, size: number = 10, param: string,
+    issueTypeId: string, param: string, page: number = 0, size: number = 10,
   ) {
     return this.request({
       method: 'get',
@@ -197,11 +253,15 @@ class StatusTransformApi extends Api {
   getNotifySetting(issueTypeId: string, statusId: string) {
     return axios({
       method: 'get',
-      url: `${this.prefix}/status_transform/setting_default_status`,
-      params: {
-        issueTypeId,
-        statusId,
-      },
+      url: `${this.prefix}/status_notice_settings/issue_type/${issueTypeId}/status/${statusId}`,
+    });
+  }
+
+  updateNotifySetting(data: IUpdateNotifySetting) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/status_notice_settings`,
+      data,
     });
   }
 

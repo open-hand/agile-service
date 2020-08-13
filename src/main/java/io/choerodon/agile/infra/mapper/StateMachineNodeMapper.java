@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.infra.dto.IssueCountDTO;
 import io.choerodon.agile.infra.dto.StateMachineNodeDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -45,4 +46,6 @@ public interface StateMachineNodeMapper extends BaseMapper<StateMachineNodeDTO> 
      * @return
      */
     int batchInsert(@Param("list") List<StateMachineNodeDTO> nodeList);
+
+    List<IssueCountDTO> countIssueTypeByStatusIds(@Param("organizationId") Long organizationId,@Param("schemeId") Long schemeId, @Param("statusIds") List<Long> statusIds);
 }

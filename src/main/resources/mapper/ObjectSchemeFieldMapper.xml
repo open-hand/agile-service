@@ -259,4 +259,30 @@
             </if>
         </if>
     </sql>
+
+    <select id="selectMemberByOptions" resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO">
+        select
+        t4.id,
+        t4.code,
+        t4.field_type,
+        flv.name as field_type_name,
+        t4.name,
+        t4.object_version_number,
+        t4.organization_id,
+        t4.project_id,
+        t4.is_system
+        from fd_object_scheme_field t4
+        join (
+        <include refid="selectExtendField"/>
+        ) t5 on t4.id = t5.field_id
+        left join fd_issue_type fit on (fit.organization_id = #{organizationId} and t5.issue_type_id = fit.id)
+        left join lookup_value flv on flv.value_code = t4.field_type and flv.type_code = 'field_type'
+        where t4.field_type = 'member'
+        <if test="schemeCode != null">
+            and t4.scheme_code = #{schemeCode}
+        </if>
+        <if test="schemeCode == null">
+            and t4.scheme_code = 'agile_issue'
+        </if>
+    </select>
 </mapper>

@@ -2958,4 +2958,22 @@
         group by ai.status_id
     </select>
 
+    <select id="countIssueTypeByStatusIds" resultType="io.choerodon.agile.infra.dto.IssueCountDTO">
+        select ai.status_id as id,fit.`name` as name from agile_issue ai
+        left join fd_issue_type fit on fit.id = ai.issue_type_id
+        where ai.project_id = #{projectId}
+        AND ai.status_id in
+        <foreach collection="statusIds" item="statusId" open="(" separator="," close=")">
+            #{statusId}
+        </foreach>
+        group by ai.status_id,ai.issue_type_id
+    </select>
+
+    <select id="selectIssueTypeIdsByStatusId" resultType="java.lang.Long">
+        select ai.issue_type_id from agile_issue ai
+        where ai.project_id = #{projectId}
+        AND ai.status_id = #{statusId}
+        group by ai.issue_type_id
+    </select>
+
 </mapper>
