@@ -4,13 +4,14 @@ import {
 } from '@choerodon/boot';
 import { Button, Table, DataSet } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { statusTransformApiConfig } from '@/api';
+import { statusTransformApiConfig, ITotalStatus } from '@/api';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import { IStatus } from '@/common/types';
 import { Popconfirm, Divider } from 'choerodon-ui';
 import { TableAutoHeightType } from 'choerodon-ui/pro/lib/table/enum';
 import { TabComponentProps } from '../index';
 import openCreateStatus from '../components/create-status';
+import openDeleteStatus from './DeleteStatus';
 import styles from './index.less';
 
 const { Column } = Table;
@@ -85,9 +86,17 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
           <Column
             name="operate"
             renderer={({ record }) => (
-              <Popconfirm title={`确认删除状态“${record?.get('name')}”`}>
-                <Button icon="delete" />
-              </Popconfirm>
+              <Button
+                icon="delete"
+                onClick={() => {
+                  openDeleteStatus({
+                    onSubmit: () => {
+                      dataSet.query();
+                    },
+                    data: record?.toData() as ITotalStatus,
+                  });
+                }}
+              />
             )}
           />
         </Table>

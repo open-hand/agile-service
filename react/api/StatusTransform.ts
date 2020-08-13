@@ -49,6 +49,18 @@ export interface IUpdateNotifySetting {
   objectVersionNumber: number,
 }
 
+export interface IStatusTransform {
+  issueTypeId: string
+  statusId: string
+}
+export interface ITotalStatus {
+  code: string
+  description: string | null
+  id: string
+  name: string
+  type: IStatus['valueCode']
+  usage: string | null
+}
 class StatusTransformApi extends Api {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
@@ -120,6 +132,29 @@ class StatusTransformApi extends Api {
         ...statusLink,
         applyType: getApplyType(),
       },
+    });
+  }
+
+  checkStatusNeedTransform(statusId: string) {
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/status/status`,
+      params: {
+        applyType: getApplyType(),
+        statusId,
+      },
+    });
+  }
+
+  deleteStatus(statusId?: string, transforms: IStatusTransform[] = []) {
+    return this.request({
+      method: 'delete',
+      url: `${this.prefix}/status/delete_status`,
+      params: {
+        applyType: getApplyType(),
+        statusId,
+      },
+      data: transforms,
     });
   }
 
