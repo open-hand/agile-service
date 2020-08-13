@@ -59,7 +59,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private IssueTypeFieldMapper issueTypeFieldMapper;
 
     @Override
-    public ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field, String[] contexts) {
+    public ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field,
+                                           String[] contexts,
+                                           String issueTypeForRank) {
         Long organizationId = field.getOrganizationId();
         Long projectId = field.getProjectId();
         field.setSystem(false);
@@ -67,23 +69,25 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (objectSchemeFieldMapper.insert(field) != 1) {
             throw new CommonException(ERROR_FIELD_CREATE);
         }
-        Long fieldId = field.getId();
         //  创建object_scheme_field_extend
         Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
         if (ObjectSchemeFieldContext.isGlobal(contexts)) {
-            getInsertExtendList(organizationId, projectId, fieldId, ObjectSchemeFieldContext.ISSUE_TYPES, issueTypeMap);
+            getInsertExtendList(organizationId, projectId, field, ObjectSchemeFieldContext.ISSUE_TYPES, issueTypeMap, issueTypeForRank);
         } else {
-            getInsertExtendList(organizationId, projectId, fieldId, contexts, issueTypeMap);
+            getInsertExtendList(organizationId, projectId, field, contexts, issueTypeMap, issueTypeForRank);
         }
         return objectSchemeFieldMapper.selectByPrimaryKey(field.getId());
     }
 
     private void getInsertExtendList(Long organizationId,
                                      Long projectId,
-                                     Long fieldId,
+                                     ObjectSchemeFieldDTO field,
                                      String[] contexts,
-                                     Map<String, Long> issueTypeMap) {
+                                     Map<String, Long> issueTypeMap,
+                                     String issueTypeForRank) {
         String minRank = null;
+        Long fieldId = field.getId();
+        String rank = field.getRank();
         for (String ctx : contexts) {
             ObjectSchemeFieldExtendDTO dto = new ObjectSchemeFieldExtendDTO();
             dto.setIssueType(ctx);
@@ -97,8 +101,13 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 dto.setCreated(true);
                 dto.setEdited(true);
                 dto.setIssueTypeId(issueTypeId);
-                minRank = getMinRank(organizationId, projectId, ctx, minRank);
-                dto.setRank(minRank);
+                if (Objects.equals(ctx, issueTypeForRank)
+                        && !StringUtils.isEmpty(rank)) {
+                    dto.setRank(rank);
+                } else {
+                    minRank = getMinRank(organizationId, projectId, ctx, minRank);
+                    dto.setRank(minRank);
+                }
                 objectSchemeFieldExtendMapper.insert(dto);
             }
         }
@@ -268,7 +277,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     @Override
-    public ObjectSchemeFieldDetailVO create(Long organizationId, Long projectId, ObjectSchemeFieldCreateVO fieldCreateDTO) {
+    public ObjectSchemeFieldDetailVO create(Long organizationId,
+                                            Long projectId,
+                                            ObjectSchemeFieldCreateVO fieldCreateDTO,
+                                            String issueTypeForRank) {
         if (!EnumUtil.contain(FieldType.class, fieldCreateDTO.getFieldType())) {
             throw new CommonException(ERROR_FIELDTYPE_ILLEGAL);
         }
@@ -294,7 +306,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (defaultValue != null) {
             field.setDefaultValue(defaultValue);
         }
-        field = baseCreate(field, contexts);
+        field = baseCreate(field, contexts, issueTypeForRank);
 
         //处理字段选项
         if (fieldCreateDTO.getFieldOptions() != null) {
@@ -631,6 +643,11 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     @Override
+    public List<ObjectSchemeFieldVO> unselected(Long organizationId, Long projectId, String issueType) {
+        return objectSchemeFieldExtendMapper.unselected(organizationId, projectId, issueType);
+    }
+
+    @Override
     public ObjectSchemeFieldDTO selectById(Long fieldId) {
         return objectSchemeFieldMapper.selectByPrimaryKey(fieldId);
     }
@@ -643,17 +660,34 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         Set<Long> deleteIds = pageConfigUpdateVO.getDeleteIds();
 
         ObjectSchemeFieldContext.isIllegalIssueType(issueType);
+        Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
         if (!ObjectUtils.isEmpty(fields)) {
-            updateFieldConfig(organizationId, projectId, issueType, fields);
+            updateFieldConfig(organizationId, projectId, issueType, fields, issueTypeMap);
         }
         if (!ObjectUtils.isEmpty(projectId)
                 && !ObjectUtils.isEmpty(issueTypeFieldVO)
                 && !StringUtils.isEmpty(issueTypeFieldVO.getTemplate())) {
-            updateTemplate(organizationId, projectId, issueType, issueTypeFieldVO);
+            updateTemplate(projectId, issueType, issueTypeFieldVO, issueTypeMap);
         }
         if (!ObjectUtils.isEmpty(deleteIds)) {
             deleteFieldConfig(organizationId, projectId, deleteIds);
         }
+        List<ObjectSchemeFieldCreateVO> createdField = pageConfigUpdateVO.getCreatedFields();
+        if (!ObjectUtils.isEmpty(createdField)) {
+            createdField.forEach(c -> create(organizationId, projectId, c, issueType));
+        }
+        Set<Long> addIds = pageConfigUpdateVO.getAddIds();
+        if(!ObjectUtils.isEmpty(addIds)) {
+            addFieldConfig(organizationId, projectId, addIds, issueType, issueTypeMap);
+        }
+    }
+
+    private void addFieldConfig(Long organizationId,
+                                Long projectId,
+                                Set<Long> addIds,
+                                String issueType,
+                                Map<String, Long> issueTypeMap) {
+        addIds.forEach(a -> insertObjectSchemeFieldExtend(organizationId, projectId, a, true, issueTypeMap, issueType, true, true));
     }
 
     private void deleteFieldConfig(Long organizationId, Long projectId, Set<Long> deleteIds) {
@@ -723,8 +757,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         return result;
     }
 
-    private void updateTemplate(Long organizationId, Long projectId, String issueType, IssueTypeFieldVO issueTypeFieldVO) {
-        Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
+    private void updateTemplate(Long projectId,
+                                String issueType,
+                                IssueTypeFieldVO issueTypeFieldVO,
+                                Map<String, Long> issueTypeMap) {
         Long issueTypeId = issueTypeMap.get(issueType);
         if (ObjectUtils.isEmpty(issueTypeId)) {
             throw new CommonException("error.issue.type.not.existed", issueType);
@@ -752,9 +788,12 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         }
     }
 
-    private void updateFieldConfig(Long organizationId, Long projectId, String issueType, List<PageConfigFieldVO> fields) {
+    private void updateFieldConfig(Long organizationId,
+                                   Long projectId,
+                                   String issueType,
+                                   List<PageConfigFieldVO> fields,
+                                   Map<String, Long> issueTypeMap) {
         boolean onProjectLevel = (projectId != null);
-        Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
         fields.forEach(f -> {
             Long fieldId = f.getFieldId();
             if (ObjectUtils.isEmpty(f.getRequired())

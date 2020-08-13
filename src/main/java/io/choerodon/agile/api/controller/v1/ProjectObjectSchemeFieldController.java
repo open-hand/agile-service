@@ -51,7 +51,7 @@ public class ProjectObjectSchemeFieldController {
                                                              @RequestParam Long organizationId,
                                                             @ApiParam(value = "字段对象", required = true)
                                                              @RequestBody @Valid ObjectSchemeFieldCreateVO fieldCreateDTO) {
-        return new ResponseEntity<>(objectSchemeFieldService.create(organizationId, projectId, fieldCreateDTO), HttpStatus.CREATED);
+        return new ResponseEntity<>(objectSchemeFieldService.create(organizationId, projectId, fieldCreateDTO, null), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -140,7 +140,7 @@ public class ProjectObjectSchemeFieldController {
 
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "查询字段的页面配置数据")
+    @ApiOperation(value = "更新字段是否必填")
     @PostMapping(value = "/update_required")
     public ResponseEntity updateRequired(@PathVariable("project_id") Long projectId,
                                          @RequestParam @Encrypt Long fieldId,
@@ -157,6 +157,15 @@ public class ProjectObjectSchemeFieldController {
                                             @RequestParam Long organizationId,
                                             @RequestBody @Validated AdjustOrderVO adjustOrderVO) {
         return new ResponseEntity<>(objectSchemeFieldService.queryRank(organizationId, projectId, adjustOrderVO), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "页面配置根据问题类型查询未选择的字段")
+    @GetMapping(value = "/unselected")
+    public ResponseEntity<List<ObjectSchemeFieldVO>> unselected(@PathVariable("project_id") Long projectId,
+                                                                @RequestParam Long organizationId,
+                                                                @RequestParam String issueType) {
+        return new ResponseEntity<>(objectSchemeFieldService.unselected(organizationId, projectId, issueType), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

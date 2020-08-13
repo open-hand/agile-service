@@ -149,4 +149,41 @@
         </choose>
         and rank &lt; #{targetRank}
     </select>
+
+    <select id="unselected" resultType="io.choerodon.agile.api.vo.ObjectSchemeFieldVO">
+        select
+        t1.field_id as id
+        from (
+            select
+            distinct field_id
+            from fd_object_scheme_field_extend
+            where organization_id = #{organizationId}
+            and project_id is null
+            <if test="projectId != null">
+                union
+                select
+                distinct field_id
+                from fd_object_scheme_field_extend
+                where organization_id = #{organizationId}
+                and project_id = #{projectId}
+            </if>
+        ) t1
+        where t1.field_id not in (
+            select
+            distinct field_id
+            from fd_object_scheme_field_extend
+            where organization_id = #{organizationId}
+            and issue_type = #{issueType}
+            and project_id is null
+            <if test="projectId != null">
+                union
+                select
+                distinct field_id
+                from fd_object_scheme_field_extend
+                where organization_id = #{organizationId}
+                and project_id = #{projectId}
+                and issue_type = #{issueType}
+            </if>
+        )
+    </select>
 </mapper>

@@ -12,7 +12,14 @@ import java.util.Map;
  */
 public interface ObjectSchemeFieldService {
 
-    ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field, String[] contexts);
+    /**
+     *
+     * @param field
+     * @param contexts
+     * @param issueTypeForRank 需要设置rank值的issueType，空值时不设置
+     * @return
+     */
+    ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field, String[] contexts, String issueTypeForRank);
 
     void baseUpdate(ObjectSchemeFieldDTO field);
 
@@ -37,9 +44,10 @@ public interface ObjectSchemeFieldService {
      * @param organizationId
      * @param projectId
      * @param fieldCreateDTO
+     * @param issueTypeForRank 需要设置rank值的issueType，空值时不设置
      * @return
      */
-    ObjectSchemeFieldDetailVO create(Long organizationId, Long projectId, ObjectSchemeFieldCreateVO fieldCreateDTO);
+    ObjectSchemeFieldDetailVO create(Long organizationId, Long projectId, ObjectSchemeFieldCreateVO fieldCreateDTO, String issueTypeForRank);
 
     /**
      * 组织层/项目层 查询字段详情
@@ -149,4 +157,14 @@ public interface ObjectSchemeFieldService {
     String queryRank(Long organizationId, Long projectId, AdjustOrderVO adjustOrderVO);
 
     List<ObjectSchemeFieldVO> selectMemberList(Long organizationId, Long projectId, String schemeCode);
+
+    /**
+     * 查询issueType下未配置的字段
+     *
+     * @param organizationId
+     * @param projectId
+     * @param issueType
+     * @return
+     */
+    List<ObjectSchemeFieldVO> unselected(Long organizationId, Long projectId, String issueType);
 }
