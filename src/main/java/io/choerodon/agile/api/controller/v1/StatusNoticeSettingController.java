@@ -28,7 +28,7 @@ public class StatusNoticeSettingController extends BaseController {
     @ApiOperation(value = "消息通知明细")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/issue_type/{issue_type_id}/status/{status_id}")
-    public ResponseEntity<StatusNoticeSettingVO> detail(@PathVariable("project_id") @Encrypt Long projectId,
+    public ResponseEntity<StatusNoticeSettingVO> detail(@PathVariable("project_id") Long projectId,
                                                         @PathVariable("issue_type_id") @Encrypt Long issueTypeId,
                                                         @PathVariable("status_id") @Encrypt Long statusId) {
         return Results.success(statusNoticeSettingService.detail(projectId, issueTypeId, statusId));
@@ -38,7 +38,7 @@ public class StatusNoticeSettingController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<Void> save(@PathVariable("project_id") Long projectId,
-                                                        @RequestBody StatusNoticeSettingVO StatusNoticeSettingVO) {
+                                     @RequestBody StatusNoticeSettingVO StatusNoticeSettingVO) {
         validObject(StatusNoticeSettingVO);
         statusNoticeSettingService.save(projectId, StatusNoticeSettingVO);
         return Results.success();
