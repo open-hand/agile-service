@@ -12,10 +12,10 @@ databaseChangeLog(logicalFilePath: 'fd_status_field_value_setting.groovy') {
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
+            column(name: 'field_type', type: 'varchar(255)', remarks: 'field type')
+            column(name: 'operate_type', type: 'varchar(255)', remarks: 'operate type')
             column(name: 'option_id', type: 'BIGINT UNSIGNED', remarks: 'option value')
             column(name: 'string_value', type: 'varchar(255)', remarks: 'string value')
-            column(name: 'field_type', type: 'varchar(255)', remarks: 'number type')
-            column(name: 'operate_type', type: 'varchar(255)', remarks: 'number type')
             column(name: 'number_value', type: 'decimal(10,0)', remarks: 'number value')
             column(name: 'number_add_value', type: 'decimal(10,0)', remarks: 'number add value')
             column(name: 'text_value', type: 'text', remarks: 'text value')
