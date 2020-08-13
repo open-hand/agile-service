@@ -71,4 +71,18 @@ public interface ObjectSchemeFieldMapper extends BaseMapper<ObjectSchemeFieldDTO
     void cascadeDelete(@Param("organizationId") Long organizationId,
                        @Param("projectId") Long projectId,
                        @Param("fieldId") Long fieldId);
+
+    /**
+     * 查询项目层或者组织层的人员字段，项目层可以看到组织层的字段，如果项目和组织层都有字段，以项目层为准
+     *
+     * @param organizationId 组织id
+     * @param projectId 项目id
+     * @param schemeCode 方案编码
+     * @return 人员字段list
+     */
+    List<ObjectSchemeFieldDTO> selectMemberByOptions(@Param("organizationId") Long organizationId,
+                                               @Param("projectId") Long projectId,
+                                               @Param("schemeCode") String schemeCode,
+                                               @Param("fieldId") Long fieldId,
+                                               @Param("issueTypeId") Long issueTypeId);
 }

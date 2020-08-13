@@ -36,6 +36,7 @@ public class StatusNoticeSettingVO extends AuditDomain {
 
     @ApiModelProperty(value = "issue类型Id",required = true)
     @NotNull
+    @Encrypt
     private Long issueTypeId;
 
     @ApiModelProperty(value = "项目id",required = true)
@@ -44,6 +45,7 @@ public class StatusNoticeSettingVO extends AuditDomain {
 
     @ApiModelProperty(value = "状态id",required = true)
     @NotNull
+    @Encrypt
     private Long statusId;
 
     @ApiModelProperty(value = "用户类型，projectOwner, assignee, reporter, specifier")

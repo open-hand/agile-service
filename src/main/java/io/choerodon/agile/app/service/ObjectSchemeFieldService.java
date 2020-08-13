@@ -147,4 +147,6 @@ public interface ObjectSchemeFieldService {
      * @return
      */
     String queryRank(Long organizationId, Long projectId, AdjustOrderVO adjustOrderVO);
+
+    List<ObjectSchemeFieldVO> selectMemberList(Long organizationId, Long projectId, String schemeCode);
 }
