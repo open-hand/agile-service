@@ -92,16 +92,17 @@ class PageConfigApi {
 
   /**
    * 更新字段是否必选
-   * @param filedId
+   * @param fieldId
    * @param required
    */
-  updateRequired(filedId: string, required: boolean) {
+  updateRequired(fieldId: string, required: boolean) {
     return axios({
       method: 'post',
       url: `${this.prefixOrgOrPro}/object_scheme_field/update_required`,
       params: {
-        filedId,
+        fieldId,
         required,
+        organizationId: getOrganizationId(),
       },
     });
   }

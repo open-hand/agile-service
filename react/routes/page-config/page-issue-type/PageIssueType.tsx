@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, {
+  useState, useEffect, useReducer, useCallback,
+} from 'react';
 import {
   TabPage as Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
@@ -25,15 +27,44 @@ interface DescriptionState {
   template: string,
   objectVersionNumber?: number,
 }
-
 type DescriptionAction = Required<{ type: string }> & Partial<DescriptionState>
+
+interface IssueTypeState {
+  current: string,
+  newCurrent: string,
+}
+type IssueTypeAction = Required<{ type: string }> & Partial<IssueTypeState>
+
 const preCls = 'c7n-agile-page-config-page-issue-type';
 const { Option } = SelectBox;
 function PageIssueType() {
   const { sortTableDataSet, intl } = usePageIssueTypeStore();
   const [edit, setEdit] = useState<boolean>();
   const [loading, setLoading] = useState<boolean>(true);
-  const [currentType, setCurrentType] = useState<string>('feature');
+  const dataStatus = useObservable({ code: '' }); // 是否有更改内容
+  const [issueTypeState, setIssueTypeState] = useReducer(
+    (state: IssueTypeState, action: IssueTypeAction) => {
+      switch (action.type) {
+        case 'change':
+          if (edit && (dataStatus.code === 'update' || dataStatus.code === 'drag_update')) {
+            console.log('state');
+            return {
+              current: state.current,
+              newCurrent: action.newCurrent,
+            };
+          }
+          return {
+            current: action.newCurrent,
+            newCurrent: action.newCurrent,
+          };
+        default:
+          return state;
+      }
+    }, {
+      current: 'feature',
+      newCurrent: 'feature',
+    },
+  );
   const [desState, setDesState] = useReducer(
     (state: DescriptionState, action: DescriptionAction) => {
       switch (action.type) {
@@ -48,6 +79,12 @@ function PageIssueType() {
             ...state,
             template: action.template,
           };
+        case 'destroy':
+          return {
+            id: undefined,
+            template: '',
+            objectVersionNumber: undefined,
+          };
         default:
           return state;
       }
@@ -57,20 +94,13 @@ function PageIssueType() {
       objectVersionNumber: undefined,
     },
   );
-  const current = useObservable({ val: 'feature' });
-  const dataStatus = useObservable({ code: '' }); // 是否有更改内容
 
-  const handleCancel = () => {
-    loadData();
-    // sortTableDataSet.reset();
-    setEdit(false);
-  };
   async function handleSubmit() {
     setLoading(true);
     const submitData = sortTableDataSet.toData() as IFiledProps[];
     if (submitData.length > 0) {
       const data = {
-        issueType: current.val as PageConfigIssueType,
+        issueType: issueTypeState.current as PageConfigIssueType,
         fields: submitData.map((item) => ({
           fieldId: item.fieldId,
           required: item.required,
@@ -95,7 +125,8 @@ function PageIssueType() {
   }
   const loadData = () => {
     setLoading(true);
-    pageConfigApi.loadByIssueType(current.val as PageConfigIssueType).then((res) => {
+    console.log('loadData');
+    pageConfigApi.loadByIssueType(issueTypeState.current as PageConfigIssueType).then((res) => {
       sortTableDataSet.loadData(res.fields);
       res.issueTypeFieldVO && setDesState({ ...res.issueTypeFieldVO, type: 'init' });
       setLoading(false);
@@ -104,6 +135,21 @@ function PageIssueType() {
   useEffect(() => {
 
   }, []);
+  const destroyData = () => {
+    setDesState({ type: 'destroy' });
+    dataStatus.code = '';
+    edit && setEdit(false);
+  };
+
+  const handleSwitch = () => {
+    destroyData();
+    loadData();
+  };
+  const handleCancel = () => {
+    destroyData();
+    loadData();
+    // sortTableDataSet.reset();
+  };
   useEffect(() => {
     if (edit && (dataStatus.code === 'update' || dataStatus.code === 'drag_update')) {
       Modal.confirm({
@@ -113,17 +159,16 @@ function PageIssueType() {
             页面有未保存的内容，切换则放弃更改
           </div>
         ),
-        onOk: loadData(),
+        onOk: handleSwitch(),
       });
     } else {
-      edit && setEdit(false);
-      current.val = currentType;
-      loadData();
+      console.log('handleSwitch');
+      handleSwitch();
     }
-  }, [currentType]);
+  }, [issueTypeState.newCurrent]);
 
   const handleSelectBox = (val: any) => {
-
+    setIssueTypeState({ type: 'change', newCurrent: val });
   };
   const handleChangeDes = (val: string) => {
     setDesState({ type: 'change', template: val });
@@ -169,7 +214,7 @@ function PageIssueType() {
       </Header>
       <Breadcrumb />
       <Content className={`${preCls}-content`}>
-        <SelectBox mode={'button' as ViewMode} defaultValue="feature" value={current.val} onChange={setCurrentType} className={`${preCls}-select-box`}>
+        <SelectBox mode={'button' as ViewMode} defaultValue="feature" value={issueTypeState.current} onChange={handleSelectBox} className={`${preCls}-select-box`}>
           <Option value="issue_epic">史诗</Option>
           <Option value="feature">特性</Option>
           <Option value="story">故事</Option>
@@ -192,7 +237,7 @@ function PageIssueType() {
                   placeholder="您可以在此自定义描述信息格式"
                 />
               )
-                : <WYSIWYGViewer data={desState.template || ''} />}
+                : <WYSIWYGViewer data={`${desState.template}`} />}
             </IssueTypeWrap>
           </div>
         </Spin>

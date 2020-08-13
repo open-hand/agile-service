@@ -22,7 +22,11 @@ import CreateField from './components/create-field';
 import './ObjectScheme.less';
 
 const { Column } = Table;
-
+enum RequireScopeType {
+  all = 'ALL',
+  part = 'PART',
+  none = 'NONE',
+}
 const showIcons: any = {
   史诗: {
     icon: 'agile_epic',
@@ -103,18 +107,19 @@ function ObjectScheme() {
   function handleCheckChange() {
     const record = schemeTableDataSet.current;
     const defaultValue = schemeTableDataSet.get('defaultValue');
-    const required = record.get('required');
+    const requiredScope = record.get('requiredScope');
+    const required = requiredScope !== RequireScopeType.all;
     if (record.get('system')) {
       return;
     }
-    if (!required && defaultValue) {
+    if (required && defaultValue) {
       Choerodon.prompt(formatMessage({ id: 'field.required.msg' }));
     }
     const field = {
       required: !required,
       objectVersionNumber: record.get('objectVersionNumber'),
     };
-    pageConfigApi.updateRequired(record.get('id'), field.required).then(() => {
+    pageConfigApi.updateRequired(record.get('id'), required).then(() => {
       handleRefresh();
     });
     // store.updateField(record.get('id'), field).then(() => {

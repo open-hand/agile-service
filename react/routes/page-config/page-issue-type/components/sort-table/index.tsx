@@ -143,7 +143,16 @@ const SortTable: React.FC<Props> = ({ disabled, dataStatus, org = 23 }) => {
       {renderCheckBox({
         value, name, record, dataSet,
       })}
-      <Button style={{ marginLeft: 10 }} onClick={() => dataSet?.remove(record as Record)}>
+      <Button
+        disabled={disabled}
+        style={{ marginLeft: 10 }}
+        onClick={() => {
+            dataSet?.remove(record as Record);
+            console.log('dataSet', dataSet?.toData());
+            dataSet?.loadData(dataSet?.toData());
+            // dataSet?.query();
+        }}
+      >
         <Icon type="delete" style={{ fontSize: 18 }} />
       </Button>
     </div>
