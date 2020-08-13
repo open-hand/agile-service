@@ -37,17 +37,22 @@ public class StatusNoticeSettingVO extends AuditDomain {
     @ApiModelProperty(value = "issue类型Id",required = true)
     @NotNull
     private Long issueTypeId;
+
     @ApiModelProperty(value = "项目id",required = true)
     @NotNull
     private Long projectId;
+
     @ApiModelProperty(value = "状态id",required = true)
     @NotNull
     private Long statusId;
+
     @ApiModelProperty(value = "用户类型，projectOwner, assignee, reporter, specifier")
     private Set<String> userTypeList = new HashSet<>();
+
     @ApiModelProperty(value = "用户id")
     @Encrypt
     private Set<Long> userIdList = new HashSet<>();
+
     @ApiModelProperty(value = "通知类型")
     private List<String> noticeTypeList;
 

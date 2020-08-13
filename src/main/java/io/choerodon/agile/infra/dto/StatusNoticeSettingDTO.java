@@ -1,6 +1,5 @@
 package io.choerodon.agile.infra.dto;
 
-import java.util.stream.Collectors;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -30,14 +29,6 @@ import org.hzero.core.base.BaseConstants;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @Table(name = "fd_status_notice_setting")
 public class StatusNoticeSettingDTO extends AuditDomain {
-
-    public static final String FIELD_ID = "id";
-    public static final String FIELD_ISSUE_TYPE_ID = "issueTypeId";
-    public static final String FIELD_PROJECT_ID = "projectId";
-    public static final String FIELD_STATUS_ID = "statusId";
-    public static final String FIELD_USER_TYPE = "userType";
-    public static final String FIELD_USER_ID = "userId";
-    public static final String FIELD_NOTICE_TYPE = "noticeType";
 
     public StatusNoticeSettingDTO() {
     }
@@ -69,35 +60,30 @@ public class StatusNoticeSettingDTO extends AuditDomain {
     @Id
     @GeneratedValue
     private Long id;
+
     @ApiModelProperty(value = "issue类型Id",required = true)
     @NotNull
     private Long issueTypeId;
+
     @ApiModelProperty(value = "项目id",required = true)
     @NotNull
     private Long projectId;
+
     @ApiModelProperty(value = "状态id",required = true)
     @NotNull
     private Long statusId;
+
     @ApiModelProperty(value = "用户类型，基本类型projectOwner, assignee, reporter, specifier",required = true)
     @NotBlank
     private String userType;
+
     @ApiModelProperty(value = "用户id")
     private Long userId;
+
     @ApiModelProperty(value = "通知类型",required = true)
     @NotBlank
     private String noticeType;
 
-    //
-    // 非数据库字段
-    // ------------------------------------------------------------------------------
-
-    //
-    // getter/setter
-    // ------------------------------------------------------------------------------
-
-    /**
-     * @return
-     */
     public Long getId() {
         return id;
     }
@@ -105,9 +91,7 @@ public class StatusNoticeSettingDTO extends AuditDomain {
     public void setId(Long id) {
         this.id = id;
     }
-    /**
-     * @return
-     */
+
     public Long getIssueTypeId() {
         return issueTypeId;
     }
@@ -115,9 +99,7 @@ public class StatusNoticeSettingDTO extends AuditDomain {
     public void setIssueTypeId(Long issueTypeId) {
         this.issueTypeId = issueTypeId;
     }
-    /**
-     * @return
-     */
+
     public Long getProjectId() {
         return projectId;
     }
@@ -125,9 +107,7 @@ public class StatusNoticeSettingDTO extends AuditDomain {
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
     }
-    /**
-     * @return
-     */
+
     public Long getStatusId() {
         return statusId;
     }
@@ -135,9 +115,7 @@ public class StatusNoticeSettingDTO extends AuditDomain {
     public void setStatusId(Long statusId) {
         this.statusId = statusId;
     }
-    /**
-     * @return
-     */
+
     public String getUserType() {
         return userType;
     }
@@ -145,9 +123,7 @@ public class StatusNoticeSettingDTO extends AuditDomain {
     public void setUserType(String userType) {
         this.userType = userType;
     }
-    /**
-     * @return
-     */
+
     public Long getUserId() {
         return userId;
     }

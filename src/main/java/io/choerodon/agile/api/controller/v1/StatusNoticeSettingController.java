@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiOperation;
  * @author choerodon@choerodon.cn 2020-08-12 11:41:01
  */
 @RestController(" statusNoticeSettingController.v1")
-@RequestMapping("/v1/projects/{project_id}")
+@RequestMapping("/v1/projects/{project_id}/status_notice_settings")
 public class StatusNoticeSettingController extends BaseController {
 
     @Autowired
@@ -26,7 +26,7 @@ public class StatusNoticeSettingController extends BaseController {
 
     @ApiOperation(value = "消息通知明细")
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/issue_type/{issue_type_id}/status/{status_id}/notice_settings")
+    @GetMapping("/issue_type/{issue_type_id}/status/{status_id}")
     public ResponseEntity<StatusNoticeSettingVO> detail(@PathVariable("project_id") Long projectId,
                                                         @PathVariable("issue_type_id") Long issueTypeId,
                                                         @PathVariable("status_id") Long statusId) {
@@ -35,7 +35,7 @@ public class StatusNoticeSettingController extends BaseController {
 
     @ApiOperation(value = "保存消息通知")
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PostMapping("/status_notice_settings")
+    @PostMapping
     public ResponseEntity<Void> save(@PathVariable("project_id") Long projectId,
                                                         @RequestBody StatusNoticeSettingVO StatusNoticeSettingVO) {
         validObject(StatusNoticeSettingVO);
