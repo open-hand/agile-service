@@ -89,6 +89,8 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     private InstanceService instanceService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private StatusTransferSettingService statusTransferSettingService;
 
     private void insertRank(Long projectId, Long issueId, String type, RankVO rankVO) {
         List<RankDTO> rankDTOList = new ArrayList<>();
@@ -233,6 +235,9 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (stateMachineId == null) {
             throw new CommonException(ERROR_ISSUE_STATE_MACHINE_NOT_FOUND);
         }
+        // 查询要转换的状态是否有流转条件
+        Long endStatusId = transformService.queryDeployTransformForAgile(projectId, transformId).getEndStatusId();
+        statusTransferSettingService.checkStatusTransferSetting(projectId,issue.getIssueTypeId(),endStatusId);
         Long currentStatusId = issue.getStatusId();
         //执行状态转换
         ExecuteResult executeResult = instanceService.executeTransform(organizationId, AGILE_SERVICE, stateMachineId, currentStatusId, transformId, inputDTO);

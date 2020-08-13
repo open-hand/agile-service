@@ -141,4 +141,26 @@ public class StatusController extends BaseController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.statusName.check"));
     }
+
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查看项目拥有的状态")
+    @PostMapping(value = "/projects/{project_id}/status/list_status")
+    public ResponseEntity<Page<ProjectStatusVO>> listStatusByProjectId(@PathVariable("project_id") Long projectId,
+                                                                       @SortDefault(value = "id", direction = Sort.Direction.DESC) PageRequest pageRequest,
+                                                                       @ApiParam(value = "status search dto", required = true)
+                                                                       @RequestBody StatusSearchVO statusSearchVO) {
+        return new ResponseEntity<>(statusService.listStatusByProjectId(projectId, pageRequest, statusSearchVO), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "删除项目的状态")
+    @DeleteMapping(value = "/projects/{project_id}/status/delete_status")
+    public ResponseEntity deleteStatus(@PathVariable("project_id") Long projectId,
+                                       @RequestParam Long statusId,
+                                       @RequestParam String applyType,
+                                       @RequestBody List<DeleteStatusTransferVO> statusTransferVOS) {
+        statusService.deleteStatus(projectId,statusId,applyType, statusTransferVOS);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

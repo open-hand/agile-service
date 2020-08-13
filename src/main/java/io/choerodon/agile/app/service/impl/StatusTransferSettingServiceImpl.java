@@ -2,15 +2,18 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.StatusTransferSettingCreateVO;
 import io.choerodon.agile.api.vo.StatusTransferSettingVO;
+import io.choerodon.agile.api.vo.UserVO;
 import io.choerodon.agile.app.assembler.StatusTransferSettingAssembler;
 import io.choerodon.agile.app.service.StatusTransferSettingService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.StatusDTO;
 import io.choerodon.agile.infra.dto.StatusTransferSettingDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.StatusMapper;
 import io.choerodon.agile.infra.mapper.StatusTransferSettingMapper;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,7 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 public class StatusTransferSettingServiceImpl implements StatusTransferSettingService {
     private static final String SPECIFIER = "specifier";
+    private static final String PROJECT_OWNER = "projectOwner";
     @Autowired
     private StatusTransferSettingMapper statusTransferSettingMapper;
     @Autowired
@@ -37,6 +41,8 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     private StatusTransferSettingAssembler statusTransferSettingAssembler;
     @Autowired
     private StatusMapper statusMapper;
+    @Autowired
+    private BaseFeignClient baseFeignClient;
 
     @Override
     public void createOrUpdate(Long projectId, Long issueTypeId, Long statusId,Long objectVersionNumber,List<StatusTransferSettingCreateVO> list) {
@@ -104,6 +110,30 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
             userDTOMap.putAll(userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity())));
         }
         return statusTransferSettingAssembler.listDTOToVO(dtos,userDTOMap);
+    }
+
+    @Override
+    public void checkStatusTransferSetting(Long projectId, Long issueTypeId, Long endStatusId) {
+        List<StatusTransferSettingDTO> query = query(projectId, issueTypeId, endStatusId);
+        if (CollectionUtils.isEmpty(query)) {
+            return;
+        }
+        // 获取当前的用户
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        Set<Long> userIds = new HashSet<>();
+        for (StatusTransferSettingDTO statusTransferSettingDTO : query) {
+            if (!PROJECT_OWNER.equals(statusTransferSettingDTO.getUserType())) {
+                List<UserVO> body = baseFeignClient.listProjectOwnerById(projectId).getBody();
+                if (!CollectionUtils.isEmpty(body)) {
+                    userIds.addAll(body.stream().map(UserVO::getId).collect(Collectors.toSet()));
+                }
+            } else {
+                userIds.add(statusTransferSettingDTO.getUserId());
+            }
+        }
+        if (!userIds.contains(userId)) {
+            throw new CommonException("error.no.permission.to.switch");
+        }
     }
 
     private void baseInsert(StatusTransferSettingDTO statusTransferSettingDTO) {
