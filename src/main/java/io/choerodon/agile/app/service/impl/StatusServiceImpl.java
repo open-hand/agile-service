@@ -3,7 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.utils.ConvertUtil;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.infra.cache.InstanceCache;
 import io.choerodon.agile.infra.enums.NodeType;
@@ -55,6 +55,8 @@ public class StatusServiceImpl implements StatusService {
     private ProjectConfigService projectConfigService;
     @Autowired
     private IssueStatusService issueStatusService;
+    @Autowired
+    private BaseFeignClient baseFeignClient;
 
     @Override
     public Page<StatusWithInfoVO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchVO statusSearchVO) {
@@ -270,14 +272,18 @@ public class StatusServiceImpl implements StatusService {
 
     @Override
     public Page<ProjectStatusVO> listStatusByProjectId(Long projectId, PageRequest pageRequest, StatusSearchVO statusSearchVO) {
-        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        Page<ProjectStatusVO> page = PageHelper.doPageAndSort(pageRequest, () -> statusMapper.listStatusByProjectId(projectId, organizationId, statusSearchVO));
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        Page<ProjectStatusVO> page = PageHelper.doPageAndSort(pageRequest, () -> statusMapper.listStatusByProjectId(projectId, projectVO.getOrganizationId(), statusSearchVO));
         List<ProjectStatusVO> content = page.getContent();
         if (CollectionUtils.isEmpty(content)) {
             return new Page<>();
         }
         List<Long> statusIds = content.stream().map(ProjectStatusVO::getId).collect(Collectors.toList());
-        List<IssueCountDTO> countDTOS = issueMapper.countIssueTypeByStatusIds(projectId, statusIds);
+        // 查询状态在当前项目的状态机的使用情况
+        String applyType = "PROGRAM".equals(projectVO.getCategory()) ? "program" : "agile";
+        ProjectConfigDetailVO projectConfigDetailVO = projectConfigService.queryById(projectId);
+        StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
+        List<IssueCountDTO> countDTOS = nodeDeployMapper.countIssueTypeByStatusIds(projectVO.getOrganizationId(),stateMachineSchemeVO.getId(),statusIds);
         Map<Long, List<String>> map = new HashMap<>();
         if (!CollectionUtils.isEmpty(countDTOS)) {
             map.putAll(countDTOS.stream().collect(Collectors.groupingBy(IssueCountDTO::getId, Collectors.mapping(IssueCountDTO::getName, Collectors.toList()))));
@@ -310,6 +316,11 @@ public class StatusServiceImpl implements StatusService {
         issueStatusDTO.setStatusId(statusId);
         issueStatusDTO.setProjectId(projectId);
         issueStatusService.delete(issueStatusDTO);
+    }
+
+    @Override
+    public List<Long> checkDeleteStatus(Long projectId, Long statusId) {
+        return issueMapper.selectIssueTypeIdsByStatusId(projectId, statusId);
     }
 
     @Override
