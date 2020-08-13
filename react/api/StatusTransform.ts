@@ -61,6 +61,11 @@ export interface ITotalStatus {
   type: IStatus['valueCode']
   usage: string | null
 }
+
+export interface IUpdateData {
+  fieldId: string,
+  fieldValueList: object[],
+}
 class StatusTransformApi extends Api {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
@@ -222,6 +227,7 @@ class StatusTransformApi extends Api {
         issueTypeId,
         statusId,
         objectVersionNumber,
+        applyType: getApplyType(),
       },
       data,
     });
@@ -286,6 +292,9 @@ class StatusTransformApi extends Api {
       method: 'post',
       url: `${this.prefix}/status_notice_settings`,
       data,
+      params: {
+        applyType: getApplyType(),
+      },
     });
   }
 
@@ -297,10 +306,33 @@ class StatusTransformApi extends Api {
   getUpdateFieldInfo(issueTypeId: string, statusId: string) {
     return axios({
       method: 'get',
-      url: `${this.prefix}/status_transform/setting_default_status`,
+      url: `${this.prefix}/status_field_settings/list`,
       params: {
         issueTypeId,
         statusId,
+      },
+    });
+  }
+
+  /**
+   * 更新属性
+   * @param issueTypeId
+   * @param statusId
+   * @param objectVersionNumber
+   * @param updateData
+   */
+  updateField(
+    issueTypeId: string, statusId: string, objectVersionNumber: number, updateData: IUpdateData[],
+  ) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/status_field_settings`,
+      data: updateData,
+      params: {
+        issueTypeId,
+        statusId,
+        objectVersionNumber,
+        applyType: getApplyType(),
       },
     });
   }

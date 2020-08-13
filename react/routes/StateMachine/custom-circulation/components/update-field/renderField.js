@@ -2,7 +2,7 @@ import React from 'react';
 
 import {
   TextField, Select, DatePicker, TimePicker, DateTimePicker,
-  NumberField, TextArea, UrlField, Col, Row,
+  NumberField, TextArea, Col, Row,
 } from 'choerodon-ui/pro';
 import SelectUser from '@/components/select/select-user';
 import styles from './index.less';
@@ -44,8 +44,8 @@ export default function renderField({
   switch (fieldType) {
     case 'time': {
       extraOptionsMap.time = [
-        { id: 'custom', label: '自定义指定时间' },
-        { id: 'current', label: '当前时间' },
+        { id: 'specifier', label: '自定义指定时间' },
+        { id: 'current_time', label: '当前时间' },
       ];
       if (!required) {
         extraOptionsMap.time.unshift({ id: 'clear', label: '清空' });
@@ -62,7 +62,7 @@ export default function renderField({
             </Select>
           </Col>
           {
-            data[code].selected && data[code].selected === 'custom' && (
+            data[code].selected && data[code].selected === 'specifier' && (
               <Col span={12}>
                 <TimePicker
                   name={code}
@@ -76,9 +76,9 @@ export default function renderField({
     }
     case 'datetime': {
       extraOptionsMap.datetime = [
-        { id: 'custom', label: '自定义指定时间' },
-        { id: 'current', label: '当前时间' },
-        { id: 'afterDay', label: '流转后几天' },
+        { id: 'specifier', label: '自定义指定时间' },
+        { id: 'current_time', label: '当前时间' },
+        { id: 'add', label: '流转后几天' },
       ];
       if (!required) {
         extraOptionsMap.datetime.unshift({ id: 'clear', label: '清空' });
@@ -95,10 +95,10 @@ export default function renderField({
             </Select>
           </Col>
           {
-            data[code].selected && (data[code].selected === 'custom' || data[code].selected === 'afterDay') && (
+            data[code].selected && (data[code].selected === 'specifier' || data[code].selected === 'afterDay') && (
             <Col span={12}>
               {
-                data[code].selected === 'custom' ? (
+                data[code].selected === 'specifier' ? (
                   <DateTimePicker
                     name={code}
                     style={{ width: '100%' }}
@@ -120,9 +120,9 @@ export default function renderField({
     }
     case 'date': {
       extraOptionsMap.date = [
-        { id: 'custom', label: '自定义指定时间' },
-        { id: 'current', label: '当前时间' },
-        { id: 'afterDay', label: '流转后几天' },
+        { id: 'specifier', label: '自定义指定时间' },
+        { id: 'current_time', label: '当前时间' },
+        { id: 'add', label: '流转后几天' },
       ];
       if (!required) {
         extraOptionsMap.date.unshift({ id: 'clear', label: '清空' });
@@ -139,10 +139,10 @@ export default function renderField({
             </Select>
           </Col>
           {
-            data[code].selected && (data[code].selected === 'custom' || data[code].selected === 'afterDay') && (
+            data[code].selected && (data[code].selected === 'specifier' || data[code].selected === 'afterDay') && (
             <Col span={12}>
               {
-                data[code].selected === 'custom' ? (
+                data[code].selected === 'specifier' ? (
                   <DatePicker
                     name={code}
                     style={{ width: '100%' }}
@@ -165,8 +165,8 @@ export default function renderField({
 
     case 'number': {
       extraOptionsMap.number = [
-        { id: 'specify', label: '指定数值' },
-        { id: 'current', label: '当前数值+指定数值' },
+        { id: 'specifier', label: '指定数值' },
+        { id: 'add', label: '当前数值+指定数值' },
       ];
       if (!required) {
         extraOptionsMap.number.unshift({ id: 'clear', label: '清空' });
@@ -183,7 +183,7 @@ export default function renderField({
             </Select>
           </Col>
           {
-            data[code].selected && (data[code].selected === 'specify' || data[code].selected === 'current') && (
+            data[code].selected && (data[code].selected === 'specifier' || data[code].selected === 'add') && (
             <Col span={8}>
               <NumberField
                 name={code}
@@ -197,7 +197,7 @@ export default function renderField({
     }
     case 'input': {
       extraOptionsMap.input = [
-        { id: 'specify', label: '指定文本' },
+        { id: 'specifier', label: '指定文本' },
       ];
       if (!required) {
         extraOptionsMap.input.unshift({ id: 'clear', label: '清空' });
@@ -214,7 +214,7 @@ export default function renderField({
             </Select>
           </Col>
           {
-            data[code].selected && data[code].selected === 'specify' && (
+            data[code].selected && data[code].selected === 'specifier' && (
               <Col span={12}>
                 <TextField
                   name={code}
@@ -229,7 +229,7 @@ export default function renderField({
     }
     case 'text': {
       extraOptionsMap.text = [
-        { id: 'specify', label: '指定文本' },
+        { id: 'specifier', label: '指定文本' },
       ];
       if (!required) {
         extraOptionsMap.text.unshift({ id: 'clear', label: '清空' });
@@ -247,7 +247,7 @@ export default function renderField({
           </Col>
           <Col span={12}>
             {
-              data[code].selected && data[code].selected === 'specify' && (
+              data[code].selected && data[code].selected === 'specifier' && (
               <TextArea
                 name={code}
                 rows={3}
@@ -260,12 +260,6 @@ export default function renderField({
         </Row>
       );
     }
-    case 'url':
-      return (
-        <UrlField
-          name={code}
-        />
-      );
     case 'radio': case 'single': case 'checkbox': case 'multiple': {
       const options = [...(!required ? [{ id: 'clear', value: '清空', enabled: true }] : []), ...(fieldOptions || [])];
       const isMultiple = !(singleList.indexOf(fieldType) !== -1);
@@ -301,18 +295,19 @@ export default function renderField({
       if (code === 'assignee') {
         extraOptionsMap.member = [
           { id: 'reportor', realName: '报告人' },
-          { id: 'lastUpdatedBy', realName: '最新更新人' },
+          { id: 'creator', realName: '创建人' },
+          { id: 'operator', realName: '当前操作人' },
         ];
       } else if (code === 'reporter') {
         extraOptionsMap.member = [
-          { id: 'agent', realName: '经办人' },
-          { id: 'lastUpdatedBy', realName: '最新更新人' },
+          { id: 'creator', realName: '创建人' },
+          { id: 'operator', realName: '当前操作人' },
         ];
       } else {
         extraOptionsMap.member = [
           { id: 'reportor', realName: '报告人' },
-          { id: 'agent', realName: '经办人' },
-          { id: 'lastUpdatedBy', realName: '最新更新人' },
+          { id: 'creator', realName: '创建人' },
+          { id: 'operator', realName: '当前操作人' },
         ];
       }
 
