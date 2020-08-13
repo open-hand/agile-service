@@ -6,6 +6,7 @@ import { statusApiConfig } from '@/api';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import { IStatus } from '@/common/types';
 import { Popconfirm } from 'choerodon-ui';
+import { TableAutoHeightType } from 'choerodon-ui/pro/lib/table/enum';
 import { TabComponentProps } from '../index';
 import openCreateStatus from '../components/create-status';
 import styles from './index.less';
@@ -58,7 +59,15 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
       </Header>
       <Content>
         {tab}
-        <Table key="user" dataSet={dataSet} className={styles.table}>
+        <Table
+          key="user"
+          dataSet={dataSet}
+          className={styles.table}
+          autoHeight={{
+            type: 'maxHeight' as TableAutoHeightType,
+            diff: 0,
+          }}
+        >
           <Column name="name" />
           <Column
             name="type"
