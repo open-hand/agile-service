@@ -10,6 +10,7 @@ import { ITotalStatus, statusTransformApi } from '@/api';
 import SelectStatus from '@/components/select/select-status';
 import './index.less';
 import { useIssueTypes } from '@/hooks';
+import { IIssueType } from '@/common/types';
 
 interface Props {
   onSubmit: Function
@@ -28,15 +29,15 @@ const DeleteStatus: React.FC<Props> = ({
   const [issueTypes] = useIssueTypes();
   useEffect(() => {
     (async () => {
-      if (data.usage) {
+      if (data.usage && issueTypes.length > 0) {
         modal.update({
           okProps: {
             disabled: true,
           },
         });
         setLoading(true);
-        const res: string[] = await statusTransformApi.checkStatusNeedTransform(data.id);
-        setNeedTransforms(res.map((issueTypeId: string) => {
+        const res: IIssueType[] = await statusTransformApi.checkStatusNeedTransform(data.id);
+        setNeedTransforms(res.map(({ id: issueTypeId }) => {
           const target = find(issueTypes, { id: issueTypeId });
           return {
             issueTypeId,
@@ -51,7 +52,7 @@ const DeleteStatus: React.FC<Props> = ({
         });
       }
     })();
-  }, [data.id, data.usage]);
+  }, [data.id, data.usage, issueTypes]);
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: needTransforms.map((needTransform) => ({
@@ -87,7 +88,8 @@ const DeleteStatus: React.FC<Props> = ({
 
   return (
     <Spin spinning={loading}>
-      {needTransforms.length > 0 && (
+      <div>
+        {needTransforms.length > 0 && (
         <Form dataSet={dataSet}>
           {needTransforms.map((needTransform) => (
             <SelectStatus
@@ -96,7 +98,8 @@ const DeleteStatus: React.FC<Props> = ({
             />
           ))}
         </Form>
-      )}
+        )}
+      </div>
     </Spin>
   );
 };
