@@ -205,11 +205,10 @@ public class SendMsgUtil {
     }
 
     @Async
-    public void noticeIssueStatus(Set<Long> userSet, List<String> noticeTypeList) {
+    public void noticeIssueStatus(Set<Long> userSet) {
         if (CollectionUtils.isEmpty(userSet)){
             return;
         }
-//        noticeTypeList.forEach(noticetype -> siteMsgUtil.sendChangeIssueStatus(noticetype, userSet));
-//        userSet
+        siteMsgUtil.sendChangeIssueStatus(userSet);
     }
 }

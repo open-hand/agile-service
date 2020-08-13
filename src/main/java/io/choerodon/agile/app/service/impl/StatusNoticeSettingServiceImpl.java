@@ -108,10 +108,8 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
         // 根据类型找到接收人
         Set<Long> userSet = new HashSet<>();
         noticeList.forEach(noticeDTO -> this.receiverType2User(projectId, noticeDTO, issue, userSet));
-        // 分析发送渠道发消息，一条一条发
-        sendMsgUtil.noticeIssueStatus(userSet,
-                Arrays.asList(StringUtils.split(noticeList.stream()
-                        .map(StatusNoticeSettingDTO::getNoticeType).findFirst().orElse(""), BaseConstants.Symbol.COMMA)));
+        // 发消息
+        sendMsgUtil.noticeIssueStatus(userSet);
     }
 
     private void receiverType2User(Long projectId, StatusNoticeSettingDTO noticeDTO, IssueDTO issue, Set<Long> userSet) {
