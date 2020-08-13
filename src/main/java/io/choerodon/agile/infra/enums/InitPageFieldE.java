@@ -47,6 +47,16 @@ public class InitPageFieldE {
         public Boolean getDisplay() {
             return display;
         }
+
+        public static Boolean getDisplayByCode(String code) {
+            Boolean display = null;
+            for (AgileIssueCreateE create : AgileIssueCreateE.values()) {
+                if (create.getFieldCode().equals(code)) {
+                    display = create.getDisplay();
+                }
+            }
+            return display;
+        }
     }
 
     public enum AgileIssueEditE {
@@ -90,6 +100,16 @@ public class InitPageFieldE {
         }
 
         public Boolean getDisplay() {
+            return display;
+        }
+
+        public static Boolean getDisplayByCode(String code) {
+            Boolean display = null;
+            for (AgileIssueEditE edit : AgileIssueEditE.values()) {
+                if (edit.getFieldCode().equals(code)) {
+                    display = edit.getDisplay();
+                }
+            }
             return display;
         }
     }

@@ -1,7 +1,6 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.domain.PageInfo;
 import io.choerodon.agile.infra.dto.IssueTypeDTO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.agile.api.vo.IssueTypeSearchVO;
@@ -54,4 +53,12 @@ public interface IssueTypeService {
     Map<Long, Map<String, Long>> initIssueTypeData(Long organizationId, List<Long> orgIds);
 
     IssueTypeDTO createIssueType(IssueTypeDTO issueType);
+
+    /**
+     * 查询issueType map, key为typeCode, value为id
+     * @param organizationId
+     * @return
+     */
+    Map<String, Long> queryIssueTypeMap(Long organizationId);
+
 }
