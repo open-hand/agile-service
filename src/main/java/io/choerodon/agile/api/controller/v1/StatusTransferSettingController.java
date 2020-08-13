@@ -31,8 +31,9 @@ public class StatusTransferSettingController {
                                           @RequestParam @Encrypt Long issueTypeId,
                                           @RequestParam @Encrypt Long statusId,
                                           @RequestParam Long objectVersionNumber,
+                                          @RequestParam String applyType,
                                           @RequestBody List<StatusTransferSettingCreateVO>list) {
-        statusTransferSettingService.createOrUpdate(projectId,issueTypeId,statusId,objectVersionNumber,list);
+        statusTransferSettingService.createOrUpdate(projectId,issueTypeId,statusId,objectVersionNumber,applyType,list);
         return new ResponseEntity(HttpStatus.OK);
     }
 

@@ -105,5 +105,5 @@ public interface StatusService {
 
     void deleteStatus(Long projectId,Long statusId,String applyType,List<DeleteStatusTransferVO> statusTransferVOS);
 
-    List<Long> checkDeleteStatus(Long projectId, Long statusId);
+    List<IssueTypeVO> checkDeleteStatus(Long projectId, Long statusId);
 }

@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface StatusTransferSettingService {
 
-   void createOrUpdate(Long projectId, Long issueTypeId, Long statusId,Long objectVersionNumber,List<StatusTransferSettingCreateVO> list);
+   void createOrUpdate(Long projectId, Long issueTypeId, Long statusId,Long objectVersionNumber,String applyType,List<StatusTransferSettingCreateVO> list);
 
    List<StatusTransferSettingDTO> query(Long projectId, Long issueTypeId, Long statusId);
 

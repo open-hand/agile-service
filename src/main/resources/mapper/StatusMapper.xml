@@ -143,7 +143,7 @@
            fs.name,
            fs.code,
            fs.type,
-           fs.object_version_number
+           smn.object_version_number
          from fd_status fs,fd_state_machine_node smn
          where fs.organization_id = #{organizationId}
          AND smn.organization_id = fs.organization_id
