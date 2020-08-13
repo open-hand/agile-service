@@ -10,10 +10,10 @@ import styles from './index.less';
 const NotifySetting = ({ modal, record, selectedType }) => {
   const memberOptionsDataSet = useMemo(() => new DataSet({
     data: [
-      { code: 'owner', label: '项目所有者' },
-      { code: 'agent', label: '经办人' },
+      { code: 'projectOwner', label: '项目所有者' },
+      { code: 'assignee', label: '经办人' },
       { code: 'reporter', label: '报告人' },
-      { code: 'assigners', label: '指定人' },
+      { code: 'specifier', label: '指定人' },
     ],
     fields: [
       { name: 'code', type: 'string' as FieldType },
@@ -35,7 +35,7 @@ const NotifySetting = ({ modal, record, selectedType }) => {
     autoCreate: true,
     fields: [
       {
-        name: 'member',
+        name: 'userTypeList',
         label: '选择人员',
         type: 'string' as FieldType,
         textField: 'label',
@@ -45,7 +45,7 @@ const NotifySetting = ({ modal, record, selectedType }) => {
         required: true,
       },
       {
-        name: 'assigners',
+        name: 'userIdList',
         label: '指定人',
         type: 'array' as FieldType,
         required: true,
@@ -54,7 +54,7 @@ const NotifySetting = ({ modal, record, selectedType }) => {
         valueField: 'id',
       },
       {
-        name: 'notifyMethod',
+        name: 'notifyTypeList',
         label: '通知方式',
         type: 'string' as FieldType,
         textField: 'label',
@@ -70,17 +70,17 @@ const NotifySetting = ({ modal, record, selectedType }) => {
     const { current } = notifySettingDataSet;
     // @ts-ignore
     statusTransformApi.getNotifySetting(selectedType, record.get('id')).then((res) => {
-      current?.set('member', res.member);
-      current?.set('assigners', res.assigners);
-      current?.set('notifyMethod', res.notifyMethod);
+      current?.set('userTypeList', res.userTypeList);
+      current?.set('userIdList', res.userIdList);
+      current?.set('notifyTypeList', res.notifyTypeList);
     });
     const handleOk = async () => {
       const validate = await notifySettingDataSet.validate();
       const data = notifySettingDataSet.toData();
       // @ts-ignore
-      const { member, assigners, notifyMethod } = data && data[0];
+      const { userTypeList, userIdList, notifyTypeList } = data && data[0];
       // @ts-ignore
-      if (validate || (member.length && member.findIndex((item: string) => item === 'assigners') === -1 && notifyMethod.length)) {
+      if (validate || (userTypeList.length && userTypeList.findIndex((item: string) => item === 'assignee') === -1 && notifyTypeList.length)) {
         console.log('validate：');
         console.log(validate);
         console.log(data[0]);
@@ -95,17 +95,17 @@ const NotifySetting = ({ modal, record, selectedType }) => {
 
   const data = notifySettingDataSet.toData();
   // @ts-ignore
-  const { member } = data && data[0];
+  const { userTypeList } = data && data[0];
   return (
     <div className={styles.notify_setting}>
       <Form dataSet={notifySettingDataSet}>
-        <Select name="member" />
+        <Select name="userTypeList" />
         {
-          member.find((item: string) => item === 'assigners') && (
-            <SelectUser name="assigners" />
+          userTypeList.find((item: string) => item === 'assignee') && (
+            <SelectUser name="userIdList" />
           )
         }
-        <Select name="notifyMethod" />
+        <Select name="notifyTypeList" />
       </Form>
     </div>
   );
