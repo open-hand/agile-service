@@ -7,7 +7,7 @@ import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { statusTransformApiConfig, ITotalStatus } from '@/api';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import { IStatus } from '@/common/types';
-import { Popconfirm, Divider } from 'choerodon-ui';
+import { Divider } from 'choerodon-ui';
 import { TableAutoHeightType } from 'choerodon-ui/pro/lib/table/enum';
 import { TabComponentProps } from '../index';
 import openCreateStatus from '../components/create-status';

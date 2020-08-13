@@ -1,15 +1,25 @@
 import queryString from 'querystring';
 import { find } from 'lodash';
 import { stores } from '@choerodon/boot';
-import { error, log } from './log';
+import { History } from 'history';
+import { error } from './log';
 
 const { HeaderStore, AppState } = stores;
+let history: History | null;
 
+export function setHistory(newHistory: History) {
+  history = newHistory;
+}
 interface IProject {
   id: number
   name: string
   category: 'GENERAL' | 'PROGRAM'
   organizationId: number
+}
+
+interface IOrg {
+  id: number
+  name: string
 }
 type Path = string;
 type ProjectLocationDescriptor = {
@@ -84,6 +94,54 @@ const to = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
       }
       break;
     }
+    case 'org': {
+      const { id } = descriptor as OrgLocationDescriptor;
+      if (!id) {
+        const {
+          id: orgId, name,
+        } = AppState.currentMenuType;
+        params = {
+          type: 'organization',
+          id: String(orgId),
+          name,
+          organizationId: String(orgId),
+        };
+      } else {
+        const orgs: IOrg[] = HeaderStore.getOrgData;
+        const targetOrg = find(orgs, (v) => String(v.id) === String(id));
+        if (!targetOrg) {
+          error('跳转错误，未找到目标组织，请检查参数', path, descriptor);
+          return;
+        }
+        const {
+          name,
+        } = targetOrg;
+        params = {
+          type: 'organization',
+          id: String(id),
+          name,
+          organizationId: String(id),
+        };
+      }
+      break;
+    }
+    case 'site': {
+      const {
+        organizationId =
+        AppState.currentMenuType.organizationId,
+      } = descriptor as SiteLocationDescriptor;
+      const orgs: IOrg[] = HeaderStore.getOrgData;
+      const targetOrg = find(orgs, (v) => String(v.id) === String(organizationId));
+      if (!targetOrg) {
+        error('跳转错误，未找到目标组织，请检查参数', path, descriptor);
+        return;
+      }
+      params = {
+        type: 'site',
+        organizationId: String(organizationId),
+      };
+      break;
+    }
     default: {
       error('跳转错误，请检查参数', path, descriptor);
       break;
@@ -94,7 +152,11 @@ const to = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
     ...otherParams,
   };
   const search = queryString.stringify(totalParams);
-  log('参数', {
+  if (!history) {
+    error('跳转失败，未设置history');
+    return;
+  }
+  history.push({
     pathname: path,
     search,
   });

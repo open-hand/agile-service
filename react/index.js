@@ -10,6 +10,7 @@ import 'moment/locale/en-nz';
 import moment from 'moment';
 import AgileProvider from '@/components/AgileProvider';
 import RunWhenProjectChange from '@/common/RunWhenProjectChange';
+import { setHistory } from '@/utils/to';
 import IsInProgramStore from './stores/common/program/IsInProgramStore';
 import './style/index.less';
 
@@ -30,6 +31,10 @@ const Settings = React.lazy(() => import('./routes/settings'));
 const { AppState } = stores;
 
 class Agile extends React.Component {
+  constructor(props) {
+    super(props);
+    setHistory(props.history);
+  }
   // componentDidCatch(error, info) {
   //   Choerodon.prompt(error.message);
   // }
