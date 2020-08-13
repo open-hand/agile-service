@@ -124,7 +124,11 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         width: 740,
         title: '变更属性',
         // @ts-ignore
-        children: <UpdateField record={record} selectedType={selectedType} isProgram={isProgram} />,
+        children: <UpdateField
+          record={record}
+          selectedType={selectedType}
+          customCirculationDataSet={customCirculationDataSet}
+        />,
       },
       notifySetting: {
         width: 380,

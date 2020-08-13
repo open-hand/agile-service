@@ -12,6 +12,7 @@ import { pageConfigApi, statusTransformApi } from '@/api';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Priority, IField } from '@/common/types';
+import { number } from '@/routes/page-config/images';
 import renderField from './renderField';
 import styles from './index.less';
 
@@ -19,22 +20,109 @@ const { Option } = Select;
 
 const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epic', 'pi'];
 
+// @ts-ignore
+const transformUpdateData = (data) => {
+  const updateData = [];
+  console.log('转换前：');
+  console.log(data);
+  for (const [key, fieldValue] of Object.entries(data)) {
+    console.log(`${key}: ${fieldValue}`);
+    const {
+    // @ts-ignore
+      fieldType, fieldId, selected, value,
+    } = fieldValue;
+    switch (fieldType) {
+      case 'member': {
+        const isSpecifier = value !== 'reportor' && value !== 'creator' && value !== 'operator' && value !== 'clear';
+        updateData.push({
+          fieldId,
+          fieldValueList: [{
+            operateType: isSpecifier ? 'specifier' : selected,
+            userId: isSpecifier ? value : undefined,
+          }],
+        });
+        break;
+      }
+      case 'radio': case 'single': case 'checkbox': case 'multiple': {
+        updateData.push({
+          fieldId,
+          fieldValueList: (fieldType === 'radio' || fieldType === 'single') ? [{
+            operateType: value ? 'specifier' : selected,
+            optionId: value,
+          }] : (value || []).map((item: string) => (
+            {
+              operateType: value ? 'specifier' : selected,
+              optionId: item,
+            }
+          )),
+        });
+        break;
+      }
+      case 'text': {
+        updateData.push({
+          fieldId,
+          fieldValueList: [{
+            operateType: value ? 'specifier' : selected,
+            textValue: value,
+          }],
+        });
+        break;
+      }
+      case 'input': {
+        updateData.push({
+          fieldId,
+          fieldValueList: [{
+            operateType: value ? 'specifier' : selected,
+            stringValue: value,
+          }],
+        });
+        break;
+      }
+      case number: {
+        updateData.push({
+          fieldId,
+          fieldValueList: [{
+            operateType: selected,
+            numberValue: selected === 'specifier' && value,
+            numAddValue: selected === 'add' ? value : undefined,
+          }],
+        });
+        break;
+      }
+      case 'date': case 'time': case 'datetime': {
+        updateData.push({
+          fieldId,
+          fieldValueList: [{
+            operateType: selected,
+            dateValue: selected === 'specifier' ? value : undefined,
+            dateAddValue: selected === 'add' ? value : undefined,
+          }],
+        });
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
+  console.log('转换后：');
+  console.log(updateData);
+  return updateData;
+};
+
 const UpdateField = ({
   // @ts-ignore
-  modal, isProgram, selectedType, record,
+  modal, selectedType, record, customCirculationDataSet,
 }) => {
   const [fieldData, setFieldData] = useState<IField[]>([]);
   const [updateCount, setUpdateCount] = useState<number>(0);
   useEffect(() => {
     pageConfigApi.loadFieldsByType(selectedType).then((res: IField[]) => {
-      console.log('res filted：');
-      console.log(res.filter((item) => !find(excludeCode, (code) => code === item.code)));
       setFieldData(res.filter((item) => !find(excludeCode, (code) => code === item.code)));
     });
   }, [selectedType]);
 
   const [fields, Field] = useFields();
-  const [loading, setLoading] = useState(false);
 
   const userFields = useMemo(() => fieldData.filter((field) => field.fieldType === 'member').map((field) => ({
     name: field.code,
@@ -79,7 +167,7 @@ const UpdateField = ({
         name: 'component',
         type: 'array' as FieldType,
         label: '模块',
-        lookupAxiosConfig: ({ record, dataSet: ds, params }) => ({
+        lookupAxiosConfig: ({ dataSet: ds, params }) => ({
           url: `/agile/v1/projects/${getProjectId()}/component/query_all`,
           method: 'post',
           data: {
@@ -151,44 +239,45 @@ const UpdateField = ({
           selected: temp[`${field.code}-select`],
           // @ts-ignore
           value: temp[field.code],
+          fieldId: field.id,
+          fieldType: field.fieldType,
         };
       }
     });
     return obj;
   }, [dataSet, fields]);
 
+  // useEffect(() => {
+  //   // @ts-ignore
+  //   statusTransformApi.getUpdateFieldInfo(selectedType, record.get('id')).then((res) => {
+  //     console.log(res);
+  //     const { current } = dataSet;
+  //     // @ts-ignore
+  //     res.forEach((item) => {
+  //       // @ts-ignore
+  //       Field.add();
+  //       current?.set(`${item.code}-select`, item.selected);
+  //       current?.set(item.code, item.value);
+  //     });
+  //     // @ts-ignore
+  //     fields.forEach((f, i) => {
+  //       const { key } = f;
+  //       const field = find(fieldData, { id: res[i].fieldId });
+  //       // @ts-ignore
+  //       Field.set(key, field);
+  //     });
+  //   });
+  // }, [dataSet, fieldData, fields, record, selectedType]);
   useEffect(() => {
-    // @ts-ignore
-    statusTransformApi.getUpdateFieldInfo(selectedType, record.get('id')).then((res) => {
-      console.log(res);
-      const { current } = dataSet;
-      // @ts-ignore
-      res.forEach((item) => {
-        // @ts-ignore
-        Field.add();
-        current?.set(`${item.code}-select`, item.selected);
-        current?.set(item.code, item.value);
-      });
-      // @ts-ignore
-      fields.forEach((f, i) => {
-        const { key } = f;
-        const field = find(fieldData, { id: res[i].fieldId });
-        // @ts-ignore
-        Field.set(key, field);
-      });
-    });
     const submit = async () => {
       const data = getData();
-      console.log('data：');
-      console.log(data);
-      // const issueIds = tableDataSet.selected.map((record) => record.get('issueId'));
-      // const res = { issueIds, ...formatFields(fieldData, data, dataSet) };
-      // await fieldApi.batchUpdateIssue(res);
-      return false;
-      // setLoading(true);
+      const updateData = transformUpdateData(data);
+      await statusTransformApi.updateField(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
+      customCirculationDataSet.query();
+      return true;
     };
     modal.handleOk(submit);
-  }, [Field, dataSet, fieldData, fields, getData, modal, record, selectedType]);
+  }, [customCirculationDataSet, getData, modal, record, selectedType]);
 
   const data = getData();
   const render = () => (
