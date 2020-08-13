@@ -13,6 +13,7 @@ import WYSIWYGEditor from '@/components/WYSIWYGEditor';
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
 import { observer, useObservable } from 'mobx-react-lite';
 import { pageConfigApi, PageConfigIssueType, IFiledProps } from '@/api/PageConfig';
+import { beforeTextUpload, text2Delta } from '@/utils/richText';
 import styles from './index.less';
 import IssueTypeWrap from './components/issue-type-wrap';
 import SortTable from './components/sort-table';
@@ -41,6 +42,8 @@ function PageIssueType() {
   const { sortTableDataSet, intl } = usePageIssueTypeStore();
   const [edit, setEdit] = useState<boolean>();
   const [loading, setLoading] = useState<boolean>(true);
+  const [newFields, setNewFields] = useState<Array<any>>([]);
+  const [deleteIds, setDeleteIds] = useState<Array<string>>([]);
   const dataStatus = useObservable({ code: '' }); // 是否有更改内容
   const [issueTypeState, setIssueTypeState] = useReducer(
     (state: IssueTypeState, action: IssueTypeAction) => {
@@ -90,42 +93,52 @@ function PageIssueType() {
       }
     }, {
       id: undefined,
-      template: '',
+      template: undefined,
       objectVersionNumber: undefined,
     },
   );
 
   async function handleSubmit() {
     setLoading(true);
-    const submitData = sortTableDataSet.toData() as IFiledProps[];
-    if (submitData.length > 0) {
+    if (dataStatus.code === 'update' || dataStatus.code === 'drag_update') {
+      let submitData: Array<any> = [];
+      if (sortTableDataSet.dirty) {
+        submitData = sortTableDataSet.filter((record) => record.dirty);
+      }
       const data = {
         issueType: issueTypeState.current as PageConfigIssueType,
+        // fields: submitData,
         fields: submitData.map((item) => ({
-          fieldId: item.fieldId,
-          required: item.required,
-          created: item.created,
-          edited: item.edited,
-          objectVersionNumber: item.objectVersionNumber,
+          fieldId: item.get('fieldId'),
+          required: item.get('required'),
+          created: item.get('created'),
+          edited: item.get('edited'),
+          objectVersionNumber: item.get('objectVersionNumber'),
         })),
-        issueTypeFieldVO: desState.id || desState.template !== '' ? {
+        issueTypeFieldVO: desState.id || desState.template ? {
           id: desState.id,
           template: desState.template,
           objectVersionNumber: desState.objectVersionNumber,
         } : undefined,
-        deleteIds: [],
+        // createdFields: newFields,
+        deleteIds,
       };
-      console.log('submitData', desState, submitData);
-      pageConfigApi.update(data).then(() => {
-        setEdit(false);
-        setLoading(false);
-      });
+      console.log('submitData', desState, submitData); // beforeTextUpload
+      const desObj = { description: undefined };
+      if (desState.template) {
+        beforeTextUpload(text2Delta(desState.template), data.issueTypeFieldVO!, () => {
+          pageConfigApi.update(data).then(() => {
+            destroyData();
+            loadData();
+          });
+        }, 'template');
+      }
+      console.log('desObj:', desObj, data);
     }
     return true;
   }
   const loadData = () => {
     setLoading(true);
-    console.log('loadData');
     pageConfigApi.loadByIssueType(issueTypeState.current as PageConfigIssueType).then((res) => {
       sortTableDataSet.loadData(res.fields);
       res.issueTypeFieldVO && setDesState({ ...res.issueTypeFieldVO, type: 'init' });
@@ -151,6 +164,10 @@ function PageIssueType() {
     // sortTableDataSet.reset();
   };
   useEffect(() => {
+    handleSwitch();
+  }, [issueTypeState.current]);
+
+  const handleSelectBox = (val: any) => {
     if (edit && (dataStatus.code === 'update' || dataStatus.code === 'drag_update')) {
       Modal.confirm({
         title: '是否放弃更改？',
@@ -159,25 +176,42 @@ function PageIssueType() {
             页面有未保存的内容，切换则放弃更改
           </div>
         ),
-        onOk: handleSwitch(),
+        onOk: () => handleSwitch(),
       });
     } else {
       console.log('handleSwitch');
-      handleSwitch();
     }
-  }, [issueTypeState.newCurrent]);
-
-  const handleSelectBox = (val: any) => {
     setIssueTypeState({ type: 'change', newCurrent: val });
   };
   const handleChangeDes = (val: string) => {
+    dataStatus.code = 'update';
     setDesState({ type: 'change', template: val });
   };
+  const handleDeleteFiled = async (data: IFiledProps) => {
+    setLoading(true);
+    setDeleteIds(deleteIds.concat([data.fieldId]));
+  };
+  useEffect(() => {
+    deleteIds.length !== 0 && sortTableDataSet.loadData(sortTableDataSet.toData()
+      .filter((item: IFiledProps) => item.fieldId !== deleteIds[deleteIds.length - 1]));
+    setLoading(false);
+  }, [deleteIds]);
+  const onSubmitLocal = (data: any) => {
+    const newArr = newFields.concat([Object.assign(data, { local: true })]);
+    setNewFields(newArr);
+    return true;
+  };
+  const checkCodeOrName = (key: string,
+    name: string) => newFields && newFields.length !== 0
+    && newFields.some((item) => item[key].trim() === name);
   function openCreateFieldModal() {
     const values = {
       formatMessage: intl.formatMessage,
       schemeCode: 'agile_issue',
-      loadData,
+      handleRefresh: loadData,
+      onSubmitLocal,
+      localCheckCode: async (str: string) => !!checkCodeOrName('code', str),
+      localCheckName: async (str: string) => !!checkCodeOrName('name', str),
     };
     Modal.open({
       key: Modal.key('create'),
@@ -213,7 +247,7 @@ function PageIssueType() {
         }
       </Header>
       <Breadcrumb />
-      <Content className={`${preCls}-content`}>
+      <Content className={`${preCls}-content`} style={{ overflowY: edit ? 'hidden' : 'auto' }}>
         <SelectBox mode={'button' as ViewMode} defaultValue="feature" value={issueTypeState.current} onChange={handleSelectBox} className={`${preCls}-select-box`}>
           <Option value="issue_epic">史诗</Option>
           <Option value="feature">特性</Option>
@@ -226,18 +260,22 @@ function PageIssueType() {
         <Spin className="c7n-im" spinning={loading}>
           <div className={styles.top}>
             <IssueTypeWrap title="字段配置">
-              <SortTable disabled={!edit} dataStatus={dataStatus} />
+              <SortTable
+                disabled={!edit}
+                dataStatus={dataStatus}
+                onDelete={handleDeleteFiled}
+              />
             </IssueTypeWrap>
             <IssueTypeWrap title="描述信息格式">
               {edit ? (
                 <WYSIWYGEditor
                   style={{ height: '100%' }}
                   onChange={handleChangeDes}
-                  value={desState.template}
+                  value={text2Delta(desState.template)}
                   placeholder="您可以在此自定义描述信息格式"
                 />
               )
-                : <WYSIWYGViewer data={`${desState.template}`} />}
+                : <WYSIWYGViewer data={desState.template || ''} />}
             </IssueTypeWrap>
           </div>
         </Spin>
