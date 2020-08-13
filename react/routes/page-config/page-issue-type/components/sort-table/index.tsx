@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 import { observer, useObservable } from 'mobx-react-lite';
 import {
-  Table, DataSet, Icon, CheckBox, Spin, Output,
+  Table, DataSet, Icon, CheckBox, Spin, Output, Button,
 } from 'choerodon-ui/pro/lib';
 import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
@@ -136,6 +136,18 @@ const SortTable: React.FC<Props> = ({ disabled, dataStatus, org = 23 }) => {
       },
     ];
   };
+  const renderAction = ({
+    value, name, record, dataSet,
+  }: RenderProps) => (
+    <div>
+      {renderCheckBox({
+        value, name, record, dataSet,
+      })}
+      <Button style={{ marginLeft: 10 }} onClick={() => dataSet?.remove(record as Record)}>
+        <Icon type="delete" style={{ fontSize: 18 }} />
+      </Button>
+    </div>
+  );
   const renderClone = ({
     provided,
     snapshot,
@@ -206,7 +218,7 @@ const SortTable: React.FC<Props> = ({ disabled, dataStatus, org = 23 }) => {
         <Column name="defaultValue" />
         <Column name="required" width={70} renderer={renderCheckBox} />
         <Column name="edited" width={130} renderer={renderCheckBox} />
-        <Column name="created" width={130} renderer={renderCheckBox} />
+        <Column name="created" width={130} renderer={renderAction} />
       </Table>
     </div>
   );

@@ -35,12 +35,78 @@ export interface Priority {
 }
 
 export interface IModalProps extends ModalProps {
-  handleOk: (promise: ()=>Promise<boolean>) => Promise<void>,
-  handleCancel: (promise: ()=>Promise<boolean>) => Promise<void>,
+  handleOk: (promise: () => Promise<boolean>) => Promise<void>,
+  handleCancel: (promise: () => Promise<boolean>) => Promise<void>,
   close: (destroy?: boolean) => void,
-  update: (modalProps:ModalProps) => void
+  update: (modalProps: ModalProps) => void
 }
-export interface IIssueType{
+interface CurrentProject {
+  agileProjectCode: string,
+  agileProjectId: number,
+  agileProjectObjectVersionNumber: number,
+  categories: Array<any>,
+  category: string
+  categoryIds: any,
+  code: string
+  createUserImageUrl: string,
+  createUserName: string,
+  createdBy: number,
+  creationDate: string,
+  editFlag: false,
+  enabled: boolean,
+  id: number,
+  imageUrl: string,
+  into: boolean,
+  lastUpdateDate: string,
+  lastUpdatedBy: number,
+  name: string,
+  objectVersionNumber: number,
+  organizationCode: null | string,
+  organizationId: number,
+  organizationName: null | string,
+  programName: null | string,
+  projects: any,
+  roles: any
+  starFlag: boolean,
+  type: any,
+  typeName: any,
+}
+interface MenuType {
+  category: string,
+  id: string | number,
+  name: string,
+  orgId: string,
+  organizationId: string,
+  projectId: string,
+  type: string,
+}
+export interface AppStateProps {
+  currentProject: CurrentProject,
+  debugger: boolean,
+  expanded: boolean,
+  guideExpanded: boolean,
+  isUser: boolean,
+  loadOrgDate: Function,
+  loadSiteInfo: Function,
+  loadUserInfo: Function,
+  menuType: MenuType,
+  siteInfo: any,
+  userInfo: any,
+  currentLanguage: string,
+  currentMenuType: MenuType,
+  currentOrginazationOrProjectId: string,
+  getCurrentProject: Object
+  getDebugger: boolean,
+  getGuideExpanded: boolean,
+  getMenuExpanded: boolean,
+  getSiteInfo: Object,
+  getType: string,
+  getUserId: string,
+  getUserInfo: Object,
+  isAuth: boolean,
+  isTypeUser: boolean,
+}
+export interface IIssueType {
   colour: string,
   description: string,
   icon: string,
