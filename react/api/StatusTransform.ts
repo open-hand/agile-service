@@ -137,10 +137,9 @@ class StatusTransformApi extends Api {
 
   checkStatusNeedTransform(statusId: string) {
     return this.request({
-      method: 'get',
-      url: `${this.prefix}/status/status`,
+      method: 'delete',
+      url: `${this.prefix}/status/check_delete_status`,
       params: {
-        applyType: getApplyType(),
         statusId,
       },
     });

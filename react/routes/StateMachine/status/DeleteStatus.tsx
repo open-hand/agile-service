@@ -4,10 +4,12 @@ import React, {
 import {
   Form, DataSet, Spin, Modal,
 } from 'choerodon-ui/pro';
+import { find } from 'lodash';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { ITotalStatus, statusTransformApi } from '@/api';
 import SelectStatus from '@/components/select/select-status';
 import './index.less';
+import { useIssueTypes } from '@/hooks';
 
 interface Props {
   onSubmit: Function
@@ -22,10 +24,8 @@ const DeleteStatus: React.FC<Props> = ({
   modal, onSubmit, data,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [needTransforms, setNeedTransforms] = useState<NeedTransform[]>([{
-    issueTypeId: '=0t1W_lJkEOwcvg90gh-fww===',
-    issueTypeName: '故事',
-  }]);
+  const [needTransforms, setNeedTransforms] = useState<NeedTransform[]>([]);
+  const [issueTypes] = useIssueTypes();
   useEffect(() => {
     (async () => {
       if (data.usage) {
@@ -35,8 +35,14 @@ const DeleteStatus: React.FC<Props> = ({
           },
         });
         setLoading(true);
-        const res = await statusTransformApi.checkStatusNeedTransform(data.id);
-        setNeedTransforms(res);
+        const res: string[] = await statusTransformApi.checkStatusNeedTransform(data.id);
+        setNeedTransforms(res.map((issueTypeId: string) => {
+          const target = find(issueTypes, { id: issueTypeId });
+          return {
+            issueTypeId,
+            issueTypeName: target?.name || '',
+          };
+        }));
         setLoading(false);
         modal.update({
           okProps: {
