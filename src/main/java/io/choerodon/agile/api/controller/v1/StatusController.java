@@ -157,7 +157,7 @@ public class StatusController extends BaseController {
     @ApiOperation(value = "删除项目的状态")
     @DeleteMapping(value = "/projects/{project_id}/status/delete_status")
     public ResponseEntity deleteStatus(@PathVariable("project_id") Long projectId,
-                                       @RequestParam Long statusId,
+                                       @RequestParam @Encrypt Long statusId,
                                        @RequestParam String applyType,
                                        @RequestBody List<DeleteStatusTransferVO> statusTransferVOS) {
         statusService.deleteStatus(projectId,statusId,applyType, statusTransferVOS);
