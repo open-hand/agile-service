@@ -120,24 +120,9 @@ public class SiteMsgUtil {
         messageClient.async().sendMessage(messageSender);
     }
 
-    public void sendChangeIssueStatus(Long tenantId, String noticetype, Set<Long> userSet){
+    public void sendChangeIssueStatus(Set<Long> userSet){
         MessageSender messageSender = handlerMessageSender(0L,null,new ArrayList<>(userSet),new HashMap<>());
-        switch (noticetype){
-            case "email":
-                messageSender.setMessageCode("邮件消息编码");
-                messageClient.sendMessage(messageSender);
-                break;
-            case "webMessage":
-                messageSender.setMessageCode("站内信消息编码");
-                messageClient.sendMessage(messageSender);
-                break;
-            default:
-                // 未知类型统一按照webhook处理
-                List<Receiver> receivers = new ArrayList<>();
-                handleReceiver(receivers,new ArrayList<>(userSet));
-                messageClient.sendWebHookMessage("webhook编码", noticetype, receivers, new HashMap<>());
-                break;
-        }
-
+        messageSender.setMessageCode("ISSUECHANGESTATUS");
+        messageClient.sendMessage(messageSender);
     }
 }
