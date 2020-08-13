@@ -175,6 +175,8 @@ public class ProjectObjectSchemeFieldController {
                                                                        @PathVariable("project_id") Long projectId,
                                                                        @ApiParam(value = "组织id", required = true)
                                                                        @RequestParam Long organizationId,
+                                                                       @ApiParam(value = "issue类型id", required = true)
+                                                                       @RequestParam Long issueTypeId,
                                                                        @ApiParam(value = "方案编码", required = true)
                                                                        @RequestParam(required = false) String schemeCode) {
         return new ResponseEntity<>(objectSchemeFieldService.selectMemberList(organizationId, projectId, schemeCode), HttpStatus.OK);
