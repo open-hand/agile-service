@@ -51,16 +51,37 @@
         </choose>
     </select>
 
-    <select id="selectOrganizationExtendField"
+    <select id="selectExtendField"
             resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO">
-        select * from fd_object_scheme_field_extend
+        select
+        id,
+        issue_type_id,
+        issue_type,
+        project_id,
+        organization_id,
+        field_id,
+        is_required as required,
+        is_created as created,
+        is_edited as edited,
+        rank,
+        object_version_number
+        from fd_object_scheme_field_extend
         where 1=1
         <if test="issueType != null">
             and issue_type = #{issueType}
         </if>
         and organization_id = #{organizationId}
-        and field_id = #{fieldId}
-        and project_id is null
+        <if test="fieldId != null">
+            and field_id = #{fieldId}
+        </if>
+        <choose>
+            <when test="projectId != null">
+                and project_id = #{projectId}
+            </when>
+            <otherwise>
+                and project_id is null
+            </otherwise>
+        </choose>
     </select>
 
 
