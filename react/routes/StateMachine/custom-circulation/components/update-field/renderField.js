@@ -1,20 +1,20 @@
 import React from 'react';
 
 import {
-  TextField, Select, DatePicker, TimePicker, DateTimePicker, NumberField, TextArea, UrlField, Col, Row,
+  TextField, Select, DatePicker, TimePicker, DateTimePicker,
+  NumberField, TextArea, UrlField, Col, Row,
 } from 'choerodon-ui/pro';
 import SelectUser from '@/components/select/select-user';
-import SelectFeature from '@/components/select/select-feature';
 import styles from './index.less';
 
 const { Option } = Select;
 const singleList = ['radio', 'single'];
 
 const clearIdMap = new Map([
-  ['labelIssueRelVOList', 'labelId'],
-  ['componentIssueRelVOList', 'componentId'],
+  ['label', 'labelId'],
+  ['component', 'componentId'],
   ['fixVersion', 'versionId'],
-  ['influenceVersion', 'versionId'],
+  ['version', 'versionId'],
 ]);
 
 const extraOptionsMap = new Map();
@@ -23,7 +23,7 @@ export default function renderField({
   code, fieldType, fieldOptions, required,
 }, data) {
   switch (code) {
-    case 'componentIssueRelVOList': {
+    case 'component': {
       return (
         <Select
           style={{ width: '100%' }}
@@ -298,12 +298,25 @@ export default function renderField({
       );
     }
     case 'member': {
-      extraOptionsMap.member = [
-        { id: 'reportor', realName: '报告人' },
-        { id: 'agent', realName: '经办人' },
-        { id: 'lastUpdatedBy', realName: '最新更新人' },
-      ];
-      if (!required || code !== 'reporterId') {
+      if (code === 'assignee') {
+        extraOptionsMap.member = [
+          { id: 'reportor', realName: '报告人' },
+          { id: 'lastUpdatedBy', realName: '最新更新人' },
+        ];
+      } else if (code === 'reporter') {
+        extraOptionsMap.member = [
+          { id: 'agent', realName: '经办人' },
+          { id: 'lastUpdatedBy', realName: '最新更新人' },
+        ];
+      } else {
+        extraOptionsMap.member = [
+          { id: 'reportor', realName: '报告人' },
+          { id: 'agent', realName: '经办人' },
+          { id: 'lastUpdatedBy', realName: '最新更新人' },
+        ];
+      }
+
+      if (!required || code !== 'reporter') {
         extraOptionsMap.member.unshift({ id: 'clear', realName: '清空' });
       }
       return (

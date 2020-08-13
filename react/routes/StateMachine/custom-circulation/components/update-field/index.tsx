@@ -8,7 +8,7 @@ import {
 import { getProjectId } from '@/utils/common';
 import { find } from 'lodash';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
-import { pageConfigApi } from '@/api';
+import { pageConfigApi, statusTransformApi } from '@/api';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Priority, IField } from '@/common/types';
@@ -19,10 +19,10 @@ const { Option } = Select;
 
 const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epic', 'pi'];
 
-// @ts-ignore
-const UpdateField = ({ modal, isProgram, selectedType }) => {
-  console.log('isProgram, selectedType：');
-  console.log(isProgram, selectedType);
+const UpdateField = ({
+  // @ts-ignore
+  modal, isProgram, selectedType, record,
+}) => {
   const [fieldData, setFieldData] = useState<IField[]>([]);
   const [updateCount, setUpdateCount] = useState<number>(0);
   useEffect(() => {
@@ -47,7 +47,7 @@ const UpdateField = ({ modal, isProgram, selectedType }) => {
   const dataSet = useMemo(() => new DataSet({
     fields: [
       {
-        name: 'priorityId',
+        name: 'priority',
         type: 'string' as FieldType,
         label: '优先级',
         lookupAxiosConfig: () => ({
@@ -65,7 +65,7 @@ const UpdateField = ({ modal, isProgram, selectedType }) => {
         valueField: 'id',
         textField: 'name',
       }, {
-        name: 'labelIssueRelVOList',
+        name: 'label',
         type: 'array' as FieldType,
         label: '标签',
         lookupAxiosConfig: () => ({
@@ -76,7 +76,7 @@ const UpdateField = ({ modal, isProgram, selectedType }) => {
         valueField: 'labelId',
         textField: 'labelName',
       }, {
-        name: 'componentIssueRelVOList',
+        name: 'component',
         type: 'array' as FieldType,
         label: '模块',
         lookupAxiosConfig: ({ record, dataSet: ds, params }) => ({
@@ -114,7 +114,7 @@ const UpdateField = ({ modal, isProgram, selectedType }) => {
         valueField: 'versionId',
         textField: 'name',
       }, {
-        name: 'influenceVersion',
+        name: 'version',
         type: 'array' as FieldType,
         label: '影响的版本',
         lookupAxiosConfig: () => ({
@@ -158,6 +158,25 @@ const UpdateField = ({ modal, isProgram, selectedType }) => {
   }, [dataSet, fields]);
 
   useEffect(() => {
+    // @ts-ignore
+    statusTransformApi.getUpdateFieldInfo(selectedType, record.get('id')).then((res) => {
+      console.log(res);
+      const { current } = dataSet;
+      // @ts-ignore
+      res.forEach((item) => {
+        // @ts-ignore
+        Field.add();
+        current?.set(`${item.code}-select`, item.selected);
+        current?.set(item.code, item.value);
+      });
+      // @ts-ignore
+      fields.forEach((f, i) => {
+        const { key } = f;
+        const field = find(fieldData, { id: res[i].fieldId });
+        // @ts-ignore
+        Field.set(key, field);
+      });
+    });
     const submit = async () => {
       const data = getData();
       console.log('data：');
@@ -169,7 +188,7 @@ const UpdateField = ({ modal, isProgram, selectedType }) => {
       // setLoading(true);
     };
     modal.handleOk(submit);
-  }, [dataSet, fields, getData, modal]);
+  }, [Field, dataSet, fieldData, fields, getData, modal, record, selectedType]);
 
   const data = getData();
   const render = () => (
@@ -199,7 +218,6 @@ const UpdateField = ({ modal, isProgram, selectedType }) => {
                   }}
                 >
                   {
-
                     // @ts-ignore
                     fieldData.filter((field: IField) => (
                       id === field.id
