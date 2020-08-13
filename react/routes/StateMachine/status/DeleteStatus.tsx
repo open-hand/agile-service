@@ -4,10 +4,13 @@ import React, {
 import {
   Form, DataSet, Spin, Modal,
 } from 'choerodon-ui/pro';
+import { find } from 'lodash';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { ITotalStatus, statusTransformApi } from '@/api';
 import SelectStatus from '@/components/select/select-status';
 import './index.less';
+import { useIssueTypes } from '@/hooks';
+import { IIssueType } from '@/common/types';
 
 interface Props {
   onSubmit: Function
@@ -22,21 +25,25 @@ const DeleteStatus: React.FC<Props> = ({
   modal, onSubmit, data,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [needTransforms, setNeedTransforms] = useState<NeedTransform[]>([{
-    issueTypeId: '=0t1W_lJkEOwcvg90gh-fww===',
-    issueTypeName: '故事',
-  }]);
+  const [needTransforms, setNeedTransforms] = useState<NeedTransform[]>([]);
+  const [issueTypes] = useIssueTypes();
   useEffect(() => {
     (async () => {
-      if (data.usage) {
+      if (data.usage && issueTypes.length > 0) {
         modal.update({
           okProps: {
             disabled: true,
           },
         });
         setLoading(true);
-        const res = await statusTransformApi.checkStatusNeedTransform(data.id);
-        setNeedTransforms(res);
+        const res: IIssueType[] = await statusTransformApi.checkStatusNeedTransform(data.id);
+        setNeedTransforms(res.map(({ id: issueTypeId }) => {
+          const target = find(issueTypes, { id: issueTypeId });
+          return {
+            issueTypeId,
+            issueTypeName: target?.name || '',
+          };
+        }));
         setLoading(false);
         modal.update({
           okProps: {
@@ -45,7 +52,7 @@ const DeleteStatus: React.FC<Props> = ({
         });
       }
     })();
-  }, [data.id, data.usage]);
+  }, [data.id, data.usage, issueTypes]);
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: needTransforms.map((needTransform) => ({
@@ -81,7 +88,8 @@ const DeleteStatus: React.FC<Props> = ({
 
   return (
     <Spin spinning={loading}>
-      {needTransforms.length > 0 && (
+      <div>
+        {needTransforms.length > 0 && (
         <Form dataSet={dataSet}>
           {needTransforms.map((needTransform) => (
             <SelectStatus
@@ -90,7 +98,8 @@ const DeleteStatus: React.FC<Props> = ({
             />
           ))}
         </Form>
-      )}
+        )}
+      </div>
     </Spin>
   );
 };
