@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Page, Header, Content } from '@choerodon/boot';
 import { Button, Table, DataSet } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { statusApiConfig } from '@/api';
+import { statusTransformApiConfig } from '@/api';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import { IStatus } from '@/common/types';
 import { Popconfirm } from 'choerodon-ui';
@@ -17,10 +17,9 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
     primaryKey: 'id',
     name: 'status',
     autoQuery: true,
-    paging: false,
     selection: false,
     transport: {
-      read: statusApiConfig.loadByProject(),
+      read: ({ params }) => statusTransformApiConfig.listStatus(params.page, params.size),
     },
     fields: [
       {
@@ -34,7 +33,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
         label: '阶段',
       },
       {
-        name: 'use',
+        name: 'usage',
         type: 'string' as FieldType,
         label: '使用情况',
       },
@@ -78,7 +77,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
               />
             )}
           />
-          <Column name="use" />
+          <Column name="usage" />
           <Column
             name="operate"
             renderer={({ record }) => (

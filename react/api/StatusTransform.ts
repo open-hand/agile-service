@@ -79,6 +79,17 @@ class StatusTransformApi extends Api {
     });
   }
 
+  listStatus(page: number, size: number) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/status/list_status`,
+      params: {
+        page,
+        size,
+      },
+    });
+  }
+
   createStatus(issueTypeIds: string[], status: IStatusCreate) {
     return this.request({
       method: 'post',
