@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
-import { Page, Header, Content } from '@choerodon/boot';
+import {
+  Page, Header, Content, Breadcrumb,
+} from '@choerodon/boot';
 import { Button, Table, DataSet } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { statusTransformApiConfig } from '@/api';
 import StatusTypeTag from '@/components/tag/status-type-tag';
 import { IStatus } from '@/common/types';
-import { Popconfirm } from 'choerodon-ui';
+import { Popconfirm, Divider } from 'choerodon-ui';
 import { TableAutoHeightType } from 'choerodon-ui/pro/lib/table/enum';
 import { TabComponentProps } from '../index';
 import openCreateStatus from '../components/create-status';
@@ -56,6 +58,8 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
       <Header>
         <Button icon="playlist_add" onClick={handleCreateStatusClick}>创建状态</Button>
       </Header>
+      <Breadcrumb />
+      <Divider className={styles.divider} />
       <Content>
         {tab}
         <Table
