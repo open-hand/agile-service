@@ -21,6 +21,27 @@ public class PageConfigUpdateVO {
     @Encrypt
     private Set<Long> deleteIds;
 
+    private List<ObjectSchemeFieldCreateVO> createdFields;
+
+    @Encrypt
+    private Set<Long> addIds;
+
+    public Set<Long> getAddIds() {
+        return addIds;
+    }
+
+    public void setAddIds(Set<Long> addIds) {
+        this.addIds = addIds;
+    }
+
+    public List<ObjectSchemeFieldCreateVO> getCreatedFields() {
+        return createdFields;
+    }
+
+    public void setCreatedFields(List<ObjectSchemeFieldCreateVO> createdFields) {
+        this.createdFields = createdFields;
+    }
+
     public Set<Long> getDeleteIds() {
         return deleteIds;
     }

@@ -41,6 +41,16 @@ public class ObjectSchemeFieldDTO extends AuditDomain {
     private List<ObjectSchemeFieldExtendDTO> extendFields;
     @Transient
     private String createdLevel;
+    @Transient
+    private String rank;
+
+    public String getRank() {
+        return rank;
+    }
+
+    public void setRank(String rank) {
+        this.rank = rank;
+    }
 
     public String getCreatedLevel() {
         return createdLevel;

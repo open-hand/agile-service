@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.ObjectSchemeFieldVO;
 import io.choerodon.agile.api.vo.PageConfigFieldVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO;
 import io.choerodon.mybatis.common.BaseMapper;
@@ -85,4 +86,13 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
                               @Param("projectId") Long projectId,
                               @Param("issueType") String issueType,
                               @Param("targetRank") String targetRank);
+
+    /**
+     *
+     * @param organizationId
+     * @param projectId
+     * @param issueType
+     * @return
+     */
+    List<ObjectSchemeFieldVO> unselected(Long organizationId, Long projectId, String issueType);
 }

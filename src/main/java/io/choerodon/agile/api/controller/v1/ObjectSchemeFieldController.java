@@ -16,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,7 +47,7 @@ public class ObjectSchemeFieldController {
                                                              @PathVariable("organization_id") Long organizationId,
                                                             @ApiParam(value = "字段对象", required = true)
                                                              @RequestBody @Valid  ObjectSchemeFieldCreateVO fieldCreateDTO) {
-        return new ResponseEntity<>(objectSchemeFieldService.create(organizationId, null, fieldCreateDTO), HttpStatus.CREATED);
+        return new ResponseEntity<>(objectSchemeFieldService.create(organizationId, null, fieldCreateDTO, null), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -123,7 +124,7 @@ public class ObjectSchemeFieldController {
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation(value = "查询字段的页面配置数据")
+    @ApiOperation(value = "更新字段是否必填")
     @PostMapping(value = "/update_required")
     public ResponseEntity updateRequired(@PathVariable("organization_id") Long organizationId,
                                          @RequestParam @Encrypt Long fieldId,
@@ -138,6 +139,14 @@ public class ObjectSchemeFieldController {
     public ResponseEntity<String> queryRank(@PathVariable("organization_id") Long organizationId,
                                             @RequestBody @Validated AdjustOrderVO adjustOrderVO) {
         return new ResponseEntity<>(objectSchemeFieldService.queryRank(organizationId, null, adjustOrderVO), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "页面配置根据问题类型查询未选择的字段")
+    @GetMapping(value = "/unselected")
+    public ResponseEntity<List<ObjectSchemeFieldVO>> unselected(@PathVariable("organization_id") Long organizationId,
+                                                                @RequestParam String issueType) {
+        return new ResponseEntity<>(objectSchemeFieldService.unselected(organizationId, null, issueType), HttpStatus.OK);
     }
 
 }
