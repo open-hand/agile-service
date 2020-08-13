@@ -89,6 +89,9 @@ const StatusCirculationTable: React.FC = () => {
               scroll={{ x: 'max-content', y: height - 50 }}
               columns={statusColumns.length > 0 ? columns : []}
               pagination={false}
+              locale={{
+                emptyText: '暂无数据',
+              }}
             />
           </Spin>
         </div>
