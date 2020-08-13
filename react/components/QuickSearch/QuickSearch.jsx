@@ -87,7 +87,7 @@ class QuickSearch extends Component {
   handleQuickSearchChange = (value, option) => {
     const { onQuickSearchChange } = this.props;
     const flattenValue = value.map((item) => item.key);
-    const otherSearchId = flattenValue.filter((item) => !(item === -1 || item === -2) && String(item).split('%')[0].length === 1);
+    const otherSearchId = flattenValue.filter((item) => !(item === -1 || item === -2) && String(item).split('%').length === 1);
     const personalFilters = flattenValue.filter((item) => String(item).split('%')[0] === 'personal').map((item) => item.split('%')[1]);
     this.setState({
       selectQuickSearch: value,
