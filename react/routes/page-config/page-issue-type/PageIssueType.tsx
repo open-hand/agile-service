@@ -189,11 +189,11 @@ function PageIssueType() {
   };
   const handleDeleteFiled = async (data: IFiledProps) => {
     setLoading(true);
-    setDeleteIds(deleteIds.concat([data.fieldId]));
+    setDeleteIds(deleteIds.concat([data.id]));
   };
   useEffect(() => {
     deleteIds.length !== 0 && sortTableDataSet.loadData(sortTableDataSet.toData()
-      .filter((item: IFiledProps) => item.fieldId !== deleteIds[deleteIds.length - 1]));
+      .filter((item: IFiledProps) => item.id !== deleteIds[deleteIds.length - 1]));
     setLoading(false);
   }, [deleteIds]);
   const onSubmitLocal = (data: any) => {
