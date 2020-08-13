@@ -532,7 +532,25 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
     }
 
-    private Long handlerTransferStatus(StateMachineNodeDTO machineNodeDTO,Map<Long, DeleteStatusTransferVO> map,StateMachineSchemeConfigVO schemeConfigVO){
+    @Override
+    public void updateNodeObjectVersionNumber(Long project, Long issueType, Long statusId, Long objectVersionNumber, String applyType) {
+        Long stateMachineId = queryStateMachineId(project, applyType, issueType);
+        // 查询状态的node
+        StateMachineNodeDTO stateMachineNodeDTO = new StateMachineNodeDTO();
+        stateMachineNodeDTO.setStatusId(statusId);
+        stateMachineNodeDTO.setStateMachineId(stateMachineId);
+        stateMachineNodeDTO.setOrganizationId(ConvertUtil.getOrganizationId(project));
+        StateMachineNodeDTO machineNodeDTO = stateMachineNodeMapper.selectOne(stateMachineNodeDTO);
+        if (ObjectUtils.isEmpty(machineNodeDTO)) {
+            throw new CommonException("error.node.null");
+        }
+        machineNodeDTO.setObjectVersionNumber(objectVersionNumber);
+        if (stateMachineNodeMapper.updateOptional(machineNodeDTO, "objectVersionNumber") != 1) {
+            throw new CommonException("error.update.node");
+        }
+    }
+
+    private Long handlerTransferStatus(StateMachineNodeDTO machineNodeDTO, Map<Long, DeleteStatusTransferVO> map, StateMachineSchemeConfigVO schemeConfigVO){
         // 判断是不是默认状态
         if (!Objects.equals(schemeConfigVO.getIssueTypeId(), 0L) && NodeType.INIT.equals(machineNodeDTO.getType())) {
             throw new CommonException("error.node.is.default.status");

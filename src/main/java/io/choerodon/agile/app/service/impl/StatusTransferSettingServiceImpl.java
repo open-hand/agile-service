@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.StatusTransferSettingCreateVO;
 import io.choerodon.agile.api.vo.StatusTransferSettingVO;
 import io.choerodon.agile.api.vo.UserVO;
 import io.choerodon.agile.app.assembler.StatusTransferSettingAssembler;
+import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusTransferSettingService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.StatusDTO;
@@ -43,9 +44,11 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
     private StatusMapper statusMapper;
     @Autowired
     private BaseFeignClient baseFeignClient;
+    @Autowired
+    private ProjectConfigService projectConfigService;
 
     @Override
-    public void createOrUpdate(Long projectId, Long issueTypeId, Long statusId,Long objectVersionNumber,List<StatusTransferSettingCreateVO> list) {
+    public void createOrUpdate(Long projectId, Long issueTypeId, Long statusId,Long objectVersionNumber,String applyType,List<StatusTransferSettingCreateVO> list) {
         List<StatusTransferSettingDTO> query = query(projectId, issueTypeId, statusId);
         if (!CollectionUtils.isEmpty(query)) {
             delete(projectId, issueTypeId, statusId);
@@ -63,19 +66,10 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
                     baseInsert(statusTransferSettingDTO);
                 }
             }
-            StatusDTO statusDTO = new StatusDTO();
-            statusDTO.setId(statusId);
-            statusDTO.setObjectVersionNumber(objectVersionNumber);
-            String[] fieldList = {"objectVersionNumber"};
-            updateStatusVersionNumber(statusDTO,fieldList);
+            projectConfigService.updateNodeObjectVersionNumber(projectId,issueTypeId,statusId,objectVersionNumber,applyType);
         }
     }
 
-    private void updateStatusVersionNumber(StatusDTO statusDTO, String[] fieldList) {
-        if (statusMapper.updateOptional(statusDTO, fieldList) != 1) {
-            throw new CommonException("error.update.status");
-        }
-    }
     @Override
     public List<StatusTransferSettingDTO> query(Long projectId, Long issueTypeId, Long statusId) {
         StatusTransferSettingDTO statusTransferSettingDTO = new StatusTransferSettingDTO();

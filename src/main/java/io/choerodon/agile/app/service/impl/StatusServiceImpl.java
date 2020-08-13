@@ -319,8 +319,17 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
-    public List<Long> checkDeleteStatus(Long projectId, Long statusId) {
-        return issueMapper.selectIssueTypeIdsByStatusId(projectId, statusId);
+    public List<IssueTypeVO> checkDeleteStatus(Long projectId, Long statusId) {
+        List<Long> list = issueMapper.selectIssueTypeIdsByStatusId(projectId, statusId);
+        if (CollectionUtils.isEmpty(list)) {
+            return new ArrayList<>();
+        }
+        List<IssueTypeVO> issueTypeVOS = list.stream().map(v -> {
+            IssueTypeVO issueTypeVO = new IssueTypeVO();
+            issueTypeVO.setId(v);
+            return issueTypeVO;
+        }).collect(Collectors.toList());
+        return issueTypeVOS;
     }
 
     @Override
