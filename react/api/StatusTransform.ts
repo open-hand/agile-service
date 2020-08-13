@@ -39,6 +39,16 @@ export interface ICondition {
   userIds?: string[],
 }
 
+export interface IUpdateNotifySetting {
+  issueTypeId: string,
+  projectId: number,
+  statusId: string,
+  userTypeList: string[],
+  noticeTypeList: string[],
+  userIdList: string[],
+  objectVersionNumber: number,
+}
+
 class StatusTransformApi extends Api {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
@@ -133,7 +143,7 @@ class StatusTransformApi extends Api {
    * @param size
    */
   getCustomCirculationList(
-    issueTypeId: string, page: number = 0, size: number = 10, param: string,
+    issueTypeId: string, param: string, page: number = 0, size: number = 10,
   ) {
     return this.request({
       method: 'get',
@@ -208,11 +218,15 @@ class StatusTransformApi extends Api {
   getNotifySetting(issueTypeId: string, statusId: string) {
     return axios({
       method: 'get',
-      url: `${this.prefix}/status_transform/setting_default_status`,
-      params: {
-        issueTypeId,
-        statusId,
-      },
+      url: `${this.prefix}/status_notice_settings/issue_type/${issueTypeId}/status/${statusId}`,
+    });
+  }
+
+  updateNotifySetting(data: IUpdateNotifySetting) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/status_notice_settings`,
+      data,
     });
   }
 
