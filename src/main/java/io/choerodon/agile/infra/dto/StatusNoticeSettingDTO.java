@@ -28,7 +28,7 @@ import org.hzero.core.base.BaseConstants;
 @VersionAudit
 @ModifyAudit
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
-@Table(name = "fd_ status_notice_setting")
+@Table(name = "fd_status_notice_setting")
 public class StatusNoticeSettingDTO extends AuditDomain {
 
     public static final String FIELD_ID = "id";
