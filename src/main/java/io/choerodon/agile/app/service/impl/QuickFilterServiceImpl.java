@@ -1,10 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,6 +15,7 @@ import io.choerodon.agile.app.service.QuickFilterFieldService;
 import io.choerodon.agile.app.service.QuickFilterService;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.QuickFilterDTO;
+import io.choerodon.agile.infra.dto.QuickFilterFieldDTO;
 import io.choerodon.agile.infra.enums.CustomFieldType;
 import io.choerodon.agile.infra.mapper.QuickFilterFieldMapper;
 import io.choerodon.agile.infra.mapper.QuickFilterMapper;
@@ -393,6 +391,8 @@ public class QuickFilterServiceImpl implements QuickFilterService {
         if (checkName(projectId, quickFilterVO.getName())) {
             throw new CommonException("error.quickFilterName.exist");
         }
+        Optional.ofNullable(quickFilterVO.getQuickFilterValueVOList())
+                .orElse(Collections.emptyList()).forEach(this::decryptValueList);
         String sqlQuery = getSqlQuery(quickFilterVO, projectId);
         QuickFilterDTO quickFilterDTO = modelMapper.map(quickFilterVO, QuickFilterDTO.class);
         String description = quickFilterDTO.getDescription();
@@ -405,6 +405,21 @@ public class QuickFilterServiceImpl implements QuickFilterService {
             throw new CommonException("error.quickFilter.insert");
         }
         return modelMapper.map(quickFilterMapper.selectByPrimaryKey(quickFilterDTO.getFilterId()), QuickFilterVO.class);
+    }
+
+    private void decryptValueList(QuickFilterValueVO filter) {
+        if (Boolean.FALSE.equals(filter.getPredefined())) {
+            if (CustomFieldType.isOption(filter.getCustomFieldType())) {
+                filter.setValue(handlerFilterEncryptList(filter.getValue(), false));
+            }
+        } else {
+            if (!"'null'".equals(filter.getValue())) {
+                String field = Optional.ofNullable(quickFilterFieldService.selectByFieldCode(filter.getFieldCode())).map(QuickFilterFieldDTO::getField).orElse(null);
+                if (!Arrays.asList(EncryptionUtils.FIELD_VALUE).contains(field)) {
+                    filter.setValue(handlerFilterEncryptList(filter.getValue(), false));
+                }
+            }
+        }
     }
 
     private Boolean checkNameUpdate(Long projectId, Long filterId, String quickFilterName) {
@@ -585,7 +600,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
             }
         } else {
             if (!"'null'".equals(value)) {
-                String field = quickFilterFieldService.selectByFieldCode(fieldCode).getField();
+                String field = Optional.ofNullable(quickFilterFieldService.selectByFieldCode(fieldCode)).map(QuickFilterFieldDTO::getField).orElse(null);;
                 if (!Arrays.asList(EncryptionUtils.FIELD_VALUE).contains(field)) {
                     objectNode.put("value", handlerFilterEncryptList(value, encrypt));
                 }
