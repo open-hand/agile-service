@@ -1,8 +1,8 @@
 package script.db
 
-databaseChangeLog(logicalFilePath: 'script/db/fd_ status_notice_setting.groovy') {
-    changeSet(author: "jiaxu.cui@hand-china.com", id: "2020-08-12-fd_ status_notice_setting") {
-        createTable(tableName: "fd_ status_notice_setting", remarks: "邮件通知") {
+databaseChangeLog(logicalFilePath: 'script/db/fd_status_notice_setting.groovy') {
+    changeSet(author: "jiaxu.cui@hand-china.com", id: "2020-08-12-fd_status_notice_setting") {
+        createTable(tableName: "fd_status_notice_setting", remarks: "邮件通知") {
             column(name: "id", type: "bigint(20) unsigned", autoIncrement: true ,   remarks: "")  {constraints(nullable:"false")}
             column(name: "issue_type_id", type: "bigint(20) unsigned",  remarks: "")  {constraints(nullable:"false")}
             column(name: "project_id", type: "bigint(20) unsigned",  remarks: "")  {constraints(nullable:"false")}
