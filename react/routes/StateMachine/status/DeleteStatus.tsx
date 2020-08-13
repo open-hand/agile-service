@@ -94,6 +94,7 @@ const DeleteStatus: React.FC<Props> = ({
           {needTransforms.map((needTransform) => (
             <SelectStatus
               name={needTransform.issueTypeId}
+              expectStatusId={data.id}
               issueTypeId={needTransform.issueTypeId}
             />
           ))}
