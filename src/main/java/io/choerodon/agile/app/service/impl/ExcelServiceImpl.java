@@ -600,9 +600,8 @@ public class ExcelServiceImpl implements ExcelService {
                 errorMessage.put(ExcelImportTemplateColumn.Issue.ISSUE_TYPE_COL, "问题类型不能为空");
             } else if (!issueTypeList.contains(issueTypeCell.toString())) {
                 errorMessage.put(ExcelImportTemplateColumn.Issue.ISSUE_TYPE_COL, "问题类型输入错误");
-            }
-            //如果是史诗的话，判断是否重复和字段长度
-            if (EPIC_CN.equals(issueTypeCell.toString())) {
+            } else if (EPIC_CN.equals(issueTypeCell.toString())) {
+                //如果是史诗的话，判断是否重复和字段长度
                 Cell epicNameCell = row.getCell(ExcelImportTemplateColumn.Issue.EPIC_NAME_COL);
                 if (isCellEmpty(epicNameCell)) {
                     errorMessage.put(ExcelImportTemplateColumn.Issue.EPIC_NAME_COL, "史诗名称不能为空");
