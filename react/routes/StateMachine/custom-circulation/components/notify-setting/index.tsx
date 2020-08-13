@@ -1,9 +1,10 @@
 import React, { useMemo, useEffect } from 'react';
 import { DataSet, Form, Select } from 'choerodon-ui/pro';
 import SelectUser from '@/components/select/select-user';
+import { find } from 'lodash';
 import { observer } from 'mobx-react-lite';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { statusTransformApi, IUpdateNotifySetting } from '@/api';
+import { statusTransformApi, IUpdateNotifySetting, statusTransformApiConfig } from '@/api';
 import { getProjectId } from '@/utils/common';
 import styles from './index.less';
 
@@ -12,17 +13,17 @@ const NotifySetting = ({
   modal, record, selectedType, customCirculationDataSet,
 }) => {
   const memberOptionsDataSet = useMemo(() => new DataSet({
-    data: [
-      { code: 'projectOwner', label: '项目所有者' },
-      { code: 'assignee', label: '经办人' },
-      { code: 'reporter', label: '报告人' },
-      { code: 'specifier', label: '指定人' },
-    ],
+    autoQuery: true,
+    paging: false,
+    transport: {
+      read: () => statusTransformApiConfig.getCustomMember(selectedType),
+    },
     fields: [
-      { name: 'code', type: 'string' as FieldType },
-      { name: 'label', type: 'string' as FieldType },
+      { name: 'id', type: 'string' as FieldType },
+      { name: 'name', type: 'string' as FieldType },
     ],
-  }), []);
+  }), [selectedType]);
+
   const notifyMethodDataSet = useMemo(() => new DataSet({
     data: [
       { label: '邮件', code: 'email' },
@@ -41,20 +42,26 @@ const NotifySetting = ({
         name: 'userTypeList',
         label: '选择人员',
         type: 'string' as FieldType,
-        textField: 'label',
-        valueField: 'code',
+        textField: 'name',
+        valueField: 'id',
         options: memberOptionsDataSet,
         multiple: true,
-        required: true,
+        dynamicProps: {
+          // eslint-disable-next-line no-shadow
+          required: ({ record }) => record.get('noticeTypeList').length,
+        },
       },
       {
         name: 'userIdList',
         label: '指定人',
         type: 'array' as FieldType,
-        required: true,
         multiple: true,
         textField: 'realName',
         valueField: 'id',
+        dynamicProps: {
+          // eslint-disable-next-line no-shadow
+          required: ({ record }) => find(record.get('userTypeList') || [], (item: string) => item === 'specifier'),
+        },
       },
       {
         name: 'noticeTypeList',
@@ -63,8 +70,11 @@ const NotifySetting = ({
         textField: 'label',
         valueField: 'code',
         options: notifyMethodDataSet,
-        required: true,
         multiple: true,
+        dynamicProps: {
+          // eslint-disable-next-line no-shadow
+          required: ({ record }) => record.get('userTypeList').length,
+        },
       },
     ],
   }), [memberOptionsDataSet, notifyMethodDataSet]);
@@ -82,20 +92,17 @@ const NotifySetting = ({
       const data = notifySettingDataSet.toData();
       // @ts-ignore
       const { userTypeList, userIdList, noticeTypeList } = data && data[0];
-      // @ts-ignore
-      if (validate || (userTypeList.length && userTypeList.findIndex((item: string) => item === 'assignee') === -1 && noticeTypeList.length)) {
+      if (validate) {
         const updateData: IUpdateNotifySetting = {
           issueTypeId: selectedType,
           projectId: getProjectId(),
           statusId: record.get('id'),
           userTypeList,
           noticeTypeList,
-          userIdList,
+          userIdList: find(userTypeList, (item) => item === 'specifier') && userIdList,
           objectVersionNumber: record.get('objectVersionNumber'),
         };
-        console.log('validate：');
-        console.log(validate);
-        console.log(updateData);
+
         await statusTransformApi.updateNotifySetting(updateData);
         customCirculationDataSet.query();
         return true;
@@ -115,7 +122,7 @@ const NotifySetting = ({
       <Form dataSet={notifySettingDataSet}>
         <Select name="userTypeList" />
         {
-          userTypeList.find((item: string) => item === 'assignee') && (
+          userTypeList.find((item: string) => item === 'specifier') && (
             <SelectUser name="userIdList" />
           )
         }

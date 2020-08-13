@@ -65,10 +65,13 @@ const Condition:React.FC<Props> = ({
         name: 'assigners',
         label: '指定人',
         type: 'array' as FieldType,
-        required: true,
         multiple: true,
         textField: 'realName',
         valueField: 'id',
+        dynamicProps: {
+          // eslint-disable-next-line no-shadow
+          required: ({ record }) => find(record.get('member') || [], (item: string) => item === 'specifier'),
+        },
       },
       // {
       //   name: 'needCompleted',
@@ -94,7 +97,7 @@ const Condition:React.FC<Props> = ({
       const validate = await conditionDataSet.validate();
       // @ts-ignore
       const { member, assigners, needCompleted } = data && data[0];
-      if (validate || (!member || !member.length) || (member.length && member.findIndex((item: string) => item === 'specifier') === -1)) {
+      if (validate) {
         const updateData: ICondition[] = [];
         member.forEach((item: 'specifier' | 'projectOwner') => {
           if (item === 'specifier') {

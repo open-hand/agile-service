@@ -8,7 +8,7 @@ import {
 import { getProjectId } from '@/utils/common';
 import { find } from 'lodash';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
-import { fieldApi, pageConfigApi } from '@/api';
+import { pageConfigApi } from '@/api';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Priority, IField } from '@/common/types';
@@ -17,124 +17,8 @@ import styles from './index.less';
 
 const { Option } = Select;
 
-const systemFields = new Map([
-  ['assigneeId', {
-    id: 'assigneeId',
-    code: 'assigneeId',
-    name: '经办人',
-    fieldType: 'member',
-  }],
-  ['reporterId', {
-    id: 'reporterId',
-    code: 'reporterId',
-    name: '报告人',
-    fieldType: 'member',
-  }],
-  ['priorityId', {
-    id: 'priorityId',
-    code: 'priorityId',
-    name: '优先级',
-    fieldType: 'single',
-  }],
-  ['labelIssueRelVOList', {
-    id: 'labelIssueRelVOList',
-    code: 'labelIssueRelVOList',
-    name: '标签',
-    fieldType: 'multiple',
-  }],
-  ['componentIssueRelVOList', {
-    id: 'componentIssueRelVOList',
-    code: 'componentIssueRelVOList',
-    name: '模块',
-    fieldType: 'multiple',
-  }],
-  ['influenceVersion', {
-    id: 'influenceVersion',
-    code: 'influenceVersion',
-    name: '影响的版本',
-    fieldType: 'multiple',
-  }],
-  ['fixVersion', {
-    id: 'fixVersion',
-    code: 'fixVersion',
-    name: '修复的版本',
-    fieldType: 'multiple',
-  }],
-  ['storyPoints', {
-    id: 'storyPoints',
-    code: 'storyPoints',
-    name: '故事点',
-    fieldType: 'number',
-  }],
-  ['remainingTime', {
-    id: 'remainingTime',
-    code: 'remainingTime',
-    name: '预估时间',
-    fieldType: 'number',
-  }],
-]);
+const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epic', 'pi'];
 
-const programSystemFields = new Map([
-  ['reporterId', {
-    id: 'reporterId',
-    code: 'reporterId',
-    name: '报告人',
-    fieldType: 'member',
-  }],
-  ['teamProjectIds', {
-    id: 'teamProjectIds',
-    code: 'teamProjectIds',
-    name: '负责的子项目',
-    fieldType: 'multiple',
-  }],
-
-  ['benfitHypothesis', {
-    id: 'benfitHypothesis',
-    code: 'benfitHypothesis',
-    name: '特性价值',
-    fieldType: 'input',
-  }],
-  ['acceptanceCritera', {
-    id: 'acceptanceCritera',
-    code: 'acceptanceCritera',
-    name: '验收标准',
-    fieldType: 'input',
-  }],
-]);
-// @ts-ignore
-function transformValue(dataSet, key, value, format) {
-  if (!value || !format) {
-    return value;
-  }
-  function transform(v: string) {
-    const lookup = dataSet.getField(key).getLookupData(v);
-    return format(v, lookup);
-  }
-  if (Array.isArray(value)) {
-    return value.map((v) => transform(v));
-  }
-  return transform(value);
-}
-// @ts-ignore
-function formatFields(fieldData, data, dataSet) {
-  const temp = {
-    predefinedFields: {},
-    customFields: [],
-  };
-  for (const key of Object.keys(data)) {
-    if (systemFields.get(key)) {
-      // @ts-ignore
-      // eslint-disable-next-line max-len
-      temp.predefinedFields[key] = transformValue(dataSet, key, data[key], systemFields.get(key).format);
-    } else {
-      const customField = find(fieldData, { code: key });
-      // @ts-ignore
-      // eslint-disable-next-line max-len
-      temp.customFields.push({ fieldId: customField.id, fieldType: customField.fieldType, value: data[key] });
-    }
-  }
-  return temp;
-}
 // @ts-ignore
 const UpdateField = ({ modal, isProgram, selectedType }) => {
   console.log('isProgram, selectedType：');
@@ -143,23 +27,12 @@ const UpdateField = ({ modal, isProgram, selectedType }) => {
   const [updateCount, setUpdateCount] = useState<number>(0);
   useEffect(() => {
     pageConfigApi.loadFieldsByType(selectedType).then((res: IField[]) => {
-      console.log('res：');
-      console.log(res);
+      console.log('res filted：');
+      console.log(res.filter((item) => !find(excludeCode, (code) => code === item.code)));
+      setFieldData(res.filter((item) => !find(excludeCode, (code) => code === item.code)));
     });
   }, [selectedType]);
-  useEffect(() => {
-    const getCustomFields = async () => {
-      const fields = await fieldApi.getCustomFields();
-      console.log('field Data：');
-      console.log([...(
-        isProgram ? programSystemFields.values() : systemFields.values()
-      ), ...fields]);
-      setFieldData([...(
-        isProgram ? programSystemFields.values() : systemFields.values()
-      ), ...fields]);
-    };
-    getCustomFields();
-  }, [isProgram]);
+
   const [fields, Field] = useFields();
   const [loading, setLoading] = useState(false);
 
