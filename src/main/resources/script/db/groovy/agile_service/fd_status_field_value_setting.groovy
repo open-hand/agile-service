@@ -12,15 +12,15 @@ databaseChangeLog(logicalFilePath: 'fd_status_field_value_setting.groovy') {
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: '项目id') {
                 constraints(nullable: false)
             }
-            column(name: 'field_type', type: 'varchar(255)', remarks: 'field type')
-            column(name: 'operate_type', type: 'varchar(255)', remarks: 'operate type')
-            column(name: 'option_id', type: 'BIGINT UNSIGNED', remarks: 'option value')
+            column(name: 'field_type', type: 'VARCHAR(255)', remarks: 'field type')
+            column(name: 'operate_type', type: 'VARCHAR(255)', remarks: 'operate type')
+            column(name: 'option_id', type: 'BIGINT UNSIGNED', remarks: 'option id')
             column(name: 'string_value', type: 'varchar(255)', remarks: 'string value')
-            column(name: 'number_value', type: 'decimal(10,0)', remarks: 'number value')
-            column(name: 'number_add_value', type: 'decimal(10,0)', remarks: 'number add value')
+            column(name: 'number_value', type: 'DECIMAL(10,2)', remarks: 'number value')
+            column(name: 'number_add_value', type: 'DECIMAL(10,2)', remarks: 'number add value')
             column(name: 'text_value', type: 'text', remarks: 'text value')
             column(name: 'date_value', type: 'DATETIME', remarks: 'date value')
-            column(name: 'date_add_value', type: 'decimal(10,0)', remarks: 'date add value')
+            column(name: 'date_add_value', type: 'DECIMAL(10,0)', remarks: 'date add value')
             column(name: 'user_id', type: 'BIGINT UNSIGNED', remarks: 'user id')
 
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")
