@@ -11,16 +11,14 @@ import io.choerodon.agile.infra.mapper.ProjectInfoMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
+import org.apache.commons.collections4.CollectionUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/4/29.
@@ -206,4 +204,12 @@ public class SendMsgUtil {
         }
     }
 
+    @Async
+    public void noticeIssueStatus(Set<Long> userSet, List<String> noticeTypeList) {
+        if (CollectionUtils.isEmpty(userSet)){
+            return;
+        }
+//        noticeTypeList.forEach(noticetype -> siteMsgUtil.sendChangeIssueStatus(noticetype, userSet));
+//        userSet
+    }
 }

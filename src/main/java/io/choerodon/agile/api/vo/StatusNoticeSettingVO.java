@@ -24,7 +24,7 @@ public class StatusNoticeSettingVO extends AuditDomain {
     }
 
     public void addUserWithNotice(String userType, Long userId){
-        if (StringUtils.equals(StatusNoticeUserType.SPECIFIER.getCode(), userType)){
+        if (StringUtils.equals(StatusNoticeUserType.SPECIFIER, userType)){
             userIdList.add(userId);
         }else {
             userTypeList.add(userType);
@@ -46,7 +46,7 @@ public class StatusNoticeSettingVO extends AuditDomain {
     @Encrypt
     private Set<Long> userIdList = new HashSet<>();
     @ApiModelProperty(value = "通知类型")
-    private String noticeType;
+    private List<String> noticeTypeList;
 
     public Long getIssueTypeId() {
         return issueTypeId;
@@ -88,11 +88,11 @@ public class StatusNoticeSettingVO extends AuditDomain {
         this.userIdList = userIdList;
     }
 
-    public String getNoticeType() {
-        return noticeType;
+    public List<String> getNoticeTypeList() {
+        return noticeTypeList;
     }
 
-    public void setNoticeType(String noticeType) {
-        this.noticeType = noticeType;
+    public void setNoticeTypeList(List<String> noticeTypeList) {
+        this.noticeTypeList = noticeTypeList;
     }
 }

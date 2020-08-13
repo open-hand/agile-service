@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.dto;
 
+import java.util.stream.Collectors;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -16,6 +17,7 @@ import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.core.base.BaseConstants;
 
 /**
  * 邮件通知
@@ -50,7 +52,7 @@ public class StatusNoticeSettingDTO extends AuditDomain {
         this.issueTypeId = statusNoticeSettingVO.getIssueTypeId();
         this.projectId = statusNoticeSettingVO.getProjectId();
         this.statusId = statusNoticeSettingVO.getStatusId();
-        this.noticeType = statusNoticeSettingVO.getNoticeType();
+        this.noticeType = String.join(BaseConstants.Symbol.COMMA, statusNoticeSettingVO.getNoticeTypeList());
         this.userType = userType;
     }
 
@@ -58,8 +60,8 @@ public class StatusNoticeSettingDTO extends AuditDomain {
         this.issueTypeId = statusNoticeSettingVO.getIssueTypeId();
         this.projectId = statusNoticeSettingVO.getProjectId();
         this.statusId = statusNoticeSettingVO.getStatusId();
-        this.noticeType = statusNoticeSettingVO.getNoticeType();
-        this.userType = StatusNoticeUserType.SPECIFIER.getCode();
+        this.noticeType = String.join(BaseConstants.Symbol.COMMA, statusNoticeSettingVO.getNoticeTypeList());
+        this.userType = StatusNoticeUserType.SPECIFIER;
         this.userId = userId;
     }
 

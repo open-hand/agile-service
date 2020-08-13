@@ -12,4 +12,6 @@ public interface StatusNoticeSettingService {
     StatusNoticeSettingVO detail(Long projectId, Long issueTypeId, Long statusId);
 
     void save(Long projectId, StatusNoticeSettingVO StatusNoticeSettingVO);
+
+    void noticeByChangeStatus(Long projectId, Long issueId);
 }

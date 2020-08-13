@@ -3,19 +3,10 @@ package io.choerodon.agile.infra.enums;
 /**
  * @author jiaxu.cui@hand-china.com 2020/8/12 下午2:59
  */
-public enum StatusNoticeUserType {
-    PROJECT_OWNER("projectOwner"),
-    ASSIGNEE("assignee"),
-    REPORTER("reporter"),
-    SPECIFIER("specifier");
+public class StatusNoticeUserType {
 
-    private String code;
-
-    StatusNoticeUserType(String code) {
-        this.code = code;
-    }
-
-    public String getCode() {
-        return code;
-    }
+    public static final String PROJECT_OWNER = "projectOwner";
+    public static final String ASSIGNEE = "assignee";
+    public static final String REPORTER = "reporter";
+    public static final String SPECIFIER = "specifier";
 }
