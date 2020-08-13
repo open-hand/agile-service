@@ -79,15 +79,18 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
             deleteList.forEach(item -> statusNoticeSettingMapper.delete(item));
         }
         // 插入
-        List<StatusNoticeSettingDTO> saveList = statusNoticeSettingVO.getUserTypeList()
-                .stream()
-                .map(useType -> new StatusNoticeSettingDTO(statusNoticeSettingVO, useType))
-                .collect(Collectors.toList());
-        saveList.addAll(statusNoticeSettingVO.getUserIdList()
-                .stream()
-                .map(userId -> new StatusNoticeSettingDTO(statusNoticeSettingVO, userId))
-                .collect(Collectors.toList()));
-        saveList.forEach(statusNoticeSettingMapper::insertSelective);
+        if (CollectionUtils.isNotEmpty(statusNoticeSettingVO.getNoticeTypeList()) &&
+                CollectionUtils.isNotEmpty(statusNoticeSettingVO.getUserTypeList())){
+            List<StatusNoticeSettingDTO> saveList = statusNoticeSettingVO.getUserTypeList()
+                    .stream()
+                    .map(useType -> new StatusNoticeSettingDTO(statusNoticeSettingVO, useType))
+                    .collect(Collectors.toList());
+            saveList.addAll(statusNoticeSettingVO.getUserIdList()
+                    .stream()
+                    .map(userId -> new StatusNoticeSettingDTO(statusNoticeSettingVO, userId))
+                    .collect(Collectors.toList()));
+            saveList.forEach(statusNoticeSettingMapper::insertSelective);
+        }
         int i = statusMapper.updateOptional(statusDTO);
         if (i != 1){
             throw new CommonException(BaseConstants.ErrorCode.OPTIMISTIC_LOCK);
