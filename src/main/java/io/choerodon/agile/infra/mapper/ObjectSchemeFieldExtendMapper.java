@@ -94,5 +94,13 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
      * @param issueType
      * @return
      */
-    List<ObjectSchemeFieldVO> unselected(Long organizationId, Long projectId, String issueType);
+    List<ObjectSchemeFieldVO> unselected(@Param("organizationId") Long organizationId,
+                                         @Param("projectId") Long projectId,
+                                         @Param("issueType") String issueType);
+
+    /**
+     * 批量插入接口
+     * @param objectSchemeFieldExtends
+     */
+    void batchInsert(@Param("insertList") List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtends);
 }

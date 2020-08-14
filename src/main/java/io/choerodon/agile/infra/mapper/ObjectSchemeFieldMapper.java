@@ -84,4 +84,10 @@ public interface ObjectSchemeFieldMapper extends BaseMapper<ObjectSchemeFieldDTO
                                                @Param("projectId") Long projectId,
                                                @Param("schemeCode") String schemeCode,
                                                @Param("fieldCodeList") List<String> fieldCodeList);
+    /**
+     * 查询字段附带页面配置数据
+     * @param objectSchemeField
+     * @return
+     */
+    List<ObjectSchemeFieldDTO> selectFieldsWithPages(@Param("objectSchemeField") ObjectSchemeFieldDTO objectSchemeField);
 }

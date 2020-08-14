@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author shinan.chen
@@ -23,4 +24,11 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
     List<Long> selectIssueTypeIds(@Param("organizationId") Long organizationId, @Param("issueTypeSearchVO") IssueTypeSearchVO issueTypeSearchVO);
 
     List<IssueTypeWithInfoDTO> queryIssueTypeList(@Param("organizationId") Long organizationId, @Param("issueTypeIds") List<Long> issueTypeIds);
+
+    /**
+     * 根据id查询issue type
+     * @param organizationIds
+     * @return
+     */
+    List<IssueTypeDTO> selectByOrganizationIds(@Param("organizationIds") Set<Long> organizationIds);
 }

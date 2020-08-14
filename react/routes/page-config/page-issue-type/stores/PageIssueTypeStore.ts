@@ -7,6 +7,8 @@ import { IFieldPostDataProps } from '../../components/create-field/CreateField';
 
 export enum PageIssueTypeStoreStatusCode {
   update = 'update',
+  del = 'delete',
+  add = 'add',
   drag = 'drag_update',
   desc = 'description_update',
   none = 'none',
@@ -61,6 +63,8 @@ class PageIssueTypeStore {
       template: undefined,
       objectVersionNumber: undefined,
     };
+    this.addIds.length = 0;
+    this.createdFields.length = 0;
   }
 
   @action('增添删除字段') addDeleteId(id: string) {
@@ -72,12 +76,20 @@ class PageIssueTypeStore {
     index !== -1 && this.createdFields.splice(index, 1);
   }
 
-  @action('增加已有字段') addNewLocalField(id:string) {
+  @action('增加已有字段') addNewLocalField(id: string) {
     this.addIds.push(id);
   }
 
   @action('增添新字段') addNewField(data: PageIFieldPostDataProps) {
     this.createdFields.push(data);
+  }
+
+  @computed get getAddIds() {
+    return this.addIds.slice();
+  }
+
+  @computed get getCreatedFields() {
+    return this.createdFields.slice();
   }
 
   @action setLoading(data: boolean) {
