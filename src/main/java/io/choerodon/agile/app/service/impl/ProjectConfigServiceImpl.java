@@ -600,6 +600,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         IssueDTO issueDTO = new IssueDTO();
         issueDTO.setProjectId(projectId);
         issueDTO.setStatusId(statusId);
+        issueDTO.setStatusId(issueTypeId);
         List<IssueDTO> select = issueMapper.select(issueDTO);
         return !CollectionUtils.isEmpty(select);
     }
