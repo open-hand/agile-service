@@ -83,7 +83,7 @@ function StateList(props) {
       content: (
         <ul className="issue-state-ul">
           {
-            data.stateMachineInfoList.map(stateMachine => (
+            data.stateMachineInfoList.map((stateMachine) => (
               <li key={stateMachine.stateMachineId}>
                 <a
                   role="none"
@@ -137,7 +137,6 @@ function StateList(props) {
         total: data.total,
       });
 
-
       if (isSetInitialTotal) {
         setInitialTotal(data.total);
       }
@@ -163,7 +162,6 @@ function StateList(props) {
     setShowType('');
     setEditState(false);
   };
-
 
   const handleSubmit = () => {
     const { form } = props;
@@ -219,7 +217,6 @@ function StateList(props) {
       page: pagination.page, size: pagination.pageSize, sort: tableParam.sorter, param: tableParam.param,
     });
   };
-
 
   const tableChange = (newPagination, filters, sorter, param) => {
     const sort = {};
@@ -326,32 +323,11 @@ function StateList(props) {
     title: <FormattedMessage id="state.stage" />,
     dataIndex: 'type',
     key: 'type',
-    filters: stageList.filter(s => s.code !== 'none').map(s => ({ text: s.name, value: s.code })),
-    render: record => (
+    filters: stageList.filter((s) => s.code !== 'none').map((s) => ({ text: s.name, value: s.code })),
+    render: (record) => (
       <div>
         <div className="issue-state-block" style={{ backgroundColor: stageMap[record]?.colour }} />
         <span style={{ verticalAlign: 'middle' }}>{stageMap[record]?.name}</span>
-      </div>
-    ),
-  },
-  {
-    title: <FormattedMessage id="state.stateMachine" />,
-    dataIndex: 'stateMachine',
-    key: 'stateMachine',
-    render: (text, record) => (
-      <div>
-        {record.stateMachineInfoList && record.stateMachineInfoList.length
-          ? (
-            <a
-              role="none"
-              onClick={() => showStateMachines(record)}
-            >
-              {record.stateMachineInfoList.length}
-              个关联的状态机
-            </a>
-          )
-          : '-'
-        }
       </div>
     ),
   }]);
@@ -407,7 +383,7 @@ function StateList(props) {
               状态被需求池使用，不可更改名称
             </span>
             )}
-          </FormItem>          
+          </FormItem>
           <FormItem
             {...formItemLayout}
             className="issue-sidebar-form"
@@ -437,7 +413,7 @@ function StateList(props) {
                 dropdownMatchSelectWidth
                 size="default"
               >
-                {stageList.map(stage => (
+                {stageList.map((stage) => (
                   <Option
                     value={stage.code}
                     key={stage.code}
@@ -479,8 +455,7 @@ function StateList(props) {
               <Button icon="playlist_add " onClick={() => showSideBar('create')}>
                 <FormattedMessage id="state.create" />
               </Button>
-            )
-          }
+            )}
         </Header>
         <Breadcrumb />
         <Content className="issue-state-content">
@@ -488,7 +463,7 @@ function StateList(props) {
             dataSource={statesList.list}
             columns={getColumn()}
             filterBarPlaceholder="过滤表"
-            rowKey={record => record.id}
+            rowKey={(record) => record.id}
             loading={stateStore.getIsLoading}
             pagination={pageInfo}
             onChange={tableChange}
