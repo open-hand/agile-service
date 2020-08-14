@@ -40,64 +40,11 @@ const prefixCls = 'c7n-page-issue-detail';
 const SortTable: React.FC = () => {
   const { sortTableDataSet, pageIssueTypeStore } = usePageIssueTypeStore();
   const { disabled, dataStatus, onDelete } = useSortTableContext();
-  // const recordMaps = useMemo(() =>
-  //  new Map(sortTableDataSet.records.map(record => [record.id, record])), [sortTableDataSet])
-  // const [dataStatus, setDataStatus] = useState<string>();
-  const renderFieldName = ({ value }: RenderProps) => (
-    <div>
-      {!disabled && <Icon type="baseline-drag_indicator" />}
-      <span>{value}</span>
-    </div>
-  );
-
-  function renderCheckBox({
-    value, name, record, dataSet,
-  }: RenderProps) {
-    return (
-      <CheckBox
-        disabled={disabled}
-        checked={value}
-        // value={value}
-        onChange={(val) => {
-          record?.set(name as String, val);
-          // console.log('dataSet?.dirty', dataSet?.dirty);
-          if (dataStatus.code !== 'drag_update' && dataSet?.dirty) {
-            // setDataStatus('update');
-            dataStatus.code = 'update';
-          } else if (dataStatus.code !== 'drag_update' && !dataSet?.dirty) {
-            // setDataStatus('ready');
-            dataStatus.code = 'ready';
-          }
-        }}
-      />
-    );
-    // return <input type="checkbox" checked={value} />;
-  }
-  const renderAction = ({
-    value, name, record, dataSet,
-  }: RenderProps) => (
-    <div>
-      {renderCheckBox({
-        value, name, record, dataSet,
-      })}
-      <Button
-        disabled={disabled}
-        style={{ marginLeft: 10 }}
-        onClick={() => {
-          onDelete && onDelete(record?.toData());
-            dataSet?.delete(record as Record);
-        }}
-      >
-        <Icon type="delete" style={{ fontSize: 18 }} />
-      </Button>
-    </div>
-  );
 
   const onDragStart = (initial: DragStart, provided: ResponderProvided) => {
 
   };
   const onDragEnd = (result: DropResult, provided: ResponderProvided) => {
-    console.log('result', result, provided);
     const { destination, source } = result;
     if (!destination?.index) {
       return;
@@ -115,14 +62,12 @@ const SortTable: React.FC = () => {
       nextRank: null,
     };
     if (destination.index > source.index) {
-      console.log('down');
       rankObj.previousRank = destinationRecord.get('rank');
     } else {
-      console.log('up');
       rankObj.nextRank = destinationRecord.get('rank');
     }
     // console.log(sourceRecord.toData(), 'sourceRecord ', destinationRecord.toData());
-    pageConfigApi.loadRankValue(rankObj).then((newRank:string) => {
+    pageConfigApi.loadRankValue(rankObj).then((newRank: string) => {
       sourceRecord.set('rank', newRank);
     }).then(() => {
       sortTableDataSet.move(source.index, destination.index);
@@ -139,7 +84,7 @@ const SortTable: React.FC = () => {
       <div className={`${prefixCls}-content`}>
         <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
           <div style={{ width: '100%' }}>
-            <DropContent rows={sortTableDataSet.records} isDropDisabled={false} />
+            <DropContent rows={sortTableDataSet.data} isDropDisabled={false} />
           </div>
         </DragDropContext>
       </div>

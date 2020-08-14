@@ -4,7 +4,6 @@ import React, {
 } from 'react';
 import {
   DraggableProvided, Draggable, DraggingStyle, NotDraggingStyle,
-  DraggableStateSnapshot, DraggableRubric, DragDropContext,
 } from 'react-beautiful-dnd';
 import {
   Button, IconPicker, Icon, Output, CheckBox,
@@ -21,11 +20,18 @@ interface Props {
   data: Record,
   provided: DraggableProvided,
   virtualizedStyle?: React.CSSProperties,
+  index: number,
   isDragDisabled?: boolean
 }
 const prefixCls = 'c7n-page-issue-detail-drag';
+const updateCodeArr = [
+  PageIssueTypeStoreStatusCode.add,
+  PageIssueTypeStoreStatusCode.del,
+  PageIssueTypeStoreStatusCode.desc,
+  PageIssueTypeStoreStatusCode.drag,
+];
 const DraggableItem: React.FC<Props> = ({
-  data, isDragDisabled, virtualizedStyle, provided,
+  data, isDragDisabled, virtualizedStyle, provided, index,
 }) => {
   const { pageIssueTypeStore } = usePageIssueTypeStore();
   const { onDelete } = useSortTableContext();
@@ -50,14 +56,13 @@ const DraggableItem: React.FC<Props> = ({
           record?.set(name as String, val);
           // console.log('dataSet?.dirty', dataSet?.dirty);
 
-          if (pageIssueTypeStore.dataStatusCode !== 'drag_update'
-            && pageIssueTypeStore.dataStatusCode !== PageIssueTypeStoreStatusCode.desc
-            && dataSet?.dirty) {
+          if (dataSet?.dirty
+            && updateCodeArr.every((item) => item !== pageIssueTypeStore.getDataStatusCode)) {
             // setDataStatus('update');
             pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.update);
-          } else if (pageIssueTypeStore.dataStatusCode !== 'drag_update' && !dataSet?.dirty) {
+          } else if (!dataSet?.dirty
+            && pageIssueTypeStore.dataStatusCode === PageIssueTypeStoreStatusCode.update) {
             // setDataStatus('ready');
-
             pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.null);
           }
         }}
@@ -78,7 +83,7 @@ const DraggableItem: React.FC<Props> = ({
         style={{ marginLeft: 10 }}
         onClick={() => {
           onDelete && onDelete(record?.toData());
-            dataSet?.delete(record as Record);
+            dataSet?.splice(index, 1);
         }}
       >
         <Icon type="delete" style={{ fontSize: 18 }} />

@@ -12,14 +12,17 @@ import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
 import ReactDOM from 'react-dom';
 import DraggableItem from './DraggableItem';
+import { usePageIssueTypeStore } from '../../stores';
 
 interface Props {
   isDropDisabled: boolean,
   rows: Array<Record>,
 }
 const DropContent: React.FC<Props> = ({ isDropDisabled, rows }) => {
+  const { pageIssueTypeStore } = usePageIssueTypeStore();
   const [scrollHeight, setScrollHeight] = useState<number>(300);
   const renderRowItem = useCallback((rowProps: ListRowProps) => {
+    console.log('rows', rows.length);
     const record = rows[rowProps.index];
     return (
       <Draggable draggableId={String(record.key)} index={rowProps.index} key={record.key}>
@@ -27,6 +30,7 @@ const DropContent: React.FC<Props> = ({ isDropDisabled, rows }) => {
           <DraggableItem
             provided={provided}
             data={rows[rowProps.index]}
+            index={rowProps.index}
             virtualizedStyle={{ ...rowProps.style }}
           />
         )}
@@ -41,6 +45,7 @@ const DropContent: React.FC<Props> = ({ isDropDisabled, rows }) => {
       renderClone={(provided, snapshot, rubric) => (
         <DraggableItem
           provided={provided}
+          index={rubric.source.index}
           // virtualizedStyle={{ margin: 0 }}
           data={rows[rubric.source.index]}
         />
