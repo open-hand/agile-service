@@ -21,23 +21,29 @@ import ExportIssue from './components/ExportIssue';
 import IssueDetail from './components/issue-detail';
 import ImportIssue from './components/ImportIssue';
 import IssueTable from './components/issue-table';
+import CollapseAll from './components/issue-table/CollapseAll';
 import Modal from './components/Modal';
 import './index.less';
 
-
 const Issue = withRouter(observer(() => {
   const {
-    dataSet, projectId, 
+    dataSet, projectId,
   } = useContext(Store);
   const [urlFilter, setUrlFilter] = useState(null);
   const importRef = useRef();
-  const tableRef = useRef(); 
+  const tableRef = useRef();
   /**
    * 默认此次操作不是删除操作
    * 防止删除此页一条数据时页时停留当前页时出现无数据清空
    * @param {Boolean} isDelete  用于标记是否为删除操作
    */
-  const refresh = (isDelete = false) => dataSet.query(isDelete && dataSet.length === 1 && dataSet.totalCount > 1 ? dataSet.currentPage - 1 : dataSet.currentPage);
+  const refresh = (isDelete = false) => dataSet.query(
+    isDelete
+    && dataSet.length === 1
+    && dataSet.totalCount > 1
+      ? dataSet.currentPage - 1
+      : dataSet.currentPage,
+  );
 
   const initFilter = async () => {
     const {
@@ -85,7 +91,7 @@ const Issue = withRouter(observer(() => {
         } catch (error) {
           Choerodon.prompt(error.message, 'error');
         }
-      }    
+      }
       IssueStore.handleFilterChange('issueIds', [id]);
       IssueStore.handleFilterChange('contents', [`${IssueStore.getProjectInfo.projectCode}-${paramName.split('-')[paramName.split('-').length - 1]}`]);
       IssueStore.setClickedRow({
@@ -122,13 +128,15 @@ const Issue = withRouter(observer(() => {
     dataSet.query();
   };
 
-
   const handleClickFilterManage = () => {
     const editFilterInfo = IssueStore.getEditFilterInfo;
     const filterListVisible = IssueStore.getFilterListVisible;
     IssueStore.setSaveFilterVisible(false);
     IssueStore.setFilterListVisible(!filterListVisible);
-    IssueStore.setEditFilterInfo(map(editFilterInfo, item => Object.assign(item, { isEditing: false })));
+    IssueStore.setEditFilterInfo(map(editFilterInfo, (item) => Object.assign(item, {
+      isEditing:
+      false,
+    })));
   };
   return (
     <Page
@@ -164,6 +172,7 @@ const Issue = withRouter(observer(() => {
           导出问题
         </Button>
         <Button onClick={handleClickFilterManage} icon="settings">筛选管理</Button>
+        <CollapseAll tableRef={tableRef} />
       </Header>
       <Breadcrumb />
       <Content style={{ paddingTop: 0 }} className="c7nagile-issue-content">
@@ -189,7 +198,7 @@ const Issue = withRouter(observer(() => {
   );
 }));
 
-export default props => (
+export default (props) => (
   <StoreProvider {...props}>
     <Issue />
   </StoreProvider>
