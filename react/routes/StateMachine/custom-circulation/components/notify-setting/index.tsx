@@ -83,7 +83,7 @@ const NotifySetting = ({
     const { current } = notifySettingDataSet;
     // @ts-ignore
     statusTransformApi.getNotifySetting(selectedType, record.get('id')).then((res) => {
-      current?.set('userTypeList', res.userTypeList);
+      current?.set('userTypeList', [...(res.userIdList && res.userIdList.length ? ['specifier'] : []), ...res.userTypeList]);
       current?.set('userIdList', res.userIdList);
       current?.set('noticeTypeList', res.noticeTypeList);
     });
