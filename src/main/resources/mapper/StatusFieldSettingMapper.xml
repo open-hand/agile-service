@@ -4,6 +4,7 @@
 
     <select id="listByStatusIds" resultType="io.choerodon.agile.api.vo.StatusFieldSettingVO">
         select
+        fsfs.id,
         fsfs.project_id,
         fsfs.issue_type_id,
         fsfs.status_id,
