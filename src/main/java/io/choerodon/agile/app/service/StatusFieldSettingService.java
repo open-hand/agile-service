@@ -17,4 +17,6 @@ public interface StatusFieldSettingService {
    List<StatusFieldSettingVO> list(Long projectId, Long issueType, Long statusId);
 
    List<StatusFieldSettingVO> listByStatusIds(Long projectId, Long issueType, List<Long> statusIds);
+
+   void handlerSettingToUpdateIssue(Long projectId,Long issueId);
 }
