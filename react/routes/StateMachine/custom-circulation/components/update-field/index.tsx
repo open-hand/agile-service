@@ -44,10 +44,7 @@ const dateTransform = (fieldType: string, d: Date) => {
 // @ts-ignore
 const transformUpdateData = (data) => {
   const updateData = [];
-  console.log('转换前：');
-  console.log(data);
   for (const [key, fieldValue] of Object.entries(data)) {
-    console.log(`${key}: ${fieldValue}`);
     const {
     // @ts-ignore
       fieldType, fieldId, selected, value,
@@ -145,8 +142,6 @@ const transformUpdateData = (data) => {
       }
     }
   }
-  console.log('转换后：');
-  console.log(updateData);
   return updateData;
 };
 
@@ -188,7 +183,9 @@ const setCurrentByFieldType = (current, fieldValue, fieldCode) => {
     case 'number': {
       const { operateType, numberValue, numAddValue } = firstField;
       current.set(`${fieldCode}-select`, operateType);
-      current.set(fieldCode, operateType === 'specifier' ? numberValue : numAddValue);
+      if (operateType !== 'clear') {
+        current.set(fieldCode, operateType === 'specifier' ? numberValue : numAddValue);
+      }
       break;
     }
     case 'date': case 'time': case 'datetime': {

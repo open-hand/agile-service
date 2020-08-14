@@ -4,6 +4,27 @@
       .c7n-pro-table-filter-select {
         border-top: none !important;
       }
+      .c7n-pro-table-cell[data-index="id"] {
+        .c7n-pro-table-cell-inner {
+          height: unset !important;
+        }
+      }
+    }
+    .setting {
+      .settingItem {
+        // display: block;
+        // white-space: nowrap;
+        // overflow: hidden;
+        // text-overflow: ellipsis;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        white-space: break-spaces;
+      }
+      .settingItem:not(:last-child) {
+        border-bottom: 1px solid #E5E5E5;
+      }
     }
   }
 }

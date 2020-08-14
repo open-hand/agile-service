@@ -15,7 +15,7 @@ import { useIsProgramContext } from '@/hooks/useIsProgrom';
 import { statusTransformApiConfig } from '@/api';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import { ColumnProps } from 'choerodon-ui/pro/lib/table/Column';
-import { Divider } from 'choerodon-ui';
+import { Divider, Tooltip } from 'choerodon-ui';
 import Condition from './components/condition';
 import Linkage from './components/linkage';
 import NotifySetting from './components/notify-setting';
@@ -59,8 +59,90 @@ interface ICustomCirculation {
   type: 'todo' | 'doing' | 'done' | 'prepare'
 }
 
+const transformedMember = {
+  reporter: '报告人',
+  reportor: '报告人',
+  creator: '创建人',
+  operator: '当前操作人',
+  assignee: '经办人',
+  projectOwner: '项目所有者',
+};
+
+const transformedNoticeType = {
+  email: '邮件',
+  webMessage: '站内信',
+  webhook: 'webhook',
+};
+
+// @ts-ignore
+const transformFieldValue = (fieldSetting) => {
+  const { fieldType, fieldValueList } = fieldSetting;
+  const firstField = (fieldValueList && fieldValueList[0]) || {};
+  let transformedValue = '';
+  switch (fieldType) {
+    case 'member': {
+      const { operateType } = firstField;
+      const isSpecifier = operateType === 'specifier';
+      transformedValue = isSpecifier
+      // @ts-ignore
+        ? fieldValueList.map((item) => item.name) : transformedMember[operateType];
+      break;
+    }
+    case 'radio': case 'single': case 'checkbox': case 'multiple': {
+      const { operateType, name } = firstField;
+      const isClear = operateType === 'clear';
+      if (fieldType === 'radio' || fieldType === 'single') {
+        transformedValue = isClear ? '清空' : name;
+      } else {
+        // @ts-ignore
+        transformedValue = isClear ? '清空' : fieldValueList.map((item) => item.name);
+      }
+      break;
+    }
+    case 'text': {
+      const { operateType, textValue } = firstField;
+      const isClear = operateType === 'clear';
+      transformedValue = isClear ? '清空' : textValue;
+      break;
+    }
+    case 'input': {
+      const { operateType, stringValue } = firstField;
+      const isClear = operateType === 'clear';
+      transformedValue = isClear ? '清空' : stringValue;
+      break;
+    }
+    case 'number': {
+      const { operateType, numberValue, numAddValue } = firstField;
+      if (operateType === 'clear') {
+        transformedValue = '清空';
+      } else if (operateType === 'add') {
+        transformedValue = `当前数值+${numAddValue}`;
+      } else if (operateType === 'specifier') {
+        transformedValue = numberValue;
+      }
+      break;
+    }
+    case 'date': case 'time': case 'datetime': {
+      const { operateType, dateValue, dateAddValue } = firstField;
+      if (operateType === 'clear') {
+        transformedValue = '清空';
+      } else if (operateType === 'add') {
+        transformedValue = `流转后${dateAddValue}天`;
+      } else if (operateType === 'specifier') {
+        transformedValue = dateValue;
+      } else if (operateType === 'current_time') {
+        transformedValue = '当前时间';
+      }
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+  return transformedValue;
+};
+
 const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
-  const { isProgram } = useIsProgramContext();
   const [issueTypes] = useIssueTypes();
   const { selectedType, setSelectedType } = useStateMachineContext();
 
@@ -188,8 +270,49 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   };
 
   // @ts-ignore
-  const renderStatusFieldSetting = (statusFieldSettingVOS) => {
+  const renderNotifySetting = (statusNoticeSettingVOS) => {
+    const {
+      userTypeList, userList, noticeTypeList, memberList,
+    } = statusNoticeSettingVOS[0];
+    const members: string[] = [];
+    const noticeTypes: string[] = [];
+    if (userTypeList && userTypeList.length && noticeTypeList && noticeTypeList.length) {
+      userTypeList.forEach((type: string) => {
+        if (type !== 'specifier') {
+          // @ts-ignore
+          members.push(transformedMember[type]);
+        }
+      });
+      if (memberList && memberList.length) {
+        // @ts-ignore
+        memberList.forEach((field) => {
+          members.push(field.name);
+        });
+      }
+      if (userList && userList.length) {
+        // @ts-ignore
+        userTypeList.forEach((user) => {
+          members.push(user.realName);
+        });
+      }
+      // @ts-ignore
+      noticeTypeList.forEach((noticeType) => {
+        // @ts-ignore
+        noticeTypes.push(transformedNoticeType[noticeType]);
+      });
+    }
+    return `设置向${members.join('、')}发${noticeTypes.join('、')}通知`;
+  };
 
+  // @ts-ignore
+  const renderStatusFieldSetting = (statusFieldSettingVOS) => {
+    if (statusFieldSettingVOS && statusFieldSettingVOS.length) {
+      // @ts-ignore
+      return (statusFieldSettingVOS.map((fieldSetting) => {
+        const { fieldName } = fieldSetting;
+        return `设置${fieldName}为：${transformFieldValue(fieldSetting)}`;
+      })).join('、');
+    }
   };
 
   const renderSetting = ({
@@ -197,19 +320,38 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     value, text, name, record, dataSet,
   }) => {
     const {
-      statusTransferSettingVOS, notifySettingVOS, statusFieldSettingVOS, linkageVOS,
+      statusTransferSettingVOS, statusNoticeSettingVOS, statusFieldSettingVOS, linkageVOS,
     } = record.data;
     const isProjectOwnerExist = statusTransferSettingVOS && find(statusTransferSettingVOS, (item: IStatusTransferSettingVOS) => item.userType === 'projectOwner');
     const assigners = filter((statusTransferSettingVOS || []), (item: IStatusTransferSettingVOS) => item.userType === 'specifier')?.map((item: IStatusTransferSettingVOS) => item.user?.realName) || [];
+    const transferRender = (isProjectOwnerExist || (assigners && assigners.length > 0)) && `移到工作项到此状态需为：${isProjectOwnerExist ? '项目所有者' : ''}${isProjectOwnerExist && assigners.length > 0 ? '、' : ''}${assigners.join('、')}`;
     return (
       <div className={styles.setting}>
         {
           (isProjectOwnerExist || (assigners && assigners.length > 0)) && (
-          <span>
-            {
-              `移到工作项到此状态需为：${isProjectOwnerExist ? '项目所有者' : ''}${isProjectOwnerExist && assigners.length > 0 ? '、' : ''}${assigners.join('、')}`
-            }
-          </span>
+          <div className={styles.settingItem}>
+            <Tooltip title={transferRender}>
+              {transferRender}
+            </Tooltip>
+          </div>
+          )
+        }
+        {
+          statusFieldSettingVOS && statusFieldSettingVOS.length > 0 && (
+            <div className={styles.settingItem}>
+              <Tooltip title={renderStatusFieldSetting(statusFieldSettingVOS)}>
+                {renderStatusFieldSetting(statusFieldSettingVOS)}
+              </Tooltip>
+            </div>
+          )
+        }
+        {
+          statusNoticeSettingVOS && statusNoticeSettingVOS.length > 0 && (
+            <div className={styles.settingItem}>
+              <Tooltip title={renderNotifySetting(statusNoticeSettingVOS)}>
+                {renderNotifySetting(statusNoticeSettingVOS)}
+              </Tooltip>
+            </div>
           )
         }
       </div>
