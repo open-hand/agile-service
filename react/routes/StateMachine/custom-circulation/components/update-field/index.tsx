@@ -12,14 +12,35 @@ import { pageConfigApi, statusTransformApi } from '@/api';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Priority, IField } from '@/common/types';
-import { number } from '@/routes/page-config/images';
+import { Loading } from '@/components';
+import moment from 'moment';
 import renderField from './renderField';
 import styles from './index.less';
 
 const { Option } = Select;
 
-const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epic', 'pi'];
-
+const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epicName', 'epic', 'pi'];
+const dateTransform = (fieldType: string, d: Date) => {
+  let transformed = '';
+  switch (fieldType) {
+    case 'time': {
+      transformed = moment(d).format('HH:mm:ss');
+      break;
+    }
+    case 'date': {
+      transformed = moment(d).format('YYYY-MM-DD');
+      break;
+    }
+    case 'datetime': {
+      transformed = moment(d).format('YYYY-MM-DD HH:mm:ss');
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+  return transformed;
+};
 // @ts-ignore
 const transformUpdateData = (data) => {
   const updateData = [];
@@ -34,70 +55,89 @@ const transformUpdateData = (data) => {
     switch (fieldType) {
       case 'member': {
         const isSpecifier = value !== 'reportor' && value !== 'creator' && value !== 'operator' && value !== 'clear';
-        updateData.push({
-          fieldId,
-          fieldValueList: [{
-            operateType: isSpecifier ? 'specifier' : selected,
-            userId: isSpecifier ? value : undefined,
-          }],
-        });
+        if (value) {
+          updateData.push({
+            fieldId,
+            fieldValueList: [{
+              operateType: isSpecifier ? 'specifier' : value,
+              userId: isSpecifier ? value : undefined,
+              fieldType,
+            }],
+          });
+        }
         break;
       }
       case 'radio': case 'single': case 'checkbox': case 'multiple': {
-        updateData.push({
-          fieldId,
-          fieldValueList: (fieldType === 'radio' || fieldType === 'single') ? [{
-            operateType: value ? 'specifier' : selected,
-            optionId: value,
-          }] : (value || []).map((item: string) => (
-            {
-              operateType: value ? 'specifier' : selected,
-              optionId: item,
-            }
-          )),
-        });
+        if (value || value.length > 0) {
+          updateData.push({
+            fieldId,
+            fieldValueList: (fieldType === 'radio' || fieldType === 'single') ? [{
+              operateType: value === 'clear' ? 'clear' : 'specifier',
+              optionId: value === 'clear' ? undefined : value,
+              fieldType,
+            }] : (value || []).map((item: string) => (
+              {
+                operateType: item === 'clear' ? 'clear' : 'specifier',
+                optionId: item === 'clear' ? undefined : item,
+                fieldType,
+              }
+            )),
+          });
+        }
         break;
       }
       case 'text': {
-        updateData.push({
-          fieldId,
-          fieldValueList: [{
-            operateType: value ? 'specifier' : selected,
-            textValue: value,
-          }],
-        });
+        if ((selected === 'specifier' && value) || selected === 'clear') {
+          updateData.push({
+            fieldId,
+            fieldValueList: [{
+              operateType: value ? 'specifier' : selected,
+              textValue: value,
+              fieldType,
+            }],
+          });
+        }
         break;
       }
       case 'input': {
-        updateData.push({
-          fieldId,
-          fieldValueList: [{
-            operateType: value ? 'specifier' : selected,
-            stringValue: value,
-          }],
-        });
+        if ((selected === 'specifier' && value) || selected === 'clear') {
+          updateData.push({
+            fieldId,
+            fieldValueList: [{
+              operateType: value ? 'specifier' : selected,
+              stringValue: value,
+              fieldType,
+            }],
+          });
+        }
         break;
       }
-      case number: {
-        updateData.push({
-          fieldId,
-          fieldValueList: [{
-            operateType: selected,
-            numberValue: selected === 'specifier' && value,
-            numAddValue: selected === 'add' ? value : undefined,
-          }],
-        });
+      case 'number': {
+        if (((selected === 'specifier' || selected === 'add') && value) || selected === 'clear') {
+          updateData.push({
+            fieldId,
+            fieldValueList: [{
+              operateType: selected,
+              numberValue: selected === 'specifier' ? value : undefined,
+              numAddValue: selected === 'add' ? value : undefined,
+              fieldType,
+            }],
+          });
+        }
         break;
       }
       case 'date': case 'time': case 'datetime': {
-        updateData.push({
-          fieldId,
-          fieldValueList: [{
-            operateType: selected,
-            dateValue: selected === 'specifier' ? value : undefined,
-            dateAddValue: selected === 'add' ? value : undefined,
-          }],
-        });
+        if (((selected === 'specifier' || selected === 'add') && value) || selected === 'clear') {
+          updateData.push({
+            fieldId,
+            fieldValueList: [{
+              operateType: selected,
+              dateValue: selected === 'specifier' ? dateTransform(fieldType, value) : undefined,
+              dateAddValue: selected === 'add' ? value : undefined,
+              fieldType,
+            }],
+          });
+        }
         break;
       }
       default: {
@@ -110,19 +150,66 @@ const transformUpdateData = (data) => {
   return updateData;
 };
 
+// @ts-ignore
+const setCurrentByFieldType = (current, fieldValue, fieldCode) => {
+  const { fieldValueList } = fieldValue;
+  const firstField = (fieldValueList && fieldValueList[0]) || {};
+  const { fieldType } = firstField;
+  switch (fieldType) {
+    case 'member': {
+      const { operateType, userId } = firstField;
+      const isSpecifier = operateType === 'specifier';
+      current.set(fieldCode, isSpecifier ? userId : operateType);
+      break;
+    }
+    case 'radio': case 'single': case 'checkbox': case 'multiple': {
+      const { operateType } = firstField;
+      const isClear = operateType === 'clear';
+      if (fieldType === 'radio' || fieldType === 'single') {
+        current.set(fieldCode, isClear ? 'clear' : firstField.optionId);
+      } else {
+        current.set(fieldCode, isClear ? ['clear'] : fieldValueList.map((item) => item.optionId));
+      }
+      break;
+    }
+    case 'text': {
+      const { operateType, textValue } = firstField;
+      current.set(`${fieldCode}-select`, operateType);
+      current.set(fieldCode, textValue);
+      break;
+    }
+    case 'input': {
+      const { operateType, stringValue } = firstField;
+      current.set(`${fieldCode}-select`, operateType);
+      current.set(fieldCode, stringValue);
+      break;
+    }
+    case 'number': {
+      const { operateType, numberValue, numAddValue } = firstField;
+      current.set(`${fieldCode}-select`, operateType);
+      current.set(fieldCode, operateType === 'specifier' ? numberValue : numAddValue);
+      break;
+    }
+    case 'date': case 'time': case 'datetime': {
+      const { operateType, dateValue, dateAddValue } = firstField;
+      current.set(`${fieldCode}-select`, operateType);
+      current.set(fieldCode, operateType === 'specifier' ? dateValue && moment(dateValue) : dateAddValue);
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+};
+
 const UpdateField = ({
   // @ts-ignore
   modal, selectedType, record, customCirculationDataSet,
 }) => {
   const [fieldData, setFieldData] = useState<IField[]>([]);
   const [updateCount, setUpdateCount] = useState<number>(0);
-  useEffect(() => {
-    pageConfigApi.loadFieldsByType(selectedType).then((res: IField[]) => {
-      setFieldData(res.filter((item) => !find(excludeCode, (code) => code === item.code)));
-    });
-  }, [selectedType]);
-
   const [fields, Field] = useFields();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const userFields = useMemo(() => fieldData.filter((field) => field.fieldType === 'member').map((field) => ({
     name: field.code,
@@ -133,6 +220,7 @@ const UpdateField = ({
   })), [fieldData]);
 
   const dataSet = useMemo(() => new DataSet({
+    autoCreate: true,
     fields: [
       {
         name: 'priority',
@@ -228,6 +316,36 @@ const UpdateField = ({
     },
   }), [userFields]);
 
+  useEffect(() => {
+    pageConfigApi.loadFieldsByType(selectedType).then((res: IField[]) => {
+      const data = res.filter((item) => !find(excludeCode, (code) => code === item.code));
+      setFieldData(data);
+    });
+  }, [selectedType]);
+
+  useEffect(() => {
+    if (fieldData && fieldData.length) {
+      setLoading(true);
+      // @ts-ignore
+      statusTransformApi.getUpdateFieldInfo(selectedType, record.get('id')).then((res) => {
+        setLoading(false);
+        const initFields = fieldData.filter((f) => res.find((item) => item.fieldId === f.id));
+        Field.init(initFields);
+        const { current } = dataSet;
+        if (current) {
+          // @ts-ignore
+          (res || []).forEach((item) => {
+            const field = find(fieldData, { id: item.fieldId }) || {};
+            const fieldCode = field?.code;
+            setCurrentByFieldType(current, item, fieldCode);
+          });
+        }
+      }).catch(() => {
+        setLoading(false);
+      });
+    }
+  }, [dataSet, fieldData, record, selectedType]);
+
   const getData = useCallback(() => {
     const temp = dataSet.current ? dataSet.current.data : {};
     const obj: any = {};
@@ -247,27 +365,6 @@ const UpdateField = ({
     return obj;
   }, [dataSet, fields]);
 
-  // useEffect(() => {
-  //   // @ts-ignore
-  //   statusTransformApi.getUpdateFieldInfo(selectedType, record.get('id')).then((res) => {
-  //     console.log(res);
-  //     const { current } = dataSet;
-  //     // @ts-ignore
-  //     res.forEach((item) => {
-  //       // @ts-ignore
-  //       Field.add();
-  //       current?.set(`${item.code}-select`, item.selected);
-  //       current?.set(item.code, item.value);
-  //     });
-  //     // @ts-ignore
-  //     fields.forEach((f, i) => {
-  //       const { key } = f;
-  //       const field = find(fieldData, { id: res[i].fieldId });
-  //       // @ts-ignore
-  //       Field.set(key, field);
-  //     });
-  //   });
-  // }, [dataSet, fieldData, fields, record, selectedType]);
   useEffect(() => {
     const submit = async () => {
       const data = getData();
@@ -278,12 +375,12 @@ const UpdateField = ({
     };
     modal.handleOk(submit);
   }, [customCirculationDataSet, getData, modal, record, selectedType]);
-
   const data = getData();
+
   const render = () => (
     <Form
       className={styles.form}
-        // disabled={Boolean(loading)}
+      disabled={Boolean(loading)}
       dataSet={dataSet}
       style={{
         maxHeight: 400, overflowY: 'auto', overflowX: 'hidden',
@@ -355,6 +452,7 @@ const UpdateField = ({
   );
   return (
     <div className={styles.updateField}>
+      <Loading loading={loading} />
       {render()}
     </div>
   );

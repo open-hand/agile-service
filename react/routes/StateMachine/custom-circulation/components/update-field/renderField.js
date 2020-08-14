@@ -95,7 +95,7 @@ export default function renderField({
             </Select>
           </Col>
           {
-            data[code].selected && (data[code].selected === 'specifier' || data[code].selected === 'afterDay') && (
+            data[code].selected && (data[code].selected === 'specifier' || data[code].selected === 'add') && (
             <Col span={12}>
               {
                 data[code].selected === 'specifier' ? (
@@ -139,7 +139,7 @@ export default function renderField({
             </Select>
           </Col>
           {
-            data[code].selected && (data[code].selected === 'specifier' || data[code].selected === 'afterDay') && (
+            data[code].selected && (data[code].selected === 'specifier' || data[code].selected === 'add') && (
             <Col span={12}>
               {
                 data[code].selected === 'specifier' ? (
