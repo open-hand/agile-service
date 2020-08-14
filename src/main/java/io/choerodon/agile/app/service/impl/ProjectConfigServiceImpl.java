@@ -93,6 +93,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private IssueAccessDataService issueAccessDataService;
     @Autowired
     private StatusFieldSettingService statusFieldSettingService;
+    @Autowired
+    private StatusNoticeSettingService statusNoticeSettingService;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -502,8 +504,11 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         List<Long> statusIds = list.stream().map(StatusSettingVO::getId).collect(Collectors.toList());
         List<StatusTransferSettingVO> transferSettingVOS = statusTransferSettingService.listByStatusIds(projectId, issueTypeId, statusIds);
         List<StatusFieldSettingVO> statusFieldSettingVOS = statusFieldSettingService.listByStatusIds(projectId, issueTypeId, statusIds);
+        List<StatusNoticeSettingVO> statusNoticeSettingVOS = statusNoticeSettingService.list(projectId, issueTypeId, statusIds);
         Map<Long, List<StatusTransferSettingVO>> transferSettingMap = new HashMap<>();
         Map<Long, List<StatusFieldSettingVO>> statusFieldSettingMap = new HashMap<>();
+        Map<Long, List<StatusNoticeSettingVO>> statusNoticSettingMap = statusNoticeSettingVOS.stream()
+                .collect(Collectors.groupingBy(StatusNoticeSettingVO::getStatusId));
         if (!CollectionUtils.isEmpty(transferSettingVOS)) {
             transferSettingMap.putAll(transferSettingVOS.stream().collect(Collectors.groupingBy(StatusTransferSettingVO::getStatusId)));
         }
@@ -513,6 +518,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         for (StatusSettingVO statusSettingVO : list) {
             statusSettingVO.setStatusTransferSettingVOS(transferSettingMap.get(statusSettingVO.getId()));
             statusSettingVO.setStatusFieldSettingVOS(statusFieldSettingMap.get(statusSettingVO.getId()));
+            statusSettingVO.setStatusNoticeSettingVOS(statusNoticSettingMap.get(statusSettingVO.getId()));
         }
         page.setContent(list);
         return page;

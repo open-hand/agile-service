@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 
 import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
 import io.choerodon.agile.api.vo.UserVO;
+import io.choerodon.agile.app.assembler.StatusNoticeSettingAssembler;
 import io.choerodon.agile.app.service.StatusNoticeSettingService;
 import io.choerodon.agile.infra.dto.IssueDTO;
 import io.choerodon.agile.infra.dto.StatusDTO;
@@ -16,9 +17,12 @@ import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.SendMsgUtil;
 import io.choerodon.core.exception.CommonException;
+import io.netty.util.internal.UnstableApi;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +51,8 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
     private BaseFeignClient baseFeignClient;
     @Autowired
     private FieldValueMapper fieldValueMapper;
+    @Autowired
+    private StatusNoticeSettingAssembler statusNoticeSettingAssembler;
 
     @Override
     public StatusNoticeSettingVO detail(Long projectId, Long issueTypeId, Long statusId) {
@@ -111,6 +117,20 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
         // 发消息
         sendMsgUtil.noticeIssueStatus(userSet);
     }
+
+    @Override
+    public List<StatusNoticeSettingVO> list(Long projectId, Long issueTypeId, List<Long> statusIdList) {
+        if (Objects.isNull(projectId) || Objects.isNull(issueTypeId) || CollectionUtils.isEmpty(statusIdList)){
+            return Collections.emptyList();
+        }
+        List<StatusNoticeSettingDTO> list =
+                statusNoticeSettingMapper.selectByCondition(Condition.builder(StatusNoticeSettingDTO.class)
+                .andWhere(Sqls.custom().andIn(StatusNoticeSettingDTO.FIELD_STATUS_ID, statusIdList)
+                        .andEqualTo(StatusNoticeSettingDTO.FIELD_PROJECT_ID, projectId)
+                        .andEqualTo(StatusNoticeSettingDTO.FIELD_ISSUE_TYPE_ID, issueTypeId)).build());
+        return statusNoticeSettingAssembler.statusNoticeDto2Vo(projectId, issueTypeId, list);
+    }
+
 
     private void receiverType2User(Long projectId, StatusNoticeSettingDTO noticeDTO, IssueDTO issue, Set<Long> userSet) {
         switch (noticeDTO.getUserType()){

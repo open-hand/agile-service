@@ -30,6 +30,10 @@ import org.hzero.core.base.BaseConstants;
 @Table(name = "fd_status_notice_setting")
 public class StatusNoticeSettingDTO extends AuditDomain {
 
+    public static final String FIELD_STATUS_ID = "statusId";
+    public static final String FIELD_ISSUE_TYPE_ID = "issueTypeId";
+    public static final String FIELD_PROJECT_ID = "projectId";
+
     public StatusNoticeSettingDTO() {
     }
 
