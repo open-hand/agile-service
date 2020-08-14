@@ -2,9 +2,11 @@ package io.choerodon.agile.api.vo;
 
 import java.util.*;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.enums.StatusNoticeUserType;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModelProperty;
@@ -58,6 +60,11 @@ public class StatusNoticeSettingVO extends AuditDomain {
     @ApiModelProperty(value = "通知类型")
     private List<String> noticeTypeList;
 
+    @ApiModelProperty(value = "用户list")
+    private List<UserDTO> userList;
+
+    private List<ObjectSchemeFieldVO> memberList;
+
     public Long getIssueTypeId() {
         return issueTypeId;
     }
@@ -104,5 +111,21 @@ public class StatusNoticeSettingVO extends AuditDomain {
 
     public void setNoticeTypeList(List<String> noticeTypeList) {
         this.noticeTypeList = noticeTypeList;
+    }
+
+    public List<UserDTO> getUserList() {
+        return userList;
+    }
+
+    public void setUserList(List<UserDTO> userList) {
+        this.userList = userList;
+    }
+
+    public List<ObjectSchemeFieldVO> getMemberList() {
+        return memberList;
+    }
+
+    public void setMemberList(List<ObjectSchemeFieldVO> memberList) {
+        this.memberList = memberList;
     }
 }

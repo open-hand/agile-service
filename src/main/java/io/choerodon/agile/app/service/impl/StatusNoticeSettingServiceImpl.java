@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
 import io.choerodon.agile.api.vo.UserVO;
 import io.choerodon.agile.app.assembler.StatusNoticeSettingAssembler;
+import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusNoticeSettingService;
 import io.choerodon.agile.infra.dto.IssueDTO;
 import io.choerodon.agile.infra.dto.StatusDTO;
@@ -53,9 +54,11 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
     private FieldValueMapper fieldValueMapper;
     @Autowired
     private StatusNoticeSettingAssembler statusNoticeSettingAssembler;
+    @Autowired
+    private ProjectConfigService projectConfigService;
 
     @Override
-    public StatusNoticeSettingVO detail(Long projectId, Long issueTypeId, Long statusId) {
+    public StatusNoticeSettingVO detail(Long projectId, Long issueTypeId, Long statusId, String schemeCode) {
         StatusNoticeSettingVO statusNoticeSettingVO = new StatusNoticeSettingVO(projectId, issueTypeId, statusId);
         StatusNoticeSettingDTO notice = new StatusNoticeSettingDTO(projectId, issueTypeId, statusId);
         List<StatusNoticeSettingDTO> list = statusNoticeSettingMapper.select(notice);
@@ -65,11 +68,12 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
         list.forEach(item -> statusNoticeSettingVO.addUserWithNotice(item.getUserType(), item.getUserId()));
         statusNoticeSettingVO.setNoticeTypeList(Stream.of(StringUtils.split(list.stream().map(StatusNoticeSettingDTO::getNoticeType)
                 .findFirst().orElse(""), BaseConstants.Symbol.COMMA)).collect(Collectors.toList()));
+        statusNoticeSettingAssembler.addUserInfo(statusNoticeSettingVO, schemeCode);
         return statusNoticeSettingVO;
     }
 
     @Override
-    public void save(Long projectId, StatusNoticeSettingVO statusNoticeSettingVO) {
+    public void save(Long projectId, StatusNoticeSettingVO statusNoticeSettingVO, String applyType) {
         StatusDTO statusDTO = new StatusDTO();
         statusDTO.setId(statusNoticeSettingVO.getStatusId());
         statusDTO.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
@@ -97,10 +101,9 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
                     .collect(Collectors.toList()));
             saveList.forEach(statusNoticeSettingMapper::insertSelective);
         }
-        int i = statusMapper.updateOptional(statusDTO);
-        if (i != 1){
-            throw new CommonException(BaseConstants.ErrorCode.OPTIMISTIC_LOCK);
-        }
+        projectConfigService.updateNodeObjectVersionNumber(projectId,statusNoticeSettingVO.getIssueTypeId(),
+                statusNoticeSettingVO.getStatusId(),statusNoticeSettingVO.getObjectVersionNumber(),
+                applyType);
     }
 
     @Override
@@ -119,7 +122,7 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
     }
 
     @Override
-    public List<StatusNoticeSettingVO> list(Long projectId, Long issueTypeId, List<Long> statusIdList) {
+    public List<StatusNoticeSettingVO> list(Long projectId, Long issueTypeId, List<Long> statusIdList, String applyType) {
         if (Objects.isNull(projectId) || Objects.isNull(issueTypeId) || CollectionUtils.isEmpty(statusIdList)){
             return Collections.emptyList();
         }
@@ -128,7 +131,7 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
                 .andWhere(Sqls.custom().andIn(StatusNoticeSettingDTO.FIELD_STATUS_ID, statusIdList)
                         .andEqualTo(StatusNoticeSettingDTO.FIELD_PROJECT_ID, projectId)
                         .andEqualTo(StatusNoticeSettingDTO.FIELD_ISSUE_TYPE_ID, issueTypeId)).build());
-        return statusNoticeSettingAssembler.statusNoticeDto2Vo(projectId, issueTypeId, list);
+        return statusNoticeSettingAssembler.statusNoticeDto2Vo(projectId, issueTypeId, list, applyType);
     }
 
 
