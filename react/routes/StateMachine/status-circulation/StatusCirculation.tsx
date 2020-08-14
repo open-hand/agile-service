@@ -1,5 +1,6 @@
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
+import { toJS } from 'mobx';
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
@@ -72,7 +73,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           onClick={() => {
             openSetDefaultStatus({
               issueTypeId: selectedType,
-              statusList: store.statusList,
+              statusList: toJS(store.statusList),
               onSubmit: refresh,
             });
           }}
