@@ -179,6 +179,6 @@ public class ProjectObjectSchemeFieldController {
                                                                        @RequestParam @Encrypt Long issueTypeId,
                                                                        @ApiParam(value = "方案编码")
                                                                        @RequestParam(required = false) String schemeCode) {
-        return new ResponseEntity<>(objectSchemeFieldService.selectMemberList(organizationId, projectId, schemeCode, null), HttpStatus.OK);
+        return new ResponseEntity<>(objectSchemeFieldService.selectMemberList(organizationId, projectId, schemeCode, issueTypeId, null), HttpStatus.OK);
     }
 }
