@@ -111,7 +111,7 @@ public class FixDataServiceImpl implements FixDataService {
             return;
         }
         ProjectVO project = baseFeignClient.queryProject(projectId).getBody();
-        LOGGER.info("项目id:{}，项目信息:{}", projectId, project.toString());
+        LOGGER.info("项目id:{}，项目信息:{}", projectId, project);
         if (!project.getCode().equals("def-ops-proj") || !project.getCategory().equals(ProjectCategory.GENERAL) || !project.getCreatedBy().equals(0L)) {
             LOGGER.info("项目id:{}，该项目不符合规定，跳过", projectId);
             return;
@@ -201,7 +201,11 @@ public class FixDataServiceImpl implements FixDataService {
             ObjectSchemeFieldExtendDTO dto = (ObjectSchemeFieldExtendDTO)mapIterator.getValue();
             dto.setCreated(Optional.ofNullable(dto.getCreated()).orElse(false));
             dto.setEdited(Optional.ofNullable(dto.getEdited()).orElse(false));
-            insertList.add(dto);
+            if (objectSchemeFieldExtendMapper
+                    .selectExtendField(dto.getIssueType(), dto.getOrganizationId(), dto.getFieldId(), dto.getProjectId())
+                    .isEmpty()) {
+                insertList.add(dto);
+            }
         }
         int total = insertList.size();
         int step = 5000;
