@@ -91,6 +91,8 @@ public class BoardServiceImpl implements BoardService {
     private PersonalFilterMapper personalFilterMapper;
     @Autowired
     private BoardAssembler boardAssembler;
+    @Autowired
+    private StatusFieldSettingService statusFieldSettingService;
 
     @Override
     public void create(Long projectId, String boardName) {
@@ -494,6 +496,7 @@ public class BoardServiceImpl implements BoardService {
             stateMachineClientService.executeTransform(projectId, issueId, transformId, issueMoveVO.getObjectVersionNumber(),
                     SchemeApplyType.AGILE, new InputDTO(issueId, UPDATE_STATUS_MOVE, JSON.toJSONString(handleIssueMoveRank(projectId, issueMoveVO))));
         }
+        statusFieldSettingService.handlerSettingToUpdateIssue(projectId,issueId);
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         IssueMoveVO result = modelMapper.map(issueDTO, IssueMoveVO.class);
         sendMsgUtil.sendMsgByIssueMoveComplete(projectId, issueMoveVO, issueDTO);
