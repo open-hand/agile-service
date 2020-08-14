@@ -43,6 +43,16 @@ public class ObjectSchemeFieldDTO extends AuditDomain {
     private String createdLevel;
     @Transient
     private String rank;
+    @Transient
+    private List<PageFieldDTO> pages;
+
+    public List<PageFieldDTO> getPages() {
+        return pages;
+    }
+
+    public void setPages(List<PageFieldDTO> pages) {
+        this.pages = pages;
+    }
 
     public String getRank() {
         return rank;
