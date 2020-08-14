@@ -5,12 +5,11 @@ import io.choerodon.agile.api.vo.StateMachineNodeVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.enums.NodeType;
-import io.choerodon.agile.infra.enums.ProjectCategory;
-import io.choerodon.agile.infra.enums.SchemeType;
-import io.choerodon.agile.infra.enums.TransformType;
+import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
+import org.apache.commons.collections.MapIterator;
+import org.apache.commons.collections.map.MultiKeyMap;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,6 +63,17 @@ public class FixDataServiceImpl implements FixDataService {
     private StateMachineSchemeConfigService stateMachineSchemeConfigService;
     @Autowired
     private IssueTypeSchemeConfigMapper issueTypeSchemeConfigMapper;
+    @Autowired
+    private ObjectSchemeFieldMapper objectSchemeFieldMapper;
+    @Autowired
+    private PageMapper pageMapper;
+    @Autowired
+    private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
+    @Autowired
+    private IssueTypeMapper issueTypeMapper;
+
+    private List<String> fieldIssueTypes = Arrays.asList(ObjectSchemeFieldContext.ISSUE_TYPES);
+
     @Override
     public void fixCreateProject() {
         // 查询有问题的项目id列表
@@ -164,7 +174,168 @@ public class FixDataServiceImpl implements FixDataService {
 
     @Override
     public void fixPage() {
+        String createPageCode = "agile_issue_create";
+        String editPageCode = "agile_issue_edit";
+        Long createPageId = getPageIdByCode(createPageCode);
+        Long editPageId = getPageIdByCode(editPageCode);
+        if (ObjectUtils.isEmpty(createPageId) || ObjectUtils.isEmpty(editPageId)) {
+            return;
+        }
 
+        String schemeCode = "agile_issue";
+        //key1 fieldId, key2 organizationId, key3 projectId, key4 issueType
+        MultiKeyMap dataMap = new MultiKeyMap();
+
+        ObjectSchemeFieldDTO objectSchemeField = new ObjectSchemeFieldDTO();
+        objectSchemeField.setSchemeCode(schemeCode);
+        objectSchemeField.setSystem(true);
+
+        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField);
+
+        objectSchemeField.setSystem(false);
+        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField);
+        List<ObjectSchemeFieldExtendDTO> insertList = new ArrayList<>();
+        MapIterator mapIterator = dataMap.mapIterator();
+        while (mapIterator.hasNext()) {
+            mapIterator.next();
+            ObjectSchemeFieldExtendDTO dto = (ObjectSchemeFieldExtendDTO)mapIterator.getValue();
+            dto.setCreated(Optional.ofNullable(dto.getCreated()).orElse(false));
+            dto.setEdited(Optional.ofNullable(dto.getEdited()).orElse(false));
+            insertList.add(dto);
+        }
+        int total = insertList.size();
+        int step = 5000;
+        int totalPage = total / step + 1;
+        for (int i = 0; i < totalPage; i++) {
+            int startLine = i * step;
+            int endLine =  (i + 1) * step > total ? total : (i + 1) * step;
+            objectSchemeFieldExtendMapper.batchInsert(insertList.subList(startLine, endLine));
+        }
+    }
+
+    private void generateDataMap(Long createPageId, Long editPageId, MultiKeyMap dataMap, ObjectSchemeFieldDTO objectSchemeField) {
+        List<ObjectSchemeFieldDTO> fields = objectSchemeFieldMapper.selectFieldsWithPages(objectSchemeField);
+        List<PageFieldDTO> pages = new ArrayList<>();
+        fields.forEach(s -> pages.addAll(s.getPages()));
+        Set<Long> organizationIds = pages.stream().map(PageFieldDTO::getOrganizationId).collect(Collectors.toSet());
+        List<IssueTypeDTO> issueTypeList = issueTypeMapper.selectByOrganizationIds(organizationIds);
+        Map<Long, List<IssueTypeDTO>> issueTypeMap = issueTypeList.stream().collect(Collectors.groupingBy(IssueTypeDTO::getOrganizationId));
+
+        fields.forEach(s -> {
+            Boolean required = s.getRequired();
+            String context = s.getContext();
+            String[] contextArray = context.split(",");
+            Long fieldId = s.getId();
+            List<PageFieldDTO> pageFields = s.getPages();
+            pageFields.forEach(p -> {
+                Long organizationId = p.getOrganizationId();
+                List<IssueTypeDTO> issueTypes = getIssueType(organizationId, issueTypeMap, contextArray);
+                ObjectSchemeFieldExtendDTO carrier =
+                        buildCarrier(createPageId, editPageId, required, fieldId, p, organizationId);
+                issueTypes.forEach(i -> {
+                    carrier.setIssueType(i.getTypeCode());
+                    carrier.setIssueTypeId(i.getId());
+                    getAndPutDataMap(dataMap, carrier);
+                });
+            });
+        });
+    }
+
+    private List<IssueTypeDTO> getIssueType(Long organizationId,
+                                            Map<Long, List<IssueTypeDTO>> issueTypeMap,
+                                            String[] contextArray) {
+        List<IssueTypeDTO> result = new ArrayList<>();
+        List<String> contextList = Arrays.asList(contextArray);
+        List<IssueTypeDTO> issueTypeList = issueTypeMap.get(organizationId);
+        if (ObjectSchemeFieldContext.isGlobal(contextArray)) {
+            issueTypeList.forEach(i -> {
+                if (fieldIssueTypes.contains(i.getTypeCode())) {
+                    result.add(i);
+                }
+            });
+        } else {
+            issueTypeList.forEach(i -> {
+                if (contextList.contains(i.getTypeCode())) {
+                    result.add(i);
+                }
+            });
+        }
+        return result;
+    }
+
+    private ObjectSchemeFieldExtendDTO buildCarrier(Long createPageId, Long editPageId, Boolean required, Long fieldId, PageFieldDTO p, Long organizationId) {
+        Long projectId = p.getProjectId();
+        Long pageId = p.getPageId();
+        Boolean created = null;
+        Boolean edited = null;
+        String rank = null;
+        if (createPageId.equals(pageId)) {
+            created = p.getDisplay();
+            rank = p.getRank();
+        }
+        if (editPageId.equals(pageId)) {
+            edited = p.getDisplay();
+            rank = p.getRank();
+        }
+
+        ObjectSchemeFieldExtendDTO carrier = new ObjectSchemeFieldExtendDTO();
+        carrier.setOrganizationId(organizationId);
+        carrier.setProjectId(projectId);
+        carrier.setFieldId(fieldId);
+        carrier.setRequired(required);
+        carrier.setCreated(created);
+        carrier.setEdited(edited);
+        carrier.setRank(rank);
+        return carrier;
+    }
+
+    private void getAndPutDataMap(MultiKeyMap dataMap, ObjectSchemeFieldExtendDTO carrier) {
+        Long issueTypeId = carrier.getIssueTypeId();
+        Long fieldId = carrier.getFieldId();
+        Long organizationId = carrier.getOrganizationId();
+        Long projectId = carrier.getProjectId();
+        String issueType = carrier.getIssueType();
+        Boolean required = carrier.getRequired();
+        Boolean created = carrier.getCreated();
+        Boolean edited = carrier.getEdited();
+        String rank = carrier.getRank();
+        ObjectSchemeFieldExtendDTO dto =
+                (ObjectSchemeFieldExtendDTO) dataMap.get(fieldId, organizationId, projectId, issueType);
+        if (ObjectUtils.isEmpty(dto)) {
+            dto = new ObjectSchemeFieldExtendDTO();
+            dto.setIssueTypeId(issueTypeId);
+            dto.setIssueType(issueType);
+            dto.setOrganizationId(organizationId);
+            dto.setProjectId(projectId);
+            dto.setFieldId(fieldId);
+            dto.setRequired(required);
+            dto.setCreated(created);
+            dto.setEdited(edited);
+            dto.setRank(rank);
+            dataMap.put(fieldId, organizationId, projectId, issueType, dto);
+        } else {
+            if (!ObjectUtils.isEmpty(rank)) {
+                dto.setRank(rank);
+            }
+            if (!ObjectUtils.isEmpty(created)) {
+                dto.setCreated(created);
+            }
+            if (!ObjectUtils.isEmpty(edited)) {
+                dto.setEdited(edited);
+            }
+            dto.setRequired(required);
+        }
+    }
+
+    private Long getPageIdByCode(String code) {
+        PageDTO pageExample = new PageDTO();
+        pageExample.setPageCode(code);
+        List<PageDTO> pages = pageMapper.select(pageExample);
+        if (pages.isEmpty()) {
+            LOGGER.error("【迁移页面配置数据失败】fd_page中不存在code={}的数据", code);
+            return null;
+        }
+        return pages.get(0).getId();
     }
 
     private  void fixStateMachineTransform(){

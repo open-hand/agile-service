@@ -709,8 +709,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             List<ObjectSchemeFieldDTO> objectSchemeFieldList =
                     objectSchemeFieldMapper.selectByExtendIds(deleteIds);
             objectSchemeFieldList.forEach(o -> {
-                if (o.getProjectId() == null) {
-                    throw new CommonException("error.project.can.not.delete.organization.field");
+                if (o.getProjectId() == null || Objects.equals(0L, o.getOrganizationId())) {
+                    //系统字段或者组织层字段
+                    throw new CommonException("error.project.can.not.delete.organization.or.system.field");
                 }
             });
             ObjectSchemeFieldExtendDTO example = new ObjectSchemeFieldExtendDTO();
