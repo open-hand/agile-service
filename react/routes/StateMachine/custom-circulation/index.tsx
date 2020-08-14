@@ -8,12 +8,10 @@ import {
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { useIssueTypes } from '@/hooks';
-import { find, filter, findLastIndex } from 'lodash';
+import { find, filter } from 'lodash';
 import STATUS from '@/constants/STATUS';
 import { IIssueType, User } from '@/common/types';
-import { useIsProgramContext } from '@/hooks/useIsProgrom';
 import { statusTransformApiConfig } from '@/api';
-import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import { ColumnProps } from 'choerodon-ui/pro/lib/table/Column';
 import { Divider, Tooltip } from 'choerodon-ui';
 import Condition from './components/condition';
@@ -24,8 +22,6 @@ import IssueTypeTab from '../components/issue-type-tab';
 import { useStateMachineContext } from '../context';
 import styles from './index.less';
 import { TabComponentProps } from '../index';
-
-const { Column } = Table;
 
 interface ISetting {
   width: number,
@@ -49,14 +45,46 @@ interface IStatusTransferSettingVOS {
   userType: 'projectOwner' | 'specifier'
 }
 
-interface ICustomCirculation {
-  code: string | null
-  id: string
-  name: string
-  objectVersionNumber: number
-  statusTransferSettingVOS: null | IStatusTransferSettingVOS
-  settingVOS: null | IStatusTransferSettingVOS
-  type: 'todo' | 'doing' | 'done' | 'prepare'
+interface IStatusNoticeSettingVOS {
+  issueTypeId: string,
+  projectId: number,
+  statusId: string,
+  userTypeList: ['projectOwner', 'assignee', 'reporter', 'specifier'],
+  userList: {id: string, realName: string}[],
+  noticeTypeList: ['webhook'| 'email'| 'webMessage'];
+  memberList: {id: string, name: string}[]
+}
+
+interface IFieldValue {
+  creationDate: string,
+  createdBy: number,
+  lastUpdateDate: string,
+  lastUpdatedBy: number,
+  objectVersionNumber: number,
+  id: string,
+  statusFieldSettingId: string,
+  projectId: number,
+  optionId: null | string | string[],
+  fieldType: 'member' | 'radio' | 'single' |'checkbox' | 'multiple' | 'text' | 'input' | 'number' | 'date' | 'time' | 'datetime',
+  operateType: 'clear' | 'specifier' | 'current_time' | 'add' | 'reportor' | 'creator' | 'operator',
+  numberValue: null | number,
+  numberAddValue: null | number,
+  textValue: null | string,
+  dateValue: null | string,
+  dateAddValue: null | number,
+  userId: null | string,
+  name: null | string
+}
+interface IStatusFieldSettingVOS {
+  id: null | string,
+  issueTypeId: string,
+  statusId: string,
+  projectId: number,
+  fieldId: string,
+  fieldName: string,
+  fieldCode: string,
+  fieldType: 'member' | 'radio' | 'single' |'checkbox' | 'multiple' | 'text' | 'input' | 'number' | 'date' | 'time' | 'datetime',
+  fieldValueList: IFieldValue[],
 }
 
 const transformedMember = {
@@ -95,7 +123,7 @@ const transformFieldValue = (fieldSetting) => {
         transformedValue = isClear ? '清空' : name;
       } else {
         // @ts-ignore
-        transformedValue = isClear ? '清空' : fieldValueList.map((item) => item.name);
+        transformedValue = isClear ? '清空' : fieldValueList.map((item) => item.name).join('、');
       }
       break;
     }
@@ -270,7 +298,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   };
 
   // @ts-ignore
-  const renderNotifySetting = (statusNoticeSettingVOS) => {
+  const renderNotifySetting = (statusNoticeSettingVOS: IStatusNoticeSettingVOS[]) => {
     const {
       userTypeList, userList, noticeTypeList, memberList,
     } = statusNoticeSettingVOS[0];
@@ -284,34 +312,28 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         }
       });
       if (memberList && memberList.length) {
-        // @ts-ignore
         memberList.forEach((field) => {
           members.push(field.name);
         });
       }
       if (userList && userList.length) {
-        // @ts-ignore
-        userTypeList.forEach((user) => {
+        userList.forEach((user) => {
           members.push(user.realName);
         });
       }
-      // @ts-ignore
       noticeTypeList.forEach((noticeType) => {
-        // @ts-ignore
         noticeTypes.push(transformedNoticeType[noticeType]);
       });
     }
     return `设置向${members.join('、')}发${noticeTypes.join('、')}通知`;
   };
 
-  // @ts-ignore
-  const renderStatusFieldSetting = (statusFieldSettingVOS) => {
+  const renderStatusFieldSetting = (statusFieldSettingVOS: IStatusFieldSettingVOS[]) => {
     if (statusFieldSettingVOS && statusFieldSettingVOS.length) {
-      // @ts-ignore
       return (statusFieldSettingVOS.map((fieldSetting) => {
         const { fieldName } = fieldSetting;
         return `设置${fieldName}为：${transformFieldValue(fieldSetting)}`;
-      })).join('、');
+      })).join('，');
     }
   };
 
