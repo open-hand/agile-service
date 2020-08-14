@@ -415,7 +415,7 @@ const UpdateField = ({
       disabled={Boolean(loading)}
       dataSet={dataSet}
       style={{
-        maxHeight: 400, overflowY: 'auto', overflowX: 'hidden',
+        overflowY: 'auto', overflowX: 'hidden',
       }}
     >
       {
