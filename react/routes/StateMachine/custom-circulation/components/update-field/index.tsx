@@ -12,7 +12,7 @@ import { pageConfigApi, statusTransformApi } from '@/api';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { Priority, IField } from '@/common/types';
-import { Loading } from '@/components';
+import Loading from '@/components/Loading';
 import moment from 'moment';
 import renderField from './renderField';
 import styles from './index.less';
@@ -168,6 +168,7 @@ const setCurrentByFieldType = (current, fieldValue, fieldCode) => {
       if (fieldType === 'radio' || fieldType === 'single') {
         current.set(fieldCode, isClear ? 'clear' : firstField.optionId);
       } else {
+        // @ts-ignore
         current.set(fieldCode, isClear ? ['clear'] : fieldValueList.map((item) => item.optionId));
       }
       break;
@@ -329,6 +330,7 @@ const UpdateField = ({
       // @ts-ignore
       statusTransformApi.getUpdateFieldInfo(selectedType, record.get('id')).then((res) => {
         setLoading(false);
+        // @ts-ignore
         const initFields = fieldData.filter((f) => res.find((item) => item.fieldId === f.id));
         Field.init(initFields);
         const { current } = dataSet;
@@ -336,6 +338,7 @@ const UpdateField = ({
           // @ts-ignore
           (res || []).forEach((item) => {
             const field = find(fieldData, { id: item.fieldId }) || {};
+            // @ts-ignore
             const fieldCode = field?.code;
             setCurrentByFieldType(current, item, fieldCode);
           });
