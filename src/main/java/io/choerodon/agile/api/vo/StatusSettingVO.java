@@ -23,6 +23,8 @@ public class StatusSettingVO {
 
     private List<StatusTransferSettingVO> statusTransferSettingVOS;
 
+    private List<StatusFieldSettingVO> statusFieldSettingVOS;
+
     public Long getId() {
         return id;
     }
@@ -69,5 +71,13 @@ public class StatusSettingVO {
 
     public void setStatusTransferSettingVOS(List<StatusTransferSettingVO> statusTransferSettingVOS) {
         this.statusTransferSettingVOS = statusTransferSettingVOS;
+    }
+
+    public List<StatusFieldSettingVO> getStatusFieldSettingVOS() {
+        return statusFieldSettingVOS;
+    }
+
+    public void setStatusFieldSettingVOS(List<StatusFieldSettingVO> statusFieldSettingVOS) {
+        this.statusFieldSettingVOS = statusFieldSettingVOS;
     }
 }

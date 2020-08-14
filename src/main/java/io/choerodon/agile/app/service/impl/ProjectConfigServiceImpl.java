@@ -91,6 +91,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private StatusTransferSettingService statusTransferSettingService;
     @Autowired
     private IssueAccessDataService issueAccessDataService;
+    @Autowired
+    private StatusFieldSettingService statusFieldSettingService;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -499,12 +501,18 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         List<Long> statusIds = list.stream().map(StatusSettingVO::getId).collect(Collectors.toList());
         List<StatusTransferSettingVO> transferSettingVOS = statusTransferSettingService.listByStatusIds(projectId, issueTypeId, statusIds);
+        List<StatusFieldSettingVO> statusFieldSettingVOS = statusFieldSettingService.listByStatusIds(projectId, issueTypeId, statusIds);
         Map<Long, List<StatusTransferSettingVO>> transferSettingMap = new HashMap<>();
+        Map<Long, List<StatusFieldSettingVO>> statusFieldSettingMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(transferSettingVOS)) {
             transferSettingMap.putAll(transferSettingVOS.stream().collect(Collectors.groupingBy(StatusTransferSettingVO::getStatusId)));
         }
+        if (!CollectionUtils.isEmpty(statusFieldSettingVOS)) {
+            statusFieldSettingMap.putAll(statusFieldSettingVOS.stream().collect(Collectors.groupingBy(StatusFieldSettingVO::getStatusId)));
+        }
         for (StatusSettingVO statusSettingVO : list) {
             statusSettingVO.setStatusTransferSettingVOS(transferSettingMap.get(statusSettingVO.getId()));
+            statusSettingVO.setStatusFieldSettingVOS(statusFieldSettingMap.get(statusSettingVO.getId()));
         }
         page.setContent(list);
         return page;

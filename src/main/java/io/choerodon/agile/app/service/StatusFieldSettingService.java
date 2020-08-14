@@ -15,4 +15,6 @@ public interface StatusFieldSettingService {
    List<StatusFieldSettingDTO> listFieldSetting(Long project, Long issueType, Long statusId);
 
    List<StatusFieldSettingVO> list(Long projectId, Long issueType, Long statusId);
+
+   List<StatusFieldSettingVO> listByStatusIds(Long projectId, Long issueType, List<Long> statusIds);
 }

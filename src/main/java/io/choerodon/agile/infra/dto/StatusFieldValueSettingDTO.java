@@ -8,6 +8,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -51,6 +52,9 @@ public class StatusFieldValueSettingDTO extends AuditDomain {
 
     @Encrypt
     private Long userId;
+
+    @Transient
+    private String name;
 
     public Long getId() {
         return id;
@@ -154,5 +158,13 @@ public class StatusFieldValueSettingDTO extends AuditDomain {
 
     public void setOperateType(String operateType) {
         this.operateType = operateType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

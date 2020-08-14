@@ -168,7 +168,8 @@ public class StatusController extends BaseController {
     @ApiOperation(value = "校验删除的需要选择转换状态的问题类型")
     @GetMapping(value = "/projects/{project_id}/status/check_delete_status")
     public ResponseEntity<List<IssueTypeVO>> checkDeleteStatus(@PathVariable("project_id") Long projectId,
-                                       @RequestParam @Encrypt Long statusId) {
-        return new ResponseEntity<>(statusService.checkDeleteStatus(projectId,statusId),HttpStatus.OK);
+                                                               @RequestParam String applyType,
+                                                               @RequestParam @Encrypt Long statusId) {
+        return new ResponseEntity<>(statusService.checkDeleteStatus(projectId, applyType, statusId), HttpStatus.OK);
     }
 }
