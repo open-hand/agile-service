@@ -888,12 +888,12 @@
                     and
                     <foreach collection="searchVO.otherArgs.customField.option" item="item" open="(" separator="and"
                              close=")">
-                        ai.issue_id in
+                         ai.issue_id in
                         (
                             SELECT
-                                ffv.instance_id
+                              ffv.instance_id
                             FROM
-                                fd_field_value ffv
+                              fd_field_value ffv
                             WHERE
                             ffv.project_id = #{projectId}
                             AND ffv.field_id = #{item.fieldId}
@@ -912,9 +912,9 @@
                         ai.issue_id in
                         (
                             SELECT
-                                ffv.instance_id
+                              ffv.instance_id
                             FROM
-                                fd_field_value ffv
+                              fd_field_value ffv
                             WHERE
                             ffv.project_id = #{projectId}
                             AND ffv.field_id = #{item.fieldId}
@@ -929,9 +929,9 @@
                         ai.issue_id in
                         (
                             SELECT
-                                ffv.instance_id
+                              ffv.instance_id
                             FROM
-                                fd_field_value ffv
+                              fd_field_value ffv
                             WHERE
                             ffv.project_id = #{projectId}
                             AND ffv.field_id = #{item.fieldId}
@@ -946,9 +946,9 @@
                         ai.issue_id in
                         (
                             SELECT
-                                ffv.instance_id
+                              ffv.instance_id
                             FROM
-                                fd_field_value ffv
+                              fd_field_value ffv
                             WHERE
                             ffv.project_id = #{projectId}
                             AND ffv.field_id = #{item.fieldId}
@@ -963,9 +963,9 @@
                         ai.issue_id in
                         (
                             SELECT
-                                ffv.instance_id
+                              ffv.instance_id
                             FROM
-                                fd_field_value ffv
+                              fd_field_value ffv
                             WHERE
                             ffv.project_id = #{projectId}
                             AND ffv.field_id = #{item.fieldId}
@@ -980,9 +980,9 @@
                         ai.issue_id in
                         (
                             SELECT
-                                ffv.instance_id
+                              ffv.instance_id
                             FROM
-                                fd_field_value ffv
+                              fd_field_value ffv
                             WHERE
                             ffv.project_id = #{projectId}
                             AND ffv.field_id = #{item.fieldId}
