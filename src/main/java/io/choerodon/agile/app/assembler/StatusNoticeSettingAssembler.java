@@ -53,7 +53,7 @@ public class StatusNoticeSettingAssembler {
             statusNoticeSettingVO.getUserTypeList().removeAll(userTypeList);
             List<ObjectSchemeFieldVO> objectSchemeFieldDTOS =
                     objectSchemeFieldService.selectMemberList(ConvertUtil.getOrganizationId(statusNoticeSettingVO.getProjectId()),
-                    statusNoticeSettingVO.getProjectId(), schemeCode, null);
+                    statusNoticeSettingVO.getProjectId(), schemeCode, new ArrayList<>(userTypeList));
             statusNoticeSettingVO.setMemberList(objectSchemeFieldDTOS);
         }
     }
