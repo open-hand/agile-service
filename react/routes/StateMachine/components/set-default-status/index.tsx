@@ -30,6 +30,7 @@ const SetDefaultStatus: React.FC<Props> = ({
         valueField: 'id',
         options: new DataSet({
           data: statusList,
+          paging: false,
         }),
       },
     ],
