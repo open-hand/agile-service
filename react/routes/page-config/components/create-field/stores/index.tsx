@@ -8,12 +8,13 @@ import { AppStateProps, IModalProps } from '@/common/types';
 import FormDataSet from './FormDataSet';
 import UserOptionDataSet from './UserOptionDataSet';
 import useStore from './useStore';
+import { IFieldPostDataProps } from '../CreateField';
 
 interface Context {
   formatMessage: InjectedIntl['formatMessage'],
   AppState: AppStateProps,
   isEdit?: boolean,
-  onSubmitLocal: (data: any) => Promise<boolean> | boolean,
+  onSubmitLocal: (data: IFieldPostDataProps) => Promise<boolean> | boolean,
   localCheckCode?: (code: string) => Promise<boolean> | boolean,
   localCheckName?: (name: string) => Promise<boolean> | boolean,
   schemeCode: string,
