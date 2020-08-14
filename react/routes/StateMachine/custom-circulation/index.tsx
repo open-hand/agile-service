@@ -187,15 +187,19 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     );
   };
 
+  const renderStatusFieldSetting = (statusFieldSettingVOS) => {
+
+  };
+
   const renderSetting = ({
     // @ts-ignore
     value, text, name, record, dataSet,
   }) => {
     const {
-      statusTransferSettingVOS, notifySettingVOS, fieldSettingVOS, linkageVOS,
+      statusTransferSettingVOS, notifySettingVOS, statusFieldSettingVOS, linkageVOS,
     } = record.data;
     const isProjectOwnerExist = statusTransferSettingVOS && find(statusTransferSettingVOS, (item: IStatusTransferSettingVOS) => item.userType === 'projectOwner');
-    const assigners = statusTransferSettingVOS && filter(statusTransferSettingVOS, (item: IStatusTransferSettingVOS) => item.userType === 'specifier')?.map((item: IStatusTransferSettingVOS) => item.user?.realName) || [];
+    const assigners = filter((statusTransferSettingVOS || []), (item: IStatusTransferSettingVOS) => item.userType === 'specifier')?.map((item: IStatusTransferSettingVOS) => item.user?.realName) || [];
     return (
       <div className={styles.setting}>
         {

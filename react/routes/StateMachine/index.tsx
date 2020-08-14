@@ -37,7 +37,7 @@ const tabs: ITab[] = [{
 const { TabPane } = Tabs;
 const StateMachine: React.FC = (props) => {
   const [selectedType, handleChangeSelectedType] = useSelectedType();
-  const [activeKey, setActiveKey] = useState(tabs[0].key);
+  const [activeKey, setActiveKey] = useState(tabs[2].key);
   const Component = find(tabs, { key: activeKey })?.component;
   const tabComponent = (
     <Tabs className={styles.tabs} activeKey={activeKey} onChange={setActiveKey}>
