@@ -140,11 +140,11 @@ const transformFieldValue = (fieldSetting) => {
       break;
     }
     case 'number': {
-      const { operateType, numberValue, numAddValue } = firstField;
+      const { operateType, numberValue, numberAddValue } = firstField;
       if (operateType === 'clear') {
         transformedValue = '清空';
       } else if (operateType === 'add') {
-        transformedValue = `当前数值+${numAddValue}`;
+        transformedValue = `当前数值+${numberAddValue}`;
       } else if (operateType === 'specifier') {
         transformedValue = numberValue;
       }

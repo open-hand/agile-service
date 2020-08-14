@@ -149,7 +149,7 @@ const transformUpdateData = (data) => {
             fieldValueList: [{
               operateType: selected,
               numberValue: selected === 'specifier' ? value : undefined,
-              numAddValue: selected === 'add' ? value : undefined,
+              numberAddValue: selected === 'add' ? value : undefined,
               fieldType,
             }],
           });
@@ -214,10 +214,10 @@ const setCurrentByFieldType = (current, fieldValue, fieldCode) => {
       break;
     }
     case 'number': {
-      const { operateType, numberValue, numAddValue } = firstField;
+      const { operateType, numberValue, numberAddValue } = firstField;
       current.set(`${fieldCode}-select`, operateType);
       if (operateType !== 'clear') {
-        current.set(fieldCode, operateType === 'specifier' ? numberValue : numAddValue);
+        current.set(fieldCode, operateType === 'specifier' ? numberValue : numberAddValue);
       }
       break;
     }
