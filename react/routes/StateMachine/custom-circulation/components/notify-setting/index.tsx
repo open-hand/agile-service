@@ -19,7 +19,7 @@ const NotifySetting = ({
       read: () => statusTransformApiConfig.getCustomMember(selectedType),
     },
     fields: [
-      { name: 'id', type: 'string' as FieldType },
+      { name: 'code', type: 'string' as FieldType },
       { name: 'name', type: 'string' as FieldType },
     ],
   }), [selectedType]);
@@ -43,7 +43,7 @@ const NotifySetting = ({
         label: '选择人员',
         type: 'string' as FieldType,
         textField: 'name',
-        valueField: 'id',
+        valueField: 'code',
         options: memberOptionsDataSet,
         multiple: true,
         dynamicProps: {
@@ -102,10 +102,13 @@ const NotifySetting = ({
           userIdList: find(userTypeList, (item) => item === 'specifier') && userIdList,
           objectVersionNumber: record.get('objectVersionNumber'),
         };
-
-        await statusTransformApi.updateNotifySetting(updateData);
-        customCirculationDataSet.query();
-        return true;
+        try {
+          await statusTransformApi.updateNotifySetting(updateData);
+          customCirculationDataSet.query();
+          return true;
+        } catch (e) {
+          return false;
+        }
       }
       return false;
     };
