@@ -254,10 +254,10 @@ class StatusTransformApi extends Api {
 
   getCustomMember(issueTypeId: string, schemeCode: string = 'agile_issue') {
     const arr = [
-      { id: 'projectOwner', name: '项目所有者' },
-      { id: 'assignee', name: '经办人' },
-      { id: 'reporter', name: '报告人' },
-      { id: 'specifier', name: '指定人' },
+      { code: 'projectOwner', name: '项目所有者' },
+      { code: 'assignee', name: '经办人' },
+      { code: 'reporter', name: '报告人' },
+      { code: 'specifier', name: '指定人' },
     ];
     return this.request({
       method: 'get',

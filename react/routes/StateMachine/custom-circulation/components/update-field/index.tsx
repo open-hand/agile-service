@@ -52,7 +52,7 @@ interface ISettingField {
   statusId: string
 }
 
-const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epicName', 'epic', 'pi'];
+const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epicName', 'epic', 'pi', 'timeTrace', 'lastUpdateDate', 'creationDate'];
 const dateTransform = (fieldType: string, d: Date) => {
   let transformed = '';
   switch (fieldType) {
@@ -415,7 +415,7 @@ const UpdateField = ({
       disabled={Boolean(loading)}
       dataSet={dataSet}
       style={{
-        maxHeight: 400, overflowY: 'auto', overflowX: 'hidden',
+        overflowY: 'auto', overflowX: 'hidden',
       }}
     >
       {

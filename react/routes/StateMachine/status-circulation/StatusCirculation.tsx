@@ -70,7 +70,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           创建新的状态
         </Button>
         <Button
-          icon="settings"
+          icon="settings-o"
           onClick={() => {
             openSetDefaultStatus({
               issueTypeId: selectedType,

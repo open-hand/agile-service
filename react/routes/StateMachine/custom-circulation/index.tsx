@@ -193,7 +193,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       },
       {
         name: 'id',
-        label: '状态流转附加字段信息',
+        label: '状态流转说明',
         type: 'array' as FieldType,
       },
       {
@@ -292,7 +292,12 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       <Dropdown
         overlay={menu}
       >
-        <Icon type="settings-o" />
+        <Icon
+          type="settings"
+          style={{
+            fontSize: 18,
+          }}
+        />
       </Dropdown>
     );
   };
@@ -398,7 +403,6 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         <span style={{
           // @ts-ignore
           color: STATUS[record.get('type')],
-          fontSize: 14,
           fontWeight: 500,
         }}
         >
