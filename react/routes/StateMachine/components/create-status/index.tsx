@@ -4,6 +4,7 @@ import React, {
 import {
   Modal, Form, DataSet, TextField, Select, SelectBox,
 } from 'choerodon-ui/pro';
+import { stores } from '@choerodon/boot';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { MAX_LENGTH_STATUS } from '@/constants/MAX_LENGTH';
 import { getProjectId, getOrganizationId } from '@/utils/common';
@@ -14,6 +15,7 @@ import './index.less';
 import { useIssueTypes } from '@/hooks';
 import { statusTransformApiConfig } from '@/api';
 
+const { AppState } = stores;
 const { Option } = SelectBox;
 const key = Modal.key();
 interface Props {
@@ -26,7 +28,7 @@ const CreateStatus: React.FC<Props> = ({
 }) => {
   const [type, setType] = useState<IStatus['valueCode'] | null>(null);
   const [issueTypes] = useIssueTypes();
-
+  const isProgram = AppState.currentMenuType.category === 'PROGRAM';
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     transport: {
@@ -75,7 +77,7 @@ const CreateStatus: React.FC<Props> = ({
         required: true,
         lookupAxiosConfig: () => ({
           url: '/agile/v1/lookup_values/status_category',
-          transformResponse: (data) => ((Array.isArray(data) ? data : JSON.parse(data).lookupValues)).filter((status: IStatus) => status.valueCode !== 'prepare'),
+          transformResponse: (data) => (Array.isArray(data) ? data : JSON.parse(data).lookupValues),
         }),
         textField: 'name',
         valueField: 'valueCode',
@@ -127,6 +129,7 @@ const CreateStatus: React.FC<Props> = ({
         <TextField name="name" maxLength={MAX_LENGTH_STATUS} />
         <Select
           name="valueCode"
+          optionsFilter={isProgram ? undefined : (record) => (isProgram ? true : record.get('valueCode') !== 'prepare')}
           optionRenderer={({ record }) => (<StatusTypeTag code={record?.get('valueCode') as IStatus['valueCode']} />)}
           disabled={type !== null}
         />
