@@ -83,6 +83,7 @@ public interface ObjectSchemeFieldMapper extends BaseMapper<ObjectSchemeFieldDTO
     List<ObjectSchemeFieldDTO> selectMemberByOptions(@Param("organizationId") Long organizationId,
                                                @Param("projectId") Long projectId,
                                                @Param("schemeCode") String schemeCode,
+                                               @Param("issueTypeId") Long issueTypeId,
                                                @Param("fieldCodeList") List<String> fieldCodeList);
     /**
      * 查询字段附带页面配置数据

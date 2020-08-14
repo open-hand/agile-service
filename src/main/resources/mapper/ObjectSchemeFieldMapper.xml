@@ -283,6 +283,9 @@
         <if test="schemeCode == null">
             AND t4.scheme_code = 'agile_issue'
         </if>
+        <if test="issueTypeId != null">
+            AND t5.issue_type_id = #{issueTypeId}
+        </if>
         <if test="fieldCodeList != null and fieldCodeList.size > 0">
             AND t4.code IN
                 <foreach collection="fieldCodeList" open="(" close=")" separator="," item="fieldCode">
