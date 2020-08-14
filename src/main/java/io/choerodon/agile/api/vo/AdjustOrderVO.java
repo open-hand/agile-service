@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author shinan.chen
@@ -12,7 +13,7 @@ import javax.validation.constraints.NotEmpty;
  */
 public class AdjustOrderVO {
     @ApiModelProperty(value = "是否拖动到第一个")
-    @NotEmpty(message = "error.field.before.null")
+    @NotNull(message = "error.field.before.null")
     private Boolean before;
     @ApiModelProperty(value = "当前移动的字段id")
     @Encrypt
@@ -22,6 +23,26 @@ public class AdjustOrderVO {
     private Long outsetFieldId;
     @NotEmpty(message = "error.field.issueType.null")
     private String issueType;
+
+    private String previousRank;
+
+    private String nextRank;
+
+    public String getPreviousRank() {
+        return previousRank;
+    }
+
+    public void setPreviousRank(String previousRank) {
+        this.previousRank = previousRank;
+    }
+
+    public String getNextRank() {
+        return nextRank;
+    }
+
+    public void setNextRank(String nextRank) {
+        this.nextRank = nextRank;
+    }
 
     public String getIssueType() {
         return issueType;
