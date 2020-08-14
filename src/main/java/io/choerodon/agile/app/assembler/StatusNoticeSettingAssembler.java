@@ -1,9 +1,6 @@
 package io.choerodon.agile.app.assembler;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,9 +47,10 @@ public class StatusNoticeSettingAssembler {
             List<UserDTO> userDTOList = baseFeignClient.listUsersByIds(statusNoticeSettingVO.getUserIdList().toArray(new Long[0]), true).getBody();
             statusNoticeSettingVO.setUserList(userDTOList);
         }
-        Set<String> userTypeList = statusNoticeSettingVO.getUserTypeList();
+        Set<String> userTypeList = new HashSet<>(statusNoticeSettingVO.getUserTypeList());
         userTypeList.removeAll(Arrays.asList(StatusNoticeUserType.BASE_USER_TYPE_LIST));
         if (CollectionUtils.isNotEmpty(userTypeList)){
+            statusNoticeSettingVO.getUserTypeList().removeAll(userTypeList);
             List<ObjectSchemeFieldVO> objectSchemeFieldDTOS =
                     objectSchemeFieldService.selectMemberList(ConvertUtil.getOrganizationId(statusNoticeSettingVO.getProjectId()),
                     statusNoticeSettingVO.getProjectId(), schemeCode, null);
