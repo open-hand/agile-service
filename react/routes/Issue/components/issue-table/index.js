@@ -6,7 +6,6 @@ import { observer } from 'mobx-react-lite';
 import _, { map } from 'lodash';
 import { Tooltip, Tag } from 'choerodon-ui';
 import { Table } from 'choerodon-ui/pro';
-
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';
@@ -14,7 +13,6 @@ import StatusTag from '@/components/StatusTag';
 import UserHead from '@/components/UserHead';
 import IssueStore from '@/stores/project/issue/IssueStore';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
-import CollapseAll from './CollapseAll';
 import Store from '../../stores';
 import './index.less';
 
@@ -100,12 +98,6 @@ function IssueTable({ tableRef, onCreateIssue }) {
           lock="left"
           name="issueId"
           width={320}
-          header={() => (
-            <div>
-              <CollapseAll tableRef={tableRef} />
-              概要
-            </div>
-          )}
           onCell={({ record }) => ({
             onClick: () => {
               handleRowClick(record);
