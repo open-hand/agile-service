@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiOperation;
  *
  * @author choerodon@choerodon.cn 2020-08-12 11:41:01
  */
-@RestController(" statusNoticeSettingController.v1")
+@RestController("statusNoticeSettingController.v1")
 @RequestMapping("/v1/projects/{project_id}/status_notice_settings")
 public class StatusNoticeSettingController extends BaseController {
 
