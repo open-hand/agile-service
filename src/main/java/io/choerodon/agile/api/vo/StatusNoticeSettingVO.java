@@ -60,10 +60,6 @@ public class StatusNoticeSettingVO extends AuditDomain {
     @ApiModelProperty(value = "通知类型")
     private List<String> noticeTypeList;
 
-    @ApiModelProperty(value = "方案类型",required = true)
-    @NotBlank
-    private String applyType;
-
     @ApiModelProperty(value = "用户list")
     private List<UserDTO> userList;
 
@@ -115,14 +111,6 @@ public class StatusNoticeSettingVO extends AuditDomain {
 
     public void setNoticeTypeList(List<String> noticeTypeList) {
         this.noticeTypeList = noticeTypeList;
-    }
-
-    public String getApplyType() {
-        return applyType;
-    }
-
-    public void setApplyType(String applyType) {
-        this.applyType = applyType;
     }
 
     public List<UserDTO> getUserList() {

@@ -73,7 +73,7 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
     }
 
     @Override
-    public void save(Long projectId, StatusNoticeSettingVO statusNoticeSettingVO) {
+    public void save(Long projectId, StatusNoticeSettingVO statusNoticeSettingVO, String applyType) {
         StatusDTO statusDTO = new StatusDTO();
         statusDTO.setId(statusNoticeSettingVO.getStatusId());
         statusDTO.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
@@ -103,7 +103,7 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
         }
         projectConfigService.updateNodeObjectVersionNumber(projectId,statusNoticeSettingVO.getIssueTypeId(),
                 statusNoticeSettingVO.getStatusId(),statusNoticeSettingVO.getObjectVersionNumber(),
-                statusNoticeSettingVO.getApplyType());
+                applyType);
     }
 
     @Override

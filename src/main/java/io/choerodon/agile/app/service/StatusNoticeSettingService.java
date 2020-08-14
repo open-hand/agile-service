@@ -13,7 +13,7 @@ public interface StatusNoticeSettingService {
 
     StatusNoticeSettingVO detail(Long projectId, Long issueTypeId, Long statusId, String schemeCode);
 
-    void save(Long projectId, StatusNoticeSettingVO StatusNoticeSettingVO);
+    void save(Long projectId, StatusNoticeSettingVO StatusNoticeSettingVO, String applyType);
 
     void noticeByChangeStatus(Long projectId, Long issueId);
 
