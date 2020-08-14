@@ -4,6 +4,7 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.infra.cache.InstanceCache;
 import io.choerodon.agile.infra.enums.NodeType;
@@ -319,7 +320,9 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
-    public List<IssueTypeVO> checkDeleteStatus(Long projectId, Long statusId) {
+    public List<IssueTypeVO> checkDeleteStatus(Long projectId,String applyType, Long statusId) {
+         // 校验是不是初始状态
+        checkInitStatus(projectId,applyType,statusId);
         List<Long> list = issueMapper.selectIssueTypeIdsByStatusId(projectId, statusId);
         if (CollectionUtils.isEmpty(list)) {
             return new ArrayList<>();
@@ -330,6 +333,16 @@ public class StatusServiceImpl implements StatusService {
             return issueTypeVO;
         }).collect(Collectors.toList());
         return issueTypeVOS;
+    }
+
+    private void checkInitStatus(Long projectId, String applyType, Long statusId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        ProjectConfigDetailVO projectConfigDetailVO = projectConfigService.queryById(projectId);
+        StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
+        List<StateMachineNodeDTO> list = nodeDeployMapper.selectInitNode(organizationId, stateMachineSchemeVO.getId(), statusId);
+        if (!CollectionUtils.isEmpty(list)) {
+            throw new CommonException("error.status.has.init");
+        }
     }
 
     @Override

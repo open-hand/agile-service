@@ -2970,9 +2970,11 @@
     </select>
 
     <select id="selectIssueTypeIdsByStatusId" resultType="java.lang.Long">
-        select ai.issue_type_id from agile_issue ai
+        select ai.issue_type_id from agile_issue ai,fd_issue_type fit
         where ai.project_id = #{projectId}
         AND ai.status_id = #{statusId}
+        AND fit.id = ai.issue_type_id
+        AND fit.type_code not in ('issue_auto_test','issue_auto_test')
         group by ai.issue_type_id
     </select>
 

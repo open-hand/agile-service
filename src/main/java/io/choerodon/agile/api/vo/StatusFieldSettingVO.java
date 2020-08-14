@@ -23,6 +23,14 @@ public class StatusFieldSettingVO {
     @Encrypt
     private Long fieldId;
 
+    private String fieldName;
+
+    private String fieldCode;
+
+    private String fieldType;
+
+    private Boolean isSystem;
+
     private List<StatusFieldValueSettingDTO> fieldValueList;
 
     public Long getId() {
@@ -71,5 +79,37 @@ public class StatusFieldSettingVO {
 
     public void setFieldValueList(List<StatusFieldValueSettingDTO> fieldValueList) {
         this.fieldValueList = fieldValueList;
+    }
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
+    }
+
+    public String getFieldCode() {
+        return fieldCode;
+    }
+
+    public void setFieldCode(String fieldCode) {
+        this.fieldCode = fieldCode;
+    }
+
+    public String getFieldType() {
+        return fieldType;
+    }
+
+    public void setFieldType(String fieldType) {
+        this.fieldType = fieldType;
+    }
+
+    public Boolean getSystem() {
+        return isSystem;
+    }
+
+    public void setSystem(Boolean system) {
+        isSystem = system;
     }
 }
