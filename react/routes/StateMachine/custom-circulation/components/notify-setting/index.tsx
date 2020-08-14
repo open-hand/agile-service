@@ -66,7 +66,7 @@ const NotifySetting = ({
       {
         name: 'noticeTypeList',
         label: '通知方式',
-        type: 'string' as FieldType,
+        type: 'array' as FieldType,
         textField: 'label',
         valueField: 'code',
         options: notifyMethodDataSet,
@@ -83,8 +83,8 @@ const NotifySetting = ({
     const { current } = notifySettingDataSet;
     // @ts-ignore
     statusTransformApi.getNotifySetting(selectedType, record.get('id')).then((res) => {
-      current?.set('userTypeList', [...(res.userIdList && res.userIdList.length ? ['specifier'] : []), ...res.userTypeList]);
-      current?.set('userIdList', res.userIdList);
+      current?.set('userTypeList', [...(res.userList && res.userList.length ? ['specifier'] : []), ...res.userTypeList]);
+      current?.set('userIdList', (res.userList || []).map((item: { id: string}) => item.id));
       current?.set('noticeTypeList', res.noticeTypeList);
     });
     const handleOk = async () => {
