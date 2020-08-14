@@ -177,8 +177,8 @@ public class ProjectObjectSchemeFieldController {
                                                                        @RequestParam Long organizationId,
                                                                        @ApiParam(value = "issue类型id", required = true)
                                                                        @RequestParam @Encrypt Long issueTypeId,
-                                                                       @ApiParam(value = "方案编码", required = true)
+                                                                       @ApiParam(value = "方案编码")
                                                                        @RequestParam(required = false) String schemeCode) {
-        return new ResponseEntity<>(objectSchemeFieldService.selectMemberList(organizationId, projectId, schemeCode), HttpStatus.OK);
+        return new ResponseEntity<>(objectSchemeFieldService.selectMemberList(organizationId, projectId, schemeCode, null), HttpStatus.OK);
     }
 }

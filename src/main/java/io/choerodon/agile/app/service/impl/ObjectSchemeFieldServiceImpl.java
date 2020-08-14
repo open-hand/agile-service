@@ -645,9 +645,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     @Override
-    public List<ObjectSchemeFieldVO> selectMemberList(Long organizationId, Long projectId, String schemeCode) {
+    public List<ObjectSchemeFieldVO> selectMemberList(Long organizationId, Long projectId, String schemeCode, List<String> fieldCodeList) {
         List<ObjectSchemeFieldDTO> list =
-                objectSchemeFieldMapper.selectMemberByOptions(organizationId, projectId, schemeCode, null, null);
+                objectSchemeFieldMapper.selectMemberByOptions(organizationId, projectId, schemeCode, fieldCodeList);
         if (CollectionUtils.isEmpty(list)){
             return Collections.emptyList();
         }

@@ -83,6 +83,5 @@ public interface ObjectSchemeFieldMapper extends BaseMapper<ObjectSchemeFieldDTO
     List<ObjectSchemeFieldDTO> selectMemberByOptions(@Param("organizationId") Long organizationId,
                                                @Param("projectId") Long projectId,
                                                @Param("schemeCode") String schemeCode,
-                                               @Param("fieldId") Long fieldId,
-                                               @Param("issueTypeId") Long issueTypeId);
+                                               @Param("fieldCodeList") List<String> fieldCodeList);
 }
