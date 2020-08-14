@@ -34,6 +34,7 @@ interface IFieldPostData extends FiledOptions {
   objectVersionNumber?: number,
   extraConfig: any,
 }
+export type IFieldPostDataProps = IFieldPostData;
 function CreateField() {
   const ctx = useContext(Store);
   const {
@@ -70,7 +71,7 @@ function CreateField() {
       disabled: currentValue === 'global' ? contextValue.length > 0 && contextValue.indexOf('global') < 0 : contextValue.indexOf('global') >= 0,
     };
   };
-  const dataTransformPostData = (fieldOption: FiledOptions) => {
+  const dataTransformPostData = (fieldOption: FiledOptions): IFieldPostData => {
     const data = formDataSet.toData()[0] as IFieldPostData;
     const prefix = type === 'project' ? 'pro_' : 'org_';
     const { name, check } = data;

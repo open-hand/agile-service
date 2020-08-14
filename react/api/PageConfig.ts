@@ -38,11 +38,29 @@ export interface UIssueTypeConfig {
   issueType: PageConfigIssueType,
   fields: Array<FiledUpdate>,
   issueTypeFieldVO?: Partial<IssueTypeFieldVO>,
-  deleteIds: string[],
+  deleteIds?: string[],
+  addIds?: string[],
+  createdFields?: Array<any>,
+
 }
 class PageConfigApi {
   get prefixOrgOrPro() {
     return `/agile/v1/${getMenuType() === 'project' ? `projects/${getProjectId()}` : `organizations/${getOrganizationId()}`}`;
+  }
+
+  /**
+   * 加载字段列表
+   * @param schemeCode
+   */
+  load(schemeCode: string = 'agile_issue') {
+    return axios({
+      method: 'get',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/list`,
+      params: {
+        schemeCode,
+        organizationId: getOrganizationId(),
+      },
+    });
   }
 
   /**
@@ -102,6 +120,21 @@ class PageConfigApi {
       params: {
         fieldId,
         required,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  /**
+   * 查询当前类型未选择的字段列表
+   * @param issueType
+   */
+  loadUnSelected(issueType: PageConfigIssueType): Promise<{ id: string }[]> {
+    return axios({
+      method: 'get',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/unselected`,
+      params: {
+        issueType,
         organizationId: getOrganizationId(),
       },
     });

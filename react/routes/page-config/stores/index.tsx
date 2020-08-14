@@ -1,11 +1,16 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 import { inject } from 'mobx-react';
 import { injectIntl } from 'react-intl';
 
-const PageConfigContext = createContext();
-export default PageConfigContext;
+interface Context {
 
-export const PageConfigProvider = injectIntl(inject('AppState')(
+}
+const PageConfigContext = createContext({} as Context);
+export function usePageConfigContext() {
+  return useContext(PageConfigContext);
+}
+// @ts-ignore
+export const PageConfigProvider: React.FC<Context> = injectIntl(inject('AppState')(
   (props) => {
     const [reLoad, setReLoad] = useState(false);
     const [pageDetailItem, setPageDetailItem] = useState({});
@@ -14,6 +19,7 @@ export const PageConfigProvider = injectIntl(inject('AppState')(
       schemeCode: 'agile_issue',
     });
     const value = {
+      // @ts-ignore
       ...props,
       pageDetailItem,
       setPageDetailItem,
@@ -26,8 +32,12 @@ export const PageConfigProvider = injectIntl(inject('AppState')(
     };
     return (
       <PageConfigContext.Provider value={value}>
-        {props.children}
+
+        {// @ts-ignore
+          props.children
+        }
       </PageConfigContext.Provider>
     );
   },
 ));
+export default PageConfigProvider;

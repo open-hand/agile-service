@@ -10,18 +10,19 @@ import {
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { ViewMode } from 'choerodon-ui/pro/lib/radio/enum';
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
-import WYSIWYGViewer from '@/components/WYSIWYGViewer';
-import { observer, useObservable } from 'mobx-react-lite';
+import { observer, useObservable, Observer } from 'mobx-react-lite';
 import { pageConfigApi, PageConfigIssueType, IFiledProps } from '@/api/PageConfig';
 import { beforeTextUpload, text2Delta } from '@/utils/richText';
 import styles from './index.less';
 import IssueTypeWrap from './components/issue-type-wrap';
 import SortTable from './components/sort-table';
-import openAddFiled from './components/add-filed';
+import openAddField from './components/add-field';
 import { usePageIssueTypeStore } from './stores';
 import Switch from './components/switch';
 import './PageIssueType.less';
 import CreateField from '../components/create-field';
+import { PageIssueTypeStoreStatusCode, PageIFieldPostDataProps } from './stores/PageIssueTypeStore';
+import { IFieldPostDataProps } from '../components/create-field/CreateField';
 
 interface DescriptionState {
   id?: string,
@@ -30,44 +31,13 @@ interface DescriptionState {
 }
 type DescriptionAction = Required<{ type: string }> & Partial<DescriptionState>
 
-interface IssueTypeState {
-  current: string,
-  newCurrent: string,
-}
-type IssueTypeAction = Required<{ type: string }> & Partial<IssueTypeState>
-
 const preCls = 'c7n-agile-page-config-page-issue-type';
 const { Option } = SelectBox;
 function PageIssueType() {
-  const { sortTableDataSet, intl } = usePageIssueTypeStore();
-  const [edit, setEdit] = useState<boolean>();
-  const [loading, setLoading] = useState<boolean>(true);
+  const {
+    sortTableDataSet, addUnselectedDataSet, intl, pageIssueTypeStore,
+  } = usePageIssueTypeStore();
   const [newFields, setNewFields] = useState<Array<any>>([]);
-  const [deleteIds, setDeleteIds] = useState<Array<string>>([]);
-  const dataStatus = useObservable({ code: '' }); // 是否有更改内容
-  const [issueTypeState, setIssueTypeState] = useReducer(
-    (state: IssueTypeState, action: IssueTypeAction) => {
-      switch (action.type) {
-        case 'change':
-          if (edit && (dataStatus.code === 'update' || dataStatus.code === 'drag_update')) {
-            console.log('state');
-            return {
-              current: state.current,
-              newCurrent: action.newCurrent,
-            };
-          }
-          return {
-            current: action.newCurrent,
-            newCurrent: action.newCurrent,
-          };
-        default:
-          return state;
-      }
-    }, {
-      current: 'feature',
-      newCurrent: 'feature',
-    },
-  );
   const [desState, setDesState] = useReducer(
     (state: DescriptionState, action: DescriptionAction) => {
       switch (action.type) {
@@ -85,7 +55,7 @@ function PageIssueType() {
         case 'destroy':
           return {
             id: undefined,
-            template: '',
+            template: undefined,
             objectVersionNumber: undefined,
           };
         default:
@@ -97,16 +67,15 @@ function PageIssueType() {
       objectVersionNumber: undefined,
     },
   );
-
   async function handleSubmit() {
-    setLoading(true);
-    if (dataStatus.code === 'update' || dataStatus.code === 'drag_update') {
+    pageIssueTypeStore.setLoading(true);
+    if (pageIssueTypeStore.dataStatusCode !== PageIssueTypeStoreStatusCode.null) {
       let submitData: Array<any> = [];
       if (sortTableDataSet.dirty) {
         submitData = sortTableDataSet.filter((record) => record.dirty);
       }
       const data = {
-        issueType: issueTypeState.current as PageConfigIssueType,
+        issueType: pageIssueTypeStore.currentIssueType,
         // fields: submitData,
         fields: submitData.map((item) => ({
           fieldId: item.get('fieldId'),
@@ -121,54 +90,45 @@ function PageIssueType() {
           objectVersionNumber: desState.objectVersionNumber,
         } : undefined,
         // createdFields: newFields,
-        deleteIds,
+        deleteIds: pageIssueTypeStore.getDeleteIds,
       };
-      console.log('submitData', desState, submitData); // beforeTextUpload
-      const desObj = { description: undefined };
       if (desState.template) {
         beforeTextUpload(text2Delta(desState.template), data.issueTypeFieldVO!, () => {
           pageConfigApi.update(data).then(() => {
-            destroyData();
             loadData();
           });
         }, 'template');
       }
-      console.log('desObj:', desObj, data);
+      console.log('desObj:', desState, data);
     }
     return true;
   }
   const loadData = () => {
-    setLoading(true);
-    pageConfigApi.loadByIssueType(issueTypeState.current as PageConfigIssueType).then((res) => {
+    setDesState({ type: 'destroy' });
+    pageIssueTypeStore.clear();
+    pageIssueTypeStore.setLoading(true);
+    pageConfigApi.loadByIssueType(pageIssueTypeStore.getCurrentIssueType).then((res) => {
       sortTableDataSet.loadData(res.fields);
-      res.issueTypeFieldVO && setDesState({ ...res.issueTypeFieldVO, type: 'init' });
-      setLoading(false);
+      if (res.issueTypeFieldVO) {
+        setDesState({ type: 'init', ...res.issueTypeFieldVO });
+      } else {
+        setDesState({
+          type: 'init', id: undefined, template: '', objectVersionNumber: undefined,
+        });
+      }
+      pageIssueTypeStore.setLoading(false);
     });
   };
   useEffect(() => {
-
+    pageIssueTypeStore.loadAllField();
   }, []);
-  const destroyData = () => {
-    setDesState({ type: 'destroy' });
-    dataStatus.code = '';
-    edit && setEdit(false);
-  };
 
-  const handleSwitch = () => {
-    destroyData();
-    loadData();
-  };
-  const handleCancel = () => {
-    destroyData();
-    loadData();
-    // sortTableDataSet.reset();
-  };
   useEffect(() => {
-    handleSwitch();
-  }, [issueTypeState.current]);
+    loadData();
+  }, [pageIssueTypeStore.currentIssueType]);
 
   const handleSelectBox = (val: any) => {
-    if (edit && (dataStatus.code === 'update' || dataStatus.code === 'drag_update')) {
+    if (pageIssueTypeStore.dataStatusCode === 'update' || pageIssueTypeStore.dataStatusCode === 'drag_update') {
       Modal.confirm({
         title: '是否放弃更改？',
         children: (
@@ -176,29 +136,38 @@ function PageIssueType() {
             页面有未保存的内容，切换则放弃更改
           </div>
         ),
-        onOk: () => handleSwitch(),
+        onOk: () => pageIssueTypeStore.setCurrentIssueType(val as PageConfigIssueType),
       });
     } else {
+      pageIssueTypeStore.setCurrentIssueType(val as PageConfigIssueType);
       console.log('handleSwitch');
     }
-    setIssueTypeState({ type: 'change', newCurrent: val });
   };
   const handleChangeDes = (val: string) => {
-    dataStatus.code = 'update';
+    pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.desc);
     setDesState({ type: 'change', template: val });
   };
-  const handleDeleteFiled = async (data: IFiledProps) => {
-    setLoading(true);
-    setDeleteIds(deleteIds.concat([data.id]));
+  const handleDeleteFiled = async (data: IFiledProps & PageIFieldPostDataProps) => {
+    // pageIssueTypeStore.setLoading(true);
+    if (data.local) {
+      pageIssueTypeStore.deleteLocalField(data.code);
+    } else {
+      pageIssueTypeStore.addDeleteId(data.id);
+    }
   };
-  useEffect(() => {
-    deleteIds.length !== 0 && sortTableDataSet.loadData(sortTableDataSet.toData()
-      .filter((item: IFiledProps) => item.id !== deleteIds[deleteIds.length - 1]));
-    setLoading(false);
-  }, [deleteIds]);
-  const onSubmitLocal = (data: any) => {
-    const newArr = newFields.concat([Object.assign(data, { local: true })]);
-    setNewFields(newArr);
+  // useEffect(() => {
+  //   deleteIds.length !== 0 && sortTableDataSet.loadData(sortTableDataSet.toData()
+  //     .filter((item: IFiledProps) => item.id !== deleteIds[deleteIds.length - 1]));
+  //   setLoading(false);
+  // }, [deleteIds]);
+  const onSubmitLocal = (data: IFieldPostDataProps) => {
+    pageIssueTypeStore.addNewField(Object.assign(data, {
+      local: true,
+      fieldName: data.name,
+      edited: false,
+      created: false,
+      required: false,
+    }));
     return true;
   };
   const checkCodeOrName = (key: string,
@@ -223,6 +192,7 @@ function PageIssueType() {
       cancelText: intl.formatMessage({ id: 'cancel' }),
     });
   }
+
   return (
     <Page
       service={[
@@ -230,25 +200,22 @@ function PageIssueType() {
       ]}
     >
       <Header>
-        {
-          edit ? [<Button icon="playlist_add" onClick={openCreateFieldModal}>创建字段</Button>,
-            <Button icon="add" onClick={openAddFiled}>添加已有字段</Button>]
-            : (
-              <Button
-                icon="mode_edit"
-                onClick={() => {
-                  setEdit(true);
-                }}
-              >
-                编辑模版
-              </Button>
-            )
 
-        }
+        <Button icon="playlist_add" onClick={openCreateFieldModal}>创建字段</Button>
+        <Button
+          icon="add"
+          onClick={() => {
+            openAddField(addUnselectedDataSet, pageIssueTypeStore);
+          }}
+        >
+          添加已有字段
+
+        </Button>
+
       </Header>
       <Breadcrumb />
-      <Content className={`${preCls}-content`} style={{ overflowY: edit ? 'hidden' : 'auto' }}>
-        <SelectBox mode={'button' as ViewMode} defaultValue="feature" value={issueTypeState.current} onChange={handleSelectBox} className={`${preCls}-select-box`}>
+      <Content className={`${preCls}-content`} style={{ overflowY: 'hidden' }}>
+        <SelectBox mode={'button' as ViewMode} defaultValue="feature" value={pageIssueTypeStore.currentIssueType} onChange={handleSelectBox} className={`${preCls}-select-box`}>
           <Option value="issue_epic">史诗</Option>
           <Option value="feature">特性</Option>
           <Option value="story">故事</Option>
@@ -257,30 +224,30 @@ function PageIssueType() {
           <Option value="bug">缺陷</Option>
           <Option value="backlog">需求</Option>
         </SelectBox>
-        <Spin className="c7n-im" spinning={loading}>
+        <Spin className="c7n-im" spinning={pageIssueTypeStore.getLoading}>
           <div className={styles.top}>
             <IssueTypeWrap title="字段配置">
               <SortTable
-                disabled={!edit}
-                dataStatus={dataStatus}
                 onDelete={handleDeleteFiled}
               />
             </IssueTypeWrap>
             <IssueTypeWrap title="描述信息格式">
-              {edit ? (
-                <WYSIWYGEditor
-                  style={{ height: '100%' }}
-                  onChange={handleChangeDes}
-                  value={text2Delta(desState.template)}
-                  placeholder="您可以在此自定义描述信息格式"
-                />
-              )
-                : <WYSIWYGViewer data={desState.template || ''} />}
+              {
+                !pageIssueTypeStore.getLoading ? (
+                  <WYSIWYGEditor
+                    style={{ height: '100%', width: '100%' }}
+                    onChange={handleChangeDes}
+                    value={text2Delta(desState.template)}
+                    placeholder="您可以在此自定义描述信息格式"
+                  />
+                ) : ''
+              }
+
             </IssueTypeWrap>
           </div>
         </Spin>
 
-        <div className={styles.bottom} style={{ display: edit ? 'block' : 'none' }}>
+        <div className={styles.bottom}>
           <Button
             funcType={'raised' as FuncType}
             color={'primary' as ButtonColor}
@@ -290,7 +257,7 @@ function PageIssueType() {
           </Button>
           <Button
             funcType={'raised' as FuncType}
-            onClick={handleCancel}
+            onClick={loadData}
           >
             取消
           </Button>

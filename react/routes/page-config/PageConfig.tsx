@@ -11,20 +11,16 @@ import PageIssueType from './page-issue-type';
 const { AppState } = stores;
 
 function PageConfig() {
-  const context = useContext(Store);
-  const { pageDetailVisible } = context;
   const { type } = AppState.currentMenuType;
   return (
     <div className="issue-page-config">
-      {pageDetailVisible
-        ? <PageDetail />
-        : (
-          <PageWrap cache noHeader={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.scheme`}>
-            <PageTab title="字段" tabKey={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.field`} component={withRouter(ObjectScheme)} alwaysShow />
-            <PageTab title="页面配置" tabKey={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.scheme111`} component={withRouter(PageIssueType)} alwaysShow />
-            <PageTab title="页面管理" tabKey={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.scheme`} component={withRouter(PageHome)} alwaysShow />
-          </PageWrap>
-        )}
+      <PageWrap cache noHeader={[]}>
+        <PageTab title="字段" tabKey={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.field`} component={withRouter(ObjectScheme)} alwaysShow />
+        <PageTab title="页面配置" tabKey={`choerodon.code.${type === 'project' ? '' : 'organization.'}setting.page.scheme`} component={withRouter(PageIssueType)} alwaysShow />
+        {/* <PageTab title="页面管理"
+        tabKey={`choerodon.code.${type === 'project' ? '' :
+         'organization.'}setting.page.scheme`} component={withRouter(PageHome)} alwaysShow /> */}
+      </PageWrap>
     </div>
   );
 }
