@@ -21,8 +21,8 @@ const DeleteStatus: React.FC<Props> = ({
     fields: [
       {
         name: 'statusId',
-        type: 'object' as FieldType,
-        label: '状态名称',
+        type: 'string' as FieldType,
+        label: '状态转换为',
         required: true,
         textField: 'name',
         valueField: 'id',
