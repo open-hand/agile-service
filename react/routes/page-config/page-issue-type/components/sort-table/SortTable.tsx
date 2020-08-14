@@ -14,7 +14,7 @@ import {
   DraggableStateSnapshot, DraggableRubric, DragDropContext, DragStart,
 } from 'react-beautiful-dnd';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { IFiledProps } from '@/api';
+import { IFiledProps, pageConfigApi } from '@/api';
 import OldSortTable from '../../../page/components/SortTable';
 import './index.less';
 import { usePageIssueTypeStore } from '../../stores';
@@ -38,7 +38,7 @@ interface DragRenderCloneProps {
 }
 const prefixCls = 'c7n-page-issue-detail';
 const SortTable: React.FC = () => {
-  const { sortTableDataSet } = usePageIssueTypeStore();
+  const { sortTableDataSet, pageIssueTypeStore } = usePageIssueTypeStore();
   const { disabled, dataStatus, onDelete } = useSortTableContext();
   // const recordMaps = useMemo(() =>
   //  new Map(sortTableDataSet.records.map(record => [record.id, record])), [sortTableDataSet])
@@ -85,83 +85,13 @@ const SortTable: React.FC = () => {
         style={{ marginLeft: 10 }}
         onClick={() => {
           onDelete && onDelete(record?.toData());
-          // dataSet?.delete(record as Record);
+            dataSet?.delete(record as Record);
         }}
       >
         <Icon type="delete" style={{ fontSize: 18 }} />
       </Button>
     </div>
   );
-  const getColumns = () => {
-    console.log('co');
-    return [
-      {
-        title: '字段名称',
-        dataIndex: 'fieldName',
-        width: '25%',
-        render: (value: string) => (
-          <div>
-            {!disabled && <Icon type="baseline-drag_indicator" />}
-            <span>{value}</span>
-          </div>
-        ),
-      },
-      {
-        title: '默认值',
-        dataIndex: 'defaultValue',
-        width: '25%',
-        // minWidth: '70px',
-      },
-      {
-        title: '是否必填',
-        dataIndex: 'require',
-        width: '75px',
-        render: (value: any) => (
-          <CheckBox
-            disabled={disabled}
-            checked
-            // value={value}
-            onChange={(val) => {
-              console.log('val', val);
-              // record?.set(name as String, val);
-            }}
-          />
-        ),
-      },
-      {
-        title: '是否加入到编辑页',
-        dataIndex: 'eidt',
-        width: '135px',
-        render: (value: any) => (
-          <CheckBox
-            disabled={disabled}
-            checked
-            value={value}
-            onChange={(val) => {
-              console.log('val', val);
-              // record?.set(name as String, val);
-            }}
-          />
-        ),
-      },
-      {
-        title: '是否加入到创建页',
-        dataIndex: 'create',
-        width: '135px',
-        render: (value: any) => (
-          <CheckBox
-            disabled={disabled}
-            checked
-            value={value}
-            onChange={(val) => {
-              console.log('val', val);
-              // record?.set(name as String, val);
-            }}
-          />
-        ),
-      },
-    ];
-  };
 
   const onDragStart = (initial: DragStart, provided: ResponderProvided) => {
 
@@ -172,33 +102,49 @@ const SortTable: React.FC = () => {
     if (!destination?.index) {
       return;
     }
-    const destinationData = sortTableDataSet.records[destination.index];
-    const sourceData = sortTableDataSet.records[source.index];
-    const destinationDataClone = destinationData.clone();
-    const sourceDataClone = sourceData.clone();
-    // [...sortTableDataSet.fields.entries()].forEach(((item: any) => {
-    //   const itemProps = item[1].props;
-    //   sourceData.set(itemProps.name, destinationDataClone.get(itemProps.name));
-    //   destinationData.set(itemProps.name, sourceDataClone.get(itemProps.name));
-    // }));
+    if (destination.index === source.index) {
+      return;
+    }
+
+    const sourceRecord = sortTableDataSet.records[source.index];
+    const destinationRecord = sortTableDataSet.records[destination.index];
+    const rankObj = {
+      before: false,
+      issueType: pageIssueTypeStore.currentIssueType,
+      previousRank: null,
+      nextRank: null,
+    };
+    if (destination.index > source.index) {
+      console.log('down');
+      rankObj.previousRank = destinationRecord.get('rank');
+    } else {
+      console.log('up');
+      rankObj.nextRank = destinationRecord.get('rank');
+    }
+    // console.log(sourceRecord.toData(), 'sourceRecord ', destinationRecord.toData());
+    pageConfigApi.loadRankValue(rankObj).then((newRank:string) => {
+      sourceRecord.set('rank', newRank);
+    }).then(() => {
+      sortTableDataSet.move(source.index, destination.index);
+    });
   };
-  console.log('lo ', sortTableDataSet);
   return (
     <div className={prefixCls}>
       <div className={`${prefixCls}-header`}>
         {[...sortTableDataSet.fields.entries()].map((item: any) => {
-          console.log('item:', item);
           const itemProps = item[1].props;
           return <span className={`${prefixCls}-header-item`}>{itemProps.label || itemProps.name}</span>;
         })}
       </div>
       <div className={`${prefixCls}-content`}>
         <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
-          <DropContent rows={sortTableDataSet.records} isDropDisabled={false} />
+          <div style={{ width: '100%' }}>
+            <DropContent rows={sortTableDataSet.records} isDropDisabled={false} />
+          </div>
         </DragDropContext>
       </div>
 
     </div>
   );
 };
-export default memo(observer(SortTable));
+export default observer(SortTable);

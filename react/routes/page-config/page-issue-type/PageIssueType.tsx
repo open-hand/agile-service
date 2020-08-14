@@ -99,7 +99,6 @@ function PageIssueType() {
           });
         }, 'template');
       }
-      console.log('desObj:', desState, data);
     }
     return true;
   }
@@ -160,14 +159,27 @@ function PageIssueType() {
   //     .filter((item: IFiledProps) => item.id !== deleteIds[deleteIds.length - 1]));
   //   setLoading(false);
   // }, [deleteIds]);
-  const onSubmitLocal = (data: IFieldPostDataProps) => {
-    pageIssueTypeStore.addNewField(Object.assign(data, {
+  useEffect(() => {
+    const addArr = pageIssueTypeStore.addIds;
+    if (addArr.length > 0) {
+      onSubmitLocal(pageIssueTypeStore.allFieldData.get(addArr[addArr.length - 1]));
+    }
+  }, [pageIssueTypeStore.addIds.length]);
+  const onSubmitLocal = (data: IFieldPostDataProps, oldField: boolean = false) => {
+    const newData = Object.assign(data, {
       local: true,
       fieldName: data.name,
       edited: false,
       created: false,
       required: false,
-    }));
+      rank: undefined,
+    });
+    // console.log('f', newData);
+    // sortTableDataSet.push(sortTableDataSet.create(newData));
+    sortTableDataSet.create(newData);
+    if (!oldField) {
+      pageIssueTypeStore.addNewField(newData);
+    }
     return true;
   };
   const checkCodeOrName = (key: string,
@@ -205,7 +217,7 @@ function PageIssueType() {
         <Button
           icon="add"
           onClick={() => {
-            openAddField(addUnselectedDataSet, pageIssueTypeStore);
+            openAddField(addUnselectedDataSet, pageIssueTypeStore, onSubmitLocal);
           }}
         >
           添加已有字段

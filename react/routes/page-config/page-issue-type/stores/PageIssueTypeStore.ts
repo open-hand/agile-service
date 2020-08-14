@@ -17,8 +17,10 @@ interface IDescriptionTempleProps {
   template: undefined | string,
   objectVersionNumber: undefined | number,
 }
-export type PageIFieldPostDataProps = IFieldPostDataProps & { local?: boolean, fieldName: string,
-   edited: boolean, created:boolean, required:boolean };
+export type PageIFieldPostDataProps = IFieldPostDataProps & {
+  local?: boolean, fieldName: string,
+  edited: boolean, created: boolean, required: boolean, rank?: string,
+};
 class PageIssueTypeStore {
   @observable loading: boolean = false;
 
@@ -68,6 +70,10 @@ class PageIssueTypeStore {
   @action('删除本地字段') deleteLocalField(code: string) {
     const index = this.createdFields.findIndex((item) => item.code === code);
     index !== -1 && this.createdFields.splice(index, 1);
+  }
+
+  @action('增加已有字段') addNewLocalField(id:string) {
+    this.addIds.push(id);
   }
 
   @action('增添新字段') addNewField(data: PageIFieldPostDataProps) {

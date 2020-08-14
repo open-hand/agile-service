@@ -10,6 +10,7 @@ import {
 } from 'react-virtualized';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
+import ReactDOM from 'react-dom';
 import DraggableItem from './DraggableItem';
 
 interface Props {
@@ -17,70 +18,72 @@ interface Props {
   rows: Array<Record>,
 }
 const DropContent: React.FC<Props> = ({ isDropDisabled, rows }) => {
+  const [scrollHeight, setScrollHeight] = useState<number>(300);
   const renderRowItem = useCallback((rowProps: ListRowProps) => {
     const record = rows[rowProps.index];
     return (
-      <Draggable draggableId={String(record.id)} index={rowProps.index} key={record.id}>
+      <Draggable draggableId={String(record.key)} index={rowProps.index} key={record.key}>
         {(provided) => (
           <DraggableItem
             provided={provided}
             data={rows[rowProps.index]}
-            virtualizedStyle={rowProps.style}
+            virtualizedStyle={{ ...rowProps.style }}
           />
         )}
       </Draggable>
-
     );
   }, [rows]);
   return (
     <Droppable
-      droppableId="list-001"
+      droppableId="sort-table"
       mode="virtual"
       isDropDisabled={isDropDisabled}
       renderClone={(provided, snapshot, rubric) => (
         <DraggableItem
           provided={provided}
+          // virtualizedStyle={{ margin: 0 }}
           data={rows[rubric.source.index]}
         />
       )}
     >
       {(provided, snapshot) => {
         const rowCount = rows.length;
+        console.log('rowCount', rowCount);
         return (
-          <div
-            ref={provided.innerRef}
-          >
-            <WindowScroller scrollElement={document.getElementsByClassName('c7n-page-issue-detail-content')[0]}>
-              {({
-                height, scrollTop,
-                // @ts-ignore
-                registerChild,
-              }) => (
-                <AutoSizer disableHeight>
-                  {({ width }) => (
-                    <div ref={(el) => registerChild(el)} style={{ width: '100%' }}>
-                      <List
-                        autoHeight
-                        height={height}
-                        noRowsRenderer={() => <div>暂无数据</div>}
-                        rowCount={rowCount}
-                        rowHeight={32}
+          <AutoSizer>
+            {({ width, height }) => (
+              <List
+                // autoHeight
+                height={scrollHeight}
+                overscanRowCount={10}
+                noRowsRenderer={() => <div>暂无数据</div>}
+                rowCount={rowCount}
+                // onScroll={onChildScroll}
+                rowHeight={32}
+                rowRenderer={renderRowItem}
+                // scrollTop={scrollTop}
+                width={width}
+                ref={(ref) => {
+                  // react-virtualized has no way to get the list's ref that I can so
+                  // So we use the `ReactDOM.findDOMNode(ref)` escape hatch to get the ref
+                  if (ref) {
+                    // eslint-disable-next-line react/no-find-dom-node
+                    const whatHasMyLifeComeTo = ReactDOM.findDOMNode(ref);
 
-                        rowRenderer={renderRowItem}
-                        scrollTop={scrollTop}
-                        width={width}
-                        style={{
-                          // background: snapshot.isDraggingOver ? '#e9e9e9' : 'inherit',
-                          transition: 'background-color 0.2s ease',
-                        }}
-                      />
-                    </div>
-                  )}
-                </AutoSizer>
-              )}
-            </WindowScroller>
-
-          </div>
+                    if (whatHasMyLifeComeTo instanceof HTMLElement) {
+                      const element = document.getElementsByClassName('c7n-page-issue-detail')[0];
+                      setScrollHeight(element.clientHeight - 30);
+                      provided.innerRef(whatHasMyLifeComeTo);
+                    }
+                  }
+                }}
+                style={{
+                  // background: snapshot.isDraggingOver ? '#e9e9e9' : 'inherit',
+                  transition: 'background-color 0.2s ease',
+                }}
+              />
+            )}
+          </AutoSizer>
         );
       }}
     </Droppable>

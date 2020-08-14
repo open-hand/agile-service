@@ -3,17 +3,19 @@ import React, {
   useMemo, ReactElement, useEffect, memo, useState, PropsWithChildren, CSSProperties,
 } from 'react';
 import {
-  DropResult, ResponderProvided, DraggableProvided, Draggable, DraggingStyle, NotDraggingStyle,
-  DraggableStateSnapshot, DraggableRubric, DragDropContext, DragStart,
+  DraggableProvided, Draggable, DraggingStyle, NotDraggingStyle,
+  DraggableStateSnapshot, DraggableRubric, DragDropContext,
 } from 'react-beautiful-dnd';
 import {
-  Button, IconPicker, CheckBox, Icon, Output,
+  Button, IconPicker, Icon, Output, CheckBox,
 } from 'choerodon-ui/pro/lib';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
 import { usePageIssueTypeStore } from '../../stores';
 import { PageIssueTypeStoreStatusCode } from '../../stores/PageIssueTypeStore';
+import { useSortTableContext } from './stores';
+// import CheckBox from './components/Checkbox';
 
 interface Props {
   data: Record,
@@ -26,6 +28,7 @@ const DraggableItem: React.FC<Props> = ({
   data, isDragDisabled, virtualizedStyle, provided,
 }) => {
   const { pageIssueTypeStore } = usePageIssueTypeStore();
+  const { onDelete } = useSortTableContext();
   const renderFieldName = ({ value }: RenderProps) => (
     <div className={`${prefixCls}-text`}>
       {!isDragDisabled && <Icon type="baseline-drag_indicator" className={`${prefixCls}-text-icon`} />}
@@ -40,9 +43,10 @@ const DraggableItem: React.FC<Props> = ({
       <CheckBox
         disabled={isDragDisabled}
         checked={record?.get(name)}
+        // record={record}
+        // name={name!}
         // value={value}
         onChange={(val) => {
-          console.log('val', val, record);
           record?.set(name as String, val);
           // console.log('dataSet?.dirty', dataSet?.dirty);
 
@@ -73,8 +77,8 @@ const DraggableItem: React.FC<Props> = ({
         disabled={isDragDisabled}
         style={{ marginLeft: 10 }}
         onClick={() => {
-          // onDelete && onDelete(record?.toData());
-          // dataSet?.delete(record as Record);
+          onDelete && onDelete(record?.toData());
+            dataSet?.delete(record as Record);
         }}
       >
         <Icon type="delete" style={{ fontSize: 18 }} />

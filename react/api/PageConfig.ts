@@ -143,10 +143,17 @@ class PageConfigApi {
   /**
    * 查询字段的rank
    */
-  loadRankValue() {
+  loadRankValue(data: {
+    before: boolean, issueType: PageConfigIssueType,
+    previousRank: string | null, nextRank: string | null,
+  }) {
     return axios({
       method: 'post',
       url: `${this.prefixOrgOrPro}/object_scheme_field/rank`,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+      data,
     });
   }
 }

@@ -14,16 +14,23 @@ interface Props {
   modal?: IModalProps,
   dataSet: DataSet,
   store: PageIssueTypeStore,
+  onSubmitLocal: any,
 }
 interface IPage {
   name: string,
   fieldTypeName: string,
   id: string,
 }
-const AddFiled: React.FC<Props> = observer(({ modal, dataSet, store }) => {
+const AddFiled: React.FC<Props> = observer(({
+  modal, dataSet, store, onSubmitLocal,
+}) => {
   const [pageList, setPageList] = useState([] as IPage[]);
   async function handleSubmit() {
     if (dataSet.validate()) {
+      // console.log('ataSet.current?.toData()', dataSet.current?.toData());
+      store.addNewLocalField(dataSet.current?.toData().field);
+      // onSubmitLocal && onSubmitLocal(dataSet.current?.toData());
+      dataSet.create();
       return true;
     }
     return false;
@@ -33,7 +40,10 @@ const AddFiled: React.FC<Props> = observer(({ modal, dataSet, store }) => {
   }, []);
   useEffect(() => {
     pageConfigApi.loadUnSelected(store.currentIssueType).then((res) => {
-      const data = res.map((item) => store.allFieldData.get(item.id));
+      const currentDataArr = dataSet.toData();
+      const data = res.filter((item) => currentDataArr.length === 1
+        || currentDataArr.every((d:any) => d.field !== item.id))
+        .map((item) => store.allFieldData.get(item.id));
       setPageList(data);
     });
   }, []);
@@ -46,7 +56,7 @@ const AddFiled: React.FC<Props> = observer(({ modal, dataSet, store }) => {
   );
 });
 
-const openField = (dataSet: DataSet, store: PageIssueTypeStore) => {
+const openField = (dataSet: DataSet, store: PageIssueTypeStore, onSubmitLocal: any) => {
   Modal.open({
     key: Modal.key(),
     title: '添加已有字段',
@@ -54,7 +64,7 @@ const openField = (dataSet: DataSet, store: PageIssueTypeStore) => {
       width: 340,
     },
     drawer: true,
-    children: <AddFiled dataSet={dataSet} store={store} />,
+    children: <AddFiled dataSet={dataSet} store={store} onSubmitLocal={onSubmitLocal} />,
   });
 };
 export default openField;
