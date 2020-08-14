@@ -146,6 +146,7 @@ class StatusTransformApi extends Api {
       url: `${this.prefix}/status/check_delete_status`,
       params: {
         statusId,
+        applyType: getApplyType(),
       },
     });
   }
