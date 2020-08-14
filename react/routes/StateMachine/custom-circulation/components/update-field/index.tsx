@@ -19,6 +19,39 @@ import styles from './index.less';
 
 const { Option } = Select;
 
+interface IFieldK extends IField {
+  key: number,
+  request: boolean,
+}
+interface IFieldValue {
+  creationDate: string,
+  createdBy: number,
+  lastUpdateDate: string,
+  lastUpdatedBy: number,
+  objectVersionNumber: number,
+  id: string,
+  statusFieldSettingId: string,
+  projectId: number,
+  optionId: null | string | string[],
+  fieldType: 'member' | 'radio' | 'single' |'checkbox' | 'multiple' | 'text' | 'input' | 'number' | 'date' | 'time' | 'datetime',
+  operateType: 'clear' | 'specifier' | 'current_time' | 'add' | 'reportor' | 'creator' | 'operator',
+  numberValue: null | number,
+  numberAddValue: null | number,
+  textValue: null | string,
+  dateValue: null | string,
+  dateAddValue: null | number,
+  userId: null | string,
+  name: null | string
+}
+interface ISettingField {
+  fieldId: string
+  fieldValueList: IFieldValue[]
+  id: string
+  issueTypeId: string
+  projectId: number
+  statusId: string
+}
+
 const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epicName', 'epic', 'pi'];
 const dateTransform = (fieldType: string, d: Date) => {
   let transformed = '';
@@ -327,13 +360,13 @@ const UpdateField = ({
       // @ts-ignore
       statusTransformApi.getUpdateFieldInfo(selectedType, record.get('id')).then((res) => {
         setLoading(false);
-        // @ts-ignore
-        const initFields = fieldData.filter((f) => res.find((item) => item.fieldId === f.id));
+        const initFields = fieldData.filter((
+          f,
+        ) => res.find((item: ISettingField) => item.fieldId === f.id));
         Field.init(initFields);
         const { current } = dataSet;
         if (current) {
-          // @ts-ignore
-          (res || []).forEach((item) => {
+          (res || []).forEach((item: ISettingField) => {
             const field = find(fieldData, { id: item.fieldId }) || {};
             // @ts-ignore
             const fieldCode = field?.code;
@@ -349,8 +382,7 @@ const UpdateField = ({
   const getData = useCallback(() => {
     const temp = dataSet.current ? dataSet.current.data : {};
     const obj: any = {};
-    // @ts-ignore
-    fields.forEach((field) => {
+    fields.forEach((field: IFieldK) => {
       if (field.code) {
         obj[field.code] = {
           // @ts-ignore
@@ -387,8 +419,7 @@ const UpdateField = ({
       }}
     >
       {
-          // @ts-ignore
-        fields.map((f) => {
+        fields.map((f: IFieldK) => {
           const { key, id } = f;
           return (
             <Row key={key} gutter={20}>
@@ -404,11 +435,9 @@ const UpdateField = ({
                   }}
                 >
                   {
-                    // @ts-ignore
                     fieldData.filter((field: IField) => (
                       id === field.id
                     ) || !find(fields, {
-                      // @ts-ignore
                       id: field.id,
                     })).map((field) => (
                       <Option value={field.id}>
@@ -420,7 +449,10 @@ const UpdateField = ({
               </Col>
               {id && (
                 <Col span={11} key={id}>
-                  { renderField(f, data) }
+                  {
+                  // @ts-ignore
+                  renderField(f, data)
+                  }
                 </Col>
               )}
               <Col span={2}>
