@@ -25,6 +25,7 @@ const DeleteStatus: React.FC<Props> = ({
   modal, onSubmit, data,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [canDelete, setCanDelete] = useState(true);
   const [needTransforms, setNeedTransforms] = useState<NeedTransform[]>([]);
   const [issueTypes] = useIssueTypes();
   useEffect(() => {
@@ -36,20 +37,31 @@ const DeleteStatus: React.FC<Props> = ({
           },
         });
         setLoading(true);
-        const res: IIssueType[] = await statusTransformApi.checkStatusNeedTransform(data.id);
-        setNeedTransforms(res.map(({ id: issueTypeId }) => {
-          const target = find(issueTypes, { id: issueTypeId });
-          return {
-            issueTypeId,
-            issueTypeName: target?.name || '',
-          };
-        }));
-        setLoading(false);
-        modal.update({
-          okProps: {
-            disabled: false,
-          },
-        });
+        try {
+          const res: IIssueType[] = await statusTransformApi.checkStatusNeedTransform(data.id);
+          setNeedTransforms(res.map(({ id: issueTypeId }) => {
+            const target = find(issueTypes, { id: issueTypeId });
+            return {
+              issueTypeId,
+              issueTypeName: target?.name || '',
+            };
+          }));
+          setLoading(false);
+          modal.update({
+            okProps: {
+              disabled: false,
+            },
+          });
+        } catch (error) {
+          console.log(error);
+          setLoading(false);
+          setCanDelete(false);
+          modal.update({
+            okProps: {
+              disabled: false,
+            },
+          });
+        }
       }
     })();
   }, [data.id, data.usage, issueTypes]);
@@ -66,6 +78,9 @@ const DeleteStatus: React.FC<Props> = ({
   }), [needTransforms]);
 
   const handleSubmit = useCallback(async () => {
+    if (!canDelete) {
+      return true;
+    }
     try {
       if (!await dataSet.validate()) {
         return false;
@@ -81,7 +96,7 @@ const DeleteStatus: React.FC<Props> = ({
     } catch (error) {
       return false;
     }
-  }, [data.id, dataSet]);
+  }, [canDelete, data.id, dataSet, onSubmit]);
   useEffect(() => {
     modal.handleOk(handleSubmit);
   }, [modal, handleSubmit]);
@@ -89,6 +104,7 @@ const DeleteStatus: React.FC<Props> = ({
   return (
     <Spin spinning={loading}>
       <div>
+        {!canDelete && '初始状态不可删除！'}
         {needTransforms.length > 0 && (
         <Form dataSet={dataSet}>
           {needTransforms.map((needTransform) => (
