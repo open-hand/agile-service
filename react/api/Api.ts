@@ -5,6 +5,7 @@ import globalCache from './Cache';
 
 interface RequestConfig extends AxiosRequestConfig {
   cache?: boolean
+  noPrompt?: boolean
 }
 function getCacheKey(config: any) {
   const {

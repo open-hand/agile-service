@@ -148,6 +148,7 @@ class StatusTransformApi extends Api {
         statusId,
         applyType: getApplyType(),
       },
+      noPrompt: true,
     });
   }
 
