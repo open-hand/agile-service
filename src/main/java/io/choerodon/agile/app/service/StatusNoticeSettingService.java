@@ -1,5 +1,7 @@
 package io.choerodon.agile.app.service;
 
+import java.util.List;
+
 import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
 
 /**
@@ -14,4 +16,6 @@ public interface StatusNoticeSettingService {
     void save(Long projectId, StatusNoticeSettingVO StatusNoticeSettingVO);
 
     void noticeByChangeStatus(Long projectId, Long issueId);
+
+    List<StatusNoticeSettingVO> list(Long projectId, Long issueTypeId, List<Long> statusIdList);
 }

@@ -25,6 +25,8 @@ public class StatusSettingVO {
 
     private List<StatusFieldSettingVO> statusFieldSettingVOS;
 
+    private List<StatusNoticeSettingVO> statusNoticeSettingVOS;
+
     public Long getId() {
         return id;
     }
@@ -79,5 +81,13 @@ public class StatusSettingVO {
 
     public void setStatusFieldSettingVOS(List<StatusFieldSettingVO> statusFieldSettingVOS) {
         this.statusFieldSettingVOS = statusFieldSettingVOS;
+    }
+
+    public List<StatusNoticeSettingVO> getStatusNoticeSettingVOS() {
+        return statusNoticeSettingVOS;
+    }
+
+    public void setStatusNoticeSettingVOS(List<StatusNoticeSettingVO> statusNoticeSettingVOS) {
+        this.statusNoticeSettingVOS = statusNoticeSettingVOS;
     }
 }
