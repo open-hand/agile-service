@@ -445,9 +445,11 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 target.setFieldId(fieldId);
                 objectSchemeFieldExtendMapper.delete(target);
             });
-            intersection.forEach(i ->
-                objectSchemeFieldExtendMapper.batchUpdateRequired(i.getIssueType(), organizationId, fieldId, required)
-            );
+            if (!ObjectUtils.isEmpty(required)) {
+                intersection.forEach(i ->
+                        objectSchemeFieldExtendMapper.batchUpdateRequired(i.getIssueType(), organizationId, fieldId, required)
+                );
+            }
             //查询该组织下已经配置过的项目，这些项目要级联创建字段类型
             Set<Long> projectIds =
                     objectSchemeFieldExtendMapper.selectProjectIdsByOrganizationId(organizationId);
