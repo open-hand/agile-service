@@ -74,13 +74,6 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
 
     @Override
     public void save(Long projectId, StatusNoticeSettingVO statusNoticeSettingVO, String applyType) {
-        StatusDTO statusDTO = new StatusDTO();
-        statusDTO.setId(statusNoticeSettingVO.getStatusId());
-        statusDTO.setOrganizationId(ConvertUtil.getOrganizationId(projectId));
-        statusDTO.setObjectVersionNumber(statusNoticeSettingVO.getObjectVersionNumber());
-        if (Objects.isNull(statusMapper.selectOne(statusDTO))){
-            throw new CommonException(BaseConstants.ErrorCode.DATA_INVALID);
-        }
         StatusNoticeSettingDTO noticeDTO = new StatusNoticeSettingDTO(projectId, statusNoticeSettingVO.getIssueTypeId(),
                 statusNoticeSettingVO.getStatusId());
         // 删除

@@ -644,6 +644,10 @@
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         left join agile_issue aii2 on aii2.project_id = #{projectId} and ai.parent_issue_id = aii2.issue_id
         WHERE ai.project_id = #{projectId} AND ai.apply_type = 'agile'
+        <include refid="explainSearchVO"/>
+    </sql>
+
+    <sql id="explainSearchVO">
         <if test='searchVO.searchArgs != null'>
             <if test='searchVO.searchArgs.summary != null and searchVO.searchArgs.summary != "" '>
                 AND ai.summary LIKE concat(concat('%',#{searchVO.searchArgs.summary}),'%')
