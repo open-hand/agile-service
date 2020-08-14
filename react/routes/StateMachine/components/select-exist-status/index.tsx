@@ -5,19 +5,20 @@ import {
   Modal, Form, DataSet, SelectBox,
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { statusTransformApiConfig } from '@/api';
+import { statusTransformApiConfig, IStatusCirculation } from '@/api';
 import SelectStatus from '../select-status';
 import './index.less';
 
 const { Option } = SelectBox;
 const key = Modal.key();
 interface Props {
+  statusList?: IStatusCirculation[]
   onSubmit: Function
   issueTypeId: string
   modal?: any
 }
 const SelectExistStatus: React.FC<Props> = ({
-  modal, onSubmit, issueTypeId,
+  modal, onSubmit, issueTypeId, statusList = [],
 }) => {
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
@@ -66,7 +67,7 @@ const SelectExistStatus: React.FC<Props> = ({
   return (
     <>
       <Form dataSet={dataSet}>
-        <SelectStatus name="statusId" />
+        <SelectStatus name="statusId" expectStatusIds={statusList.map((status) => status.id)} />
         <SelectBox name="default">
           <Option value>是</Option>
           <Option value={false}>否</Option>
