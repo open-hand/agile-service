@@ -187,6 +187,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     );
   };
 
+  // @ts-ignore
   const renderStatusFieldSetting = (statusFieldSettingVOS) => {
 
   };
