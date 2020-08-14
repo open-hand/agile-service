@@ -890,18 +890,18 @@
                              close=")">
                         ai.issue_id in
                         (
-                        SELECT
-                        ffv.instance_id
-                        FROM
-                        fd_field_value ffv
-                        WHERE
-                        ffv.project_id = #{projectId}
-                        AND ffv.field_id = #{item.fieldId}
-                        AND ffv.option_id IN
-                        <foreach collection="item.value" item="value" open="(" separator=","
-                                 close=")">
-                            #{value}
-                        </foreach>
+                            SELECT
+                                ffv.instance_id
+                            FROM
+                                fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.option_id IN
+                            <foreach collection="item.value" item="value" open="(" separator=","
+                                     close=")">
+                                #{value}
+                            </foreach>
                         )
                     </foreach>
                 </if>
@@ -911,14 +911,14 @@
                              close=")">
                         ai.issue_id in
                         (
-                        SELECT
-                        ffv.instance_id
-                        FROM
-                        fd_field_value ffv
-                        WHERE
-                        ffv.project_id = #{projectId}
-                        AND ffv.field_id = #{item.fieldId}
-                        AND ffv.date_value &gt;= #{item.startDate} AND ffv.date_value &lt;= #{item.endDate}
+                            SELECT
+                                ffv.instance_id
+                            FROM
+                                fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.date_value &gt;= #{item.startDate} AND ffv.date_value &lt;= #{item.endDate}
                         )
                     </foreach>
                 </if>
@@ -928,14 +928,14 @@
                              close=")">
                         ai.issue_id in
                         (
-                        SELECT
-                        ffv.instance_id
-                        FROM
-                        fd_field_value ffv
-                        WHERE
-                        ffv.project_id = #{projectId}
-                        AND ffv.field_id = #{item.fieldId}
-                        AND DATE_FORMAT(ffv.date_value, '%H:%i:%s') &gt;= #{item.startDate} AND DATE_FORMAT(ffv.date_value, '%H:%i:%s') &lt;= #{item.endDate}
+                            SELECT
+                                ffv.instance_id
+                            FROM
+                                fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND DATE_FORMAT(ffv.date_value, '%H:%i:%s') &gt;= #{item.startDate} AND DATE_FORMAT(ffv.date_value, '%H:%i:%s') &lt;= #{item.endDate}
                         )
                     </foreach>
                 </if>
@@ -945,14 +945,14 @@
                              close=")">
                         ai.issue_id in
                         (
-                        SELECT
-                        ffv.instance_id
-                        FROM
-                        fd_field_value ffv
-                        WHERE
-                        ffv.project_id = #{projectId}
-                        AND ffv.field_id = #{item.fieldId}
-                        AND ffv.number_value = #{item.value}
+                            SELECT
+                                ffv.instance_id
+                            FROM
+                                fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.number_value = #{item.value}
                         )
                     </foreach>
                 </if>
@@ -962,14 +962,14 @@
                              close=")">
                         ai.issue_id in
                         (
-                        SELECT
-                        ffv.instance_id
-                        FROM
-                        fd_field_value ffv
-                        WHERE
-                        ffv.project_id = #{projectId}
-                        AND ffv.field_id = #{item.fieldId}
-                        AND ffv.string_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
+                            SELECT
+                                ffv.instance_id
+                            FROM
+                                fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.string_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
                         )
                     </foreach>
                 </if>
@@ -979,14 +979,14 @@
                              close=")">
                         ai.issue_id in
                         (
-                        SELECT
-                        ffv.instance_id
-                        FROM
-                        fd_field_value ffv
-                        WHERE
-                        ffv.project_id = #{projectId}
-                        AND ffv.field_id = #{item.fieldId}
-                        AND ffv.text_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
+                            SELECT
+                                ffv.instance_id
+                            FROM
+                                fd_field_value ffv
+                            WHERE
+                            ffv.project_id = #{projectId}
+                            AND ffv.field_id = #{item.fieldId}
+                            AND ffv.text_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
                         )
                     </foreach>
                 </if>
