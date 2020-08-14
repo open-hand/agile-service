@@ -61,7 +61,7 @@ const StatusCirculationTable: React.FC = () => {
   ...statusColumns,
   {
     dataIndex: 'delete',
-    width: 80,
+    width: 60,
     fixed: 'right',
     align: 'center',
     title: null,
@@ -81,7 +81,7 @@ const StatusCirculationTable: React.FC = () => {
       }}
     >
       {({ measureRef }) => (
-        <div ref={measureRef} style={{ height: '100%', width: '100%', overflow: 'hidden' }}>
+        <div ref={measureRef} className={styles.table}>
           <Spin spinning={loading}>
             <Table
               size="small"
