@@ -37,7 +37,6 @@ function PageIssueType() {
   const {
     sortTableDataSet, addUnselectedDataSet, intl, pageIssueTypeStore,
   } = usePageIssueTypeStore();
-  const [newFields, setNewFields] = useState<Array<any>>([]);
   const [desState, setDesState] = useReducer(
     (state: DescriptionState, action: DescriptionAction) => {
       switch (action.type) {
@@ -72,7 +71,7 @@ function PageIssueType() {
     if (pageIssueTypeStore.dataStatusCode !== PageIssueTypeStoreStatusCode.null) {
       let submitData: Array<any> = [];
       if (sortTableDataSet.dirty) {
-        submitData = sortTableDataSet.filter((record) => record.dirty);
+        submitData = sortTableDataSet.filter((record) => record.dirty && !record.get('local'));
       }
       const data = {
         issueType: pageIssueTypeStore.currentIssueType,
@@ -89,7 +88,8 @@ function PageIssueType() {
           template: desState.template,
           objectVersionNumber: desState.objectVersionNumber,
         } : undefined,
-        // createdFields: newFields,
+        addIds: pageIssueTypeStore.getAddIds,
+        createdFields: pageIssueTypeStore.getCreatedFields,
         deleteIds: pageIssueTypeStore.getDeleteIds,
       };
       if (desState.template) {
@@ -98,6 +98,10 @@ function PageIssueType() {
             loadData();
           });
         }, 'template');
+      } else {
+        pageConfigApi.update(data).then(() => {
+          loadData();
+        });
       }
     }
     return true;
@@ -105,6 +109,7 @@ function PageIssueType() {
   const loadData = () => {
     setDesState({ type: 'destroy' });
     pageIssueTypeStore.clear();
+    addUnselectedDataSet.clear();
     pageIssueTypeStore.setLoading(true);
     pageConfigApi.loadByIssueType(pageIssueTypeStore.getCurrentIssueType).then((res) => {
       sortTableDataSet.loadData(res.fields);
@@ -127,7 +132,7 @@ function PageIssueType() {
   }, [pageIssueTypeStore.currentIssueType]);
 
   const handleSelectBox = (val: any) => {
-    if (pageIssueTypeStore.dataStatusCode === 'update' || pageIssueTypeStore.dataStatusCode === 'drag_update') {
+    if (pageIssueTypeStore.dataStatusCode !== PageIssueTypeStoreStatusCode.null) {
       Modal.confirm({
         title: '是否放弃更改？',
         children: (
@@ -139,7 +144,6 @@ function PageIssueType() {
       });
     } else {
       pageIssueTypeStore.setCurrentIssueType(val as PageConfigIssueType);
-      console.log('handleSwitch');
     }
   };
   const handleChangeDes = (val: string) => {
@@ -148,9 +152,11 @@ function PageIssueType() {
   };
   const handleDeleteFiled = async (data: IFiledProps & PageIFieldPostDataProps) => {
     // pageIssueTypeStore.setLoading(true);
+    pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.del);
     if (data.local) {
       pageIssueTypeStore.deleteLocalField(data.code);
     } else {
+      console.log('data', data);
       pageIssueTypeStore.addDeleteId(data.id);
     }
   };
@@ -162,29 +168,34 @@ function PageIssueType() {
   useEffect(() => {
     const addArr = pageIssueTypeStore.addIds;
     if (addArr.length > 0) {
-      onSubmitLocal(pageIssueTypeStore.allFieldData.get(addArr[addArr.length - 1]));
+      onSubmitLocal(pageIssueTypeStore.allFieldData.get(addArr[addArr.length - 1]), true);
     }
   }, [pageIssueTypeStore.addIds.length]);
   const onSubmitLocal = (data: IFieldPostDataProps, oldField: boolean = false) => {
     const newData = Object.assign(data, {
       local: true,
       fieldName: data.name,
-      edited: false,
-      created: false,
+      edited: true,
+      created: true,
       required: false,
       rank: undefined,
     });
+    if (oldField
+      || (newData.context.some((item: any) => item === 'global' || item === pageIssueTypeStore.currentIssueType))) {
+      sortTableDataSet.create(newData);
+    }
     // console.log('f', newData);
     // sortTableDataSet.push(sortTableDataSet.create(newData));
-    sortTableDataSet.create(newData);
     if (!oldField) {
       pageIssueTypeStore.addNewField(newData);
     }
+    pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.add);
     return true;
   };
   const checkCodeOrName = (key: string,
-    name: string) => newFields && newFields.length !== 0
-    && newFields.some((item) => item[key].trim() === name);
+    name: string) => pageIssueTypeStore.getCreatedFields.length !== 0
+    // @ts-ignore
+    && pageIssueTypeStore.getCreatedFields.some((item) => item[key].trim() === name);
   function openCreateFieldModal() {
     const values = {
       formatMessage: intl.formatMessage,
