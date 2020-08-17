@@ -182,17 +182,6 @@
 
     <insert id="migrateStatusMachineNode">
         insert into fd_status_machine_node
-        select
-         id,
-         state_machine_id,
-         status_id,
-         type,
-         organization_id,
-         object_version_number,
-         created_by,
-         creation_date,
-         last_updated_by,
-         last_update_date
-        from fd_state_machine_node
+        select * from fd_state_machine_node
     </insert>
 </mapper>

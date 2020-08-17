@@ -29,23 +29,7 @@
 
     <insert id="migrateStatusMachineTransform">
         insert into fd_status_machine_transform
-        select
-         id,
-         name,
-         description,
-         state_machine_id,
-         start_node_id,
-         end_node_id,
-         type,
-         condition_strategy,
-         organization_id,
-
-         object_version_number,
-         created_by,
-         creation_date,
-         last_updated_by,
-         last_update_date
-         from fd_state_machine_transform
+        select * from fd_state_machine_transform
     </insert>
 
     <select id="queryByStartNodeIdOrType" resultType="io.choerodon.agile.infra.dto.StatusMachineTransformDTO">

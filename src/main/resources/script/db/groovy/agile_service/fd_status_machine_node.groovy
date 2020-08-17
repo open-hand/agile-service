@@ -12,9 +12,14 @@ databaseChangeLog(logicalFilePath: 'fd_status_machine_node.groovy') {
             column(name: 'status_id', type: 'BIGINT UNSIGNED', remarks: '状态id') {
                 constraints(nullable: false)
             }
+            column(name: 'position_x', type: 'BIGINT', remarks: '坐标x')
+            column(name: 'position_y', type: 'BIGINT', remarks: '坐标y')
+            column(name: 'width', type: 'BIGINT UNSIGNED', remarks: '宽')
+            column(name: 'height', type: 'BIGINT UNSIGNED', remarks: '高')
             column(name: 'type', type: 'VARCHAR(30)', remarks: '类型') {
                 constraints(nullable: false)
             }
+            column(name: "all_status_transform_id", type: "BIGINT UNSIGNED", defaultValue: '0', remarks: '所有状态都可以转换给当前状态的转换id')
             column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)
             }
