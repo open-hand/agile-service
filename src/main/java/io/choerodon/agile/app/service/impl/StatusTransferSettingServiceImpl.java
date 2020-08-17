@@ -116,7 +116,7 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         Long userId = DetailsHelper.getUserDetails().getUserId();
         Set<Long> userIds = new HashSet<>();
         for (StatusTransferSettingDTO statusTransferSettingDTO : query) {
-            if (!PROJECT_OWNER.equals(statusTransferSettingDTO.getUserType())) {
+            if (PROJECT_OWNER.equals(statusTransferSettingDTO.getUserType())) {
                 List<UserVO> body = baseFeignClient.listProjectOwnerById(projectId).getBody();
                 if (!CollectionUtils.isEmpty(body)) {
                     userIds.addAll(body.stream().map(UserVO::getId).collect(Collectors.toSet()));
