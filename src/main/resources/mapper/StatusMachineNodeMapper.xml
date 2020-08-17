@@ -187,7 +187,6 @@
          state_machine_id,
          status_id,
          type,
-         all_status_transform_id,
          organization_id,
          object_version_number,
          created_by,

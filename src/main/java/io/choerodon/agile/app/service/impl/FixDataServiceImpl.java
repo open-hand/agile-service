@@ -168,16 +168,21 @@ public class FixDataServiceImpl implements FixDataService {
     }
 
     public void fixDateStateMachine(){
-        long l = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         LOGGER.info("开始修复数据");
+        // 迁移数据
+        migrateData();
         // 修状态转换数据
         fixStateMachineTransform();
         // 修项目的问题类型对应的状态机
         fixStateMachineByIssueTypeId();
-        LOGGER.info("修复数据完成,耗时{}",System.currentTimeMillis() - l);
+        // 修复页面配置
+        fixPage();
+        LOGGER.info("修复数据完成,耗时{}",System.currentTimeMillis() - start);
     }
 
-    public void migrateData() {
+    private  void migrateData() {
+        LOGGER.info("开始迁移状态机相关表的数据");
         // 迁移状态机方案配置表
         statusMachineSchemeConfigMapper.migrateStatusMachineSchemeConfig();
         // 迁移状态机表
@@ -186,6 +191,7 @@ public class FixDataServiceImpl implements FixDataService {
         statusMachineNodeMapper.migrateStatusMachineNode();
         // 迁移状态机转换表
         statusMachineTransformMapper.migrateStatusMachineTransform();
+        LOGGER.info("完成迁移状态机相关的表");
     }
 
     @Override

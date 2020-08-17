@@ -15,7 +15,6 @@ databaseChangeLog(logicalFilePath: 'fd_status_machine_node.groovy') {
             column(name: 'type', type: 'VARCHAR(30)', remarks: '类型') {
                 constraints(nullable: false)
             }
-            column(name: "all_status_transform_id", type: "BIGINT UNSIGNED", defaultValue: '0', remarks: '所有状态都可以转换给当前状态的转换id')
             column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)
             }
