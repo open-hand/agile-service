@@ -26,9 +26,7 @@ function CollapseAll({ tableRef }) {
       <Icon
         type="baseline-arrow_right"
         style={{
-          // cursor: 'pointer',
-          // marginLeft: -12,
-          transform: needExpand ? 'none' : 'rotate(90deg)',
+          transform: 'rotate(90deg)',
           transition: 'transform 0.3s',
         }}
       />
