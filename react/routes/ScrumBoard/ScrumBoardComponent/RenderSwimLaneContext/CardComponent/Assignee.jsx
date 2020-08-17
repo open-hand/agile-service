@@ -10,7 +10,7 @@ import UserHead from '@/components/UserHead/UserHead';
  */
 function Assignee({
   assigneeId, imageUrl, assigneeName,
-  assigneeRealName, assigneeLoginName, 
+  assigneeRealName, assigneeLoginName,
 }) {
   return (
     <div>
@@ -19,7 +19,7 @@ function Assignee({
             <UserHead
               hiddenText
               size={28}
-              style={{ marginLeft: 8 }}
+              style={{ marginLeft: 0 }}
               user={{
                 id: assigneeId,
                 name: assigneeName,

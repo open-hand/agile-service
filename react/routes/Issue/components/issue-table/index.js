@@ -163,7 +163,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
           sortable
           name="statusId"
           renderer={({ record }) => (
-            <Tooltip title={record.get('statusVO').name}>
+            <Tooltip title={record.get('statusVO')?.name}>
               <div style={{
                 display: 'inline-flex',
                 overflow: 'hidden',

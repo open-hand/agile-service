@@ -15,7 +15,13 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
   } = statusArgs;
   const config = useMemo(() => ({
     name: 'status',
-    request: () => statusApi.loadTransformStatusByIssue(statusId, issueId, typeId, applyType, projectId),
+    request: () => statusApi.loadTransformStatusByIssue(
+      statusId,
+      issueId,
+      typeId,
+      applyType,
+      projectId,
+    ),
     paging: false,
     textField: 'statusVO.name',
     valueField: 'endStatusId',
@@ -68,7 +74,7 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
       statusVO = {}, statusId, issueTypeVO = {},
       issueId,
     } = issue;
-    const { type, name } = statusVO;
+    const { type, name } = statusVO || {};
     const typeId = issueTypeVO.id;
     return (
       <div className="line-start mt-10">
