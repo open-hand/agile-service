@@ -2,6 +2,7 @@ import React, { memo, Fragment } from 'react';
 import { observer } from 'mobx-react';
 import { Tooltip } from 'choerodon-ui';
 import classnames from 'classnames';
+import moment from 'moment';
 import TypeTag from '@/components/TypeTag';
 import UserHead from '@/components/UserHead';
 import StatusTag from '@/components/StatusTag';
@@ -10,6 +11,7 @@ import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 
 import './IssueItem.less';
+import { calcDays } from '@/utils/Date';
 
 const prefix = 'c7n-backlog-issue';
 function DraggingNum({ num }) {
@@ -39,8 +41,13 @@ function getStyle({ draggableStyle, virtualStyle, isDragging }) {
 }
 const Item = memo(({ issue, draggingNum }) => {
   const { isShowFeature } = IsInProgramStore; // 由后端判断是否显示特性
+  const { issueEndDate, statusVO } = issue;
+  let diffDays = 0;
+  if (issueEndDate) {
+    diffDays = calcDays(moment(), issueEndDate);
+  }
   return (
-    <Fragment>
+    <>
       {draggingNum && (<DraggingNum num={draggingNum} />)}
       <div
         className={`${prefix}-left`}
@@ -59,7 +66,16 @@ const Item = memo(({ issue, draggingNum }) => {
       <div
         className={`${prefix}-right`}
       >
-
+        {
+          !statusVO.completed && issueEndDate && (
+            diffDays > 0 || (diffDays >= -1 || diffDays < 0)) && (
+            <div className={`${prefix}-${diffDays > 0 ? 'delay' : 'soonDelay'}`}>
+              {
+              diffDays > 0 ? `延期${Math.ceil(diffDays)}天` : '即将到期'
+            }
+            </div>
+          )
+        }
         {issue.versionNames && issue.versionNames.length > 0 ? (
           <Tooltip title={`版本: ${issue.versionNames.join(', ')}`}>
             <span className={`${prefix}-version`}>
@@ -124,10 +140,9 @@ const Item = memo(({ issue, draggingNum }) => {
           </div>
         </Tooltip>
       </div>
-    </Fragment>
+    </>
   );
 });
-
 
 function IssueItem({
   provided, style, issue = {}, isDragging, sprintId,
