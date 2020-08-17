@@ -188,6 +188,8 @@ export default function renderField({
               <NumberField
                 name={code}
                 style={{ width: '100%' }}
+                step={0}
+                min={1}
               />
             </Col>
             )

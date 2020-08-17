@@ -143,7 +143,7 @@ const transformUpdateData = (data) => {
         break;
       }
       case 'number': {
-        if (((selected === 'specifier' || selected === 'add') && value) || selected === 'clear') {
+        if (((selected === 'specifier' || selected === 'add') && (value || value === 0)) || selected === 'clear') {
           updateData.push({
             fieldId,
             fieldValueList: [{
@@ -157,7 +157,7 @@ const transformUpdateData = (data) => {
         break;
       }
       case 'date': case 'time': case 'datetime': {
-        if (((selected === 'specifier' || selected === 'add') && value) || selected === 'clear') {
+        if (((selected === 'specifier' || selected === 'add') && value) || selected === 'clear' || selected === 'current_time') {
           updateData.push({
             fieldId,
             fieldValueList: [{
@@ -400,7 +400,9 @@ const UpdateField = ({
   useEffect(() => {
     const submit = async () => {
       const data = getData();
+      console.log(data);
       const updateData = transformUpdateData(data);
+      console.log(updateData);
       await statusTransformApi.updateField(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
       customCirculationDataSet.query();
       return true;
