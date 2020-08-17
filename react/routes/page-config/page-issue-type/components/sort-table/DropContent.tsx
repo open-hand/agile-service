@@ -1,7 +1,5 @@
 /* eslint-disable no-param-reassign */
-import React, {
-  useMemo, ReactElement, useEffect, memo, useState, PropsWithChildren, useCallback,
-} from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Draggable, Droppable, DroppableStateSnapshot,
 } from 'react-beautiful-dnd';
@@ -22,7 +20,6 @@ const DropContent: React.FC<Props> = ({ isDropDisabled, rows }) => {
   const { pageIssueTypeStore } = usePageIssueTypeStore();
   const [scrollHeight, setScrollHeight] = useState<number>(300);
   const renderRowItem = useCallback((rowProps: ListRowProps) => {
-    console.log('rows', rows.length);
     const record = rows[rowProps.index];
     return (
       <Draggable draggableId={String(record.key)} index={rowProps.index} key={record.key}>

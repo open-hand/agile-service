@@ -1,5 +1,5 @@
 import React, {
-  Fragment, useContext,
+  Fragment, useContext, useState,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
@@ -18,7 +18,7 @@ import Store from './stores';
 import TableDropMenu from '../../../common/TableDropMenu';
 import TypeTag from '../../../components/TypeTag';
 import CreateField from './components/create-field';
-
+import RequiredPrompt from './components/required-prompt';
 import './ObjectScheme.less';
 
 const { Column } = Table;
@@ -103,7 +103,6 @@ function ObjectScheme() {
     };
     schemeTableDataSet.delete(record, modalProps);
   }
-
   function handleCheckChange() {
     const record = schemeTableDataSet.current;
     const defaultValue = schemeTableDataSet.get('defaultValue');
@@ -115,18 +114,31 @@ function ObjectScheme() {
     if (required && defaultValue) {
       Choerodon.prompt(formatMessage({ id: 'field.required.msg' }));
     }
-    const field = {
-      required: !required,
-      objectVersionNumber: record.get('objectVersionNumber'),
-    };
-    pageConfigApi.updateRequired(record.get('id'), required).then(() => {
-      handleRefresh();
-    });
-    // store.updateField(record.get('id'), field).then(() => {
-    //   handleRefresh();
-    // });
+    if (!openPromptForRequire(record.get('name'), required)) {
+      pageConfigApi.updateRequired(record.get('id'), required).then(() => {
+        handleRefresh();
+      });
+    }
   }
-
+  function openPromptForRequire(fieldName: string, required: boolean) {
+    const isOpen: boolean = !(localStorage.getItem('agile.page.field.setting.required.prompt') === 'false');
+    if (isOpen) {
+      const promptText = `确定要将【${fieldName}】设置为${!required ? '不' : ''}必填项吗？
+      设置后组织下所有项目中该字段都将为${!required ? '不' : ''}必填，这将会影响【快速创建】问题的使用。`;
+      Modal.open({
+        key: Modal.key(),
+        className: `${prefixCls}-detail-prompt`,
+        title: '确认设置为必填',
+        children: (<RequiredPrompt
+          formatMessage={formatMessage}
+          onContinue={handleCheckChange}
+          promptText={promptText}
+        />),
+        footer: null,
+      });
+    }
+    return isOpen;
+  }
   // 打开创建模态框
   function openCreateFieldModal() {
     const values = {
@@ -241,7 +253,6 @@ function ObjectScheme() {
     const system = record?.get('system');
     // const required = record?.get('required');
     const requiredScope = record?.get('requiredScope');
-
     const projectId = record?.get('projectId');
     // console.log('required', required);
     return (
@@ -249,6 +260,7 @@ function ObjectScheme() {
         <CheckBox
           defaultChecked={requiredScope === 'ALL'}
           indeterminate={requiredScope === 'PART'}
+          checked={requiredScope === 'ALL'}
           disabled={system || (AppState.currentMenuType.type === 'project' && !projectId)}
           onChange={handleCheckChange}
         />

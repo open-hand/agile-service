@@ -1,42 +1,21 @@
-/* eslint-disable no-param-reassign */
-import React, {
-  useMemo, ReactElement, useEffect, memo, useState, PropsWithChildren,
-} from 'react';
-import { observer, useObservable, useObserver } from 'mobx-react-lite';
+import React from 'react';
+import { observer } from 'mobx-react-lite';
 import {
-  Table, DataSet, Icon, CheckBox, Spin, Output, Button,
-} from 'choerodon-ui/pro/lib';
-import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
-import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
-import { ColumnProps } from 'choerodon-ui/pro/lib/table/Column';
-import {
-  DropResult, ResponderProvided, DraggableProvided,
-  DraggableStateSnapshot, DraggableRubric, DragDropContext, DragStart,
+  DropResult, ResponderProvided, DragDropContext, DragStart,
 } from 'react-beautiful-dnd';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { IFiledProps, pageConfigApi } from '@/api';
-import OldSortTable from '../../../page/components/SortTable';
 import './index.less';
 import { usePageIssueTypeStore } from '../../stores';
 import { useSortTableContext } from './stores';
 import DropContent from './DropContent';
-import { PageIssueTypeStoreStatusCode } from '../../stores/PageIssueTypeStore';
 
-const { Column } = Table;
 interface Props {
   disabled: boolean | undefined,
   org?: number,
   dataStatus: { code: string },
   onDelete?: (data: IFiledProps) => void,
 }
-interface DragRenderCloneProps {
-  provided: DraggableProvided, // DraggableProvided,
-  snapshot: DraggableStateSnapshot, // DraggableStateSnapshot,
-  rubric: DraggableRubric,
-  key: any,
-  record: Record,
-  column: ColumnProps[],
-}
+
 const columns = [
   { name: 'fieldName', label: '字段名称' },
   { name: 'defaultValue', label: '默认值' },
@@ -83,7 +62,7 @@ const SortTable: React.FC = () => {
       // sortTableDataSet.data[source.index].set('rank', newRank);
       // outSetRank(newRank);
       sourceRecord.set('rank', newRank);
-      pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.drag);
+      // pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.drag);
     });
   };
   return (
