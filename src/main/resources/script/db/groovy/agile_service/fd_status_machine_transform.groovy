@@ -17,9 +17,11 @@ databaseChangeLog(logicalFilePath: 'fd_status_machine_transform.groovy') {
             column(name: 'end_node_id', type: 'BIGINT UNSIGNED', remarks: '结束节点id') {
                 constraints(nullable: false)
             }
+            column(name: 'url', type: 'VARCHAR(255)', remarks: '页面')
             column(name: 'type', type: 'VARCHAR(30)', remarks: '类型') {
                 constraints(nullable: false)
             }
+            column(name: 'style', type: 'clob', remarks: '样式')
             column(name: 'condition_strategy', type: 'VARCHAR(20)', remarks: '条件策略', defaultValue: "condition_all")
             column(name: 'organization_id', type: 'BIGINT UNSIGNED', remarks: '组织id') {
                 constraints(nullable: false)
