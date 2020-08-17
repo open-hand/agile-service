@@ -9,14 +9,14 @@ interface Props extends SelectProps {
 }
 
 const SelectNumber: React.FC<Props> = forwardRef(({
-  selectNumbers = ['0.5', '1', '2', '3', '4', '5', '8', '13'], 
-  onChange, 
-  onBlur, 
-  pattern = /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/, 
+  selectNumbers = ['0.5', '1', '2', '3', '4', '5', '8', '13'],
+  onChange,
+  onBlur,
+  pattern = /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/,
   validationRenderer = () => (
     <span>请输入小于3位的整数或者整数位小于3位小数点后一位的小数</span>
-  ), 
-  defaultValue, 
+  ),
+  defaultValue,
   ...otherProps
 }, ref: React.Ref<Select>) => {
   const [value, setValue] = useState<string>('');
@@ -33,7 +33,7 @@ const SelectNumber: React.FC<Props> = forwardRef(({
       const newValue = e.target.value;
       if (!defaultValue) {
         setValue(newValue);
-      } 
+      }
     }
   };
 
@@ -63,6 +63,6 @@ const SelectNumber: React.FC<Props> = forwardRef(({
         ))
     }
     </Select>
-  ); 
+  );
 });
 export default SelectNumber;
