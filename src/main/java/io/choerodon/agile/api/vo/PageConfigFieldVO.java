@@ -18,6 +18,8 @@ public class PageConfigFieldVO {
 
     private String defaultValue;
 
+    private String fieldType;
+
     private Boolean required;
 
     private Boolean created;
@@ -31,6 +33,14 @@ public class PageConfigFieldVO {
     private String createdLevel;
 
     private Long objectVersionNumber;
+
+    public String getFieldType() {
+        return fieldType;
+    }
+
+    public void setFieldType(String fieldType) {
+        this.fieldType = fieldType;
+    }
 
     public Long getObjectVersionNumber() {
         return objectVersionNumber;
