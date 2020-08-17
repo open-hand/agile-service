@@ -79,7 +79,7 @@
             count( SMN.id )
         FROM
             fd_state_machine_node_draft SMN
-            LEFT JOIN fd_state_machine SM ON SMN.state_machine_id = SM.id
+            LEFT JOIN fd_status_machine SM ON SMN.state_machine_id = SM.id
         WHERE
             SMN.status_id = #{statusId}
             AND SM.organization_id = #{organizationId}

@@ -9,10 +9,10 @@ import javax.persistence.*;
 /**
  * @author peng.jiang,dinghuang123@gmail.com
  */
-@Table(name = "fd_state_machine_transform")
+@Table(name = "fd_status_machine_transform")
 @ModifyAudit
 @VersionAudit
-public class StateMachineTransformDTO extends AuditDomain {
+public class StatusMachineTransformDTO extends AuditDomain {
     @Id
     @GeneratedValue
     private Long id;
@@ -33,10 +33,10 @@ public class StateMachineTransformDTO extends AuditDomain {
     @Transient
     private Long endStatusId;
 
-    public StateMachineTransformDTO() {
+    public StatusMachineTransformDTO() {
     }
 
-    public StateMachineTransformDTO(String name, Long stateMachineId, Long startNodeId, Long endNodeId, String type, String conditionStrategy, Long organizationId) {
+    public StatusMachineTransformDTO(String name, Long stateMachineId, Long startNodeId, Long endNodeId, String type, String conditionStrategy, Long organizationId) {
         this.name = name;
         this.stateMachineId = stateMachineId;
         this.startNodeId = startNodeId;

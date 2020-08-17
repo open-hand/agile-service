@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="io.choerodon.agile.infra.mapper.StateMachineMapper">
+<mapper namespace="io.choerodon.agile.infra.mapper.StatusMachineMapper">
 
-    <select id="queryById" resultType="io.choerodon.agile.infra.dto.StateMachineDTO">
+    <select id="queryById" resultType="io.choerodon.agile.infra.dto.StatusMachineDTO">
         SELECT *
-        FROM fd_state_machine
+        FROM fd_status_machine
         WHERE organization_id = #{organizationId}
         and id = #{id}
     </select>
 
-    <select id="fulltextSearch" resultType="io.choerodon.agile.infra.dto.StateMachineDTO">
-        SELECT * FROM fd_state_machine
+    <select id="fulltextSearch" resultType="io.choerodon.agile.infra.dto.StatusMachineDTO">
+        SELECT * FROM fd_status_machine
         WHERE 1=1
         <if test="stateMachine.organizationId != null">
             AND organization_id = #{stateMachine.organizationId}
@@ -30,13 +30,22 @@
 
     <select id="getStatusBySmId" resultType="io.choerodon.agile.api.vo.event.StatusPayload">
         select s.id as status_id, s.name as status_name, s.type, #{projectId} as project_id
-        from fd_state_machine_node smn
+        from fd_status_machine_node smn
         left join fd_status s on smn.status_id = s.id
         where smn.state_machine_id = #{stateMachineId} and smn.status_id != 0
     </select>
 
-    <select id="queryByIds" resultType="io.choerodon.agile.infra.dto.StateMachineDTO">
-        SELECT * FROM fd_state_machine sm
+    <select id="selectAllStateMachine" resultType="io.choerodon.agile.infra.dto.StatusMachineDTO">
+        select * from fd_status_machine
+    </select>
+
+    <insert id="migrateStatusMachine">
+        insert into fd_status_machine
+        select * from fd_state_machine
+    </insert>
+
+    <select id="queryByIds" resultType="io.choerodon.agile.infra.dto.StatusMachineDTO">
+        SELECT * FROM fd_status_machine sm
         WHERE 1=1
         <if test="organizationId != null">
             AND sm.organization_id = #{organizationId}

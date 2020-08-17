@@ -4,7 +4,7 @@ import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.api.vo.StateMachineSchemeConfigVO;
 import io.choerodon.agile.api.vo.StateMachineSchemeVO;
 import io.choerodon.agile.infra.dto.ProjectConfigDTO;
-import io.choerodon.agile.infra.dto.StateMachineSchemeConfigDTO;
+import io.choerodon.agile.infra.dto.StatusMachineSchemeConfigDTO;
 import io.choerodon.agile.infra.dto.StateMachineSchemeDTO;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -24,7 +24,7 @@ public class ConvertUtils {
     public static StateMachineSchemeVO convertStateMachineSchemeToVO(final StateMachineSchemeDTO scheme, final Map<Long, ProjectVO> projectMap) {
         ModelMapper modelMapper = new ModelMapper();
         StateMachineSchemeVO schemeVO = modelMapper.map(scheme, StateMachineSchemeVO.class);
-        List<StateMachineSchemeConfigDTO> schemeConfigs = scheme.getSchemeConfigs();
+        List<StatusMachineSchemeConfigDTO> schemeConfigs = scheme.getSchemeConfigs();
         if (null != schemeConfigs && !schemeConfigs.isEmpty()) {
             List<StateMachineSchemeConfigVO> schemeConfigVOS = modelMapper.map(schemeConfigs, new TypeToken<List<StateMachineSchemeConfigVO>>() {
             }.getType());

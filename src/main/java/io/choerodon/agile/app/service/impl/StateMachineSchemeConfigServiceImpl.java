@@ -5,7 +5,7 @@ import io.choerodon.agile.api.vo.event.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.annotation.ChangeSchemeStatus;
 import io.choerodon.agile.infra.dto.ProjectConfigDTO;
-import io.choerodon.agile.infra.dto.StateMachineSchemeConfigDTO;
+import io.choerodon.agile.infra.dto.StatusMachineSchemeConfigDTO;
 import io.choerodon.agile.infra.dto.StateMachineSchemeConfigDraftDTO;
 import io.choerodon.agile.infra.dto.StateMachineSchemeDTO;
 import io.choerodon.agile.infra.enums.SchemeType;
@@ -13,11 +13,10 @@ import io.choerodon.agile.infra.enums.StateMachineSchemeDeployStatus;
 import io.choerodon.agile.infra.enums.StateMachineSchemeStatus;
 import io.choerodon.agile.infra.mapper.ProjectConfigMapper;
 import io.choerodon.agile.infra.mapper.StateMachineSchemeConfigDraftMapper;
-import io.choerodon.agile.infra.mapper.StateMachineSchemeConfigMapper;
+import io.choerodon.agile.infra.mapper.StatusMachineSchemeConfigMapper;
 import io.choerodon.agile.infra.mapper.StateMachineSchemeMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.hzero.mybatis.common.Criteria;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
@@ -38,7 +37,7 @@ import java.util.stream.Collectors;
 public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeConfigService {
     public static final Logger logger = LoggerFactory.getLogger(StateMachineSchemeConfigServiceImpl.class);
     @Autowired
-    private StateMachineSchemeConfigMapper configMapper;
+    private StatusMachineSchemeConfigMapper configMapper;
     @Autowired
     private StateMachineSchemeConfigDraftMapper configDraftMapper;
     @Autowired
@@ -87,7 +86,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
         draft.setSchemeId(schemeId);
         configDraftMapper.delete(draft);
         //删除发布
-        StateMachineSchemeConfigDTO config = new StateMachineSchemeConfigDTO();
+        StatusMachineSchemeConfigDTO config = new StatusMachineSchemeConfigDTO();
         config.setOrganizationId(organizationId);
         config.setSchemeId(schemeId);
         configMapper.delete(config);
@@ -171,11 +170,11 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
                 return configDraftMapper.selectDefault(organizationId, schemeId).getStateMachineId();
             }
         } else {
-            StateMachineSchemeConfigDTO config = new StateMachineSchemeConfigDTO();
+            StatusMachineSchemeConfigDTO config = new StatusMachineSchemeConfigDTO();
             config.setOrganizationId(organizationId);
             config.setSchemeId(schemeId);
             config.setIssueTypeId(issueTypeId);
-            List<StateMachineSchemeConfigDTO> configs = configMapper.select(config);
+            List<StatusMachineSchemeConfigDTO> configs = configMapper.select(config);
             if (!configs.isEmpty()) {
                 return configs.get(0).getStateMachineId();
             } else {
@@ -195,12 +194,12 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
             List<StateMachineSchemeConfigDraftDTO> configs = configDraftMapper.select(config);
             return configs.stream().map(StateMachineSchemeConfigDraftDTO::getIssueTypeId).collect(Collectors.toList());
         } else {
-            StateMachineSchemeConfigDTO config = new StateMachineSchemeConfigDTO();
+            StatusMachineSchemeConfigDTO config = new StatusMachineSchemeConfigDTO();
             config.setOrganizationId(organizationId);
             config.setSchemeId(schemeId);
             config.setStateMachineId(stateMachineId);
-            List<StateMachineSchemeConfigDTO> configs = configMapper.select(config);
-            return configs.stream().map(StateMachineSchemeConfigDTO::getIssueTypeId).collect(Collectors.toList());
+            List<StatusMachineSchemeConfigDTO> configs = configMapper.select(config);
+            return configs.stream().map(StatusMachineSchemeConfigDTO::getIssueTypeId).collect(Collectors.toList());
         }
     }
 
@@ -214,7 +213,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
             configVOS = modelMapper.map(configDraftMapper.select(select), new TypeToken<List<StateMachineSchemeConfigVO>>() {
             }.getType());
         } else {
-            StateMachineSchemeConfigDTO select = new StateMachineSchemeConfigDTO();
+            StatusMachineSchemeConfigDTO select = new StatusMachineSchemeConfigDTO();
             select.setOrganizationId(organizationId);
             select.setSchemeId(schemeId);
             configVOS = modelMapper.map(configMapper.select(select), new TypeToken<List<StateMachineSchemeConfigVO>>() {
@@ -232,10 +231,10 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
             select.setOrganizationId(organizationId);
             schemeIds = configDraftMapper.select(select).stream().map(StateMachineSchemeConfigDraftDTO::getSchemeId).distinct().collect(Collectors.toList());
         } else {
-            StateMachineSchemeConfigDTO select = new StateMachineSchemeConfigDTO();
+            StatusMachineSchemeConfigDTO select = new StatusMachineSchemeConfigDTO();
             select.setStateMachineId(stateMachineId);
             select.setOrganizationId(organizationId);
-            schemeIds = configMapper.select(select).stream().map(StateMachineSchemeConfigDTO::getSchemeId).distinct().collect(Collectors.toList());
+            schemeIds = configMapper.select(select).stream().map(StatusMachineSchemeConfigDTO::getSchemeId).distinct().collect(Collectors.toList());
         }
         return schemeIds;
     }
@@ -253,11 +252,11 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
         Map<Long, List<StatusVO>> smMap = stateMachineWithStatusVOS.stream().collect(Collectors.toMap(StateMachineWithStatusVO::getId, StateMachineWithStatusVO::getStatusVOS));
         //获取发布配置
         List<Long> oldStatusIds = new ArrayList<>();
-        StateMachineSchemeConfigDTO config = new StateMachineSchemeConfigDTO();
+        StatusMachineSchemeConfigDTO config = new StatusMachineSchemeConfigDTO();
         config.setSchemeId(schemeId);
         config.setOrganizationId(organizationId);
-        List<StateMachineSchemeConfigDTO> deploys = configMapper.select(config);
-        List<Long> oldStateMachineIds = deploys.stream().map(StateMachineSchemeConfigDTO::getStateMachineId).collect(Collectors.toList());
+        List<StatusMachineSchemeConfigDTO> deploys = configMapper.select(config);
+        List<Long> oldStateMachineIds = deploys.stream().map(StatusMachineSchemeConfigDTO::getStateMachineId).collect(Collectors.toList());
         for (Long oldStateMachineId : oldStateMachineIds) {
             oldStatusIds.addAll(smMap.get(oldStateMachineId).stream().map(StatusVO::getId).collect(Collectors.toList()));
 
@@ -384,11 +383,11 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
     @Override
     public List<StateMachineSchemeChangeItem> checkDeploy(Long organizationId, Long schemeId) {
         //获取发布配置
-        StateMachineSchemeConfigDTO config = new StateMachineSchemeConfigDTO();
+        StatusMachineSchemeConfigDTO config = new StatusMachineSchemeConfigDTO();
         config.setSchemeId(schemeId);
         config.setOrganizationId(organizationId);
-        List<StateMachineSchemeConfigDTO> deploys = configMapper.select(config);
-        Map<Long, Long> deployMap = deploys.stream().collect(Collectors.toMap(StateMachineSchemeConfigDTO::getIssueTypeId, StateMachineSchemeConfigDTO::getStateMachineId));
+        List<StatusMachineSchemeConfigDTO> deploys = configMapper.select(config);
+        Map<Long, Long> deployMap = deploys.stream().collect(Collectors.toMap(StatusMachineSchemeConfigDTO::getIssueTypeId, StatusMachineSchemeConfigDTO::getStateMachineId));
         Long deployDefaultStateMachineId = deployMap.get(0L);
         deployMap.remove(0L);
         //获取草稿配置
@@ -489,10 +488,10 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
             configDraftMapper.delete(draft);
         }
         //复制发布配置到草稿配置
-        StateMachineSchemeConfigDTO config = new StateMachineSchemeConfigDTO();
+        StatusMachineSchemeConfigDTO config = new StatusMachineSchemeConfigDTO();
         config.setSchemeId(schemeId);
         config.setOrganizationId(organizationId);
-        List<StateMachineSchemeConfigDTO> configs = configMapper.select(config);
+        List<StatusMachineSchemeConfigDTO> configs = configMapper.select(config);
         if (configs != null && !configs.isEmpty()) {
             List<StateMachineSchemeConfigDraftDTO> configDrafts = modelMapper.map(configs, new TypeToken<List<StateMachineSchemeConfigDraftDTO>>() {
             }.getType());
@@ -509,7 +508,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
     public void copyDraftToDeploy(Boolean isDeleteOldDeploy, Long organizationId, Long schemeId) {
         //删除发布配置
         if (isDeleteOldDeploy) {
-            StateMachineSchemeConfigDTO deploy = new StateMachineSchemeConfigDTO();
+            StatusMachineSchemeConfigDTO deploy = new StatusMachineSchemeConfigDTO();
             deploy.setSchemeId(schemeId);
             deploy.setOrganizationId(organizationId);
             configMapper.delete(deploy);
@@ -520,9 +519,9 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
         draft.setOrganizationId(organizationId);
         List<StateMachineSchemeConfigDraftDTO> configs = configDraftMapper.select(draft);
         if (configs != null && !configs.isEmpty()) {
-            List<StateMachineSchemeConfigDTO> configDrafts = modelMapper.map(configs, new TypeToken<List<StateMachineSchemeConfigDTO>>() {
+            List<StatusMachineSchemeConfigDTO> configDrafts = modelMapper.map(configs, new TypeToken<List<StatusMachineSchemeConfigDTO>>() {
             }.getType());
-            for (StateMachineSchemeConfigDTO insertConfig : configDrafts) {
+            for (StatusMachineSchemeConfigDTO insertConfig : configDrafts) {
                 int result = configMapper.insert(insertConfig);
                 if (result != 1) {
                     throw new CommonException("error.stateMachineSchemeConfig.create");
@@ -533,15 +532,15 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
 
     @Override
     public Long queryStatusMachineBySchemeIdAndIssueType(Long organizationId, Long stateMachineSchemeId, Long issueTypeId) {
-        StateMachineSchemeConfigDTO config = new StateMachineSchemeConfigDTO(stateMachineSchemeId,issueTypeId,organizationId);
-        List<StateMachineSchemeConfigDTO> configs = configMapper.select(config);
+        StatusMachineSchemeConfigDTO config = new StatusMachineSchemeConfigDTO(stateMachineSchemeId,issueTypeId,organizationId);
+        List<StatusMachineSchemeConfigDTO> configs = configMapper.select(config);
         Long stateMachineId = null;
         if (!configs.isEmpty()) {
             // 默认使用查询出来的第一个状态机
             Long currentStateMachineId = configs.get(0).getStateMachineId();
             // 校验在是否有其他问题类型共用一个状态机
-            StateMachineSchemeConfigDTO configDTO = new StateMachineSchemeConfigDTO(currentStateMachineId,false,organizationId);
-            List<StateMachineSchemeConfigDTO> select = configMapper.select(configDTO);
+            StatusMachineSchemeConfigDTO configDTO = new StatusMachineSchemeConfigDTO(currentStateMachineId,false,organizationId);
+            List<StatusMachineSchemeConfigDTO> select = configMapper.select(configDTO);
             if (select.size() <= 1) {
                 return currentStateMachineId;
             }
@@ -561,7 +560,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
     }
 
     private void insert(Long organizationId, Long stateMachineId, Long stateMachineSchemeId, Long issueTypeId, boolean isDefault) {
-        StateMachineSchemeConfigDTO configDTO = new StateMachineSchemeConfigDTO();
+        StatusMachineSchemeConfigDTO configDTO = new StatusMachineSchemeConfigDTO();
         configDTO.setOrganizationId(organizationId);
         configDTO.setSchemeId(stateMachineSchemeId);
         configDTO.setStateMachineId(stateMachineId);

@@ -46,7 +46,7 @@ public class IssueTypeDTO extends AuditDomain {
     private BigDecimal sequence;
 
     @Transient
-    private StateMachineSchemeConfigDTO stateMachineSchemeConfig;
+    private StatusMachineSchemeConfigDTO stateMachineSchemeConfig;
 
     public Long getId() {
         return id;
@@ -97,11 +97,11 @@ public class IssueTypeDTO extends AuditDomain {
         this.icon = icon;
     }
 
-    public StateMachineSchemeConfigDTO getStateMachineSchemeConfig() {
+    public StatusMachineSchemeConfigDTO getStateMachineSchemeConfig() {
         return stateMachineSchemeConfig;
     }
 
-    public void setStateMachineSchemeConfig(StateMachineSchemeConfigDTO stateMachineSchemeConfig) {
+    public void setStateMachineSchemeConfig(StatusMachineSchemeConfigDTO stateMachineSchemeConfig) {
         this.stateMachineSchemeConfig = stateMachineSchemeConfig;
     }
 

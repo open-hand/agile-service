@@ -9,10 +9,10 @@ import javax.persistence.*;
 /**
  * @author peng.jiang,dinghuang123@gmail.com
  */
-@Table(name = "fd_state_machine_node")
+@Table(name = "fd_status_machine_node")
 @ModifyAudit
 @VersionAudit
-public class StateMachineNodeDTO extends AuditDomain {
+public class StatusMachineNodeDTO extends AuditDomain {
     @Id
     @GeneratedValue
     private Long id;
@@ -32,10 +32,10 @@ public class StateMachineNodeDTO extends AuditDomain {
     @Transient
     private StatusDTO status;
 
-    public StateMachineNodeDTO() {
+    public StatusMachineNodeDTO() {
     }
 
-    public StateMachineNodeDTO(Long stateMachineId, Long statusId, Long organizationId) {
+    public StatusMachineNodeDTO(Long stateMachineId, Long statusId, Long organizationId) {
         this.stateMachineId = stateMachineId;
         this.statusId = statusId;
         this.organizationId = organizationId;

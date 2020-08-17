@@ -12,10 +12,10 @@ import javax.persistence.Table;
 /**
  * @author peng.jiang@hand-china.com
  */
-@Table(name = "fd_state_machine_scheme_config")
+@Table(name = "fd_status_machine_scheme_config")
 @ModifyAudit
 @VersionAudit
-public class StateMachineSchemeConfigDTO extends AuditDomain {
+public class StatusMachineSchemeConfigDTO extends AuditDomain {
 
     @Id
     @GeneratedValue
@@ -27,22 +27,22 @@ public class StateMachineSchemeConfigDTO extends AuditDomain {
     private Integer sequence;
     private Long organizationId;
 
-    public StateMachineSchemeConfigDTO() {
+    public StatusMachineSchemeConfigDTO() {
     }
 
-    public StateMachineSchemeConfigDTO(Long schemeId, Long issueTypeId, Long organizationId) {
+    public StatusMachineSchemeConfigDTO(Long schemeId, Long issueTypeId, Long organizationId) {
         this.schemeId = schemeId;
         this.issueTypeId = issueTypeId;
         this.organizationId = organizationId;
     }
 
-    public StateMachineSchemeConfigDTO(Long stateMachineId, Boolean isDefault, Long organizationId) {
+    public StatusMachineSchemeConfigDTO(Long stateMachineId, Boolean isDefault, Long organizationId) {
         this.stateMachineId = stateMachineId;
         this.isDefault = isDefault;
         this.organizationId = organizationId;
     }
 
-    public StateMachineSchemeConfigDTO(Long schemeId, Long issueTypeId, Long stateMachineId, Boolean isDefault, Long organizationId) {
+    public StatusMachineSchemeConfigDTO(Long schemeId, Long issueTypeId, Long stateMachineId, Boolean isDefault, Long organizationId) {
         this.schemeId = schemeId;
         this.issueTypeId = issueTypeId;
         this.stateMachineId = stateMachineId;

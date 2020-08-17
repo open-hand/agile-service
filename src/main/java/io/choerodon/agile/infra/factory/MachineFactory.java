@@ -2,11 +2,11 @@ package io.choerodon.agile.infra.factory;
 
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.cache.InstanceCache;
-import io.choerodon.agile.infra.dto.StateMachineDTO;
-import io.choerodon.agile.infra.dto.StateMachineNodeDTO;
-import io.choerodon.agile.infra.dto.StateMachineTransformDTO;
+import io.choerodon.agile.infra.dto.StatusMachineDTO;
+import io.choerodon.agile.infra.dto.StatusMachineNodeDTO;
+import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
 import io.choerodon.agile.infra.enums.TransformType;
-import io.choerodon.agile.infra.mapper.StateMachineNodeMapper;
+import io.choerodon.agile.infra.mapper.StatusMachineNodeMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
@@ -43,16 +43,16 @@ public class MachineFactory {
     @Autowired
     private StateMachineNodeService nodeService;
     @Autowired
-    private StateMachineNodeMapper nodeDeployMapper;
+    private StatusMachineNodeMapper nodeDeployMapper;
     @Autowired
     private InstanceService instanceService;
     @Autowired
     private InstanceCache instanceCache;
 
     private StateMachineBuilder.Builder<String, String> getBuilder(Long organizationId, String serviceCode, Long stateMachineId) {
-        StateMachineDTO stateMachine = stateMachineService.queryDeployForInstance(organizationId, stateMachineId);
-        List<StateMachineNodeDTO> nodes = stateMachine.getNodes();
-        List<StateMachineTransformDTO> transforms = stateMachine.getTransforms();
+        StatusMachineDTO stateMachine = stateMachineService.queryDeployForInstance(organizationId, stateMachineId);
+        List<StatusMachineNodeDTO> nodes = stateMachine.getNodes();
+        List<StatusMachineTransformDTO> transforms = stateMachine.getTransforms();
         Long initNodeId = nodeService.getInitNode(organizationId, stateMachineId);
 
         StateMachineBuilder.Builder<String, String> builder = StateMachineBuilder.builder();
@@ -64,10 +64,10 @@ public class MachineFactory {
                     .withStates()
                     .initial(initNodeId.toString(), initialAction(organizationId, serviceCode))
                     .states(nodes.stream().map(x -> x.getId().toString()).collect(Collectors.toSet()));
-            for (StateMachineTransformDTO transform : transforms) {
+            for (StatusMachineTransformDTO transform : transforms) {
                 if (transform.getType().equals(TransformType.ALL)) {
                     //若配置了全部转换
-                    for (StateMachineNodeDTO node : nodes) {
+                    for (StatusMachineNodeDTO node : nodes) {
                         String event = transform.getId().toString();
                         String source = node.getId().toString();
                         String target = transform.getEndNodeId().toString();
@@ -151,9 +151,9 @@ public class MachineFactory {
         try {
             Long instanceId = inputDTO.getInstanceId();
             //校验transformId是否合法
-            List<StateMachineTransformDTO> transforms = transformService.queryListByStatusIdByDeploy(organizationId, stateMachineId, currentStatusId);
-            StateMachineTransformDTO transform = null;
-            for (StateMachineTransformDTO t : transforms) {
+            List<StatusMachineTransformDTO> transforms = transformService.queryListByStatusIdByDeploy(organizationId, stateMachineId, currentStatusId);
+            StatusMachineTransformDTO transform = null;
+            for (StatusMachineTransformDTO t : transforms) {
                 if (t.getId().equals(transformId)) {
                     transform = t;
                 }
@@ -201,7 +201,7 @@ public class MachineFactory {
 
     }
 
-    private boolean isInstanceLatest(StateMachineTransformDTO transform, StateMachine<String, String> instance) {
+    private boolean isInstanceLatest(StatusMachineTransformDTO transform, StateMachine<String, String> instance) {
         Long endNodeId = transform.getEndNodeId();
         for (State<String, String> s :instance.getStates()) {
             if (Long.valueOf(s.getId()).equals(endNodeId)) {

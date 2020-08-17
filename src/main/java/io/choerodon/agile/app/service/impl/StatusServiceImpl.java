@@ -37,17 +37,17 @@ public class StatusServiceImpl implements StatusService {
     @Autowired
     private StateMachineNodeDraftMapper nodeDraftMapper;
     @Autowired
-    private StateMachineNodeMapper nodeDeployMapper;
+    private StatusMachineNodeMapper nodeDeployMapper;
     @Autowired
     private StateMachineNodeService nodeService;
     @Autowired
     private StateMachineTransformDraftMapper transformDraftMapper;
     @Autowired
-    private StateMachineTransformMapper transformDeployMapper;
+    private StatusMachineTransformMapper transformDeployMapper;
     @Autowired
     private InstanceCache instanceCache;
     @Autowired
-    private StateMachineMapper stateMachineMapper;
+    private StatusMachineMapper statusMachineMapper;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
@@ -210,7 +210,7 @@ public class StatusServiceImpl implements StatusService {
         if (stateMachineId == null) {
             throw new CommonException("error.stateMachineId.notNull");
         }
-        if (stateMachineMapper.queryById(organizationId, stateMachineId) == null) {
+        if (statusMachineMapper.queryById(organizationId, stateMachineId) == null) {
             throw new CommonException("error.stateMachine.notFound");
         }
 
@@ -236,11 +236,11 @@ public class StatusServiceImpl implements StatusService {
         if (statusId == null) {
             throw new CommonException("error.statusId.notNull");
         }
-        StateMachineNodeDTO stateNode = new StateMachineNodeDTO();
+        StatusMachineNodeDTO stateNode = new StatusMachineNodeDTO();
         stateNode.setOrganizationId(organizationId);
         stateNode.setStateMachineId(stateMachineId);
         stateNode.setStatusId(statusId);
-        StateMachineNodeDTO res = nodeDeployMapper.selectOne(stateNode);
+        StatusMachineNodeDTO res = nodeDeployMapper.selectOne(stateNode);
         if (res == null) {
             throw new RemoveStatusException("error.status.exist");
         }
@@ -339,7 +339,7 @@ public class StatusServiceImpl implements StatusService {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         ProjectConfigDetailVO projectConfigDetailVO = projectConfigService.queryById(projectId);
         StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
-        List<StateMachineNodeDTO> list = nodeDeployMapper.selectInitNode(organizationId, stateMachineSchemeVO.getId(), statusId);
+        List<StatusMachineNodeDTO> list = nodeDeployMapper.selectInitNode(organizationId, stateMachineSchemeVO.getId(), statusId);
         if (!CollectionUtils.isEmpty(list)) {
             throw new CommonException("error.status.has.init");
         }
