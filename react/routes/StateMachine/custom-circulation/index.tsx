@@ -51,7 +51,7 @@ interface IStatusNoticeSettingVOS {
   statusId: string,
   userTypeList: ['projectOwner', 'assignee', 'reporter', 'specifier'],
   userList: {id: string, realName: string}[],
-  noticeTypeList: ['webhook'| 'email'| 'webMessage'];
+  noticeTypeList: ['WEB_HOOK'| 'EMAIL'| 'WEB'];
   memberList: {id: string, name: string}[]
 }
 
@@ -97,9 +97,9 @@ const transformedMember = {
 };
 
 const transformedNoticeType = {
-  email: '邮件',
-  webMessage: '站内信',
-  webhook: 'webhook',
+  EMAIL: '邮件',
+  WEB: 'webMessage',
+  WEB_HOOK: 'webhook',
 };
 
 // @ts-ignore

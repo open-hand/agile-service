@@ -129,4 +129,6 @@ export interface IField {
   fieldTypeName?: string,
   id: string,
   name: string,
+  system: boolean,
+  extraConfig?: boolean,
 }

@@ -26,9 +26,9 @@ const NotifySetting = ({
 
   const notifyMethodDataSet = useMemo(() => new DataSet({
     data: [
-      { label: '邮件', code: 'email' },
-      { label: '站内信', code: 'webMessage' },
-      { label: 'webhook', code: 'webhook' },
+      { label: '邮件', code: 'EMAIL' },
+      { label: '站内信', code: 'WEB' },
+      { label: 'webhook', code: 'WEB_HOOK' },
     ],
     fields: [
       { name: 'code', type: 'string' as FieldType },

@@ -53,6 +53,7 @@ interface ISettingField {
 }
 
 const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epicName', 'epic', 'pi', 'timeTrace', 'lastUpdateDate', 'creationDate'];
+
 const dateTransform = (fieldType: string, d: Date) => {
   let transformed = '';
   switch (fieldType) {
@@ -250,6 +251,29 @@ const UpdateField = ({
     label: '人员',
   })), [fieldData]);
 
+  const numberFields = useMemo(() => fieldData.filter((field) => field.fieldType === 'number').map((field) => {
+    if (field.code === 'storyPoints' || field.code === 'remainingTime') {
+      return {
+        name: field.code,
+        type: 'number' as FieldType,
+        min: 0,
+        max: 100,
+        step: 1,
+      };
+    } if (!field.system && field.extraConfig) {
+      return {
+        name: field.code,
+        type: 'number' as FieldType,
+        step: 0.01,
+      };
+    }
+    return {
+      name: field.code,
+      type: 'number' as FieldType,
+      step: 1,
+    };
+  }), [fieldData]);
+
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [
@@ -332,7 +356,7 @@ const UpdateField = ({
         }),
         valueField: 'versionId',
         textField: 'name',
-      }, ...userFields],
+      }, ...userFields, ...numberFields],
     events: {
       update: ({
         // @ts-ignore
@@ -345,7 +369,7 @@ const UpdateField = ({
         setUpdateCount((count) => count + 1);
       },
     },
-  }), [userFields]);
+  }), [numberFields, userFields]);
 
   useEffect(() => {
     pageConfigApi.loadFieldsByType(selectedType).then((res: IField[]) => {
@@ -399,13 +423,18 @@ const UpdateField = ({
 
   useEffect(() => {
     const submit = async () => {
-      const data = getData();
-      console.log(data);
-      const updateData = transformUpdateData(data);
-      console.log(updateData);
-      await statusTransformApi.updateField(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
-      customCirculationDataSet.query();
-      return true;
+      const validate = await dataSet.validate();
+      console.log(validate);
+      if (validate) {
+        const data = getData();
+        console.log(data);
+        const updateData = transformUpdateData(data);
+        console.log(updateData);
+        await statusTransformApi.updateField(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
+        customCirculationDataSet.query();
+        return true;
+      }
+      return false;
     };
     modal.handleOk(submit);
   }, [customCirculationDataSet, getData, modal, record, selectedType]);
