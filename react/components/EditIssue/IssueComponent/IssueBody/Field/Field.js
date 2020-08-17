@@ -12,7 +12,6 @@ import SelectFocusLoad from '../../../../SelectFocusLoad';
 import UserHead from '../../../../UserHead';
 import './Field.less';
 
-
 const { TextArea } = Input;
 const { Option } = Select;
 const { Text, Edit } = TextEditToggle;
@@ -71,7 +70,7 @@ let sign = false;
       if ((fieldType === 'number' && newValue === undefined) || (fieldType !== 'number' && !newValue)) {
         Choerodon.prompt(`${fieldName}必填！`);
         return;
-      } else if (newValue instanceof Array && newValue.length === 0) {
+      } if (newValue instanceof Array && newValue.length === 0) {
         Choerodon.prompt(`${fieldName}必填！`);
         return;
       }
@@ -121,10 +120,10 @@ let sign = false;
         return (
           <Radio.Group
             className="fieldWith"
-            onChange={e => this.handleChange(e)}
+            onChange={(e) => this.handleChange(e)}
           >
             {fieldOptions && fieldOptions.length > 0
-              && fieldOptions.filter(option => option.enabled || option.id === value).map(item => (
+              && fieldOptions.filter((option) => option.enabled || option.id === value).map((item) => (
                 <Radio
                   className="radioStyle"
                   value={item.id}
@@ -135,26 +134,25 @@ let sign = false;
               ))}
           </Radio.Group>
         );
-      } else {
-        return (
-          <Radio.Group
-            className="fieldWith"
-            onChange={e => this.handleChange(e)}
-          >
-            <span style={{ color: '#D50000' }}>暂无选项，请联系管理员</span>
-          </Radio.Group>
-        );
       }
-    } else if (field.fieldType === 'checkbox') {
+      return (
+        <Radio.Group
+          className="fieldWith"
+          onChange={(e) => this.handleChange(e)}
+        >
+          <span style={{ color: '#D50000' }}>暂无选项，请联系管理员</span>
+        </Radio.Group>
+      );
+    } if (field.fieldType === 'checkbox') {
       if (fieldOptions && fieldOptions.length > 0) {
         return (
           <Checkbox.Group
             className="fieldWith"
-            onChange={e => this.handleChange(e)}
+            onChange={(e) => this.handleChange(e)}
           >
             <Row>
               {fieldOptions && fieldOptions.length > 0
-                && fieldOptions.filter(option => option.enabled || value.indexOf(option.id) !== -1).map(item => (
+                && fieldOptions.filter((option) => option.enabled || value.indexOf(option.id) !== -1).map((item) => (
                   <Col
                     span={24}
                     key={item.id}
@@ -171,54 +169,53 @@ let sign = false;
             </Row>
           </Checkbox.Group>
         );
-      } else {
-        return (
-          <Checkbox.Group
-            className="fieldWith"
-            onChange={e => this.handleChange(e)}
-          >
-            <span style={{ color: '#D50000' }}>暂无选项，请联系管理员</span>
-          </Checkbox.Group>
-        );
       }
-    } else if (field.fieldType === 'time') {
+      return (
+        <Checkbox.Group
+          className="fieldWith"
+          onChange={(e) => this.handleChange(e)}
+        >
+          <span style={{ color: '#D50000' }}>暂无选项，请联系管理员</span>
+        </Checkbox.Group>
+      );
+    } if (field.fieldType === 'time') {
       return (
         <TimePicker
           className="fieldWith"
           defaultOpenValue={moment('00:00:00', 'HH:mm:ss')}
           allowEmpty={!required}
-          onChange={e => this.handleChange(e)}
+          onChange={(e) => this.handleChange(e)}
         />
       );
-    } else if (field.fieldType === 'datetime') {
+    } if (field.fieldType === 'datetime') {
       return (
         <DatePicker
           showTime
           format="YYYY-MM-DD HH:mm:ss"
           className="fieldWith"
           allowClear={!required}
-          onChange={e => this.handleChange(e)}
+          onChange={(e) => this.handleChange(e)}
         />
       );
-    } else if (field.fieldType === 'date') {
+    } if (field.fieldType === 'date') {
       return (
         <DatePicker
           format="YYYY-MM-DD"
           className="fieldWith"
           allowClear={!required}
-          onChange={e => this.handleChange(e)}
+          onChange={(e) => this.handleChange(e)}
         />
       );
-    } else if (field.fieldType === 'single') {
+    } if (field.fieldType === 'single') {
       return (
         <Select
           dropdownMatchSelectWidth
           className="fieldWith"
           allowClear={!required}
-          onChange={e => this.handleChange(e)}
+          onChange={(e) => this.handleChange(e)}
         >
           {field.fieldOptions && field.fieldOptions.length > 0
-            && field.fieldOptions.filter(option => option.enabled || option.id === value).map(item => (
+            && field.fieldOptions.filter((option) => option.enabled || option.id === value).map((item) => (
               <Option
                 value={item.id}
                 key={item.id}
@@ -228,16 +225,16 @@ let sign = false;
             ))}
         </Select>
       );
-    } else if (field.fieldType === 'multiple') {
+    } if (field.fieldType === 'multiple') {
       return (
         <Select
           dropdownMatchSelectWidth
           mode="multiple"
           className="fieldWith"
-          onChange={e => this.handleChange(e)}
+          onChange={(e) => this.handleChange(e)}
         >
           {field.fieldOptions && field.fieldOptions.length > 0
-            && field.fieldOptions.filter(option => option.enabled || (value && value.indexOf(option.id) !== -1)).map(item => (
+            && field.fieldOptions.filter((option) => option.enabled || (value && value.indexOf(option.id) !== -1)).map((item) => (
               <Option
                 value={item.id}
                 key={item.id}
@@ -247,27 +244,27 @@ let sign = false;
             ))}
         </Select>
       );
-    } else if (field.fieldType === 'number') {
+    } if (field.fieldType === 'number') {
       return (
         <InputNumber
           autoFocus
-          onChange={e => this.handleChange(e)}
+          onChange={(e) => this.handleChange(e)}
           className="fieldWith"
           step={field.extraConfig === '1' ? 0.1 : 1}
           maxLength={8}
         />
       );
-    } else if (field.fieldType === 'text') {
+    } if (field.fieldType === 'text') {
       return (
         <TextArea
           autoFocus
           autosize
           className="fieldWith textArea"
-          onChange={e => this.handleChange(e)}
+          onChange={(e) => this.handleChange(e)}
           maxLength={255}
         />
       );
-    } else if (field.fieldType === 'member') {
+    } if (field.fieldType === 'member') {
       return (
         <SelectFocusLoad
           type="user"
@@ -276,30 +273,28 @@ let sign = false;
           filterOption={false}
           defaultOption={field.valueStr || undefined}
           defaultOpen
-          allowClear          
-          onChange={e => this.handleChange(e)}
-        />
-      );
-    } else {
-      return (
-        <Input
-          autoFocus
-          maxLength={100}
-          className="fieldWith"
-          onChange={e => this.handleChange(e)}
+          allowClear
+          onChange={(e) => this.handleChange(e)}
         />
       );
     }
+    return (
+      <Input
+        autoFocus
+        maxLength={100}
+        className="fieldWith"
+        onChange={(e) => this.handleChange(e)}
+      />
+    );
   };
 
   transform = (fieldType, value) => {
     if (fieldType === 'time' || fieldType === 'datetime' || fieldType === 'date') {
       return value ? moment(value) : undefined;
-    } else if (value instanceof Array) {
+    } if (value instanceof Array) {
       return value.slice();
-    } else {
-      return value;
     }
+    return value;
   };
 
   render() {
@@ -324,7 +319,7 @@ let sign = false;
             required={required}
             fieldType={fieldType}
             fieldName={fieldName}
-            fieldProps={{ getValueFromEvent: fieldType === 'number' ? v => (v ? String(v) : undefined) : undefined }}
+            fieldProps={{ getValueFromEvent: fieldType === 'number' ? (v) => (v ? String(v) : undefined) : undefined }}
           >
             <Text key="text">
               <div style={{ maxWidth: 200, wordBreak: 'break-all', whiteSpace: 'pre-line' }}>
