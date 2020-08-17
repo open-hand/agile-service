@@ -20,10 +20,11 @@ class CardProvider extends React.Component {
     return isUsingPlaceholder && !find(data, { issueId });
   };
 
-  renderIssueItem = (data, { index, style }) => {
+  renderIssueItem = ({ index, style }) => {
     const {
       keyId, id, completed, statusName, categoryCode,
     } = this.props;
+    const data = ScrumBoardStore.getSwimLaneData[keyId][id];
     const issueObj = data[index];
     if (!issueObj) {
       return null;
@@ -31,10 +32,10 @@ class CardProvider extends React.Component {
     const draggableId = `${keyId}/${issueObj.issueId}`;
     return (
       <Draggable draggableId={draggableId} index={index} key={draggableId}>
-        {provided => (
+        {(provided) => (
           <Card
             provided={provided}
-            key={issueObj.issueId}            
+            key={issueObj.issueId}
             index={index}
             issue={issueObj}
             completed={completed}
@@ -44,7 +45,7 @@ class CardProvider extends React.Component {
           />
         )}
       </Draggable>
-      
+
     );
   };
 
@@ -59,17 +60,17 @@ class CardProvider extends React.Component {
     return (
       data.length > VIRTUAL_LIMIT ? (
         <WindowScroller scrollElement={document.getElementsByClassName('c7n-scrumboard')[0]}>
-          {({ height, scrollTop, registerChild }) => (         
+          {({ height, scrollTop, registerChild }) => (
             <AutoSizer disableHeight>
               {({ width }) => (
-                <div ref={el => registerChild(el)} style={{ width: '100%' }}>
+                <div ref={(el) => registerChild(el)} style={{ width: '100%' }}>
                   <List
                     autoHeight
                     width={width}
                     height={height}
                     rowCount={rowCount}
                     rowHeight={120}
-                    rowRenderer={this.renderIssueItem.bind(this, data)}
+                    rowRenderer={this.renderIssueItem}
                     scrollTop={scrollTop}
                   />
                 </div>
@@ -77,8 +78,8 @@ class CardProvider extends React.Component {
             </AutoSizer>
           )}
         </WindowScroller>
-      ) : data.map((item, index) => this.renderIssueItem(data, { index }))       
-    ); 
+      ) : data.map((item, index) => this.renderIssueItem({ index }))
+    );
   }
 }
 export default CardProvider;

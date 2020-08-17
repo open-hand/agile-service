@@ -343,7 +343,9 @@ class ScrumBoardHome extends Component {
     const { type, id: projectId, organizationId: orgId } = menu;
     const currentSprintIsDoing = ScrumBoardStore.didCurrentSprintExist && ScrumBoardStore.sprintNotClosedArray.find((item) => item.statusCode === 'started' && item.sprintId === ScrumBoardStore.sprintId);
     return (
-      <>
+      <Page
+        className="c7n-scrumboard-page"
+      >
         <Header title="活跃冲刺">
           <Select
             ref={(SelectBoard) => { this.SelectBoard = SelectBoard; }}
@@ -420,7 +422,10 @@ class ScrumBoardHome extends Component {
           }
         </Header>
         <Breadcrumb />
-        <Content style={{ padding: 0, display: 'flex', flexDirection: 'column' }}>
+        <Content style={{
+          padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        }}
+        >
           <div style={{ display: 'flex' }}>
             <QuickSearch
               onQuickSearchChange={this.onQuickSearchChange}
@@ -432,8 +437,8 @@ class ScrumBoardHome extends Component {
             {ScrumBoardStore.hasSetFilter && <Button type="primary" onClick={this.handleClearFilter}>清除筛选</Button>}
           </div>
           <Spin spinning={ScrumBoardStore.getSpinIf}>
-            <div style={{ display: 'flex', width: '100%' }}>
-              <div className="c7n-scrumboard" style={HeaderStore.announcementClosed ? {} : { height: 'calc(100vh - 252px)' }}>
+            <div className="c7n-scrumboard" style={HeaderStore.announcementClosed ? {} : { height: 'calc(100vh - 254px)' }}>
+              <div style={{ display: 'table', minWidth: '100%' }}>
                 <div className="c7n-scrumboard-header">
                   <StatusColumn />
                 </div>
@@ -464,10 +469,10 @@ class ScrumBoardHome extends Component {
                     </div>
                   )}
               </div>
-              <IssueDetail
-                refresh={this.refresh}
-              />
             </div>
+            <IssueDetail
+              refresh={this.refresh}
+            />
           </Spin>
         </Content>
         {
@@ -529,19 +534,8 @@ class ScrumBoardHome extends Component {
             </Modal>
           ) : null
         }
-      </>
+      </Page>
     );
   }
 }
-export default (props) => (
-  <Page
-    className="c7n-scrumboard-page"
-    service={[...[
-      'choerodon.code.project.cooperation.iteration-plan.ps.default',
-      'choerodon.code.project.cooperation.iteration-plan.ps.board.create',
-      'choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish',
-    ], ...service]}
-  >
-    <ScrumBoardHome {...props} />
-  </Page>
-);
+export default ScrumBoardHome;
