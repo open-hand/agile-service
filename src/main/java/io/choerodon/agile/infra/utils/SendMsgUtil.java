@@ -205,10 +205,30 @@ public class SendMsgUtil {
     }
 
     @Async
-    public void noticeIssueStatus(Set<Long> userSet) {
+    public void noticeIssueStatus(Long projectId, Set<Long> userSet, List<String> noticeTypeList, IssueDTO issueDTO,
+                                  CustomUserDetails userDetails) {
         if (CollectionUtils.isEmpty(userSet)){
             return;
         }
-        siteMsgUtil.sendChangeIssueStatus(userSet);
+        Map<String, String> templateArgsMap = new HashMap<>();
+        // 设置经办人
+        Long[] ids = new Long[2];
+        ids[0] = issueDTO.getAssigneeId();
+        ids[1] = userDetails.getUserId();
+        List<UserDTO> userDTOList = userService.listUsersByIds(ids);
+        String assigneeName = userDTOList.stream().filter(user -> Objects.equals(user.getId(), issueDTO.getAssigneeId()))
+                .findFirst().map(UserDTO::getRealName).orElse("");
+        // 设置概要
+        String summary = issueDTO.getIssueNum() + "-" + issueDTO.getSummary();
+        // 设置操作人
+        String operatorName = userDTOList.stream().filter(user -> Objects.equals(user.getId(), userDetails.getUserId()))
+                .findFirst().map(UserDTO::getRealName).orElse("");
+        // 设置状态
+        String status = ConvertUtil.getIssueStatusMap(projectId).get(issueDTO.getStatusId()).getName();
+        templateArgsMap.put("assigneeName", assigneeName);
+        templateArgsMap.put("summary", summary);
+        templateArgsMap.put("operatorName", operatorName);
+        templateArgsMap.put("status", status);
+        siteMsgUtil.sendChangeIssueStatus(projectId, userSet, noticeTypeList, templateArgsMap);
     }
 }
