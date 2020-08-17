@@ -11,10 +11,10 @@ import java.util.List;
 /**
  * @author peng.jiang,dinghuang123@gmail.com
  */
-@Table(name = "fd_state_machine")
+@Table(name = "fd_status_machine")
 @ModifyAudit
 @VersionAudit
-public class StateMachineDTO extends AuditDomain {
+public class StatusMachineDTO extends AuditDomain {
     @Id
     @GeneratedValue
     @Encrypt
@@ -26,9 +26,9 @@ public class StateMachineDTO extends AuditDomain {
     private Boolean isDefault;
 
     @Transient
-    private List<StateMachineNodeDTO> nodes;
+    private List<StatusMachineNodeDTO> nodes;
     @Transient
-    private List<StateMachineTransformDTO> transforms;
+    private List<StatusMachineTransformDTO> transforms;
 
     public Long getId() {
         return id;
@@ -70,19 +70,19 @@ public class StateMachineDTO extends AuditDomain {
         this.organizationId = organizationId;
     }
 
-    public List<StateMachineNodeDTO> getNodes() {
+    public List<StatusMachineNodeDTO> getNodes() {
         return nodes;
     }
 
-    public void setNodes(List<StateMachineNodeDTO> nodes) {
+    public void setNodes(List<StatusMachineNodeDTO> nodes) {
         this.nodes = nodes;
     }
 
-    public List<StateMachineTransformDTO> getTransforms() {
+    public List<StatusMachineTransformDTO> getTransforms() {
         return transforms;
     }
 
-    public void setTransforms(List<StateMachineTransformDTO> transforms) {
+    public void setTransforms(List<StatusMachineTransformDTO> transforms) {
         this.transforms = transforms;
     }
 

@@ -5,12 +5,12 @@ import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.app.service.BoardService;
 import io.choerodon.agile.app.service.InitService;
 import io.choerodon.agile.app.service.StateMachineService;
-import io.choerodon.agile.infra.dto.StateMachineDTO;
+import io.choerodon.agile.infra.dto.StatusMachineDTO;
 import io.choerodon.agile.infra.dto.StateMachineNodeDraftDTO;
 import io.choerodon.agile.infra.dto.StateMachineTransformDraftDTO;
 import io.choerodon.agile.infra.dto.StatusDTO;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.mapper.StateMachineMapper;
+import io.choerodon.agile.infra.mapper.StatusMachineMapper;
 import io.choerodon.agile.infra.mapper.StateMachineNodeDraftMapper;
 import io.choerodon.agile.infra.mapper.StateMachineTransformDraftMapper;
 import io.choerodon.agile.infra.mapper.StatusMapper;
@@ -44,7 +44,7 @@ public class InitServiceImpl implements InitService {
     @Autowired
     private StateMachineService stateMachineService;
     @Autowired
-    private StateMachineMapper stateMachineMapper;
+    private StatusMachineMapper statusMachineMapper;
     @Autowired
     private StateMachineTransformDraftMapper transformDraftMapper;
     @Autowired
@@ -89,16 +89,16 @@ public class InitServiceImpl implements InitService {
     @Override
     public Long initDefaultStateMachine(Long organizationId) {
         //初始化默认状态机
-        StateMachineDTO stateMachine = new StateMachineDTO();
+        StatusMachineDTO stateMachine = new StatusMachineDTO();
         stateMachine.setOrganizationId(organizationId);
         stateMachine.setName("默认状态机");
         stateMachine.setDescription("默认状态机");
         stateMachine.setStatus(StateMachineStatus.CREATE);
         stateMachine.setDefault(true);
-        List<StateMachineDTO> selects = stateMachineMapper.select(stateMachine);
+        List<StatusMachineDTO> selects = statusMachineMapper.select(stateMachine);
         Long stateMachineId;
         if (selects.isEmpty()) {
-            if (stateMachineMapper.insert(stateMachine) != 1) {
+            if (statusMachineMapper.insert(stateMachine) != 1) {
                 throw new CommonException(ERROR_STATEMACHINE_CREATE);
             }
             //创建状态机节点和转换
@@ -114,13 +114,13 @@ public class InitServiceImpl implements InitService {
     public Long initAGStateMachine(Long organizationId, ProjectEvent projectEvent) {
         String projectCode = projectEvent.getProjectCode();
         //初始化状态机
-        StateMachineDTO stateMachine = new StateMachineDTO();
+        StatusMachineDTO stateMachine = new StatusMachineDTO();
         stateMachine.setOrganizationId(organizationId);
         stateMachine.setName(projectCode + "默认状态机【敏捷】");
         stateMachine.setDescription(projectCode + "默认状态机【敏捷】");
         stateMachine.setStatus(StateMachineStatus.CREATE);
         stateMachine.setDefault(false);
-        if (stateMachineMapper.insert(stateMachine) != 1) {
+        if (statusMachineMapper.insert(stateMachine) != 1) {
             throw new CommonException(ERROR_STATEMACHINE_CREATE);
         }
         //创建状态机节点和转换
@@ -129,7 +129,7 @@ public class InitServiceImpl implements InitService {
         Long stateMachineId = stateMachine.getId();
         stateMachineService.deploy(organizationId, stateMachineId, false);
         //敏捷创建完状态机后需要到敏捷创建列
-        List<StatusPayload> statusPayloads = stateMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
+        List<StatusPayload> statusPayloads = statusMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
         boardService.initBoard(projectEvent.getProjectId(), DEFAULT_BOARD, statusPayloads);
         return stateMachineId;
     }
@@ -138,13 +138,13 @@ public class InitServiceImpl implements InitService {
     public Long initTEStateMachine(Long organizationId, ProjectEvent projectEvent) {
         String projectCode = projectEvent.getProjectCode();
         //初始化状态机
-        StateMachineDTO stateMachine = new StateMachineDTO();
+        StatusMachineDTO stateMachine = new StatusMachineDTO();
         stateMachine.setOrganizationId(organizationId);
         stateMachine.setName(projectCode + "默认状态机【测试】");
         stateMachine.setDescription(projectCode + "默认状态机【测试】");
         stateMachine.setStatus(StateMachineStatus.CREATE);
         stateMachine.setDefault(false);
-        if (stateMachineMapper.insert(stateMachine) != 1) {
+        if (statusMachineMapper.insert(stateMachine) != 1) {
             throw new CommonException(ERROR_STATEMACHINE_CREATE);
         }
         //创建状态机节点和转换

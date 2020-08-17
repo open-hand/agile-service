@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="io.choerodon.agile.infra.mapper.StateMachineNodeMapper">
+<mapper namespace="io.choerodon.agile.infra.mapper.StatusMachineNodeMapper">
 
-    <resultMap id="nodeDeployWithState" type="io.choerodon.agile.infra.dto.StateMachineNodeDTO">
+    <resultMap id="nodeDeployWithState" type="io.choerodon.agile.infra.dto.StatusMachineNodeDTO">
         <id property="id" column="id"/>
         <result property="stateMachineId" column="state_machine_id"/>
         <result property="statusId" column="status_id"/>
@@ -31,9 +31,9 @@
         </association>
     </resultMap>
 
-    <select id="queryById" resultType="io.choerodon.agile.infra.dto.StateMachineNodeDTO">
+    <select id="queryById" resultType="io.choerodon.agile.infra.dto.StatusMachineNodeDTO">
         SELECT *
-        FROM fd_state_machine_node
+        FROM fd_status_machine_node
         WHERE organization_id = #{organizationId}
         and id = #{id}
     </select>
@@ -51,7 +51,7 @@
         STATE.last_update_date as s_last_update_date,
         STATE.last_updated_by as s_last_updated_by,
         STATE.object_version_number as s_object_version_number
-        FROM fd_state_machine_node SMN
+        FROM fd_status_machine_node SMN
         LEFT JOIN fd_status STATE ON STATE.id = SMN.status_id
         WHERE SMN.id = #{nodeId}
     </select>
@@ -69,7 +69,7 @@
         STATE.last_update_date as s_last_update_date,
         STATE.last_updated_by as s_last_updated_by,
         STATE.object_version_number as s_object_version_number
-        FROM fd_state_machine_node SMN
+        FROM fd_status_machine_node SMN
         LEFT JOIN fd_status STATE ON STATE.id = SMN.status_id
         WHERE STATE.id = #{statusId}
         AND SMN.state_machine_id = #{stateMachineId}
@@ -88,15 +88,15 @@
         STATE.last_update_date as s_last_update_date,
         STATE.last_updated_by as s_last_updated_by,
         STATE.object_version_number as s_object_version_number
-        FROM fd_state_machine_node SMN
+        FROM fd_status_machine_node SMN
         LEFT JOIN fd_status STATE ON STATE.id = SMN.status_id
         WHERE SMN.state_machine_id = #{stateMachineId}
     </select>
 
-    <select id="queryInitByStateMachineIds" resultType="io.choerodon.agile.infra.dto.StateMachineNodeDTO">
+    <select id="queryInitByStateMachineIds" resultType="io.choerodon.agile.infra.dto.StatusMachineNodeDTO">
         SELECT
         *
-        FROM fd_state_machine_node smn
+        FROM fd_status_machine_node smn
         where smn.organization_id = #{organizationId} and smn.type = 'node_init' and smn.state_machine_id in
         <foreach collection="stateMachineIds" item="id" open="(" separator=","
                  close=")">
@@ -108,35 +108,35 @@
         SELECT
         count( SMN.id )
         FROM
-        fd_state_machine_node SMN
-        LEFT JOIN fd_state_machine SM ON SMN.state_machine_id = SM.id
+        fd_status_machine_node SMN
+        LEFT JOIN fd_status_machine SM ON SMN.state_machine_id = SM.id
         WHERE
         SMN.status_id = #{statusId}
         AND SM.organization_id = #{organizationId}
     </select>
 
-    <select id="selectMaxPositionY" resultType="io.choerodon.agile.infra.dto.StateMachineNodeDTO">
+    <select id="selectMaxPositionY" resultType="io.choerodon.agile.infra.dto.StatusMachineNodeDTO">
         SELECT *
-        FROM fd_state_machine_node
+        FROM fd_status_machine_node
         WHERE position_y = (
             SELECT max(position_y)
-            FROM fd_state_machine_node
+            FROM fd_status_machine_node
             WHERE state_machine_id = #{stateMachineId}
         )
         LIMIT 1
     </select>
 
     <update id="updateAllStatusTransformId">
-        UPDATE fd_state_machine_node
+        UPDATE fd_status_machine_node
         SET all_status_transform_id = #{allStatusTransformId}
         WHERE organization_id = #{organizationId}
         AND id = #{id}
     </update>
 
-    <select id="queryByStateMachineIds" resultType="io.choerodon.agile.infra.dto.StateMachineNodeDTO">
+    <select id="queryByStateMachineIds" resultType="io.choerodon.agile.infra.dto.StatusMachineNodeDTO">
         SELECT
         *
-        FROM fd_state_machine_node smn
+        FROM fd_status_machine_node smn
         where smn.organization_id = #{organizationId}
         and smn.state_machine_id in
         <foreach collection="stateMachineIds" item="id" open="(" separator="," close=")">
@@ -145,7 +145,7 @@
     </select>
 
     <insert id="batchInsert" useGeneratedKeys="true" keyProperty="id">
-      insert into fd_state_machine_node(state_machine_id,status_id,type
+      insert into fd_status_machine_node(state_machine_id,status_id,type
       ,all_status_transform_id,organization_id,created_by,last_updated_by)
       values
         <foreach collection="list" item="item" separator=",">
@@ -155,8 +155,8 @@
     </insert>
 
     <select id="countIssueTypeByStatusIds" resultType="io.choerodon.agile.infra.dto.IssueCountDTO">
-        select fsmn.status_id as id,fit.name as name from fd_state_machine_scheme_config fsmsc
-        ,fd_state_machine_node fsmn,fd_issue_type fit
+        select fsmn.status_id as id,fit.name as name from fd_status_machine_scheme_config fsmsc
+        ,fd_status_machine_node fsmn,fd_issue_type fit
         where fsmsc.organization_id = #{organizationId}
         AND fsmsc.scheme_id = #{schemeId}
         AND fsmsc.state_machine_id = fsmn.state_machine_id
@@ -170,13 +170,30 @@
         group by fsmn.status_id,fit.name
     </select>
 
-    <select id="selectInitNode" resultType="io.choerodon.agile.infra.dto.StateMachineNodeDTO">
-        select fsmn.* from fd_state_machine_scheme_config fsmsc
-        ,fd_state_machine_node fsmn
+    <select id="selectInitNode" resultType="io.choerodon.agile.infra.dto.StatusMachineNodeDTO">
+        select fsmn.* from fd_status_machine_scheme_config fsmsc
+        ,fd_status_machine_node fsmn
          where fsmsc.organization_id = #{organizationId}
          AND fsmsc.scheme_id = #{schemeId}
          AND fsmsc.state_machine_id = fsmn.state_machine_id
          AND fsmn.status_id = #{statusId}
          AND fsmn.type = 'node_init'
     </select>
+
+    <insert id="migrateStatusMachineNode">
+        insert into fd_status_machine_node
+        select
+         id,
+         state_machine_id,
+         status_id,
+         type,
+         all_status_transform_id,
+         organization_id,
+         object_version_number,
+         created_by,
+         creation_date,
+         last_updated_by,
+         last_update_date
+        from fd_state_machine_node
+    </insert>
 </mapper>

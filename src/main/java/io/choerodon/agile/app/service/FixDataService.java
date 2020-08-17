@@ -9,4 +9,6 @@ public interface FixDataService {
     void fixDateStateMachine();
 
     void fixPage();
+
+    void migrateData();
 }

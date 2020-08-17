@@ -148,4 +148,12 @@ public class FixDataController {
         fixDataService.fixPage();
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.SITE)
+    @ApiOperation("【0.24】修复页面配置")
+    @GetMapping("/migrate_data")
+    public ResponseEntity migrateData() {
+        fixDataService.migrateData();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

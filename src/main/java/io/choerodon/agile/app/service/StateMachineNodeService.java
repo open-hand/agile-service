@@ -2,7 +2,7 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.StateMachineNodeVO;
 import io.choerodon.agile.api.vo.StatusVO;
-import io.choerodon.agile.infra.dto.StateMachineNodeDTO;
+import io.choerodon.agile.infra.dto.StatusMachineNodeDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -83,7 +83,7 @@ public interface StateMachineNodeService {
      */
     void createNodeAndTransformForAgile(Long organizationId, Long stateMachineId, StatusVO statusVO);
 
-    void baseUpdate(StateMachineNodeDTO olderDefaultNode);
+    void baseUpdate(StatusMachineNodeDTO olderDefaultNode);
 
-    void baseCreate(StateMachineNodeDTO stateMachineNodeDTO);
+    void baseCreate(StatusMachineNodeDTO statusMachineNodeDTO);
 }

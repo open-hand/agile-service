@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="io.choerodon.agile.infra.mapper.StateMachineTransformMapper">
+<mapper namespace="io.choerodon.agile.infra.mapper.StatusMachineTransformMapper">
 
-    <select id="queryById" resultType="io.choerodon.agile.infra.dto.StateMachineTransformDTO">
+    <select id="queryById" resultType="io.choerodon.agile.infra.dto.StatusMachineTransformDTO">
         SELECT
         smt.*,
         smn.status_id as endStatusId
-        FROM fd_state_machine_transform smt
-        LEFT JOIN fd_state_machine_node smn ON smn.id = smt.end_node_id
+        FROM fd_status_machine_transform smt
+        LEFT JOIN fd_status_machine_node smn ON smn.id = smt.end_node_id
         where smt.organization_id = #{organizationId}
         and smt.id = #{id}
     </select>
 
     <update id="deleteByNodeId">
-        DELETE FROM fd_state_machine_transform
+        DELETE FROM fd_status_machine_transform
         WHERE start_node_id = #{nodeId} OR end_node_id = #{nodeId}
     </update>
 
     <delete id="deleteByStateMachineIdAndNodeId">
-        DELETE FROM fd_state_machine_transform
+        DELETE FROM fd_status_machine_transform
         WHERE
         organization_id = #{organizationId}
         AND state_machine_id = #{stateMachineId}
@@ -27,9 +27,14 @@
         )
     </delete>
 
-    <select id="queryByStartNodeIdOrType" resultType="io.choerodon.agile.infra.dto.StateMachineTransformDTO">
+    <insert id="migrateStatusMachineTransform">
+        insert into fd_status_machine_transform
+        select * from fd_state_machine_transform
+    </insert>
+
+    <select id="queryByStartNodeIdOrType" resultType="io.choerodon.agile.infra.dto.StatusMachineTransformDTO">
         SELECT *
-        FROM fd_state_machine_transform
+        FROM fd_status_machine_transform
         WHERE organization_id = #{organizationId}
         and state_machine_id = #{stateMachineId}
         and (
@@ -39,12 +44,12 @@
         )
     </select>
 
-    <select id="queryByStateMachineIds" resultType="io.choerodon.agile.infra.dto.StateMachineTransformDTO">
+    <select id="queryByStateMachineIds" resultType="io.choerodon.agile.infra.dto.StatusMachineTransformDTO">
         SELECT
         smt.*,
         smn.status_id as endStatusId
-        FROM fd_state_machine_transform smt
-        LEFT JOIN fd_state_machine_node smn ON smn.id = smt.end_node_id
+        FROM fd_status_machine_transform smt
+        LEFT JOIN fd_status_machine_node smn ON smn.id = smt.end_node_id
         where smt.organization_id = #{organizationId}
         and smt.state_machine_id in
         <foreach collection="stateMachineIds" item="id" open="(" separator="," close=")">
@@ -53,7 +58,7 @@
     </select>
 
     <insert id="batchInsert" useGeneratedKeys="true" keyProperty="id">
-        insert into fd_state_machine_transform(name,description,state_machine_id
+        insert into fd_status_machine_transform(name,description,state_machine_id
         ,start_node_id,end_node_id,type,condition_strategy,organization_id,created_by,last_updated_by)
         values
         <foreach collection="list" item="item" separator=",">
