@@ -8,6 +8,7 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.RankUtil;
 import org.apache.commons.collections.MapIterator;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.slf4j.Logger;
@@ -185,15 +186,17 @@ public class FixDataServiceImpl implements FixDataService {
         String schemeCode = "agile_issue";
         //key1 fieldId, key2 organizationId, key3 projectId, key4 issueType
         MultiKeyMap dataMap = new MultiKeyMap();
+        //key1 fieldId, key2 organizationId, key3 projectId, key4 pageId
+        MultiKeyMap rankMap = new MultiKeyMap();
 
         ObjectSchemeFieldDTO objectSchemeField = new ObjectSchemeFieldDTO();
         objectSchemeField.setSchemeCode(schemeCode);
         objectSchemeField.setSystem(true);
 
-        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField);
+        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap);
 
         objectSchemeField.setSystem(false);
-        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField);
+        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap);
         List<ObjectSchemeFieldExtendDTO> insertList = new ArrayList<>();
         MapIterator mapIterator = dataMap.mapIterator();
         while (mapIterator.hasNext()) {
@@ -201,9 +204,9 @@ public class FixDataServiceImpl implements FixDataService {
             ObjectSchemeFieldExtendDTO dto = (ObjectSchemeFieldExtendDTO)mapIterator.getValue();
             dto.setCreated(Optional.ofNullable(dto.getCreated()).orElse(false));
             dto.setEdited(Optional.ofNullable(dto.getEdited()).orElse(false));
-            if (objectSchemeFieldExtendMapper
-                    .selectExtendField(dto.getIssueType(), dto.getOrganizationId(), dto.getFieldId(), dto.getProjectId())
-                    .isEmpty()) {
+            String rank = getRank(rankMap, createPageId, editPageId, dto);
+            dto.setRank(rank);
+            if (objectSchemeFieldExtendMapper.selectExtendFieldCount(dto.getIssueType(), dto.getOrganizationId(), dto.getFieldId(), dto.getProjectId()) == 0) {
                 insertList.add(dto);
             }
         }
@@ -217,7 +220,30 @@ public class FixDataServiceImpl implements FixDataService {
         }
     }
 
-    private void generateDataMap(Long createPageId, Long editPageId, MultiKeyMap dataMap, ObjectSchemeFieldDTO objectSchemeField) {
+    private String getRank(MultiKeyMap rankMap,
+                           Long createPageId,
+                           Long editPageId,
+                           ObjectSchemeFieldExtendDTO fieldExtend) {
+        Long fieldId = fieldExtend.getFieldId();
+        Long organizationId = fieldExtend.getOrganizationId();
+        Long projectId = fieldExtend.getProjectId();
+        //优先使用编辑界面的顺序
+        Object rank = rankMap.get(fieldId, organizationId, projectId, editPageId);
+        if (!ObjectUtils.isEmpty(rank)) {
+            return (String) rank;
+        }
+        rank = rankMap.get(fieldId, organizationId, projectId, createPageId);
+        if (!ObjectUtils.isEmpty(rank)) {
+            return (String) rank;
+        }
+        return RankUtil.mid();
+    }
+
+    private void generateDataMap(Long createPageId,
+                                 Long editPageId,
+                                 MultiKeyMap dataMap,
+                                 ObjectSchemeFieldDTO objectSchemeField,
+                                 MultiKeyMap rankMap) {
         List<ObjectSchemeFieldDTO> fields = objectSchemeFieldMapper.selectFieldsWithPages(objectSchemeField);
         List<PageFieldDTO> pages = new ArrayList<>();
         fields.forEach(s -> pages.addAll(s.getPages()));
@@ -234,6 +260,8 @@ public class FixDataServiceImpl implements FixDataService {
             pageFields.forEach(p -> {
                 Long organizationId = p.getOrganizationId();
                 List<IssueTypeDTO> issueTypes = getIssueType(organizationId, issueTypeMap, contextArray);
+                String rank = p.getRank();
+                rankMap.put(fieldId, organizationId, p.getProjectId(), p.getPageId(), rank);
                 ObjectSchemeFieldExtendDTO carrier =
                         buildCarrier(createPageId, editPageId, required, fieldId, p, organizationId);
                 issueTypes.forEach(i -> {
@@ -267,19 +295,21 @@ public class FixDataServiceImpl implements FixDataService {
         return result;
     }
 
-    private ObjectSchemeFieldExtendDTO buildCarrier(Long createPageId, Long editPageId, Boolean required, Long fieldId, PageFieldDTO p, Long organizationId) {
+    private ObjectSchemeFieldExtendDTO buildCarrier(Long createPageId,
+                                                    Long editPageId,
+                                                    Boolean required,
+                                                    Long fieldId,
+                                                    PageFieldDTO p,
+                                                    Long organizationId) {
         Long projectId = p.getProjectId();
         Long pageId = p.getPageId();
         Boolean created = null;
         Boolean edited = null;
-        String rank = null;
         if (createPageId.equals(pageId)) {
             created = p.getDisplay();
-            rank = p.getRank();
         }
         if (editPageId.equals(pageId)) {
             edited = p.getDisplay();
-            rank = p.getRank();
         }
 
         ObjectSchemeFieldExtendDTO carrier = new ObjectSchemeFieldExtendDTO();
@@ -289,7 +319,6 @@ public class FixDataServiceImpl implements FixDataService {
         carrier.setRequired(required);
         carrier.setCreated(created);
         carrier.setEdited(edited);
-        carrier.setRank(rank);
         return carrier;
     }
 
@@ -302,7 +331,6 @@ public class FixDataServiceImpl implements FixDataService {
         Boolean required = carrier.getRequired();
         Boolean created = carrier.getCreated();
         Boolean edited = carrier.getEdited();
-        String rank = carrier.getRank();
         ObjectSchemeFieldExtendDTO dto =
                 (ObjectSchemeFieldExtendDTO) dataMap.get(fieldId, organizationId, projectId, issueType);
         if (ObjectUtils.isEmpty(dto)) {
@@ -315,12 +343,8 @@ public class FixDataServiceImpl implements FixDataService {
             dto.setRequired(required);
             dto.setCreated(created);
             dto.setEdited(edited);
-            dto.setRank(rank);
             dataMap.put(fieldId, organizationId, projectId, issueType, dto);
         } else {
-            if (!ObjectUtils.isEmpty(rank)) {
-                dto.setRank(rank);
-            }
             if (!ObjectUtils.isEmpty(created)) {
                 dto.setCreated(created);
             }

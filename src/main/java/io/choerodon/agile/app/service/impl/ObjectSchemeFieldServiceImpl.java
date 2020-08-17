@@ -42,11 +42,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     @Autowired
     private FieldOptionService fieldOptionService;
     @Autowired
-    private PageFieldService pageFieldService;
-    @Autowired
     private FieldValueService fieldValueService;
-    @Autowired
-    private LookupValueMapper lookupValueMapper;
     @Autowired
     private FieldDataLogService fieldDataLogService;
     @Autowired
@@ -421,7 +417,13 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         dealWithExtendFields(organizationId, projectId, fieldId, required, intersection, deleteList, insertSet);
     }
 
-    private void dealWithExtendFields(Long organizationId, Long projectId, Long fieldId, Boolean required, List<ObjectSchemeFieldExtendDTO> intersection, List<ObjectSchemeFieldExtendDTO> deleteList, Set<String> insertSet) {
+    private void dealWithExtendFields(Long organizationId,
+                                      Long projectId,
+                                      Long fieldId,
+                                      Boolean required,
+                                      List<ObjectSchemeFieldExtendDTO> intersection,
+                                      List<ObjectSchemeFieldExtendDTO> deleteList,
+                                      Set<String> insertSet) {
         boolean onProjectLevel = (projectId != null);
         Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
         if (onProjectLevel) {
@@ -755,6 +757,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         PageConfigVO result = new PageConfigVO();
         List<PageConfigFieldVO> pageConfigFields = objectSchemeFieldExtendMapper.listConfigs(organizationId, projectId, issueType);
         result.setFields(pageConfigFields);
+        //处理默认值
+        processDefaultValue(pageConfigFields);
         if (!ObjectUtils.isEmpty(projectId)) {
             Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
             Long issueTypeId = issueTypeMap.get(issueType);
@@ -770,6 +774,23 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             }
         }
         return result;
+    }
+
+    private void processDefaultValue(List<PageConfigFieldVO> pageConfigFields) {
+        pageConfigFields.forEach(p -> {
+            String defaultValue = p.getDefaultValue();
+            ObjectSchemeFieldDetailVO example = new ObjectSchemeFieldDetailVO();
+            example.setDefaultValue(defaultValue);
+            example.setFieldType(p.getFieldType());
+            FieldValueUtil.handleDefaultValue(example);
+            defaultValue = example.getDefaultValue();
+            Object object = example.getDefaultValueObj();
+            if (!ObjectUtils.isEmpty(object)) {
+                UserDTO user = (UserDTO)object;
+                defaultValue = user.getRealName();
+            }
+            p.setDefaultValue(defaultValue);
+        });
     }
 
     private void updateTemplate(Long projectId,

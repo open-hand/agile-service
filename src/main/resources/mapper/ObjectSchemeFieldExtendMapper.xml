@@ -84,6 +84,28 @@
         </choose>
     </select>
 
+    <select id="selectExtendFieldCount" resultType="java.lang.Integer">
+        select
+        count(id)
+        from fd_object_scheme_field_extend
+        where 1=1
+        <if test="issueType != null">
+            and issue_type = #{issueType}
+        </if>
+        and organization_id = #{organizationId}
+        <if test="fieldId != null">
+            and field_id = #{fieldId}
+        </if>
+        <choose>
+            <when test="projectId != null">
+                and project_id = #{projectId}
+            </when>
+            <otherwise>
+                and project_id is null
+            </otherwise>
+        </choose>
+    </select>
+
 
     <select id="listConfigs" resultType="io.choerodon.agile.api.vo.PageConfigFieldVO">
         select
@@ -91,6 +113,7 @@
         t4.field_id,
         t6.name as field_name,
         t6.default_value,
+        t6.field_type,
         t4.is_required as required,
         t4.is_created as created,
         t4.is_edited as edited,
@@ -125,6 +148,7 @@
         ) t5 on t4.id = t5.id
         left join fd_object_scheme_field t6
         on t4.field_id = t6.id
+        order by t4.rank desc, t4.id asc
     </select>
 
     <select id="selectProjectIdsByOrganizationId" resultType="java.lang.Long">
@@ -186,4 +210,5 @@
             </if>
         )
     </select>
+
 </mapper>
