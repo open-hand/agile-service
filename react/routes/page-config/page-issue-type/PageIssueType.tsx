@@ -4,15 +4,14 @@ import React, {
 import {
   TabPage as Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
-import {
-  Button, SelectBox, Modal, Spin,
-} from 'choerodon-ui/pro/lib';
+import { Button, Modal, Spin } from 'choerodon-ui/pro/lib';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
-import { ViewMode } from 'choerodon-ui/pro/lib/radio/enum';
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
 import { observer, useObservable, Observer } from 'mobx-react-lite';
+import { Prompt } from 'react-router-dom';
 import { pageConfigApi, PageConfigIssueType, IFiledProps } from '@/api/PageConfig';
 import { beforeTextUpload, text2Delta } from '@/utils/richText';
+import { getApplyType, getMenuType } from '@/utils/common';
 import styles from './index.less';
 import IssueTypeWrap from './components/issue-type-wrap';
 import SortTable from './components/sort-table';
@@ -26,53 +25,39 @@ import { IFieldPostDataProps } from '../components/create-field/CreateField';
 
 interface DescriptionState {
   id?: string,
-  template: string,
+  template: string | Array<any>,
+  originTemplate: string,
   objectVersionNumber?: number,
 }
 type DescriptionAction = Required<{ type: string }> & Partial<DescriptionState>
 
+const issueTypeOptions = [
+  { value: 'issue_epic', text: '史诗' },
+  { value: 'feature', text: '特性' },
+  { value: 'story', text: '故事' },
+  { value: 'task', text: '任务' },
+  { value: 'sub_task', text: '子任务' },
+  { value: 'bug', text: '缺陷' },
+  { value: 'backlog', text: '需求' },
+];
 const preCls = 'c7n-agile-page-config-page-issue-type';
-const { Option } = SelectBox;
 function PageIssueType() {
   const {
     sortTableDataSet, addUnselectedDataSet, intl, pageIssueTypeStore,
   } = usePageIssueTypeStore();
-  const [desState, setDesState] = useReducer(
-    (state: DescriptionState, action: DescriptionAction) => {
-      switch (action.type) {
-        case 'init':
-          return ({
-            id: action.id,
-            template: action.template,
-            objectVersionNumber: action.objectVersionNumber,
-          });
-        case 'change':
-          return {
-            ...state,
-            template: action.template,
-          };
-        case 'destroy':
-          return {
-            id: undefined,
-            template: undefined,
-            objectVersionNumber: undefined,
-          };
-        default:
-          return state;
-      }
-    }, {
-      id: undefined,
-      template: undefined,
-      objectVersionNumber: undefined,
-    },
-  );
+
   async function handleSubmit() {
-    pageIssueTypeStore.setLoading(true);
-    if (pageIssueTypeStore.dataStatusCode !== PageIssueTypeStoreStatusCode.null) {
+    const issueTypeFieldVO = pageIssueTypeStore.getDescriptionObj;
+
+    if (issueTypeFieldVO.dirty
+      || pageIssueTypeStore.dataStatusCode !== PageIssueTypeStoreStatusCode.null) {
+      pageIssueTypeStore.setLoading(true);
       let submitData: Array<any> = [];
       if (sortTableDataSet.dirty) {
-        submitData = sortTableDataSet.filter((record) => record.dirty && !record.get('local'));
+        submitData = sortTableDataSet.filter((record) => record.dirty && !record.get('local'));// &&
       }
+      // console.log(sortTableDataSet.dirty, 'submitData', submitData);
+      // return true;
       const data = {
         issueType: pageIssueTypeStore.currentIssueType,
         // fields: submitData,
@@ -81,58 +66,45 @@ function PageIssueType() {
           required: item.get('required'),
           created: item.get('created'),
           edited: item.get('edited'),
+          rank: item.get('rank'),
           objectVersionNumber: item.get('objectVersionNumber'),
         })),
-        issueTypeFieldVO: desState.id || desState.template ? {
-          id: desState.id,
-          template: desState.template,
-          objectVersionNumber: desState.objectVersionNumber,
+        issueTypeFieldVO: issueTypeFieldVO.dirty ? {
+          id: issueTypeFieldVO.id,
+          template: issueTypeFieldVO.template as string,
+          objectVersionNumber: issueTypeFieldVO.objectVersionNumber,
         } : undefined,
         addIds: pageIssueTypeStore.getAddIds,
         createdFields: pageIssueTypeStore.getCreatedFields,
         deleteIds: pageIssueTypeStore.getDeleteIds,
       };
-      if (desState.template) {
-        beforeTextUpload(text2Delta(desState.template), data.issueTypeFieldVO!, () => {
+      if (issueTypeFieldVO.dirty) {
+        beforeTextUpload(text2Delta(issueTypeFieldVO.template), data.issueTypeFieldVO!, () => {
           pageConfigApi.update(data).then(() => {
-            loadData();
+            pageIssueTypeStore.loadData();
           });
         }, 'template');
       } else {
         pageConfigApi.update(data).then(() => {
-          loadData();
+          pageIssueTypeStore.loadData();
         });
       }
     }
     return true;
   }
-  const loadData = () => {
-    setDesState({ type: 'destroy' });
-    pageIssueTypeStore.clear();
-    addUnselectedDataSet.clear();
-    pageIssueTypeStore.setLoading(true);
-    pageConfigApi.loadByIssueType(pageIssueTypeStore.getCurrentIssueType).then((res) => {
-      sortTableDataSet.loadData(res.fields);
-      if (res.issueTypeFieldVO) {
-        setDesState({ type: 'init', ...res.issueTypeFieldVO });
-      } else {
-        setDesState({
-          type: 'init', id: undefined, template: '', objectVersionNumber: undefined,
-        });
-      }
-      pageIssueTypeStore.setLoading(false);
-    });
-  };
+  // 加载全部字段 用于增添已有字段
   useEffect(() => {
     pageIssueTypeStore.loadAllField();
   }, []);
 
   useEffect(() => {
-    loadData();
+    pageIssueTypeStore.loadData();
   }, [pageIssueTypeStore.currentIssueType]);
 
   const handleSelectBox = (val: any) => {
-    if (pageIssueTypeStore.dataStatusCode !== PageIssueTypeStoreStatusCode.null) {
+    console.log('code:', pageIssueTypeStore.getDataStatusCode);
+    if (pageIssueTypeStore.getDataStatusCode !== PageIssueTypeStoreStatusCode.null
+      || pageIssueTypeStore.getDescriptionObj.dirty) {
       Modal.confirm({
         title: '是否放弃更改？',
         children: (
@@ -142,54 +114,64 @@ function PageIssueType() {
         ),
         onOk: () => pageIssueTypeStore.setCurrentIssueType(val as PageConfigIssueType),
       });
-    } else {
-      pageIssueTypeStore.setCurrentIssueType(val as PageConfigIssueType);
+      return false;
     }
+    // console.log('lo lo', pageIssueTypeStore.getDataStatusCode);
+    pageIssueTypeStore.setCurrentIssueType(val as PageConfigIssueType);
+    return true;
   };
   const handleChangeDes = (val: string) => {
-    pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.desc);
-    setDesState({ type: 'change', template: val });
+    pageIssueTypeStore.changeTemplate(val);
   };
-  const handleDeleteFiled = async (data: IFiledProps & PageIFieldPostDataProps) => {
+  const handleDeleteFiled = async (data: IFiledProps &
+    PageIFieldPostDataProps & { id?: string }) => {
     // pageIssueTypeStore.setLoading(true);
-    pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.del);
     if (data.local) {
-      pageIssueTypeStore.deleteLocalField(data.code);
+      pageIssueTypeStore.deleteLocalField(data.code, data.id);
     } else {
       console.log('data', data);
       pageIssueTypeStore.addDeleteId(data.id);
+      pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.del);
     }
   };
-  // useEffect(() => {
-  //   deleteIds.length !== 0 && sortTableDataSet.loadData(sortTableDataSet.toData()
-  //     .filter((item: IFiledProps) => item.id !== deleteIds[deleteIds.length - 1]));
-  //   setLoading(false);
-  // }, [deleteIds]);
+  // 增添已有字段进行本地提交数据
   useEffect(() => {
-    const addArr = pageIssueTypeStore.addIds;
-    if (addArr.length > 0) {
-      onSubmitLocal(pageIssueTypeStore.allFieldData.get(addArr[addArr.length - 1]), true);
+    const addDataLength = pageIssueTypeStore.addIds.length
+      + pageIssueTypeStore.createdFields.length;
+    if (addDataLength === 0
+      && pageIssueTypeStore.getDataStatusCode === PageIssueTypeStoreStatusCode.add) {
+      pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.null);
     }
-  }, [pageIssueTypeStore.addIds.length]);
-  const onSubmitLocal = (data: IFieldPostDataProps, oldField: boolean = false) => {
+  }, [pageIssueTypeStore.addIds.length, pageIssueTypeStore.createdFields.length]);
+
+  /**
+   * 本地提交
+   * @param data 本地所需数据
+   * @param oldField 是否是已有字段
+   */
+  const onSubmitLocal = async (data: IFieldPostDataProps, oldField: boolean = false) => {
     const newData = Object.assign(data, {
       local: true,
       fieldName: data.name,
       edited: true,
       created: true,
       required: false,
-      rank: undefined,
+      rank: undefined, // 需要修改
     });
+    pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.add);
+    !oldField && pageIssueTypeStore.addCreatedField(newData);
+    // 当是增添的已有字段 或是当前类型字段时 增添数据至表格
     if (oldField
       || (newData.context.some((item: any) => item === 'global' || item === pageIssueTypeStore.currentIssueType))) {
+      const newRank = await pageConfigApi.loadRankValue({
+        before: false,
+        previousRank: sortTableDataSet.data[sortTableDataSet.length - 1].get('rank'),
+        nextRank: null,
+        issueType: pageIssueTypeStore.currentIssueType,
+      });
+      newData.rank = newRank;
       sortTableDataSet.create(newData);
     }
-    // console.log('f', newData);
-    // sortTableDataSet.push(sortTableDataSet.create(newData));
-    if (!oldField) {
-      pageIssueTypeStore.addNewField(newData);
-    }
-    pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.add);
     return true;
   };
   const checkCodeOrName = (key: string,
@@ -200,8 +182,8 @@ function PageIssueType() {
     const values = {
       formatMessage: intl.formatMessage,
       schemeCode: 'agile_issue',
-      handleRefresh: loadData,
       onSubmitLocal,
+      defaultContext: [pageIssueTypeStore.getCurrentIssueType],
       localCheckCode: async (str: string) => !!checkCodeOrName('code', str),
       localCheckName: async (str: string) => !!checkCodeOrName('name', str),
     };
@@ -218,10 +200,12 @@ function PageIssueType() {
 
   return (
     <Page
-      service={[
-        'choerodon.code.project.setting.page.ps.scheme',
-      ]}
+      service={
+        getMenuType() !== 'project' ? ['choerodon.code.organization.setting.issue.page.ps.scheme']
+          : ['choerodon.code.project.setting.page.ps.scheme']
+      }
     >
+      <Prompt message="页面有未保存的内容，切换则放弃更改" when={sortTableDataSet.dirty} />
       <Header>
 
         <Button icon="playlist_add" onClick={openCreateFieldModal}>创建字段</Button>
@@ -238,16 +222,13 @@ function PageIssueType() {
       </Header>
       <Breadcrumb />
       <Content className={`${preCls}-content`} style={{ overflowY: 'hidden' }}>
-        <SelectBox mode={'button' as ViewMode} defaultValue="feature" value={pageIssueTypeStore.currentIssueType} onChange={handleSelectBox} className={`${preCls}-select-box`}>
-          <Option value="issue_epic">史诗</Option>
-          <Option value="feature">特性</Option>
-          <Option value="story">故事</Option>
-          <Option value="task">任务</Option>
-          <Option value="sub_task">子任务</Option>
-          <Option value="bug">缺陷</Option>
-          <Option value="backlog">需求</Option>
-        </SelectBox>
-        <Spin className="c7n-im" spinning={pageIssueTypeStore.getLoading}>
+        <Switch
+          defaultValue="feature"
+          value={pageIssueTypeStore.currentIssueType}
+          options={issueTypeOptions}
+          onChange={handleSelectBox}
+        />
+        <Spin spinning={pageIssueTypeStore.getLoading}>
           <div className={styles.top}>
             <IssueTypeWrap title="字段配置">
               <SortTable
@@ -260,7 +241,7 @@ function PageIssueType() {
                   <WYSIWYGEditor
                     style={{ height: '100%', width: '100%' }}
                     onChange={handleChangeDes}
-                    value={text2Delta(desState.template)}
+                    defaultValue={text2Delta(pageIssueTypeStore.descriptionObj.originTemplate)}
                     placeholder="您可以在此自定义描述信息格式"
                   />
                 ) : ''
@@ -280,7 +261,7 @@ function PageIssueType() {
           </Button>
           <Button
             funcType={'raised' as FuncType}
-            onClick={loadData}
+            onClick={pageIssueTypeStore.loadData}
           >
             取消
           </Button>

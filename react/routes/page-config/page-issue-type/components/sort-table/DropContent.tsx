@@ -53,7 +53,6 @@ const DropContent: React.FC<Props> = ({ isDropDisabled, rows }) => {
     >
       {(provided, snapshot) => {
         const rowCount = rows.length;
-        console.log('rowCount', rowCount);
         return (
           <AutoSizer>
             {({ width, height }) => (

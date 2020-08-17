@@ -16,6 +16,7 @@ interface Props {
   isEdit: boolean,
   oldRecord?: Record,
   userOptionDataSet: DataSet,
+  defaultContext?: string[],
   localCheckCode?: (code: string) => Promise<boolean> | boolean,
   localCheckName?: (name: string) => Promise<boolean> | boolean,
 }
@@ -43,7 +44,7 @@ const dateList = ['time', 'datetime', 'date'];
 
 const FormDataSet = ({
   formatMessage, type, store, schemeCode, id, isEdit,
-  oldRecord, userOptionDataSet, localCheckCode, localCheckName,
+  oldRecord, userOptionDataSet, localCheckCode, localCheckName, defaultContext,
 }: Props): DataSetProps => {
   const regex = /^[0-9a-zA-Z_]+$/;
   async function checkCode(value: string): Promise<boolean | string | undefined> {
@@ -145,6 +146,7 @@ const FormDataSet = ({
         multiple: true,
         valueField: 'valueCode',
         textField: 'name',
+        defaultValue: defaultContext,
         lookupAxiosConfig: getLookupConfig('object_scheme_field_context'),
       },
       {

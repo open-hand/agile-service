@@ -30,7 +30,9 @@ const PageIssueTypeProvider = injectIntl(inject('AppState')(observer(
   (props: any) => {
     const sortTableDataSet = useMemo(() => new DataSet(SortTableDataSet()), []);
     const addUnselectedDataSet = useMemo(() => new DataSet(AddUnselectedDataSet()), []);
-    const pageIssueTypeStore = useMemo(() => new PageIssueTypeStore(), []);
+    const pageIssueTypeStore = useMemo(() => new PageIssueTypeStore(
+      { sortTableDataSet, addUnselectedDataSet },
+    ), [sortTableDataSet, addUnselectedDataSet]);
 
     const value = {
       ...props,

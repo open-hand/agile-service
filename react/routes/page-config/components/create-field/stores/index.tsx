@@ -14,6 +14,7 @@ interface Context {
   formatMessage: InjectedIntl['formatMessage'],
   AppState: AppStateProps,
   isEdit?: boolean,
+  defaultContext?: string[],
   onSubmitLocal: (data: IFieldPostDataProps) => Promise<boolean> | boolean,
   localCheckCode?: (code: string) => Promise<boolean> | boolean,
   localCheckName?: (name: string) => Promise<boolean> | boolean,
@@ -21,7 +22,7 @@ interface Context {
   record?: Record,
   formDataSet: DataSet,
   userOptionDataSet: DataSet,
-  handleRefresh: () => void,
+  handleRefresh?: () => void,
   modal: IModalProps,
 }
 const Store = createContext({} as Context);
@@ -32,7 +33,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
   (props) => {
     const {
       formatMessage, AppState: { currentMenuType: { type, id, organizationId } },
-      schemeCode, record, localCheckCode, localCheckName,
+      schemeCode, record, localCheckCode, localCheckName, defaultContext,
     } = props;
     const isEdit = !!record;
     const store = useStore(type, id, organizationId);
@@ -51,6 +52,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
       userOptionDataSet,
       localCheckCode,
       localCheckName,
+      defaultContext,
     }));
 
     useEffect(() => {
