@@ -10,15 +10,12 @@ import io.choerodon.agile.app.assembler.StatusNoticeSettingAssembler;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusNoticeSettingService;
 import io.choerodon.agile.infra.dto.IssueDTO;
-import io.choerodon.agile.infra.dto.StatusDTO;
 import io.choerodon.agile.infra.dto.StatusNoticeSettingDTO;
 import io.choerodon.agile.infra.enums.StatusNoticeUserType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.SendMsgUtil;
-import io.choerodon.core.exception.CommonException;
-import io.netty.util.internal.UnstableApi;
+import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
@@ -110,8 +107,10 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
         // 根据类型找到接收人
         Set<Long> userSet = new HashSet<>();
         noticeList.forEach(noticeDTO -> this.receiverType2User(projectId, noticeDTO, issue, userSet));
-        // 发消息
-        sendMsgUtil.noticeIssueStatus(userSet);
+        // 根据通知类型发消息
+        sendMsgUtil.noticeIssueStatus(projectId, userSet, Arrays.asList(StringUtils.split(noticeList.stream()
+                .map(StatusNoticeSettingDTO::getNoticeType).findFirst().orElse(""), BaseConstants.Symbol.COMMA)),
+                issue, DetailsHelper.getUserDetails());
     }
 
     @Override

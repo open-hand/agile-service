@@ -4,12 +4,12 @@ import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
-//import io.choerodon.agile.infra.feign.NotifyFeignClient;
-//import io.choerodon.core.notify.NoticeSendDTO;
 import io.choerodon.core.enums.MessageAdditionalType;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.MessageSender;
 import org.hzero.boot.message.entity.Receiver;
+import org.hzero.core.base.BaseConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +34,7 @@ public class SiteMsgUtil {
     private static final String URL = "url";
     private static final String NOTIFY_TYPE = "agile";
     private static final String PROJECT_NAME = "projectName";
+    private static final String USER_NAME = "userName";
 
     @Autowired
     private BaseFeignClient baseFeignClient;
@@ -71,7 +72,7 @@ public class SiteMsgUtil {
         return messageSender;
     }
 
-    private void handleReceiver(List<Receiver> receivers,List<Long> userIds){
+    private Map<Long, UserDTO> handleReceiver(List<Receiver> receivers,Collection<Long> userIds){
         List<UserDTO> users = baseFeignClient.listUsersByIds(userIds.toArray(new Long[]{}), true).getBody();
         Map<Long, UserDTO> userDTOMap = users.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity()));
         for (Long userId:userIds) {
@@ -83,6 +84,7 @@ public class SiteMsgUtil {
             receiver.setTargetUserTenantId(userDTO.getOrganizationId());
             receivers.add(receiver);
         }
+        return userDTOMap;
     }
 
     public void issueAssignee(List<Long> userIds, String assigneeName, String summary, String url, Long projectId, String operatorName) {
@@ -120,9 +122,27 @@ public class SiteMsgUtil {
         messageClient.async().sendMessage(messageSender);
     }
 
-    public void sendChangeIssueStatus(Set<Long> userSet){
-        MessageSender messageSender = handlerMessageSender(0L,null,new ArrayList<>(userSet),new HashMap<>());
+    public void sendChangeIssueStatus(Long projectId, Set<Long> userSet, List<String> noticeTypeList, Map<String, String> templateArgsMap){
+        MessageSender messageSender = new MessageSender();
+        messageSender.setTenantId(BaseConstants.DEFAULT_TENANT_ID);
         messageSender.setMessageCode("ISSUECHANGESTATUS");
-        messageClient.sendMessage(messageSender);
+        List<Receiver> receiverList = new ArrayList<>();
+        Map<Long, UserDTO> userMap = handleReceiver(receiverList, userSet);
+        // 设置模板参数
+        messageSender.setArgs(templateArgsMap);
+        // 设置额外参数
+        Map<String,Object> objectMap=new HashMap<>();
+        objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
+        messageSender.setAdditionalInformation(objectMap);
+        messageSender.setTypeCodeList(noticeTypeList);
+        if (CollectionUtils.isNotEmpty(receiverList)){
+            for (Receiver receiver : receiverList) {
+                // 设置接收者和用户名
+                templateArgsMap.put(USER_NAME, userMap.getOrDefault(receiver.getUserId(), new UserDTO()).getRealName());
+                messageSender.setArgs(templateArgsMap);
+                messageSender.setReceiverAddressList(Collections.singletonList(receiver));
+                messageClient.async().sendMessage(messageSender);
+            }
+        }
     }
 }
