@@ -2,7 +2,7 @@
 import React, {
   useMemo, ReactElement, useEffect, memo, useState, PropsWithChildren,
 } from 'react';
-import { observer, useObservable } from 'mobx-react-lite';
+import { observer, useObservable, useObserver } from 'mobx-react-lite';
 import {
   Table, DataSet, Icon, CheckBox, Spin, Output, Button,
 } from 'choerodon-ui/pro/lib';
@@ -20,6 +20,7 @@ import './index.less';
 import { usePageIssueTypeStore } from '../../stores';
 import { useSortTableContext } from './stores';
 import DropContent from './DropContent';
+import { PageIssueTypeStoreStatusCode } from '../../stores/PageIssueTypeStore';
 
 const { Column } = Table;
 interface Props {
@@ -36,6 +37,15 @@ interface DragRenderCloneProps {
   record: Record,
   column: ColumnProps[],
 }
+const columns = [
+  { name: 'fieldName', label: '字段名称' },
+  { name: 'defaultValue', label: '默认值' },
+  { name: 'required', label: '必填' },
+  { name: 'edited', label: '加入到编辑页' },
+  { name: 'created', label: '加入到创建页' },
+
+];
+
 const prefixCls = 'c7n-page-issue-detail';
 const SortTable: React.FC = () => {
   const { sortTableDataSet, pageIssueTypeStore } = usePageIssueTypeStore();
@@ -44,17 +54,17 @@ const SortTable: React.FC = () => {
   const onDragStart = (initial: DragStart, provided: ResponderProvided) => {
 
   };
-  const onDragEnd = (result: DropResult, provided: ResponderProvided) => {
+  const onDragEnd = async (result: DropResult, provided: ResponderProvided) => {
     const { destination, source } = result;
-    if (!destination?.index) {
+    if (!destination) {
       return;
     }
     if (destination.index === source.index) {
       return;
     }
 
-    const sourceRecord = sortTableDataSet.records[source.index];
-    const destinationRecord = sortTableDataSet.records[destination.index];
+    const sourceRecord = sortTableDataSet.data[source.index];
+    const destinationRecord = sortTableDataSet.data[destination.index];
     const rankObj = {
       before: false,
       issueType: pageIssueTypeStore.currentIssueType,
@@ -66,20 +76,20 @@ const SortTable: React.FC = () => {
     } else {
       rankObj.nextRank = destinationRecord.get('rank');
     }
-    // console.log(sourceRecord.toData(), 'sourceRecord ', destinationRecord.toData());
-    pageConfigApi.loadRankValue(rankObj).then((newRank: string) => {
+    // 在异步函数中调用 防止不修改record
+    // const outSetRank = (newRank: string) => sourceRecord.set('rank', newRank);
+    sortTableDataSet.move(source.index, destination.index);
+    await pageConfigApi.loadRankValue(rankObj).then((newRank: string) => {
+      // sortTableDataSet.data[source.index].set('rank', newRank);
+      // outSetRank(newRank);
       sourceRecord.set('rank', newRank);
-    }).then(() => {
-      sortTableDataSet.move(source.index, destination.index);
+      pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.drag);
     });
   };
   return (
     <div className={prefixCls}>
       <div className={`${prefixCls}-header`}>
-        {[...sortTableDataSet.fields.entries()].map((item: any) => {
-          const itemProps = item[1].props;
-          return <span className={`${prefixCls}-header-item`}>{itemProps.label || itemProps.name}</span>;
-        })}
+        {columns.map((itemProps) => <span className={`${prefixCls}-header-item`}>{itemProps.label || itemProps.name}</span>)}
       </div>
       <div className={`${prefixCls}-content`}>
         <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>

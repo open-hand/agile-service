@@ -3,9 +3,12 @@ import {
 } from 'mobx';
 
 import { PageConfigIssueType, pageConfigApi } from '@/api';
+import { DataSet } from 'choerodon-ui/pro/lib';
 import { IFieldPostDataProps } from '../../components/create-field/CreateField';
 
 export enum PageIssueTypeStoreStatusCode {
+  ready = 'ready',
+  loaded = 'loaded',
   update = 'update',
   del = 'delete',
   add = 'add',
@@ -17,13 +20,24 @@ export enum PageIssueTypeStoreStatusCode {
 interface IDescriptionTempleProps {
   id: string | undefined,
   template: undefined | string,
+  originTemplate: undefined | string,
   objectVersionNumber: undefined | number,
+  dirty: boolean,
 }
 export type PageIFieldPostDataProps = IFieldPostDataProps & {
   local?: boolean, fieldName: string,
   edited: boolean, created: boolean, required: boolean, rank?: string,
 };
 class PageIssueTypeStore {
+  constructor(props: { addUnselectedDataSet: DataSet, sortTableDataSet: DataSet }) {
+    this.addUnselectedDataSet = props.addUnselectedDataSet;
+    this.sortTableDataSet = props.sortTableDataSet;
+  }
+
+  @observable sortTableDataSet: DataSet;
+
+  @observable addUnselectedDataSet: DataSet;
+
   @observable loading: boolean = false;
 
   @observable allFieldData = observable.map();
@@ -41,18 +55,14 @@ class PageIssueTypeStore {
   @observable descriptionObj: IDescriptionTempleProps = {
     id: undefined,
     template: undefined,
+    originTemplate: undefined,
     objectVersionNumber: undefined,
+    dirty: false,
   };
 
   @action('清空全部数据') destroy() {
+    this.clear();
     this.currentIssueType = PageConfigIssueType.feature;
-    this.dataStatusCode = PageIssueTypeStoreStatusCode.null;
-    this.deleteIds.length = 0;
-    this.descriptionObj = {
-      id: undefined,
-      template: undefined,
-      objectVersionNumber: undefined,
-    };
   }
 
   @action('清空编辑数据') clear() {
@@ -61,7 +71,9 @@ class PageIssueTypeStore {
     this.descriptionObj = {
       id: undefined,
       template: undefined,
+      originTemplate: undefined,
       objectVersionNumber: undefined,
+      dirty: false,
     };
     this.addIds.length = 0;
     this.createdFields.length = 0;
@@ -71,8 +83,14 @@ class PageIssueTypeStore {
     this.deleteIds.push(id);
   }
 
-  @action('删除本地字段') deleteLocalField(code: string) {
-    const index = this.createdFields.findIndex((item) => item.code === code);
+  @action('删除本地字段') deleteLocalField(code: string, id?: string) {
+    let index = -1;
+    if (id) { // id 存在 则删除已有字段集合
+      index = this.addIds.findIndex((item) => item === id);
+      index !== -1 && this.addIds.splice(index, 1);
+      return;
+    }
+    index = this.createdFields.findIndex((item) => item.code === code);
     index !== -1 && this.createdFields.splice(index, 1);
   }
 
@@ -80,7 +98,7 @@ class PageIssueTypeStore {
     this.addIds.push(id);
   }
 
-  @action('增添新字段') addNewField(data: PageIFieldPostDataProps) {
+  @action('增添新字段') addCreatedField(data: PageIFieldPostDataProps) {
     this.createdFields.push(data);
   }
 
@@ -102,6 +120,17 @@ class PageIssueTypeStore {
 
   @action setDescriptionObj(data: IDescriptionTempleProps) {
     this.descriptionObj = data;
+  }
+
+  @action changeTemplate(data: string) {
+    const dataStr = JSON.stringify(data);
+    if (dataStr === this.descriptionObj.originTemplate) {
+      this.descriptionObj.dirty = false;
+    } else {
+      // console.log(dataStr !== JSON.stringify([{ insert: '\n' }]));
+      this.descriptionObj.dirty = !this.descriptionObj.id ? dataStr !== JSON.stringify([{ insert: '\n' }]) : true;
+    }
+    this.descriptionObj.template = data;
   }
 
   @computed get getDescriptionObj() {
@@ -133,6 +162,24 @@ class PageIssueTypeStore {
       res?.content?.map((item: any) => {
         this.allFieldData.set(item.id, item);
       });
+    });
+  }
+
+  loadData = () => {
+    this.clear();
+    this.addUnselectedDataSet.clear();
+    // pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.ready);
+    this.setLoading(true);
+    pageConfigApi.loadByIssueType(this.getCurrentIssueType).then((res) => {
+      this.sortTableDataSet.loadData(res.fields);
+      if (res.issueTypeFieldVO) {
+        this.setDescriptionObj({
+          ...res.issueTypeFieldVO,
+          originTemplate: res.issueTypeFieldVO.template,
+          dirty: false,
+        });
+      }
+      this.setLoading(false);
     });
   }
 }

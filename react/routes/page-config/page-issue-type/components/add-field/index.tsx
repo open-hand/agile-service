@@ -6,6 +6,7 @@ import { observer } from 'mobx-react-lite';
 import { IModalProps } from '@/common/types';
 import { pageConfigApi, PageConfigIssueType } from '@/api';
 import issueTable from '@/routes/Issue/components/issue-table';
+import stores from 'choerodon-ui/pro/lib/stores';
 import { usePageIssueTypeStore } from '../../stores';
 import PageIssueTypeStore from '../../stores/PageIssueTypeStore';
 
@@ -28,7 +29,9 @@ const AddFiled: React.FC<Props> = observer(({
   async function handleSubmit() {
     if (dataSet.validate()) {
       // console.log('ataSet.current?.toData()', dataSet.current?.toData());
+      const id = dataSet.current?.toData().field;
       store.addNewLocalField(dataSet.current?.toData().field);
+      onSubmitLocal(store.allFieldData.get(id), true);
       // onSubmitLocal && onSubmitLocal(dataSet.current?.toData());
       dataSet.create();
       return true;
@@ -42,7 +45,7 @@ const AddFiled: React.FC<Props> = observer(({
     pageConfigApi.loadUnSelected(store.currentIssueType).then((res) => {
       const currentDataArr = dataSet.toData();
       const data = res.filter((item) => currentDataArr.length === 1
-        || currentDataArr.every((d:any) => d.field !== item.id))
+        || currentDataArr.every((d: any) => d.field !== item.id))
         .map((item) => store.allFieldData.get(item.id));
       setPageList(data);
     });

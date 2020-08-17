@@ -55,7 +55,6 @@ const DraggableItem: React.FC<Props> = ({
         onChange={(val) => {
           record?.set(name as String, val);
           // console.log('dataSet?.dirty', dataSet?.dirty);
-
           if (dataSet?.dirty
             && updateCodeArr.every((item) => item !== pageIssueTypeStore.getDataStatusCode)) {
             // setDataStatus('update');

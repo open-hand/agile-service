@@ -12,10 +12,11 @@ const SortTableDataSet = (): DataSetProps => ({
     { name: 'required', type: 'boolean' as FieldType, label: '必填' },
     { name: 'edited', type: 'boolean' as FieldType, label: '加入到编辑页' },
     { name: 'created', type: 'boolean' as FieldType, label: '加入到创建页' },
+    { name: 'rank', type: 'string' as FieldType, label: '排序' },
   ],
 
   events: {
-    update: ({ value }: { value: any }) => {
+    update: ({ value, name }: { value: any, name: string }) => {
     },
   },
 

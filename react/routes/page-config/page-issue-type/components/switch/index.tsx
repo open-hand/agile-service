@@ -4,22 +4,25 @@ import React, {
 import styles from './index.less';
 
 interface Props {
-    options: Array<{
-        text: any,
-        value: any,
-    }>,
-    onChange: (value: any) => void,
-    defaultValue: any,
+  options: Array<{
+    text: any,
+    value: any,
+  }>,
+  defaultValue: any,
+  onChange: (value: any) => Promise<boolean> | boolean,
+  value: any,
 }
+type SwitchProps = Required<Pick<Props, 'options'>> & Partial<Pick<Props, 'defaultValue' | 'onChange' | 'value'>>
 function Switch({
-  options: propsOption, onChange, defaultValue,
-}: Props) {
+  options: propsOption, onChange, defaultValue, value: propsValue,
+}: SwitchProps) {
   const [value, setValue] = useState<Props['defaultValue']>(defaultValue || 0);
   const [options, setOptions] = useState<Props['options']>(propsOption || []);
   const onClick = (v: any) => {
-    setValue(v);
-    if (onChange) {
-      onChange(v);
+    if (onChange && typeof onChange === 'function' && onChange(v)) {
+      setValue(v);
+    } else if (!onChange) {
+      setValue(v);
     }
   };
   useEffect(() => {
@@ -31,7 +34,11 @@ function Switch({
     // eslint-disable-next-line no-param-reassign
     propsOption = options;
   }, []);
-
+  useEffect(() => {
+    if (value !== propsValue) {
+      setValue(propsValue);
+    }
+  }, [propsValue]);
   return (
     <ul className={styles.switch}>
       {options.map((option, index) => (
@@ -45,7 +52,7 @@ function Switch({
             e.preventDefault();
             onClick(option.value);
           }}
-          className={value === option.value ? styles.active : styles.li}
+          className={value === option.value ? styles.active : ''}
         >
           {option.text || option}
         </li>

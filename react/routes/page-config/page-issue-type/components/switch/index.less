@@ -1,6 +1,40 @@
 .switch {
-  background: rgba(245, 246, 250, 1);
+  display: flex;
+  height: max-content;
+  background: #fff;
   border-radius: 2px;
-  padding: .05rem .06rem;
+  padding: 0;
   margin: 0;
+  width: max-content;
+  cursor: pointer;
+
+  li {
+    float: left;
+    list-style: none;
+    padding: .07rem .15rem;
+    border: 1px solid rgba(232, 232, 232, 1);
+    font-size: 13px;
+    font-family: PingFangSC-Regular, PingFang SC;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 1);
+    line-height: 18px;
+
+    &:not(:last-child) {
+      border-right-width: 0;
+    }
+  }
+
+  li:hover {
+    &:not(:last-child) {
+      border-right-width: 1px;
+    }
+
+    border-color: #3f51b5;
+  }
+
+  .active {
+    font-weight: 500;
+    color: rgba(255, 255, 255, 1);
+    background: rgba(63, 81, 181, 1);
+  }
 }

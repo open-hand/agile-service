@@ -147,7 +147,7 @@ function CreateField() {
     });
     try {
       if ((await formDataSet.submit()) !== false) {
-        handleRefresh();
+        handleRefresh && handleRefresh();
         return true;
       }
       return false;
