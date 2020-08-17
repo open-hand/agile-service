@@ -28,7 +28,6 @@ const updateCodeArr = [
   PageIssueTypeStoreStatusCode.add,
   PageIssueTypeStoreStatusCode.del,
   PageIssueTypeStoreStatusCode.desc,
-  PageIssueTypeStoreStatusCode.drag,
 ];
 const DraggableItem: React.FC<Props> = ({
   data, isDragDisabled, virtualizedStyle, provided, index,
@@ -54,16 +53,13 @@ const DraggableItem: React.FC<Props> = ({
         // value={value}
         onChange={(val) => {
           record?.set(name as String, val);
-          // console.log('dataSet?.dirty', dataSet?.dirty);
-          if (dataSet?.dirty
-            && updateCodeArr.every((item) => item !== pageIssueTypeStore.getDataStatusCode)) {
-            // setDataStatus('update');
-            pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.update);
-          } else if (!dataSet?.dirty
-            && pageIssueTypeStore.dataStatusCode === PageIssueTypeStoreStatusCode.update) {
-            // setDataStatus('ready');
-            pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.null);
-          }
+          // if (dataSet?.dirty
+          //   && updateCodeArr.every((item) => item !== pageIssueTypeStore.getDataStatusCode)) {
+          //   pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.update);
+          // } else if (!dataSet?.dirty
+          //   && pageIssueTypeStore.dataStatusCode === PageIssueTypeStoreStatusCode.update) {
+          //   pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.null);
+          // }
         }}
       />
     );
@@ -82,7 +78,10 @@ const DraggableItem: React.FC<Props> = ({
         style={{ marginLeft: 10 }}
         onClick={() => {
           onDelete && onDelete(record?.toData());
-            dataSet?.splice(index, 1);
+          console.log('re', record);
+          pageIssueTypeStore.addDeleteRecord(record!);
+          dataSet?.remove(record!);
+          // dataSet?.splice(index, 1);
         }}
       >
         <Icon type="delete" style={{ fontSize: 18 }} />

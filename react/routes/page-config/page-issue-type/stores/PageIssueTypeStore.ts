@@ -4,15 +4,14 @@ import {
 
 import { PageConfigIssueType, pageConfigApi } from '@/api';
 import { DataSet } from 'choerodon-ui/pro/lib';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { IFieldPostDataProps } from '../../components/create-field/CreateField';
 
 export enum PageIssueTypeStoreStatusCode {
-  ready = 'ready',
-  loaded = 'loaded',
-  update = 'update',
+  // update = 'update',
   del = 'delete',
   add = 'add',
-  drag = 'drag_update',
+  // drag = 'drag_update',
   desc = 'description_update',
   none = 'none',
   null = '',
@@ -48,6 +47,8 @@ class PageIssueTypeStore {
 
   @observable deleteIds: Array<string> = [];
 
+  @observable deleteRecords: Array<Record> = []; // 删除列表中初始时所拥有的字段
+
   @observable addIds: Array<string> = [];
 
   @observable createdFields: Array<PageIFieldPostDataProps> = [];
@@ -77,6 +78,14 @@ class PageIssueTypeStore {
     };
     this.addIds.length = 0;
     this.createdFields.length = 0;
+  }
+
+  @action addDeleteRecord(record: Record) {
+    this.deleteRecords.push(record);
+  }
+
+  @computed get getDeleteRecords() {
+    return this.deleteRecords.slice();
   }
 
   @action('增添删除字段') addDeleteId(id: string) {
@@ -127,7 +136,6 @@ class PageIssueTypeStore {
     if (dataStr === this.descriptionObj.originTemplate) {
       this.descriptionObj.dirty = false;
     } else {
-      // console.log(dataStr !== JSON.stringify([{ insert: '\n' }]));
       this.descriptionObj.dirty = !this.descriptionObj.id ? dataStr !== JSON.stringify([{ insert: '\n' }]) : true;
     }
     this.descriptionObj.template = data;
@@ -143,6 +151,21 @@ class PageIssueTypeStore {
 
   @action setDataStatusCode(code: PageIssueTypeStoreStatusCode) {
     this.dataStatusCode = code;
+  }
+
+  @action('设置数据状态') changeDataStatusCode(code: PageIssueTypeStoreStatusCode) {
+    if (this.dataStatusCode === PageIssueTypeStoreStatusCode.del) {
+      return;
+    }
+    // if (code === PageIssueTypeStoreStatusCode.add) {
+    //   this.dataStatusCode = code;
+    // }
+    this.dataStatusCode = code;
+  }
+
+  @computed get getDirty() {
+    return this.getDataStatusCode !== PageIssueTypeStoreStatusCode.null
+    || this.getDescriptionObj.dirty || this.sortTableDataSet.dirty;
   }
 
   @computed get getDataStatusCode() {

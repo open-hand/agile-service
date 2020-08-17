@@ -2,7 +2,7 @@ import React, {
   useState, useEffect, useReducer, useCallback,
 } from 'react';
 import {
-  TabPage as Page, Header, Content, Breadcrumb,
+  TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import { Button, Modal, Spin } from 'choerodon-ui/pro/lib';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
@@ -11,7 +11,7 @@ import { observer, useObservable, Observer } from 'mobx-react-lite';
 import { Prompt } from 'react-router-dom';
 import { pageConfigApi, PageConfigIssueType, IFiledProps } from '@/api/PageConfig';
 import { beforeTextUpload, text2Delta } from '@/utils/richText';
-import { getApplyType, getMenuType } from '@/utils/common';
+import { getMenuType } from '@/utils/common';
 import styles from './index.less';
 import IssueTypeWrap from './components/issue-type-wrap';
 import SortTable from './components/sort-table';
@@ -45,19 +45,18 @@ function PageIssueType() {
   const {
     sortTableDataSet, addUnselectedDataSet, intl, pageIssueTypeStore,
   } = usePageIssueTypeStore();
-
-  async function handleSubmit() {
-    const issueTypeFieldVO = pageIssueTypeStore.getDescriptionObj;
-
-    if (issueTypeFieldVO.dirty
-      || pageIssueTypeStore.dataStatusCode !== PageIssueTypeStoreStatusCode.null) {
+  const [btnLoading, setBtnLoading] = useState<boolean>();
+  const handleSubmit = () => {
+    if (pageIssueTypeStore.getDirty) {
+      setBtnLoading(true);
       pageIssueTypeStore.setLoading(true);
       let submitData: Array<any> = [];
       if (sortTableDataSet.dirty) {
-        submitData = sortTableDataSet.filter((record) => record.dirty && !record.get('local'));// &&
+        submitData = sortTableDataSet.filter((record) => record.dirty && !record.get('local'));
       }
-      // console.log(sortTableDataSet.dirty, 'submitData', submitData);
+      console.log(sortTableDataSet.dirty, 'submitData', submitData);
       // return true;
+      const issueTypeFieldVO = pageIssueTypeStore.getDescriptionObj;
       const data = {
         issueType: pageIssueTypeStore.currentIssueType,
         // fields: submitData,
@@ -82,16 +81,18 @@ function PageIssueType() {
         beforeTextUpload(text2Delta(issueTypeFieldVO.template), data.issueTypeFieldVO!, () => {
           pageConfigApi.update(data).then(() => {
             pageIssueTypeStore.loadData();
+            setBtnLoading(false);
           });
         }, 'template');
       } else {
         pageConfigApi.update(data).then(() => {
           pageIssueTypeStore.loadData();
+          setBtnLoading(false);
         });
       }
     }
     return true;
-  }
+  };
   // 加载全部字段 用于增添已有字段
   useEffect(() => {
     pageIssueTypeStore.loadAllField();
@@ -103,20 +104,18 @@ function PageIssueType() {
 
   const handleSelectBox = (val: any) => {
     console.log('code:', pageIssueTypeStore.getDataStatusCode);
-    if (pageIssueTypeStore.getDataStatusCode !== PageIssueTypeStoreStatusCode.null
-      || pageIssueTypeStore.getDescriptionObj.dirty) {
+    if (pageIssueTypeStore.getDirty) {
       Modal.confirm({
         title: '是否放弃更改？',
         children: (
           <div>
-            页面有未保存的内容，切换则放弃更改
+            页面有未保存的内容,是否放弃更改？
           </div>
         ),
         onOk: () => pageIssueTypeStore.setCurrentIssueType(val as PageConfigIssueType),
       });
       return false;
     }
-    // console.log('lo lo', pageIssueTypeStore.getDataStatusCode);
     pageIssueTypeStore.setCurrentIssueType(val as PageConfigIssueType);
     return true;
   };
@@ -131,7 +130,7 @@ function PageIssueType() {
     } else {
       console.log('data', data);
       pageIssueTypeStore.addDeleteId(data.id);
-      pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.del);
+      pageIssueTypeStore.changeDataStatusCode(PageIssueTypeStoreStatusCode.del);
     }
   };
   // 增添已有字段进行本地提交数据
@@ -197,7 +196,6 @@ function PageIssueType() {
       cancelText: intl.formatMessage({ id: 'cancel' }),
     });
   }
-
   return (
     <Page
       service={
@@ -205,7 +203,7 @@ function PageIssueType() {
           : ['choerodon.code.project.setting.page.ps.scheme']
       }
     >
-      <Prompt message="页面有未保存的内容，切换则放弃更改" when={sortTableDataSet.dirty} />
+      <Prompt message={`是否放弃更改？${Choerodon.STRING_DEVIDER}页面有未保存的内容,是否放弃更改？`} when={pageIssueTypeStore.getDirty} />
       <Header>
 
         <Button icon="playlist_add" onClick={openCreateFieldModal}>创建字段</Button>
@@ -250,22 +248,13 @@ function PageIssueType() {
             </IssueTypeWrap>
           </div>
         </Spin>
-
         <div className={styles.bottom}>
-          <Button
-            funcType={'raised' as FuncType}
-            color={'primary' as ButtonColor}
-            onClick={handleSubmit}
-          >
+          <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} loading={btnLoading} onClick={handleSubmit}>
             确定
           </Button>
-          <Button
-            funcType={'raised' as FuncType}
-            onClick={pageIssueTypeStore.loadData}
-          >
+          <Button funcType={'raised' as FuncType} onClick={pageIssueTypeStore.loadData}>
             取消
           </Button>
-
         </div>
 
       </Content>

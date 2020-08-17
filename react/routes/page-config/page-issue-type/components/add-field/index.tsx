@@ -20,6 +20,7 @@ interface Props {
 interface IPage {
   name: string,
   fieldTypeName: string,
+  fieldName: string,
   id: string,
 }
 const AddFiled: React.FC<Props> = observer(({
@@ -28,11 +29,9 @@ const AddFiled: React.FC<Props> = observer(({
   const [pageList, setPageList] = useState([] as IPage[]);
   async function handleSubmit() {
     if (dataSet.validate()) {
-      // console.log('ataSet.current?.toData()', dataSet.current?.toData());
       const id = dataSet.current?.toData().field;
       store.addNewLocalField(dataSet.current?.toData().field);
       onSubmitLocal(store.allFieldData.get(id), true);
-      // onSubmitLocal && onSubmitLocal(dataSet.current?.toData());
       dataSet.create();
       return true;
     }
@@ -44,16 +43,20 @@ const AddFiled: React.FC<Props> = observer(({
   useEffect(() => {
     pageConfigApi.loadUnSelected(store.currentIssueType).then((res) => {
       const currentDataArr = dataSet.toData();
+      const deleteRecords = store.getDeleteRecords.map((record) => record.toData());
       const data = res.filter((item) => currentDataArr.length === 1
         || currentDataArr.every((d: any) => d.field !== item.id))
         .map((item) => store.allFieldData.get(item.id));
-      setPageList(data);
+      setPageList(data.concat(deleteRecords));
     });
+    return () => {
+      dataSet.current?.reset();
+    };
   }, []);
   return (
     <Form record={dataSet.current}>
       <Select name="field">
-        {pageList.map((item) => <Option value={item.id}>{item.name}</Option>)}
+        {pageList.map((item) => <Option value={item.id}>{item.name || item.fieldName}</Option>)}
       </Select>
     </Form>
   );
