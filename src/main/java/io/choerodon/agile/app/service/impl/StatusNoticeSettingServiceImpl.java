@@ -83,6 +83,7 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
                 CollectionUtils.isNotEmpty(statusNoticeSettingVO.getUserTypeList())){
             List<StatusNoticeSettingDTO> saveList = statusNoticeSettingVO.getUserTypeList()
                     .stream()
+                    .filter(useType -> !StringUtils.equals(useType, StatusNoticeUserType.SPECIFIER))
                     .map(useType -> new StatusNoticeSettingDTO(statusNoticeSettingVO, useType))
                     .collect(Collectors.toList());
             saveList.addAll(statusNoticeSettingVO.getUserIdList()
