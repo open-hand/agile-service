@@ -24,7 +24,7 @@ interface Props {
   provided: DraggableProvided,
   virtualizedStyle?: React.CSSProperties,
   draggingClassName?: string,
-  isDragDisabled?: boolean
+  isDragDisabled?: boolean,
 }
 const prefixCls = 'c7n-page-issue-detail-drag';
 const updateCodeArr = [
@@ -37,7 +37,8 @@ const DraggableItem: React.FC<Props> = ({
 }) => {
   const { pageIssueTypeStore } = usePageIssueTypeStore();
   const { onDelete, showSplitLine } = useSortTableContext();
-  const renderFieldName = ({ value, record, dataSet }: RenderProps) => (
+  const disabled = data.get('createdLevel') === 'system' || (!showSplitLine && data.get('createdLevel') !== 'project');
+  const renderFieldName = ({ value, record, dataSet }: RenderProps, editDisabled?: boolean) => (
     <div className={`${prefixCls}-text`}>
 
       <TableDropMenu
@@ -59,10 +60,10 @@ const DraggableItem: React.FC<Props> = ({
 
   function renderCheckBox({
     name, record, dataSet,
-  }: RenderProps) {
+  }: RenderProps, editDisabled?: boolean) {
     return (
       <CheckBox
-        disabled={isDragDisabled}
+        disabled={isDragDisabled || editDisabled}
         checked={record?.get(name)}
         // record={record}
         // name={name!}
@@ -76,12 +77,10 @@ const DraggableItem: React.FC<Props> = ({
   }
   const handleDelete = (record: Record, dataSet: DataSet) => {
     onDelete && onDelete(record?.toData());
-    console.log('re', record);
     pageIssueTypeStore.addDeleteRecord(record!);
     dataSet?.remove(record!);
   };
   function onClickDel(record: Record, dataSet: DataSet) {
-    console.log('record', record);
     Modal.confirm({
       title: `是否删除【${record?.get('fieldName')}】字段`,
       onOk: handleDelete.bind(this, record, dataSet),
@@ -89,13 +88,13 @@ const DraggableItem: React.FC<Props> = ({
   }
   const renderAction = ({
     name, record, dataSet,
-  }: RenderProps) => (
+  }: RenderProps, editDisabled?: boolean) => (
     <div className={`${prefixCls}-action`}>
       {renderCheckBox({
         name, record, dataSet,
-      })}
+      }, editDisabled)}
       {
-          (record?.get('createdLevel') !== 'organization' && !showSplitLine)
+          (!showSplitLine && record?.get('createdLevel') !== 'organization')
           && (
             <Button
               className={`${prefixCls}-action-button`}
@@ -150,13 +149,13 @@ const DraggableItem: React.FC<Props> = ({
       </Tooltip>
 
       <div className={`${prefixCls}-item`}>
-        {renderCheckBox({ record: data, name: 'required', dataSet: data.dataSet })}
+        {renderCheckBox({ record: data, name: 'required', dataSet: data.dataSet }, disabled)}
       </div>
       <div className={`${prefixCls}-item`}>
-        {renderCheckBox({ record: data, name: 'edited', dataSet: data.dataSet })}
+        {renderCheckBox({ record: data, name: 'edited', dataSet: data.dataSet }, disabled)}
       </div>
       <div className={`${prefixCls}-item`}>
-        {renderAction({ record: data, name: 'created', dataSet: data.dataSet })}
+        {renderAction({ record: data, name: 'created', dataSet: data.dataSet }, disabled)}
       </div>
     </div>
 
