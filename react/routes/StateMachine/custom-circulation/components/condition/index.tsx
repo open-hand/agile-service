@@ -92,6 +92,9 @@ const Condition:React.FC<Props> = ({
         }
       }
     });
+  }, [conditionDataSet, record, selectedType]);
+
+  useEffect(() => {
     const handleOk = async () => {
       const data = conditionDataSet.toData();
       const validate = await conditionDataSet.validate();

@@ -87,6 +87,9 @@ const NotifySetting = ({
       current?.set('userIdList', (res.userList || []).map((item: { id: string}) => item.id));
       current?.set('noticeTypeList', res.noticeTypeList);
     });
+  }, [selectedType, record, notifySettingDataSet]);
+
+  useEffect(() => {
     const handleOk = async () => {
       const validate = await notifySettingDataSet.validate();
       const data = notifySettingDataSet.toData();

@@ -1,7 +1,7 @@
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  Page, Header, Content, Breadcrumb,
+  Page, Content, Breadcrumb,
 } from '@choerodon/boot';
 import {
   Table, DataSet, Menu, Dropdown, Icon, Modal,
@@ -9,8 +9,9 @@ import {
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { useIssueTypes } from '@/hooks';
 import { find, filter } from 'lodash';
+import moment from 'moment';
 import STATUS from '@/constants/STATUS';
-import { IIssueType, User } from '@/common/types';
+import { IIssueType, User, IStatus } from '@/common/types';
 import { statusTransformApiConfig } from '@/api';
 import { ColumnProps } from 'choerodon-ui/pro/lib/table/Column';
 import { Divider, Tooltip } from 'choerodon-ui';
@@ -87,6 +88,17 @@ interface IStatusFieldSettingVOS {
   fieldValueList: IFieldValue[],
 }
 
+interface IStatusLinkageVOS {
+  id: null | string
+  issueTypeId: string
+  issueTypeVO: IIssueType
+  parentIssueStatusSetting: string
+  parentIssueTypeCode: 'story' | 'bug' | 'task'
+  projectId: number
+  statusId: string
+  statusVO: IStatus
+}
+
 const transformedMember = {
   reporter: '报告人',
   reportor: '报告人',
@@ -102,6 +114,27 @@ const transformedNoticeType = {
   WEB_HOOK: 'webhook',
 };
 
+const dateTransform = (fieldType: string, d: Date) => {
+  let transformed = '';
+  switch (fieldType) {
+    case 'time': {
+      transformed = moment(d).format('HH:mm:ss');
+      break;
+    }
+    case 'date': {
+      transformed = moment(d).format('YYYY-MM-DD');
+      break;
+    }
+    case 'datetime': {
+      transformed = moment(d).format('YYYY-MM-DD HH:mm:ss');
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+  return transformed;
+};
 // @ts-ignore
 const transformFieldValue = (fieldSetting) => {
   const { fieldType, fieldValueList } = fieldSetting;
@@ -157,7 +190,7 @@ const transformFieldValue = (fieldSetting) => {
       } else if (operateType === 'add') {
         transformedValue = `流转后${dateAddValue}天`;
       } else if (operateType === 'specifier') {
-        transformedValue = dateValue;
+        transformedValue = dateTransform(fieldType, dateValue);
       } else if (operateType === 'current_time') {
         transformedValue = '当前时间';
       }
@@ -228,7 +261,11 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         width: 380,
         title: '状态联动',
         // @ts-ignore
-        children: <Linkage record={record} selectedType={selectedType} />,
+        children: <Linkage
+          record={record}
+          selectedType={selectedType}
+          customCirculationDataSet={customCirculationDataSet}
+        />,
       },
       updateField: {
         width: 740,
@@ -342,13 +379,33 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     }
   };
 
+  const renderStatusLinkageSetting = (statusLinkageVOS: IStatusLinkageVOS[]) => {
+    const selectedTypeCode = find(issueTypes, (
+      item: IIssueType,
+    ) => item.id === selectedType)?.typeCode;
+    if (statusLinkageVOS && statusLinkageVOS.length && (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug')) {
+      const prefixStr = `如果全部${selectedTypeCode === 'sub_task' ? '子任务' : '子缺陷'}都在${selectedTypeCode === 'sub_task' ? '已完成' : '已修复'}状态，则将`;
+      const parentDes = (
+        statusLinkageVOS.map((linkageSetting) => {
+          const { statusVO, issueTypeVO } = linkageSetting;
+          const toStatusName = statusVO?.name;
+          const parentTypeName = issueTypeVO?.name;
+          return `父级${parentTypeName}的状态自动流转到${toStatusName}`;
+        })).join('、');
+      return `${prefixStr}${parentDes}`;
+    }
+  };
+
   const renderSetting = ({
     // @ts-ignore
     value, text, name, record, dataSet,
   }) => {
     const {
-      statusTransferSettingVOS, statusNoticeSettingVOS, statusFieldSettingVOS, linkageVOS,
+      statusTransferSettingVOS, statusNoticeSettingVOS, statusFieldSettingVOS, statusLinkageVOS,
     } = record.data;
+    const selectedTypeCode = find(issueTypes, (
+      item: IIssueType,
+    ) => item.id === selectedType)?.typeCode;
     const isProjectOwnerExist = statusTransferSettingVOS && find(statusTransferSettingVOS, (item: IStatusTransferSettingVOS) => item.userType === 'projectOwner');
     const assigners = filter((statusTransferSettingVOS || []), (item: IStatusTransferSettingVOS) => item.userType === 'specifier')?.map((item: IStatusTransferSettingVOS) => item.user?.realName) || [];
     const transferRender = (isProjectOwnerExist || (assigners && assigners.length > 0)) && `移到工作项到此状态需为：${isProjectOwnerExist ? '项目所有者' : ''}${isProjectOwnerExist && assigners.length > 0 ? '、' : ''}${assigners.join('、')}`;
@@ -361,6 +418,15 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
               {transferRender}
             </Tooltip>
           </div>
+          )
+        }
+        {
+          (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug') && statusLinkageVOS && statusLinkageVOS.length > 0 && (
+            <div className={`${styles.settingItem} ${styles.linkageSettingItem}`}>
+              <Tooltip title={renderStatusLinkageSetting(statusLinkageVOS)}>
+                {renderStatusLinkageSetting(statusLinkageVOS)}
+              </Tooltip>
+            </div>
           )
         }
         {
@@ -412,7 +478,6 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     },
     {
       name: 'id',
-      tooltip: 'overflow',
       renderer: renderSetting,
     },
     {

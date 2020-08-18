@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { Form, DataSet, Select } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { find } from 'lodash';
@@ -7,11 +7,24 @@ import { IIssueType } from '@/common/types';
 import SelectStatus from '@/components/select/select-status';
 import { statusTransformApi } from '@/api';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import Loading from '@/components/Loading';
 import styles from './index.less';
 
+interface IParentIssueStatusSetting {
+  id: string
+  issueTypeId: string
+  parentIssueStatusSetting: string
+  parentIssueTypeCode: 'story' | 'task' | 'bug'
+  projectId: number
+  statusId: string
+}
+
+const Linkage = ({
 // @ts-ignore
-const Linkage = ({ modal, record, selectedType }) => {
+  modal, record, selectedType, customCirculationDataSet,
+}) => {
   const [issueTypes] = useIssueTypes();
+  const [loading, setLoading] = useState(false);
   const linkageDataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [
@@ -33,24 +46,51 @@ const Linkage = ({ modal, record, selectedType }) => {
 
   useEffect(() => {
     const { current } = linkageDataSet;
-    // @ts-ignore
-    statusTransformApi.getLinkage(selectedType, record.get('id')).then((res) => {
-      current?.set('story', res.story);
-      current?.set('task', res.task);
+    setLoading(true);
+    statusTransformApi.getLinkage(selectedType, record.get('id')).then((res: IParentIssueStatusSetting[]) => {
+      setLoading(false);
+      current?.set('story', find(res, { parentIssueTypeCode: 'story' })?.parentIssueStatusSetting);
+      current?.set('task', find(res, { parentIssueTypeCode: 'task' })?.parentIssueStatusSetting);
       if (selectedTypeCode === 'sub_task') {
-        current?.set('bug', res.bug);
+        current?.set('bug', find(res, { parentIssueTypeCode: 'bug' })?.parentIssueStatusSetting);
       }
+    }).catch(() => {
+      setLoading(false);
     });
+  }, []);
+
+  useEffect(() => {
     const handleOk = async () => {
       const data = linkageDataSet.toData();
       // @ts-ignore
       const { story, task, bug } = data && data[0];
-      console.log(data[0]);
+      const updateData = [];
+      if (story) {
+        updateData.push({
+          parentIssueTypeCode: 'story',
+          parentIssueStatusSetting: story,
+        });
+      }
+      if (task) {
+        updateData.push({
+          parentIssueTypeCode: 'task',
+          parentIssueStatusSetting: task,
+        });
+      }
+      if (bug) {
+        updateData.push({
+          parentIssueTypeCode: 'bug',
+          parentIssueStatusSetting: bug,
+        });
+      }
+      // @ts-ignore
+      await statusTransformApi.updateLinkage(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
+      customCirculationDataSet.query();
     };
     if (modal) {
       modal.handleOk(handleOk);
     }
-  }, [linkageDataSet, modal, record, selectedType, selectedTypeCode]);
+  }, [customCirculationDataSet, linkageDataSet, modal, record, selectedType]);
 
   const getIssueTypeId = (code: string) => find(issueTypes, (
     item: IIssueType,
@@ -58,6 +98,7 @@ const Linkage = ({ modal, record, selectedType }) => {
 
   return (
     <div className={styles.linkage}>
+      <Loading loading={loading} />
       <div className={styles.tip}>当工作项流转到此状态后，关联的父任务状态设置。</div>
       <Form dataSet={linkageDataSet}>
         <div>
