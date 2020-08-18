@@ -1,12 +1,14 @@
 import React, {
-  useState, useEffect, ReactElement, MouseEventHandler,
+  useState, useEffect, ReactElement, MouseEventHandler, useCallback,
 } from 'react';
+import { observer } from 'mobx-react-lite';
 import styles from './index.less';
 
 interface Props {
   options: Array<{
     text: any,
     value: any,
+    [propsName: string]: any,
   }>,
   defaultValue: any,
   onChange: (value: any) => Promise<boolean> | boolean,
@@ -17,7 +19,7 @@ function Switch({
   options: propsOption, onChange, defaultValue, value: propsValue,
 }: SwitchProps) {
   const [value, setValue] = useState<Props['defaultValue']>(defaultValue || 0);
-  const [options, setOptions] = useState<Props['options']>(propsOption || []);
+  const [options, setOptions] = useState<Props['options']>([]);
   const onClick = (v: any) => {
     if (onChange && typeof onChange === 'function' && onChange(v)) {
       setValue(v);
@@ -25,19 +27,27 @@ function Switch({
       setValue(v);
     }
   };
-  useEffect(() => {
-    if (!Array.isArray(options)) {
+  const initOptions = useCallback(() => {
+    let newOptions:Props['options'] = propsOption;
+    if (!Array.isArray(newOptions)) {
       setOptions([]);
-    } else if (!options.some((v) => v.value)) {
-      setOptions(options.map((v, index) => ({ text: v, value: index })));
+    } else if (!newOptions.some((v) => v.value)) {
+      newOptions = newOptions.map((v, index) => ({ text: v, value: index }));
+      setOptions(newOptions);
     }
-    if (value === 0) {
-      console.log('hi', options[0].value);
-      setValue(options[0].value);
+    setOptions(newOptions);
+    if (value === 0 && newOptions.length > 0) {
+      setValue(newOptions[0].value);
     }
     // eslint-disable-next-line no-param-reassign
-    propsOption = options;
-  }, []);
+    // propsOption = options;
+  }, [propsOption]);
+  useEffect(() => {
+    initOptions();
+  }, [propsOption]);
+  // useEffect(() => {
+  //   initOptions();
+  // }, [initOptions]);
   useEffect(() => {
     if (value !== propsValue) {
       setValue(propsValue);
@@ -64,4 +74,4 @@ function Switch({
     </ul>
   );
 }
-export default Switch;
+export default observer(Switch);

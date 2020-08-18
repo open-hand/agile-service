@@ -41,7 +41,7 @@ class PageIssueTypeStore {
 
   @observable allFieldData = observable.map();
 
-  @observable currentIssueType: PageConfigIssueType = PageConfigIssueType.feature;
+  @observable currentIssueType: PageConfigIssueType = PageConfigIssueType.null;
 
   @observable dataStatusCode: PageIssueTypeStoreStatusCode = PageIssueTypeStoreStatusCode.null;
 
@@ -67,7 +67,7 @@ class PageIssueTypeStore {
 
   @action('清空全部数据') destroy() {
     this.clear();
-    this.currentIssueType = PageConfigIssueType.feature;
+    this.currentIssueType = PageConfigIssueType.null;
   }
 
   @action('清空编辑数据') clear() {

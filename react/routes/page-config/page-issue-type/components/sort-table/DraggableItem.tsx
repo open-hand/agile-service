@@ -4,13 +4,15 @@ import {
   DraggableProvided, Draggable, DraggingStyle, NotDraggingStyle,
 } from 'react-beautiful-dnd';
 import classnames from 'classnames';
+import { Menu, Modal } from 'choerodon-ui';
 import {
   Button, IconPicker, Icon, Output, CheckBox, Tooltip, DataSet,
 } from 'choerodon-ui/pro/lib';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
-import { Modal } from 'choerodon-ui';
+import moment from 'moment';
+import TableDropMenu from '@/common/TableDropMenu';
 import { usePageIssueTypeStore } from '../../stores';
 import { PageIssueTypeStoreStatusCode } from '../../stores/PageIssueTypeStore';
 import { useSortTableContext } from './stores';
@@ -35,12 +37,23 @@ const DraggableItem: React.FC<Props> = ({
 }) => {
   const { pageIssueTypeStore } = usePageIssueTypeStore();
   const { onDelete, showSplitLine } = useSortTableContext();
-  const renderFieldName = ({ value }: RenderProps) => (
+  const renderFieldName = ({ value, record, dataSet }: RenderProps) => (
     <div className={`${prefixCls}-text`}>
-      {!isDragDisabled && <Icon type="baseline-drag_indicator" className={`${prefixCls}-text-icon`} />}
-      <Tooltip title={value} placement="top">
-        <span>{value}</span>
-      </Tooltip>
+
+      <TableDropMenu
+        menu={(
+          <Menu onClick={() => onClickDel(record!, dataSet!)}>
+            <Menu.Item>删除</Menu.Item>
+          </Menu>
+        )}
+        text={(
+          <>
+            {!isDragDisabled && <Icon type="baseline-drag_indicator" className={`${prefixCls}-text-icon`} />}
+            <span>{value}</span>
+          </>
+        )}
+        isHasMenu={showSplitLine}
+      />
     </div>
   );
 
@@ -56,13 +69,6 @@ const DraggableItem: React.FC<Props> = ({
         // value={value}
         onChange={(val) => {
           record?.set(name as String, val);
-          // if (dataSet?.dirty
-          //   && updateCodeArr.every((item) => item !== pageIssueTypeStore.getDataStatusCode)) {
-          //   pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.update);
-          // } else if (!dataSet?.dirty
-          //   && pageIssueTypeStore.dataStatusCode === PageIssueTypeStoreStatusCode.update) {
-          //   pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.null);
-          // }
         }}
       />
     );
@@ -74,6 +80,13 @@ const DraggableItem: React.FC<Props> = ({
     pageIssueTypeStore.addDeleteRecord(record!);
     dataSet?.remove(record!);
   };
+  function onClickDel(record: Record, dataSet: DataSet) {
+    console.log('record', record);
+    Modal.confirm({
+      title: `是否删除【${record?.get('fieldName')}】字段`,
+      onOk: handleDelete.bind(this, record, dataSet),
+    });
+  }
   const renderAction = ({
     name, record, dataSet,
   }: RenderProps) => (
@@ -81,27 +94,41 @@ const DraggableItem: React.FC<Props> = ({
       {renderCheckBox({
         name, record, dataSet,
       })}
-      <Button
-        className={`${prefixCls}-action-button`}
-        disabled={isDragDisabled}
-        style={{ marginLeft: 10 }}
-        onClick={() => {
-          Modal.confirm({
-            title: `是否删除【${record?.get('fieldName')}】字段`,
-            onOk: handleDelete.bind(this, record, dataSet),
-          });
+      {
+          (record?.get('createdLevel') !== 'organization' && !showSplitLine)
+          && (
+            <Button
+              className={`${prefixCls}-action-button`}
+              disabled={isDragDisabled}
+              style={{ marginLeft: 10 }}
+              onClick={() => onClickDel(record!, dataSet!)}
+            >
+              <Icon type="delete" style={{ fontSize: 18 }} />
+            </Button>
+          )
+        }
 
-          // dataSet?.splice(index, 1);
-        }}
-      >
-        <Icon type="delete" style={{ fontSize: 18 }} />
-      </Button>
     </div>
   );
   const getStyle = (draggableStyle: DraggingStyle | NotDraggingStyle | undefined) => ({
     ...draggableStyle,
     ...virtualizedStyle,
   });
+  const transformDefaultValue = (fieldType: string, defaultValue: any) => {
+    if (!defaultValue || defaultValue === '') {
+      return defaultValue;
+    }
+    switch (fieldType) {
+      case 'datetime':
+        return moment(defaultValue).format('YYYY-MM-DD hh:mm:ss');
+      case 'time':
+        return moment(defaultValue).format('hh:mm:ss');
+      case 'date':
+        return moment(defaultValue).format('YYYY-MM-DD');
+      default:
+        return defaultValue;
+    }
+  };
   return (
 
     <div
@@ -114,11 +141,11 @@ const DraggableItem: React.FC<Props> = ({
       onClick={(e) => { }}
     >
       <div className={`${prefixCls}-item`}>
-        {renderFieldName({ value: data.get('fieldName') })}
+        {renderFieldName({ value: data.get('fieldName'), record: data, dataSet: data.dataSet })}
       </div>
-      <Tooltip title={data.get('defaultValue')} placement="top">
+      <Tooltip title={transformDefaultValue(data.get('fieldType'), data.get('defaultValue'))} placement="top">
         <div className={`${prefixCls}-item ${prefixCls}-item-text`}>
-          {data.get('defaultValue')}
+          {transformDefaultValue(data.get('fieldType'), data.get('defaultValue'))}
         </div>
       </Tooltip>
 

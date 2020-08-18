@@ -9,6 +9,7 @@ export enum PageConfigIssueType {
   task = 'task',
   epic = 'issue_epic',
   demand = 'demand',
+  null = '',
 }
 interface IFiled {
   created: boolean,
@@ -73,6 +74,20 @@ class PageConfigApi {
       url: `${this.prefixOrgOrPro}/field_value/list/fields`,
       params: {
         issueTypeId,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  /**
+   * 查询当前项目或组织下可配置的问题类型
+   *
+   */
+  loadAvailableIssueType(): Promise<{ id: string, name: string, typeCode: string }[]> {
+    return axios({
+      method: 'get',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/configs/issue_types`,
+      params: {
         organizationId: getOrganizationId(),
       },
     });

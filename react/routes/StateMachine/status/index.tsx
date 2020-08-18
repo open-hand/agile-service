@@ -72,7 +72,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
             diff: 100,
           }}
         >
-          <Column name="name" />
+          <Column name="name" renderer={({ value }) => <span className={styles.gray}>{value}</span>} />
           <Column
             name="type"
             renderer={({ record }) => (
@@ -82,7 +82,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
               />
             )}
           />
-          <Column name="usage" />
+          <Column name="usage" renderer={({ value }) => <span className={styles.gray}>{value}</span>} />
           <Column
             name="operate"
             renderer={({ record }) => (
