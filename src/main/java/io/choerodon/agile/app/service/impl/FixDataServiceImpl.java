@@ -77,8 +77,6 @@ public class FixDataServiceImpl implements FixDataService {
     @Autowired
     private StatusMachineNodeMapper statusMachineNodeMapper;
 
-    private List<String> fieldIssueTypes = Arrays.asList(ObjectSchemeFieldContext.ISSUE_TYPES);
-
     @Override
     public void fixCreateProject() {
         // 查询有问题的项目id列表
@@ -306,7 +304,7 @@ public class FixDataServiceImpl implements FixDataService {
         List<IssueTypeDTO> issueTypeList = issueTypeMap.get(organizationId);
         if (ObjectSchemeFieldContext.isGlobal(contextArray)) {
             issueTypeList.forEach(i -> {
-                if (fieldIssueTypes.contains(i.getTypeCode())) {
+                if (ObjectSchemeFieldContext.ISSUE_TYPES_LIST.contains(i.getTypeCode())) {
                     result.add(i);
                 }
             });

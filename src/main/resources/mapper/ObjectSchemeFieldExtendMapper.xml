@@ -120,7 +120,11 @@
         t4.issue_type,
         t4.rank,
         t4.object_version_number,
-        case when t6.project_id is null then 'organization' else 'project' end as created_level
+        case
+            when t6.organization_id = 0 then 'system'
+            when t6.organization_id != 0 and t6.project_id is null then 'organization'
+            else 'project'
+        end as created_level
         from fd_object_scheme_field_extend t4
         join (
             select

@@ -177,6 +177,7 @@
         <result property="organizationId" column="organization_id"/>
         <result property="projectId" column="project_id"/>
         <result property="system" column="is_system"/>
+        <result property="extraConfig" column="extra_config"/>
         <result property="createdLevel" column="created_level"/>
         <collection property="extendFields" ofType="io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO">
             <id property="id" column="extend_id"/>
@@ -199,7 +200,12 @@
             t4.organization_id,
             t4.project_id,
             t4.is_system,
-            case when t4.project_id is null then 'organization' else 'project' end as created_level,
+            t4.extra_config,
+            case
+                when t4.organization_id = 0 then 'system'
+                when t4.organization_id != 0 and t4.project_id is null then 'organization'
+                else 'project'
+            end as created_level,
             t5.id as extend_id,
             fit.type_code as extend_issue_type,
             fit.name as extend_issue_type_name,

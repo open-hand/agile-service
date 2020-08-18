@@ -189,4 +189,12 @@ public class ProjectObjectSchemeFieldController {
                                                         @RequestParam Long organizationId) {
         return new ResponseEntity<>(objectSchemeFieldService.issueTypes(organizationId, projectId), HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "根据项目和类型查询描述模版")
+    @GetMapping(value = "/description_template")
+    public ResponseEntity<IssueTypeFieldVO> queryDescriptionTemplate(@PathVariable("project_id") Long projectId,
+                                                                     @RequestParam @Encrypt Long issueTypeId) {
+        return new ResponseEntity<>(objectSchemeFieldService.queryDescriptionTemplate(projectId, issueTypeId), HttpStatus.OK);
+    }
 }
