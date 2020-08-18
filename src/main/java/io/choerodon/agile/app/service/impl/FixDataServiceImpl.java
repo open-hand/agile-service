@@ -196,6 +196,7 @@ public class FixDataServiceImpl implements FixDataService {
 
     @Override
     public void fixPage() {
+        LOGGER.info("开始迁移页面数据");
         String createPageCode = "agile_issue_create";
         String editPageCode = "agile_issue_edit";
         Long createPageId = getPageIdByCode(createPageCode);
@@ -234,11 +235,14 @@ public class FixDataServiceImpl implements FixDataService {
         int total = insertList.size();
         int step = 5000;
         int totalPage = total / step + 1;
+        LOGGER.info("开始插入数据，数据量: {}, 每次插入{}条数据, 需要插入{}次", total, step, totalPage);
         for (int i = 0; i < totalPage; i++) {
             int startLine = i * step;
             int endLine =  (i + 1) * step > total ? total : (i + 1) * step;
             objectSchemeFieldExtendMapper.batchInsert(insertList.subList(startLine, endLine));
+            LOGGER.info("第{}次插入成功", i+1);
         }
+        LOGGER.info("迁移页面数据完成");
     }
 
     private String getRank(MultiKeyMap rankMap,

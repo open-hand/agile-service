@@ -211,4 +211,86 @@
         )
     </select>
 
+
+    <select id="selectFields" resultType="io.choerodon.agile.infra.dto.PageFieldDTO">
+        select
+        t5.name as field_name,
+        t5.field_type,
+        t5.is_system as system,
+        t5.default_value,
+        t5.extra_config,
+        t5.code as field_code,
+        t4.is_required as required,
+        case
+            when #{created} is not null
+            then #{created}
+            else #{edited}
+        end as display,
+        t4.rank,
+        t4.id,
+        t4.field_id,
+        t4.project_id,
+        t4.organization_id
+        from (
+        select
+            t6.*
+        from (
+            select
+            t1.id,
+            t1.field_id,
+            t1.issue_type_id,
+            t1.is_required,
+            t1.project_id,
+            t1.organization_id,
+            t1.is_created,
+            t1.is_edited,
+            t1.rank
+            from fd_object_scheme_field_extend t1
+            where t1.organization_id = #{organizationId}
+            and t1.project_id is null
+            <if test="issueType != null">
+                and t1.issue_type = #{issueType}
+            </if>
+            <if test="projectId != null">
+                and t1.field_id not in (
+                    select t3.field_id
+                    from fd_object_scheme_field_extend t3
+                    where t3.organization_id = #{organizationId}
+                    and t3.project_id = #{projectId}
+                    <if test="issueType != null">
+                        and t3.issue_type = #{issueType}
+                    </if>
+                )
+                union
+                select
+                    t2.id,
+                    t2.field_id,
+                    t2.issue_type_id,
+                    t2.is_required,
+                    t2.project_id,
+                    t2.organization_id,
+                    t2.is_created,
+                    t2.is_edited,
+                    t2.rank
+                from fd_object_scheme_field_extend t2
+                where t2.organization_id = #{organizationId}
+                and t2.project_id = #{projectId}
+                <if test="issueType != null">
+                    and t2.issue_type = #{issueType}
+                </if>
+            </if>
+        ) t6
+        where 1=1
+        <if test="created != null">
+            and t6.is_created = #{created}
+        </if>
+        <if test="edited != null">
+            and t6.is_edited = #{edited}
+        </if>
+        ) t4
+        join fd_object_scheme_field t5 on t4.field_id = t5.id
+        where 1=1
+        order by t4.rank desc, t4.id asc
+    </select>
+
 </mapper>

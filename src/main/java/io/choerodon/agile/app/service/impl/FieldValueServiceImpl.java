@@ -9,7 +9,6 @@ import io.choerodon.agile.infra.enums.FieldType;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
 import io.choerodon.agile.infra.enums.ObjectSchemeFieldContext;
 import io.choerodon.agile.infra.enums.PageCode;
-//import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.mapper.FieldDataLogMapper;
 import io.choerodon.agile.infra.mapper.FieldValueMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
@@ -46,7 +45,6 @@ public class FieldValueServiceImpl implements FieldValueService {
     private static final String ERROR_OPTION_ILLEGAL = "error.option.illegal";
     private static final String ERROR_FIELDTYPE_ILLEGAL = "error.fieldType.illegal";
     private static final String ERROR_SYSTEM_ILLEGAL = "error.system.illegal";
-    private static final String ERROR_ISSUE_ID = "error.issueIds.null";
 
     @Autowired
     private FieldValueMapper fieldValueMapper;
@@ -68,8 +66,6 @@ public class FieldValueServiceImpl implements FieldValueService {
     private ProjectConfigService projectConfigService;
     @Autowired
     private MessageClient messageClient;
-//    @Autowired
-//    private NotifyFeignClient notifyFeignClient;
 
     @Override
     public void fillValues(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewVO> pageFieldViews) {
@@ -255,7 +251,6 @@ public class FieldValueServiceImpl implements FieldValueService {
                 }
             }
             batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
-//            notifyFeignClient.postWebSocket(batchUpdateFieldStatusVO.getKey(),batchUpdateFieldStatusVO.getUserId().toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
             messageClient.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
         });
     }
@@ -284,7 +279,6 @@ public class FieldValueServiceImpl implements FieldValueService {
                 }
             }
             batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
-//            notifyFeignClient.postWebSocket(batchUpdateFieldStatusVO.getKey(),batchUpdateFieldStatusVO.getUserId().toString(), JSON.toJSONString(batchUpdateFieldStatusVO));
             messageClient.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
         });
     }

@@ -149,4 +149,11 @@ public class ObjectSchemeFieldController {
         return new ResponseEntity<>(objectSchemeFieldService.unselected(organizationId, null, issueType), HttpStatus.OK);
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "页面配置类型查询接口")
+    @GetMapping(value = "/configs/issue_types")
+    public ResponseEntity<List<IssueTypeVO>> issueTypes(@PathVariable("organization_id") Long organizationId) {
+        return new ResponseEntity<>(objectSchemeFieldService.issueTypes(organizationId, null), HttpStatus.OK);
+    }
+
 }
