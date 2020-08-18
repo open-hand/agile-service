@@ -1,6 +1,7 @@
 import React, {
-  useState, useEffect, forwardRef, useCallback,
+  useState, useEffect, forwardRef, useCallback, useMemo,
 } from 'react';
+import { find } from 'lodash';
 import { Select } from 'choerodon-ui/pro';
 import { sprintApi } from '@/api';
 import { Tooltip } from 'choerodon-ui';
@@ -26,6 +27,10 @@ const SelectSprint: React.FC<Props> = forwardRef(({
   ...otherProps
 }, ref: React.Ref<Select>) => {
   const [teams, setTeams] = useState<Team[]>([]);
+  const sprints = useMemo(() => teams.reduce((result, team) => [
+    ...result,
+    ...team.sprints,
+  ], []), [teams]);
   const loadData = useCallback(async () => {
     if (piId && Array.isArray(teamIds) && teamIds.length > 0) {
       const res = await sprintApi.getTeamSprints(piId, teamIds);
@@ -41,6 +46,8 @@ const SelectSprint: React.FC<Props> = forwardRef(({
     <Select
       ref={ref}
       multiple
+      // @ts-ignore
+      renderer={({ value }) => find(sprints, { sprintId: value })?.sprintName}
       {...otherProps}
     >
       {
