@@ -192,4 +192,12 @@ public interface ObjectSchemeFieldService {
      */
     Boolean containsAllIssueTypes(Long organizationId, Long projectId, List<String> issueTypes);
 
+    /**
+     * 查询项目下某个类型的描述模版
+     *
+     * @param projectId
+     * @param issueTypeId
+     * @return
+     */
+    IssueTypeFieldVO queryDescriptionTemplate(Long projectId, Long issueTypeId);
 }

@@ -93,7 +93,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             Long issueTypeId = issueTypeMap.get(ctx);
             if (objectSchemeFieldExtendMapper.select(dto).isEmpty()
                     && !ObjectUtils.isEmpty(issueTypeId)) {
-                dto.setRequired(true);
+                dto.setRequired(false);
                 dto.setCreated(true);
                 dto.setEdited(true);
                 dto.setIssueTypeId(issueTypeId);
@@ -224,8 +224,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     @Override
     public List<IssueTypeVO> issueTypes(Long organizationId, Long projectId) {
         List<IssueTypeVO> issueTypes = issueTypeService.queryByOrgId(organizationId);
-        List<String> issueTypeList = Arrays.asList(ObjectSchemeFieldContext.ISSUE_TYPES);
-        return issueTypes.stream().filter(i -> issueTypeList.contains(i.getTypeCode())).collect(Collectors.toList());
+        return issueTypes.stream().filter(i -> ObjectSchemeFieldContext.ISSUE_TYPES_LIST.contains(i.getTypeCode())).collect(Collectors.toList());
     }
 
     private List<IssueTypeDTO> convertContextToIssueTypes(String context, Long organizationId) {
@@ -295,6 +294,18 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             result =  result && issueTypes.contains(vo.getTypeCode());
         }
         return result;
+    }
+
+    @Override
+    public IssueTypeFieldVO queryDescriptionTemplate(Long projectId, Long issueTypeId) {
+        IssueTypeFieldDTO dto = new IssueTypeFieldDTO();
+        dto.setIssueTypeId(issueTypeId);
+        dto.setProjectId(projectId);
+        IssueTypeFieldDTO result = issueTypeFieldMapper.selectOne(dto);
+        if (ObjectUtils.isEmpty(result)) {
+            return null;
+        }
+        return modelMapper.map(result, IssueTypeFieldVO.class);
     }
 
     @Override
@@ -451,7 +462,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
         if (onProjectLevel) {
             deleteList.forEach(d -> objectSchemeFieldExtendMapper.deleteByPrimaryKey(d));
-            insertSet.forEach(i -> insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, true, issueTypeMap, i, true, true));
+            insertSet.forEach(i -> insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, false, issueTypeMap, i, true, true));
         } else {
             //组织层新增或删除，项目层数据同时新增或删除
             deleteList.forEach(d -> {
@@ -466,8 +477,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             Set<Long> projectIds =
                     objectSchemeFieldExtendMapper.selectProjectIdsByOrganizationId(organizationId);
             insertSet.forEach(i -> {
-                insertObjectSchemeFieldExtend(organizationId, null, fieldId, true, issueTypeMap, i, true, true);
-                projectIds.forEach(p -> insertObjectSchemeFieldExtend(organizationId, p, fieldId, true, issueTypeMap, i, true, true));
+                insertObjectSchemeFieldExtend(organizationId, null, fieldId, false, issueTypeMap, i, true, true);
+                projectIds.forEach(p -> insertObjectSchemeFieldExtend(organizationId, p, fieldId, false, issueTypeMap, i, true, true));
             });
         }
     }
@@ -713,7 +724,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                 Set<Long> addIds,
                                 String issueType,
                                 Map<String, Long> issueTypeMap) {
-        addIds.forEach(a -> insertObjectSchemeFieldExtend(organizationId, projectId, a, true, issueTypeMap, issueType, true, true));
+        addIds.forEach(a -> insertObjectSchemeFieldExtend(organizationId, projectId, a, false, issueTypeMap, issueType, true, true));
     }
 
     private void deleteFieldConfig(Long organizationId, Long projectId, Set<Long> deleteIds) {
