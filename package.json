@@ -66,7 +66,7 @@
   "scripts": {
     "start": "node --max_old_space_size=4096 node_modules/@choerodon/boot/bin/choerodon-front-boot-start --config ./react/config.js",
     "dist": "choerodon-front-boot dist --config ./react/config.js",
-    "watch": "c7n compile --watch --ignore-error",
+    "watch": "compiler compile --watch --ignore-error",
     "compile": "compiler compile --ignore-error",
     "analyze": "node --max_old_space_size=4096 node_modules/@choerodon/boot/bin/choerodon-front-boot-analyze --config ./react/config.js",
     "fix": "eslint --ext .jsx,.js,tsx,ts react/ --fix",

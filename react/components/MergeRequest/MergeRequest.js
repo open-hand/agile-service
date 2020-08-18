@@ -61,7 +61,7 @@ class MergeRequest extends Component {
         title: '编码',
         dataIndex: 'id',
         width: '10%',
-        render: id => (
+        render: (id) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={id}>
               <p style={{
@@ -80,7 +80,7 @@ class MergeRequest extends Component {
         title: '名称',
         dataIndex: 'title',
         width: '35%',
-        render: title => (
+        render: (title) => (
           <div style={{ width: '100%', overflow: 'hidden', flexShrink: 0 }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={title}>
               <p style={{
@@ -97,7 +97,7 @@ class MergeRequest extends Component {
         title: '状态',
         dataIndex: 'state',
         width: '10%',
-        render: state => (
+        render: (state) => (
           <div style={{ width: '100%', overflow: 'hidden', flexShrink: 0 }}>
             {['opened', 'merged', 'closed'].includes(state) ? STATUS_SHOW[state] : ''}
           </div>
@@ -115,7 +115,7 @@ class MergeRequest extends Component {
             <UserHead
               user={{
                 id: authorId,
-                realName: record.authorName,
+                realName: record.assigneeName,
                 avatar: record.imageUrl,
               }}
             />
@@ -126,7 +126,7 @@ class MergeRequest extends Component {
         title: '更新时间',
         dataIndex: 'updatedAt',
         width: '15%',
-        render: updatedAt => (
+        render: (updatedAt) => (
           <div style={{ width: '100%', overflow: 'hidden', flexShrink: 0 }}>
             <Popover
               title="更新时间"
@@ -174,7 +174,7 @@ class MergeRequest extends Component {
         >
           <Table
             filterBar={false}
-            rowKey={record => record.id}
+            rowKey={(record) => record.id}
             columns={column}
             dataSource={this.state.mergeRequests}
             loading={this.state.loading}
