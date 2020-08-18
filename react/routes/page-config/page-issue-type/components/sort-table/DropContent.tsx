@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import React, { useState, useCallback } from 'react';
 import {
-  Draggable, Droppable, DroppableStateSnapshot,
+  Draggable, Droppable,
 } from 'react-beautiful-dnd';
 import {
   WindowScroller, List, AutoSizer, ListRowProps, ListRowRenderer,
@@ -9,25 +9,28 @@ import {
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
 import ReactDOM from 'react-dom';
+import classnames from 'classnames';
 import DraggableItem from './DraggableItem';
 import { usePageIssueTypeStore } from '../../stores';
+import { useSortTableContext } from './stores';
 
 interface Props {
   isDropDisabled: boolean,
   rows: Array<Record>,
 }
+const prefixCls = 'c7n-page-issue-detail';
 const DropContent: React.FC<Props> = ({ isDropDisabled, rows }) => {
   const { pageIssueTypeStore } = usePageIssueTypeStore();
+  const { showSplitLine } = useSortTableContext();
   const [scrollHeight, setScrollHeight] = useState<number>(300);
   const renderRowItem = useCallback((rowProps: ListRowProps) => {
     const record = rows[rowProps.index];
     return (
       <Draggable draggableId={String(record.key)} index={rowProps.index} key={record.key}>
-        {(provided) => (
+        {(provided, snapshot) => (
           <DraggableItem
             provided={provided}
             data={rows[rowProps.index]}
-            index={rowProps.index}
             virtualizedStyle={{ ...rowProps.style }}
           />
         )}
@@ -41,9 +44,8 @@ const DropContent: React.FC<Props> = ({ isDropDisabled, rows }) => {
       isDropDisabled={isDropDisabled}
       renderClone={(provided, snapshot, rubric) => (
         <DraggableItem
+          draggingClassName={`${prefixCls}-dragging-item`}
           provided={provided}
-          index={rubric.source.index}
-          // virtualizedStyle={{ margin: 0 }}
           data={rows[rubric.source.index]}
         />
       )}
@@ -55,13 +57,14 @@ const DropContent: React.FC<Props> = ({ isDropDisabled, rows }) => {
             {({ width, height }) => (
               <List
                 // autoHeight
-                height={scrollHeight}
+                height={height}
                 overscanRowCount={10}
-                noRowsRenderer={() => <div>暂无数据</div>}
+                noRowsRenderer={() => <div className={classnames(`${prefixCls}-drop-null`, { [`${prefixCls}-drop-null-split`]: showSplitLine })}>暂无数据</div>}
                 rowCount={rowCount}
                 // onScroll={onChildScroll}
-                rowHeight={32}
+                rowHeight={showSplitLine ? 40 : 32}
                 rowRenderer={renderRowItem}
+
                 // scrollTop={scrollTop}
                 width={width}
                 ref={(ref) => {
@@ -73,7 +76,7 @@ const DropContent: React.FC<Props> = ({ isDropDisabled, rows }) => {
 
                     if (whatHasMyLifeComeTo instanceof HTMLElement) {
                       const element = document.getElementsByClassName('c7n-page-issue-detail')[0];
-                      setScrollHeight(element.clientHeight - 30);
+                      setScrollHeight(element.clientHeight - (showSplitLine ? 0 : 30));
                       provided.innerRef(whatHasMyLifeComeTo);
                     }
                   }

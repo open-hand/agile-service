@@ -31,6 +31,10 @@ function Switch({
     } else if (!options.some((v) => v.value)) {
       setOptions(options.map((v, index) => ({ text: v, value: index })));
     }
+    if (value === 0) {
+      console.log('hi', options[0].value);
+      setValue(options[0].value);
+    }
     // eslint-disable-next-line no-param-reassign
     propsOption = options;
   }, []);

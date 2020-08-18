@@ -17,7 +17,7 @@ import { pageConfigApi } from '@/api/PageConfig';
 import Store from './stores';
 import TableDropMenu from '../../../common/TableDropMenu';
 import TypeTag from '../../../components/TypeTag';
-import CreateField from './components/create-field';
+import CreateField from '../components/create-field';
 import RequiredPrompt from './components/required-prompt';
 import './ObjectScheme.less';
 
@@ -292,7 +292,7 @@ function ObjectScheme() {
       <Content className={`${prefixCls}-detail-content`}>
         <Table dataSet={schemeTableDataSet} queryBar={'none' as TableQueryBarType} className={`${prefixCls}-detail-content-table`}>
           <Column name="name" renderer={renderDropDown} />
-          <Column name="contextName" renderer={renderContextName} width={330} />
+          <Column name="contextName" renderer={renderContextName} width={430} />
           <Column name="fieldOrigin" renderer={renderFieldOrigin} header={formatMessage({ id: 'field.origin' })} />
           <Column name="fieldTypeName" />
           <Column name="required" renderer={renderRequired} />

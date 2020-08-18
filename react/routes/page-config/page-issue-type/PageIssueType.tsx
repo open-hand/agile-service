@@ -30,21 +30,27 @@ interface DescriptionState {
   objectVersionNumber?: number,
 }
 type DescriptionAction = Required<{ type: string }> & Partial<DescriptionState>
-
-const issueTypeOptions = [
-  { value: 'issue_epic', text: '史诗' },
-  { value: 'feature', text: '特性' },
-  { value: 'story', text: '故事' },
-  { value: 'task', text: '任务' },
-  { value: 'sub_task', text: '子任务' },
-  { value: 'bug', text: '缺陷' },
-  { value: 'backlog', text: '需求' },
+interface IssueOption {
+  value: string,
+  text: string,
+  type: 'normal' | 'program' | 'common' | 'demand',
+}
+const issueTypeOptions: Array<IssueOption> = [
+  { value: 'issue_epic', text: '史诗', type: 'normal' },
+  { value: 'feature', text: '特性', type: 'program' },
+  { value: 'story', text: '故事', type: 'common' },
+  { value: 'task', text: '任务', type: 'common' },
+  { value: 'sub_task', text: '子任务', type: 'common' },
+  { value: 'bug', text: '缺陷', type: 'common' },
+  { value: 'backlog', text: '需求', type: 'common' },
 ];
 const preCls = 'c7n-agile-page-config-page-issue-type';
 function PageIssueType() {
   const {
-    sortTableDataSet, addUnselectedDataSet, intl, pageIssueTypeStore,
+    sortTableDataSet, addUnselectedDataSet, intl, pageIssueTypeStore, isInProgram,
   } = usePageIssueTypeStore();
+  console.log('content:', isInProgram);
+  const [switchOptions, setSwitchOption] = useState<Array<IssueOption>>();
   const [btnLoading, setBtnLoading] = useState<boolean>();
   const handleSubmit = () => {
     if (pageIssueTypeStore.getDirty) {
@@ -96,6 +102,9 @@ function PageIssueType() {
   // 加载全部字段 用于增添已有字段
   useEffect(() => {
     pageIssueTypeStore.loadAllField();
+    const showOptions = issueTypeOptions.filter((item) => item.type === 'common' || !isInProgram);
+    pageIssueTypeStore.init(showOptions[0].value as PageConfigIssueType);
+    setSwitchOption(showOptions);
   }, []);
 
   useEffect(() => {
@@ -221,31 +230,44 @@ function PageIssueType() {
       <Breadcrumb />
       <Content className={`${preCls}-content`} style={{ overflowY: 'hidden' }}>
         <Switch
-          defaultValue="feature"
+          // defaultValue="feature"
           value={pageIssueTypeStore.currentIssueType}
-          options={issueTypeOptions}
+          options={switchOptions}
           onChange={handleSelectBox}
         />
         <Spin spinning={pageIssueTypeStore.getLoading}>
           <div className={styles.top}>
-            <IssueTypeWrap title="字段配置">
-              <SortTable
-                onDelete={handleDeleteFiled}
-              />
-            </IssueTypeWrap>
-            <IssueTypeWrap title="描述信息格式">
-              {
-                !pageIssueTypeStore.getLoading ? (
-                  <WYSIWYGEditor
-                    style={{ height: '100%', width: '100%' }}
-                    onChange={handleChangeDes}
-                    defaultValue={text2Delta(pageIssueTypeStore.descriptionObj.originTemplate)}
-                    placeholder="您可以在此自定义描述信息格式"
-                  />
-                ) : ''
-              }
+            {
+              getMenuType() !== 'project' ? (
+                <SortTable
+                  showSplitLine={getMenuType() !== 'project'}
+                  onDelete={handleDeleteFiled}
+                />
+              )
+                : [
+                  <IssueTypeWrap title="字段配置">
+                    <SortTable
+                      showSplitLine={getMenuType() !== 'project'}
+                      onDelete={handleDeleteFiled}
+                    />
+                  </IssueTypeWrap>,
+                  <IssueTypeWrap title="描述信息格式">
+                    {
+                      !pageIssueTypeStore.getLoading ? (
+                        <WYSIWYGEditor
+                          style={{ height: '100%', width: '100%' }}
+                          onChange={handleChangeDes}
+                          defaultValue={text2Delta(
+                            pageIssueTypeStore.descriptionObj.originTemplate,
+                          )}
+                          placeholder="您可以在此自定义描述信息格式"
+                        />
+                      ) : ''
+                    }
 
-            </IssueTypeWrap>
+                  </IssueTypeWrap>]
+            }
+
           </div>
         </Spin>
         <div className={styles.bottom}>
