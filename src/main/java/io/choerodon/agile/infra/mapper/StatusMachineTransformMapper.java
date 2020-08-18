@@ -39,4 +39,6 @@ public interface StatusMachineTransformMapper extends BaseMapper<StatusMachineTr
     int deleteByStateMachineIdAndNodeId(@Param("organizationId") Long organizationId, @Param("stateMachineId") Long stateMachineId,@Param("nodeId") Long nodeId);
 
     void migrateStatusMachineTransform();
+
+    List<StatusMachineTransformDTO> selectTransformByStatusId(@Param("organizationId") Long organizationId,@Param("stateMachineId") Long stateMachineId,@Param("statusId") Long statusId,@Param("changeStatus") Long changeStatus);
 }

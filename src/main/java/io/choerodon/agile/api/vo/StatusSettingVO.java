@@ -1,6 +1,5 @@
 package io.choerodon.agile.api.vo;
 
-import io.choerodon.agile.infra.dto.StatusTransferSettingDTO;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -26,6 +25,8 @@ public class StatusSettingVO {
     private List<StatusFieldSettingVO> statusFieldSettingVOS;
 
     private List<StatusNoticeSettingVO> statusNoticeSettingVOS;
+
+    private List<StatusLinkageVO> statusLinkageVOS;
 
     public Long getId() {
         return id;
@@ -89,5 +90,13 @@ public class StatusSettingVO {
 
     public void setStatusNoticeSettingVOS(List<StatusNoticeSettingVO> statusNoticeSettingVOS) {
         this.statusNoticeSettingVOS = statusNoticeSettingVOS;
+    }
+
+    public List<StatusLinkageVO> getStatusLinkageVOS() {
+        return statusLinkageVOS;
+    }
+
+    public void setStatusLinkageVOS(List<StatusLinkageVO> statusLinkageVOS) {
+        this.statusLinkageVOS = statusLinkageVOS;
     }
 }
