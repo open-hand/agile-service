@@ -456,6 +456,7 @@ public class FixDataServiceImpl implements FixDataService {
             List<Long> list = projectIds.subList(page * size > total ? total : page * size, (page + 1) * size > total ? total : (page + 1) * size);
             List<ProjectVO> projectVOS = baseFeignClient.queryByIds(new HashSet<>(list)).getBody();
             for (ProjectVO projectVO : projectVOS) {
+                LOGGER.info("开始修复{}+{}", projectVO.getId(),projectVO.getName());
                 String applyType = "PROGRAM".equals(projectVO.getCategory()) ? "program" : "agile";
                 // 查询单个项目的问题类型(故事、特性、任务、子任务、bug)
                 fixStateMachineApplyType(projectVO,applyType);

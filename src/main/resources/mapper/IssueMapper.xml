@@ -2982,4 +2982,10 @@
         group by ai.issue_type_id
     </select>
 
+    <select id="querySubIssueByParentIssueId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+        select * from agile_issue ai
+        where ai.project_id = #{projectId}
+        AND (ai.parent_issue_id = #{parentIssueId} OR ai.relate_issue_id = #{parentIssueId})
+    </select>
+
 </mapper>

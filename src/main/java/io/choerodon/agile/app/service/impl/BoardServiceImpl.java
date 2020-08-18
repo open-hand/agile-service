@@ -93,6 +93,8 @@ public class BoardServiceImpl implements BoardService {
     private BoardAssembler boardAssembler;
     @Autowired
     private StatusFieldSettingService statusFieldSettingService;
+    @Autowired
+    private StatusLinkageService statusLinkageService;
 
     @Override
     public void create(Long projectId, String boardName) {
@@ -497,6 +499,7 @@ public class BoardServiceImpl implements BoardService {
                     SchemeApplyType.AGILE, new InputDTO(issueId, UPDATE_STATUS_MOVE, JSON.toJSONString(handleIssueMoveRank(projectId, issueMoveVO))));
         }
         statusFieldSettingService.handlerSettingToUpdateIssue(projectId,issueId);
+        statusLinkageService.updateParentStatus(projectId,issueId,SchemeApplyType.AGILE);
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         IssueMoveVO result = modelMapper.map(issueDTO, IssueMoveVO.class);
         sendMsgUtil.sendMsgByIssueMoveComplete(projectId, issueMoveVO, issueDTO);

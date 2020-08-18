@@ -274,6 +274,8 @@ public class IssueServiceImpl implements IssueService {
     private FieldValueService fieldValueService;
     @Autowired
     private StatusFieldSettingService statusFieldSettingService;
+    @Autowired
+    private StatusLinkageService statusLinkageService;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -571,6 +573,7 @@ public class IssueServiceImpl implements IssueService {
             issueAccessDataService.updateSelective(issueConvertDTO);
         }
         statusFieldSettingService.handlerSettingToUpdateIssue(projectId,issueId);
+        statusLinkageService.updateParentStatus(projectId,issueId,applyType);
         return queryIssueByUpdate(projectId, issueId, Collections.singletonList("statusId"));
     }
 
