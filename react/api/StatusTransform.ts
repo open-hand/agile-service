@@ -66,6 +66,11 @@ export interface IUpdateData {
   fieldId: string,
   fieldValueList: object[],
 }
+
+export interface ILinkage {
+  parentIssueTypeCode: 'story' | 'task' | 'bug',
+  parentIssueStatusSetting: string,
+}
 class StatusTransformApi extends Api {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
@@ -244,11 +249,34 @@ class StatusTransformApi extends Api {
   getLinkage(issueTypeId: string, statusId: string) {
     return axios({
       method: 'get',
-      url: `${this.prefix}/status_transform/setting_default_status`,
+      url: `${this.prefix}/status_linkages/list`,
       params: {
         issueTypeId,
         statusId,
       },
+    });
+  }
+
+  /**
+   * 更新状态联动
+   * @param issueTypeId
+   * @param statusId
+   * @param objectVersionNumber
+   * @param data
+   */
+  updateLinkage(
+    issueTypeId: string, statusId: string, objectVersionNumber: number, data: ILinkage[],
+  ) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/status_linkages`,
+      params: {
+        issueTypeId,
+        statusId,
+        objectVersionNumber,
+        applyType: getApplyType(),
+      },
+      data,
     });
   }
 

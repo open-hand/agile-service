@@ -54,27 +54,6 @@ interface ISettingField {
 
 const excludeCode = ['summary', 'status', 'issueNum', 'issueType', 'sprint', 'feature', 'epicName', 'epic', 'pi', 'timeTrace', 'lastUpdateDate', 'creationDate'];
 
-const dateTransform = (fieldType: string, d: Date) => {
-  let transformed = '';
-  switch (fieldType) {
-    case 'time': {
-      transformed = moment(d).format('HH:mm:ss');
-      break;
-    }
-    case 'date': {
-      transformed = moment(d).format('YYYY-MM-DD');
-      break;
-    }
-    case 'datetime': {
-      transformed = moment(d).format('YYYY-MM-DD HH:mm:ss');
-      break;
-    }
-    default: {
-      break;
-    }
-  }
-  return transformed;
-};
 // @ts-ignore
 const transformUpdateData = (data) => {
   const updateData = [];
@@ -163,7 +142,7 @@ const transformUpdateData = (data) => {
             fieldId,
             fieldValueList: [{
               operateType: selected,
-              dateValue: selected === 'specifier' ? dateTransform(fieldType, value) : undefined,
+              dateValue: selected === 'specifier' ? moment(value).format('YYYY-MM-DD HH:mm:ss') : undefined,
               dateAddValue: selected === 'add' ? value : undefined,
               fieldType,
             }],
