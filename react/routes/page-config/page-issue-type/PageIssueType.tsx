@@ -1,13 +1,11 @@
-import React, {
-  useState, useEffect, useReducer, useCallback,
-} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import { Button, Modal, Spin } from 'choerodon-ui/pro/lib';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
-import { observer, useObservable, Observer } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import { Prompt } from 'react-router-dom';
 import { pageConfigApi, PageConfigIssueType, IFiledProps } from '@/api/PageConfig';
 import { beforeTextUpload, text2Delta } from '@/utils/richText';
@@ -49,7 +47,6 @@ function PageIssueType() {
   const {
     sortTableDataSet, addUnselectedDataSet, intl, pageIssueTypeStore, isInProgram,
   } = usePageIssueTypeStore();
-  console.log('content:', isInProgram);
   const [switchOptions, setSwitchOption] = useState<Array<IssueOption>>();
   const [btnLoading, setBtnLoading] = useState<boolean>();
   const handleSubmit = () => {
@@ -60,8 +57,6 @@ function PageIssueType() {
       if (sortTableDataSet.dirty) {
         submitData = sortTableDataSet.filter((record) => record.dirty && !record.get('local'));
       }
-      console.log(sortTableDataSet.dirty, 'submitData', submitData);
-      // return true;
       const issueTypeFieldVO = pageIssueTypeStore.getDescriptionObj;
       const data = {
         issueType: pageIssueTypeStore.currentIssueType,
@@ -103,16 +98,22 @@ function PageIssueType() {
   useEffect(() => {
     pageIssueTypeStore.loadAllField();
     const showOptions = issueTypeOptions.filter((item) => item.type === 'common' || !isInProgram);
-    pageIssueTypeStore.init(showOptions[0].value as PageConfigIssueType);
-    setSwitchOption(showOptions);
+    pageConfigApi.loadAvailableIssueType().then((res) => {
+      if (!res.some((item) => item.typeCode === 'backlog')) {
+        showOptions.pop();
+      }
+      pageIssueTypeStore.init(showOptions[0].value as PageConfigIssueType);
+      setSwitchOption(showOptions);
+    });
   }, []);
 
   useEffect(() => {
-    pageIssueTypeStore.loadData();
+    if (pageIssueTypeStore.currentIssueType !== '') {
+      pageIssueTypeStore.loadData();
+    }
   }, [pageIssueTypeStore.currentIssueType]);
 
   const handleSelectBox = (val: any) => {
-    console.log('code:', pageIssueTypeStore.getDataStatusCode);
     if (pageIssueTypeStore.getDirty) {
       Modal.confirm({
         title: '是否放弃更改？',
@@ -137,7 +138,6 @@ function PageIssueType() {
     if (data.local) {
       pageIssueTypeStore.deleteLocalField(data.code, data.id);
     } else {
-      console.log('data', data);
       pageIssueTypeStore.addDeleteId(data.id);
       pageIssueTypeStore.changeDataStatusCode(PageIssueTypeStoreStatusCode.del);
     }
@@ -232,7 +232,7 @@ function PageIssueType() {
         <Switch
           // defaultValue="feature"
           value={pageIssueTypeStore.currentIssueType}
-          options={switchOptions}
+          options={switchOptions || []}
           onChange={handleSelectBox}
         />
         <Spin spinning={pageIssueTypeStore.getLoading}>

@@ -15,7 +15,7 @@ interface Context {
   AppState: AppStateProps,
   isEdit?: boolean,
   defaultContext?: string[],
-  onSubmitLocal: (data: IFieldPostDataProps) => Promise<boolean> | boolean,
+  onSubmitLocal?: (data: IFieldPostDataProps) => Promise<boolean> | boolean,
   localCheckCode?: (code: string) => Promise<boolean> | boolean,
   localCheckName?: (name: string) => Promise<boolean> | boolean,
   schemeCode: string,

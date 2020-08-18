@@ -5,6 +5,7 @@ import { DataSet } from 'choerodon-ui/pro/lib';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { getProjectId } from '@/utils/common';
 import { Store } from './useStore';
 
 interface Props {
@@ -24,6 +25,9 @@ function getLookupConfig(code: string) {
   return {
     url: `/agile/v1/lookup_values/${code}`,
     method: 'get',
+    params: {
+      projectId: getProjectId(),
+    },
     transformResponse: (response: any) => {
       try {
         const data = JSON.parse(response);
