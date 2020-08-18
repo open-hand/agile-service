@@ -572,8 +572,18 @@ public class IssueServiceImpl implements IssueService {
             issueConvertDTO.setObjectVersionNumber(issueMapper.selectByPrimaryKey(issueId).getObjectVersionNumber());
             issueAccessDataService.updateSelective(issueConvertDTO);
         }
-        statusFieldSettingService.handlerSettingToUpdateIssue(projectId,issueId);
-        statusLinkageService.updateParentStatus(projectId,issueId,applyType);
+        /**
+         * 修改属性报错，导致数据回滚但是状态机实例已经完成状态变更，导致issue无论变更什么状态都无效
+         * 抛异常并清空当前实例的状态机的状态信息
+         */
+        try {
+            statusFieldSettingService.handlerSettingToUpdateIssue(projectId,issueId);
+            statusLinkageService.updateParentStatus(projectId,issueId,applyType);
+        }
+        catch (Exception e) {
+            stateMachineClientService.cleanInstanceCache(projectId,issueId,applyType);
+            throw new CommonException("error.update.status.transform.setting",e);
+        }
         return queryIssueByUpdate(projectId, issueId, Collections.singletonList("statusId"));
     }
 
