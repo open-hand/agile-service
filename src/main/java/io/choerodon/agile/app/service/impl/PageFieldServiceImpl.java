@@ -15,7 +15,6 @@ import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.core.exception.CommonException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -65,6 +64,8 @@ public class PageFieldServiceImpl implements PageFieldService {
     private ObjectSchemeFieldService objectSchemeFieldService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
 
     @Override
     public PageFieldDTO baseCreate(PageFieldDTO field) {
@@ -144,21 +145,21 @@ public class PageFieldServiceImpl implements PageFieldService {
      * @return
      */
     @Override
-    public List<PageFieldDTO> queryPageField(Long organizationId, Long projectId, String pageCode, String context) {
-        List<PageFieldDTO> pageFields;
-        if (projectId != null && projectPageFieldMapper.queryOne(organizationId, projectId) != null) {
-            pageFields = pageFieldMapper.listQuery(organizationId, projectId, pageCode, context);
-        } else {
-            pageFields = pageFieldMapper.listQuery(organizationId, null, pageCode, context);
+    public List<PageFieldDTO> queryPageField(Long organizationId, Long projectId, String pageCode, String issueType) {
+        Boolean created = null;
+        if (PageCode.AGILE_ISSUE_CREATE.equals(pageCode)) {
+            created = true;
         }
-        //若没有数据则初始化【修复旧数据】
+        Boolean edited = null;
+        if (PageCode.AGILE_ISSUE_EDIT.equals(pageCode)) {
+            edited = true;
+        }
+        List<PageFieldDTO> pageFields =
+                objectSchemeFieldExtendMapper.selectFields(organizationId, projectId, issueType, created, edited);
         if (pageFields.isEmpty()) {
-            initPageFieldByOrg(organizationId);
-            if (projectId != null && projectPageFieldMapper.queryOne(organizationId, projectId) != null) {
-                pageFields = pageFieldMapper.listQuery(organizationId, projectId, pageCode, context);
-            } else {
-                pageFields = pageFieldMapper.listQuery(organizationId, null, pageCode, context);
-            }
+            objectSchemeFieldService.createSystemFieldIfNotExisted(organizationId);
+            pageFields =
+                    objectSchemeFieldExtendMapper.selectFields(organizationId, projectId, issueType, created, edited);
         }
         return pageFields;
     }
@@ -310,19 +311,18 @@ public class PageFieldServiceImpl implements PageFieldService {
 
     @Override
     public List<PageFieldViewVO> queryPageFieldViewList(Long organizationId, Long projectId, PageFieldViewParamVO paramDTO) {
-        if (!EnumUtil.contain(PageCode.class, paramDTO.getPageCode())) {
+        String issueType = paramDTO.getContext();
+        String pageCode = paramDTO.getPageCode();
+        if (!EnumUtil.contain(PageCode.class, pageCode)) {
             throw new CommonException(ERROR_PAGECODE_ILLEGAL);
         }
         if (!EnumUtil.contain(ObjectSchemeCode.class, paramDTO.getSchemeCode())) {
             throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
         }
-        if (!EnumUtil.contain(ObjectSchemeFieldContext.class, paramDTO.getContext())) {
+        if (!EnumUtil.contain(ObjectSchemeFieldContext.class, issueType)) {
             throw new CommonException(ERROR_CONTEXT_ILLEGAL);
         }
-        List<PageFieldDTO> pageFields = queryPageField(organizationId, projectId, paramDTO.getPageCode(), paramDTO.getContext());
-        //modelMapper设置严格匹配策略
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        pageFields = pageFields.stream().filter(PageFieldDTO::getDisplay).collect(Collectors.toList());
+        List<PageFieldDTO> pageFields = queryPageField(organizationId, projectId, pageCode, issueType);
         List<PageFieldViewVO> pageFieldViews = modelMapper.map(pageFields, new TypeToken<List<PageFieldViewVO>>() {
         }.getType());
         //填充option

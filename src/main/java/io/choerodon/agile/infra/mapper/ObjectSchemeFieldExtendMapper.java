@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.mapper;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldVO;
 import io.choerodon.agile.api.vo.PageConfigFieldVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO;
+import io.choerodon.agile.infra.dto.PageFieldDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -43,6 +44,7 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
 
     /**
      * 查询数量
+     *
      * @param issueType
      * @param organizationId
      * @param fieldId
@@ -89,6 +91,7 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
 
     /**
      * 查询targetRank之前最大的rank值
+     *
      * @param organizationId
      * @param projectId
      * @param issueType
@@ -101,7 +104,6 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
                               @Param("targetRank") String targetRank);
 
     /**
-     *
      * @param organizationId
      * @param projectId
      * @param issueType
@@ -113,7 +115,24 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
 
     /**
      * 批量插入接口
+     *
      * @param objectSchemeFieldExtends
      */
     void batchInsert(@Param("insertList") List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtends);
+
+    /**
+     * 根据项目id和组织id以及界面类型查某个类型的字段
+     *
+     * @param organizationId
+     * @param projectId
+     * @param issueType
+     * @param created
+     * @param edited
+     * @return
+     */
+    List<PageFieldDTO> selectFields(@Param("organizationId") Long organizationId,
+                                    @Param("projectId") Long projectId,
+                                    @Param("issueType") String issueType,
+                                    @Param("created") Boolean created,
+                                    @Param("edited") Boolean edited);
 }

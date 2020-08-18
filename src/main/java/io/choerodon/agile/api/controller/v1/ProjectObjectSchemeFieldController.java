@@ -181,4 +181,12 @@ public class ProjectObjectSchemeFieldController {
                                                                        @RequestParam(required = false) String schemeCode) {
         return new ResponseEntity<>(objectSchemeFieldService.selectMemberList(organizationId, projectId, schemeCode, issueTypeId, null), HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "页面配置类型查询接口")
+    @GetMapping(value = "/configs/issue_types")
+    public ResponseEntity<List<IssueTypeVO>> issueTypes(@PathVariable("project_id") Long projectId,
+                                                        @RequestParam Long organizationId) {
+        return new ResponseEntity<>(objectSchemeFieldService.issueTypes(organizationId, projectId), HttpStatus.OK);
+    }
 }

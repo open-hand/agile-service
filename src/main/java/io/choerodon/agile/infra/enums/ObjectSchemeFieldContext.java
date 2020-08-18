@@ -27,11 +27,11 @@ public class ObjectSchemeFieldContext {
 
     public static final String FEATURE = "feature";
 
-    public static final String BACKLOG = "backlog";
+    public static final String[] CONTEXTS = {GLOBAL, STORY, EPIC, BUG, TASK, SUB_TASK, FEATURE};
 
-    public static final String[] CONTEXTS = {GLOBAL, STORY, EPIC, BUG, TASK, SUB_TASK, FEATURE, BACKLOG};
+    public static final String[] ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK, FEATURE};
 
-    public static final String[] ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK, FEATURE, BACKLOG};
+    public static final List<String> ISSUE_TYPES_LIST = Arrays.asList(ISSUE_TYPES);
 
     public static void isIllegalContexts(String[] context) {
         for (String str : context) {
@@ -53,16 +53,6 @@ public class ObjectSchemeFieldContext {
         if (!Arrays.asList(ISSUE_TYPES).contains(issueType)) {
             throw new CommonException("error.issue.type.illegal");
         }
-    }
-
-    public static boolean containsAllIssueTypes(List<String> issueTypes) {
-        return issueTypes.contains(STORY)
-                && issueTypes.contains(EPIC)
-                && issueTypes.contains(BUG)
-                && issueTypes.contains(TASK)
-                && issueTypes.contains(SUB_TASK)
-                && issueTypes.contains(FEATURE)
-                && issueTypes.contains(BACKLOG);
     }
 
     public static boolean isGlobal(String[] context) {

@@ -13,7 +13,6 @@ import java.util.Map;
 public interface ObjectSchemeFieldService {
 
     /**
-     *
      * @param field
      * @param contexts
      * @param issueTypeForRank 需要设置rank值的issueType，空值时不设置
@@ -167,4 +166,30 @@ public interface ObjectSchemeFieldService {
      * @return
      */
     List<ObjectSchemeFieldVO> unselected(Long organizationId, Long projectId, String issueType);
+
+    /**
+     * 组织初始化系统字段
+     *
+     * @param organizationId
+     */
+    void createSystemFieldIfNotExisted(Long organizationId);
+
+    /**
+     * 查询组织下支持的问题类型与
+     *
+     * @param organizationId
+     * @return
+     */
+    List<IssueTypeVO> issueTypes(Long organizationId, Long projectId);
+
+    /**
+     * 判断issueTypes是否保包含所有类型
+     *
+     * @param organizationId
+     * @param projectId
+     * @param issueTypes
+     * @return
+     */
+    Boolean containsAllIssueTypes(Long organizationId, Long projectId, List<String> issueTypes);
+
 }
