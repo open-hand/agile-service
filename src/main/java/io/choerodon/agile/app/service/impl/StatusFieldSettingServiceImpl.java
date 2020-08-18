@@ -361,7 +361,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 return numberAddValue;
             }
             String numberValue = fieldValueDTOS.get(0).getNumberValue();
-            BigDecimal oldValue = BigDecimal.valueOf(Long.valueOf(numberValue));
+            BigDecimal oldValue = new BigDecimal(numberValue);
             BigDecimal add = oldValue.add(numberAddValue);
             bigDecimal = add;
             return add;

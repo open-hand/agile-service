@@ -13,4 +13,6 @@ import java.util.List;
 public interface StatusLinkageMapper extends BaseMapper<StatusLinkageDTO> {
 
     List<StatusLinkageDTO> selectByStatusIds(@Param("projectId") Long projectId, @Param("issueTypeId") Long issueTypeId, @Param("statusIds") List<Long> statusId);
+
+    List<StatusLinkageDTO> listByIssueTypeIdsParentTypeCode(@Param("projectId") Long projectId,@Param("typeCode") String typeCode, @Param("issueTypeIds") List<Long> issueTypeIds,@Param("parentChangeStatusId") Long parentChangeStatusId);
 }

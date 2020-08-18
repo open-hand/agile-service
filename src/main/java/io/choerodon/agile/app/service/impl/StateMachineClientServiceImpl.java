@@ -8,6 +8,7 @@ import io.choerodon.agile.api.vo.event.CreateIssuePayload;
 import io.choerodon.agile.api.vo.event.CreateSubIssuePayload;
 import io.choerodon.agile.app.assembler.IssueAssembler;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.cache.InstanceCache;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
@@ -91,6 +92,8 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     private ModelMapper modelMapper;
     @Autowired
     private StatusTransferSettingService statusTransferSettingService;
+    @Autowired
+    private InstanceCache instanceCache;
 
     private void insertRank(Long projectId, Long issueId, String type, RankVO rankVO) {
         List<RankDTO> rankDTOList = new ArrayList<>();
@@ -283,6 +286,27 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
             updateStatusMove(issueId, targetStatusId, inputDTO.getInput());
         }
         return new ExecuteResult();
+    }
+
+    @Override
+    public void cleanInstanceCache(Long projectId, Long issueId, String applyType) {
+        if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
+            throw new CommonException("error.applyType.illegal");
+        }
+        IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
+        if (issue == null) {
+            throw new CommonException(ERROR_ISSUE_NOT_FOUND);
+        }
+        if (!projectId.equals(issue.getProjectId())) {
+            throw new CommonException("error.project.id.illegal");
+        }
+        //获取状态机id
+        Long stateMachineId = projectConfigService.queryStateMachineId(projectId, applyType, issue.getIssueTypeId());
+        if (stateMachineId == null) {
+            throw new CommonException(ERROR_ISSUE_STATE_MACHINE_NOT_FOUND);
+        }
+        String key = AGILE_SERVICE + ":" + stateMachineId + ":" + issueId;
+        instanceCache.cleanInstance(key);
     }
 
     @Condition(code = "just_reporter", name = "仅允许报告人", description = "只有该报告人才能执行转换")

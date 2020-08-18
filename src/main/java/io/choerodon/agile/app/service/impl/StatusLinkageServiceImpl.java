@@ -156,17 +156,14 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         Boolean isChange = false;
         Long changeStatus = null;
         // 查询父任务的子任务
-        StatusLinkageDTO statusLinkage = new StatusLinkageDTO();
-        statusLinkage.setProjectId(projectId);
-        statusLinkage.setParentIssueTypeCode(parentIssue.getTypeCode());
-        List<StatusLinkageDTO> select = statusLinkageMapper.select(statusLinkage);
-        Map<Long, StatusLinkageDTO> linkageDTOMap = select.stream().collect(Collectors.toMap(StatusLinkageDTO::getIssueTypeId, Function.identity()));
         List<IssueDTO> issueDTOS = issueMapper.querySubIssueByParentIssueId(projectId, parentIssueId);
+        List<Long> issueTypeIds = issueDTOS.stream().map(IssueDTO::getIssueTypeId).collect(Collectors.toList());
+        List<StatusLinkageDTO> select = statusLinkageMapper.listByIssueTypeIdsParentTypeCode(projectId,parentIssue.getTypeCode(),issueTypeIds,statusLinkageDTO.getParentIssueStatusSetting());
+        Map<Long, StatusLinkageDTO> linkageDTOMap = select.stream().collect(Collectors.toMap(StatusLinkageDTO::getIssueTypeId, Function.identity()));
         Map<String, List<IssueDTO>> issueMap = issueDTOS.stream().collect(Collectors.groupingBy(IssueDTO::getTypeCode));
-        StatusLinkageDTO statusLink = linkageDTOMap.get(issueDTO.getIssueTypeId());
-        if (select.size() == 1 && statusLink.getIssueTypeId().equals(issueDTO.getIssueTypeId())) {
-            isChange = handlerSingleIssueType(statusLink, issueMap, issueDTO.getTypeCode());
-            changeStatus = getChangeStatus(isChange, statusLink);
+        if (select.size() == 1 && statusLinkageDTO.getIssueTypeId().equals(issueDTO.getIssueTypeId())) {
+            isChange = handlerSingleIssueType(statusLinkageDTO, issueMap, issueDTO.getTypeCode());
+            changeStatus = getChangeStatus(isChange, statusLinkageDTO);
         } else {
             Map<String, Object> variables = new HashMap<>();
             handlerMultiSetting(variables, select, issueDTO, issueMap, linkageDTOMap, issueDTOS);
@@ -245,7 +242,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         if (CollectionUtils.isEmpty(sub)) {
             return Boolean.TRUE;
         }
-        long count = sub.stream().filter(v -> v.getStatusId().equals(statusLink.getParentIssueStatusSetting())).count();
+        long count = sub.stream().filter(v -> v.getStatusId().equals(statusLink.getStatusId())).count();
         if (Boolean.FALSE.equals((count == sub.size()))) {
             return Boolean.FALSE;
         }
