@@ -203,14 +203,6 @@ function ObjectScheme() {
     );
   };
 
-  const renderContextName = ({ text }: RenderProps) => (
-    <>
-      {text?.split(',').map((name: any) => (
-        name
-      )).join(',')}
-    </>
-  );
-
   const renderFieldOrigin = ({ record }: RenderProps) => {
     const system = record?.get('system');
     const projectId = record?.get('projectId');
@@ -285,7 +277,7 @@ function ObjectScheme() {
       <Content className={`${prefixCls}-detail-content`}>
         <Table dataSet={schemeTableDataSet} queryBar={'none' as TableQueryBarType} className={`${prefixCls}-detail-content-table`}>
           <Column name="name" renderer={renderDropDown} />
-          <Column name="contextName" renderer={renderContextName} width={245} />
+          <Column name="contextName" width={245} />
           <Column name="fieldOrigin" renderer={renderFieldOrigin} header={formatMessage({ id: 'field.origin' })} />
           <Column name="fieldTypeName" />
           <Column name="required" renderer={renderRequired} />
