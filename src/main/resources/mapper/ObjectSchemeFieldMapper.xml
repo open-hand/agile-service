@@ -277,6 +277,7 @@
         LEFT JOIN lookup_value flv on flv.value_code = t4.field_type and flv.type_code = 'field_type'
         WHERE
             t4.field_type = 'member'
+        AND t4.is_system = 0
         <if test="schemeCode != null">
             AND t4.scheme_code = #{schemeCode}
         </if>
