@@ -1,9 +1,10 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  DropResult, ResponderProvided, DragDropContext, DragStart,
+  DropResult, ResponderProvided, DragDropContext, DragStart, DragUpdate,
 } from 'react-beautiful-dnd';
 import { IFiledProps, pageConfigApi } from '@/api';
+import classnames from 'classnames';
 import './index.less';
 import { usePageIssueTypeStore } from '../../stores';
 import { useSortTableContext } from './stores';
@@ -17,19 +18,20 @@ interface Props {
 }
 
 const columns = [
-  { name: 'fieldName', label: '字段名称' },
-  { name: 'defaultValue', label: '默认值' },
-  { name: 'required', label: '必填' },
-  { name: 'edited', label: '加入到编辑页' },
-  { name: 'created', label: '加入到创建页' },
+  { name: 'fieldName', label: '字段名称', type: 'common' },
+  { name: 'defaultValue', label: '默认值', type: 'common' },
+  { name: 'required', label: '必填', type: 'project' },
+  { name: 'required', label: '必填（控制项目）', type: 'organization' },
+  { name: 'edited', label: '加入到编辑页', type: 'common' },
+  { name: 'created', label: '加入到创建页', type: 'common' },
 
 ];
 
 const prefixCls = 'c7n-page-issue-detail';
 const SortTable: React.FC = () => {
   const { sortTableDataSet, pageIssueTypeStore } = usePageIssueTypeStore();
-  const { disabled, dataStatus, onDelete } = useSortTableContext();
-
+  const { showSplitLine } = useSortTableContext();
+  const type = showSplitLine ? 'organization' : 'project';
   const onDragStart = (initial: DragStart, provided: ResponderProvided) => {
 
   };
@@ -67,12 +69,18 @@ const SortTable: React.FC = () => {
   };
   return (
     <div className={prefixCls}>
-      <div className={`${prefixCls}-header`}>
-        {columns.map((itemProps) => <span className={`${prefixCls}-header-item`}>{itemProps.label || itemProps.name}</span>)}
+      <div className={classnames(`${prefixCls}-header `, { [`${prefixCls}-header-split`]: showSplitLine })}>
+        {columns.filter((item) => item.type === 'common' || item.type === type).map((itemProps) => <span className={`${prefixCls}-header-item`}>{itemProps.label || itemProps.name}</span>)}
       </div>
       <div className={`${prefixCls}-content`}>
-        <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
-          <div style={{ width: '100%' }}>
+        <DragDropContext
+          onDragEnd={onDragEnd}
+          onDragStart={onDragStart}
+        // onDragUpdate={(initial: DragUpdate, provided: ResponderProvided) => {
+        //   console.log('initial', initial, provided);
+        // }}
+        >
+          <div className={`${prefixCls}-drop-wrap`}>
             <DropContent rows={sortTableDataSet.data} isDropDisabled={false} />
           </div>
         </DragDropContext>

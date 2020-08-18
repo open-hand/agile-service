@@ -8,9 +8,9 @@ import { observer } from 'mobx-react-lite';
 import { IFiledProps } from '@/api';
 
 interface Context {
-    disabled: boolean | undefined,
-    dataStatus: { code: string },
-    onDelete?: (data: IFiledProps) => void,
+  disabled: boolean | undefined,
+  showSplitLine?: boolean,
+  onDelete?: (data: IFiledProps) => void,
 }
 
 const SortTableContext = createContext({} as Context);

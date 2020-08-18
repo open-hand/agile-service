@@ -5,6 +5,7 @@ import { injectIntl, InjectedIntl } from 'react-intl';
 import { inject } from 'mobx-react';
 import { DataSet } from 'choerodon-ui/pro/lib';
 import { observer } from 'mobx-react-lite';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import SortTableDataSet from './SortTableDataSet';
 import AddUnselectedDataSet from './AddUnselectedDataSet';
 import PageIssueTypeStore from './PageIssueTypeStore';
@@ -13,6 +14,7 @@ interface Context {
   sortTableDataSet: DataSet,
   addUnselectedDataSet: DataSet,
   pageIssueTypeStore: PageIssueTypeStore,
+  isInProgram: boolean,
   intl: InjectedIntl,
 }
 interface IssueTypeState {
@@ -39,6 +41,7 @@ const PageIssueTypeProvider = injectIntl(inject('AppState')(observer(
       sortTableDataSet,
       addUnselectedDataSet,
       pageIssueTypeStore,
+      isInProgram: IsInProgramStore.getIsInProgram,
     };
     return (
       <PageIssueTypeContext.Provider value={value}>

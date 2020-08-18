@@ -48,9 +48,9 @@ const FormDataSet = ({
 }: Props): DataSetProps => {
   const regex = /^[0-9a-zA-Z_]+$/;
   async function checkCode(value: string): Promise<boolean | string | undefined> {
-    if (isEdit) return false;
+    if (isEdit) return true;
     if (!value) {
-      return false;
+      return true;
     } if (!regex.test(value)) {
       return formatMessage({ id: 'field.code.rule' });
     }
@@ -69,9 +69,9 @@ const FormDataSet = ({
     return undefined;
   }
   async function checkName(value: string): Promise<boolean | string | undefined> {
-    if (isEdit && value === oldRecord?.get('name')) return false;
+    if (isEdit && value === oldRecord?.get('name')) return true;
     if (!value) {
-      return false;
+      return true;
     }
     try {
       let data: boolean = await store.checkName(value, schemeCode);
@@ -85,7 +85,7 @@ const FormDataSet = ({
       return formatMessage({ id: 'network.error' });
     }
 
-    return undefined;
+    return true;
   }
 
   function handleUpdate({ record, name, value }: RenderProps) {

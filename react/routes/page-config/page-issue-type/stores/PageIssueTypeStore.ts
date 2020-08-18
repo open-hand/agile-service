@@ -61,6 +61,10 @@ class PageIssueTypeStore {
     dirty: false,
   };
 
+  @action init(issueType: PageConfigIssueType) {
+    this.currentIssueType = issueType;
+  }
+
   @action('清空全部数据') destroy() {
     this.clear();
     this.currentIssueType = PageConfigIssueType.feature;
@@ -165,7 +169,7 @@ class PageIssueTypeStore {
 
   @computed get getDirty() {
     return this.getDataStatusCode !== PageIssueTypeStoreStatusCode.null
-    || this.getDescriptionObj.dirty || this.sortTableDataSet.dirty;
+      || this.getDescriptionObj.dirty || this.sortTableDataSet.dirty;
   }
 
   @computed get getDataStatusCode() {
