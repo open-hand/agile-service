@@ -16,7 +16,6 @@ import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { pageConfigApi } from '@/api/PageConfig';
 import Store from './stores';
 import TableDropMenu from '../../../common/TableDropMenu';
-import TypeTag from '../../../components/TypeTag';
 import CreateField from '../components/create-field';
 import RequiredPrompt from './components/required-prompt';
 import './ObjectScheme.less';
@@ -104,6 +103,9 @@ function ObjectScheme() {
     schemeTableDataSet.delete(record, modalProps);
   }
   function handleCheckChange() {
+    handleContinueCheckChange();
+  }
+  function handleContinueCheckChange(secondEntry = false) {
     const record = schemeTableDataSet.current;
     const defaultValue = schemeTableDataSet.get('defaultValue');
     const requiredScope = record.get('requiredScope');
@@ -114,7 +116,7 @@ function ObjectScheme() {
     if (required && defaultValue) {
       Choerodon.prompt(formatMessage({ id: 'field.required.msg' }));
     }
-    if (!openPromptForRequire(record.get('name'), required)) {
+    if (secondEntry || !openPromptForRequire(record.get('name'), required)) {
       pageConfigApi.updateRequired(record.get('id'), required).then(() => {
         handleRefresh();
       });
@@ -128,10 +130,10 @@ function ObjectScheme() {
       Modal.open({
         key: Modal.key(),
         className: `${prefixCls}-detail-prompt`,
-        title: '确认设置为必填',
+        title: `确认设置为${!required ? '不' : ''}必填`,
         children: (<RequiredPrompt
           formatMessage={formatMessage}
-          onContinue={handleCheckChange}
+          onContinue={handleContinueCheckChange}
           promptText={promptText}
         />),
         footer: null,
@@ -236,10 +238,8 @@ function ObjectScheme() {
 
   const renderRequired = ({ record }: RenderProps) => {
     const system = record?.get('system');
-    // const required = record?.get('required');
     const requiredScope = record?.get('requiredScope');
     const projectId = record?.get('projectId');
-    // console.log('required', required);
     return (
       <div>
         <CheckBox

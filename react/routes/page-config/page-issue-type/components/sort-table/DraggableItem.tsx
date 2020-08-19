@@ -37,8 +37,15 @@ const DraggableItem: React.FC<Props> = ({
 }) => {
   const { pageIssueTypeStore } = usePageIssueTypeStore();
   const { onDelete, showSplitLine } = useSortTableContext();
-  const disabled = data.get('createdLevel') === 'system' || (!showSplitLine && data.get('createdLevel') !== 'project');
-  const renderFieldName = ({ value, record, dataSet }: RenderProps, editDisabled?: boolean) => (
+  const pageConfigFieldEdited = data?.get('pageConfigFieldEdited') || {};
+  const {
+    requiredFieldCanNotEdit = false,
+    createdFieldCanNotEdit = false,
+    editedFieldCanNotEdit = false,
+  } = pageConfigFieldEdited;
+  // 是否禁止删除此字段 1.系统字段不可删除  2. 项目层下组织层字段不可删除
+  const disabledDel = data.get('createdLevel') === 'system' || (!showSplitLine && data.get('createdLevel') !== 'project');
+  const renderFieldName = ({ value, record, dataSet }: RenderProps) => (
     <div className={`${prefixCls}-text`}>
 
       <TableDropMenu
@@ -53,7 +60,7 @@ const DraggableItem: React.FC<Props> = ({
             <span>{value}</span>
           </>
         )}
-        isHasMenu={showSplitLine}
+        isHasMenu={!disabledDel && showSplitLine}
       />
     </div>
   );
@@ -94,7 +101,7 @@ const DraggableItem: React.FC<Props> = ({
         name, record, dataSet,
       }, editDisabled)}
       {
-          (!showSplitLine && record?.get('createdLevel') !== 'organization')
+          (!disabledDel && !showSplitLine && record?.get('createdLevel') !== 'organization')
           && (
             <Button
               className={`${prefixCls}-action-button`}
@@ -147,15 +154,14 @@ const DraggableItem: React.FC<Props> = ({
           {transformDefaultValue(data.get('fieldType'), data.get('defaultValue'))}
         </div>
       </Tooltip>
-
       <div className={`${prefixCls}-item`}>
-        {renderCheckBox({ record: data, name: 'required', dataSet: data.dataSet }, disabled)}
+        {renderCheckBox({ record: data, name: 'required', dataSet: data.dataSet }, requiredFieldCanNotEdit)}
       </div>
       <div className={`${prefixCls}-item`}>
-        {renderCheckBox({ record: data, name: 'edited', dataSet: data.dataSet }, disabled)}
+        {renderCheckBox({ record: data, name: 'edited', dataSet: data.dataSet }, createdFieldCanNotEdit)}
       </div>
       <div className={`${prefixCls}-item`}>
-        {renderAction({ record: data, name: 'created', dataSet: data.dataSet }, disabled)}
+        {renderAction({ record: data, name: 'created', dataSet: data.dataSet }, editedFieldCanNotEdit)}
       </div>
     </div>
 
