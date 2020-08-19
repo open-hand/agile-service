@@ -18,7 +18,7 @@ import {
 import {
   getProjectName, getProjectId,
 } from '@/utils/common';
-
+import { observer } from 'mobx-react';
 import { UploadButton } from '../CommonComponent';
 import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 import SelectNumber from '../SelectNumber';
@@ -601,6 +601,12 @@ class CreateIssue extends Component {
                     label="史诗"
                     allowClear
                     type="epic"
+                    loadWhenMount
+                    afterLoad={() => {
+                      form.setFieldsValue({
+                        epicId: this.props.epicId,
+                      });
+                    }}
                   />,
                 )}
               </FormItem>
@@ -828,6 +834,7 @@ class CreateIssue extends Component {
       // contentDescription,
       // contentLink,
       hiddenFields,
+      teamProjectIds,
     } = this.props;
     const {
       createLoading, fields, loading, newIssueTypeCode,
@@ -854,7 +861,7 @@ class CreateIssue extends Component {
                   </FormItem>
                 )}
                 {fields && fields.filter((field) => !hiddenFields.includes(field.fieldCode)).map((field) => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
-                {newIssueTypeCode === 'feature' && <FieldTeam form={form} />}
+                {newIssueTypeCode === 'feature' && <FieldTeam form={form} teamProjectIds={teamProjectIds} />}
                 {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}
                 {newIssueTypeCode !== 'epic' && (
                   <>
@@ -872,4 +879,4 @@ class CreateIssue extends Component {
   }
 }
 CreateIssue.defaultProps = defaultProps;
-export default Form.create({})(CreateIssue);
+export default Form.create({})(observer(CreateIssue));

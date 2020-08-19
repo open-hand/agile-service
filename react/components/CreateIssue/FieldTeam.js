@@ -1,9 +1,10 @@
 import React from 'react';
 import { Form } from 'choerodon-ui';
+import { observer } from 'mobx-react-lite';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
 
 const FormItem = Form.Item;
-function FieldTeam({ form: { getFieldDecorator } }) {
+function FieldTeam({ form: { getFieldDecorator, setFieldsValue }, teamProjectIds }) {
   return (
     <FormItem key="teamProjectIds">
       {getFieldDecorator('teamProjectIds', {})(
@@ -16,10 +17,13 @@ function FieldTeam({ form: { getFieldDecorator } }) {
           loadWhenMount
           mode="multiple"
           type="sub_project"
+          afterLoad={() => {
+            setFieldsValue({ teamProjectIds });
+          }}
         />,
       )}
     </FormItem>
   );
 }
 
-export default FieldTeam;
+export default observer(FieldTeam);
