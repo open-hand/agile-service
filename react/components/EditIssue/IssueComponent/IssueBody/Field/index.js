@@ -1,4 +1,3 @@
-export Field from './Field';
 export FieldAssignee from './FieldAssignee';
 export FieldComponent from './FieldComponent';
 export FieldDateTime from './FieldDateTime';

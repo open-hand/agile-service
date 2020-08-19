@@ -73,7 +73,8 @@ const EditorMap = new Map([
         case 'checkbox':
         {
           const options = field.fieldOptions && field.fieldOptions.length > 0
-              && field.fieldOptions.filter((option) => option.enabled || (value && value.indexOf(option.id) !== -1)).map((item) => (
+              && field.fieldOptions.filter((option) => option.enabled
+              || (value && value.indexOf(option.id) !== -1)).map((item) => (
                 <Editor.Option
                   value={item.id}
                   key={item.id}
