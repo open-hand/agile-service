@@ -10,6 +10,7 @@ import {
 import EditIssueContext from '../../stores';
 import FieldPro from './Field/FieldPro';
 import FieldStartTime from './Field/FieldStartTime';
+import FieldEndTime from './Field/FieldEndTime';
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
 
@@ -101,7 +102,14 @@ const IssueField = observer((props) => {
   return (
     <div className="c7n-content-wrapper IssueField">
       {issueId ? fields.map((field) => <Fragment key={field.id}>{getFieldComponent(field)}</Fragment>) : ''}
-      <FieldStartTime {...props} />
+      {
+        typeCode !== 'epic' && (
+          <>
+            <FieldStartTime {...props} />
+            <FieldEndTime {...props} />
+          </>
+        )
+      }
     </div>
   );
 });

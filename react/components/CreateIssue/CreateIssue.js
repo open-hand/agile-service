@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import {
-  stores, Content, Choerodon, 
+  stores, Content, Choerodon,
 } from '@choerodon/boot';
 import { map, find } from 'lodash';
 import {
@@ -9,15 +9,16 @@ import {
 import moment from 'moment';
 import reactComponentDebounce from '@/components/DebounceComponent';
 import {
-  featureApi, epicApi, fieldApi, issueTypeApi, 
+  featureApi, epicApi, fieldApi, issueTypeApi,
+  issueApi,
 } from '@/api';
 import {
-  beforeTextUpload, handleFileUpload, validateFile, normFile, 
+  beforeTextUpload, handleFileUpload, validateFile, normFile,
 } from '@/utils/richText';
 import {
   getProjectName, getProjectId,
 } from '@/utils/common';
-import { issueApi } from '@/api';
+
 import { UploadButton } from '../CommonComponent';
 import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 import SelectNumber from '../SelectNumber';
@@ -29,6 +30,8 @@ import renderField from './renderField';
 import FieldIssueLinks from './FieldIssueLinks';
 import WSJF from './WSJF';
 import FieldTeam from './FieldTeam';
+import FieldStartTime from './FieldStartTime';
+import FieldEndTime from './FieldEndTime';
 
 const DebounceInput = reactComponentDebounce({
   valuePropName: 'value',
@@ -145,7 +148,7 @@ class CreateIssue extends Component {
           fileName: fileList[0].name,
           projectId: AppState.currentMenuType.id,
         };
-        if (fileList.some(one => !one.url)) {
+        if (fileList.some((one) => !one.url)) {
           handleFileUpload(fileList, () => { }, config);
         }
       }
@@ -248,7 +251,7 @@ class CreateIssue extends Component {
           featureId,
           teamProjectIds,
         } = values;
-        const { typeCode } = originIssueTypes.find(t => t.id === typeId);
+        const { typeCode } = originIssueTypes.find((t) => t.id === typeId);
         if (typeCode === 'feature' && epicId) {
           const hasSame = await featureApi.hasSameInEpicBySummary(summary, epicId);
           if (hasSame) {
@@ -258,30 +261,28 @@ class CreateIssue extends Component {
         }
         const exitComponents = originComponents;
         const componentIssueRelVOList = map(componentIssueRel
-          && componentIssueRel.filter(v => v && v.trim()), (component) => {
+          && componentIssueRel.filter((v) => v && v.trim()), (component) => {
           const target = find(exitComponents, { name: component.trim() });
           if (target) {
             return target;
-          } else {
-            return ({
-              name: component.trim(),
-              projectId: getProjectId(),
-            });
           }
+          return ({
+            name: component.trim(),
+            projectId: getProjectId(),
+          });
         });
         const exitLabels = originLabels;
         const labelIssueRelVOList = map(issueLabel, (label) => {
           const target = find(exitLabels, { labelName: label });
           if (target) {
             return target;
-          } else {
-            return ({
-              labelName: label,
-              projectId: getProjectId(),
-            });
           }
+          return ({
+            labelName: label,
+            projectId: getProjectId(),
+          });
         });
-        const fixVersionIssueRelVOList = map(fixVersionIssueRel, versionId => ({
+        const fixVersionIssueRelVOList = map(fixVersionIssueRel, (versionId) => ({
           versionId,
           relationType: 'fix',
         }));
@@ -356,13 +357,12 @@ class CreateIssue extends Component {
     });
   };
 
-
   getIssueTypes = () => {
     const { mode } = this.props;
     const { originIssueTypes } = this.state;
-    const filterSubType = type => (!['sub_task'].includes(type.typeCode));
-    const filterEpic = type => (!['issue_epic'].includes(type.typeCode));
-    const filterFeature = type => (!['feature'].includes(type.typeCode));
+    const filterSubType = (type) => (!['sub_task'].includes(type.typeCode));
+    const filterEpic = (type) => (!['issue_epic'].includes(type.typeCode));
+    const filterFeature = (type) => (!['feature'].includes(type.typeCode));
     const issueTypes = applyFilter(originIssueTypes, [
       filterSubType, {
         filter: filterEpic,
@@ -374,7 +374,7 @@ class CreateIssue extends Component {
     return issueTypes;
   }
 
-  setDefaultSelect = field => (list, defaultValue) => {
+  setDefaultSelect = (field) => (list, defaultValue) => {
     const { form } = this.props;
     form.setFieldsValue({
       [field]: defaultValue,
@@ -423,9 +423,9 @@ class CreateIssue extends Component {
                   })(
                     <Select
                       label="问题类型"
-                      getPopupContainer={triggerNode => triggerNode.parentNode}
+                      getPopupContainer={(triggerNode) => triggerNode.parentNode}
                       onChange={((value) => {
-                        const { typeCode } = originIssueTypes.find(item => item.id === value);
+                        const { typeCode } = originIssueTypes.find((item) => item.id === value);
                         this.setState({
                           newIssueTypeCode: typeCode,
                         });
@@ -441,7 +441,7 @@ class CreateIssue extends Component {
                         });
                       })}
                     >
-                      {this.getIssueTypes().map(type => (
+                      {this.getIssueTypes().map((type) => (
                         <Option key={type.id} value={type.id}>
                           <TypeTag
                             data={type}
@@ -461,7 +461,7 @@ class CreateIssue extends Component {
                 })(
                   <Select
                     label="特性类型"
-                    getPopupContainer={triggerNode => triggerNode.parentNode}
+                    getPopupContainer={(triggerNode) => triggerNode.parentNode}
                   >
                     {[
                       {
@@ -475,7 +475,7 @@ class CreateIssue extends Component {
                         featureType: 'enabler',
                         name: '使能',
                       },
-                    ].map(type => (
+                    ].map((type) => (
                       <Option key={type.featureType} value={type.featureType}>
                         <TypeTag
                           data={type}
@@ -499,7 +499,7 @@ class CreateIssue extends Component {
                   label="经办人"
                   style={{ flex: 1 }}
                   loadWhenMount
-                  getPopupContainer={triggerNode => triggerNode.parentNode}
+                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
                   allowClear
                 />,
               )}
@@ -550,8 +550,8 @@ class CreateIssue extends Component {
         return (
           <FormItem label="标签">
             {getFieldDecorator('issueLabel', {
-              rules: [{ transform: value => (value ? value.toString() : value) }],
-              normalize: value => (value ? value.map(s => s.toString().substr(0, 10)) : value), // 限制最长10位
+              rules: [{ transform: (value) => (value ? value.toString() : value) }],
+              normalize: (value) => (value ? value.map((s) => s.toString().substr(0, 10)) : value), // 限制最长10位
             })(
               <SelectFocusLoad
                 label="标签"
@@ -579,7 +579,7 @@ class CreateIssue extends Component {
         return (
           <FormItem label="修复的版本">
             {getFieldDecorator('fixVersionIssueRel', {
-              rules: [{ transform: value => (value ? value.toString() : value) }],
+              rules: [{ transform: (value) => (value ? value.toString() : value) }],
             })(
               <SelectFocusLoad
                 label="修复的版本"
@@ -606,7 +606,7 @@ class CreateIssue extends Component {
               </FormItem>
             )
           );
-        } else if (IsInProgramStore.isShowFeature && newIssueTypeCode === 'story') {
+        } if (IsInProgramStore.isShowFeature && newIssueTypeCode === 'story') {
           return (
             <FormItem label="特性">
               {getFieldDecorator('featureId', {})(
@@ -618,15 +618,15 @@ class CreateIssue extends Component {
               )}
             </FormItem>
           );
-        } else {
-          return '';
         }
+        return '';
+
       case 'component':
         return (
           ['sub_task'].includes(newIssueTypeCode) ? null : (
             <FormItem label="模块">
               {getFieldDecorator('componentIssueRel', {
-                rules: [{ transform: value => (value ? value.toString() : value) }],
+                rules: [{ transform: (value) => (value ? value.toString() : value) }],
               })(
                 <SelectFocusLoad
                   label="模块"
@@ -670,7 +670,7 @@ class CreateIssue extends Component {
               {getFieldDecorator('estimatedTime')(
                 <SelectNumber
                   label="预估时间"
-                  getPopupContainer={triggerNode => triggerNode.parentNode}
+                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
                 />,
               )}
             </FormItem>
@@ -683,7 +683,7 @@ class CreateIssue extends Component {
               {getFieldDecorator('storyPoints')(
                 <SelectNumber
                   label="故事点"
-                  getPopupContainer={triggerNode => triggerNode.parentNode}
+                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
                 />,
               )}
             </FormItem>
@@ -691,7 +691,7 @@ class CreateIssue extends Component {
         );
       case 'description':
         return (
-          <Fragment>
+          <>
             <FormItem key={newIssueTypeCode} label={fieldName} className="c7nagile-line">
               {getFieldDecorator(fieldCode, {
                 initialValue: newIssueTypeCode === 'bug' ? bugDefaultDes : undefined,
@@ -712,7 +712,7 @@ class CreateIssue extends Component {
                 <UploadButton />,
               )}
             </FormItem>
-          </Fragment>
+          </>
         );
       case 'benfitHypothesis':
         return (
@@ -748,7 +748,7 @@ class CreateIssue extends Component {
           <FormItem label={fieldName} style={{ width: 330 }}>
             {getFieldDecorator(fieldCode, {
               rules: [{ required, message: `${fieldName}为必填项` }],
-              getValueFromEvent: fieldType === 'number' ? value => (value ? String(value) : undefined) : undefined,
+              getValueFromEvent: fieldType === 'number' ? (value) => (value ? String(value) : undefined) : undefined,
               initialValue: this.transformValue(fieldType, defaultValue),
             })(
               renderField(field),
@@ -762,16 +762,13 @@ class CreateIssue extends Component {
     if (value) {
       if (fieldType === 'time' || fieldType === 'datetime' || fieldType === 'date') {
         return value ? moment(value) : undefined;
-      } else if (value instanceof Array) {
+      } if (value instanceof Array) {
         return value.slice();
-      } else {
-        return value;
       }
-    } else {
-      return undefined;
+      return value;
     }
+    return undefined;
   };
-
 
   renderIssueLinks = () => {
     const { newIssueTypeCode } = this.state;
@@ -824,7 +821,6 @@ class CreateIssue extends Component {
     return null;
   }
 
-
   render() {
     const {
       visible, form, parentSummary, title, mode,
@@ -857,9 +853,15 @@ class CreateIssue extends Component {
                     <Input label="父任务概要" value={parentSummary} disabled />
                   </FormItem>
                 )}
-                {fields && fields.filter(field => !hiddenFields.includes(field.fieldCode)).map(field => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
+                {fields && fields.filter((field) => !hiddenFields.includes(field.fieldCode)).map((field) => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
                 {newIssueTypeCode === 'feature' && <FieldTeam form={form} />}
-                {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}                            
+                {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}
+                {newIssueTypeCode !== 'epic' && (
+                  <>
+                    <FieldStartTime form={form} field={fields.find((field) => field.code === 'issueStartTime') || {}} />
+                    <FieldEndTime form={form} field={fields.find((field) => field.code === 'issueEndTime') || {}} />
+                  </>
+                )}
               </div>
               {mode !== 'feature' && mode !== 'sub_task' && !['issue_epic', 'feature'].includes(newIssueTypeCode) && <FieldIssueLinks form={form} />}
             </Form>

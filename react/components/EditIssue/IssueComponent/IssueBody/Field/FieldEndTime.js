@@ -3,11 +3,12 @@ import { observer } from 'mobx-react';
 import moment from 'moment';
 import { DateTimePicker } from 'choerodon-ui/pro';
 import TextEditToggle from '@/components/TextEditTogglePro';
+import { toJS } from 'mobx';
 import { DatetimeAgo } from '../../../../CommonComponent';
 
-class FieldStartTime extends Component {
+class FieldEndTime extends Component {
   updateIssueField = (value) => {
-    console.log('newStartTime:');
+    console.log('newEndTime:');
     console.log(value && value.format('YYYY-MM-DD HH:mm:ss'));
     // const {
     //   store, onUpdate, reloadIssue, field,
@@ -39,24 +40,26 @@ class FieldStartTime extends Component {
   render() {
     const { store } = this.props;
     const issue = store.getIssue;
-    const { creationDate, lastUpdateDate } = issue;
+    console.log('issue：');
+    console.log(toJS(issue));
+    const { lastUpdateDate, creationDate } = issue;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
           <span className="c7n-property">
-            预计开始时间
+            预计结束时间
           </span>
         </div>
         <div className="c7n-value-wrapper" style={{ width: 'auto' }}>
           <TextEditToggle
-            initValue={creationDate ? moment(creationDate) : undefined}
+            initValue={lastUpdateDate ? moment(lastUpdateDate) : undefined}
             onSubmit={this.updateIssueField}
             alwaysRender={false}
-            editor={() => <DateTimePicker max={lastUpdateDate && moment(lastUpdateDate).subtract(1, 's')} />}
+            editor={() => <DateTimePicker min={creationDate && moment(creationDate).add(1, 's')} />}
             submitTrigger={['blur']}
           >
             <DatetimeAgo
-              date={creationDate}
+              date={lastUpdateDate}
             />
           </TextEditToggle>
         </div>
@@ -65,4 +68,4 @@ class FieldStartTime extends Component {
   }
 }
 
-export default observer(FieldStartTime);
+export default observer(FieldEndTime);
