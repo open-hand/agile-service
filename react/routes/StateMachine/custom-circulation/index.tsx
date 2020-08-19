@@ -379,12 +379,12 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     }
   };
 
-  const renderStatusLinkageSetting = (statusLinkageVOS: IStatusLinkageVOS[]) => {
+  const renderStatusLinkageSetting = (statusLinkageVOS: IStatusLinkageVOS[], record) => {
     const selectedTypeCode = find(issueTypes, (
       item: IIssueType,
     ) => item.id === selectedType)?.typeCode;
     if (statusLinkageVOS && statusLinkageVOS.length && (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug')) {
-      const prefixStr = `如果全部${selectedTypeCode === 'sub_task' ? '子任务' : '子缺陷'}都在${selectedTypeCode === 'sub_task' ? '已完成' : '已修复'}状态，则将`;
+      const prefixStr = `如果全部${selectedTypeCode === 'sub_task' ? '子任务' : '子缺陷'}都在${record.get('name')}状态，则将`;
       const parentDes = (
         statusLinkageVOS.map((linkageSetting) => {
           const { statusVO, issueTypeVO } = linkageSetting;
@@ -423,8 +423,8 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         {
           (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug') && statusLinkageVOS && statusLinkageVOS.length > 0 && (
             <div className={`${styles.settingItem} ${styles.linkageSettingItem}`}>
-              <Tooltip title={renderStatusLinkageSetting(statusLinkageVOS)}>
-                {renderStatusLinkageSetting(statusLinkageVOS)}
+              <Tooltip title={renderStatusLinkageSetting(statusLinkageVOS, record)}>
+                {renderStatusLinkageSetting(statusLinkageVOS, record)}
               </Tooltip>
             </div>
           )
