@@ -25,7 +25,6 @@ const IssueField = observer((props) => {
     const teamIds = activePiTeams.map((team) => team.id);
 
     const { typeCode } = issue;
-    // debugger;
     switch (field.fieldCode) {
       case 'assignee':
         return (<FieldAssignee {...props} />);
@@ -86,7 +85,7 @@ const IssueField = observer((props) => {
   };
   const issue = store.getIssue;
   const { issueId, typeCode } = issue;
-  let fields = applyType === 'program' ? toJS(store.getFields).filter((item) => hideFields.indexOf(item.fieldCode) === -1) : toJS(store.getFields);
+  let fields = applyType === 'program' ? toJS(store.customFields).filter((item) => hideFields.indexOf(item.fieldCode) === -1) : toJS(store.customFields);
   // 系统字段单独控制是否显示
   if (typeCode === 'sub_task') {
     fields = fields.filter((field) => ['component', 'epic'].indexOf(field.fieldCode) === -1);
