@@ -23,6 +23,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -385,7 +386,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         return userId;
     }
 
-    private Date handlerTimeField(StatusFieldValueSettingDTO statusFieldValueSettingDTO) {
+    private String handlerTimeField(StatusFieldValueSettingDTO statusFieldValueSettingDTO) {
         Date date = null;
         if ("add".equals(statusFieldValueSettingDTO.getOperateType())) {
             BigDecimal dateAddValue = statusFieldValueSettingDTO.getDateAddValue();
@@ -397,7 +398,14 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         } else {
             date = statusFieldValueSettingDTO.getDateValue();
         }
-        return date;
+        String dateFormat = null;
+        SimpleDateFormat dff = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            dateFormat = dff.format(date.getTime());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dateFormat;
     }
 
     private void handlerFieldValue(StatusFieldSettingVO statusFieldSettingVO, List<StatusFieldValueSettingDTO> statusFieldValueSettingDTOS) {
