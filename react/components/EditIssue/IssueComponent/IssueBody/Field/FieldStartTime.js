@@ -7,8 +7,8 @@ import { DatetimeAgo } from '../../../../CommonComponent';
 
 class FieldStartTime extends Component {
   updateIssueField = (value) => {
-    console.log('newStartTime:');
-    console.log(value && value.format('YYYY-MM-DD HH:mm:ss'));
+    // console.log('newStartTime:');
+    // console.log(value && value.format('YYYY-MM-DD HH:mm:ss'));
     // const {
     //   store, onUpdate, reloadIssue, field,
     // } = this.props;

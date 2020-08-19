@@ -379,6 +379,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     }
   };
 
+  // @ts-ignore
   const renderStatusLinkageSetting = (statusLinkageVOS: IStatusLinkageVOS[], record) => {
     const selectedTypeCode = find(issueTypes, (
       item: IIssueType,
@@ -394,6 +395,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         })).join('、');
       return `${prefixStr}${parentDes}`;
     }
+    return '';
   };
 
   const renderSetting = ({

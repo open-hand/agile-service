@@ -8,8 +8,8 @@ import { DatetimeAgo } from '../../../../CommonComponent';
 
 class FieldEndTime extends Component {
   updateIssueField = (value) => {
-    console.log('newEndTime:');
-    console.log(value && value.format('YYYY-MM-DD HH:mm:ss'));
+    // console.log('newEndTime:');
+    // console.log(value && value.format('YYYY-MM-DD HH:mm:ss'));
     // const {
     //   store, onUpdate, reloadIssue, field,
     // } = this.props;
@@ -40,8 +40,8 @@ class FieldEndTime extends Component {
   render() {
     const { store } = this.props;
     const issue = store.getIssue;
-    console.log('issue：');
-    console.log(toJS(issue));
+    // console.log('issue：');
+    // console.log(toJS(issue));
     const { lastUpdateDate, creationDate } = issue;
     return (
       <div className="line-start mt-10">
