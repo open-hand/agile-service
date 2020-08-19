@@ -99,6 +99,7 @@
         <id property="fieldTypeName" column="field_type_name"/>
         <id property="required" column="required"/>
         <id property="system" column="is_system"/>
+        <id property="extraConfig" column="extra_config"/>
         <collection property="fieldOptions"  ofType="io.choerodon.agile.api.vo.FieldOptionVO">
             <id property="id" column="ffo_id"/>
             <result property="fieldId" column="ffo_field_id"/>
@@ -115,6 +116,7 @@
             t1.name,
             t1.field_type,
             t1.is_system,
+            t1.extra_config,
             flv.name as field_type_name,
             t2.is_required as required,
             ffo.id as ffo_id,
