@@ -34,6 +34,26 @@ public class PageConfigFieldVO {
 
     private Long objectVersionNumber;
 
+    private PageConfigFieldEditedVO pageConfigFieldEdited;
+
+    private String fieldCode;
+
+    public String getFieldCode() {
+        return fieldCode;
+    }
+
+    public void setFieldCode(String fieldCode) {
+        this.fieldCode = fieldCode;
+    }
+
+    public PageConfigFieldEditedVO getPageConfigFieldEdited() {
+        return pageConfigFieldEdited;
+    }
+
+    public void setPageConfigFieldEdited(PageConfigFieldEditedVO pageConfigFieldEdited) {
+        this.pageConfigFieldEdited = pageConfigFieldEdited;
+    }
+
     public String getFieldType() {
         return fieldType;
     }

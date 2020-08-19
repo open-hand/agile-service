@@ -114,6 +114,7 @@
         t6.name as field_name,
         t6.default_value,
         t6.field_type,
+        t6.code as field_code,
         t4.is_required as required,
         t4.is_created as created,
         t4.is_edited as edited,

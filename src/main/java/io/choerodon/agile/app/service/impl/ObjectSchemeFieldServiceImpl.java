@@ -780,6 +780,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         result.setFields(pageConfigFields);
         //处理默认值
         processDefaultValue(pageConfigFields);
+        //处理字段是否可被编辑
+        processFieldEdited(issueType, pageConfigFields);
         if (!ObjectUtils.isEmpty(projectId)) {
             Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
             Long issueTypeId = issueTypeMap.get(issueType);
@@ -795,6 +797,19 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             }
         }
         return result;
+    }
+
+    private void processFieldEdited(String issueType, List<PageConfigFieldVO> pageConfigFields) {
+        Map<String, PageConfigFieldEditedVO> map = SystemFieldCanNotEdit.fieldEdited(issueType);
+        if (!ObjectUtils.isEmpty(map)) {
+            pageConfigFields.forEach(p -> {
+                String fieldCode = p.getFieldCode();
+                PageConfigFieldEditedVO fieldEdited = map.get(fieldCode);
+                if (!ObjectUtils.isEmpty(fieldCode)) {
+                    p.setPageConfigFieldEdited(fieldEdited);
+                }
+            });
+        }
     }
 
     private void processDefaultValue(List<PageConfigFieldVO> pageConfigFields) {
