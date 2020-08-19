@@ -10,7 +10,7 @@ import promptStyles from './index.less';
 interface Props {
   modal?: IModalProps,
   formatMessage: InjectedIntl['formatMessage'],
-  onContinue: () => void,
+  onContinue: (secondEntry?: boolean) => void,
   promptText: string,
 }
 const RequiredPrompt: React.FC<Props> = ({
@@ -22,7 +22,7 @@ const RequiredPrompt: React.FC<Props> = ({
   };
   const handleConfirm = () => {
     localStorage.setItem('agile.page.field.setting.required.prompt', isPrompt);
-    onContinue();
+    onContinue(true);
     modal?.close();
   };
   return (

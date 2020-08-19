@@ -116,7 +116,7 @@ function PageIssueType() {
   const handleSelectBox = (val: any) => {
     if (pageIssueTypeStore.getDirty) {
       Modal.confirm({
-        title: '是否放弃更改？',
+        title: '是否放弃更改',
         children: (
           <div>
             页面有未保存的内容,是否放弃更改？
@@ -212,7 +212,7 @@ function PageIssueType() {
           : ['choerodon.code.project.setting.page.ps.scheme']
       }
     >
-      <Prompt message={`是否放弃更改？${Choerodon.STRING_DEVIDER}页面有未保存的内容,是否放弃更改？`} when={pageIssueTypeStore.getDirty} />
+      <Prompt message={`是否放弃更改 ${Choerodon.STRING_DEVIDER}页面有未保存的内容,是否放弃更改？`} when={pageIssueTypeStore.getDirty} />
       <Header>
 
         <Button icon="playlist_add" onClick={openCreateFieldModal}>创建字段</Button>
