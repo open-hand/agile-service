@@ -21,31 +21,15 @@ import CreateField from '../components/create-field';
 import { PageIssueTypeStoreStatusCode, PageIFieldPostDataProps } from './stores/PageIssueTypeStore';
 import { IFieldPostDataProps } from '../components/create-field/CreateField';
 
-interface DescriptionState {
-  id?: string,
-  template: string | Array<any>,
-  originTemplate: string,
-  objectVersionNumber?: number,
-}
-type DescriptionAction = Required<{ type: string }> & Partial<DescriptionState>
 interface IssueOption {
   value: string,
   text: string,
-  type: 'normal' | 'program' | 'common' | 'demand',
 }
-const issueTypeOptions: Array<IssueOption> = [
-  { value: 'issue_epic', text: '史诗', type: 'normal' },
-  { value: 'feature', text: '特性', type: 'program' },
-  { value: 'story', text: '故事', type: 'common' },
-  { value: 'task', text: '任务', type: 'common' },
-  { value: 'sub_task', text: '子任务', type: 'common' },
-  { value: 'bug', text: '缺陷', type: 'common' },
-  { value: 'backlog', text: '需求', type: 'common' },
-];
+
 const preCls = 'c7n-agile-page-config-page-issue-type';
 function PageIssueType() {
   const {
-    sortTableDataSet, addUnselectedDataSet, intl, pageIssueTypeStore, isInProgram,
+    sortTableDataSet, addUnselectedDataSet, intl, pageIssueTypeStore,
   } = usePageIssueTypeStore();
   const [switchOptions, setSwitchOption] = useState<Array<IssueOption>>();
   const [btnLoading, setBtnLoading] = useState<boolean>();
@@ -96,12 +80,11 @@ function PageIssueType() {
   };
   // 加载全部字段 用于增添已有字段
   useEffect(() => {
+    pageIssueTypeStore.setLoading(true);
     pageIssueTypeStore.loadAllField();
-    const showOptions = issueTypeOptions.filter((item) => item.type === 'common' || !isInProgram);
+    // const showOptions = issueTypeOptions.filter((item) => item.type === 'common' || );
     pageConfigApi.loadAvailableIssueType().then((res) => {
-      if (!res.some((item) => item.typeCode === 'backlog')) {
-        showOptions.pop();
-      }
+      const showOptions = res.map((item) => ({ value: item.typeCode, text: item.name }));
       pageIssueTypeStore.init(showOptions[0].value as PageConfigIssueType);
       setSwitchOption(showOptions);
     });
