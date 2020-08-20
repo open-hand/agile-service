@@ -12,7 +12,6 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -137,8 +136,8 @@ public class ObjectSchemeFieldController {
     @ApiOperation(value = "拖动查询rank值接口")
     @PostMapping(value = "/rank")
     public ResponseEntity<String> queryRank(@PathVariable("organization_id") Long organizationId,
-                                            @RequestBody @Validated AdjustOrderVO adjustOrderVO) {
-        return new ResponseEntity<>(objectSchemeFieldService.queryRank(organizationId, null, adjustOrderVO), HttpStatus.OK);
+                                            @RequestBody AdjustOrderVO adjustOrderVO) {
+        return new ResponseEntity<>(objectSchemeFieldService.queryRank(adjustOrderVO.getPreviousRank(), adjustOrderVO.getNextRank()), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

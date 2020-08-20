@@ -661,10 +661,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     @Override
-    public String queryRank(Long organizationId, Long projectId, AdjustOrderVO adjustOrderVO) {
-        String issueType = adjustOrderVO.getIssueType();
-        String previousRank = adjustOrderVO.getPreviousRank();
-        String nextRank = adjustOrderVO.getNextRank();
+    public String queryRank(String previousRank, String nextRank) {
         if (!ObjectUtils.isEmpty(previousRank) || !ObjectUtils.isEmpty(nextRank)) {
             if (StringUtils.isEmpty(previousRank)) {
                 return RankUtil.genPre(nextRank);
@@ -674,21 +671,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 return RankUtil.between(nextRank, previousRank);
             }
         } else {
-            ObjectSchemeFieldExtendDTO target = objectSchemeFieldExtendMapper.selectByPrimaryKey(adjustOrderVO.getOutsetFieldId());
-            if (ObjectUtils.isEmpty(target)) {
-                throw new CommonException("error.extend.field.not.existed");
-            }
-            String targetRank = target.getRank();
-            if (adjustOrderVO.getBefore()) {
-                return RankUtil.genNext(targetRank);
-            } else {
-                previousRank = objectSchemeFieldExtendMapper.selectPreviousRank(organizationId, projectId, issueType, targetRank);
-                if (ObjectUtils.isEmpty(previousRank)) {
-                    return RankUtil.genPre(targetRank);
-                } else {
-                    return RankUtil.between(targetRank, previousRank);
-                }
-            }
+            throw new CommonException("error.at.least.one.rank");
         }
     }
 

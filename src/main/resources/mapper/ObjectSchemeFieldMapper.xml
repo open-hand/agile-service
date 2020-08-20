@@ -228,7 +228,7 @@
         <if test="schemeCode == null">
             and t4.scheme_code = 'agile_issue'
         </if>
-        order by t4.id asc
+        order by t4.is_system desc, t4.id asc
     </select>
 
     <sql id="selectExtendField">
