@@ -110,7 +110,7 @@ const transformedMember = {
 
 const transformedNoticeType = {
   EMAIL: '邮件',
-  WEB: 'webMessage',
+  WEB: '站内信',
   WEB_HOOK: 'webhook',
 };
 
@@ -346,7 +346,9 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     } = statusNoticeSettingVOS[0];
     const members: string[] = [];
     const noticeTypes: string[] = [];
-    if (userTypeList && userTypeList.length && noticeTypeList && noticeTypeList.length) {
+    if (((userTypeList && userTypeList.length) || (userList && userList.length) || (
+      memberList && memberList.length))
+    && noticeTypeList && noticeTypeList.length) {
       userTypeList.forEach((type: string) => {
         if (type !== 'specifier') {
           // @ts-ignore
@@ -367,14 +369,14 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         noticeTypes.push(transformedNoticeType[noticeType]);
       });
     }
-    return `设置向${members.join('、')}发${noticeTypes.join('、')}通知`;
+    return `设置向【${members.join('、')}】发【${noticeTypes.join('、')}】通知`;
   };
 
   const renderStatusFieldSetting = (statusFieldSettingVOS: IStatusFieldSettingVOS[]) => {
     if (statusFieldSettingVOS && statusFieldSettingVOS.length) {
       return (statusFieldSettingVOS.map((fieldSetting) => {
         const { fieldName } = fieldSetting;
-        return `设置${fieldName}为：${transformFieldValue(fieldSetting)}`;
+        return `设置【${fieldName}】为：【${transformFieldValue(fieldSetting)}】`;
       })).join('，');
     }
     return null;
@@ -386,13 +388,13 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       item: IIssueType,
     ) => item.id === selectedType)?.typeCode;
     if (statusLinkageVOS && statusLinkageVOS.length && (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug')) {
-      const prefixStr = `如果全部${selectedTypeCode === 'sub_task' ? '子任务' : '子缺陷'}都在${record.get('name')}状态，则将`;
+      const prefixStr = `全部${selectedTypeCode === 'sub_task' ? '子任务' : '子缺陷'}都在【${record.get('name')}】状态，则将`;
       const parentDes = (
         statusLinkageVOS.map((linkageSetting) => {
           const { statusVO, issueTypeVO } = linkageSetting;
           const toStatusName = statusVO?.name;
           const parentTypeName = issueTypeVO?.name;
-          return `父级${parentTypeName}的状态自动流转到${toStatusName}`;
+          return `父级【${parentTypeName}】的状态自动流转到【${toStatusName}】`;
         })).join('、');
       return `${prefixStr}${parentDes}`;
     }
