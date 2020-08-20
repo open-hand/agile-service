@@ -29,7 +29,7 @@ public class StatusNoticeSettingAssembler {
     private ObjectSchemeFieldService objectSchemeFieldService;
 
     public List<StatusNoticeSettingVO> statusNoticeDto2Vo(Long projectId, Long issueTypeId,
-                                                          List<StatusNoticeSettingDTO> list, String applyType) {
+                                                          List<StatusNoticeSettingDTO> list, String schemeCode) {
         Map<Long, List<StatusNoticeSettingDTO>> group =
                 list.stream().collect(Collectors.groupingBy(StatusNoticeSettingDTO::getStatusId));
         return group.entrySet().stream().map(entry -> {
@@ -37,7 +37,7 @@ public class StatusNoticeSettingAssembler {
             entry.getValue().forEach(item -> settingVO.addUserWithNotice(item.getUserType(), item.getUserId()));
             settingVO.setNoticeTypeList(Stream.of(StringUtils.split(entry.getValue().stream().map(StatusNoticeSettingDTO::getNoticeType)
                     .findFirst().orElse(""), BaseConstants.Symbol.COMMA)).collect(Collectors.toList()));
-            this.addUserInfo(settingVO, applyType);
+            this.addUserInfo(settingVO, schemeCode);
             return settingVO;
         }).collect(Collectors.toList());
     }

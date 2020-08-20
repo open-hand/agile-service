@@ -243,7 +243,8 @@ public class SchemeController extends BaseController {
                                                                             PageRequest pageRequest,
                                                                             @RequestParam @Encrypt Long issueTypeId,
                                                                             @RequestParam(required = false) String param,
-                                                                            @RequestParam String applyType) {
-        return new ResponseEntity<>(projectConfigService.statusTransformSettingList(projectId, issueTypeId,pageRequest,param, applyType), HttpStatus.OK);
+                                                                            @RequestParam String applyType,
+                                                                            @RequestParam String schemeCode) {
+        return new ResponseEntity<>(projectConfigService.statusTransformSettingList(projectId, issueTypeId,pageRequest,param, applyType, schemeCode), HttpStatus.OK);
     }
 }

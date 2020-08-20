@@ -115,7 +115,7 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
     }
 
     @Override
-    public List<StatusNoticeSettingVO> list(Long projectId, Long issueTypeId, List<Long> statusIdList, String applyType) {
+    public List<StatusNoticeSettingVO> list(Long projectId, Long issueTypeId, List<Long> statusIdList, String schemeCode) {
         if (Objects.isNull(projectId) || Objects.isNull(issueTypeId) || CollectionUtils.isEmpty(statusIdList)){
             return Collections.emptyList();
         }
@@ -124,7 +124,7 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
                 .andWhere(Sqls.custom().andIn(StatusNoticeSettingDTO.FIELD_STATUS_ID, statusIdList)
                         .andEqualTo(StatusNoticeSettingDTO.FIELD_PROJECT_ID, projectId)
                         .andEqualTo(StatusNoticeSettingDTO.FIELD_ISSUE_TYPE_ID, issueTypeId)).build());
-        return statusNoticeSettingAssembler.statusNoticeDto2Vo(projectId, issueTypeId, list, applyType);
+        return statusNoticeSettingAssembler.statusNoticeDto2Vo(projectId, issueTypeId, list, schemeCode);
     }
 
 
