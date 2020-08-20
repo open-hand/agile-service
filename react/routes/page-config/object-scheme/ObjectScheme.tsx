@@ -103,8 +103,11 @@ function ObjectScheme() {
     };
     schemeTableDataSet.delete(record, modalProps);
   }
-  function handleCheckChange() {
-    handleContinueCheckChange();
+  function handleCheckChange(value: boolean) {
+    if (handleContinueCheckChange()) {
+      return value;
+    }
+    return !value;
   }
   function handleContinueCheckChange(secondEntry = false) {
     const record = schemeTableDataSet.current;
@@ -112,16 +115,19 @@ function ObjectScheme() {
     const requiredScope = record.get('requiredScope');
     const required = requiredScope !== RequireScopeType.all;
     if (record.get('system')) {
-      return;
+      return false;
     }
     if (required && defaultValue) {
       Choerodon.prompt(formatMessage({ id: 'field.required.msg' }));
+      return false;
     }
     if (secondEntry || !openPromptForRequire(record.get('name'), required)) {
       pageConfigApi.updateRequired(record.get('id'), required).then(() => {
         handleRefresh();
       });
+      return true;
     }
+    return false;
   }
   function openPromptForRequire(fieldName: string, required: boolean) {
     const isOpen: boolean = !(localStorage.getItem('agile.page.field.setting.required.prompt') === 'false');
@@ -243,10 +249,19 @@ function ObjectScheme() {
     const projectId = record?.get('projectId');
     return (
       <div>
-        <CheckBox
+        {/* <CheckBox
           defaultChecked={requiredScope === 'ALL'}
           indeterminate={requiredScope === 'PART'}
           checked={requiredScope === 'ALL'}
+          disabled={system || (AppState.currentMenuType.type === 'project' && !projectId)}
+          onChange={handleCheckChange}
+        /> */}
+        <NewCheckBox
+          defaultChecked={requiredScope === 'ALL'}
+          indeterminate={requiredScope === 'PART'}
+          checked={requiredScope === 'ALL'}
+          record={record}
+          name={name!}
           disabled={system || (AppState.currentMenuType.type === 'project' && !projectId)}
           onChange={handleCheckChange}
         />
