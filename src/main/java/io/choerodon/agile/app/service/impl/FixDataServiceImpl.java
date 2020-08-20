@@ -310,15 +310,18 @@ public class FixDataServiceImpl implements FixDataService {
                                                String[] contextArray) {
         List<IssueTypeDTO> result = new ArrayList<>();
         List<String> contextList = Arrays.asList(contextArray);
+        List<String> fixDataIssueTypes = Arrays.asList(ObjectSchemeFieldContext.FIX_DATA_ISSUE_TYPES);
         if (ObjectSchemeFieldContext.isGlobal(contextArray)) {
             issueTypes.forEach(i -> {
-                if (Arrays.asList(ObjectSchemeFieldContext.FIX_DATA_ISSUE_TYPES).contains(i.getTypeCode())) {
+                if (fixDataIssueTypes.contains(i.getTypeCode())) {
                     result.add(i);
                 }
             });
         } else {
             issueTypes.forEach(i -> {
-                if (contextList.contains(i.getTypeCode())) {
+                String typeCode = i.getTypeCode();
+                if (contextList.contains(typeCode)
+                        && fixDataIssueTypes.contains(typeCode)) {
                     result.add(i);
                 }
             });
