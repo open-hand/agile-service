@@ -43,10 +43,6 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
     const activePiTeams = issue.activePiTeams || [];
     const { id: piId } = issue.activePi || {};
     const teamIds = activePiTeams.map((team) => team.id);
-
-    console.log('teamIds：');
-    console.log(teamIds);
-
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -61,17 +57,15 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
             onSubmit={this.updateIssueSprint}
             initValue={sprintIds}
             editor={(
-              <div>
-                <SelectTeamSprints
-                  label="活跃冲刺"
-                  mode="multiple"
-                  getPopupContainer={() => document.getElementById('detail')}
-                  allowClear
-                  showCheckAll={false}
-                  piId={piId}
-                  teamIds={teamIds}
-                />
-              </div>
+              <SelectTeamSprints
+                label="活跃冲刺"
+                mode="multiple"
+                getPopupContainer={() => document.getElementById('detail')}
+                allowClear
+                showCheckAll={false}
+                piId={piId}
+                teamIds={teamIds}
+              />
             )}
             editExtraContent={
               closedPiSprints.length ? (
