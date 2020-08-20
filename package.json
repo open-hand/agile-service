@@ -39,7 +39,7 @@
     "wolfy87-eventemitter": "^5.2.8"
   },
   "devDependencies": {
-    "@choerodon/boot": "0.22.0",
+    "@choerodon/boot": "0.22.1-test",
     "@choerodon/compiler": "^0.0.1",
     "@choerodon/master": "0.24.0",
     "@types/classnames": "^2.2.10",
@@ -89,5 +89,17 @@
     "hooks": {
       "pre-commit": "lint-staged"
     }
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

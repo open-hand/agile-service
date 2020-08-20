@@ -91,7 +91,7 @@ const StatusCirculation: React.FC<TabComponentProps> = ({ tab }) => {
             if (store.hasAction) {
               openConfirmLeave({
                 onOk: async () => {
-                  await store.batchUpdateStatusTransform(selectedType);
+                  store.clearActions();
                   setSelectedType(newType);
                 },
               });

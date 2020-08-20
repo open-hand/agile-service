@@ -35,7 +35,7 @@ const StatusCirculationTable: React.FC = () => {
   const statusColumns: ColumnsType<IStatusCirculation> = useMemo(() => statusList.map((status) => ({
     dataIndex: status.name,
     width: 150,
-    title: <span style={{ color: STATUS[status.type] }}>{status.name}</span>,
+    title: <span style={{ color: STATUS[status.type], fontWeight: 500 }}>{status.name}</span>,
     render: ((text: string, record) => (
       <Checkbox store={store} status={status} record={record} />
     )),
@@ -46,7 +46,7 @@ const StatusCirculationTable: React.FC = () => {
     fixed: true,
     title: null,
     render: ((text: string, record) => (
-      <span style={{ color: STATUS[record.type] }}>
+      <span style={{ color: STATUS[record.type], fontWeight: 500 }}>
         {record.name}
         {record.defaultStatus && <span className={styles.default_status}>初始</span>}
       </span>
