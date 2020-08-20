@@ -328,6 +328,8 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     return (
       <Dropdown
         overlay={menu}
+        // @ts-ignore
+        trigger={['click']}
       >
         <Icon
           type="settings"

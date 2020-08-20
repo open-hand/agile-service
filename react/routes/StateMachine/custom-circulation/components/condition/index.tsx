@@ -129,8 +129,8 @@ const Condition:React.FC<Props> = ({
     <div className={styles.condition}>
       <div className={styles.tip}>当工作项流转到此状态应满足的条件设置。</div>
       <div className={styles.setting}>
+        <p className={styles.memberSelectTip}>移动工作项到此状态的成员为</p>
         <Form dataSet={conditionDataSet}>
-          <p className={styles.memberSelectTip}>移动工作项到此状态的成员为</p>
           <Select name="member" />
           {
             // @ts-ignore
