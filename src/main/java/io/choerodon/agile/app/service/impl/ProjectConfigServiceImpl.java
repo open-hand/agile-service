@@ -491,7 +491,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
-    public Page<StatusSettingVO> statusTransformSettingList(Long projectId, Long issueTypeId, PageRequest pageRequest, String param,String applyType) {
+    public Page<StatusSettingVO> statusTransformSettingList(Long projectId, Long issueTypeId, PageRequest pageRequest,
+                                                            String param,String applyType,String schemeCode) {
         if (Boolean.FALSE.equals(EnumUtil.contain(SchemeApplyType.class, applyType))) {
             throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
         }
@@ -506,7 +507,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         List<Long> statusIds = list.stream().map(StatusSettingVO::getId).collect(Collectors.toList());
         List<StatusTransferSettingVO> transferSettingVOS = statusTransferSettingService.listByStatusIds(projectId, issueTypeId, statusIds);
         List<StatusFieldSettingVO> statusFieldSettingVOS = statusFieldSettingService.listByStatusIds(projectId, issueTypeId, statusIds);
-        List<StatusNoticeSettingVO> statusNoticeSettingVOS = statusNoticeSettingService.list(projectId, issueTypeId, statusIds, applyType);
+        List<StatusNoticeSettingVO> statusNoticeSettingVOS = statusNoticeSettingService.list(projectId, issueTypeId, statusIds, schemeCode);
         List<StatusLinkageVO> linkageVOS = statusLinkageService.listByStatusIds(projectId, issueTypeId, statusIds, applyType);
         Map<Long, List<StatusTransferSettingVO>> transferSettingMap = new HashMap<>();
         Map<Long, List<StatusFieldSettingVO>> statusFieldSettingMap = new HashMap<>();
@@ -520,7 +521,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (!CollectionUtils.isEmpty(statusFieldSettingVOS)) {
             statusFieldSettingMap.putAll(statusFieldSettingVOS.stream().collect(Collectors.groupingBy(StatusFieldSettingVO::getStatusId)));
         }
-        
+
         for (StatusSettingVO statusSettingVO : list) {
             statusSettingVO.setStatusTransferSettingVOS(transferSettingMap.get(statusSettingVO.getId()));
             statusSettingVO.setStatusFieldSettingVOS(statusFieldSettingMap.get(statusSettingVO.getId()));
