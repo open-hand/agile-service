@@ -111,13 +111,16 @@ const CreateStatus: React.FC<Props> = ({
     }
   }, [type]);
   const handleSubmit = useCallback(async () => {
-    try {
-      await dataSet.submit();
-      onSubmit();
-      return true;
-    } catch (error) {
-      return false;
+    if (await dataSet.validate()) {
+      try {
+        await dataSet.submit();
+        onSubmit();
+        return true;
+      } catch (error) {
+        return false;
+      }
     }
+    return false;
   }, [dataSet, onSubmit]);
   useEffect(() => {
     modal.handleOk(handleSubmit);
