@@ -216,7 +216,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
                 StatusLinkageDTO value = next.getValue();
                 isChange = handlerSingleIssueType(value, issueMap, typeCode);
                 if (Boolean.FALSE.equals(isChange)) {
-                    continue;
+                    break;
                 }
                 changeStatus = getChangeStatus(isChange, value);
             }
