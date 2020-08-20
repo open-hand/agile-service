@@ -119,6 +119,7 @@ const DraggableItem: React.FC<Props> = ({
   const getStyle = (draggableStyle: DraggingStyle | NotDraggingStyle | undefined) => ({
     ...draggableStyle,
     ...virtualizedStyle,
+    cursor: 'all-scroll',
   });
   const transformDefaultValue = (fieldType: string, defaultValue: any) => {
     if (!defaultValue || defaultValue === '') {

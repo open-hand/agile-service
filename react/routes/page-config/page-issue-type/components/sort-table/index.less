@@ -127,9 +127,12 @@
 
       // border-top: 0.02rem dashed #1890ff;
       // background-color: red;
+      .c7n-pro-checkbox:disabled +.c7n-pro-checkbox-inner {
+        color: rgba(0, 0, 0, 0.25);
+        background-color: #f5f5f5 !important;
+        border-color: rgba(0, 0, 0, 0.25) !important;
+      }
     }
-
-    &-item +.c7n-page-issue-detail-drag {}
   }
 
   &-drop {
