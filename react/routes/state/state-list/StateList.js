@@ -438,9 +438,10 @@ function StateList(props) {
     };
 
     return (
-      <Page service={[
-        'choerodon.code.organization.setting.issue.states.ps.state',
-      ]}
+      <Page
+        service={[
+          'choerodon.code.organization.setting.issue.states.ps.state',
+        ]}
       >
         <Header title={<FormattedMessage id="state.title" />}>
           {!initialTotal
@@ -458,7 +459,7 @@ function StateList(props) {
             )}
         </Header>
         <Breadcrumb />
-        <Content className="issue-state-content">
+        <Content className="issue-state-content" style={{ paddingTop: 0 }}>
           <Table
             dataSource={statesList.list}
             columns={getColumn()}
