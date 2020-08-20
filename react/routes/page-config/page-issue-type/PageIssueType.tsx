@@ -268,7 +268,7 @@ function PageIssueType() {
         </Spin>
         <div className={styles.bottom}>
           <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} loading={btnLoading} onClick={handleSubmit}>
-            确定
+            保存
           </Button>
           <Button funcType={'raised' as FuncType} onClick={pageIssueTypeStore.loadData}>
             取消
