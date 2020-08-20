@@ -83,9 +83,9 @@ function EditIssue() {
         pageCode: 'agile_issue_edit',
       };
       const fields = await fieldApi.getFieldAndValue(id, param);
-      const { description, issueTypeId } = issue;
+      const { description, issueTypeVO: { typeCode } } = issue;
       if (!description || description === JSON.stringify([{ insert: '\n' }])) { // 加载默认模版
-        const issueTemplateInfo = await pageConfigApi.loadTemplateByType(issueTypeId) || {};
+        const issueTemplateInfo = await pageConfigApi.loadTemplateByType(typeCode) || {};
         const { template } = issueTemplateInfo;
         issue.descriptionTemplate = template;
       }

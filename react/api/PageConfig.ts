@@ -80,15 +80,15 @@ class PageConfigApi {
   }
 
   /**
-   * 根据问题类型id查询默认模版
-   * @param issueTypeId
+   * 根据问题类型code查询默认模版
+   * @param issueType
    */
-  loadTemplateByType(issueTypeId: string) {
+  loadTemplateByType(issueType: string) {
     return axios({
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/description_template`,
       params: {
-        issueTypeId,
+        issueType,
         organizationId: getOrganizationId(),
       },
     });
