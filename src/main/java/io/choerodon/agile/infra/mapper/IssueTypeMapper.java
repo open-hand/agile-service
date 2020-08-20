@@ -27,8 +27,17 @@ public interface IssueTypeMapper extends BaseMapper<IssueTypeDTO> {
 
     /**
      * 根据id查询issue type
+     *
      * @param organizationIds
      * @return
      */
     List<IssueTypeDTO> selectByOrganizationIds(@Param("organizationIds") Set<Long> organizationIds);
+
+    /**
+     * 根据typeCode查询issue type
+     *
+     * @param typeCode
+     * @return
+     */
+    List<IssueTypeDTO> selectByTypeCode(@Param("typeCode") String typeCode);
 }

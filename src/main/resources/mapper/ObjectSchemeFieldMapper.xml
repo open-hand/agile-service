@@ -310,6 +310,7 @@
         <result property="context" column="context"/>
         <result property="organizationId" column="organization_id"/>
         <result property="projectId" column="project_id"/>
+        <result property="code" column="code"/>
         <collection property="pages" ofType="io.choerodon.agile.infra.dto.PageFieldDTO">
             <id property="id" column="page_field_id"/>
             <result property="pageId" column="page_id"/>
@@ -327,6 +328,7 @@
         t1.context,
         t1.project_id,
         t1.organization_id,
+        t1.code,
         t2.id as page_field_id,
         t2.page_id,
         t2.is_display,

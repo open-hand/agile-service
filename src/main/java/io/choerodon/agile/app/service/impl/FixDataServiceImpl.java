@@ -65,13 +65,13 @@ public class FixDataServiceImpl implements FixDataService {
     @Autowired
     private IssueTypeSchemeConfigMapper issueTypeSchemeConfigMapper;
     @Autowired
-    private ObjectSchemeFieldMapper objectSchemeFieldMapper;
+    protected ObjectSchemeFieldMapper objectSchemeFieldMapper;
     @Autowired
     private PageMapper pageMapper;
     @Autowired
     private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
     @Autowired
-    private IssueTypeMapper issueTypeMapper;
+    protected IssueTypeMapper issueTypeMapper;
     @Autowired
     private StatusMachineSchemeConfigMapper statusMachineSchemeConfigMapper;
     @Autowired
@@ -262,7 +262,7 @@ public class FixDataServiceImpl implements FixDataService {
         return RankUtil.mid();
     }
 
-    private void generateDataMap(Long createPageId,
+    protected void generateDataMap(Long createPageId,
                                  Long editPageId,
                                  MultiKeyMap dataMap,
                                  ObjectSchemeFieldDTO objectSchemeField,
@@ -274,6 +274,15 @@ public class FixDataServiceImpl implements FixDataService {
         List<IssueTypeDTO> issueTypeList = issueTypeMapper.selectByOrganizationIds(organizationIds);
         Map<Long, List<IssueTypeDTO>> issueTypeMap = issueTypeList.stream().collect(Collectors.groupingBy(IssueTypeDTO::getOrganizationId));
 
+        processFields(createPageId, editPageId, dataMap, rankMap, fields, issueTypeMap);
+    }
+
+    protected void processFields(Long createPageId,
+                                 Long editPageId,
+                                 MultiKeyMap dataMap,
+                                 MultiKeyMap rankMap,
+                                 List<ObjectSchemeFieldDTO> fields,
+                                 Map<Long, List<IssueTypeDTO>> issueTypeMap) {
         fields.forEach(s -> {
             Boolean required = s.getRequired();
             String context = s.getContext();
@@ -282,7 +291,8 @@ public class FixDataServiceImpl implements FixDataService {
             List<PageFieldDTO> pageFields = s.getPages();
             pageFields.forEach(p -> {
                 Long organizationId = p.getOrganizationId();
-                List<IssueTypeDTO> issueTypes = getIssueType(organizationId, issueTypeMap, contextArray);
+                List<IssueTypeDTO> issueTypes = issueTypeMap.get(organizationId);
+                issueTypes = filterIssueType(issueTypes, contextArray);
                 String rank = p.getRank();
                 rankMap.put(fieldId, organizationId, p.getProjectId(), p.getPageId(), rank);
                 ObjectSchemeFieldExtendDTO carrier =
@@ -296,20 +306,18 @@ public class FixDataServiceImpl implements FixDataService {
         });
     }
 
-    private List<IssueTypeDTO> getIssueType(Long organizationId,
-                                            Map<Long, List<IssueTypeDTO>> issueTypeMap,
-                                            String[] contextArray) {
+    private List<IssueTypeDTO> filterIssueType(List<IssueTypeDTO> issueTypes,
+                                               String[] contextArray) {
         List<IssueTypeDTO> result = new ArrayList<>();
         List<String> contextList = Arrays.asList(contextArray);
-        List<IssueTypeDTO> issueTypeList = issueTypeMap.get(organizationId);
         if (ObjectSchemeFieldContext.isGlobal(contextArray)) {
-            issueTypeList.forEach(i -> {
-                if (ObjectSchemeFieldContext.ISSUE_TYPES_LIST.contains(i.getTypeCode())) {
+            issueTypes.forEach(i -> {
+                if (Arrays.asList(ObjectSchemeFieldContext.FIX_DATA_ISSUE_TYPES).contains(i.getTypeCode())) {
                     result.add(i);
                 }
             });
         } else {
-            issueTypeList.forEach(i -> {
+            issueTypes.forEach(i -> {
                 if (contextList.contains(i.getTypeCode())) {
                     result.add(i);
                 }

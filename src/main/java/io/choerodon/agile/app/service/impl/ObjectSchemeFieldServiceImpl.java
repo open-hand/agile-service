@@ -27,28 +27,28 @@ import org.springframework.util.ObjectUtils;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
-    private static final String ERROR_FIELD_ILLEGAL = "error.field.illegal";
-    private static final String ERROR_FIELD_CREATE = "error.field.create";
-    private static final String ERROR_FIELD_NOTFOUND = "error.field.notFound";
-    private static final String ERROR_FIELD_UPDATE = "error.field.update";
-    private static final String ERROR_SCHEMECODE_ILLEGAL = "error.schemeCode.illegal";
-    private static final String ERROR_FIELDTYPE_ILLEGAL = "error.fieldType.illegal";
-    private static final String ERROR_FIELD_NAMEEXIST = "error.field.nameExist";
-    private static final String ERROR_FIELD_CODEEXIST = "error.field.codeExist";
+    protected static final String ERROR_FIELD_ILLEGAL = "error.field.illegal";
+    protected static final String ERROR_FIELD_CREATE = "error.field.create";
+    protected static final String ERROR_FIELD_NOTFOUND = "error.field.notFound";
+    protected static final String ERROR_FIELD_UPDATE = "error.field.update";
+    protected static final String ERROR_SCHEMECODE_ILLEGAL = "error.schemeCode.illegal";
+    protected static final String ERROR_FIELDTYPE_ILLEGAL = "error.fieldType.illegal";
+    protected static final String ERROR_FIELD_NAMEEXIST = "error.field.nameExist";
+    protected static final String ERROR_FIELD_CODEEXIST = "error.field.codeExist";
     @Autowired
-    private ObjectSchemeFieldMapper objectSchemeFieldMapper;
+    protected ObjectSchemeFieldMapper objectSchemeFieldMapper;
     @Autowired
-    private ObjectSchemeMapper objectSchemeMapper;
+    protected ObjectSchemeMapper objectSchemeMapper;
     @Autowired
-    private FieldOptionService fieldOptionService;
+    protected FieldOptionService fieldOptionService;
     @Autowired
-    private FieldValueService fieldValueService;
+    protected FieldValueService fieldValueService;
     @Autowired
-    private FieldDataLogService fieldDataLogService;
+    protected FieldDataLogService fieldDataLogService;
     @Autowired
-    private ModelMapper modelMapper;
+    protected ModelMapper modelMapper;
     @Autowired
-    private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
+    protected ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
     @Autowired
     protected IssueTypeService issueTypeService;
     @Autowired

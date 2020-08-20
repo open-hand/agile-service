@@ -45,6 +45,17 @@ public class ObjectSchemeFieldExtendDTO extends AuditDomain {
     @Column(name = "is_edited")
     private Boolean edited;
 
+    public ObjectSchemeFieldExtendDTO() {
+    }
+
+    public ObjectSchemeFieldExtendDTO(Boolean required,
+                                      Boolean created,
+                                      Boolean edited) {
+        this.required = required;
+        this.created = created;
+        this.edited = edited;
+    }
+
     public String getIssueTypeName() {
         return issueTypeName;
     }
