@@ -189,7 +189,7 @@ class StatusTransformApi extends Api {
    * @param size
    */
   getCustomCirculationList(
-    issueTypeId: string, param: string, page: number = 0, size: number = 10,
+    issueTypeId: string, param: string, page: number = 0, size: number = 10, schemeCode: string = 'agile_issue',
   ) {
     return this.request({
       method: 'get',
@@ -200,6 +200,7 @@ class StatusTransformApi extends Api {
         page,
         size,
         param,
+        schemeCode,
       },
     });
   }
