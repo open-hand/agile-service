@@ -148,12 +148,11 @@ public interface ObjectSchemeFieldService {
     /**
      * 查询rank值
      *
-     * @param organizationId
-     * @param projectId
-     * @param adjustOrderVO
+     * @param previousRank
+     * @param nextRank
      * @return
      */
-    String queryRank(Long organizationId, Long projectId, AdjustOrderVO adjustOrderVO);
+    String queryRank(String previousRank, String nextRank);
 
     List<ObjectSchemeFieldVO> selectMemberList(Long organizationId, Long projectId, String schemeCode, Long issueTypeId, List<String> fieldCodeList);
 
