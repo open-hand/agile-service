@@ -17,6 +17,7 @@ import { getMenuType } from '@/utils/common';
 import Store from './stores';
 import TableDropMenu from '../../../common/TableDropMenu';
 import CreateField from '../components/create-field';
+import NewCheckBox from '../components/check-box';
 import RequiredPrompt from './components/required-prompt';
 import './ObjectScheme.less';
 
@@ -236,7 +237,7 @@ function ObjectScheme() {
       );
   };
 
-  const renderRequired = ({ record }: RenderProps) => {
+  const renderRequired = ({ record, name }: RenderProps) => {
     const system = record?.get('system');
     const requiredScope = record?.get('requiredScope');
     const projectId = record?.get('projectId');

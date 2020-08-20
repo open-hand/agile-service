@@ -44,7 +44,7 @@ const DraggableItem: React.FC<Props> = ({
     editedFieldCanNotEdit = false,
   } = pageConfigFieldEdited;
   // 是否禁止删除此字段 1.系统字段不可删除  2. 项目层下组织层字段不可删除
-  const disabledDel = data.get('createdLevel') === 'system' || (!showSplitLine && data.get('createdLevel') !== 'project');
+  const disabledDel = data?.get('pageConfigFieldEdited');
   const renderFieldName = ({ value, record, dataSet }: RenderProps) => (
     <div className={`${prefixCls}-text`}>
 
