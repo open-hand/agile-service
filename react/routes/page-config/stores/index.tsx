@@ -1,6 +1,8 @@
 import React, { createContext, useState, useContext } from 'react';
 import { inject } from 'mobx-react';
 import { injectIntl } from 'react-intl';
+import IsProgramContext from '@/hooks/useIsProgrom';
+import { getApplyType } from '@/utils/common';
 
 interface Context {
 
@@ -31,12 +33,14 @@ export const PageConfigProvider: React.FC<Context> = injectIntl(inject('AppState
       setReLoad,
     };
     return (
-      <PageConfigContext.Provider value={value}>
+      <IsProgramContext.Provider value={{ isProgram: getApplyType() === 'program' }}>
+        <PageConfigContext.Provider value={value}>
 
-        {// @ts-ignore
-          props.children
-        }
-      </PageConfigContext.Provider>
+          {// @ts-ignore
+            props.children
+          }
+        </PageConfigContext.Provider>
+      </IsProgramContext.Provider>
     );
   },
 ));

@@ -10,6 +10,7 @@ import { Prompt } from 'react-router-dom';
 import { pageConfigApi, PageConfigIssueType, IFiledProps } from '@/api/PageConfig';
 import { beforeTextUpload, text2Delta } from '@/utils/richText';
 import { getMenuType } from '@/utils/common';
+import { useIsProgramContext } from '@/hooks/useIsProgrom';
 import styles from './index.less';
 import IssueTypeWrap from './components/issue-type-wrap';
 import SortTable from './components/sort-table';
@@ -40,6 +41,8 @@ function PageIssueType() {
   const {
     sortTableDataSet, addUnselectedDataSet, intl, pageIssueTypeStore,
   } = usePageIssueTypeStore();
+  const { isProgram } = useIsProgramContext();
+
   const [switchOptions, setSwitchOption] = useState<Array<IssueOption>>();
   const [btnLoading, setBtnLoading] = useState<boolean>();
   const handleSubmit = () => {
@@ -92,12 +95,19 @@ function PageIssueType() {
     pageIssueTypeStore.setLoading(true);
     pageIssueTypeStore.loadAllField();
     const currentMenuType = getMenuType();
-    const showOptions = issueTypeOptions.filter((item) => item.type === 'common' || currentMenuType === 'organization');
+
+    const showOptions = isProgram
+      ? [
+        { value: 'feature', text: '特性', type: 'organization' },
+        { value: 'story', text: '故事', type: 'common' },
+        { value: 'backlog', text: '需求', type: 'common' },
+      ] as Array<IssueOption> : issueTypeOptions.filter((item) => item.type === 'common' || currentMenuType === 'organization');
     pageConfigApi.loadAvailableIssueType().then((res) => {
       // const showOptions = res.map((item) => ({ value: item.typeCode, text: item.name }));
       if (!res.some((item) => item.typeCode === 'backlog')) {
         showOptions.pop();
       }
+
       pageIssueTypeStore.init(showOptions[0].value as PageConfigIssueType);
       setSwitchOption(showOptions);
     });

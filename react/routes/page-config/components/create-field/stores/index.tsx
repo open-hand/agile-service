@@ -5,6 +5,7 @@ import moment from 'moment';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { InjectedIntl } from 'react-intl';
 import { AppStateProps, IModalProps } from '@/common/types';
+import { getApplyType } from '@/utils/common';
 import FormDataSet from './FormDataSet';
 import UserOptionDataSet from './UserOptionDataSet';
 import useStore from './useStore';
@@ -44,6 +45,9 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
     const filterContext = ['global'];
     if (type === 'project') {
       filterContext.push('feature');
+    }
+    if (getApplyType() === 'program') { // 临时增加项目群限制
+      filterContext.push(...['story', 'task', 'sub_task', 'bug']);
     }
     const formDataSet = new DataSet(FormDataSet({
       formatMessage,
