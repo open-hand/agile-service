@@ -185,7 +185,12 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         Long stateMachineId = projectConfigService.queryStateMachineId(projectId, applyType, parentIssue.getIssueTypeId());
         // 获取开始状态和结束状态查询转换Id
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        List<StatusMachineTransformDTO> statusMachineTransformDTOS = statusMachineTransformMapper.selectTransformByStatusId(organizationId, stateMachineId, parentIssue.getStatusId(), changeStatus);
+        List<StatusMachineTransformDTO> statusMachineTransformDTOS = statusMachineTransformMapper
+                .selectTransformByStatusId(organizationId, stateMachineId, parentIssue.getStatusId(), changeStatus, false);
+        if (CollectionUtils.isEmpty(statusMachineTransformDTOS)){
+            statusMachineTransformDTOS = statusMachineTransformMapper
+                    .selectTransformByStatusId(organizationId, stateMachineId, parentIssue.getStatusId(), changeStatus, true);
+        }
         if (CollectionUtils.isEmpty(statusMachineTransformDTOS)) {
             throw new CommonException("error.status.transform.not.exist");
         }

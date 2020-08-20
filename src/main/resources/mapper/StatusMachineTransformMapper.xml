@@ -33,14 +33,27 @@
     </insert>
 
     <select id="selectTransformByStatusId" resultType="io.choerodon.agile.infra.dto.StatusMachineTransformDTO">
-        select fsmt.* from fd_status_machine_transform fsmt,fd_status_machine_node fsmns,fd_status_machine_node fsmne
-        where fsmt.organization_id = #{organizationId}
+        select
+            fsmt.*
+        from
+            fd_status_machine_transform fsmt,
+        <if test="!transformAllFlag">
+            fd_status_machine_node fsmns,
+        </if>
+            fd_status_machine_node fsmne
+        where
+            fsmt.organization_id = #{organizationId}
         AND fsmt.state_machine_id = #{stateMachineId}
-        AND fsmns.id = fsmt.start_node_id
+        <if test="!transformAllFlag">
+            AND fsmns.id = fsmt.start_node_id
+            AND fsmns.state_machine_id = fsmt.state_machine_id
+            AND fsmns.status_id = #{statusId}
+        </if>
+        <if test="transformAllFlag">
+            AND fsmt.type = 'transform_all'
+        </if>
         AND fsmne.id = fsmt.end_node_id
-        AND fsmns.state_machine_id = fsmt.state_machine_id
         AND fsmne.state_machine_id = fsmt.state_machine_id
-        AND fsmns.status_id = #{statusId}
         AND fsmne.status_id = #{changeStatus}
     </select>
 
