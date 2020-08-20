@@ -29,7 +29,7 @@ const SelectSprint: React.FC<Props> = forwardRef(({
   const [teams, setTeams] = useState<Team[]>([]);
   const sprints = useMemo(() => teams.reduce((result, team) => [
     ...result,
-    ...team.sprints,
+    ...(team.sprints || []),
   ], []), [teams]);
   const loadData = useCallback(async () => {
     if (piId && Array.isArray(teamIds) && teamIds.length > 0) {
