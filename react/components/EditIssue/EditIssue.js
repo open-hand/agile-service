@@ -84,7 +84,6 @@ function EditIssue() {
       };
       const fields = await fieldApi.getFieldAndValue(id, param);
       const { description, issueTypeId } = issue;
-      console.log('d:', description, description === JSON.stringify([{ insert: '\n' }]));
       if (!description || description === JSON.stringify([{ insert: '\n' }])) { // 加载默认模版
         const issueTemplateInfo = await pageConfigApi.loadTemplateByType(issueTypeId) || {};
         const { template } = issueTemplateInfo;
