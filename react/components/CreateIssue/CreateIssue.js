@@ -11,9 +11,10 @@ import reactComponentDebounce from '@/components/DebounceComponent';
 import {
   featureApi, epicApi, fieldApi, issueTypeApi,
   issueApi,
+  pageConfigApi,
 } from '@/api';
 import {
-  beforeTextUpload, handleFileUpload, validateFile, normFile,
+  beforeTextUpload, handleFileUpload, validateFile, normFile, text2Delta,
 } from '@/utils/richText';
 import {
   getProjectName, getProjectId,
@@ -46,7 +47,6 @@ const { AppState } = stores;
 const { Sidebar } = Modal;
 const { Option } = Select;
 const FormItem = Form.Item;
-
 const bugDefaultDes = [{ attributes: { bold: true }, insert: '步骤' }, { insert: '\n' }, { attributes: { list: 'ordered' }, insert: '\n\n\n' }, { attributes: { bold: true }, insert: '结果' }, { insert: '\n\n' }, { attributes: { bold: true }, insert: '期望' }, { insert: '\n' }];
 const defaultProps = {
   mode: 'default',
@@ -89,6 +89,7 @@ class CreateIssue extends Component {
       newIssueTypeCode: '',
       fields: [],
     };
+    this.originDescription = true;
   }
 
   componentDidMount() {
@@ -115,6 +116,7 @@ class CreateIssue extends Component {
     }
   }
 
+  // eslint-disable-next-line react/destructuring-assignment
   getDefaultType = (issueTypes = this.state.originIssueTypes) => {
     const { defaultTypeCode } = this.props;
     return find(issueTypes, { typeCode: defaultTypeCode });
@@ -166,8 +168,32 @@ class CreateIssue extends Component {
     });
   };
 
+  checkSameDescription = (origin, current) => {
+    if (!origin) {
+      return !current || JSON.stringify(current) === JSON.stringify([{ insert: '\n' }]);
+    }
+    if (current) {
+      return origin === JSON.stringify(current);
+    }
+    return true;
+  };
+
+  loadDefaultTemplate = (issueTypeId) => {
+    const { form } = this.props;
+    const currentDes = form.getFieldValue('description');
+    if (this.checkSameDescription(this.originDescription, currentDes)) {
+      pageConfigApi.loadTemplateByType(issueTypeId).then((res) => {
+        const { template } = res || {};
+        form.setFieldsValue({
+          description: text2Delta(template),
+        });
+        this.originDescription = template;
+      });
+    }
+  };
+
   loadIssueTypes = () => {
-    const { applyType } = this.props;
+    const { applyType, form } = this.props;
     issueTypeApi.loadAllWithStateMachineId(applyType).then((res) => {
       if (res && res.length) {
         const defaultType = this.getDefaultType(res);
@@ -176,6 +202,7 @@ class CreateIssue extends Component {
           context: defaultType.typeCode,
           pageCode: 'agile_issue_create',
         };
+        this.loadDefaultTemplate(defaultType.id);
         fieldApi.getFields(param).then((fields) => {
           this.setState({
             fields,
@@ -406,6 +433,7 @@ class CreateIssue extends Component {
       originIssueTypes,
       newIssueTypeCode, defaultTypeId,
     } = this.state;
+
     switch (field.fieldCode) {
       case 'issueType':
         return (
@@ -434,6 +462,7 @@ class CreateIssue extends Component {
                           context: typeCode,
                           pageCode: 'agile_issue_create',
                         };
+                        this.loadDefaultTemplate(value);
                         fieldApi.getFields(param).then((res) => {
                           this.setState({
                             fields: res,
@@ -551,7 +580,8 @@ class CreateIssue extends Component {
           <FormItem label="标签">
             {getFieldDecorator('issueLabel', {
               rules: [{ transform: (value) => (value ? value.toString() : value) }],
-              normalize: (value) => (value ? value.map((s) => s.toString().substr(0, 10)) : value), // 限制最长10位
+              normalize: (value) => (value ? value.map((s) => s.toString().substr(0, 10))
+                : value), // 限制最长10位
             })(
               <SelectFocusLoad
                 label="标签"
@@ -604,6 +634,7 @@ class CreateIssue extends Component {
                     loadWhenMount
                     afterLoad={() => {
                       form.setFieldsValue({
+                        // eslint-disable-next-line react/destructuring-assignment
                         epicId: this.props.epicId,
                       });
                     }}
@@ -700,9 +731,9 @@ class CreateIssue extends Component {
           <>
             <FormItem key={newIssueTypeCode} label={fieldName} className="c7nagile-line">
               {getFieldDecorator(fieldCode, {
-                initialValue: newIssueTypeCode === 'bug' ? bugDefaultDes : undefined,
+                // initialValue: undefined,
               })(
-                <DebounceEditor
+                <WYSIWYGEditor
                   style={{ height: 200, width: '100%' }}
                 />,
               )}
@@ -860,7 +891,8 @@ class CreateIssue extends Component {
                     <Input label="父任务概要" value={parentSummary} disabled />
                   </FormItem>
                 )}
-                {fields && fields.filter((field) => !hiddenFields.includes(field.fieldCode)).map((field) => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
+                {fields && fields.filter((field) => !hiddenFields.includes(field.fieldCode))
+                  .map((field) => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
                 {newIssueTypeCode === 'feature' && <FieldTeam form={form} teamProjectIds={teamProjectIds} />}
                 {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}
                 {newIssueTypeCode !== 'epic' && (

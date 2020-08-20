@@ -80,6 +80,21 @@ class PageConfigApi {
   }
 
   /**
+   * 根据问题类型id查询默认模版
+   * @param issueTypeId
+   */
+  loadTemplateByType(issueTypeId: string) {
+    return axios({
+      method: 'get',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/description_template`,
+      params: {
+        issueTypeId,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  /**
    * 查询当前项目或组织下可配置的问题类型
    *
    */

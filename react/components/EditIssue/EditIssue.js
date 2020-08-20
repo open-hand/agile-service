@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-bind */
 /* eslint-disable react/sort-comp */
 import React, {
   useContext, useState, useEffect, useImperativeHandle, useRef,
@@ -10,7 +11,7 @@ import './EditIssue.less';
 import useIsOwner from '@/hooks/useIsOwner';
 import { useIssueTypes } from '@/hooks';
 import {
-  issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, devOpsApi,
+  issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, devOpsApi, pageConfigApi,
 } from '@/api';
 import RelateStory from '../RelateStory';
 import CopyIssue from '../CopyIssue';
@@ -59,13 +60,15 @@ function EditIssue() {
   const [issueTypes] = useIssueTypes();
   const container = useRef();
   const idRef = useRef();
+
   const loadIssueDetail = async (paramIssueId) => {
     const id = paramIssueId || currentIssueId;
     idRef.current = id;
     setIssueLoading(true);
     try {
       // 1. 加载详情
-      const issue = await (programId ? issueApi.loadUnderProgram(id, programId) : issueApi.load(id));
+      const issue = await (programId
+        ? issueApi.loadUnderProgram(id, programId) : issueApi.load(id));
       if (idRef.current !== id) {
         return;
       }
@@ -80,6 +83,13 @@ function EditIssue() {
         pageCode: 'agile_issue_edit',
       };
       const fields = await fieldApi.getFieldAndValue(id, param);
+      const { description, issueTypeId } = issue;
+      console.log('d:', description, description === JSON.stringify([{ insert: '\n' }]));
+      if (!description || description === JSON.stringify([{ insert: '\n' }])) { // 加载默认模版
+        const issueTemplateInfo = await pageConfigApi.loadTemplateByType(issueTypeId) || {};
+        const { template } = issueTemplateInfo;
+        issue.descriptionTemplate = template;
+      }
       setIssueLoading(false);
       store.setIssueFields(issue, fields);
       if (issueStore) {
