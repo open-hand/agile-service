@@ -1,6 +1,6 @@
 package io.choerodon.agile.app.eventhandler;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSON;
 import io.choerodon.agile.api.vo.event.OrganizationCreateEventPayload;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
@@ -41,6 +41,8 @@ public class AgileEventHandler {
     private PriorityService priorityService;
     @Autowired
     private InitService initService;
+    @Autowired
+    private ObjectSchemeFieldService objectSchemeFieldService;
 
     @SagaTask(code = TASK_ORG_CREATE,
             description = "创建组织事件",
@@ -48,7 +50,7 @@ public class AgileEventHandler {
             seq = 1)
     public String handleOrgaizationCreateByConsumeSagaTask(String data) {
         LOGGER.info("消费创建组织消息{}", data);
-        OrganizationCreateEventPayload organizationEventPayload = JSONObject.parseObject(data, OrganizationCreateEventPayload.class);
+        OrganizationCreateEventPayload organizationEventPayload = JSON.parseObject(data, OrganizationCreateEventPayload.class);
         Long organizationId = organizationEventPayload.getId();
         //注册组织初始化问题类型
         issueTypeService.initIssueTypeByConsumeCreateOrganization(organizationId);
@@ -58,6 +60,8 @@ public class AgileEventHandler {
         initService.initStatus(organizationId);
         //初始化默认状态机
         initService.initDefaultStateMachine(organizationId);
+        //初始化页面配置数据
+        objectSchemeFieldService.createSystemFieldIfNotExisted(organizationId);
         return data;
     }
 
@@ -71,7 +75,7 @@ public class AgileEventHandler {
             sagaCode = PROJECT_CREATE,
             seq = 2)
     public String handleProjectInitByConsumeSagaTask(String message) {
-        ProjectEvent projectEvent = JSONObject.parseObject(message, ProjectEvent.class);
+        ProjectEvent projectEvent = JSON.parseObject(message, ProjectEvent.class);
         LOGGER.info("接受创建项目消息{}", message);
         if (ProjectCategory.AGILE.equals(projectEvent.getProjectCategory()) || ProjectCategory.GENERAL.equals(projectEvent.getProjectCategory())) {
             //创建projectInfo

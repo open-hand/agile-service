@@ -67,8 +67,11 @@
         object_version_number
         from fd_object_scheme_field_extend
         where 1=1
-        <if test="issueType != null">
-            and issue_type = #{issueType}
+        <if test="issueTypes != null and issueTypes.size > 0">
+            and issue_type in
+            <foreach collection="issueTypes" item="issueType" index="index" open="(" separator="," close=")">
+                #{issueType}
+            </foreach>
         </if>
         and organization_id = #{organizationId}
         <if test="fieldId != null">

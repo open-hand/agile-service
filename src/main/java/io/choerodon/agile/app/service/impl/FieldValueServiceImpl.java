@@ -41,13 +41,13 @@ import java.util.stream.Collectors;
 public class FieldValueServiceImpl implements FieldValueService {
     private static final String ERROR_PAGECODE_ILLEGAL = "error.pageCode.illegal";
     private static final String ERROR_CONTEXT_ILLEGAL = "error.context.illegal";
-    private static final String ERROR_SCHEMECODE_ILLEGAL = "error.schemeCode.illegal";
+    protected static final String ERROR_SCHEMECODE_ILLEGAL = "error.schemeCode.illegal";
     private static final String ERROR_OPTION_ILLEGAL = "error.option.illegal";
-    private static final String ERROR_FIELDTYPE_ILLEGAL = "error.fieldType.illegal";
+    protected static final String ERROR_FIELDTYPE_ILLEGAL = "error.fieldType.illegal";
     private static final String ERROR_SYSTEM_ILLEGAL = "error.system.illegal";
 
     @Autowired
-    private FieldValueMapper fieldValueMapper;
+    protected FieldValueMapper fieldValueMapper;
     @Autowired
     private PageFieldService pageFieldService;
     @Autowired

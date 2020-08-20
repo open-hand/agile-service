@@ -32,12 +32,12 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
     /**
      * 查询组织层的扩展字段
      *
-     * @param issueType
+     * @param issueTypes
      * @param organizationId
      * @param fieldId
      * @return
      */
-    List<ObjectSchemeFieldExtendDTO> selectExtendField(@Param("issueType") String issueType,
+    List<ObjectSchemeFieldExtendDTO> selectExtendField(@Param("issueTypes") List<String> issueTypes,
                                                        @Param("organizationId") Long organizationId,
                                                        @Param("fieldId") Long fieldId,
                                                        @Param("projectId") Long projectId);
