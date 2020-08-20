@@ -53,8 +53,8 @@ const CreateStatus: React.FC<Props> = ({
           const data = JSON.parse(res);
           const { statusExist, type: newType } = data;
           if (statusExist) {
-            dataSet.current?.set('valueCode', newType);
-            setType(newType);
+              dataSet.current?.set('valueCode', newType);
+              setType(newType);
           } else {
             setType(null);
           }
@@ -129,7 +129,15 @@ const CreateStatus: React.FC<Props> = ({
   return (
     <>
       <Form dataSet={dataSet}>
-        <TextField name="name" maxLength={MAX_LENGTH_STATUS} />
+        <TextField
+          name="name"
+          maxLength={MAX_LENGTH_STATUS}
+          onInput={(e) => {
+            // @ts-ignore
+            dataSet.current?.set('name', e.target.value);
+            dataSet.current?.getField('name')?.checkValidity();
+          }}
+        />
         <Select
           name="valueCode"
           optionsFilter={isProgram ? undefined : (record) => (isProgram ? true : record.get('valueCode') !== 'prepare')}
