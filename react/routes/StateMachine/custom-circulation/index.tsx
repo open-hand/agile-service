@@ -377,6 +377,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         return `设置${fieldName}为：${transformFieldValue(fieldSetting)}`;
       })).join('，');
     }
+    return null;
   };
 
   // @ts-ignore
@@ -471,7 +472,6 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
         <span style={{
           // @ts-ignore
           color: STATUS[record.get('type')],
-          fontWeight: 500,
         }}
         >
           {text}
