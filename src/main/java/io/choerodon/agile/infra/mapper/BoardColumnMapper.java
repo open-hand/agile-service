@@ -92,4 +92,7 @@ public interface BoardColumnMapper extends BaseMapper<BoardColumnDTO> {
                                             @Param("columnConstraint") String columnConstraint);
 
     List<BoardColumnStatusRelDTO> queryRelByColumnIds(@Param("columnIds") List<Long> columnIds);
+
+    List<BoardColumnStatusRelDTO> selectByStatusId(@Param("projectId") Long projectId, @Param("statusId") Long statusId);
+
 }

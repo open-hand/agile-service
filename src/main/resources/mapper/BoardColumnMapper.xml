@@ -342,4 +342,13 @@
             #{columnId}
         </foreach>
     </select>
+    <select id="selectByStatusId" resultType="io.choerodon.agile.infra.dto.BoardColumnStatusRelDTO">
+        SELECT
+            abcsr.id
+        FROM
+            agile_board_column_status_rel abcsr
+        WHERE
+            abcsr.project_id = #{projectId}
+        AND abcsr.status_id = #{statusId}
+    </select>
 </mapper>

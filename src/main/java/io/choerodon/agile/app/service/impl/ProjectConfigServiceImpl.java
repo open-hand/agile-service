@@ -17,8 +17,10 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hzero.core.base.BaseConstants;
+import org.hzero.mybatis.domian.Condition;
+import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,6 +101,10 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private StatusNoticeSettingService statusNoticeSettingService;
     @Autowired
     private StatusLinkageService statusLinkageService;
+    @Autowired
+    private StatusLinkageMapper statusLinkageMapper;
+    @Autowired
+    private BoardColumnMapper boardColumnMapper;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -476,30 +482,57 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     @Override
     public void deleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId,Long statusId) {
         Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
-        Assert.notNull(statusId, BaseConstants.ErrorCode.DATA_INVALID);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
         StatusMachineNodeDTO statusMachineNodeDTO = new StatusMachineNodeDTO();
         statusMachineNodeDTO.setOrganizationId(organizationId);
         statusMachineNodeDTO.setStateMachineId(stateMachineId);
-        // 校验当前node的状态有没有被项目下的issue使用
-        StatusMachineNodeDTO machineNodeDTO = statusMachineNodeMapper.selectByPrimaryKey(nodeId);
-        Boolean checkIssueUse = checkIssueUse(projectId,issueTypeId,machineNodeDTO.getStatusId());
-        if (Boolean.TRUE.equals(checkIssueUse)) {
-            // 将该问题类型下状态为当前状态的issue改为指定状态
-            updateIssueStatusByStatusId(projectId,issueTypeId,applyType,machineNodeDTO.getStatusId(),statusId, statusMachineNodeDTO);
-        }
+        StatusMachineNodeDTO currentNode = checkStatusLink(projectId, issueTypeId, applyType, nodeId,
+                statusId, statusMachineNodeDTO);
+        Long currentStatusId = currentNode.getStatusId();
+        Assert.notNull(currentStatusId, BaseConstants.ErrorCode.DATA_INVALID);
         // 删除当前node的转换
         statusMachineTransformMapper.deleteByStateMachineIdAndNodeId(organizationId,stateMachineId,nodeId);
         // 删除node
         statusMachineNodeDTO.setStatusId(null);
         statusMachineNodeDTO.setId(nodeId);
         statusMachineNodeMapper.delete(statusMachineNodeDTO);
-        // 删除issue_status关联
-        IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
-        issueStatusDTO.setProjectId(projectId);
-        issueStatusDTO.setStatusId(statusId);
-        issueStatusMapper.delete(issueStatusDTO);
+        // 检测状态是否与其他node有关联
+        StatusMachineNodeDTO exist = new StatusMachineNodeDTO();
+        exist.setStatusId(currentStatusId);
+        exist.setOrganizationId(organizationId);
+        if (CollectionUtils.isEmpty(statusMachineNodeMapper.select(exist))){
+            // 无关联则删除与issue_status关联
+            IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
+            issueStatusDTO.setProjectId(projectId);
+            issueStatusDTO.setStatusId(currentStatusId);
+            issueStatusMapper.delete(issueStatusDTO);
+        }
+    }
+
+    private StatusMachineNodeDTO checkStatusLink(Long projectId, Long issueTypeId, String applyType, Long nodeId,Long statusId,
+                            StatusMachineNodeDTO statusMachineNodeDTO) {
+        // 校验当前node的状态有没有被项目下的issue使用
+        StatusMachineNodeDTO machineNodeDTO = statusMachineNodeMapper.selectByPrimaryKey(nodeId);
+        Long currentStatusId = machineNodeDTO.getStatusId();
+        Boolean checkIssueUse = checkIssueUse(projectId, issueTypeId,machineNodeDTO.getStatusId());
+        if (Boolean.TRUE.equals(checkIssueUse)) {
+            // 将该问题类型下状态为当前状态的issue改为指定状态
+            updateIssueStatusByStatusId(projectId, issueTypeId, applyType, currentStatusId, statusId, statusMachineNodeDTO);
+        }
+        // 校验当前node的状态是否与其他状态有联动
+        List<StatusLinkageDTO> linkExistList =
+                statusLinkageMapper.selectByCondition(Condition.builder(StatusLinkageDTO.class)
+                .andWhere(Sqls.custom().orEqualTo("statusId", currentStatusId).orEqualTo("parentIssueStatusSetting", currentStatusId)).build());
+        if (CollectionUtils.isNotEmpty(linkExistList)){
+            throw new CommonException("error.status.status_link_exist");
+        }
+        // 校验当前状态是否存在于看版列
+        List<BoardColumnStatusRelDTO> boardColExistList = boardColumnMapper.selectByStatusId(projectId, currentStatusId);
+        if (CollectionUtils.isNotEmpty(boardColExistList)){
+            throw new CommonException("error.status.board_column_exist");
+        }
+        return machineNodeDTO;
     }
 
     @Override
