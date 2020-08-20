@@ -65,7 +65,7 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
         list.forEach(item -> statusNoticeSettingVO.addUserWithNotice(item.getUserType(), item.getUserId()));
         statusNoticeSettingVO.setNoticeTypeList(Stream.of(StringUtils.split(list.stream().map(StatusNoticeSettingDTO::getNoticeType)
                 .findFirst().orElse(""), BaseConstants.Symbol.COMMA)).collect(Collectors.toList()));
-        statusNoticeSettingAssembler.addUserInfo(statusNoticeSettingVO, schemeCode);
+        statusNoticeSettingAssembler.addUserInfo(statusNoticeSettingVO, schemeCode, issueTypeId);
         return statusNoticeSettingVO;
     }
 

@@ -18,11 +18,13 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections.CollectionUtils;
+import org.hzero.core.base.BaseConstants;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -401,11 +403,14 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         StatusCheckVO statusCheckVO = statusService.checkName(organizationId, statusVO.getName());
-        if (Boolean.TRUE.equals(statusCheckVO.getStatusExist())) {
-            throw new CommonException("error.status.name.exist");
-        }
         // 创建状态
-        StatusVO status = statusService.create(organizationId, statusVO);
+        StatusVO status;
+        if (statusCheckVO.getStatusExist()) {
+            StatusDTO statusInDb = statusMapper.queryById(organizationId, statusCheckVO.getId());
+            status = modelMapper.map(statusInDb, StatusVO.class);
+        }else {
+            status = statusService.create(organizationId, statusVO);
+        }
         // 关联状态机
         if (!CollectionUtils.isEmpty(issueTypeIds)) {
             for (Long issueTypeId:issueTypeIds) {
@@ -470,6 +475,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 
     @Override
     public void deleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId,Long statusId) {
+        Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.notNull(statusId, BaseConstants.ErrorCode.DATA_INVALID);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
         StatusMachineNodeDTO statusMachineNodeDTO = new StatusMachineNodeDTO();
@@ -488,6 +495,11 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         statusMachineNodeDTO.setStatusId(null);
         statusMachineNodeDTO.setId(nodeId);
         statusMachineNodeMapper.delete(statusMachineNodeDTO);
+        // 删除issue_status关联
+        IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
+        issueStatusDTO.setProjectId(projectId);
+        issueStatusDTO.setStatusId(statusId);
+        issueStatusMapper.delete(issueStatusDTO);
     }
 
     @Override

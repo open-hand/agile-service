@@ -33,16 +33,16 @@ public class StatusNoticeSettingAssembler {
         Map<Long, List<StatusNoticeSettingDTO>> group =
                 list.stream().collect(Collectors.groupingBy(StatusNoticeSettingDTO::getStatusId));
         return group.entrySet().stream().map(entry -> {
-            StatusNoticeSettingVO settingVO = new StatusNoticeSettingVO(issueTypeId, projectId, entry.getKey());
+            StatusNoticeSettingVO settingVO = new StatusNoticeSettingVO(projectId, issueTypeId, entry.getKey());
             entry.getValue().forEach(item -> settingVO.addUserWithNotice(item.getUserType(), item.getUserId()));
             settingVO.setNoticeTypeList(Stream.of(StringUtils.split(entry.getValue().stream().map(StatusNoticeSettingDTO::getNoticeType)
                     .findFirst().orElse(""), BaseConstants.Symbol.COMMA)).collect(Collectors.toList()));
-            this.addUserInfo(settingVO, schemeCode);
+            this.addUserInfo(settingVO, schemeCode, issueTypeId);
             return settingVO;
         }).collect(Collectors.toList());
     }
 
-    public void addUserInfo(StatusNoticeSettingVO statusNoticeSettingVO, String schemeCode){
+    public void addUserInfo(StatusNoticeSettingVO statusNoticeSettingVO, String schemeCode, Long issueTypeId){
         if (CollectionUtils.isNotEmpty(statusNoticeSettingVO.getUserIdList())){
             List<UserDTO> userDTOList = baseFeignClient.listUsersByIds(statusNoticeSettingVO.getUserIdList().toArray(new Long[0]), true).getBody();
             statusNoticeSettingVO.setUserList(userDTOList);
@@ -53,7 +53,7 @@ public class StatusNoticeSettingAssembler {
             statusNoticeSettingVO.getUserTypeList().removeAll(userTypeList);
             List<ObjectSchemeFieldVO> objectSchemeFieldDTOS =
                     objectSchemeFieldService.selectMemberList(ConvertUtil.getOrganizationId(statusNoticeSettingVO.getProjectId()),
-                    statusNoticeSettingVO.getProjectId(),  schemeCode, null, new ArrayList<>(userTypeList));
+                    statusNoticeSettingVO.getProjectId(),  schemeCode, issueTypeId, new ArrayList<>(userTypeList));
             statusNoticeSettingVO.setMemberList(objectSchemeFieldDTOS);
         }
     }
