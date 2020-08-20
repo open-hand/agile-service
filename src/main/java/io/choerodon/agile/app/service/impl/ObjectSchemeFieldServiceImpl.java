@@ -237,18 +237,23 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private List<IssueTypeDTO> convertContextToIssueTypes(String context, Long organizationId) {
         List<IssueTypeDTO> result = new ArrayList<>();
         Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
+        List<String> fixDataIssueTypes = Arrays.asList(ObjectSchemeFieldContext.FIX_DATA_ISSUE_TYPES);
         String[] contextArray = context.split(",");
         if (ObjectSchemeFieldContext.isGlobal(contextArray)) {
             for (Map.Entry<String, Long> entry : issueTypeMap.entrySet()) {
-                IssueTypeDTO dto = new IssueTypeDTO();
-                dto.setId(entry.getValue());
-                dto.setTypeCode(entry.getKey());
-                result.add(dto);
+                String issueType = entry.getKey();
+                if (fixDataIssueTypes.contains(issueType)) {
+                    IssueTypeDTO dto = new IssueTypeDTO();
+                    dto.setId(entry.getValue());
+                    dto.setTypeCode(entry.getKey());
+                    result.add(dto);
+                }
             }
         } else {
             for (String ctx : contextArray) {
                 Long id = issueTypeMap.get(ctx);
-                if (ObjectUtils.isEmpty(id)) {
+                if (ObjectUtils.isEmpty(id)
+                        || !fixDataIssueTypes.contains(ctx)) {
                     continue;
                 }
                 IssueTypeDTO dto = new IssueTypeDTO();
