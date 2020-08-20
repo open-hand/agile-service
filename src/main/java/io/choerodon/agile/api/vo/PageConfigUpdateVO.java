@@ -23,15 +23,14 @@ public class PageConfigUpdateVO {
 
     private List<ObjectSchemeFieldCreateVO> createdFields;
 
-    @Encrypt
-    private Set<Long> addIds;
+    private List<PageConfigFieldVO> addFields;
 
-    public Set<Long> getAddIds() {
-        return addIds;
+    public List<PageConfigFieldVO> getAddFields() {
+        return addFields;
     }
 
-    public void setAddIds(Set<Long> addIds) {
-        this.addIds = addIds;
+    public void setAddFields(List<PageConfigFieldVO> addFields) {
+        this.addFields = addFields;
     }
 
     public List<ObjectSchemeFieldCreateVO> getCreatedFields() {
