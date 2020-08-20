@@ -46,18 +46,20 @@ const Linkage = ({
 
   useEffect(() => {
     const { current } = linkageDataSet;
-    setLoading(true);
-    statusTransformApi.getLinkage(selectedType, record.get('id')).then((res: IParentIssueStatusSetting[]) => {
-      setLoading(false);
-      current?.set('story', find(res, { parentIssueTypeCode: 'story' })?.parentIssueStatusSetting);
-      current?.set('task', find(res, { parentIssueTypeCode: 'task' })?.parentIssueStatusSetting);
-      if (selectedTypeCode === 'sub_task') {
-        current?.set('bug', find(res, { parentIssueTypeCode: 'bug' })?.parentIssueStatusSetting);
-      }
-    }).catch(() => {
-      setLoading(false);
-    });
-  }, []);
+    if (selectedTypeCode) { // 有selectedTypeCode的时候再请求，防止请求两边，浪费一次没有意义的请求
+      setLoading(true);
+      statusTransformApi.getLinkage(selectedType, record.get('id')).then((res: IParentIssueStatusSetting[]) => {
+        setLoading(false);
+        current?.set('story', find(res, { parentIssueTypeCode: 'story' })?.parentIssueStatusSetting);
+        current?.set('task', find(res, { parentIssueTypeCode: 'task' })?.parentIssueStatusSetting);
+        if (selectedTypeCode === 'sub_task') {
+          current?.set('bug', find(res, { parentIssueTypeCode: 'bug' })?.parentIssueStatusSetting);
+        }
+      }).catch(() => {
+        setLoading(false);
+      });
+    }
+  }, [linkageDataSet, record, selectedType, selectedTypeCode]);
 
   useEffect(() => {
     const handleOk = async () => {
