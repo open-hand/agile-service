@@ -1,6 +1,6 @@
 import { observable, action, computed } from 'mobx';
 
-const hiddenFields = ['issueType', 'summary', 'description', 'remainingTime'];
+const hiddenFields = ['issueType', 'summary', 'description', 'remainingTime', 'storyPoints'];
 class EditIssueStore {
   // issue
   @observable issue = {};
