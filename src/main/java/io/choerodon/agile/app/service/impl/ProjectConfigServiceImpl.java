@@ -514,6 +514,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                             StatusMachineNodeDTO statusMachineNodeDTO) {
         // 校验当前node的状态有没有被项目下的issue使用
         StatusMachineNodeDTO machineNodeDTO = statusMachineNodeMapper.selectByPrimaryKey(nodeId);
+        Assert.notNull(machineNodeDTO, BaseConstants.ErrorCode.DATA_NOT_EXISTS);
         Long currentStatusId = machineNodeDTO.getStatusId();
         Boolean checkIssueUse = checkIssueUse(projectId, issueTypeId,machineNodeDTO.getStatusId());
         if (Boolean.TRUE.equals(checkIssueUse)) {
