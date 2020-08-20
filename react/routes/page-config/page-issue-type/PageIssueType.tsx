@@ -24,8 +24,17 @@ import { IFieldPostDataProps } from '../components/create-field/CreateField';
 interface IssueOption {
   value: string,
   text: string,
+  type: 'organization' | 'common',
 }
-
+const issueTypeOptions: Array<IssueOption> = [
+  { value: 'issue_epic', text: '史诗', type: 'common' },
+  { value: 'feature', text: '特性', type: 'organization' },
+  { value: 'story', text: '故事', type: 'common' },
+  { value: 'task', text: '任务', type: 'common' },
+  { value: 'sub_task', text: '子任务', type: 'common' },
+  { value: 'bug', text: '缺陷', type: 'common' },
+  { value: 'backlog', text: '需求', type: 'common' },
+];
 const preCls = 'c7n-agile-page-config-page-issue-type';
 function PageIssueType() {
   const {
@@ -82,9 +91,13 @@ function PageIssueType() {
   useEffect(() => {
     pageIssueTypeStore.setLoading(true);
     pageIssueTypeStore.loadAllField();
-    // const showOptions = issueTypeOptions.filter((item) => item.type === 'common' || );
+    const currentMenuType = getMenuType();
+    const showOptions = issueTypeOptions.filter((item) => item.type === 'common' || currentMenuType === 'organization');
     pageConfigApi.loadAvailableIssueType().then((res) => {
-      const showOptions = res.map((item) => ({ value: item.typeCode, text: item.name }));
+      // const showOptions = res.map((item) => ({ value: item.typeCode, text: item.name }));
+      if (!res.some((item) => item.typeCode === 'backlog')) {
+        showOptions.pop();
+      }
       pageIssueTypeStore.init(showOptions[0].value as PageConfigIssueType);
       setSwitchOption(showOptions);
     });

@@ -41,6 +41,10 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
     const userOptionDataSet = new DataSet(UserOptionDataSet({
       type, id, defaultUserId, isEdit,
     }));
+    const filterContext = ['global'];
+    if (type === 'project') {
+      filterContext.push('feature');
+    }
     const formDataSet = new DataSet(FormDataSet({
       formatMessage,
       type,
@@ -53,6 +57,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
       localCheckCode,
       localCheckName,
       defaultContext,
+      filterContext,
     }));
 
     useEffect(() => {

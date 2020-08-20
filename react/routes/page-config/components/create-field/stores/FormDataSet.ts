@@ -18,10 +18,11 @@ interface Props {
   oldRecord?: Record,
   userOptionDataSet: DataSet,
   defaultContext?: string[],
+  filterContext?: string[], // 过滤的问题类型
   localCheckCode?: (code: string) => Promise<boolean> | boolean,
   localCheckName?: (name: string) => Promise<boolean> | boolean,
 }
-function getLookupConfig(code: string) {
+function getLookupConfig(code: string, filterArr?: string[]) {
   return {
     url: `/agile/v1/lookup_values/${code}`,
     method: 'get',
@@ -33,12 +34,17 @@ function getLookupConfig(code: string) {
         const data = JSON.parse(response);
         if (data && data.lookupValues) {
           if (code === 'object_scheme_field_context') {
-            remove(data.lookupValues, (item: any) => item.valueCode === 'global');
+            const waitRemove = filterArr ? [...filterArr, 'global'] : ['global'];
+            remove(data.lookupValues, (item: any) => waitRemove.some((w) => w === item.valueCode));
           }
           return data.lookupValues;
         }
         return data;
       } catch (error) {
+        if (code === 'object_scheme_field_context') {
+          const waitRemove = filterArr ? [...filterArr, 'global'] : ['global'];
+          remove(response, (item: any) => waitRemove.some((w) => w === item.valueCode));
+        }
         return response;
       }
     },
@@ -47,7 +53,7 @@ function getLookupConfig(code: string) {
 const dateList = ['time', 'datetime', 'date'];
 
 const FormDataSet = ({
-  formatMessage, type, store, schemeCode, id, isEdit,
+  formatMessage, type, store, schemeCode, id, isEdit, filterContext,
   oldRecord, userOptionDataSet, localCheckCode, localCheckName, defaultContext,
 }: Props): DataSetProps => {
   const regex = /^[0-9a-zA-Z_]+$/;
@@ -151,7 +157,7 @@ const FormDataSet = ({
         valueField: 'valueCode',
         textField: 'name',
         defaultValue: defaultContext,
-        lookupAxiosConfig: getLookupConfig('object_scheme_field_context'),
+        lookupAxiosConfig: getLookupConfig('object_scheme_field_context', filterContext),
       },
       {
         name: 'defaultValue',
