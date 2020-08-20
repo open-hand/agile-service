@@ -9,11 +9,11 @@ import { Tag } from 'choerodon-ui';
 import {
   TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
-
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { pageConfigApi } from '@/api/PageConfig';
+import { getMenuType } from '@/utils/common';
 import Store from './stores';
 import TableDropMenu from '../../../common/TableDropMenu';
 import CreateField from '../components/create-field';
@@ -126,7 +126,7 @@ function ObjectScheme() {
     const isOpen: boolean = !(localStorage.getItem('agile.page.field.setting.required.prompt') === 'false');
     if (isOpen) {
       const promptText = `确定要将【${fieldName}】设置为${!required ? '不' : ''}必填项吗？
-      设置后组织下所有项目中该字段都将为${!required ? '不' : ''}必填，这将会影响【快速创建】问题的使用。`;
+      设置后${getMenuType() !== 'project' ? '组织下所有' : ''}项目中该字段都将为${!required ? '不' : ''}必填，这将会影响【快速创建】问题的使用。`;
       Modal.open({
         key: Modal.key(),
         className: `${prefixCls}-detail-prompt`,
