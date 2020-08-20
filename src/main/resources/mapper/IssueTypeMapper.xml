@@ -119,4 +119,10 @@
         </foreach>
     </select>
 
+    <select id="selectByTypeCode" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
+        select *
+        from fd_issue_type
+        where type_code = #{typeCode}
+    </select>
+
 </mapper>
