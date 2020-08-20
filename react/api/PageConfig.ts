@@ -174,7 +174,6 @@ class PageConfigApi {
    * 查询字段的rank
    */
   loadRankValue(data: {
-    before: boolean, issueType: PageConfigIssueType,
     previousRank: string | null, nextRank: string | null,
   }) {
     return axios({

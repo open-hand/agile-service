@@ -47,11 +47,18 @@ const SortTable: React.FC = () => {
     const sourceRecord = sortTableDataSet.data[source.index];
     const destinationRecord = sortTableDataSet.data[destination.index];
     const rankObj = {
-      before: false,
-      issueType: pageIssueTypeStore.currentIssueType,
+      // before: false,
+      // issueType: pageIssueTypeStore.currentIssueType,
       previousRank: null,
       nextRank: null,
     };
+    if (destination.index > source.index) {
+      rankObj.previousRank = destinationRecord.get('rank');
+      rankObj.nextRank = sortTableDataSet.length - 1 !== destination.index ? sortTableDataSet.data[destination.index + 1].get('rank') : null;
+    } else {
+      rankObj.previousRank = destination.index !== 0 ? sortTableDataSet.data[destination.index - 1].get('rank') : null;
+      rankObj.nextRank = destinationRecord.get('rank');
+    }
     if (destination.index > source.index) {
       rankObj.previousRank = destinationRecord.get('rank');
     } else {

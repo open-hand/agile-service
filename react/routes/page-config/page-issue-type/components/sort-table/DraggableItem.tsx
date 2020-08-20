@@ -6,13 +6,14 @@ import {
 import classnames from 'classnames';
 import { Menu, Modal } from 'choerodon-ui';
 import {
-  Button, IconPicker, Icon, Output, CheckBox, Tooltip, DataSet,
+  Button, IconPicker, Icon, Output, Tooltip, DataSet,
 } from 'choerodon-ui/pro/lib';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
 import moment from 'moment';
 import TableDropMenu from '@/common/TableDropMenu';
+import CheckBox from '../../../components/check-box';
 import { usePageIssueTypeStore } from '../../stores';
 import { PageIssueTypeStoreStatusCode } from '../../stores/PageIssueTypeStore';
 import { useSortTableContext } from './stores';
@@ -72,8 +73,8 @@ const DraggableItem: React.FC<Props> = ({
       <CheckBox
         disabled={isDragDisabled || editDisabled}
         checked={record?.get(name)}
-        // record={record}
-        // name={name!}
+        record={record}
+        name={name!}
         // value={value}
         onChange={(val) => {
           record?.set(name as String, val);
