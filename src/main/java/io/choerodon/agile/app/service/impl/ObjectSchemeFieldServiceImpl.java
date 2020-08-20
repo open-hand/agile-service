@@ -193,7 +193,14 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     @Override
     public void createSystemFieldIfNotExisted(Long organizationId) {
-        if (objectSchemeFieldExtendMapper.selectExtendField(null,organizationId, null, null).isEmpty()) {
+        List<ObjectSchemeFieldExtendDTO> result =
+                objectSchemeFieldExtendMapper
+                        .selectExtendField(
+                                Arrays.asList(ObjectSchemeFieldContext.FIX_DATA_ISSUE_TYPES),
+                                organizationId,
+                                null,
+                                null);
+        if (result.isEmpty()) {
             ObjectSchemeFieldDTO dto = new ObjectSchemeFieldDTO();
             dto.setSystem(true);
             List<ObjectSchemeFieldDTO> systemFields = objectSchemeFieldMapper.select(dto);
@@ -297,7 +304,18 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     @Override
-    public IssueTypeFieldVO queryDescriptionTemplate(Long projectId, Long issueTypeId) {
+    public IssueTypeFieldVO queryDescriptionTemplate(Long projectId,
+                                                     String issueType,
+                                                     Long organizationId) {
+        List<IssueTypeVO> issueTypes =
+                issueTypeService.queryByOrgId(organizationId)
+                        .stream()
+                        .filter(i -> i.getTypeCode().equals(issueType))
+                        .collect(Collectors.toList());
+        if (ObjectUtils.isEmpty(issueTypes)) {
+            throw new CommonException("error.illegal.issueType");
+        }
+        Long issueTypeId = issueTypes.get(0).getId();
         IssueTypeFieldDTO dto = new IssueTypeFieldDTO();
         dto.setIssueTypeId(issueTypeId);
         dto.setProjectId(projectId);
@@ -526,7 +544,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
         List<ObjectSchemeFieldExtendDTO> existedList;
         if (ObjectUtils.isEmpty(projectId)) {
-            existedList = objectSchemeFieldExtendMapper.selectExtendField(issueType, organizationId, fieldId, null);
+            existedList = objectSchemeFieldExtendMapper.selectExtendField(Arrays.asList(issueType), organizationId, fieldId, null);
         } else {
             dto.setProjectId(projectId);
             existedList = objectSchemeFieldExtendMapper.select(dto);
@@ -897,7 +915,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 }
             } else {
                 List<ObjectSchemeFieldExtendDTO> result =
-                        objectSchemeFieldExtendMapper.selectExtendField(issueType, organizationId, fieldId, null);
+                        objectSchemeFieldExtendMapper.selectExtendField(Arrays.asList(issueType), organizationId, fieldId, null);
                 if (result.isEmpty()) {
                     throw new CommonException("error.page.config.field.not.existed");
                 } else {
