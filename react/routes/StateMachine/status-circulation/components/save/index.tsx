@@ -8,10 +8,6 @@ import { useStatusCirculationContext } from '../..';
 const Save: React.FC = () => {
   const { store } = useStatusCirculationContext();
   const { selectedType } = useStateMachineContext();
-  const { hasAction } = store;
-  if (!hasAction) {
-    return null;
-  }
   return (
     <div style={{ height: 50, display: 'flex', alignItems: 'center' }}>
       <Button
