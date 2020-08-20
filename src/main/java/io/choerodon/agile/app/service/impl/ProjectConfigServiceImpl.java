@@ -372,6 +372,27 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         stateMachineNodeService.baseUpdate(olderDefaultNode);
         nodeDTO.setType(NodeType.INIT);
         stateMachineNodeService.baseUpdate(nodeDTO);
+        // 修改初始转换
+        changeInitTransform(organizationId, stateMachineId, olderDefaultNode.getId(), nodeDTO.getId());
+    }
+
+    private void changeInitTransform(Long organizationId, Long stateMachineId, Long oldNodeId, Long newNodeId) {
+        if (Objects.equals(oldNodeId, newNodeId)) {
+            return;
+        }
+        StatusMachineTransformDTO initTransform = new StatusMachineTransformDTO();
+        initTransform.setStateMachineId(stateMachineId);
+        initTransform.setEndNodeId(oldNodeId);
+        initTransform.setType("transform_init");
+        initTransform.setOrganizationId(organizationId);
+        StatusMachineTransformDTO oldTransform = statusMachineTransformMapper.selectOne(initTransform);
+        if (oldTransform == null) {
+            throw new CommonException("error.statusMachine.initTransform.notFound");
+        }
+        oldTransform.setEndNodeId(newNodeId);
+        if (statusMachineTransformMapper.updateByPrimaryKeySelective(oldTransform) != 1) {
+            throw new CommonException("error.initTransform.update");
+        }
     }
 
     @Override
