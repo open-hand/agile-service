@@ -262,18 +262,22 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             //获取组织中所有状态
             List<StatusVO> statusVOS = statusService.queryAllStatus(organizationId);
             Map<Long, StatusVO> statusMap = statusVOS.stream().collect(Collectors.toMap(StatusVO::getId, x -> x));
-            transformVOS.forEach(transformVO -> {
+            // 查询哪些状态能够流转
+            List<Long> statusIds = transformVOS.stream().map(TransformVO::getEndStatusId).collect(Collectors.toList());
+            List<Long> canTransformStatus = statusTransferSettingService.checkStatusTransform(projectId,issueTypeId, statusIds);
+            List<TransformVO> collect = transformVOS.stream().filter(v -> canTransformStatus.contains(v.getEndStatusId())).collect(Collectors.toList());
+            collect.forEach(transformVO -> {
                 StatusVO statusVO = statusMap.get(transformVO.getEndStatusId());
                 transformVO.setStatusVO(statusVO);
             });
             //如果转换中不包含当前状态，则添加一个self
-            if (transformVOS.stream().noneMatch(transformVO -> currentStatusId.equals(transformVO.getEndStatusId()))) {
+            if (collect.stream().noneMatch(transformVO -> currentStatusId.equals(transformVO.getEndStatusId()))) {
                 TransformVO self = new TransformVO();
                 self.setEndStatusId(currentStatusId);
                 self.setStatusVO(statusMap.get(currentStatusId));
                 transformVOS.add(self);
             }
-            return transformVOS;
+            return collect;
         } else {
             throw new CommonException("error.queryIssueTypesByProjectId.stateMachineSchemeId.null");
         }
@@ -319,7 +323,15 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         for (IssueTypeDTO issueType : issueTypes) {
             Long stateMachineId = idMap.get(issueType.getId());
             if (stateMachineId != null) {
-                resultMap.put(issueType.getId(), statusMap.get(stateMachineId));
+                Map<Long, List<TransformVO>> statusTransferMap = statusMap.get(stateMachineId);
+                Set<Long> allStatus = statusTransferMap.keySet();
+                // 查询能转换的状态
+                List<Long> canTransferStatus = statusTransferSettingService.checkStatusTransform(projectId, issueType.getId(), new ArrayList<>(allStatus));
+                // 过滤掉不能转换的状态
+                Map<Long, List<TransformVO>> transferMap = new HashMap<>();
+                statusTransferMap.entrySet().stream().forEach(entry ->
+                        transferMap.put(entry.getKey(),entry.getValue().stream().filter(v -> canTransferStatus.contains(v.getEndStatusId())).collect(Collectors.toList())));
+                resultMap.put(issueType.getId(),transferMap);
             }
         }
         return resultMap;
