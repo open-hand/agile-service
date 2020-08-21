@@ -94,6 +94,8 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     private StatusTransferSettingService statusTransferSettingService;
     @Autowired
     private InstanceCache instanceCache;
+    @Autowired
+    private StatusNoticeSettingService statusNoticeSettingService;
 
     private void insertRank(Long projectId, Long issueId, String type, RankVO rankVO) {
         List<RankDTO> rankDTOList = new ArrayList<>();
@@ -247,6 +249,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (!executeResult.getSuccess()) {
             throw new CommonException("error.stateMachine.executeTransform", executeResult.getException());
         }
+        statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
         return executeResult;
     }
 
