@@ -39,15 +39,11 @@ function Switch({
     if (value === 0 && newOptions.length > 0) {
       setValue(newOptions[0].value);
     }
-    // eslint-disable-next-line no-param-reassign
-    // propsOption = options;
   }, [propsOption]);
   useEffect(() => {
     initOptions();
   }, [propsOption]);
-  // useEffect(() => {
-  //   initOptions();
-  // }, [initOptions]);
+
   useEffect(() => {
     if (value !== propsValue) {
       setValue(propsValue);

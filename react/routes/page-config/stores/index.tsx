@@ -5,28 +5,21 @@ import IsProgramContext from '@/hooks/useIsProgrom';
 import { getApplyType } from '@/utils/common';
 
 interface Context {
+  objectDetailItem: { schemeCode: string },
 
 }
 const PageConfigContext = createContext({} as Context);
 export function usePageConfigContext() {
   return useContext(PageConfigContext);
 }
-// @ts-ignore
-export const PageConfigProvider: React.FC<Context> = injectIntl(inject('AppState')(
-  (props) => {
+const PageConfigProvider = injectIntl(inject('AppState')(
+  (props:any) => {
     const [reLoad, setReLoad] = useState(false);
-    const [pageDetailItem, setPageDetailItem] = useState({});
-    const [pageDetailVisible, setPageDetailVisible] = useState(false);
     const [objectDetailItem, setObjectDetailItem] = useState({
       schemeCode: 'agile_issue',
     });
     const value = {
-      // @ts-ignore
       ...props,
-      pageDetailItem,
-      setPageDetailItem,
-      pageDetailVisible,
-      setPageDetailVisible,
       objectDetailItem,
       setObjectDetailItem,
       reLoad,
@@ -35,10 +28,7 @@ export const PageConfigProvider: React.FC<Context> = injectIntl(inject('AppState
     return (
       <IsProgramContext.Provider value={{ isProgram: getApplyType() === 'program' }}>
         <PageConfigContext.Provider value={value}>
-
-          {// @ts-ignore
-            props.children
-          }
+          {props.children}
         </PageConfigContext.Provider>
       </IsProgramContext.Provider>
     );

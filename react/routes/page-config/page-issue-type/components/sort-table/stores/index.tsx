@@ -1,9 +1,6 @@
 import React, {
   createContext, useState, useContext, useMemo,
 } from 'react';
-import { injectIntl, InjectedIntl } from 'react-intl';
-import { inject } from 'mobx-react';
-import { DataSet } from 'choerodon-ui/pro/lib';
 import { observer } from 'mobx-react-lite';
 import { IFiledProps } from '@/api';
 
@@ -11,6 +8,7 @@ interface Context {
   disabled: boolean | undefined,
   showSplitLine?: boolean,
   onDelete?: (data: IFiledProps) => void,
+  prefixCls: 'c7n-page-issue-detail',
 }
 
 const SortTableContext = createContext({} as Context);
@@ -23,6 +21,7 @@ const SortTableProvider = observer(
   (props: any) => {
     const value = {
       ...props,
+      prefixCls: 'c7n-page-issue-detail',
     };
     return (
       <SortTableContext.Provider value={value}>

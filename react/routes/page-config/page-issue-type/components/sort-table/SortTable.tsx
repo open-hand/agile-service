@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-  DropResult, ResponderProvided, DragDropContext, DragStart, DragUpdate,
+  DropResult, ResponderProvided, DragDropContext, DragStart,
 } from 'react-beautiful-dnd';
 import { IFiledProps, pageConfigApi } from '@/api';
 import classnames from 'classnames';
@@ -27,10 +27,9 @@ const columns = [
 
 ];
 
-const prefixCls = 'c7n-page-issue-detail';
 const SortTable: React.FC = () => {
-  const { sortTableDataSet, pageIssueTypeStore } = usePageIssueTypeStore();
-  const { showSplitLine } = useSortTableContext();
+  const { sortTableDataSet } = usePageIssueTypeStore();
+  const { showSplitLine, prefixCls } = useSortTableContext();
   const type = showSplitLine ? 'organization' : 'project';
   const onDragStart = (initial: DragStart, provided: ResponderProvided) => {
 
@@ -53,16 +52,11 @@ const SortTable: React.FC = () => {
       nextRank: null,
     };
     if (destination.index > source.index) {
-      rankObj.previousRank = destinationRecord.get('rank');
-      rankObj.nextRank = sortTableDataSet.length - 1 !== destination.index ? sortTableDataSet.data[destination.index + 1].get('rank') : null;
-    } else {
-      rankObj.previousRank = destination.index !== 0 ? sortTableDataSet.data[destination.index - 1].get('rank') : null;
       rankObj.nextRank = destinationRecord.get('rank');
-    }
-    if (destination.index > source.index) {
-      rankObj.previousRank = destinationRecord.get('rank');
+      rankObj.previousRank = sortTableDataSet.length - 1 !== destination.index ? sortTableDataSet.data[destination.index + 1].get('rank') : null;
     } else {
-      rankObj.nextRank = destinationRecord.get('rank');
+      rankObj.nextRank = destination.index !== 0 ? sortTableDataSet.data[destination.index - 1].get('rank') : null;
+      rankObj.previousRank = destinationRecord.get('rank');
     }
     // 在异步函数中调用 防止不修改record
     // const outSetRank = (newRank: string) => sourceRecord.set('rank', newRank);
