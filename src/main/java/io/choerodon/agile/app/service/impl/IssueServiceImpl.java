@@ -171,8 +171,7 @@ public class IssueServiceImpl implements IssueService {
     private ProjectUtil projectUtil;
     @Autowired
     private BoardAssembler boardAssembler;
-    @Autowired
-    private StatusNoticeSettingService statusNoticeSettingService;
+
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -374,7 +373,6 @@ public class IssueServiceImpl implements IssueService {
         IssueVO result = issueAssembler.issueDetailDTOToVO(issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
         sendMsgUtil.sendMsgByIssueAssignee(projectId, fieldList, result);
         sendMsgUtil.sendMsgByIssueComplete(projectId, fieldList, result);
-        statusNoticeSettingService.noticeByChangeStatus(projectId, issueId);
         return result;
     }
 
