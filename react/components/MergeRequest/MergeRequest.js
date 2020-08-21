@@ -114,7 +114,7 @@ class MergeRequest extends Component {
           >
             <UserHead
               user={{
-                id: authorId,
+                id: record.assigneeId,
                 realName: record.assigneeName,
                 avatar: record.imageUrl,
               }}
