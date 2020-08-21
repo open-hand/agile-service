@@ -98,7 +98,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                   ObjectSchemeFieldDTO field,
                                   List<IssueTypeVO> issueTypes,
                                   String issueTypeForRank) {
-        String minRank = null;
         Long fieldId = field.getId();
         String rank = field.getRank();
         for (IssueTypeVO issueType : issueTypes) {
@@ -118,7 +117,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                         && !StringUtils.isEmpty(rank)) {
                     dto.setRank(rank);
                 } else {
-                    minRank = getMinRank(organizationId, projectId, type, minRank);
+                    String minRank = getMinRank(organizationId, projectId, type, null);
                     dto.setRank(minRank);
                 }
                 objectSchemeFieldExtendMapper.insert(dto);
@@ -126,9 +125,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         }
     }
 
-    private String getMinRank(Long organizationId, Long projectId, String ctx, String minRank) {
+    private String getMinRank(Long organizationId, Long projectId, String issueType, String minRank) {
         if (ObjectUtils.isEmpty(minRank)) {
-            String rank = objectSchemeFieldExtendMapper.selectMinRank(organizationId, projectId, ctx);
+            String rank = objectSchemeFieldExtendMapper.selectMinRank(organizationId, projectId, issueType);
             if (ObjectUtils.isEmpty(rank)) {
                 minRank =  RankUtil.mid();
             } else {
@@ -818,7 +817,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         List<PageConfigFieldVO> pageConfigFields = objectSchemeFieldExtendMapper.listConfigs(organizationId, projectId, issueType);
         result.setFields(pageConfigFields);
         //处理默认值
-        processDefaultValue(pageConfigFields);
+        processDefaultValue(pageConfigFields, organizationId);
         //处理字段是否可被编辑
         processFieldEdited(issueType, pageConfigFields);
         if (!ObjectUtils.isEmpty(projectId)) {
@@ -851,20 +850,34 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         }
     }
 
-    private void processDefaultValue(List<PageConfigFieldVO> pageConfigFields) {
+    private void processDefaultValue(List<PageConfigFieldVO> pageConfigFields,
+                                     Long organizationId) {
         pageConfigFields.forEach(p -> {
             String defaultValue = p.getDefaultValue();
-            ObjectSchemeFieldDetailVO example = new ObjectSchemeFieldDetailVO();
-            example.setDefaultValue(defaultValue);
-            example.setFieldType(p.getFieldType());
-            FieldValueUtil.handleDefaultValue(example);
-            defaultValue = example.getDefaultValue();
-            Object object = example.getDefaultValueObj();
-            if (!ObjectUtils.isEmpty(object)) {
-                UserDTO user = (UserDTO)object;
-                defaultValue = user.getRealName();
+            Long fieldId = p.getFieldId();
+            boolean dealWithOptions = false;
+            if (!ObjectUtils.isEmpty(defaultValue)) {
+                List<FieldOptionVO> fieldOptions = fieldOptionService.queryByFieldId(organizationId, fieldId);
+                for (FieldOptionVO opt: fieldOptions) {
+                    if (Objects.equals(defaultValue, String.valueOf(opt.getId()))) {
+                        p.setDefaultValue(opt.getValue());
+                        dealWithOptions = true;
+                    }
+                }
             }
-            p.setDefaultValue(defaultValue);
+            if (!dealWithOptions) {
+                ObjectSchemeFieldDetailVO example = new ObjectSchemeFieldDetailVO();
+                example.setDefaultValue(defaultValue);
+                example.setFieldType(p.getFieldType());
+                FieldValueUtil.handleDefaultValue(example);
+                defaultValue = example.getDefaultValue();
+                Object object = example.getDefaultValueObj();
+                if (!ObjectUtils.isEmpty(object)) {
+                    UserDTO user = (UserDTO)object;
+                    defaultValue = user.getRealName();
+                }
+                p.setDefaultValue(defaultValue);
+            }
         });
     }
 
