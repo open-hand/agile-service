@@ -9,22 +9,13 @@ let modal;
 function Header({ dataSet, close }) {
   return (
     <>
-      <div style={{ fontSize: '30px', fontWeight: 500, marginRight: 12 }}>{dataSet.selected.length}</div>
-      <div style={{ fontSize: '16px' }}>
-        项已选中
+      <div style={{ fontSize: '18px', fontWeight: 500, marginRight: 12 }}>
+        {`批量编辑 (已选中${dataSet.selected.length}项)`}
       </div>
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
-        <Icon type="mode_edit" />
-        <span style={{ marginLeft: 6 }}>批量修改</span>
-      </div>
-      <div style={{
-        width: 1, height: '100%', margin: '0px 8px 0 15px', background: '#95A5FF',
-      }}
-      />
       <Button
         icon="close"
         shape="circle"
-        style={{ color: 'white', marginRight: -5 }}
+        style={{ color: 'white', marginRight: -5, marginLeft: 'auto' }}
         onClick={close}
       />
     </>
