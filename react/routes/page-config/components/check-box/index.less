@@ -78,10 +78,6 @@
   background: rgba(0, 0, 0, 0.26);
 }
 
-.checkbox_indeterminate {
-  background: #3f51b5;
-}
-
 .checkbox_indeterminate label::before {
   background: #3f51b5;
   border: none;
@@ -97,4 +93,8 @@
   border: 0.125em solid #fff;
   border-top-style: none;
   border-right-style: none;
+}
+
+.checkbox_indeterminate input[type="checkbox"]:disabled +label:before {
+  background: rgba(0, 0, 0, 0.26);
 }
