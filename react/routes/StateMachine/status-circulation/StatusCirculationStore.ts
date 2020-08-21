@@ -146,6 +146,9 @@ class StatusCirculationStore {
   }
 
   async batchUpdateStatusTransform(issueTypeId: string) {
+    if (!this.hasAction) {
+      return;
+    }
     await statusTransformApi.batchUpdate(issueTypeId, this.needSubmitActions);
     this.clearActions();
     this.getStatusList(issueTypeId);
