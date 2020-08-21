@@ -15,10 +15,5 @@ const SortTableDataSet = (): DataSetProps => ({
     { name: 'rank', type: 'string' as FieldType, label: '排序' },
   ],
 
-  events: {
-    update: ({ value, name }: { value: any, name: string }) => {
-    },
-  },
-
 });
 export default SortTableDataSet;

@@ -1,4 +1,3 @@
-import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 
 const AddUnselectedDataSet = (): DataSetProps => ({

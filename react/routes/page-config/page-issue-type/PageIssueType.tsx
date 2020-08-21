@@ -4,12 +4,13 @@ import {
 } from '@choerodon/boot';
 import { Button, Modal, Spin } from 'choerodon-ui/pro/lib';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
 import { observer } from 'mobx-react-lite';
 import { Prompt } from 'react-router-dom';
 import { pageConfigApi, PageConfigIssueType, IFiledProps } from '@/api/PageConfig';
 import { beforeTextUpload, text2Delta } from '@/utils/richText';
-import { getMenuType } from '@/utils/common';
+import { validKeyReturnValue } from '@/common/commonValid';
 import { omit } from 'lodash';
 import { useIsProgramContext } from '@/hooks/useIsProgrom';
 import styles from './index.less';
@@ -37,10 +38,9 @@ const issueTypeOptions: Array<IssueOption> = [
   { value: 'bug', text: '缺陷', type: 'common' },
   { value: 'backlog', text: '需求', type: 'common' },
 ];
-const preCls = 'c7n-agile-page-config-page-issue-type';
 function PageIssueType() {
   const {
-    sortTableDataSet, addUnselectedDataSet, intl, pageIssueTypeStore,
+    sortTableDataSet, addUnselectedDataSet, intl, pageIssueTypeStore, isProject, prefixCls,
   } = usePageIssueTypeStore();
   const { isProgram } = useIsProgramContext();
 
@@ -50,8 +50,8 @@ function PageIssueType() {
     if (pageIssueTypeStore.getDirty) {
       setBtnLoading(true);
       pageIssueTypeStore.setLoading(true);
-      let submitData: Array<any> = [];
-      let addFields: Array<any> = [];
+      let submitData: Array<Record> = [];
+      let addFields: Array<Record> = [];
       const CreatedFields = pageIssueTypeStore.getCreatedFields.map((item) => {
         let newRank = item.rank;
         if (item.dataSetRecord) {
@@ -110,14 +110,12 @@ function PageIssueType() {
   useEffect(() => {
     pageIssueTypeStore.setLoading(true);
     pageIssueTypeStore.loadAllField();
-    const currentMenuType = getMenuType();
-
     const showOptions = isProgram
       ? [
         { value: 'feature', text: '特性', type: 'organization' },
         { value: 'issue_epic', text: '史诗', type: 'common' },
         { value: 'backlog', text: '需求', type: 'common' },
-      ] as Array<IssueOption> : issueTypeOptions.filter((item) => item.type === 'common' || currentMenuType === 'organization');
+      ] as Array<IssueOption> : issueTypeOptions.filter((item) => item.type === 'common' || !isProject);
     pageConfigApi.loadAvailableIssueType().then((res) => {
       // const showOptions = res.map((item) => ({ value: item.typeCode, text: item.name }));
       if (!res.some((item) => item.typeCode === 'backlog')) {
@@ -205,10 +203,11 @@ function PageIssueType() {
     }
     return true;
   };
-  const checkCodeOrName = (key: string,
+
+  const checkCodeOrName = (key: 'name' | 'code',
     name: string) => pageIssueTypeStore.getCreatedFields.length !== 0
-    // @ts-ignore
-    && pageIssueTypeStore.getCreatedFields.some((item) => item[key].trim() === name);
+    && pageIssueTypeStore.getCreatedFields
+      .some((item) => validKeyReturnValue(key, item).trim() === name);
   function openCreateFieldModal() {
     const values = {
       formatMessage: intl.formatMessage,
@@ -230,28 +229,22 @@ function PageIssueType() {
   }
   return (
     <Page
-      service={
-        getMenuType() !== 'project' ? ['choerodon.code.organization.setting.issue.page.ps.scheme']
-          : ['choerodon.code.project.setting.page.ps.scheme']
-      }
+      service={isProject ? ['choerodon.code.project.setting.page.ps.scheme']
+        : ['choerodon.code.organization.setting.issue.page.ps.scheme']}
     >
       <Prompt message={`是否放弃更改 ${Choerodon.STRING_DEVIDER}页面有未保存的内容,是否放弃更改？`} when={pageIssueTypeStore.getDirty} />
       <Header>
-
         <Button icon="playlist_add" onClick={openCreateFieldModal}>创建字段</Button>
         <Button
           icon="add"
-          onClick={() => {
-            openAddField(addUnselectedDataSet, pageIssueTypeStore, onSubmitLocal);
-          }}
+          onClick={() => openAddField(addUnselectedDataSet, pageIssueTypeStore, onSubmitLocal)}
         >
           添加已有字段
-
         </Button>
 
       </Header>
       <Breadcrumb />
-      <Content className={`${preCls}-content`} style={{ overflowY: 'hidden' }}>
+      <Content className={`${prefixCls}-content`}>
         <Switch
           // defaultValue="feature"
           value={pageIssueTypeStore.currentIssueType}
@@ -261,16 +254,16 @@ function PageIssueType() {
         <Spin spinning={pageIssueTypeStore.getLoading}>
           <div className={styles.top}>
             {
-              getMenuType() !== 'project' ? (
+              !isProject ? (
                 <SortTable
-                  showSplitLine={getMenuType() !== 'project'}
+                  showSplitLine={!isProject}
                   onDelete={handleDeleteFiled}
                 />
               )
                 : [
                   <IssueTypeWrap title="字段配置">
                     <SortTable
-                      showSplitLine={getMenuType() !== 'project'}
+                      showSplitLine={!isProject}
                       onDelete={handleDeleteFiled}
                     />
                   </IssueTypeWrap>,

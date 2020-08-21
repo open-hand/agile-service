@@ -131,7 +131,8 @@ function CreateField() {
     // 防止使用dataSet提交时 忽略filedOptions
     formDataSet.current?.set('updateFieldOptions', obj.fieldOptions);
     if (onSubmitLocal) {
-      return onSubmitLocal(dataTransformPostData(obj));
+      const validResult = await formDataSet.validate();
+      return validResult && onSubmitLocal(dataTransformPostData(obj));
     }
     const url = isEdit ? `/agile/v1/${type}s/${id}/object_scheme_field/${formDataSet.current?.get('id')}?organizationId=${organizationId}` : `/agile/v1/${type}s/${id}/object_scheme_field?organizationId=${organizationId}`;
     const method = isEdit ? 'put' : 'post';
