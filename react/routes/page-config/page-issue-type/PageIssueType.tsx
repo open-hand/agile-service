@@ -2,13 +2,17 @@ import React, { useState, useEffect } from 'react';
 import {
   TabPage as Page, Header, Content, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
-import { Button, Modal, Spin } from 'choerodon-ui/pro/lib';
+import {
+  Button, Modal, Spin, message,
+} from 'choerodon-ui/pro/lib';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
 import { observer } from 'mobx-react-lite';
 import { Prompt } from 'react-router-dom';
-import { pageConfigApi, PageConfigIssueType, IFiledProps } from '@/api/PageConfig';
+import {
+  pageConfigApi, PageConfigIssueType, IFiledProps, UIssueTypeConfig,
+} from '@/api/PageConfig';
 import { beforeTextUpload, text2Delta } from '@/utils/richText';
 import { validKeyReturnValue } from '@/common/commonValid';
 import { omit } from 'lodash';
@@ -46,6 +50,15 @@ function PageIssueType() {
 
   const [switchOptions, setSwitchOption] = useState<Array<IssueOption>>();
   const [btnLoading, setBtnLoading] = useState<boolean>();
+  const handleRequest = (data: UIssueTypeConfig) => {
+    pageConfigApi.updateConfig(data).then(() => {
+      pageIssueTypeStore.loadData();
+      message.success('保存成功');
+      setBtnLoading(false);
+    }).catch(() => {
+      message.error('网络异常');
+    });
+  };
   const handleSubmit = () => {
     if (pageIssueTypeStore.getDirty) {
       setBtnLoading(true);
@@ -69,7 +82,6 @@ function PageIssueType() {
       const issueTypeFieldVO = pageIssueTypeStore.getDescriptionObj;
       const data = {
         issueType: pageIssueTypeStore.currentIssueType,
-        // fields: submitData,
         fields: submitData.map((item) => ({
           fieldId: item.get('fieldId'),
           required: item.get('required'),
@@ -92,16 +104,10 @@ function PageIssueType() {
       };
       if (issueTypeFieldVO.dirty) {
         beforeTextUpload(text2Delta(issueTypeFieldVO.template), data.issueTypeFieldVO!, () => {
-          pageConfigApi.update(data).then(() => {
-            pageIssueTypeStore.loadData();
-            setBtnLoading(false);
-          });
+          handleRequest(data);
         }, 'template');
       } else {
-        pageConfigApi.update(data).then(() => {
-          pageIssueTypeStore.loadData();
-          setBtnLoading(false);
-        });
+        handleRequest(data);
       }
     }
     return true;
@@ -207,7 +213,7 @@ function PageIssueType() {
   const checkCodeOrName = (key: 'name' | 'code',
     name: string) => pageIssueTypeStore.getCreatedFields.length !== 0
     && pageIssueTypeStore.getCreatedFields
-      .some((item) => validKeyReturnValue(key, item).trim() === name);
+      .some((item) => item[key].trim() === name);
   function openCreateFieldModal() {
     const values = {
       formatMessage: intl.formatMessage,

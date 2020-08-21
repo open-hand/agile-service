@@ -1,33 +1,36 @@
 import React, { createContext, useMemo, useContext } from 'react';
 import { inject } from 'mobx-react';
-import { injectIntl } from 'react-intl';
+import { injectIntl, InjectedIntl } from 'react-intl';
 import { DataSet } from 'choerodon-ui/pro';
 import { usePageConfigContext } from '../../stores';
 import SchemeTableDataSet from './SchemeTableDataSet';
-import useStore from './useStore';
 
-const Store = createContext();
-export default Store;
+interface Context {
+  prefixCls: 'issue-object-scheme',
+  intlPrefix: 'issue-object-scheme',
+  intl: InjectedIntl,
+  schemeTableDataSet: DataSet,
+  schemeCode: string,
+}
+const Store = createContext({} as Context);
+export function useObjectSchemeStore() {
+  return useContext(Store);
+}
 
-export const StoreProvider = injectIntl(inject('AppState')(
-  (props) => {
+const StoreProvider = injectIntl(
+  (props: any) => {
     const contextPageConfig = usePageConfigContext();
     const { objectDetailItem: { schemeCode } } = contextPageConfig;
-    const {
-      AppState: {
-        currentMenuType: { type, id, organizationId },
-      }, intl: { formatMessage },
-    } = props;
-    const store = useStore(type, id, organizationId);
+    const { intl: { formatMessage } } = props;
     const schemeTableDataSet = useMemo(() => new DataSet(SchemeTableDataSet({
-      projectId: id, formatMessage, organizationId, schemeCode, type,
-    }), []));
+      formatMessage,
+      schemeCode,
+    })), []);
 
     const value = {
       ...props,
       prefixCls: 'issue-object-scheme',
       intlPrefix: 'issue-object-scheme',
-      store,
       schemeTableDataSet,
       schemeCode,
     };
@@ -38,4 +41,5 @@ export const StoreProvider = injectIntl(inject('AppState')(
       </Store.Provider>
     );
   },
-));
+);
+export default StoreProvider;

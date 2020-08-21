@@ -1,12 +1,12 @@
 /* eslint-disable no-param-reassign */
 import React from 'react';
 import {
-  DraggableProvided, Draggable, DraggingStyle, NotDraggingStyle,
+  DraggableProvided, DraggingStyle, NotDraggingStyle,
 } from 'react-beautiful-dnd';
 import classnames from 'classnames';
 import { Menu, Modal } from 'choerodon-ui';
 import {
-  Button, IconPicker, Icon, Output, Tooltip, DataSet,
+  Button, Icon, Tooltip, DataSet,
 } from 'choerodon-ui/pro/lib';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
@@ -27,17 +27,12 @@ interface Props {
   draggingClassName?: string,
   isDragDisabled?: boolean,
 }
-const prefixCls = 'c7n-page-issue-detail-drag';
-const updateCodeArr = [
-  PageIssueTypeStoreStatusCode.add,
-  PageIssueTypeStoreStatusCode.del,
-  PageIssueTypeStoreStatusCode.desc,
-];
 const DraggableItem: React.FC<Props> = ({
   data, isDragDisabled, virtualizedStyle, provided, draggingClassName,
 }) => {
   const { pageIssueTypeStore } = usePageIssueTypeStore();
-  const { onDelete, showSplitLine } = useSortTableContext();
+  const { onDelete, showSplitLine, prefixCls: originPrefixCls } = useSortTableContext();
+  const prefixCls = `${originPrefixCls}-drag`;
   const pageConfigFieldEdited = data?.get('pageConfigFieldEdited') || {};
   const {
     requiredFieldCanNotEdit = false,

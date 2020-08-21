@@ -20,7 +20,6 @@ const CheckBox: React.FC<Props> = ({
   const [checked, setChecked] = useState<boolean>(propsChecked);
   const [indeterminate, setIndeterminate] = useState<boolean>(!!propsIndeterminate);
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    console.log('onChange:', e.target.checked);
     const targetChecked = e.target.checked;
     if (typeof propsChecked !== 'undefined' && onChange) {
       const returnVal = onChange(targetChecked);

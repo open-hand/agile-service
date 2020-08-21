@@ -1,28 +1,21 @@
-/* eslint-disable no-param-reassign */
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   Draggable, Droppable,
 } from 'react-beautiful-dnd';
-import {
-  WindowScroller, List, AutoSizer, ListRowProps, ListRowRenderer,
-} from 'react-virtualized';
+import { List, AutoSizer, ListRowProps } from 'react-virtualized';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { observer } from 'mobx-react-lite';
 import ReactDOM from 'react-dom';
 import classnames from 'classnames';
 import DraggableItem from './DraggableItem';
-import { usePageIssueTypeStore } from '../../stores';
 import { useSortTableContext } from './stores';
 
 interface Props {
   isDropDisabled: boolean,
   rows: Array<Record>,
 }
-const prefixCls = 'c7n-page-issue-detail';
 const DropContent: React.FC<Props> = ({ isDropDisabled, rows }) => {
-  const { pageIssueTypeStore } = usePageIssueTypeStore();
-  const { showSplitLine } = useSortTableContext();
-  const [scrollHeight, setScrollHeight] = useState<number>(300);
+  const { showSplitLine, prefixCls } = useSortTableContext();
   const renderRowItem = useCallback((rowProps: ListRowProps) => {
     const record = rows[rowProps.index];
     return (
@@ -64,7 +57,6 @@ const DropContent: React.FC<Props> = ({ isDropDisabled, rows }) => {
                 // onScroll={onChildScroll}
                 rowHeight={showSplitLine ? 40 : 32}
                 rowRenderer={renderRowItem}
-
                 // scrollTop={scrollTop}
                 width={width}
                 ref={(ref) => {
@@ -76,14 +68,9 @@ const DropContent: React.FC<Props> = ({ isDropDisabled, rows }) => {
 
                     if (whatHasMyLifeComeTo instanceof HTMLElement) {
                       const element = document.getElementsByClassName('c7n-page-issue-detail')[0];
-                      setScrollHeight(element.clientHeight - (showSplitLine ? 0 : 30));
                       provided.innerRef(whatHasMyLifeComeTo);
                     }
                   }
-                }}
-                style={{
-                  // background: snapshot.isDraggingOver ? '#e9e9e9' : 'inherit',
-                  transition: 'background-color 0.2s ease',
                 }}
               />
             )}

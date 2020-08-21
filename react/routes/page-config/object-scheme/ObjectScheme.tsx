@@ -1,6 +1,4 @@
-import React, {
-  Fragment, useContext, useState,
-} from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Table, Button, CheckBox, Modal, Menu, Icon,
@@ -14,7 +12,7 @@ import { FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
 import { pageConfigApi } from '@/api/PageConfig';
 import { getMenuType } from '@/utils/common';
-import Store from './stores';
+import { useObjectSchemeStore } from './stores';
 import TableDropMenu from '../../../common/TableDropMenu';
 import CreateField from '../components/create-field';
 import NewCheckBox from '../components/check-box';
@@ -22,55 +20,11 @@ import RequiredPrompt from './components/required-prompt';
 import './ObjectScheme.less';
 
 const { Column } = Table;
-enum RequireScopeType {
+enum IRequireScopeType {
   all = 'ALL',
   part = 'PART',
   none = 'NONE',
 }
-const showIcons: any = {
-  史诗: {
-    icon: 'agile_epic',
-    colour: '#743be7',
-    typeCode: 'issue_epic',
-    name: '史诗',
-  },
-  故事: {
-    icon: 'agile_story',
-    colour: '#00bfa5',
-    typeCode: 'story',
-    name: '故事',
-  },
-  特性: {
-    icon: 'agile-feature',
-    colour: '#3D5AFE',
-    typeCode: 'feature',
-    name: '特性',
-  },
-  缺陷: {
-    icon: 'agile_fault',
-    colour: '#f44336',
-    typeCode: 'bug',
-    name: '缺陷',
-  },
-  任务: {
-    icon: 'agile_task',
-    colour: '#4d90fe',
-    typeCode: 'task',
-    name: '任务',
-  },
-  子任务: {
-    icon: 'agile_subtask',
-    colour: '#4d90fe',
-    typeCode: 'sub_task',
-    name: '子任务',
-  },
-  需求: {
-    icon: 'highlight',
-    colour: 'rgba(246,127,90,1)',
-    typeCode: 'backlog',
-    name: '需求',
-  },
-};
 
 const createModelKey = Modal.key();
 const editModelKey = Modal.key();
@@ -80,13 +34,10 @@ const createModelStyle = {
 };
 
 function ObjectScheme() {
-  const context = useContext(Store);
   const {
-    AppState, prefixCls, schemeTableDataSet,
-    intl: { formatMessage },
+    prefixCls, schemeTableDataSet, intl: { formatMessage },
     schemeCode,
-    store,
-  } = context;
+  } = useObjectSchemeStore();
 
   function handleRefresh() {
     schemeTableDataSet.query();
@@ -95,7 +46,7 @@ function ObjectScheme() {
   function handleRemove() {
     const record = schemeTableDataSet.current;
     const modalProps = {
-      title: formatMessage({ id: 'field.delete.title' }, { name: record.get('name') }),
+      title: formatMessage({ id: 'field.delete.title' }, { name: record?.get('name') }),
       children: formatMessage({ id: 'field.delete.msg' }),
       okText: formatMessage({ id: 'delete' }),
       okProps: { color: 'red' },
@@ -111,18 +62,18 @@ function ObjectScheme() {
   }
   function handleContinueCheckChange(secondEntry = false) {
     const record = schemeTableDataSet.current;
-    const defaultValue = schemeTableDataSet.get('defaultValue');
-    const requiredScope = record.get('requiredScope');
-    const required = requiredScope !== RequireScopeType.all;
-    if (record.get('system')) {
+    const defaultValue = record?.get('defaultValue');
+    const requiredScope = record?.get('requiredScope');
+    const required = requiredScope !== IRequireScopeType.all;
+    if (record?.get('system')) {
       return false;
     }
-    if (required && defaultValue) {
+    if (required && !defaultValue) {
       Choerodon.prompt(formatMessage({ id: 'field.required.msg' }));
       return false;
     }
-    if (secondEntry || !openPromptForRequire(record.get('name'), required)) {
-      pageConfigApi.updateRequired(record.get('id'), required).then(() => {
+    if (secondEntry || !openPromptForRequire(record?.get('name'), required)) {
+      pageConfigApi.updateRequired(record?.get('id'), required).then(() => {
         handleRefresh();
       });
       return true;
@@ -206,7 +157,7 @@ function ObjectScheme() {
           menu={menu}
           onClickEdit={openEditFieldModal}
           text={text}
-          isHasMenu={!(system || (AppState.currentMenuType.type === 'project' && !projectId))}
+          isHasMenu={!(system || (getMenuType() === 'project' && !projectId))}
         />
       </div>
     );
@@ -249,27 +200,20 @@ function ObjectScheme() {
     const projectId = record?.get('projectId');
     return (
       <div>
-        {/* <CheckBox
-          defaultChecked={requiredScope === 'ALL'}
-          indeterminate={requiredScope === 'PART'}
-          checked={requiredScope === 'ALL'}
-          disabled={system || (AppState.currentMenuType.type === 'project' && !projectId)}
-          onChange={handleCheckChange}
-        /> */}
         <NewCheckBox
           defaultChecked={requiredScope === 'ALL'}
           indeterminate={requiredScope === 'PART'}
           checked={requiredScope === 'ALL'}
           record={record}
           name={name!}
-          disabled={system || (AppState.currentMenuType.type === 'project' && !projectId)}
+          disabled={system || (getMenuType() === 'project' && !projectId)}
           onChange={handleCheckChange}
         />
       </div>
     );
   };
 
-  const service = AppState.currentMenuType.type === 'project' ? [
+  const service = getMenuType() === 'project' ? [
     'choerodon.code.project.setting.page.ps.field',
   ]
     : [
