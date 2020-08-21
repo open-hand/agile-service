@@ -105,6 +105,12 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private StatusLinkageMapper statusLinkageMapper;
     @Autowired
     private BoardColumnMapper boardColumnMapper;
+    @Autowired
+    private StatusNoticeSettingMapper statusNoticeSettingMapper;
+    @Autowired
+    private StatusTransferSettingMapper statusTransferSettingMapper;
+    @Autowired
+    private StatusFieldSettingMapper statusFieldSettingMapper;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -480,15 +486,14 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
-    public void deleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId,Long statusId) {
+    public void deleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId, Long statusId) {
         Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
         StatusMachineNodeDTO statusMachineNodeDTO = new StatusMachineNodeDTO();
         statusMachineNodeDTO.setOrganizationId(organizationId);
         statusMachineNodeDTO.setStateMachineId(stateMachineId);
-        StatusMachineNodeDTO currentNode = checkStatusLink(projectId, issueTypeId, applyType, nodeId,
-                statusId, statusMachineNodeDTO);
+        StatusMachineNodeDTO currentNode = checkStatusLink(projectId, issueTypeId, nodeId);
         Long currentStatusId = currentNode.getStatusId();
         Assert.notNull(currentStatusId, BaseConstants.ErrorCode.DATA_INVALID);
         // 删除当前node的转换
@@ -510,16 +515,15 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
     }
 
-    private StatusMachineNodeDTO checkStatusLink(Long projectId, Long issueTypeId, String applyType, Long nodeId,Long statusId,
-                            StatusMachineNodeDTO statusMachineNodeDTO) {
+    private StatusMachineNodeDTO checkStatusLink(Long projectId, Long issueTypeId, Long nodeId) {
         // 校验当前node的状态有没有被项目下的issue使用
         StatusMachineNodeDTO machineNodeDTO = statusMachineNodeMapper.selectByPrimaryKey(nodeId);
         Assert.notNull(machineNodeDTO, BaseConstants.ErrorCode.DATA_NOT_EXISTS);
         Long currentStatusId = machineNodeDTO.getStatusId();
         Boolean checkIssueUse = checkIssueUse(projectId, issueTypeId,machineNodeDTO.getStatusId());
         if (Boolean.TRUE.equals(checkIssueUse)) {
-            // 将该问题类型下状态为当前状态的issue改为指定状态
-            updateIssueStatusByStatusId(projectId, issueTypeId, applyType, currentStatusId, statusId, statusMachineNodeDTO);
+            // 报错
+            throw new CommonException("error.status.status_issue_used");
         }
         // 校验当前node的状态是否与其他状态有联动
         List<StatusLinkageDTO> linkExistList =
@@ -532,6 +536,28 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         List<BoardColumnStatusRelDTO> boardColExistList = boardColumnMapper.selectByStatusId(projectId, currentStatusId);
         if (CollectionUtils.isNotEmpty(boardColExistList)){
             throw new CommonException("error.status.board_column_exist");
+        }
+        Sqls existCondition = Sqls.custom().andEqualTo("projectId", projectId).andEqualTo("statusId", currentStatusId);
+        // 校验是否关联流转条件
+        List<StatusTransferSettingDTO> transferExist =
+                statusTransferSettingMapper.selectByCondition(Condition.builder(StatusTransferSettingDTO.class)
+                .andWhere(existCondition).build());
+        if (CollectionUtils.isNotEmpty(transferExist)){
+            throw new CommonException("error.status.status_transfer_exist");
+        }
+        // 校验是否关联属性字段
+        List<StatusFieldSettingDTO> statusFieldExist =
+                statusFieldSettingMapper.selectByCondition(Condition.builder(StatusFieldSettingDTO.class)
+                .andWhere(existCondition).build());
+        if (CollectionUtils.isNotEmpty(statusFieldExist)){
+            throw new CommonException("error.status.status_field_exist");
+        }
+        // 校验是否存在通知设置
+        List<StatusNoticeSettingDTO> statusNoticeExist =
+                statusNoticeSettingMapper.selectByCondition(Condition.builder(StatusNoticeSettingDTO.class)
+                        .andWhere(existCondition).build());
+        if (CollectionUtils.isNotEmpty(statusNoticeExist)){
+            throw new CommonException("error.status.status_notice_exist");
         }
         return machineNodeDTO;
     }
