@@ -130,6 +130,42 @@ public class StatusTransferSettingServiceImpl implements StatusTransferSettingSe
         }
     }
 
+    @Override
+    public List<Long> checkStatusTransform(Long projectId, Long issueTypeId, List<Long> statusIds) {
+        List<StatusTransferSettingDTO> dtos = statusTransferSettingMapper.listByStatusId(projectId, issueTypeId, statusIds);
+        if (CollectionUtils.isEmpty(dtos)) {
+            return statusIds;
+        }
+        List<Long> list = new ArrayList<>();
+        Map<Long, List<StatusTransferSettingDTO>> statusTransferSettingMap = dtos.stream().collect(Collectors.groupingBy(StatusTransferSettingDTO::getStatusId));
+        for (Long statusId : statusIds) {
+            List<StatusTransferSettingDTO> statusTransfer = statusTransferSettingMap.get(statusId);
+            if (CollectionUtils.isEmpty(statusTransfer)) {
+                list.add(statusId);
+            } else {
+                Set<Long> userIds = new HashSet<>();
+                getUserIds(projectId, userIds, statusTransfer);
+                Long userId = DetailsHelper.getUserDetails().getUserId();
+                if (userIds.contains(userId)) {
+                    list.add(statusId);
+                }
+            }
+        }
+        return list;
+    }
+
+    private void getUserIds(Long projectId,Set<Long> userIds,List<StatusTransferSettingDTO> query){
+        for (StatusTransferSettingDTO statusTransferSettingDTO : query) {
+            if (PROJECT_OWNER.equals(statusTransferSettingDTO.getUserType())) {
+                List<UserVO> body = baseFeignClient.listProjectOwnerById(projectId).getBody();
+                if (!CollectionUtils.isEmpty(body)) {
+                    userIds.addAll(body.stream().map(UserVO::getId).collect(Collectors.toSet()));
+                }
+            } else {
+                userIds.add(statusTransferSettingDTO.getUserId());
+            }
+        }
+    }
     private void baseInsert(StatusTransferSettingDTO statusTransferSettingDTO) {
         if (statusTransferSettingMapper.insertSelective(statusTransferSettingDTO) != 1) {
             throw new CommonException("error.insert.status.transfer.setting");

@@ -21,4 +21,6 @@ public interface StatusTransferSettingService {
    List<StatusTransferSettingVO> listByStatusIds(Long projectId, Long issueTypeId, List<Long> statusIds);
 
     void checkStatusTransferSetting(Long projectId, Long issueTypeId, Long endStatusId);
+
+    List<Long> checkStatusTransform(Long projectId,Long issueTypeId, List<Long> statusIds);
 }

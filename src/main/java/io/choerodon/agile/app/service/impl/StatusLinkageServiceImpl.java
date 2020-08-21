@@ -208,7 +208,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
             isChange = handlerSingleIssueType(statusLink, issueMap, issueDTO.getTypeCode());
             changeStatus = getChangeStatus(isChange, statusLink);
         } else {
-            Map<Long, String> typeCodeMap = issueDTOS.stream().collect(Collectors.toMap(IssueDTO::getIssueTypeId, IssueDTO::getTypeCode));
+            Map<Long, String> typeCodeMap = issueDTOS.stream().collect(Collectors.toMap(IssueDTO::getIssueTypeId, IssueDTO::getTypeCode,(code1,code2) -> code1));
             Iterator<Map.Entry<Long, StatusLinkageDTO>> iterator = linkageDTOMap.entrySet().iterator();
             while (iterator.hasNext()) {
                 Map.Entry<Long, StatusLinkageDTO> next = iterator.next();
