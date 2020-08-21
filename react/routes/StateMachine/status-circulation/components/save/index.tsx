@@ -8,9 +8,11 @@ import { useStatusCirculationContext } from '../..';
 const Save: React.FC = () => {
   const { store } = useStatusCirculationContext();
   const { selectedType } = useStateMachineContext();
+  const { hasAction } = store;
   return (
     <div style={{ height: 50, display: 'flex', alignItems: 'center' }}>
       <Button
+        disabled={!hasAction}
         color={'blue' as ButtonColor}
         funcType={'raised' as FuncType}
         onClick={async () => {
@@ -20,6 +22,7 @@ const Save: React.FC = () => {
         保存
       </Button>
       <Button
+        disabled={!hasAction}
         funcType={'raised' as FuncType}
         onClick={() => {
           store.clearActions();
