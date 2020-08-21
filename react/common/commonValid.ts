@@ -7,5 +7,5 @@ export function validKeyReturnValue<K extends keyof T, T extends object>(key: K,
   if (key in obj) {
     return obj[key];
   }
-  throw Error(`${key} is not exist Object`);
+  throw Error(`${key} is not exist key in Object`);
 }

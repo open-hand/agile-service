@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Form, Select, DataSet, Modal, Axios,
-} from 'choerodon-ui/pro/lib';
+  Form, Select, DataSet, Modal,
+} from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { IModalProps } from '@/common/types';
-import { pageConfigApi, PageConfigIssueType } from '@/api';
-import issueTable from '@/routes/Issue/components/issue-table';
-import stores from 'choerodon-ui/pro/lib/stores';
-import { usePageIssueTypeStore } from '../../stores';
+import { pageConfigApi } from '@/api';
 import PageIssueTypeStore from '../../stores/PageIssueTypeStore';
 
 const { Option } = Select;

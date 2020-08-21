@@ -46,8 +46,6 @@ const SortTable: React.FC = () => {
     const sourceRecord = sortTableDataSet.data[source.index];
     const destinationRecord = sortTableDataSet.data[destination.index];
     const rankObj = {
-      // before: false,
-      // issueType: pageIssueTypeStore.currentIssueType,
       previousRank: null,
       nextRank: null,
     };
@@ -62,10 +60,7 @@ const SortTable: React.FC = () => {
     // const outSetRank = (newRank: string) => sourceRecord.set('rank', newRank);
     sortTableDataSet.move(source.index, destination.index);
     await pageConfigApi.loadRankValue(rankObj).then((newRank: string) => {
-      // sortTableDataSet.data[source.index].set('rank', newRank);
-      // outSetRank(newRank);
       sourceRecord.set('rank', newRank);
-      // pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.drag);
     });
   };
   return (
@@ -77,9 +72,6 @@ const SortTable: React.FC = () => {
         <DragDropContext
           onDragEnd={onDragEnd}
           onDragStart={onDragStart}
-        // onDragUpdate={(initial: DragUpdate, provided: ResponderProvided) => {
-        //   console.log('initial', initial, provided);
-        // }}
         >
           <div className={`${prefixCls}-drop-wrap`}>
             <DropContent rows={sortTableDataSet.data} isDropDisabled={false} />

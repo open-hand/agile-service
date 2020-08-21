@@ -1,5 +1,5 @@
 import React from 'react';
-import { StoreProvider } from './stores';
+import StoreProvider from './stores';
 import ObjectScheme from './ObjectScheme';
 
 export default function Index(props:any) {

@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId, getMenuType } from '@/utils/common';
+import Api from './Api';
 
 export enum PageConfigIssueType {
   feature = 'feature',
@@ -47,7 +48,7 @@ export interface UIssueTypeConfig {
   createdFields?: Array<any>,
 
 }
-class PageConfigApi {
+class PageConfigApi extends Api {
   get prefixOrgOrPro() {
     return `/agile/v1/${getMenuType() === 'project' ? `projects/${getProjectId()}` : `organizations/${getOrganizationId()}`}`;
   }
@@ -57,7 +58,7 @@ class PageConfigApi {
    * @param schemeCode
    */
   load(schemeCode: string = 'agile_issue') {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/list`,
       params: {
@@ -126,11 +127,22 @@ class PageConfigApi {
     });
   }
 
+  updateField(fieldId: string, data: any) {
+    return axios({
+      method: 'put',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/${fieldId}`,
+      data,
+      params: {
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
   /**
    * 更新页面配置
    * @param data
    */
-  update(data: UIssueTypeConfig) {
+  updateConfig(data: UIssueTypeConfig) {
     return axios({
       method: 'post',
       url: `${this.prefixOrgOrPro}/object_scheme_field/configs`,
@@ -153,6 +165,20 @@ class PageConfigApi {
       params: {
         fieldId,
         required,
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  /**
+   * 删除字段
+   * @param fieldId
+   */
+  delete(fieldId: string) {
+    return this.request({
+      method: 'delete',
+      url: `${this.prefixOrgOrPro}/object_scheme_field/${fieldId}`,
+      params: {
         organizationId: getOrganizationId(),
       },
     });
@@ -191,4 +217,5 @@ class PageConfigApi {
 }
 
 const pageConfigApi = new PageConfigApi();
-export { pageConfigApi };
+const pageConfigApiConfig = new PageConfigApi(true);
+export { pageConfigApi, pageConfigApiConfig };
