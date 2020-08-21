@@ -37,18 +37,37 @@
     </update>
 
     <select id="selectMinRank" resultType="java.lang.String">
-        select min(rank)
-        from fd_object_scheme_field_extend
-        where organization_id = #{organizationId}
-        and issue_type = #{issueType}
-        <choose>
-            <when test="projectId != null">
-                AND project_id = #{projectId}
-            </when>
-            <otherwise>
-                AND project_id is null
-            </otherwise>
-        </choose>
+        select min(t.rank)
+        from (
+            select
+            t1.rank
+            from fd_object_scheme_field_extend t1
+            where t1.organization_id = #{organizationId}
+            and t1.project_id is null
+            <if test="issueType != null">
+                and t1.issue_type = #{issueType}
+            </if>
+            <if test="projectId != null">
+                and t1.field_id not in (
+                select t3.field_id
+                from fd_object_scheme_field_extend t3
+                where t3.organization_id = #{organizationId}
+                and t3.project_id = #{projectId}
+                <if test="issueType != null">
+                    and t3.issue_type = #{issueType}
+                </if>
+                )
+                union
+                select
+                t2.rank
+                from fd_object_scheme_field_extend t2
+                where t2.organization_id = #{organizationId}
+                and t2.project_id = #{projectId}
+                <if test="issueType != null">
+                    and t2.issue_type = #{issueType}
+                </if>
+            </if>
+        ) t
     </select>
 
     <select id="selectExtendField"
