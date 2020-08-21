@@ -10,6 +10,7 @@ import { Prompt } from 'react-router-dom';
 import { pageConfigApi, PageConfigIssueType, IFiledProps } from '@/api/PageConfig';
 import { beforeTextUpload, text2Delta } from '@/utils/richText';
 import { getMenuType } from '@/utils/common';
+import { omit } from 'lodash';
 import { useIsProgramContext } from '@/hooks/useIsProgrom';
 import styles from './index.less';
 import IssueTypeWrap from './components/issue-type-wrap';
@@ -50,8 +51,20 @@ function PageIssueType() {
       setBtnLoading(true);
       pageIssueTypeStore.setLoading(true);
       let submitData: Array<any> = [];
+      let addFields: Array<any> = [];
+      const CreatedFields = pageIssueTypeStore.getCreatedFields.map((item) => {
+        let newRank = item.rank;
+        if (item.dataSetRecord) {
+          newRank = item.dataSetRecord.get('rank');
+        }
+        return {
+          ...omit(item, 'dataSetRecord'),
+          rank: newRank,
+        };
+      });
       if (sortTableDataSet.dirty) {
         submitData = sortTableDataSet.filter((record) => record.dirty && !record.get('local'));
+        addFields = sortTableDataSet.filter((record) => record.get('localSource') === 'add');
       }
       const issueTypeFieldVO = pageIssueTypeStore.getDescriptionObj;
       const data = {
@@ -70,8 +83,11 @@ function PageIssueType() {
           template: issueTypeFieldVO.template as string,
           objectVersionNumber: issueTypeFieldVO.objectVersionNumber,
         } : undefined,
-        addIds: pageIssueTypeStore.getAddIds,
-        createdFields: pageIssueTypeStore.getCreatedFields,
+        addFields: addFields.map((item) => ({
+          fieldId: item.get('id'),
+          rank: item.get('rank'),
+        })),
+        createdFields: CreatedFields,
         deleteIds: pageIssueTypeStore.getDeleteIds,
       };
       if (issueTypeFieldVO.dirty) {
@@ -99,7 +115,7 @@ function PageIssueType() {
     const showOptions = isProgram
       ? [
         { value: 'feature', text: '特性', type: 'organization' },
-        { value: 'story', text: '故事', type: 'common' },
+        { value: 'issue_epic', text: '史诗', type: 'common' },
         { value: 'backlog', text: '需求', type: 'common' },
       ] as Array<IssueOption> : issueTypeOptions.filter((item) => item.type === 'common' || currentMenuType === 'organization');
     pageConfigApi.loadAvailableIssueType().then((res) => {
@@ -150,13 +166,13 @@ function PageIssueType() {
   };
   // 增添已有字段进行本地提交数据
   useEffect(() => {
-    const addDataLength = pageIssueTypeStore.addIds.length
+    const addDataLength = pageIssueTypeStore.addFields.length
       + pageIssueTypeStore.createdFields.length;
     if (addDataLength === 0
       && pageIssueTypeStore.getDataStatusCode === PageIssueTypeStoreStatusCode.add) {
       pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.null);
     }
-  }, [pageIssueTypeStore.addIds.length, pageIssueTypeStore.createdFields.length]);
+  }, [pageIssueTypeStore.addFields.length, pageIssueTypeStore.createdFields.length]);
 
   /**
    * 本地提交
@@ -166,6 +182,7 @@ function PageIssueType() {
   const onSubmitLocal = async (data: IFieldPostDataProps, oldField: boolean = false) => {
     const newData = Object.assign(data, {
       local: true,
+      localSource: oldField ? 'add' : 'created',
       fieldName: data.name,
       edited: true,
       created: true,
@@ -178,13 +195,13 @@ function PageIssueType() {
     if (oldField
       || (newData.context.some((item: any) => item === 'global' || item === pageIssueTypeStore.currentIssueType))) {
       const newRank = await pageConfigApi.loadRankValue({
-        before: false,
         previousRank: sortTableDataSet.data[sortTableDataSet.length - 1].get('rank'),
         nextRank: null,
-        issueType: pageIssueTypeStore.currentIssueType,
       });
       newData.rank = newRank;
-      sortTableDataSet.create(newData);
+      oldField && pageIssueTypeStore.addNewLocalField({ fieldId: data.id!, rank: newRank });
+      const newRecord = sortTableDataSet.create(newData);
+      pageIssueTypeStore.bindRecordForCreated(newRecord);
     }
     return true;
   };

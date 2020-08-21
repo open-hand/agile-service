@@ -47,6 +47,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
       filterContext.push('feature');
     }
     if (getApplyType() === 'program') { // 临时增加项目群限制
+      filterContext.pop();
       filterContext.push(...['story', 'task', 'sub_task', 'bug']);
     }
     const formDataSet = new DataSet(FormDataSet({

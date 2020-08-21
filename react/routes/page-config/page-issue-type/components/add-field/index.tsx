@@ -30,7 +30,6 @@ const AddFiled: React.FC<Props> = observer(({
   async function handleSubmit() {
     if (dataSet.validate()) {
       const id = dataSet.current?.toData().field;
-      store.addNewLocalField(dataSet.current?.toData().field);
       onSubmitLocal(store.allFieldData.get(id), true);
       dataSet.create();
       return true;
