@@ -95,4 +95,5 @@ public interface BoardColumnMapper extends BaseMapper<BoardColumnDTO> {
 
     List<BoardColumnStatusRelDTO> selectByStatusId(@Param("projectId") Long projectId, @Param("statusId") Long statusId);
 
+    void deleteByStatusId(@Param("projectId") Long projectId, @Param("statusId") Long statusId);
 }
