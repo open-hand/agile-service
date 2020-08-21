@@ -24,9 +24,14 @@ interface IDescriptionTempleProps {
   dirty: boolean,
 }
 export type PageIFieldPostDataProps = IFieldPostDataProps & {
-  local?: boolean, fieldName: string,
+  local?: boolean, fieldName: string, localSource: string, // 'add' | 'created'
   edited: boolean, created: boolean, required: boolean, rank?: string,
+  dataSetRecord?: Record,
 };
+interface IAddPostData {
+  fieldId: string,
+  rank: string,
+}
 class PageIssueTypeStore {
   constructor(props: { addUnselectedDataSet: DataSet, sortTableDataSet: DataSet }) {
     this.addUnselectedDataSet = props.addUnselectedDataSet;
@@ -49,7 +54,7 @@ class PageIssueTypeStore {
 
   @observable deleteRecords: Array<Record> = []; // 删除列表中初始时所拥有的字段
 
-  @observable addIds: Array<string> = [];
+  @observable addFields: Array<IAddPostData> = [];
 
   @observable createdFields: Array<PageIFieldPostDataProps> = [];
 
@@ -80,7 +85,7 @@ class PageIssueTypeStore {
       objectVersionNumber: undefined,
       dirty: false,
     };
-    this.addIds.length = 0;
+    this.addFields.length = 0;
     this.createdFields.length = 0;
   }
 
@@ -99,24 +104,28 @@ class PageIssueTypeStore {
   @action('删除本地字段') deleteLocalField(code: string, id?: string) {
     let index = -1;
     if (id) { // id 存在 则删除已有字段集合
-      index = this.addIds.findIndex((item) => item === id);
-      index !== -1 && this.addIds.splice(index, 1);
+      index = this.addFields.findIndex((item) => item.fieldId === id);
+      index !== -1 && this.addFields.splice(index, 1);
       return;
     }
     index = this.createdFields.findIndex((item) => item.code === code);
     index !== -1 && this.createdFields.splice(index, 1);
   }
 
-  @action('增加已有字段') addNewLocalField(id: string) {
-    this.addIds.push(id);
+  @action('增加已有字段') addNewLocalField(data: IAddPostData) {
+    this.addFields.push(data);
   }
 
   @action('增添新字段') addCreatedField(data: PageIFieldPostDataProps) {
     this.createdFields.push(data);
   }
 
-  @computed get getAddIds() {
-    return this.addIds.slice();
+  @action('最新创建的新字段绑定record') bindRecordForCreated(record: Record) {
+    this.createdFields[this.createdFields.length - 1].dataSetRecord = record;
+  }
+
+  @computed get getAddFields() {
+    return this.addFields.slice();
   }
 
   @computed get getCreatedFields() {

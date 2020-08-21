@@ -40,7 +40,10 @@ export interface UIssueTypeConfig {
   fields: Array<FiledUpdate>,
   issueTypeFieldVO?: Partial<IssueTypeFieldVO>,
   deleteIds?: string[],
-  addIds?: string[],
+  addIds?: Array<{
+    fieldId: string,
+    rank: string
+  }>,
   createdFields?: Array<any>,
 
 }

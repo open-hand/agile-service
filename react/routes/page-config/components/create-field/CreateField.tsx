@@ -26,6 +26,7 @@ interface FiledOptions {
   defaultValue: string
 }
 interface IFieldPostData extends FiledOptions {
+  id?: string,
   context: any
   code: string,
   name: string,
