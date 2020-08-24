@@ -59,7 +59,7 @@ type IParams = NodeJS.Dict<string | number | boolean | ReadonlyArray<string> |
   ReadonlyArray<number> | ReadonlyArray<boolean> | null>
 // eslint-disable-next-line max-len
 function getParams(path: Path, descriptor: LocationDescriptor = defaultDescriptor): IParams | null {
-  const { type, params: otherParams } = descriptor;
+  const { type = 'project', params: otherParams } = descriptor;
   let params;
   switch (type) {
     case 'project': {
@@ -179,7 +179,7 @@ const linkUrl = (path: Path, descriptor: LocationDescriptor = defaultDescriptor)
     return path;
   }
   const search = queryString.stringify(params);
-  return `path?${search}`;
+  return `${path}?${search}`;
 };
 export { linkUrl };
 export default to;

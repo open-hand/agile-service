@@ -1,5 +1,7 @@
 import { stores } from '@choerodon/boot';
+import LINK_URL from '@/constants/LINK_URL';
 import { getOrganizationId } from './common';
+import to from './to';
 
 const { AppState } = stores;
 
@@ -21,21 +23,16 @@ export function commonLink(link) {
   const {
     type, id: projectId, name, organizationId,
   } = menu;
-  
+
   return encodeURI(`/agile${link}?type=${type}&id=${projectId}&organizationId=${organizationId}&orgId=${organizationId}&name=${name}`);
 }
-export function issueLink(issueId, typeCode, issueName = null) {
-  const menu = AppState.currentMenuType;
-  const {
-    type, id: projectId, name, organizationId, category,
-  } = menu;
-  if (typeCode === 'issue_test' || typeCode === 'issue_auto_test') {
-    return encodeURI(`/testManager/IssueManage/testCase/${issueId}?type=${type}&id=${projectId}&name=${name}&category=${category}&organizationId=${organizationId}&orgId=${organizationId}`);
-  } else if (issueName) {
-    return encodeURI(`/agile/work-list/issue?type=${type}&id=${projectId}&name=${name}&category=${category}&organizationId=${organizationId}&paramIssueId=${issueId}&paramName=${issueName}&orgId=${organizationId}`);
-  } else {
-    return encodeURI(`/agile/work-list/issue?type=${type}&id=${projectId}&name=${name}&category=${category}&organizationId=${organizationId}&paramIssueId=${issueId}&orgId=${organizationId}`);
-  }
+export function issueLinkTo(issueId, issueName = null) {
+  to(LINK_URL.workListIssue, {
+    params: {
+      paramIssueId: issueId,
+      paramName: issueName,
+    },
+  });
 }
 export function toIssueInProject({
   issueId, issueNum, projectId, projectName, category,
