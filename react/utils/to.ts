@@ -55,7 +55,9 @@ type LocationDescriptor =
 const defaultDescriptor: ProjectLocationDescriptor = {
   type: 'project',
 };
-const to = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
+type IParams = NodeJS.Dict<string | number | boolean | ReadonlyArray<string> |
+  ReadonlyArray<number> | ReadonlyArray<boolean> | null>
+function getParams(path: Path, descriptor: LocationDescriptor = defaultDescriptor): IParams {
   const { type, params: otherParams } = descriptor;
   let params;
   switch (type) {
@@ -77,7 +79,7 @@ const to = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
         const targetProject = find(projects, (v) => String(v.id) === String(id));
         if (!targetProject) {
           error('跳转错误，未找到目标项目，请检查参数', path, descriptor);
-          return;
+          return {};
         }
         const {
           name,
@@ -111,7 +113,7 @@ const to = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
         const targetOrg = find(orgs, (v) => String(v.id) === String(id));
         if (!targetOrg) {
           error('跳转错误，未找到目标组织，请检查参数', path, descriptor);
-          return;
+          return {};
         }
         const {
           name,
@@ -134,7 +136,7 @@ const to = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
       const targetOrg = find(orgs, (v) => String(v.id) === String(organizationId));
       if (!targetOrg) {
         error('跳转错误，未找到目标组织，请检查参数', path, descriptor);
-        return;
+        return {};
       }
       params = {
         type: 'site',
@@ -151,7 +153,13 @@ const to = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
     ...params,
     ...otherParams,
   };
-  const search = queryString.stringify(totalParams);
+
+  return totalParams;
+}
+
+const to = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
+  const params = getParams(path, descriptor);
+  const search = queryString.stringify(params);
   if (!history) {
     error('跳转失败，未设置history');
     return;
@@ -161,5 +169,10 @@ const to = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
     search,
   });
 };
-
+const linkUrl = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
+  const params = getParams(path, descriptor);
+  const search = queryString.stringify(params);
+  return path + search ? `?${search}` : '';
+};
+export { linkUrl };
 export default to;
