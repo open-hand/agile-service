@@ -3,12 +3,12 @@ import { observer } from 'mobx-react';
 import { Tooltip } from 'choerodon-ui';
 import classnames from 'classnames';
 import moment from 'moment';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import TypeTag from '@/components/TypeTag';
 import UserHead from '@/components/UserHead';
 import StatusTag from '@/components/StatusTag';
 import PriorityTag from '@/components/PriorityTag';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 
 import './IssueItem.less';
 import { calcDays } from '@/utils/Date';
@@ -40,7 +40,7 @@ function getStyle({ draggableStyle, virtualStyle, isDragging }) {
   return combined;
 }
 const Item = memo(({ issue, draggingNum }) => {
-  const { isShowFeature } = IsInProgramStore; // 由后端判断是否显示特性
+  const { isShowFeature } = useIsInProgram(); // 由后端判断是否显示特性
   const { issueEndDate, statusVO } = issue;
   let diffDays = 0;
   if (issueEndDate) {

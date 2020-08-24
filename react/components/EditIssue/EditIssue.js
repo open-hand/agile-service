@@ -13,6 +13,7 @@ import { useIssueTypes } from '@/hooks';
 import {
   issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, devOpsApi, pageConfigApi,
 } from '@/api';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import RelateStory from '../RelateStory';
 import CopyIssue from '../CopyIssue';
 import ResizeAble from '../ResizeAble';
@@ -22,7 +23,6 @@ import ChangeParent from '../ChangeParent';
 import IssueHeader from './IssueComponent/IssueHeader';
 import IssueBody from './IssueComponent/IssueBody/IssueBody';
 import EditIssueContext from './stores';
-import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 // 项目加入群之后，不关联自己的史诗和特性，只能关联项目群的，不能改关联的史诗
 const { AppState } = stores;
 
@@ -194,7 +194,8 @@ function EditIssue() {
     getTransformFromSubIssueShow: transformFromSubIssueShow,
     getRelateStoryShow: relateStoryShow,
   } = store;
-  const rightDisabled = disabled || (IsInProgramStore.isInProgram && typeCode === 'issue_epic');
+  const { isInProgram } = useIsInProgram();
+  const rightDisabled = disabled || (isInProgram && typeCode === 'issue_epic');
   const HasPermission = (isOwner || createdBy === AppState.userInfo.id);
   return (
     <div style={{

@@ -9,7 +9,7 @@ import {
 } from '@choerodon/boot';
 import { find } from 'lodash';
 import { getProjectId, getOrganizationId } from '@/utils/common';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import WSProvider from '@choerodon/master/lib/containers/components/c7n/tools/ws/WSProvider';
 import { fieldApi } from '@/api';
 import useFields from './useFields';
@@ -141,7 +141,7 @@ function formatFields(fieldData, data, dataSet) {
 function BatchModal({
   dataSet: tableDataSet, fields: customFields, onCancel, onEdit,
 }) {
-  const { isInProgram } = IsInProgramStore;
+  const { isInProgram } = useIsInProgram();
   const fieldData = [...systemFields.values(), ...customFields].filter(((f) => (isInProgram ? f.code !== 'epicId' : f.code !== 'featureId')));
   const [fields, Field] = useFields();
   const [loading, setLoading] = useState(false);
