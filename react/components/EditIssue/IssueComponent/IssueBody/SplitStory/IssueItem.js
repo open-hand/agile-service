@@ -6,9 +6,7 @@ import PriorityTag from '@/components/PriorityTag';
 import StatusTag from '@/components/StatusTag';
 import TypeTag from '@/components/TypeTag';
 import styled from '@emotion/styled';
-import { issueLinkTo } from '@/utils/link';
-import to from '@/utils/to';
-import LINK_URL from '@/constants/LINK_URL';
+import { LINK_URL_TO } from '@/constants/LINK_URL';
 
 const Link = styled.a`
   overflow:hidden;
@@ -18,13 +16,12 @@ const Link = styled.a`
   color:#3f51b5;
 `;
 function IssueItem({ issue }) {
-  const history = useHistory();
   const {
     issueId, issueTypeVO, issueNum, summary, priorityVO,
     statusVO, projectVO, totalCount, completedCount,
   } = issue;
   const handleSummaryClick = () => {
-    issueLinkTo(issueId, issueNum);
+    LINK_URL_TO.issueLinkTo(issueId, issueNum);
   };
 
   return (

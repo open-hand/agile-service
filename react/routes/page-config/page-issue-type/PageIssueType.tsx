@@ -199,8 +199,8 @@ function PageIssueType() {
     if (oldField
       || (newData.context.some((item: any) => item === 'global' || item === pageIssueTypeStore.currentIssueType))) {
       const newRank = await pageConfigApi.loadRankValue({
-        previousRank: sortTableDataSet.data[sortTableDataSet.length - 1].get('rank'),
-        nextRank: null,
+        previousRank: null,
+        nextRank: sortTableDataSet.data[sortTableDataSet.length - 1].get('rank'),
       });
       newData.rank = newRank;
       oldField && pageIssueTypeStore.addNewLocalField({ fieldId: data.id!, rank: newRank });

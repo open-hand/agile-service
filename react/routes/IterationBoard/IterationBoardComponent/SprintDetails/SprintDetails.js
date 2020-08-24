@@ -1,3 +1,5 @@
+/* eslint-disable react/sort-comp */
+/* eslint-disable react/destructuring-assignment */
 import React, { Component } from 'react';
 import { stores, Choerodon } from '@choerodon/boot';
 import {
@@ -6,6 +8,7 @@ import {
 import _ from 'lodash';
 import { withRouter } from 'react-router-dom';
 import { sprintApi } from '@/api';
+import { LINK_URL_TO } from '@/constants/LINK_URL';
 import TypeTag from '../../../../components/TypeTag';
 import PriorityTag from '../../../../components/PriorityTag';
 import StatusTag from '../../../../components/StatusTag';
@@ -46,9 +49,8 @@ class SprintDetails extends Component {
   getPagination = (pagination, res) => { // 注意：pagination
     if (pagination === undefined) {
       return res.list.length > 10 ? { current: 1, pageSize: 10 } : false;
-    } else {
-      return { current: pagination.page + 1, pageSize: pagination.size };
     }
+    return { current: pagination.page + 1, pageSize: pagination.size };
   }
 
   handleTableChange = (pagination) => {
@@ -109,7 +111,6 @@ class SprintDetails extends Component {
       });
   }
 
-
   loadUndoIssues(sprintId, pagination) {
     this.setState({
       loading: true,
@@ -139,7 +140,7 @@ class SprintDetails extends Component {
     sprintApi.loadSprintIssues(sprintId, 'unfinished')
       .then((res) => {
         this.setState({
-          undoAndNotEstimatedIssues: res.list.filter(item => (item.storyPoints === 0 && item.typeCode === 'story') || (item.remainTime === null && item.typeCode === 'task')),
+          undoAndNotEstimatedIssues: res.list.filter((item) => (item.storyPoints === 0 && item.typeCode === 'story') || (item.remainTime === null && item.typeCode === 'task')),
           loading: false,
           pagination: this.getPagination(pagination, res),
         });
@@ -157,7 +158,7 @@ class SprintDetails extends Component {
     return (
       <div>
         <Table
-          rowKey={record => record.issueId}
+          rowKey={(record) => record.issueId}
           dataSource={doneIssues}
           columns={column}
           filterBar={false}
@@ -175,7 +176,7 @@ class SprintDetails extends Component {
     return (
       <div>
         <Table
-          rowKey={record => record.issueId}
+          rowKey={(record) => record.issueId}
           dataSource={undoIssues}
           columns={column}
           filterBar={false}
@@ -193,7 +194,7 @@ class SprintDetails extends Component {
     return (
       <div>
         <Table
-          rowKey={record => record.issueId}
+          rowKey={(record) => record.issueId}
           dataSource={undoAndNotEstimatedIssues}
           columns={column}
           filterBar={false}
@@ -207,10 +208,9 @@ class SprintDetails extends Component {
   }
 
   handleSkipDeatil(text, record) {
-    const { history } = this.props;
     const { sprintId } = this.state;
     const urlParams = AppState.currentMenuType;
-    history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${encodeURIComponent(urlParams.id)}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${record.issueNum}&paramIssueId=${encodeURIComponent(record.issueId)}&paramUrl=iterationBoard/${sprintId}`);
+    LINK_URL_TO.issueLinkTo(record.issueId, record.issueNum);
   }
 
   render() {
