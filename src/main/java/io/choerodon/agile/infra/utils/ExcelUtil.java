@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.utils;
 
+import io.choerodon.agile.infra.dto.ExcelCursorDTO;
 import io.choerodon.agile.infra.dto.PredefinedDTO;
 import io.choerodon.core.exception.CommonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -354,6 +355,7 @@ public class ExcelUtil {
     public static <T> SXSSFWorkbook generateExcel(List<T> list, Class<T> clazz, String[] fieldsName, String[] fields, String sheetName) {
         //1、创建工作簿
         SXSSFWorkbook workbook = new SXSSFWorkbook();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         if (list != null && !list.isEmpty()) {
             //1.3、列标题样式
             CellStyle style2 = createCellStyle(workbook, (short) 13, CellStyle.ALIGN_LEFT, true);
@@ -377,55 +379,66 @@ public class ExcelUtil {
                     cell2.setCellStyle(style2);
                     cell2.setCellValue(fieldsName[i]);
                     //4、操作单元格；将数据写入excel
-                    handleWriteCell(row, i, data, cellStyle, fields, clazz, null);
+                    handleWriteCell(row, i, data, cellStyle, fields, clazz, null, formatter);
                 }
             }
         }
         return workbook;
     }
 
-    /**
-     * 通过类导出
-     */
-    public static <T> void export(Map<Long, T> map,
-                                  Map<Long,Set<Long>> parentSonMap,
-                                  Class<T> clazz, String[] fieldsName,
-                                  String[] fields, String sheetName,
-                                  List<String> autoSizeColumn,
-                                  HttpServletResponse response) {
-        if (!ObjectUtils.isEmpty(map)) {
-            //1、创建工作簿
-            SXSSFWorkbook workbook = new SXSSFWorkbook();
-            //1.3、列标题样式
-            CellStyle style2 = createCellStyle(workbook, (short) 13, CellStyle.ALIGN_LEFT, true);
-            //1.4、强制换行
-            CellStyle cellStyle = workbook.createCellStyle();
-            cellStyle.setWrapText(true);
-            //2、创建工作表
-            SXSSFSheet sheet = workbook.createSheet(sheetName);
-            //设置默认列宽
-            sheet.setDefaultColumnWidth(13);
-            sheet.setColumnWidth(3, 12000);
-            //创建标题列
-            SXSSFRow row2 = sheet.createRow(0);
-            row2.setHeight((short) 260);
-            for (int i = 0; i < fieldsName.length; i++) {
-                //3.3设置列标题
-                SXSSFCell cell2 = row2.createCell(i);
-                //加载单元格样式
-                style2.setFillForegroundColor(HSSFColor.PALE_BLUE.index);
-                style2.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-                cell2.setCellStyle(style2);
-                cell2.setCellValue(fieldsName[i]);
-            }
+    public static Workbook initIssueExportWorkbook(String sheetName, String[] fieldsName) {
+        //1、创建工作簿
+        SXSSFWorkbook workbook = new SXSSFWorkbook();
+        //1.3、列标题样式
+        CellStyle style2 = createCellStyle(workbook, (short) 13, CellStyle.ALIGN_LEFT, true);
+        //1.4、强制换行
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setWrapText(true);
+        //2、创建工作表
+        SXSSFSheet sheet = workbook.createSheet(sheetName);
+        //设置默认列宽
+        sheet.setDefaultColumnWidth(13);
+        sheet.setColumnWidth(3, 12000);
+        //创建标题列
+        SXSSFRow row2 = sheet.createRow(0);
+        row2.setHeight((short) 260);
+        for (int i = 0; i < fieldsName.length; i++) {
+            //3.3设置列标题
+            SXSSFCell cell2 = row2.createCell(i);
+            //加载单元格样式
+            style2.setFillForegroundColor(HSSFColor.PALE_BLUE.index);
+            style2.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            cell2.setCellStyle(style2);
+            cell2.setCellValue(fieldsName[i]);
+        }
+        return workbook;
+    }
 
+    public static <T> void writeIssue(Map<Long, T> map,
+                                      Map<Long,Set<Long>> parentSonMap,
+                                      Class<T> clazz,
+                                      String[] fieldsName,
+                                      String[] fields,
+                                      String sheetName,
+                                      List<String> autoSizeColumn,
+                                      Workbook workbook,
+                                      ExcelCursorDTO cursor) {
+        //样式
+        CellStyle cellStyle = workbook.createCellStyle();
+        SXSSFSheet sheet = (SXSSFSheet) workbook.getSheet(sheetName);
+        cellStyle.setWrapText(true);
+
+        CellStyle tanForegroundColor = createForegroundColor(workbook, IndexedColors.TAN);
+        CellStyle lightTurquoiseForegroundColor = createForegroundColor(workbook, IndexedColors.LIGHT_TURQUOISE);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        if (!ObjectUtils.isEmpty(map)) {
             Set<Long> childrenSet = new HashSet<>();
             for (Map.Entry<Long, Set<Long>> entry : parentSonMap.entrySet()) {
                 childrenSet.addAll(entry.getValue());
             }
-            int rowNum = 1;
             IndexedColors lastColors = null;
             for (Map.Entry<Long, T> entry : map.entrySet()) {
+                int rowNum = cursor.getRow();
                 Long id = entry.getKey();
                 T data = entry.getValue();
                 if (childrenSet.contains(id)) {
@@ -437,22 +450,24 @@ public class ExcelUtil {
                 if (hasSonNodes) {
                     if (ObjectUtils.isEmpty(lastColors)) {
                         lastColors = IndexedColors.TAN;
+                        foregroundColor = tanForegroundColor;
                     } else if (IndexedColors.TAN.equals(lastColors)) {
                         lastColors = IndexedColors.LIGHT_TURQUOISE;
+                        foregroundColor = lightTurquoiseForegroundColor;
                     } else if (IndexedColors.LIGHT_TURQUOISE.equals(lastColors)) {
                         lastColors = IndexedColors.TAN;
+                        foregroundColor = tanForegroundColor;
                     }
-                    foregroundColor = createForegroundColor(workbook, lastColors);
                 }
-                fillInExcelRow(clazz, fieldsName, fields, cellStyle, sheet, rowNum, data, foregroundColor);
-                rowNum++;
+                fillInExcelRow(clazz, fieldsName, fields, cellStyle, sheet, rowNum, data, foregroundColor, formatter);
+                rowNum = cursor.increaseRow();
 
                 if (hasSonNodes) {
                     for (Long sonId : sonSet) {
                         T son = map.get(sonId);
                         if (!ObjectUtils.isEmpty(son)) {
-                            fillInExcelRow(clazz, fieldsName, fields, cellStyle, sheet, rowNum, son, foregroundColor);
-                            rowNum++;
+                            fillInExcelRow(clazz, fieldsName, fields, cellStyle, sheet, rowNum, son, foregroundColor, formatter);
+                            rowNum = cursor.increaseRow();
                         }
                     }
                 }
@@ -464,26 +479,28 @@ public class ExcelUtil {
                     sheet.autoSizeColumn(i);
                 }
             }
-            //5、输出
+        }
+    }
+
+    public static void writeToResponse(HttpServletResponse response, Workbook workbook) {
+        try {
+            String disposition = String.format("attachment;filename=\"%s-%s.xlsx\"", "Choerodon", System.currentTimeMillis());
+            response.setContentType("application/vnd.ms-excel");
+            response.setCharacterEncoding("utf-8");
+            response.addHeader("Content-Disposition", disposition);
+            workbook.write(response.getOutputStream());
+        } catch (Exception e) {
+            LOGGER.error(EXCEPTION, e);
+        } finally {
             try {
-                String disposition = String.format("attachment;filename=\"%s-%s.xlsx\"", "Choerodon", System.currentTimeMillis());
-                response.setContentType("application/vnd.ms-excel");
-                response.setCharacterEncoding("utf-8");
-                response.addHeader("Content-Disposition", disposition);
-                workbook.write(response.getOutputStream());
-            } catch (Exception e) {
+                workbook.close();
+            } catch (IOException e) {
                 LOGGER.error(EXCEPTION, e);
-            } finally {
-                try {
-                    workbook.close();
-                } catch (IOException e) {
-                    LOGGER.error(EXCEPTION, e);
-                }
             }
         }
     }
 
-    protected static CellStyle createForegroundColor(SXSSFWorkbook workbook, IndexedColors colors) {
+    protected static CellStyle createForegroundColor(Workbook workbook, IndexedColors colors) {
         CellStyle cellStyle = workbook.createCellStyle();
         cellStyle.setFillForegroundColor(colors.getIndex());
         cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
@@ -491,18 +508,19 @@ public class ExcelUtil {
     }
 
     protected static <T> void fillInExcelRow(Class<T> clazz,
-                                           String[] fieldsName,
-                                           String[] fields,
-                                           CellStyle cellStyle,
-                                           SXSSFSheet sheet,
-                                           int rowNum,
-                                           T data,
-                                           CellStyle foregroundColor) {
+                                             String[] fieldsName,
+                                             String[] fields,
+                                             CellStyle cellStyle,
+                                             SXSSFSheet sheet,
+                                             int rowNum,
+                                             T data,
+                                             CellStyle foregroundColor,
+                                             SimpleDateFormat formatter) {
         SXSSFRow row = sheet.createRow(rowNum);
         row.setHeight((short) 260);
         for (int i = 0; i < fieldsName.length; i++) {
             //4、操作单元格；将数据写入excel
-            handleWriteCell(row, i, data, cellStyle, fields, clazz, foregroundColor);
+            handleWriteCell(row, i, data, cellStyle, fields, clazz, foregroundColor, formatter);
         }
     }
 
@@ -512,7 +530,8 @@ public class ExcelUtil {
                                               CellStyle cellStyle,
                                               String[] fields,
                                               Class<T> clazz,
-                                              CellStyle foregroundColor) {
+                                              CellStyle foregroundColor,
+                                              SimpleDateFormat formatter) {
         SXSSFCell cell = row.createCell(i);
         cell.setCellStyle(cellStyle);
         if (!ObjectUtils.isEmpty(foregroundColor)) {
@@ -523,7 +542,7 @@ public class ExcelUtil {
             try {
                 method = clazz.getMethod(createGetter(fields[i]));
             } catch (NoSuchMethodException e) {
-                LOGGER.debug("no such method exception: {}", e);
+                LOGGER.debug("no such method exception: {}", e.getMessage());
                 try {
                     method = clazz.getMethod("getFoundationFieldValue");
                 } catch (NoSuchMethodException e1) {
@@ -537,7 +556,6 @@ public class ExcelUtil {
                 LOGGER.error(EXCEPTION, e);
             }
             if (invoke instanceof Date) {
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 cell.setCellValue(substring(formatter.format(invoke)));
             } else if (invoke instanceof Map) {
                 ObjectMapper m = new ObjectMapper();
