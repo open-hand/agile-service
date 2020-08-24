@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { Icon, Popconfirm, Tooltip } from 'choerodon-ui';
 import './DocItem.less';
-
+import to from '@/utils/to';
+import LINK_URL from '@/constants/LINK_URL';
 
 class DocItem extends Component {
   paramConverter = (url) => {
@@ -18,19 +19,14 @@ class DocItem extends Component {
     return retObj;
   };
 
-  getUrl = (id) => {
-    const { origin } = window.location;
-    const { location } = this.props;
-    const { search } = location;
-    const params = this.paramConverter(search);
-    return `${origin}#/knowledge/project?spaceId=${id}&type=project&id=${params.id}&name=${params.name}&category=${params.category}&organizationId=${params.organizationId}&orgId=${params.organizationId}`;
-  };
-
   handleDocClick = ({ id, baseId }) => {
-    const { location, history } = this.props;
-    const { search } = location;
-    const params = this.paramConverter(search);
-    history.push(`/knowledge/project/doc/${baseId}?spaceId=${id}&type=project&id=${params.id}&name=${params.name}&category=${params.category}&organizationId=${params.organizationId}&orgId=${params.organizationId}`);
+    console.log('handleDocClick', id);
+    to(LINK_URL.knowledgeDoc(baseId), {
+      params: {
+        type: 'project',
+        spaceId: id,
+      },
+    });
   };
 
   render() {
@@ -47,7 +43,7 @@ class DocItem extends Component {
             <a
               role="none"
               className={`c7n-docItem-text c7n-docItem-${type}`}
-              onClick={this.handleDocClick.bind(this, doc.workSpaceVO)}    
+              onClick={this.handleDocClick.bind(this, doc.workSpaceVO)}
               rel="noopener noreferrer"
             >
               {doc.workSpaceVO.name}
@@ -59,8 +55,7 @@ class DocItem extends Component {
                 {doc.wikiName}
               </span>
             </Tooltip>
-          )
-        }
+          )}
 
         <Popconfirm
           title="确认删除知识关联吗？"
