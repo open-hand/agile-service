@@ -26,6 +26,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -519,6 +520,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId, Long statusId) {
         Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
@@ -539,7 +541,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         StatusMachineNodeDTO exist = new StatusMachineNodeDTO();
         exist.setStatusId(currentStatusId);
         exist.setOrganizationId(organizationId);
-        if (statusMachineNodeMapper.existByProjectId(projectId, currentStatusId)){
+        if (!statusMachineNodeMapper.existByProjectId(projectId, currentStatusId)){
             // 无关联则删除与issue_status关联
             IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
             issueStatusDTO.setProjectId(projectId);

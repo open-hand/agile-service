@@ -294,7 +294,7 @@
         DELETE FROM agile_board_column_status_rel
         WHERE
             status_id = #{statusId}
-          AND projectId = #{projectId}
+          AND project_id = #{projectId}
     </delete>
 
     <select id="sortAndJudgeCompleted" resultType="java.lang.Long">
