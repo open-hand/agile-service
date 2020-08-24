@@ -14,7 +14,6 @@ import SubTask from './SubTask';
 import SubBug from './SubBug';
 import IssueLink from './IssueLink';
 import IssueBranch from './IssueBranch';
-import IssueTestExecute from './IssueTestExecute';
 import IssueDropDown from '../IssueDropDown';
 import IssuePIHistory from './IssuePIHistory';
 import { FieldStoryPoint, FieldSummary } from './Field';
@@ -94,7 +93,6 @@ function IssueBody(props) {
           } */}
           {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
             ? <IssueLink {...props} /> : ''}
-          {store.testExecutes.length > 0 ? <IssueTestExecute {...props} /> : null}
           {['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
         </TabPane>
         {

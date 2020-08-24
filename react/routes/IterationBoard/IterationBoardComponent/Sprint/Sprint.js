@@ -83,7 +83,6 @@ class Sprint extends Component {
 
   renderUserHead() {
     const { sprintInfo: { assigneeIssueVOList } } = this.state;
-    const { history } = this.props;
     return (
       <div className="users">
         {
@@ -147,4 +146,4 @@ class Sprint extends Component {
   }
 }
 
-export default withRouter(Sprint);
+export default Sprint;

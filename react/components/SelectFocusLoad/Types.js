@@ -3,17 +3,19 @@ import React from 'react';
 import { Select } from 'choerodon-ui';
 import { find } from 'lodash';
 import {
-  userApi, componentApi, issueApi, epicApi, versionApi, issueTypeApi, commonApi, issueLabelApi, priorityApi, statusApi,
+  userApi, componentApi, issueApi, epicApi, versionApi,
+  issueTypeApi, commonApi, issueLabelApi, priorityApi, statusApi,
+  featureApi, piApi, sprintApi,
 } from '@/api';
 
 import { issueLinkTypeApi } from '@/api/IssueLinkType';
-import { featureApi, piApi, sprintApi } from '@/api';
+
 import { Tooltip } from 'choerodon-ui/pro';
 import UserHead from '../UserHead';
 import TypeTag from '../TypeTag';
 import StatusTag from '../StatusTag';
 import { IsInProgramStore } from '../../exports';
-// 增加 typeof 避免选项中 加载更多 影响 
+// 增加 typeof 避免选项中 加载更多 影响
 const filterOption = (input, option) => option.props.children && typeof (option.props.children) === 'string' && option.props.children.toLowerCase().indexOf(
   input.toLowerCase(),
 ) >= 0;
@@ -22,7 +24,7 @@ const filterOptionByName = (input, option) => option.props.name && typeof (optio
 ) >= 0;
 export function transform(links) {
   // split active and passive
-  const active = links.map(link => ({
+  const active = links.map((link) => ({
     name: link.outWard,
     isIn: false,
     linkTypeId: link.linkTypeId,
@@ -45,10 +47,10 @@ const issue_type_program = {
   props: {
     filterOption,
   },
-  request: () => new Promise(resolve => issueTypeApi.loadAllWithStateMachineId('program').then((issueTypes) => {
+  request: () => new Promise((resolve) => issueTypeApi.loadAllWithStateMachineId('program').then((issueTypes) => {
     resolve(issueTypes);
   })),
-  render: issueType => (
+  render: (issueType) => (
     <Option
       key={issueType.id}
       value={issueType.id}
@@ -65,8 +67,8 @@ const issue_type_program = {
 };
 export default {
   user: {
-    request: ({ filter, page }) => userApi.getAllInProject(filter, page).then(UserData => ({ ...UserData, list: UserData.list.filter(user => user.enabled) })),
-    render: user => (
+    request: ({ filter, page }) => userApi.getAllInProject(filter, page).then((UserData) => ({ ...UserData, list: UserData.list.filter((user) => user.enabled) })),
+    render: (user) => (
       <Option key={user.id} value={user.id}>
         <div style={{
           display: 'inline-flex', alignItems: 'center', padding: 2, verticalAlign: 'sub',
@@ -102,7 +104,7 @@ export default {
   },
   issue_status: {
     request: () => statusApi.loadByProject('agile'),
-    render: status => (
+    render: (status) => (
       <Option
         key={status.id}
         value={status.id}
@@ -113,10 +115,10 @@ export default {
     ),
   },
   status_program: {
-    request: () => new Promise(resolve => statusApi.loadByProject('program').then((statusList) => {
+    request: () => new Promise((resolve) => statusApi.loadByProject('program').then((statusList) => {
       resolve(statusList);
     })),
-    render: status => (
+    render: (status) => (
       <Option
         key={status.id}
         value={status.id}
@@ -135,7 +137,7 @@ export default {
       filterOption,
     },
     request: () => epicApi.loadEpicsForSelect(),
-    render: epic => (
+    render: (epic) => (
       <Option
         key={epic.issueId}
         value={epic.issueId}
@@ -146,7 +148,7 @@ export default {
   },
   epic_program: {
     props: {
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
       filterOption:
         (input, option) => option.props.children
           && option.props.children.toLowerCase().indexOf(
@@ -154,7 +156,7 @@ export default {
           ) >= 0,
     },
     request: epicApi.loadProgramEpics,
-    render: epic => (
+    render: (epic) => (
       <Option
         key={epic.issueId}
         value={epic.issueId}
@@ -166,7 +168,7 @@ export default {
   issue_type_program,
   issue_type_program_simple: {
     ...issue_type_program,
-    render: issueType => (
+    render: (issueType) => (
       <Option
         key={issueType.id}
         value={issueType.id}
@@ -178,7 +180,7 @@ export default {
   },
   issue_type: {
     request: () => issueTypeApi.loadAllWithStateMachineId('agile'),
-    render: issueType => (
+    render: (issueType) => (
       <Option
         key={issueType.id}
         value={issueType.id}
@@ -190,7 +192,7 @@ export default {
   },
   issue_type_program_feature_epic: {
     ...issue_type_program,
-    request: () => new Promise(resolve => issueTypeApi.loadAllWithStateMachineId('program').then((issueTypes) => {
+    request: () => new Promise((resolve) => issueTypeApi.loadAllWithStateMachineId('program').then((issueTypes) => {
       const featureTypes = [{
         id: 'business',
         name: '特性',
@@ -201,7 +203,7 @@ export default {
       const epicType = find(issueTypes, { typeCode: 'issue_epic' });
       resolve([...featureTypes, epicType]);
     })),
-    render: issueType => (
+    render: (issueType) => (
       <Option
         key={issueType.id}
         value={issueType.id}
@@ -213,13 +215,13 @@ export default {
   },
   issue_link: {
     props: {
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
       filter: false,
       filterOption: false,
       loadWhenMount: true,
     },
-    request: () => issueLinkTypeApi.getAll().then(res => transform(res.list)),
-    render: link => (
+    request: () => issueLinkTypeApi.getAll().then((res) => transform(res.list)),
+    render: (link) => (
       <Option value={`${link.linkTypeId}+${link.isIn}`}>
         {link.name}
       </Option>
@@ -229,10 +231,10 @@ export default {
     props: {
       mode: 'multiple',
       optionLabelProp: 'showName',
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
     },
     request: ({ filter, page }, issueId) => issueApi.loadIssuesInLink(page, 20, issueId, filter),
-    render: issue => (
+    render: (issue) => (
       <Option
         key={issue.issueId}
         value={issue.issueId}
@@ -274,10 +276,10 @@ export default {
     props: {
       mode: 'multiple',
       optionLabelProp: 'showName',
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
     },
     request: ({ filter, page }, issueId) => featureApi.loadFeaturesInLink(page, 20, issueId, filter),
-    render: issue => (
+    render: (issue) => (
       <Option
         key={issue.featureId}
         value={issue.featureId}
@@ -316,14 +318,14 @@ export default {
   },
   priority: {
     props: {
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
       filter: false,
       filterOption: false,
       loadWhenMount: true,
     },
     request: () => priorityApi.loadByProject(),
-    getDefaultValue: priorities => find(priorities, { default: true }).id,
-    render: priority => (
+    getDefaultValue: (priorities) => find(priorities, { default: true }).id,
+    render: (priority) => (
       <Option key={priority.id} value={priority.id}>
         <div style={{ display: 'inline-flex', alignItems: 'center', padding: 2 }}>
           <span>{priority.name}</span>
@@ -333,13 +335,13 @@ export default {
   },
   component: {
     props: {
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
       filter: false,
       filterOption: false,
       loadWhenMount: true,
     },
     request: ({ filter }) => componentApi.loadAllComponents(filter),
-    render: component => (
+    render: (component) => (
       <Option
         key={component.name}
         value={component.name}
@@ -350,13 +352,13 @@ export default {
   },
   label: {
     props: {
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
       filter: false,
       filterOption: false,
       loadWhenMount: true,
     },
     request: () => issueLabelApi.loads(),
-    render: label => (
+    render: (label) => (
       <Option key={label.labelName} value={label.labelName}>
         {label.labelName}
       </Option>
@@ -364,13 +366,13 @@ export default {
   },
   label_id: {
     props: {
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
       filter: true,
       filterOption,
       loadWhenMount: true,
     },
     request: () => issueLabelApi.loads(),
-    render: label => (
+    render: (label) => (
       <Option key={label.labelId} value={label.labelId}>
         {label.labelName}
       </Option>
@@ -378,13 +380,13 @@ export default {
   },
   version: {
     props: {
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
       filter: false,
       filterOption: false,
       loadWhenMount: true,
     },
     request: ({ filter, page }, statusList = ['version_planning']) => versionApi.loadNamesByStatus(statusList),
-    render: version => (
+    render: (version) => (
       <Option
         key={version.versionId}
         value={version.versionId}
@@ -395,12 +397,12 @@ export default {
   },
   sprint: {
     props: {
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
       filterOption,
       loadWhenMount: true,
     },
     request: ({ filter, page }, statusList = ['sprint_planning', 'started']) => sprintApi.loadSprints(statusList),
-    render: sprint => (
+    render: (sprint) => (
       <Option key={sprint.sprintId} value={sprint.sprintId}>
         {sprint.sprintName}
       </Option>
@@ -408,12 +410,12 @@ export default {
   },
   sprint_in_project: {
     props: {
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
       filterOption,
       loadWhenMount: true,
     },
     request: ({ filter, page }, { teamId, piId }) => sprintApi.loadSprintsByTeam(teamId, piId),
-    render: sprint => (
+    render: (sprint) => (
       <Option key={sprint.sprintId} value={sprint.sprintId}>
         {sprint.sprintName}
       </Option>
@@ -421,12 +423,12 @@ export default {
   },
   pi: {
     props: {
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
       filterOption,
       loadWhenMount: true,
     },
     request: () => piApi.getUnfinished(),
-    render: pi => (
+    render: (pi) => (
       <Option disabled={!IsInProgramStore.isOwner && pi.statusCode === 'doing'} key={pi.id} value={pi.id}>
         {`${pi.code}-${pi.name}`}
       </Option>
@@ -434,14 +436,14 @@ export default {
   },
   all_pi: {
     props: {
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
       filterOption,
       onFilterChange: false,
       loadWhenMount: true,
       label: 'PI',
     },
     request: () => piApi.getPiListByStatus(),
-    render: pi => (
+    render: (pi) => (
       <Option disabled={!IsInProgramStore.isOwner && pi.statusCode === 'doing'} key={pi.id} value={pi.id}>
         {pi.code ? `${pi.code}-${pi.name}` : pi.name}
       </Option>
@@ -449,35 +451,35 @@ export default {
   },
   feature: {
     request: ({ filter, page }, requestArgs) => featureApi.getByEpicId(undefined, filter, page),
-    render: item => (
+    render: (item) => (
       <Option key={`${item.issueId}`} value={item.issueId}>{item.summary}</Option>
     ),
     props: {
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
       filterOption,
       loadWhenMount: true,
     },
   }, // 特性列表
   feature_all: {
     request: ({ filter, page }, requestArgs) => featureApi.queryAllInSubProject(requestArgs, filter, page),
-    render: item => (
+    render: (item) => (
       <Option key={`${item.issueId}`} value={item.issueId}>{item.summary}</Option>
     ),
     props: {
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
       filterOption,
       loadWhenMount: true,
     },
   }, // 特性列表
   sub_project: {
     props: {
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
       filterOption: filterOptionByName,
       onFilterChange: false,
       loadWhenMount: true,
     },
     request: () => commonApi.getSubProjects(true),
-    render: pro => (
+    render: (pro) => (
       <Option key={pro.projectId} value={pro.projectId} name={pro.projName}>
         <Tooltip title={pro.projName}>{pro.projName}</Tooltip>
       </Option>
@@ -485,15 +487,15 @@ export default {
   },
   sub_sprint: {
     props: {
-      getPopupContainer: triggerNode => triggerNode.parentNode,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
       filterOption,
       onFilterChange: false,
       loadWhenMount: true,
     },
     request: ({ filter, page }, { piId, teamIds }) => sprintApi.getTeamSprints(piId, teamIds),
-    render: team => (
+    render: (team) => (
       <OptGroup label={team.projectVO.name} key={team.projectVO.id}>
-        {(team.sprints || []).map(sprint => (
+        {(team.sprints || []).map((sprint) => (
           <Option key={`${sprint.sprintId}`} value={sprint.sprintId}>
             <Tooltip placement="topRight" title={sprint.sprintName}>{sprint.sprintName}</Tooltip>
           </Option>

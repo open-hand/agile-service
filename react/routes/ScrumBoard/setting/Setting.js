@@ -1,3 +1,5 @@
+/* eslint-disable react/sort-comp */
+/* eslint-disable react/prop-types */
 import React, { Component, Fragment } from 'react';
 import { observer } from 'mobx-react';
 import {
@@ -10,6 +12,8 @@ import {
 import { withRouter } from 'react-router-dom';
 import './Setting.less';
 import { commonApi, boardApi } from '@/api';
+import to from '@/utils/to';
+import LINK_URL from '@/constants/LINK_URL';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import SettingColumn from './components/setting-column';
 import SwimLanePage from './components/SwimLanePage/SwimLanePage';
@@ -54,9 +58,7 @@ class Setting extends Component {
     });
     const boardId = ScrumBoardStore.getSelectedBoard;
     if (!boardId) {
-      const { history } = this.props;
-      const urlParams = AppState.currentMenuType;
-      history.push(`/agile/scrumboard?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`);
+      to(LINK_URL.scrumboard);
     } else {
       ScrumBoardStore.loadStatus();
       boardApi.load(boardId).then((data) => {
@@ -92,8 +94,6 @@ class Setting extends Component {
   }
 
   handleDeleteBoard() {
-    const { history } = this.props;
-    const urlParams = AppState.currentMenuType;
     const { name } = ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard);
     confirm({
       title: `删除看板"${name}"`,
@@ -104,7 +104,7 @@ class Setting extends Component {
       width: 520,
       onOk() {
         boardApi.delete(ScrumBoardStore.getSelectedBoard).then((res) => {
-          history.push(`/agile/scrumboard?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`);
+          to(LINK_URL.scrumboard);
         }).catch((error) => {
         });
       },
@@ -140,11 +140,11 @@ class Setting extends Component {
     });
   }
 
-  renderWorkCalendarPage = updateWorkDatePermission => (
+  renderWorkCalendarPage = (updateWorkDatePermission) => (
     <WorkCalendarPage selectedDateDisabled={!updateWorkDatePermission} />
   )
 
-  renderEditBoardName = editBoardNamePermission => (
+  renderEditBoardName = (editBoardNamePermission) => (
     <EditBoardName
       editBoardNameDisabled={!editBoardNamePermission}
       saveRef={(ref) => {
@@ -152,7 +152,7 @@ class Setting extends Component {
       }}
     />
   )
-  
+
   render() {
     const { loading, activeKey } = this.state;
     const menu = AppState.currentMenuType;
@@ -163,11 +163,11 @@ class Setting extends Component {
       >
         <Header title="配置看板">
           {activeKey === '1' ? (
-            <Fragment>
+            <>
               {
               ScrumBoardStore.getCanAddStatus ? (
                 <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.status.create']}>
-                  <Button                    
+                  <Button
                     icon="playlist_add"
                     onClick={this.handleCreateStatusClick}
                   >
@@ -178,7 +178,7 @@ class Setting extends Component {
                 <Tooltip
                   placement="bottomLeft"
                   title="当前项目关联了多个状态机，无法创建状态。"
-                  getPopupContainer={triggerNode => triggerNode.parentNode}
+                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
                 >
                   <Button
                     funcType="flat"
@@ -199,14 +199,14 @@ class Setting extends Component {
                   添加列
                 </Button>
               </Permission>
-            </Fragment>
+            </>
           ) : null}
           <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.board.delete']}>
-            <Button funcType="flat" onClick={this.handleDeleteBoard.bind(this)} disabled={ScrumBoardStore.getBoardList.size === 1}>
+            <Button funcType="flat" onClick={() => this.handleDeleteBoard()} disabled={ScrumBoardStore.getBoardList.size === 1}>
               <Icon type="delete_forever icon" />
               <span>删除看板</span>
             </Button>
-          </Permission>         
+          </Permission>
         </Header>
         <Breadcrumb title="配置看板" />
         <Content className="c7n-scrumboard" style={{ height: '100%', paddingTop: 0 }}>
@@ -219,8 +219,8 @@ class Setting extends Component {
           >
             <TabPane tab="列配置" key="1">
               <Spin spinning={loading}>
-                <SettingColumn                  
-                  refresh={this.refresh.bind(this)}
+                <SettingColumn
+                  refresh={this.refresh}
                 />
               </Spin>
             </TabPane>
@@ -234,8 +234,7 @@ class Setting extends Component {
                     {this.renderWorkCalendarPage}
                   </Permission>
                 </TabPane>
-              ) : null
-            }
+              ) : null}
             <TabPane tab="看板名称" key="4">
               <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.board.update']}>
                 {this.renderEditBoardName}

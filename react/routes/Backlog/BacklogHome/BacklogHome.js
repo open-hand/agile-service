@@ -2,13 +2,13 @@ import React, { Component, Fragment } from 'react';
 import { observer } from 'mobx-react';
 import {
   TabPage as Page, Header, Breadcrumb, Content,
+  Permission,
 } from '@choerodon/boot';
 import {
   Button, Spin, Icon, Tooltip,
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
-import { Permission } from '@choerodon/boot';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';
@@ -28,7 +28,8 @@ class BacklogHome extends Component {
     const { BacklogStore } = this.props;
     BacklogStore.resetData();
     BacklogStore.refresh();
-    if (IsInProgramStore.isShowFeature) {
+    const { isShowFeature } = this.props;
+    if (isShowFeature) {
       BacklogStore.loadPiInfoAndSprint();
     }
   }
@@ -106,7 +107,7 @@ class BacklogHome extends Component {
     }
   };
 
-  renderCreateSprintInPi = (visible, disabled) => { 
+  renderCreateSprintInPi = (visible, disabled) => {
     if (!visible) {
       return null;
     }
@@ -130,9 +131,9 @@ class BacklogHome extends Component {
   render() {
     const { BacklogStore } = this.props;
     const arr = BacklogStore.getSprintData;
-    const { isInProgram, isShowFeature } = IsInProgramStore;
+    const { isInProgram, isShowFeature } = this.props;
     return (
-      <Fragment>
+      <>
         <Header title="待办事项">
           <Button
             onClick={this.handleClickCBtn}
@@ -151,8 +152,7 @@ class BacklogHome extends Component {
           )}
           {this.renderCreateSprintInPi(isShowFeature, !BacklogStore.getPiInfo.id)}
           {isInProgram && arr.length && arr.length > 1
-            ? <ShowPlanSprint /> : null
-          }
+            ? <ShowPlanSprint /> : null}
         </Header>
         <Breadcrumb />
         {/* 盖住tab下面的边框 */}
@@ -269,15 +269,14 @@ class BacklogHome extends Component {
             />
           </div>
         </Content>
-      </Fragment>
+      </>
     );
   }
 }
 
-const { isInProgram } = IsInProgramStore;
-export default props => (
+export default (props) => (
   <Page
-    service={isInProgram ? [
+    service={props.isInProgram ? [
       'choerodon.code.project.cooperation.work-list.ps.backlog',
       'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.feature',
       'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint',

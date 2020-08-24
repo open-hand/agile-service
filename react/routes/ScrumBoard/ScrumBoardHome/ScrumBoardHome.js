@@ -11,6 +11,8 @@ import CloseSprint from '@/components/close-sprint';
 import {
   sprintApi, issueApi, epicApi, issueTypeApi, statusApi, boardApi,
 } from '@/api';
+import LINK_URL from '@/constants/LINK_URL';
+import to from '@/utils/to';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
@@ -241,9 +243,8 @@ class ScrumBoardHome extends Component {
   };
 
   handleToIterationBoard = () => {
-    const { history } = this.props;
     if (!ScrumBoardStore.getSpinIf) {
-      history.push(`/agile/iterationBoard/${ScrumBoardStore.getSprintId}?type=project&id=${AppState.currentMenuType.id}&name=${AppState.currentMenuType.name}&organizationId=${AppState.currentMenuType.organizationId}&orgId=${AppState.currentMenuType.organizationId}`);
+      to(LINK_URL.iterationBoard);
     } else {
       Choerodon.prompt('等待加载当前迭代');
     }
@@ -338,7 +339,7 @@ class ScrumBoardHome extends Component {
   }
 
   render() {
-    const { history, HeaderStore } = this.props;
+    const { HeaderStore } = this.props;
     const {
       updateParentStatus,
     } = this.state;
@@ -396,8 +397,11 @@ class ScrumBoardHome extends Component {
               marginRight: 15,
             }}
             onClick={() => {
-              const urlParams = AppState.currentMenuType;
-              history.push(`/agile/scrumboard/setting?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&boardId=${ScrumBoardStore.getSelectedBoard}`);
+              to(LINK_URL.scrumboardSetting, {
+                params: {
+                  boardId: ScrumBoardStore.getSelectedBoard,
+                },
+              });
             }}
           >
             配置看板

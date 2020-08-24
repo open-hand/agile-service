@@ -20,8 +20,8 @@ import {
   getProjectName, getProjectId,
 } from '@/utils/common';
 import { observer } from 'mobx-react';
+import { IsInProgram } from '@/hooks/useIsInProgram';
 import { UploadButton } from '../CommonComponent';
-import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 import SelectNumber from '../SelectNumber';
 import WYSIWYGEditor from '../WYSIWYGEditor';
 import TypeTag from '../TypeTag';
@@ -384,7 +384,7 @@ class CreateIssue extends Component {
     });
   };
 
-  getIssueTypes = () => {
+  getIssueTypes = (isInProgram) => {
     const { mode } = this.props;
     const { originIssueTypes } = this.state;
     const filterSubType = (type) => (!['sub_task'].includes(type.typeCode));
@@ -393,7 +393,7 @@ class CreateIssue extends Component {
     const issueTypes = applyFilter(originIssueTypes, [
       filterSubType, {
         filter: filterEpic,
-        apply: IsInProgramStore.isInProgram || mode === 'feature', // 在项目群下的子项目和创建feature时，把epic过滤掉
+        apply: isInProgram || mode === 'feature', // 在项目群下的子项目和创建feature时，把epic过滤掉
       }, {
         filter: filterFeature,
         apply: mode !== 'program', // 在项目群中创建issue时不过滤feature类型
@@ -444,44 +444,51 @@ class CreateIssue extends Component {
                 initialValue: defaultTypeId || '',
               })
               : (
-                <FormItem label="问题类型">
-                  {getFieldDecorator('typeId', {
-                    rules: [{ required: true, message: '问题类型为必输项' }],
-                    initialValue: defaultTypeId || '',
-                  })(
-                    <Select
-                      label="问题类型"
-                      getPopupContainer={(triggerNode) => triggerNode.parentNode}
-                      onChange={((value) => {
-                        const { typeCode } = originIssueTypes.find((item) => item.id === value);
-                        this.setState({
-                          newIssueTypeCode: typeCode,
-                        });
-                        const param = {
-                          schemeCode: 'agile_issue',
-                          context: typeCode,
-                          pageCode: 'agile_issue_create',
-                        };
-                        this.loadDefaultTemplate(typeCode);
-                        fieldApi.getFields(param).then((res) => {
-                          this.setState({
-                            fields: res,
-                          });
-                        });
-                      })}
-                    >
-                      {this.getIssueTypes().map((type) => (
-                        <Option key={type.id} value={type.id}>
-                          <TypeTag
-                            data={type}
-                            showName
-                          />
-                        </Option>
-                      ))}
-                    </Select>,
-                  )}
-                </FormItem>
+                <IsInProgram>
+                  {
+                        ({ isInProgram }) => (
+                          <FormItem label="问题类型">
+                            {getFieldDecorator('typeId', {
+                              rules: [{ required: true, message: '问题类型为必输项' }],
+                              initialValue: defaultTypeId || '',
+                            })(<Select
+                              label="问题类型"
+                              getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                              onChange={((value) => {
+                                const { typeCode } = originIssueTypes.find(
+                                  (item) => item.id === value,
+                                );
+                                this.setState({
+                                  newIssueTypeCode: typeCode,
+                                });
+                                const param = {
+                                  schemeCode: 'agile_issue',
+                                  context: typeCode,
+                                  pageCode: 'agile_issue_create',
+                                };
+                                this.loadDefaultTemplate(typeCode);
+                                fieldApi.getFields(param).then((res) => {
+                                  this.setState({
+                                    fields: res,
+                                  });
+                                });
+                              })}
+                            >
+                              {this.getIssueTypes(isInProgram).map((type) => (
+                                <Option key={type.id} value={type.id}>
+                                  <TypeTag
+                                    data={type}
+                                    showName
+                                  />
+                                </Option>
+                              ))}
+                            </Select>)}
+                          </FormItem>
+                        )
+                      }
+                </IsInProgram>
               ),
+
             newIssueTypeCode === 'feature' ? (
               <FormItem>
                 {getFieldDecorator('featureType', {
@@ -621,43 +628,50 @@ class CreateIssue extends Component {
           </FormItem>
         );
       case 'epic':
-        // 如果在项目群中则不显示史诗
-        if (!IsInProgramStore.isInProgram) {
-          return (
-            ['issue_epic', 'sub_task'].includes(newIssueTypeCode) ? null : (
-              <FormItem label="史诗">
-                {getFieldDecorator('epicId', {})(
-                  <SelectFocusLoad
-                    label="史诗"
-                    allowClear
-                    type="epic"
-                    loadWhenMount
-                    afterLoad={() => {
-                      form.setFieldsValue({
-                        // eslint-disable-next-line react/destructuring-assignment
-                        epicId: this.props.epicId,
-                      });
-                    }}
-                  />,
-                )}
-              </FormItem>
-            )
-          );
-        } if (IsInProgramStore.isShowFeature && newIssueTypeCode === 'story') {
-          return (
-            <FormItem label="特性">
-              {getFieldDecorator('featureId', {})(
-                <SelectFocusLoad
-                  label="特性"
-                  allowClear
-                  type="feature"
-                />,
-              )}
-            </FormItem>
-          );
-        }
-        return '';
-
+        return (
+          <IsInProgram>
+            {
+              ({ isInProgram, isShowFeature }) => {
+                // 如果在项目群中则不显示史诗
+                if (!isInProgram) {
+                  return (
+                    ['issue_epic', 'sub_task'].includes(newIssueTypeCode) ? null : (
+                      <FormItem label="史诗">
+                        {getFieldDecorator('epicId', {})(
+                          <SelectFocusLoad
+                            label="史诗"
+                            allowClear
+                            type="epic"
+                            loadWhenMount
+                            afterLoad={() => {
+                              form.setFieldsValue({
+                                // eslint-disable-next-line react/destructuring-assignment
+                                epicId: this.props.epicId,
+                              });
+                            }}
+                          />,
+                        )}
+                      </FormItem>
+                    )
+                  );
+                } if (isShowFeature && newIssueTypeCode === 'story') {
+                  return (
+                    <FormItem label="特性">
+                      {getFieldDecorator('featureId', {})(
+                        <SelectFocusLoad
+                          label="特性"
+                          allowClear
+                          type="feature"
+                        />,
+                      )}
+                    </FormItem>
+                  );
+                }
+                return '';
+              }
+            }
+          </IsInProgram>
+        );
       case 'component':
         return (
           ['sub_task'].includes(newIssueTypeCode) ? null : (

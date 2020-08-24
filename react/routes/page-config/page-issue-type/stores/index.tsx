@@ -3,9 +3,9 @@ import React, {
 } from 'react';
 import { injectIntl, InjectedIntl } from 'react-intl';
 import { getMenuType } from '@/utils/common';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import { DataSet } from 'choerodon-ui/pro/lib';
 import { observer } from 'mobx-react-lite';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import SortTableDataSet from './SortTableDataSet';
 import AddUnselectedDataSet from './AddUnselectedDataSet';
 import PageIssueTypeStore from './PageIssueTypeStore';
@@ -33,7 +33,7 @@ const PageIssueTypeProvider = injectIntl(observer(
     const pageIssueTypeStore = useMemo(() => new PageIssueTypeStore(
       { sortTableDataSet, addUnselectedDataSet },
     ), [sortTableDataSet, addUnselectedDataSet]);
-
+    const { isInProgram } = useIsInProgram();
     const value = {
       ...props,
       sortTableDataSet,
@@ -41,7 +41,7 @@ const PageIssueTypeProvider = injectIntl(observer(
       pageIssueTypeStore,
       prefixCls: 'c7n-agile-page-config-page-issue-type',
       isProject: getMenuType() === 'project',
-      isInProgram: IsInProgramStore.getIsInProgram,
+      isInProgram,
     };
     return (
       <PageIssueTypeContext.Provider value={value}>

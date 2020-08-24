@@ -1,15 +1,16 @@
 import { axios, stores } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
+import Api from './Api';
 
 const { AppState } = stores;
-class CommonApi {
+class CommonApi extends Api {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }
 
   /**
    * 查询项目所有报告人
-   * @param page 
+   * @param page
    * @param param  查询词
    * @param userId  后端不处理
    */
@@ -26,16 +27,19 @@ class CommonApi {
   }
 
   /**
-   * 查询此项目是否展示特性字段 
-   * 
+   * 查询此项目是否展示特性字段
+   *
    */
   getIsShowFeature() {
-    return axios.get(`${this.prefix}/art/isArtDoding`); // 多次请求待优化
+    return this.request({
+      method: 'get',
+      url: `${this.prefix}/art/isArtDoding`,
+      cache: true,
+    });
   }
 
-
   /**
-   * 查询项目群下的子项目  
+   * 查询项目群下的子项目
    * @param onlySelectEnableSubProject  是否只查询启动的子项目
    */
   getSubProjects(onlySelectEnableSubProject: boolean = false) {
@@ -54,9 +58,12 @@ class CommonApi {
    * 不在项目群中无返回信息
    */
   getProjectsInProgram() {
-    return axios.get(`iam/choerodon/v1/organizations/${getOrganizationId()}/projects/${getProjectId()}/program`);
+    return this.request({
+      method: 'get',
+      url: `iam/choerodon/v1/organizations/${getOrganizationId()}/projects/${getProjectId()}/program`,
+      cache: true,
+    });
   }
-
 
   /**
    * 当前项目下用户拥有的角色

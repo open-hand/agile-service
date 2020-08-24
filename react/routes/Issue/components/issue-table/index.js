@@ -1,7 +1,5 @@
 /* eslint-disable max-len */
-import React, {
-  useContext, Fragment,
-} from 'react';
+import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import _, { map } from 'lodash';
 import { Tooltip, Tag } from 'choerodon-ui';
@@ -12,7 +10,7 @@ import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
 import UserHead from '@/components/UserHead';
 import IssueStore from '@/stores/project/issue/IssueStore';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import Store from '../../stores';
 import './index.less';
 
@@ -21,7 +19,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
   const {
     dataSet, fields,
   } = useContext(Store);
-  const { isInProgram } = IsInProgramStore;
+  const { isInProgram } = useIsInProgram();
   const handleRowClick = (record) => {
     // dataSet.select(record);
     const editFilterInfo = IssueStore.getEditFilterInfo;
