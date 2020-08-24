@@ -3,7 +3,7 @@ import { withRouter } from 'react-router-dom';
 import { PageWrap, PageTab } from '@choerodon/boot';
 import { getMenuType } from '@/utils/common';
 import ObjectScheme from './object-scheme';
-import './pageConfig.less';
+import './PageConfig.less';
 import PageIssueType from './page-issue-type';
 
 function PageConfig() {

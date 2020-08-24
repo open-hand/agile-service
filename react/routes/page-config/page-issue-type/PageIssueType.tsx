@@ -191,7 +191,7 @@ function PageIssueType() {
       edited: true,
       created: true,
       required: false,
-      rank: undefined, // 需要修改
+      rank: undefined, // 本地提交数据如需在列表显示需要一个可靠rank
     });
     pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.add);
     !oldField && pageIssueTypeStore.addCreatedField(newData);
@@ -205,15 +205,15 @@ function PageIssueType() {
       newData.rank = newRank;
       oldField && pageIssueTypeStore.addNewLocalField({ fieldId: data.id!, rank: newRank });
       const newRecord = sortTableDataSet.create(newData);
-      pageIssueTypeStore.bindRecordForCreated(newRecord);
+      !oldField && pageIssueTypeStore.bindRecordForCreated(newRecord);
     }
     return true;
   };
 
-  const checkCodeOrName = (key: 'name' | 'code',
+  const checkCodeOrName = (key: 'code' | 'name',
     name: string) => pageIssueTypeStore.getCreatedFields.length !== 0
     && pageIssueTypeStore.getCreatedFields
-      .some((item) => item[key].trim() === name);
+      .some((item) => validKeyReturnValue(key, item).trim() === name);
   function openCreateFieldModal() {
     const values = {
       formatMessage: intl.formatMessage,
