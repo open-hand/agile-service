@@ -13,7 +13,7 @@ const Setting = asyncRouter(() => (import('./setting')));
 const ScrumBoardIndex = ({ match }) => (
   <Switch>
     <PermissionRoute
-      service={[...[
+      permissions={[...[
         'choerodon.code.project.cooperation.iteration-plan.ps.default',
         'choerodon.code.project.cooperation.iteration-plan.ps.board.create',
         'choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish',

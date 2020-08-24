@@ -3,6 +3,7 @@ import { Tabs } from 'choerodon-ui';
 import { stores } from '@choerodon/boot';
 import { find } from 'lodash';
 import IsProgramContext from '@/hooks/useIsProgrom';
+import permission from '@/components/permission';
 import Status from './status';
 import StatusCirculation from './status-circulation';
 import CustomCirculation from './custom-circulation';
@@ -57,4 +58,7 @@ const StateMachine: React.FC = (props) => {
   );
 };
 
-export default StateMachine;
+export default permission([
+  'choerodon.code.project.setting.state.ps.default',
+  'choerodon.code.project.setting.state.ps.master',
+])(StateMachine);
