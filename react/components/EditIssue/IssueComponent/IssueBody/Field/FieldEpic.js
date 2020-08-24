@@ -2,21 +2,12 @@ import React, { Component } from 'react';
 import { Choerodon } from '@choerodon/boot';
 import { observer, inject } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
-import { Select, Tooltip } from 'choerodon-ui';
 import { injectIntl } from 'react-intl';
-import { featureApi, issueApi, epicApi } from '@/api';
+import { featureApi, issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectEpic from '@/components/select/select-epic';
 import SelectFeature from '@/components/select/select-feature';
-// import TextEditToggle from '../../../../TextEditToggle';
-import IsInProgramStore from '../../../../../stores/common/program/IsInProgramStore';
-
-const { Option } = Select;
-// const { Text, Edit } = TextEditToggle;
-
-const filterOption = (input, option) => option.props.name && option.props.name.toLowerCase().indexOf(
-  input.toLowerCase(),
-) >= 0;
+import { IsInProgram } from '@/hooks/useIsInProgram';
 
 @inject('AppState')
 @observer class FieldEpic extends Component {
@@ -82,54 +73,56 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
       featureId, featureName,
     } = issue;
     return (
-      <React.Fragment>
-        {typeCode === 'story' && IsInProgramStore.isShowFeature
-          ? (
-            <div className="line-start mt-10">
-              <div className="c7n-property-wrapper">
-                <span className="c7n-property">
-                  特性
-                </span>
-              </div>
-              <div className="c7n-value-wrapper">
-                <TextEditToggle
-                  disabled={disabled}
-                  onSubmit={this.updateIssueFeature}
-                  initValue={featureName ? featureId || [] : []}
-                  editor={<SelectFeature featureId={featureId} featureName={featureName} />}
-                >
-                  {featureName ? (
-                    <div
-                      className="primary"
-                      style={{ wordBreak: 'break-word' }}
-                    >
-                      {featureName}
+      <IsInProgram>
+        {
+          ({ isShowFeature }) => (
+            <>
+              {typeCode === 'story' && isShowFeature
+                ? (
+                  <div className="line-start mt-10">
+                    <div className="c7n-property-wrapper">
+                      <span className="c7n-property">
+                        特性
+                      </span>
                     </div>
-                  ) : (
-                    <div>
-                      无
+                    <div className="c7n-value-wrapper">
+                      <TextEditToggle
+                        disabled={disabled}
+                        onSubmit={this.updateIssueFeature}
+                        initValue={featureName ? featureId || [] : []}
+                        editor={<SelectFeature featureId={featureId} featureName={featureName} />}
+                        submitTrigger={['change', 'blur']}
+                      >
+                        {featureName ? (
+                          <div
+                            className="primary"
+                            style={{ wordBreak: 'break-word' }}
+                          >
+                            {featureName}
+                          </div>
+                        ) : (
+                          <div>
+                            无
+                          </div>
+                        )}
+                      </TextEditToggle>
                     </div>
-                  )
-                  }
-                </TextEditToggle>
-              </div>
-            </div>
-          ) : ''
-        }
-        <div className="line-start mt-10">
-          <div className="c7n-property-wrapper">
-            <span className="c7n-property">
-              史诗
-            </span>
-          </div>
-          <div className="c7n-value-wrapper">
-            <TextEditToggle
-              disabled={featureName || disabled}
-              onSubmit={this.updateIssueEpic}
-              initValue={issueEpicName ? epicId || null : null}
-              editor={({ submit }) => <SelectEpic onChange={submit} />}
-            >
-              {
+                  </div>
+                ) : ''}
+              <div className="line-start mt-10">
+                <div className="c7n-property-wrapper">
+                  <span className="c7n-property">
+                    史诗
+                  </span>
+                </div>
+                <div className="c7n-value-wrapper">
+                  <TextEditToggle
+                    disabled={featureName || disabled}
+                    onSubmit={this.updateIssueEpic}
+                    initValue={issueEpicName ? epicId || null : null}
+                    editor={({ submit }) => <SelectEpic onChange={submit} />}
+                  >
+                    {
                 issueEpicName ? (
                   <div
                     style={{
@@ -154,10 +147,14 @@ const filterOption = (input, option) => option.props.name && option.props.name.t
                   </div>
                 )
               }
-            </TextEditToggle>
-          </div>
-        </div>
-      </React.Fragment>
+                  </TextEditToggle>
+                </div>
+              </div>
+            </>
+          )
+        }
+      </IsInProgram>
+
     );
   }
 }

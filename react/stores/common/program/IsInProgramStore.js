@@ -7,7 +7,7 @@ import { commonApi } from '@/api';
 const { AppState } = stores;
 /**
  * @param isInProgram 判断项目是否在项目群中
- * @param isShowFeature 判断项目是否显示特性 需先使用loadIsShowFeature 
+ * @param isShowFeature 判断项目是否显示特性 需先使用loadIsShowFeature
  */
 class IsInProgramStore {
   @observable isOwner = true;
@@ -19,7 +19,6 @@ class IsInProgramStore {
   @observable isShowFeature = false; // 判断是否可以展示特性字段
 
   @observable artInfo = {};
-
 
   refresh = async () => {
     if (AppState.currentMenuType?.category !== 'PROGRAM' && AppState.currentMenuType?.type === 'project') {
@@ -36,7 +35,6 @@ class IsInProgramStore {
       this.setIsInProgram(false);
     }
   }
-
 
   @action setIsInProgram(isInProgram) {
     this.isInProgram = isInProgram;
@@ -75,7 +73,6 @@ class IsInProgramStore {
     return this.artInfo;
   }
 
-
   loadIsShowFeature = async () => {
     const artInfo = await commonApi.getIsShowFeature();
     runInAction(() => {
@@ -85,6 +82,5 @@ class IsInProgramStore {
     return Boolean(artInfo);
   }
 }
-
 
 export default new IsInProgramStore();
