@@ -13,8 +13,8 @@ import io.choerodon.agile.infra.dto.SprintDTO;
 import io.choerodon.agile.infra.dto.WorkLogDTO;
 import io.choerodon.agile.infra.enums.InitIssueType;
 import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.DateUtil;
-import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,17 +50,17 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
         List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId).stream()
                 .filter(issue -> BooleanUtils.isFalse(issue.getCompleted())).collect(Collectors.toList());
         SprintDTO sprint = safeSelectSprint(projectId, sprintId);
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
         if (Objects.isNull(sprint)) {
             return uncompletedCount;
         }
         if (sprint.getEndDate() != null) {
             uncompletedCount.setRemainingDays(dateUtil.getDaysBetweenDifferentDate(new Date(), sprint.getEndDate(),
                     workCalendarRefMapper.queryHolidayBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()),
-                    workCalendarRefMapper.queryWorkBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()), DetailsHelper.getUserDetails().getTenantId()));
-
+                    workCalendarRefMapper.queryWorkBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()), organizationId));
             uncompletedCount.setTotalDays(dateUtil.getDaysBetweenDifferentDate(sprint.getStartDate(), sprint.getEndDate(),
                     workCalendarRefMapper.queryHolidayBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()),
-                    workCalendarRefMapper.queryWorkBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()), DetailsHelper.getUserDetails().getTenantId()));
+                    workCalendarRefMapper.queryWorkBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()), organizationId));
         }
         if (CollectionUtils.isEmpty(issueList)){
             return uncompletedCount;
