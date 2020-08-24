@@ -20,10 +20,8 @@ class DocItem extends Component {
   };
 
   handleDocClick = ({ id, baseId }) => {
-    console.log('handleDocClick', id);
     to(LINK_URL.knowledgeDoc(baseId), {
       params: {
-        type: 'project',
         spaceId: id,
       },
     });
