@@ -52,4 +52,6 @@ public interface StatusMachineNodeMapper extends BaseMapper<StatusMachineNodeDTO
     List<StatusMachineNodeDTO> selectInitNode(@Param("organizationId")  Long organizationId, @Param("schemeId") Long schemeId,@Param("statusId") Long statusId);
 
     void migrateStatusMachineNode();
+
+    boolean existByProjectId(@Param("projectId") Long projectId, @Param("statusId") Long statusId);
 }

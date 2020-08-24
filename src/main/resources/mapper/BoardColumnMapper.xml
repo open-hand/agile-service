@@ -290,6 +290,12 @@
             ais.project_id = #{removeStatusWithProject.projectId}
         </foreach>
     </delete>
+    <delete id="deleteByStatusId">
+        DELETE FROM agile_board_column_status_rel
+        WHERE
+            status_id = #{statusId}
+          AND project_id = #{projectId}
+    </delete>
 
     <select id="sortAndJudgeCompleted" resultType="java.lang.Long">
         select ai.issue_id

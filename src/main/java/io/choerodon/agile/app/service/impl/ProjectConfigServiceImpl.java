@@ -26,6 +26,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -519,6 +520,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId, Long statusId) {
         Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
@@ -539,12 +541,20 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         StatusMachineNodeDTO exist = new StatusMachineNodeDTO();
         exist.setStatusId(currentStatusId);
         exist.setOrganizationId(organizationId);
-        if (CollectionUtils.isEmpty(statusMachineNodeMapper.select(exist))){
+        if (!statusMachineNodeMapper.existByProjectId(projectId, currentStatusId)){
             // 无关联则删除与issue_status关联
             IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
             issueStatusDTO.setProjectId(projectId);
             issueStatusDTO.setStatusId(currentStatusId);
             issueStatusMapper.delete(issueStatusDTO);
+        }
+        // 校验当前状态是否是项目下最后一个状态，是则删除所有看版列的关系
+        List<IssueStatusDTO> issueStatusExist =
+                issueStatusMapper.selectByCondition(Condition.builder(IssueStatusDTO.class)
+                .andWhere(Sqls.custom().andEqualTo("statusId", currentStatusId)
+                        .andEqualTo("projectId", projectId)).build());
+        if (CollectionUtils.isEmpty(issueStatusExist)){
+            boardColumnMapper.deleteByStatusId(projectId, currentStatusId);
         }
     }
 
@@ -564,11 +574,6 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 .andWhere(Sqls.custom().andEqualTo("statusId", currentStatusId).orEqualTo("parentIssueStatusSetting", currentStatusId)).build());
         if (CollectionUtils.isNotEmpty(linkExistList)){
             throw new CommonException("error.status.status_link_exist");
-        }
-        // 校验当前状态是否存在于看版列
-        List<BoardColumnStatusRelDTO> boardColExistList = boardColumnMapper.selectByStatusId(projectId, currentStatusId);
-        if (CollectionUtils.isNotEmpty(boardColExistList)){
-            throw new CommonException("error.status.board_column_exist");
         }
         Sqls existCondition = Sqls.custom().andEqualTo("projectId", projectId).andEqualTo("statusId", currentStatusId);
         // 校验是否关联流转条件
