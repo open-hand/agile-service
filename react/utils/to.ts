@@ -57,14 +57,9 @@ const defaultDescriptor: ProjectLocationDescriptor = {
 };
 type IParams = NodeJS.Dict<string | number | boolean | ReadonlyArray<string> |
   ReadonlyArray<number> | ReadonlyArray<boolean> | null>
-<<<<<<< HEAD
 // eslint-disable-next-line max-len
 function getParams(path: Path, descriptor: LocationDescriptor = defaultDescriptor): IParams | null {
-  const { type, params: otherParams } = descriptor;
-=======
-function getParams(path: Path, descriptor: LocationDescriptor = defaultDescriptor): IParams {
   const { type = 'project', params: otherParams } = descriptor;
->>>>>>> [IMP]前端链接整合
   let params;
   switch (type) {
     case 'project': {
