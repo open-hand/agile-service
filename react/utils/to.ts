@@ -57,7 +57,8 @@ const defaultDescriptor: ProjectLocationDescriptor = {
 };
 type IParams = NodeJS.Dict<string | number | boolean | ReadonlyArray<string> |
   ReadonlyArray<number> | ReadonlyArray<boolean> | null>
-function getParams(path: Path, descriptor: LocationDescriptor = defaultDescriptor): IParams {
+// eslint-disable-next-line max-len
+function getParams(path: Path, descriptor: LocationDescriptor = defaultDescriptor): IParams | null {
   const { type, params: otherParams } = descriptor;
   let params;
   switch (type) {
@@ -78,8 +79,8 @@ function getParams(path: Path, descriptor: LocationDescriptor = defaultDescripto
         const projects: IProject[] = HeaderStore.getProData;
         const targetProject = find(projects, (v) => String(v.id) === String(id));
         if (!targetProject) {
-          error('跳转错误，未找到目标项目，请检查参数', path, descriptor);
-          return {};
+          error('链接错误，未找到目标项目，请检查参数', path, descriptor);
+          return null;
         }
         const {
           name,
@@ -112,8 +113,8 @@ function getParams(path: Path, descriptor: LocationDescriptor = defaultDescripto
         const orgs: IOrg[] = HeaderStore.getOrgData;
         const targetOrg = find(orgs, (v) => String(v.id) === String(id));
         if (!targetOrg) {
-          error('跳转错误，未找到目标组织，请检查参数', path, descriptor);
-          return {};
+          error('链接错误，未找到目标组织，请检查参数', path, descriptor);
+          return null;
         }
         const {
           name,
@@ -135,8 +136,8 @@ function getParams(path: Path, descriptor: LocationDescriptor = defaultDescripto
       const orgs: IOrg[] = HeaderStore.getOrgData;
       const targetOrg = find(orgs, (v) => String(v.id) === String(organizationId));
       if (!targetOrg) {
-        error('跳转错误，未找到目标组织，请检查参数', path, descriptor);
-        return {};
+        error('链接错误，未找到目标组织，请检查参数', path, descriptor);
+        return null;
       }
       params = {
         type: 'site',
@@ -145,8 +146,8 @@ function getParams(path: Path, descriptor: LocationDescriptor = defaultDescripto
       break;
     }
     default: {
-      error('跳转错误，请检查参数', path, descriptor);
-      break;
+      error('链接错误，请检查参数', path, descriptor);
+      return null;
     }
   }
   const totalParams = {
@@ -159,6 +160,9 @@ function getParams(path: Path, descriptor: LocationDescriptor = defaultDescripto
 
 const to = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
   const params = getParams(path, descriptor);
+  if (!params) {
+    return;
+  }
   const search = queryString.stringify(params);
   if (!history) {
     error('跳转失败，未设置history');
@@ -171,8 +175,11 @@ const to = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
 };
 const linkUrl = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
   const params = getParams(path, descriptor);
+  if (!params) {
+    return path;
+  }
   const search = queryString.stringify(params);
-  return path + search ? `?${search}` : '';
+  return `path?${search}`;
 };
 export { linkUrl };
 export default to;
