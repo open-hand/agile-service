@@ -364,7 +364,7 @@ public class IssueAssembler extends AbstractAssembler {
         return issueSubVO;
     }
 
-    public List<ExportIssuesVO> exportIssuesDOListToExportIssuesDTO(List<IssueDTO> exportIssues, Long projectId) {
+    public List<ExportIssuesVO> exportIssuesDOListToExportIssuesDTO(List<IssueDTO> exportIssues, Long projectId, ExcelCursorDTO cursor) {
         List<ExportIssuesVO> exportIssuesVOS = new ArrayList<>(exportIssues.size());
         Set<Long> userIds = exportIssues.stream().filter(issue -> issue.getAssigneeId() != null && !Objects.equals(issue.getAssigneeId(), 0L)).map(IssueDTO::getAssigneeId).collect(Collectors.toSet());
         userIds.addAll(exportIssues.stream().filter(issue -> issue.getReporterId() != null && !Objects.equals(issue.getReporterId(), 0L)).map(IssueDTO::getReporterId).collect(Collectors.toSet()));
@@ -372,6 +372,14 @@ public class IssueAssembler extends AbstractAssembler {
         Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
         Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
+        cursor
+                .addCollections(exportIssuesVOS)
+                .addCollections(userIds)
+                .addCollections(usersMap)
+                .addCollections(issueTypeDTOMap)
+                .addCollections(statusMapDTOMap)
+                .addCollections(priorityDTOMap)
+        ;
         exportIssues.forEach(issue -> {
             String assigneeName = usersMap.get(issue.getAssigneeId()) != null ? usersMap.get(issue.getAssigneeId()).getName() : null;
             String assigneeRealName = usersMap.get(issue.getAssigneeId()) != null ? usersMap.get(issue.getAssigneeId()).getRealName() : null;
