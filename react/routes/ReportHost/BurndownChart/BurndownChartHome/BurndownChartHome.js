@@ -1,3 +1,5 @@
+/* eslint-disable react/destructuring-assignment */
+/* eslint-disable react/sort-comp */
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
@@ -11,6 +13,7 @@ import _ from 'lodash';
 import Moment from 'moment';
 import { extendMoment } from 'moment-range';
 import { sprintApi, reportApi } from '@/api';
+import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 import BurndownChartStore from '../../../../stores/project/burndownChart/BurndownChartStore';
 import './BurndownChartHome.less';
 import NoDataComponent from '../../Component/noData';
@@ -20,7 +23,6 @@ import SwithChart from '../../Component/switchChart';
 const moment = extendMoment(Moment);
 const { AppState } = stores;
 const { Option } = Select;
-
 
 @observer
 class BurndownChartHome extends Component {
@@ -53,21 +55,20 @@ class BurndownChartHome extends Component {
     this.getSprintData();
   }
 
-
   getBetweenDateStr(start, end) {
     // 是否显示非工作日
     const { restDays } = this.state;
     const range = moment.range(start, end);
     const days = Array.from(range.by('day'));
-    const result = days.map(day => day.format('YYYY-MM-DD'));
-    const rest = days.filter(day => restDays.includes(day.format('YYYY-MM-DD'))).map(day => day.format('YYYY-MM-DD'));
+    const result = days.map((day) => day.format('YYYY-MM-DD'));
+    const rest = days.filter((day) => restDays.includes(day.format('YYYY-MM-DD'))).map((day) => day.format('YYYY-MM-DD'));
     return { result, rest };
   }
 
   getSprintData() {
     BurndownChartStore.axiosGetSprintList().then((res) => {
       BurndownChartStore.setSprintList(res);
-      const defaultSprint = res.find(item => item.statusCode === 'started') || res[0]; // 如果有活跃冲刺就展示活跃冲刺否则就展示第一个
+      const defaultSprint = res.find((item) => item.statusCode === 'started') || res[0]; // 如果有活跃冲刺就展示活跃冲刺否则就展示第一个
       this.setState({
         defaultSprintId: defaultSprint.sprintId,
         endDate: defaultSprint.endDate,
@@ -84,7 +85,7 @@ class BurndownChartHome extends Component {
   axiosGetRestDays = () => {
     sprintApi.getRestDays(this.state.defaultSprintId).then((res) => {
       this.setState({
-        restDays: res.map(date => moment(date).format('YYYY-MM-DD')),
+        restDays: res.map((date) => moment(date).format('YYYY-MM-DD')),
       }, () => {
         this.getChartCoordinate();
       });
@@ -187,11 +188,32 @@ class BurndownChartHome extends Component {
       tableLoading: true,
     });
     reportApi.loadSprintBurnDown(this.state.defaultSprintId, this.state.select).then((res) => {
-        const data = res;
-        const newData = [];
-        // 将操作日期相同的合并
-        for (let index = 0, len = data.length; index < len; index += 1) {
-          if (!_.some(newData, { date: data[index].date })) {
+      const data = res;
+      const newData = [];
+      // 将操作日期相同的合并
+      for (let index = 0, len = data.length; index < len; index += 1) {
+        if (!_.some(newData, { date: data[index].date })) {
+          newData.push({
+            date: data[index].date,
+            issues: [{
+              issueId: data[index].issueId,
+              issueNum: data[index].issueNum,
+              newValue: data[index].newValue,
+              oldValue: data[index].oldValue,
+              statistical: data[index].statistical,
+              parentIssueId: data[index].parentIssueId,
+              parentIssueNum: data[index].parentIssueNum,
+            }],
+            type: data[index].type,
+          });
+        } else {
+          let index2;
+          for (let i = 0, len2 = newData.length; i < len2; i += 1) {
+            if (newData[i].date === data[index].date) {
+              index2 = i;
+            }
+          }
+          if (newData[index2].type.indexOf(data[index].type) === -1) {
             newData.push({
               date: data[index].date,
               issues: [{
@@ -206,65 +228,44 @@ class BurndownChartHome extends Component {
               type: data[index].type,
             });
           } else {
-            let index2;
-            for (let i = 0, len2 = newData.length; i < len2; i += 1) {
-              if (newData[i].date === data[index].date) {
-                index2 = i;
-              }
-            }
-            if (newData[index2].type.indexOf(data[index].type) === -1) {
-              newData.push({
-                date: data[index].date,
-                issues: [{
-                  issueId: data[index].issueId,
-                  issueNum: data[index].issueNum,
-                  newValue: data[index].newValue,
-                  oldValue: data[index].oldValue,
-                  statistical: data[index].statistical,
-                  parentIssueId: data[index].parentIssueId,
-                  parentIssueNum: data[index].parentIssueNum,
-                }],
-                type: data[index].type,
-              });
-            } else {
-              newData[index2].issues = [...newData[index2].issues, {
-                issueId: data[index].issueId,
-                issueNum: data[index].issueNum,
-                newValue: data[index].newValue,
-                oldValue: data[index].oldValue,
-                statistical: data[index].statistical,
-                parentIssueId: data[index].parentIssueId,
-                parentIssueNum: data[index].parentIssueNum,
-              }];
+            newData[index2].issues = [...newData[index2].issues, {
+              issueId: data[index].issueId,
+              issueNum: data[index].issueNum,
+              newValue: data[index].newValue,
+              oldValue: data[index].oldValue,
+              statistical: data[index].statistical,
+              parentIssueId: data[index].parentIssueId,
+              parentIssueNum: data[index].parentIssueNum,
+            }];
+          }
+        }
+      }
+      // 计算剩余
+      for (let index = 0, dataLen = newData.length; index < dataLen; index += 1) {
+        let rest = 0;
+        if (newData[index].type !== 'endSprint') {
+          if (index > 0) {
+            rest = newData[index - 1].rest;
+          }
+        }
+        for (let i = 0, len = newData[index].issues.length; i < len; i += 1) {
+          if (newData[index].issues[i].statistical) {
+            rest += newData[index].issues[i].newValue - newData[index].issues[i].oldValue;
+            if (rest % 1 > 0) {
+              // 如果计算结果为小数，利用toFixed消除js计算精度bug
+              rest = rest.toFixed(1) * 1;
             }
           }
         }
-        // 计算剩余
-        for (let index = 0, dataLen = newData.length; index < dataLen; index += 1) {
-          let rest = 0;
-          if (newData[index].type !== 'endSprint') {
-            if (index > 0) {
-              rest = newData[index - 1].rest;
-            }
-          }
-          for (let i = 0, len = newData[index].issues.length; i < len; i += 1) {
-            if (newData[index].issues[i].statistical) {
-              rest += newData[index].issues[i].newValue - newData[index].issues[i].oldValue;
-              if (rest % 1 > 0) {
-                // 如果计算结果为小数，利用toFixed消除js计算精度bug
-                rest = rest.toFixed(1) * 1;
-              }
-            }
-          }
-          newData[index].rest = rest;
-        }
-        BurndownChartStore.setBurndownList(newData);
-        this.setState({
-          tableLoading: false,
-        });
-      }).catch((error) => {
-        console.log(error)
+        newData[index].rest = rest;
+      }
+      BurndownChartStore.setBurndownList(newData);
+      this.setState({
+        tableLoading: false,
       });
+    }).catch((error) => {
+      console.log(error)
+    });
   }
 
   getOption() {
@@ -631,12 +632,11 @@ class BurndownChartHome extends Component {
                 }}
                 role="none"
                 onClick={() => {
-                  const { history } = this.props;
                   const urlParams = AppState.currentMenuType;
                   if (item.parentIssueId) {
-                    history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${item.issueNum}&paramIssueId=${encodeURIComponent(item.parentIssueId)}&paramOpenIssueId=${encodeURIComponent(item.issueId)}&paramUrl=reporthost/burndownchart`);
+                    LINK_URL_TO.issueLinkTo(item.parentIssueId, item.issueNum, { paramOpenIssueId: item.issueId });
                   } else {
-                    history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${item.issueNum}&paramIssueId=${encodeURIComponent(item.issueId)}&paramOpenIssueId=${encodeURIComponent(item.issueId)}&paramUrl=reporthost/burndownchart`);
+                    LINK_URL_TO.issueLinkTo(item.issueId, item.issueNum, { paramOpenIssueId: item.issueId });
                   }
                 }}
               >
@@ -719,7 +719,6 @@ class BurndownChartHome extends Component {
         sprintName = BurndownChartStore.getSprintList[index].sprintName;
       }
     }
-    const { history } = this.props;
     const urlParams = AppState.currentMenuType;
     const { linkFromParamUrl } = this.state;
     return (
@@ -730,7 +729,6 @@ class BurndownChartHome extends Component {
           backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
         >
           <SwithChart
-            history={this.props.history}
             current="burndownchart"
           />
           {/* <Button funcType="flat" onClick={this.getChartData.bind(this)}> */}
@@ -814,7 +812,7 @@ class BurndownChartHome extends Component {
                 />
               </div>
             ) : (
-                <NoDataComponent title="冲刺" links={[{ name: '待办事项', link: '/agile/work-list/backlog' }]} img={epicSvg} />
+                <NoDataComponent title="冲刺" links={[{ name: '待办事项', link: LINK_URL.workListBacklog }]} img={epicSvg} />
               )
           }
         </Content>

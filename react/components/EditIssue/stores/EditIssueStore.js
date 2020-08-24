@@ -35,8 +35,6 @@ class EditIssueStore {
 
   @observable branch = {};
 
-  @observable testExecutes = [];
-
   @action setDoc(data) {
     this.doc = data;
   }

@@ -1,3 +1,4 @@
+/* eslint-disable react/destructuring-assignment */
 /* eslint-disable prefer-destructuring */
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
@@ -10,6 +11,7 @@ import {
 import ReactEcharts from 'echarts-for-react';
 import _ from 'lodash';
 import moment from 'moment';
+import querystring from 'querystring';
 import BurndownChartStore from '@/stores/project/burndownChart/BurndownChartStore';
 import ReportStore from '@/stores/project/Report';
 import { commonformatDate } from '@/utils/Date';
@@ -19,6 +21,8 @@ import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';
 import STATUS from '@/constants/STATUS';
 import { sprintApi, reportApi } from '@/api';
+import to from '@/utils/to';
+import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 import NoDataComponent from '../Component/noData';
 import SwithChart from '../Component/switchChart';
 import './SprintReport.less';
@@ -54,10 +58,10 @@ class SprintReport extends Component {
   getDefaultSprintId() {
     const { location: { search } } = this.props;
     if (search.lastIndexOf('sprintId') !== -1) {
-      const arr = search.split('&');
-      const sprintId = arr.find(item => item.split('=')[0] === 'sprintId').split('=')[1];
+      const searchNoExtra = search.substring(1);
+      const { sprintId } = querystring.parse(searchNoExtra);
       this.setState({
-        defaultSprint: _.parseInt(sprintId),
+        defaultSprint: sprintId,
       });
     }
   }
@@ -93,7 +97,8 @@ class SprintReport extends Component {
         result.push(`${dateList[0]}-${dateList[1]}-${dateList[2]}`);
       }
       diffDay.setTime(countDay + 24 * 60 * 60 * 1000);
-      if (String(dateList[0]) === endDay[0] && String(dateList[1]) === endDay[1] && String(dateList[2]) === endDay[2]) {
+      if (String(dateList[0]) === endDay[0]
+        && String(dateList[1]) === endDay[1] && String(dateList[2]) === endDay[2]) {
         i = 1;
       }
     }
@@ -106,7 +111,7 @@ class SprintReport extends Component {
       BurndownChartStore.setSprintList(res);
       this.setState({
         defaultSprint: defaultSprint === '' ? res[0].sprintId : defaultSprint,
-        endDate: defaultSprint === '' ? res[0].endDate : res.filter(item => item.sprintId === defaultSprint)[0].endDate,
+        endDate: defaultSprint === '' ? res[0].endDate : res.filter((item) => item.sprintId === defaultSprint)[0].endDate,
       }, () => {
         // this.getChartData();
         this.axiosGetRestDays();
@@ -115,15 +120,15 @@ class SprintReport extends Component {
     });
   }
 
-  axiosGetRestDays = () => {
-    sprintApi.getRestDays(this.state.defaultSprint).then((res) => {
-      this.setState({
-        restDays: res.map(date => moment(date).format('YYYY-MM-DD')),
-      }, () => {
-        this.getChartCoordinate();
-      });
-    });
-  };
+  // axiosGetRestDays1 = () => {
+  //   sprintApi.getRestDays(this.state.defaultSprint).then((res) => {
+  //     this.setState({
+  //       restDays: res.map((date) => moment(date).format('YYYY-MM-DD')),
+  //     }, () => {
+  //       this.getChartCoordinate();
+  //     });
+  //   });
+  // };
 
   getChartCoordinate() {
     reportApi.loadBurnDownCoordinate(this.state.defaultSprint, this.state.select).then((res) => {
@@ -188,7 +193,8 @@ class SprintReport extends Component {
             exportAxisData[b + 1] = exportAxisData[b];
           } else {
             // 工作量取整
-            exportAxisData[b + 1] = (exportAxisData[b] - dayAmount) < 0 ? 0 : exportAxisData[b] - dayAmount;
+            exportAxisData[b + 1] = (exportAxisData[b] - dayAmount) < 0
+              ? 0 : exportAxisData[b] - dayAmount;
           }
         }
         // eslint-disable-next-line no-prototype-builtins
@@ -202,7 +208,7 @@ class SprintReport extends Component {
           res.coordinate[nowKey] = res.coordinate[beforeKey];
         }
       }
-      const sliceDate = _.map(allDate, item => item.slice(5).replace('-', '/'));
+      const sliceDate = _.map(allDate, (item) => item.slice(5).replace('-', '/'));
       this.setState({
         xAxis: ['', ...sliceDate],
         yAxis: allDateValues,
@@ -340,7 +346,8 @@ class SprintReport extends Component {
         axisLabel: {
           show: true,
           // eslint-disable-next-line radix
-          interval: parseInt(this.state.xAxis.length / 7) ? parseInt(this.state.xAxis.length / 7) - 1 : 0,
+          interval: parseInt(this.state.xAxis.length / 7)
+            ? parseInt(this.state.xAxis.length / 7, 10) - 1 : 0,
           textStyle: {
             color: 'rgba(0, 0, 0, 0.65)',
             fontSize: 12,
@@ -461,31 +468,29 @@ class SprintReport extends Component {
     }
   }
 
-  renderDoneIssue(column) {
-    return (
-      <div>
-        <Table
-          rowKey={record => record.issueId}
-          dataSource={ReportStore.doneIssues}
-          pagination={ReportStore.donePagination}
-          columns={column}
-          filterBar={false}
-          scroll={{ x: true }}
-          loading={ReportStore.loading}
-          onChange={(pagination, filters, sorter) => {
-            ReportStore.setDonePagination(pagination);
-            ReportStore.loadDoneIssues(pagination.current - 1, pagination.pageSize);
-          }}
-        />
-      </div>
-    );
+  onCheckChange = (e) => {
+    this.setState({
+      restDayShow: e.target.checked,
+    }, () => {
+      this.getChartCoordinate();
+    });
+  };
+
+  axiosGetRestDays() {
+    sprintApi.getRestDays(this.state.defaultSprint).then((res) => {
+      this.setState({
+        restDays: res.map((date) => moment(date).format('YYYY-MM-DD')),
+      }, () => {
+        this.getChartCoordinate();
+      });
+    });
   }
 
   renderTodoIssue(column) {
     return (
       <div>
         <Table
-          rowKey={record => record.issueId}
+          rowKey={(record) => record.issueId}
           dataSource={ReportStore.todoIssues}
           pagination={ReportStore.todoPagination}
           columns={column}
@@ -501,11 +506,31 @@ class SprintReport extends Component {
     );
   }
 
+  renderDoneIssue(column) {
+    return (
+      <div>
+        <Table
+          rowKey={(record) => record.issueId}
+          dataSource={ReportStore.doneIssues}
+          pagination={ReportStore.donePagination}
+          columns={column}
+          filterBar={false}
+          scroll={{ x: true }}
+          loading={ReportStore.loading}
+          onChange={(pagination, filters, sorter) => {
+            ReportStore.setDonePagination(pagination);
+            ReportStore.loadDoneIssues(pagination.current - 1, pagination.pageSize);
+          }}
+        />
+      </div>
+    );
+  }
+
   renderRemoveIssue(column) {
     return (
       <div>
         <Table
-          rowKey={record => record.issueId}
+          rowKey={(record) => record.issueId}
           dataSource={ReportStore.removeIssues}
           pagination={ReportStore.removePagination}
           columns={column}
@@ -520,14 +545,6 @@ class SprintReport extends Component {
       </div>
     );
   }
-
-  onCheckChange = (e) => {
-    this.setState({
-      restDayShow: e.target.checked,
-    }, () => {
-      this.getChartCoordinate();
-    });
-  };
 
   render() {
     const column = [
@@ -546,9 +563,7 @@ class SprintReport extends Component {
               }}
               role="none"
               onClick={() => {
-                const { history } = this.props;
-                const urlParams = AppState.currentMenuType;
-                history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${issueNum}&paramIssueId=${encodeURIComponent(record.issueId)}&paramUrl=reporthost/sprintreport`);
+                LINK_URL_TO.issueLinkTo(record.issueId, issueNum);
               }}
             >
               {issueNum}
@@ -646,7 +661,6 @@ class SprintReport extends Component {
 
         >
           <SwithChart
-            history={this.props.history}
             current="sprint"
           />
           <Button
@@ -668,7 +682,7 @@ class SprintReport extends Component {
                 <div>
                   <div>
                     <Select
-                      getPopupContainer={triggerNode => triggerNode.parentNode}
+                      getPopupContainer={(triggerNode) => triggerNode.parentNode}
                       style={{ width: 244 }}
                       label="迭代冲刺"
                       value={this.state.defaultSprint}
@@ -690,7 +704,8 @@ class SprintReport extends Component {
                           total: undefined,
                         });
                         let endDate;
-                        for (let index = 0, len = BurndownChartStore.getSprintList.length; index < len; index += 1) {
+                        for (let index = 0, len = BurndownChartStore.getSprintList.length;
+                          index < len; index += 1) {
                           if (BurndownChartStore.getSprintList[index].sprintId === value) {
                             endDate = BurndownChartStore.getSprintList[index].endDate;
                           }
@@ -706,7 +721,7 @@ class SprintReport extends Component {
                       }}
                     >
                       {BurndownChartStore.getSprintList.length > 0
-                        ? BurndownChartStore.getSprintList.map(item => (
+                        ? BurndownChartStore.getSprintList.map((item) => (
                           <Option value={item.sprintId}>{item.sprintName}</Option>
                         )) : ''}
                     </Select>
@@ -737,7 +752,13 @@ class SprintReport extends Component {
                         }}
                         role="none"
                         onClick={() => {
-                          this.props.history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramType=sprint&paramId=${encodeURIComponent(ReportStore.currentSprint.sprintId)}&paramName=${encodeURIComponent(`${ReportStore.currentSprint.sprintName}下的问题`)}&paramUrl=reporthost/sprintreport`);
+                          to(LINK_URL.workListIssue, {
+                            params: {
+                              paramType: 'sprint',
+                              paramId: ReportStore.currentSprint.sprintId,
+                              paramName: `${ReportStore.currentSprint.sprintName}下的问题`,
+                            },
+                          });
                         }}
                       >
                         在“问题管理中”查看
@@ -759,7 +780,7 @@ class SprintReport extends Component {
                   </Tabs>
                 </div>
               ) : (
-                <NoDataComponent title="冲刺" links={[{ name: '待办事项', link: '/agile/work-list/backlog' }]} img={epicSvg} />
+                <NoDataComponent title="冲刺" links={[{ name: '待办事项', link: LINK_URL.workListBacklog }]} img={epicSvg} />
               )
             }
           </Spin>

@@ -3,14 +3,19 @@ import { withRouter } from 'react-router-dom';
 import { stores } from '@choerodon/boot';
 import { Icon } from 'choerodon-ui';
 import './Card.less';
+import to from '@/utils/to';
 
 const { AppState } = stores;
 
 class Card extends Component {
   handleClick() {
-    const { link, history, sprintId } = this.props;
-    const urlParams = AppState.currentMenuType;
-    history.push(`/agile/${link}?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}${sprintId !== undefined ? (`&sprintId=${sprintId}`) : ''}&paramUrl=iterationBoard/${sprintId}`);
+    const { link, sprintId } = this.props;
+    to(link, {
+      params: {
+        sprintId,
+        paramUrl: `iterationBoard/${sprintId}`,
+      },
+    });
   }
 
   render() {
@@ -31,7 +36,7 @@ class Card extends Component {
                   <Icon
                     type="arrow_forward"
                     style={{ cursor: 'pointer' }}
-                    onClick={this.handleClick.bind(this)}
+                    onClick={() => this.handleClick()}
                   />
                 </span>
               ) : null
