@@ -8,17 +8,13 @@ import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { IFieldPostDataProps } from '../../components/create-field/CreateField';
 
 export enum PageIssueTypeStoreStatusCode {
-  // update = 'update',
   del = 'delete',
   add = 'add',
-  // drag = 'drag_update',
-  desc = 'description_update',
-  none = 'none',
   null = '',
 }
 interface IDescriptionTempleProps {
   id: string | undefined,
-  template: undefined | string,
+  template: undefined | string | Array<any>,
   originTemplate: undefined | string,
   objectVersionNumber: undefined | number,
   dirty: boolean,
@@ -144,7 +140,7 @@ class PageIssueTypeStore {
     this.descriptionObj = data;
   }
 
-  @action changeTemplate(data: string) {
+  @action changeTemplate(data: Array<any>) {
     const dataStr = JSON.stringify(data);
     if (dataStr === this.descriptionObj.originTemplate) {
       this.descriptionObj.dirty = false;
@@ -170,10 +166,9 @@ class PageIssueTypeStore {
     if (this.dataStatusCode === PageIssueTypeStoreStatusCode.del) {
       return;
     }
-    // if (code === PageIssueTypeStoreStatusCode.add) {
-    //   this.dataStatusCode = code;
-    // }
-    this.dataStatusCode = code;
+    if (this.dataStatusCode === PageIssueTypeStoreStatusCode.add) {
+      this.dataStatusCode = code;
+    }
   }
 
   @computed get getDirty() {
@@ -204,7 +199,6 @@ class PageIssueTypeStore {
   loadData = () => {
     this.clear();
     this.addUnselectedDataSet.clear();
-    // pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.ready);
     this.setLoading(true);
     pageConfigApi.loadByIssueType(this.getCurrentIssueType).then((res) => {
       this.sortTableDataSet.loadData(res.fields);
@@ -219,5 +213,4 @@ class PageIssueTypeStore {
     });
   }
 }
-// export { PageIssueTypeStore };
 export default PageIssueTypeStore;
