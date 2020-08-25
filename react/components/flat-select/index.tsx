@@ -1,6 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import React, { isValidElement, ReactNode } from 'react';
 import { observer } from 'mobx-react';
+import { Tooltip } from 'choerodon-ui/pro';
 import isNil from 'lodash/isNil';
 import isString from 'lodash/isString';
 import { Select, SelectProps } from 'choerodon-ui/pro/lib/select/Select';
@@ -82,7 +83,13 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
       }
       return undefined;
     });
-    return <span className="flat-select-multiple-text">{texts}</span>;
+    return (
+      <span className="flat-select-multiple-text">
+        <Tooltip title={texts.join(',')}>
+          {texts.join(',')}
+        </Tooltip>
+      </span>
+    );
   }
 }
 

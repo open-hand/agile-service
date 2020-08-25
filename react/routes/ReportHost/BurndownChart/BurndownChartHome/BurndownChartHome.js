@@ -14,6 +14,7 @@ import Moment from 'moment';
 import { extendMoment } from 'moment-range';
 import { sprintApi, reportApi } from '@/api';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
+import QuickSearch from '@/components/quick-search';
 import BurndownChartStore from '../../../../stores/project/burndownChart/BurndownChartStore';
 import './BurndownChartHome.less';
 import NoDataComponent from '../../Component/noData';
@@ -42,6 +43,12 @@ class BurndownChartHome extends Component {
       exportAxis: [],
       markAreaData: [],
       dateSort: 'asc',
+      quickFilter: {
+        onlyMe: false,
+        onlyStory: false,
+        personalFilters: [],
+        quickFilters: [],
+      },
     };
   }
 
@@ -81,16 +88,6 @@ class BurndownChartHome extends Component {
     }).catch((error) => {
     });
   }
-
-  axiosGetRestDays = () => {
-    sprintApi.getRestDays(this.state.defaultSprintId).then((res) => {
-      this.setState({
-        restDays: res.map((date) => moment(date).format('YYYY-MM-DD')),
-      }, () => {
-        this.getChartCoordinate();
-      });
-    });
-  };
 
   getChartCoordinate() {
     this.setState({ chartLoading: true });
@@ -432,6 +429,15 @@ class BurndownChartHome extends Component {
     };
   }
 
+  axiosGetRestDays = () => {
+    sprintApi.getRestDays(this.state.defaultSprintId).then((res) => {
+      this.setState({
+        restDays: res.map((date) => moment(date).format('YYYY-MM-DD')),
+      }, () => {
+        this.getChartCoordinate();
+      });
+    });
+  };
   handleChangeSelect(value) {
     this.setState({
       select: value,
@@ -441,6 +447,13 @@ class BurndownChartHome extends Component {
     });
   }
 
+  handleQuickSearchChange = (value) => {
+    this.setState({
+      quickFilter: value
+    }, () => {
+      this.getChartData()
+    })
+  }
   renderChartTitle() {
     let result = '';
     if (this.state.select === 'remainingEstimatedTime') {
@@ -720,7 +733,7 @@ class BurndownChartHome extends Component {
       }
     }
     const urlParams = AppState.currentMenuType;
-    const { linkFromParamUrl } = this.state;
+    const { linkFromParamUrl, quickFilter } = this.state;
     return (
       <Page service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.burndown']}>
         <Header
@@ -792,6 +805,11 @@ class BurndownChartHome extends Component {
                     <Option value="storyPoints">故事点</Option>
                     <Option value="issueCount">问题计数</Option>
                   </Select>
+                  <QuickSearch
+                    style={{ marginLeft: 24, width: 244 }}
+                    onChange={this.handleQuickSearchChange} 
+                    value={quickFilter}
+                  />
                   <Checkbox
                     style={{ marginLeft: 24 }}
                     checked={this.state.restDayShow}

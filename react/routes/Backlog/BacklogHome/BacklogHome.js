@@ -1,14 +1,15 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
   TabPage as Page, Header, Breadcrumb, Content,
   Permission,
 } from '@choerodon/boot';
 import {
-  Button, Spin, Icon, Tooltip,
+  Button, Spin, Tooltip,
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
-
+import BacklogStore from '@/stores/project/backlog/BacklogStore';
+import SideNav from '@/components/side-nav';
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';
@@ -21,11 +22,10 @@ import './BacklogHome.less';
 
 const createSprintKey = Modal.key();
 const createCurrentPiSprintKey = Modal.key();
-
+const { Panel } = SideNav;
 @observer
 class BacklogHome extends Component {
   componentDidMount() {
-    const { BacklogStore } = this.props;
     BacklogStore.resetData();
     BacklogStore.refresh();
     const { isShowFeature } = this.props;
@@ -34,23 +34,20 @@ class BacklogHome extends Component {
     }
   }
 
-  refresh = (...args) => {
-    const { BacklogStore } = this.props;
-    BacklogStore.refresh(...args);
-  }
-
   componentWillUnmount() {
-    const { BacklogStore } = this.props;
     BacklogStore.resetData();
     BacklogStore.clearMultiSelected();
     BacklogStore.resetFilter();
+  }
+
+  refresh = (...args) => {
+    BacklogStore.refresh(...args);
   }
 
   /**
    * 创建冲刺
    */
   handleCreateSprint = async () => {
-    const { BacklogStore } = this.props;
     const onCreate = (sprint) => {
       BacklogStore.setCreatedSprint(sprint.sprintId);
       this.refresh();
@@ -70,7 +67,6 @@ class BacklogHome extends Component {
    * 当前PI下创建冲刺
    */
   handleCreateCurrentPiSprint = async () => {
-    const { BacklogStore } = this.props;
     await BacklogStore.loadPiInfoAndSprint();
     const onCreate = (sprint) => {
       BacklogStore.setCreatedSprint(sprint.sprintId);
@@ -90,20 +86,13 @@ class BacklogHome extends Component {
   };
 
   handleClickCBtn = () => {
-    const { BacklogStore } = this.props;
     BacklogStore.setNewIssueVisible(true);
   }
 
   toggleCurrentVisible = (type) => {
-    const { BacklogStore } = this.props;
-    const currentVisible = BacklogStore.getCurrentVisible;
-    if (currentVisible === type) {
-      BacklogStore.toggleVisible(null);
-    } else {
-      BacklogStore.toggleVisible(type);
-      if (type === 'feature') {
-        BacklogStore.clearMultiSelected();
-      }
+    BacklogStore.toggleVisible(type);
+    if (type === 'feature') {
+      BacklogStore.clearMultiSelected();
     }
   };
 
@@ -129,7 +118,6 @@ class BacklogHome extends Component {
   }
 
   render() {
-    const { BacklogStore } = this.props;
     const arr = BacklogStore.getSprintData;
     const { isInProgram, isShowFeature } = this.props;
     return (
@@ -177,84 +165,70 @@ class BacklogHome extends Component {
               overflow: 'hidden',
             }}
           >
-            <div className="c7n-backlog-side">
-              <p
-                role="none"
-                onClick={() => {
-                  this.toggleCurrentVisible('version');
-                }}
-              >
-                版本
-                {
-                  BacklogStore.chosenVersion !== 'all' && (
-                    <span className="c7n-backlog-side-tip" />
+            <SideNav onChange={this.toggleCurrentVisible}>
+              <Panel
+                key="version"
+                title="版本"
+                nav={(title) => (BacklogStore.chosenVersion !== 'all'
+                  ? (
+                    <>
+                      {title}
+                      <span className="c7n-backlog-side-tip" />
+                    </>
                   )
-                }
-              </p>
-              {!isShowFeature && (
-                <p
-                  style={{
-                    marginTop: 12,
+                  : title)}
+              >
+                <Version
+                  store={BacklogStore}
+                  refresh={this.refresh}
+                  issueRefresh={() => {
+                    this.IssueDetail.refreshIssueDetail();
                   }}
-                  role="none"
-                  onClick={() => {
-                    this.toggleCurrentVisible('epic');
-                  }}
-                >
-                  史诗
-                  {
-                    BacklogStore.chosenEpic !== 'all' && (
-                      <span className="c7n-backlog-side-tip" />
+                />
+              </Panel>
+              {!isShowFeature ? (
+                <Panel
+                  key="epic"
+                  title="史诗"
+                  nav={(title) => (BacklogStore.chosenEpic !== 'all'
+                    ? (
+                      <>
+                        {title}
+                        <span className="c7n-backlog-side-tip" />
+                      </>
                     )
-                  }
-                </p>
-              )}
-              {isShowFeature && (
-                <p
-                  style={{
-                    marginTop: 12,
-                  }}
-                  role="none"
-                  onClick={() => {
-                    this.toggleCurrentVisible('feature');
-                  }}
+                    : title)}
                 >
-                  特性
-                  {
-                    BacklogStore.chosenFeature !== 'all' && (
-                      <span className="c7n-backlog-side-tip" />
+                  <Epic
+                    refresh={this.refresh}
+                    issueRefresh={() => {
+                      this.IssueDetail.refreshIssueDetail();
+                    }}
+                  />
+                </Panel>
+              ) : (
+                <Panel
+                  key="feature"
+                  title="特性"
+                  nav={(title) => (BacklogStore.chosenFeature !== 'all'
+                    ? (
+                      <>
+                        {title}
+                        <span className="c7n-backlog-side-tip" />
+                      </>
                     )
-                  }
-                </p>
+                    : title)}
+                >
+                  <Feature
+                    refresh={this.refresh}
+                    isInProgram={isShowFeature}
+                    issueRefresh={() => {
+                      this.IssueDetail.refreshIssueDetail();
+                    }}
+                  />
+                </Panel>
               )}
-            </div>
-            <Version
-              store={BacklogStore}
-              refresh={this.refresh}
-              visible={BacklogStore.getCurrentVisible}
-              issueRefresh={() => {
-                this.IssueDetail.refreshIssueDetail();
-              }}
-            />
-            {!isShowFeature && (
-              <Epic
-                refresh={this.refresh}
-                visible={BacklogStore.getCurrentVisible}
-                issueRefresh={() => {
-                  this.IssueDetail.refreshIssueDetail();
-                }}
-              />
-            )}
-            {isShowFeature ? (
-              <Feature
-                refresh={this.refresh}
-                isInProgram={isShowFeature}
-                visible={BacklogStore.getCurrentVisible}
-                issueRefresh={() => {
-                  this.IssueDetail.refreshIssueDetail();
-                }}
-              />
-            ) : null}
+            </SideNav>
             <Spin spinning={BacklogStore.getSpinIf}>
               <div className="c7n-backlog-content">
                 <SprintList />
@@ -274,8 +248,10 @@ class BacklogHome extends Component {
   }
 }
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default (props) => (
   <Page
+    // eslint-disable-next-line react/destructuring-assignment
     service={props.isInProgram ? [
       'choerodon.code.project.cooperation.work-list.ps.backlog',
       'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.feature',
