@@ -217,4 +217,6 @@ public interface ProjectConfigService {
     void handlerDeleteStatusByProject(Long projectId, String applyType, Long statusId, List<DeleteStatusTransferVO> statusTransferVOS);
 
     void updateNodeObjectVersionNumber(Long project, Long issueType, Long statusId, Long objectVersionNumber, String applyType);
+
+    void initIssueTypeStatusMachine(Long project, String applyType);
 }
