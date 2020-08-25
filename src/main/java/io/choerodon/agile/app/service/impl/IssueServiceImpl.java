@@ -1284,6 +1284,9 @@ public class IssueServiceImpl implements IssueService {
                 //查询所有父节点问题
                 Page<IssueDTO> page =
                         PageHelper.doPage(cursor.getPage(), cursor.getSize(), () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr));
+                if (page.getTotalElements() < 1) {
+                    break;
+                }
                 List<Long> parentIds = page.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
                 List<Long> issueIds = new ArrayList<>();
                 Map<Long, Set<Long>> parentSonMap = new HashMap<>();
