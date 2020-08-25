@@ -126,42 +126,44 @@ class ExportIssue extends Component {
         onCancel={this.handleCancel}
         confirmLoading={loading}
       >
-        <div style={{ margin: '10px 0' }}>
-          您正在导出
-          {' '}
-          <span style={{ fontWeight: 500 }}>{projectName}</span>
-          {' '}
-          的问题，请选择你需要导出的字段
-        </div>
-        {!this.getIsHasFilter() && (
+        <div style={{ margin: '10px 0', display: 'inline-block' }}>
           <div>
-            <SelectFocusLoad
-              style={{ width: '400px' }}
-              type="sprint"
-              loadWhenMount
-              mode="multiple"
-              showCheckAll={false}
-              allowClear
-              dropdownMatchSelectWidth={false}
-              placeholder="冲刺"
-              saveList={(v) => {
-                list = unionBy(list, v, 'sprintId');
-              }}
-              afterLoad={(data) => {
-                if (data && data.length > 0) {
-                  this.setState({
-                    sprints: [data[0].sprintId],
-                  });
-                }
-              }}
-              filter
-              onChange={this.handleSprintChange}
-              value={sprints}
-              getPopupContainer={triggerNode => triggerNode.parentNode}
-              requestArgs={[]}
-            />
+            您正在导出
+            {' '}
+            <span style={{ fontWeight: 500 }}>{projectName}</span>
+            {' '}
+            的问题，请选择你需要导出的字段
           </div>
-        )}
+          {!this.getIsHasFilter() && (
+            <div style={{ display: 'flex' }}>
+              <SelectFocusLoad
+                style={{ flexGrow: 1, width: 0, marginTop: 10 }}
+                type="sprint"
+                loadWhenMount
+                mode="multiple"
+                showCheckAll={false}
+                allowClear
+                dropdownMatchSelectWidth={false}
+                placeholder="冲刺"
+                saveList={(v) => {
+                  list = unionBy(list, v, 'sprintId');
+                }}
+                afterLoad={(data) => {
+                  if (data && data.length > 0) {
+                    this.setState({
+                      sprints: [data[0].sprintId],
+                    });
+                  }
+                }}
+                filter
+                onChange={this.handleSprintChange}
+                value={sprints}
+                getPopupContainer={triggerNode => triggerNode.parentNode}
+                requestArgs={[]}
+              />
+            </div>
+          )}
+        </div>
         <RadioGroup onChange={this.handleExportChange} value={mode}>
           <Radio style={radioStyle} value="show">当前页面显示字段</Radio>
           <Radio style={radioStyle} value="all">全部字段</Radio>
