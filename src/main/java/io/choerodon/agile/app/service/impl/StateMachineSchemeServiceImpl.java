@@ -303,7 +303,7 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
         Long stateMachineId = initService.createStateMachineWithCreateProject(organizationId, schemeApplyType, projectEvent);
 
         StateMachineSchemeDTO scheme = new StateMachineSchemeDTO();
-        scheme.setStatus(StateMachineSchemeStatus.CREATE);
+        scheme.setStatus(StateMachineSchemeStatus.ACTIVE);
         scheme.setName(name);
         scheme.setDescription(name);
         scheme.setOrganizationId(organizationId);

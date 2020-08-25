@@ -112,6 +112,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     private StatusTransferSettingMapper statusTransferSettingMapper;
     @Autowired
     private StatusFieldSettingMapper statusFieldSettingMapper;
+    @Autowired
+    private IssueTypeSchemeConfigMapper issueTypeSchemeConfigMapper;
 
     @Override
     public ProjectConfigDTO create(Long projectId, Long schemeId, String schemeType, String applyType) {
@@ -132,10 +134,10 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             throw new CommonException("error.projectConfig.create");
         }
 
-        //若是关联状态机方案，设置状态机方案、状态机为活跃
-        if (schemeType.equals(SchemeType.STATE_MACHINE)) {
-            stateMachineSchemeService.activeSchemeWithRefProjectConfig(schemeId);
-        }
+//        //若是关联状态机方案，设置状态机方案、状态机为活跃
+//        if (schemeType.equals(SchemeType.STATE_MACHINE)) {
+//            stateMachineSchemeService.activeSchemeWithRefProjectConfig(schemeId);
+//        }
         return projectConfig;
     }
 
@@ -679,6 +681,32 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         machineNodeDTO.setObjectVersionNumber(objectVersionNumber);
         if (statusMachineNodeMapper.updateOptional(machineNodeDTO, "objectVersionNumber") != 1) {
             throw new CommonException("error.update.node");
+        }
+    }
+
+    @Override
+    public void initIssueTypeStatusMachine(Long projectId, String applyType) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        ProjectConfigDTO projectConfigDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.ISSUE_TYPE, applyType);
+        ProjectConfigDTO configDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType);
+        if (ObjectUtils.isEmpty(projectConfigDTO)) {
+            return;
+        }
+        if (ObjectUtils.isEmpty(configDTO)) {
+            return;
+        }
+        Long stateMachineSchemeId = configDTO.getSchemeId();
+        Long schemeId = projectConfigDTO.getSchemeId();
+        IssueTypeSchemeConfigDTO issueTypeSchemeConfigDTO = new IssueTypeSchemeConfigDTO();
+        issueTypeSchemeConfigDTO.setSchemeId(schemeId);
+        issueTypeSchemeConfigDTO.setOrganizationId(organizationId);
+        List<IssueTypeSchemeConfigDTO> issueTypeSchemeConfigDTOS = issueTypeSchemeConfigMapper.select(issueTypeSchemeConfigDTO);
+        if (org.springframework.util.CollectionUtils.isEmpty(issueTypeSchemeConfigDTOS)) {
+            return;
+        }
+        List<Long> issueTypeIds = issueTypeSchemeConfigDTOS.stream().map(IssueTypeSchemeConfigDTO::getIssueTypeId).collect(Collectors.toList());
+        for (Long issueTypeId : issueTypeIds) {
+            stateMachineSchemeConfigService.queryStatusMachineBySchemeIdAndIssueType(organizationId, stateMachineSchemeId, issueTypeId);
         }
     }
 

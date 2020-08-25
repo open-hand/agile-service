@@ -62,6 +62,8 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
     private StateMachineSchemeService schemeService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private StatusMachineSchemeConfigMapper statusMachineSchemeConfigMapper;
 
     @Override
     @ChangeSchemeStatus
@@ -120,14 +122,14 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
     @Override
     public void createDefaultConfig(Long organizationId, Long schemeId, Long stateMachineId) {
         //创建草稿
-        StateMachineSchemeConfigDraftDTO defaultConfig = new StateMachineSchemeConfigDraftDTO();
+        StatusMachineSchemeConfigDTO defaultConfig = new StatusMachineSchemeConfigDTO();
         defaultConfig.setStateMachineId(stateMachineId);
         defaultConfig.setSequence(0);
         defaultConfig.setIssueTypeId(0L);
         defaultConfig.setSchemeId(schemeId);
         defaultConfig.setOrganizationId(organizationId);
         defaultConfig.setDefault(true);
-        int isInsert = configDraftMapper.insert(defaultConfig);
+        int isInsert = statusMachineSchemeConfigMapper.insert(defaultConfig);
         if (isInsert < 1) {
             throw new CommonException("error.stateMachineSchemeConfig.insert");
         }
