@@ -3,9 +3,12 @@
 import React, { Component } from 'react';
 import { Choerodon } from '@choerodon/boot';
 import { Select } from 'choerodon-ui/pro';
+import { omit, isEqual } from 'lodash';
 import {
   quickFilterApi, personalFilterApi,
 } from '@/api';
+import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import './index.less';
 
 const { Option, OptGroup } = Select;
@@ -26,7 +29,7 @@ interface IPersonalFilter {
   projectId: number
   userId: string
 }
-interface Props {
+interface Props extends Partial<SelectProps> {
   value?: string[] | null
   onChange?: (value: IQuickSearchValue) => void
 }
@@ -136,6 +139,10 @@ class QuickSearch extends Component<Props, State> {
   }
 
   triggerChange = (value: IQuickSearchValue) => {
+    const { value: currentValue } = this.state;
+    if (isEqual(value, currentValue)) {
+      return;
+    }
     const { onChange } = this.props;
     if (!('value' in this.props)) {
       this.setState({ value });
@@ -195,9 +202,13 @@ class QuickSearch extends Component<Props, State> {
     return (
       <Select
         multiple
-        placeholder="快速搜索"
+        label="快速筛选"
         onChange={this.handleChange}
         value={QuickSearchValueToValue(value)}
+        labelLayout={'float' as LabelLayout}
+        maxTagCount={3}
+        dropdownMatchSelectWidth={false}
+        {...omit(this.props, ['value', 'onChange'])}
       >
         {this.renderCommonlyUsedOptions()}
         {this.renderQuickFiltersOptions()}

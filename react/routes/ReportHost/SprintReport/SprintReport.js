@@ -113,7 +113,6 @@ class SprintReport extends Component {
         defaultSprint: defaultSprint === '' ? res[0].sprintId : defaultSprint,
         endDate: defaultSprint === '' ? res[0].endDate : res.filter((item) => item.sprintId === defaultSprint)[0].endDate,
       }, () => {
-        // this.getChartData();
         this.axiosGetRestDays();
       });
     }).catch((error) => {
@@ -215,72 +214,6 @@ class SprintReport extends Component {
         exportAxis: exportAxisData,
         markAreaData,
       });
-    });
-  }
-
-  // 废弃
-  getChartData() {
-    this.setState({
-      loading: true,
-    });
-    reportApi.loadSprintBurnDown(this.state.defaultSprint, this.state.select).then((res) => {
-      const data = res;
-      const newData = [];
-      for (let index = 0, len = data.length; index < len; index += 1) {
-        if (!_.some(newData, { date: data[index].date })) {
-          newData.push({
-            date: data[index].date,
-            issues: [{
-              issueId: data[index].issueId,
-              issueNum: data[index].issueNum,
-              newValue: data[index].newValue,
-              oldValue: data[index].oldValue,
-              statistical: data[index].statistical,
-              parentIssueId: data[index].parentIssueId,
-              parentIssueNum: data[index].parentIssueNum,
-            }],
-            type: data[index].type,
-          });
-        } else {
-          let index2;
-          for (let i = 0, len2 = newData.length; i < len2; i += 1) {
-            if (newData[i].date === data[index].date) {
-              index2 = i;
-            }
-          }
-          if (newData[index2].type.indexOf(data[index].type) === -1) {
-            newData[index2].type += `-${data[index].type}`;
-          }
-          newData[index2].issues = [...newData[index2].issues, {
-            issueId: data[index].issueId,
-            issueNum: data[index].issueNum,
-            newValue: data[index].newValue,
-            oldValue: data[index].oldValue,
-            statistical: data[index].statistical,
-            parentIssueId: data[index].parentIssueId,
-            parentIssueNum: data[index].parentIssueNum,
-          }];
-        }
-      }
-      for (let index = 0, dataLen = newData.length; index < dataLen; index += 1) {
-        let rest = 0;
-        if (newData[index].type !== 'endSprint') {
-          if (index > 0) {
-            rest = newData[index - 1].rest;
-          }
-        }
-        for (let i = 0, len = newData[index].issues.length; i < len; i += 1) {
-          if (newData[index].issues[i].statistical) {
-            rest += newData[index].issues[i].newValue - newData[index].issues[i].oldValue;
-          }
-        }
-        newData[index].rest = rest;
-      }
-      BurndownChartStore.setBurndownList(newData);
-      this.setState({
-        loading: false,
-      });
-    }).catch((error) => {
     });
   }
 
@@ -714,8 +647,6 @@ class SprintReport extends Component {
                           defaultSprint: value,
                           endDate,
                         }, () => {
-                          // this.getChartData();
-                          // this.getChartCoordinate();
                           this.axiosGetRestDays();
                         });
                       }}
