@@ -14,6 +14,7 @@ import Moment from 'moment';
 import { extendMoment } from 'moment-range';
 import { sprintApi, reportApi } from '@/api';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
+import QuickSearch from '@/components/quick-search';
 import BurndownChartStore from '../../../../stores/project/burndownChart/BurndownChartStore';
 import './BurndownChartHome.less';
 import NoDataComponent from '../../Component/noData';
@@ -751,6 +752,7 @@ class BurndownChartHome extends Component {
             BurndownChartStore.getSprintList.length > 0 ? (
               <div>
                 <div>
+                  <QuickSearch />
                   <Select
                     getPopupContainer={triggerNode => triggerNode.parentNode}
                     style={{ width: 244 }}
