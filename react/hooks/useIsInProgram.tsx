@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { commonApi } from '@/api';
 import { stores } from '@choerodon/boot';
 
@@ -16,41 +17,36 @@ interface Props {
   children: (data: ChildrenProps) => React.ReactElement,
 }
 
-const useIsInProgram = ():ChildrenProps => {
+const useIsInProgram = (): ChildrenProps => {
   const [isInProgram, setIsInProgram] = useState<boolean>(false);
   const [program, setProgram] = useState<object | boolean>(false);
   const [isShowFeature, setIsShowFeature] = useState<boolean>(false);
   const [artInfo, setArtInfo] = useState<object | boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const type = AppState.currentMenuType.category === 'PROGRAM' ? 'program' : 'agile';
   const isProgram = type === 'program';
-
-  const loadIsShowFeature = useCallback(async () => {
-    const art = await commonApi.getIsShowFeature();
-    setArtInfo(art);
-    setIsShowFeature(Boolean(art));
-    setLoading(false);
-    return Boolean(art);
-  }, []);
 
   const refresh = useCallback(async () => {
     if (!isProgram) {
       setLoading(true);
       const projectProgram = await commonApi.getProjectsInProgram();
       const hasProgram = Boolean(projectProgram);
-      setIsInProgram(hasProgram);
-      setProgram(projectProgram);
+      let art = false;
+      let showFeature = false;
       if (hasProgram) {
-        loadIsShowFeature();
-      } else {
-        setIsShowFeature(false);
-        setLoading(false);
+        art = await commonApi.getIsShowFeature();
+        showFeature = Boolean(art);
       }
-    } else {
-      setIsInProgram(false);
+      batchedUpdates(() => {
+        setIsInProgram(hasProgram);
+        setProgram(projectProgram);
+        setArtInfo(art);
+        setIsShowFeature(showFeature);
+        setLoading(false);
+      });
     }
-  }, [isProgram, loadIsShowFeature]);
+  }, [isProgram]);
 
   useEffect(() => {
     refresh();
@@ -61,7 +57,7 @@ const useIsInProgram = ():ChildrenProps => {
   };
 };
 
-const IsInProgram:React.FC<Props> = ({ children }) => {
+const IsInProgram: React.FC<Props> = ({ children }) => {
   const data = useIsInProgram();
   return children(data);
 };
