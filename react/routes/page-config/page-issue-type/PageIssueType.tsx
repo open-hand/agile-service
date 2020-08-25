@@ -7,16 +7,14 @@ import {
 } from 'choerodon-ui/pro/lib';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import WYSIWYGEditor from '@/components/WYSIWYGEditor';
 import { observer } from 'mobx-react-lite';
 import { Prompt } from 'react-router-dom';
 import {
-  pageConfigApi, PageConfigIssueType, IFiledProps, UIssueTypeConfig,
+  pageConfigApi, UIssueTypeConfig,
 } from '@/api/PageConfig';
 import { beforeTextUpload, text2Delta } from '@/utils/richText';
 import { validKeyReturnValue } from '@/common/commonValid';
 import { omit } from 'lodash';
-import { useIsProgramContext } from '@/hooks/useIsProgrom';
 import styles from './index.less';
 import IssueTypeWrap from './components/issue-type-wrap';
 import SortTable from './components/sort-table';
@@ -25,30 +23,15 @@ import { usePageIssueTypeStore } from './stores';
 import Switch from './components/switch';
 import './PageIssueType.less';
 import CreateField from '../components/create-field';
-import { PageIssueTypeStoreStatusCode, PageIFieldPostDataProps } from './stores/PageIssueTypeStore';
+import { PageIssueTypeStoreStatusCode } from './stores/PageIssueTypeStore';
 import { IFieldPostDataProps } from '../components/create-field/CreateField';
+import PageDescription from './components/page-description';
 
-interface IssueOption {
-  value: string,
-  text: string,
-  type: 'organization' | 'common',
-}
-const issueTypeOptions: Array<IssueOption> = [
-  { value: 'issue_epic', text: '史诗', type: 'common' },
-  { value: 'feature', text: '特性', type: 'organization' },
-  { value: 'story', text: '故事', type: 'common' },
-  { value: 'task', text: '任务', type: 'common' },
-  { value: 'sub_task', text: '子任务', type: 'common' },
-  { value: 'bug', text: '缺陷', type: 'common' },
-  { value: 'backlog', text: '需求', type: 'common' },
-];
 function PageIssueType() {
   const {
     sortTableDataSet, addUnselectedDataSet, intl, pageIssueTypeStore, isProject, prefixCls,
   } = usePageIssueTypeStore();
-  const { isProgram } = useIsProgramContext();
 
-  const [switchOptions, setSwitchOption] = useState<Array<IssueOption>>();
   const [btnLoading, setBtnLoading] = useState<boolean>();
   const handleRequest = (data: UIssueTypeConfig) => {
     pageConfigApi.updateConfig(data).then(() => {
@@ -112,71 +95,6 @@ function PageIssueType() {
     }
     return true;
   };
-  // 加载全部字段 用于增添已有字段
-  useEffect(() => {
-    pageIssueTypeStore.setLoading(true);
-    pageIssueTypeStore.loadAllField();
-    const showOptions = isProgram
-      ? [
-        { value: 'feature', text: '特性', type: 'organization' },
-        { value: 'issue_epic', text: '史诗', type: 'common' },
-        { value: 'backlog', text: '需求', type: 'common' },
-      ] as Array<IssueOption> : issueTypeOptions.filter((item) => item.type === 'common' || !isProject);
-    pageConfigApi.loadAvailableIssueType().then((res) => {
-      // const showOptions = res.map((item) => ({ value: item.typeCode, text: item.name }));
-      if (!res.some((item) => item.typeCode === 'backlog')) {
-        showOptions.pop();
-      }
-
-      pageIssueTypeStore.init(showOptions[0].value as PageConfigIssueType);
-      setSwitchOption(showOptions);
-    });
-  }, []);
-
-  useEffect(() => {
-    if (pageIssueTypeStore.currentIssueType !== '') {
-      pageIssueTypeStore.loadData();
-    }
-  }, [pageIssueTypeStore.currentIssueType]);
-
-  const handleSelectBox = (val: any) => {
-    if (pageIssueTypeStore.getDirty) {
-      Modal.confirm({
-        title: '是否放弃更改',
-        children: (
-          <div>
-            页面有未保存的内容,是否放弃更改？
-          </div>
-        ),
-        onOk: () => pageIssueTypeStore.setCurrentIssueType(val as PageConfigIssueType),
-      });
-      return false;
-    }
-    pageIssueTypeStore.setCurrentIssueType(val as PageConfigIssueType);
-    return true;
-  };
-  const handleChangeDes = (val: string) => {
-    pageIssueTypeStore.changeTemplate(val);
-  };
-  const handleDeleteFiled = async (data: IFiledProps &
-    PageIFieldPostDataProps & { id?: string }) => {
-    // pageIssueTypeStore.setLoading(true);
-    if (data.local) {
-      pageIssueTypeStore.deleteLocalField(data.code, data.id);
-    } else {
-      pageIssueTypeStore.addDeleteId(data.id);
-      pageIssueTypeStore.changeDataStatusCode(PageIssueTypeStoreStatusCode.del);
-    }
-  };
-  // 增添已有字段进行本地提交数据
-  useEffect(() => {
-    const addDataLength = pageIssueTypeStore.addFields.length
-      + pageIssueTypeStore.createdFields.length;
-    if (addDataLength === 0
-      && pageIssueTypeStore.getDataStatusCode === PageIssueTypeStoreStatusCode.add) {
-      pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.null);
-    }
-  }, [pageIssueTypeStore.addFields.length, pageIssueTypeStore.createdFields.length]);
 
   /**
    * 本地提交
@@ -193,7 +111,7 @@ function PageIssueType() {
       required: false,
       rank: undefined, // 本地提交数据如需在列表显示需要一个可靠rank
     });
-    pageIssueTypeStore.setDataStatusCode(PageIssueTypeStoreStatusCode.add);
+    pageIssueTypeStore.changeDataStatusCode(PageIssueTypeStoreStatusCode.add);
     !oldField && pageIssueTypeStore.addCreatedField(newData);
     // 当是增添的已有字段 或是当前类型字段时 增添数据至表格
     if (oldField
@@ -247,49 +165,26 @@ function PageIssueType() {
         >
           添加已有字段
         </Button>
-
       </Header>
       <Breadcrumb />
       <Content className={`${prefixCls}-content`}>
-        <Switch
-          // defaultValue="feature"
-          value={pageIssueTypeStore.currentIssueType}
-          options={switchOptions || []}
-          onChange={handleSelectBox}
-        />
+        <Switch />
         <Spin spinning={pageIssueTypeStore.getLoading}>
           <div className={styles.top}>
             {
-              !isProject ? (
-                <SortTable
-                  showSplitLine={!isProject}
-                  onDelete={handleDeleteFiled}
-                />
-              )
+              !isProject ? <SortTable />
                 : [
                   <IssueTypeWrap title="字段配置">
-                    <SortTable
-                      showSplitLine={!isProject}
-                      onDelete={handleDeleteFiled}
-                    />
+                    <SortTable />
                   </IssueTypeWrap>,
                   <IssueTypeWrap title="描述信息格式">
                     {
                       !pageIssueTypeStore.getLoading ? (
-                        <WYSIWYGEditor
-                          style={{ height: '100%', width: '100%' }}
-                          onChange={handleChangeDes}
-                          defaultValue={text2Delta(
-                            pageIssueTypeStore.descriptionObj.originTemplate,
-                          )}
-                          placeholder="您可以在此自定义描述信息格式"
-                        />
+                        <PageDescription />
                       ) : ''
                     }
-
                   </IssueTypeWrap>]
             }
-
           </div>
         </Spin>
         <div className={styles.bottom}>
