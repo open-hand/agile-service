@@ -19,7 +19,6 @@ function MemberField({
         list: list.concat([{ id: 0, realName: '未分配' }]),
         textField: 'realName',
         valueFiled: 'id',
-        parseNumber: true,
       })}
       type="user"
       loadWhenMount

@@ -14,7 +14,6 @@ function PriorityField({ field, value, onChange }) {
         list,
         textField: 'name',
         valueFiled: 'id',
-        parseNumber: true,
       })}
       type="priority"
       loadWhenMount

@@ -14,7 +14,6 @@ function SprintField({ field, value, onChange }) {
         list,
         textField: 'sprintName',
         valueFiled: 'sprintId',
-        parseNumber: true,
       })}
       type="sprint"
       loadWhenMount

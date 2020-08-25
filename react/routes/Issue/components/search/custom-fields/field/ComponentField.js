@@ -16,7 +16,6 @@ function ComponentField({ field, value, onChange }) {
         list,
         textField: 'name',
         valueFiled: 'componentId',
-        parseNumber: true,
       })}
       type="component"
       loadWhenMount            

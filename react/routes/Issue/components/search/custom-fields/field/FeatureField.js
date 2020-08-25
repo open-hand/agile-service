@@ -14,7 +14,6 @@ function FeatureField({ field, value, onChange }) {
         list,
         textField: 'summary',
         valueFiled: 'issueId',
-        parseNumber: true,
       })}
       type="feature_all"
       loadWhenMount

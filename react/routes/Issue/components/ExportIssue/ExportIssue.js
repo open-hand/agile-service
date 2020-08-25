@@ -6,6 +6,10 @@ import FileSaver from 'file-saver';
 import IssueStore from '@/stores/project/issue/IssueStore';
 import { find } from 'lodash';
 import { issueApi } from '@/api';
+import { unionBy } from 'lodash';
+import SelectFocusLoad from '@/components/SelectFocusLoad';
+import { configTheme } from '@/utils/common';
+import { isFilterSame, flattenObject } from '../search';
 
 const RadioGroup = Radio.Group;
 const { AppState } = stores;
@@ -14,11 +18,14 @@ const radioStyle = {
   height: '30px',
   lineHeight: '30px',
 };
+
+let list = [];
 @observer
 class ExportIssue extends Component {
   state = {
-    mode: 'all',
+    mode: 'show',
     loading: false,
+    sprints: [],
   }
 
   handleExportChange = (e) => {
@@ -66,7 +73,7 @@ class ExportIssue extends Component {
    */
   exportExcel = () => {
     const searchDTO = IssueStore.getCustomFieldFilters();
-    const { mode } = this.state;
+    const { mode, sprints } = this.state;
     const { dataSet } = this.props;
     const field = find([...dataSet.fields.values()], f => f.order);
     const tableShowColumns = mode === 'all' ? [] : this.getVisibleColumns();
@@ -77,6 +84,9 @@ class ExportIssue extends Component {
     this.setState({
       loading: true,
     });
+    if (!this.getIsHasFilter()) {
+      search.otherArgs.sprint = sprints;
+    }
     issueApi.export(search, field ? `${field.name},${field.order}` : undefined)
       .then((data) => {
         const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -91,10 +101,23 @@ class ExportIssue extends Component {
       });
   };
 
+  handleSprintChange = (sprints) => {
+    this.setState({
+      sprints,
+    });
+  }
+
+  getIsHasFilter = () => {
+    const currentFilterDTO = IssueStore.getCustomFieldFilters() ? flattenObject(IssueStore.getCustomFieldFilters()) : {};
+    const isHasFilter = !isFilterSame({}, currentFilterDTO);
+    return isHasFilter;
+  }
+
   render() {
-    const { mode, loading } = this.state;
+    const { mode, loading, sprints } = this.state;
     const visible = IssueStore.exportModalVisible;
     const projectName = AppState.currentMenuType.name;
+
     return (
       <Modal
         title="问题列表导出确认"
@@ -110,6 +133,35 @@ class ExportIssue extends Component {
           {' '}
           的问题，请选择你需要导出的字段
         </div>
+        {!this.getIsHasFilter() && (
+          <div>
+            <SelectFocusLoad
+              style={{ width: '400px' }}
+              type="sprint"
+              loadWhenMount
+              mode="multiple"
+              showCheckAll={false}
+              allowClear
+              dropdownMatchSelectWidth={false}
+              placeholder="冲刺"
+              saveList={(v) => {
+                list = unionBy(list, v, 'sprintId');
+              }}
+              afterLoad={(data) => {
+                if (data && data.length > 0) {
+                  this.setState({
+                    sprints: [data[0].sprintId],
+                  });
+                }
+              }}
+              filter
+              onChange={this.handleSprintChange}
+              value={sprints}
+              getPopupContainer={triggerNode => triggerNode.parentNode}
+              requestArgs={[]}
+            />
+          </div>
+        )}
         <RadioGroup onChange={this.handleExportChange} value={mode}>
           <Radio style={radioStyle} value="show">当前页面显示字段</Radio>
           <Radio style={radioStyle} value="all">全部字段</Radio>

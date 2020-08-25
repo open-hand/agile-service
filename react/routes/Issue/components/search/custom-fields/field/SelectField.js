@@ -13,7 +13,6 @@ function SelectField({ field, value, onChange }) {
         list: fieldOptions,
         textField: 'value',
         valueFiled: 'id',
-        parseNumber: true,
       })}
       value={value}
       onChange={onChange}
