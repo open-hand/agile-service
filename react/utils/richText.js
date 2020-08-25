@@ -118,7 +118,7 @@ export function returnBeforeTextUpload(text, data, func, pro = 'description') {
  * @param {{issueType:string,issueId:number,fileName:string}} config 附件上传的额外信息
  */
 export function handleFileUpload(propFileList, func, config, projectId) {
-  const fileList = propFileList.filter(i => !i.url);
+  const fileList = propFileList.filter((i) => !i.url);
   const formData = new FormData();
   fileList.forEach((file) => {
     // file.name = encodeURI(encodeURI(file.name));
@@ -178,14 +178,22 @@ export function text2Delta(description) {
  * @param {*} delta
  */
 export function delta2Html(description) {
+  let isDelta = true;
+  try {
+    JSON.parse(description);
+  } catch (error) {
+    isDelta = false;
+  }
+  if (!isDelta) {
+    return description;
+  }
   const delta = text2Delta(description);
   const converter = new QuillDeltaToHtmlConverter(delta, {});
   const text = converter.convert();
   if (text.substring(0, 3) === '<p>') {
     return text.substring(3);
-  } else {
-    return text;
   }
+  return text;
 }
 
 export function validateFile(rule, fileList, callback) {
