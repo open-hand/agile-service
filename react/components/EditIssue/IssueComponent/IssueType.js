@@ -87,7 +87,7 @@ const IssueType = observer(({
     ];
     currentIssueType = featureType === 'business' ? issueTypeData[0] : issueTypeData[1];
   } else {
-    issueTypeData = issueTypeData.filter((item) => item.stateMachineId === stateMachineId).filter((item) => ![typeCode, 'feature', 'sub_task'].includes(item.typeCode));
+    issueTypeData = issueTypeData.filter((item) => item.stateMachineId !== stateMachineId).filter((item) => ![typeCode, 'feature', 'sub_task'].includes(item.typeCode));
     if (isInProgram) {
       issueTypeData = issueTypeData.filter((item) => item.typeCode !== 'issue_epic');
     }
