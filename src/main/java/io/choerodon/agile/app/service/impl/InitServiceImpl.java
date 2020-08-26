@@ -190,8 +190,7 @@ public class InitServiceImpl implements InitService {
         list.add(transform);
         Map<Long, StatusDTO> statusDTOMap = initStatuses.stream().filter(x -> x.getCode() != null).collect(Collectors.toMap(StatusDTO::getId, x -> x, (code1, code2) -> code1));
         for (StatusMachineNodeDTO startNode:nodeDTOS) {
-            List<StatusMachineNodeDTO> endNodes = nodeDTOS.stream().filter(v -> !startNode.getId().equals(v.getId())).collect(Collectors.toList());
-            for (StatusMachineNodeDTO endNode :endNodes) {
+            for (StatusMachineNodeDTO endNode :nodeDTOS) {
                 StatusMachineTransformDTO transformDTO = new StatusMachineTransformDTO();
                 transformDTO.setStateMachineId(stateMachineId);
                 String startStatusName = statusDTOMap.get(startNode.getStatusId()).getName();
