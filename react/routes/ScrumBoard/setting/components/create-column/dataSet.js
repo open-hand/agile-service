@@ -8,7 +8,7 @@ export default function DataSetFactory({ sequence, boardId }) {
         url: `/agile/v1/projects/${getProjectId()}/board_column`,
         method: 'post',
         params: {
-          applyType: 'agile', 
+          applyType: 'agile',
           categoryCode: data[0].categoryCode,
         },
         // eslint-disable-next-line no-shadow
@@ -17,25 +17,25 @@ export default function DataSetFactory({ sequence, boardId }) {
           sequence,
           boardId,
           projectId: getProjectId(),
-          enable: true,          
+          enable: true,
         })),
-      }),      
+      }),
     },
     fields: [
       {
         name: 'name',
         type: 'string',
         label: '列名称',
-        required: true,       
+        required: true,
       },
       {
         name: 'categoryCode',
         type: 'string',
         label: '类别',
-        required: true, 
+        required: true,
         lookupAxiosConfig: () => ({
           url: '/agile/v1/lookup_values/status_category',
-          transformResponse: data => ((Array.isArray(data) ? data : JSON.parse(data).lookupValues)).filter(status => status.valueCode !== 'prepare'),
+          transformResponse: (data) => ((Array.isArray(data) ? data : JSON.parse(data).lookupValues)).filter((status) => status.valueCode !== 'prepare'),
         }),
         textField: 'name',
         valueField: 'valueCode',

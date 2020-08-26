@@ -6,8 +6,6 @@ import { issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectUser from '@/components/select/select-user';
 import UserHead from '../../../../UserHead';
-import './Field.less';
-
 
 @inject('AppState')
 @observer class FieldStatus extends Component {
@@ -104,8 +102,7 @@ import './Field.less';
               >
                 分配给我
               </span>
-            ) : ''
-        }
+            ) : ''}
         </div>
       </div>
     );

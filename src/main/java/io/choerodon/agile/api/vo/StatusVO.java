@@ -32,6 +32,8 @@ public class StatusVO {
     @ApiModelProperty(value = "状态是否已完成")
     private Boolean completed;
 
+    private Boolean defaultStatus;
+
     public StatusVO() {
     }
 
@@ -112,5 +114,13 @@ public class StatusVO {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public Boolean getDefaultStatus() {
+        return defaultStatus;
+    }
+
+    public void setDefaultStatus(Boolean defaultStatus) {
+        this.defaultStatus = defaultStatus;
     }
 }

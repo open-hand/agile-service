@@ -5,9 +5,9 @@ import {
   Form, Input, Select, Button, DatePicker, Icon, TimePicker,
 } from 'choerodon-ui';
 import { Content, stores, axios } from '@choerodon/boot';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import _ from 'lodash';
 import { fieldApi, quickFilterApi } from '@/api';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import SelectFocusLoad from '../../../../../components/SelectFocusLoad';
 import { NumericInput } from '../../../../../components/CommonComponent';
 
@@ -213,30 +213,28 @@ const CreateFilter = (props) => {
     if (filter === 'priority') {
       if (type === '[object Array]') {
         const v = _.map(value, 'key');
-        const vv = v.map(e => `${e}`);
+        const vv = v.map((e) => `${e}`);
         return `(${vv.join(',')})`;
-      } else {
-        const v = value.key;
-        return `${v}`;
       }
-    } else if (filter === 'issue_type') {
+      const v = value.key;
+      return `${v}`;
+    } if (filter === 'issue_type') {
       if (type === '[object Array]') {
         const v = _.map(value, 'key');
-        const vv = v.map(e => `'${e}'`);
+        const vv = v.map((e) => `'${e}'`);
         return `(${vv.join(',')})`;
-      } else {
-        const v = value.key;
-        return `'${v}'`;
       }
-    } else if (type === '[object Array]') {
+      const v = value.key;
+      return `'${v}'`;
+    } if (type === '[object Array]') {
       const v = _.map(value, 'key');
       return `(${v.join(',')})`;
-    } else if (type === '[object Object]') {
+    } if (type === '[object Object]') {
       if (value.key) {
         const v = value.key;
         if (Object.prototype.toString.call(v) === '[object Number]') {
           return v;
-        } else if (Object.prototype.toString.call(v) === '[object String]') {
+        } if (Object.prototype.toString.call(v) === '[object String]') {
           return v;
         }
       } else {
@@ -257,12 +255,12 @@ const CreateFilter = (props) => {
     if (Object.prototype.toString.call(value) === '[object Array]') {
       const v = _.map(value, 'label');
       return `[${v.join(',')}]`;
-    } else if (Object.prototype.toString.call(value) === '[object Object]') {
+    } if (Object.prototype.toString.call(value) === '[object Object]') {
       if (value.key) {
         const v = value.label;
         if (Object.prototype.toString.call(v) === '[object Number]') {
           return v;
-        } else if (Object.prototype.toString.call(v) === '[object String]') {
+        } if (Object.prototype.toString.call(v) === '[object String]') {
           return v;
         }
       } else {
@@ -279,7 +277,7 @@ const CreateFilter = (props) => {
    * @param filter
    * @returns {*|Array}
    */
-  const getOperation = filter => OPERATION_FILTER[filter] || [];
+  const getOperation = (filter) => OPERATION_FILTER[filter] || [];
 
   /**
    * 调用接口，获取'属性'的值列表
@@ -390,10 +388,11 @@ const CreateFilter = (props) => {
    * 加载属性列表
    */
   const loadQuickFilterFiled = () => {
+    const { isInProgram } = props;
     const getPreDefinedField = () => quickFilterApi.loadField();
     const getCustomField = () => fieldApi.getCustomFields();
     Promise.all([getPreDefinedField(), getCustomField()]).then(([preDefinedField, customField]) => {
-      setQuickFilterFiled([...preDefinedField, ...IsInProgramStore.isInProgram ? [{ fieldCode: 'feature', type: 'long', name: '特性' }] : [], ...customField].map(field => ({ ...field, fieldCode: field.code || field.fieldCode, type: field.fieldType || field.type })) || []);
+      setQuickFilterFiled([...preDefinedField, ...isInProgram ? [{ fieldCode: 'feature', type: 'long', name: '特性' }] : [], ...customField].map((field) => ({ ...field, fieldCode: field.code || field.fieldCode, type: field.fieldType || field.type })) || []);
     });
   };
 
@@ -435,7 +434,7 @@ const CreateFilter = (props) => {
           if (deleteItem.indexOf(i) !== -1) {
             return;
           }
-          const { id, type } = quickFilterFiled.find(item => item.fieldCode === values[`filter-${i}-prop`]) || {};
+          const { id, type } = quickFilterFiled.find((item) => item.fieldCode === values[`filter-${i}-prop`]) || {};
           const a = {
             fieldCode: values[`filter-${i}-prop`],
             operation: transformOperation(values[`filter-${i}-rule`]),
@@ -477,7 +476,6 @@ const CreateFilter = (props) => {
     });
     return false;
   };
-
 
   /**
    *校验快速搜索名称是否重复
@@ -597,8 +595,8 @@ const CreateFilter = (props) => {
         name: 'summary',
       },
     };
-    
-    const arr = (temp || []).map(v => (
+
+    const arr = (temp || []).map((v) => (
       <Option key={v[OPTION_FILTER[filter].id]} value={v[OPTION_FILTER[filter].id]}>
         {v[OPTION_FILTER[filter].name]}
       </Option>
@@ -613,31 +611,30 @@ const CreateFilter = (props) => {
    * @returns {XML}
    */
   const renderOperation = (filter, index) => {
-    const { id, type } = quickFilterFiled.find(item => item.fieldCode === filter) || {};
+    const { id, type } = quickFilterFiled.find((item) => item.fieldCode === filter) || {};
     if (!filter) {
       return (
         <Select label="关系" />
       );
-    } else {
-      return (
-        <Select
-          label="关系"
-          style={['in', 'notIn'].indexOf(form.getFieldValue(`filter-${index}-prop`)) > -1 ? { marginTop: 8 } : {}}
-          onChange={() => {
-            const str = `filter-${index}-value`;
-            form.setFieldsValue({
-              [str]: undefined,
-            });
-          }}
-        >
-          {
-            getOperation(!id ? filter : type).map(v => (
+    }
+    return (
+      <Select
+        label="关系"
+        style={['in', 'notIn'].indexOf(form.getFieldValue(`filter-${index}-prop`)) > -1 ? { marginTop: 8 } : {}}
+        onChange={() => {
+          const str = `filter-${index}-value`;
+          form.setFieldsValue({
+            [str]: undefined,
+          });
+        }}
+      >
+        {
+            getOperation(!id ? filter : type).map((v) => (
               <Option key={v.value} value={v.value}>{v.text}</Option>
             ))
           }
-        </Select>
-      );
-    }
+      </Select>
+    );
   };
 
   /**
@@ -647,13 +644,13 @@ const CreateFilter = (props) => {
    * @returns {XML}
    */
   const renderValue = (filter, operation) => {
-    const { id, type, fieldOptions = [] } = quickFilterFiled.find(item => item.fieldCode === filter) || {};
+    const { id, type, fieldOptions = [] } = quickFilterFiled.find((item) => item.fieldCode === filter) || {};
 
     if (!filter || !operation) {
       return (
         <Select label="值" />
       );
-    } else if ((['assignee', 'reporter', 'created_user',
+    } if ((['assignee', 'reporter', 'created_user',
       'last_updated_user'].indexOf(filter) > -1 && !id) || (id && type === 'member')) {
       if (['=', '!='].indexOf(operation) > -1) {
         // return normal value
@@ -662,14 +659,14 @@ const CreateFilter = (props) => {
             label="值"
             type="user"
             labelInValue
-            render={user => (
+            render={(user) => (
               <Option key={user.id} value={user.id}>
                 {user.realName}
               </Option>
             )}
           />
         );
-      } else if (['is', 'isNot'].indexOf(operation) > -1) {
+      } if (['is', 'isNot'].indexOf(operation) > -1) {
         // return value add empty
         return (
           <Select
@@ -686,23 +683,22 @@ const CreateFilter = (props) => {
             </Option>
           </Select>
         );
-      } else {
-        // return multiple value
-        return (
-          <SelectFocusLoad
-            label="值"
-            type="user"
-            mode="multiple"
-            labelInValue
-            render={user => (
-              <Option key={user.id} value={user.id}>
-                {user.realName}
-              </Option>
-            )}
-          />
-        );
       }
-    } else if (
+      // return multiple value
+      return (
+        <SelectFocusLoad
+          label="值"
+          type="user"
+          mode="multiple"
+          labelInValue
+          render={(user) => (
+            <Option key={user.id} value={user.id}>
+              {user.realName}
+            </Option>
+          )}
+        />
+      );
+    } if (
       (['priority', 'status',
         'epic', 'sprint', 'label', 'component',
         'influence_version', 'fix_version', 'issue_type', 'feature'].indexOf(filter) > -1 && !id) || (id && (type === 'single' || type === 'multiple' || type === 'radio' || type === 'checkbox'))) {
@@ -721,12 +717,12 @@ const CreateFilter = (props) => {
               getOption(filter, false, page);
             } : () => {}}
           >
-            {!id ? tempOption(filter, false) : fieldOptions.map(option => (
+            {!id ? tempOption(filter, false) : fieldOptions.map((option) => (
               <Option key={option.id} value={option.id}>{option.value}</Option>
             ))}
           </Select>
         );
-      } else if (['is', 'isNot'].indexOf(operation) > -1) {
+      } if (['is', 'isNot'].indexOf(operation) > -1) {
         // return value add empty
         return (
           <Select
@@ -743,29 +739,28 @@ const CreateFilter = (props) => {
             </Option>
           </Select>
         );
-      } else {
-        // return multiple value
-        return (
-          <Select
-            label="值"
-            labelInValue
-            mode="multiple"
-            filter
-            dropdownClassName="hidden-text hidden-label"
-            optionFilterProp="children"
-            filterOption={(input, option) => option.props.children.toLowerCase()
-              .indexOf(input.toLowerCase()) >= 0}
-            onFocus={!id ? () => {
-              getOption(filter, false, page);
-            } : () => {}}
-          >
-            {!id ? tempOption(filter, false) : fieldOptions.map(option => (
-              <Option key={option.id} value={option.id}>{option.value}</Option>
-            ))}
-          </Select>
-        );
       }
-    } else if ((['creation_date', 'last_update_date'].indexOf(filter) > -1 && !id) || (type === 'datetime' && id)) {
+      // return multiple value
+      return (
+        <Select
+          label="值"
+          labelInValue
+          mode="multiple"
+          filter
+          dropdownClassName="hidden-text hidden-label"
+          optionFilterProp="children"
+          filterOption={(input, option) => option.props.children.toLowerCase()
+            .indexOf(input.toLowerCase()) >= 0}
+          onFocus={!id ? () => {
+            getOption(filter, false, page);
+          } : () => {}}
+        >
+          {!id ? tempOption(filter, false) : fieldOptions.map((option) => (
+            <Option key={option.id} value={option.id}>{option.value}</Option>
+          ))}
+        </Select>
+      );
+    } if ((['creation_date', 'last_update_date'].indexOf(filter) > -1 && !id) || (type === 'datetime' && id)) {
       // time
       // return data picker
       return (
@@ -776,7 +771,7 @@ const CreateFilter = (props) => {
           showTime
         />
       );
-    } else if (id && type === 'date') {
+    } if (id && type === 'date') {
       return (
         <DatePicker
           style={{ width: '100%' }}
@@ -784,55 +779,53 @@ const CreateFilter = (props) => {
           format="YYYY-MM-DD"
         />
       );
-    } else if (id && type === 'time') {
+    } if (id && type === 'time') {
       return (
         <TimePicker
           style={{ width: '100%' }}
           label="值"
         />
       );
-    } else if (id && type === 'input') {
+    } if (id && type === 'input') {
       return (
         <Input
           style={{ width: '100%' }}
           label="值"
         />
       );
-    } else if (id && type === 'text') {
+    } if (id && type === 'text') {
       return (
         <TextArea
           style={{ width: '100%' }}
           label="值"
         />
       );
-    } else {
-      // story points && remainning time
-      // return number input
-      return (operation === 'is' || operation === 'isNot'
-        ? (
-          <Select
-            label="值"
-            labelInValue
-            filter
-            dropdownClassName="hidden-text hidden-label"
-            optionFilterProp="children"
-            filterOption={(input, option) => option.props.children.toLowerCase()
-              .indexOf(input.toLowerCase()) >= 0}
-          >
-            <Option key="'null'" value="'null'">
-              空
-            </Option>
-          </Select>
-        )
-        : (
-          <NumericInput
-            label="值"
-            style={{ width: '100%' }}
-          // style={{ lineHeight: '22px', marginBottom: 0, width: 300 }}
-          />
-        )
-      );
     }
+    // story points && remainning time
+    // return number input
+    return (operation === 'is' || operation === 'isNot'
+      ? (
+        <Select
+          label="值"
+          labelInValue
+          filter
+          dropdownClassName="hidden-text hidden-label"
+          optionFilterProp="children"
+          filterOption={(input, option) => option.props.children.toLowerCase()
+            .indexOf(input.toLowerCase()) >= 0}
+        >
+          <Option key="'null'" value="'null'">
+            空
+          </Option>
+        </Select>
+      )
+      : (
+        <NumericInput
+          label="值"
+          style={{ width: '100%' }}
+        />
+      )
+    );
   };
 
   useEffect(loadQuickFilterFiled, []);
@@ -906,7 +899,7 @@ const CreateFilter = (props) => {
                         }}
                       >
                         {
-                          quickFilterFiled.map(v => (
+                          quickFilterFiled.map((v) => (
                             <Option key={v.fieldCode} value={v.fieldCode}>{v.name}</Option>
                           ))
                         }
@@ -979,4 +972,9 @@ const CreateFilter = (props) => {
   );
 };
 
-export default Form.create()(CreateFilter);
+const CreateFilterHoc = (props) => {
+  const { isInProgram, loading } = useIsInProgram();
+  return !loading && <CreateFilter {...props} isInProgram={isInProgram} />;
+};
+
+export default Form.create()(CreateFilterHoc);

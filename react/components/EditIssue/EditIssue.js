@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-bind */
 /* eslint-disable react/sort-comp */
 import React, {
   useContext, useState, useEffect, useImperativeHandle, useRef,
@@ -10,8 +11,9 @@ import './EditIssue.less';
 import useIsOwner from '@/hooks/useIsOwner';
 import { useIssueTypes } from '@/hooks';
 import {
-  issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, devOpsApi, 
+  issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, devOpsApi, pageConfigApi,
 } from '@/api';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import RelateStory from '../RelateStory';
 import CopyIssue from '../CopyIssue';
 import ResizeAble from '../ResizeAble';
@@ -21,10 +23,8 @@ import ChangeParent from '../ChangeParent';
 import IssueHeader from './IssueComponent/IssueHeader';
 import IssueBody from './IssueComponent/IssueBody/IssueBody';
 import EditIssueContext from './stores';
-import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 // 项目加入群之后，不关联自己的史诗和特性，只能关联项目群的，不能改关联的史诗
 const { AppState } = stores;
-
 
 const defaultProps = {
   applyType: 'agile',
@@ -60,13 +60,15 @@ function EditIssue() {
   const [issueTypes] = useIssueTypes();
   const container = useRef();
   const idRef = useRef();
+
   const loadIssueDetail = async (paramIssueId) => {
     const id = paramIssueId || currentIssueId;
     idRef.current = id;
     setIssueLoading(true);
     try {
       // 1. 加载详情
-      const issue = await (programId ? issueApi.loadUnderProgram(id, programId) : issueApi.load(id));
+      const issue = await (programId
+        ? issueApi.loadUnderProgram(id, programId) : issueApi.load(id));
       if (idRef.current !== id) {
         return;
       }
@@ -81,6 +83,12 @@ function EditIssue() {
         pageCode: 'agile_issue_edit',
       };
       const fields = await fieldApi.getFieldAndValue(id, param);
+      const { description, issueTypeVO: { typeCode } } = issue;
+      if (!description || description === JSON.stringify([{ insert: '\n' }])) { // 加载默认模版
+        const issueTemplateInfo = await pageConfigApi.loadTemplateByType(typeCode) || {};
+        const { template } = issueTemplateInfo;
+        issue.descriptionTemplate = template;
+      }
       setIssueLoading(false);
       store.setIssueFields(issue, fields);
       if (issueStore) {
@@ -88,9 +96,9 @@ function EditIssue() {
       }
       // 3. 加载额外信息
       const [
-        doc, 
+        doc,
         workLogs,
-        dataLogs, 
+        dataLogs,
         linkIssues,
         branches,
       ] = await Promise.all([
@@ -109,7 +117,6 @@ function EditIssue() {
     }
   };
 
-
   const setQuery = (width = container.current.clientWidth) => {
     if (width <= 600) {
       container.current.setAttribute('max-width', '600px');
@@ -117,7 +124,7 @@ function EditIssue() {
       container.current.removeAttribute('max-width');
     }
   };
-  
+
   useEffect(() => {
     loadIssueDetail(currentIssueId);
     setQuery();
@@ -172,7 +179,6 @@ function EditIssue() {
     }
   }, 150);
 
-
   const issue = store.getIssue;
   const {
     issueId, issueNum, summary,
@@ -188,7 +194,8 @@ function EditIssue() {
     getTransformFromSubIssueShow: transformFromSubIssueShow,
     getRelateStoryShow: relateStoryShow,
   } = store;
-  const rightDisabled = disabled || (IsInProgramStore.isInProgram && typeCode === 'issue_epic');
+  const { isInProgram } = useIsInProgram();
+  const rightDisabled = disabled || (isInProgram && typeCode === 'issue_epic');
   const HasPermission = (isOwner || createdBy === AppState.userInfo.id);
   return (
     <div style={{

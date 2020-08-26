@@ -1,17 +1,12 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.domain.PageInfo;
-import io.choerodon.agile.api.vo.StatusCheckVO;
-import io.choerodon.agile.api.vo.StatusSearchVO;
-import io.choerodon.agile.api.vo.StatusVO;
-import io.choerodon.agile.api.vo.StatusWithInfoVO;
-import io.choerodon.agile.app.service.StateMachineNodeService;
-import io.choerodon.agile.app.service.StatusService;
 import io.choerodon.agile.infra.cache.InstanceCache;
-import io.choerodon.agile.infra.dto.StateMachineNodeDTO;
-import io.choerodon.agile.infra.dto.StatusDTO;
-import io.choerodon.agile.infra.dto.StatusWithInfoDTO;
 import io.choerodon.agile.infra.enums.NodeType;
 import io.choerodon.agile.infra.enums.StatusType;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
@@ -25,8 +20,12 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -38,19 +37,27 @@ public class StatusServiceImpl implements StatusService {
     @Autowired
     private StateMachineNodeDraftMapper nodeDraftMapper;
     @Autowired
-    private StateMachineNodeMapper nodeDeployMapper;
+    private StatusMachineNodeMapper nodeDeployMapper;
     @Autowired
     private StateMachineNodeService nodeService;
     @Autowired
     private StateMachineTransformDraftMapper transformDraftMapper;
     @Autowired
-    private StateMachineTransformMapper transformDeployMapper;
+    private StatusMachineTransformMapper transformDeployMapper;
     @Autowired
     private InstanceCache instanceCache;
     @Autowired
-    private StateMachineMapper stateMachineMapper;
+    private StatusMachineMapper statusMachineMapper;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private IssueMapper issueMapper;
+    @Autowired
+    private ProjectConfigService projectConfigService;
+    @Autowired
+    private IssueStatusService issueStatusService;
+    @Autowired
+    private BaseFeignClient baseFeignClient;
 
     @Override
     public Page<StatusWithInfoVO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchVO statusSearchVO) {
@@ -203,7 +210,7 @@ public class StatusServiceImpl implements StatusService {
         if (stateMachineId == null) {
             throw new CommonException("error.stateMachineId.notNull");
         }
-        if (stateMachineMapper.queryById(organizationId, stateMachineId) == null) {
+        if (statusMachineMapper.queryById(organizationId, stateMachineId) == null) {
             throw new CommonException("error.stateMachine.notFound");
         }
 
@@ -229,11 +236,11 @@ public class StatusServiceImpl implements StatusService {
         if (statusId == null) {
             throw new CommonException("error.statusId.notNull");
         }
-        StateMachineNodeDTO stateNode = new StateMachineNodeDTO();
+        StatusMachineNodeDTO stateNode = new StatusMachineNodeDTO();
         stateNode.setOrganizationId(organizationId);
         stateNode.setStateMachineId(stateMachineId);
         stateNode.setStatusId(statusId);
-        StateMachineNodeDTO res = nodeDeployMapper.selectOne(stateNode);
+        StatusMachineNodeDTO res = nodeDeployMapper.selectOne(stateNode);
         if (res == null) {
             throw new RemoveStatusException("error.status.exist");
         }
@@ -262,5 +269,84 @@ public class StatusServiceImpl implements StatusService {
             }.getType());
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public Page<ProjectStatusVO> listStatusByProjectId(Long projectId, PageRequest pageRequest, StatusSearchVO statusSearchVO) {
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        Page<ProjectStatusVO> page = PageHelper.doPageAndSort(pageRequest, () -> statusMapper.listStatusByProjectId(projectId, projectVO.getOrganizationId(), statusSearchVO));
+        List<ProjectStatusVO> content = page.getContent();
+        if (CollectionUtils.isEmpty(content)) {
+            return new Page<>();
+        }
+        List<Long> statusIds = content.stream().map(ProjectStatusVO::getId).collect(Collectors.toList());
+        // 查询状态在当前项目的状态机的使用情况
+        String applyType = "PROGRAM".equals(projectVO.getCategory()) ? "program" : "agile";
+        ProjectConfigDetailVO projectConfigDetailVO = projectConfigService.queryById(projectId);
+        StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
+        List<IssueCountDTO> countDTOS = nodeDeployMapper.countIssueTypeByStatusIds(projectVO.getOrganizationId(),stateMachineSchemeVO.getId(),statusIds);
+        Map<Long, List<String>> map = new HashMap<>();
+        if (!CollectionUtils.isEmpty(countDTOS)) {
+            map.putAll(countDTOS.stream().collect(Collectors.groupingBy(IssueCountDTO::getId, Collectors.mapping(IssueCountDTO::getName, Collectors.toList()))));
+        }
+        content.forEach(v -> v.setUsage(CollectionUtils.isEmpty(map.get(v.getId())) ? null : StringUtils.collectionToDelimitedString(map.get(v.getId()), ",")));
+        page.setContent(content);
+        return page;
+    }
+
+    @Override
+    public void deleteStatus(Long projectId, Long statusId, String applyType, List<DeleteStatusTransferVO> statusTransferVOS) {
+        // 查询状态被使用的情况
+        StatusDTO statusDTO = statusMapper.selectByPrimaryKey(statusId);
+        if (!ObjectUtils.isEmpty(statusDTO.getCode())) {
+            throw new CommonException("error.delete.init.status");
+        }
+        List<Long> issueTypeIds = issueMapper.selectIssueTypeIdsByStatusId(projectId, statusId);
+        if (!CollectionUtils.isEmpty(issueTypeIds)) {
+            // 校验是否所有的问题类型都重新指定状态
+            List<Long> issueType = statusTransferVOS.stream().map(DeleteStatusTransferVO::getIssueTypeId).collect(Collectors.toList());
+            issueTypeIds.removeAll(issueType);
+            if (!CollectionUtils.isEmpty(issueTypeIds)) {
+                throw new CommonException("error.issueType.specifier.status");
+            }
+        }
+        // 删掉对应问题类型状态机里面的节点和转换
+        projectConfigService.handlerDeleteStatusByProject(projectId, applyType, statusId, statusTransferVOS);
+        // 解除状态和项目的关联
+        IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
+        issueStatusDTO.setStatusId(statusId);
+        issueStatusDTO.setProjectId(projectId);
+        issueStatusService.delete(issueStatusDTO);
+    }
+
+    @Override
+    public List<IssueTypeVO> checkDeleteStatus(Long projectId,String applyType, Long statusId) {
+         // 校验是不是初始状态
+        checkInitStatus(projectId,applyType,statusId);
+        List<Long> list = issueMapper.selectIssueTypeIdsByStatusId(projectId, statusId);
+        if (CollectionUtils.isEmpty(list)) {
+            return new ArrayList<>();
+        }
+        List<IssueTypeVO> issueTypeVOS = list.stream().map(v -> {
+            IssueTypeVO issueTypeVO = new IssueTypeVO();
+            issueTypeVO.setId(v);
+            return issueTypeVO;
+        }).collect(Collectors.toList());
+        return issueTypeVOS;
+    }
+
+    private void checkInitStatus(Long projectId, String applyType, Long statusId) {
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        ProjectConfigDetailVO projectConfigDetailVO = projectConfigService.queryById(projectId);
+        StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
+        List<StatusMachineNodeDTO> list = nodeDeployMapper.selectInitNode(organizationId, stateMachineSchemeVO.getId(), statusId);
+        if (!CollectionUtils.isEmpty(list)) {
+            throw new CommonException("error.status.has.init");
+        }
+    }
+
+    @Override
+    public List<StatusAndTransformVO> queryStatusByStateMachineId(Long organizationId, Long stateMachineId) {
+        return statusMapper.queryByStateMachineId(organizationId,stateMachineId);
     }
 }

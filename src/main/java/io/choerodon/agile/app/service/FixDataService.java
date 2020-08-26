@@ -5,4 +5,8 @@ public interface FixDataService {
     void fixCreateProject();
 
     void fixCreateProjectSingle(Long projectId);
+
+    void fixDateStateMachine();
+
+    void fixPage();
 }

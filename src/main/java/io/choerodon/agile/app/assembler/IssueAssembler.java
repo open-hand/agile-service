@@ -767,5 +767,4 @@ public class IssueAssembler extends AbstractAssembler {
         oneJob.setWorkDateSource(workDate);
         return oneJob;
     }
-
 }

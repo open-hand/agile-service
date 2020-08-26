@@ -3,6 +3,8 @@ import { stores } from '@choerodon/boot';
 import { Spin, Tooltip } from 'choerodon-ui';
 import { withRouter } from 'react-router-dom';
 import { sprintApi } from '@/api';
+import LINK_URL from '@/constants/LINK_URL';
+import to from '@/utils/to';
 import EmptyBlockDashboard from '../../../../components/EmptyBlockDashboard';
 import pic from '../EmptyPics/no_sprint.svg';
 import UserHead from '../../../../components/UserHead';
@@ -81,11 +83,10 @@ class Sprint extends Component {
 
   renderUserHead() {
     const { sprintInfo: { assigneeIssueVOList } } = this.state;
-    const { history } = this.props;
     return (
       <div className="users">
         {
-          assigneeIssueVOList.length ? assigneeIssueVOList.slice(0, 10).map(user => (
+          assigneeIssueVOList.length ? assigneeIssueVOList.slice(0, 10).map((user) => (
             <div key={user.assigneeName}>
               {
                   user.assigneeId === 0 && assigneeIssueVOList.length === 1
@@ -131,7 +132,7 @@ class Sprint extends Component {
           ))
             : <div style={{ height: 18, width: '100%' }} />
         }
-        {assigneeIssueVOList.length > 10 && <a role="none" onClick={() => { history.push(`/agile/work-list/backlog?type=project&id=${AppState.currentMenuType.id}&name=${encodeURIComponent(AppState.currentMenuType.name)}&organizationId=${AppState.currentMenuType.organizationId}&orgId=${AppState.currentMenuType.organizationId}`); }}>查看更多...</a>}
+        {assigneeIssueVOList.length > 10 && <a role="none" onClick={() => to(LINK_URL.workListBacklog)}>查看更多...</a>}
       </div>
     );
   }
@@ -145,4 +146,4 @@ class Sprint extends Component {
   }
 }
 
-export default withRouter(Sprint);
+export default Sprint;

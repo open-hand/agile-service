@@ -15,7 +15,7 @@
         <result property="lastUpdatedBy" column="last_updated_by"/>
         <result property="objectVersionNumber" column="object_version_number"/>
 
-        <collection property="schemeConfigs" ofType="io.choerodon.agile.infra.dto.StateMachineSchemeConfigDTO"
+        <collection property="schemeConfigs" ofType="io.choerodon.agile.infra.dto.StatusMachineSchemeConfigDTO"
                     columnPrefix="c_" autoMapping="true">
         </collection>
 
@@ -26,7 +26,7 @@
 
     <select id="fulltextSearch" resultType="io.choerodon.agile.infra.dto.StateMachineSchemeDTO">
         SELECT SMS.*
-        FROM fd_state_machine_scheme SMS
+        FROM fd_status_machine_scheme SMS
         WHERE 1=1
         <if test="scheme.organizationId != null">
             AND SMS.organization_id = #{scheme.organizationId}
@@ -58,8 +58,8 @@
         SMSC.last_updated_by as c_last_updated_by,
         SMSC.object_version_number as c_object_version_number,
         PC.project_id as pc_project_id
-        FROM fd_state_machine_scheme SMS
-        LEFT JOIN fd_state_machine_scheme_config SMSC on SMS.id = SMSC.scheme_id
+        FROM fd_status_machine_scheme SMS
+        LEFT JOIN fd_status_machine_scheme_config SMSC on SMS.id = SMSC.scheme_id
         LEFT JOIN fd_project_config PC on SMS.id = PC.scheme_id
         WHERE SMS.organization_id = #{organizationId}
         <if test="schemeIds != null and schemeIds.size()>0">
@@ -73,7 +73,7 @@
 
     <select id="queryByIds" resultType="io.choerodon.agile.infra.dto.StateMachineSchemeDTO">
         SELECT SMS.*
-        FROM fd_state_machine_scheme SMS
+        FROM fd_status_machine_scheme SMS
         WHERE 1=1
         <if test="organizationId != null">
             AND SMS.organization_id = #{organizationId}
@@ -88,19 +88,19 @@
 
     <select id="queryByOrgId" resultType="io.choerodon.agile.infra.dto.StateMachineSchemeDTO">
         SELECT SMS.*
-        FROM fd_state_machine_scheme SMS
+        FROM fd_status_machine_scheme SMS
         WHERE SMS.organization_id = #{organizationId}
     </select>
 
     <update id="updateDeployProgress">
-        UPDATE fd_state_machine_scheme
+        UPDATE fd_status_machine_scheme
         SET deploy_progress = #{deployProgress}
         WHERE organization_id = #{organizationId}
         and id = #{schemeId}
     </update>
 
     <update id="updateDeployStatus">
-        UPDATE fd_state_machine_scheme
+        UPDATE fd_status_machine_scheme
         SET deploy_status = #{deployStatus}
         WHERE organization_id = #{organizationId}
         and id = #{schemeId}

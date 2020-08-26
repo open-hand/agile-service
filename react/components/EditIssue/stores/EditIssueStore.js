@@ -1,5 +1,6 @@
 import { observable, action, computed } from 'mobx';
 
+const hiddenFields = ['issueType', 'summary', 'description', 'remainingTime', 'storyPoints'];
 class EditIssueStore {
   // issue
   @observable issue = {};
@@ -20,8 +21,8 @@ class EditIssueStore {
     this.issue = issue;
   }
 
-  @computed get getFields() {
-    return this.fields;
+  @computed get customFields() {
+    return this.fields.filter((field) => !hiddenFields.includes(field.fieldCode));
   }
 
   @observable doc = {};
@@ -33,8 +34,6 @@ class EditIssueStore {
   @observable linkIssues = [];
 
   @observable branch = {};
-
-  @observable testExecutes = [];
 
   @action setDoc(data) {
     this.doc = data;
@@ -83,7 +82,6 @@ class EditIssueStore {
     this.linkIssues = linkIssues || [];
     this.branch = branch || {};
   }
-
 
   @observable createBranchShow = false;
 

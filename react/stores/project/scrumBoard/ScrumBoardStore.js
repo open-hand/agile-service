@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import {
   observable, action, computed, toJS,
 } from 'mobx';
@@ -16,6 +17,10 @@ class ScrumBoardStore {
     assigneeFilterIds: [],
     sprintId: undefined,
   };
+
+  @observable personalFilter = []
+
+  @observable priorityIds = []
 
   @observable allColumnCount = [];
 
@@ -192,7 +197,7 @@ class ScrumBoardStore {
   }
 
   @action setBoardParentIssueId(data) {
-    data.forEach(item => item !== 0 && this.parentIssueIdData.add(item));
+    data.forEach((item) => item !== 0 && this.parentIssueIdData.add(item));
   }
 
   @computed get getBoardParentIssueId() {
@@ -216,7 +221,6 @@ class ScrumBoardStore {
   @action setAllEpicData(data) {
     this.allEpicData = data;
   }
-
 
   @computed get getEpicData() {
     return toJS(this.epicData);
@@ -272,7 +276,7 @@ class ScrumBoardStore {
 
   @action initBoardList(boardListData) {
     if (boardListData) {
-      this.boardList = observable.map(boardListData.map(board => [board.boardId, board]));
+      this.boardList = observable.map(boardListData.map((board) => [board.boardId, board]));
     }
   }
 
@@ -303,8 +307,8 @@ class ScrumBoardStore {
 
   @action judgeMoveParentToDone(destinationStatus, swimLaneId, parentId, statusIsDone) {
     const completedStatusIssueLength = Object.keys(this.swimLaneData[swimLaneId])
-      .filter(statusId => this.statusMap.get(statusId).completed === true)
-      .map(statusId => this.swimLaneData[swimLaneId][statusId].length)
+      .filter((statusId) => this.statusMap.get(statusId).completed === true)
+      .map((statusId) => this.swimLaneData[swimLaneId][statusId].length)
       .reduce((accumulator, currentValue) => accumulator + currentValue);
     if (statusIsDone && completedStatusIssueLength === this.interconnectedData.get(parentId).subIssueData.length && this.interconnectedData.get(parentId).categoryCode !== 'done') {
       this.updatedParentIssue = this.interconnectedData.get(parentId);
@@ -325,10 +329,16 @@ class ScrumBoardStore {
     this.quickSearchObj.sprintId = data;
   }
 
-  @action addQuickSearchFilter(onlyMeChecked = false, onlyStoryChecked = false, moreChecked = []) {
+  @action addQuickSearchFilter(
+    onlyMeChecked = false,
+    onlyStoryChecked = false,
+    moreChecked = [],
+    personalFilter,
+  ) {
     this.quickSearchObj.onlyMe = onlyMeChecked;
     this.quickSearchObj.onlyStory = onlyStoryChecked;
     this.quickSearchObj.quickSearchArray = moreChecked;
+    this.personalFilter = personalFilter;
   }
 
   @action clearFilter() {
@@ -337,24 +347,33 @@ class ScrumBoardStore {
     this.quickSearchObj.onlyStory = false;
     this.quickSearchObj.quickSearchArray = [];
     this.quickSearchObj.sprintId = undefined;
+    this.personalFilter = [];
+    this.priorityIds = [];
   }
 
   @computed get hasSetFilter() {
     const {
       onlyMe, onlyStory, quickSearchArray, assigneeFilterIds, sprintId,
     } = this.quickSearchObj;
-    if (onlyMe === false && onlyStory === false && quickSearchArray.length === 0 && assigneeFilterIds.length === 0 && !sprintId) {
+    if (onlyMe === false
+      && onlyStory === false
+      && quickSearchArray.length === 0
+      && assigneeFilterIds.length === 0
+      && !sprintId
+      && this.personalFilter.length === 0
+      && this.priorityIds.length === 0
+    ) {
       return false;
     }
     return true;
   }
 
-
   setTransFromData(parentIssue, parentId) {
-    statusApi.loadTransformStatusByIssue(parentIssue.statusId, parentIssue.issueId, parentIssue.issueTypeId).then(
+    statusApi.loadTransformStatusByIssue(parentIssue.statusId,
+      parentIssue.issueId, parentIssue.issueTypeId).then(
       action('fetchSuccess', (res) => {
         this.updatedParentIssue = this.interconnectedData.get(parentId);
-        this.translateToCompleted = res.filter(transform => transform.statusVO.type === 'done');
+        this.translateToCompleted = res.filter((transform) => transform.statusVO.type === 'done');
         this.interconnectedData.set(parentId, {
           ...this.interconnectedData.get(parentId),
           canMoveToComplish: true,
@@ -405,9 +424,9 @@ class ScrumBoardStore {
   }
 
   /**
-   * 
-   * @param {*} parentIssueId 
-   * @param {*} isSkipIssue  是否为跳转问题 
+   *
+   * @param {*} parentIssueId
+   * @param {*} isSkipIssue  是否为跳转问题
    */
   @action resetCurrentClick(parentIssueId, isSkipIssue = false) {
     if (this.currentClickTarget && !isSkipIssue) {
@@ -425,13 +444,7 @@ class ScrumBoardStore {
     this.spinIf = true;
     this.swimLaneData = null;
     this.headerData = new Map();
-    this.quickSearchObj = {
-      onlyMe: false,
-      onlyStory: false,
-      quickSearchArray: [],
-      assigneeFilterIds: [],
-      sprintId: undefined,
-    };
+    this.clearFilter();
     this.currentSprintExist = false;
     this.calanderCouldUse = false;
     this.clickIssueMap.clear();
@@ -579,6 +592,8 @@ class ScrumBoardStore {
         quickFilterIds: quickSearchArray,
         assigneeFilterIds,
         sprintId,
+        personalFilterIds: this.personalFilter,
+        priorityIds: this.priorityIds,
       });
   }
 
@@ -616,10 +631,9 @@ class ScrumBoardStore {
       rankFlag: true,
     };
     // Object.keys(this.stateMachineMap)[0] 若无问题类型状态机方案，则选用默认的
-    const { id: transformId } = this.stateMachineMap[issueTypeId] ? this.stateMachineMap[issueTypeId][startStatus].find(issue => issue.endStatusId === destinationStatus) : this.stateMachineMap[Object.keys(this.stateMachineMap)[0]][startStatus].find(issue => issue.endStatusId === destinationStatus);
+    const { id: transformId } = this.stateMachineMap[issueTypeId] ? this.stateMachineMap[issueTypeId][startStatus].find((issue) => issue.endStatusId === destinationStatus) : this.stateMachineMap[Object.keys(this.stateMachineMap)[0]][startStatus].find((issue) => issue.endStatusId === destinationStatus);
     return boardApi.moveIssue(issueId, transformId, data);
   };
-
 
   @computed get getDragStartItem() {
     return this.dragStartItem;
@@ -645,7 +659,6 @@ class ScrumBoardStore {
       }
     });
   }
-
 
   @action setWorkDate(data) {
     if (data.sprintId) {
@@ -709,7 +722,7 @@ class ScrumBoardStore {
     this.parentIds = [];
     this.epicData = [];
     if (boardListData) {
-      this.boardList = observable.map(boardListData.map(board => [board.boardId, board]));
+      this.boardList = observable.map(boardListData.map((board) => [board.boardId, board]));
     }
     this.selectedBoardId = boardId;
     this.swimlaneBasedCode = userDefaultBoard;
@@ -801,13 +814,13 @@ class ScrumBoardStore {
   @action setWhichCanNotDragOn(statusId, { id: typeId }) {
     [...this.canDragOn.keys()].forEach((status) => {
       if (this.stateMachineMap[typeId]) {
-        if (this.stateMachineMap[typeId][statusId].find(issue => issue.endStatusId === status)) {
+        if (this.stateMachineMap[typeId][statusId].find((issue) => issue.endStatusId === status)) {
           this.canDragOn.set(status, false);
         } else {
           this.canDragOn.set(status, true);
         }
         // Object.keys(this.stateMachineMap)[0] 若无问题类型状态机方案，则选用默认的
-      } else if (this.stateMachineMap[Object.keys(this.stateMachineMap)[0]][statusId].find(issue => issue.endStatusId === status)) {
+      } else if (this.stateMachineMap[Object.keys(this.stateMachineMap)[0]][statusId].find((issue) => issue.endStatusId === status)) {
         this.canDragOn.set(status, false);
       } else {
         this.canDragOn.set(status, true);
@@ -902,6 +915,10 @@ class ScrumBoardStore {
 
   @action setEditRef(ref) {
     this.editRef = ref;
+  }
+
+  @action setPriority(priorityIds) {
+    this.priorityIds = priorityIds;
   }
 }
 

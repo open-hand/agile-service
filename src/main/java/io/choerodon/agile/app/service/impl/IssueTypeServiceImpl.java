@@ -1,7 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.domain.PageInfo;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.IssueTypeService;
 import io.choerodon.agile.app.service.StateMachineSchemeConfigService;
@@ -19,10 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -176,6 +172,13 @@ public class IssueTypeServiceImpl implements IssueTypeService {
             throw new CommonException("error.issueType.create");
         }
         return issueTypeMapper.selectByPrimaryKey(issueType);
+    }
+
+    @Override
+    public Map<String, Long> queryIssueTypeMap(Long organizationId) {
+        IssueTypeDTO dto = new IssueTypeDTO();
+        dto.setOrganizationId(organizationId);
+        return issueTypeMapper.select(dto).stream().collect(Collectors.toMap(IssueTypeDTO::getTypeCode, IssueTypeDTO::getId));
     }
 
     @Override

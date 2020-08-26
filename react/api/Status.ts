@@ -1,16 +1,17 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
+import Api from './Api';
 
 interface IStatus {
   name: string,
   description?: string,
   // organizationId: "4"
-  type: string, // 状态类型
+  type: string, // 阶段
 }
 interface UpdateData extends IStatus {
   objectVersionNumber: number
 }
-class StatusApi {
+class StatusApi extends Api {
   get orgPrefix() {
     return `/agile/v1/organizations/${getOrganizationId()}`;
   }
@@ -21,7 +22,7 @@ class StatusApi {
 
   /**
     * 创建状态
-    * @param map 
+    * @param map
     */
   create(data: IStatus) {
     return axios.post(`${this.orgPrefix}/status`, data);
@@ -29,19 +30,18 @@ class StatusApi {
 
   /**
     * 根据状态id加载状态
-    * @param statusId 
+    * @param statusId
     */
   load(statusId: number) {
     return axios.get(`${this.orgPrefix}/status/${statusId}`);
   }
 
-
   /**
-    * 加载状态列表 
-    * @param page 
-    * @param size 
-    * @param sort 
-    * @param filters 
+    * 加载状态列表
+    * @param page
+    * @param size
+    * @param sort
+    * @param filters
     */
   loadList(page: number = 1, size: number = 20, sort: string, filters: object) {
     return axios({
@@ -56,13 +56,12 @@ class StatusApi {
     });
   }
 
-
   /**
    * 加载当前项目下所有状态
-   * @param applyType 
+   * @param applyType
    */
-  loadByProject(applyType = 'agile') {
-    return axios({
+  loadByProject(applyType = getApplyType()) {
+    return this.request({
       method: 'get',
       url: `${this.prefix}/schemes/query_status_by_project_id`,
       params: { apply_type: applyType },
@@ -71,10 +70,10 @@ class StatusApi {
 
   /**
    * 根据issueId查询问题可以转换的全部的状态
-   * @param currentStatusId 当前问题状态id 
+   * @param currentStatusId 当前问题状态id
    * @param issueId 问题id
    * @param issueTypeId 问题类型id
-   * @param applyType 
+   * @param applyType
    */
   loadTransformStatusByIssue(currentStatusId: number, issueId: number, issueTypeId: string, applyType: string = 'agile') {
     return axios({
@@ -98,8 +97,8 @@ class StatusApi {
 
   /**
    * 根据问题类型id查询改问题类型下所有状态
-   * @param issueTypeId 
-   * @param applyType 
+   * @param issueTypeId
+   * @param applyType
    */
   loadAllForIssueType(issueTypeId: number, applyType: string = 'agile') {
     return axios({
@@ -113,9 +112,9 @@ class StatusApi {
   }
 
   /**
-   *查询工作流第一个状态 
-   * @param issueTypeId 
-   * @param applyType 
+   *查询工作流第一个状态
+   * @param issueTypeId
+   * @param applyType
    */
   loadFirstInWorkFlow(issueTypeId: number, applyType: string = 'agile') {
     const organizationId = getOrganizationId();
@@ -143,7 +142,7 @@ class StatusApi {
 
   /**
      * 删除状态
-     * @param statusId 
+     * @param statusId
      */
   delete(statusId: number) {
     return axios.delete(`${this.orgPrefix}/status/${statusId}`);
@@ -151,8 +150,8 @@ class StatusApi {
 
   /**
    * 更新状态
-   * @param statusId 
-   * @param updateData 
+   * @param statusId
+   * @param updateData
    */
   update(statusId: number, updateData: UpdateData) {
     return axios.put(`${this.orgPrefix}/status/${statusId}`, updateData);
@@ -160,7 +159,7 @@ class StatusApi {
 
   /**
     * 检查状态名是否重复
-    * @param name 
+    * @param name
     */
   checkName(name: string) {
     return axios({
@@ -174,7 +173,7 @@ class StatusApi {
 
   /**
    * 校验是否能新增状态 [敏捷]
-   * @param applyType 
+   * @param applyType
    */
   checkCanCreateStatus(applyType = 'agile') {
     return axios({
@@ -188,7 +187,7 @@ class StatusApi {
 
   /**
    * 校验是否能删除状态 [敏捷]
-   * @param code 
+   * @param code
    */
   checkCanDelStatus(statusId:number, applyType = 'agile') {
     return axios({
@@ -203,4 +202,5 @@ class StatusApi {
 }
 
 const statusApi = new StatusApi();
-export { statusApi };
+const statusApiConfig = new StatusApi(true);
+export { statusApi, statusApiConfig };

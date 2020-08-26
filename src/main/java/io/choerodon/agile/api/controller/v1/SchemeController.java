@@ -6,7 +6,9 @@ import io.choerodon.agile.app.service.ProjectConfigService;
 
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.ProjectUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.core.exception.CommonException;
@@ -167,5 +169,82 @@ public class SchemeController extends BaseController {
                 .map(initStatusId -> encryptionService.encrypt(initStatusId.toString(), EncryptionUtils.BLANK_KEY))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.firstStatus.get"));
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "状态与流转列表")
+    @GetMapping(value = "/status_transform/list")
+    public ResponseEntity<List<StatusAndTransformVO>> statusTransformList(@PathVariable("project_id") Long projectId,
+                                                                          @RequestParam @Encrypt Long issueTypeId,
+                                                                          @RequestParam String applyType) {
+        return new ResponseEntity<>(projectConfigService.statusTransformList(projectId, issueTypeId, applyType), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "设置状态机的默认状态")
+    @PutMapping(value = "/status_transform/setting_default_status")
+    public ResponseEntity settingDefaultStatus(@PathVariable("project_id") Long projectId,
+                                               @RequestParam @Encrypt Long issueTypeId,
+                                               @RequestParam @Encrypt Long stateMachineId,
+                                               @RequestParam @Encrypt Long statusId) {
+        projectConfigService.defaultStatus(projectId, issueTypeId, stateMachineId, statusId);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "改变问题类型的转换")
+    @PutMapping(value = "/status_transform/update")
+    public ResponseEntity<List<StateMachineTransformUpdateVO>> updateTransformByIssueTypeId(@PathVariable("project_id") Long projectId,
+                                               @RequestParam @Encrypt Long issueTypeId,
+                                               @RequestParam String applyType,
+                                               @RequestBody List<StateMachineTransformUpdateVO> list) {
+
+        return new ResponseEntity(projectConfigService.updateTransformByIssueTypeId(projectId, issueTypeId,applyType,list),HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "添加新状态")
+    @PostMapping(value = "/status/create")
+    public ResponseEntity<StatusVO> createStatus(@PathVariable("project_id") Long projectId,
+                                                 @RequestParam(required = false)@Encrypt List<Long> issueTypeIds,
+                                                 @RequestParam String applyType,
+                                                 @RequestBody StatusVO statusVO) {
+
+        return new ResponseEntity(projectConfigService.createStatus(projectId, issueTypeIds,applyType, statusVO), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "关联已有状态")
+    @GetMapping(value = "/state_machine/link_status")
+    public ResponseEntity<StateMachineNodeVO> linkStatus(@PathVariable("project_id") Long projectId,
+                                                 @RequestParam @Encrypt Long issueTypeId,
+                                                 @RequestParam String applyType,
+                                                 @RequestParam @Encrypt Long statusId,
+                                                 @RequestParam Boolean defaultStatus) {
+        return new ResponseEntity(projectConfigService.linkStatus(projectId, issueTypeId,applyType, statusId,defaultStatus), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "删除状态机里面的node")
+    @DeleteMapping(value = "/state_machine_node/delete")
+    public ResponseEntity deleteNode(@PathVariable("project_id") Long projectId,
+                                                         @RequestParam @Encrypt Long issueTypeId,
+                                                         @RequestParam String applyType,
+                                                         @RequestParam  @Encrypt Long nodeId,
+                                                         @RequestParam(required = false)  @Encrypt Long statusId) {
+        projectConfigService.deleteNode(projectId, issueTypeId,applyType,nodeId,statusId);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "自定义流转列表")
+    @GetMapping(value = "/status_transform_setting/list")
+    public ResponseEntity<Page<StatusSettingVO>> statusTransformSettingList(@PathVariable("project_id") Long projectId,
+                                                                            PageRequest pageRequest,
+                                                                            @RequestParam @Encrypt Long issueTypeId,
+                                                                            @RequestParam(required = false) String param,
+                                                                            @RequestParam String applyType,
+                                                                            @RequestParam String schemeCode) {
+        return new ResponseEntity<>(projectConfigService.statusTransformSettingList(projectId, issueTypeId,pageRequest,param, applyType, schemeCode), HttpStatus.OK);
     }
 }

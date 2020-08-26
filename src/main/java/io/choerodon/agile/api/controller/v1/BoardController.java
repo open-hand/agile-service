@@ -31,7 +31,7 @@ public class BoardController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建scrum board,创建默认列，关联项目状态")
     @PostMapping
-    public ResponseEntity createScrumBoard(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Void> createScrumBoard(@ApiParam(value = "项目id", required = true)
                                            @PathVariable(name = "project_id") Long projectId,
                                            @ApiParam(value = "board name", required = true)
                                            @RequestParam String boardName) {
@@ -55,8 +55,8 @@ public class BoardController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("删除scrum board")
-    @DeleteMapping(value = "/{boardId}")
-    public ResponseEntity deleteScrumBoard(@ApiParam(value = "项目id", required = true)
+    @DeleteMapping("/{boardId}")
+    public ResponseEntity<Void> deleteScrumBoard(@ApiParam(value = "项目id", required = true)
                                            @PathVariable(name = "project_id") Long projectId,
                                            @ApiParam(value = "agile board id", required = true)
                                            @PathVariable @Encrypt Long boardId) {
@@ -131,24 +131,15 @@ public class BoardController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("all data , Refactoring")
-    @GetMapping(value = "/{boardId}/all_data/{organization_id}")
+    @PostMapping(value = "/{boardId}/all_data/{organization_id}")
     public ResponseEntity<JSONObject> queryByOptions(@ApiParam(value = "项目id", required = true)
                                                      @PathVariable(name = "project_id") Long projectId,
                                                      @ApiParam(value = "agile board id", required = true)
                                                      @PathVariable @Encrypt Long boardId,
-                                                     @ApiParam(value = "search item，my problem", required = false)
-                                                     @RequestParam(required = false) @Encrypt Long assigneeId,
-                                                     @ApiParam(value = "search item，only story", required = false)
-                                                     @RequestParam(required = false) Boolean onlyStory,
-                                                     @ApiParam(value = "quick filter", required = false)
-                                                     @RequestParam(required = false) @Encrypt List<Long> quickFilterIds,
                                                      @ApiParam(value = "组织id", required = true)
                                                      @PathVariable(name = "organization_id") Long organizationId,
-                                                     @ApiParam(value = "经办人搜索", required = false)
-                                                     @RequestParam(required = false) @Encrypt List<Long> assigneeFilterIds,
-                                                     @ApiParam(value = "冲刺id", required = false)
-                                                     @RequestParam(required = false) @Encrypt Long sprintId) {
-        return Optional.ofNullable(boardService.queryAllData(projectId, boardId, assigneeId, onlyStory, quickFilterIds, organizationId, assigneeFilterIds, sprintId))
+                                                     @RequestBody BoardQueryVO boardQuery) {
+        return Optional.ofNullable(boardService.queryAllData(projectId, boardId, organizationId, boardQuery))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.board.get"));
     }

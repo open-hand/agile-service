@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import {
-  stores, Content, Choerodon, 
+  stores, Content, Choerodon,
 } from '@choerodon/boot';
 import { map, find } from 'lodash';
 import {
@@ -9,17 +9,19 @@ import {
 import moment from 'moment';
 import reactComponentDebounce from '@/components/DebounceComponent';
 import {
-  featureApi, epicApi, fieldApi, issueTypeApi, 
+  featureApi, epicApi, fieldApi, issueTypeApi,
+  issueApi,
+  pageConfigApi,
 } from '@/api';
 import {
-  beforeTextUpload, handleFileUpload, validateFile, normFile, 
+  beforeTextUpload, handleFileUpload, validateFile, normFile, text2Delta,
 } from '@/utils/richText';
 import {
   getProjectName, getProjectId,
 } from '@/utils/common';
-import { issueApi } from '@/api';
+import { observer } from 'mobx-react';
+import { IsInProgram } from '@/hooks/useIsInProgram';
 import { UploadButton } from '../CommonComponent';
-import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 import SelectNumber from '../SelectNumber';
 import WYSIWYGEditor from '../WYSIWYGEditor';
 import TypeTag from '../TypeTag';
@@ -29,6 +31,8 @@ import renderField from './renderField';
 import FieldIssueLinks from './FieldIssueLinks';
 import WSJF from './WSJF';
 import FieldTeam from './FieldTeam';
+import FieldStartTime from './FieldStartTime';
+import FieldEndTime from './FieldEndTime';
 
 const DebounceInput = reactComponentDebounce({
   valuePropName: 'value',
@@ -43,7 +47,6 @@ const { AppState } = stores;
 const { Sidebar } = Modal;
 const { Option } = Select;
 const FormItem = Form.Item;
-
 const bugDefaultDes = [{ attributes: { bold: true }, insert: '步骤' }, { insert: '\n' }, { attributes: { list: 'ordered' }, insert: '\n\n\n' }, { attributes: { bold: true }, insert: '结果' }, { insert: '\n\n' }, { attributes: { bold: true }, insert: '期望' }, { insert: '\n' }];
 const defaultProps = {
   mode: 'default',
@@ -86,6 +89,7 @@ class CreateIssue extends Component {
       newIssueTypeCode: '',
       fields: [],
     };
+    this.originDescription = true;
   }
 
   componentDidMount() {
@@ -112,6 +116,7 @@ class CreateIssue extends Component {
     }
   }
 
+  // eslint-disable-next-line react/destructuring-assignment
   getDefaultType = (issueTypes = this.state.originIssueTypes) => {
     const { defaultTypeCode } = this.props;
     return find(issueTypes, { typeCode: defaultTypeCode });
@@ -145,7 +150,7 @@ class CreateIssue extends Component {
           fileName: fileList[0].name,
           projectId: AppState.currentMenuType.id,
         };
-        if (fileList.some(one => !one.url)) {
+        if (fileList.some((one) => !one.url)) {
           handleFileUpload(fileList, () => { }, config);
         }
       }
@@ -163,8 +168,32 @@ class CreateIssue extends Component {
     });
   };
 
+  checkSameDescription = (origin, current) => {
+    if (!origin) {
+      return !current || JSON.stringify(current) === JSON.stringify([{ insert: '\n' }]);
+    }
+    if (current) {
+      return origin === JSON.stringify(current);
+    }
+    return true;
+  };
+
+  loadDefaultTemplate = (issueTypeId) => {
+    const { form } = this.props;
+    const currentDes = form.getFieldValue('description');
+    if (this.checkSameDescription(this.originDescription, currentDes)) {
+      pageConfigApi.loadTemplateByType(issueTypeId).then((res) => {
+        const { template } = res || {};
+        form.setFieldsValue({
+          description: text2Delta(template),
+        });
+        this.originDescription = template;
+      });
+    }
+  };
+
   loadIssueTypes = () => {
-    const { applyType } = this.props;
+    const { applyType, form } = this.props;
     issueTypeApi.loadAllWithStateMachineId(applyType).then((res) => {
       if (res && res.length) {
         const defaultType = this.getDefaultType(res);
@@ -173,6 +202,7 @@ class CreateIssue extends Component {
           context: defaultType.typeCode,
           pageCode: 'agile_issue_create',
         };
+        this.loadDefaultTemplate(defaultType.typeCode);
         fieldApi.getFields(param).then((fields) => {
           this.setState({
             fields,
@@ -248,7 +278,7 @@ class CreateIssue extends Component {
           featureId,
           teamProjectIds,
         } = values;
-        const { typeCode } = originIssueTypes.find(t => t.id === typeId);
+        const { typeCode } = originIssueTypes.find((t) => t.id === typeId);
         if (typeCode === 'feature' && epicId) {
           const hasSame = await featureApi.hasSameInEpicBySummary(summary, epicId);
           if (hasSame) {
@@ -258,30 +288,28 @@ class CreateIssue extends Component {
         }
         const exitComponents = originComponents;
         const componentIssueRelVOList = map(componentIssueRel
-          && componentIssueRel.filter(v => v && v.trim()), (component) => {
+          && componentIssueRel.filter((v) => v && v.trim()), (component) => {
           const target = find(exitComponents, { name: component.trim() });
           if (target) {
             return target;
-          } else {
-            return ({
-              name: component.trim(),
-              projectId: getProjectId(),
-            });
           }
+          return ({
+            name: component.trim(),
+            projectId: getProjectId(),
+          });
         });
         const exitLabels = originLabels;
         const labelIssueRelVOList = map(issueLabel, (label) => {
           const target = find(exitLabels, { labelName: label });
           if (target) {
             return target;
-          } else {
-            return ({
-              labelName: label,
-              projectId: getProjectId(),
-            });
           }
+          return ({
+            labelName: label,
+            projectId: getProjectId(),
+          });
         });
-        const fixVersionIssueRelVOList = map(fixVersionIssueRel, versionId => ({
+        const fixVersionIssueRelVOList = map(fixVersionIssueRel, (versionId) => ({
           versionId,
           relationType: 'fix',
         }));
@@ -356,17 +384,16 @@ class CreateIssue extends Component {
     });
   };
 
-
-  getIssueTypes = () => {
+  getIssueTypes = (isInProgram) => {
     const { mode } = this.props;
     const { originIssueTypes } = this.state;
-    const filterSubType = type => (!['sub_task'].includes(type.typeCode));
-    const filterEpic = type => (!['issue_epic'].includes(type.typeCode));
-    const filterFeature = type => (!['feature'].includes(type.typeCode));
+    const filterSubType = (type) => (!['sub_task'].includes(type.typeCode));
+    const filterEpic = (type) => (!['issue_epic'].includes(type.typeCode));
+    const filterFeature = (type) => (!['feature'].includes(type.typeCode));
     const issueTypes = applyFilter(originIssueTypes, [
       filterSubType, {
         filter: filterEpic,
-        apply: IsInProgramStore.isInProgram || mode === 'feature', // 在项目群下的子项目和创建feature时，把epic过滤掉
+        apply: isInProgram || mode === 'feature', // 在项目群下的子项目和创建feature时，把epic过滤掉
       }, {
         filter: filterFeature,
         apply: mode !== 'program', // 在项目群中创建issue时不过滤feature类型
@@ -374,7 +401,7 @@ class CreateIssue extends Component {
     return issueTypes;
   }
 
-  setDefaultSelect = field => (list, defaultValue) => {
+  setDefaultSelect = (field) => (list, defaultValue) => {
     const { form } = this.props;
     form.setFieldsValue({
       [field]: defaultValue,
@@ -406,6 +433,7 @@ class CreateIssue extends Component {
       originIssueTypes,
       newIssueTypeCode, defaultTypeId,
     } = this.state;
+
     switch (field.fieldCode) {
       case 'issueType':
         return (
@@ -416,43 +444,51 @@ class CreateIssue extends Component {
                 initialValue: defaultTypeId || '',
               })
               : (
-                <FormItem label="问题类型">
-                  {getFieldDecorator('typeId', {
-                    rules: [{ required: true, message: '问题类型为必输项' }],
-                    initialValue: defaultTypeId || '',
-                  })(
-                    <Select
-                      label="问题类型"
-                      getPopupContainer={triggerNode => triggerNode.parentNode}
-                      onChange={((value) => {
-                        const { typeCode } = originIssueTypes.find(item => item.id === value);
-                        this.setState({
-                          newIssueTypeCode: typeCode,
-                        });
-                        const param = {
-                          schemeCode: 'agile_issue',
-                          context: typeCode,
-                          pageCode: 'agile_issue_create',
-                        };
-                        fieldApi.getFields(param).then((res) => {
-                          this.setState({
-                            fields: res,
-                          });
-                        });
-                      })}
-                    >
-                      {this.getIssueTypes().map(type => (
-                        <Option key={type.id} value={type.id}>
-                          <TypeTag
-                            data={type}
-                            showName
-                          />
-                        </Option>
-                      ))}
-                    </Select>,
-                  )}
-                </FormItem>
+                <IsInProgram>
+                  {
+                        ({ isInProgram }) => (
+                          <FormItem label="问题类型">
+                            {getFieldDecorator('typeId', {
+                              rules: [{ required: true, message: '问题类型为必输项' }],
+                              initialValue: defaultTypeId || '',
+                            })(<Select
+                              label="问题类型"
+                              getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                              onChange={((value) => {
+                                const { typeCode } = originIssueTypes.find(
+                                  (item) => item.id === value,
+                                );
+                                this.setState({
+                                  newIssueTypeCode: typeCode,
+                                });
+                                const param = {
+                                  schemeCode: 'agile_issue',
+                                  context: typeCode,
+                                  pageCode: 'agile_issue_create',
+                                };
+                                this.loadDefaultTemplate(typeCode);
+                                fieldApi.getFields(param).then((res) => {
+                                  this.setState({
+                                    fields: res,
+                                  });
+                                });
+                              })}
+                            >
+                              {this.getIssueTypes(isInProgram).map((type) => (
+                                <Option key={type.id} value={type.id}>
+                                  <TypeTag
+                                    data={type}
+                                    showName
+                                  />
+                                </Option>
+                              ))}
+                            </Select>)}
+                          </FormItem>
+                        )
+                      }
+                </IsInProgram>
               ),
+
             newIssueTypeCode === 'feature' ? (
               <FormItem>
                 {getFieldDecorator('featureType', {
@@ -461,7 +497,7 @@ class CreateIssue extends Component {
                 })(
                   <Select
                     label="特性类型"
-                    getPopupContainer={triggerNode => triggerNode.parentNode}
+                    getPopupContainer={(triggerNode) => triggerNode.parentNode}
                   >
                     {[
                       {
@@ -475,7 +511,7 @@ class CreateIssue extends Component {
                         featureType: 'enabler',
                         name: '使能',
                       },
-                    ].map(type => (
+                    ].map((type) => (
                       <Option key={type.featureType} value={type.featureType}>
                         <TypeTag
                           data={type}
@@ -499,7 +535,7 @@ class CreateIssue extends Component {
                   label="经办人"
                   style={{ flex: 1 }}
                   loadWhenMount
-                  getPopupContainer={triggerNode => triggerNode.parentNode}
+                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
                   allowClear
                 />,
               )}
@@ -550,8 +586,9 @@ class CreateIssue extends Component {
         return (
           <FormItem label="标签">
             {getFieldDecorator('issueLabel', {
-              rules: [{ transform: value => (value ? value.toString() : value) }],
-              normalize: value => (value ? value.map(s => s.toString().substr(0, 10)) : value), // 限制最长10位
+              rules: [{ transform: (value) => (value ? value.toString() : value) }],
+              normalize: (value) => (value ? value.map((s) => s.toString().substr(0, 10))
+                : value), // 限制最长10位
             })(
               <SelectFocusLoad
                 label="标签"
@@ -579,7 +616,7 @@ class CreateIssue extends Component {
         return (
           <FormItem label="修复的版本">
             {getFieldDecorator('fixVersionIssueRel', {
-              rules: [{ transform: value => (value ? value.toString() : value) }],
+              rules: [{ transform: (value) => (value ? value.toString() : value) }],
             })(
               <SelectFocusLoad
                 label="修复的版本"
@@ -591,42 +628,56 @@ class CreateIssue extends Component {
           </FormItem>
         );
       case 'epic':
-        // 如果在项目群中则不显示史诗
-        if (!IsInProgramStore.isInProgram) {
-          return (
-            ['issue_epic', 'sub_task'].includes(newIssueTypeCode) ? null : (
-              <FormItem label="史诗">
-                {getFieldDecorator('epicId', {})(
-                  <SelectFocusLoad
-                    label="史诗"
-                    allowClear
-                    type="epic"
-                  />,
-                )}
-              </FormItem>
-            )
-          );
-        } else if (IsInProgramStore.isShowFeature && newIssueTypeCode === 'story') {
-          return (
-            <FormItem label="特性">
-              {getFieldDecorator('featureId', {})(
-                <SelectFocusLoad
-                  label="特性"
-                  allowClear
-                  type="feature"
-                />,
-              )}
-            </FormItem>
-          );
-        } else {
-          return '';
-        }
+        return (
+          <IsInProgram>
+            {
+              ({ isInProgram, isShowFeature }) => {
+                // 如果在项目群中则不显示史诗
+                if (!isInProgram) {
+                  return (
+                    ['issue_epic', 'sub_task'].includes(newIssueTypeCode) ? null : (
+                      <FormItem label="史诗">
+                        {getFieldDecorator('epicId', {})(
+                          <SelectFocusLoad
+                            label="史诗"
+                            allowClear
+                            type="epic"
+                            loadWhenMount
+                            afterLoad={() => {
+                              form.setFieldsValue({
+                                // eslint-disable-next-line react/destructuring-assignment
+                                epicId: this.props.epicId,
+                              });
+                            }}
+                          />,
+                        )}
+                      </FormItem>
+                    )
+                  );
+                } if (isShowFeature && newIssueTypeCode === 'story') {
+                  return (
+                    <FormItem label="特性">
+                      {getFieldDecorator('featureId', {})(
+                        <SelectFocusLoad
+                          label="特性"
+                          allowClear
+                          type="feature"
+                        />,
+                      )}
+                    </FormItem>
+                  );
+                }
+                return '';
+              }
+            }
+          </IsInProgram>
+        );
       case 'component':
         return (
           ['sub_task'].includes(newIssueTypeCode) ? null : (
             <FormItem label="模块">
               {getFieldDecorator('componentIssueRel', {
-                rules: [{ transform: value => (value ? value.toString() : value) }],
+                rules: [{ transform: (value) => (value ? value.toString() : value) }],
               })(
                 <SelectFocusLoad
                   label="模块"
@@ -670,7 +721,7 @@ class CreateIssue extends Component {
               {getFieldDecorator('estimatedTime')(
                 <SelectNumber
                   label="预估时间"
-                  getPopupContainer={triggerNode => triggerNode.parentNode}
+                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
                 />,
               )}
             </FormItem>
@@ -683,7 +734,7 @@ class CreateIssue extends Component {
               {getFieldDecorator('storyPoints')(
                 <SelectNumber
                   label="故事点"
-                  getPopupContainer={triggerNode => triggerNode.parentNode}
+                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
                 />,
               )}
             </FormItem>
@@ -691,12 +742,12 @@ class CreateIssue extends Component {
         );
       case 'description':
         return (
-          <Fragment>
+          <>
             <FormItem key={newIssueTypeCode} label={fieldName} className="c7nagile-line">
               {getFieldDecorator(fieldCode, {
-                initialValue: newIssueTypeCode === 'bug' ? bugDefaultDes : undefined,
+                // initialValue: undefined,
               })(
-                <DebounceEditor
+                <WYSIWYGEditor
                   style={{ height: 200, width: '100%' }}
                 />,
               )}
@@ -712,7 +763,7 @@ class CreateIssue extends Component {
                 <UploadButton />,
               )}
             </FormItem>
-          </Fragment>
+          </>
         );
       case 'benfitHypothesis':
         return (
@@ -748,7 +799,7 @@ class CreateIssue extends Component {
           <FormItem label={fieldName} style={{ width: 330 }}>
             {getFieldDecorator(fieldCode, {
               rules: [{ required, message: `${fieldName}为必填项` }],
-              getValueFromEvent: fieldType === 'number' ? value => (value ? String(value) : undefined) : undefined,
+              getValueFromEvent: fieldType === 'number' ? (value) => (value ? String(value) : undefined) : undefined,
               initialValue: this.transformValue(fieldType, defaultValue),
             })(
               renderField(field),
@@ -762,16 +813,13 @@ class CreateIssue extends Component {
     if (value) {
       if (fieldType === 'time' || fieldType === 'datetime' || fieldType === 'date') {
         return value ? moment(value) : undefined;
-      } else if (value instanceof Array) {
+      } if (value instanceof Array) {
         return value.slice();
-      } else {
-        return value;
       }
-    } else {
-      return undefined;
+      return value;
     }
+    return undefined;
   };
-
 
   renderIssueLinks = () => {
     const { newIssueTypeCode } = this.state;
@@ -824,7 +872,6 @@ class CreateIssue extends Component {
     return null;
   }
 
-
   render() {
     const {
       visible, form, parentSummary, title, mode,
@@ -832,6 +879,7 @@ class CreateIssue extends Component {
       // contentDescription,
       // contentLink,
       hiddenFields,
+      teamProjectIds,
     } = this.props;
     const {
       createLoading, fields, loading, newIssueTypeCode,
@@ -857,9 +905,16 @@ class CreateIssue extends Component {
                     <Input label="父任务概要" value={parentSummary} disabled />
                   </FormItem>
                 )}
-                {fields && fields.filter(field => !hiddenFields.includes(field.fieldCode)).map(field => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
-                {newIssueTypeCode === 'feature' && <FieldTeam form={form} />}
-                {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}                            
+                {fields && fields.filter((field) => !hiddenFields.includes(field.fieldCode))
+                  .map((field) => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
+                {newIssueTypeCode === 'feature' && <FieldTeam form={form} teamProjectIds={teamProjectIds} />}
+                {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}
+                {newIssueTypeCode !== 'epic' && (
+                  <>
+                    <FieldStartTime form={form} field={fields.find((field) => field.code === 'issueStartTime') || {}} />
+                    <FieldEndTime form={form} field={fields.find((field) => field.code === 'issueEndTime') || {}} />
+                  </>
+                )}
               </div>
               {mode !== 'feature' && mode !== 'sub_task' && !['issue_epic', 'feature'].includes(newIssueTypeCode) && <FieldIssueLinks form={form} />}
             </Form>
@@ -870,4 +925,4 @@ class CreateIssue extends Component {
   }
 }
 CreateIssue.defaultProps = defaultProps;
-export default Form.create({})(CreateIssue);
+export default Form.create({})(observer(CreateIssue));

@@ -60,11 +60,11 @@
         smddn.status as smddn_status
         from fd_status st
         left join (select smn.status_id, smn.state_machine_id, sm.name, sm.status
-        from fd_state_machine_node smn, fd_state_machine sm
+        from fd_status_machine_node smn, fd_status_machine sm
         where smn.state_machine_id = sm.id
         union all
         select smnd.status_id, smnd.state_machine_id, sm.name, sm.status
-        from fd_state_machine_node_draft smnd, fd_state_machine sm
+        from fd_state_machine_node_draft smnd, fd_status_machine sm
         where smnd.state_machine_id = sm.id) smddn on st.id = smddn.status_id
         where st.organization_id = #{organizationId}
         and st.id in
@@ -113,11 +113,74 @@
         AND id IN(
         SELECT
         smn.status_id
-        FROM fd_state_machine_node smn
+        FROM fd_status_machine_node smn
         WHERE smn.state_machine_id IN
         <foreach item="item" index="index" collection="stateMachineIds" open="(" separator="," close=")">
             #{item}
         </foreach>
         )
+    </select>
+
+    <select id="queryByStateMachineId" resultType="io.choerodon.agile.api.vo.StatusAndTransformVO">
+         select
+           fs.id,
+           fs.name,
+           fs.code,
+           fs.type,
+           smn.id as nodeId,
+           smn.state_machine_id,
+           IF(smn.type = 'node_init',1,0) as defaultStatus
+         from fd_status fs,fd_status_machine_node smn
+         where fs.organization_id = #{organizationId}
+         AND smn.organization_id = fs.organization_id
+         AND smn.status_id = fs.id
+         AND smn.state_machine_id = #{stateMachineId}
+    </select>
+
+    <select id="listStatusTransferByStateMachineId" resultType="io.choerodon.agile.api.vo.StatusSettingVO">
+         select
+           fs.id,
+           fs.name,
+           fs.code,
+           fs.type,
+           smn.object_version_number
+         from fd_status fs,fd_status_machine_node smn
+         where fs.organization_id = #{organizationId}
+         AND smn.organization_id = fs.organization_id
+         AND smn.status_id = fs.id
+         AND smn.state_machine_id = #{stateMachineId}
+         <if test="param != null">
+            AND fs.name LIKE CONCAT(CONCAT('%', #{param}), '%')
+         </if>
+    </select>
+
+    <select id="listStatusByProjectId" resultType="io.choerodon.agile.api.vo.ProjectStatusVO">
+        select
+           fs.id,
+           fs.name,
+           fs.code,
+           fs.description,
+           fs.type,
+           fs.object_version_number
+         from fd_status fs,agile_issue_status ais
+         where fs.organization_id = #{organizationId}
+         AND ais.project_id = #{projectId}
+         AND fs.id = ais.status_id
+         <if test="statusSearchVO != null">
+             <if test="statusSearchVO.name != null">
+                 AND fs.name LIKE concat('%',#{statusSearchVO.name},'%')
+             </if>
+             <if test="statusSearchVO.type != null">
+                 AND fs.type LIKE concat('%',#{statusSearchVO.type},'%')
+             </if>
+             <if test="statusSearchVO.description != null">
+                 AND fs.description LIKE concat('%',#{statusSearchVO.description},'%')
+             </if>
+             <if test="statusSearchVO.param != null">
+                 AND ( fs.name LIKE concat('%',#{statusSearchVO.param},'%')
+                 OR fs.description LIKE concat('%',#{statusSearchVO.param},'%')
+                 )
+             </if>
+         </if>
     </select>
 </mapper>

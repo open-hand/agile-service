@@ -6,7 +6,6 @@ import { issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectUser from '@/components/select/select-user';
 import UserHead from '../../../../UserHead';
-import './Field.less';
 
 @inject('AppState')
 @observer class FieldStatus extends Component {

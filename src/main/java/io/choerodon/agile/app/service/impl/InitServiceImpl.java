@@ -5,16 +5,11 @@ import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.app.service.BoardService;
 import io.choerodon.agile.app.service.InitService;
 import io.choerodon.agile.app.service.StateMachineService;
-import io.choerodon.agile.infra.dto.StateMachineDTO;
-import io.choerodon.agile.infra.dto.StateMachineNodeDraftDTO;
-import io.choerodon.agile.infra.dto.StateMachineTransformDraftDTO;
-import io.choerodon.agile.infra.dto.StatusDTO;
+import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
-import io.choerodon.agile.infra.mapper.StateMachineMapper;
-import io.choerodon.agile.infra.mapper.StateMachineNodeDraftMapper;
-import io.choerodon.agile.infra.mapper.StateMachineTransformDraftMapper;
-import io.choerodon.agile.infra.mapper.StatusMapper;
+import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.core.oauth.DetailsHelper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,13 +39,17 @@ public class InitServiceImpl implements InitService {
     @Autowired
     private StateMachineService stateMachineService;
     @Autowired
-    private StateMachineMapper stateMachineMapper;
+    private StatusMachineMapper statusMachineMapper;
     @Autowired
     private StateMachineTransformDraftMapper transformDraftMapper;
     @Autowired
     private BoardService boardService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private StatusMachineNodeMapper statusMachineNodeMapper;
+    @Autowired
+    private StatusMachineTransformMapper statusMachineTransformMapper;
 
     @Override
     public synchronized List<StatusDTO> initStatus(Long organizationId) {
@@ -89,16 +88,16 @@ public class InitServiceImpl implements InitService {
     @Override
     public Long initDefaultStateMachine(Long organizationId) {
         //初始化默认状态机
-        StateMachineDTO stateMachine = new StateMachineDTO();
+        StatusMachineDTO stateMachine = new StatusMachineDTO();
         stateMachine.setOrganizationId(organizationId);
         stateMachine.setName("默认状态机");
         stateMachine.setDescription("默认状态机");
         stateMachine.setStatus(StateMachineStatus.CREATE);
         stateMachine.setDefault(true);
-        List<StateMachineDTO> selects = stateMachineMapper.select(stateMachine);
+        List<StatusMachineDTO> selects = statusMachineMapper.select(stateMachine);
         Long stateMachineId;
         if (selects.isEmpty()) {
-            if (stateMachineMapper.insert(stateMachine) != 1) {
+            if (statusMachineMapper.insert(stateMachine) != 1) {
                 throw new CommonException(ERROR_STATEMACHINE_CREATE);
             }
             //创建状态机节点和转换
@@ -114,22 +113,22 @@ public class InitServiceImpl implements InitService {
     public Long initAGStateMachine(Long organizationId, ProjectEvent projectEvent) {
         String projectCode = projectEvent.getProjectCode();
         //初始化状态机
-        StateMachineDTO stateMachine = new StateMachineDTO();
+        StatusMachineDTO stateMachine = new StatusMachineDTO();
         stateMachine.setOrganizationId(organizationId);
         stateMachine.setName(projectCode + "默认状态机【敏捷】");
         stateMachine.setDescription(projectCode + "默认状态机【敏捷】");
-        stateMachine.setStatus(StateMachineStatus.CREATE);
+        stateMachine.setStatus(StateMachineStatus.ACTIVE);
         stateMachine.setDefault(false);
-        if (stateMachineMapper.insert(stateMachine) != 1) {
+        if (statusMachineMapper.insert(stateMachine) != 1) {
             throw new CommonException(ERROR_STATEMACHINE_CREATE);
         }
         //创建状态机节点和转换
         createStateMachineDetail(organizationId, stateMachine.getId(), SchemeApplyType.AGILE);
         //发布状态机
         Long stateMachineId = stateMachine.getId();
-        stateMachineService.deploy(organizationId, stateMachineId, false);
+//        stateMachineService.deploy(organizationId, stateMachineId, false);
         //敏捷创建完状态机后需要到敏捷创建列
-        List<StatusPayload> statusPayloads = stateMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
+        List<StatusPayload> statusPayloads = statusMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
         boardService.initBoard(projectEvent.getProjectId(), DEFAULT_BOARD, statusPayloads);
         return stateMachineId;
     }
@@ -138,20 +137,20 @@ public class InitServiceImpl implements InitService {
     public Long initTEStateMachine(Long organizationId, ProjectEvent projectEvent) {
         String projectCode = projectEvent.getProjectCode();
         //初始化状态机
-        StateMachineDTO stateMachine = new StateMachineDTO();
+        StatusMachineDTO stateMachine = new StatusMachineDTO();
         stateMachine.setOrganizationId(organizationId);
         stateMachine.setName(projectCode + "默认状态机【测试】");
         stateMachine.setDescription(projectCode + "默认状态机【测试】");
-        stateMachine.setStatus(StateMachineStatus.CREATE);
+        stateMachine.setStatus(StateMachineStatus.ACTIVE);
         stateMachine.setDefault(false);
-        if (stateMachineMapper.insert(stateMachine) != 1) {
+        if (statusMachineMapper.insert(stateMachine) != 1) {
             throw new CommonException(ERROR_STATEMACHINE_CREATE);
         }
         //创建状态机节点和转换
         createStateMachineDetail(organizationId, stateMachine.getId(), SchemeApplyType.TEST);
         //发布状态机
         Long stateMachineId = stateMachine.getId();
-        stateMachineService.deploy(organizationId, stateMachineId, false);
+//        stateMachineService.deploy(organizationId, stateMachineId, false);
         return stateMachineId;
     }
 
@@ -169,44 +168,51 @@ public class InitServiceImpl implements InitService {
         //老的组织没有相关数据要重新创建
         initStatuses = initOrganization(organizationId, initStatuses);
         //初始化节点
-        Map<String, StateMachineNodeDraftDTO> nodeMap = new HashMap<>();
+        Map<String, StatusMachineNodeDTO> nodeMap = new HashMap<>();
         Map<String, StatusDTO> statusMap = initStatuses.stream().filter(x -> x.getCode() != null).collect(Collectors.toMap(StatusDTO::getCode, x -> x, (code1, code2) -> code1));
         handleNode(organizationId, stateMachineId, applyType, nodeMap, statusMap);
 
         //初始化转换
-        for (InitTransform initTransform : InitTransform.list(applyType)) {
-            StateMachineTransformDraftDTO transform = new StateMachineTransformDraftDTO();
-            transform.setStateMachineId(stateMachineId);
-            transform.setName(initTransform.getName());
-            if (initTransform.getType().equals(TransformType.ALL)) {
-                transform.setStartNodeId(0L);
-                transform.setDescription("【全部】转换");
-            } else {
-                transform.setStartNodeId(nodeMap.get(initTransform.getStartNodeCode()).getId());
-                transform.setDescription("初始化");
-            }
-            transform.setEndNodeId(nodeMap.get(initTransform.getEndNodeCode()).getId());
-            transform.setType(initTransform.getType());
-            transform.setConditionStrategy(initTransform.getConditionStrategy());
-            transform.setOrganizationId(organizationId);
-            int isTransformInsert = transformDraftMapper.insert(transform);
-            if (isTransformInsert != 1) {
-                throw new CommonException("error.stateMachineTransform.create");
-            }
-            //如果是ALL类型的转换，要更新节点的allStatusTransformId
-            if (initTransform.getType().equals(TransformType.ALL)) {
-                StateMachineNodeDraftDTO nodeDraft = nodeMap.get(initTransform.getEndNodeCode());
-                int update = nodeDraftMapper.updateAllStatusTransformId(organizationId, nodeDraft.getId(), transform.getId());
-                if (update != 1) {
-                    throw new CommonException("error.stateMachineNode.allStatusTransformId.update");
-                }
+        List<StatusMachineNodeDTO> nodeDTOS = nodeMap.entrySet().stream().map(Map.Entry::getValue).filter(v -> !v.getStatusId().equals(0L)).collect(Collectors.toList());
+        // 初始化节点
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        List<StatusMachineTransformDTO> list = new ArrayList<>();
+        StatusMachineTransformDTO transform = new StatusMachineTransformDTO();
+        transform.setStateMachineId(stateMachineId);
+        transform.setName("初始化");
+        transform.setType(TransformType.INIT);
+        transform.setConditionStrategy(TransformConditionStrategy.ALL);
+        transform.setStartNodeId(0L);
+        transform.setEndNodeId(nodeDTOS.get(0).getId());
+        transform.setCreatedBy(userId);
+        transform.setCreatedBy(userId);
+        transform.setOrganizationId(organizationId);
+        list.add(transform);
+        Map<Long, StatusDTO> statusDTOMap = initStatuses.stream().filter(x -> x.getCode() != null).collect(Collectors.toMap(StatusDTO::getId, x -> x, (code1, code2) -> code1));
+        for (StatusMachineNodeDTO startNode:nodeDTOS) {
+            List<StatusMachineNodeDTO> endNodes = nodeDTOS.stream().filter(v -> !startNode.getId().equals(v.getId())).collect(Collectors.toList());
+            for (StatusMachineNodeDTO endNode :endNodes) {
+                StatusMachineTransformDTO transformDTO = new StatusMachineTransformDTO();
+                transformDTO.setStateMachineId(stateMachineId);
+                String startStatusName = statusDTOMap.get(startNode.getStatusId()).getName();
+                String endStatusName = statusDTOMap.get(endNode.getStatusId()).getName();
+                transformDTO.setName(startStatusName + "转换到"+ endStatusName);
+                transformDTO.setType(TransformType.CUSTOM);
+                transformDTO.setConditionStrategy(TransformConditionStrategy.ALL);
+                transformDTO.setStartNodeId(startNode.getId());
+                transformDTO.setEndNodeId(endNode.getId());
+                transformDTO.setCreatedBy(userId);
+                transformDTO.setOrganizationId(organizationId);
+                transformDTO.setLastUpdatedBy(userId);
+                list.add(transformDTO);
             }
         }
+        statusMachineTransformMapper.batchInsert(list);
     }
 
-    private void handleNode(Long organizationId, Long stateMachineId, String applyType, Map<String, StateMachineNodeDraftDTO> nodeMap, Map<String, StatusDTO> statusMap) {
+    private void handleNode(Long organizationId, Long stateMachineId, String applyType, Map<String, StatusMachineNodeDTO> nodeMap, Map<String, StatusDTO> statusMap) {
         for (InitNode initNode : InitNode.list(applyType)) {
-            StateMachineNodeDraftDTO node = new StateMachineNodeDraftDTO();
+            StatusMachineNodeDTO node = new StatusMachineNodeDTO();
             node.setStateMachineId(stateMachineId);
             if (initNode.getType().equals(NodeType.START)) {
                 node.setStatusId(0L);
@@ -219,7 +225,7 @@ public class InitServiceImpl implements InitService {
             node.setHeight(initNode.getHeight());
             node.setType(initNode.getType());
             node.setOrganizationId(organizationId);
-            int isNodeInsert = nodeDraftMapper.insert(node);
+            int isNodeInsert = statusMachineNodeMapper.insert(node);
             if (isNodeInsert != 1) {
                 throw new CommonException("error.stateMachineNode.create");
             }

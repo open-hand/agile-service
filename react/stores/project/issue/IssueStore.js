@@ -92,9 +92,8 @@ export function getSystemFields() {
     defaultShow: false,
     fieldType: 'datetime',
   }];
-  return IsInProgramStore.isInProgram ? systemFields : systemFields.filter(f => f.code !== 'feature');
+  return IsInProgramStore.isInProgram ? systemFields : systemFields.filter((f) => f.code !== 'feature');
 }
-
 
 const { AppState } = stores;
 function transformSystemFilter(data) {
@@ -272,7 +271,6 @@ class IssueStore {
     return toJS(this.expand);
   }
 
-
   axiosGetMyFilterList = () => {
     // const { userInfo: { id } } = AppState;
     this.setLoading(true);
@@ -280,7 +278,7 @@ class IssueStore {
       this.setLoading(false);
       const reverseMyFilters = reverse(myFilters);
       this.setMyFilters(reverseMyFilters);
-      this.setEditFilterInfo(map(map(reverseMyFilters, item => ({
+      this.setEditFilterInfo(map(map(reverseMyFilters, (item) => ({
         filterId: item.filterId,
       })), (item, index) => ({
         ...item,
@@ -307,7 +305,7 @@ class IssueStore {
   @observable chosenFields = new Map();
 
   @action initChosenFields() {
-    this.chosenFields = new Map(getSystemFields().filter(f => f.defaultShow).map(f => ([f.code, observable({ ...f, value: undefined })])));
+    this.chosenFields = new Map(getSystemFields().filter((f) => f.defaultShow).map((f) => ([f.code, observable({ ...f, value: undefined })])));
   }
 
   @action handleChosenFieldChange = (select, field) => {
@@ -367,7 +365,7 @@ class IssueStore {
         break;
       }
     }
-    this.chosenFields = new Map(getSystemFields().filter(f => f.defaultShow).map(f => ([f.code, this.chosenFields.get(f.code)])));
+    this.chosenFields = new Map(getSystemFields().filter((f) => f.defaultShow).map((f) => ([f.code, this.chosenFields.get(f.code)])));
     // 取消全选之前如果有筛选就查一次
     if (hasValue) {
       this.query();

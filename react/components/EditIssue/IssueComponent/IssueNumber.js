@@ -1,11 +1,10 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { Tooltip } from 'choerodon-ui';
-import { issueLink } from '@/utils/link';
-
+import { LINK_URL_TO } from '@/constants/LINK_URL';
 
 const IssueNumber = ({
-  parentIssueId, resetIssue, reloadIssue, typeCode, parentSummary, issue, type, history, disabled,
+  parentIssueId, resetIssue, reloadIssue, typeCode, parentSummary, issue, type, disabled,
 }) => {
   const handleClickParent = () => {
     if (disabled) {
@@ -25,10 +24,9 @@ const IssueNumber = ({
       return false;
     }
     const { issueId, issueNum } = issue;
-    history.push(issueLink(issueId, typeCode, issueNum));
+    LINK_URL_TO.issueLinkTo(issueId, issueNum);
     return false;
   };
-
 
   const { issueNum } = issue;
   return (

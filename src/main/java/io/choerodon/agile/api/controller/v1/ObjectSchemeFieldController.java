@@ -1,11 +1,9 @@
 package io.choerodon.agile.api.controller.v1;
 
 
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
-import io.choerodon.agile.api.vo.ObjectSchemeFieldCreateVO;
-import io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO;
-import io.choerodon.agile.api.vo.ObjectSchemeFieldUpdateVO;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -17,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,7 +46,7 @@ public class ObjectSchemeFieldController {
                                                              @PathVariable("organization_id") Long organizationId,
                                                             @ApiParam(value = "字段对象", required = true)
                                                              @RequestBody @Valid  ObjectSchemeFieldCreateVO fieldCreateDTO) {
-        return new ResponseEntity<>(objectSchemeFieldService.create(organizationId, null, fieldCreateDTO), HttpStatus.CREATED);
+        return new ResponseEntity<>(objectSchemeFieldService.create(organizationId, null, fieldCreateDTO, null), HttpStatus.CREATED);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -104,4 +103,56 @@ public class ObjectSchemeFieldController {
                                              @RequestParam String schemeCode) {
         return new ResponseEntity<>(objectSchemeFieldService.checkCode(organizationId, null, code, schemeCode), HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "页面配置接口")
+    @PostMapping(value = "/configs")
+    public ResponseEntity config(@ApiParam(value = "组织id", required = true)
+                                 @PathVariable("organization_id") Long organizationId,
+                                 @RequestBody PageConfigUpdateVO pageConfigUpdateVO) {
+        objectSchemeFieldService.config(organizationId, null, pageConfigUpdateVO);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "查询字段的页面配置数据")
+    @GetMapping(value = "/configs")
+    public ResponseEntity<PageConfigVO> listConfigs(@PathVariable("organization_id") Long organizationId,
+                                                          @RequestParam String issueType) {
+        return new ResponseEntity<>(objectSchemeFieldService.listConfigs(organizationId, null, issueType), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "更新字段是否必填")
+    @PostMapping(value = "/update_required")
+    public ResponseEntity updateRequired(@PathVariable("organization_id") Long organizationId,
+                                         @RequestParam @Encrypt Long fieldId,
+                                         @RequestParam Boolean required) {
+        objectSchemeFieldService.updateRequired(organizationId, null, fieldId, required);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "拖动查询rank值接口")
+    @PostMapping(value = "/rank")
+    public ResponseEntity<String> queryRank(@PathVariable("organization_id") Long organizationId,
+                                            @RequestBody AdjustOrderVO adjustOrderVO) {
+        return new ResponseEntity<>(objectSchemeFieldService.queryRank(adjustOrderVO.getPreviousRank(), adjustOrderVO.getNextRank()), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "页面配置根据问题类型查询未选择的字段")
+    @GetMapping(value = "/unselected")
+    public ResponseEntity<List<ObjectSchemeFieldVO>> unselected(@PathVariable("organization_id") Long organizationId,
+                                                                @RequestParam String issueType) {
+        return new ResponseEntity<>(objectSchemeFieldService.unselected(organizationId, null, issueType), HttpStatus.OK);
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation(value = "页面配置类型查询接口")
+    @GetMapping(value = "/configs/issue_types")
+    public ResponseEntity<List<IssueTypeVO>> issueTypes(@PathVariable("organization_id") Long organizationId) {
+        return new ResponseEntity<>(objectSchemeFieldService.issueTypes(organizationId, null), HttpStatus.OK);
+    }
+
 }

@@ -1,5 +1,6 @@
 /* eslint-disable react/no-danger */
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Lightbox from 'react-image-lightbox';
 import { delta2Html } from '@/utils/richText';
 import './WYSIWYGViewer.less';
@@ -30,12 +31,12 @@ class WYSIWYGViewer extends Component {
     });
   };
 
-  escape = str => str.replace(/<\/script/g, '<\\/script').replace(/<!--/g, '<\\!--');
+  escape = (str) => str.replace(/<\/script/g, '<\\/script').replace(/<!--/g, '<\\!--');
 
   render() {
     const { data } = this.props;
     const { open, src } = this.state;
-    const html = delta2Html(data);
+    const html = delta2Html(data) || '';
 
     return (
       <div className="c7n-read-delta" style={{ width: '100%', wordBreak: 'break-all' }}>
@@ -53,5 +54,7 @@ class WYSIWYGViewer extends Component {
     );
   }
 }
-
+WYSIWYGViewer.propTypes = {
+  data: PropTypes.string.isRequired,
+};
 export default WYSIWYGViewer;

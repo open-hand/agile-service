@@ -99,4 +99,11 @@ public interface StatusService {
      */
     List<StatusVO> queryByStateMachineIds(Long organizationId, List<Long> stateMachineIds);
 
+    List<StatusAndTransformVO> queryStatusByStateMachineId(Long organizationId, Long stateMachineId);
+
+    Page<ProjectStatusVO> listStatusByProjectId(Long projectId, PageRequest pageRequest, StatusSearchVO statusSearchVO);
+
+    void deleteStatus(Long projectId,Long statusId,String applyType,List<DeleteStatusTransferVO> statusTransferVOS);
+
+    List<IssueTypeVO> checkDeleteStatus(Long projectId, String applyType,Long statusId);
 }

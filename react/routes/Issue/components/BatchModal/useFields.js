@@ -9,6 +9,12 @@ const requestKey = (() => {
 })();
 function reducer(state, action) {
   switch (action.type) {
+    case 'INIT': {
+      return action.payload.map((item) => ({
+        key: requestKey(),
+        ...item,
+      }));
+    }
     case 'ADD': {
       return produce(state, (draft) => {
         draft.push({
@@ -28,7 +34,7 @@ function reducer(state, action) {
         draft[index] = {
           key: action.payload.key,
           ...action.payload.value,
-        };       
+        };
       });
     }
     default: throw new Error();
@@ -38,6 +44,12 @@ function reducer(state, action) {
 const initialState = [];
 function useFields() {
   const [fields, dispatch] = useReducer(reducer, initialState);
+  const init = (data) => {
+    dispatch({
+      type: 'INIT',
+      payload: data,
+    });
+  };
   const add = () => {
     dispatch({
       type: 'ADD',
@@ -55,6 +67,8 @@ function useFields() {
       payload: { key, value },
     });
   };
-  return [fields, { add, remove: removeField, set }];
+  return [fields, {
+    add, remove: removeField, set, init,
+  }];
 }
 export default useFields;

@@ -15,8 +15,8 @@ class StateMachineApi {
 
   /**
      * 分页加载状态机列表
-     * @param map 
-     * @param sort 
+     * @param map
+     * @param sort
      */
   loadList(map = {}, sort = { field: 'id', order: 'desc' }) {
     return axios({
@@ -38,7 +38,7 @@ class StateMachineApi {
 
   /**
      * 根据stateId加载状态机和配置(活跃)
-     * @param stateId 
+     * @param stateId
      */
   loadWithConfig(stateId: number) {
     return axios.get(`${this.orgPrefix}/state_machine/with_config_deploy/${stateId}`);
@@ -46,7 +46,7 @@ class StateMachineApi {
 
   /**
      * 根据stateId加载状态机和配置(新建/草稿)
-     * @param stateId 
+     * @param stateId
      */
   loadWithDraftConfig(stateId: number) {
     return axios.get(`${this.orgPrefix}/state_machine/with_config_draft/${stateId}`);
@@ -54,7 +54,7 @@ class StateMachineApi {
 
   /**
      * 创建状态机
-     * @param data 
+     * @param data
      */
   create(data: IStateMachine) {
     return axios({
@@ -66,7 +66,7 @@ class StateMachineApi {
 
   /**
    * 加载状态机节点 （草稿）
-   * @param nodeId 
+   * @param nodeId
    */
   loadNode(nodeId:number) {
     return axios.get(`${this.orgPrefix}/state_machine_node/${nodeId}`);
@@ -74,8 +74,8 @@ class StateMachineApi {
 
   /**
    * 编辑状态机时增加节点
-   * @param stateMachineId 
-   * @param map 
+   * @param stateMachineId
+   * @param map
    */
   addNode(stateMachineId:number, node:any) {
     return axios({
@@ -88,12 +88,11 @@ class StateMachineApi {
     });
   }
 
-
   /**
    * 更新状态机节点 （草稿）
-   * @param stateMachineId 
-   * @param nodeId 
-   * @param node 
+   * @param stateMachineId
+   * @param nodeId
+   * @param node
    */
   updateNode(stateMachineId:number, nodeId:number, node:any) {
     return axios({
@@ -108,8 +107,8 @@ class StateMachineApi {
 
   /**
    * 删除状态机节点 （草稿）
-   * @param stateMachineId 
-   * @param nodeId 
+   * @param stateMachineId
+   * @param nodeId
    */
   deleteNode(stateMachineId:number, nodeId:number) {
     return axios({
@@ -123,9 +122,9 @@ class StateMachineApi {
 
   /**
    * 检查状态机节点是否可删除 (草稿)
-   * @param orgId 
-   * @param statusId 
-   * @param stateMachineId 
+   * @param orgId
+   * @param statusId
+   * @param stateMachineId
    */
   checkBeforeDeleteNode(statusId:number, stateMachineId:number) {
     return axios({
@@ -138,10 +137,9 @@ class StateMachineApi {
     });
   }
 
-
   /**
      * 删除状态机
-     * @param stateMachineId 
+     * @param stateMachineId
      */
   delete(stateMachineId: number) {
     return axios.delete(`${this.orgPrefix}/state_machine/${stateMachineId}`);
@@ -149,8 +147,8 @@ class StateMachineApi {
 
   /**
      * 更新状态机
-     * @param stateMachineId 
-     * @param data 
+     * @param stateMachineId
+     * @param data
      */
   update(stateMachineId: number, data: UStateMachine) {
     return axios({
@@ -162,7 +160,7 @@ class StateMachineApi {
 
   /**
    * 发布状态机
-   * @param stateMachineId 
+   * @param stateMachineId
    */
   publish(stateMachineId:number) {
     return axios.get(`${this.orgPrefix}/state_machine/deploy/${stateMachineId}`);
@@ -170,7 +168,7 @@ class StateMachineApi {
 
   /**
    * 删除草稿
-   * @param stateMachineId 
+   * @param stateMachineId
    */
   deleteDraft(stateMachineId:number) {
     return axios.delete(`${this.orgPrefix}/state_machine/delete_draft/${stateMachineId}`);
@@ -178,8 +176,8 @@ class StateMachineApi {
 
   /**
    * 更改条件策略
-   * @param transformId 
-   * @param type 
+   * @param transformId
+   * @param type
    */
   updateCondition(transformId:number, type:string) {
     return axios({
@@ -193,8 +191,8 @@ class StateMachineApi {
 
   /**
    * 创建【全部】转换，所有节点均可转换到当前节点（草稿）
-   * @param endNodeId 
-   * @param stateMachineId 
+   * @param endNodeId
+   * @param stateMachineId
    */
   createAllTransferToNode(endNodeId:number, stateMachineId:number) {
     return axios({
@@ -209,7 +207,7 @@ class StateMachineApi {
 
   /**
    * 删除 【全部】转换 （草稿）
-   * @param transformId 
+   * @param transformId
    */
   deleteAllTransferToNode(transformId:number) {
     return axios.delete(`${this.orgPrefix}/state_machine_transform/delete_type_all/${transformId}`);
@@ -217,7 +215,7 @@ class StateMachineApi {
 
   /**
    * 加载状态机的转换
-   * @param transferId 
+   * @param transferId
    */
   loadTransfer(transferId:number) {
     return axios.get(`${this.orgPrefix}/state_machine_transform/${transferId}`);
@@ -225,8 +223,8 @@ class StateMachineApi {
 
   /**
    * 获取未配置的条件，验证，后置动作等列表
-   * @param transformId 
-   * @param type 
+   * @param transformId
+   * @param type
    */
   loadTransferConfig(transformId:number, type:string) {
     return axios({
@@ -240,8 +238,8 @@ class StateMachineApi {
 
   /**
    * 创建状态机转换（草稿）
-   * @param stateMachineId 
-   * @param data 
+   * @param stateMachineId
+   * @param data
    */
   addTransfer(stateMachineId:number, data:any) {
     return axios({
@@ -256,9 +254,9 @@ class StateMachineApi {
 
   /**
    * 更新状态机转换 （草稿）
-   * @param stateMachineId 
-   * @param transferId 
-   * @param data 
+   * @param stateMachineId
+   * @param transferId
+   * @param data
    */
   updateTransfer(stateMachineId:number, transferId:number, data:any) {
     return axios({
@@ -273,8 +271,8 @@ class StateMachineApi {
 
   /**
    * 删除状态机转换 （草稿）
-   * @param stateMachineId 
-   * @param transferId 
+   * @param stateMachineId
+   * @param transferId
    */
   deleteTransfer(stateMachineId:number, transferId:number) {
     return axios({
@@ -288,9 +286,9 @@ class StateMachineApi {
 
   /**
    * 创建配置 （草稿）
-   * @param stateMachineId 
-   * @param transformId 
-   * @param data 
+   * @param stateMachineId
+   * @param transformId
+   * @param data
    */
   addConfig(stateMachineId:number, transformId:number, data:any) {
     return axios({
@@ -305,7 +303,7 @@ class StateMachineApi {
 
   /**
    * 删除配置 （草稿）
-   * @param configId 
+   * @param configId
    */
   deleteConfig(configId:number) {
     return axios.delete(`${this.orgPrefix}/state_machine_config/${configId}`);
@@ -313,7 +311,7 @@ class StateMachineApi {
 
   /**
     * 检查状态机名称是否重复
-    * @param name 
+    * @param name
     */
   checkName(name: string) {
     return axios({
@@ -327,10 +325,10 @@ class StateMachineApi {
 
   /**
    * 检查状态机转换名称是否重复
-   * @param startNodeId 
-   * @param endNodeId 
-   * @param stateMachineId 
-   * @param name 
+   * @param startNodeId
+   * @param endNodeId
+   * @param stateMachineId
+   * @param name
    */
   checkTransferName(startNodeId:number, endNodeId:number, stateMachineId:number, name:string) {
     return axios({

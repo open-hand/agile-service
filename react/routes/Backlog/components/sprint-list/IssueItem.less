@@ -23,6 +23,7 @@
     justify-content: flex-end;
     margin-left: auto;
     margin-top: 0.05rem;
+    align-items: center;
   }
 
   &-issueNum {
@@ -35,6 +36,20 @@
     overflow: hidden;
     -ms-text-overflow: ellipsis;
     text-overflow: ellipsis;
+  }
+
+  &-delay, &-soonDelay {
+    color: #F5222D;
+    border: 1px solid #F5222D;
+    font-size: 12px;
+    margin-right: 0.1rem;
+    white-space: nowrap;
+    height: 20px;
+  }
+
+  &-soonDelay {
+    color: rgb(255, 177, 0);
+    border: 1px solid rgb(255, 177, 0);
   }
 
   &-version {

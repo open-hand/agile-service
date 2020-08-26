@@ -13,8 +13,9 @@ import {
 } from 'lodash';
 import { observer } from 'mobx-react-lite';
 import IssueStore from '@/stores/project/issue/IssueStore';
-import { getParams } from '@/utils/link';
 import { quickFilterApi } from '@/api';
+import { linkUrl } from '@/utils/to';
+import LINK_URL, { getParams } from '@/constants/LINK_URL';
 import SummaryField from './custom-fields/field/SummaryField';
 import Store from '../../stores';
 import CustomFields from './custom-fields';
@@ -94,7 +95,7 @@ export default withRouter(observer(({
     } = getParams(location.search);
     setSelectedQuickFilters([]);
     if (paramOpenIssueId || paramIssueId || paramChoose || paramType) {
-      history.replace(`/agile/work-list/issue?${queryString.stringify(otherArgs)}`);
+      history.replace(linkUrl(LINK_URL.workListIssue));
     }
     onClear();
     IssueStore.clearAllFilter();
@@ -106,7 +107,7 @@ export default withRouter(observer(({
     if (type === 'quick') {
       const newSelectedQuickFilters = [...selectedQuickFilters, v];
       setSelectedQuickFilters([...selectedQuickFilters, v]);
-      const quickFilterIds = newSelectedQuickFilters.map(filter => filter.key.split('|')[1]);
+      const quickFilterIds = newSelectedQuickFilters.map((filter) => filter.key.split('|')[1]);
       IssueStore.handleFilterChange('quickFilterIds', quickFilterIds);
     } else if (type === 'my') {
       const targetMyFilter = find(filters, { filterId: id });
@@ -116,7 +117,7 @@ export default withRouter(observer(({
       for (const [key, value] of Object.entries(filterObject)) {
         // 自定义字段保存的时候只保存了id，这里要找到code
         if (value.isCustom) {
-          const code = IssueStore.getFieldCodeById(key);          
+          const code = IssueStore.getFieldCodeById(key);
           if (code) {
             IssueStore.handleFilterChange(code, value.value);
           }
@@ -146,19 +147,22 @@ export default withRouter(observer(({
       IssueStore.clearAllFilter();
       IssueStore.query();
     }
-    const quickFilterIds = selectedQuickFilters.map(filter => filter.key.split('|')[1]);
+    const quickFilterIds = selectedQuickFilters.map((filter) => filter.key.split('|')[1]);
     IssueStore.handleFilterChange('quickFilterIds', quickFilterIds);
   };
 
   const findSameFilter = () => {
-    const currentFilterDTO = IssueStore.getCustomFieldFilters() ? flattenObject(IssueStore.getCustomFieldFilters()) : {};
+    const currentFilterDTO = IssueStore.getCustomFieldFilters()
+      ? flattenObject(IssueStore.getCustomFieldFilters()) : {};
     // console.log(currentFilterDTO);
     // 找到与当前筛选相同条件的我的筛选
-    const targetMyFilter = find(filters, filter => isFilterSame(flattenObject(JSON.parse(filter.filterJson)), currentFilterDTO));    
+    const targetMyFilter = find(filters,
+      (filter) => isFilterSame(flattenObject(JSON.parse(filter.filterJson)), currentFilterDTO));
     return targetMyFilter;
   };
   const isHasFilter = () => {
-    const currentFilterDTO = IssueStore.getCustomFieldFilters() ? flattenObject(IssueStore.getCustomFieldFilters()) : {};
+    const currentFilterDTO = IssueStore.getCustomFieldFilters()
+      ? flattenObject(IssueStore.getCustomFieldFilters()) : {};
     return !isFilterSame({}, currentFilterDTO);
   };
   const getMyFilterSelectValue = () => {
@@ -168,7 +172,8 @@ export default withRouter(observer(({
   const handleClickSaveFilter = () => {
     IssueStore.setSaveFilterVisible(true);
     IssueStore.setFilterListVisible(false);
-    IssueStore.setEditFilterInfo(map(editFilterInfo, item => Object.assign(item, { isEditing: false })));
+    IssueStore.setEditFilterInfo(map(editFilterInfo,
+      (item) => Object.assign(item, { isEditing: false })));
   };
   const handleInputChange = (value) => {
     if (value) {
@@ -179,14 +184,14 @@ export default withRouter(observer(({
     IssueStore.handleFilterChange('issueIds', []);
   };
   const renderSearch = () => (
-    <Fragment>
+    <>
       <div style={{ marginTop: 4 }}>
         <SummaryField
           onChange={handleInputChange}
           value={IssueStore.getFilterValueByCode('contents') ? IssueStore.getFilterValueByCode('contents')[0] : undefined}
         />
-      </div>      
-      <div className={`${prefixCls}-search-left`}>                
+      </div>
+      <div className={`${prefixCls}-search-left`}>
         <CustomFields>
           <div style={{ margin: '4px 5px' }}>
             <Select
@@ -198,25 +203,25 @@ export default withRouter(observer(({
               placeholder="快速筛选"
               maxTagCount={0}
               labelInValue
-              maxTagPlaceholder={ommittedValues => `${ommittedValues.map(item => item.label).join(', ')}`}
+              maxTagPlaceholder={(ommittedValues) => `${ommittedValues.map((item) => item.label).join(', ')}`}
               style={{ ...getSelectStyle({ name: '快速筛选' }, getMyFilterSelectValue()), height: 34 }}
               onSelect={handleSelect}
               onDeselect={handleDeselect}
               onClear={handleDeselect}
               value={getMyFilterSelectValue()}
-              getPopupContainer={triggerNode => triggerNode.parentNode}
+              getPopupContainer={(triggerNode) => triggerNode.parentNode}
             >
               <OptGroup key="quick" label="快速筛选">
-                {quickFilters.map(filter => (
+                {quickFilters.map((filter) => (
                   <Option value={`quick|${filter.filterId}`}>{filter.name}</Option>
                 ))}
               </OptGroup>
               <OptGroup key="my" label="我的筛选">
                 {
-              filters.map(filter => (
-                <Option value={`my|${filter.filterId}`}>{filter.name}</Option>
-              ))
-            }
+                  filters.map((filter) => (
+                    <Option value={`my|${filter.filterId}`}>{filter.name}</Option>
+                  ))
+                }
               </OptGroup>
             </Select>
           </div>
@@ -226,10 +231,10 @@ export default withRouter(observer(({
         {isHasFilter() && <Button onClick={reset} funcType="flat" color="blue">重置</Button>}
         {!findSameFilter() && isHasFilter() && <Button onClick={handleClickSaveFilter} funcType="raised" color="blue">保存筛选</Button>}
       </div>
-    </Fragment>
+    </>
   );
   const renderUrlFilter = () => (
-    <Fragment>
+    <>
       <div className={`${prefixCls}-search-left`}>
         <div className={`${prefixCls}-search-urlFilter`}>
           <Icon type="search" />
@@ -239,7 +244,7 @@ export default withRouter(observer(({
       <div className={`${prefixCls}-search-right`}>
         <Button onClick={reset} funcType="flat" color="blue">重置</Button>
       </div>
-    </Fragment>
+    </>
   );
   return (
     <div className={`${prefixCls}-search`}>

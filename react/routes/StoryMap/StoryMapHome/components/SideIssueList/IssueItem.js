@@ -4,13 +4,13 @@ import { observer } from 'mobx-react';
 import { Tooltip } from 'choerodon-ui';
 import { find } from 'lodash';
 import { DragSource } from 'react-dnd';
-import { issueLink } from '@/utils/link';
 import { storyMapApi } from '@/api';
+import { linkUrl } from '@/utils/to';
+import LINK_URL from '@/constants/LINK_URL';
 import TypeTag from '../../../../../components/TypeTag';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 
 import './IssueItem.less';
-
 
 const preFix = 'c7nagile-SideIssueList-IssueItem';
 @observer
@@ -27,7 +27,20 @@ class IssueItem extends Component {
       connectDragSource(
         <div className={preFix}>
           <TypeTag data={issueTypeVO} />
-          <Link target="_blank" to={issueLink(issueId, issueTypeVO && issueTypeVO.typeCode, issueNum)} className="primary" style={{ margin: '0 10px' }}>{issueNum}</Link>
+          <Link
+            target="_blank"
+            to={`${linkUrl(LINK_URL.workListIssue, {
+              params: {
+                paramIssueId: issueId,
+                paramName: issueNum,
+              },
+            })}`}
+            className="primary"
+            style={{ margin: '0 10px' }}
+          >
+            {issueNum}
+
+          </Link>
           <div className={`${preFix}-summary`}>
             <Tooltip title={summary}>
               {summary}
@@ -46,7 +59,7 @@ IssueItem.propTypes = {
 export default DragSource(
   'story',
   {
-    beginDrag: props => ({
+    beginDrag: (props) => ({
       type: 'side',
       issue: props.issue,
     }),
@@ -54,7 +67,10 @@ export default DragSource(
       const source = monitor.getItem();
       const dropResult = monitor.getDropResult();
       if (dropResult) {
-        const { epic: { issueId: targetEpicId }, feature: { issueId: targetFeatureId }, version } = dropResult;
+        const {
+          epic: { issueId: targetEpicId },
+          feature: { issueId: targetFeatureId }, version,
+        } = dropResult;
         const { versionId: targetVersionId } = version || {};
         const { issue: { issueId, storyMapVersionVOList } } = source;
         const storyMapDragVO = {
@@ -77,7 +93,8 @@ export default DragSource(
           storyMapDragVO.versionIssueIds = [issueId];
         }
         if (targetVersionId === 'none' && storyMapVersionVOList.length > 0) {
-          storyMapDragVO.versionIssueRelVOList = storyMapVersionVOList.map(v => ({ ...v, issueId }));
+          storyMapDragVO.versionIssueRelVOList = storyMapVersionVOList
+            .map((v) => ({ ...v, issueId }));
         }
         // console.log(storyMapDragVO);
         storyMapApi.move(storyMapDragVO).then(() => {

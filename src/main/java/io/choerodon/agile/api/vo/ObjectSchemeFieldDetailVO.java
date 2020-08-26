@@ -34,6 +34,7 @@ public class ObjectSchemeFieldDetailVO {
     private Boolean system;
     @ApiModelProperty(value = "是否必填")
     private Boolean required;
+    private String requiredScope;
     @ApiModelProperty(value = "上下文")
     private String[] context;
     @ApiModelProperty(value = "对象方案编码")
@@ -46,6 +47,14 @@ public class ObjectSchemeFieldDetailVO {
     private Long objectVersionNumber;
     @ApiModelProperty(value = "字段选项列表")
     private List<FieldOptionVO> fieldOptions;
+
+    public String getRequiredScope() {
+        return requiredScope;
+    }
+
+    public void setRequiredScope(String requiredScope) {
+        this.requiredScope = requiredScope;
+    }
 
     public Object getDefaultValueObj() {
         return defaultValueObj;

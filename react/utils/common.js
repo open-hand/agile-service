@@ -7,7 +7,11 @@ const { AppState } = stores;
 
 export const getProjectId = () => (AppState.currentMenuType ? AppState.currentMenuType.id : 0);
 export const getProjectName = () => (AppState.currentMenuType ? AppState.currentMenuType.name : '');
-export const getOrganizationId = () => (AppState.currentMenuType ? AppState.currentMenuType.organizationId : 0);
+export const getOrganizationId = () => (AppState.currentMenuType
+  ? AppState.currentMenuType.organizationId
+  : 0);
+export const getApplyType = () => (AppState.currentMenuType.category === 'PROGRAM' ? 'program' : 'agile');
+export const getMenuType = () => (AppState.currentMenuType ? AppState.currentMenuType.type : '');
 
 // 选择主题
 export function configTheme({
@@ -22,7 +26,8 @@ export function configTheme({
     const values = [];
     for (const value of ommittedValues) {
       // eslint-disable-next-line no-restricted-globals
-      const target = parseNumber ? find(list, { [valueFiled]: isNaN(value) ? value : Number(value) })
+      const target = parseNumber
+        ? find(list, { [valueFiled]: isNaN(value) ? value : Number(value) })
         : find(list, { [valueFiled]: value });
       if (target) {
         if (renderText) {
@@ -40,7 +45,6 @@ export function configTheme({
     maxTagPlaceholder: renderPlaceHolder,
   };
 }
-
 
 // 获取文件名后缀
 export function getFileSuffix(fileName) {

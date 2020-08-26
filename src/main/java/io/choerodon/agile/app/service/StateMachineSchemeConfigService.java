@@ -143,4 +143,6 @@ public interface StateMachineSchemeConfigService {
      * @param schemeId
      */
     void copyDraftToDeploy(Boolean isDeleteOldDeploy, Long organizationId, Long schemeId);
+
+    Long queryStatusMachineBySchemeIdAndIssueType(Long organizationId, Long stateMachineSchemeId, Long issueTypeId);
 }
