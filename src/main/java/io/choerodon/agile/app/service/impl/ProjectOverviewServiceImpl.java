@@ -47,75 +47,72 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
     @Override
     public UncompletedCountVO selectUncompletedBySprint(Long projectId, Long sprintId) {
         UncompletedCountVO uncompletedCount = new UncompletedCountVO();
-//        List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId).stream()
-//                .filter(issue -> BooleanUtils.isFalse(issue.getCompleted())).collect(Collectors.toList());
-//        SprintDTO sprint = safeSelectSprint(projectId, sprintId);
-//        Long organizationId = ConvertUtil.getOrganizationId(projectId);
-//        if (Objects.isNull(sprint)) {
-//            return uncompletedCount;
-//        }
-//        if (sprint.getEndDate() != null) {
-//            uncompletedCount.setRemainingDays(dateUtil.getDaysBetweenDifferentDate(new Date(), sprint.getEndDate(),
-//                    workCalendarRefMapper.queryHolidayBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()),
-//                    workCalendarRefMapper.queryWorkBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()), organizationId));
-//            uncompletedCount.setTotalDays(dateUtil.getDaysBetweenDifferentDate(sprint.getStartDate(), sprint.getEndDate(),
-//                    workCalendarRefMapper.queryHolidayBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()),
-//                    workCalendarRefMapper.queryWorkBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()), organizationId));
-//        }
-//        if (CollectionUtils.isEmpty(issueList)){
-//            return uncompletedCount;
-//        }
-//        uncompletedCount.setStoryPoints(issueList.stream()
-//                .filter(issue -> Objects.equals(issue.getTypeCode(), InitIssueType.STORY.getTypeCode()))
-//                .map(IssueOverviewVO::getStoryPoints).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add));
-//        uncompletedCount.setRemainingEstimatedTime(issueList.stream()
-//                .map(IssueOverviewVO::getRemainingTime).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add));
-//        uncompletedCount.setIssueCount(issueList.size());
+        List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId).stream()
+                .filter(issue -> BooleanUtils.isFalse(issue.getCompleted())).collect(Collectors.toList());
+        SprintDTO sprint = safeSelectSprint(projectId, sprintId);
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        if (Objects.isNull(sprint)) {
+            return uncompletedCount;
+        }
+        if (sprint.getEndDate() != null) {
+            uncompletedCount.setRemainingDays(dateUtil.getDaysBetweenDifferentDate(new Date(), sprint.getEndDate(),
+                    workCalendarRefMapper.queryHolidayBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()),
+                    workCalendarRefMapper.queryWorkBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()), organizationId));
+            uncompletedCount.setTotalDays(dateUtil.getDaysBetweenDifferentDate(sprint.getStartDate(), sprint.getEndDate(),
+                    workCalendarRefMapper.queryHolidayBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()),
+                    workCalendarRefMapper.queryWorkBySprintIdAndProjectId(sprint.getSprintId(), sprint.getProjectId()), organizationId));
+        }
+        if (CollectionUtils.isEmpty(issueList)){
+            return uncompletedCount;
+        }
+        uncompletedCount.setStoryPoints(issueList.stream()
+                .filter(issue -> Objects.equals(issue.getTypeCode(), InitIssueType.STORY.getTypeCode()))
+                .map(IssueOverviewVO::getStoryPoints).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add));
+        uncompletedCount.setRemainingEstimatedTime(issueList.stream()
+                .map(IssueOverviewVO::getRemainingTime).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add));
+        uncompletedCount.setIssueCount(issueList.size());
         return uncompletedCount;
     }
 
     @Override
     public List<IssueCompletedStatusVO> selectIssueCountBysprint(Long projectId, Long sprintId) {
-//        List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId);
-//        List<IssueOverviewVO> bugList = issueList.stream()
-//                .filter(bug -> InitIssueType.BUG.getTypeCode().equals(bug.getTypeCode()))
-//                .collect(Collectors.toList());
-//        // 优先排序set
-//        Set<Long> priority = issueList.stream().map(IssueOverviewVO::getAssigneeId).collect(Collectors.toSet());
-//        priority.addAll(issueList.stream().map(IssueOverviewVO::getReporterId).collect(Collectors.toSet()));
-//        priority.remove(null);
-//        priority.remove(0L);
-//        // issueDTO转换IssueCountVO
-//        return issueAssembler.issueDTOToIssueCountVO(bugList, priority);
-        return new ArrayList<>();
+        List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId);
+        List<IssueOverviewVO> bugList = issueList.stream()
+                .filter(bug -> InitIssueType.BUG.getTypeCode().equals(bug.getTypeCode()))
+                .collect(Collectors.toList());
+        // 优先排序set
+        Set<Long> priority = issueList.stream().map(IssueOverviewVO::getAssigneeId).collect(Collectors.toSet());
+        priority.addAll(issueList.stream().map(IssueOverviewVO::getReporterId).collect(Collectors.toSet()));
+        priority.remove(null);
+        priority.remove(0L);
+        // issueDTO转换IssueCountVO
+        return issueAssembler.issueDTOToIssueCountVO(bugList, priority);
     }
 
     @Override
     public SprintStatisticsVO selectSprintStatistics(Long projectId, Long sprintId) {
-//        List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId);
-//        return issueAssembler.issueDTOToSprintStatisticsVO(issueList);
-        return null;
+        List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId);
+        return issueAssembler.issueDTOToSprintStatisticsVO(issueList);
     }
 
     @Override
     public List<OneJobVO> selectOneJobsBysprint(Long projectId, Long sprintId) {
-//        SprintDTO sprint = safeSelectSprint(projectId,sprintId);
-//        if (Objects.isNull(sprint.getActualEndDate())){
-//            sprint.setActualEndDate(new Date());
-//        }
-//        List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId);
-//        if (CollectionUtils.isEmpty(issueList)){
-//            return Collections.emptyList();
-//        }
-//        List<WorkLogDTO> workLogList = workLogMapper.selectWorkTimeBySpring(projectId, sprintId,
-//                sprint.getStartDate(), sprint.getActualEndDate());
-//        Set<Long> issueIdList = issueList.stream().map(IssueOverviewVO::getIssueId).collect(Collectors.toSet());
-//        List<DataLogDTO> resolutionLogList = dataLogMapper.selectResolutionIssueBySprint(projectId,
-//                issueIdList, "resolution", sprint.getStartDate(), sprint.getActualEndDate());
-//        List<DataLogDTO> assigneeLogList = dataLogMapper.selectResolutionIssueBySprint(projectId,
-//                issueIdList, "assignee", sprint.getStartDate(), sprint.getActualEndDate());
-//        return issueAssembler.issueToOneJob(sprint, issueList, workLogList, resolutionLogList, assigneeLogList);
-        return new ArrayList<>();
+        SprintDTO sprint = safeSelectSprint(projectId,sprintId);
+        if (Objects.isNull(sprint.getActualEndDate())){
+            sprint.setActualEndDate(new Date());
+        }
+        List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId);
+        if (CollectionUtils.isEmpty(issueList)){
+            return Collections.emptyList();
+        }
+        List<WorkLogDTO> workLogList = workLogMapper.selectWorkTimeBySpring(projectId, sprintId,
+                sprint.getStartDate(), sprint.getActualEndDate());
+        Set<Long> issueIdList = issueList.stream().map(IssueOverviewVO::getIssueId).collect(Collectors.toSet());
+        List<DataLogDTO> resolutionLogList = dataLogMapper.selectResolutionIssueBySprint(projectId,
+                issueIdList, "resolution", sprint.getStartDate(), sprint.getActualEndDate());
+        List<DataLogDTO> assigneeLogList = dataLogMapper.selectResolutionIssueBySprint(projectId,
+                issueIdList, "assignee", sprint.getStartDate(), sprint.getActualEndDate());
+        return issueAssembler.issueToOneJob(sprint, issueList, workLogList, resolutionLogList, assigneeLogList);
     }
 
     private List<IssueOverviewVO> selectIssueBysprint(Long projectId, Long sprintId) {
