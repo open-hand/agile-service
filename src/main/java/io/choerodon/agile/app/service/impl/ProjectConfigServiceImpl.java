@@ -571,13 +571,15 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             throw new CommonException("error.status.status_issue_used");
         }
         // 校验当前node的状态是否与其他状态有联动
-        List<StatusLinkageDTO> linkExistList =
-                statusLinkageMapper.selectByCondition(Condition.builder(StatusLinkageDTO.class)
-                .andWhere(Sqls.custom().andEqualTo("statusId", currentStatusId).orEqualTo("parentIssueStatusSetting", currentStatusId)).build());
+        List<StatusLinkageDTO> linkExistList = statusLinkageMapper.selectByCondition(Condition.builder(StatusLinkageDTO.class)
+                .andWhere(Sqls.custom().andEqualTo("issueTypeId", issueTypeId)
+                        .andEqualTo("projectId", projectId))
+                .andWhere(Sqls.custom().andEqualTo("statusId", currentStatusId)
+                                .orEqualTo("parentIssueStatusSetting", currentStatusId)).build());
         if (CollectionUtils.isNotEmpty(linkExistList)){
             throw new CommonException("error.status.status_link_exist");
         }
-        Sqls existCondition = Sqls.custom().andEqualTo("projectId", projectId).andEqualTo("statusId", currentStatusId);
+        Sqls existCondition = Sqls.custom().andEqualTo("projectId", projectId).andEqualTo("statusId", currentStatusId).andEqualTo("issueTypeId", issueTypeId);
         // 校验是否关联流转条件
         List<StatusTransferSettingDTO> transferExist =
                 statusTransferSettingMapper.selectByCondition(Condition.builder(StatusTransferSettingDTO.class)
