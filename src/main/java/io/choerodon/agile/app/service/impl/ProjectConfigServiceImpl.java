@@ -571,11 +571,11 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             throw new CommonException("error.status.status_issue_used");
         }
         // 校验当前node的状态是否与其他状态有联动
-        List<StatusLinkageDTO> linkExistList =
-                statusLinkageMapper.selectByCondition(Condition.builder(StatusLinkageDTO.class)
+        List<StatusLinkageDTO> linkExistList = statusLinkageMapper.selectByCondition(Condition.builder(StatusLinkageDTO.class)
                 .andWhere(Sqls.custom().andEqualTo("issueTypeId", issueTypeId)
-                        .andEqualTo("projectId", projectId).andEqualTo("statusId", currentStatusId)
-                        .orEqualTo("parentIssueStatusSetting", currentStatusId)).build());
+                        .andEqualTo("projectId", projectId))
+                .andWhere(Sqls.custom().andEqualTo("statusId", currentStatusId)
+                                .orEqualTo("parentIssueStatusSetting", currentStatusId)).build());
         if (CollectionUtils.isNotEmpty(linkExistList)){
             throw new CommonException("error.status.status_link_exist");
         }
