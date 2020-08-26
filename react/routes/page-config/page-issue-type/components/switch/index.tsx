@@ -30,6 +30,7 @@ function PageSwitch() {
     if (pageIssueTypeStore.getDirty) {
       Modal.confirm({
         title: '是否放弃更改',
+        className: 'c7n-agile-page-config-page-issue-type-switch-modal',
         children: (
           <div>
             页面有未保存的内容,是否放弃更改？
