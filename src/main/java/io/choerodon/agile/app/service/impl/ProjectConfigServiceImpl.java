@@ -577,7 +577,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (CollectionUtils.isNotEmpty(linkExistList)){
             throw new CommonException("error.status.status_link_exist");
         }
-        Sqls existCondition = Sqls.custom().andEqualTo("projectId", projectId).andEqualTo("statusId", currentStatusId);
+        Sqls existCondition = Sqls.custom().andEqualTo("projectId", projectId).andEqualTo("statusId", currentStatusId).andEqualTo("issueTypeId", issueTypeId);
         // 校验是否关联流转条件
         List<StatusTransferSettingDTO> transferExist =
                 statusTransferSettingMapper.selectByCondition(Condition.builder(StatusTransferSettingDTO.class)
