@@ -34,6 +34,7 @@ import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
@@ -1289,61 +1290,226 @@ public class IssueServiceImpl implements IssueService {
         }
         project.setCode(projectInfoDTO.getProjectCode());
         Boolean condition = handleSearchUser(searchVO, projectId);
+
+        String sheetName = project.getName();
+        Workbook workbook = ExcelUtil.initIssueExportWorkbook(sheetName, fieldNames);
+        ExcelCursorDTO cursor = new ExcelCursorDTO(1, 0, 1000);
         if (condition) {
             String filterSql = null;
             if (searchVO.getQuickFilterIds() != null && !searchVO.getQuickFilterIds().isEmpty()) {
                 filterSql = getQuickFilter(searchVO.getQuickFilterIds());
             }
             final String searchSql = filterSql;
-            //查询所有父节点问题
             String orderStr = getOrderStrOfQueryingIssuesWithSub(sort);
-            List<Long> parentIds =
-                    issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr)
-                            .stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-            List<Long> issueIds = new ArrayList<>();
-            Map<Long, Set<Long>> parentSonMap = new HashMap<>();
-            List<IssueDTO> issues = null;
-            if (!parentIds.isEmpty()) {
-                Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(parentIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
-                issues = issueMapper.queryIssueListWithSubByIssueIds(parentIds, childrenIds, true);
-                issues.forEach(i -> {
-                    issueIds.add(i.getIssueId());
-                    processParentSonRelation(parentSonMap, i);
-                });
+            while (true) {
+                //查询所有父节点问题
+                Page<IssueDTO> page =
+                        PageHelper.doPage(cursor.getPage(), cursor.getSize(), () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr));
+                if (page.getTotalElements() < 1) {
+                    break;
+                }
+                List<Long> parentIds = page.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+                List<Long> issueIds = new ArrayList<>();
+                Map<Long, Set<Long>> parentSonMap = new HashMap<>();
+                List<IssueDTO> issues = new ArrayList<>();
+                if (!parentIds.isEmpty()) {
+                    Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(parentIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                    cursor.addCollections(childrenIds);
+                    issues = issueMapper.queryIssueListWithSubByIssueIds(parentIds, childrenIds, true);
+                }
+                Map<Long, ExportIssuesVO> issueMap = new LinkedHashMap<>();
+                cursor
+                        .addCollections(page.getContent())
+                        .addCollections(parentIds)
+                        .addCollections(issueIds)
+                        .addCollections(parentSonMap)
+                        .addCollections(issueMap)
+                        .addCollections(issues);
+                if (!ObjectUtils.isEmpty(issues)) {
+                    Set<Long> userIds = new HashSet<>();
+                    issues.forEach(i -> {
+                        issueIds.add(i.getIssueId());
+                        Long assigneeId = i.getAssigneeId();
+                        Long reporterId = i.getReporterId();
+                        if (!ObjectUtils.isEmpty(assigneeId) && !Objects.equals(assigneeId, 0L)) {
+                            userIds.add(assigneeId);
+                        }
+                        if (!ObjectUtils.isEmpty(reporterId) && !Objects.equals(reporterId, 0L)) {
+                            userIds.add(reporterId);
+                        }
+                    });
+                    Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(new ArrayList<>(userIds), true);
+                    Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
+                    Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
+                    Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
+                    Map<Long, List<SprintNameDTO>> closeSprintNames = issueMapper.querySprintNameByIssueIds(projectId, issueIds).stream().collect(Collectors.groupingBy(SprintNameDTO::getIssueId));
+                    Map<Long, List<VersionIssueRelDTO>> fixVersionNames = issueMapper.queryVersionNameByIssueIds(projectId, issueIds, FIX_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
+                    Map<Long, List<VersionIssueRelDTO>> influenceVersionNames = issueMapper.queryVersionNameByIssueIds(projectId, issueIds, INFLUENCE_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
+                    Map<Long, List<LabelIssueRelDTO>> labelNames = issueMapper.queryLabelIssueByIssueIds(projectId, issueIds).stream().collect(Collectors.groupingBy(LabelIssueRelDTO::getIssueId));
+                    Map<Long, List<ComponentIssueRelDTO>> componentMap = issueMapper.queryComponentIssueByIssueIds(projectId, issueIds).stream().collect(Collectors.groupingBy(ComponentIssueRelDTO::getIssueId));
+                    Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, issueIds, true);
+                    cursor
+                            .addCollections(userIds)
+                            .addCollections(usersMap)
+                            .addCollections(issueTypeDTOMap)
+                            .addCollections(statusMapDTOMap)
+                            .addCollections(priorityDTOMap)
+                            .addCollections(closeSprintNames)
+                            .addCollections(fixVersionNames)
+                            .addCollections(influenceVersionNames)
+                            .addCollections(labelNames)
+                            .addCollections(componentMap)
+                            .addCollections(foundationCodeValue);
+                    issues.forEach(issue -> {
+                        Long issueId = issue.getIssueId();
+                        ExportIssuesVO exportIssuesVO = new ExportIssuesVO();
+                        BeanUtils.copyProperties(issue, exportIssuesVO);
+
+                        exportIssuesVO.setProjectName(project.getName());
+                        exportIssuesVO.setSprintName(getActiveSprintName(issue));
+                        setAssignee(usersMap, issue, exportIssuesVO);
+                        serReporter(usersMap, issue, exportIssuesVO);
+                        setPriorityName(priorityDTOMap, issue, exportIssuesVO);
+                        setStatusName(statusMapDTOMap, issue, exportIssuesVO);
+                        setTypeName(issueTypeDTOMap, issue, exportIssuesVO);
+                        setCloseSprintName(closeSprintNames, issueId, exportIssuesVO);
+                        setFixVersionName(fixVersionNames, issueId, exportIssuesVO);
+                        exportIssuesVO.setSprintName(exportIssuesSprintName(exportIssuesVO));
+                        setInfluenceVersionName(influenceVersionNames, issueId, exportIssuesVO);
+                        setLabelName(labelNames, issueId, exportIssuesVO);
+                        setComponentName(componentMap, issueId, exportIssuesVO);
+                        exportIssuesVO.setVersionName(exportIssuesVersionName(exportIssuesVO));
+                        exportIssuesVO.setDescription(getDes(exportIssuesVO.getDescription()));
+                        setFoundationFieldValue(foundationCodeValue, issueId, exportIssuesVO);
+                        issueMap.put(issueId, exportIssuesVO);
+                        processParentSonRelation(parentSonMap, issue);
+                    });
+                }
+                ExcelUtil.writeIssue(issueMap, parentSonMap, ExportIssuesVO.class, fieldNames, fieldCodes, sheetName, Arrays.asList(AUTO_SIZE_WIDTH), workbook, cursor);
+
+                boolean hasNextPage = cursor.getPage() < page.getTotalPages();
+                cursor.clean();
+                if (!hasNextPage) {
+                    break;
+                }
+                //查询后页数增1
+                cursor.increasePage();
             }
-            Map<Long, ExportIssuesVO> issueMap = new LinkedHashMap<>();
-            if (!issueIds.isEmpty()) {
-                List<ExportIssuesVO> exportIssues = issueAssembler.exportIssuesDOListToExportIssuesDTO(issues, projectId);
-                Map<Long, List<SprintNameDTO>> closeSprintNames = issueMapper.querySprintNameByIssueIds(projectId, issueIds).stream().collect(Collectors.groupingBy(SprintNameDTO::getIssueId));
-                Map<Long, List<VersionIssueRelDTO>> fixVersionNames = issueMapper.queryVersionNameByIssueIds(projectId, issueIds, FIX_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
-                Map<Long, List<VersionIssueRelDTO>> influenceVersionNames = issueMapper.queryVersionNameByIssueIds(projectId, issueIds, INFLUENCE_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
-                Map<Long, List<LabelIssueRelDTO>> labelNames = issueMapper.queryLabelIssueByIssueIds(projectId, issueIds).stream().collect(Collectors.groupingBy(LabelIssueRelDTO::getIssueId));
-                Map<Long, List<ComponentIssueRelDTO>> componentMap = issueMapper.queryComponentIssueByIssueIds(projectId, issueIds).stream().collect(Collectors.groupingBy(ComponentIssueRelDTO::getIssueId));
-                Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, issueIds, true);
-                exportIssues.forEach(exportIssue -> {
-                    String closeSprintName = closeSprintNames.get(exportIssue.getIssueId()) != null ? closeSprintNames.get(exportIssue.getIssueId()).stream().map(SprintNameDTO::getSprintName).collect(Collectors.joining(",")) : "";
-                    String fixVersionName = fixVersionNames.get(exportIssue.getIssueId()) != null ? fixVersionNames.get(exportIssue.getIssueId()).stream().map(VersionIssueRelDTO::getName).collect(Collectors.joining(",")) : "";
-                    String influenceVersionName = influenceVersionNames.get(exportIssue.getIssueId()) != null ? influenceVersionNames.get(exportIssue.getIssueId()).stream().map(VersionIssueRelDTO::getName).collect(Collectors.joining(",")) : "";
-                    String labelName = labelNames.get(exportIssue.getIssueId()) != null ? labelNames.get(exportIssue.getIssueId()).stream().map(LabelIssueRelDTO::getLabelName).collect(Collectors.joining(",")) : "";
-                    String componentName = componentMap.get(exportIssue.getIssueId()) != null ? componentMap.get(exportIssue.getIssueId()).stream().map(ComponentIssueRelDTO::getName).collect(Collectors.joining(",")) : "";
-                    Map<String, Object> fieldValue = foundationCodeValue.get(exportIssue.getIssueId()) != null ? foundationCodeValue.get(exportIssue.getIssueId()) : new HashMap<>();
-                    exportIssue.setCloseSprintName(closeSprintName);
-                    exportIssue.setProjectName(project.getName());
-                    exportIssue.setSprintName(exportIssuesSprintName(exportIssue));
-                    exportIssue.setFixVersionName(fixVersionName);
-                    exportIssue.setInfluenceVersionName(influenceVersionName);
-                    exportIssue.setVersionName(exportIssuesVersionName(exportIssue));
-                    exportIssue.setDescription(getDes(exportIssue.getDescription()));
-                    exportIssue.setLabelName(labelName);
-                    exportIssue.setComponentName(componentName);
-                    exportIssue.setFoundationFieldValue(fieldValue);
-                    issueMap.put(exportIssue.getIssueId(), exportIssue);
-                });
-            }
-            ExcelUtil.export(issueMap, parentSonMap, ExportIssuesVO.class, fieldNames, fieldCodes, project.getName(), Arrays.asList(AUTO_SIZE_WIDTH), response);
-        } else {
-            ExcelUtil.export(Collections.emptyMap(), Collections.emptyMap(), ExportIssuesVO.class, fieldNames, fieldCodes, project.getName(), Arrays.asList(AUTO_SIZE_WIDTH), response);
         }
+        ExcelUtil.writeToResponse(response, workbook);
+    }
+
+    protected void setLabelName(Map<Long, List<LabelIssueRelDTO>> labelNames, Long issueId, ExportIssuesVO exportIssuesVO) {
+        String labelName = "";
+        List<LabelIssueRelDTO> labelIssueRel = labelNames.get(issueId);
+        if (!ObjectUtils.isEmpty(labelIssueRel)) {
+            labelName = labelIssueRel.stream().map(LabelIssueRelDTO::getLabelName).collect(Collectors.joining(","));
+        }
+        exportIssuesVO.setLabelName(labelName);
+    }
+
+    protected void setComponentName(Map<Long, List<ComponentIssueRelDTO>> componentMap, Long issueId, ExportIssuesVO exportIssuesVO) {
+        String componentName = "";
+        List<ComponentIssueRelDTO> componentIssueRel = componentMap.get(issueId);
+        if (!ObjectUtils.isEmpty(componentIssueRel)) {
+            componentName = componentIssueRel.stream().map(ComponentIssueRelDTO::getName).collect(Collectors.joining(","));
+        }
+        exportIssuesVO.setComponentName(componentName);
+    }
+
+    protected void setFoundationFieldValue(Map<Long, Map<String, Object>> foundationCodeValue, Long issueId, ExportIssuesVO exportIssuesVO) {
+        Map<String, Object> fieldValue = foundationCodeValue.get(issueId);
+        if (fieldValue == null) {
+            fieldValue = new HashMap<>();
+        }
+        exportIssuesVO.setFoundationFieldValue(fieldValue);
+    }
+
+    protected void setInfluenceVersionName(Map<Long, List<VersionIssueRelDTO>> influenceVersionNames, Long issueId, ExportIssuesVO exportIssuesVO) {
+        String influenceVersionName = "";
+        List<VersionIssueRelDTO> versionIssueRel = influenceVersionNames.get(issueId);
+        if (!ObjectUtils.isEmpty(versionIssueRel)) {
+            influenceVersionName = versionIssueRel.stream().map(VersionIssueRelDTO::getName).collect(Collectors.joining(","));
+        }
+        exportIssuesVO.setInfluenceVersionName(influenceVersionName);
+    }
+
+    protected void setCloseSprintName(Map<Long, List<SprintNameDTO>> closeSprintNames, Long issueId, ExportIssuesVO exportIssuesVO) {
+        String closeSprintName = "";
+        List<SprintNameDTO> sprintNames = closeSprintNames.get(issueId);
+        if (!ObjectUtils.isEmpty(sprintNames)) {
+            closeSprintName =
+                    sprintNames
+                            .stream()
+                            .map(SprintNameDTO::getSprintName)
+                            .collect(Collectors.joining(","));
+        }
+        exportIssuesVO.setCloseSprintName(closeSprintName);
+    }
+
+    protected void setFixVersionName(Map<Long, List<VersionIssueRelDTO>> fixVersionNames, Long issueId, ExportIssuesVO exportIssuesVO) {
+        String fixVersionName = "";
+        List<VersionIssueRelDTO> versionIssueRel = fixVersionNames.get(issueId);
+        if (!ObjectUtils.isEmpty(versionIssueRel)) {
+            fixVersionName =
+                    versionIssueRel
+                            .stream()
+                            .map(VersionIssueRelDTO::getName)
+                            .collect(Collectors.joining(","));
+        }
+        exportIssuesVO.setFixVersionName(fixVersionName);
+    }
+
+    protected void setTypeName(Map<Long, IssueTypeVO> issueTypeDTOMap, IssueDTO issue, ExportIssuesVO exportIssuesVO) {
+        IssueTypeVO issueTypeVO = issueTypeDTOMap.get(issue.getIssueTypeId());
+        if (!ObjectUtils.isEmpty(issueTypeVO)) {
+            exportIssuesVO.setTypeName(issueTypeVO.getName());
+        }
+    }
+
+    protected void setStatusName(Map<Long, StatusVO> statusMapDTOMap, IssueDTO issue, ExportIssuesVO exportIssuesVO) {
+        StatusVO statusVO = statusMapDTOMap.get(issue.getStatusId());
+        if (!ObjectUtils.isEmpty(statusVO)) {
+            exportIssuesVO.setStatusName(statusVO.getName());
+        }
+    }
+
+    protected void setPriorityName(Map<Long, PriorityVO> priorityDTOMap, IssueDTO issue, ExportIssuesVO exportIssuesVO) {
+        Long priorityId = issue.getPriorityId();
+        PriorityVO priorityVO = priorityDTOMap.get(priorityId);
+        if (!ObjectUtils.isEmpty(priorityVO)) {
+            exportIssuesVO.setPriorityName(priorityVO.getName());
+        }
+    }
+
+    protected void serReporter(Map<Long, UserMessageDTO> usersMap, IssueDTO issue, ExportIssuesVO exportIssuesVO) {
+        Long reporterId = issue.getReporterId();
+        UserMessageDTO userMessage = usersMap.get(reporterId);
+        if (!ObjectUtils.isEmpty(userMessage)) {
+            exportIssuesVO.setReporterName(userMessage.getName());
+            exportIssuesVO.setReporterRealName(userMessage.getRealName());
+        }
+    }
+
+    protected void setAssignee(Map<Long, UserMessageDTO> usersMap, IssueDTO issue, ExportIssuesVO exportIssuesVO) {
+        Long assigneeId = issue.getAssigneeId();
+        UserMessageDTO userMessage = usersMap.get(assigneeId);
+        if (!ObjectUtils.isEmpty(userMessage)) {
+            exportIssuesVO.setAssigneeName(userMessage.getName());
+            exportIssuesVO.setAssigneeRealName(userMessage.getRealName());
+        }
+    }
+
+    protected String getActiveSprintName(IssueDTO issue) {
+        List<IssueSprintDTO>  issueSprintList = issue.getIssueSprintDTOS();
+        if (!ObjectUtils.isEmpty(issueSprintList)) {
+            for(IssueSprintDTO sprint : issueSprintList) {
+                if (!"closed".equals(sprint.getStatusCode())) {
+                    return sprint.getSprintName();
+                }
+            }
+        }
+        return null;
     }
 
     protected String[] sortFieldNames(String[] fieldNames) {

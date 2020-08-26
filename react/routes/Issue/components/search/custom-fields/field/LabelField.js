@@ -14,7 +14,6 @@ function LabelField({ field, value, onChange }) {
         list,
         textField: 'labelName',
         valueFiled: 'labelId',
-        parseNumber: true,
       })}
       type="label_id"
       loadWhenMount

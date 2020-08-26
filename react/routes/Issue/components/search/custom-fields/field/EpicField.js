@@ -14,7 +14,6 @@ function EpicField({ field, value, onChange }) {
         list,
         textField: 'epicName',
         valueFiled: 'issueId',
-        parseNumber: true,
       })}
       type="epic"
       loadWhenMount

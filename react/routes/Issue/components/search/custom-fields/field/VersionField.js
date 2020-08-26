@@ -14,7 +14,6 @@ function VersionField({ field, value, onChange }) {
         list,
         textField: 'name',
         valueFiled: 'versionId',
-        parseNumber: true,
       })}
       type="version"
       loadWhenMount

@@ -22,13 +22,19 @@ import CustomFields from './custom-fields';
 import { getSelectStyle } from './custom-fields/utils';
 import './index.less';
 
+export const isFilterSame = (obj, obj2) => {
+  // 过滤掉 [] null '' 那些不起作用的属性
+  const keys1 = Object.keys(obj).filter(k => !isEmpty(obj[k]));
+  const keys2 = Object.keys(obj2).filter(k => !isEmpty(obj2[k]));
+  return isEqual(pick(obj, keys1), pick(obj2, keys2));
+};
 const { Option, OptGroup } = Select;
 /**
  * 对象扁平化 {a:{b:'v'}}  = >  {b:'v'}
  *
  * @param {*} object
  */
-function flattenObject(object) {
+export function flattenObject(object) {
   const result = {};
   for (const [key, value] of Object.entries(object)) {
     if (Object.prototype.toString.call(value) === '[object Object]') {
@@ -144,12 +150,7 @@ export default withRouter(observer(({
     const quickFilterIds = selectedQuickFilters.map((filter) => filter.key.split('|')[1]);
     IssueStore.handleFilterChange('quickFilterIds', quickFilterIds);
   };
-  const isFilterSame = (obj, obj2) => {
-    // 过滤掉 [] null '' 那些不起作用的属性
-    const keys1 = Object.keys(obj).filter((k) => !isEmpty(obj[k]));
-    const keys2 = Object.keys(obj2).filter((k) => !isEmpty(obj2[k]));
-    return isEqual(pick(obj, keys1), pick(obj2, keys2));
-  };
+
   const findSameFilter = () => {
     const currentFilterDTO = IssueStore.getCustomFieldFilters()
       ? flattenObject(IssueStore.getCustomFieldFilters()) : {};
