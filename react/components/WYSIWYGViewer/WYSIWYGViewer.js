@@ -30,12 +30,12 @@ class WYSIWYGViewer extends Component {
     });
   };
 
-  escape = str => str.replace(/<\/script/g, '<\\/script').replace(/<!--/g, '<\\!--');
+  escape = (str) => str.replace(/<\/script/g, '<\\/script').replace(/<!--/g, '<\\!--');
 
   render() {
     const { data } = this.props;
     const { open, src } = this.state;
-    const html = delta2Html(data);
+    const html = delta2Html(data) || '';
 
     return (
       <div className="c7n-read-delta" style={{ width: '100%', wordBreak: 'break-all' }}>
