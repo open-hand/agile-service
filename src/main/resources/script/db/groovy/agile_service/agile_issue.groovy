@@ -182,4 +182,11 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_issue.groovy') {
             column(name: "relate_issue_id")
         }
     }
+
+    changeSet(id: '2020-08-26-agile-issue-add-column', author: 'kaiwen.li@hand-china.com') {
+        addColumn(tableName: 'agile_issue') {
+            column(name: 'estimated_start_time', type: 'DATETIME', remarks: '预计开始时间')
+            column(name: 'estimated_end_time', type: 'DATETIME', remarks: '预计结束时间')
+        }
+    }
 }
