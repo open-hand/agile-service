@@ -108,6 +108,9 @@
         AND p.page_code = #{pageCode}
         AND pf.field_id = #{fieldId}
     </select>
+    <select id="selectOrganizationIds" resultType="java.lang.Long">
+        select distinct organization_id from fd_page_field
+    </select>
 
     <insert id="batchInsert">
         INSERT IGNORE INTO fd_page_field

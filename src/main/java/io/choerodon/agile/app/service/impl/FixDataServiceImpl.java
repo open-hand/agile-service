@@ -10,6 +10,7 @@ import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.RankUtil;
 import org.apache.commons.collections.MapIterator;
+import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -76,6 +78,8 @@ public class FixDataServiceImpl implements FixDataService {
     private StatusMachineSchemeConfigMapper statusMachineSchemeConfigMapper;
     @Autowired
     private StatusMachineNodeMapper statusMachineNodeMapper;
+    @Autowired
+    private PageFieldMapper pageFieldMapper;
 
     @Override
     public void fixCreateProject() {
@@ -215,6 +219,8 @@ public class FixDataServiceImpl implements FixDataService {
 
         generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap);
 
+        processEstimatedTime(dataMap, rankMap, editPageId);
+
         objectSchemeField.setSystem(false);
         generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap);
         List<ObjectSchemeFieldExtendDTO> insertList = new ArrayList<>();
@@ -241,6 +247,97 @@ public class FixDataServiceImpl implements FixDataService {
             LOGGER.info("第{}次插入成功", i+1);
         }
         LOGGER.info("迁移页面数据完成");
+    }
+
+    private void processEstimatedTime(MultiKeyMap dataMap, MultiKeyMap rankMap,
+                                      Long editPageId) {
+        String estimatedStartTime = "estimatedStartTime";
+        String estimatedEndTime = "estimatedEndTime";
+        ObjectSchemeFieldDTO example = new ObjectSchemeFieldDTO();
+        example.setCode(estimatedStartTime);
+        ObjectSchemeFieldDTO estimatedStartTimeField = objectSchemeFieldMapper.selectOne(example);
+        example.setCode(estimatedEndTime);
+        ObjectSchemeFieldDTO estimatedEndTimeField = objectSchemeFieldMapper.selectOne(example);
+        if (!ObjectUtils.isEmpty(estimatedStartTimeField)
+                && !ObjectUtils.isEmpty(estimatedEndTimeField)) {
+            Set<Long> organizationIds = pageFieldMapper.selectOrganizationIds();
+            List<IssueTypeDTO> issueTypeList = issueTypeMapper.selectByOrganizationIds(organizationIds);
+            Map<Long, List<IssueTypeDTO>> issueTypeMap = issueTypeList.stream().collect(Collectors.groupingBy(IssueTypeDTO::getOrganizationId));
+            //获取某个组织下的某个类型的最小rank值
+            Map<Long, String> minRankMap = getMinRankMap(rankMap);
+
+            String estimatedStartTimeFieldContext = estimatedStartTimeField.getContext();
+            String[] estimatedStartTimeFieldContextArray = estimatedStartTimeFieldContext.split(",");
+
+            String estimatedEndTimeFieldContext = estimatedEndTimeField.getContext();
+            String[] estimatedEndTimeFieldContextArray = estimatedEndTimeFieldContext.split(",");
+
+            organizationIds.forEach(o -> {
+                List<IssueTypeDTO> issueTypes = issueTypeMap.get(o);
+                if (ObjectUtils.isEmpty(issueTypes)) {
+                    return;
+                }
+                List<IssueTypeDTO> filterIssueTypeList = filterIssueType(issueTypes, estimatedStartTimeFieldContextArray);
+                fillInData(filterIssueTypeList, estimatedStartTimeField, o, dataMap, rankMap, minRankMap, editPageId, SystemFieldPageConfig.CommonField.ESTIMATED_START_TIME);
+
+                filterIssueTypeList = filterIssueType(issueTypes, estimatedEndTimeFieldContextArray);
+                fillInData(filterIssueTypeList, estimatedEndTimeField, o, dataMap, rankMap, minRankMap, editPageId, SystemFieldPageConfig.CommonField.ESTIMATED_END_TIME);
+            });
+        }
+    }
+
+    private void fillInData(List<IssueTypeDTO> filterIssueTypeList,
+                            ObjectSchemeFieldDTO field,
+                            Long organizationId,
+                            MultiKeyMap dataMap,
+                            MultiKeyMap rankMap,
+                            Map<Long, String> minRankMap,
+                            Long editPageId,
+                            SystemFieldPageConfig.CommonField commonField) {
+        Long fieldId = field.getId();
+        filterIssueTypeList.forEach(f -> {
+            ObjectSchemeFieldExtendDTO dto = new ObjectSchemeFieldExtendDTO();
+            dto.setFieldId(fieldId);
+            dto.setOrganizationId(organizationId);
+            dto.setIssueType(f.getTypeCode());
+            dto.setIssueTypeId(f.getId());
+            dto.setRequired(field.getRequired());
+            dto.setCreated(commonField.created());
+            dto.setEdited(commonField.edited());
+            dataMap.put(fieldId, organizationId, null, f.getTypeCode(), dto);
+            String minRank = minRankMap.get(organizationId);
+            String rank;
+            if (StringUtils.hasText(minRank)) {
+                rank = RankUtil.genPre(minRank);
+            } else {
+                rank = RankUtil.mid();
+            }
+            minRankMap.put(organizationId, rank);
+            rankMap.put(fieldId, organizationId, null, editPageId, rank);
+        });
+    }
+
+    private Map<Long, String> getMinRankMap(MultiKeyMap rankMap) {
+        Map<Long, String> result = new HashMap<>();
+        MapIterator iterator = rankMap.mapIterator();
+        while (iterator.hasNext()) {
+            iterator.next();
+            MultiKey mk = (MultiKey) iterator.getKey();
+            Long organizationId = (Long) mk.getKey(1);
+            String rank = (String) iterator.getValue();
+            String minRank = result.get(organizationId);
+            if (ObjectUtils.isEmpty(minRank)) {
+                result.put(organizationId, rank);
+            } else {
+                int compare = minRank.compareTo(rank);
+                if (compare < 0) {
+                    result.put(organizationId, minRank);
+                } else {
+                    result.put(organizationId, rank);
+                }
+            }
+        }
+        return result;
     }
 
     private String getRank(MultiKeyMap rankMap,

@@ -225,8 +225,16 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 List<IssueTypeDTO> issueTypes = convertContextToIssueTypes(context, organizationId);
                 String code = field.getCode();
                 Boolean required = field.getRequired();
-                Boolean created = Optional.ofNullable(InitPageFieldE.AgileIssueCreateE.getDisplayByCode(code)).orElse(false);
-                Boolean edited = Optional.ofNullable(InitPageFieldE.AgileIssueEditE.getDisplayByCode(code)).orElse(false);
+                SystemFieldPageConfig.CommonField commonField = SystemFieldPageConfig.CommonField.queryByField(code);
+                Boolean created;
+                Boolean edited;
+                if (ObjectUtils.isEmpty(commonField)) {
+                    created = false;
+                    edited = false;
+                } else {
+                    created = commonField.created();
+                    edited = commonField.edited();
+                }
                 issueTypes.forEach(issueType -> {
                     ObjectSchemeFieldExtendDTO extendField = new ObjectSchemeFieldExtendDTO();
                     extendField.setFieldId(field.getId());

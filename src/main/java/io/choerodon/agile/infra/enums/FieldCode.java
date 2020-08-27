@@ -27,4 +27,7 @@ public class FieldCode {
     public static final String CREATION_DATE = "creationDate";
     public static final String LAST_UPDATE_DATE = "lastUpdateDate";
     public static final String TIME_TRACE = "timeTrace";
+    public static final String ESTIMATED_START_TIME = "estimatedStartTime";
+    public static final String ESTIMATED_END_TIME = "estimatedEndTime";
+
 }
