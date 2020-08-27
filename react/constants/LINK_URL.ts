@@ -1,19 +1,5 @@
 import to from '@/utils/to';
 
-interface IRouterList {
-  knowledgeDoc: (baseId: string) => string,
-  workListIssue: '/agile/work-list/issue',
-  workListBacklog: '/agile/work-list/backlog',
-  workListVersion: '/agile/work-list/version',
-  reportBurnDown: '/agile/reporthost/burndownchart',
-  reportIssueType: '/agile/reporthost/pieReport/typeCode',
-  reportPriority: '/agile/reporthost/pieReport/priority',
-  reportAssignee: '/agile/reporthost/pieReport/assignee',
-  reportSprint: '/agile/reporthost/sprintReport',
-  scrumboardSetting: '/agile/scrumboard/setting',
-  scrumboard: '/agile/scrumboard',
-  iterationBoard: (sprintId: string) => string,
-}
 interface IRouterToList {
   issueLinkTo: (issueId: string, issueName: string | null, otherParams: any) => void,
 }
@@ -29,7 +15,7 @@ function issueLinkTo(issueId: string, issueName: string | null = null, otherPara
   });
 }
 
-const LINK_URL: IRouterList = {
+const LINK_URL = {
   knowledgeDoc: (baseId: string) => `/knowledge/project/doc/${baseId}`,
   workListIssue: '/agile/work-list/issue',
   workListBacklog: '/agile/work-list/backlog',
@@ -42,7 +28,9 @@ const LINK_URL: IRouterList = {
   scrumboard: '/agile/scrumboard',
   scrumboardSetting: '/agile/scrumboard/setting',
   iterationBoard: (sprintId: string) => `/agile/iterationBoard/${sprintId}`,
+  stateMachine: '/agile/state-machine',
 };
+
 const LINK_URL_TO: IRouterToList = {
   issueLinkTo,
 };

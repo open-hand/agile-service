@@ -32,6 +32,7 @@ const Issue = withRouter(observer(() => {
   const [urlFilter, setUrlFilter] = useState(null);
   const importRef = useRef();
   const tableRef = useRef();
+  IssueStore.setTableRef(tableRef);
   /**
    * 默认此次操作不是删除操作
    * 防止删除此页一条数据时页时停留当前页时出现无数据清空
