@@ -201,6 +201,17 @@ class QuickSearch extends Component {
                   <Option key={-1} value={-1}>仅我的问题</Option>
                   <Option key={-2} value={-2}>仅故事</Option>
                 </OptGroup>
+                <OptGroup key="personal" label="我的筛选">
+                  {
+                    personalFilter.map((item) => (
+                      <Option
+                        value={`personal%${item.filterId}`}
+                      >
+                        {item.name}
+                      </Option>
+                    ))
+                  }
+                </OptGroup>
                 <OptGroup key="more" label="更多">
                   {
                     quickSearchArray.map((item) => (
@@ -211,17 +222,6 @@ class QuickSearch extends Component {
                       >
                         {item.label}
 
-                      </Option>
-                    ))
-                  }
-                </OptGroup>
-                <OptGroup key="personal" label="我的筛选">
-                  {
-                    personalFilter.map((item) => (
-                      <Option
-                        value={`personal%${item.filterId}`}
-                      >
-                        {item.name}
                       </Option>
                     ))
                   }
