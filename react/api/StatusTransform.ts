@@ -157,7 +157,7 @@ class StatusTransformApi extends Api {
     });
   }
 
-  deleteStatus(statusId?: string, transforms: IStatusTransform[] = []) {
+  deleteStatus(statusId?: string) {
     return this.request({
       method: 'delete',
       url: `${this.prefix}/status/delete_status`,
@@ -165,7 +165,7 @@ class StatusTransformApi extends Api {
         applyType: getApplyType(),
         statusId,
       },
-      data: transforms,
+      data: [],
     });
   }
 
