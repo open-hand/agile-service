@@ -1,4 +1,5 @@
 @delay-color: #F5222D;
+@soonDelay-color: rgb(255, 177, 0);
 
 .c7n-scrumboard-issue {
   background: #fff;
@@ -18,7 +19,7 @@
   border-top: 0.01rem solid rgba(0, 0, 0, 0.20);
   min-height: 1.02rem;
 
-  &-delay {
+  &-delay, &-soonDelay {
     border-color: @delay-color;
 
     &:after {
@@ -34,7 +35,10 @@
       width: 0;
     }
   }
-
+   
+  &-soonDelay {
+    border-color: @soonDelay-color;
+  }
 
   .c7n-scrumboard-issueSide {
     width: 0.32rem;

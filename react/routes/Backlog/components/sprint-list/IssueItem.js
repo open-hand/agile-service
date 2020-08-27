@@ -41,10 +41,10 @@ function getStyle({ draggableStyle, virtualStyle, isDragging }) {
 }
 const Item = memo(({ issue, draggingNum }) => {
   const { isShowFeature } = useIsInProgram(); // 由后端判断是否显示特性
-  const { issueEndDate, statusVO } = issue;
-  let diffDays = 0;
-  if (issueEndDate) {
-    diffDays = calcDays(moment(), issueEndDate);
+  const { estimatedEndTime, statusVO } = issue;
+  let delayDays = 0;
+  if (estimatedEndTime) {
+    delayDays = calcDays(moment(), estimatedEndTime);
   }
   return (
     <>
@@ -67,11 +67,11 @@ const Item = memo(({ issue, draggingNum }) => {
         className={`${prefix}-right`}
       >
         {
-          !statusVO.completed && issueEndDate && (
-            diffDays > 0 || (diffDays >= -1 || diffDays < 0)) && (
-            <div className={`${prefix}-${diffDays > 0 ? 'delay' : 'soonDelay'}`}>
+          !statusVO.completed && estimatedEndTime && (
+            delayDays > 0 || (delayDays >= -1 && delayDays < 0)) && (
+            <div className={`${prefix}-${delayDays > 0 ? 'delay' : 'soonDelay'}`}>
               {
-              diffDays > 0 ? `延期${Math.ceil(diffDays)}天` : '即将到期'
+              delayDays > 0 ? `延期${Math.ceil(delayDays)}天` : '即将到期'
             }
             </div>
           )
