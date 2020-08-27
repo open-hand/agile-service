@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.agile.infra.enums.NodeType;
 import io.choerodon.core.domain.Page;
 import com.google.common.collect.Lists;
 import io.choerodon.agile.api.validator.IssueLinkValidator;
@@ -276,6 +277,8 @@ public class IssueServiceImpl implements IssueService {
     private StatusFieldSettingService statusFieldSettingService;
     @Autowired
     private StatusLinkageService statusLinkageService;
+    @Autowired
+    private StateMachineNodeService stateMachineNodeService;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -992,7 +995,28 @@ public class IssueServiceImpl implements IssueService {
         }
         issueConvertDTO.setIssueTypeId(issueUpdateTypeVO.getIssueTypeId());
         issueAccessDataService.update(issueConvertDTO, new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, RANK_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, RELATE_ISSUE_ID});
+        // 查看目标问题类型的状态机是否含有当前状态，没有就是用默认状态
+        handlerStatus(issueConvertDTO.getProjectId(),issueUpdateTypeVO);
         return queryIssue(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), organizationId);
+    }
+
+    private void handlerStatus(Long projectId, IssueUpdateTypeVO issueUpdateTypeVO) {
+        IssueConvertDTO issueConvertDTO = queryIssueByProjectIdAndIssueId(projectId, issueUpdateTypeVO.getIssueId());
+        Long currentStateMachineId = projectConfigService.queryStateMachineId(projectId, AGILE, issueUpdateTypeVO.getIssueTypeId());
+        // 查询状态机里面的状态
+        List<StateMachineNodeVO> stateMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(ConvertUtil.getOrganizationId(projectId), currentStateMachineId, false);
+        if (CollectionUtils.isEmpty(stateMachineNodeVOS)) {
+            throw new CommonException("error.current.state.machine.node.null");
+        }
+        List<Long> list = stateMachineNodeVOS.stream().map(StateMachineNodeVO::getStatusId).collect(Collectors.toList());
+        if (!list.contains(issueConvertDTO.getStatusId())) {
+            StateMachineNodeVO stateMachineNodeVO = stateMachineNodeVOS.stream().filter(v -> NodeType.INIT.equals(v.getType())).findAny().get();
+            if (ObjectUtils.isEmpty(stateMachineNodeVO)) {
+                throw new CommonException("error.init.node.not.found");
+            }
+            issueConvertDTO.setStatusId(stateMachineNodeVO.getStatusId());
+            issueAccessDataService.update(issueConvertDTO, new String[]{"statusId"});
+        }
     }
 
     @Override
