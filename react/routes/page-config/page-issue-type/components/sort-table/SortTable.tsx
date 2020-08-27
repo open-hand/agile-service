@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   DropResult, ResponderProvided, DragDropContext, DragStart,
 } from 'react-beautiful-dnd';
+import { Icon, Tooltip } from 'choerodon-ui/pro';
 import { IFiledProps, pageConfigApi } from '@/api';
 import classnames from 'classnames';
 import './index.less';
@@ -16,12 +17,25 @@ interface Props {
   dataStatus: { code: string },
   onDelete?: (data: IFiledProps) => void,
 }
-
+function renderLabelRequire(value: string | ReactElement) {
+  return (
+    <div>
+      {value}
+      <Tooltip title="必填只是针对创建页有效" placement="top">
+        <Icon type="help " className="c7n-page-issue-detail-header-item-icon" />
+      </Tooltip>
+    </div>
+  );
+}
 const columns = [
   { name: 'fieldName', label: '字段名称', type: 'common' },
   { name: 'defaultValue', label: '默认值', type: 'common' },
-  { name: 'required', label: '必填', type: 'project' },
-  { name: 'required', label: '必填（控制项目）', type: 'organization' },
+  {
+    name: 'required', label: '必填', type: 'project', render: renderLabelRequire,
+  },
+  {
+    name: 'required', label: '必填（控制项目）', type: 'organization', render: renderLabelRequire,
+  },
   { name: 'edited', label: '加入到编辑页', type: 'common' },
   { name: 'created', label: '加入到创建页', type: 'common' },
 
@@ -66,7 +80,7 @@ const SortTable: React.FC = () => {
   return (
     <div className={prefixCls}>
       <div className={classnames(`${prefixCls}-header `, { [`${prefixCls}-header-split`]: showSplitLine })}>
-        {columns.filter((item) => item.type === 'common' || item.type === type).map((itemProps) => <span className={`${prefixCls}-header-item`}>{itemProps.label || itemProps.name}</span>)}
+        {columns.filter((item) => item.type === 'common' || item.type === type).map((itemProps) => <span className={`${prefixCls}-header-item`}>{itemProps.render ? itemProps.render(itemProps.label) : itemProps.label}</span>)}
       </div>
       <div className={`${prefixCls}-content`}>
         <DragDropContext
