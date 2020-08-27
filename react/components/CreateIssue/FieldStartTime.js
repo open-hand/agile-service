@@ -5,11 +5,11 @@ import moment from 'moment';
 const FormItem = Form.Item;
 function FieldStartTime({ form, field }) {
   const { getFieldDecorator, getFieldValue } = form;
-  // const issueStartValue = getFieldValue('issueStartValue');
+  // const issueEndValue = getFieldValue('estimatedEndTime');
   const issueEndValue = '2020-08-19 10:00:00';
   return (
-    <FormItem key="issueStartTime">
-      {getFieldDecorator('issueStartTime', {
+    <FormItem key="estimatedStartTime">
+      {getFieldDecorator('estimatedStartTime', {
         rules: [{ required: field.required, message: '预计开始时间是必填项' }],
       })(
         <DatePicker
