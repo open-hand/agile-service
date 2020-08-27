@@ -1010,7 +1010,7 @@ public class IssueServiceImpl implements IssueService {
         }
         List<Long> list = stateMachineNodeVOS.stream().map(StateMachineNodeVO::getStatusId).collect(Collectors.toList());
         if (!list.contains(issueConvertDTO.getStatusId())) {
-            StateMachineNodeVO stateMachineNodeVO = stateMachineNodeVOS.stream().filter(v -> NodeType.INIT.equals(v.getType())).findAny().get();
+            StateMachineNodeVO stateMachineNodeVO = stateMachineNodeVOS.stream().filter(v -> NodeType.INIT.equals(v.getType())).findAny().orElse(null);
             if (ObjectUtils.isEmpty(stateMachineNodeVO)) {
                 throw new CommonException("error.init.node.not.found");
             }
