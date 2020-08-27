@@ -161,8 +161,8 @@
         join (
             select distinct field_id from fd_object_scheme_field_extend t1
             where t1.id in
-            <foreach collection="extendIds" item="id" index="index" separator=",">
-                (#{id})
+            <foreach collection="extendIds" item="id" index="index" separator="," open="(" close=")">
+                #{id}
             </foreach>
         ) t3 on t2.id = t3.field_id
     </select>
