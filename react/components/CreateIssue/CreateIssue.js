@@ -277,6 +277,8 @@ class CreateIssue extends Component {
           jobSize,
           featureId,
           teamProjectIds,
+          estimatedEndTime,
+          estimatedStartTime,
         } = values;
         const { typeCode } = originIssueTypes.find((t) => t.id === typeId);
         if (typeCode === 'feature' && epicId) {
@@ -349,6 +351,8 @@ class CreateIssue extends Component {
           },
           featureId, // 特性字段
           teamProjectIds,
+          estimatedEndTime,
+          estimatedStartTime,
         };
         this.setState({ createLoading: true });
         const deltaOps = description;
@@ -488,7 +492,6 @@ class CreateIssue extends Component {
                       }
                 </IsInProgram>
               ),
-
             newIssueTypeCode === 'feature' ? (
               <FormItem>
                 {getFieldDecorator('featureType', {
@@ -911,8 +914,8 @@ class CreateIssue extends Component {
                 {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}
                 {newIssueTypeCode !== 'epic' && (
                   <>
-                    <FieldStartTime form={form} field={fields.find((field) => field.code === 'issueStartTime') || {}} />
-                    <FieldEndTime form={form} field={fields.find((field) => field.code === 'issueEndTime') || {}} />
+                    <FieldStartTime form={form} field={fields.find((field) => field.code === 'estimatedStartTime') || {}} />
+                    <FieldEndTime form={form} field={fields.find((field) => field.code === 'estimatedEndTime') || {}} />
                   </>
                 )}
               </div>
