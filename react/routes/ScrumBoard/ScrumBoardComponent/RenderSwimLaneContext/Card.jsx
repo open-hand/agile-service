@@ -3,10 +3,12 @@ import { observer } from 'mobx-react';
 import classNames from 'classnames';
 import TypeTag from '@/components/TypeTag';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
+import moment from 'moment';
 import {
   IssueNum, StayDay, StatusName, Priority, Assignee, Summary, Delay,
 } from './CardComponent/index';
 import './Card.less';
+import { calcDays } from '@/utils/Date';
 
 function getStyle({ draggableStyle, virtualStyle, isDragging }) {
   const combined = {
@@ -67,11 +69,17 @@ class Card extends Component {
     const {
       completed, issue, statusName, categoryCode, selected, ...otherProps
     } = this.props;
-
     const delayDays = 0;
+    const { estimatedEndTime } = issue;
+    if (estimatedEndTime) {
+      delayDays = calcDays(moment(), estimatedEndTime);
+    }
     return (
       <div
-        className={classNames('c7n-scrumboard-issue', { 'c7n-scrumboard-issue-delay': delayDays > 0 })}
+        className={classNames('c7n-scrumboard-issue', {
+          'c7n-scrumboard-issue-delay': !completed && delayDays > 0,
+          'c7n-scrumboard-issue-soonDelay': !completed && (delayDays < 0 && delayDays >= -1),
+        })}
         role="none"
         onMouseDown={this.myOnMouseDown}
         onClick={(e) => this.handleClick(e)}
@@ -106,7 +114,13 @@ class Card extends Component {
                 <Priority
                   priorityVO={issue.priorityVO}
                 />
-                {delayDays > 0 && <Delay day={delayDays} />}
+                {
+                  !completed && (
+                    delayDays > 0 || (delayDays >= -1 && delayDays < 0)
+                  ) && (
+                  <Delay day={delayDays} />
+                  )
+                }
               </div>
             </div>
             <Assignee

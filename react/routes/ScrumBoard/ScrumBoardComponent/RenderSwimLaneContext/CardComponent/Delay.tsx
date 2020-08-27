@@ -5,8 +5,8 @@ interface Props {
   day: number
 }
 const Delay: React.FC<Props> = ({ day }) => (
-  <div className={styles.delay}>
-    {`延期${day}天`}
+  <div className={day > 0 ? styles.delay : styles.soonDelay}>
+    {day > 0 ? `延期${Math.ceil(day)}天` : '即将到期'}
   </div>
 );
 

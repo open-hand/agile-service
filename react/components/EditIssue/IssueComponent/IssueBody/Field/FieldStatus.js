@@ -11,7 +11,7 @@ import useSelect from '@/hooks/useSelect';
 const { Option } = Select;
 const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
   const {
-    statusId, issueId, typeId, applyType, projectId,
+    statusId, issueId, typeId, applyType, projectId, name,
   } = statusArgs;
   const config = useMemo(() => ({
     name: 'status',
@@ -22,6 +22,21 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
       applyType,
       projectId,
     ),
+    middleWare: (data) => {
+      const newData = [...data];
+      const currentStatus = (newData || []).find((item) => item.endStatusId === statusId);
+      if (!currentStatus) {
+        newData.unshift({
+          id: 'current',
+          name,
+          endStatusId: statusId,
+          statusVO: {
+            name,
+          },
+        });
+      }
+      return newData;
+    },
     paging: false,
     textField: 'statusVO.name',
     valueField: 'endStatusId',
@@ -42,7 +57,6 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
   updateIssueStatus = (transform) => {
     if (transform) {
       const transformId = transform.id;
-
       const {
         store, onUpdate, reloadIssue, applyType,
       } = this.props;
@@ -92,7 +106,7 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
             editor={() => (
               <SelectStatus
                 statusArgs={{
-                  statusId, issueId, typeId, applyType, projectId,
+                  statusId, issueId, typeId, applyType, projectId, name,
                 }}
               />
             )}

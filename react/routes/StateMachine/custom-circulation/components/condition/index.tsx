@@ -1,13 +1,18 @@
-import React, { useMemo, useEffect } from 'react';
+import React, {
+  useMemo, useEffect, useRef, useCallback, useState,
+} from 'react';
 import { observer } from 'mobx-react-lite';
 import { find, filter, uniq } from 'lodash';
 import {
-  Select, CheckBox, Form, DataSet,
+  Select, CheckBox, Form, DataSet, Dropdown,
 } from 'choerodon-ui/pro';
-import { Divider } from 'choerodon-ui';
+import { Divider, Icon } from 'choerodon-ui';
 import SelectUser from '@/components/select/select-user';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { statusTransformApi } from '@/api';
+import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
+import { getProjectId } from '@/utils/common';
+import { User } from '@/common/types';
 import styles from './index.less';
 
 interface Props {
@@ -30,37 +35,81 @@ interface IConditionInfo {
   userId: null | number[]
   userType: 'projectOwner' | 'specifier',
 }
+
+interface ConditionSelectProps {
+  conditionDataSet: DataSet,
+}
+
+const ConditionSelect: React.FC<ConditionSelectProps> = ({ conditionDataSet }) => {
+  const data = conditionDataSet.toData()[0];
+  return (
+    <div
+      className={styles.condition_select}
+    >
+      <Form dataSet={conditionDataSet}>
+        <CheckBox name="projectOwner" />
+        <CheckBox name="specifier" />
+        {
+          // @ts-ignore
+          data.specifier && (
+            <Select
+              name="assigners"
+              maxTagCount={2}
+              className={styles.condition_assigners}
+            />
+          )
+        }
+      </Form>
+    </div>
+  );
+};
+
+// @ts-ignore
+function useClickOut(onClickOut) {
+  const ref = useRef();
+  const handleClick = useCallback((e) => {
+    const popupContainerEle = document.getElementsByClassName('c7n-pro-popup-container')[0];
+    const triggerBtn = document.getElementsByClassName('dropDown_trigger')[0];
+    // @ts-ignore
+    if (ref.current && (!ref.current.contains(e.target) && !popupContainerEle.contains(e.target) && e.target.tagName !== 'BODY' && !triggerBtn.contains(e.target))) {
+      onClickOut(e);
+    }
+  }, [onClickOut]);
+  useEffect(() => {
+    document.addEventListener('click', handleClick, true);
+    return () => {
+      document.removeEventListener('click', handleClick, true);
+    };
+  }, [handleClick]);
+  return ref;
+}
+
 const Condition:React.FC<Props> = ({
   modal, record, selectedType, customCirculationDataSet,
 }) => {
-  const memberOptionDataSet = useMemo(() => new DataSet({
-    data: [
-      { code: 'projectOwner', name: '项目所有者' },
-      { code: 'specifier', name: '被指定人' },
-    ],
-    fields: [
-      {
-        name: 'code',
-        type: 'string' as FieldType,
+  const [hidden, setHidden] = useState(true);
+  const handleClickOut = useCallback(() => {
+    setHidden(true);
+  }, []);
+  const ref = useClickOut(handleClickOut);
+
+  const userDs = useMemo(() => new DataSet({
+    autoQuery: true,
+    selection: false,
+    paging: false,
+    transport: {
+      read: {
+        url: `/iam/choerodon/v1/projects/${getProjectId()}/users/search_by_name`,
+        method: 'get',
       },
-      {
-        name: 'name',
-        type: 'string' as FieldType,
-      },
-    ],
+    },
   }), []);
+
   const conditionDataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [
-      {
-        name: 'member',
-        label: '成员',
-        type: 'array' as FieldType,
-        textField: 'name',
-        valueField: 'code',
-        options: memberOptionDataSet,
-        multiple: true,
-      },
+      { name: 'projectOwner', label: '项目所有者', type: 'boolean' as FieldType },
+      { name: 'specifier', label: '被指定人', type: 'boolean' as FieldType },
       {
         name: 'assigners',
         label: '指定人',
@@ -68,9 +117,10 @@ const Condition:React.FC<Props> = ({
         multiple: true,
         textField: 'realName',
         valueField: 'id',
+        options: userDs,
         dynamicProps: {
           // eslint-disable-next-line no-shadow
-          required: ({ record }) => find(record.get('member') || [], (item: string) => item === 'specifier'),
+          required: ({ record }) => record.get('specifier'),
         },
       },
       // {
@@ -79,16 +129,20 @@ const Condition:React.FC<Props> = ({
       //   type: 'boolean' as FieldType,
       // },
     ],
-  }), [memberOptionDataSet]);
+  }), [userDs]);
 
   useEffect(() => {
     const { current } = conditionDataSet;
     statusTransformApi.getCondition(selectedType, record.get('id')).then((res: IConditionInfo[]) => {
       if (res) {
-        current?.set('member', uniq(res.map((item) => item.userType)));
         const assigners = filter(res, (item: IConditionInfo) => item.userType === 'specifier');
-        if (assigners) {
+        const projectOwnerItem = find(res, (item: IConditionInfo) => item.userType === 'projectOwner');
+        if (assigners && assigners.length) {
+          current?.set('specifier', true);
           current?.set('assigners', assigners.map((item: IConditionInfo) => item.userId));
+        }
+        if (projectOwnerItem) {
+          current?.set('projectOwner', true);
         }
       }
     });
@@ -98,51 +152,107 @@ const Condition:React.FC<Props> = ({
     const handleOk = async () => {
       const data = conditionDataSet.toData();
       const validate = await conditionDataSet.validate();
+      const {
       // @ts-ignore
-      const { member, assigners, needCompleted } = data && data[0];
+        projectOwner, specifier, assigners, needCompleted,
+      } = (data && data[0]) || {};
       if (validate) {
         const updateData: ICondition[] = [];
-        member.forEach((item: 'specifier' | 'projectOwner') => {
-          if (item === 'specifier') {
-            updateData.push({
-              type: item,
-              userIds: assigners,
-            });
-          } else {
-            updateData.push({
-              type: item,
-            });
-          }
-        });
+        if (projectOwner) {
+          updateData.push({
+            type: 'projectOwner',
+          });
+        }
+        if (specifier) {
+          updateData.push({
+            type: 'specifier',
+            userIds: assigners,
+          });
+        }
         await statusTransformApi.updateCondition(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
         customCirculationDataSet.query();
         return true;
       }
+      setHidden(false);
       return false;
     };
     modal.handleOk(handleOk);
   }, [conditionDataSet, customCirculationDataSet, modal, record, selectedType]);
 
-  const data = conditionDataSet.toData();
-
+  const data = conditionDataSet.toData()[0];
+  const selected = [];
+  // @ts-ignore
+  if (data && data.projectOwner) {
+    selected.push('所有者');
+    // @ts-ignore
+  }
+  // @ts-ignore
+  if (data && data.specifier) {
+    // @ts-ignore
+    const assigners = data.assigners || [];
+    // @ts-ignore
+    assigners.forEach((id) => {
+      // @ts-ignore
+      const user = find(userDs.toData(), (item: User) => item.id === id);
+      if (user) {
+        // @ts-ignore
+        selected.push(user.realName);
+      }
+    });
+  }
   return (
     <div className={styles.condition}>
       <div className={styles.tip}>当工作项流转到此状态应满足的条件设置。</div>
       <div className={styles.setting}>
         <p className={styles.memberSelectTip}>移动工作项到此状态的成员为</p>
-        <Form dataSet={conditionDataSet}>
-          <Select name="member" />
-          {
+        <Dropdown
+          visible={!hidden}
+          overlay={(
+            <div
             // @ts-ignore
-            data && data[0].member.find((item: string) => item === 'specifier') && (
-              <SelectUser name="assigners" />
-            )
-          }
-          {/* <Divider className={styles.divider} />
+              ref={ref}
+              role="none"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <ConditionSelect conditionDataSet={conditionDataSet} />
+            </div>
+          )}
+          trigger={['click'] as Action[]}
+        >
+          <div
+            className="dropDown_trigger"
+            role="none"
+            onClick={(e) => {
+              e.nativeEvent.stopImmediatePropagation();
+              setHidden(!hidden);
+            }}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '0 10px',
+              height: 36,
+              border: '1px solid rgba(0, 0, 0, 0.2)',
+              borderRadius: '5px',
+            }}
+          >
+            <span style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+            >
+              {selected.join(',')}
+            </span>
+            <Icon type="arrow_drop_down" />
+          </div>
+        </Dropdown>
+        {/* <Divider className={styles.divider} />
           <div className={styles.completeSetting}>
             <CheckBox name="needCompleted" />
           </div> */}
-        </Form>
       </div>
     </div>
   );
