@@ -1,18 +1,17 @@
 /* eslint-disable camelcase */
 import React, {
-  useContext, useEffect, useState, Fragment,
+  useContext, useEffect, useState,
 } from 'react';
-import queryString from 'querystring';
 import { withRouter } from 'react-router-dom';
 import {
   Select, Icon,
 } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
 import {
-  find, pick, isEqual, remove, map, isEmpty,
+  find, remove, map,
 } from 'lodash';
 import { observer } from 'mobx-react-lite';
-import IssueStore from '@/stores/project/issue/IssueStore';
+import IssueStore, { flattenObject, isFilterSame } from '@/stores/project/issue/IssueStore';
 import { quickFilterApi } from '@/api';
 import { linkUrl } from '@/utils/to';
 import LINK_URL, { getParams } from '@/constants/LINK_URL';
@@ -22,50 +21,7 @@ import CustomFields from './custom-fields';
 import { getSelectStyle } from './custom-fields/utils';
 import './index.less';
 
-export const isFilterSame = (obj, obj2) => {
-  // 过滤掉 [] null '' 那些不起作用的属性
-  const keys1 = Object.keys(obj).filter(k => !isEmpty(obj[k]));
-  const keys2 = Object.keys(obj2).filter(k => !isEmpty(obj2[k]));
-  return isEqual(pick(obj, keys1), pick(obj2, keys2));
-};
 const { Option, OptGroup } = Select;
-/**
- * 对象扁平化 {a:{b:'v'}}  = >  {b:'v'}
- *
- * @param {*} object
- */
-export function flattenObject(object) {
-  const result = {};
-  for (const [key, value] of Object.entries(object)) {
-    if (Object.prototype.toString.call(value) === '[object Object]') {
-      Object.assign(result, flattenObject(value));
-    } else {
-      result[key] = value;
-    }
-  }
-  const {
-    date = [],
-    date_hms = [],
-    number = [],
-    option = [],
-    string = [],
-    text = [],
-  } = result;
-  [...date, ...date_hms].forEach((d) => {
-    result[d.fieldId] = { isCustom: true, value: [d.startDate, d.endDate] };
-  });
-  [...number, ...option, ...string, ...text].forEach((d) => {
-    result[d.fieldId] = { isCustom: true, value: d.value };
-  });
-
-  delete result.date;
-  delete result.date_hms;
-  delete result.number;
-  delete result.option;
-  delete result.string;
-  delete result.text;
-  return result;
-}
 
 export default withRouter(observer(({
   urlFilter, onClear, history, location,
@@ -76,6 +32,7 @@ export default withRouter(observer(({
 
   const filters = IssueStore.getMyFilters;
   const editFilterInfo = IssueStore.getEditFilterInfo;
+  const { isHasFilter } = IssueStore;
   const [quickFilters, setQuickFilters] = useState([]);
   const [selectedQuickFilters, setSelectedQuickFilters] = useState([]);
   const loadFilters = async () => {
@@ -160,11 +117,6 @@ export default withRouter(observer(({
       (filter) => isFilterSame(flattenObject(JSON.parse(filter.filterJson)), currentFilterDTO));
     return targetMyFilter;
   };
-  const isHasFilter = () => {
-    const currentFilterDTO = IssueStore.getCustomFieldFilters()
-      ? flattenObject(IssueStore.getCustomFieldFilters()) : {};
-    return !isFilterSame({}, currentFilterDTO);
-  };
   const getMyFilterSelectValue = () => {
     const targetMyFilter = findSameFilter();
     return targetMyFilter ? selectedQuickFilters.concat({ key: `my|${targetMyFilter.filterId}`, label: targetMyFilter.name }) : selectedQuickFilters;
@@ -228,8 +180,8 @@ export default withRouter(observer(({
         </CustomFields>
       </div>
       <div className={`${prefixCls}-search-right`}>
-        {isHasFilter() && <Button onClick={reset} funcType="flat" color="blue">重置</Button>}
-        {!findSameFilter() && isHasFilter() && <Button onClick={handleClickSaveFilter} funcType="raised" color="blue">保存筛选</Button>}
+        {isHasFilter && <Button onClick={reset} funcType="flat" color="blue">重置</Button>}
+        {!findSameFilter() && isHasFilter && <Button onClick={handleClickSaveFilter} funcType="raised" color="blue">保存筛选</Button>}
       </div>
     </>
   );

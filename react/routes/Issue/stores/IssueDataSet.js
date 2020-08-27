@@ -1,3 +1,4 @@
+/* eslint-disable import/no-anonymous-default-export */
 import React, { Fragment } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Button, Icon } from 'choerodon-ui';
@@ -107,5 +108,11 @@ export default ({
     selectAll: handleSelect,
     unSelect: handleUnSelect,
     unSelectAll: handleUnSelect,
+    load: ({ dataSet }) => {
+      // 有筛选，自动展开
+      if (IssueStore.isHasFilter) {
+        IssueStore.tableRef.current.tableStore.expandAll();
+      }
+    },
   },
 });
