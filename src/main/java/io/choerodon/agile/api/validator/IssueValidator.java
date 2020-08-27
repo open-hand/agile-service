@@ -194,9 +194,6 @@ public class IssueValidator {
         if (originStateMachineId == null || currentStateMachineId == null) {
             throw new CommonException("error.IssueRule.stateMachineId");
         }
-        if (!originStateMachineId.equals(currentStateMachineId)) {
-            throw new CommonException("error.IssueRule.stateMachineId");
-        }
         return issueConvertDTO;
     }
 

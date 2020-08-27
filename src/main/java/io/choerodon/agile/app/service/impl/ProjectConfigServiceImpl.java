@@ -517,6 +517,10 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO(name1, stateMachineId, stateMachineNodeVO.getId(), nodeId, TransformType.CUSTOM, TransformConditionStrategy.ALL, organizationId);
                 list.add(statusMachineTransformDTO);
             }
+            // 转换到自身
+            String nodeName = statusVO.getName() + "转换到" + statusVO.getName();
+            StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO(nodeName, stateMachineId, nodeId, nodeId, TransformType.CUSTOM, TransformConditionStrategy.ALL, organizationId);
+            list.add(statusMachineTransformDTO);
             statusMachineTransformMapper.batchInsert(list);
         }
     }
