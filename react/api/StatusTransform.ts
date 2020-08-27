@@ -169,7 +169,7 @@ class StatusTransformApi extends Api {
     });
   }
 
-  deleteStatusByIssueType(issueTypeId: string, nodeId: string, toStatusId?: string) {
+  deleteStatusByIssueType(issueTypeId: string, nodeId: string) {
     return this.request({
       method: 'delete',
       url: `${this.prefix}/state_machine_node/delete`,
@@ -177,7 +177,6 @@ class StatusTransformApi extends Api {
         issueTypeId,
         nodeId,
         applyType: getApplyType(),
-        statusId: toStatusId,
       },
     });
   }
