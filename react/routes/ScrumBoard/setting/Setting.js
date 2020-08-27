@@ -1,13 +1,13 @@
 /* eslint-disable react/sort-comp */
 /* eslint-disable react/prop-types */
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Page, Header, Content, stores, Permission, Breadcrumb,
+  Page, Header, Content, Permission, Breadcrumb,
 } from '@choerodon/boot';
 import moment from 'moment';
 import {
-  Button, Spin, Modal, Tabs, Tooltip, Icon,
+  Button, Spin, Modal, Tabs, Icon,
 } from 'choerodon-ui';
 import { withRouter } from 'react-router-dom';
 import './Setting.less';
@@ -19,12 +19,10 @@ import SettingColumn from './components/setting-column';
 import SwimLanePage from './components/SwimLanePage/SwimLanePage';
 import WorkCalendarPage from './components/WorkCalendarPage/WorkCalendarPage';
 import EditBoardName from './components/EditBoardName/EditBoardName';
-import CreateStatus from './components/create-status';
 import CreateColumn from './components/create-column';
 
 const { TabPane } = Tabs;
 const { confirm } = Modal;
-const { AppState } = stores;
 
 const service = [
   'choerodon.code.project.cooperation.iteration-plan.ps.config',
@@ -52,7 +50,7 @@ class Setting extends Component {
     this.refresh();
   }
 
-  refresh=() => {
+  refresh = () => {
     this.setState({
       loading: true,
     });
@@ -113,7 +111,7 @@ class Setting extends Component {
     });
   }
 
-  handleTabChange=(key) => {
+  handleTabChange = (key) => {
     this.setState({
       activeKey: key,
     }, () => {
@@ -125,13 +123,11 @@ class Setting extends Component {
     });
   }
 
-  handleCreateStatusClick=() => {
-    CreateStatus.open({
-      onCreate: this.refresh,
-    });
+  handleCreateStatusClick = () => {
+    to(LINK_URL.stateMachine);
   }
 
-  handleCreateColumnClick=() => {
+  handleCreateColumnClick = () => {
     CreateColumn.open({
       onCreate: this.refresh,
       statusList: ScrumBoardStore.getStatusList,
@@ -155,8 +151,6 @@ class Setting extends Component {
 
   render() {
     const { loading, activeKey } = this.state;
-    const menu = AppState.currentMenuType;
-    const { type, id: projectId, organizationId: orgId } = menu;
     return (
       <Page
         service={service}
@@ -164,33 +158,14 @@ class Setting extends Component {
         <Header title="配置看板">
           {activeKey === '1' ? (
             <>
-              {
-              ScrumBoardStore.getCanAddStatus ? (
-                <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.status.create']}>
-                  <Button
-                    icon="playlist_add"
-                    onClick={this.handleCreateStatusClick}
-                  >
-                    添加状态
-                  </Button>
-                </Permission>
-              ) : (
-                <Tooltip
-                  placement="bottomLeft"
-                  title="当前项目关联了多个状态机，无法创建状态。"
-                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
+              <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.status.create']}>
+                <Button
+                  icon="playlist_add"
+                  onClick={this.handleCreateStatusClick}
                 >
-                  <Button
-                    funcType="flat"
-                    type="primary"
-                    disabled
-                  >
-                    <Icon type="playlist_add" />
-                    <span>添加状态</span>
-                  </Button>
-                </Tooltip>
-              )
-            }
+                  添加状态
+                </Button>
+              </Permission>
               <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.column.create']}>
                 <Button
                   icon="playlist_add"
