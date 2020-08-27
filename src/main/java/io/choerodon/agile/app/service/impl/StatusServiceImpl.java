@@ -58,6 +58,8 @@ public class StatusServiceImpl implements StatusService {
     private IssueStatusService issueStatusService;
     @Autowired
     private BaseFeignClient baseFeignClient;
+    @Autowired
+    private IssueStatusMapper issueStatusMapper;
 
     @Override
     public Page<StatusWithInfoVO> queryStatusList(PageRequest pageRequest, Long organizationId, StatusSearchVO statusSearchVO) {
@@ -316,7 +318,10 @@ public class StatusServiceImpl implements StatusService {
         IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
         issueStatusDTO.setStatusId(statusId);
         issueStatusDTO.setProjectId(projectId);
-        issueStatusService.delete(issueStatusDTO);
+        IssueStatusDTO issueStatus = issueStatusMapper.selectOne(issueStatusDTO);
+        if (!ObjectUtils.isEmpty(issueStatus)) {
+            issueStatusService.delete(issueStatusDTO);
+        }
     }
 
     @Override
