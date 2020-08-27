@@ -183,7 +183,7 @@
         SELECT
            CASE WHEN count(*)  > 0 THEN 1 ELSE 0 END AS result
         FROM fd_status_machine_node fsmn
-        JOIN fd_state_machine_scheme_config fsmsc ON fsmsc.state_machine_id = fsmn.state_machine_id
+        JOIN fd_status_machine_scheme_config fsmsc ON fsmsc.state_machine_id = fsmn.state_machine_id
         JOIN fd_project_config fpc ON fsmsc.scheme_id = fpc.scheme_id
         WHERE fpc.project_id = #{projectId}
         AND fsmn.status_id = #{statusId}
