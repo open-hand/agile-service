@@ -303,15 +303,6 @@ public class StatusServiceImpl implements StatusService {
         if (!ObjectUtils.isEmpty(statusDTO.getCode())) {
             throw new CommonException("error.delete.init.status");
         }
-        List<Long> issueTypeIds = issueMapper.selectIssueTypeIdsByStatusId(projectId, statusId);
-        if (!CollectionUtils.isEmpty(issueTypeIds)) {
-            // 校验是否所有的问题类型都重新指定状态
-            List<Long> issueType = statusTransferVOS.stream().map(DeleteStatusTransferVO::getIssueTypeId).collect(Collectors.toList());
-            issueTypeIds.removeAll(issueType);
-            if (!CollectionUtils.isEmpty(issueTypeIds)) {
-                throw new CommonException("error.issueType.specifier.status");
-            }
-        }
         // 删掉对应问题类型状态机里面的节点和转换
         projectConfigService.handlerDeleteStatusByProject(projectId, applyType, statusId, statusTransferVOS);
         // 解除状态和项目的关联
