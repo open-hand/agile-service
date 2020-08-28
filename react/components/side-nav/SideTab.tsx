@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Context from './context';
 import Panel, { Tab, PaneProps } from './PanelList/Panel';
 import { toArray } from './utils';
@@ -8,6 +8,7 @@ import styles from './SideTab.less';
 
 interface Props {
   onChange?: (activeKey: React.Key | null) => void
+  activeKey?: React.Key
 }
 function parseTabList(children: React.ReactNode): Tab[] {
   // @ts-ignore
@@ -28,9 +29,12 @@ interface SideTabComponent extends React.FC<Props> {
   Panel: typeof Panel
 }
 const SideTab: SideTabComponent = ({
-  onChange, children,
+  onChange, activeKey: propsKey, children,
 }) => {
-  const [activeKey, setActiveKey] = useState<React.Key | null>(null);
+  const [activeKey, setActiveKey] = useState<React.Key | null>(propsKey || null);
+  useEffect(() => {
+    setActiveKey(propsKey || null);
+  }, [propsKey]);
   const tabs = parseTabList(children);
   const handleChange = (key: React.Key | null) => {
     setActiveKey(key);
