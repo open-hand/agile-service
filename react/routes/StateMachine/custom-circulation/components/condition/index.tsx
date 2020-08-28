@@ -7,7 +7,6 @@ import {
   Select, CheckBox, Form, DataSet, Dropdown,
 } from 'choerodon-ui/pro';
 import { Divider, Icon } from 'choerodon-ui';
-import SelectUser from '@/components/select/select-user';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { statusTransformApi } from '@/api';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
@@ -56,6 +55,8 @@ const ConditionSelect: React.FC<ConditionSelectProps> = ({ conditionDataSet }) =
               name="assigners"
               maxTagCount={2}
               className={styles.condition_assigners}
+              // @ts-ignore
+              getPopupContainer={(trigger) => trigger.parentNode}
             />
           )
         }
@@ -68,10 +69,17 @@ const ConditionSelect: React.FC<ConditionSelectProps> = ({ conditionDataSet }) =
 function useClickOut(onClickOut) {
   const ref = useRef();
   const handleClick = useCallback((e) => {
-    const popupContainerEle = document.getElementsByClassName('c7n-pro-popup-container')[0];
+    const popupContainerEles = document.getElementsByClassName('c7n-pro-popup-container');
     const triggerBtn = document.getElementsByClassName('dropDown_trigger')[0];
+    let allIsNotContain = true;
+    for (let i = 0; i < popupContainerEles.length; i += 1) {
+      if (popupContainerEles[i].contains(e.target)) {
+        allIsNotContain = false;
+        break;
+      }
+    }
     // @ts-ignore
-    if (ref.current && (!ref.current.contains(e.target) && !popupContainerEle.contains(e.target) && e.target.tagName !== 'BODY' && !triggerBtn.contains(e.target))) {
+    if (ref.current && (!ref.current.contains(e.target) && allIsNotContain && e.target.tagName !== 'BODY' && !triggerBtn.contains(e.target))) {
       onClickOut(e);
     }
   }, [onClickOut]);
@@ -206,6 +214,8 @@ const Condition:React.FC<Props> = ({
       <div className={styles.setting}>
         <p className={styles.memberSelectTip}>移动工作项到此状态的成员为</p>
         <Dropdown
+          // @ts-ignore
+          getPopupContainer={(trigger) => trigger.parentNode}
           visible={!hidden}
           overlay={(
             <div
