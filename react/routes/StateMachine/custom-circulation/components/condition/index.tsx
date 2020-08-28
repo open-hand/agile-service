@@ -70,7 +70,7 @@ function useClickOut(onClickOut) {
   const ref = useRef();
   const handleClick = useCallback((e) => {
     const popupContainerEles = document.getElementsByClassName('c7n-pro-popup-container');
-    const triggerBtn = document.getElementsByClassName('dropDown_trigger')[0];
+    const triggerBtn = document.getElementsByClassName(styles.dropDown_trigger)[0];
     let allIsNotContain = true;
     for (let i = 0; i < popupContainerEles.length; i += 1) {
       if (popupContainerEles[i].contains(e.target)) {
@@ -232,28 +232,14 @@ const Condition:React.FC<Props> = ({
           trigger={['click'] as Action[]}
         >
           <div
-            className="dropDown_trigger"
+            className={styles.dropDown_trigger}
             role="none"
             onClick={(e) => {
               e.nativeEvent.stopImmediatePropagation();
               setHidden(!hidden);
             }}
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '0 10px',
-              height: 36,
-              border: '1px solid rgba(0, 0, 0, 0.2)',
-              borderRadius: '5px',
-            }}
           >
-            <span style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-            >
+            <span>
               {selected.join(',')}
             </span>
             <Icon type="arrow_drop_down" />

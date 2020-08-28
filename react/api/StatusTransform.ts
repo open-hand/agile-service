@@ -285,7 +285,6 @@ class StatusTransformApi extends Api {
       { code: 'projectOwner', name: '项目所有者' },
       { code: 'assignee', name: '经办人' },
       { code: 'reporter', name: '报告人' },
-      { code: 'specifier', name: '指定人' },
     ];
     return this.request({
       method: 'get',
@@ -298,7 +297,7 @@ class StatusTransformApi extends Api {
       transformResponse: (res: IField) => {
         if (typeof res === 'string') {
           const data = JSON.parse(res);
-          return [...arr, ...data];
+          return [...arr, ...data, { code: 'specifier', name: '指定人' }];
         }
         return res;
       },
