@@ -304,7 +304,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected Map<String, Long> getManagers(Long projectId) {
         Map<String, Long> managerMap = new HashMap<>();
-        ResponseEntity<Page<UserDTO>> response = baseFeignClient.listUsersByProjectId(projectId, 1, 0);
+        ResponseEntity<Page<UserDTO>> response = baseFeignClient.listUsersByProjectId(projectId, 1, 0, null);
         List<UserDTO> users = response.getBody().getContent();
         users.forEach(u -> {
             if (u.getEnabled()) {
