@@ -46,7 +46,6 @@ const Item = memo(({ issue, draggingNum }) => {
   if (estimatedEndTime) {
     delayDays = calcDays(moment(), estimatedEndTime);
   }
-  console.log(estimatedEndTime, delayDays);
   return (
     <>
       {draggingNum && (<DraggingNum num={draggingNum} />)}

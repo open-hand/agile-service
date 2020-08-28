@@ -7,6 +7,7 @@
   padding: 0 20px;
   background: white;
   user-select: none;
+
   &-selected {
     background: #eff2f9;
   }
@@ -38,7 +39,10 @@
     text-overflow: ellipsis;
   }
 
-  &-delay, &-soonDelay {
+  &-delay,
+  &-soonDelay {
+    border-radius: 2px;
+    padding: 0 7px;
     color: #F5222D;
     border: 1px solid #F5222D;
     font-size: 12px;
@@ -53,16 +57,24 @@
   }
 
   &-version {
+    border-radius: 2px;
+    padding: 0 7px;
     border: 0.01rem solid fade(@base, 36%);
     margin: 0 5px;
+    white-space: nowrap;
   }
 
   &-epic {
+    border-radius: 2px;
+    padding: 0 7px;
     border: 0.01rem solid #f953ba;
     margin-right: 0.12rem;
+    white-space: nowrap;
   }
 
   &-feature {
+    border-radius: 2px;
+    padding: 0 7px;
     margin-right: 0.12rem;
     color: #4A4A4A;
     border: 1px solid #4A4A4A;
