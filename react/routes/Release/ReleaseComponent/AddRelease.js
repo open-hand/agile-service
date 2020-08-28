@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import {
   Modal, Form, Input, DatePicker,
 } from 'choerodon-ui';
+import { Button } from 'choerodon-ui/pro';
 import moment from 'moment';
 import { stores } from '@choerodon/boot';
 import { versionApi } from '@/api';
@@ -98,12 +99,16 @@ class AddRelease extends Component {
       <Sidebar
         title="创建发布版本"
         visible={visible}
-        onCancel={this.handleCancel}
-        onOk={this.handleOk.bind(this)}
         okText="创建"
         cancelText="取消"
         confirmLoading={loading}
         width={380}
+        footer={[
+          <Button key="submit" color="primary" funcType="raised" loading={loading} onClick={this.handleOk}>
+            确定
+          </Button>,
+          <Button key="back" funcType="raised" onClick={this.handleCancel}>取消</Button>,
+        ]}
       >
         <Form>
           <FormItem>
@@ -128,7 +133,7 @@ class AddRelease extends Component {
                 label="开始日期"
                 placeholder="请选择开始日期"
                 disabledDate={expectReleaseDate
-                  ? current => current > moment(expectReleaseDate) : () => false}
+                  ? (current) => current > moment(expectReleaseDate) : () => false}
                 onChange={(date) => {
                   this.setState({
                     startDate: date,
@@ -148,7 +153,7 @@ class AddRelease extends Component {
                     expectReleaseDate: date,
                   });
                 }}
-                disabledDate={startDate ? current => current < moment(startDate) : () => false}
+                disabledDate={startDate ? (current) => current < moment(startDate) : () => false}
               />,
             )}
           </FormItem>
