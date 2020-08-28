@@ -80,11 +80,11 @@ const IssueField = observer((props) => {
           <FieldProgramSprint {...props} field={field} key={teamIds} />,
         ]);
       case 'estimatedStartTime':
-        return typeCode !== 'epic' && (
+        return typeCode !== 'issue_epic' && (
           <FieldStartTime {...props} field={field} />
         );
       case 'estimatedEndTime':
-        return typeCode !== 'epic' && (
+        return typeCode !== 'issue_epic' && (
           <FieldEndTime {...props} field={field} />
         );
       default:
