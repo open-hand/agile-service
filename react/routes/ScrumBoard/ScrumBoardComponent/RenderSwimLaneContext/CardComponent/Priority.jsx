@@ -9,7 +9,7 @@ function Priority({ priorityVO }) {
           background: `${priorityVO ? priorityVO.colour : '#FFFFFF'}1F`,
           color: priorityVO ? priorityVO.colour : '#FFFFFF',
           textAlign: 'center',
-          marginLeft: '8px',
+          marginLeft: '10px',
           minWidth: 16,
           maxWidth: 46,
           paddingLeft: 2,
