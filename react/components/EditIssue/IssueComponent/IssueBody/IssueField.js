@@ -79,6 +79,14 @@ const IssueField = observer((props) => {
           <FieldTeam {...props} field={field} />,
           <FieldProgramSprint {...props} field={field} key={teamIds} />,
         ]);
+      case 'estimatedStartTime':
+        return typeCode !== 'epic' && (
+          <FieldStartTime {...props} field={field} />
+        );
+      case 'estimatedEndTime':
+        return typeCode !== 'epic' && (
+          <FieldEndTime {...props} field={field} />
+        );
       default:
         return renderNormalField(field);
     }
@@ -101,14 +109,6 @@ const IssueField = observer((props) => {
   return (
     <div className="c7n-content-wrapper IssueField">
       {issueId ? fields.map((field) => <Fragment key={field.id}>{getFieldComponent(field)}</Fragment>) : ''}
-      {
-        typeCode !== 'epic' && (
-          <>
-            <FieldStartTime {...props} />
-            <FieldEndTime {...props} />
-          </>
-        )
-      }
     </div>
   );
 });

@@ -69,7 +69,7 @@ class Card extends Component {
     const {
       completed, issue, statusName, categoryCode, selected, ...otherProps
     } = this.props;
-    const delayDays = 0;
+    let delayDays = 0;
     const { estimatedEndTime } = issue;
     if (estimatedEndTime) {
       delayDays = calcDays(moment(), estimatedEndTime);
