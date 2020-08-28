@@ -285,8 +285,10 @@ const NotifySetting = ({
               e.nativeEvent.stopImmediatePropagation();
               setHidden(!hidden);
             }}
+            tabIndex={0}
           >
-            <span>
+            {/* <span className={styles.trigger_label}>通知人员</span> */}
+            <span className={styles.selected}>
               {selected.join(',')}
             </span>
             <Icon type="arrow_drop_down" />

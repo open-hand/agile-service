@@ -1,4 +1,5 @@
 .dropDown_trigger {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -6,10 +7,16 @@
   height: 36px;
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 5px;
-  span {
+  .selected {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+  }
+  .trigger_label {
+    position: absolute;
+    padding: 0;
+    color: rgba(0, 0, 0, 0.6);
+    pointer-events: none;
   }
 }
 

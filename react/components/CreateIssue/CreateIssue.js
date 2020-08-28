@@ -351,8 +351,8 @@ class CreateIssue extends Component {
           },
           featureId, // 特性字段
           teamProjectIds,
-          estimatedEndTime: estimatedEndTime.format('YYYY-MM-DD HH:mm:ss'),
-          estimatedStartTime: estimatedStartTime.format('YYYY-MM-DD HH:mm:ss'),
+          estimatedEndTime: estimatedEndTime && estimatedEndTime.format('YYYY-MM-DD HH:mm:ss'),
+          estimatedStartTime: estimatedEndTime && estimatedStartTime.format('YYYY-MM-DD HH:mm:ss'),
         };
         this.setState({ createLoading: true });
         const deltaOps = description;
@@ -798,14 +798,14 @@ class CreateIssue extends Component {
           </FormItem>
         );
       case 'estimatedStartTime':
-        return newIssueTypeCode !== 'epic' && (
+        return newIssueTypeCode !== 'issue_epic' && (
           <FieldStartTime
             form={form}
             field={field || {}}
           />
         );
       case 'estimatedEndTime':
-        return newIssueTypeCode !== 'epic' && (
+        return newIssueTypeCode !== 'issue_epic' && (
           <FieldEndTime
             form={form}
             field={field || {}}
