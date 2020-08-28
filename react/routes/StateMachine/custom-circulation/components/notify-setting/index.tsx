@@ -118,7 +118,6 @@ const NotifySetting = ({
     data: [
       { label: '邮件', code: 'EMAIL' },
       { label: '站内信', code: 'WEB' },
-      { label: 'webhook', code: 'WEB_HOOK' },
     ],
     fields: [
       { name: 'code', type: 'string' as FieldType },
@@ -163,6 +162,11 @@ const NotifySetting = ({
           },
         },
       },
+      {
+        name: 'webhook',
+        label: '启用webhook通知',
+        type: 'boolean' as FieldType,
+      },
     ],
   }), [memberOptionsDataSet, notifyMethodDataSet, userDs]);
 
@@ -179,7 +183,8 @@ const NotifySetting = ({
         current?.set(usertype, true);
       });
       current?.set('userIdList', (res.userList || []).map((item: { id: string}) => item.id));
-      current?.set('noticeTypeList', res.noticeTypeList);
+      current?.set('noticeTypeList', (res.noticeTypeList || []).filter((item: string) => item !== 'WEB_HOOK'));
+      current?.set('webhook', Boolean((res.noticeTypeList || []).find((item: string) => item === 'WEB_HOOK')));
     });
   }, [selectedType, record, notifySettingDataSet]);
 
@@ -187,8 +192,10 @@ const NotifySetting = ({
     const handleOk = async () => {
       const validate = await notifySettingDataSet.validate();
       const data = notifySettingDataSet.toData();
+      const {
       // @ts-ignore
-      const { specifier, userIdList, noticeTypeList } = data && data[0];
+        specifier, userIdList, noticeTypeList, webhook,
+      } = data && data[0];
       const userTypeList = [];
       if (validate) {
         for (const [key, value] of Object.entries(data[0])) {
@@ -203,7 +210,7 @@ const NotifySetting = ({
           projectId: getProjectId(),
           statusId: record.get('id'),
           userTypeList,
-          noticeTypeList,
+          noticeTypeList: webhook ? ['WEB_HOOK', ...noticeTypeList] : noticeTypeList,
           userIdList: specifier ? userIdList : undefined,
           objectVersionNumber: record.get('objectVersionNumber'),
         };
@@ -295,6 +302,12 @@ const NotifySetting = ({
           </div>
         </Dropdown>
         <Select name="noticeTypeList" />
+        <CheckBox
+          name="webhook"
+          style={{
+            marginTop: -30,
+          }}
+        />
       </Form>
     </div>
   );
