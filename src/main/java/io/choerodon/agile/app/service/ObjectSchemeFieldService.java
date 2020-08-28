@@ -14,11 +14,11 @@ public interface ObjectSchemeFieldService {
 
     /**
      * @param field
-     * @param contexts
+     * @param issueTypes
      * @param issueTypeForRank 需要设置rank值的issueType，空值时不设置
      * @return
      */
-    ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field, String[] contexts, String issueTypeForRank);
+    ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field, List<IssueTypeVO> issueTypes, String issueTypeForRank);
 
     void baseUpdate(ObjectSchemeFieldDTO field);
 
