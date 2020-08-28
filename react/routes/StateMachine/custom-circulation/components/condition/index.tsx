@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/tabindex-no-positive */
 import React, {
   useMemo, useEffect, useRef, useCallback, useState,
 } from 'react';
@@ -121,7 +122,6 @@ const Condition:React.FC<Props> = ({
       {
         name: 'assigners',
         label: '指定人',
-        type: 'array' as FieldType,
         multiple: true,
         textField: 'realName',
         valueField: 'id',
@@ -191,7 +191,7 @@ const Condition:React.FC<Props> = ({
   const selected = [];
   // @ts-ignore
   if (data && data.projectOwner) {
-    selected.push('所有者');
+    selected.push('项目所有者');
     // @ts-ignore
   }
   // @ts-ignore
@@ -201,7 +201,7 @@ const Condition:React.FC<Props> = ({
     // @ts-ignore
     assigners.forEach((id) => {
       // @ts-ignore
-      const user = find(userDs.toData(), (item: User) => item.id === id);
+      const user = find(userDs.toData(), (item: User) => item.id.toString() === id.toString());
       if (user) {
         // @ts-ignore
         selected.push(user.realName);
@@ -232,14 +232,26 @@ const Condition:React.FC<Props> = ({
           trigger={['click'] as Action[]}
         >
           <div
-            className={styles.dropDown_trigger}
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+            tabIndex={1}
+            className={`${styles.dropDown_trigger} ${selected && selected.length ? styles.dropDown_trigger_hasSelected : styles.dropDown_trigger_hasNoSelected}`}
             role="none"
             onClick={(e) => {
               e.nativeEvent.stopImmediatePropagation();
               setHidden(!hidden);
             }}
           >
-            <span>
+            <span
+              className={styles.trigger_label}
+              style={{
+                top: selected.length ? '-12px' : '7px',
+                left: '6px',
+                fontSize: selected.length ? '12px' : '13px',
+              }}
+            >
+              选择成员
+            </span>
+            <span className={styles.selected}>
               {selected.join(',')}
             </span>
             <Icon type="arrow_drop_down" />
