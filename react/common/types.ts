@@ -3,7 +3,7 @@ import { ModalProps } from 'choerodon-ui/lib/modal';
 export interface User {
   email: string
   enabled?: boolean
-  id: number
+  id: string
   imageUrl: string | null
   ldap: boolean
   loginName: string
