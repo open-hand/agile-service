@@ -25,8 +25,6 @@ public class ObjectSchemeFieldContext {
 
     public static final String SUB_TASK = "sub_task";
 
-    public static final String[] CONTEXTS = {GLOBAL, STORY, EPIC, BUG, TASK, SUB_TASK};
-
     public static final String[] ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK};
 
     public static final String[] FIX_DATA_ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK};
@@ -35,7 +33,7 @@ public class ObjectSchemeFieldContext {
 
     public static void isIllegalContexts(String[] context) {
         for (String str : context) {
-            if (!Arrays.asList(CONTEXTS).contains(str)) {
+            if (!ISSUE_TYPES_LIST.contains(str)) {
                 throw new CommonException("error.context.illegal");
             }
         }
