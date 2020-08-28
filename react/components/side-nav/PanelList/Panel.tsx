@@ -9,13 +9,14 @@ export interface PaneProps {
   tabKey: React.Key
   active: boolean
   onClose?: () => void
+  noHeader?: boolean
 }
 export interface Tab extends PaneProps {
   key: React.Key;
   node: React.ReactElement;
 }
 const Panel: React.FC<PaneProps> = ({
-  children, active, tabKey, title, onClose,
+  children, active, tabKey, title, onClose, noHeader,
 }) => {
   const [visited, setVisited] = React.useState(false);
   useEffect(() => {
@@ -28,18 +29,20 @@ const Panel: React.FC<PaneProps> = ({
       [styles.panel_hidden]: !active,
     })}
     >
-      <div className={styles.panel_header}>
-        <div className={styles.panel_title}>{title}</div>
-        <Icon
-          className={styles.panel_close}
-          type="first_page"
-          onClick={() => {
-            if (onClose) {
-              onClose();
-            }
-          }}
-        />
-      </div>
+      {!noHeader && (
+        <div className={styles.panel_header}>
+          <div className={styles.panel_title}>{title}</div>
+          <Icon
+            className={styles.panel_close}
+            type="first_page"
+            onClick={() => {
+              if (onClose) {
+                onClose();
+              }
+            }}
+          />
+        </div>
+      )}
       <div className={styles.panel_content}>
         {(active || visited) && children}
       </div>

@@ -165,7 +165,7 @@ class BacklogHome extends Component {
               overflow: 'hidden',
             }}
           >
-            <SideNav onChange={this.toggleCurrentVisible}>
+            <SideNav onChange={this.toggleCurrentVisible} activeKey={BacklogStore.whichVisible}>
               <Panel
                 key="version"
                 title="版本"
@@ -186,10 +186,11 @@ class BacklogHome extends Component {
                   }}
                 />
               </Panel>
-              {!isShowFeature ? (
+              {isShowFeature ? (
                 <Panel
                   key="epic"
                   title="史诗"
+                  noHeader
                   nav={(title) => (BacklogStore.chosenEpic !== 'all'
                     ? (
                       <>

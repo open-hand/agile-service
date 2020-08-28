@@ -97,7 +97,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
           name="issueId"
           width={320}
           header={() => (
-            <div style={{ marginLeft: 20 }}>
+            <div className="c7nagile-issue-table-summary">
               概要
             </div>
           )}
