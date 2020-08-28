@@ -22,13 +22,11 @@ interface Props {
   localCheckCode?: (code: string) => Promise<boolean> | boolean,
   localCheckName?: (name: string) => Promise<boolean> | boolean,
 }
-function getLookupConfig(code: string, filterArr?: string[]) {
+function getLookupConfig(code: string, filterArr?: string[], type?: string, id?: string) {
   return {
     url: `/agile/v1/lookup_values/${code}`,
     method: 'get',
-    params: {
-      projectId: getProjectId(),
-    },
+    params: type && { [type]: id },
     transformResponse: (response: any) => {
       try {
         const data = JSON.parse(response);
@@ -157,7 +155,7 @@ const FormDataSet = ({
         valueField: 'valueCode',
         textField: 'name',
         defaultValue: defaultContext,
-        lookupAxiosConfig: getLookupConfig('object_scheme_field_context', filterContext),
+        lookupAxiosConfig: getLookupConfig('object_scheme_field_context', filterContext, type, id),
       },
       {
         name: 'defaultValue',
