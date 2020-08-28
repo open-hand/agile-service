@@ -130,7 +130,7 @@ const NotifySetting = ({
       {
         name: 'userIdList',
         label: '指定人',
-        type: 'array' as FieldType,
+        // type: 'array' as FieldType,
         multiple: true,
         textField: 'realName',
         valueField: 'id',
@@ -196,15 +196,24 @@ const NotifySetting = ({
       // @ts-ignore
         specifier, userIdList, noticeTypeList, webhook,
       } = data && data[0];
+
       const userTypeList = [];
       if (validate) {
         for (const [key, value] of Object.entries(data[0])) {
-          if (key !== 'userIdList' && key !== 'noticeTypeList') {
+          if (key !== 'userIdList' && key !== 'noticeTypeList' && key !== 'webhook') {
             if (typeof value === 'boolean' && value) {
               userTypeList.push(key);
             }
           }
         }
+
+        if ((noticeTypeList.length || webhook) && !userTypeList.length) {
+          return false;
+        }
+        if (specifier && (!userIdList || userIdList.length === 0)) {
+          setHidden(false);
+        }
+
         const updateData: IUpdateNotifySetting = {
           issueTypeId: selectedType,
           projectId: getProjectId(),
@@ -222,9 +231,6 @@ const NotifySetting = ({
           return false;
         }
       }
-      if (specifier && (!userIdList || userIdList.length === 0)) {
-        setHidden(false);
-      }
       return false;
     };
     if (modal) {
@@ -236,7 +242,7 @@ const NotifySetting = ({
   const selected = [];
   if (data[0]) {
     for (const [key, value] of Object.entries(data[0])) {
-      if (key !== 'userIdList' && key !== 'noticeTypeList' && key !== 'specifier') {
+      if (key !== 'userIdList' && key !== 'noticeTypeList' && key !== 'specifier' && key !== 'webhook') {
         if (typeof value === 'boolean' && value) {
           const memberItem = memberOptionsDataSet.toData().find((item: {
             code: string, name: string}) => item.code === key);
@@ -251,15 +257,20 @@ const NotifySetting = ({
     if (data[0].specifier) {
       // @ts-ignore
       (data[0].userIdList || []).forEach((userId: string) => {
-        const userItem = userDs.toData().find((item: User) => item.id === userId) as User;
+        const userItem = userDs.toData().find((
+          item: User,
+        ) => item.id.toString() === userId.toString()) as User;
         if (userItem) {
           selected.push(userItem.realName);
         }
       });
     }
   }
-
+  const memberIsRequired = data[0] && ((
   // @ts-ignore
+    data[0].noticeTypeList && data[0].noticeTypeList.length > 0
+    // @ts-ignore
+  ) || data[0].webhook);
   return (
     <div className={styles.notify_setting}>
       <Loading loading={loading} />
@@ -286,18 +297,29 @@ const NotifySetting = ({
           trigger={['click'] as Action[]}
         >
           <div
-            className={styles.dropDown_trigger}
+            className={`${styles.dropDown_trigger} ${selected && selected.length ? styles.dropDown_trigger_hasSelected : styles.dropDown_trigger_hasNoSelected}`}
             role="none"
             onClick={(e) => {
               e.nativeEvent.stopImmediatePropagation();
               setHidden(!hidden);
             }}
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
             tabIndex={0}
           >
-            {/* <span className={styles.trigger_label}>通知人员</span> */}
+            <span
+              className={`${styles.trigger_label}  ${memberIsRequired ? styles.dropDown_member_isRequired : styles.dropDown_member_isNotRequired}`}
+              style={{
+                top: selected.length ? '-12px' : '7px',
+                left: '6px',
+                fontSize: selected.length ? '12px' : '13px',
+              }}
+            >
+              通知人员
+            </span>
             <span className={styles.selected}>
               {selected.join(',')}
             </span>
+            <span className={`${styles.trigger_tip} ${memberIsRequired && !selected.length ? styles.trigger_tip_visible : styles.trigger_tip_hidden}`}>请输入通知人员</span>
             <Icon type="arrow_drop_down" />
           </div>
         </Dropdown>
