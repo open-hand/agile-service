@@ -51,7 +51,8 @@ public interface BaseFeignClient {
     @GetMapping(value = "/choerodon/v1/projects/{id}/users")
     ResponseEntity<Page<UserDTO>> listUsersByProjectId(@PathVariable("id") Long id,
                                                        @RequestParam("page") int page,
-                                                       @RequestParam("size") int size);
+                                                       @RequestParam("size") int size,
+                                                       @RequestParam("param") String param);
 
 
     @PostMapping(value = "/choerodon/v1/projects/{id}/agile_users")
