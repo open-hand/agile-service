@@ -4,7 +4,7 @@ import moment from 'moment';
 import { DateTimePicker } from 'choerodon-ui/pro';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { toJS } from 'mobx';
-import { fieldApi } from '@/api';
+import { issueApi } from '@/api';
 import { DatetimeAgo } from '../../../../CommonComponent';
 
 class FieldEndTime extends Component {
@@ -15,15 +15,13 @@ class FieldEndTime extends Component {
     const issue = store.getIssue;
     console.log('this.props，newEndTime，field:');
     console.log(this.props, value && value.format('YYYY-MM-DD HH:mm:ss'), field);
-    const {
-      fieldId, fieldType,
-    } = field;
-    const { issueId } = issue;
+    const { issueId, objectVersionNumber } = issue;
     const obj = {
-      fieldType,
-      value: value && value.format('YYYY-MM-DD HH:mm:ss'),
+      issueId,
+      objectVersionNumber,
+      estimatedEndTime: value && value.format('YYYY-MM-DD HH:mm:ss'),
     };
-    fieldApi.updateFieldValue(issueId, fieldId, 'agile_issue', obj)
+    issueApi.update(obj)
       .then(() => {
         if (onUpdate) {
           onUpdate();

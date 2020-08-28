@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import moment from 'moment';
 import { DateTimePicker } from 'choerodon-ui/pro';
 import TextEditToggle from '@/components/TextEditTogglePro';
-import { fieldApi } from '@/api';
+import { issueApi } from '@/api';
 import { DatetimeAgo } from '../../../../CommonComponent';
 
 class FieldStartTime extends Component {
@@ -12,17 +12,13 @@ class FieldStartTime extends Component {
       store, onUpdate, reloadIssue, field,
     } = this.props;
     const issue = store.getIssue;
-    console.log('newStartTime，field:');
-    console.log(value && value.format('YYYY-MM-DD HH:mm:ss'), field);
-    const {
-      fieldId, fieldType,
-    } = field;
-    const { issueId } = issue;
+    const { issueId, objectVersionNumber } = issue;
     const obj = {
-      fieldType,
-      value: value && value.format('YYYY-MM-DD HH:mm:ss'),
+      issueId,
+      objectVersionNumber,
+      estimatedStartTime: value && value.format('YYYY-MM-DD HH:mm:ss'),
     };
-    fieldApi.updateFieldValue(issueId, fieldId, 'agile_issue', obj)
+    issueApi.update(obj)
       .then(() => {
         if (onUpdate) {
           onUpdate();

@@ -351,8 +351,8 @@ class CreateIssue extends Component {
           },
           featureId, // 特性字段
           teamProjectIds,
-          estimatedEndTime,
-          estimatedStartTime,
+          estimatedEndTime: estimatedEndTime.format('YYYY-MM-DD HH:mm:ss'),
+          estimatedStartTime: estimatedStartTime.format('YYYY-MM-DD HH:mm:ss'),
         };
         this.setState({ createLoading: true });
         const deltaOps = description;
@@ -797,6 +797,20 @@ class CreateIssue extends Component {
             )}
           </FormItem>
         );
+      case 'estimatedStartTime':
+        return newIssueTypeCode !== 'epic' && (
+          <FieldStartTime
+            form={form}
+            field={field || {}}
+          />
+        );
+      case 'estimatedEndTime':
+        return newIssueTypeCode !== 'epic' && (
+          <FieldEndTime
+            form={form}
+            field={field || {}}
+          />
+        );
       default:
         return (
           <FormItem label={fieldName} style={{ width: 330 }}>
@@ -912,12 +926,6 @@ class CreateIssue extends Component {
                   .map((field) => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
                 {newIssueTypeCode === 'feature' && <FieldTeam form={form} teamProjectIds={teamProjectIds} />}
                 {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}
-                {newIssueTypeCode !== 'epic' && (
-                  <>
-                    <FieldStartTime form={form} field={fields.find((field) => field.code === 'estimatedStartTime') || {}} />
-                    <FieldEndTime form={form} field={fields.find((field) => field.code === 'estimatedEndTime') || {}} />
-                  </>
-                )}
               </div>
               {mode !== 'feature' && mode !== 'sub_task' && !['issue_epic', 'feature'].includes(newIssueTypeCode) && <FieldIssueLinks form={form} />}
             </Form>

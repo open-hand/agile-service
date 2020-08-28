@@ -5,8 +5,7 @@ import moment from 'moment';
 const FormItem = Form.Item;
 function FieldEndTime({ form, field }) {
   const { getFieldDecorator, getFieldValue } = form;
-  // const issueStartValue = getFieldValue('estimatedStartTime');
-  const issueStartValue = '2020-07-19 10:50:00';
+  const issueStartValue = getFieldValue('estimatedStartTime');
   return (
     <FormItem key="estimatedEndTime">
       {getFieldDecorator('estimatedEndTime', {
