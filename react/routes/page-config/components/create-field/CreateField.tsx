@@ -76,10 +76,10 @@ function CreateField() {
     const data = formDataSet.toData()[0] as IFieldPostData;
     const prefix = type === 'project' ? 'pro_' : 'org_';
     const { name, check } = data;
-    let { context } = data;
-    if (context && context.length === formDataSet.getField('context')?.options?.length) {
-      context = ['global'];
-    }
+    const { context } = data;
+    // if (context && context.length === formDataSet.getField('context')?.options?.length) {
+    //   context = ['global'];
+    // }
     const postData: IFieldPostData = {
       context,
       code: `${prefix}${data.code}`,
