@@ -33,8 +33,6 @@ class FieldStartTime extends Component {
     const { store } = this.props;
     const issue = store.getIssue;
     const { estimatedStartTime, estimatedEndTime } = issue;
-    console.log('estimatedStartTime, estimatedEndTime：');
-    console.log(estimatedStartTime, estimatedEndTime);
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">

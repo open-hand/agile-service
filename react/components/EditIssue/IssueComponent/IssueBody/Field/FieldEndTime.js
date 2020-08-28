@@ -13,8 +13,6 @@ class FieldEndTime extends Component {
       store, onUpdate, reloadIssue, field,
     } = this.props;
     const issue = store.getIssue;
-    console.log('this.props，newEndTime，field:');
-    console.log(this.props, value && value.format('YYYY-MM-DD HH:mm:ss'), field);
     const { issueId, objectVersionNumber } = issue;
     const obj = {
       issueId,
