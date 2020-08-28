@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
 import com.alibaba.fastjson.JSONObject;
+import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.BoardService;
 import io.choerodon.core.iam.ResourceLevel;
@@ -27,6 +28,9 @@ public class BoardController {
 
     @Autowired
     private BoardService boardService;
+
+    @Autowired
+    private IssueValidator issueValidator;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("创建scrum board,创建默认列，关联项目状态")
@@ -87,6 +91,7 @@ public class BoardController {
                                              @RequestParam @Encrypt Long transformId,
                                             @ApiParam(value = "issue move object", required = true)
                                              @RequestBody IssueMoveVO issueMoveVO) {
+        issueValidator.verifyIssueUpdateStatus(projectId,issueId,transformId);
         return Optional.ofNullable(boardService.move(projectId, issueId, transformId, issueMoveVO, false))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.issue.update"));

@@ -241,8 +241,6 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
             throw new CommonException(ERROR_ISSUE_STATE_MACHINE_NOT_FOUND);
         }
         // 查询要转换的状态是否有流转条件
-        Long endStatusId = transformService.queryDeployTransformForAgile(organizationId, transformId).getEndStatusId();
-        statusTransferSettingService.checkStatusTransferSetting(projectId,issue.getIssueTypeId(),endStatusId);
         Long currentStatusId = issue.getStatusId();
         //执行状态转换
         ExecuteResult executeResult = instanceService.executeTransform(organizationId, AGILE_SERVICE, stateMachineId, currentStatusId, transformId, inputDTO);

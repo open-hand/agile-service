@@ -126,6 +126,7 @@ public class IssueController {
                                                       @RequestParam Long objectVersionNumber,
                                                      @ApiParam(value = "应用类型", required = true)
                                                       @RequestParam String applyType) {
+        issueValidator.verifyIssueUpdateStatus(projectId,issueId,transformId);
         return Optional.ofNullable(issueService.updateIssueStatus(projectId, issueId, transformId, objectVersionNumber, applyType))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.Issue.updateIssueStatus"));

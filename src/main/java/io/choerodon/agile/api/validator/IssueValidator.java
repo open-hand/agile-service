@@ -6,14 +6,18 @@ import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.ProjectConfigService;
+import io.choerodon.agile.app.service.StateMachineTransformService;
+import io.choerodon.agile.app.service.StatusTransferSettingService;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/8/9.
@@ -63,6 +67,12 @@ public class IssueValidator {
     @Autowired
     private ProjectConfigService projectConfigService;
 
+    @Autowired
+    private StateMachineTransformService transformService;
+
+    @Autowired
+    private StatusTransferSettingService statusTransferSettingService;
+
 
     public void verifyCreateData(IssueCreateVO issueCreateVO, Long projectId, String applyType) {
         issueCreateVO.setProjectId(projectId);
@@ -90,6 +100,22 @@ public class IssueValidator {
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
             throw new CommonException("error.applyType.illegal");
         }
+    }
+
+    public void verifyIssueUpdateStatus(Long projectId, Long issueId, Long transformId){
+        StatusMachineTransformDTO statusMachineTransformDTO = transformService.queryDeployTransformForAgile(ConvertUtil.getOrganizationId(projectId), transformId);
+        if (ObjectUtils.isEmpty(statusMachineTransformDTO)) {
+            throw new CommonException("error.transfrom.not.exist");
+        }
+        Long endStatusId = statusMachineTransformDTO.getEndStatusId();
+        IssueDTO issueDTO = new IssueDTO();
+        issueDTO.setIssueId(issueId);
+        issueDTO.setProjectId(projectId);
+        issueDTO = issueMapper.selectByPrimaryKey(issueDTO);
+        if (ObjectUtils.isEmpty(issueDTO)) {
+            throw new CommonException(ERROR_ISSUE_ID_NOT_FOUND);
+        }
+        statusTransferSettingService.checkStatusTransferSetting(projectId,issueDTO.getIssueTypeId(),endStatusId);
     }
 
     public void verifyUpdateData(JSONObject issueUpdate, Long projectId) {
