@@ -12,12 +12,12 @@ function FieldList() {
     fields, chosenFields, handleChosenFieldChange,
   } = IssueStore;
   const systemFields = getSystemFields();
-  const selectableSystemFields = systemFields.filter(field => !field.defaultShow);
-  const defaultShowSystemFields = systemFields.filter(field => field.defaultShow);
+  const selectableSystemFields = systemFields.filter((field) => !field.defaultShow);
+  const defaultShowSystemFields = systemFields.filter((field) => field.defaultShow);
   const checked = chosenFields.size - defaultShowSystemFields.length > 0;
   const indeterminate = checked && chosenFields.size - defaultShowSystemFields.length < fields.length + selectableSystemFields.length;
   const [search, setSearch] = useState('');
-  const filter = field => (search ? field.name.indexOf(search) > -1 : true);
+  const filter = (field) => (search ? field.name.indexOf(search) > -1 : true);
   const filteredFields = fields.filter(filter);
   const filteredSystemFields = selectableSystemFields.filter(filter);
   return (
@@ -42,15 +42,15 @@ function FieldList() {
           checked={checked}
           onChange={(checkAll) => {
             if (checkAll) {
-              IssueStore.chooseAll();
+              IssueStore.chooseAll([...filteredFields, ...filteredSystemFields]);
             } else {
               IssueStore.unChooseAll();
             }
           }}
         >
           全选
-        </CheckBox>  
-        <Button 
+        </CheckBox>
+        <Button
           style={{ display: checked || indeterminate ? 'inline-block' : 'none' }}
           onClick={() => {
             IssueStore.unChooseAll();
@@ -71,7 +71,7 @@ function FieldList() {
                     <CheckBox
                       value={code}
                       checked={chosenFields.has(code)}
-                      onChange={value => handleChosenFieldChange(value, field)}
+                      onChange={(value) => handleChosenFieldChange(value, field)}
                     >
                       {name}
                     </CheckBox>
@@ -92,7 +92,7 @@ function FieldList() {
                     <CheckBox
                       value={code}
                       checked={chosenFields.has(code)}
-                      onChange={value => handleChosenFieldChange(value, field)}
+                      onChange={(value) => handleChosenFieldChange(value, field)}
                     >
                       {name}
                     </CheckBox>

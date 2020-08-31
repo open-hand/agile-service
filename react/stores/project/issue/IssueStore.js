@@ -401,8 +401,8 @@ class IssueStore {
     this.chosenFields = chosenFields;
   }
 
-  @action chooseAll() {
-    [...getSystemFields(), ...this.fields].forEach((field) => {
+  @action chooseAll(filteredFields) {
+    filteredFields.forEach((field) => {
       this.chosenFields.set(field.code, observable({ ...field, value: undefined }));
     });
   }
