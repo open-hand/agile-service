@@ -244,7 +244,7 @@ class ScrumBoardHome extends Component {
 
   handleToIterationBoard = () => {
     if (!ScrumBoardStore.getSpinIf) {
-      to(LINK_URL.iterationBoard);
+      to(LINK_URL.iterationBoard(ScrumBoardStore.getSprintId));
     } else {
       Choerodon.prompt('等待加载当前迭代');
     }
