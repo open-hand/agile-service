@@ -229,7 +229,7 @@ public class IssueAssembler extends AbstractAssembler {
         return list;
     }
 
-    private void setParentId(IssueListFieldKVVO issueListFieldKVVO, IssueDTO issue) {
+    protected void setParentId(IssueListFieldKVVO issueListFieldKVVO, IssueDTO issue) {
         Long parentId = null;
         Long parentIssueId = issue.getParentIssueId();
         Long relateIssueId = issue.getRelateIssueId();
