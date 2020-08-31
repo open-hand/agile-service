@@ -26,7 +26,7 @@ function getLookupConfig(code: string, filterArr?: string[], type?: string, id?:
   return {
     url: `/agile/v1/lookup_values/${code}`,
     method: 'get',
-    params: type && { [type]: id },
+    params: type && { [`${type}Id`]: id },
     transformResponse: (response: any) => {
       try {
         const data = JSON.parse(response);
