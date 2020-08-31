@@ -148,6 +148,7 @@ function BatchModal({
   const [progress, setProgress] = useState(0);
   const userFields = fieldData.filter((field) => field.fieldType === 'member').map((field) => ({
     name: field.code,
+    type: 'number',
     textField: 'realName',
     valueField: 'id',
   }));
