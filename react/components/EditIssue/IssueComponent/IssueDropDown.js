@@ -44,7 +44,7 @@ const IssueDropDown = ({
             <p style={{ marginBottom: 10 }}>这个问题将会被彻底删除。包括所有附件和评论。</p>
             <p style={{ marginBottom: 10 }}>如果您完成了这个问题，通常是已解决或者已关闭，而不是删除。</p>
             {
-              subIssueVOList.length ? <p style={{ color: '#d50000' }}>{`注意：问题的${subIssueVOList.length}子任务将被删除。`}</p> : null
+              subIssueVOList.length ? <p style={{ color: '#d50000' }}>{`注意：问题的${subIssueVOList.length}个子任务将被删除。`}</p> : null
             }
           </div>
         ),
@@ -185,7 +185,7 @@ const IssueDropDown = ({
     <Dropdown
       overlay={getMenu()}
       trigger={['click']}
-      getPopupContainer={trigger => trigger.parentNode}
+      getPopupContainer={(trigger) => trigger.parentNode}
       placement="bottomRight"
     >
       <Button icon="more_vert" />
