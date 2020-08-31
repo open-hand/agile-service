@@ -352,7 +352,7 @@ class CreateIssue extends Component {
           featureId, // 特性字段
           teamProjectIds,
           estimatedEndTime: estimatedEndTime && estimatedEndTime.format('YYYY-MM-DD HH:mm:ss'),
-          estimatedStartTime: estimatedEndTime && estimatedStartTime.format('YYYY-MM-DD HH:mm:ss'),
+          estimatedStartTime: estimatedStartTime && estimatedStartTime.format('YYYY-MM-DD HH:mm:ss'),
         };
         this.setState({ createLoading: true });
         const deltaOps = description;
