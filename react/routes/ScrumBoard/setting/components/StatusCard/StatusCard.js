@@ -50,14 +50,14 @@ class StatusCard extends Component {
     const originData = JSON.parse(JSON.stringify(ScrumBoardStore.getBoardData));
     const data = JSON.parse(JSON.stringify(ScrumBoardStore.getBoardData));
     const deleteCode = propData.statusId;
-    let deleteIndex = '';    
+    let deleteIndex = '';
     for (let index = 0, len = data[data.length - 1].subStatusDTOS.length; index < len; index += 1) {
       if (String(data[data.length - 1].subStatusDTOS[index].statusId) === String(deleteCode)) {
         deleteIndex = index;
       }
     }
     data[data.length - 1].subStatusDTOS.splice(deleteIndex, 1);
-    ScrumBoardStore.setBoardData(data);    
+    ScrumBoardStore.setBoardData(data);
     try {
       await boardApi.deleteStatus(deleteCode);
     } catch (err) {
@@ -68,7 +68,7 @@ class StatusCard extends Component {
 
   /**
    * 搜索状态code
-   * @param {*} statusId 
+   * @param {*} statusId
    */
   findStatusCodeByStatusId(statusId) {
     const statusList = ScrumBoardStore.getStatusList;
@@ -77,7 +77,7 @@ class StatusCard extends Component {
 
   getDisabled = () => {
     const { columnId, data } = this.props;
-    // 待处理状态 不可删除 一直处于禁止删除状态 
+    // 待处理状态 不可删除 一直处于禁止删除状态
     // 根据状态code 是否为create 为create则如下
     if (this.findStatusCodeByStatusId(data.statusId) === 'create') {
       return [true, '初始化状态'];
@@ -86,12 +86,10 @@ class StatusCard extends Component {
       if (data.issues.length === 0) {
         if (this.getStatusNumber() <= 1) {
           return [true, '应至少剩余一个状态'];
-        } else {
-          return [false];
         }
-      } else {
-        return [true, '状态下有问题'];
+        return [false];
       }
+      return [true, '状态下有问题'];
     }
     return [true, '在普通列中'];
   }
@@ -129,31 +127,29 @@ class StatusCard extends Component {
         index={index}
         type="status"
       >
-        {provided => (
+        {(provided) => (
           <div
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
             className={prefix}
           >
-            {ScrumBoardStore.getCanAddStatus && (
-              <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.status.delete']}>                
-                <div className={`${prefix}-delete`}>
-                  {disableDelete ? (
-                    <Tooltip title={disableDelete ? `${reason}，不可删除` : undefined}>
-                      <Icon type="delete" style={{ fontSize: '14px', color: 'gray' }} />
-                    </Tooltip>
-                  ) : (
-                    <Button
-                      size="small"
-                      icon="delete"
-                      disabled={disableDelete}
-                      onClick={this.handleDeleteClick}
-                    />
-                  )}                    
-                </div> 
-              </Permission>
-            )}
+            <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.status.delete']}>
+              <div className={`${prefix}-delete`}>
+                {disableDelete ? (
+                  <Tooltip title={disableDelete ? `${reason}，不可删除` : undefined}>
+                    <Icon type="delete" style={{ fontSize: '14px', color: 'gray' }} />
+                  </Tooltip>
+                ) : (
+                  <Button
+                    size="small"
+                    icon="delete"
+                    disabled={disableDelete}
+                    onClick={this.handleDeleteClick}
+                  />
+                )}
+              </div>
+            </Permission>
             <div
               className={`${prefix}-status`}
               style={{
