@@ -186,7 +186,7 @@ class BacklogHome extends Component {
                   }}
                 />
               </Panel>
-              {isShowFeature ? (
+              {!isShowFeature ? (
                 <Panel
                   key="epic"
                   title="史诗"

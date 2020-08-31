@@ -148,14 +148,13 @@ function BatchModal({
   const [progress, setProgress] = useState(0);
   const userFields = fieldData.filter((field) => field.fieldType === 'member').map((field) => ({
     name: field.code,
-    type: 'string',
+    type: 'number',
     textField: 'realName',
     valueField: 'id',
   }));
   const dataSet = useMemo(() => new DataSet({
     fields: [{
       name: 'statusId',
-      type: 'string',
       label: '状态',
       lookupAxiosConfig: () => ({
         url: `/agile/v1/projects/${getProjectId()}/schemes/query_status_by_project_id?apply_type=${'agile'}`,
@@ -165,7 +164,6 @@ function BatchModal({
       textField: 'name',
     }, {
       name: 'sprintId',
-      type: 'string',
       label: '冲刺',
       lookupAxiosConfig: () => ({
         url: `/agile/v1/projects/${getProjectId()}/sprint/names`,
@@ -177,13 +175,11 @@ function BatchModal({
     },
     ...isInProgram ? [{
       name: 'featureId',
-      type: 'string',
       label: '所属特性',
       valueField: 'issueId',
       textField: 'summary',
     }] : [{
       name: 'epicId',
-      type: 'string',
       label: '所属史诗',
       lookupAxiosConfig: () => ({
         url: `/agile/v1/projects/${getProjectId()}/issues/epics/select_data`,
@@ -193,7 +189,6 @@ function BatchModal({
       textField: 'epicName',
     }], {
       name: 'priorityId',
-      type: 'string',
       label: '优先级',
       lookupAxiosConfig: () => ({
         url: `/agile/v1/projects/${getProjectId()}/priority/list_by_org`,

@@ -167,7 +167,7 @@ function PageIssueType() {
         </Button>
       </Header>
       <Breadcrumb />
-      <Content className={`${prefixCls}-content`}>
+      <Content className={`${prefixCls}-content`} style={{ overflowY: 'hidden' }}>
         <Switch />
         <Spin spinning={pageIssueTypeStore.getLoading}>
           <div className={styles.top}>

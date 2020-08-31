@@ -31,27 +31,32 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * 表基础字段处理工具类
+ *
  * @author jiaxu.cui@hand-china.com 2020/7/6 上午11:06
  */
 public class BaseFieldUtil {
 
+    protected BaseFieldUtil() {
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseFieldUtil.class);
 
-    protected static String FIELD_ORGANIZATION_ID = "organizationId";
-    protected static String FIELD_PROJECT_ID = "projectId";
+    protected static final String FIELD_ORGANIZATION_ID = "organizationId";
+    protected static final String FIELD_PROJECT_ID = "projectId";
 
     private static IssueMapper issueMapper;
 
     /**
      * 更新issue的最后更新时间，最后更新人
+     *
      * @param primaryKey 主键值
-     * @param projectId 项目id
+     * @param projectId  项目id
      */
-    public static IssueDTO updateIssueLastUpdateInfo(Long issueId, Long projectId){
-        if (Objects.isNull(issueId) || Objects.equals(issueId, 0L)){
+    public static IssueDTO updateIssueLastUpdateInfo(Long issueId, Long projectId) {
+        if (Objects.isNull(issueId) || Objects.equals(issueId, 0L)) {
             return null;
         }
-        if (Objects.isNull(issueMapper)){
+        if (Objects.isNull(issueMapper)) {
             issueMapper = ApplicationContextHelper.getContext().getBean(IssueMapper.class);
         }
         return updateLastUpdateInfo(issueMapper, IssueDTO.class, issueId, null, projectId);
@@ -59,22 +64,24 @@ public class BaseFieldUtil {
 
     /**
      * 根据评论id更新issue
+     *
      * @param commentMapper commentMapper
-     * @param commentId 评论id
+     * @param commentId     评论id
      * @return 更新后的对象
      */
-    public static IssueDTO updateIssueLastUpdateInfoByCommentId(IssueCommentMapper commentMapper, Long commentId){
+    public static IssueDTO updateIssueLastUpdateInfoByCommentId(IssueCommentMapper commentMapper, Long commentId) {
         IssueCommentDTO issueCommentDTO = commentMapper.selectByPrimaryKey(commentId);
         return BaseFieldUtil.updateIssueLastUpdateInfo(issueCommentDTO.getIssueId(), issueCommentDTO.getProjectId());
     }
 
     /**
      * 根据issueline更新issue，包括IssueId和LinkedIssueId
-     * @param projectId 项目id
+     *
+     * @param projectId    项目id
      * @param issueLinkDTO issueLinkDTO
      */
-    public static void updateIssueLastUpdateInfoForIssueLink(Long projectId, IssueLinkDTO issueLinkDTO){
-        if (Objects.isNull(issueLinkDTO)){
+    public static void updateIssueLastUpdateInfoForIssueLink(Long projectId, IssueLinkDTO issueLinkDTO) {
+        if (Objects.isNull(issueLinkDTO)) {
             return;
         }
         BaseFieldUtil.updateIssueLastUpdateInfo(issueLinkDTO.getIssueId(), projectId);
@@ -83,17 +90,18 @@ public class BaseFieldUtil {
 
     /**
      * 根据issueId, 更新所有关联到的issue
+     *
      * @param issueLinkMapper issueLinkMapper
-     * @param issueId 根据issueId
+     * @param issueId         根据issueId
      */
-    public static void updateIssueLastUpdateInfoForALLIssueLink(IssueLinkMapper issueLinkMapper, Long issueId){
+    public static void updateIssueLastUpdateInfoForALLIssueLink(IssueLinkMapper issueLinkMapper, Long issueId) {
         // 更新关联的issue的最后更新时间，更新人
         List<IssueLinkDTO> issueLinkList = issueLinkMapper.selectByCondition(Condition.builder(IssueLinkDTO.class)
                 .orWhere(Sqls.custom().andEqualTo(IssueLinkDTO.FIELD_ISSUE_ID, issueId)
                         .andNotEqualTo(IssueLinkDTO.FIELD_ISSUE_ID, 0L))
                 .orWhere(Sqls.custom().andEqualTo(IssueLinkDTO.FIELD_LINKED_ISSUE_ID, issueId)
                         .andNotEqualTo(IssueLinkDTO.FIELD_LINKED_ISSUE_ID, 0L)).build());
-        if (CollectionUtils.isEmpty(issueLinkList)){
+        if (CollectionUtils.isEmpty(issueLinkList)) {
             return;
         }
         issueLinkList.forEach(link -> BaseFieldUtil.updateIssueLastUpdateInfoForIssueLink(link.getProjectId(), link));
@@ -102,33 +110,34 @@ public class BaseFieldUtil {
 
     /**
      * 更新最后更新时间，最后更新人
-     * @param mapper {@link BaseMapper}
-     * @param clazz 实例类
-     * @param primaryKey 主键值
+     *
+     * @param mapper         {@link BaseMapper}
+     * @param clazz          实例类
+     * @param primaryKey     主键值
      * @param organizationId 组织id
-     * @param projectId 项目id
-     * @param <T> 实体类
+     * @param projectId      项目id
+     * @param <T>            实体类
      */
     public static <T extends AuditDomain> T updateLastUpdateInfo(BaseMapper<T> mapper,
-                                                                    Class<T> clazz,
-                                                                    Long primaryKey,
-                                                                    Long organizationId,
-                                                                    Long projectId){
+                                                                 Class<T> clazz,
+                                                                 Long primaryKey,
+                                                                 Long organizationId,
+                                                                 Long projectId) {
         Assert.notNull(primaryKey, BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(Objects.nonNull(organizationId) || Objects.nonNull(projectId),
                 BaseConstants.ErrorCode.DATA_INVALID);
         Field[] fields = FieldUtils.getFieldsWithAnnotation(clazz, Id.class);
-        if (fields.length != 1){
+        if (fields.length != 1) {
             throw new CommonException(BaseConstants.ErrorCode.ERROR);
         }
         T t;
         try {
             t = clazz.newInstance();
             FieldUtils.writeField(t, fields[0].getName(), primaryKey, true);
-            if(Objects.nonNull(organizationId)){
+            if (Objects.nonNull(organizationId)) {
                 FieldUtils.writeField(t, FIELD_ORGANIZATION_ID, organizationId, true);
             }
-            if (Objects.nonNull(projectId)){
+            if (Objects.nonNull(projectId)) {
                 FieldUtils.writeField(t, FIELD_PROJECT_ID, projectId, true);
             }
         } catch (InstantiationException | IllegalAccessException e) {
@@ -136,7 +145,7 @@ public class BaseFieldUtil {
             throw new CommonException(BaseConstants.ErrorCode.ERROR);
         }
         T update = mapper.selectOne(t);
-        if (Objects.isNull(update)){
+        if (Objects.isNull(update)) {
             LOGGER.error("数据不存在,请检查。实体对象: [{}] ", t);
             throw new CommonException(BaseConstants.ErrorCode.DATA_NOT_EXISTS);
         }
@@ -145,7 +154,7 @@ public class BaseFieldUtil {
     }
 
     public static void updateIssueLastUpdateInfoForIssueLinks(IssueConvertDTO issueConvertDTO, List<IssueLinkDTO> issueLinkDTOS) {
-        if (Objects.isNull(issueMapper)){
+        if (Objects.isNull(issueMapper)) {
             issueMapper = ApplicationContextHelper.getContext().getBean(IssueMapper.class);
         }
         IssueDTO issueDTO = new IssueDTO();

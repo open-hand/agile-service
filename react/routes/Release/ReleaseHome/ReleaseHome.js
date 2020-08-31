@@ -1,3 +1,5 @@
+/* eslint-disable react/sort-comp */
+/* eslint-disable react/jsx-no-bind */
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
@@ -148,7 +150,10 @@ class ReleaseHome extends Component {
       searchArgs.description = filters.description[0];
     }
     ReleaseStore.setFilters({
-      advancedSearchArgs: { statusCodes: filters && filters.key && filters.key.length > 0 ? filters.key : [] },
+      advancedSearchArgs: {
+        statusCodes: filters
+        && filters.key && filters.key.length > 0 ? filters.key : [],
+      },
       searchArgs,
       contents: barFilters,
     });
@@ -172,7 +177,7 @@ class ReleaseHome extends Component {
   renderMenu = (text, record) => {
     const { type, id, organizationId } = AppState.currentMenuType;
     const menu = (
-      <Menu onClick={e => this.handleClickMenu(record, e.key)}>
+      <Menu onClick={(e) => this.handleClickMenu(record, e.key)}>
         {record.statusCode === 'archived'
           ? null
           : (
@@ -185,8 +190,7 @@ class ReleaseHome extends Component {
                 </Tooltip>
               </Menu.Item>
             </Permission>
-          )
-        }
+          )}
         <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversionstatus']} key="3">
           <Menu.Item key="3">
             <Tooltip placement="top" title={record.statusCode === 'archived' ? '撤销归档' : '归档'}>
@@ -208,8 +212,7 @@ class ReleaseHome extends Component {
                 </Tooltip>
               </Menu.Item>
             </Permission>
-          )
-        }
+          )}
       </Menu>
     );
     return (
@@ -251,7 +254,7 @@ class ReleaseHome extends Component {
       title: '版本状态',
       dataIndex: 'status',
       key: 'key',
-      render: text => (
+      render: (text) => (
         <p style={{ marginBottom: 0, minWidth: 60 }}>
           <span
             style={{
@@ -288,22 +291,22 @@ class ReleaseHome extends Component {
       title: '开始日期',
       dataIndex: 'startDate',
       key: 'startDate',
-      render: text => (text ? <p style={{ marginBottom: 0, minWidth: 75 }}>{text.split(' ')[0]}</p> : ''),
+      render: (text) => (text ? <p style={{ marginBottom: 0, minWidth: 75 }}>{text.split(' ')[0]}</p> : ''),
     }, {
       title: '预计发布日期',
       dataIndex: 'expectReleaseDate',
       key: 'expectReleaseDate',
-      render: text => (text ? <p style={{ marginBottom: 0, minWidth: 75 }}>{text.split(' ')[0]}</p> : ''),
+      render: (text) => (text ? <p style={{ marginBottom: 0, minWidth: 75 }}>{text.split(' ')[0]}</p> : ''),
     }, {
       title: '实际发布日期',
       dataIndex: 'releaseDate',
       key: 'releaseDate',
-      render: text => (text ? <p style={{ marginBottom: 0, minWidth: 75 }}>{text.split(' ')[0]}</p> : ''),
+      render: (text) => (text ? <p style={{ marginBottom: 0, minWidth: 75 }}>{text.split(' ')[0]}</p> : ''),
     }, {
       title: '描述',
       dataIndex: 'description',
       key: 'description',
-      render: text => (
+      render: (text) => (
         <Tooltip mouseEnterDelay={0.5} title={`描述：${text}`}>
           <p style={{
             marginBottom: 0, maxWidth: '120px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
@@ -363,8 +366,7 @@ class ReleaseHome extends Component {
                 }}
                 refresh={this.refresh.bind(this, pagination)}
               />
-            ) : ''
-          }
+            ) : ''}
           <DeleteReleaseWithIssues
             visible={deleteReleaseVisible}
             versionDelInfo={versionDelInfo}
