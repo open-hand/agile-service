@@ -34,9 +34,6 @@ public class StatusNoticeSettingDTO extends AuditDomain {
     public static final String FIELD_ISSUE_TYPE_ID = "issueTypeId";
     public static final String FIELD_PROJECT_ID = "projectId";
 
-    public StatusNoticeSettingDTO() {
-    }
-
     public StatusNoticeSettingDTO(Long projectId, Long issueTypeId, Long statusId) {
         this.issueTypeId = issueTypeId;
         this.projectId = projectId;

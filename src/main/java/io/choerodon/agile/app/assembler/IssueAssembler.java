@@ -589,10 +589,20 @@ public class IssueAssembler extends AbstractAssembler {
         sprintStatistics.setTotal(issueList.size());
         sprintStatistics.setCompletedCount(group.getOrDefault(Boolean.TRUE, Collections.emptyList()).size());
         sprintStatistics.setUncompletedCount(group.getOrDefault(Boolean.FALSE, Collections.emptyList()).size());
-        sprintStatistics.setTodoCount(Long.valueOf(group.getOrDefault(Boolean.FALSE, Collections.emptyList()).stream()
-                .filter(issue -> Objects.equals(StatusType.TODO, issue.getCategoryCode())).count()).intValue());
-        sprintStatistics.setUnassignCount(Long.valueOf(group.getOrDefault(Boolean.FALSE, Collections.emptyList()).stream()
-                .filter(issue -> Objects.isNull(issue.getAssigneeId())).count()).intValue());
+        long todoCount =
+                group
+                        .getOrDefault(Boolean.FALSE, Collections.emptyList())
+                        .stream()
+                        .filter(issue -> Objects.equals(StatusType.TODO, issue.getCategoryCode()))
+                        .count();
+        sprintStatistics.setTodoCount((int) todoCount);
+        long unAssignCount =
+                group
+                        .getOrDefault(Boolean.FALSE, Collections.emptyList())
+                        .stream()
+                        .filter(issue -> Objects.isNull(issue.getAssigneeId()))
+                        .count();
+        sprintStatistics.setUnassignCount((int) unAssignCount);
         return sprintStatistics;
     }
 

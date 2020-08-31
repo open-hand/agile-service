@@ -5,6 +5,7 @@ import java.util.Map;
 
 import io.choerodon.agile.api.vo.SearchVO;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/8/7 下午4:53
@@ -15,30 +16,21 @@ public class BoardAssembler extends AbstractAssembler {
     public void handleOtherArgs(SearchVO searchVO) {
         Map<String, Object> args = searchVO.getOtherArgs();
         if (args != null) {
-            List<String> list = (List<String>) args.get("sprint");
-            if (list != null && list.contains("0")) {
-                args.put("sprintNull", true);
-            }
-            list = (List<String>) args.get("version");
-            if (list != null && list.contains("0")) {
-                args.put("versionNull", true);
-            }
-            list = (List<String>) args.get("component");
-            if (list != null && list.contains("0")) {
-                args.put("componentNull", true);
-            }
-            list = (List<String>) args.get("epic");
-            if (list != null && list.contains("0")) {
-                args.put("epicNull", true);
-            }
-            list = (List<String>) args.get("label");
-            if (list != null && list.contains("0")) {
-                args.put("labelNull", true);
-            }
-            list = (List<String>) args.get("assigneeId");
-            if (list != null && list.contains("0")) {
-                args.put("assigneeIdNull", true);
-            }
+            assertNull(args, "sprint");
+            assertNull(args, "version");
+            assertNull(args, "component");
+            assertNull(args, "epic");
+            assertNull(args, "label");
+            assertNull(args, "assigneeId");
+        }
+    }
+
+    private void assertNull(Map<String, Object> args, String key) {
+        List<String> list = (List<String>) args.get(key);
+        String zero = "0";
+        StringBuilder builder = new StringBuilder(key).append("Null");
+        if (!ObjectUtils.isEmpty(list) && list.contains(zero)) {
+            args.put(builder.toString(), true);
         }
     }
 }

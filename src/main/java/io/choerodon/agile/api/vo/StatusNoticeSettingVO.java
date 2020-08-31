@@ -19,9 +19,6 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StatusNoticeSettingVO extends AuditDomain {
 
-    public StatusNoticeSettingVO() {
-    }
-
     public StatusNoticeSettingVO(Long projectId, Long issueTypeId, Long statusId) {
         this.issueTypeId = issueTypeId;
         this.projectId = projectId;
