@@ -551,7 +551,7 @@ public class FixDataServiceImpl implements FixDataService {
         LOGGER.info("修复状态机转换完成,共计修复:{}条", stateMachines.size());
     }
 
-    private void fixStateMachineByIssueTypeId(){
+    protected void fixStateMachineByIssueTypeId(){
         LOGGER.info("开始修复问题类型的状态机");
         // 查询所有的项目
         List<Long> projectIds = projectInfoMapper.selectAll().stream().map(ProjectInfoDTO::getProjectId).collect(Collectors.toList());
@@ -566,12 +566,10 @@ public class FixDataServiceImpl implements FixDataService {
             List<Long> list = projectIds.subList(page * size > total ? total : page * size, (page + 1) * size > total ? total : (page + 1) * size);
             List<ProjectVO> projectVOS = baseFeignClient.queryByIds(new HashSet<>(list)).getBody();
             for (ProjectVO projectVO : projectVOS) {
-                LOGGER.info("开始修复{}+{}", projectVO.getId(),projectVO.getName());
+                LOGGER.info("开始修复{}:{}", projectVO.getId(),projectVO.getName());
                 String applyType = "PROGRAM".equals(projectVO.getCategory()) ? "program" : "agile";
                 // 查询单个项目的问题类型(故事、特性、任务、子任务、bug)
                 fixStateMachineApplyType(projectVO,applyType);
-                // 修复需求池的状态机
-                fixStateMachineApplyType(projectVO,"backlog");
             }
             totalSize = totalSize + projectVOS.size();
         }
@@ -579,7 +577,7 @@ public class FixDataServiceImpl implements FixDataService {
         LOGGER.info("项目的状态机修复完成:实际修复项目{}个", totalSize);
     }
 
-    private void fixStateMachineApplyType(ProjectVO projectVO,String applyType){
+    protected void fixStateMachineApplyType(ProjectVO projectVO,String applyType){
         ProjectConfigDTO projectConfigDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectVO.getId(), SchemeType.ISSUE_TYPE, applyType);
         ProjectConfigDTO configDTO = projectConfigMapper.queryBySchemeTypeAndApplyType(projectVO.getId(), SchemeType.STATE_MACHINE, applyType);
         if (ObjectUtils.isEmpty(projectConfigDTO)) {
