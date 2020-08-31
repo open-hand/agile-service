@@ -648,6 +648,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void handlerDeleteStatusByProject(Long projectId, String applyType, Long statusId, List<DeleteStatusTransferVO> statusTransferVOS) {
         Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
         Long organizationId = ConvertUtil.getOrganizationId(projectId);

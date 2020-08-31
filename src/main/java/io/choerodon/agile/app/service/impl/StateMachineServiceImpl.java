@@ -224,8 +224,10 @@ public class StateMachineServiceImpl implements StateMachineService {
         instanceCache.cleanStateMachine(stateMachineId);
 
         //是否有状态的改动
-        if (isChangeStatus && !oldStatus.equals(StateMachineStatus.CREATE)) {
-            this.deployStateMachine(organizationId, stateMachineId, changeMap);
+        if (isChangeStatus
+                && !oldStatus.equals(StateMachineStatus.CREATE)
+                && !ObjectUtils.isEmpty(changeMap)) {
+            deployStateMachine(organizationId, stateMachineId, changeMap);
         }
         return true;
     }

@@ -1,6 +1,8 @@
 package io.choerodon.agile.infra.utils;
 
 import io.choerodon.core.exception.CommonException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -16,6 +18,8 @@ import java.util.Map;
  */
 @Component
 public class HttpRequestUtil {
+
+    private static final Logger logger = LoggerFactory.getLogger(HttpRequestUtil.class);
     /**
      * 向指定URL发送GET方法的请求
      *
@@ -60,7 +64,7 @@ public class HttpRequestUtil {
                     in.close();
                 }
             } catch (Exception e2) {
-                throw new CommonException(e2.getMessage());
+                logger.error("close input stream error: {}", e2);
             }
         }
         return result;

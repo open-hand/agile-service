@@ -20,6 +20,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -297,6 +298,7 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteStatus(Long projectId, Long statusId, String applyType, List<DeleteStatusTransferVO> statusTransferVOS) {
         // 查询状态被使用的情况
         StatusDTO statusDTO = statusMapper.selectByPrimaryKey(statusId);

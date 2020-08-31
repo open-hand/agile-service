@@ -617,10 +617,12 @@ public class ExcelUtil {
                 }
             }
             Object invoke = new Object();
-            try {
-                invoke = method.invoke(data);
-            } catch (InvocationTargetException | IllegalAccessException e) {
-                LOGGER.error(EXCEPTION, e);
+            if (!ObjectUtils.isEmpty(method)) {
+                try {
+                    invoke = method.invoke(data);
+                } catch (InvocationTargetException | IllegalAccessException e) {
+                    LOGGER.error(EXCEPTION, e);
+                }
             }
             if (invoke instanceof Date) {
                 cell.setCellValue(substring(formatter.format(invoke)));
