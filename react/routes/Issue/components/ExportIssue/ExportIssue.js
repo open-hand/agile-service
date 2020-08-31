@@ -158,6 +158,7 @@ class ExportIssue extends Component {
             </div>
           )}
         </div>
+        <br />
         <RadioGroup onChange={this.handleExportChange} value={mode}>
           <Radio style={radioStyle} value="show">当前页面显示字段</Radio>
           <Radio style={radioStyle} value="all">全部字段</Radio>
