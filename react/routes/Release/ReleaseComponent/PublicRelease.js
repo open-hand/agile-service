@@ -131,22 +131,24 @@ class PublicRelease extends Component {
                           </RadioGroup>,
                         )}
                       </FormItem>
-                      <FormItem>
-                        {getFieldDecorator('moveVersion', {
-                          initialValue:
+                      {
+                        getFieldValue('chose') === 2 && (
+                          <FormItem>
+                            {getFieldDecorator('moveVersion', {
+                              initialValue:
                             ReleaseStore.getPublicVersionDetail.versionNames.length > 0
                               ? ReleaseStore.getPublicVersionDetail.versionNames[0].versionId
                               : undefined,
-                          rules: [{
-                            required: getFieldValue('chose') === 2,
-                            message: '移动版本是必填的',
-                          }],
-                        })(
-                          <Select
-                            label="选择要移动到的版本"
-                            disabled={getFieldValue('chose') === 1}
-                          >
-                            {
+                              rules: [{
+                                required: getFieldValue('chose') === 2,
+                                message: '移动版本是必填的',
+                              }],
+                            })(
+                              <Select
+                                label="选择要移动到的版本"
+                                disabled={getFieldValue('chose') === 1}
+                              >
+                                {
                               ReleaseStore.getPublicVersionDetail.versionNames.map((item) => (
                                 <Option
                                   key={item.versionId}
@@ -156,9 +158,11 @@ class PublicRelease extends Component {
                                 </Option>
                               ))
                             }
-                          </Select>,
-                        )}
-                      </FormItem>
+                              </Select>,
+                            )}
+                          </FormItem>
+                        )
+                      }
                     </div>
                   ) : ''
                 }
