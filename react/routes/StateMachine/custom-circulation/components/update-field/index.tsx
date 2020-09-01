@@ -403,14 +403,11 @@ const UpdateField = ({
   useEffect(() => {
     const submit = async () => {
       const validate = await dataSet.validate();
-      console.log(validate);
       if (validate) {
         const data = getData();
-        console.log(data);
         const updateData = transformUpdateData(data);
-        console.log(updateData);
         await statusTransformApi.updateField(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
-        customCirculationDataSet.query();
+        customCirculationDataSet.query(customCirculationDataSet.currentPage);
         return true;
       }
       return false;

@@ -87,7 +87,7 @@ const Linkage = ({
       }
       // @ts-ignore
       await statusTransformApi.updateLinkage(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
-      customCirculationDataSet.query();
+      customCirculationDataSet.query(customCirculationDataSet.currentPage);
     };
     if (modal) {
       modal.handleOk(handleOk);
