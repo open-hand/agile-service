@@ -8,6 +8,8 @@ import io.choerodon.agile.infra.annotation.Update;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.lang.ArrayUtils;
 import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
@@ -22,6 +24,8 @@ import java.util.*;
  */
 @Component
 public class VerifyUpdateUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(VerifyUpdateUtil.class);
 
     /**
      * 根据前端数据进行部分更新
@@ -135,7 +139,7 @@ public class VerifyUpdateUtil {
                         field1.setAccessible(true);
                         handleFieldType(field1, obj, value, false);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        LOGGER.error("reflect error: {}", e);
                     }
                 });
                 list.add(obj);

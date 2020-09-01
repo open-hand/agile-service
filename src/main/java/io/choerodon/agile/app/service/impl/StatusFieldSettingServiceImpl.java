@@ -15,6 +15,8 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.lang.StringUtils;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,9 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class StatusFieldSettingServiceImpl implements StatusFieldSettingService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StatusFieldSettingServiceImpl.class);
+
     private static final String[] FILTER_FIELD_TYPE = {"checkbox", "multiple", "member", "radio", "single"};
     protected static final Map<String, String> FIELD_CODE = new LinkedHashMap<>();
     private static final String CLEAR = "clear";
@@ -401,7 +406,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         try {
             dateFormat = dff.format(date.getTime());
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("format date error: {}", e);
         }
         return dateFormat;
     }

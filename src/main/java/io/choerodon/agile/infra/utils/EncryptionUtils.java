@@ -28,6 +28,8 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.hzero.starter.keyencrypt.core.EncryptProperties;
 import org.hzero.starter.keyencrypt.core.EncryptionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -36,17 +38,19 @@ import org.springframework.util.ObjectUtils;
  */
 public class EncryptionUtils {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(EncryptionUtils.class);
+
     static EncryptionService encryptionService = new EncryptionService(new EncryptProperties());
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     private static ObjectMapper encryptMapper;
 
-    public static String[] FIELD_VALUE = {"remaining_time","story_points","creation_date","type_code"};
+    public static final String[] FIELD_VALUE = {"remaining_time","story_points","creation_date","type_code"};
 
-    public static String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList","assigneeId","reporterIds"};
+    public static final String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList","assigneeId","reporterIds"};
 
-    public static String[] IGNORE_VALUES = {"0"};
+    public static final String[] IGNORE_VALUES = {"0"};
     public static final String BLANK_KEY = "";
 
     /**
@@ -172,7 +176,7 @@ public class EncryptionUtils {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("string to json node error: {}", e);
         }
 
         return list;
@@ -223,11 +227,11 @@ public class EncryptionUtils {
                         field.set(object, list);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOGGER.error("reflect error: {}", e);
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("string to json node error: {}", e);
         }
     }
 
@@ -424,7 +428,7 @@ public class EncryptionUtils {
                 map.put(key, encryptionService.decrypt(tempStr, BLANK_KEY));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("string to json node error: {}", e);
         }
     }
 
@@ -515,7 +519,7 @@ public class EncryptionUtils {
             objectNode.set("searchArgs",jsonNode.get("searchArgs"));
             return objectMapper.writeValueAsString(objectNode);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("jackson io error: {}", e);
         }
         return null;
     }
@@ -533,7 +537,7 @@ public class EncryptionUtils {
                 try {
                     value = objectMapper.readValue(objectMapper.writeValueAsString(next.getValue()),new TypeReference<List<String>>() { });
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LOGGER.error("string to object error: {}", e);
                 }
                 if (!CollectionUtils.isEmpty(value)) {
                     object = value.stream().map(v -> encrypt ? encrypt(Long.valueOf(v)) : decrypt(v)).collect(Collectors.toList());
@@ -591,18 +595,18 @@ public class EncryptionUtils {
             }
             return map;
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("jackson io error: {}", e);
         }
         return null;
     }
 
-    public static <T> Map<String, Map<String, List<?>>> encryptMapValueMap(Map<Long, Map<Long, List<T>>> map) {
-        Map<String, Map<String, List<?>>> mapHashMap = new HashMap<>();
+    public static <T> Map<String, Map<String, List>> encryptMapValueMap(Map<Long, Map<Long, List<T>>> map) {
+        Map<String, Map<String, List>> mapHashMap = new HashMap<>();
         if(!ObjectUtils.isEmpty(map)){
             for (Map.Entry<Long,Map<Long,List<T>>> entry : map.entrySet()) {
                 Long key = entry.getKey();
                 Map<Long, List<T>> value = entry.getValue();
-                Map<String,List<?>> stringListMap = new HashMap<>();
+                Map<String,List> stringListMap = new HashMap<>();
                 for(Map.Entry<Long,List<T>> entry1 : value.entrySet()){
                     stringListMap.put(encryptionService.encrypt(entry1.getKey().toString(),BLANK_KEY),entry1.getValue());
                 }

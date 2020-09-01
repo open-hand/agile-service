@@ -84,6 +84,9 @@ ribbon:
   OkToRetryOnAllOperations: true
   MaxAutoRetries: 1
   MaxAutoRetriesNextServer: 1
+  eager-load:
+    enabled: true
+    clients: hzero-iam, hzero-file, knowledgebase-service, hzero-message, test-manager-service
 services:
   attachment:
     url: example.com

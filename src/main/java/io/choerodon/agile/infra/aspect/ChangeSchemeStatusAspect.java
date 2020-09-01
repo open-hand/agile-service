@@ -5,7 +5,6 @@ import io.choerodon.agile.infra.dto.StateMachineSchemeDTO;
 import io.choerodon.agile.infra.mapper.StateMachineSchemeMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.app.service.StateMachineSchemeService;
-import org.hzero.mybatis.common.Criteria;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -54,8 +53,6 @@ public class ChangeSchemeStatusAspect {
         }
         if (scheme.getStatus().equals(StateMachineSchemeStatus.ACTIVE)) {
             scheme.setStatus(StateMachineSchemeStatus.DRAFT);
-//            Criteria criteria = new Criteria();
-//            criteria.update("status");
             schemeMapper.updateOptional(scheme, "status");
         }
 

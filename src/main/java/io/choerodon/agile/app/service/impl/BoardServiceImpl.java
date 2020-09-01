@@ -98,7 +98,7 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public void create(Long projectId, String boardName) {
-        if (checkName(projectId, boardName)) {
+        if (Boolean.TRUE.equals(checkName(projectId, boardName))) {
             throw new CommonException("error.boardName.exist");
         }
         BoardDTO boardResult = createBoard(projectId, boardName);
@@ -239,7 +239,7 @@ public class BoardServiceImpl implements BoardService {
             column.setSubStatusDTOS(subStatusDTOS);
         }
         //选择故事泳道选择仅我的任务后，子任务经办人为自己，父任务经办人不为自己的情况
-        if (condition) {
+        if (Boolean.TRUE.equals(condition)) {
             handleParentIdsWithSubIssues(parentIds, issueIds, columns, boardId);
         }
         Collections.sort(parentIds);
@@ -397,7 +397,6 @@ public class BoardServiceImpl implements BoardService {
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);
         Comparator<IssueForBoardDO> comparator = Comparator.comparing(IssueForBoardDO::getRank, nullsFirst(naturalOrder()));
         columns.forEach(columnAndIssueDTO ->
-        {
             columnAndIssueDTO.getSubStatusDTOS().forEach(subStatusDTO -> {
                 subStatusDTO.getIssues().forEach(issueForBoardDO -> {
                     UserMessageDTO userMessageDTO = usersMap.get(issueForBoardDO.getAssigneeId());
@@ -417,8 +416,7 @@ public class BoardServiceImpl implements BoardService {
                     }
                 });
                 subStatusDTO.getIssues().sort(comparator);
-            });
-        });
+            }));
         jsonObject.put("columnsData", putColumnData(columns));
         jsonObject.put("currentSprint", putCurrentSprint(currentSprint, organizationId));
         //处理用户默认看板设置，保存最近一次的浏览
@@ -455,7 +453,7 @@ public class BoardServiceImpl implements BoardService {
                 throw new CommonException("error.userSetting.create");
             }
             userSettingMapper.updateOtherBoardNoDefault(boardId, projectId, userId);
-        } else if (!query.getDefaultBoard()) {
+        } else if (Boolean.FALSE.equals(query.getDefaultBoard())) {
             query.setDefaultBoard(true);
             if (userSettingMapper.selectByPrimaryKey(query) == null) {
                 throw new CommonException("error.userSetting.notFound");
@@ -491,7 +489,7 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public IssueMoveVO move(Long projectId, Long issueId, Long transformId, IssueMoveVO issueMoveVO, Boolean isDemo) {
         //执行状态机转换
-        if (isDemo) {
+        if (Boolean.TRUE.equals(isDemo)) {
             stateMachineClientService.executeTransformForDemo(projectId, issueId, transformId, issueMoveVO.getObjectVersionNumber(),
                     SchemeApplyType.AGILE, new InputDTO(issueId, UPDATE_STATUS_MOVE, JSON.toJSONString(handleIssueMoveRank(projectId, issueMoveVO))));
         } else {
@@ -520,9 +518,9 @@ public class BoardServiceImpl implements BoardService {
 
     protected JSONObject handleIssueMoveRank(Long projectId, IssueMoveVO issueMoveVO) {
         JSONObject jsonObject = new JSONObject();
-        if (issueMoveVO.getRankFlag()) {
+        if (Boolean.TRUE.equals(issueMoveVO.getRankFlag())) {
             String rank;
-            if (issueMoveVO.getBefore()) {
+            if (Boolean.TRUE.equals(issueMoveVO.getBefore())) {
                 if (issueMoveVO.getOutsetIssueId() == null || Objects.equals(issueMoveVO.getOutsetIssueId(), 0L)) {
                     String minRank = sprintMapper.queryMinRank(projectId, issueMoveVO.getSprintId());
                     if (minRank == null) {
