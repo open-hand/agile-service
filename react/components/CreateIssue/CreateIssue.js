@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-closing-tag-location */
 import React, { Component, Fragment } from 'react';
 import {
   stores, Content, Choerodon,
@@ -450,46 +451,50 @@ class CreateIssue extends Component {
               : (
                 <IsInProgram>
                   {
-                        ({ isInProgram }) => (
-                          <FormItem label="问题类型">
-                            {getFieldDecorator('typeId', {
-                              rules: [{ required: true, message: '问题类型为必输项' }],
-                              initialValue: defaultTypeId || '',
-                            })(<Select
-                              label="问题类型"
-                              getPopupContainer={(triggerNode) => triggerNode.parentNode}
-                              onChange={((value) => {
-                                const { typeCode } = originIssueTypes.find(
-                                  (item) => item.id === value,
-                                );
-                                this.setState({
-                                  newIssueTypeCode: typeCode,
-                                });
-                                const param = {
-                                  schemeCode: 'agile_issue',
-                                  context: typeCode,
-                                  pageCode: 'agile_issue_create',
-                                };
-                                this.loadDefaultTemplate(typeCode);
-                                fieldApi.getFields(param).then((res) => {
-                                  this.setState({
-                                    fields: res,
-                                  });
-                                });
-                              })}
-                            >
-                              {this.getIssueTypes(isInProgram).map((type) => (
-                                <Option key={type.id} value={type.id}>
-                                  <TypeTag
-                                    data={type}
-                                    showName
-                                  />
-                                </Option>
-                              ))}
-                            </Select>)}
-                          </FormItem>
-                        )
-                      }
+                    ({ isInProgram }) => (
+                      <FormItem label="问题类型">
+                        {getFieldDecorator('typeId', {
+                          rules: [{ required: true, message: '问题类型为必输项' }],
+                          initialValue: defaultTypeId || '',
+                        })(<Select
+                          label="问题类型"
+                          getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                          onChange={((value) => {
+                            const { typeCode } = originIssueTypes.find(
+                              (item) => item.id === value,
+                            );
+                            this.setState({
+                              newIssueTypeCode: typeCode,
+                            });
+                            const param = {
+                              schemeCode: 'agile_issue',
+                              context: typeCode,
+                              pageCode: 'agile_issue_create',
+                            };
+                            this.loadDefaultTemplate(typeCode);
+                            fieldApi.getFields(param).then((res) => {
+                              const { fields } = this.state;
+                              form.resetFields(['assigneedId', 'sprintId', 'priorityId', 'epicId', 'componentIssueRel',
+                                'estimatedTime', 'storyPoints', 'description', 'fixVersionIssueRel', 'issueLabel',
+                                ...fields.map((f) => f.fieldCode).filter((code) => code !== 'typeId')]);
+                              this.setState({
+                                fields: res,
+                              });
+                            });
+                          })}
+                        >
+                          {this.getIssueTypes(isInProgram).map((type) => (
+                            <Option key={type.id} value={type.id}>
+                              <TypeTag
+                                data={type}
+                                showName
+                              />
+                            </Option>
+                          ))}
+                        </Select>)}
+                      </FormItem>
+                    )
+                  }
                 </IsInProgram>
               ),
             newIssueTypeCode === 'feature' ? (
@@ -530,9 +535,11 @@ class CreateIssue extends Component {
         );
       case 'assignee':
         return (
-          <FormItem label="经办人">
+          <FormItem label="经办人" key={`${newIssueTypeCode}-assignee`}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              {getFieldDecorator('assigneedId', {})(
+              {getFieldDecorator('assigneedId', {
+                rules: [{ required: field.required, message: '请选择经办人' }],
+              })(
                 <SelectFocusLoad
                   type="user"
                   label="经办人"
@@ -560,8 +567,10 @@ class CreateIssue extends Component {
         );
       case 'sprint':
         return (
-          <FormItem label="冲刺">
-            {getFieldDecorator('sprintId', {})(
+          <FormItem label="冲刺" key={`${newIssueTypeCode}-sprint`}>
+            {getFieldDecorator('sprintId', {
+              rules: [{ required: field.required, message: '请选择冲刺' }],
+            })(
               <SelectFocusLoad
                 label="冲刺"
                 allowClear
@@ -589,7 +598,11 @@ class CreateIssue extends Component {
         return (
           <FormItem label="标签">
             {getFieldDecorator('issueLabel', {
-              rules: [{ transform: (value) => (value ? value.toString() : value) }],
+              rules: [{
+                transform: (value) => (value ? value.toString() : value),
+              },
+              { required: field.required, message: '请选择标签' },
+              ],
               normalize: (value) => (value ? value.map((s) => s.toString().substr(0, 10))
                 : value), // 限制最长10位
             })(
@@ -606,7 +619,9 @@ class CreateIssue extends Component {
         // 如果在项目群中则不显示史诗 目前 工作列表这边创建问题 不调用这个case
         return (
           <FormItem label="特性">
-            {getFieldDecorator('feature', {})(
+            {getFieldDecorator('feature', {
+              rules: [{ required: field.required, message: '请选择特性' }],
+            })(
               <SelectFocusLoad
                 label="特性"
                 allowClear
@@ -619,7 +634,8 @@ class CreateIssue extends Component {
         return (
           <FormItem label="修复的版本">
             {getFieldDecorator('fixVersionIssueRel', {
-              rules: [{ transform: (value) => (value ? value.toString() : value) }],
+              rules: [{ transform: (value) => (value ? value.toString() : value) },
+                { required: field.required, message: '请选择修复的版本' }],
             })(
               <SelectFocusLoad
                 label="修复的版本"
@@ -640,7 +656,9 @@ class CreateIssue extends Component {
                   return (
                     ['issue_epic', 'sub_task'].includes(newIssueTypeCode) ? null : (
                       <FormItem label="史诗">
-                        {getFieldDecorator('epicId', {})(
+                        {getFieldDecorator('epicId', {
+                          rules: [{ required: field.required, message: '请选择史诗' }],
+                        })(
                           <SelectFocusLoad
                             label="史诗"
                             allowClear
@@ -680,7 +698,9 @@ class CreateIssue extends Component {
           ['sub_task'].includes(newIssueTypeCode) ? null : (
             <FormItem label="模块">
               {getFieldDecorator('componentIssueRel', {
-                rules: [{ transform: (value) => (value ? value.toString() : value) }],
+                rules: [{ transform: (value) => (value ? value.toString() : value) },
+                  { required: field.required, message: '请选择模块' },
+                ],
               })(
                 <SelectFocusLoad
                   label="模块"
@@ -721,7 +741,9 @@ class CreateIssue extends Component {
         return (
           newIssueTypeCode !== 'issue_epic' && (
             <FormItem>
-              {getFieldDecorator('estimatedTime')(
+              {getFieldDecorator('estimatedTime', {
+                rules: [{ required: field.required, message: '请选择预估时间' }],
+              })(
                 <SelectNumber
                   label="预估时间"
                   getPopupContainer={(triggerNode) => triggerNode.parentNode}
@@ -734,7 +756,9 @@ class CreateIssue extends Component {
         return (
           newIssueTypeCode === 'story' && (
             <FormItem>
-              {getFieldDecorator('storyPoints')(
+              {getFieldDecorator('storyPoints', {
+                rules: [{ required: field.required, message: '请填写故事点' }],
+              })(
                 <SelectNumber
                   label="故事点"
                   getPopupContainer={(triggerNode) => triggerNode.parentNode}
@@ -748,7 +772,7 @@ class CreateIssue extends Component {
           <>
             <FormItem key={newIssueTypeCode} label={fieldName} className="c7nagile-line">
               {getFieldDecorator(fieldCode, {
-                // initialValue: undefined,
+                rules: [{ required: field.required, message: '请填写描述' }],
               })(
                 <WYSIWYGEditor
                   style={{ height: 200, width: '100%' }}
@@ -772,6 +796,7 @@ class CreateIssue extends Component {
         return (
           <FormItem key={field.id}>
             {getFieldDecorator('benfitHypothesis', {
+              rules: [{ required: field.required, message: '请填写预估价值' }],
             })(
               <DebounceInput label="特性价值" maxLength={100} />,
             )}
@@ -781,6 +806,7 @@ class CreateIssue extends Component {
         return (
           <FormItem key={field.id}>
             {getFieldDecorator('acceptanceCritera', {
+              rules: [{ required: field.required, message: '请填写验收标准' }],
             })(
               <DebounceInput label="验收标准" maxLength={100} />,
             )}
@@ -789,7 +815,9 @@ class CreateIssue extends Component {
       case 'pi':
         return (
           <FormItem key={field.id} label="PI">
-            {getFieldDecorator('pi')(
+            {getFieldDecorator('pi', {
+              rules: [{ required: field.required, message: '请选择pi' }],
+            })(
               <SelectFocusLoad
                 label="PI"
                 type="pi"
