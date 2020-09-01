@@ -5,10 +5,10 @@ class DataLogApi {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }
-  
+
   /**
    *根据issueId查询操作记录
-   * @param issueId 
+   * @param issueId
    */
   loadByIssue(issueId:number) {
     return axios({
@@ -22,7 +22,7 @@ class DataLogApi {
 
   /**
    * 项目层下查询问题记录 (项目群)
-   * @param issueId 
+   * @param issueId
    * @param programId 项目群id
    */
   loadUnderProgram(issueId:number, programId:number) {
