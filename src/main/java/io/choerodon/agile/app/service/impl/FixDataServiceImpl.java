@@ -9,6 +9,7 @@ import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.RankUtil;
+import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections.MapIterator;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.collections.map.MultiKeyMap;
@@ -225,6 +226,7 @@ public class FixDataServiceImpl implements FixDataService {
         generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap);
         List<ObjectSchemeFieldExtendDTO> insertList = new ArrayList<>();
         MapIterator mapIterator = dataMap.mapIterator();
+        LOGGER.info("同一个字段，优先使用编辑页面的排序值作为页面配置的排序值");
         while (mapIterator.hasNext()) {
             mapIterator.next();
             ObjectSchemeFieldExtendDTO dto = (ObjectSchemeFieldExtendDTO)mapIterator.getValue();
@@ -251,6 +253,7 @@ public class FixDataServiceImpl implements FixDataService {
 
     private void processEstimatedTime(MultiKeyMap dataMap, MultiKeyMap rankMap,
                                       Long editPageId) {
+        LOGGER.info("处理预计开始时间和预计结束时间");
         String estimatedStartTime = "estimatedStartTime";
         String estimatedEndTime = "estimatedEndTime";
         ObjectSchemeFieldDTO example = new ObjectSchemeFieldDTO();
@@ -283,6 +286,8 @@ public class FixDataServiceImpl implements FixDataService {
                 filterIssueTypeList = filterIssueType(issueTypes, estimatedEndTimeFieldContextArray);
                 fillInData(filterIssueTypeList, estimatedEndTimeField, o, dataMap, rankMap, minRankMap, editPageId, SystemFieldPageConfig.CommonField.ESTIMATED_END_TIME);
             });
+        } else {
+            throw new CommonException("系统字段缺失，字段estimatedStartTime或estimatedEndTime不存在");
         }
     }
 
@@ -356,7 +361,19 @@ public class FixDataServiceImpl implements FixDataService {
         if (!ObjectUtils.isEmpty(rank)) {
             return (String) rank;
         }
-        return RankUtil.mid();
+        StringBuilder msgBuilder = new StringBuilder();
+        msgBuilder
+                .append("fieldId=")
+                .append(fieldId)
+                .append("的字段在组织organizationId=")
+                .append(organizationId);
+        if (!ObjectUtils.isEmpty(projectId)) {
+            msgBuilder.append("项目projectId=").append(projectId);
+        }
+        String rankStr = RankUtil.mid();
+        msgBuilder.append("下不存在排序值，生成随机rank值: ").append(rankStr);
+        LOGGER.warn(msgBuilder.toString());
+        return rankStr;
     }
 
     protected void generateDataMap(Long createPageId,
@@ -364,6 +381,11 @@ public class FixDataServiceImpl implements FixDataService {
                                  MultiKeyMap dataMap,
                                  ObjectSchemeFieldDTO objectSchemeField,
                                  MultiKeyMap rankMap) {
+        if (Boolean.TRUE.equals(objectSchemeField.getSystem())) {
+            LOGGER.info("处理系统字段");
+        } else {
+            LOGGER.info("处理自定义字段");
+        }
         List<ObjectSchemeFieldDTO> fields = objectSchemeFieldMapper.selectFieldsWithPages(objectSchemeField);
         List<PageFieldDTO> pages = new ArrayList<>();
         fields.forEach(s -> pages.addAll(s.getPages()));
@@ -491,8 +513,8 @@ public class FixDataServiceImpl implements FixDataService {
         pageExample.setPageCode(code);
         List<PageDTO> pages = pageMapper.select(pageExample);
         if (pages.isEmpty()) {
-            LOGGER.error("【迁移页面配置数据失败】fd_page中不存在code={}的数据", code);
-            return null;
+            String msg = "【迁移页面配置数据失败】fd_page中不存在code=" + code + "的数据";
+            throw new CommonException(msg);
         }
         return pages.get(0).getId();
     }
