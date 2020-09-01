@@ -9,7 +9,7 @@ import {
 } from 'choerodon-ui';
 import STATUS from '@/constants/STATUS';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
-import to from '@/utils/to';
+import to, { linkUrl } from '@/utils/to';
 import pic from '../../../../assets/image/emptyChart.svg';
 import finish from './legend/finish.svg';
 import total from './legend/total.svg';
@@ -590,7 +590,7 @@ class EpicReport extends Component {
       <Page className="c7n-versionReport" serice={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.versionreport']}>
         <Header
           title="版本报告图"
-          backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
+          backPath={linkUrl(LINK_URL.report)}
         >
           <SwithChart
             current="versionReport"

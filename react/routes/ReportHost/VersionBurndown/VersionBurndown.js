@@ -11,7 +11,7 @@ import {
 import STATUS from '@/constants/STATUS';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 
-import to from '@/utils/to';
+import to, { linkUrl } from '@/utils/to';
 import pic from '../../../assets/image/emptyChart.svg';
 import SwithChart from '../Component/switchChart';
 import StatusTag from '../../../components/StatusTag';
@@ -850,7 +850,7 @@ class VersionBurndown extends Component {
           organizationId=${urlParams.organizationId}`}
 
            */
-          backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
+          backPath={linkUrl(LINK_URL.report)}
         >
           <SwithChart
             current="versionBurndown"

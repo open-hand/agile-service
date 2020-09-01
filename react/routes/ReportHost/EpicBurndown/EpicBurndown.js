@@ -11,7 +11,7 @@ import {
 } from 'choerodon-ui';
 // import pic from './no_epic.svg';
 import STATUS from '@/constants/STATUS';
-import to from '@/utils/to';
+import to, { linkUrl } from '@/utils/to';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 
 import pic from '../../../assets/image/emptyChart.svg';
@@ -814,7 +814,6 @@ class EpicBurndown extends Component {
 
   render() {
     const { checkbox, tabActiveKey, linkFromParamUrl } = this.state;
-    const urlParams = AppState.currentMenuType;
     return (
       <Page className="c7n-epicBurndown" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.epicburndown']}>
         <Header
@@ -825,7 +824,7 @@ class EpicBurndown extends Component {
             mponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}
 
            */
-          backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
+          backPath={linkUrl(LINK_URL.report)}
         >
           <SwithChart
             current="epicBurndown"
