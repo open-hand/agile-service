@@ -116,6 +116,9 @@ public class EncryptionUtils {
     }
 
     public static String decrypt(String crypt) {
+        if (!EncryptContext.isEncrypt()){
+            return crypt;
+        }
         return encryptionService.decrypt(crypt, BLANK_KEY);
     }
 
@@ -153,7 +156,7 @@ public class EncryptionUtils {
     public static List jsonToList(Object object, Class clazz) {
         List list = new ArrayList();
         try {
-            JsonNode jsonNode = objectMapper.readTree(object.toString());
+            JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(object));
             if (jsonNode.isArray()) {
                 Iterator<JsonNode> elements = jsonNode.elements();
                 while (elements.hasNext()) {
@@ -204,7 +207,7 @@ public class EncryptionUtils {
                                 && Arrays.asList(encrypt.ignoreValue()).contains(valueNode.textValue())) {
                             field.set(object, Long.valueOf(valueNode.textValue()));
                         } else {
-                            field.set(object, valueNode == null ? null : Long.valueOf(valueNode.toString()));
+                            field.set(object, valueNode == null ? null : Long.valueOf(valueNode.textValue()));
                         }
                     } else if (field.getType() == Date.class) {
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -498,7 +501,7 @@ public class EncryptionUtils {
                 objectNode.set("otherArgs",objectMapper.readTree(objectMapper.writeValueAsString(handlerOtherArgs(oAMap, encrypt))));
             }
             else {
-                objectNode.put("otherArgs", objectMapper.readTree(objectMapper.writeValueAsString(new HashMap())));
+                objectNode.set("otherArgs", objectMapper.readTree(objectMapper.writeValueAsString(new HashMap())));
             }
             if(!ObjectUtils.isEmpty(jsonNode.get("quickFilterIds"))){
                List<String> list =  objectMapper.readValue(objectMapper.writeValueAsString(jsonNode.get("quickFilterIds")),new TypeReference<List<String>>() {});
@@ -533,7 +536,7 @@ public class EncryptionUtils {
                     e.printStackTrace();
                 }
                 if (!CollectionUtils.isEmpty(value)) {
-                    object = value.stream().map(v -> encrypt ? encryptionService.encrypt(v, BLANK_KEY) : encryptionService.decrypt(v, BLANK_KEY)).collect(Collectors.toList());
+                    object = value.stream().map(v -> encrypt ? encrypt(Long.valueOf(v)) : decrypt(v)).collect(Collectors.toList());
                 }
                 else {
                     object = new ArrayList<>();
@@ -625,6 +628,9 @@ public class EncryptionUtils {
     public static String encrypt(Long value) {
         if (Objects.isNull(value)){
             return null;
+        }
+        if (!EncryptContext.isEncrypt()){
+            return value.toString();
         }
         return encryptionService.encrypt(value.toString(), BLANK_KEY);
     }

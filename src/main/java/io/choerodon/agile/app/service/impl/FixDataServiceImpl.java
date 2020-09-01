@@ -187,12 +187,16 @@ public class FixDataServiceImpl implements FixDataService {
         LOGGER.info("开始迁移状态机相关表的数据");
         // 迁移状态机方案配置表
         statusMachineSchemeConfigMapper.migrateStatusMachineSchemeConfig();
+        LOGGER.info("完成迁移状态机方案配置表");
         // 迁移状态机表
         statusMachineMapper.migrateStatusMachine();
+        LOGGER.info("完成迁移状态机表");
         // 迁移状态机node表
         statusMachineNodeMapper.migrateStatusMachineNode();
+        LOGGER.info("完成迁移状态机node表");
         // 迁移状态机转换表
         statusMachineTransformMapper.migrateStatusMachineTransform();
+        LOGGER.info("完成迁移状态机转换表");
         LOGGER.info("完成迁移状态机相关的表");
     }
 
@@ -543,6 +547,7 @@ public class FixDataServiceImpl implements FixDataService {
             });
             // 批量增加
             statusMachineTransformMapper.batchInsert(addTransform);
+            LOGGER.info("修复状态机:{}-{}的转换完成",statusMachineDTO.getId(),statusMachineDTO.getName());
         }
         // 删除所有type为transform_all的转换
         StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO();
