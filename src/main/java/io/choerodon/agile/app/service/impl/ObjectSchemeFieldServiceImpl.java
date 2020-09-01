@@ -379,8 +379,13 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                                        Long organizationId,
                                                        Long projectId) {
         ObjectSchemeFieldContext.isIllegalContexts(contexts);
+        List<String> contextArray = Arrays.asList(contexts);
         List<IssueTypeVO> issueTypes = issueTypeService.queryByOrgId(organizationId);
-        return issueTypes.stream().filter(i -> ObjectSchemeFieldContext.ISSUE_TYPES_LIST.contains(i.getTypeCode())).collect(Collectors.toList());
+        return issueTypes
+                .stream()
+                .filter(i -> ObjectSchemeFieldContext.ISSUE_TYPES_LIST.contains(i.getTypeCode())
+                        && contextArray.contains(i.getTypeCode()))
+                .collect(Collectors.toList());
     }
 
     @Override
