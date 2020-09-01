@@ -7,7 +7,7 @@ import {
   Modal, Form, DataSet, TextField, Select,
 } from 'choerodon-ui/pro';
 import { MAX_LENGTH_STATUS } from '@/constants/MAX_LENGTH';
-import StatusTag from '../create-status/StatusTag';
+import StatusTag from './StatusTag';
 import DataSetFactory from './dataSet';
 
 import './index.less';
@@ -39,21 +39,18 @@ function CreateColumn({
         });
         if (button === 'ok') {
           return submit();
-        } else {
-          return false;
         }
-      } else {
-        return submit();
+        return false;
       }
-    } else {
-      return false;
+      return submit();
     }
+    return false;
   }, [dataSet, onCreate]);
   useEffect(() => {
     modal.handleOk(handleSubmit);
   }, [modal, handleSubmit]);
   return (
-    <Fragment>
+    <>
       <Form dataSet={dataSet}>
         <TextField name="name" maxLength={MAX_LENGTH_STATUS} />
         <Select
@@ -61,7 +58,7 @@ function CreateColumn({
           optionRenderer={({ record }) => (<StatusTag data={record.toData()} />)}
         />
       </Form>
-    </Fragment>
+    </>
   );
 }
 CreateColumn.propTypes = propTypes;
