@@ -670,10 +670,10 @@ public class IssueAssembler extends AbstractAssembler {
         Date startDate = DateUtils.truncate(sprint.getStartDate(), Calendar.DAY_OF_MONTH);
         Date endDate = DateUtils.truncate(sprint.getActualEndDate(), Calendar.DAY_OF_MONTH);
         // 渲染基础时间轴，包含从迭代开始到目前的所有日期, 迭代所有涉及到的经办人和报告人
-        if (startDate.compareTo(endDate) > 0){
+        if (startDate.after(endDate)){
             throw new CommonException(BaseConstants.ErrorCode.DATA_INVALID);
         }
-        while (startDate.compareTo(endDate) <= 0){
+        while (startDate.before(endDate) || startDate.equals(endDate)){
             timeUserLine.put(startDate, new HashSet<>(userSet));
             startDate = DateUtils.addDays(startDate, 1);
         }
