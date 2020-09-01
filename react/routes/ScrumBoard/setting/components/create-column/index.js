@@ -1,5 +1,5 @@
 import React, {
-  useEffect, useMemo, useCallback, Fragment,
+  useEffect, useMemo, useCallback,
 } from 'react';
 import PropTypes from 'prop-types';
 import { find } from 'lodash';
