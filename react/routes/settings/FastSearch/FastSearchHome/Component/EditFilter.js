@@ -828,7 +828,11 @@ class AddComponent extends Component {
 
   loadQuickFilter() {
     const projectId = AppState.currentMenuType.id;
-    userApi.getAllInProject().then((res) => this.setState({ originUsers: res.list }));
+    userApi.getAllInProject().then((res) => this.setState({
+      originUsers: res.list.map(
+        (item) => ({ ...item, id: item.id.toString() }),
+      ),
+    }));
     priorityApi.loadByProject().then((res) => this.setState({ originPriorities: res }));
     statusApi.loadByProject().then((res) => this.setState({ originStatus: res }));
     epicApi.loadEpicsForSelect().then((res) => this.setState({ originEpics: res }));
@@ -837,7 +841,9 @@ class AddComponent extends Component {
     componentApi.loadAll().then((res) => this.setState({ originComponents: res }));
     versionApi.loadNamesByStatus().then((res) => this.setState({ originVersions: res }));
     issueTypeApi.loadAll().then((res) => this.setState({ originTypes: res }));
-    featureApi.queryAllInSubProject([], undefined, 1, 0).then((res) => this.setState({ originFeatures: res.content }));
+    featureApi.queryAllInSubProject([], undefined, 1, 0).then((res) => this.setState(
+      { originFeatures: res.content },
+    ));
     fieldApi.getCustomFields().then((res) => {
       const customFieldState = {};
       res.forEach((item) => {
