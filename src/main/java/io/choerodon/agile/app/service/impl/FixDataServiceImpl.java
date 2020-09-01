@@ -387,6 +387,7 @@ public class FixDataServiceImpl implements FixDataService {
             LOGGER.info("处理自定义字段");
         }
         List<ObjectSchemeFieldDTO> fields = objectSchemeFieldMapper.selectFieldsWithPages(objectSchemeField);
+        LOGGER.info("查询到{}条字段", fields.size());
         List<PageFieldDTO> pages = new ArrayList<>();
         fields.forEach(s -> pages.addAll(s.getPages()));
         Set<Long> organizationIds = pages.stream().map(PageFieldDTO::getOrganizationId).collect(Collectors.toSet());
