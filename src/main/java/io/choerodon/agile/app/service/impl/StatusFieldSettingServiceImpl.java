@@ -80,6 +80,8 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         FIELD_CODE.put(FieldCode.EPIC, "epicId");
         FIELD_CODE.put(FieldCode.CREATION_DATE, "creationDate");
         FIELD_CODE.put(FieldCode.LAST_UPDATE_DATE, "lastUpdateDate");
+        FIELD_CODE.put(FieldCode.ESTIMATED_END_TIME, "estimatedEndTime");
+        FIELD_CODE.put(FieldCode.ESTIMATED_START_TIME, "estimatedStartTime");
     }
     @Override
     public List<StatusFieldSettingVO> createOrUpdate(Long project, Long issueType, Long statusId, Long objectVersionNumber, String applyType, List<StatusFieldSettingVO> list) {
@@ -263,7 +265,9 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 break;
             case FieldCode.CREATION_DATE:
             case FieldCode.LAST_UPDATE_DATE:
-                field.set(issueUpdateVO, handlerTimeField(fieldValueSettingDTO));
+            case FieldCode.ESTIMATED_START_TIME:
+            case FieldCode.ESTIMATED_END_TIME:
+                field.set(issueUpdateVO, handlerPredefinedTimeField(fieldValueSettingDTO));
                 break;
             case FieldCode.EPIC:
             case FieldCode.PRIORITY:
@@ -299,6 +303,21 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             default:
                 break;
         }
+    }
+
+    private Date handlerPredefinedTimeField(StatusFieldValueSettingDTO fieldValueSettingDTO) {
+        Date date = null;
+        if ("add".equals(fieldValueSettingDTO.getOperateType())) {
+            BigDecimal dateAddValue = fieldValueSettingDTO.getDateAddValue();
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DAY_OF_MONTH, dateAddValue.intValue());
+            date = cal.getTime();
+        } else if ("current_time".equals(fieldValueSettingDTO.getOperateType())) {
+            date = new Date();
+        } else {
+            date = fieldValueSettingDTO.getDateValue();
+        }
+        return date;
     }
 
     private BigDecimal handlerPredefinedNumber(StatusFieldValueSettingDTO statusFieldValueSettingDTO, BigDecimal oldValue) {
