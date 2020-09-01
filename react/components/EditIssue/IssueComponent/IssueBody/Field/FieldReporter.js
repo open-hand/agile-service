@@ -38,7 +38,8 @@ import UserHead from '../../../../UserHead';
       reporterId, reporterName, reporterImageUrl,
       reporterRealName, reporterLoginName,
     } = issue;
-
+    const field = store.getFieldByCode('reporter');
+    const required = field?.required;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -53,7 +54,8 @@ import UserHead from '../../../../UserHead';
             initValue={reporterLoginName ? Number(reporterId) || undefined : undefined}
             editor={({ submit }) => (
               <SelectUser
-                // clearButton
+                clearButton={!required}
+                required={required}
                 onChange={submit}
                 selectedUser={reporterId ? {
                   id: reporterId,

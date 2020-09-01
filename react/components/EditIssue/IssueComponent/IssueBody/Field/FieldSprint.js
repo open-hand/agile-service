@@ -43,7 +43,8 @@ const { Option } = Select;
     const issue = store.getIssue;
     const { closeSprint = [], activeSprint = {} } = issue;
     const sprintId = activeSprint ? activeSprint.sprintId : undefined;
-
+    const field = store.getFieldByCode('sprint');
+    const required = field?.required;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -66,7 +67,7 @@ const { Option } = Select;
                 </div>
               ) : null
             }
-            editor={({ submit }) => <SelectSprint onChange={submit} />}
+            editor={({ submit }) => <SelectSprint required={required} onChange={submit} />}
           >
             <Tooltip
               placement="top"

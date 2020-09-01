@@ -37,6 +37,8 @@ import UserHead from '../../../../UserHead';
       assigneeId, assigneeImageUrl,
       assigneeLoginName, assigneeName, assigneeRealName,
     } = issue;
+    const field = store.getFieldByCode('assignee');
+    const required = field?.required;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -51,7 +53,8 @@ import UserHead from '../../../../UserHead';
             initValue={Number(assigneeId) || undefined}
             editor={({ submit }) => (
               <SelectUser
-                clearButton
+                clearButton={!required}
+                required={required}
                 onChange={submit}
                 selectedUser={assigneeId ? {
                   id: assigneeId,
