@@ -11,7 +11,6 @@ import PriorityTag from '@/components/PriorityTag';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
 import './IssueItem.less';
-import { calcDays } from '@/utils/Date';
 
 const prefix = 'c7n-backlog-issue';
 function DraggingNum({ num }) {
@@ -44,7 +43,7 @@ const Item = memo(({ issue, draggingNum }) => {
   const { estimatedEndTime, statusVO } = issue;
   let delayDays = 0;
   if (estimatedEndTime) {
-    delayDays = calcDays(moment(), estimatedEndTime);
+    delayDays = moment().diff(moment(estimatedEndTime), 'days', true);
   }
   return (
     <>

@@ -43,12 +43,3 @@ export function commonformatDate(str) {
   }
   return `${d[0]}/${d[1]}/${d[2]} ${t[0] < 12 ? t[0] : t[0] * 1 - 12}:${t[1]}  ${t[0] * 1 < 12 ? ' 上' : ' 下'}午`;
 }
-
-/**
-   * 将时分秒换化为天
-   * @param {*} startDate YYYY-MM-DD HH:MM:SS
-   * @param {*} endDate
-   */
-export function calcDays(endDate, startDate) {
-  return moment(endDate).diff(startDate, 'seconds') / 60 / 60 / 24;
-}
