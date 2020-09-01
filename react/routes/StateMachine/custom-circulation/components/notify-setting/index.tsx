@@ -225,7 +225,7 @@ const NotifySetting = ({
         };
         try {
           await statusTransformApi.updateNotifySetting(updateData);
-          customCirculationDataSet.query();
+          customCirculationDataSet.query(customCirculationDataSet.currentPage);
           return true;
         } catch (e) {
           return false;

@@ -178,7 +178,7 @@ const Condition:React.FC<Props> = ({
           });
         }
         await statusTransformApi.updateCondition(selectedType, record.get('id'), record.get('objectVersionNumber'), updateData);
-        customCirculationDataSet.query();
+        customCirculationDataSet.query(customCirculationDataSet.currentPage);
         return true;
       }
       setHidden(false);

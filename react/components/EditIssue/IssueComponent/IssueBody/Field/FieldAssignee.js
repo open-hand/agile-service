@@ -48,7 +48,7 @@ import UserHead from '../../../../UserHead';
           <TextEditToggle
             disabled={disabled}
             onSubmit={this.updateIssueAssignee}
-            initValue={Number(assigneeId) || undefined}
+            initValue={assigneeId.toString() || undefined}
             editor={({ submit }) => (
               <SelectUser
                 clearButton
@@ -81,7 +81,7 @@ import UserHead from '../../../../UserHead';
               )
             }
           </TextEditToggle>
-          {Number(assigneeId) !== Number(loginUserId) && !disabled
+          {assigneeId.toString() !== loginUserId.toString() && !disabled
             ? (
               <span
                 role="none"
@@ -95,7 +95,7 @@ import UserHead from '../../../../UserHead';
                   whiteSpace: 'nowrap',
                 }}
                 onClick={() => {
-                  if (Number(loginUserId) !== Number(assigneeId)) {
+                  if (loginUserId.toString() !== assigneeId.toString()) {
                     this.updateIssueAssignee(loginUserId);
                   }
                 }}
