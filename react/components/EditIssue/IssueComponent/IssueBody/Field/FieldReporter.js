@@ -50,10 +50,12 @@ import UserHead from '../../../../UserHead';
         <div className="c7n-value-wrapper">
           <TextEditToggle
             disabled={disabled || (
-              reporterId.toString() !== loginUserId.toString() && !hasPermission
+              reporterId && reporterId.toString() !== loginUserId.toString() && !hasPermission
             )}
             onSubmit={this.updateIssueReporter}
-            initValue={reporterLoginName ? reporterId.toString() || undefined : undefined}
+            initValue={reporterLoginName ? (
+              reporterId && reporterId.toString()
+            ) || undefined : undefined}
             editor={({ submit }) => (
               <SelectUser
                 clearButton={!required}
