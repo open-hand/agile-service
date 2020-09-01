@@ -3,11 +3,8 @@ package io.choerodon.agile.infra.dto;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-
-import javax.validation.constraints.NotBlank;
 
 import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
 import io.choerodon.agile.infra.enums.StatusNoticeUserType;
@@ -33,6 +30,9 @@ public class StatusNoticeSettingDTO extends AuditDomain {
     public static final String FIELD_STATUS_ID = "statusId";
     public static final String FIELD_ISSUE_TYPE_ID = "issueTypeId";
     public static final String FIELD_PROJECT_ID = "projectId";
+
+    public StatusNoticeSettingDTO() {
+    }
 
     public StatusNoticeSettingDTO(Long projectId, Long issueTypeId, Long statusId) {
         this.issueTypeId = issueTypeId;
@@ -63,26 +63,21 @@ public class StatusNoticeSettingDTO extends AuditDomain {
     private Long id;
 
     @ApiModelProperty(value = "issue类型Id",required = true)
-    @NotNull
     private Long issueTypeId;
 
     @ApiModelProperty(value = "项目id",required = true)
-    @NotNull
     private Long projectId;
 
     @ApiModelProperty(value = "状态id",required = true)
-    @NotNull
     private Long statusId;
 
     @ApiModelProperty(value = "用户类型，基本类型projectOwner, assignee, reporter, specifier",required = true)
-    @NotBlank
     private String userType;
 
     @ApiModelProperty(value = "用户id")
     private Long userId;
 
     @ApiModelProperty(value = "通知类型",required = true)
-    @NotBlank
     private String noticeType;
 
     public Long getId() {

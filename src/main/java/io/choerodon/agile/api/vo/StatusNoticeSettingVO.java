@@ -2,7 +2,6 @@ package io.choerodon.agile.api.vo;
 
 import java.util.*;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
