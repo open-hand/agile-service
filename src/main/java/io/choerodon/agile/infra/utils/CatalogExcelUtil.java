@@ -4,6 +4,7 @@ import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -12,6 +13,8 @@ import java.io.InputStream;
  */
 public class CatalogExcelUtil {
 
+    protected CatalogExcelUtil () {}
+
     /**
      * 创建Workbook
      *
@@ -19,13 +22,9 @@ public class CatalogExcelUtil {
      * @return
      * @throws Exception
      */
-    public static Workbook createWorkBook(InputStream in) throws Exception {
-        try {
-            return new HSSFWorkbook(in);
-        } finally {
-            if (in != null) {
-                in.close();
-            }
+    public static Workbook createWorkBook(InputStream in) throws IOException {
+        try (HSSFWorkbook workbook = new HSSFWorkbook(in)) {
+            return workbook;
         }
     }
 
@@ -40,7 +39,7 @@ public class CatalogExcelUtil {
             return "";
         }
 
-        cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+        cell.setCellType(CellType.STRING);
         RichTextString str = cell.getRichStringCellValue();
         return str.getString();
     }
@@ -93,18 +92,19 @@ public class CatalogExcelUtil {
      */
     public static CellStyle getHeadStyle(Workbook wb) {
         CellStyle style = wb.createCellStyle();
-        style.setFillForegroundColor(HSSFColor.PALE_BLUE.index);
-        style.setFillPattern(CellStyle.SOLID_FOREGROUND);
-        style.setBorderTop(HSSFCellStyle.BORDER_THIN);
-        style.setBorderRight(HSSFCellStyle.BORDER_THIN);
-        style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-        style.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+        style.setFillForegroundColor(HSSFColor.HSSFColorPredefined.PALE_BLUE.getIndex());
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
 
         Font font = wb.createFont();
-        font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD); // 粗体
+        // 粗体
+        font.setBold(true);
         style.setFont(font);
         style.setLocked(true);
-        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        style.setAlignment(HorizontalAlignment.CENTER);
         return style;
     }
 
@@ -116,10 +116,10 @@ public class CatalogExcelUtil {
      */
     public static CellStyle getBodyStyle(Workbook wb) {
         CellStyle style = wb.createCellStyle();
-        style.setBorderTop(HSSFCellStyle.BORDER_THIN);
-        style.setBorderRight(HSSFCellStyle.BORDER_THIN);
-        style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-        style.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
         return style;
     }
 
@@ -133,7 +133,7 @@ public class CatalogExcelUtil {
         CellStyle style = wb.createCellStyle();
 
         Font font = wb.createFont();
-        font.setColor(HSSFColor.RED.index);
+        font.setColor(HSSFColor.HSSFColorPredefined.RED.getIndex());
 
         style.setFont(font);
         return style;

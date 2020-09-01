@@ -7,6 +7,7 @@ import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.core.exception.CommonException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
@@ -51,10 +52,7 @@ public class IssueLinkValidator {
         issueLink.setLinkedIssueId(issueLinkDTO.getLinkedIssueId());
         issueLink.setProjectId(issueLinkDTO.getProjectId());
         List<IssueLinkDTO> issueLinkDTOList = issueLinkMapper.select(issueLink);
-        if (issueLinkDTOList != null && !issueLinkDTOList.isEmpty()) {
-            return false;
-        }
-        return true;
+        return ObjectUtils.isEmpty(issueLinkDTOList);
     }
 
 }

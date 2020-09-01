@@ -41,11 +41,11 @@ public class StatusNoticeSettingController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<Void> save(@PathVariable("project_id") Long projectId,
-                                     @RequestBody StatusNoticeSettingVO StatusNoticeSettingVO,
+                                     @RequestBody StatusNoticeSettingVO statusNoticeSettingVO,
                                      @ApiParam(value = "方案编码", required = true)
                                      @RequestParam String applyType) {
-        validObject(StatusNoticeSettingVO);
-        statusNoticeSettingService.save(projectId, StatusNoticeSettingVO, applyType);
+        validObject(statusNoticeSettingVO);
+        statusNoticeSettingService.save(projectId, statusNoticeSettingVO, applyType);
         return Results.success();
     }
 

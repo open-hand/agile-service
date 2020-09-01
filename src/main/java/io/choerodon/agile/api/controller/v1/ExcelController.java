@@ -7,7 +7,6 @@ import io.choerodon.agile.infra.utils.ExcelUtil;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;

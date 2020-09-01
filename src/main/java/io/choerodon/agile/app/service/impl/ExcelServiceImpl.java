@@ -542,7 +542,7 @@ public class ExcelServiceImpl implements ExcelService {
         try {
             message = objectMapper.writeValueAsString(fileOperationHistoryDTO);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            LOGGER.error("object to json error: {}", e);
         }
         messageClient.sendByUserId(userId, WEBSOCKET_IMPORT_CODE, message);
     }
