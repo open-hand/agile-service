@@ -16,6 +16,8 @@ import ReactEcharts from 'echarts-for-react';
 import {
   quickFilterApi, reportApi, projectApi, boardApi,
 } from '@/api';
+import { linkUrl } from '@/utils/to';
+import LINK_URL from '@/constants/LINK_URL';
 import ScrumBoardStore from '../../../../stores/project/scrumBoard/ScrumBoardStore';
 import AccumulationStore from '../../../../stores/project/accumulation/AccumulationStore';
 import AccumulationFilter from '../AccumulationComponent/AccumulationFilter';
@@ -464,7 +466,6 @@ class AccumulationHome extends Component {
 
   render() {
     const { linkFromParamUrl } = this.state;
-    const urlParams = AppState.currentMenuType;
     return (
       <Page service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.cumulative_flow_diagram']}>
         <Header
@@ -474,7 +475,7 @@ class AccumulationHome extends Component {
            'reporthost'}?type=${urlParams.type}&id=${urlParams.id}&
            name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}
            */
-          backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
+          backPath={linkUrl(LINK_URL.report)}
         >
           <SwithChart
             current="accumulation"

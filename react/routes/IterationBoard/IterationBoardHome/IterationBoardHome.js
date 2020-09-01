@@ -9,7 +9,7 @@ import {
 } from 'choerodon-ui';
 import { sprintApi } from '@/api';
 import LINK_URL from '@/constants/LINK_URL';
-import to from '@/utils/to';
+import to, { linkUrl } from '@/utils/to';
 import Assignee from '../IterationBoardComponent/Assignee';
 import BurnDown from '../IterationBoardComponent/BurnDown';
 import Sprint from '../IterationBoardComponent/Sprint';
@@ -155,7 +155,7 @@ class IterationBoardHome extends Component {
           'choerodon.code.project.cooperation.iteration-plan.ps.report',
         ]}
       >
-        <Header title="活跃冲刺" backPath={LINK_URL.scrumboard}>
+        <Header title="活跃冲刺" backPath={linkUrl(LINK_URL.scrumboard)}>
           {this.renderSwitchMode()}
         </Header>
         <Content>
