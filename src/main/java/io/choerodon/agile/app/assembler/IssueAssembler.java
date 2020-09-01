@@ -668,7 +668,7 @@ public class IssueAssembler extends AbstractAssembler {
         Map<Date, Set<Long>> timeUserLine = new HashMap<>();
         // 生成迭代的开始时间与结束时间
         Date startDate = DateUtils.truncate(sprint.getStartDate(), Calendar.DAY_OF_MONTH);
-        Date endDate = DateUtils.truncate(sprint.getEndDate(), Calendar.DAY_OF_MONTH);
+        Date endDate = DateUtils.truncate(sprint.getActualEndDate(), Calendar.DAY_OF_MONTH);
         // 渲染基础时间轴，包含从迭代开始到目前的所有日期, 迭代所有涉及到的经办人和报告人
         if (startDate.compareTo(endDate) > 0){
             throw new CommonException(BaseConstants.ErrorCode.DATA_INVALID);
