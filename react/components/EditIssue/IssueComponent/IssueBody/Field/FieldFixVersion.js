@@ -7,19 +7,17 @@ import { issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectVersion from '@/components/select/select-version';
 
-
 @inject('AppState')
 @observer class FieldFixVersion extends Component {
   dataRef = React.createRef();
- 
+
   transToArr = (arr, pro, type = 'string') => {
     if (!arr.length) {
       return type === 'string' ? '无' : [];
-    } else if (typeof arr[0] === 'object') {
+    } if (typeof arr[0] === 'object') {
       return type === 'string' ? _.map(arr, pro).join() : _.map(arr, pro);
-    } else {
-      return type === 'string' ? arr.join() : arr;
     }
+    return type === 'string' ? arr.join() : arr;
   };
 
   updateIssueFixVersion = (newVersion) => {
@@ -71,15 +69,17 @@ import SelectVersion from '@/components/select/select-version';
 
   render() {
     const {
-      store, disabled, saveRef, 
+      store, disabled, saveRef,
     } = this.props;
     saveRef(this);
     const issue = store.getIssue;
     const { versionIssueRelVOList = [] } = issue;
     const fixVersionsTotal = _.filter(versionIssueRelVOList, { relationType: 'fix' }) || [];
     const fixVersionsFixed = _.filter(fixVersionsTotal, { statusCode: 'archived' }) || [];
-    const fixVersions = _.filter(fixVersionsTotal, v => v.statusCode !== 'archived') || [];
+    const fixVersions = _.filter(fixVersionsTotal, (v) => v.statusCode !== 'archived') || [];
 
+    const field = store.getFieldByCode('fixVersion');
+    const required = field?.required;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -89,7 +89,7 @@ import SelectVersion from '@/components/select/select-version';
         </div>
         <div className="c7n-value-wrapper">
           <TextEditToggle
-            disabled={disabled}            
+            disabled={disabled}
             onSubmit={this.updateIssueFixVersion}
             initValue={this.transToArr(fixVersions, 'name', 'array')}
             editExtraContent={
@@ -102,7 +102,7 @@ import SelectVersion from '@/components/select/select-version';
                 </div>
               ) : null
             }
-            editor={<SelectVersion dataRef={this.dataRef} statusArr={['version_planning']} />}
+            editor={<SelectVersion required={required} dataRef={this.dataRef} statusArr={['version_planning']} />}
           >
             {
                 fixVersionsFixed.length || fixVersions.length ? (

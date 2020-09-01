@@ -15,11 +15,10 @@ import TextEditToggle from '@/components/TextEditTogglePro';
   transToArr = (arr, pro, type = 'string') => {
     if (!arr.length) {
       return type === 'string' ? '无' : [];
-    } else if (typeof arr[0] === 'object') {
+    } if (typeof arr[0] === 'object') {
       return type === 'string' ? _.map(arr, pro).join() : _.map(arr, pro);
-    } else {
-      return type === 'string' ? arr.join() : arr;
     }
+    return type === 'string' ? arr.join() : arr;
   };
 
   updateIssueVersion = (newVersion) => {
@@ -71,13 +70,15 @@ import TextEditToggle from '@/components/TextEditTogglePro';
 
   render() {
     const {
-      store, disabled, saveRef, 
+      store, disabled, saveRef,
     } = this.props;
     saveRef(this);
     const issue = store.getIssue;
     const { versionIssueRelVOList = [] } = issue;
     const influenceVersions = _.filter(versionIssueRelVOList, { relationType: 'influence' }) || [];
 
+    const field = store.getFieldByCode('influenceVersion');
+    const required = field?.required;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -93,7 +94,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
             style={{ width: '100%', maxWidth: '200px' }}
             onSubmit={this.updateIssueVersion}
             initValue={this.transToArr(influenceVersions, 'name', 'array')}
-            editor={<SelectVersion dataRef={this.dataRef} statusArr={[]} />}
+            editor={<SelectVersion required={required} dataRef={this.dataRef} statusArr={[]} />}
           >
             {
                 influenceVersions.length ? (
