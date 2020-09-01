@@ -1,22 +1,18 @@
 import React, {
-  useMemo, Fragment, useState,
+  useMemo, useState,
 } from 'react';
 import {
   Form, Button, Select, DataSet, Row, Col, Progress,
 } from 'choerodon-ui/pro';
-import {
-  stores, WSHandler, Choerodon,
-} from '@choerodon/boot';
-import { find } from 'lodash';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { WSHandler, Choerodon } from '@choerodon/boot';
+import { find, pick } from 'lodash';
+import { getProjectId } from '@/utils/common';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import WSProvider from '@choerodon/master/lib/containers/components/c7n/tools/ws/WSProvider';
 import { fieldApi } from '@/api';
 import useFields from './useFields';
 import renderField from './renderField';
 import styles from './index.less';
-
-const { AppState } = stores;
 
 const systemFields = new Map([
   ['statusId', {
@@ -80,14 +76,14 @@ const systemFields = new Map([
     code: 'influenceVersion',
     name: '影响的版本',
     fieldType: 'multiple',
-    format: (value, influenceVersion) => influenceVersion,
+    format: (value, influenceVersion) => pick(influenceVersion, ['versionId', 'name']),
   }],
   ['fixVersion', {
     id: 'fixVersion',
     code: 'fixVersion',
     name: '修复的版本',
     fieldType: 'multiple',
-    format: (value, fixVersion) => fixVersion,
+    format: (value, fixVersion) => pick(fixVersion, ['versionId', 'name']),
   }],
   ['storyPoints', {
     id: 'storyPoints',
@@ -206,7 +202,6 @@ function BatchModal({
       textField: 'name',
     }, {
       name: 'labelIssueRelVOList',
-      type: 'array',
       label: '标签',
       lookupAxiosConfig: () => ({
         url: `/agile/v1/projects/${getProjectId()}/issue_labels`,
@@ -216,7 +211,6 @@ function BatchModal({
       textField: 'labelName',
     }, {
       name: 'componentIssueRelVOList',
-      type: 'array',
       label: '模块',
       lookupAxiosConfig: ({ record, dataSet: ds, params }) => ({
         url: `/agile/v1/projects/${getProjectId()}/component/query_all`,
@@ -242,7 +236,6 @@ function BatchModal({
       textField: 'name',
     }, {
       name: 'fixVersion',
-      type: 'array',
       label: '修复的版本',
       lookupAxiosConfig: () => ({
         url: `/agile/v1/projects/${getProjectId()}/product_version/names`,
@@ -253,7 +246,6 @@ function BatchModal({
       textField: 'name',
     }, {
       name: 'influenceVersion',
-      type: 'array',
       label: '影响的版本',
       lookupAxiosConfig: () => ({
         url: `/agile/v1/projects/${getProjectId()}/product_version/names`,
@@ -276,8 +268,6 @@ function BatchModal({
   };
   const submit = async () => {
     const data = getData();
-    console.log('data：');
-    console.log(data);
     const issueIds = tableDataSet.selected.map((record) => record.get('issueId'));
     const res = { issueIds, ...formatFields(fieldData, data, dataSet) };
     await fieldApi.batchUpdateIssue(res);
