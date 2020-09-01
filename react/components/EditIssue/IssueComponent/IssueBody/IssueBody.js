@@ -57,7 +57,7 @@ function IssueBody(props) {
           {
             issueId && ['story', 'feature'].indexOf(typeCode) !== -1 ? (
               <div style={{ display: 'flex', marginRight: 25 }}>
-                <FieldStoryPoint {...props} field={store.getFieldByCode('storyPoints')} />
+                <FieldStoryPoint {...props} field={{ fieldCode: 'storyPoints', fieldName: '故事点' }} />
               </div>
             ) : null
           }
