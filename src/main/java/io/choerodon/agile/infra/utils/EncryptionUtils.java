@@ -574,9 +574,20 @@ public class EncryptionUtils {
                         nodeObjValue.put("value", list);
                     } else if (StringUtils.contains(next.getKey(), "date")){
                         try {
-                            nodeObjValue.put("startDate", sdf.parse(node.get("startDate").textValue()));
-                            nodeObjValue.put("endDate", sdf.parse(node.get("endDate").textValue()));
-                        } catch (ParseException e) {
+                            String startTime = null;
+                            String endTime = null;
+                            if (encrypt) {
+                                String startDate = node.get("startDate").asText();
+                                String endDate = node.get("endDate").asText();
+                                startTime = startDate.contains("-") ? startDate : sdf.format(new Date(Long.parseLong(startDate)));
+                                endTime = endDate.contains("-") ? endDate : sdf.format(new Date(Long.parseLong(endDate)));
+                            } else {
+                                startTime = node.get("startDate").textValue();
+                                endTime = node.get("endDate").textValue();
+                            }
+                            nodeObjValue.put("startDate", startTime);
+                            nodeObjValue.put("endDate", endTime);
+                        } catch (Exception e) {
                             throw new CommonException(e);
                         }
                     }else {
