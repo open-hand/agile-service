@@ -4,11 +4,11 @@ import classNames from 'classnames';
 import TypeTag from '@/components/TypeTag';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import moment from 'moment';
+import { calcDays } from '@/utils/Date';
 import {
   IssueNum, StayDay, StatusName, Priority, Assignee, Summary, Delay,
 } from './CardComponent/index';
 import './Card.less';
-import { calcDays } from '@/utils/Date';
 
 function getStyle({ draggableStyle, virtualStyle, isDragging }) {
   const combined = {
@@ -72,7 +72,7 @@ class Card extends Component {
     let delayDays = 0;
     const { estimatedEndTime } = issue;
     if (estimatedEndTime) {
-      delayDays = calcDays(moment(), estimatedEndTime);
+      delayDays = moment().diff(moment(estimatedEndTime), 'days', true);
     }
     return (
       <div
@@ -118,7 +118,7 @@ class Card extends Component {
                   !completed && (
                     delayDays > 0 || (delayDays >= -1 && delayDays < 0)
                   ) && (
-                  <Delay day={delayDays} />
+                  <Delay day={Math.ceil(delayDays)} />
                   )
                 }
               </div>

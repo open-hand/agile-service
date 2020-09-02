@@ -13,6 +13,7 @@ import _ from 'lodash';
 import Moment from 'moment';
 import { extendMoment } from 'moment-range';
 import { sprintApi, reportApi } from '@/api';
+import { linkUrl } from '@/utils/to';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 import QuickSearch from '@/components/quick-search';
 import BurndownChartStore from '../../../../stores/project/burndownChart/BurndownChartStore';
@@ -739,7 +740,7 @@ class BurndownChartHome extends Component {
         <Header
           title="燃尽图"
           // backPath={`/agile/${linkFromParamUrl || 'reporthost'}?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}
-          backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
+          backPath={linkUrl(LINK_URL.report)}
         >
           <SwithChart
             current="burndownchart"

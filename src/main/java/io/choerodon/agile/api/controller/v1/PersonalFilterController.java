@@ -3,11 +3,9 @@ package io.choerodon.agile.api.controller.v1;
 import io.choerodon.agile.api.vo.PersonalFilterVO;
 import io.choerodon.agile.app.service.PersonalFilterService;
 
-import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
-import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;

@@ -37,6 +37,8 @@ import UserHead from '../../../../UserHead';
       assigneeId, assigneeImageUrl,
       assigneeLoginName, assigneeName, assigneeRealName,
     } = issue;
+    const field = store.getFieldByCode('assignee');
+    const required = field?.required;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -48,10 +50,11 @@ import UserHead from '../../../../UserHead';
           <TextEditToggle
             disabled={disabled}
             onSubmit={this.updateIssueAssignee}
-            initValue={Number(assigneeId) || undefined}
+            initValue={(assigneeId && assigneeId.toString()) || undefined}
             editor={({ submit }) => (
               <SelectUser
-                clearButton
+                clearButton={!required}
+                required={required}
                 onChange={submit}
                 selectedUser={assigneeId ? {
                   id: assigneeId,
@@ -81,7 +84,9 @@ import UserHead from '../../../../UserHead';
               )
             }
           </TextEditToggle>
-          {Number(assigneeId) !== Number(loginUserId) && !disabled
+          {(!assigneeId || (
+            assigneeId && assigneeId.toString() !== loginUserId.toString()
+          )) && !disabled
             ? (
               <span
                 role="none"
@@ -95,7 +100,7 @@ import UserHead from '../../../../UserHead';
                   whiteSpace: 'nowrap',
                 }}
                 onClick={() => {
-                  if (Number(loginUserId) !== Number(assigneeId)) {
+                  if (!assigneeId || loginUserId.toString() !== assigneeId.toString()) {
                     this.updateIssueAssignee(loginUserId);
                   }
                 }}

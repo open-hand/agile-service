@@ -7,7 +7,6 @@ import { issueApi } from '@/api';
 import SelectLabel from '@/components/select/select-label';
 import TextEditToggle from '@/components/TextEditTogglePro';
 
-
 @inject('AppState')
 @observer class FieldLabel extends Component {
   dataRef = React.createRef();
@@ -15,11 +14,10 @@ import TextEditToggle from '@/components/TextEditTogglePro';
   transToArr = (arr, pro, type = 'string') => {
     if (!arr.length) {
       return type === 'string' ? '无' : [];
-    } else if (typeof arr[0] === 'object') {
+    } if (typeof arr[0] === 'object') {
       return type === 'string' ? _.map(arr, pro).join() : _.map(arr, pro);
-    } else {
-      return type === 'string' ? arr.join() : arr;
     }
+    return type === 'string' ? arr.join() : arr;
   };
 
   updateIssueLabel = (labels) => {
@@ -64,7 +62,8 @@ import TextEditToggle from '@/components/TextEditTogglePro';
     const { store, disabled } = this.props;
     const issue = store.getIssue;
     const { labelIssueRelVOList = [] } = issue;
-
+    const field = store.getFieldByCode('label');
+    const required = field?.required;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -77,13 +76,13 @@ import TextEditToggle from '@/components/TextEditTogglePro';
             disabled={disabled}
             onSubmit={this.updateIssueLabel}
             initValue={this.transToArr(labelIssueRelVOList, 'labelName', 'array')}
-            editor={() => <SelectLabel dataRef={this.dataRef} />}
+            editor={() => <SelectLabel required={required} dataRef={this.dataRef} />}
           >
             {
               labelIssueRelVOList.length > 0 ? (
                 <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                   {
-                    this.transToArr(labelIssueRelVOList, 'labelName', 'array').map(label => (
+                    this.transToArr(labelIssueRelVOList, 'labelName', 'array').map((label) => (
                       <div
                         key={label}
                         style={{

@@ -49,9 +49,6 @@ public class ChangeStateMachineStatusAspect {
         }
         if (stateMachine.getStatus().equals(StateMachineStatus.ACTIVE)) {
             stateMachine.setStatus(StateMachineStatus.DRAFT);
-//            Criteria criteria = new Criteria();
-//            criteria.update("status");
-//            stateMachineMapper.updateByPrimaryKeyOptions(stateMachine, criteria);
             statusMachineMapper.updateOptional(stateMachine, "status");
         }
 

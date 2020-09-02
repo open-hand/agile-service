@@ -1,4 +1,7 @@
-import { observable, action, computed } from 'mobx';
+import {
+  observable, action, computed, toJS,
+} from 'mobx';
+import { find } from 'lodash';
 
 const hiddenFields = ['issueType', 'summary', 'description', 'remainingTime', 'storyPoints'];
 class EditIssueStore {
@@ -19,6 +22,13 @@ class EditIssueStore {
   @action setIssueFields(issue, fields) {
     this.fields = fields;
     this.issue = issue;
+  }
+
+  getFieldByCode(code) {
+    if (code === 'storyPoints') {
+      console.log(toJS(this.fields));
+    }
+    return find(this.fields, { fieldCode: code });
   }
 
   @computed get customFields() {

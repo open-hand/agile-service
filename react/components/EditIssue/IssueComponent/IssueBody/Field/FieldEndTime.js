@@ -34,6 +34,8 @@ class FieldEndTime extends Component {
     const { store } = this.props;
     const issue = store.getIssue;
     const { estimatedEndTime, estimatedStartTime } = issue;
+    const field = store.getFieldByCode('estimatedEndTime');
+    const required = field?.required;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -46,7 +48,7 @@ class FieldEndTime extends Component {
             initValue={estimatedEndTime ? moment(estimatedEndTime) : undefined}
             onSubmit={this.updateIssueField}
             alwaysRender={false}
-            editor={() => <DateTimePicker min={estimatedStartTime && moment(estimatedStartTime).add(1, 's')} />}
+            editor={() => <DateTimePicker required={required} min={estimatedStartTime && moment(estimatedStartTime).add(1, 's')} />}
             submitTrigger={['blur']}
           >
             {

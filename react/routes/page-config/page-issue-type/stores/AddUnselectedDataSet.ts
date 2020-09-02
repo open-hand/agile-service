@@ -8,7 +8,6 @@ const AddUnselectedDataSet = (): DataSetProps => ({
     {
       name: 'field', label: '字段', required: true,
     },
-
   ],
 });
 export default AddUnselectedDataSet;

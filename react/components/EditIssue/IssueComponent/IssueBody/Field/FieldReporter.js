@@ -38,7 +38,8 @@ import UserHead from '../../../../UserHead';
       reporterId, reporterName, reporterImageUrl,
       reporterRealName, reporterLoginName,
     } = issue;
-
+    const field = store.getFieldByCode('reporter');
+    const required = field?.required;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -48,12 +49,17 @@ import UserHead from '../../../../UserHead';
         </div>
         <div className="c7n-value-wrapper">
           <TextEditToggle
-            disabled={disabled || (Number(reporterId) !== Number(loginUserId) && !hasPermission)}
+            disabled={disabled || (
+              reporterId && reporterId.toString() !== loginUserId.toString() && !hasPermission
+            )}
             onSubmit={this.updateIssueReporter}
-            initValue={reporterLoginName ? Number(reporterId) || undefined : undefined}
+            initValue={reporterLoginName ? (
+              reporterId && reporterId.toString()
+            ) || undefined : undefined}
             editor={({ submit }) => (
               <SelectUser
-                // clearButton
+                clearButton={!required}
+                required={required}
                 onChange={submit}
                 selectedUser={reporterId ? {
                   id: reporterId,
@@ -66,7 +72,7 @@ import UserHead from '../../../../UserHead';
             )}
           >
             {
-              Number(reporterId) && reporterLoginName ? (
+              reporterId && reporterLoginName ? (
                 <UserHead
                   user={{
                     id: reporterId,

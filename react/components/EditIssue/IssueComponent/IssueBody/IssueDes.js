@@ -13,7 +13,6 @@ import FullEditor from '../../../FullEditor';
 import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
-const bugDefaultDes = [{ attributes: { bold: true }, insert: '步骤' }, { insert: '\n' }, { attributes: { list: 'ordered' }, insert: '\n\n\n' }, { attributes: { bold: true }, insert: '结果' }, { insert: '\n\n' }, { attributes: { bold: true }, insert: '期望' }, { insert: '\n' }];
 const IssueDes = ({ reloadIssue }) => {
   const [editDesShow, setEditDesShow] = useState(false);
   const [fullEdit, setFullEdit] = useState(false);

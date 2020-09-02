@@ -7,7 +7,6 @@ import { issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectComponent from '@/components/select/select-component';
 
-
 @inject('AppState')
 @observer class FieldComponent extends Component {
   dataRef = React.createRef();
@@ -15,11 +14,10 @@ import SelectComponent from '@/components/select/select-component';
   transToArr = (arr, pro, type = 'string') => {
     if (!arr.length) {
       return type === 'string' ? '无' : [];
-    } else if (typeof arr[0] === 'object') {
+    } if (typeof arr[0] === 'object') {
       return type === 'string' ? _.map(arr, pro).join() : _.map(arr, pro);
-    } else {
-      return type === 'string' ? arr.join() : arr;
     }
+    return type === 'string' ? arr.join() : arr;
   };
 
   updateIssueComponents = (newComponents) => {
@@ -65,6 +63,8 @@ import SelectComponent from '@/components/select/select-component';
     const { store, disabled } = this.props;
     const issue = store.getIssue;
     const { componentIssueRelVOList = [] } = issue;
+    const field = store.getFieldByCode('component');
+    const required = field?.required;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -79,8 +79,9 @@ import SelectComponent from '@/components/select/select-component';
             initValue={this.transToArr(componentIssueRelVOList, 'name', 'array')}
             editor={(
               <SelectComponent
+                required={required}
                 dataRef={this.dataRef}
-                getPopupContainer={() => document.getElementById('detail')} 
+                getPopupContainer={() => document.getElementById('detail')}
                 style={{ marginTop: 0, paddingTop: 0 }}
               />
           )}
@@ -96,8 +97,7 @@ import SelectComponent from '@/components/select/select-component';
                 <div>
                   无
                 </div>
-              )
-              }
+              )}
           </TextEditToggle>
         </div>
       </div>

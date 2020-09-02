@@ -182,6 +182,9 @@ const NotifySetting = ({
       (res.userTypeList || []).forEach((usertype: string) => {
         current?.set(usertype, true);
       });
+      (res.memberList || []).forEach((item: { code: string, name: string}) => {
+        current?.set(item.code, true);
+      });
       current?.set('userIdList', (res.userList || []).map((item: { id: string}) => item.id));
       current?.set('noticeTypeList', (res.noticeTypeList || []).filter((item: string) => item !== 'WEB_HOOK'));
       current?.set('webhook', Boolean((res.noticeTypeList || []).find((item: string) => item === 'WEB_HOOK')));
@@ -225,7 +228,7 @@ const NotifySetting = ({
         };
         try {
           await statusTransformApi.updateNotifySetting(updateData);
-          customCirculationDataSet.query();
+          customCirculationDataSet.query(customCirculationDataSet.currentPage);
           return true;
         } catch (e) {
           return false;

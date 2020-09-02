@@ -1,4 +1,5 @@
 import { axios } from '@choerodon/boot';
+import { AxiosRequestConfig } from 'axios';
 import { getProjectId, getOrganizationId, getMenuType } from '@/utils/common';
 import Api from './Api';
 
@@ -25,6 +26,23 @@ interface IFiled {
   required: boolean,
   source: string,
 }
+interface IFiledListItem {
+  code: string,
+  context: 'feature' | 'bug' | 'sub_task' | 'issue_epic' | 'task' | 'story' | 'backlog',
+  contextName: string,
+  defaultValue: any,
+  description: string,
+  fieldType: string,
+  fieldTypeName: string,
+  id: string,
+  name: string,
+  objectVersionNumber: number,
+  organizationId: string,
+  projectId: string | null,
+  requiredScope: 'ALL' | 'PART' | 'NONE',
+  system: boolean,
+}
+export type IFiledListItemProps = IFiledListItem;
 export type IFiledProps = IFiled;
 interface IssueTypeFieldVO {
   id: string,

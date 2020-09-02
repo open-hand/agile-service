@@ -6,7 +6,7 @@ interface Props {
 }
 const Delay: React.FC<Props> = ({ day }) => (
   <div className={day > 0 ? styles.delay : styles.soonDelay}>
-    {day > 0 ? `延期${Math.ceil(day)}天` : '即将到期'}
+    {day > 0 ? `延期${day}天` : '即将到期'}
   </div>
 );
 

@@ -28,6 +28,8 @@ import org.hzero.starter.keyencrypt.core.EncryptProperties;
 import org.hzero.starter.keyencrypt.core.EncryptionService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +42,8 @@ import org.springframework.util.ObjectUtils;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class QuickFilterServiceImpl implements QuickFilterService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(QuickFilterServiceImpl.class);
 
     protected static final String NOT_IN = "not in";
     protected static final String IS_NOT = "is not";
@@ -580,7 +584,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
             }
             stringBuilder.append("}");
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("json to json node error: {}", e);
         }
         return stringBuilder.toString();
     }

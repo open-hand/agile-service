@@ -37,9 +37,8 @@ import TextEditToggle from '@/components/TextEditTogglePro';
   render() {
     const { store, field, disabled } = this.props;
     const issue = store.getIssue;
-    const { fieldCode, fieldName } = field;
+    const { fieldCode, fieldName, required } = field || {};
     const { [fieldCode]: value, typeCode } = issue;
-
     return (
       <div className="line-start mt-10" style={{ width: '100%' }}>
         <div>
@@ -54,7 +53,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
             onSubmit={this.updateIssueField}
             initValue={value ? String(value) : undefined}
             editor={({ submit }) => (
-              <SelectNumber onChange={submit} />
+              <SelectNumber required={required} onChange={submit} />
             )}
           >
             <div style={{ whiteSpace: 'nowrap' }}>

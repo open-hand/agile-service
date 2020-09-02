@@ -8,7 +8,7 @@ import {
 import {
   Button, Table, Select, Icon, Spin,
 } from 'choerodon-ui';
-import to from '@/utils/to';
+import to, { linkUrl } from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import pic from '../../../../assets/image/emptyChart.svg';
 import SwithChart from '../../Component/switchChart';
@@ -350,7 +350,7 @@ class VelocityChart extends Component {
       <Page className="c7n-velocity" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.velocity_chart']}>
         <Header
           title="迭代速度图"
-          backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
+          backPath={linkUrl(LINK_URL.report)}
         >
           <SwithChart current="velocityChart" />
           <Button funcType="flat" onClick={() => this.refresh()}>

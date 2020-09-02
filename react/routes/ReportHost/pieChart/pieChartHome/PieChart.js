@@ -16,7 +16,7 @@ import {
 } from 'choerodon-ui';
 import './pie.less';
 import { sprintApi, versionApi } from '@/api';
-import to from '@/utils/to';
+import to, { linkUrl } from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import SwitchChart from '../../Component/switchChart';
 import VersionReportStore from '../../../../stores/project/versionReport/VersionReport';
@@ -476,7 +476,7 @@ class ReleaseDetail extends Component {
       <Page className="pie-chart" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.piechart']}>
         <Header
           title="统计图"
-          backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
+          backPath={linkUrl(LINK_URL.report)}
         >
           <SwitchChart
             current="pieReport"

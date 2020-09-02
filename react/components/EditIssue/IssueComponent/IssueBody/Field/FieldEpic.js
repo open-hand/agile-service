@@ -72,6 +72,8 @@ import { IsInProgram } from '@/hooks/useIsInProgram';
       epicColor, epicId, issueEpicName, typeCode,
       featureId, featureName,
     } = issue;
+    const field = store.getFieldByCode('epic');
+    const required = field?.required;
     return (
       <IsInProgram>
         {
@@ -120,7 +122,7 @@ import { IsInProgram } from '@/hooks/useIsInProgram';
                     disabled={featureName || disabled}
                     onSubmit={this.updateIssueEpic}
                     initValue={issueEpicName ? epicId || null : null}
-                    editor={({ submit }) => <SelectEpic onChange={submit} />}
+                    editor={({ submit }) => <SelectEpic required={required} onChange={submit} />}
                   >
                     {
                 issueEpicName ? (

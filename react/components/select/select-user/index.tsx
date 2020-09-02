@@ -5,6 +5,7 @@ import { userApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { User } from '@/common/types';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import Item from 'choerodon-ui/lib/list/Item';
 
 const toArray = (something: any) => (Array.isArray(something) ? something : [something]);
 export interface SelectUserProps extends Partial<SelectProps> {
@@ -30,13 +31,17 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       if (selectedUser) {
         const temp: User[] = [];
         (toArray(selectedUser).forEach((user) => {
-          if (!find(data, { id: Number(user.id) })) {
+          if (!find(data, (item) => String(item.id) === user.id)) {
             temp.push(user);
           }
         }));
-        return [...(extraOptions || []), ...temp, ...data];
+        return [...(extraOptions || []), ...temp, ...data].map((item: User) => (
+          { ...item, id: item.id.toString() }
+        ));
       }
-      return [...(extraOptions || []), ...data];
+      return [...(extraOptions || []), ...data].map((item: User) => (
+        { ...item, id: item.id.toString() }
+      ));
     },
   }), [extraOptions, selectedUser]);
   const props = useSelect(config);

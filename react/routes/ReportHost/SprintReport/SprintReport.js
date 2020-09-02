@@ -21,7 +21,7 @@ import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';
 import STATUS from '@/constants/STATUS';
 import { sprintApi, reportApi } from '@/api';
-import to from '@/utils/to';
+import to, { linkUrl } from '@/utils/to';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 import NoDataComponent from '../Component/noData';
 import SwithChart from '../Component/switchChart';
@@ -590,7 +590,7 @@ class SprintReport extends Component {
       <Page className="c7n-report" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.sprintreport']}>
         <Header
           title="冲刺报告图"
-          backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
+          backPath={linkUrl(LINK_URL.report)}
 
         >
           <SwithChart
