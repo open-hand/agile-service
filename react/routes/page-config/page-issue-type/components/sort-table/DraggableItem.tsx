@@ -19,7 +19,12 @@ import { PageIssueTypeStoreStatusCode } from '../../stores/PageIssueTypeStore';
 import { useSortTableContext } from './stores';
 
 // import CheckBox from './components/Checkbox';
-
+interface IFieldOption {
+  id: string,
+  fieldId: string,
+  code: string,
+  value: string,
+}
 interface Props {
   data: Record,
   provided: DraggableProvided,
@@ -122,7 +127,8 @@ const DraggableItem: React.FC<Props> = ({
     ...virtualizedStyle,
     cursor: 'all-scroll',
   });
-  const transformDefaultValue = (fieldType: string, defaultValue: any) => {
+  const transformDefaultValue = (fieldType: string, defaultValue: any,
+    defaultValueObj?: any, fieldOptions?: Array<IFieldOption> | null) => {
     if (!defaultValue || defaultValue === '') {
       return defaultValue;
     }
@@ -133,6 +139,18 @@ const DraggableItem: React.FC<Props> = ({
         return moment(defaultValue).format('hh:mm:ss');
       case 'date':
         return moment(defaultValue).format('YYYY-MM-DD');
+      case 'multiple':
+      case 'checkbox':
+      case 'single':
+      case 'radio': {
+        const valueArr = String(defaultValue).split(',');
+        return Array.isArray(fieldOptions)
+          ? fieldOptions.filter((option) => valueArr.some((v) => v === option.id)).join(',') : defaultValue;
+      }
+      case 'member': {
+        const { realName } = defaultValueObj || {};
+        return realName || defaultValue;
+      }
       default:
         return defaultValue;
     }
@@ -151,7 +169,7 @@ const DraggableItem: React.FC<Props> = ({
       <div className={`${prefixCls}-item`}>
         {renderFieldName({ value: data.get('fieldName'), record: data, dataSet: data.dataSet })}
       </div>
-      <Tooltip title={transformDefaultValue(data.get('fieldType'), data.get('defaultValue'))} placement="top">
+      <Tooltip title={transformDefaultValue(data.get('fieldType'), data.get('defaultValue'), data.get('defaultValueObj'), data.get('fieldOptions'))} placement="top">
         <div className={`${prefixCls}-item ${prefixCls}-item-text`}>
           {transformDefaultValue(data.get('fieldType'), data.get('defaultValue'))}
         </div>
