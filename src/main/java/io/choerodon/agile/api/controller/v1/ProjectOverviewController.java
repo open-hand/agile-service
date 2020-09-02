@@ -66,7 +66,7 @@ public class ProjectOverviewController {
                                                            @PathVariable(name = "project_id") Long projectId,
                                                            @ApiParam(value = "冲刺Id", required = true)
                                                            @PathVariable @Encrypt Long sprintId) {
-        return Results.success(reportService.selectBugBysprint(projectId, sprintId));
+        return Results.success(null);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
