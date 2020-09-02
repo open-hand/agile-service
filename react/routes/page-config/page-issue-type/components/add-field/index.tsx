@@ -5,6 +5,7 @@ import {
 import { observer } from 'mobx-react-lite';
 import { IModalProps } from '@/common/types';
 import { pageConfigApi } from '@/api';
+import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import PageIssueTypeStore from '../../stores/PageIssueTypeStore';
 
 const { Option } = Select;
@@ -13,21 +14,27 @@ interface Props {
   dataSet: DataSet,
   store: PageIssueTypeStore,
   onSubmitLocal: any,
+  onRestoreLocal: (record: Record) => Promise<boolean>,
 }
 interface IPage {
   name: string,
-  fieldTypeName: string,
-  fieldName: string,
+  fieldId?: string,
   id: string,
 }
 const AddFiled: React.FC<Props> = observer(({
-  modal, dataSet, store, onSubmitLocal,
+  modal, dataSet, store, onSubmitLocal, onRestoreLocal,
 }) => {
   const [pageList, setPageList] = useState([] as IPage[]);
   async function handleSubmit() {
     if (dataSet.validate()) {
       const id = dataSet.current?.toData().field;
-      onSubmitLocal(store.allFieldData.get(id), true);
+      const addFiledData = store.allFieldData.get(id);
+      if (addFiledData) {
+        onSubmitLocal(store.allFieldData.get(id), true);
+      } else {
+        const deleteRecord = store.getDeleteRecords.find((record) => record.get('id') === id);
+        deleteRecord && onRestoreLocal(deleteRecord);
+      }
       dataSet.create();
       return true;
     }
@@ -39,10 +46,19 @@ const AddFiled: React.FC<Props> = observer(({
   useEffect(() => {
     pageConfigApi.loadUnSelected(store.currentIssueType).then((res) => {
       const currentDataArr = dataSet.toData();
-      const deleteRecords = store.getDeleteRecords.map((record) => record.toData());
+      const deleteRecords = store.getDeleteRecords.map((record) => {
+        const recordData = record.toData();
+        return {
+          ...recordData,
+          name: recordData.fieldName,
+          deleteAgainAdd: true, // 标记创建过的字段重新增添
+        };
+      });
+
+      // 第一次进入时不进行过滤 并且会过滤已增添字段  过滤系统字段
       const data = res.filter((item) => currentDataArr.length === 1
-        || currentDataArr.every((d: any) => d.field !== item.id))
-        .map((item) => store.allFieldData.get(item.id));
+        || !currentDataArr.some((d: any) => d.field === item.id))
+        .map((item) => store.allFieldData.get(item.id)!).filter((item) => !item.system);
       setPageList(data.concat(deleteRecords));
     });
     return () => {
@@ -52,13 +68,13 @@ const AddFiled: React.FC<Props> = observer(({
   return (
     <Form record={dataSet.current}>
       <Select name="field">
-        {pageList.map((item) => <Option value={item.id}>{item.name || item.fieldName}</Option>)}
+        {pageList.map((item) => <Option value={item.id}>{item.name}</Option>)}
       </Select>
     </Form>
   );
 });
 
-const openField = (dataSet: DataSet, store: PageIssueTypeStore, onSubmitLocal: any) => {
+const openField = (dataSet: DataSet, store: PageIssueTypeStore, onSubmitLocal: any, onRestoreLocal: Props['onRestoreLocal']) => {
   Modal.open({
     key: Modal.key(),
     title: '添加已有字段',
@@ -66,7 +82,12 @@ const openField = (dataSet: DataSet, store: PageIssueTypeStore, onSubmitLocal: a
       width: 340,
     },
     drawer: true,
-    children: <AddFiled dataSet={dataSet} store={store} onSubmitLocal={onSubmitLocal} />,
+    children: <AddFiled
+      dataSet={dataSet}
+      store={store}
+      onSubmitLocal={onSubmitLocal}
+      onRestoreLocal={onRestoreLocal}
+    />,
   });
 };
 export default openField;

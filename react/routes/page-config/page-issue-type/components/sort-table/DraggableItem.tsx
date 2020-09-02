@@ -40,7 +40,7 @@ const DraggableItem: React.FC<Props> = ({
     editedFieldCanNotEdit = false,
   } = pageConfigFieldEdited;
   // 是否禁止删除此字段 1.系统字段不可删除  2. 项目层下组织层字段不可删除
-  const disabledDel = data?.get('pageConfigFieldEdited');
+  const disabledDel = !!data?.get('pageConfigFieldEdited') || data.get('createdLevel') === 'system';
   const renderFieldName = ({ value, record, dataSet }: RenderProps) => (
     <div className={`${prefixCls}-text`}>
 
@@ -79,8 +79,13 @@ const DraggableItem: React.FC<Props> = ({
     // return <input type="checkbox" checked={value} />;
   }
   const handleDelete = (record: Record, dataSet: DataSet) => {
-    onDelete && onDelete(record?.toData());
-    pageIssueTypeStore.addDeleteRecord(record!);
+    const recordData = record.toData();
+    onDelete && onDelete(recordData);
+    // 非本地提交数据删除 对其记录，方便后续添加已有字段时恢复数据
+    if (!recordData.local) {
+      pageIssueTypeStore.addDeleteRecord(record!);
+    }
+
     dataSet?.remove(record!);
   };
   function onClickDel(record: Record, dataSet: DataSet) {

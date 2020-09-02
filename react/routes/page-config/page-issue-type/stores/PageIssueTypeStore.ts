@@ -1,8 +1,10 @@
 import {
-  observable, action, runInAction, computed,
+  observable, action, runInAction, computed, ObservableMap,
 } from 'mobx';
-
-import { PageConfigIssueType, pageConfigApi } from '@/api';
+import { findIndex } from 'lodash';
+import {
+  PageConfigIssueType, pageConfigApi, IFiledProps, IFiledListItemProps,
+} from '@/api';
 import { DataSet } from 'choerodon-ui/pro/lib';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { IFieldPostDataProps } from '../../components/create-field/CreateField';
@@ -40,7 +42,7 @@ class PageIssueTypeStore {
 
   @observable loading: boolean = false;
 
-  @observable allFieldData = observable.map();
+  @observable allFieldData: ObservableMap<any, IFiledListItemProps> = observable.map();
 
   @observable currentIssueType: PageConfigIssueType = PageConfigIssueType.null;
 
@@ -74,6 +76,7 @@ class PageIssueTypeStore {
   @action('清空编辑数据') clear() {
     this.dataStatusCode = PageIssueTypeStoreStatusCode.null;
     this.deleteIds.length = 0;
+    this.deleteRecords.length = 0;
     this.descriptionObj = {
       id: undefined,
       template: undefined,
@@ -95,6 +98,16 @@ class PageIssueTypeStore {
 
   @action('增添删除字段') addDeleteId(id: string) {
     this.deleteIds.push(id);
+  }
+
+  @action('移除删除字段') removeDeleteId(id: string) {
+    const index = findIndex(this.deleteIds, (deleteId: string) => deleteId === id);
+    index !== -1 && this.deleteIds.splice(index, 1);
+  }
+
+  @action('移除删除缓存记录') removeDeleteRecord(RecordId: number) {
+    const index = findIndex(this.deleteRecords, (record: Record) => record.id === RecordId);
+    index !== -1 && this.deleteRecords.splice(index, 1);
   }
 
   @action('删除本地字段') deleteLocalField(code: string, id?: string) {
