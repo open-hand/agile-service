@@ -128,6 +128,20 @@ function PageIssueType() {
     return true;
   };
 
+  const onRestoreLocal = async (record: Record) => {
+    // 移除将要删除id
+    pageIssueTypeStore.removeDeleteId(record.get('id'));
+    // 移除删除的记录的缓存
+    pageIssueTypeStore.removeDeleteRecord(record.id);
+    record.reset();
+    const newRank = await pageConfigApi.loadRankValue({
+      previousRank: null,
+      nextRank: sortTableDataSet.data[sortTableDataSet.length - 1].get('rank'),
+    });
+    sortTableDataSet.move(record.index, sortTableDataSet.data[sortTableDataSet.length - 1].index);
+    record.set('rank', newRank);
+    return true;
+  };
   const checkCodeOrName = (key: 'code' | 'name',
     name: string) => pageIssueTypeStore.getCreatedFields.length !== 0
     && pageIssueTypeStore.getCreatedFields
@@ -161,7 +175,8 @@ function PageIssueType() {
         <Button icon="playlist_add" onClick={openCreateFieldModal}>创建字段</Button>
         <Button
           icon="add"
-          onClick={() => openAddField(addUnselectedDataSet, pageIssueTypeStore, onSubmitLocal)}
+          onClick={() => openAddField(addUnselectedDataSet,
+            pageIssueTypeStore, onSubmitLocal, onRestoreLocal)}
         >
           添加已有字段
         </Button>

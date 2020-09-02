@@ -25,6 +25,23 @@ interface IFiled {
   required: boolean,
   source: string,
 }
+interface IFiledListItem {
+  code: string,
+  context: 'feature' | 'bug' | 'sub_task' | 'issue_epic' | 'task' | 'story' | 'backlog',
+  contextName: string,
+  defaultValue: any,
+  description: string,
+  fieldType: string,
+  fieldTypeName: string,
+  id: string,
+  name: string,
+  objectVersionNumber: number,
+  organizationId: string,
+  projectId: string | null,
+  requiredScope: 'ALL' | 'PART' | 'NONE',
+  system: boolean,
+}
+export type IFiledListItemProps = IFiledListItem;
 export type IFiledProps = IFiled;
 interface IssueTypeFieldVO {
   id: string,
@@ -57,7 +74,7 @@ class PageConfigApi extends Api {
    * 加载字段列表
    * @param schemeCode
    */
-  load(schemeCode: string = 'agile_issue') {
+  load(schemeCode: string = 'agile_issue'): Promise<Array<IFiledListItem>> {
     return this.request({
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/list`,
