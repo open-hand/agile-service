@@ -2,8 +2,6 @@ package io.choerodon.agile.api.vo;
 
 import java.util.*;
 
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.enums.StatusNoticeUserType;
@@ -17,6 +15,9 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StatusNoticeSettingVO extends AuditDomain {
+
+    public StatusNoticeSettingVO() {
+    }
 
     public StatusNoticeSettingVO(Long projectId, Long issueTypeId, Long statusId) {
         this.issueTypeId = issueTypeId;
@@ -33,16 +34,13 @@ public class StatusNoticeSettingVO extends AuditDomain {
     }
 
     @ApiModelProperty(value = "issue类型Id",required = true)
-    @NotNull
     @Encrypt
     private Long issueTypeId;
 
     @ApiModelProperty(value = "项目id",required = true)
-    @NotNull
     private Long projectId;
 
     @ApiModelProperty(value = "状态id",required = true)
-    @NotNull
     @Encrypt
     private Long statusId;
 

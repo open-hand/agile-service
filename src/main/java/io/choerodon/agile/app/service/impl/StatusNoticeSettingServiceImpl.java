@@ -71,6 +71,9 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
 
     @Override
     public void save(Long projectId, StatusNoticeSettingVO statusNoticeSettingVO, String applyType) {
+        Assert.notNull(statusNoticeSettingVO.getIssueTypeId(), BaseConstants.ErrorCode.NOT_NULL);
+        Assert.notNull(statusNoticeSettingVO.getProjectId(), BaseConstants.ErrorCode.NOT_NULL);
+        Assert.notNull(statusNoticeSettingVO.getStatusId(), BaseConstants.ErrorCode.NOT_NULL);
         StatusNoticeSettingDTO noticeDTO = new StatusNoticeSettingDTO(projectId, statusNoticeSettingVO.getIssueTypeId(),
                 statusNoticeSettingVO.getStatusId());
         // 删除
