@@ -31,7 +31,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       if (selectedUser) {
         const temp: User[] = [];
         (toArray(selectedUser).forEach((user) => {
-          if (!find(data, { id: Number(user.id) })) {
+          if (!find(data, (item) => String(item.id) === user.id)) {
             temp.push(user);
           }
         }));
