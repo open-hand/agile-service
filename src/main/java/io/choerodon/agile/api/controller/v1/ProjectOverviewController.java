@@ -35,7 +35,7 @@ public class ProjectOverviewController {
                                                            @PathVariable(name = "project_id") Long projectId,
                                                            @ApiParam(value = "冲刺Id", required = true)
                                                            @PathVariable @Encrypt Long sprintId) {
-        return Results.success(projectOverviewService.selectUncompletedBySprint(projectId, sprintId));
+        return Results.success(new UncompletedCountVO());
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -45,7 +45,7 @@ public class ProjectOverviewController {
                                                                  @PathVariable(name = "project_id") Long projectId,
                                                                  @ApiParam(value = "冲刺Id", required = true)
                                                                  @PathVariable @Encrypt Long sprintId) {
-        return Results.success(projectOverviewService.selectIssueCountBysprint(projectId, sprintId));
+        return Results.success(new ArrayList<>());
     }
 
 
@@ -56,7 +56,7 @@ public class ProjectOverviewController {
                                                                 @PathVariable(name = "project_id") Long projectId,
                                                                      @ApiParam(value = "冲刺Id", required = true)
                                                                 @PathVariable @Encrypt Long sprintId) {
-        return Results.success(projectOverviewService.selectSprintStatistics(projectId, sprintId));
+        return Results.success(null);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -76,6 +76,6 @@ public class ProjectOverviewController {
                                                                @PathVariable(name = "project_id") Long projectId,
                                                                 @ApiParam(value = "冲刺Id", required = true)
                                                                @PathVariable @Encrypt Long sprintId) {
-        return Results.success(projectOverviewService.selectOneJobsBysprint(projectId, sprintId));
+        return Results.success(new ArrayList<>());
     }
 }
