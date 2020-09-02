@@ -97,6 +97,18 @@ const systemFields = new Map([
     name: '预估时间',
     fieldType: 'number',
   }],
+  ['estimatedStartTime', {
+    id: 'estimatedStartTime',
+    code: 'estimatedStartTime',
+    name: '预计开始时间',
+    fieldType: 'datetime',
+  }],
+  ['estimatedEndTime', {
+    id: 'estimatedEndTime',
+    code: 'estimatedEndTime',
+    name: '预计结束时间',
+    fieldType: 'datetime',
+  }],
 ]);
 const { Option } = Select;
 

@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import {
   stores, Content, Choerodon,
 } from '@choerodon/boot';
-import { withRouter } from 'react-router-dom';
 import {
   Form, Input, Button, Spin,
 } from 'choerodon-ui';

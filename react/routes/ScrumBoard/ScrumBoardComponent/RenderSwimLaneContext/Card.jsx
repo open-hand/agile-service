@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import TypeTag from '@/components/TypeTag';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import moment from 'moment';
+import { calcDays } from '@/utils/Date';
 import {
   IssueNum, StayDay, StatusName, Priority, Assignee, Summary, Delay,
 } from './CardComponent/index';
