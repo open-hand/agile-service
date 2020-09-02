@@ -18,7 +18,7 @@ class SwimLanePage extends Component {
 
   handleSave(select) {
     const { selectValue, selectedValue } = this.state;
- 
+
     boardApi.updateUserSetting(select.boardId, selectValue || ScrumBoardStore.getSwimLaneCode).then((res) => {
       ScrumBoardStore.setSwimLaneCode(selectedValue);
       Choerodon.prompt('保存成功');

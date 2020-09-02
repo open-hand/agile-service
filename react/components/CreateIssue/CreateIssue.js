@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-closing-tag-location */
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import {
   stores, Content, Choerodon,
 } from '@choerodon/boot';
@@ -48,7 +48,6 @@ const { AppState } = stores;
 const { Sidebar } = Modal;
 const { Option } = Select;
 const FormItem = Form.Item;
-const bugDefaultDes = [{ attributes: { bold: true }, insert: '步骤' }, { insert: '\n' }, { attributes: { list: 'ordered' }, insert: '\n\n\n' }, { attributes: { bold: true }, insert: '结果' }, { insert: '\n\n' }, { attributes: { bold: true }, insert: '期望' }, { insert: '\n' }];
 const defaultProps = {
   mode: 'default',
   applyType: 'agile',
