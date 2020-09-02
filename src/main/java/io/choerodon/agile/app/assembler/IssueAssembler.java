@@ -10,6 +10,7 @@ import io.choerodon.agile.infra.enums.StatusType;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.*;
 
+import io.choerodon.core.exception.CommonException;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -656,14 +657,16 @@ public class IssueAssembler extends AbstractAssembler {
     private Map<Date, Set<Long>> generateTimeUserLine(SprintDTO sprint, Set<Long> userSet) {
         Map<Date, Set<Long>> timeUserLine = new HashMap<>();
         // 生成迭代的开始时间与结束时间
-        Date temp = DateUtils.truncate(sprint.getStartDate(), Calendar.DAY_OF_MONTH);
-        Date now = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
+        Date startDate = DateUtils.truncate(sprint.getStartDate(), Calendar.DAY_OF_MONTH);
+        Date endDate = DateUtils.truncate(sprint.getActualEndDate(), Calendar.DAY_OF_MONTH);
         // 渲染基础时间轴，包含从迭代开始到目前的所有日期, 迭代所有涉及到的经办人和报告人
-        while (!temp.equals(now)){
-            timeUserLine.put(temp, new HashSet<>(userSet));
-            temp = DateUtils.addDays(temp, 1);
+        if (startDate.after(endDate)){
+            throw new CommonException(BaseConstants.ErrorCode.DATA_INVALID);
         }
-        timeUserLine.put(now, new HashSet<>(userSet));
+        while (startDate.before(endDate) || startDate.equals(endDate)){
+            timeUserLine.put(startDate, new HashSet<>(userSet));
+            startDate = DateUtils.addDays(startDate, 1);
+        }
         return timeUserLine;
     }
 
