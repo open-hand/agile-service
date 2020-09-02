@@ -183,7 +183,7 @@ class AddComponent extends Component {
     // [=, !=, in, notIn, is, isNot]
     const equal_notEqual_in_notIn_is_isNot = new Set(['assignee', 'reporter', 'created_user', 'last_updated_user', 'epic', 'sprint', 'label', 'component', 'influence_version', 'fix_version', 'feature', 'member']);
     // [>, >=, <, <=]
-    const greater_greaterAndEqual_lessThan_lessThanAndEqual = new Set(['last_update_date', 'creation_date', 'date', 'dateTime', 'time']);
+    const greater_greaterAndEqual_lessThan_lessThanAndEqual = new Set(['last_update_date', 'creation_date', 'date', 'datetime', 'time']);
     // [>, >=, <, <=, is, isNot]
     const greater_greaterAndEqual_lessThan_lessThanAndEqual_is_isNot_equal = new Set(['story_point', 'remain_time', 'number']);
     // [=, !=, is, isNot]
