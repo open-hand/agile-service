@@ -1,4 +1,5 @@
 import { axios } from '@choerodon/boot';
+import { AxiosRequestConfig } from 'axios';
 import { getProjectId, getOrganizationId, getMenuType } from '@/utils/common';
 import Api from './Api';
 
@@ -74,7 +75,7 @@ class PageConfigApi extends Api {
    * 加载字段列表
    * @param schemeCode
    */
-  load(schemeCode: string = 'agile_issue'): Promise<Array<IFiledListItem>> {
+  load(schemeCode: string = 'agile_issue') {
     return this.request({
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/list`,
