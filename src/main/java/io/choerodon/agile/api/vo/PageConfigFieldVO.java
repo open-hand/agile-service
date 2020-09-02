@@ -2,6 +2,8 @@ package io.choerodon.agile.api.vo;
 
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import java.util.List;
+
 /**
  * @author superlee
  * @since 2020-08-10
@@ -16,7 +18,9 @@ public class PageConfigFieldVO {
 
     private String fieldName;
 
-    private String defaultValue;
+    private Object defaultValue;
+
+    private Object defaultValueObj;
 
     private String fieldType;
 
@@ -37,6 +41,34 @@ public class PageConfigFieldVO {
     private PageConfigFieldEditedVO pageConfigFieldEdited;
 
     private String fieldCode;
+
+    private Boolean extraConfig;
+
+    private List<FieldOptionVO> fieldOptions;
+
+    public Object getDefaultValueObj() {
+        return defaultValueObj;
+    }
+
+    public void setDefaultValueObj(Object defaultValueObj) {
+        this.defaultValueObj = defaultValueObj;
+    }
+
+    public List<FieldOptionVO> getFieldOptions() {
+        return fieldOptions;
+    }
+
+    public void setFieldOptions(List<FieldOptionVO> fieldOptions) {
+        this.fieldOptions = fieldOptions;
+    }
+
+    public Boolean getExtraConfig() {
+        return extraConfig;
+    }
+
+    public void setExtraConfig(Boolean extraConfig) {
+        this.extraConfig = extraConfig;
+    }
 
     public String getFieldCode() {
         return fieldCode;
@@ -94,11 +126,11 @@ public class PageConfigFieldVO {
         this.fieldName = fieldName;
     }
 
-    public String getDefaultValue() {
+    public Object getDefaultValue() {
         return defaultValue;
     }
 
-    public void setDefaultValue(String defaultValue) {
+    public void setDefaultValue(Object defaultValue) {
         this.defaultValue = defaultValue;
     }
 

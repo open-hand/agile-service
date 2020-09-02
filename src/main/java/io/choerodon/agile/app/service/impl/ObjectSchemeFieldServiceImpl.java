@@ -53,6 +53,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     protected IssueTypeService issueTypeService;
     @Autowired
     private IssueTypeFieldMapper issueTypeFieldMapper;
+    @Autowired
+    private FieldOptionService optionService;
 
     @Override
     public ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field,
@@ -849,31 +851,26 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     private void processDefaultValue(List<PageConfigFieldVO> pageConfigFields,
                                      Long organizationId) {
+        List<PageFieldViewVO> pageFieldViews = new ArrayList<>();
         pageConfigFields.forEach(p -> {
-            String defaultValue = p.getDefaultValue();
+            PageFieldViewVO vo = new PageFieldViewVO();
+            vo.setFieldId(p.getFieldId());
+            vo.setDefaultValue(p.getDefaultValue());
+            vo.setFieldType(p.getFieldType());
+            vo.setExtraConfig(p.getExtraConfig());
+            pageFieldViews.add(vo);
+        });
+        optionService.fillOptions(organizationId, null, pageFieldViews);
+        FieldValueUtil.handleDefaultValue(pageFieldViews);
+        Map<Long, PageFieldViewVO> pageFieldViewMap =
+                pageFieldViews.stream().collect(Collectors.toMap(PageFieldViewVO::getFieldId, x -> x));
+        pageConfigFields.forEach(p -> {
             Long fieldId = p.getFieldId();
-            boolean dealWithOptions = false;
-            if (!ObjectUtils.isEmpty(defaultValue)) {
-                List<FieldOptionVO> fieldOptions = fieldOptionService.queryByFieldId(organizationId, fieldId);
-                for (FieldOptionVO opt : fieldOptions) {
-                    if (Objects.equals(defaultValue, String.valueOf(opt.getId()))) {
-                        p.setDefaultValue(opt.getValue());
-                        dealWithOptions = true;
-                    }
-                }
-            }
-            if (!dealWithOptions) {
-                ObjectSchemeFieldDetailVO example = new ObjectSchemeFieldDetailVO();
-                example.setDefaultValue(defaultValue);
-                example.setFieldType(p.getFieldType());
-                FieldValueUtil.handleDefaultValue(example);
-                defaultValue = example.getDefaultValue();
-                Object object = example.getDefaultValueObj();
-                if (!ObjectUtils.isEmpty(object)) {
-                    UserDTO user = (UserDTO) object;
-                    defaultValue = user.getRealName();
-                }
-                p.setDefaultValue(defaultValue);
+            PageFieldViewVO vo = pageFieldViewMap.get(fieldId);
+            if (!ObjectUtils.isEmpty(vo)) {
+                p.setDefaultValue(vo.getDefaultValue());
+                p.setDefaultValueObj(vo.getDefaultValueObj());
+                p.setFieldOptions(vo.getFieldOptions());
             }
         });
     }

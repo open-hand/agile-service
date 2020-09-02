@@ -147,7 +147,8 @@
             when t6.organization_id = 0 then 'system'
             when t6.organization_id != 0 and t6.project_id is null then 'organization'
             else 'project'
-        end as created_level
+        end as created_level,
+        t6.extra_config
         from fd_object_scheme_field_extend t4
         join (
             select
