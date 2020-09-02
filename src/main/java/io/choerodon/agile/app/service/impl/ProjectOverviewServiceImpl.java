@@ -17,9 +17,11 @@ import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.DateUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.hzero.core.base.BaseConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/6/29 下午3:51
@@ -98,8 +100,10 @@ public class ProjectOverviewServiceImpl implements ProjectOverviewService {
     @Override
     public List<OneJobVO> selectOneJobsBysprint(Long projectId, Long sprintId) {
         SprintDTO sprint = safeSelectSprint(projectId,sprintId);
+        Assert.notNull(sprint.getStartDate(), BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.notNull(sprint.getEndDate(), BaseConstants.ErrorCode.DATA_INVALID);
         if (Objects.isNull(sprint.getActualEndDate())){
-            sprint.setActualEndDate(new Date());
+            sprint.setActualEndDate(sprint.getEndDate());
         }
         List<IssueOverviewVO> issueList = selectIssueBysprint(projectId, sprintId);
         if (CollectionUtils.isEmpty(issueList)){
