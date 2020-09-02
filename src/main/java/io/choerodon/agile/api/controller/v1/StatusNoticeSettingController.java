@@ -44,7 +44,6 @@ public class StatusNoticeSettingController extends BaseController {
                                      @RequestBody StatusNoticeSettingVO statusNoticeSettingVO,
                                      @ApiParam(value = "方案编码", required = true)
                                      @RequestParam String applyType) {
-        validObject(statusNoticeSettingVO);
         statusNoticeSettingService.save(projectId, statusNoticeSettingVO, applyType);
         return Results.success();
     }
