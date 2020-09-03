@@ -2,9 +2,8 @@ import React from 'react';
 import { Icon } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import { Permission, stores } from '@choerodon/boot';
-
+import useIsInProgram from '@/hooks/useIsInProgram';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import SprintName from './SprintHeaderComponent/SprintName';
 import SprintStatus from './SprintHeaderComponent/SprintStatus';
 import SprintButton from './SprintHeaderComponent/SprintButton';
@@ -47,7 +46,7 @@ function SprintHeader({ data }) {
   } = data;
   const isSprint = type === 'sprint';
   const { type: projectType, id: projectId, organizationId: orgId } = AppState.currentMenuType;
-
+  const { isInProgram } = useIsInProgram();
   return (
     isSprint ? (
       <div className={prefix}>
@@ -60,9 +59,9 @@ function SprintHeader({ data }) {
           />
           <SprintIcon sprintType={sprintType} />
           <Permission
-            service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
+            service={[isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
             noAccessChildren={(
-              <SprintName            
+              <SprintName
                 data={data}
                 noPermission
               />
@@ -91,22 +90,22 @@ function SprintHeader({ data }) {
         </div>
         <div className={`${prefix}-bottom`}>
           <Permission
-            service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
+            service={[isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
             noAccessChildren={(
-              <SprintDateRange            
+              <SprintDateRange
                 data={data}
                 noPermission
               />
             )}
           >
-            <SprintDateRange            
+            <SprintDateRange
               data={data}
             />
           </Permission>
           <Permission
-            service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
+            service={[isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
             noAccessChildren={(
-              <SprintGoal            
+              <SprintGoal
                 data={data}
                 noPermission
               />

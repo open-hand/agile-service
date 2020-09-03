@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import {
-  stores, Content, Choerodon, 
+  stores, Content, Choerodon,
 } from '@choerodon/boot';
-import { withRouter } from 'react-router-dom';
 import {
   Form, Input, Button, Spin,
 } from 'choerodon-ui';
@@ -24,7 +23,8 @@ class EditBoardName extends Component {
   }
 
   componentDidMount() {
-    const initialBoardName = ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard).name;
+    const boardList = ScrumBoardStore.getBoardList;
+    const initialBoardName = boardList.get(ScrumBoardStore.getSelectedBoard).name;
     const { saveRef } = this.props;
     saveRef(this.boardName);
     this.setState({
@@ -55,7 +55,7 @@ class EditBoardName extends Component {
 
   handleUpdateBoardName = () => {
     const { boardName } = this.state;
-    const { form, history } = this.props;
+    const { form } = this.props;
     const currentEditBoard = ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard);
     const { objectVersionNumber, boardId, projectId } = currentEditBoard;
     const data = {
@@ -77,7 +77,6 @@ class EditBoardName extends Component {
           });
           ScrumBoardStore.setBoardList(ScrumBoardStore.getSelectedBoard, res);
           Choerodon.prompt('保存成功');
-          // history.push(`/agile/scrumboard?type=project&id=${data.projectId}&name=${encodeURIComponent(AppState.currentMenuType.name)}&organizationId=${AppState.currentMenuType.organizationId}`);
         });
       }
     });
@@ -158,4 +157,4 @@ class EditBoardName extends Component {
     );
   }
 }
-export default withRouter(Form.create()(EditBoardName));
+export default Form.create()(EditBoardName);

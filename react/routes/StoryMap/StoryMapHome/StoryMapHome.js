@@ -7,12 +7,12 @@ import {
 } from '@choerodon/boot';
 import { Button, Icon } from 'choerodon-ui';
 import {
-  Select, DataSet, CheckBox, Modal, 
+  Select, DataSet, CheckBox, Modal,
 } from 'choerodon-ui/pro';
 import { DragDropContextProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { observer } from 'mobx-react-lite';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import HeaderLine from '@/components/HeaderLine';
 import Minimap from '../../../components/MiniMap';
 import Empty from '../../../components/Empty';
@@ -44,7 +44,7 @@ const StoryMapHome = observer(() => {
   };
   const ref = useRef(null);
   StoryMapStore.setMiniMapRef(ref);
-  
+
   useEffect(() => {
     handleRefresh();
     return () => { StoryMapStore.clear(); };
@@ -71,11 +71,9 @@ const StoryMapHome = observer(() => {
     StoryMapStore.afterCreateEpicInModal(newEpic);
   };
 
-
   const onFullScreenChange = (isFullScreen) => {
     StoryMapStore.setIsFullScreen(!!isFullScreen);
   };
-
 
   const renderChild = ({
     width, height, left, top, node,
@@ -106,7 +104,7 @@ const StoryMapHome = observer(() => {
   };
   /**
    * 问题宽度localStorage.getItem('agile.EditIssue.width')
-   * @param {*} width 
+   * @param {*} width
    */
   const setIssueWidth = (width) => {
     if (ref.current) {
@@ -133,8 +131,7 @@ const StoryMapHome = observer(() => {
     }
   }, [selectedIssueMap.size]);
 
-  const { isInProgram } = IsInProgramStore; // 判断是否为项目群下的子项目 是则不显示史诗
-  
+  const { isInProgram } = useIsInProgram(); // 判断是否为项目群下的子项目 是则不显示史诗
   const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => {}, 'c7nagile-StoryMap-fullScreen');
   return (
     <Page
@@ -168,11 +165,11 @@ const StoryMapHome = observer(() => {
       >
         <Loading loading={loading} />
         {!isEmpty ? (
-          <Fragment>
+          <>
             <Minimap ref={ref} disabledVertical width={300} height={40} showHeight={300} className="c7nagile-StoryMap-minimap" selector=".minimapCard" childComponent={renderChild}>
               <StoryMapBody />
             </Minimap>
-          </Fragment>
+          </>
         ) : (
           loading ? null : (
               // eslint-disable-next-line react/jsx-indent
@@ -181,9 +178,9 @@ const StoryMapHome = observer(() => {
                 pic={epicPic}
                 title="欢迎使用敏捷用户故事地图"
                 description={(
-                  <Fragment>
+                  <>
                     用户故事地图是以史诗为基础，根据版本控制进行管理规划
-                  </Fragment>
+                  </>
                 )}
               />
           )

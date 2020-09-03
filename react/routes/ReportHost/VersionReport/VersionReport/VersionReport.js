@@ -8,6 +8,8 @@ import {
   Button, Tabs, Table, Select, Icon, Tooltip, Spin,
 } from 'choerodon-ui';
 import STATUS from '@/constants/STATUS';
+import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
+import to, { linkUrl } from '@/utils/to';
 import pic from '../../../../assets/image/emptyChart.svg';
 import finish from './legend/finish.svg';
 import total from './legend/total.svg';
@@ -34,12 +36,10 @@ class EpicReport extends Component {
     if (VS.beforeCurrentUnit === 'story_point') {
       if (record.issueTypeVO.typeCode === 'story') {
         return record.storyPoints === null ? '未预估' : record.storyPoints;
-      } else {
-        return '';
       }
-    } else {
-      return record.remainTime === null ? '未预估' : record.remainTime;
+      return '';
     }
+    return record.remainTime === null ? '未预估' : record.remainTime;
   }
 
   getOption() {
@@ -407,18 +407,18 @@ class EpicReport extends Component {
         ],
       };
     }
-    return Object.assign({}, commonOption, option);
+    return { ...commonOption, ...option };
   }
 
   getTableDta(type) {
     if (type === 'compoleted') {
-      return VS.tableData.filter(v => v.completed === 1);
+      return VS.tableData.filter((v) => v.completed === 1);
     }
     if (type === 'unFinish') {
-      return VS.tableData.filter(v => v.completed === 0);
+      return VS.tableData.filter((v) => v.completed === 0);
     }
     if (type === 'unFinishAndunEstimate') {
-      return VS.tableData.filter(v => v.completed === 0
+      return VS.tableData.filter((v) => v.completed === 0
         && ((v.storyPoints === null && v.issueTypeVO && v.issueTypeVO.typeCode === 'story')
           || (v.remainTime === null && v.issueTypeVO && v.issueTypeVO.typeCode !== 'story')));
     }
@@ -486,9 +486,7 @@ class EpicReport extends Component {
               }}
               role="none"
               onClick={() => {
-                const { history } = this.props;
-                const urlParams = AppState.currentMenuType;
-                history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${issueNum}&paramIssueId=${encodeURIComponent(record.issueId)}&paramUrl=reporthost/versionReport`);
+                LINK_URL_TO.issueLinkTo(record.issueId, issueNum);
               }}
             >
               {issueNum}
@@ -501,7 +499,7 @@ class EpicReport extends Component {
           width: '30%',
           title: '概要',
           dataIndex: 'summary',
-          render: summary => (
+          render: (summary) => (
             <div style={{ width: '100%', overflow: 'hidden' }}>
               <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={`问题概要：${summary}`}>
                 <p style={{
@@ -576,7 +574,7 @@ class EpicReport extends Component {
     return (
       <Table
         pagination={this.getTableDta(type).length > 10}
-        rowKey={record => record.issueId}
+        rowKey={(record) => record.issueId}
         dataSource={this.getTableDta(type)}
         filterBar={false}
         columns={column}
@@ -587,21 +585,19 @@ class EpicReport extends Component {
   }
 
   render() {
-    const { history } = this.props;
     const urlParams = AppState.currentMenuType;
     return (
       <Page className="c7n-versionReport" serice={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.versionreport']}>
         <Header
           title="版本报告图"
-          backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
+          backPath={linkUrl(LINK_URL.report)}
         >
           <SwithChart
-            history={history}
             current="versionReport"
           />
           <Button
             funcType="flat"
-            onClick={this.refresh.bind(this)}
+            onClick={() => this.refresh()}
           >
             <Icon type="refresh icon" />
             <span>刷新</span>
@@ -617,10 +613,10 @@ class EpicReport extends Component {
                     style={{ width: 244 }}
                     label="版本"
                     value={VS.currentVersionId}
-                    onChange={this.handleChangeCurrentVersion.bind(this)}
+                    onChange={(versionId) => this.handleChangeCurrentVersion(versionId)}
                   >
                     {
-                      VS.versions.map(version => (
+                      VS.versions.map((version) => (
                         <Option
                           key={version.versionId}
                           value={version.versionId}
@@ -634,7 +630,7 @@ class EpicReport extends Component {
                     style={{ width: 244, marginLeft: 24 }}
                     label="单位"
                     value={VS.currentUnit}
-                    onChange={this.handleChangeCurrentUnit.bind(this)}
+                    onChange={(unit) => this.handleChangeCurrentUnit(unit)}
                   >
                     <Option key="story_point" value="story_point">故事点</Option>
                     <Option key="issue_count" value="issue_count">问题计数</Option>
@@ -653,8 +649,13 @@ class EpicReport extends Component {
                     }}
                     role="none"
                     onClick={() => {
-                      // history.push(encodeURI(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${urlParams.name}&organizationId=${urlParams.organizationId}&paramType=version&paramId=${VS.currentVersionId}&paramName=${VS.getCurrentVersion.name}下的问题&paramUrl=reporthost/VersionReport`));
-                      history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramType=version&paramId=${encodeURIComponent(VS.currentVersionId)}&paramName=${encodeURIComponent(`${VS.getCurrentVersion.name}下的问题`)}&paramUrl=reporthost/VersionReport`);
+                      to(LINK_URL.workListIssue, {
+                        params: {
+                          paramType: 'version',
+                          paramId: VS.currentVersionId,
+                          paramName: `${VS.getCurrentVersion.name}下的问题`,
+                        },
+                      });
                     }}
                   >
                     在“问题管理中”查看
@@ -710,14 +711,14 @@ class EpicReport extends Component {
                       style={{ margin: '0 5px', cursor: 'pointer' }}
                       role="none"
                       onClick={() => {
-                        history.push(`/agile/work-list/version?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`);
+                        to(LINK_URL.workListVersion);
                       }}
                     >
                       发布版本
                     </span>
                     <span>中创建一个版本</span>
                   </div>
-                )}
+                  )}
               />
             )
           }

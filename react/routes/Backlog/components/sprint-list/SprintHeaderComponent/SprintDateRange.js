@@ -4,9 +4,9 @@ import { observer } from 'mobx-react';
 import { DatePicker, Form } from 'choerodon-ui';
 import TextEditToggle from '@/components/TextEditToggle';
 import { getProjectId } from '@/utils/common';
+import { IsInProgram } from '@/hooks/useIsInProgram';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import { sprintApi } from '@/api';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 
 const { Text, Edit } = TextEditToggle;
 const FormItem = Form.Item;
@@ -18,7 +18,7 @@ const FormItem = Form.Item;
     this.endDateEdit = createRef();
   }
 
-  handleUpdateDate = (date) => {
+  handleUpdateDate = (date, isShowFeature) => {
     // const date = `${dateString} 00:00:00`;
     const { data } = this.props;
     const { startDate, endDate } = date;
@@ -30,15 +30,15 @@ const FormItem = Form.Item;
       startDate,
       endDate,
     };
-    
-    sprintApi.updateSprint(req, IsInProgramStore.isShowFeature).then((res) => {
+
+    sprintApi.updateSprint(req, isShowFeature).then((res) => {
       BacklogStore.updateSprint(sprintId, {
         objectVersionNumber: res.objectVersionNumber,
         startDate: res.startDate,
         endDate: res.endDate,
       });
       // 在项目群的子项目 刷新冲刺限制列表
-      if (IsInProgramStore.isShowFeature) {
+      if (isShowFeature) {
         if (data.planning) {
           BacklogStore.getPlanPi();
         } else {
@@ -56,150 +56,150 @@ const FormItem = Form.Item;
       }, form: { getFieldDecorator }, form, noPermission,
     } = this.props;
     return (
-      <div
-        className="c7n-backlog-sprintData"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-        }}
-        role="none"
-      >
-        <TextEditToggle
-          disabled={sprintType === 'ip' || noPermission} // ip冲刺禁止修改时间
-          saveRef={this.startDateEdit}
-          onSubmit={() => {
-            form.validateFields((err, values) => {
-              if (!err) {
-                // console.log('v', values);
-                this.handleUpdateDate({
-                  startDate: values.startDate.format('YYYY-MM-DD HH:mm:ss'),
-                  endDate: values.endDate.format('YYYY-MM-DD HH:mm:ss'),
-                });
-              }
-            });
-            form.resetFields();
-          }}
-        >
-          <Text>
+      <IsInProgram>
+        {
+          ({ isShowFeature }) => (
             <div
-              className="c7n-backlog-sprintDataItem"
+              className="c7n-backlog-sprintData"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+              }}
               role="none"
             >
-              {startDate ? moment(startDate, 'YYYY-MM-DD HH:mm:ss').format('YYYY年MM月DD日 HH:mm:ss') : '无'}
-            </div>
-            <p>~</p>
-            <div
-              className="c7n-backlog-sprintDataItem"
-            >
-              {endDate ? moment(endDate, 'YYYY-MM-DD HH:mm:ss').format('YYYY年MM月DD日 HH:mm:ss') : '无'}
-            </div>
-          </Text>
-          <Edit>
-            <Form>
-              <div style={{ display: 'flex' }}>
-                <FormItem>
-                  {getFieldDecorator('startDate', {
-                    rules: [
-                      { required: true, message: '请选择开始日期' },
-                    ],
-                    initialValue: startDate ? moment(startDate, 'YYYY-MM-DD HH:mm:ss') : '',
-                  })(
-                    <DatePicker
-                      autoFocus
-                      style={{ width: 165, height: 32 }}
-                      allowClear
-                      disabledDate={(date) => {
-                        if (!date) {
-                          return false;
-                        }
-                        // eslint-disable-next-line no-shadow
-                        const endDate = form.getFieldValue('endDate');
-                        if (!sprintType) {
-                          if (endDate) {
-                            return date >= endDate;
-                          } else {
-                            return false;
-                          }
-                        } else {
-                          if (planning && !BacklogStore.piMap.get(piId)) {
-                            return true;
-                          }
-                          const pi = planning === true ? BacklogStore.piMap.get(piId).pi : undefined;
-                          const sprints = planning === true ? BacklogStore.piMap.get(piId).sprints : undefined;
-                          // 没选结束时间的时候，只判断时间点能不能选
-                          // eslint-disable-next-line no-lonely-if
-                          if (!endDate) {
-                            return !BacklogStore.dateCanChoose({
-                              date, sprintId, pi, sprints, 
-                            });
-                          } else {
-                            // 选了结束时间之后，判断形成的时间段是否和其他重叠
-                            return !BacklogStore.rangeCanChoose({
-                              startDate: date, endDate, sprintId, pi, sprints,  
-                            });
-                          }                  
-                        }
-                      }}
-                      format="YYYY-MM-DD HH:mm:ss"
-                      showTime
-                    />,
-                  )}
-                </FormItem>
+              <TextEditToggle
+                disabled={sprintType === 'ip' || noPermission} // ip冲刺禁止修改时间
+                saveRef={this.startDateEdit}
+                onSubmit={() => {
+                  form.validateFields((err, values) => {
+                    if (!err) {
+                      // console.log('v', values);
+                      this.handleUpdateDate({
+                        startDate: values.startDate.format('YYYY-MM-DD HH:mm:ss'),
+                        endDate: values.endDate.format('YYYY-MM-DD HH:mm:ss'),
+                      }, isShowFeature);
+                    }
+                  });
+                  form.resetFields();
+                }}
+              >
+                <Text>
+                  <div
+                    className="c7n-backlog-sprintDataItem"
+                    role="none"
+                  >
+                    {startDate ? moment(startDate, 'YYYY-MM-DD HH:mm:ss').format('YYYY年MM月DD日 HH:mm:ss') : '无'}
+                  </div>
+                  <p>~</p>
+                  <div
+                    className="c7n-backlog-sprintDataItem"
+                  >
+                    {endDate ? moment(endDate, 'YYYY-MM-DD HH:mm:ss').format('YYYY年MM月DD日 HH:mm:ss') : '无'}
+                  </div>
+                </Text>
+                <Edit>
+                  <Form>
+                    <div style={{ display: 'flex' }}>
+                      <FormItem>
+                        {getFieldDecorator('startDate', {
+                          rules: [
+                            { required: true, message: '请选择开始日期' },
+                          ],
+                          initialValue: startDate ? moment(startDate, 'YYYY-MM-DD HH:mm:ss') : '',
+                        })(
+                          <DatePicker
+                            autoFocus
+                            style={{ width: 165, height: 32 }}
+                            allowClear
+                            disabledDate={(date) => {
+                              if (!date) {
+                                return false;
+                              }
+                              // eslint-disable-next-line no-shadow
+                              const endDate = form.getFieldValue('endDate');
+                              if (!sprintType) {
+                                if (endDate) {
+                                  return date >= endDate;
+                                }
+                                return false;
+                              }
+                              if (planning && !BacklogStore.piMap.get(piId)) {
+                                return true;
+                              }
+                              const pi = planning === true ? BacklogStore.piMap.get(piId).pi : undefined;
+                              const sprints = planning === true ? BacklogStore.piMap.get(piId).sprints : undefined;
+                              // 没选结束时间的时候，只判断时间点能不能选
+                              // eslint-disable-next-line no-lonely-if
+                              if (!endDate) {
+                                return !BacklogStore.dateCanChoose({
+                                  date, sprintId, pi, sprints,
+                                });
+                              }
+                              // 选了结束时间之后，判断形成的时间段是否和其他重叠
+                              return !BacklogStore.rangeCanChoose({
+                                startDate: date, endDate, sprintId, pi, sprints,
+                              });
+                            }}
+                            format="YYYY-MM-DD HH:mm:ss"
+                            showTime
+                          />,
+                        )}
+                      </FormItem>
 
-                <p style={{ marginTop: '.08rem' }}>~</p>
-                <FormItem>
-                  {getFieldDecorator('endDate', {
-                    rules: [
-                      { required: true, message: '请选择结束日期' },
-                    ],
-                    initialValue: endDate ? moment(endDate, 'YYYY-MM-DD HH:mm:ss') : '',
-                  })(
-                    <DatePicker
-                      autoFocus
-                      style={{ width: 165, height: 32 }}
-                      allowClear
-                      disabledDate={(date) => {
-                        if (!date) {
-                          return false;
-                        }
-                        // eslint-disable-next-line no-shadow
-                        const startDate = form.getFieldValue('startDate');
-                        if (!sprintType) {
-                          if (startDate) {
-                            return date <= startDate;
-                          } else {
-                            return false;
-                          }
-                        } else {
-                          if (planning && !BacklogStore.piMap.get(piId)) {
-                            return true;
-                          }
-                          const pi = planning === true ? BacklogStore.piMap.get(piId).pi : undefined;
-                          const sprints = planning === true ? BacklogStore.piMap.get(piId).sprints : undefined;
-                          // 没选开始时间的时候，只判断时间点能不能选
-                          // eslint-disable-next-line no-lonely-if
-                          if (!startDate) {
-                            return !BacklogStore.dateCanChoose({
-                              date, sprintId, pi, sprints,  
-                            });
-                          } else {
-                            // 选了开始时间之后，判断形成的时间段是否和其他重叠
-                            return !BacklogStore.rangeCanChoose({
-                              startDate, endDate: date, sprintId, pi, sprints,  
-                            });
-                          }
-                        }
-                      }}
-                      format="YYYY-MM-DD HH:mm:ss"
-                      showTime
-                    />,
-                  )}
-                </FormItem>
-              </div>
-            </Form>
-          </Edit>
-        </TextEditToggle>
-      </div>
+                      <p style={{ marginTop: '.08rem' }}>~</p>
+                      <FormItem>
+                        {getFieldDecorator('endDate', {
+                          rules: [
+                            { required: true, message: '请选择结束日期' },
+                          ],
+                          initialValue: endDate ? moment(endDate, 'YYYY-MM-DD HH:mm:ss') : '',
+                        })(
+                          <DatePicker
+                            autoFocus
+                            style={{ width: 165, height: 32 }}
+                            allowClear
+                            disabledDate={(date) => {
+                              if (!date) {
+                                return false;
+                              }
+                              // eslint-disable-next-line no-shadow
+                              const startDate = form.getFieldValue('startDate');
+                              if (!sprintType) {
+                                if (startDate) {
+                                  return date <= startDate;
+                                }
+                                return false;
+                              }
+                              if (planning && !BacklogStore.piMap.get(piId)) {
+                                return true;
+                              }
+                              const pi = planning === true ? BacklogStore.piMap.get(piId).pi : undefined;
+                              const sprints = planning === true ? BacklogStore.piMap.get(piId).sprints : undefined;
+                              // 没选开始时间的时候，只判断时间点能不能选
+                              // eslint-disable-next-line no-lonely-if
+                              if (!startDate) {
+                                return !BacklogStore.dateCanChoose({
+                                  date, sprintId, pi, sprints,
+                                });
+                              }
+                              // 选了开始时间之后，判断形成的时间段是否和其他重叠
+                              return !BacklogStore.rangeCanChoose({
+                                startDate, endDate: date, sprintId, pi, sprints,
+                              });
+                            }}
+                            format="YYYY-MM-DD HH:mm:ss"
+                            showTime
+                          />,
+                        )}
+                      </FormItem>
+                    </div>
+                  </Form>
+                </Edit>
+              </TextEditToggle>
+            </div>
+          )
+        }
+      </IsInProgram>
     );
   }
 }

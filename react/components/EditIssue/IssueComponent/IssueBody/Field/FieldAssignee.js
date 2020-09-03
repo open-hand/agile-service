@@ -6,8 +6,6 @@ import { issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectUser from '@/components/select/select-user';
 import UserHead from '../../../../UserHead';
-import './Field.less';
-
 
 @inject('AppState')
 @observer class FieldStatus extends Component {
@@ -39,6 +37,8 @@ import './Field.less';
       assigneeId, assigneeImageUrl,
       assigneeLoginName, assigneeName, assigneeRealName,
     } = issue;
+    const field = store.getFieldByCode('assignee');
+    const required = field?.required;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -50,10 +50,11 @@ import './Field.less';
           <TextEditToggle
             disabled={disabled}
             onSubmit={this.updateIssueAssignee}
-            initValue={assigneeId || undefined}
+            initValue={(assigneeId && assigneeId.toString()) || undefined}
             editor={({ submit }) => (
               <SelectUser
-                clearButton
+                clearButton={!required}
+                required={required}
                 onChange={submit}
                 selectedUser={assigneeId ? {
                   id: assigneeId,
@@ -83,7 +84,9 @@ import './Field.less';
               )
             }
           </TextEditToggle>
-          {assigneeId !== loginUserId && !disabled
+          {(!assigneeId || (
+            assigneeId && assigneeId.toString() !== loginUserId.toString()
+          )) && !disabled
             ? (
               <span
                 role="none"
@@ -97,15 +100,14 @@ import './Field.less';
                   whiteSpace: 'nowrap',
                 }}
                 onClick={() => {
-                  if (loginUserId !== assigneeId) {
+                  if (!assigneeId || loginUserId.toString() !== assigneeId.toString()) {
                     this.updateIssueAssignee(loginUserId);
                   }
                 }}
               >
                 分配给我
               </span>
-            ) : ''
-        }
+            ) : ''}
         </div>
       </div>
     );

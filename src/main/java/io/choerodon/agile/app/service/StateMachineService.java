@@ -1,14 +1,13 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.domain.PageInfo;
 import io.choerodon.agile.api.vo.StateMachineListVO;
 import io.choerodon.agile.api.vo.StateMachineVO;
 import io.choerodon.agile.api.vo.StateMachineWithStatusVO;
 import io.choerodon.agile.api.vo.event.ChangeStatus;
 import io.choerodon.agile.api.vo.event.DeployStateMachinePayload;
 import io.choerodon.agile.api.vo.event.StateMachineSchemeDeployCheckIssue;
-import io.choerodon.agile.infra.dto.StateMachineDTO;
+import io.choerodon.agile.infra.dto.StatusMachineDTO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
@@ -122,7 +121,7 @@ public interface StateMachineService {
      * @param stateMachineId 状态机id
      * @return
      */
-    StateMachineDTO queryDeployForInstance(Long organizationId, Long stateMachineId);
+    StatusMachineDTO queryDeployForInstance(Long organizationId, Long stateMachineId);
 
     /**
      * 删除草稿
@@ -219,4 +218,12 @@ public interface StateMachineService {
 
     DeployStateMachinePayload handleStateMachineChangeStatusByStateMachineId(Long organizationId, Long stateMachineId, ChangeStatus changeStatus);
 
+    /**
+     * 复制状态机
+     * @param organizationId
+     * @param currentStateMachineId
+     * @param issueTypeId
+     * @return
+     */
+    Long copyStateMachine(Long organizationId, Long currentStateMachineId,Long issueTypeId);
 }

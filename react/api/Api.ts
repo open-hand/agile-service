@@ -5,6 +5,7 @@ import globalCache from './Cache';
 
 interface RequestConfig extends AxiosRequestConfig {
   cache?: boolean
+  noPrompt?: boolean
 }
 function getCacheKey(config: any) {
   const {
@@ -34,9 +35,8 @@ class Api {
           callback: resolve,
         });
       });
-    } else {
-      return axios(AxiosConfig);
     }
+    return axios(AxiosConfig);
   }
 
   get projectId() {

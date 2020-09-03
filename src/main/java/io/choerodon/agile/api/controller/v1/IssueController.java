@@ -119,13 +119,14 @@ public class IssueController {
     public ResponseEntity<IssueVO> updateIssueStatus(@ApiParam(value = "项目id", required = true)
                                                       @PathVariable(name = "project_id") Long projectId,
                                                      @ApiParam(value = "转换id", required = true)
-                                                      @RequestParam Long transformId,
+                                                      @RequestParam @Encrypt Long transformId,
                                                      @ApiParam(value = "问题id", required = true)
                                                       @RequestParam @Encrypt Long issueId,
                                                      @ApiParam(value = "版本号", required = true)
                                                       @RequestParam Long objectVersionNumber,
                                                      @ApiParam(value = "应用类型", required = true)
                                                       @RequestParam String applyType) {
+        issueValidator.verifyIssueUpdateStatus(projectId,issueId,transformId);
         return Optional.ofNullable(issueService.updateIssueStatus(projectId, issueId, transformId, objectVersionNumber, applyType))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.CREATED))
                 .orElseThrow(() -> new CommonException("error.Issue.updateIssueStatus"));

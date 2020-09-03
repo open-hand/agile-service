@@ -1,7 +1,6 @@
 import { observable, action, computed } from 'mobx';
 import { store } from '@choerodon/boot';
-import _ from 'lodash';
-import { sprintApi, reportApi } from '@/api';
+import { sprintApi } from '@/api';
 
 @store('ReportStore')
 class ReportStore {
@@ -68,11 +67,6 @@ class ReportStore {
       sprintApi.loadSprint(sprintId)
         .then((res) => {
           this.setCurrentSprint(res || {});
-          // ready to load when activeKey change
-          // this.setTodo(false);
-          // this.setDone(false);
-          // this.setRemove(false);
-          // this.getChartData();
           this.loadCurrentTab();
         })
         .catch((error) => {
@@ -92,62 +86,6 @@ class ReportStore {
       return;
     }
     this[ARRAY[this.activeKey]]();
-  }
-
-  getChartData() {
-    reportApi.loadSprintBurnDown(this.currentSprint.sprintId, 'issueCount').then((res) => {
-      const data = res;
-      const newData = [];
-      for (let index = 0, len = data.length; index < len; index += 1) {
-        if (!_.some(newData, { date: data[index].date })) {
-          newData.push({
-            date: data[index].date,
-            issues: [{
-              issueId: data[index].issueId,
-              issueNum: data[index].issueNum,
-              newValue: data[index].newValue,
-              oldValue: data[index].oldValue,
-              statistical: data[index].statistical,
-            }],
-            type: data[index].type,
-          });
-        } else {
-          let index2;
-          for (let i = 0, len2 = newData.length; i < len2; i += 1) {
-            if (newData[i].date === data[index].date) {
-              index2 = i;
-            }
-          }
-          newData[index2].issues = [...newData[index2].issues, {
-            issueId: data[index].issueId,
-            issueNum: data[index].issueNum,
-            newValue: data[index].newValue,
-            oldValue: data[index].oldValue,
-            statistical: data[index].statistical,
-          }];
-        }
-      }
-      for (let index = 0, len = newData.length; index < len; index += 1) {
-        let rest = 0;
-        if (newData[index].type !== 'endSprint') {
-          if (index > 0) {
-            // eslint-disable-next-line prefer-destructuring
-            rest = newData[index - 1].rest;
-          }
-        }
-        for (let i = 0, len2 = newData[index].issues.length; i < len2; i += 1) {
-          if (newData[index].issues[i].statistical) {
-            rest += newData[index].issues[i].newValue - newData[index].issues[i].oldValue;
-          }
-        }
-        newData[index].rest = rest;
-      }
-      this.setChartData({
-        xAxis: _.map(newData, 'date'),
-        yAxis: _.map(newData, 'rest'),
-      });
-    }).catch((error) => {
-    });
   }
 
   loadDoneIssues(page = 1, size = 10) {
@@ -300,9 +238,8 @@ class ReportStore {
         status: '',
         action: '',
       });
-    } else {
-      return STATUS_TIP[this.currentSprint.statusCode];
     }
+    return STATUS_TIP[this.currentSprint.statusCode];
   }
 }
 const reportStore = new ReportStore();

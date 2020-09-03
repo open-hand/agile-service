@@ -7,13 +7,13 @@ interface Props {
   priorityId?: number
 }
 
-const SelectPriority: React.FC<Props> = forwardRef(({ priorityId, ...otherProps }, ref: React.Ref<Select>) => {
+const SelectPriority: React.FC<Props> = forwardRef(({ priorityId, ...otherProps },
+  ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'priority',
     textField: 'name',
     valueField: 'id',
-    request: () => priorityApi.loadByProject(),
-    middleWare: priorities => priorities.filter((priority: any) => priority.enable || priority.id === priorityId),
+    request: () => priorityApi.loadByProject(undefined, [String(priorityId)]),
     paging: false,
   }), [priorityId]);
   const props = useSelect(config);

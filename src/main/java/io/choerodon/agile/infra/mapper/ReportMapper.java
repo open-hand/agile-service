@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
+import io.choerodon.agile.api.vo.BurnDownSearchVO;
 import io.choerodon.agile.infra.dto.*;
 import org.apache.ibatis.annotations.Param;
 
@@ -50,7 +51,8 @@ public interface ReportMapper {
      * @param sprintDTO sprintDTO
      * @return issueIds
      */
-    List<Long> queryIssueIdsBeforeSprintStart(@Param("sprintDTO") SprintDTO sprintDTO);
+    List<Long> queryIssueIdsBeforeSprintStart(@Param("sprintDTO") SprintDTO sprintDTO,
+                                              @Param("burnDownSearchVO") BurnDownSearchVO burnDownSearchVO);
 
     /**
      * 获取冲刺期间加入的issue
@@ -58,7 +60,8 @@ public interface ReportMapper {
      * @param sprintDTO sprintDTO
      * @return issueIdList
      */
-    List<Long> queryAddIssueIdsDuringSprint(@Param("sprintDTO") SprintDTO sprintDTO);
+    List<Long> queryAddIssueIdsDuringSprint(@Param("sprintDTO") SprintDTO sprintDTO,
+                                            @Param("burnDownSearchVO") BurnDownSearchVO burnDownSearchVO);
 
     /**
      * 获取冲刺期间移除的issue(不包含子任务和epic)
@@ -212,7 +215,8 @@ public interface ReportMapper {
      * @param sprintDTO sprintDTO
      * @return Long
      */
-    List<Long> queryRemoveIssueIdsDuringSprint(@Param("sprintDTO") SprintDTO sprintDTO);
+    List<Long> queryRemoveIssueIdsDuringSprint(@Param("sprintDTO") SprintDTO sprintDTO,
+                                               @Param("burnDownSearchVO") BurnDownSearchVO burnDownSearchVO);
 
     /**
      * 判断issue是否在冲刺外

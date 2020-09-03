@@ -127,6 +127,26 @@ public class IssueListFieldKVVO {
     @ApiModelProperty(value = "项目信息")
     private ProjectVO projectVO;
 
+    private Date estimatedStartTime;
+
+    private Date estimatedEndTime;
+
+    public Date getEstimatedStartTime() {
+        return estimatedStartTime;
+    }
+
+    public void setEstimatedStartTime(Date estimatedStartTime) {
+        this.estimatedStartTime = estimatedStartTime;
+    }
+
+    public Date getEstimatedEndTime() {
+        return estimatedEndTime;
+    }
+
+    public void setEstimatedEndTime(Date estimatedEndTime) {
+        this.estimatedEndTime = estimatedEndTime;
+    }
+
     public List<IssueSprintVO> getIssueSprintVOS() {
         return issueSprintVOS;
     }

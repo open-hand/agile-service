@@ -6,7 +6,7 @@ import './TableDropMenu.less';
 /**
  * 表格中的下拉菜单
  * 4个参数
- * menu 菜单 Menu 组件构成的菜单项 
+ * menu 菜单 Menu 组件构成的菜单项
  *      无传入则代表无下来菜单，仅渲染text内容
  * text 该列需渲染的文字部分
  * onClickEdit 点击文件编辑事件
@@ -26,6 +26,7 @@ const TableDropMenu = (props) => {
   // 渲染文本
   const renderText = () => {
     const textA = (
+      // eslint-disable-next-line jsx-a11y/interactive-supports-focus
       <a role="button" onClick={onClickEdit} onKeyDown={null}>
         {text}
       </a>
@@ -35,7 +36,7 @@ const TableDropMenu = (props) => {
   return (
     <div
       style={{
-        display: 'flex', justifyContent: 'space-between', lineHeight: '24px', cursor: onClickEdit ? 'pointer' : 'default', 
+        display: 'flex', justifyContent: 'space-between', lineHeight: '24px', cursor: onClickEdit ? 'pointer' : 'inherit',
       }}
       className={className || 'table-drop-menu-base'}
     >
@@ -51,12 +52,11 @@ const TableDropMenu = (props) => {
               {renderText()}
             </Permission>
           )
-          : renderText()
-        }
+          : renderText()}
       </span>
       {isHasMenu && menu
         ? (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
             <Dropdown overlay={menu} trigger="click">
               <Icon shape="circle" type="more_vert" />
             </Dropdown>

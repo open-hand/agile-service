@@ -29,10 +29,10 @@ class IssueDetail extends Component {
     }).catch((error) => {
     });
   }
-  
+
   /**
    * 重置点击
-   * @param {*} current 
+   * @param {*} current
    */
   handleResetClicked(current) {
     // BacklogStore.clickedOnce(sprintId, current);
@@ -68,6 +68,9 @@ class IssueDetail extends Component {
           BacklogStore.clearMultiSelected();
         }}
         onDeleteIssue={() => {
+          if (BacklogStore.chosenEpic === BacklogStore.getClickIssueId) {
+            BacklogStore.setChosenEpic('all');
+          }
           BacklogStore.setClickIssueDetail({});
           BacklogStore.setIsLeaveSprint(false);
           refresh();

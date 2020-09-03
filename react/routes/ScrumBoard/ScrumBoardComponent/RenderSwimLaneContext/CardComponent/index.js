@@ -5,6 +5,7 @@ import Priority from './Priority';
 import StatusName from './StatusName';
 import StayDay from './StayDay';
 import Summary from './Summary';
+import Delay from './Delay';
 
 export {
   Assignee,
@@ -14,4 +15,5 @@ export {
   StatusName,
   StayDay,
   Summary,
+  Delay,
 };

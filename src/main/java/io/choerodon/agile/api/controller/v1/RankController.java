@@ -4,7 +4,6 @@ import io.choerodon.agile.api.vo.RankVO;
 import io.choerodon.agile.app.service.RankService;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
-import io.choerodon.core.iam.InitRoleCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 

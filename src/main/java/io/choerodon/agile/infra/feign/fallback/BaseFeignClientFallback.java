@@ -39,7 +39,7 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     }
 
     @Override
-    public ResponseEntity<Page<UserDTO>> listUsersByProjectId(Long id, int page, int size) {
+    public ResponseEntity<Page<UserDTO>> listUsersByProjectId(Long id, int page, int size, String param) {
         throw new CommonException(QUERY_ERROR);
     }
 
@@ -121,6 +121,11 @@ public class BaseFeignClientFallback implements BaseFeignClient {
 
     @Override
     public ResponseEntity<List<ProjectVO>> queryOrgProjects(Long organizationId, Long userId) {
+        throw new CommonException("error.list.projects");
+    }
+
+    @Override
+    public ResponseEntity<List<ProjectVO>> queryByIds(Set<Long> ids) {
         throw new CommonException("error.list.projects");
     }
 }

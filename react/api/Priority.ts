@@ -2,17 +2,17 @@ import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 
 interface IPriority {
-    name: string
-    description: string,
-    default: boolean, // 是否设置为默认优先级
-    colour: string,
+  name: string
+  description: string,
+  default: boolean, // 是否设置为默认优先级
+  colour: string,
 }
 interface UPriority extends IPriority {
-    objectVersionNumber:number,
+  objectVersionNumber: number,
 }
-interface ISequence{
-    id:number,
-    sequence:number,
+interface ISequence {
+  id: number,
+  sequence: number,
 }
 class PriorityApi {
   get prefix() {
@@ -40,14 +40,17 @@ class PriorityApi {
   /**
      * 根据项目id查询组织优先级
      */
-  loadByProject(projectId?:number) {
+  loadByProject(projectId?: number, priorityIds?: string[]) {
     // 进行一层处理，过滤掉禁用的优先级
-    return axios.get(`/agile/v1/projects/${projectId || getProjectId()}/priority/list_by_org`).then((data: any) => Array.isArray(data) && data.filter(v => v.enable));
+    return axios.get(`/agile/v1/projects/${projectId || getProjectId()}/priority/list_by_org`)
+      .then((data: any) => Array.isArray(data)
+       && data.filter((v) => v.enable
+       || (Array.isArray(priorityIds) && priorityIds.some((id) => id === v.id))));
   }
 
   /**
      * 创建优先级
-     * @param priority 
+     * @param priority
      */
   create(priority: IPriority) {
     return axios.post(`${this.orgPrefix}/priority`, priority);
@@ -55,19 +58,19 @@ class PriorityApi {
 
   /**
    * 更新优先级
-   * @param priorityId 
-   * @param priority 
+   * @param priorityId
+   * @param priority
    */
-  update(priorityId:number, priority:UPriority) {
+  update(priorityId: number, priority: UPriority) {
     return axios.put(`${this.orgPrefix}/priority/${priorityId}`, priority);
   }
 
   /**
    * 更改优先级状态
-   * @param priorityId 
-   * @param enable 
+   * @param priorityId
+   * @param enable
    */
-  updateStatus(priorityId:number, enable:boolean) {
+  updateStatus(priorityId: number, enable: boolean) {
     return axios({
       method: 'get',
       url: `${this.orgPrefix}/priority/enable/${priorityId}`,
@@ -79,10 +82,10 @@ class PriorityApi {
 
   /**
    *根据priorityId删除优先级
-   * @param priorityId 
-   * @param changePriorityId 
+   * @param priorityId
+   * @param changePriorityId
    */
-  delete(priorityId:number, changePriorityId:number) {
+  delete(priorityId: number, changePriorityId: number) {
     return axios({
       method: 'delete',
       url: `${this.orgPrefix}/priority/delete/${priorityId}`,
@@ -94,7 +97,7 @@ class PriorityApi {
 
   /**
    * 删除前检查优先级
-   * @param priorityId 
+   * @param priorityId
    */
   checkBeforeDel(priorityId: number) {
     return axios.get(`${this.orgPrefix}/priority/check_delete/${priorityId}`);
@@ -102,7 +105,7 @@ class PriorityApi {
 
   /**
      * 检查优先级名称是否重复
-     * @param name 
+     * @param name
      */
   checkName(name: string) {
     return axios({
@@ -116,15 +119,15 @@ class PriorityApi {
 
   /**
    * 优先级排序
-   * @param sequences 
+   * @param sequences
    */
-  sort(sequences:Array<ISequence>) {
+  sort(sequences: Array<ISequence>) {
     return axios.put(`${this.orgPrefix}/priority/sequence`, sequences);
   }
 
   /**
    * 根据冲刺id查询优先级分布状况
-   * @param sprintId 
+   * @param sprintId
    */
   getDistribute(sprintId: number) {
     const organizationId = getOrganizationId();

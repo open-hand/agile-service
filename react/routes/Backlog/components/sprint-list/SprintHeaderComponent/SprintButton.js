@@ -8,7 +8,7 @@ import { Permission, stores } from '@choerodon/boot';
 import moment from 'moment';
 import classnames from 'classnames';
 import { sprintApi, workCalendarApi } from '@/api';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import CloseSprint from '@/components/close-sprint';
 import { Tooltip } from 'choerodon-ui/pro/lib';
@@ -37,7 +37,7 @@ function SprintButton({
   const issueList = BacklogStore.getIssueListBySprintId(sprintId);
   const hasActiveSprint = BacklogStore.getHasActiveSprint;
   const [disableStart, reason] = judgeDisabled([[hasActiveSprint, '已有活跃冲刺'], [!issueList || issueList.length === 0, '冲刺下没有问题'], [planning === true, '非当前PI下冲刺不可开启']]);
-
+  const { isShowFeature, isInProgram } = useIsInProgram();
   const openStartSprint = async () => {
     if (!disableStart) {
       const year = moment().year();
@@ -62,7 +62,7 @@ function SprintButton({
   };
   const menu = (
     <Menu
-      onClick={() => { BacklogStore.handleDeleteSprint(data, IsInProgramStore.isShowFeature); }}
+      onClick={() => { BacklogStore.handleDeleteSprint(data, isShowFeature); }}
     >
       <Menu.Item key="0">
         删除sprint
@@ -73,10 +73,10 @@ function SprintButton({
   const { type, id: projectId, organizationId: orgId } = AppState.currentMenuType;
 
   return (
-    <Fragment>
+    <>
       {statusCode === 'started' ? (
         <Permission
-          service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
+          service={[isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
         >
           <p
             className={prefix}
@@ -87,9 +87,9 @@ function SprintButton({
           </p>
         </Permission>
       ) : (
-        <Fragment>
+        <>
           <Permission
-            service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
+            service={[isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
           >
             <Tooltip title={reason}>
               <p
@@ -107,7 +107,7 @@ function SprintButton({
             type={type}
             projectId={projectId}
             organizationId={orgId}
-            service={[IsInProgramStore.isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
+            service={[isInProgram ? 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.subprojectupdatesprint' : 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.backlog.projectupdatesprint']}
           >
             {(data.sprintType !== 'ip'
                 && (
@@ -117,9 +117,9 @@ function SprintButton({
                 )
               )}
           </Permission>
-        </Fragment>
+        </>
       )}
-    </Fragment>
+    </>
   );
 }
 

@@ -9,6 +9,9 @@ import {
   Button, Tabs, Table, Select, Icon, Tooltip, Spin, Checkbox,
 } from 'choerodon-ui';
 import STATUS from '@/constants/STATUS';
+import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
+
+import to, { linkUrl } from '@/utils/to';
 import pic from '../../../assets/image/emptyChart.svg';
 import SwithChart from '../Component/switchChart';
 import StatusTag from '../../../components/StatusTag';
@@ -66,12 +69,10 @@ class VersionBurndown extends Component {
     if (ES.beforeCurrentUnit === 'story_point') {
       if (record.typeCode === 'story') {
         return record.storyPoints === null ? '' : record.storyPoints;
-      } else {
-        return '';
       }
-    } else {
-      return record.remainTime === null ? '' : record.remainTime;
+      return '';
     }
+    return record.remainTime === null ? '' : record.remainTime;
   }
 
   getOption() {
@@ -207,7 +208,7 @@ class VersionBurndown extends Component {
           /* eslint-disable */
           params[0].name = _.trim(params[0].name, '\n\n');
           /* eslint-enable */
-          const sprint = chartDataOrigin.filter(item => item.name === params[0].name)[0];
+          const sprint = chartDataOrigin.filter((item) => item.name === params[0].name)[0];
           let res = `<span className="primary">${params[0].name}</span>`;
           res += `<span style="display:block; margin-top: 0px; margin-bottom: 2px; color: rgba(0,0,0,0.54); font-size: 11px;">${sprint.startDate && sprint.startDate.split(' ')[0].split('-').join('/')}-${sprint.endDate && sprint.endDate.split(' ')[0].split('-').join('/')}</span>`;
           res += `本迭代开始时故事点数：${sprint.start}`;
@@ -400,7 +401,7 @@ class VersionBurndown extends Component {
   getColumn = (item) => {
     let totalStoryPoints = 0;
     if (item && item.length > 0) {
-      totalStoryPoints = _.sum(_.map(_.filter(item, o => o.typeCode === 'story' && o.storyPoints !== null), 'storyPoints'));
+      totalStoryPoints = _.sum(_.map(_.filter(item, (o) => o.typeCode === 'story' && o.storyPoints !== null), 'storyPoints'));
       if (totalStoryPoints % 1 > 0) {
         totalStoryPoints = totalStoryPoints.toFixed(1);
       }
@@ -422,9 +423,7 @@ class VersionBurndown extends Component {
               }}
               role="none"
               onClick={() => {
-                const { history } = this.props;
-                const urlParams = AppState.currentMenuType;
-                history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${issueNum}&paramIssueId=${encodeURIComponent(record.issueId)}&paramUrl=reporthost/VersionBurndown`);
+                LINK_URL_TO.issueLinkTo(record.issueId, issueNum);
               }}
             >
               {issueNum}
@@ -438,7 +437,7 @@ class VersionBurndown extends Component {
           // width: '30%',
           title: '概要',
           dataIndex: 'summary',
-          render: summary => (
+          render: (summary) => (
             <div style={{ width: '100%', overflow: 'hidden' }}>
               <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={`问题概要：${summary}`}>
                 <p style={{
@@ -535,7 +534,7 @@ class VersionBurndown extends Component {
     iconShowInfo.style.display = 'none';
   }
 
-  transformPlaceholder2Zero = arr => arr.map(v => (v === '-' ? 0 : v));
+  transformPlaceholder2Zero = (arr) => arr.map((v) => (v === '-' ? 0 : v));
 
   handleChangeCurrentVersion(versionId) {
     ES.setCurrentVersion(versionId);
@@ -578,9 +577,7 @@ class VersionBurndown extends Component {
               <a
                 role="none"
                 onClick={() => {
-                  const { history } = this.props;
-                  const urlParams = AppState.currentMenuType;
-                  history.push(`/agile/work-list/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramUrl=reporthost/VersionBurndown`);
+                  to(LINK_URL.workListBacklog);
                 }}
               >
                 待办事项
@@ -616,14 +613,13 @@ class VersionBurndown extends Component {
     );
   }
 
-
   renderTable = (type) => {
     const sprintBurnDownReportVOS = this.getTableDta('compoleted');
     let firstCompleteIssues = 0;
     if (type === 'unFinish') {
       return (
         <Table
-          rowKey={record => record.issueId}
+          rowKey={(record) => record.issueId}
           dataSource={this.getTableDta('unFinish')}
           filterBar={false}
           // columns={column}
@@ -666,15 +662,15 @@ class VersionBurndown extends Component {
                           }}
                           role="none"
                           onClick={() => {
-                            const { history } = this.props;
-                            const urlParams = AppState.currentMenuType;
                             if (item.statusCode === 'started') {
-                              history.push(`/agile/work-list/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramUrl=reporthost/VersionBurndown`);
+                              to(LINK_URL.workListBacklog);
                             } else {
-                              history.push(`/agile/reporthost/sprintReport?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&sprintId=${item.sprintId}&paramUrl=reporthost/VersionBurndown`);
+                              to(LINK_URL.reportSprint, {
+                                sprintId: item.sprintId,
+                                paramUrl: 'reporthost/VersionBurndown',
+                              });
                             }
-                          }
-                          }
+                          }}
                         >
                           {`${item.sprintName}`}
                         </span>
@@ -689,7 +685,7 @@ class VersionBurndown extends Component {
                         </span>
                       </p>
                       <Table
-                        rowKey={record => record.issueId}
+                        rowKey={(record) => record.issueId}
                         dataSource={item.completeIssues}
                         filterBar={false}
                         // columns={column}
@@ -830,7 +826,8 @@ class VersionBurndown extends Component {
 
   renderVersionInfo() {
     if (ES.currentVersionId !== undefined) {
-      const currentVersion = ES.versions.filter(item => item.versionId === ES.currentVersionId)[0];
+      const currentVersion = ES.versions
+        .filter((item) => item.versionId === ES.currentVersionId)[0];
       return (
         <p className="c7n-versionInfo">
           {`${currentVersion && currentVersion.releaseDate === null ? '未发布' : (`发布于 ${currentVersion && currentVersion.releaseDate.split(' ')[0]}`)}`}
@@ -841,23 +838,26 @@ class VersionBurndown extends Component {
   }
 
   render() {
-    const { history } = this.props;
     const { checkbox, tabActiveKey, linkFromParamUrl } = this.state;
     const urlParams = AppState.currentMenuType;
     return (
       <Page className="c7n-versionBurndown" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.versionburndown']}>
         <Header
           title="版本燃耗图"
-          // backPath={`/agile/${linkFromParamUrl || 'reporthost'}?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}
-          backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
+          /**
+          // backPath={`/agile/${linkFromParamUrl || 'reporthost'}?type=${urlParams.type}
+          &id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&
+          organizationId=${urlParams.organizationId}`}
+
+           */
+          backPath={linkUrl(LINK_URL.report)}
         >
           <SwithChart
-            history={history}
             current="versionBurndown"
           />
           <Button
             funcType="flat"
-            onClick={this.refresh.bind(this)}
+            onClick={() => this.refresh()}
           >
             <Icon type="refresh icon" />
             <span>刷新</span>
@@ -873,11 +873,11 @@ class VersionBurndown extends Component {
                     style={{ width: 512, marginRight: 33, height: 35 }}
                     label="版本"
                     value={ES.currentVersionId}
-                    onChange={this.handleChangeCurrentVersion.bind(this)}
-                    getPopupContainer={(triggerNode => triggerNode.parentNode)}
+                    onChange={(versionId) => this.handleChangeCurrentVersion(versionId)}
+                    getPopupContainer={((triggerNode) => triggerNode.parentNode)}
                   >
                     {
-                      ES.versions.map(version => (
+                      ES.versions.map((version) => (
                         <Option
                           key={version.versionId}
                           value={version.versionId}
@@ -892,7 +892,7 @@ class VersionBurndown extends Component {
                       label="查看选项"
                       value={checkbox}
                       options={[{ label: '根据图表校准冲刺', value: 'checked' }]}
-                      onChange={this.handleChangeCheckbox.bind(this)}
+                      onChange={(checkboxVal) => this.handleChangeCheckbox(checkboxVal)}
                     />
                     <span className="icon-show" role="none" onMouseEnter={this.handleIconMouseEnter} onMouseLeave={this.handleIconMouseLeave}>
                       <Icon type="help icon" />
@@ -955,33 +955,33 @@ class VersionBurndown extends Component {
                 pic={pic}
                 title="当前项目无可用版本"
                 des={(
-                  // eslint-disable-next-line react/jsx-indent
-                  <div>
-                    <span>请在</span>
-                    <span
-                      className="primary"
-                      style={{ margin: '0 5px', cursor: 'pointer' }}
-                      role="none"
-                      onClick={() => {
-                        history.push(`/agile/work-list/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramUrl=reporthost/VersionBurndown`);
-                      }}
-                    >
-                      待办事项
-                    </span>
-                    <span>或</span>
-                    <span
-                      className="primary"
-                      style={{ margin: '0 5px', cursor: 'pointer' }}
-                      role="none"
-                      onClick={() => {
-                        history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramUrl=reporthost/VersionBurndown`);
-                      }}
-                    >
-                      问题管理
-                    </span>
-                    <span>中创建一个版本</span>
-                  </div>
-                )}
+                    // eslint-disable-next-line react/jsx-indent
+                    <div>
+                      <span>请在</span>
+                      <span
+                        className="primary"
+                        style={{ margin: '0 5px', cursor: 'pointer' }}
+                        role="none"
+                        onClick={() => {
+                          to(LINK_URL.workListBacklog);
+                        }}
+                      >
+                        待办事项
+                      </span>
+                      <span>或</span>
+                      <span
+                        className="primary"
+                        style={{ margin: '0 5px', cursor: 'pointer' }}
+                        role="none"
+                        onClick={() => {
+                          to(LINK_URL.workListIssue);
+                        }}
+                      >
+                        问题管理
+                      </span>
+                      <span>中创建一个版本</span>
+                    </div>
+                  )}
               />
             )
           }

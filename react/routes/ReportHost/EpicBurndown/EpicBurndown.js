@@ -1,3 +1,4 @@
+/* eslint-disable react/sort-comp */
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import ReactEcharts from 'echarts-for-react';
@@ -10,6 +11,9 @@ import {
 } from 'choerodon-ui';
 // import pic from './no_epic.svg';
 import STATUS from '@/constants/STATUS';
+import to, { linkUrl } from '@/utils/to';
+import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
+
 import pic from '../../../assets/image/emptyChart.svg';
 // import finish from './legend/finish.svg';
 import SwithChart from '../Component/switchChart';
@@ -68,12 +72,10 @@ class EpicBurndown extends Component {
     if (ES.beforeCurrentUnit === 'story_point') {
       if (record.typeCode === 'story') {
         return record.storyPoints === null ? '' : record.storyPoints;
-      } else {
-        return '';
       }
-    } else {
-      return record.remainTime === null ? '' : record.remainTime;
+      return '';
     }
+    return record.remainTime === null ? '' : record.remainTime;
   }
 
   getOption() {
@@ -130,7 +132,8 @@ class EpicBurndown extends Component {
               //   ) : value;
               // }
               // if (chartDataOrigin.length >= 10) {
-              //   return value.length > 3 ? `<Tooltip title={value}><span>{(`${value.slice(0, 5)}...`)}</span></Tooltip>` : value;
+              //   return value.length > 3 ?`<Tooltip title={value}><span>
+              // {(`${value.slice(0, 5)}...`)}</span></Tooltip>` : value;
               // }
               // return value.length > 7 ? (
               //   <Tooltip title={value}>
@@ -225,7 +228,7 @@ class EpicBurndown extends Component {
         formatter(params) {
           // eslint-disable-next-line no-param-reassign
           params[0].name = _.trim(params[0].name, '\n\n');
-          const sprint = chartDataOrigin.filter(item => item.name === params[0].name)[0];
+          const sprint = chartDataOrigin.filter((item) => item.name === params[0].name)[0];
           let res = `<span className="primary">${params[0].name}</span>`;
           res += `<span style="display:block; margin-top: 0px; margin-bottom: 2px; color: rgba(0,0,0,0.54); font-size: 11px;">${sprint.startDate && sprint.startDate.split(' ')[0].split('-').join('/')}-${sprint.endDate && sprint.endDate.split(' ')[0].split('-').join('/')}</span>`;
           res += `本迭代开始时故事点数：${sprint.start}`;
@@ -386,7 +389,7 @@ class EpicBurndown extends Component {
     return option;
   }
 
-  transformPlaceholder2Zero = arr => arr.map(v => (v === '-' ? 0 : v))
+  transformPlaceholder2Zero = (arr) => arr.map((v) => (v === '-' ? 0 : v))
 
   getSprintSpeed = () => {
     const { chartData, chartDataOrigin } = ES;
@@ -414,7 +417,7 @@ class EpicBurndown extends Component {
   getColumn = (item) => {
     let totalStoryPoints = 0;
     if (item && item.length > 0) {
-      totalStoryPoints = _.sum(_.map(_.filter(item, o => o.typeCode === 'story' && o.storyPoints !== null), 'storyPoints'));
+      totalStoryPoints = _.sum(_.map(_.filter(item, (o) => o.typeCode === 'story' && o.storyPoints !== null), 'storyPoints'));
       if (totalStoryPoints % 1 > 0) {
         totalStoryPoints = totalStoryPoints.toFixed(1);
       }
@@ -429,16 +432,14 @@ class EpicBurndown extends Component {
           render: (issueNum, record) => (
             <span
               className="primary"
-              style={{                
+              style={{
                 cursor: 'pointer',
                 display: 'block',
                 minWidth: 85,
               }}
               role="none"
               onClick={() => {
-                const { history } = this.props;
-                const urlParams = AppState.currentMenuType;
-                history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramName=${issueNum}&paramIssueId=${encodeURIComponent(record.issueId)}&paramUrl=reporthost/EpicBurndown`);
+                LINK_URL_TO.issueLinkTo(record.issueId, issueNum);
               }}
             >
               {issueNum}
@@ -452,7 +453,7 @@ class EpicBurndown extends Component {
           // width: '30%',
           title: '概要',
           dataIndex: 'summary',
-          render: summary => (
+          render: (summary) => (
             <div style={{ width: '100%', overflow: 'hidden' }}>
               <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={`问题概要：${summary}`}>
                 <p style={{
@@ -580,17 +581,11 @@ class EpicBurndown extends Component {
   }
 
   handleLinkToIssue(linkType, item) {
-    const urlParams = AppState.currentMenuType;
-    const {
-      type, id, organizationId,
-    } = urlParams;
-    const { history } = this.props;
-    let urlPush = `/agile/work-list/issue?type=${type}&id=${id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${organizationId}&orgId=${urlParams.organizationId}`;
     if (JSON.stringify(item) !== '{}') {
       if (linkType === 'epic') {
-        urlPush += `&paramName=${item.issueNum}&paramIssueId=${encodeURIComponent(item.issueId)}&paramUrl=reporthost/epicBurndown`;
+        LINK_URL_TO.issueLinkTo(item.issueId, item.issueNum);
       }
-      history.push(urlPush);
+      to(LINK_URL.workListIssue);
     }
   }
 
@@ -609,9 +604,7 @@ class EpicBurndown extends Component {
               <a
                 role="none"
                 onClick={() => {
-                  const { history } = this.props;
-                  const urlParams = AppState.currentMenuType;
-                  history.push(`/agile/work-list/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramUrl=reporthost/epicBurndown`);
+                  to(LINK_URL.workListBacklog);
                 }}
               >
                 待办事项
@@ -655,7 +648,7 @@ class EpicBurndown extends Component {
     if (type === 'unFinish') {
       return (
         <Table
-          rowKey={record => record.issueId}
+          rowKey={(record) => record.issueId}
           dataSource={this.getTableDta(type)}
           filterBar={false}
           columns={this.getColumn(this.getTableDta('unFinish'))}
@@ -697,15 +690,12 @@ class EpicBurndown extends Component {
                           }}
                           role="none"
                           onClick={() => {
-                            const { history } = this.props;
-                            const urlParams = AppState.currentMenuType;
                             if (item.statusCode === 'started') {
-                              history.push(`/agile/work-list/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramUrl=reporthost/EpicBurndown`);
+                              to(LINK_URL.workListBacklog);
                             } else {
-                              history.push(`/agile/reporthost/sprintReport?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&sprintId=${item.sprintId}&paramUrl=reporthost/EpicBurndown`);
+                              to(LINK_URL.reportSprint, { params: { sprintId: item.sprintId, paramUrl: 'reporthost/EpicBurndown' } });
                             }
-                          }
-                          }
+                          }}
                         >
                           {`${item.sprintName}`}
                         </span>
@@ -720,7 +710,7 @@ class EpicBurndown extends Component {
                         </span>
                       </p>
                       <Table
-                        rowKey={record => record.issueId}
+                        rowKey={(record) => record.issueId}
                         dataSource={item.completeIssues}
                         filterBar={false}
                         columns={this.getColumn(item.completeIssues)}
@@ -802,16 +792,16 @@ class EpicBurndown extends Component {
 
   renderEpicInfo() {
     if (ES.currentEpicId !== undefined) {
-      const currentEpic = ES.epics.find(item => item.issueId === ES.currentEpicId);
+      const currentEpic = ES.epics.find((item) => item.issueId === ES.currentEpicId);
       return (
         <p className="c7n-epicInfo">
           <span
             className="primary"
-            style={{              
+            style={{
               cursor: 'pointer',
             }}
             role="none"
-            onClick={this.handleLinkToIssue.bind(this, 'epic', ES.currentEpicId !== undefined ? ES.epics.filter(item => item.issueId === ES.currentEpicId)[0] : {})}
+            onClick={this.handleLinkToIssue.bind(this, 'epic', ES.currentEpicId !== undefined ? ES.epics.filter((item) => item.issueId === ES.currentEpicId)[0] : {})}
           >
             {`${currentEpic ? currentEpic.issueNum : ''}`}
           </span>
@@ -823,23 +813,25 @@ class EpicBurndown extends Component {
   }
 
   render() {
-    const { history } = this.props;
     const { checkbox, tabActiveKey, linkFromParamUrl } = this.state;
-    const urlParams = AppState.currentMenuType;
     return (
       <Page className="c7n-epicBurndown" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.epicburndown']}>
         <Header
           title="史诗燃耗图"
-          // backPath={`/agile/${linkFromParamUrl || 'reporthost'}?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}
-          backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
+          /**
+          backPath={`/agile/${linkFromParamUrl || 'reporthost'}?ty
+          pe=${urlParams.type}&id=${urlParams.id}&name=${encodeURICo
+            mponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}
+
+           */
+          backPath={linkUrl(LINK_URL.report)}
         >
           <SwithChart
-            history={history}
             current="epicBurndown"
           />
           <Button
             funcType="flat"
-            onClick={this.refresh.bind(this)}
+            onClick={() => this.refresh()}
           >
             <Icon type="refresh icon" />
             <span>刷新</span>
@@ -855,11 +847,11 @@ class EpicBurndown extends Component {
                     style={{ width: 512, marginRight: 33, height: 35 }}
                     label="史诗"
                     value={ES.currentEpicId}
-                    onChange={this.handleChangeCurrentEpic.bind(this)}
-                    getPopupContainer={(triggerNode => triggerNode.parentNode)}
+                    onChange={(epic) => this.handleChangeCurrentEpic(epic)}
+                    getPopupContainer={((triggerNode) => triggerNode.parentNode)}
                   >
                     {
-                      ES.epics.map(epic => (
+                      ES.epics.map((epic) => (
                         <Option key={epic.issueId} value={epic.issueId}>{epic.epicName}</Option>
                       ))
                     }
@@ -869,7 +861,7 @@ class EpicBurndown extends Component {
                       label="查看选项"
                       value={checkbox}
                       options={[{ label: '根据图表校准冲刺', value: 'checked' }]}
-                      onChange={this.handleChangeCheckbox.bind(this)}
+                      onChange={(val) => this.handleChangeCheckbox(val)}
                     />
                     <span className="icon-show" role="none" onMouseEnter={this.handleIconMouseEnter} onMouseLeave={this.handleIconMouseLeave}>
                       <Icon type="help icon" />
@@ -939,7 +931,7 @@ class EpicBurndown extends Component {
                       style={{ margin: '0 5px', cursor: 'pointer' }}
                       role="none"
                       onClick={() => {
-                        history.push(`/agile/work-list/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramUrl=reporthost/EpicBurndown`);
+                        to(LINK_URL.workListBacklog);
                       }}
                     >
                       待办事项
@@ -950,7 +942,7 @@ class EpicBurndown extends Component {
                       style={{ margin: '0 5px', cursor: 'pointer' }}
                       role="none"
                       onClick={() => {
-                        history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramUrl=reporthost/EpicBurndown`);
+                        to(LINK_URL.workListIssue);
                       }}
                     >
                       问题管理

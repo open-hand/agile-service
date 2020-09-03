@@ -3,22 +3,18 @@ import {
   Page, Header, Content, stores,
 } from '@choerodon/boot';
 import './style';
+import to from '@/utils/to';
 import list from './list';
 
 const { AppState } = stores;
 
 class Home extends Component {
   handleClickItem(report) {
-    const { history } = this.props;
-    const urlParams = AppState.currentMenuType;
-    const {
-      type, id, name, organizationId,
-    } = urlParams;
-    history.push(`${report.link}?type=${type}&id=${id}&name=${name}&organizationId=${organizationId}&orgId=${organizationId}`);
+    to(report.link);
   }
 
   renderContentLinks() {
-    return list.map(report => (
+    return list.map((report) => (
       <div
         key={report.key}
         className="c7n-item"

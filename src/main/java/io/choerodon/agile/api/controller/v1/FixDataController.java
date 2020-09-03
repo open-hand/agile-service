@@ -132,4 +132,12 @@ public class FixDataController {
 //        notifyFeignClient.checkLog("0.20.0", "agile");
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.SITE)
+    @ApiOperation("【0.24】修复状态机和页面数据")
+    @GetMapping("/fix_data_state_machine")
+    public ResponseEntity fixDataStateMachine() {
+        fixDataService.fixDateStateMachine();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

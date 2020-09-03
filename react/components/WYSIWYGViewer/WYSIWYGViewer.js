@@ -1,5 +1,6 @@
 /* eslint-disable react/no-danger */
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Lightbox from 'react-image-lightbox';
 import { delta2Html } from '@/utils/richText';
 import './WYSIWYGViewer.less';
@@ -53,5 +54,7 @@ class WYSIWYGViewer extends Component {
     );
   }
 }
-
+WYSIWYGViewer.propTypes = {
+  data: PropTypes.string.isRequired,
+};
 export default WYSIWYGViewer;

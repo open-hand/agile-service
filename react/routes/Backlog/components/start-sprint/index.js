@@ -10,7 +10,7 @@ import moment from 'moment';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import { sprintApi } from '@/api';
 import WorkCalendar from '@/components/WorkCalendar';
-import IsInProgramStore from '../../../../stores/common/program/IsInProgramStore';
+import useIsInProgram from '@/hooks/useIsInProgram';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -44,7 +44,7 @@ class StartSprint extends Component {
   handleStartSprint = () => {
     const { workDates } = this.state;
     const {
-      form, data, modal,
+      form, data, modal, isShowFeature,
     } = this.props;
     form.validateFields((err, values) => {
       if (!err) {
@@ -58,7 +58,7 @@ class StartSprint extends Component {
           objectVersionNumber: data.objectVersionNumber,
           workDates,
         };
-        sprintApi.start(newData, IsInProgramStore.isShowFeature).then((res) => {
+        sprintApi.start(newData, isShowFeature).then((res) => {
           modal.close();
           BacklogStore.refresh();
         }).catch(() => {
@@ -105,13 +105,13 @@ class StartSprint extends Component {
       // 周六日
       const isWeekDay = weekdays.includes(localData.weekdaysMin(moment(diffDay)));
       // 冲刺自定义设置
-      const workDate = workDates.filter(date => date.workDay === moment(diffDay).format('YYYY-MM-DD'));
+      const workDate = workDates.filter((date) => date.workDay === moment(diffDay).format('YYYY-MM-DD'));
       // 工作日历自定义设置
-      const selectDay = selectDays.filter(date => date.workDay === moment(diffDay).format('YYYY-MM-DD'));
+      const selectDay = selectDays.filter((date) => date.workDay === moment(diffDay).format('YYYY-MM-DD'));
       // 法定假期
       let holiday = false;
       if (useHoliday && holidayRefs.length) {
-        holiday = holidayRefs.filter(date => date.holiday === moment(diffDay).format('YYYY-MM-DD'));
+        holiday = holidayRefs.filter((date) => date.holiday === moment(diffDay).format('YYYY-MM-DD'));
       }
       if (workDate.length) {
         if (workDate[0].status === 1) {
@@ -171,7 +171,9 @@ class StartSprint extends Component {
       sprintDetail,
       form,
       form: { getFieldDecorator, getFieldValue, setFieldsValue },
+      isShowFeature,
     } = this.props;
+
     const {
       showCalendar,
       startDate,
@@ -270,11 +272,10 @@ class StartSprint extends Component {
                     message: '开始日期是必填的',
                   }],
                   initialValue: start ? (() => {
-                    if (IsInProgramStore.isShowFeature) {
+                    if (isShowFeature) {
                       return moment();
-                    } else {
-                      return moment(start);
                     }
+                    return moment(start);
                   })() : undefined,
                 })(
                   <DatePicker
@@ -339,16 +340,14 @@ class StartSprint extends Component {
                       const startDate = form.getFieldValue('startDate');
                       if (!sprintType && startDate) {
                         return date <= startDate;
-                      } else {
-                        // 没选开始时间的时候，只判断时间点能不能选
-                        // eslint-disable-next-line no-lonely-if
-                        if (!startDate) {
-                          return !BacklogStore.dateCanChoose({ date, sprintId });
-                        } else {
-                          // 选了开始时间之后，判断形成的时间段是否和其他重叠
-                          return !BacklogStore.rangeCanChoose({ startDate, endDate: date, sprintId });
-                        }
                       }
+                      // 没选开始时间的时候，只判断时间点能不能选
+                      // eslint-disable-next-line no-lonely-if
+                      if (!startDate) {
+                        return !BacklogStore.dateCanChoose({ date, sprintId });
+                      }
+                      // 选了开始时间之后，判断形成的时间段是否和其他重叠
+                      return !BacklogStore.rangeCanChoose({ startDate, endDate: date, sprintId });
                     }}
                     showTime
                   />,
@@ -381,13 +380,11 @@ class StartSprint extends Component {
                         return true;
                       }
                       return false;
-                    }
-                    }
+                    }}
                   />,
                 )}
               </FormItem>
-            )
-          }
+            )}
         </Form>
         {!sprintType && startDate && endDate
           ? (
@@ -414,12 +411,10 @@ class StartSprint extends Component {
                     holidayRefs={holidayRefs}
                     onWorkDateChange={this.onWorkDateChange}
                   />
-                ) : null
-              }
+                ) : null}
             </div>
-          ) : ''
-        }
-        {sprintType 
+          ) : ''}
+        {sprintType
           ? (
             <div>
               <div style={{ marginBottom: 20 }}>
@@ -444,17 +439,21 @@ class StartSprint extends Component {
                     holidayRefs={holidayRefs}
                     onWorkDateChange={this.onWorkDateChange}
                   />
-                ) : null
-              }
+                ) : null}
             </div>
-          ) : ''
-        }
+          ) : ''}
 
       </div>
     );
   }
 }
 const FormStartSprint = Form.create()(StartSprint);
+
+const FormStartSprintHoc = (props) => {
+  const { isShowFeature } = useIsInProgram();
+  return <FormStartSprint {...props} isShowFeature={isShowFeature} />;
+};
+
 export default function (props) {
   Modal.open({
     key: 'sprint',
@@ -465,6 +464,6 @@ export default function (props) {
     style: {
       width: 740,
     },
-    children: <FormStartSprint {...props} />,
+    children: <FormStartSprintHoc {...props} />,
   });
 }

@@ -20,10 +20,9 @@ const editKey = Modal.key();
 const deleteKey = Modal.key();
 const { Column } = Table;
 
-
 function ComponentHome() {
   const { dataSet, history } = useContext(Store);
-  
+
   const menu = AppState.currentMenuType;
   const urlParams = AppState.currentMenuType;
   const {
@@ -41,13 +40,12 @@ function ComponentHome() {
       },
       drawer: true,
       children: (
-        <CreateComponent          
+        <CreateComponent
           onOk={handleOk}
         />
-      ),     
+      ),
     });
   };
-
 
   const openEditModal = (record) => {
     const currentComponentId = record.get('componentId');
@@ -59,11 +57,11 @@ function ComponentHome() {
       },
       drawer: true,
       children: (
-        <EditComponent 
+        <EditComponent
           componentId={currentComponentId}
           onOk={handleOk}
         />
-      ),     
+      ),
     });
   };
   const openDeleteModal = (component) => {
@@ -83,7 +81,6 @@ function ComponentHome() {
     });
   };
 
-
   const renderMenu = (text, record) => (
     <TableAction
       menus={[{
@@ -91,7 +88,7 @@ function ComponentHome() {
         text: '删除',
       }]}
       onEditClick={() => openEditModal(record)}
-      onMenuClick={openDeleteModal.bind(this, record)}
+      onMenuClick={() => openDeleteModal(record)}
       text={(
         <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={text}>
           <p
@@ -106,7 +103,7 @@ function ComponentHome() {
             {text}
           </p>
         </Tooltip>
-        )}
+      )}
       type={type}
       projectId={id}
       organizationId={orgId}
@@ -131,7 +128,7 @@ function ComponentHome() {
               to={`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramType=component&paramId=${encodeURIComponent(record.get('componentId'))}&paramName=${encodeURIComponent(`模块"${record.get('name')}"下的问题`)}`}
             >
               {issueCount}
-              {'issues'}              
+              {'issues'}
             </Link>
           ) : null
         )}

@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -73,6 +74,8 @@ public class ReportServiceImpl implements ReportService {
     private IssueTypeService issueTypeService;
     @Autowired
     private StatusService statusService;
+    @Autowired
+    private BoardService boardService;
 
     public static final String STORY_POINTS = "storyPoints";
     public static final String REMAINING_ESTIMATED_TIME = "remainingEstimatedTime";
@@ -200,34 +203,46 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<ReportIssueVO> queryBurnDownReport(Long projectId, Long sprintId, String type, String ordinalType) {
-        List<ReportIssueConvertDTO> reportIssueConvertDTOList = getBurnDownReport(projectId, sprintId, type);
+    public List<ReportIssueVO> queryBurnDownReport(Long projectId, Long sprintId, BurnDownSearchVO burnDownSearchVO) {
+        String ordinalType = burnDownSearchVO.getOrdinalType();
+        if (StringUtils.isEmpty(ordinalType)) {
+            throw new CommonException("error.query.ordinalType.empty");
+        }
+        List<ReportIssueConvertDTO> reportIssueConvertDTOList = getBurnDownReport(projectId, sprintId, burnDownSearchVO);
         return modelMapper.map(ordinalType.equals(ASC) ? reportIssueConvertDTOList.stream().
                 sorted(Comparator.comparing(ReportIssueConvertDTO::getDate)).collect(Collectors.toList()) : reportIssueConvertDTOList.stream().
                 sorted(Comparator.comparing(ReportIssueConvertDTO::getDate).reversed()).collect(Collectors.toList()), new TypeToken<List<ReportIssueVO>>() {
         }.getType());
     }
 
-    private List<ReportIssueConvertDTO> getBurnDownReport(Long projectId, Long sprintId, String type) {
+    private List<ReportIssueConvertDTO> getBurnDownReport(Long projectId, Long sprintId, BurnDownSearchVO burnDownSearchVO) {
+        String type = burnDownSearchVO.getType();
         List<ReportIssueConvertDTO> reportIssueConvertDTOList = new ArrayList<>();
         SprintDTO sprintDTO = new SprintDTO();
         sprintDTO.setSprintId(sprintId);
         sprintDTO.setProjectId(projectId);
         SprintConvertDTO sprintConvertDTO = modelMapper.map(sprintMapper.selectOne(sprintDTO), SprintConvertDTO.class);
+        List<Long> quickFilterIds = burnDownSearchVO.getQuickFilterIds();
+        if (!ObjectUtils.isEmpty(quickFilterIds)) {
+            burnDownSearchVO.setFilterSql(boardService.getQuickFilter(quickFilterIds));
+        } else {
+            //防止注入
+            burnDownSearchVO.setFilterSql(null);
+        }
         if (sprintConvertDTO != null && !sprintConvertDTO.getStatusCode().equals(SPRINT_PLANNING_CODE)) {
             sprintConvertDTO.initStartAndEndTime();
             switch (type) {
                 case STORY_POINTS:
-                    queryStoryPointsOrRemainingEstimatedTime(sprintConvertDTO, reportIssueConvertDTOList, FIELD_STORY_POINTS);
+                    queryStoryPointsOrRemainingEstimatedTime(sprintConvertDTO, reportIssueConvertDTOList, FIELD_STORY_POINTS, burnDownSearchVO);
                     break;
                 case REMAINING_ESTIMATED_TIME:
-                    queryStoryPointsOrRemainingEstimatedTime(sprintConvertDTO, reportIssueConvertDTOList, FIELD_TIMEESTIMATE);
+                    queryStoryPointsOrRemainingEstimatedTime(sprintConvertDTO, reportIssueConvertDTOList, FIELD_TIMEESTIMATE, burnDownSearchVO);
                     break;
                 case ISSUE_COUNT:
-                    queryIssueCount(sprintConvertDTO, reportIssueConvertDTOList);
+                    queryIssueCount(sprintConvertDTO, reportIssueConvertDTOList, burnDownSearchVO);
                     break;
                 default:
-                    queryStoryPointsOrRemainingEstimatedTime(sprintConvertDTO, reportIssueConvertDTOList, FIELD_STORY_POINTS);
+                    queryStoryPointsOrRemainingEstimatedTime(sprintConvertDTO, reportIssueConvertDTOList, FIELD_STORY_POINTS, burnDownSearchVO);
                     break;
             }
         } else {
@@ -682,7 +697,9 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    private void queryIssueCount(SprintConvertDTO sprintConvertDTO, List<ReportIssueConvertDTO> reportIssueConvertDTOList) {
+    private void queryIssueCount(SprintConvertDTO sprintConvertDTO,
+                                 List<ReportIssueConvertDTO> reportIssueConvertDTOList,
+                                 BurnDownSearchVO burnDownSearchVO) {
         SprintDTO sprintDTO = modelMapper.map(sprintConvertDTO, SprintDTO.class);
         //获取冲刺开启前的issue
         List<Long> issueIdBeforeSprintList;
@@ -692,11 +709,11 @@ public class ReportServiceImpl implements ReportService {
         List<Long> issueIdRemoveList;
         //异步任务
         CompletableFuture<List<Long>> task1 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO), pool);
+                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO, burnDownSearchVO), pool);
         CompletableFuture<List<Long>> task2 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO), pool);
+                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO, burnDownSearchVO), pool);
         CompletableFuture<List<Long>> task3 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO), pool);
+                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO, burnDownSearchVO), pool);
         issueIdBeforeSprintList = task1.join();
         issueIdAddList = task2.join();
         issueIdRemoveList = task3.join();
@@ -716,7 +733,10 @@ public class ReportServiceImpl implements ReportService {
         handleRemoveDoneIssueCountDuringSprint(sprintDTO, reportIssueConvertDTOList, issueAllList);
     }
 
-    private void queryStoryPointsOrRemainingEstimatedTime(SprintConvertDTO sprintConvertDTO, List<ReportIssueConvertDTO> reportIssueConvertDTOList, String field) {
+    private void queryStoryPointsOrRemainingEstimatedTime(SprintConvertDTO sprintConvertDTO,
+                                                          List<ReportIssueConvertDTO> reportIssueConvertDTOList,
+                                                          String field,
+                                                          BurnDownSearchVO burnDownSearchVO) {
         SprintDTO sprintDTO = modelMapper.map(sprintConvertDTO, SprintDTO.class);
         //获取冲刺开启前的issue
         List<Long> issueIdBeforeSprintList;
@@ -726,11 +746,11 @@ public class ReportServiceImpl implements ReportService {
         List<Long> issueIdRemoveList;
         //异步任务
         CompletableFuture<List<Long>> task1 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO), pool);
+                .supplyAsync(() -> reportMapper.queryIssueIdsBeforeSprintStart(sprintDTO, burnDownSearchVO), pool);
         CompletableFuture<List<Long>> task2 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO), pool);
+                .supplyAsync(() -> reportMapper.queryAddIssueIdsDuringSprint(sprintDTO, burnDownSearchVO), pool);
         CompletableFuture<List<Long>> task3 = CompletableFuture
-                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO), pool);
+                .supplyAsync(() -> reportMapper.queryRemoveIssueIdsDuringSprint(sprintDTO, burnDownSearchVO), pool);
         issueIdBeforeSprintList = task1.join();
         issueIdAddList = task2.join();
         issueIdRemoveList = task3.join();
@@ -1375,9 +1395,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    @Cacheable(cacheNames = AGILE, key = "'BurnDownCoordinate' + #projectId + ':' + #sprintId + ':' + #type")
-    public JSONObject queryBurnDownCoordinate(Long projectId, Long sprintId, String type) {
-        List<ReportIssueConvertDTO> reportIssueConvertDTOList = getBurnDownReport(projectId, sprintId, type);
+//    @Cacheable(cacheNames = AGILE, key = "'BurnDownCoordinate' + #projectId + ':' + #sprintId + ':' + #type")
+    public JSONObject queryBurnDownCoordinate(Long projectId, Long sprintId, BurnDownSearchVO burnDownSearchVO) {
+        List<ReportIssueConvertDTO> reportIssueConvertDTOList = getBurnDownReport(projectId, sprintId, burnDownSearchVO);
         return handleSameDay(reportIssueConvertDTOList.stream().filter(reportIssueConvertDTO -> !"endSprint".equals(reportIssueConvertDTO.getType())).
                 sorted(Comparator.comparing(ReportIssueConvertDTO::getDate)).collect(Collectors.toList()));
     }

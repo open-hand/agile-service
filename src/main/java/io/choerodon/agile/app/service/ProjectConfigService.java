@@ -2,6 +2,8 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.ProjectConfigDTO;
+import io.choerodon.core.domain.Page;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -134,4 +136,87 @@ public interface ProjectConfigService {
     Long queryWorkFlowFirstStatus(Long projectId, String applyType, Long issueTypeId, Long organizationId);
 
     Map<Long, Map<Long, List<TransformVO>>> queryTransformsMapByProjectId(Long projectId, String applyType);
+
+    /**
+     * 查询项目下问题类型的状态与流转列表
+     * @param projectId
+     * @param issueTypeId
+     * @param applyType
+     * @return
+     */
+    List<StatusAndTransformVO> statusTransformList(Long projectId, Long issueTypeId, String applyType);
+
+    /**
+     * 改变状态机默认状态
+     *
+     * @param projectId
+     * @param issueTypeId
+     * @param stateMachineId
+     * @param statusId
+     * @return
+     */
+    void defaultStatus(Long projectId, Long issueTypeId, Long stateMachineId, Long statusId);
+
+    /**
+     * 更新问题类型状态机的转换
+     *
+     * @param projectId
+     * @param issueTypeId
+     * @param applyType
+     * @param list
+     * @return
+     */
+    List<StateMachineTransformUpdateVO> updateTransformByIssueTypeId(Long projectId, Long issueTypeId,String applyType,List<StateMachineTransformUpdateVO> list);
+
+    /**
+     * 创建新状态
+     *
+     * @param projectId
+     * @param issueTypeIds
+     * @param applyType
+     * @param statusVO
+     * @return
+     */
+    StatusVO createStatus(Long projectId, List<Long> issueTypeIds, String applyType, StatusVO statusVO);
+
+    /**
+     * 关联已有的状态
+     *
+     * @param projectId
+     * @param issueTypeId
+     * @param applyType
+     * @param statusId
+     * @param defaultStatus
+     * @return
+     */
+    StateMachineNodeVO linkStatus(Long projectId, Long issueTypeId, String applyType, Long statusId, Boolean defaultStatus);
+
+    /**
+     * 删除状态机里面的状态
+     *
+     * @param projectId
+     * @param issueTypeId
+     * @param applyType
+     * @param nodeId
+     * @param statusId
+     */
+    void deleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId,Long statusId);
+
+    /**
+     * 查询自定义流转列表
+     *
+     * @param projectId
+     * @param issueTypeId
+     * @param applyType
+     * @param pageRequest
+     * @param param
+     * @return
+     */
+    Page<StatusSettingVO> statusTransformSettingList(Long projectId, Long issueTypeId, PageRequest pageRequest, String param, String applyType, String schemeCode);
+
+    void handlerDeleteStatusByProject(Long projectId, String applyType, Long statusId, List<DeleteStatusTransferVO> statusTransferVOS);
+
+    void updateNodeObjectVersionNumber(Long project, Long issueType, Long statusId, Long objectVersionNumber, String applyType);
+
+    void initIssueTypeStatusMachine(Long project, String applyType);
 }

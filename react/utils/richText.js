@@ -102,13 +102,12 @@ export function returnBeforeTextUpload(text, data, func, pro = 'description') {
       send[pro] = JSON.stringify(deltaOps);
       return func(send);
     });
-  } else {
-    const converter = new QuillDeltaToHtmlConverter(deltaOps, {});
-    const html = converter.convert();
-    // send.gitlabDescription = html;
-    send[pro] = JSON.stringify(deltaOps);
-    return func(send);
   }
+  const converter = new QuillDeltaToHtmlConverter(deltaOps, {});
+  const html = converter.convert();
+  // send.gitlabDescription = html;
+  send[pro] = JSON.stringify(deltaOps);
+  return func(send);
 }
 
 /**

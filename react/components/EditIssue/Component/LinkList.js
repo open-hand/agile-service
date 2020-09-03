@@ -30,14 +30,12 @@ class LinkList extends Component {
   render() {
     const {
       issue, i, showAssignee, showProject,
-      canDelete = true, onOpen, type,
+      canDelete = true, onOpen,
     } = this.props;
 
     const { typeCode } = issue;
-    let deleteTipTitle = '确认要删除该问题链接吗？';
-    if (type === 'test') {
-      deleteTipTitle = '确认要删除该测试用例吗?';
-    }
+    let deleteTipTitle;
+
     if (typeCode !== 'feature') {
       deleteTipTitle = '确认删除该问题的关联关系吗?';
     } else {
@@ -165,7 +163,7 @@ class LinkList extends Component {
               <Popconfirm
                 title={deleteTipTitle}
                 placement="left"
-                onConfirm={this.confirm.bind(this, typeCode === 'feature' ? issue.featureDependId : issue.linkId)}
+                onConfirm={() => this.confirm(typeCode === 'feature' ? issue.featureDependId : issue.linkId)}
                 onCancel={this.cancel}
                 okText="删除"
                 cancelText="取消"
@@ -174,8 +172,7 @@ class LinkList extends Component {
                 <Icon type="delete_forever pointer" />
               </Popconfirm>
             </div>
-          ) : ''
-        }
+          ) : ''}
       </div>
     );
   }

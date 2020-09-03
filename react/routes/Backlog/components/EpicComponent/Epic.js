@@ -45,7 +45,7 @@ class Epic extends Component {
   render() {
     const { draggableIds, addEpic } = this.state;
     const { refresh, issueRefresh } = this.props;
-    return BacklogStore.getCurrentVisible === 'epic' ? (
+    return (
       <div className="c7n-backlog-epic">
         <div className="c7n-backlog-epicContent">
           <div className="c7n-backlog-epicTitle">
@@ -160,7 +160,7 @@ class Epic extends Component {
           />
         </div>
       </div>
-    ) : null;
+    );
   }
 }
 

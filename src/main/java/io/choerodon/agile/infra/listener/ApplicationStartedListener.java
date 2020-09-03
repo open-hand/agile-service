@@ -29,7 +29,7 @@ public class ApplicationStartedListener implements ApplicationListener<Applicati
      */
     @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
-        LOGGER.info("ApplicationStartedListener:{}", event.toString());
+        LOGGER.info("ApplicationStartedListener:{}", event);
         configCodeService.handlePropertyData(stateMachineClient.getStateMachinePropertyData());
     }
 }

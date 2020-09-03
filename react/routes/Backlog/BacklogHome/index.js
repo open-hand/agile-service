@@ -1,3 +1,3 @@
-import BacklogHome from './BacklogHome';
+import BacklogHome from './BacklogHomeHoc';
 
 export default BacklogHome;

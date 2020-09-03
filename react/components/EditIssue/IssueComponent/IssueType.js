@@ -4,11 +4,10 @@ import { Dropdown, Menu, Icon } from 'choerodon-ui';
 import { find } from 'lodash';
 import { useIssueTypes } from '@/hooks';
 import { issueApi } from '@/api';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import TypeTag from '../../TypeTag';
-import IsInProgramStore from '../../../stores/common/program/IsInProgramStore';
 import EditIssueContext from '../stores';
 import './IssueComponent.less';
-
 
 const IssueType = observer(({
   reloadIssue, onUpdate,
@@ -63,9 +62,8 @@ const IssueType = observer(({
         });
     }
   };
-
- 
   const issue = store.getIssue;
+  const { isInProgram } = useIsInProgram();
   const { issueTypeVO = {}, featureVO = {}, subIssueVOList = [] } = issue;
   const { typeCode } = issueTypeVO;
   const { stateMachineId } = find(issueTypeData, { typeCode }) || {};
@@ -89,13 +87,13 @@ const IssueType = observer(({
     ];
     currentIssueType = featureType === 'business' ? issueTypeData[0] : issueTypeData[1];
   } else {
-    issueTypeData = issueTypeData.filter(item => item.stateMachineId === stateMachineId).filter(item => ![typeCode, 'feature', 'sub_task'].includes(item.typeCode));
-    if (IsInProgramStore.isInProgram) {
-      issueTypeData = issueTypeData.filter(item => item.typeCode !== 'issue_epic');
+    issueTypeData = issueTypeData.filter((item) => item.stateMachineId !== stateMachineId).filter((item) => ![typeCode, 'feature', 'sub_task'].includes(item.typeCode));
+    if (isInProgram) {
+      issueTypeData = issueTypeData.filter((item) => item.typeCode !== 'issue_epic');
     }
   }
   if (subIssueVOList.length > 0) {
-    issueTypeData = issueTypeData.filter(item => ['task', 'story'].includes(item.typeCode));
+    issueTypeData = issueTypeData.filter((item) => ['task', 'story'].includes(item.typeCode));
   }
   const typeList = (
     <Menu
@@ -108,7 +106,7 @@ const IssueType = observer(({
       onClick={handleChangeType}
     >
       {
-        issueTypeData.map(t => (
+        issueTypeData.map((t) => (
           <Menu.Item key={t.typeCode} value={t.id} featureType={t.featureType}>
             <TypeTag
               style={{ margin: 0 }}

@@ -4,13 +4,24 @@ import {
   Switch,
 } from 'react-router-dom';
 import { asyncRouter, nomatch } from '@choerodon/boot';
+import PermissionRoute from '@/components/PermissionRoute';
+import { service } from './setting/Setting';
 
 const ScrumBoardHome = asyncRouter(() => (import('./ScrumBoardHome')));
 const Setting = asyncRouter(() => (import('./setting')));
 
 const ScrumBoardIndex = ({ match }) => (
   <Switch>
-    <Route exact path={`${match.url}`} component={ScrumBoardHome} />
+    <PermissionRoute
+      permissions={[...[
+        'choerodon.code.project.cooperation.iteration-plan.ps.default',
+        'choerodon.code.project.cooperation.iteration-plan.ps.board.create',
+        'choerodon.code.project.cooperation.iteration-plan.ps.sprint.finish',
+      ], ...service]}
+      exact
+      path={`${match.url}`}
+      component={ScrumBoardHome}
+    />
     <Route path={`${match.url}/setting`} component={Setting} />
     <Route path="*" component={nomatch} />
   </Switch>

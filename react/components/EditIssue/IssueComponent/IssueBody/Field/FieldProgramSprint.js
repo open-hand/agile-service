@@ -14,9 +14,11 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
     const issue = store.getIssue;
     const { issueId } = issue;
     const activePiSprints = issue.activePiSprints || [];
-    const originSprintIds = activePiSprints.map(sprint => sprint.sprintId);
-    const addSprints = (sprintIds || []).filter(teamId => !originSprintIds.includes(teamId));
-    const removeSprints = sprintIds ? originSprintIds.filter(sprintId => !sprintIds.includes(sprintId)) : originSprintIds;
+    const originSprintIds = activePiSprints.map((sprint) => sprint.sprintId);
+    const addSprints = (sprintIds || []).filter((teamId) => !originSprintIds.includes(teamId));
+    const removeSprints = sprintIds ? originSprintIds.filter(
+      (sprintId) => !sprintIds.includes(sprintId),
+    ) : originSprintIds;
     await featureApi.updateTeamAndSprint({
       piId: issue.activePi ? issue.activePi.id : null,
       deleteSprintIds: removeSprints,
@@ -25,7 +27,7 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
       teamProjectIds: [],
       deleteTeamProjectIds: [],
     });
-    
+
     if (onUpdate) {
       onUpdate();
     }
@@ -37,11 +39,10 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
     const issue = store.getIssue;
     const activePiSprints = issue.activePiSprints || [];
     const closedPiSprints = issue.closedPiSprints || [];
-    const sprintIds = activePiSprints.map(s => s.sprintId);
+    const sprintIds = activePiSprints.map((s) => s.sprintId);
     const activePiTeams = issue.activePiTeams || [];
     const { id: piId } = issue.activePi || {};
-    const teamIds = activePiTeams.map(team => team.id);
-   
+    const teamIds = activePiTeams.map((team) => team.id);
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -89,7 +90,7 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
                           {map(closedPiSprints, 'sprintName').join(' , ')}
                         </div>
                         <div>
-                          {activePiSprints.map(sprint => (
+                          {activePiSprints.map((sprint) => (
                             <div
                               style={{
                                 color: '#4d90fe',
@@ -100,7 +101,7 @@ import SelectTeamSprints from '@/components/select/select-teamSprint';
                             >
                               {sprint.sprintName}
                             </div>
-                          ))}                        
+                          ))}
                         </div>
                       </div>
                     )
