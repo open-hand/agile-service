@@ -1,3 +1,4 @@
+/* eslint-disable import/no-anonymous-default-export */
 import React, { Fragment } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Button, Icon } from 'choerodon-ui';
@@ -8,26 +9,17 @@ import BatchModal from '../components/BatchModal';
 let modal;
 function Header({ dataSet, close }) {
   return (
-    <Fragment>
-      <div style={{ fontSize: '30px', fontWeight: 500, marginRight: 12 }}>{dataSet.selected.length}</div>
-      <div style={{ fontSize: '16px' }}>
-        项已选中
+    <>
+      <div style={{ fontSize: '18px', fontWeight: 500, marginRight: 12 }}>
+        {`批量编辑 (已选中${dataSet.selected.length}项)`}
       </div>
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
-        <Icon type="mode_edit" />
-        <span style={{ marginLeft: 6 }}>批量修改</span>        
-      </div>
-      <div style={{
-        width: 1, height: '100%', margin: '0px 8px 0 15px', background: '#95A5FF', 
-      }}
-      />
       <Button
         icon="close"
-        shape="circle" 
-        style={{ color: 'white', marginRight: -5 }}         
+        shape="circle"
+        style={{ color: 'white', marginRight: -5, marginLeft: 'auto' }}
         onClick={close}
-      />      
-    </Fragment>
+      />
+    </>
   );
 }
 const ObserverHeader = observer(Header);
@@ -82,7 +74,7 @@ export default ({
         ...params,
         organizationId,
       },
-      transformRequest: (data) => {
+      transformRequest: () => {
         const searchDTO = IssueStore.getCustomFieldFilters();
         return JSON.stringify(searchDTO);
       },
@@ -104,17 +96,25 @@ export default ({
     { name: 'feature', type: 'string', label: '特性' },
     { name: 'lastUpdateDate', type: 'string', label: '最后更新时间' },
     { name: 'creationDate', type: 'string', label: '创建时间' },
+    { name: 'estimatedStartTime', type: 'string', label: '预计开始时间' },
+    { name: 'estimatedEndTime', type: 'string', label: '预计结束时间' },
     { name: 'issueSprintVOS', type: 'array', label: '冲刺' },
   ],
   queryFields: [
     { name: 'issueTypeId', type: 'array', label: '问题类型' },
     // { name: 'service', type: 'string', label: service },
-    // { name: 'description', type: 'string', label: description },      
+    // { name: 'description', type: 'string', label: description },
   ],
   events: {
     select: handleSelect,
     selectAll: handleSelect,
     unSelect: handleUnSelect,
     unSelectAll: handleUnSelect,
+    load: ({ dataSet }) => {
+      // 有筛选，自动展开
+      if (IssueStore.isHasFilter) {
+        IssueStore.tableRef.current.tableStore.expandAll();
+      }
+    },
   },
 });

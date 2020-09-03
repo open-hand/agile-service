@@ -34,4 +34,6 @@ public interface StateMachineClientService {
     ExecuteResult executeTransform(Long projectId, Long issueId, Long transformId, Long objectVersionNumber, String applyType, InputDTO inputDTO);
 
     ExecuteResult executeTransformForDemo(Long projectId, Long issueId, Long transformId, Long objectVersionNumber, String applyType, InputDTO inputDTO);
+
+    void cleanInstanceCache(Long projectId, Long issueId, String applyType);
 }

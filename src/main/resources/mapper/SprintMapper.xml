@@ -50,6 +50,8 @@
         <id property="issueTypeId" column="issue_type_id"/>
         <id property="priorityId" column="priority_id"/>
         <id property="objectVersionNumber" column="is_object_version_number"/>
+        <id property="estimatedStartTime" column="estimated_start_time"/>
+        <id property="estimatedEndTime" column="estimated_end_time"/>
         <id property="epicName" column="issue_epic_name"/>
         <id property="color" column="color"/>
         <!--<id property="featureName" column="feature_name"/>-->
@@ -98,6 +100,8 @@
         ai.issue_type_id,
         ai.object_version_number as is_object_version_number, ai.priority_code,
         ai1.epic_name AS issue_epic_name,
+        ai.estimated_start_time,
+        ai.estimated_end_time,
         alv2.name AS color,
 --         feature_info.feature_name AS feature_name,
         apv1.version_id AS version_id,
@@ -417,6 +421,8 @@
         ai2.story_points, ai2.status_id,
         ai2.issue_type_id,
         ai2.priority_id,
+        ai2.estimated_start_time,
+        ai2.estimated_end_time,
         ai2.object_version_number as is_object_version_number, ai2.priority_code,
         ai1.epic_name AS issue_epic_name,
         alv2.name AS color,
@@ -509,6 +515,8 @@
         ai2.priority_id,
         ai2.object_version_number as is_object_version_number,
         ai2.priority_code,
+        ai2.estimated_start_time,
+        ai2.estimated_end_time,
 --         ai2.feature_id,
         ai1.epic_name AS issue_epic_name,
         alv2.name AS color,

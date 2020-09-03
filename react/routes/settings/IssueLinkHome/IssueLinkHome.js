@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   TabPage as Page, Header, Content, Action, Permission, Breadcrumb,
@@ -11,7 +11,6 @@ import ClickText from '@/components/ClickText';
 import CreateEditForm from './create-edit-form';
 import DeleteModal from './delete-modal';
 import useLinkHomeStore from './stores';
-
 
 import './IssueLinkHome.less';
 
@@ -31,7 +30,6 @@ function IssueLinkHome() {
     issueLinkTableDs,
   } = useLinkHomeStore();
 
-
   function openCreateEditModal(isEdit) {
     const record = isEdit ? issueLinkTableDs.current : issueLinkTableDs.create();
     const titleId = !isEdit ? 'issue_link.create.issue_link' : 'issue_link.edit.issue_link';
@@ -50,10 +48,9 @@ function IssueLinkHome() {
       cancelText: formatMessage({ id: 'cancel' }),
       onOk: async () => {
         if (await issueLinkTableDs.validate()) {
-          return issueLinkTableDs.submit().then((res) => {
-            issueLinkTableDs.query();
-            return !!res;
-          });
+          await issueLinkTableDs.submit();
+          issueLinkTableDs.query();
+          return true;
         }
         return false;
       },
@@ -85,12 +82,11 @@ function IssueLinkHome() {
     });
   }
 
-
   function renderLinkName({ text }) {
     return (
       <ClickText
         value={text}
-        onClick={openCreateEditModal.bind(null, true)}
+        onClick={() => openCreateEditModal(true)}
         clickAble
         showToolTip
         permissionCode={['choerodon.code.project.setting.issue.ps.updatelink']}
@@ -142,7 +138,7 @@ function IssueLinkHome() {
         <Permission
           service={['choerodon.code.project.setting.issue.ps.createfastsearch']}
         >
-          <Button funcType="flat" onClick={openCreateEditModal.bind(null, false)}>
+          <Button funcType="flat" onClick={() => openCreateEditModal(false)}>
             <Icon type="playlist_add icon" />
             <span>{formatMessage({ id: 'issue_link.create' })}</span>
           </Button>

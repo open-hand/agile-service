@@ -30,6 +30,8 @@
         <id column="relate_issue_id" property="relateIssueId"/>
         <id column="relate_issue_num" property="relateIssueNum"/>
         <id column="parent_relate_num" property="parentRelateNum"/>
+        <result property="estimatedStartTime" column="estimated_start_time"/>
+        <result property="estimatedEndTime" column="estimated_end_time"/>
         <association property="activeSprint" column="issue_id" select="queryActiveSprintNameByIssueId"/>
         <collection property="versionIssueRelDTOList" column="issue_id"
                     ofType="io.choerodon.agile.infra.dto.IssueDetailDTO"
@@ -126,7 +128,9 @@
             ai3.summary                                                                      AS parent_issue_summary,
             IF(ai4.issue_num IS NULL, NULL, CONCAT_WS('-', api.project_code, ai4.issue_num)) AS relate_issue_num,
             ai4.summary                                                                      AS parent_relate_summary,
-            CONCAT_WS('-', api.project_code, ai.issue_num)                                   AS issue_num_splicing
+            CONCAT_WS('-', api.project_code, ai.issue_num)                                   AS issue_num_splicing,
+            ai.estimated_start_time,
+            ai.estimated_end_time
         FROM agile_issue ai
             LEFT JOIN agile_issue ai2 ON ai2.issue_id = ai.epic_id
             LEFT JOIN lookup_value alv2 ON ai2.color_code = alv2.value_code
@@ -312,6 +316,8 @@
         <result property="creationDate" column="creation_date"/>
         <result property="estimateTime" column="estimate_time"/>
         <result property="resolution" column="resolution"/>
+        <result property="estimatedStartTime" column="estimated_start_time"/>
+        <result property="estimatedEndTime" column="estimated_end_time"/>
         <collection property="versionIssueRelDTOS"
                     ofType="io.choerodon.agile.infra.dto.VersionIssueRelDTO">
             <id property="versionId" column="version_id"/>
@@ -389,7 +395,9 @@
             IF((ais.is_completed = 1), '是', '否') AS resolution,
         </if>
         ai.parent_issue_id,
-        ai.relate_issue_id
+        ai.relate_issue_id,
+        ai.estimated_start_time,
+        ai.estimated_end_time
         FROM agile_issue ai
         <if test="isExcelExported">
           left join agile_issue_status ais on ais.status_id = ai.status_id and ais.project_id = ai.project_id
@@ -644,6 +652,10 @@
         LEFT JOIN agile_project_info api ON ai.project_id = api.project_id
         left join agile_issue aii2 on aii2.project_id = #{projectId} and ai.parent_issue_id = aii2.issue_id
         WHERE ai.project_id = #{projectId} AND ai.apply_type = 'agile'
+        <include refid="explainSearchVO"/>
+    </sql>
+
+    <sql id="explainSearchVO">
         <if test='searchVO.searchArgs != null'>
             <if test='searchVO.searchArgs.summary != null and searchVO.searchArgs.summary != "" '>
                 AND ai.summary LIKE concat(concat('%',#{searchVO.searchArgs.summary}),'%')
@@ -2944,6 +2956,44 @@
                     #{status}
                 </foreach>
           </if>
+    </select>
+
+    <update id="updateStatusByStatusId">
+        update agile_issue set status_id = #{statusId}
+        where project_id = #{projectId} and status_id = #{currentStatusId}
+    </update>
+
+    <select id="selectStatusIdByIssueType" resultType="java.lang.Long">
+        select ai.status_id from agile_issue ai
+        where ai.project_id = #{projectId}
+        AND ai.issue_type_id = #{issueTypeId}
+        group by ai.status_id
+    </select>
+
+    <select id="countIssueTypeByStatusIds" resultType="io.choerodon.agile.infra.dto.IssueCountDTO">
+        select ai.status_id as id,fit.`name` as name from agile_issue ai
+        left join fd_issue_type fit on fit.id = ai.issue_type_id
+        where ai.project_id = #{projectId}
+        AND ai.status_id in
+        <foreach collection="statusIds" item="statusId" open="(" separator="," close=")">
+            #{statusId}
+        </foreach>
+        group by ai.status_id,ai.issue_type_id
+    </select>
+
+    <select id="selectIssueTypeIdsByStatusId" resultType="java.lang.Long">
+        select ai.issue_type_id from agile_issue ai,fd_issue_type fit
+        where ai.project_id = #{projectId}
+        AND ai.status_id = #{statusId}
+        AND fit.id = ai.issue_type_id
+        AND fit.type_code not in ('issue_auto_test','issue_auto_test')
+        group by ai.issue_type_id
+    </select>
+
+    <select id="querySubIssueByParentIssueId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+        select * from agile_issue ai
+        where ai.project_id = #{projectId}
+        AND (ai.parent_issue_id = #{parentIssueId} OR ai.relate_issue_id = #{parentIssueId})
     </select>
 
 </mapper>

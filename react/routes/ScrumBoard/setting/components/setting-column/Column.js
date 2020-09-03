@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { Droppable, Draggable } from 'react-beautiful-dnd';
+import { Draggable } from 'react-beautiful-dnd';
 import { stores, Permission, Choerodon } from '@choerodon/boot';
 import { Icon, Input } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
 import './Column.less';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import TextEditToggle from '@/components/TextEditToggle';
-import { boardApi, boardColumnApi } from '@/api';
+import { boardColumnApi } from '@/api';
 import StatusList from './StatusList';
 
 const { AppState } = stores;
@@ -76,7 +76,6 @@ class Column extends Component {
     });
   }
 
-
   renderColumnName = () => {
     const {
       data,
@@ -93,7 +92,7 @@ class Column extends Component {
             originData={data.name}
           >
             <Text>
-              {text => text}
+              {(text) => text}
             </Text>
             <Edit>
               <Input
@@ -124,11 +123,11 @@ class Column extends Component {
         })}
         type="columndrop"
       >
-        {provided => (
+        {(provided) => (
           <div
             className="c7n-scrumsetting-column"
             ref={provided.innerRef}
-            {...provided.draggableProps}            
+            {...provided.draggableProps}
           >
             <div className="c7n-scrumsetting-columnContent">
               <div className="c7n-scrumsetting-columnTop">
@@ -152,7 +151,7 @@ class Column extends Component {
                           display: isDragDisabled && 'none',
                         }}
                         role="none"
-                        onClick={this.handleDeleteColumn.bind(this)}
+                        onClick={this.handleDeleteColumn}
                       />
                     </Permission>
                   </div>
@@ -191,7 +190,7 @@ class Column extends Component {
                         originData={data.maxNum}
                       >
                         <Text>
-                          {text => (
+                          {(text) => (
                             <span
                               style={{ cursor: 'pointer', minWidth: '110px' }}
                             >
@@ -226,7 +225,7 @@ class Column extends Component {
                         originData={data.minNum}
                       >
                         <Text>
-                          {text => (
+                          {(text) => (
                             <span
                               style={{ cursor: 'pointer', minWidth: '110px' }}
                             >

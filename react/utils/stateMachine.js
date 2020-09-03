@@ -1,22 +1,4 @@
 /**
- * 动态计算名称宽度
- * @param val
- * @returns {number}
- */
-export function getByteLen(val) {
-  let len = 0;
-  for (let i = 0; i < val.length; i += 1) {
-    const a = val.charAt(i);
-    if (a.match(/[^\x00-\xff]/ig) !== null) { // \x00-\xff→GBK双字节编码范围
-      len += 15;
-    } else {
-      len += 10;
-    }
-  }
-  return len;
-}
-  
-/**
    * 获取stageList
    * @returns []
    */
@@ -48,7 +30,7 @@ export function getStageList() {
     },
   ];
 }
-  
+
 /**
    * 获取stageMap
    * @returns {}

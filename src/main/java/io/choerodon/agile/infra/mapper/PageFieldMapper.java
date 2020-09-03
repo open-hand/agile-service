@@ -5,6 +5,7 @@ import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author shinan.chen
@@ -76,4 +77,10 @@ public interface PageFieldMapper extends BaseMapper<PageFieldDTO> {
      * @param fieldId
      */
     void deleteByFieldId(@Param("fieldId") Long fieldId);
+
+    /**
+     * 查所有的组织id
+     * @return
+     */
+    Set<Long> selectOrganizationIds();
 }

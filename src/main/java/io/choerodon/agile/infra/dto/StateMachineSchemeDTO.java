@@ -26,7 +26,7 @@ public class StateMachineSchemeDTO extends AuditDomain {
     private String deployStatus;
 
     @Transient
-    private List<StateMachineSchemeConfigDTO> schemeConfigs;
+    private List<StatusMachineSchemeConfigDTO> schemeConfigs;
     @Transient
     private List<ProjectConfigDTO> projectConfigs;
 
@@ -78,11 +78,11 @@ public class StateMachineSchemeDTO extends AuditDomain {
         this.organizationId = organizationId;
     }
 
-    public List<StateMachineSchemeConfigDTO> getSchemeConfigs() {
+    public List<StatusMachineSchemeConfigDTO> getSchemeConfigs() {
         return schemeConfigs;
     }
 
-    public void setSchemeConfigs(List<StateMachineSchemeConfigDTO> schemeConfigs) {
+    public void setSchemeConfigs(List<StatusMachineSchemeConfigDTO> schemeConfigs) {
         this.schemeConfigs = schemeConfigs;
     }
 

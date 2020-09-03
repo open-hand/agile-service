@@ -34,6 +34,16 @@ public class ObjectSchemeFieldCreateVO {
     @ApiModelProperty(value = "字段选项列表")
     private List<FieldOptionUpdateVO> fieldOptions;
 
+    private String rank;
+
+    public String getRank() {
+        return rank;
+    }
+
+    public void setRank(String rank) {
+        this.rank = rank;
+    }
+
     public Boolean getExtraConfig() {
         return extraConfig;
     }

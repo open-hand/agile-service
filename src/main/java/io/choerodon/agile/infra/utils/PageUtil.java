@@ -43,18 +43,10 @@ public class PageUtil {
                 }
                 if (!flag) {
                     //驼峰转下划线
-                    if(order.getDirection().isAscending()){
-                        if (mainTableAlias != null) {
-                            order.setProperty(mainTableAlias + "." + StringUtil.camelhumpToUnderline(order.getProperty()));
-                        } else {
-                            order.setProperty(StringUtil.camelhumpToUnderline(order.getProperty()));
-                        }
+                    if (mainTableAlias != null) {
+                        order.setProperty(mainTableAlias + "." + StringUtil.camelhumpToUnderline(order.getProperty()));
                     } else {
-                        if (mainTableAlias != null) {
-                            order.setProperty(mainTableAlias + "." + StringUtil.camelhumpToUnderline(order.getProperty()));
-                        } else {
-                            order.setProperty(StringUtil.camelhumpToUnderline(order.getProperty()));
-                        }
+                        order.setProperty(StringUtil.camelhumpToUnderline(order.getProperty()));
                     }
                 }
                 orders.add(order);

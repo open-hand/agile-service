@@ -1,8 +1,9 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.StateMachineTransformUpdateVO;
 import io.choerodon.agile.api.vo.StateMachineTransformVO;
 import io.choerodon.agile.api.vo.TransformVO;
-import io.choerodon.agile.infra.dto.StateMachineTransformDTO;
+import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ public interface StateMachineTransformService {
      * @param stateMachineId
      * @return
      */
-    StateMachineTransformDTO getInitTransform(Long organizationId, Long stateMachineId);
+    StatusMachineTransformDTO getInitTransform(Long organizationId, Long stateMachineId);
 
     /**
      * 根据id获取转换
@@ -65,7 +66,7 @@ public interface StateMachineTransformService {
      * @param statusId
      * @return
      */
-    List<StateMachineTransformDTO> queryListByStatusIdByDeploy(Long organizationId, Long stateMachineId, Long statusId);
+    List<StatusMachineTransformDTO> queryListByStatusIdByDeploy(Long organizationId, Long stateMachineId, Long statusId);
 
     /**
      * 创建【全部转换到此状态】转换，所有节点均可转换到当前节点
@@ -121,5 +122,9 @@ public interface StateMachineTransformService {
      * @param transformId
      * @return
      */
-    StateMachineTransformDTO queryDeployTransformForAgile(Long organizationId, Long transformId);
+    StatusMachineTransformDTO queryDeployTransformForAgile(Long organizationId, Long transformId);
+
+    void createTransform(Long organizationId, Long stateMachineId, StateMachineTransformUpdateVO transformUpdateVO);
+
+    void deleteTransformByNodeId(Long organizationId, Long stateMachineId, Long startNodeId, Long endNodeId);
 }

@@ -13,13 +13,12 @@ import FullEditor from '../../../FullEditor';
 import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
-const bugDefaultDes = [{ attributes: { bold: true }, insert: '步骤' }, { insert: '\n' }, { attributes: { list: 'ordered' }, insert: '\n\n\n' }, { attributes: { bold: true }, insert: '结果' }, { insert: '\n\n' }, { attributes: { bold: true }, insert: '期望' }, { insert: '\n' }];
 const IssueDes = ({ reloadIssue }) => {
   const [editDesShow, setEditDesShow] = useState(false);
   const [fullEdit, setFullEdit] = useState(false);
   const [editDes, setEditDes] = useState('');
   const { store, disabled } = useContext(EditIssueContext);
-  const { description, typeCode } = store.getIssue;
+  const { description, descriptionTemplate, typeCode } = store.getIssue;
   useEffect(() => {
     setEditDes(description);
     setEditDesShow(false);
@@ -60,7 +59,7 @@ const IssueDes = ({ reloadIssue }) => {
               <WYSIWYGEditor
                 autoFocus
                 bottomBar
-                value={typeCode === 'bug' ? text2Delta(editDes) || bugDefaultDes : text2Delta(editDes)}
+                value={text2Delta(descriptionTemplate) || text2Delta(editDes)}
                 style={{
                   height: '100%', width: '100%',
                 }}
@@ -77,20 +76,18 @@ const IssueDes = ({ reloadIssue }) => {
           </div>
         )
       );
-    } else {
-      return (
-        <div className="c7n-content-wrapper">
-          <div
-            className="mt-10 c7n-description"
-            role="none"
-          >
-            <WYSIWYGViewer data={description} />
-          </div>
-        </div>
-      );
     }
+    return (
+      <div className="c7n-content-wrapper">
+        <div
+          className="mt-10 c7n-description"
+          role="none"
+        >
+          <WYSIWYGViewer data={description} />
+        </div>
+      </div>
+    );
   };
-
 
   const callback = (value) => {
     updateIssueDes(value);
@@ -110,7 +107,7 @@ const IssueDes = ({ reloadIssue }) => {
         /> */}
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px', position: 'relative' }}>
-            <Tooltip title="全屏编辑" getPopupContainer={triggerNode => triggerNode.parentNode}>
+            <Tooltip title="全屏编辑" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
               <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => setFullEdit(true)}>
                 <Icon type="zoom_out_map icon" style={{ marginRight: 2 }} />
               </Button>

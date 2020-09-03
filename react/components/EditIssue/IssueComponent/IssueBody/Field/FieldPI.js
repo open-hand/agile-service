@@ -9,7 +9,7 @@ import { piApi } from '@/api';
 class FieldPI extends Component {
   updateIssuePI = async (value) => {
     const {
-      store, onUpdate, reloadIssue, 
+      store, onUpdate, reloadIssue,
     } = this.props;
     const issue = store.getIssue;
     const { issueId, activePi } = issue;
@@ -17,10 +17,9 @@ class FieldPI extends Component {
     await piApi.addFeatures([issueId], id || 0, value || 0);
     if (onUpdate) {
       onUpdate();
-    }    
+    }
     await reloadIssue(issueId);
   }
-
 
   render() {
     const { store, hasPermission, disabled } = this.props;
@@ -29,6 +28,8 @@ class FieldPI extends Component {
     const {
       name, code, id, statusCode,
     } = activePi || {};
+    const field = store.getFieldByCode('pi');
+    const required = field?.required;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -42,8 +43,9 @@ class FieldPI extends Component {
             onSubmit={this.updateIssuePI}
             initValue={id}
             editor={({ submit }) => (
-              <SelectPI 
-                statusList={['todo', 'doing']} 
+              <SelectPI
+                required={required}
+                statusList={['todo', 'doing']}
                 multiple={false}
                 allowClear
                 onChange={submit}
@@ -59,7 +61,7 @@ class FieldPI extends Component {
                     !closePi.length && !id ? '无' : (
                       <div>
                         <div>
-                          {closePi.map(p => `${p.code}-${p.name}`).join(' , ')}
+                          {closePi.map((p) => `${p.code}-${p.name}`).join(' , ')}
                         </div>
                         {
                           id && (

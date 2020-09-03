@@ -1,16 +1,10 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { Content, stores } from '@choerodon/boot';
-import {
-  Select,
-} from 'choerodon-ui';
+import { Content } from '@choerodon/boot';
 import moment from 'moment';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import WorkCalendar from '@/components/WorkCalendar';
 import { workCalendarApi } from '@/api';
-
-const { AppState } = stores;
-const { Option } = Select;
 
 @observer
 class WorkCalendarPage extends Component {
@@ -43,10 +37,10 @@ class WorkCalendarPage extends Component {
     } = ScrumBoardStore.getWorkDate;
     const { selectedDateDisabled } = this.props;
     return (
-      <Content        
+      <Content
         style={{
           padding: 0,
-          height: '100%',         
+          height: '100%',
         }}
       >
         <WorkCalendar

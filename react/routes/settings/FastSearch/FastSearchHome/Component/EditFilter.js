@@ -5,10 +5,13 @@ import {
 import { stores } from '@choerodon/boot';
 import moment from 'moment';
 import _ from 'lodash';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import {
-  sprintApi, epicApi, featureApi, userApi, versionApi, fieldApi, issueLabelApi, priorityApi, statusApi, quickFilterApi, commonApi, componentApi, issueTypeApi, 
+  sprintApi, epicApi, featureApi, userApi, versionApi, fieldApi,
+  issueLabelApi, priorityApi, statusApi, quickFilterApi, commonApi, componentApi, issueTypeApi,
 } from '@/api';
+import useIsInProgram from '@/hooks/useIsInProgram';
+import { getProjectId, getOrganizationId } from '@/utils/common';
+
 import { NumericInput } from '../../../../../components/CommonComponent';
 
 const { Sidebar } = Modal;
@@ -18,6 +21,109 @@ const { AppState } = stores;
 const FormItem = Form.Item;
 
 let sign = -1;
+const OPTION_FILTER = {
+  assignee: {
+    url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=0`,
+    prop: 'list',
+    id: 'id',
+    name: 'realName',
+    state: 'originUsers',
+  },
+  priority: {
+    url: `/agile/v1/projects/${getProjectId()}/priority/list_by_org`,
+    prop: '',
+    id: 'id',
+    name: 'name',
+    state: 'originPriorities',
+  },
+  status: {
+    url: `/agile/v1/projects/${getProjectId()}/schemes/query_status_by_project_id?apply_type=agile`,
+    prop: '',
+    id: 'id',
+    name: 'name',
+    state: 'originStatus',
+  },
+  reporter: {
+    url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=0`,
+    prop: 'list',
+    id: 'id',
+    name: 'realName',
+    state: 'originUsers',
+  },
+  created_user: {
+    url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=0`,
+    prop: 'list',
+    id: 'id',
+    name: 'realName',
+    state: 'originUsers',
+  },
+  last_updated_user: {
+    url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=0`,
+    prop: 'list',
+    id: 'id',
+    name: 'realName',
+    state: 'originUsers',
+  },
+  epic: {
+    url: `/agile/v1/projects/${getProjectId()}/issues/epics/select_data`,
+    prop: '',
+    id: 'issueId',
+    name: 'epicName',
+    state: 'originEpics',
+  },
+  sprint: {
+    // post
+    url: `/agile/v1/projects/${getProjectId()}/sprint/names`,
+    prop: '',
+    id: 'sprintId',
+    name: 'sprintName',
+    state: 'originSprints',
+  },
+  label: {
+    url: `/agile/v1/projects/${getProjectId()}/issue_labels`,
+    prop: '',
+    id: 'labelId',
+    name: 'labelName',
+    state: 'originLabels',
+  },
+  component: {
+    url: `/agile/v1/projects/${getProjectId()}/component`,
+    prop: '',
+    id: 'componentId',
+    name: 'name',
+    state: 'originComponents',
+  },
+  influence_version: {
+    // post
+    url: `/agile/v1/projects/${getProjectId()}/product_version/names`,
+    prop: '',
+    id: 'versionId',
+    name: 'name',
+    state: 'originVersions',
+  },
+  fix_version: {
+    // post
+    url: `/agile/v1/projects/${getProjectId()}/product_version/names`,
+    prop: '',
+    id: 'versionId',
+    name: 'name',
+    state: 'originVersions',
+  },
+  issue_type: {
+    url: '',
+    prop: '',
+    id: 'typeCode',
+    name: 'name',
+    state: 'originTypes',
+  },
+  feature: {
+    url: `/agile/v1/projects/${getProjectId()}/issues/feature/all?organizationId=${getOrganizationId()}&page=0&size=0&param=`,
+    prop: '',
+    id: 'issueId',
+    name: 'summary',
+    state: 'originFeatures',
+  },
+};
 
 const customFieldType = {
   radio: 'option',
@@ -77,7 +183,7 @@ class AddComponent extends Component {
     // [=, !=, in, notIn, is, isNot]
     const equal_notEqual_in_notIn_is_isNot = new Set(['assignee', 'reporter', 'created_user', 'last_updated_user', 'epic', 'sprint', 'label', 'component', 'influence_version', 'fix_version', 'feature', 'member']);
     // [>, >=, <, <=]
-    const greater_greaterAndEqual_lessThan_lessThanAndEqual = new Set(['last_update_date', 'creation_date', 'date', 'dateTime', 'time']);
+    const greater_greaterAndEqual_lessThan_lessThanAndEqual = new Set(['last_update_date', 'creation_date', 'date', 'datetime', 'time']);
     // [>, >=, <, <=, is, isNot]
     const greater_greaterAndEqual_lessThan_lessThanAndEqual_is_isNot_equal = new Set(['story_point', 'remain_time', 'number']);
     // [=, !=, is, isNot]
@@ -90,17 +196,17 @@ class AddComponent extends Component {
 
     if (equal_notEqual_in_notin.has(filter)) {
       return 'is (=,!=,in,notin)';
-    } else if (greater_greaterAndEqual_lessThan_lessThanAndEqual.has(filter)) {
+    } if (greater_greaterAndEqual_lessThan_lessThanAndEqual.has(filter)) {
       return 'is (>,>=,<,<=)';
-    } else if (equal_notEqual_in_notIn_is_isNot.has(filter)) {
+    } if (equal_notEqual_in_notIn_is_isNot.has(filter)) {
       return 'is (=,!=,in,notin,is,isNot)';
-    } else if (greater_greaterAndEqual_lessThan_lessThanAndEqual_is_isNot_equal.has(filter)) {
+    } if (greater_greaterAndEqual_lessThan_lessThanAndEqual_is_isNot_equal.has(filter)) {
       return 'is (>,>=,<,<=,is,isNot)';
-    } else if (equal_notEqual_is_isNot.has(filter)) {
+    } if (equal_notEqual_is_isNot.has(filter)) {
       return 'is (=, !=, is, isNot)';
-    } else if (in_notIn_is_isNot.has(filter)) {
+    } if (in_notIn_is_isNot.has(filter)) {
       return 'is (in, notIn, is, isNot)';
-    } else if (equal_notEqual_like_notLike.has(filter)) {
+    } if (equal_notEqual_like_notLike.has(filter)) {
       return 'is (=, !=, like, notLike)';
     }
     return null;
@@ -108,7 +214,7 @@ class AddComponent extends Component {
 
   getOperation = (filter) => {
     const { quickFilterFiled } = this.state;
-    const field = quickFilterFiled.find(item => item.fieldCode === filter) || {};
+    const field = quickFilterFiled.find((item) => item.fieldCode === filter) || {};
     const operationGroupBase = [
       [
         {
@@ -239,11 +345,11 @@ class AddComponent extends Component {
         return operationGroupAdv[0];
       case 'is (>,>=,<,<=,is,isNot)':
         return operationGroupAdv[1];
-      case 'is (=, !=, is, isNot)': 
+      case 'is (=, !=, is, isNot)':
         return operationGroupAdv[2];
-      case 'is (in, notIn, is, isNot)': 
+      case 'is (in, notIn, is, isNot)':
         return operationGroupAdv[3];
-      case 'is (=, !=, like, notLike)': 
+      case 'is (=, !=, like, notLike)':
         return operationGroupAdv[4];
       default:
         return [];
@@ -291,125 +397,21 @@ class AddComponent extends Component {
   };
 
   loadQuickFilterFiled = () => {
+    const { isInProgram } = this.props;
     const getPreDefinedField = () => quickFilterApi.loadField();
     const getCustomField = () => fieldApi.getCustomFields();
     Promise.all([getPreDefinedField(), getCustomField()]).then(([preDefinedField, customField]) => {
       this.setState({
-        quickFilterFiled: [...preDefinedField, ...IsInProgramStore.isInProgram ? [{ fieldCode: 'feature', type: 'long', name: '特性' }] : [], ...customField].map(field => ({ ...field, fieldCode: field.code || field.fieldCode, type: field.fieldType || field.type })) || [],
+        quickFilterFiled: [...preDefinedField, ...isInProgram ? [{ fieldCode: 'feature', type: 'long', name: '特性' }] : [], ...customField].map((field) => ({ ...field, fieldCode: field.code || field.fieldCode, type: field.fieldType || field.type })) || [],
       });
     });
   };
 
   tempOption = (filter, addEmpty) => {
     const { state } = this;
-    const projectId = AppState.currentMenuType.id;
-    const orgId = AppState.currentMenuType.organizationId;
     const { quickFilterFiled } = state;
-    const customFields = quickFilterFiled.filter(item => item.id);
-    const customMemberField = quickFilterFiled.find(item => item.type === 'member') || {};
-    const OPTION_FILTER = {
-      assignee: {
-        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
-        prop: 'list',
-        id: 'id',
-        name: 'realName',
-        state: 'originUsers',
-      },
-      priority: {
-        url: `/agile/v1/projects/${projectId}/priority/list_by_org`,
-        prop: '',
-        id: 'id',
-        name: 'name',
-        state: 'originPriorities',
-      },
-      status: {
-        url: `/agile/v1/projects/${projectId}/schemes/query_status_by_project_id?apply_type=agile`,
-        prop: '',
-        id: 'id',
-        name: 'name',
-        state: 'originStatus',
-      },
-      reporter: {
-        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
-        prop: 'list',
-        id: 'id',
-        name: 'realName',
-        state: 'originUsers',
-      },
-      created_user: {
-        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
-        prop: 'list',
-        id: 'id',
-        name: 'realName',
-        state: 'originUsers',
-      },
-      last_updated_user: {
-        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
-        prop: 'list',
-        id: 'id',
-        name: 'realName',
-        state: 'originUsers',
-      },
-      epic: {
-        url: `/agile/v1/projects/${projectId}/issues/epics/select_data`,
-        prop: '',
-        id: 'issueId',
-        name: 'epicName',
-        state: 'originEpics',
-      },
-      sprint: {
-        // post
-        url: `/agile/v1/projects/${projectId}/sprint/names`,
-        prop: '',
-        id: 'sprintId',
-        name: 'sprintName',
-        state: 'originSprints',
-      },
-      label: {
-        url: `/agile/v1/projects/${projectId}/issue_labels`,
-        prop: '',
-        id: 'labelId',
-        name: 'labelName',
-        state: 'originLabels',
-      },
-      component: {
-        url: `/agile/v1/projects/${projectId}/component`,
-        prop: '',
-        id: 'componentId',
-        name: 'name',
-        state: 'originComponents',
-      },
-      influence_version: {
-        // post
-        url: `/agile/v1/projects/${projectId}/product_version/names`,
-        prop: '',
-        id: 'versionId',
-        name: 'name',
-        state: 'originVersions',
-      },
-      fix_version: {
-        // post
-        url: `/agile/v1/projects/${projectId}/product_version/names`,
-        prop: '',
-        id: 'versionId',
-        name: 'name',
-        state: 'originVersions',
-      },
-      issue_type: {
-        url: '',
-        prop: '',
-        id: 'typeCode',
-        name: 'name',
-        state: 'originTypes',
-      },
-      feature: {
-        url: `/agile/v1/projects/${projectId}/issues/feature/all?organizationId=${orgId}&page=0&size=0&param=`,
-        prop: '',
-        id: 'issueId',
-        name: 'summary',
-        state: 'originFeatures',
-      },
-    };
+    const customFields = quickFilterFiled.filter((item) => item.id);
+    const customMemberField = quickFilterFiled.find((item) => item.type === 'member') || {};
 
     customFields.forEach((item) => {
       OPTION_FILTER[item.code] = {
@@ -422,18 +424,17 @@ class AddComponent extends Component {
     });
 
     OPTION_FILTER[customMemberField.code] = {
-      url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
+      url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=0`,
       prop: 'list',
       id: 'id',
       name: 'realName',
       state: 'originUsers',
     };
-    const arr = (state[OPTION_FILTER[filter].state] || []).map(v => (
+    const arr = (state[OPTION_FILTER[filter].state] || []).map((v) => (
       <Option key={v[OPTION_FILTER[filter].id]} value={v[OPTION_FILTER[filter].id]}>
         {v[OPTION_FILTER[filter].name]}
       </Option>
     ));
-   
     if (addEmpty) {
       arr.unshift(
         <Option key="null" value="null">
@@ -485,30 +486,28 @@ class AddComponent extends Component {
     if (filter === 'priority') {
       if (type === '[object Array]') {
         const v = _.map(value, 'key');
-        const vv = v.map(e => `${e}`);
+        const vv = v.map((e) => `${e}`);
         return `(${vv.join(',')})`;
-      } else {
-        const v = value.key;
-        return `${v}`;
       }
-    } else if (filter === 'issue_type') {
+      const v = value.key;
+      return `${v}`;
+    } if (filter === 'issue_type') {
       if (type === '[object Array]') {
         const v = _.map(value, 'key');
-        const vv = v.map(e => `'${e}'`);
+        const vv = v.map((e) => `'${e}'`);
         return `(${vv.join(',')})`;
-      } else {
-        const v = value.key;
-        return `'${v}'`;
       }
-    } else if (type === '[object Array]') {
+      const v = value.key;
+      return `'${v}'`;
+    } if (type === '[object Array]') {
       const v = _.map(value, 'key');
       return `(${v.join(',')})`;
-    } else if (type === '[object Object]') {
+    } if (type === '[object Object]') {
       if (value.key) {
         const v = value.key;
         if (Object.prototype.toString.call(v) === '[object Number]') {
           return v;
-        } else if (Object.prototype.toString.call(v) === '[object String]') {
+        } if (Object.prototype.toString.call(v) === '[object String]') {
           return v;
         }
       } else {
@@ -520,16 +519,31 @@ class AddComponent extends Component {
     return '';
   };
 
-  getLabel = (value) => {
+  getLabel = (value, attributeName) => {
+    const { state } = this;
     if (Object.prototype.toString.call(value) === '[object Array]') {
-      const v = _.map(value, 'label');
+      const v = _.map(value, (itemOption) => {
+        if (!itemOption.label) {
+          const currentLabelValue = _.find(state[OPTION_FILTER[attributeName].state],
+            (item) => {
+              const idKey = OPTION_FILTER[attributeName].id;
+              if (String(item[idKey]) === String(itemOption.key)) {
+                return true;
+              }
+              return false;
+            });
+          const nameKey = OPTION_FILTER[attributeName].name;
+          return currentLabelValue ? currentLabelValue[nameKey] : undefined;
+        }
+        return itemOption.label;
+      });
       return `[${v.join(',')}]`;
-    } else if (Object.prototype.toString.call(value) === '[object Object]') {
+    } if (Object.prototype.toString.call(value) === '[object Object]') {
       if (value.key) {
         const v = value.label;
         if (Object.prototype.toString.call(v) === '[object Number]') {
           return v;
-        } else if (Object.prototype.toString.call(v) === '[object String]') {
+        } if (Object.prototype.toString.call(v) === '[object String]') {
           return v;
         }
       } else {
@@ -554,111 +568,8 @@ class AddComponent extends Component {
     const projectId = AppState.currentMenuType.id;
     const orgId = AppState.currentMenuType.organizationId;
     const { quickFilterFiled } = state;
-    const customFields = quickFilterFiled.filter(item => item.id);
-    const customMemberField = quickFilterFiled.find(item => item.type === 'member') || {};
-    const OPTION_FILTER = {
-      assignee: {
-        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
-        prop: 'list',
-        id: 'id',
-        name: 'realName',
-        state: 'originUsers',
-      },
-      priority: {
-        url: `/agile/v1/projects/${projectId}/priority/list_by_org`,
-        prop: '',
-        id: 'id',
-        name: 'name',
-        state: 'originPriorities',
-      },
-      status: {
-        url: `/agile/v1/projects/${projectId}/schemes/query_status_by_project_id?apply_type=agile`,
-        prop: '',
-        id: 'id',
-        name: 'name',
-        state: 'originStatus',
-      },
-      reporter: {
-        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
-        prop: 'list',
-        id: 'id',
-        name: 'realName',
-        state: 'originUsers',
-      },
-      created_user: {
-        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
-        prop: 'list',
-        id: 'id',
-        name: 'realName',
-        state: 'originUsers',
-      },
-      last_updated_user: {
-        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
-        prop: 'list',
-        id: 'id',
-        name: 'realName',
-        state: 'originUsers',
-      },
-      epic: {
-        url: `/agile/v1/projects/${projectId}/issues/epics/select_data`,
-        prop: '',
-        id: 'issueId',
-        name: 'epicName',
-        state: 'originEpics',
-      },
-      sprint: {
-        // post
-        url: `/agile/v1/projects/${projectId}/sprint/names`,
-        prop: '',
-        id: 'sprintId',
-        name: 'sprintName',
-        state: 'originSprints',
-      },
-      label: {
-        url: `/agile/v1/projects/${projectId}/issue_labels`,
-        prop: '',
-        id: 'labelId',
-        name: 'labelName',
-        state: 'originLabels',
-      },
-      component: {
-        url: `/agile/v1/projects/${projectId}/component`,
-        prop: '',
-        id: 'componentId',
-        name: 'name',
-        state: 'originComponents',
-      },
-      influence_version: {
-        // post
-        url: `/agile/v1/projects/${projectId}/product_version/names`,
-        prop: '',
-        id: 'versionId',
-        name: 'name',
-        state: 'originVersions',
-      },
-      fix_version: {
-        // post
-        url: `/agile/v1/projects/${projectId}/product_version/names`,
-        prop: '',
-        id: 'versionId',
-        name: 'name',
-        state: 'originVersions',
-      },
-      issue_type: {
-        url: '',
-        prop: '',
-        id: 'typeCode',
-        name: 'name',
-        state: 'originTypes',
-      },
-      feature: {
-        url: `/agile/v1/projects/${projectId}/issues/feature/all?organizationId=${orgId}&page=0&size=0&param=`,
-        prop: '',
-        id: 'issueId',
-        name: 'summary',
-        state: 'originFeatures',
-      },
-    };
+    const customFields = quickFilterFiled.filter((item) => item.id);
+    const customMemberField = quickFilterFiled.find((item) => item.type === 'member') || {};
 
     customFields.forEach((item) => {
       OPTION_FILTER[item.code] = {
@@ -671,23 +582,22 @@ class AddComponent extends Component {
     });
 
     OPTION_FILTER[customMemberField.code] = {
-      url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=0`,
+      url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=0`,
       prop: 'list',
       id: 'id',
       name: 'realName',
       state: 'originUsers',
     };
 
-    const field = quickFilterFiled.find(item => item.fieldCode === filter) || {};
+    const field = quickFilterFiled.find((item) => item.fieldCode === filter) || {};
 
     if (sign === index) {
       if (operation === 'in' || operation === 'notIn') {
         sign = -1;
         return [];
-      } else {
-        sign = -1;
-        return undefined;
       }
+      sign = -1;
+      return undefined;
     }
     if (filter === 'creation_date' || filter === 'last_update_date' || (field.id && field.type === 'datetime')) {
       // return moment
@@ -719,33 +629,32 @@ class AddComponent extends Component {
             label: priority ? priority.name : v,
           };
         });
-      } else {
-        const k = value;
-        const priority = _.find(state[OPTION_FILTER[filter].state], { [OPTION_FILTER[filter].id]: k });
-        return ({
-          key: k,
-          label: priority ? priority.name : k,
-        });
       }
-    } else if (filter === 'issue_type') {
+      const k = value;
+      const priority = _.find(state[OPTION_FILTER[filter].state],
+        { [OPTION_FILTER[filter].id]: k });
+      return ({
+        key: k,
+        label: priority ? priority.name : k,
+      });
+    } if (filter === 'issue_type') {
       if (operation === 'in' || operation === 'notIn' || operation === 'not in') {
         const arr = value.slice(1, -1).split(',');
-        return arr.map(v => ({
+        return arr.map((v) => ({
           key: v.slice(1, -1),
           label: _.find(state[OPTION_FILTER[filter].state],
             { [OPTION_FILTER[filter].id]: v.slice(1, -1) }).name,
         }));
-      } else {
-        const k = value.slice(1, -1);
-        return ({
-          key: k,
-          label: (_.find(state[OPTION_FILTER[filter].state],
-            { [OPTION_FILTER[filter].id]: k }) || {}).name,
-        });
       }
-    } else if (operation === 'in' || operation === 'notIn' || operation === 'not in') {
+      const k = value.slice(1, -1);
+      return ({
+        key: k,
+        label: (_.find(state[OPTION_FILTER[filter].state],
+          { [OPTION_FILTER[filter].id]: k }) || {}).name,
+      });
+    } if (operation === 'in' || operation === 'notIn' || operation === 'not in') {
       const arr = value.slice(1, -1).split(',');
-      return arr.map(v => ({
+      return arr.map((v) => ({
         key: v,
         label: _.find(state[OPTION_FILTER[filter].state],
           { [OPTION_FILTER[filter].id]: value })
@@ -753,19 +662,18 @@ class AddComponent extends Component {
             { [OPTION_FILTER[filter].id]: v })[OPTION_FILTER[filter].name]
           : undefined,
       }));
-    } else if (operation === 'like' || operation === 'not like') {
+    } if (operation === 'like' || operation === 'not like') {
       return value;
-    } else {
-      const k = value;
-      return ({
-        key: k,
-        label: _.find(state[OPTION_FILTER[filter].state],
-          { [OPTION_FILTER[filter].id]: k })
-          ? _.find(state[OPTION_FILTER[filter].state],
-            { [OPTION_FILTER[filter].id]: k })[OPTION_FILTER[filter].name]
-          : undefined,
-      });
     }
+    const k = value;
+    return ({
+      key: k,
+      label: _.find(state[OPTION_FILTER[filter].state],
+        { [OPTION_FILTER[filter].id]: k })
+        ? _.find(state[OPTION_FILTER[filter].state],
+          { [OPTION_FILTER[filter].id]: k })[OPTION_FILTER[filter].name]
+        : undefined,
+    });
   }
 
   handleOk(e) {
@@ -777,6 +685,7 @@ class AddComponent extends Component {
     form.validateFieldsAndScroll((err, values, modify) => {
       if (!err && (modify || deleteFlag)) {
         const arrCopy = [];
+
         const expressQueryArr = [];
         const o = [];
         const f = arr.slice();
@@ -784,7 +693,7 @@ class AddComponent extends Component {
           if (deleteItem.indexOf(i) !== -1) {
             return;
           }
-          const field = quickFilterFiled.find(item => item.fieldCode === v.fieldCode) || {};
+          const field = quickFilterFiled.find((item) => item.fieldCode === v.fieldCode) || {};
           const a = {
             fieldCode: values[`filter-${i}-prop`],
             operation: this.transformOperation2(values[`filter-${i}-rule`]),
@@ -800,7 +709,7 @@ class AddComponent extends Component {
           expressQueryArr.push(_.find(quickFilterFiled,
             { fieldCode: a.fieldCode }).name);
           expressQueryArr.push(a.operation);
-          expressQueryArr.push(this.getLabel(values[`filter-${i}-value`]));
+          expressQueryArr.push(this.getLabel(values[`filter-${i}-value`], values[`filter-${i}-prop`]));
         });
         const d = new Date();
         const json = JSON.stringify({
@@ -833,16 +742,22 @@ class AddComponent extends Component {
 
   loadQuickFilter() {
     const projectId = AppState.currentMenuType.id;
-    userApi.getAllInProject().then(res => this.setState({ originUsers: res.list }));
-    priorityApi.loadByProject().then(res => this.setState({ originPriorities: res }));
-    statusApi.loadByProject().then(res => this.setState({ originStatus: res }));
-    epicApi.loadEpicsForSelect().then(res => this.setState({ originEpics: res }));
-    sprintApi.loadSprints().then(res => this.setState({ originSprints: res }));
-    issueLabelApi.loads().then(res => this.setState({ originLabels: res }));
-    componentApi.loadAll().then(res => this.setState({ originComponents: res }));
-    versionApi.loadNamesByStatus().then(res => this.setState({ originVersions: res }));
-    issueTypeApi.loadAll().then(res => this.setState({ originTypes: res }));
-    featureApi.queryAllInSubProject([], undefined, 1, 0).then(res => this.setState({ originFeatures: res.content }));
+    userApi.getAllInProject().then((res) => this.setState({
+      originUsers: res.list.map(
+        (item) => ({ ...item, id: item.id.toString() }),
+      ),
+    }));
+    priorityApi.loadByProject().then((res) => this.setState({ originPriorities: res }));
+    statusApi.loadByProject().then((res) => this.setState({ originStatus: res }));
+    epicApi.loadEpicsForSelect().then((res) => this.setState({ originEpics: res }));
+    sprintApi.loadSprints().then((res) => this.setState({ originSprints: res }));
+    issueLabelApi.loads().then((res) => this.setState({ originLabels: res }));
+    componentApi.loadAll().then((res) => this.setState({ originComponents: res }));
+    versionApi.loadNamesByStatus().then((res) => this.setState({ originVersions: res }));
+    issueTypeApi.loadAll().then((res) => this.setState({ originTypes: res }));
+    featureApi.queryAllInSubProject([], undefined, 1, 0).then((res) => this.setState(
+      { originFeatures: res.content },
+    ));
     fieldApi.getCustomFields().then((res) => {
       const customFieldState = {};
       res.forEach((item) => {
@@ -858,37 +773,36 @@ class AddComponent extends Component {
       return (
         <Select label="关系" />
       );
-    } else {
-      return (
-        <Select
-          label="关系"
-          onChange={(v) => {
-            sign = index;
-            const str = `filter-${index}-value`;
-            let value;
-            if (v === 'in' || v === 'notIn' || v === 'not in' || v === 'like' || v === 'notLike' || v === 'not like') {
-              value = [];
-            } else {
-              value = undefined;
-            }
-            form.setFieldsValue({
-              [str]: value,
-            });
-          }}
-        >
-          {
-            this.getOperation(filter).map(v => (
-              <Option key={v.value} value={v.value}>{v.text}</Option>
-            ))
-          }
-        </Select>
-      );
     }
+    return (
+      <Select
+        label="关系"
+        onChange={(v) => {
+          sign = index;
+          const str = `filter-${index}-value`;
+          let value;
+          if (v === 'in' || v === 'notIn' || v === 'not in' || v === 'like' || v === 'notLike' || v === 'not like') {
+            value = [];
+          } else {
+            value = undefined;
+          }
+          form.setFieldsValue({
+            [str]: value,
+          });
+        }}
+      >
+        {
+          this.getOperation(filter).map((v) => (
+            <Option key={v.value} value={v.value}>{v.text}</Option>
+          ))
+        }
+      </Select>
+    );
   }
 
   renderValue(filter, opera) {
     const { quickFilterFiled } = this.state;
-    const field = quickFilterFiled.find(item => item.fieldCode === filter) || {};
+    const field = quickFilterFiled.find((item) => item.fieldCode === filter) || {};
     let operation;
     if (opera === 'not in') {
       operation = 'notIn';
@@ -897,11 +811,12 @@ class AddComponent extends Component {
     } else {
       operation = opera;
     }
+
     if (!filter || !operation) {
       return (
         <Select label="值" />
       );
-    } else if (['assignee', 'priority', 'status', 'reporter', 'created_user', 'last_update_user', 'epic', 'sprint', 'label', 'component', 'influence_version', 'fix_version', 'issue_type', 'feature'].indexOf(filter) > -1 || (field.id && (field.type === 'member' || field.type === 'single' || field.type === 'multiple' || field.type === 'radio' || field.type === 'checkbox'))) {
+    } if (['assignee', 'priority', 'status', 'reporter', 'created_user', 'last_update_user', 'epic', 'sprint', 'label', 'component', 'influence_version', 'fix_version', 'issue_type', 'feature'].indexOf(filter) > -1 || (field.id && (field.type === 'member' || field.type === 'single' || field.type === 'multiple' || field.type === 'radio' || field.type === 'checkbox'))) {
       // select
       if (['=', '!='].indexOf(operation) > -1) {
         // return normal value
@@ -918,7 +833,7 @@ class AddComponent extends Component {
             {this.tempOption(filter, false)}
           </Select>
         );
-      } else if (['is', 'isNot'].indexOf(operation) > -1) {
+      } if (['is', 'isNot'].indexOf(operation) > -1) {
         // return value add empty
         return (
           <Select
@@ -935,24 +850,23 @@ class AddComponent extends Component {
             </Option>
           </Select>
         );
-      } else {
-        // return multiple value
-        return (
-          <Select
-            label="值"
-            labelInValue
-            mode="multiple"
-            filter
-            optionFilterProp="children"
-            dropdownClassName="hidden-text hidden-label"
-            filterOption={(input, option) => option.props.children.toLowerCase()
-              .indexOf(input.toLowerCase()) >= 0}
-          >
-            {this.tempOption(filter, false)}
-          </Select>
-        );
       }
-    } else if (['creation_date', 'last_update_date'].indexOf(filter) > -1 || (field.id && field.type === 'datetime')) {
+      // return multiple value
+      return (
+        <Select
+          label="值"
+          labelInValue
+          mode="multiple"
+          filter
+          optionFilterProp="children"
+          dropdownClassName="hidden-text hidden-label"
+          filterOption={(input, option) => option.props.children.toLowerCase()
+            .indexOf(input.toLowerCase()) >= 0}
+        >
+          {this.tempOption(filter, false)}
+        </Select>
+      );
+    } if (['creation_date', 'last_update_date'].indexOf(filter) > -1 || (field.id && field.type === 'datetime')) {
       // time
       // return data picker
       return (
@@ -963,7 +877,7 @@ class AddComponent extends Component {
           showTime
         />
       );
-    } else if (field.id && field.type === 'date') {
+    } if (field.id && field.type === 'date') {
       return (
         <DatePicker
           style={{ width: '100%' }}
@@ -971,51 +885,50 @@ class AddComponent extends Component {
           format="YYYY-MM-DD"
         />
       );
-    } else if (field.id && field.type === 'time') {
+    } if (field.id && field.type === 'time') {
       return (
         <TimePicker
           style={{ width: '100%' }}
           label="值"
         />
       );
-    } else if (field.id && field.type === 'input') {
+    } if (field.id && field.type === 'input') {
       return (
         <Input
           style={{ width: '100%' }}
           label="值"
         />
       );
-    } else if (field.id && field.type === 'text') {
+    } if (field.id && field.type === 'text') {
       return (
         <TextArea
           style={{ width: '100%' }}
           label="值"
         />
       );
-    } else {
-      // story points && remainning time
-      // return number input
-      return !(operation === 'is' || operation === 'isNot') ? (
-        <NumericInput
-          label="值"
-          style={{ lineHeight: '22px', marginBottom: 0, width: '100%' }}
-        />
-      ) : (
-        <Select
-          label="值"
-          labelInValue
-          filter
-          optionFilterProp="children"
-          dropdownClassName="hidden-text hidden-label"
-          filterOption={(input, option) => option.props.children.toLowerCase()
-            .indexOf(input.toLowerCase()) >= 0}
-        >
-          <Option key="'null'" value="'null'">
-            空
-          </Option>
-        </Select>
-      );
     }
+    // story points && remainning time
+    // return number input
+    return !(operation === 'is' || operation === 'isNot') ? (
+      <NumericInput
+        label="值"
+        style={{ lineHeight: '22px', marginBottom: 0, width: '100%' }}
+      />
+    ) : (
+      <Select
+        label="值"
+        labelInValue
+        filter
+        optionFilterProp="children"
+        dropdownClassName="hidden-text hidden-label"
+        filterOption={(input, option) => option.props.children.toLowerCase()
+          .indexOf(input.toLowerCase()) >= 0}
+      >
+        <Option key="'null'" value="'null'">
+          空
+        </Option>
+      </Select>
+    );
   }
 
   render() {
@@ -1032,7 +945,7 @@ class AddComponent extends Component {
         cancelText="取消"
         visible={origin.filterId}
         confirmLoading={loading}
-        onOk={this.handleOk.bind(this)}
+        onOk={(e) => this.handleOk(e)}
         onCancel={onCancel}
         width={740}
       >
@@ -1102,7 +1015,7 @@ class AddComponent extends Component {
                             }}
                           >
                             {
-                              quickFilterFiled.map(v => (
+                              quickFilterFiled.map((v) => (
                                 <Option key={v.fieldCode} value={v.fieldCode}>{v.name}</Option>
                               ))
                             }
@@ -1187,4 +1100,9 @@ class AddComponent extends Component {
   }
 }
 
-export default Form.create()(AddComponent);
+const AddComponentHoc = (props) => {
+  const { isInProgram, loading } = useIsInProgram();
+  return !loading && <AddComponent {...props} isInProgram={isInProgram} />;
+};
+
+export default Form.create()(AddComponentHoc);

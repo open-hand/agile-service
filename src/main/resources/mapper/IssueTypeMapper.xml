@@ -111,4 +111,18 @@
         order by it.id desc
     </select>
 
+    <select id="selectByOrganizationIds" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
+        select * from fd_issue_type
+        where organization_id in
+        <foreach collection="organizationIds" item="organizationId" open="(" close=")" separator=",">
+            #{organizationId}
+        </foreach>
+    </select>
+
+    <select id="selectByTypeCode" resultType="io.choerodon.agile.infra.dto.IssueTypeDTO">
+        select *
+        from fd_issue_type
+        where type_code = #{typeCode}
+    </select>
+
 </mapper>

@@ -1,18 +1,20 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
+import classNames from 'classnames';
 import TypeTag from '@/components/TypeTag';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
+import moment from 'moment';
+import { calcDays } from '@/utils/Date';
 import {
-  IssueNum, StayDay, StatusName, Priority, Assignee, Summary,
+  IssueNum, StayDay, StatusName, Priority, Assignee, Summary, Delay,
 } from './CardComponent/index';
-import './StatusIssue.less';
+import './Card.less';
 
 function getStyle({ draggableStyle, virtualStyle, isDragging }) {
   const combined = {
     ...virtualStyle,
     ...draggableStyle,
   };
-
 
   const grid = 8;
   const height = isDragging ? combined.height : combined.height - grid;
@@ -37,13 +39,6 @@ class Card extends Component {
     this.ref = React.createRef();
   }
 
-  scrollIntoView() {
-    const { selected } = this.props;
-    if (selected && this.ref && this.ref.current.scrollIntoViewIfNeeded) {
-      this.ref.current.scrollIntoViewIfNeeded();
-    }
-  }
-
   componentDidMount() {
     this.scrollIntoView();
   }
@@ -51,7 +46,7 @@ class Card extends Component {
   componentDidUpdate() {
     this.scrollIntoView();
   }
-  
+
   handleClick = (e) => {
     e.stopPropagation();
     const { issue } = this.props;
@@ -63,16 +58,31 @@ class Card extends Component {
     ScrumBoardStore.setWhichCanNotDragOn(issue.statusId, issue.issueTypeVO);
   };
 
+  scrollIntoView() {
+    const { selected } = this.props;
+    if (selected && this.ref && this.ref.current.scrollIntoViewIfNeeded) {
+      this.ref.current.scrollIntoViewIfNeeded();
+    }
+  }
+
   render() {
     const {
       completed, issue, statusName, categoryCode, selected, ...otherProps
     } = this.props;
+    let delayDays = 0;
+    const { estimatedEndTime } = issue;
+    if (estimatedEndTime) {
+      delayDays = moment().diff(moment(estimatedEndTime), 'days', true);
+    }
     return (
       <div
-        className="c7n-scrumboard-issue"
+        className={classNames('c7n-scrumboard-issue', {
+          'c7n-scrumboard-issue-delay': !completed && delayDays > 0,
+          'c7n-scrumboard-issue-soonDelay': !completed && (delayDays < 0 && delayDays >= -1),
+        })}
         role="none"
         onMouseDown={this.myOnMouseDown}
-        onClick={e => this.handleClick(e)}
+        onClick={(e) => this.handleClick(e)}
         ref={this.ref}
         {...otherProps}
         key={issue.issueNum}
@@ -104,6 +114,13 @@ class Card extends Component {
                 <Priority
                   priorityVO={issue.priorityVO}
                 />
+                {
+                  !completed && (
+                    delayDays > 0 || (delayDays >= -1 && delayDays < 0)
+                  ) && (
+                  <Delay day={Math.ceil(delayDays)} />
+                  )
+                }
               </div>
             </div>
             <Assignee
@@ -123,24 +140,42 @@ class Card extends Component {
   }
 }
 function IssueItem({
-  completed, issue, isDragging, index, statusName, categoryCode, onClick, clicked, style, provided, ...otherProps
+  completed,
+  issue,
+  isDragging,
+  index,
+  statusName,
+  categoryCode,
+  onClick,
+  clicked,
+  style,
+  provided,
+  ...otherProps
 }) {
   const selected = ScrumBoardStore.clickIssueMap.get(issue.issueId);
   return (
     <div
       key={issue.issueId}
       role="none"
-      className="c7n-swimlaneContext-itemBodyCard"
       ref={provided.innerRef}
       {...provided.draggableProps}
       {...provided.dragHandleProps}
-      style={getStyle({
-        draggableStyle: provided.draggableProps.style,
-        virtualStyle: style,
-        isDragging,
-      })}
+      style={{
+        ...getStyle({
+          draggableStyle: provided.draggableProps.style,
+          virtualStyle: style,
+          isDragging,
+        }),
+        cursor: 'all-scroll',
+      }}
     >
-      <Card completed={completed} issue={issue} statusName={statusName} categoryCode={categoryCode} selected={selected} />
+      <Card
+        completed={completed}
+        issue={issue}
+        statusName={statusName}
+        categoryCode={categoryCode}
+        selected={selected}
+      />
     </div>
   );
 }

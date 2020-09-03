@@ -1,10 +1,16 @@
 .c7nagile-issue-table {
+  &-summary {
+    display: inline-block;
+    margin-left: 20px;
+  }
+
   .c7n-pro-table-wrapper {
     margin-top: -19px;
 
     .c7n-pro-table-thead {
       .c7n-pro-table-cell[data-index="issueId"] {
         padding-left: 13px;
+
         .c7n-pro-table-cell-inner {
           .icon {
             margin-right: 12px;
@@ -62,5 +68,11 @@
 
   .c7nagile-row-selected {
     background: rgba(140, 158, 255, 0.12);
+  }
+}
+
+.c7n-pro-table-columns-chooser-dropdown-menu {
+  .c7nagile-issue-table-summary {
+    margin-left: 0;
   }
 }

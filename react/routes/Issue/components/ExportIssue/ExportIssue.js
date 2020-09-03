@@ -4,12 +4,9 @@ import { observer } from 'mobx-react';
 import { Modal, Radio } from 'choerodon-ui';
 import FileSaver from 'file-saver';
 import IssueStore from '@/stores/project/issue/IssueStore';
-import { find } from 'lodash';
+import { find, unionBy } from 'lodash';
 import { issueApi } from '@/api';
-import { unionBy } from 'lodash';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
-import { configTheme } from '@/utils/common';
-import { isFilterSame, flattenObject } from '../search';
 
 const RadioGroup = Radio.Group;
 const { AppState } = stores;
@@ -22,6 +19,7 @@ const radioStyle = {
 let list = [];
 @observer
 class ExportIssue extends Component {
+  // eslint-disable-next-line react/state-in-constructor
   state = {
     mode: 'show',
     loading: false,
@@ -64,8 +62,10 @@ class ExportIssue extends Component {
       component: 'componentName',
     };
     const { tableRef } = this.props;
-    const columns = tableRef.current ? tableRef.current.tableStore.columns.filter(column => column.name && !column.hidden) : [];
-    return columns.map(column => fieldTransform[column.name] || column.name);
+    const columns = tableRef.current
+      ? tableRef.current.tableStore.columns.filter((column) => column.name && !column.hidden)
+      : [];
+    return columns.map((column) => fieldTransform[column.name] || column.name);
   };
 
   /**
@@ -75,7 +75,7 @@ class ExportIssue extends Component {
     const searchDTO = IssueStore.getCustomFieldFilters();
     const { mode, sprints } = this.state;
     const { dataSet } = this.props;
-    const field = find([...dataSet.fields.values()], f => f.order);
+    const field = find([...dataSet.fields.values()], (f) => f.order);
     const tableShowColumns = mode === 'all' ? [] : this.getVisibleColumns();
     const search = {
       ...searchDTO,
@@ -84,7 +84,7 @@ class ExportIssue extends Component {
     this.setState({
       loading: true,
     });
-    if (!this.getIsHasFilter()) {
+    if (!IssueStore.isHasFilter) {
       search.otherArgs.sprint = sprints;
     }
     issueApi.export(search, field ? `${field.name},${field.order}` : undefined)
@@ -105,12 +105,6 @@ class ExportIssue extends Component {
     this.setState({
       sprints,
     });
-  }
-
-  getIsHasFilter = () => {
-    const currentFilterDTO = IssueStore.getCustomFieldFilters() ? flattenObject(IssueStore.getCustomFieldFilters()) : {};
-    const isHasFilter = !isFilterSame({}, currentFilterDTO);
-    return isHasFilter;
   }
 
   render() {
@@ -134,7 +128,7 @@ class ExportIssue extends Component {
             {' '}
             的问题，请选择你需要导出的字段
           </div>
-          {!this.getIsHasFilter() && (
+          {!IssueStore.isHasFilter && (
             <div style={{ display: 'flex' }}>
               <SelectFocusLoad
                 style={{ flexGrow: 1, width: 0, marginTop: 10 }}
@@ -158,12 +152,13 @@ class ExportIssue extends Component {
                 filter
                 onChange={this.handleSprintChange}
                 value={sprints}
-                getPopupContainer={triggerNode => triggerNode.parentNode}
+                getPopupContainer={(triggerNode) => triggerNode.parentNode}
                 requestArgs={[]}
               />
             </div>
           )}
         </div>
+        <br />
         <RadioGroup onChange={this.handleExportChange} value={mode}>
           <Radio style={radioStyle} value="show">当前页面显示字段</Radio>
           <Radio style={radioStyle} value="all">全部字段</Radio>

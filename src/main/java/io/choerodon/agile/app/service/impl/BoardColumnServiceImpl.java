@@ -51,6 +51,8 @@ public class BoardColumnServiceImpl implements BoardColumnService {
     private static final String COLUMN_COLOR_PREPARE = "column_color_prepare";
     private static final String APPLY_TYPE_PROGRAM = "program";
 
+    private static final String BOARD_COLUMN_UPDATE_ERROR = "error.BoardColumn.update";
+
     @Autowired
     private ColumnStatusRelService columnStatusRelService;
 
@@ -75,7 +77,7 @@ public class BoardColumnServiceImpl implements BoardColumnService {
         Integer lastSequence = lastColumn.getSequence();
         lastColumn.setSequence(lastSequence + 1);
         if (boardColumnMapper.updateByPrimaryKeySelective(lastColumn) != 1) {
-            throw new CommonException("error.BoardColumn.update");
+            throw new CommonException(BOARD_COLUMN_UPDATE_ERROR);
         }
         boardColumnVO.setSequence(lastSequence);
     }
@@ -112,7 +114,7 @@ public class BoardColumnServiceImpl implements BoardColumnService {
     }
 
     private void setColumnColor(BoardColumnVO boardColumnVO, Boolean checkStatus) {
-        if (!checkStatus) {
+        if (Boolean.FALSE.equals(checkStatus)) {
             switch (boardColumnVO.getCategoryCode()) {
                 case PREPARE_CODE:
                     boardColumnVO.setColorCode(COLUMN_COLOR_PREPARE);
@@ -171,15 +173,11 @@ public class BoardColumnServiceImpl implements BoardColumnService {
                 issueStatus.setName(boardColumnVO.getName());
                 issueStatus.setProjectId(projectId);
                 issueStatus.setStatusId(statusId);
-                if (boardColumnVO.getCategoryCode().equals(DONE_CODE)) {
-                    issueStatus.setCompleted(true);
-                } else {
-                    issueStatus.setCompleted(false);
-                }
+                issueStatus.setCompleted(DONE_CODE.equals(boardColumnVO.getCategoryCode()));
                 issueStatusService.insertIssueStatus(issueStatus);
             }
             // 创建列与状态关联关系
-            if (!checkStatus) {
+            if (Boolean.FALSE.equals(checkStatus)) {
                 ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
                 columnStatusRelDTO.setColumnId(boardColumnDTO.getColumnId());
                 columnStatusRelDTO.setStatusId(statusId);
@@ -200,7 +198,7 @@ public class BoardColumnServiceImpl implements BoardColumnService {
         BoardColumnValidator.checkUpdateBoardColumnDTO(projectId, boardId, boardColumnVO);
         BoardColumnDTO boardColumnDTO = modelMapper.map(boardColumnVO, BoardColumnDTO.class);
         if (boardColumnMapper.updateByPrimaryKeySelective(boardColumnDTO) != 1) {
-            throw new CommonException("error.BoardColumn.update");
+            throw new CommonException(BOARD_COLUMN_UPDATE_ERROR);
         }
         return modelMapper.map(boardColumnMapper.selectByPrimaryKey(boardColumnDTO.getColumnId()), BoardColumnVO.class);
     }
@@ -298,11 +296,7 @@ public class BoardColumnServiceImpl implements BoardColumnService {
             issueStatus.setName(name);
             issueStatus.setEnable(false);
             issueStatus.setCategoryCode(categoryCode);
-            if (categoryCode.equals(DONE_CODE)) {
-                issueStatus.setCompleted(true);
-            } else {
-                issueStatus.setCompleted(false);
-            }
+            issueStatus.setCompleted(DONE_CODE.equals(categoryCode));
             issueStatusService.insertIssueStatus(issueStatus);
         }
         ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
@@ -338,7 +332,7 @@ public class BoardColumnServiceImpl implements BoardColumnService {
                 boardColumnMapper.columnSortDesc(columnSortVO.getBoardId(), columnSortVO.getSequence(), originColumn.getSequence());
             }
             if (boardColumnMapper.updateByPrimaryKeySelective(modelMapper.map(columnSortVO, BoardColumnDTO.class)) != 1) {
-                throw new CommonException("error.BoardColumn.update");
+                throw new CommonException(BOARD_COLUMN_UPDATE_ERROR);
             }
             BoardColumnDTO boardColumnDTO = new BoardColumnDTO();
             boardColumnDTO.setProjectId(projectId);
@@ -367,7 +361,7 @@ public class BoardColumnServiceImpl implements BoardColumnService {
                 boardColumnMapper.columnSortDesc(boardId, boardColumnDTO.getSequence(), originColumn.getSequence());
             }
             if (boardColumnMapper.updateByPrimaryKeySelective(boardColumnDTO) != 1) {
-                throw new CommonException("error.BoardColumn.update");
+                throw new CommonException(BOARD_COLUMN_UPDATE_ERROR);
             }
         } catch (Exception e) {
             throw new CommonException("error.column.sort.by.program", e);

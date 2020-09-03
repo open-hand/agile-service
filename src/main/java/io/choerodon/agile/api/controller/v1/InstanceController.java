@@ -100,7 +100,7 @@ public class InstanceController extends BaseController {
     @Transactional(rollbackFor = Exception.class)
     public void cleanInstance(@PathVariable("organization_id") Long organizationId,
                               @RequestParam("is_clean_all") Boolean isCleanAll) {
-        if (isCleanAll) {
+        if (Boolean.TRUE.equals(isCleanAll)) {
             instanceCache.cleanAllInstances();
         } else {
             instanceCache.cleanInstanceTask();

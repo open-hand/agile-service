@@ -2,13 +2,15 @@ import React, { useContext, Fragment } from 'react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import {
-  Field, FieldAssignee, FieldVersion, FieldStatus, FieldSprint, FieldText,
+  FieldAssignee, FieldVersion, FieldStatus, FieldSprint, FieldText,
   FieldReporter, FieldPriority, FieldLabel, FieldFixVersion, FieldPI,
   FieldEpic, FieldDateTime, FieldComponent, FieldTimeTrace, FieldStoryPoint,
   FieldSummary, FieldInput, FieldTeam, FieldProgramSprint,
 } from './Field';
 import EditIssueContext from '../../stores';
 import FieldPro from './Field/FieldPro';
+import FieldStartTime from './Field/FieldStartTime';
+import FieldEndTime from './Field/FieldEndTime';
 
 const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 'timeTrace', 'assignee'];
 
@@ -16,14 +18,13 @@ const IssueField = observer((props) => {
   const {
     store, applyType, saveFieldVersionRef, saveFieldFixVersionRef,
   } = useContext(EditIssueContext);
-  const renderNormalField = field => (<FieldPro {...props} field={field} />);
+  const renderNormalField = (field) => (<FieldPro {...props} field={field} />);
   const getFieldComponent = (field) => {
     const issue = store.getIssue;
     const activePiTeams = issue.activePiTeams || [];
-    const teamIds = activePiTeams.map(team => team.id);
+    const teamIds = activePiTeams.map((team) => team.id);
 
     const { typeCode } = issue;
-    // debugger;
     switch (field.fieldCode) {
       case 'assignee':
         return (<FieldAssignee {...props} />);
@@ -34,9 +35,9 @@ const IssueField = observer((props) => {
       case 'sprint':
         if (typeCode !== 'sub_task') {
           return (<FieldSprint {...props} />);
-        } else {
-          return (<FieldSprint {...props} disabled />);
         }
+        return (<FieldSprint {...props} disabled />);
+
       case 'reporter':
         return (<FieldReporter {...props} />);
       case 'priority':
@@ -74,19 +75,30 @@ const IssueField = observer((props) => {
       case 'storyPoints':
         return (<FieldStoryPoint {...props} field={field} />);
       case 'teams':
-        return ([<FieldTeam {...props} field={field} />, <FieldProgramSprint {...props} field={field} key={teamIds} />]);
+        return ([
+          <FieldTeam {...props} field={field} />,
+          <FieldProgramSprint {...props} field={field} key={teamIds} />,
+        ]);
+      case 'estimatedStartTime':
+        return typeCode !== 'issue_epic' && (
+          <FieldStartTime {...props} field={field} />
+        );
+      case 'estimatedEndTime':
+        return typeCode !== 'issue_epic' && (
+          <FieldEndTime {...props} field={field} />
+        );
       default:
         return renderNormalField(field);
     }
   };
   const issue = store.getIssue;
   const { issueId, typeCode } = issue;
-  let fields = applyType === 'program' ? toJS(store.getFields).filter(item => hideFields.indexOf(item.fieldCode) === -1) : toJS(store.getFields);
+  let fields = applyType === 'program' ? toJS(store.customFields).filter((item) => hideFields.indexOf(item.fieldCode) === -1) : toJS(store.customFields);
   // 系统字段单独控制是否显示
   if (typeCode === 'sub_task') {
-    fields = fields.filter(field => ['component', 'epic'].indexOf(field.fieldCode) === -1);
+    fields = fields.filter((field) => ['component', 'epic'].indexOf(field.fieldCode) === -1);
   } else if (typeCode === 'issue_epic') {
-    fields = fields.filter(field => field.fieldCode !== 'epic');
+    fields = fields.filter((field) => field.fieldCode !== 'epic');
   } else if (typeCode === 'feature') {
     fields.splice(4, 0, { fieldCode: 'teams', fieldName: '负责团队和冲刺' });
     // fields.splice(4, 0, { fieldCode: 'teamSprint', fieldName: '团队Sprint' });
@@ -96,7 +108,7 @@ const IssueField = observer((props) => {
   }
   return (
     <div className="c7n-content-wrapper IssueField">
-      {issueId ? fields.map(field => <Fragment key={field.id}>{getFieldComponent(field)}</Fragment>) : ''}
+      {issueId ? fields.map((field) => <Fragment key={field.id}>{getFieldComponent(field)}</Fragment>) : ''}
     </div>
   );
 });

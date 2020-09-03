@@ -24,6 +24,19 @@
         <id property="objectVersionNumber" column="object_version_number"/>
     </resultMap>
 
+    <delete id="cascadeDelete">
+        delete t1.*, t2.*
+        from fd_object_scheme_field t1
+        left join fd_object_scheme_field_extend t2 on (
+            t1.id = t2.field_id
+            and t2.organization_id = #{organizationId}
+            <if test="projectId != null">
+                and t2.project_id = #{projectId}
+            </if>
+        )
+        where t1.id = #{fieldId}
+    </delete>
+
     <select id="listQuery" resultMap="objectSchemeFieldMap">
         SELECT osf.*,
         flv.name as field_type_name
@@ -79,12 +92,15 @@
     </select>
 
     <resultMap id="objectSchemeFieldDetailMap" type="io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO">
-        <id property="id" column="osf_id"/>
-        <id property="code" column="osf_code"/>
-        <id property="name" column="osf_name"/>
-        <id property="fieldType" column="osf_field_type"/>
+        <id property="id" column="id"/>
+        <id property="code" column="code"/>
+        <id property="name" column="name"/>
+        <id property="fieldType" column="field_type"/>
         <id property="fieldTypeName" column="field_type_name"/>
-        <collection property="fieldOptions" autoMapping="true" ofType="io.choerodon.agile.api.vo.FieldOptionVO">
+        <id property="required" column="required"/>
+        <id property="system" column="is_system"/>
+        <id property="extraConfig" column="extra_config"/>
+        <collection property="fieldOptions"  ofType="io.choerodon.agile.api.vo.FieldOptionVO">
             <id property="id" column="ffo_id"/>
             <result property="fieldId" column="ffo_field_id"/>
             <result property="code" column="ffo_code"/>
@@ -93,12 +109,36 @@
         </collection>
     </resultMap>
 
+    <select id="selectFieldsWithOptionals" resultMap="objectSchemeFieldDetailMap">
+        select
+            t1.id,
+            t1.code,
+            t1.name,
+            t1.field_type,
+            t1.is_system,
+            t1.extra_config,
+            flv.name as field_type_name,
+            t2.is_required as required,
+            ffo.id as ffo_id,
+            ffo.field_id as ffo_field_id,
+            ffo.code as ffo_code,
+            ffo.value as ffo_value,
+            ffo.is_enabled as ffo_enabled
+        from fd_object_scheme_field t1
+        join (
+            <include refid="selectExtendField"/>
+        ) t2 on t1.id = t2.field_id
+        left join lookup_value flv on flv.value_code = t1.field_type and flv.type_code = 'field_type'
+        left join fd_field_option ffo on t1.id = ffo.field_id
+        order by t1.id desc
+    </select>
+
     <select id="selectCustomFieldList" resultMap="objectSchemeFieldDetailMap">
         SELECT
-            osf.id as osf_id,
-            osf.code as osf_code,
-            osf.name as osf_name,
-            osf.field_type as osf_field_type,
+            osf.id,
+            osf.code,
+            osf.name,
+            osf.field_type,
             flv.name as field_type_name,
             ffo.id as ffo_id,
             ffo.field_id as ffo_field_id,
@@ -113,5 +153,191 @@
         AND
         (osf.project_id = #{projectId} OR osf.project_id IS NULL)
         order by osf.id DESC
+    </select>
+
+    <select id="selectByExtendIds" resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO">
+        select *
+        from fd_object_scheme_field t2
+        join (
+            select distinct field_id from fd_object_scheme_field_extend t1
+            where t1.id in
+            <foreach collection="extendIds" item="id" index="index" separator="," open="(" close=")">
+                #{id}
+            </foreach>
+        ) t3 on t2.id = t3.field_id
+    </select>
+
+    <resultMap id="objectSchemeFieldWithExtends" type="io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO">
+        <id property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="defaultValue" column="default_value"/>
+        <result property="description" column="description"/>
+        <result property="fieldType" column="field_type"/>
+        <result property="fieldTypeName" column="field_type_name"/>
+        <result property="name" column="name"/>
+        <result property="objectVersionNumber" column="object_version_number"/>
+        <result property="organizationId" column="organization_id"/>
+        <result property="projectId" column="project_id"/>
+        <result property="system" column="is_system"/>
+        <result property="extraConfig" column="extra_config"/>
+        <result property="createdLevel" column="created_level"/>
+        <collection property="extendFields" ofType="io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO">
+            <id property="id" column="extend_id"/>
+            <result property="issueType" column="extend_issue_type"/>
+            <result property="issueTypeName" column="extend_issue_type_name"/>
+            <result property="required" column="extend_field_required"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectByOptions" resultMap="objectSchemeFieldWithExtends">
+        select
+            t4.id,
+            t4.code,
+            t4.default_value,
+            t4.description,
+            t4.field_type,
+            flv.name as field_type_name,
+            t4.name,
+            t4.object_version_number,
+            t4.organization_id,
+            t4.project_id,
+            t4.is_system,
+            t4.extra_config,
+            case
+                when t4.organization_id = 0 then 'system'
+                when t4.organization_id != 0 and t4.project_id is null then 'organization'
+                else 'project'
+            end as created_level,
+            t5.id as extend_id,
+            fit.type_code as extend_issue_type,
+            fit.name as extend_issue_type_name,
+            t5.is_required as extend_field_required
+        from fd_object_scheme_field t4
+        join (
+            <include refid="selectExtendField"/>
+        ) t5 on t4.id = t5.field_id
+        left join fd_issue_type fit on (fit.organization_id = #{organizationId} and t5.issue_type_id = fit.id)
+        left join lookup_value flv on flv.value_code = t4.field_type and flv.type_code = 'field_type'
+        where 1=1
+        <if test="fieldId != null">
+            and t4.id = #{fieldId}
+        </if>
+        <if test="schemeCode != null">
+            and t4.scheme_code = #{schemeCode}
+        </if>
+        <if test="schemeCode == null">
+            and t4.scheme_code = 'agile_issue'
+        </if>
+        order by t4.is_system desc, t4.id asc
+    </select>
+
+    <sql id="selectExtendField">
+        select
+            t1.id,
+            t1.field_id,
+            t1.issue_type_id,
+            t1.is_required
+        from fd_object_scheme_field_extend t1
+        where t1.organization_id = #{organizationId}
+        and t1.project_id is null
+        <if test="issueTypeId != null">
+            and t1.issue_type_id = #{issueTypeId}
+        </if>
+        <if test="projectId != null">
+            and t1.field_id not in (
+            select t3.field_id
+            from fd_object_scheme_field_extend t3
+            where t3.organization_id = #{organizationId}
+            and t3.project_id = #{projectId}
+            <if test="issueTypeId != null">
+                and t3.issue_type_id = #{issueTypeId}
+            </if>
+            )
+            union
+            select
+            t2.id,
+            t2.field_id,
+            t2.issue_type_id,
+            t2.is_required
+            from fd_object_scheme_field_extend t2
+            where t2.organization_id = #{organizationId}
+            and t2.project_id = #{projectId}
+            <if test="issueTypeId != null">
+                and t2.issue_type_id = #{issueTypeId}
+            </if>
+        </if>
+    </sql>
+
+    <select id="selectMemberByOptions" resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO">
+        SELECT
+            t4.id,
+            t4.code,
+            t4.field_type,
+            flv.name as field_type_name,
+            t4.name,
+            t4.object_version_number,
+            t4.organization_id,
+            t4.project_id,
+            t4.is_system
+        FROM fd_object_scheme_field t4
+        JOIN fd_object_scheme_field_extend t5 ON t4.id = t5.field_id
+            AND t5.organization_id = #{organizationId} AND t5.project_id = #{projectId}
+        LEFT JOIN fd_issue_type fit on (fit.organization_id = #{organizationId} and t5.issue_type_id = fit.id)
+        LEFT JOIN lookup_value flv on flv.value_code = t4.field_type and flv.type_code = 'field_type'
+        WHERE
+            t4.field_type = 'member'
+        AND t4.is_system = 0
+        <if test="schemeCode != null">
+            AND t4.scheme_code = #{schemeCode}
+        </if>
+        <if test="schemeCode == null">
+            AND t4.scheme_code = 'agile_issue'
+        </if>
+        <if test="issueTypeId != null">
+            AND t5.issue_type_id = #{issueTypeId}
+        </if>
+        <if test="fieldCodeList != null and fieldCodeList.size > 0">
+            AND t4.code IN
+                <foreach collection="fieldCodeList" open="(" close=")" separator="," item="fieldCode">
+                    #{fieldCode}
+                </foreach>
+        </if>
+    </select>
+
+    <resultMap id="objectSchemeFieldWithPages" type="io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO">
+        <id property="id" column="id"/>
+        <result property="required" column="is_required"/>
+        <result property="context" column="context"/>
+        <result property="organizationId" column="organization_id"/>
+        <result property="projectId" column="project_id"/>
+        <result property="code" column="code"/>
+        <collection property="pages" ofType="io.choerodon.agile.infra.dto.PageFieldDTO">
+            <id property="id" column="page_field_id"/>
+            <result property="pageId" column="page_id"/>
+            <result property="display" column="is_display"/>
+            <result property="rank" column="rank"/>
+            <result property="projectId" column="page_project_id"/>
+            <result property="organizationId" column="page_organization_id"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectFieldsWithPages" resultMap="objectSchemeFieldWithPages">
+        select
+        t1.id,
+        t1.is_required,
+        t1.context,
+        t1.project_id,
+        t1.organization_id,
+        t1.code,
+        t2.id as page_field_id,
+        t2.page_id,
+        t2.is_display,
+        t2.rank,
+        t2.project_id as page_project_id,
+        t2.organization_id as page_organization_id
+        from fd_object_scheme_field t1
+        left join fd_page_field t2 on t1.id = t2.field_id
+        where t1.scheme_code = #{objectSchemeField.schemeCode}
+        and t1.is_system = #{objectSchemeField.system}
     </select>
 </mapper>

@@ -14,8 +14,6 @@ import SubTask from './SubTask';
 import SubBug from './SubBug';
 import IssueLink from './IssueLink';
 import IssueBranch from './IssueBranch';
-import TestLink from './TestLink';
-import IssueTestExecute from './IssueTestExecute';
 import IssueDropDown from '../IssueDropDown';
 import IssuePIHistory from './IssuePIHistory';
 import { FieldStoryPoint, FieldSummary } from './Field';
@@ -83,23 +81,18 @@ function IssueBody(props) {
             )
           }
           {issueTypeVO.typeCode && ['feature'].indexOf(issueTypeVO.typeCode) === -1
-            ? <IssueDoc {...props} /> : ''
-          }
+            ? <IssueDoc {...props} /> : ''}
 
           {issueTypeVO.typeCode && ['issue_epic', 'sub_task', 'feature'].indexOf(issueTypeVO.typeCode) === -1
-            ? <SubTask {...props} /> : ''
-          }
+            ? <SubTask {...props} /> : ''}
 
           {issueTypeVO.typeCode && ['story', 'task'].indexOf(issueTypeVO.typeCode) !== -1
-            ? <SubBug {...props} /> : ''
-          }
-          {issueTypeVO.typeCode && ['feature', 'sub_task'].indexOf(issueTypeVO.typeCode) === -1
-            ? <TestLink {...props} /> : ''
-          }
+            ? <SubBug {...props} /> : ''}
+          {/* {issueTypeVO.typeCode && ['feature', 'sub_task'].indexOf(issueTypeVO.typeCode) === -1
+            ? <TestLink {...props} /> : ''测试用例关联链接 后端无返回数据
+          } */}
           {issueTypeVO.typeCode && ['feature', 'sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
-            ? <IssueLink {...props} /> : ''
-          }
-          {store.testExecutes.length > 0 ? <IssueTestExecute {...props} /> : null}
+            ? <IssueLink {...props} /> : ''}
           {['sub_task', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1 && <InjectedComponent.Backlog {...props} />}
         </TabPane>
         {
@@ -116,13 +109,11 @@ function IssueBody(props) {
         <TabPane tab="记录" key="3">
           {!disabled && issueTypeVO.typeCode === 'feature' && <IssuePIHistory {...props} />}
           {issueTypeVO.typeCode && ['feature', 'issue_epic'].indexOf(issueTypeVO.typeCode) === -1
-            ? <IssueWorkLog {...props} /> : ''
-          }
+            ? <IssueWorkLog {...props} /> : ''}
           <IssueLog {...props} />
         </TabPane>
         {applyType !== 'program' && !isOnlyAgileProject
-          ? <TabPane tab="开发" key="4"><IssueBranch {...props} /></TabPane> : ''
-        }
+          ? <TabPane tab="开发" key="4"><IssueBranch {...props} /></TabPane> : ''}
       </Tabs>
       {
         createBranchShow ? (

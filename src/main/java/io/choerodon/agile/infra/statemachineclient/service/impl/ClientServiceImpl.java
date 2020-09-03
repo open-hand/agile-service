@@ -52,7 +52,7 @@ public class ClientServiceImpl implements ClientService {
             inputDTO.setInstanceId(instanceId);
             inputDTO.setConfigs(configDTOS);
             ExecuteResult result = configExecuteCondition(transformInfo.getEndStatusId(), transformInfo.getConditionStrategy(), inputDTO);
-            if (result.getSuccess()) {
+            if (Boolean.TRUE.equals(result.getSuccess())) {
                 logger.info("stateMachine client conditionFilter transform match condition: instanceId:{}, transformId:{}", instanceId, transformInfo.getId());
                 resultTransforms.add(transformInfo);
             } else {
@@ -82,14 +82,14 @@ public class ClientServiceImpl implements ClientService {
             isSuccess = methodInvokeBean(StateMachineConfigType.CONDITION, configDTO, instanceId);
             //根据不同的条件策略返回不同结果
             if (conditionStrategy.equals(TransformConditionStrategy.ALL)) {
-                if (!isSuccess) {
+                if (Boolean.FALSE.equals(isSuccess)) {
                     executeResult.setErrorMessage(CONFIGURE_TYPE_CONDITION + configDTO.getCode() + NO_PASS);
                     break;
                 } else {
                     executeResult.setErrorMessage(CONDITION_ALL_MATCH);
                 }
             } else {
-                if (isSuccess) {
+                if (Boolean.TRUE.equals(isSuccess)) {
                     executeResult.setErrorMessage(CONFIGURE_TYPE_CONDITION + configDTO.getCode() + PASS);
                     break;
                 } else {
@@ -118,7 +118,7 @@ public class ClientServiceImpl implements ClientService {
         //执行代码中配置的验证
         for (StateMachineConfigDTO configDTO : configDTOS) {
             isSuccess = methodInvokeBean(StateMachineConfigType.VALIDATOR, configDTO, instanceId);
-            if (!isSuccess) {
+            if (Boolean.FALSE.equals(isSuccess)) {
                 executeResult.setErrorMessage(CONFIGURE_TYPE_VALIDATION + configDTO.getCode() + NO_PASS);
                 break;
             }
@@ -149,10 +149,10 @@ public class ClientServiceImpl implements ClientService {
         }
 
         //执行代码中配置的后置动作
-        if (isSuccess) {
+        if (Boolean.TRUE.equals(isSuccess)) {
             for (StateMachineConfigDTO configDTO : configDTOS) {
                 isSuccess = methodInvokeBean(StateMachineConfigType.POSTPOSITION, configDTO, instanceId);
-                if (!isSuccess) {
+                if (Boolean.FALSE.equals(isSuccess)) {
                     executeResult.setErrorMessage(CONFIGURE_TYPE_POST_ACTION + configDTO.getCode() + NO_PASS);
                     break;
                 }

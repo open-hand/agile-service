@@ -30,10 +30,9 @@ function getCurrentFullScreen() {
   return Boolean(isFullScreen);
 }
 
-
 export default function useFullScreen(target, onFullScreenChange, customClassName = 'fullScrenn') {
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const handleChangeFullScreen = () => {  
+  const handleChangeFullScreen = () => {
     const element = typeof target === 'function' ? target() : target;
     const currentFullScreen = getCurrentFullScreen();
     setTimeout(() => {
@@ -48,14 +47,14 @@ export default function useFullScreen(target, onFullScreenChange, customClassNam
       onFullScreenChange(currentFullScreen);
     }
   };
-  
+
   const toggleFullScreen = () => {
     const currentFullScreen = getCurrentFullScreen();
     const element = typeof target === 'function' ? target() : target;
     if (currentFullScreen) {
       exitFullScreen();
     } else {
-      toFullScreen(element);      
+      toFullScreen(element);
     }
   };
   useEffect(() => {
@@ -71,7 +70,7 @@ export default function useFullScreen(target, onFullScreenChange, customClassNam
         });
         const element = typeof target === 'function' ? target() : target;
         element.classList.remove(customClassName);
-      } 
+      }
       document.removeEventListener('fullscreenchange', handleChangeFullScreen);
       document.removeEventListener('webkitfullscreenchange', handleChangeFullScreen);
       document.removeEventListener('mozfullscreenchange', handleChangeFullScreen);

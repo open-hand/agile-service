@@ -6,7 +6,6 @@ import { issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectUser from '@/components/select/select-user';
 import UserHead from '../../../../UserHead';
-import './Field.less';
 
 @inject('AppState')
 @observer class FieldStatus extends Component {
@@ -39,7 +38,8 @@ import './Field.less';
       reporterId, reporterName, reporterImageUrl,
       reporterRealName, reporterLoginName,
     } = issue;
-
+    const field = store.getFieldByCode('reporter');
+    const required = field?.required;
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -49,12 +49,17 @@ import './Field.less';
         </div>
         <div className="c7n-value-wrapper">
           <TextEditToggle
-            disabled={disabled || (reporterId !== loginUserId && !hasPermission)}
+            disabled={disabled || (
+              reporterId && reporterId.toString() !== loginUserId.toString() && !hasPermission
+            )}
             onSubmit={this.updateIssueReporter}
-            initValue={reporterLoginName ? reporterId || undefined : undefined}
+            initValue={reporterLoginName ? (
+              reporterId && reporterId.toString()
+            ) || undefined : undefined}
             editor={({ submit }) => (
               <SelectUser
-                // clearButton
+                clearButton={!required}
+                required={required}
                 onChange={submit}
                 selectedUser={reporterId ? {
                   id: reporterId,

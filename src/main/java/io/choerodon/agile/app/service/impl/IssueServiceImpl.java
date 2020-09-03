@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.agile.infra.enums.NodeType;
 import io.choerodon.core.domain.Page;
 import com.google.common.collect.Lists;
 import io.choerodon.agile.api.validator.IssueLinkValidator;
@@ -170,6 +171,9 @@ public class IssueServiceImpl implements IssueService {
     private BaseFeignClient baseFeignClient;
     @Autowired
     private ProjectUtil projectUtil;
+    @Autowired
+    private BoardAssembler boardAssembler;
+
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -269,6 +273,12 @@ public class IssueServiceImpl implements IssueService {
     private ProjectInfoService projectInfoService;
     @Autowired
     private FieldValueService fieldValueService;
+    @Autowired
+    private StatusFieldSettingService statusFieldSettingService;
+    @Autowired
+    private StatusLinkageService statusLinkageService;
+    @Autowired
+    private StateMachineNodeService stateMachineNodeService;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -385,7 +395,7 @@ public class IssueServiceImpl implements IssueService {
                 filterSql = getQuickFilter(searchVO.getQuickFilterIds());
             }
             //处理未匹配的筛选
-            handleOtherArgs(searchVO);
+            boardAssembler.handleOtherArgs(searchVO);
             final String searchSql = filterSql;
             if (!handleSortField(pageRequest).equals("")) {
                 String fieldCode = handleSortField(pageRequest);
@@ -473,6 +483,12 @@ public class IssueServiceImpl implements IssueService {
         } else return "";
     }
 
+    /**
+     * @see BoardAssembler#handleOtherArgs(io.choerodon.agile.api.vo.SearchVO)
+     * @deprecated {@link io.choerodon.agile.app.assembler.BoardAssembler#handleOtherArgs(io.choerodon.agile.api.vo.SearchVO)}
+     * @param searchVO searchVO
+     */
+    @Deprecated
     protected void handleOtherArgs(SearchVO searchVO) {
         Map<String, Object> otherArgs = searchVO.getOtherArgs();
         if (otherArgs != null) {
@@ -558,6 +574,18 @@ public class IssueServiceImpl implements IssueService {
             issueConvertDTO.setObjectVersionNumber(issueMapper.selectByPrimaryKey(issueId).getObjectVersionNumber());
             issueAccessDataService.updateSelective(issueConvertDTO);
         }
+        /**
+         * 修改属性报错，导致数据回滚但是状态机实例已经完成状态变更，导致issue无论变更什么状态都无效
+         * 抛异常并清空当前实例的状态机的状态信息
+         */
+        try {
+            statusFieldSettingService.handlerSettingToUpdateIssue(projectId,issueId);
+            statusLinkageService.updateParentStatus(projectId,issueId,applyType);
+        }
+        catch (Exception e) {
+            stateMachineClientService.cleanInstanceCache(projectId,issueId,applyType);
+            throw new CommonException("error.update.status.transform.setting",e);
+        }
         return queryIssueByUpdate(projectId, issueId, Collections.singletonList("statusId"));
     }
 
@@ -591,10 +619,6 @@ public class IssueServiceImpl implements IssueService {
                 fieldList.add(RANK_FIELD);
                 issueConvertDTO.setOriginSprintId(originIssue.getSprintId());
             }
-        }
-        IssueDTO issueDTO = issueMapper.selectOne(modelMapper.map(issueConvertDTO, IssueDTO.class));
-        if (Objects.isNull(issueDTO)){
-            throw new CommonException(IssueAccessDataServiceImpl.UPDATE_ERROR);
         }
         issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
     }
@@ -971,7 +995,28 @@ public class IssueServiceImpl implements IssueService {
         }
         issueConvertDTO.setIssueTypeId(issueUpdateTypeVO.getIssueTypeId());
         issueAccessDataService.update(issueConvertDTO, new String[]{TYPE_CODE_FIELD, REMAIN_TIME_FIELD, PARENT_ISSUE_ID, EPIC_NAME_FIELD, COLOR_CODE_FIELD, EPIC_ID_FIELD, STORY_POINTS_FIELD, RANK_FIELD, EPIC_SEQUENCE, ISSUE_TYPE_ID, RELATE_ISSUE_ID});
+        // 查看目标问题类型的状态机是否含有当前状态，没有就是用默认状态
+        handlerStatus(issueConvertDTO.getProjectId(),issueUpdateTypeVO);
         return queryIssue(issueConvertDTO.getProjectId(), issueConvertDTO.getIssueId(), organizationId);
+    }
+
+    private void handlerStatus(Long projectId, IssueUpdateTypeVO issueUpdateTypeVO) {
+        IssueConvertDTO issueConvertDTO = queryIssueByProjectIdAndIssueId(projectId, issueUpdateTypeVO.getIssueId());
+        Long currentStateMachineId = projectConfigService.queryStateMachineId(projectId, AGILE, issueUpdateTypeVO.getIssueTypeId());
+        // 查询状态机里面的状态
+        List<StateMachineNodeVO> stateMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(ConvertUtil.getOrganizationId(projectId), currentStateMachineId, false);
+        if (CollectionUtils.isEmpty(stateMachineNodeVOS)) {
+            throw new CommonException("error.current.state.machine.node.null");
+        }
+        List<Long> list = stateMachineNodeVOS.stream().map(StateMachineNodeVO::getStatusId).collect(Collectors.toList());
+        if (!list.contains(issueConvertDTO.getStatusId())) {
+            StateMachineNodeVO stateMachineNodeVO = stateMachineNodeVOS.stream().filter(v -> NodeType.INIT.equals(v.getType())).findAny().orElse(null);
+            if (ObjectUtils.isEmpty(stateMachineNodeVO)) {
+                throw new CommonException("error.init.node.not.found");
+            }
+            issueConvertDTO.setStatusId(stateMachineNodeVO.getStatusId());
+            issueAccessDataService.update(issueConvertDTO, new String[]{"statusId"});
+        }
     }
 
     @Override

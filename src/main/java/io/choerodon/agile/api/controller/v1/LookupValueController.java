@@ -10,10 +10,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -34,8 +31,9 @@ public class LookupValueController {
     @ApiOperation("根据type code查询其下的value值")
     @GetMapping(value = "/{typeCode}")
     public ResponseEntity<LookupTypeWithValuesVO> queryLookupValueByCode(@ApiParam(value = "type code", required = true)
-                                                                         @PathVariable String typeCode) {
-        return Optional.ofNullable(lookupValueService.queryLookupValueByCode(typeCode))
+                                                                         @PathVariable String typeCode,
+                                                                         @RequestParam(required = false) Long projectId) {
+        return Optional.ofNullable(lookupValueService.queryLookupValueByCode(typeCode, projectId))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.lookupValueList.get"));
     }

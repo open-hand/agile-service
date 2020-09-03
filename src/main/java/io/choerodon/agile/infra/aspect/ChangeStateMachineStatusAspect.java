@@ -1,12 +1,10 @@
 package io.choerodon.agile.infra.aspect;
 
 import io.choerodon.agile.infra.enums.StateMachineStatus;
-import io.choerodon.agile.infra.dto.StateMachineDTO;
-import io.choerodon.agile.infra.mapper.StateMachineMapper;
+import io.choerodon.agile.infra.dto.StatusMachineDTO;
+import io.choerodon.agile.infra.mapper.StatusMachineMapper;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.app.service.StateMachineClientService;
-import io.choerodon.mybatis.helper.OptionalHelper;
-import org.hzero.mybatis.common.Criteria;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -15,9 +13,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * @author shinan.chen
@@ -28,7 +23,7 @@ import java.util.Arrays;
 @Transactional(rollbackFor = Exception.class)
 public class ChangeStateMachineStatusAspect {
     @Autowired
-    private StateMachineMapper stateMachineMapper;
+    private StatusMachineMapper statusMachineMapper;
     @Autowired
     private StateMachineClientService stateMachineClientService;
 
@@ -48,16 +43,13 @@ public class ChangeStateMachineStatusAspect {
                 stateMachineId = Long.valueOf(args[i] + "");
             }
         }
-        StateMachineDTO stateMachine = stateMachineMapper.selectByPrimaryKey(stateMachineId);
+        StatusMachineDTO stateMachine = statusMachineMapper.selectByPrimaryKey(stateMachineId);
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.notFound");
         }
         if (stateMachine.getStatus().equals(StateMachineStatus.ACTIVE)) {
             stateMachine.setStatus(StateMachineStatus.DRAFT);
-//            Criteria criteria = new Criteria();
-//            criteria.update("status");
-//            stateMachineMapper.updateByPrimaryKeyOptions(stateMachine, criteria);
-            stateMachineMapper.updateOptional(stateMachine, "status");
+            statusMachineMapper.updateOptional(stateMachine, "status");
         }
 
         try {

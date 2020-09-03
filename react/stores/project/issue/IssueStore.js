@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import {
   observable, action, computed, toJS,
 } from 'mobx';
@@ -5,11 +6,54 @@ import {
   stores, Choerodon,
 } from '@choerodon/boot';
 import {
-  debounce, reverse, map, find, isEmpty,
+  debounce, reverse, map, find, isEmpty, isEqual, pick,
 } from 'lodash';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import { fieldApi, personalFilterApi } from '@/api';
 
+export const isFilterSame = (obj, obj2) => {
+  // 过滤掉 [] null '' 那些不起作用的属性
+  const keys1 = Object.keys(obj).filter((k) => !isEmpty(obj[k]));
+  const keys2 = Object.keys(obj2).filter((k) => !isEmpty(obj2[k]));
+  return isEqual(pick(obj, keys1), pick(obj2, keys2));
+};
+/**
+ * 对象扁平化 {a:{b:'v'}}  = >  {b:'v'}
+ *
+ * @param {*} object
+ */
+export function flattenObject(object) {
+  const result = {};
+  for (const [key, value] of Object.entries(object)) {
+    if (Object.prototype.toString.call(value) === '[object Object]') {
+      Object.assign(result, flattenObject(value));
+    } else {
+      result[key] = value;
+    }
+  }
+  const {
+    date = [],
+    date_hms = [],
+    number = [],
+    option = [],
+    string = [],
+    text = [],
+  } = result;
+  [...date, ...date_hms].forEach((d) => {
+    result[d.fieldId] = { isCustom: true, value: [d.startDate, d.endDate] };
+  });
+  [...number, ...option, ...string, ...text].forEach((d) => {
+    result[d.fieldId] = { isCustom: true, value: d.value };
+  });
+
+  delete result.date;
+  delete result.date_hms;
+  delete result.number;
+  delete result.option;
+  delete result.string;
+  delete result.text;
+  return result;
+}
 export function getSystemFields() {
   const systemFields = [{
     code: 'issueIds',
@@ -92,9 +136,8 @@ export function getSystemFields() {
     defaultShow: false,
     fieldType: 'datetime',
   }];
-  return IsInProgramStore.isInProgram ? systemFields : systemFields.filter(f => f.code !== 'feature');
+  return IsInProgramStore.isInProgram ? systemFields : systemFields.filter((f) => f.code !== 'feature');
 }
-
 
 const { AppState } = stores;
 function transformSystemFilter(data) {
@@ -272,7 +315,6 @@ class IssueStore {
     return toJS(this.expand);
   }
 
-
   axiosGetMyFilterList = () => {
     // const { userInfo: { id } } = AppState;
     this.setLoading(true);
@@ -280,7 +322,7 @@ class IssueStore {
       this.setLoading(false);
       const reverseMyFilters = reverse(myFilters);
       this.setMyFilters(reverseMyFilters);
-      this.setEditFilterInfo(map(map(reverseMyFilters, item => ({
+      this.setEditFilterInfo(map(map(reverseMyFilters, (item) => ({
         filterId: item.filterId,
       })), (item, index) => ({
         ...item,
@@ -307,7 +349,9 @@ class IssueStore {
   @observable chosenFields = new Map();
 
   @action initChosenFields() {
-    this.chosenFields = new Map(getSystemFields().filter(f => f.defaultShow).map(f => ([f.code, observable({ ...f, value: undefined })])));
+    this.chosenFields = new Map(getSystemFields()
+      .filter((f) => f.defaultShow)
+      .map((f) => ([f.code, observable({ ...f, value: undefined })])));
   }
 
   @action handleChosenFieldChange = (select, field) => {
@@ -325,6 +369,10 @@ class IssueStore {
 
   getFilterValueByCode(code) {
     return this.chosenFields.get(code) ? toJS(this.chosenFields.get(code).value) : undefined;
+  }
+
+  setTableRef(tableRef) {
+    this.tableRef = tableRef;
   }
 
   query = debounce(() => {
@@ -353,8 +401,8 @@ class IssueStore {
     this.chosenFields = chosenFields;
   }
 
-  @action chooseAll() {
-    [...getSystemFields(), ...this.fields].forEach((field) => {
+  @action chooseAll(filteredFields) {
+    filteredFields.forEach((field) => {
       this.chosenFields.set(field.code, observable({ ...field, value: undefined }));
     });
   }
@@ -367,7 +415,8 @@ class IssueStore {
         break;
       }
     }
-    this.chosenFields = new Map(getSystemFields().filter(f => f.defaultShow).map(f => ([f.code, this.chosenFields.get(f.code)])));
+    this.chosenFields = new Map(getSystemFields().filter((f) => f.defaultShow)
+      .map((f) => ([f.code, this.chosenFields.get(f.code)])));
     // 取消全选之前如果有筛选就查一次
     if (hasValue) {
       this.query();
@@ -471,13 +520,19 @@ class IssueStore {
     }
     const filter = transformSystemFilter(systemFilter);
     filter.otherArgs.customField = customField;
-    // console.log(filter);
     return filter;
   }
 
   getFieldCodeById(id) {
     const field = find(this.fields, { id });
     return field ? field.code : undefined;
+  }
+
+  @computed
+  get isHasFilter() {
+    const currentFilterDTO = this.getCustomFieldFilters()
+      ? flattenObject(this.getCustomFieldFilters()) : {};
+    return !isFilterSame({}, currentFilterDTO);
   }
 }
 

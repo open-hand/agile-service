@@ -6,7 +6,6 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.base.BaseController;
-import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.agile.api.vo.ObjectSchemeSearchVO;
 import io.choerodon.agile.api.vo.ObjectSchemeVO;
 import io.choerodon.agile.app.service.ObjectSchemeService;

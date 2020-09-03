@@ -7,6 +7,8 @@ import {
 import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { versionApi } from '@/api';
+import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
+import to from '@/utils/to';
 import ReleaseStore from '../../../stores/project/release/ReleaseStore';
 
 const { Sidebar } = Modal;
@@ -47,9 +49,13 @@ class PublicRelease extends Component {
   }
 
   goIssue() {
-    const { history } = this.props;
-    const urlParams = AppState.currentMenuType;
-    history.push(`/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramType=version&paramId=${encodeURIComponent(ReleaseStore.getVersionDetail.versionId)}&paramName=${encodeURIComponent(`版本${ReleaseStore.getVersionDetail.name}中的问题`)}&paramResolution=true&paramUrl=release`);
+    to(LINK_URL.workListIssue, {
+      params: {
+        paramType: 'version',
+        paramId: ReleaseStore.getVersionDetail.versionId,
+        paramName: `版本${ReleaseStore.getVersionDetail.name}中的问题`,
+      },
+    });
   }
 
   renderRadioDisabled() {
@@ -71,8 +77,8 @@ class PublicRelease extends Component {
       <Sidebar
         title="发布版本"
         visible={visible}
-        onCancel={onCancel.bind(this)}
-        onOk={this.handlePublic.bind(this)}
+        onCancel={() => onCancel()}
+        onOk={(e) => this.handlePublic(e)}
         okText="确定"
         cancelText="取消"
         width={380}
@@ -125,23 +131,25 @@ class PublicRelease extends Component {
                           </RadioGroup>,
                         )}
                       </FormItem>
-                      <FormItem>
-                        {getFieldDecorator('moveVersion', {
-                          initialValue:
+                      {
+                        getFieldValue('chose') === 2 && (
+                          <FormItem>
+                            {getFieldDecorator('moveVersion', {
+                              initialValue:
                             ReleaseStore.getPublicVersionDetail.versionNames.length > 0
                               ? ReleaseStore.getPublicVersionDetail.versionNames[0].versionId
                               : undefined,
-                          rules: [{
-                            required: getFieldValue('chose') === 2,
-                            message: '移动版本是必填的',
-                          }],
-                        })(
-                          <Select
-                            label="选择要移动到的版本"
-                            disabled={getFieldValue('chose') === 1}
-                          >
-                            {
-                              ReleaseStore.getPublicVersionDetail.versionNames.map(item => (
+                              rules: [{
+                                required: getFieldValue('chose') === 2,
+                                message: '移动版本是必填的',
+                              }],
+                            })(
+                              <Select
+                                label="选择要移动到的版本"
+                                disabled={getFieldValue('chose') === 1}
+                              >
+                                {
+                              ReleaseStore.getPublicVersionDetail.versionNames.map((item) => (
                                 <Option
                                   key={item.versionId}
                                   value={item.versionId}
@@ -150,9 +158,11 @@ class PublicRelease extends Component {
                                 </Option>
                               ))
                             }
-                          </Select>,
-                        )}
-                      </FormItem>
+                              </Select>,
+                            )}
+                          </FormItem>
+                        )
+                      }
                     </div>
                   ) : ''
                 }
@@ -168,7 +178,7 @@ class PublicRelease extends Component {
                       placeholder="发布日期"
                       style={{ width: '100%' }}
                       disabledDate={release.startDate
-                        ? current => current < moment(release.startDate) : () => false}
+                        ? (current) => current < moment(release.startDate) : () => false}
                     />,
                   )}
                 </FormItem>

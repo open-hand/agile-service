@@ -1,3 +1,4 @@
+/* eslint-disable react/sort-comp */
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import ReactEcharts from 'echarts-for-react';
@@ -7,6 +8,8 @@ import {
 import {
   Button, Table, Select, Icon, Spin,
 } from 'choerodon-ui';
+import to, { linkUrl } from '@/utils/to';
+import LINK_URL from '@/constants/LINK_URL';
 import pic from '../../../../assets/image/emptyChart.svg';
 import SwithChart from '../../Component/switchChart';
 import VS from '../../../../stores/project/velocityChart';
@@ -15,7 +18,6 @@ import './VelocityChart.less';
 
 const { AppState } = stores;
 const { Option } = Select;
-
 
 @observer
 class VelocityChart extends Component {
@@ -123,9 +125,8 @@ class VelocityChart extends Component {
           formatter(value, index) {
             if (value.length > 10) {
               return `${value.slice(0, 11)}...`;
-            } else {
-              return value;
             }
+            return value;
           },
         },
         splitLine: {
@@ -286,15 +287,13 @@ class VelocityChart extends Component {
             }}
             role="none"
             onClick={() => {
-              const { history } = this.props;
-              const urlParams = AppState.currentMenuType;
-              history.push(
-                `/agile/work-list/issue?type=${urlParams.type}&id=${urlParams.id}&name=${
-                  encodeURIComponent(urlParams.name)
-                }&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}&paramType=sprint&paramId=${
-                  encodeURIComponent(record.sprintId)
-                }&paramName=${encodeURIComponent(`${sprintName}下的问题`)}&paramUrl=reporthost/velocityChart`,
-              );
+              to(LINK_URL.workListIssue, {
+                params: {
+                  paramType: 'sprint',
+                  paramId: record.sprintId,
+                  paramName: `${sprintName}下的问题`,
+                },
+              });
             }}
           >
             {sprintName}
@@ -334,7 +333,7 @@ class VelocityChart extends Component {
     ];
     return (
       <Table
-        rowKey={record => record.sprintId}
+        rowKey={(record) => record.sprintId}
         dataSource={VS.chartData}
         columns={column}
         filterBar={false}
@@ -346,16 +345,15 @@ class VelocityChart extends Component {
   }
 
   render() {
-    const { history } = this.props;
     const urlParams = AppState.currentMenuType;
     return (
       <Page className="c7n-velocity" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.velocity_chart']}>
         <Header
           title="迭代速度图"
-          backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
+          backPath={linkUrl(LINK_URL.report)}
         >
-          <SwithChart history={this.props.history} current="velocityChart" />
-          <Button funcType="flat" onClick={this.refresh.bind(this)}>
+          <SwithChart current="velocityChart" />
+          <Button funcType="flat" onClick={() => this.refresh()}>
             <Icon type="refresh icon" />
             <span>刷新</span>
           </Button>
@@ -368,7 +366,7 @@ class VelocityChart extends Component {
                 style={{ width: 512 }}
                 label="单位选择"
                 value={VS.currentUnit}
-                onChange={this.handleChangeCurrentUnit.bind(this)}
+                onChange={(unit) => this.handleChangeCurrentUnit(unit)}
               >
                 <Option key="story_point" value="story_point">
                   故事点
@@ -402,18 +400,14 @@ class VelocityChart extends Component {
                     style={{ margin: '0 5px', cursor: 'pointer' }}
                     role="none"
                     onClick={() => {
-                      history.push(
-                        `/agile/work-list/backlog?type=${urlParams.type}&id=${urlParams.id}&name=${
-                          encodeURIComponent(urlParams.name)
-                        }&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`,
-                      );
+                      to(LINK_URL.workListBacklog);
                     }}
                   >
                     待办事项
                   </span>
                   <span>中创建一个冲刺</span>
                 </div>
-              )}
+                )}
             />
           )}
         </Content>

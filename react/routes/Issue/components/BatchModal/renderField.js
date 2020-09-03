@@ -9,7 +9,6 @@ import SelectFeature from '@/components/select/select-feature';
 const { Option } = Select;
 const singleList = ['radio', 'single'];
 
-
 export default function renderField({ code, fieldType, fieldOptions }) {
   switch (code) {
     case 'componentIssueRelVOList': {
@@ -26,7 +25,7 @@ export default function renderField({ code, fieldType, fieldOptions }) {
         <TimePicker
           name={code}
           style={{ width: '100%' }}
-        />         
+        />
       );
     case 'datetime':
       return (

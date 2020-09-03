@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 export function formatDate(str) {
   const MONTH = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
   if (!str) {
@@ -19,7 +21,7 @@ export function formatDate(str) {
   }
   return `${d[2]}/${MONTH[d[1] * 1 - 1]}月/${d[0]} ${t[0] < 12 ? t[0] : t[0] * 1 - 12}:${t[1]}  ${t[0] * 1 < 12 ? ' 上' : ' 下'}午`;
 }
-  
+
 export function commonformatDate(str) {
   const MONTH = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
   if (!str) {

@@ -2,17 +2,15 @@ import React, { Component } from 'react';
 import { stores } from '@choerodon/boot';
 import { withRouter } from 'react-router-dom';
 import './nodata.less';
-
-const { AppState } = stores;
+import to from '@/utils/to';
 
 class NoDataComponent extends Component {
   linkToUrl(url) {
-    const { history } = this.props;
-    history.push(`${url}?type=project&id=${AppState.currentMenuType.id}&name=${AppState.currentMenuType.name}&organizationId=${AppState.currentMenuType.organizationId}&orgId=${AppState.currentMenuType.organizationId}`);
+    to(url);
   }
 
   render() {
-    const data = this.props.links;
+    const { links: { data }, title, img } = this.props;
     let linkDom = [];
     if (data.length) {
       if (data.length === 1) {
@@ -21,7 +19,7 @@ class NoDataComponent extends Component {
             请在
             <a onClick={this.linkToUrl.bind(this, data[0].link)} style={{ padding: '0 3px 0 3px' }} role="none">{data[0].name}</a>
             中创建一个
-            {this.props.title}
+            {title}
             {' '}
 
           </div>
@@ -31,24 +29,24 @@ class NoDataComponent extends Component {
           <div className="nodata-description">
             请在
             {data.map((item, index) => (
-              <React.Fragment>
+              <>
                 <a style={{ padding: '0 3px 0 3px' }} role="none" onClick={this.linkToUrl.bind(this, item.link)}>{item.name}</a>
                 {index < data.length - 1 && '或'}
-              </React.Fragment>
+              </>
             ))}
             中创建一个
-            {this.props.title}
+            {title}
           </div>
         );
       }
     }
     return (
       <div className="nodata-container">
-        <img src={this.props.img} alt="" width={200} />
+        <img src={img} alt="" width={200} />
         <div className="nodata-content">
           <span className="nodata-text">
             当前项目无可用
-            {this.props.title}
+            {title}
           </span>
           {linkDom}
         </div>
@@ -57,4 +55,4 @@ class NoDataComponent extends Component {
   }
 }
 
-export default withRouter(NoDataComponent);
+export default NoDataComponent;

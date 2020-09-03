@@ -79,7 +79,7 @@ public class RankServiceImpl implements RankService {
 //        return featureIds;
 //    }
 
-    private void insertRankByBatch(Long projectId, List<Long> issueIds, String type) {
+    protected void insertRankByBatch(Long projectId, List<Long> issueIds, String type) {
         List<RankDTO> insertRankList = new ArrayList<>();
         String rank = RankUtil.mid();
         for (Long issueId : issueIds) {

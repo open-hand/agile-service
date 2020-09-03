@@ -5,6 +5,7 @@ import io.choerodon.agile.api.vo.PriorityVO;
 import io.choerodon.agile.api.vo.StatusVO;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,6 +31,8 @@ public class IssueSearchDTO {
     private BigDecimal storyPoints;
     private String color;
     private Long objectVersionNumber;
+    private Date estimatedStartTime;
+    private Date estimatedEndTime;
 
     private PriorityVO priorityVO;
     private Long priorityId;
@@ -249,4 +252,19 @@ public class IssueSearchDTO {
         this.assigneeRealName = assigneeRealName;
     }
 
+    public Date getEstimatedStartTime() {
+        return estimatedStartTime;
+    }
+
+    public void setEstimatedStartTime(Date estimatedStartTime) {
+        this.estimatedStartTime = estimatedStartTime;
+    }
+
+    public Date getEstimatedEndTime() {
+        return estimatedEndTime;
+    }
+
+    public void setEstimatedEndTime(Date estimatedEndTime) {
+        this.estimatedEndTime = estimatedEndTime;
+    }
 }

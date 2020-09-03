@@ -1,26 +1,27 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import {
-  asyncRouter, PageWrap, PageTab, Permission, 
+  asyncRouter, PageWrap, PageTab, Permission,
 } from '@choerodon/boot';
+import LINK_URL from '@/constants/LINK_URL';
 
-const Backlog = asyncRouter(() => import('../Backlog'));
-const Issue = asyncRouter(() => (import('../Issue')));
-const Release = asyncRouter(() => (import('../Release')));
+const Backlog = withRouter(asyncRouter(() => import('../Backlog')));
+const Issue = withRouter(asyncRouter(() => (import('../Issue'))));
+const Release = withRouter(asyncRouter(() => (import('../Release'))));
 
 const WorkList = ({ match }) => (
   <Permission service={['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.work-list.createversion']}>
     {
-        hasPermission => (
-          <PageWrap
-            noHeader={hasPermission ? [] : ['choerodon.code.project.cooperation.work-list.ps.version']}
-          >
-            <PageTab title="待办事项" route="/agile/work-list/backlog" tabKey="choerodon.code.project.cooperation.work-list.ps.backlog" component={withRouter(Backlog)} />
-            <PageTab title="所有问题" route="/agile/work-list/issue" tabKey="choerodon.code.project.cooperation.work-list.ps.issue" component={withRouter(Issue)} />
-            <PageTab title="版本列表" route="/agile/work-list/version" tabKey="choerodon.code.project.cooperation.work-list.ps.version" component={withRouter(Release)} />
-          </PageWrap>
-        )
-      }
+      (hasPermission) => (
+        <PageWrap
+          noHeader={hasPermission ? [] : ['choerodon.code.project.cooperation.work-list.ps.version']}
+        >
+          <PageTab title="待办事项" route={LINK_URL.workListBacklog} tabKey="choerodon.code.project.cooperation.work-list.ps.backlog" component={Backlog} />
+          <PageTab title="所有问题" route={LINK_URL.workListIssue} tabKey="choerodon.code.project.cooperation.work-list.ps.issue" component={Issue} />
+          <PageTab title="版本列表" route={LINK_URL.workListVersion} tabKey="choerodon.code.project.cooperation.work-list.ps.version" component={Release} />
+        </PageWrap>
+      )
+    }
   </Permission>
 );
 export default WorkList;

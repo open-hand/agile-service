@@ -1,3 +1,5 @@
+/* eslint-disable react/sort-comp */
+/* eslint-disable react/destructuring-assignment */
 import React, { Component, createRef } from 'react';
 import { observer } from 'mobx-react';
 import echarts from 'echarts/lib/echarts';
@@ -14,6 +16,8 @@ import {
 } from 'choerodon-ui';
 import './pie.less';
 import { sprintApi, versionApi } from '@/api';
+import to, { linkUrl } from '@/utils/to';
+import LINK_URL from '@/constants/LINK_URL';
 import SwitchChart from '../../Component/switchChart';
 import VersionReportStore from '../../../../stores/project/versionReport/VersionReport';
 import NoDataComponent from '../../Component/noData';
@@ -21,7 +25,6 @@ import pic from '../../../../assets/image/emptyChart.svg';
 
 const { Option } = Select;
 const { AppState } = stores;
-
 
 @observer
 class ReleaseDetail extends Component {
@@ -78,7 +81,6 @@ class ReleaseDetail extends Component {
         });
       }));
 
-
     const pieChart = this.pie.getEchartsInstance();
     pieChart.on('mouseout', (params) => {
       if (params.data.name === '其它') {
@@ -125,19 +127,18 @@ class ReleaseDetail extends Component {
       { title: '史诗', value: 'epic' },
     ];
     const quaryLink = pathname.slice(pathname.lastIndexOf('/') + 1, pathname.length);
-    if (quaryLinks.filter(item => item.value === quaryLink).length === 0) {
+    if (quaryLinks.filter((item) => item.value === quaryLink).length === 0) {
       this.setState({
         type: '经办人',
         value: 'assignee',
       });
       return 'assignee';
-    } else {
-      this.setState({
-        type: quaryLinks.filter(item => item.value === quaryLink)[0].title,
-        value: quaryLink,
-      });
-      return quaryLink;
     }
+    this.setState({
+      type: quaryLinks.filter((item) => item.value === quaryLink)[0].title,
+      value: quaryLink,
+    });
+    return quaryLink;
   }
 
   getOption() {
@@ -153,18 +154,17 @@ class ReleaseDetail extends Component {
               this.otherTooltipRef.current.style.display = 'none';
             }
             return `<div><span>问题：${value.data.value} 个</span><br/><span>百分比：${(value.data.percent.toFixed(2))}%</span></div>`;
-          } else {
-            if (this.otherTooltipRef && this.otherTooltipRef.current) {
-              this.otherTooltipRef.current.style.display = 'block';
-              const otherTooptipItem = document.getElementsByClassName('pie-otherTooptip-item-percent');
-              let opacity = 0.9;
-              for (let i = 0; i < otherTooptipItem.length; i += 1) {
-                opacity = 1 - i * 0.1 > 0 ? 1 - i * 0.1 : 0.9;
-                otherTooptipItem[i].style.backgroundColor = `rgba(250,211,82,${opacity})`;
-              }
-            }
-            return '';
           }
+          if (this.otherTooltipRef && this.otherTooltipRef.current) {
+            this.otherTooltipRef.current.style.display = 'block';
+            const otherTooptipItem = document.getElementsByClassName('pie-otherTooptip-item-percent');
+            let opacity = 0.9;
+            for (let i = 0; i < otherTooptipItem.length; i += 1) {
+              opacity = 1 - i * 0.1 > 0 ? 1 - i * 0.1 : 0.9;
+              otherTooptipItem[i].style.backgroundColor = `rgba(250,211,82,${opacity})`;
+            }
+          }
+          return '';
         },
         padding: 10,
         textStyle: {
@@ -267,11 +267,10 @@ class ReleaseDetail extends Component {
       const val2 = obj2[pro];
       if (val1 < val2) {
         return 1;
-      } else if (val1 > val2) {
+      } if (val1 > val2) {
         return -1;
-      } else {
-        return 0;
       }
+      return 0;
     };
   }
 
@@ -296,11 +295,11 @@ class ReleaseDetail extends Component {
       currentChooseDimension, currentSprintChoose, currentVersionChoose, startDate, endDate,
     } = this.state;
     const CHOOSEQUERY = {
-      sprint: `&paramChoose=sprint&paramCurrentSprint=${currentSprintChoose}`,
-      version: `&paramChoose=version&paramCurrentVersion=${currentVersionChoose}`,
-      timeRange: startDate && endDate && `&paramChoose=timeRange&paramStartDate=${startDate.format().substring(0, 10)}&paramEndDate=${endDate.format().substring(0, 10)}`,
+      sprint: { paramChoose: 'sprint', paramCurrentSprint: currentSprintChoose },
+      version: { paramChoose: 'version', paramCurrentSprint: currentVersionChoose },
+      timeRange: (startDate && endDate) ? { paramChoose: 'timeRange', paramStartDate: startDate.format().substring(0, 10), paramEndDate: endDate.format().substring(0, 10) } : {},
     };
-    return (currentChooseDimension && CHOOSEQUERY[currentChooseDimension]) ? CHOOSEQUERY[currentChooseDimension] : '';
+    return currentChooseDimension ? CHOOSEQUERY[currentChooseDimension] : ({});
   }
 
   handleLinkToIssue(item) {
@@ -308,37 +307,40 @@ class ReleaseDetail extends Component {
     const {
       type, id, organizationId,
     } = urlParams;
-    const { history } = this.props;
     const {
-      value, sprintAndVersion, currentChooseDimension, currentSprintChoose, currentVersionChoose, startDate, endDate,
+      value, sprintAndVersion, currentChooseDimension,
+      currentSprintChoose, currentVersionChoose, startDate, endDate,
     } = this.state;
     const { typeName, name } = item;
     const queryString = this.getQueryString(value, typeName);
-    const chooseQueryString = this.getCurrentChoose();
+    const queryObj = this.getCurrentChoose();
     let paramName = name || '未分配';
     if (currentChooseDimension === 'sprint') {
-      paramName += `、冲刺为${sprintAndVersion.sprint.find(sprintItem => sprintItem.sprintId === currentSprintChoose).sprintName}`;
+      paramName += `、冲刺为${sprintAndVersion.sprint.find((sprintItem) => sprintItem.sprintId === currentSprintChoose).sprintName}`;
     }
 
     if (currentChooseDimension === 'version') {
-      paramName += `、版本为${sprintAndVersion.version.find(versionItem => versionItem.versionId === currentVersionChoose).name}`;
+      paramName += `、版本为${sprintAndVersion.version.find((versionItem) => versionItem.versionId === currentVersionChoose).name}`;
     }
 
     paramName += '下的问题';
 
     if (!queryString) return;
-    history.push(
-      encodeURI(`/agile/work-list/issue?type=${type}&id=${id}&name=${urlParams.name}&organizationId=${organizationId}&orgId=${organizationId}&${queryString}${`${chooseQueryString || ''}`}&paramName=${paramName}&paramUrl=reporthost/pieReport`),
-    );
+    to(LINK_URL.workListIssue, {
+      params: {
+        paramName,
+        ...queryObj,
+      },
+    });
   }
 
   renderOtherTooltip = () => {
     const sourceData = VersionReportStore.getSourceData;
-    const otherDates = sourceData.filter(item => item.percent < 2).sort(this.compare('percent'));
+    const otherDates = sourceData.filter((item) => item.percent < 2).sort(this.compare('percent'));
     if (otherDates && otherDates.length > 0) {
       if (otherDates.length <= 6) {
         return (
-          otherDates.map(item => (
+          otherDates.map((item) => (
             <div className="pie-otherTooptip-item">
               <p className="pie-otherTooptip-item-percent">
                 <span>{`${item.percent.toFixed(2)}%`}</span>
@@ -351,34 +353,33 @@ class ReleaseDetail extends Component {
             </div>
           ))
         );
-      } else {
-        return (
-          <React.Fragment>
-            {otherDates.slice(0, 6).map(item => (
-              <div className="pie-otherTooptip-item">
-                <p className="pie-otherTooptip-item-percent">
-                  <span>{`${item.percent.toFixed(2)}%`}</span>
-                </p>
-                <p>
-                  <Tooltip title={item.name} placement="bottom">
-                    <span>{item.realName ? item.realName : item.name}</span>
-                  </Tooltip>
-                </p>
-              </div>
-            ))}
-            <div className="pie-otherTooptip-item">
-              <span className="pie-otherTooptip-item-ignore">...</span>
-            </div>
-          </React.Fragment>
-        );
       }
+      return (
+        <>
+          {otherDates.slice(0, 6).map((item) => (
+            <div className="pie-otherTooptip-item">
+              <p className="pie-otherTooptip-item-percent">
+                <span>{`${item.percent.toFixed(2)}%`}</span>
+              </p>
+              <p>
+                <Tooltip title={item.name} placement="bottom">
+                  <span>{item.realName ? item.realName : item.name}</span>
+                </Tooltip>
+              </p>
+            </div>
+          ))}
+          <div className="pie-otherTooptip-item">
+            <span className="pie-otherTooptip-item-ignore">...</span>
+          </div>
+        </>
+      );
     }
     return '';
   }
 
   renderChooseDimension = () => {
     const {
-      sprintAndVersion, currentChooseDimension, currentSprintChoose, currentVersionChoose, 
+      sprintAndVersion, currentChooseDimension, currentSprintChoose, currentVersionChoose,
     } = this.state;
     return (
       <div>
@@ -386,23 +387,34 @@ class ReleaseDetail extends Component {
           className="c7n-pieChart-filter-item"
           style={{ minWidth: 200 }}
           value={currentChooseDimension === 'version' ? (
-            sprintAndVersion.version.find(item => item.versionId === currentVersionChoose) && sprintAndVersion.version.find(item => item.versionId === currentVersionChoose).name) : (
-            sprintAndVersion.sprint.find(item => item.sprintId === currentSprintChoose) && sprintAndVersion.sprint.find(item => item.sprintId === currentSprintChoose).sprintName)
-          }
+            sprintAndVersion.version
+              .find((item) => item.versionId === currentVersionChoose)
+               && sprintAndVersion.version
+                 .find((item) => item.versionId === currentVersionChoose).name)
+            : (sprintAndVersion.sprint
+              .find((item) => item.sprintId === currentSprintChoose)
+              && sprintAndVersion.sprint
+                .find((item) => item.sprintId === currentSprintChoose).sprintName)}
           onChange={this.handleSecondChooseChange}
           allowClear
         >
           {
             // eslint-disable-next-line array-callback-return
-            sprintAndVersion && currentChooseDimension && sprintAndVersion[currentChooseDimension] && sprintAndVersion[currentChooseDimension].map((item) => {
-              if (currentChooseDimension === 'version') {
-                return <Option key={item.versionId} value={item.versionId}>{item.name}</Option>;
-              }
-              if (currentChooseDimension === 'sprint') {
-                return <Option key={item.sprintId} value={item.sprintId}>{item.sprintName}</Option>;
-              }
-              return '';
-            })
+            sprintAndVersion && currentChooseDimension
+            && sprintAndVersion[currentChooseDimension] && sprintAndVersion[currentChooseDimension]
+              .map((item) => {
+                if (currentChooseDimension === 'version') {
+                  return <Option key={item.versionId} value={item.versionId}>{item.name}</Option>;
+                }
+                if (currentChooseDimension === 'sprint') {
+                  return (
+                    <Option key={item.sprintId} value={item.sprintId}>
+                      {item.sprintName}
+                    </Option>
+                  );
+                }
+                return '';
+              })
           }
         </Select>
       </div>
@@ -464,10 +476,9 @@ class ReleaseDetail extends Component {
       <Page className="pie-chart" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.piechart']}>
         <Header
           title="统计图"
-          backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
+          backPath={linkUrl(LINK_URL.report)}
         >
           <SwitchChart
-            history={this.props.history}
             current="pieReport"
           />
           <Button onClick={this.handelRefresh}>
@@ -481,14 +492,14 @@ class ReleaseDetail extends Component {
             <div className="c7n-pieChart-filter">
               <Select
                 className="c7n-pieChart-filter-item"
-                getPopupContainer={triggerNode => triggerNode.parentNode}
+                getPopupContainer={(triggerNode) => triggerNode.parentNode}
                 defaultValue={value}
                 value={value}
                 label="统计类型"
                 onChange={this.changeType}
               >
                 {
-                  type.map(item => (
+                  type.map((item) => (
                     <Option value={item.value} key={item.title}>{item.title}</Option>
                   ))
                 }
@@ -498,12 +509,21 @@ class ReleaseDetail extends Component {
                 style={{ minWidth: 70 }}
                 label="选择维度"
                 defaultValue={chooseDimensionType[0].name}
-                value={chooseDimensionType.find(item => item.key === currentChooseDimension) && chooseDimensionType.find(item => item.key === currentChooseDimension).name}
+                value={chooseDimensionType
+                  .find((item) => item.key === currentChooseDimension)
+                  && chooseDimensionType.find((item) => item.key === currentChooseDimension).name}
                 onChange={this.handleChooseDimensionChange}
                 allowClear
               >
                 {
-                  chooseDimensionType.map(item => <Option key={item.key} value={item.key}>{item.name}</Option>)
+                  chooseDimensionType.map((item) => (
+                    <Option
+                      key={item.key}
+                      value={item.key}
+                    >
+                      {item.name}
+                    </Option>
+                  ))
                 }
               </Select>
               {
@@ -512,7 +532,7 @@ class ReleaseDetail extends Component {
             </div>
 
             {data.length ? (
-              <React.Fragment>
+              <>
                 <div style={{
                   display: 'flex', justifyContent: 'flex-start', alignItems: 'center',
                 }}
@@ -567,8 +587,8 @@ class ReleaseDetail extends Component {
                     </table>
                   </div>
                 </div>
-              </React.Fragment>
-            ) : <NoDataComponent title="问题" links={[{ name: '问题管理', link: '/agile/work-list/issue' }]} img={pic} />}
+              </>
+            ) : <NoDataComponent title="问题" links={[{ name: '问题管理', link: LINK_URL.workListIssue }]} img={pic} />}
           </Spin>
 
         </Content>

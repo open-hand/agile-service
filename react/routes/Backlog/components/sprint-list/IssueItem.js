@@ -2,12 +2,13 @@ import React, { memo, Fragment } from 'react';
 import { observer } from 'mobx-react';
 import { Tooltip } from 'choerodon-ui';
 import classnames from 'classnames';
+import moment from 'moment';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import TypeTag from '@/components/TypeTag';
 import UserHead from '@/components/UserHead';
 import StatusTag from '@/components/StatusTag';
 import PriorityTag from '@/components/PriorityTag';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
-import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 
 import './IssueItem.less';
 
@@ -38,9 +39,14 @@ function getStyle({ draggableStyle, virtualStyle, isDragging }) {
   return combined;
 }
 const Item = memo(({ issue, draggingNum }) => {
-  const { isShowFeature } = IsInProgramStore; // 由后端判断是否显示特性
+  const { isShowFeature } = useIsInProgram(); // 由后端判断是否显示特性
+  const { estimatedEndTime, statusVO } = issue;
+  let delayDays = 0;
+  if (estimatedEndTime) {
+    delayDays = moment().diff(moment(estimatedEndTime), 'days', true);
+  }
   return (
-    <Fragment>
+    <>
       {draggingNum && (<DraggingNum num={draggingNum} />)}
       <div
         className={`${prefix}-left`}
@@ -59,7 +65,16 @@ const Item = memo(({ issue, draggingNum }) => {
       <div
         className={`${prefix}-right`}
       >
-
+        {
+          !statusVO.completed && estimatedEndTime && (
+            delayDays > 0 || (delayDays >= -1 && delayDays < 0)) && (
+            <div className={`${prefix}-${delayDays > 0 ? 'delay' : 'soonDelay'}`}>
+              {
+              delayDays > 0 ? `延期${Math.ceil(delayDays)}天` : '即将到期'
+            }
+            </div>
+          )
+        }
         {issue.versionNames && issue.versionNames.length > 0 ? (
           <Tooltip title={`版本: ${issue.versionNames.join(', ')}`}>
             <span className={`${prefix}-version`}>
@@ -124,10 +139,9 @@ const Item = memo(({ issue, draggingNum }) => {
           </div>
         </Tooltip>
       </div>
-    </Fragment>
+    </>
   );
 });
-
 
 function IssueItem({
   provided, style, issue = {}, isDragging, sprintId,

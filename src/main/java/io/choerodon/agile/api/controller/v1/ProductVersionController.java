@@ -44,7 +44,6 @@ public class ProductVersionController {
     private static final String VERSION_STATISTICS_ERROR = "error.versionStatistics.query";
     private static final String QUERY_PLAN_VERSION_NAME_ERROR = "error.planVersionName.query";
     private static final String QUERY_VERSION_NAME_ERROR = "error.versionName.query";
-    private static final String QUERY_ISSUE_ERROR = "error.issue.query";
     private static final String RELEASE_ERROR = "error.productVersion.release";
     private static final String REVOKE_RELEASE_ERROR = "error.productVersion.revokeRelease";
     private static final String ARCHIVED_ERROR = "error.productVersion.archived";

@@ -1,3 +1,4 @@
+/* eslint-disable react/sort-comp */
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
@@ -7,6 +8,8 @@ import {
   Row, Col, Radio, Tooltip, Icon,
 } from 'choerodon-ui';
 import { sprintApi } from '@/api';
+import LINK_URL from '@/constants/LINK_URL';
+import to, { linkUrl } from '@/utils/to';
 import Assignee from '../IterationBoardComponent/Assignee';
 import BurnDown from '../IterationBoardComponent/BurnDown';
 import Sprint from '../IterationBoardComponent/Sprint';
@@ -84,7 +87,7 @@ class IterationBoardHome extends Component {
           <Col span={24}>
             <BurnDown
               sprintId={sprintId}
-              link="reporthost/burndownchart"
+              link={LINK_URL.reportBurnDown}
             />
           </Col>
         </Row>
@@ -92,20 +95,20 @@ class IterationBoardHome extends Component {
           <Col span={8}>
             <IssueType
               sprintId={sprintId}
-              link="reporthost/pieReport/typeCode"
+              link={LINK_URL.reportIssueType}
             />
           </Col>
 
           <Col span={8}>
             <Priority
               sprintId={sprintId}
-              link="reporthost/pieReport/priority"
+              link={LINK_URL.reportPriority}
             />
           </Col>
           <Col span={8}>
             <Assignee
               sprintId={sprintId}
-              link="reporthost/pieReport/assignee"
+              link={LINK_URL.reportAssignee}
             />
           </Col>
         </Row>
@@ -113,7 +116,7 @@ class IterationBoardHome extends Component {
           <Col span={24}>
             <SprintDetails
               sprintId={sprintId}
-              link="reporthost/sprintReport"
+              link={LINK_URL.reportSprint}
             />
           </Col>
         </Row>
@@ -122,9 +125,8 @@ class IterationBoardHome extends Component {
   }
 
   handleModeChange = (e) => {
-    const { history } = this.props;
     if (e.target.value === 'board') {
-      history.push(`/agile/scrumboard?type=project&id=${AppState.currentMenuType.id}&name=${encodeURIComponent(AppState.currentMenuType.name)}&organizationId=${AppState.currentMenuType.organizationId}&orgId=${AppState.currentMenuType.organizationId}`);
+      to(LINK_URL.scrumboard);
     }
   }
 
@@ -153,7 +155,7 @@ class IterationBoardHome extends Component {
           'choerodon.code.project.cooperation.iteration-plan.ps.report',
         ]}
       >
-        <Header title="活跃冲刺" backPath={`/agile/scrumboard?type=project&id=${AppState.currentMenuType.id}&name=${encodeURIComponent(AppState.currentMenuType.name)}&organizationId=${AppState.currentMenuType.organizationId}&orgId=${AppState.currentMenuType.organizationId}`}>
+        <Header title="活跃冲刺" backPath={linkUrl(LINK_URL.scrumboard)}>
           {this.renderSwitchMode()}
         </Header>
         <Content>

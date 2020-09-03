@@ -18,8 +18,8 @@ function noop<T>(data: T) {
 }
 /**
  * 从对象中获取值，可以传一个key或路径，比如 date.str
- * @param object 
- * @param path 
+ * @param object
+ * @param path
  */
 function getValueByPath(object: object, path: string) {
   const paths: string[] = path.split('.');
@@ -51,7 +51,6 @@ export interface SelectConfig<T = {}> {
   paging?: boolean
   props?: object
 }
-
 
 export interface RefHandle {
   refresh: (config?: LoadConfig) => void
@@ -151,9 +150,8 @@ export default function useSelect<T extends {}>(config: SelectConfig<T>, ref?: R
     }
     if (record.get('loadMoreButton') === true) {
       return loadMoreButton;
-    } else {
-      return optionRenderer(record.toData());
     }
+    return optionRenderer(record.toData());
   };
   const selectProps = {
     searchable: true,
@@ -183,7 +181,7 @@ export default function useSelect<T extends {}>(config: SelectConfig<T>, ref?: R
     // }) => {
 
     //   return (record ? renderer() : null);
-    // } : undefined,    
+    // } : undefined,
     // @ts-ignore
     onOption: ({ record }) => {
       if (record.get('loadMoreButton') === true) {

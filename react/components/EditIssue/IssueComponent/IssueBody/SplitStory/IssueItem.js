@@ -6,7 +6,8 @@ import PriorityTag from '@/components/PriorityTag';
 import StatusTag from '@/components/StatusTag';
 import TypeTag from '@/components/TypeTag';
 import styled from '@emotion/styled';
-import { toIssueInProject } from '@/utils/link';
+import LINK_URL from '@/constants/LINK_URL';
+import to from '@/utils/to';
 
 const Link = styled.a`
   overflow:hidden;
@@ -16,20 +17,20 @@ const Link = styled.a`
   color:#3f51b5;
 `;
 function IssueItem({ issue }) {
-  const history = useHistory();
   const {
-    issueId, issueTypeVO, issueNum, summary, priorityVO, statusVO, projectVO, totalCount, completedCount,
+    issueId, issueTypeVO, issueNum, summary, priorityVO,
+    statusVO, projectVO, totalCount, completedCount,
   } = issue;
-  const handleSummaryClick = useCallback(() => {
-    history.push(toIssueInProject({
-      issueId,
-      issueNum,
-      projectId: projectVO.id,
-      projectName: projectVO.name,
-      category: projectVO.category,
-    }));
-  });
-
+  const handleSummaryClick = () => {
+    to(LINK_URL.workListIssue, {
+      type: 'project',
+      id: projectVO.id,
+      params: {
+        paramIssueId: issueId,
+        paramName: issueNum,
+      },
+    });
+  };
 
   return (
     <div
@@ -48,7 +49,7 @@ function IssueItem({ issue }) {
       </Tooltip>
       <Tooltip title={`概要： ${issue.issueNum} ${issue.summary}`}>
         <div style={{
-          margin: '0 4px', flex: 1, overflow: 'hidden', display: 'flex', 
+          margin: '0 4px', flex: 1, overflow: 'hidden', display: 'flex',
         }}
         >
           <Link style={{ margin: '0 2px', flexShrink: 0 }} onClick={handleSummaryClick}>{issueNum}</Link>

@@ -1,26 +1,28 @@
-import React, { Component, Fragment } from 'react';
+/* eslint-disable react/sort-comp */
+/* eslint-disable react/prop-types */
+import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Page, Header, Content, stores, Permission, Breadcrumb,
+  Page, Header, Content, Permission, Breadcrumb,
 } from '@choerodon/boot';
 import moment from 'moment';
 import {
-  Button, Spin, Modal, Tabs, Tooltip, Icon,
+  Button, Spin, Modal, Tabs, Icon,
 } from 'choerodon-ui';
 import { withRouter } from 'react-router-dom';
 import './Setting.less';
 import { commonApi, boardApi } from '@/api';
+import to from '@/utils/to';
+import LINK_URL from '@/constants/LINK_URL';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import SettingColumn from './components/setting-column';
 import SwimLanePage from './components/SwimLanePage/SwimLanePage';
 import WorkCalendarPage from './components/WorkCalendarPage/WorkCalendarPage';
 import EditBoardName from './components/EditBoardName/EditBoardName';
-import CreateStatus from './components/create-status';
 import CreateColumn from './components/create-column';
 
 const { TabPane } = Tabs;
 const { confirm } = Modal;
-const { AppState } = stores;
 
 const service = [
   'choerodon.code.project.cooperation.iteration-plan.ps.config',
@@ -48,15 +50,13 @@ class Setting extends Component {
     this.refresh();
   }
 
-  refresh=() => {
+  refresh = () => {
     this.setState({
       loading: true,
     });
     const boardId = ScrumBoardStore.getSelectedBoard;
     if (!boardId) {
-      const { history } = this.props;
-      const urlParams = AppState.currentMenuType;
-      history.push(`/agile/scrumboard?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`);
+      to(LINK_URL.scrumboard);
     } else {
       ScrumBoardStore.loadStatus();
       boardApi.load(boardId).then((data) => {
@@ -92,8 +92,6 @@ class Setting extends Component {
   }
 
   handleDeleteBoard() {
-    const { history } = this.props;
-    const urlParams = AppState.currentMenuType;
     const { name } = ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard);
     confirm({
       title: `删除看板"${name}"`,
@@ -104,7 +102,7 @@ class Setting extends Component {
       width: 520,
       onOk() {
         boardApi.delete(ScrumBoardStore.getSelectedBoard).then((res) => {
-          history.push(`/agile/scrumboard?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`);
+          to(LINK_URL.scrumboard);
         }).catch((error) => {
         });
       },
@@ -113,7 +111,7 @@ class Setting extends Component {
     });
   }
 
-  handleTabChange=(key) => {
+  handleTabChange = (key) => {
     this.setState({
       activeKey: key,
     }, () => {
@@ -125,13 +123,11 @@ class Setting extends Component {
     });
   }
 
-  handleCreateStatusClick=() => {
-    CreateStatus.open({
-      onCreate: this.refresh,
-    });
+  handleCreateStatusClick = () => {
+    to(LINK_URL.stateMachine);
   }
 
-  handleCreateColumnClick=() => {
+  handleCreateColumnClick = () => {
     CreateColumn.open({
       onCreate: this.refresh,
       statusList: ScrumBoardStore.getStatusList,
@@ -140,11 +136,11 @@ class Setting extends Component {
     });
   }
 
-  renderWorkCalendarPage = updateWorkDatePermission => (
+  renderWorkCalendarPage = (updateWorkDatePermission) => (
     <WorkCalendarPage selectedDateDisabled={!updateWorkDatePermission} />
   )
 
-  renderEditBoardName = editBoardNamePermission => (
+  renderEditBoardName = (editBoardNamePermission) => (
     <EditBoardName
       editBoardNameDisabled={!editBoardNamePermission}
       saveRef={(ref) => {
@@ -152,45 +148,24 @@ class Setting extends Component {
       }}
     />
   )
-  
+
   render() {
     const { loading, activeKey } = this.state;
-    const menu = AppState.currentMenuType;
-    const { type, id: projectId, organizationId: orgId } = menu;
     return (
       <Page
         service={service}
       >
         <Header title="配置看板">
           {activeKey === '1' ? (
-            <Fragment>
-              {
-              ScrumBoardStore.getCanAddStatus ? (
-                <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.status.create']}>
-                  <Button                    
-                    icon="playlist_add"
-                    onClick={this.handleCreateStatusClick}
-                  >
-                    添加状态
-                  </Button>
-                </Permission>
-              ) : (
-                <Tooltip
-                  placement="bottomLeft"
-                  title="当前项目关联了多个状态机，无法创建状态。"
-                  getPopupContainer={triggerNode => triggerNode.parentNode}
+            <>
+              <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.status.create']}>
+                <Button
+                  icon="playlist_add"
+                  onClick={this.handleCreateStatusClick}
                 >
-                  <Button
-                    funcType="flat"
-                    type="primary"
-                    disabled
-                  >
-                    <Icon type="playlist_add" />
-                    <span>添加状态</span>
-                  </Button>
-                </Tooltip>
-              )
-            }
+                  添加状态
+                </Button>
+              </Permission>
               <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.column.create']}>
                 <Button
                   icon="playlist_add"
@@ -199,14 +174,14 @@ class Setting extends Component {
                   添加列
                 </Button>
               </Permission>
-            </Fragment>
+            </>
           ) : null}
           <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.board.delete']}>
-            <Button funcType="flat" onClick={this.handleDeleteBoard.bind(this)} disabled={ScrumBoardStore.getBoardList.size === 1}>
+            <Button funcType="flat" onClick={() => this.handleDeleteBoard()} disabled={ScrumBoardStore.getBoardList.size === 1}>
               <Icon type="delete_forever icon" />
               <span>删除看板</span>
             </Button>
-          </Permission>         
+          </Permission>
         </Header>
         <Breadcrumb title="配置看板" />
         <Content className="c7n-scrumboard" style={{ height: '100%', paddingTop: 0 }}>
@@ -219,8 +194,8 @@ class Setting extends Component {
           >
             <TabPane tab="列配置" key="1">
               <Spin spinning={loading}>
-                <SettingColumn                  
-                  refresh={this.refresh.bind(this)}
+                <SettingColumn
+                  refresh={this.refresh}
                 />
               </Spin>
             </TabPane>
@@ -234,8 +209,7 @@ class Setting extends Component {
                     {this.renderWorkCalendarPage}
                   </Permission>
                 </TabPane>
-              ) : null
-            }
+              ) : null}
             <TabPane tab="看板名称" key="4">
               <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.board.update']}>
                 {this.renderEditBoardName}

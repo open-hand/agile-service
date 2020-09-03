@@ -1,3 +1,4 @@
+/* eslint-disable react/no-deprecated */
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import {
@@ -35,7 +36,7 @@ class EditRelease extends Component {
   componentDidMount() {
     permissionApi.check(['choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion']).then((res) => {
       this.setState({
-        editPermission: res.find(item => item.code === 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion').approve,
+        editPermission: res.find((item) => item.code === 'choerodon.code.project.cooperation.work-list.ps.choerodon.code.cooperate.worklist.updateversion').approve,
       });
     });
   }
@@ -97,7 +98,7 @@ class EditRelease extends Component {
 
   render() {
     const {
-      loading, expectReleaseDate, startDate, editPermission, 
+      loading, expectReleaseDate, startDate, editPermission,
     } = this.state;
     const { form, visible, onCancel } = this.props;
     const { getFieldDecorator } = form;
@@ -114,7 +115,7 @@ class EditRelease extends Component {
           <Button key="submit" type="primary" funcType="raised" loading={loading} onClick={this.handleOk} disabled={!editPermission}>
             确定
           </Button>,
-          <Button key="back" onClick={onCancel}>取消</Button>,
+          <Button key="back" onClick={onCancel} funcType="raised">取消</Button>,
         ]}
       >
         {
@@ -143,7 +144,7 @@ class EditRelease extends Component {
                     label="开始日期"
                     placeholder="请选择开始日期"
                     disabledDate={expectReleaseDate
-                      ? current => current > moment(expectReleaseDate) : () => false}
+                      ? (current) => current > moment(expectReleaseDate) : () => false}
                     onChange={(date) => {
                       this.setState({
                         startDate: date,
@@ -161,7 +162,7 @@ class EditRelease extends Component {
                     label="预计发布日期"
                     placeholder="请选择预计发布日期"
                     disabledDate={startDate
-                      ? current => current < moment(startDate) : () => false}
+                      ? (current) => current < moment(startDate) : () => false}
                     onChange={(date) => {
                       this.setState({
                         expectReleaseDate: date,

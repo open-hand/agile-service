@@ -50,7 +50,7 @@ class TransformSubIssue extends Component {
     });
   }
 
-  onFilterChange(input) {
+  onFilterChange=(input) => {
     const { issueId } = this.props;
     if (!sign) {
       this.setState({
@@ -74,7 +74,7 @@ class TransformSubIssue extends Component {
     });
     const { issueTypes } = this.props;
     const issueTypeData = issueTypes;
-    const subTask = issueTypeData.find(t => t.typeCode === 'sub_task');
+    const subTask = issueTypeData.find((t) => t.typeCode === 'sub_task');
     if (subTask) {
       statusApi.loadAllForIssueType(subTask.id).then((res) => {
         this.setState({
@@ -84,7 +84,7 @@ class TransformSubIssue extends Component {
       });
       statusApi.loadFirstInWorkFlow(subTask.id).then((res) => {
         this.setState({
-          selectDefaultValue: res,
+          selectDefaultValue: String(res),
         });
       });
     } else {
@@ -102,7 +102,7 @@ class TransformSubIssue extends Component {
     form.validateFields((err, values) => {
       if (!err) {
         const issueTypeData = issueTypes;
-        const subTask = issueTypeData.find(t => t.typeCode === 'sub_task');
+        const subTask = issueTypeData.find((t) => t.typeCode === 'sub_task');
         const issueTransformSubTask = {
           issueId,
           parentIssueId: values.issuesId,
@@ -165,9 +165,9 @@ class TransformSubIssue extends Component {
                 loading={selectLoading}
                 filter
                 filterOption={false}
-                onFilterChange={this.onFilterChange.bind(this)}
+                onFilterChange={this.onFilterChange}
               >
-                {originIssues.map(issue => (
+                {originIssues.map((issue) => (
                   <Option
                     key={issue.issueId}
                     value={issue.issueId}
@@ -217,7 +217,7 @@ class TransformSubIssue extends Component {
                 loading={selectLoading}
               >
                 {
-                  originStatus.map(status => (
+                  originStatus.map((status) => (
                     <Option key={status.id} value={status.id}>
                       <div style={{ display: 'inline-flex', alignItems: 'center' }}>
                         <div

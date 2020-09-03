@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.choerodon.agile.infra.mapper.ObjectSchemeFieldExtendMapper">
+    <insert id="batchInsert">
+        <bind name="audit" value="@io.choerodon.mybatis.helper.AuditHelper@audit()"/>
+        insert into fd_object_scheme_field_extend
+        (issue_type_id, issue_type, organization_id, project_id, field_id, is_required, is_created, is_edited, rank, created_by, last_updated_by)
+        values
+        <foreach collection="insertList" item="extend" index="index" separator=",">
+            (
+                #{extend.issueTypeId},
+                #{extend.issueType},
+                #{extend.organizationId},
+                #{extend.projectId},
+                #{extend.fieldId},
+                #{extend.required},
+                #{extend.created},
+                #{extend.edited},
+                #{extend.rank},
+                #{audit.user},
+                #{audit.user}
+            )
+        </foreach>
+    </insert>
+
+    <update id="batchUpdateRequired">
+        <bind name="audit" value="@io.choerodon.mybatis.helper.AuditHelper@audit()"/>
+        update fd_object_scheme_field_extend
+        set is_required = #{required},
+        last_updated_by = #{audit.user},
+        last_update_date = #{audit.now}
+        where organization_id = #{organizationId}
+        <if test="issueType != null">
+            and issue_type = #{issueType}
+        </if>
+        and field_id = #{fieldId}
+    </update>
+
+    <select id="selectMinRank" resultType="java.lang.String">
+        select min(t.rank)
+        from (
+            select
+            t1.rank
+            from fd_object_scheme_field_extend t1
+            where t1.organization_id = #{organizationId}
+            and t1.project_id is null
+            <if test="issueType != null">
+                and t1.issue_type = #{issueType}
+            </if>
+            <if test="projectId != null">
+                and t1.field_id not in (
+                select t3.field_id
+                from fd_object_scheme_field_extend t3
+                where t3.organization_id = #{organizationId}
+                and t3.project_id = #{projectId}
+                <if test="issueType != null">
+                    and t3.issue_type = #{issueType}
+                </if>
+                )
+                union
+                select
+                t2.rank
+                from fd_object_scheme_field_extend t2
+                where t2.organization_id = #{organizationId}
+                and t2.project_id = #{projectId}
+                <if test="issueType != null">
+                    and t2.issue_type = #{issueType}
+                </if>
+            </if>
+        ) t
+    </select>
+
+    <select id="selectExtendField"
+            resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO">
+        select
+        id,
+        issue_type_id,
+        issue_type,
+        project_id,
+        organization_id,
+        field_id,
+        is_required as required,
+        is_created as created,
+        is_edited as edited,
+        rank,
+        object_version_number
+        from fd_object_scheme_field_extend
+        where 1=1
+        <if test="issueTypes != null and issueTypes.size > 0">
+            and issue_type in
+            <foreach collection="issueTypes" item="issueType" index="index" open="(" separator="," close=")">
+                #{issueType}
+            </foreach>
+        </if>
+        and organization_id = #{organizationId}
+        <if test="fieldId != null">
+            and field_id = #{fieldId}
+        </if>
+        <choose>
+            <when test="projectId != null">
+                and project_id = #{projectId}
+            </when>
+            <otherwise>
+                and project_id is null
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectExtendFieldCount" resultType="java.lang.Integer">
+        select
+        count(id)
+        from fd_object_scheme_field_extend
+        where 1=1
+        <if test="issueType != null">
+            and issue_type = #{issueType}
+        </if>
+        and organization_id = #{organizationId}
+        <if test="fieldId != null">
+            and field_id = #{fieldId}
+        </if>
+        <choose>
+            <when test="projectId != null">
+                and project_id = #{projectId}
+            </when>
+            <otherwise>
+                and project_id is null
+            </otherwise>
+        </choose>
+    </select>
+
+
+    <select id="listConfigs" resultType="io.choerodon.agile.api.vo.PageConfigFieldVO">
+        select
+        t4.id,
+        t4.field_id,
+        t6.name as field_name,
+        t6.default_value,
+        t6.field_type,
+        t6.code as field_code,
+        t4.is_required as required,
+        t4.is_created as created,
+        t4.is_edited as edited,
+        t4.issue_type,
+        t4.rank,
+        t4.object_version_number,
+        case
+            when t6.organization_id = 0 then 'system'
+            when t6.organization_id != 0 and t6.project_id is null then 'organization'
+            else 'project'
+        end as created_level,
+        t6.extra_config
+        from fd_object_scheme_field_extend t4
+        join (
+            select
+            t1.id
+            from fd_object_scheme_field_extend t1
+            where t1.organization_id = #{organizationId}
+            and t1.issue_type = #{issueType}
+            and t1.project_id is null
+            <if test="projectId != null">
+                and t1.field_id not in (
+                    select t3.field_id
+                    from fd_object_scheme_field_extend t3
+                    where t3.organization_id = #{organizationId}
+                    and t3.issue_type = #{issueType}
+                    and t3.project_id = #{projectId}
+                )
+                union
+                select
+                    t2.id
+                from fd_object_scheme_field_extend t2
+                where t2.organization_id = #{organizationId}
+                and t2.issue_type = #{issueType}
+                and t2.project_id = #{projectId}
+            </if>
+        ) t5 on t4.id = t5.id
+        left join fd_object_scheme_field t6
+        on t4.field_id = t6.id
+        order by t4.rank desc, t4.id asc
+    </select>
+
+    <select id="selectProjectIdsByOrganizationId" resultType="java.lang.Long">
+        select distinct project_id
+        from fd_object_scheme_field_extend
+        where organization_id = #{organizationId}
+        and project_id is not null
+    </select>
+
+    <select id="selectPreviousRank" resultType="java.lang.String">
+        select max(rank)
+        from fd_object_scheme_field_extend
+        where organization_id = #{organizationId}
+        and issue_type = #{issueType}
+        <choose>
+            <when test="projectId != null">
+                and project_id = #{projectId}
+            </when>
+            <otherwise>
+                and project_id is null
+            </otherwise>
+        </choose>
+        and rank &lt; #{targetRank}
+    </select>
+
+    <select id="unselected" resultType="io.choerodon.agile.api.vo.ObjectSchemeFieldVO">
+        select
+        t1.field_id as id
+        from (
+            select
+            distinct field_id
+            from fd_object_scheme_field_extend
+            where organization_id = #{organizationId}
+            and project_id is null
+            <if test="projectId != null">
+                union
+                select
+                distinct field_id
+                from fd_object_scheme_field_extend
+                where organization_id = #{organizationId}
+                and project_id = #{projectId}
+            </if>
+        ) t1
+        where t1.field_id not in (
+            select
+            distinct field_id
+            from fd_object_scheme_field_extend
+            where organization_id = #{organizationId}
+            and issue_type = #{issueType}
+            and project_id is null
+            <if test="projectId != null">
+                union
+                select
+                distinct field_id
+                from fd_object_scheme_field_extend
+                where organization_id = #{organizationId}
+                and project_id = #{projectId}
+                and issue_type = #{issueType}
+            </if>
+        )
+    </select>
+
+
+    <select id="selectFields" resultType="io.choerodon.agile.infra.dto.PageFieldDTO">
+        select
+        t5.name as field_name,
+        t5.field_type,
+        t5.is_system as system,
+        t5.default_value,
+        t5.extra_config,
+        t5.code as field_code,
+        t4.is_required as required,
+        case
+            when #{created} is not null
+            then #{created}
+            else #{edited}
+        end as display,
+        t4.rank,
+        t4.id,
+        t4.field_id,
+        t4.project_id,
+        t4.organization_id
+        from (
+        select
+            t6.*
+        from (
+            select
+            t1.id,
+            t1.field_id,
+            t1.issue_type_id,
+            t1.is_required,
+            t1.project_id,
+            t1.organization_id,
+            t1.is_created,
+            t1.is_edited,
+            t1.rank
+            from fd_object_scheme_field_extend t1
+            where t1.organization_id = #{organizationId}
+            and t1.project_id is null
+            <if test="issueType != null">
+                and t1.issue_type = #{issueType}
+            </if>
+            <if test="projectId != null">
+                and t1.field_id not in (
+                    select t3.field_id
+                    from fd_object_scheme_field_extend t3
+                    where t3.organization_id = #{organizationId}
+                    and t3.project_id = #{projectId}
+                    <if test="issueType != null">
+                        and t3.issue_type = #{issueType}
+                    </if>
+                )
+                union
+                select
+                    t2.id,
+                    t2.field_id,
+                    t2.issue_type_id,
+                    t2.is_required,
+                    t2.project_id,
+                    t2.organization_id,
+                    t2.is_created,
+                    t2.is_edited,
+                    t2.rank
+                from fd_object_scheme_field_extend t2
+                where t2.organization_id = #{organizationId}
+                and t2.project_id = #{projectId}
+                <if test="issueType != null">
+                    and t2.issue_type = #{issueType}
+                </if>
+            </if>
+        ) t6
+        where 1=1
+        <if test="created != null">
+            and t6.is_created = #{created}
+        </if>
+        <if test="edited != null">
+            and t6.is_edited = #{edited}
+        </if>
+        ) t4
+        join fd_object_scheme_field t5 on t4.field_id = t5.id
+        where 1=1
+        order by t4.rank desc, t4.id asc
+    </select>
+
+</mapper>

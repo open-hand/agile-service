@@ -1,3 +1,5 @@
+/* eslint-disable react/sort-comp */
+/* eslint-disable react/destructuring-assignment */
 /* eslint-disable prefer-destructuring */
 /* eslint-disable no-param-reassign */
 import React, { Component } from 'react';
@@ -12,8 +14,10 @@ import _ from 'lodash';
 import moment from 'moment';
 import ReactEcharts from 'echarts-for-react';
 import {
-  quickFilterApi, reportApi, projectApi, boardApi, 
+  quickFilterApi, reportApi, projectApi, boardApi,
 } from '@/api';
+import { linkUrl } from '@/utils/to';
+import LINK_URL from '@/constants/LINK_URL';
 import ScrumBoardStore from '../../../../stores/project/scrumBoard/ScrumBoardStore';
 import AccumulationStore from '../../../../stores/project/accumulation/AccumulationStore';
 import AccumulationFilter from '../AccumulationComponent/AccumulationFilter';
@@ -25,7 +29,6 @@ import SwithChart from '../../Component/switchChart';
 
 const { AppState } = stores;
 const { RangePicker } = DatePicker;
-
 
 @observer
 class AccumulationHome extends Component {
@@ -213,7 +216,8 @@ class AccumulationHome extends Component {
     let newxAxis = [];
     if (data.length > 0) {
       for (let index = 0, len = data.length; index < len; index += 1) {
-        for (let index2 = 0, len2 = data[index].coordinateVOList.length; index2 < len2; index2 += 1) {
+        for (let index2 = 0, len2 = data[index].coordinateVOList.length;
+          index2 < len2; index2 += 1) {
           if (newxAxis.length === 0) {
             newxAxis.push(data[index].coordinateVOList[index2].date.split(' ')[0]);
           } else if (newxAxis.indexOf(data[index].coordinateVOList[index2].date.split(' ')[0]) === -1) {
@@ -222,7 +226,7 @@ class AccumulationHome extends Component {
         }
       }
     }
-    newxAxis = (_.orderBy(newxAxis, item => new Date(item).getTime()));
+    newxAxis = (_.orderBy(newxAxis, (item) => new Date(item).getTime()));
     const legendSeries = [];
     data = data.reverse();
     for (let index = 0, len = data.length; index < len; index += 1) {
@@ -252,7 +256,8 @@ class AccumulationHome extends Component {
         let date = '';
         let max = 0;
         let flag = 0;
-        for (let index3 = 0, len3 = data[index].coordinateVOList.length; index3 < len3; index3 += 1) {
+        for (let index3 = 0, len3 = data[index].coordinateVOList.length;
+          index3 < len3; index3 += 1) {
           if (data[index].coordinateVOList[index3].date.split(' ')[0] === newxAxis[index2]) {
             flag = 1;
             if (date === '') {
@@ -267,7 +272,8 @@ class AccumulationHome extends Component {
         if (flag === 1) {
           legendSeries[index].data.push(max || 0);
         } else {
-          legendSeries[index].data.push(legendSeries[index].data[legendSeries[index].data.length - 1] || 0);
+          legendSeries[index].data
+            .push(legendSeries[index].data[legendSeries[index].data.length - 1] || 0);
         }
       }
     }
@@ -278,7 +284,7 @@ class AccumulationHome extends Component {
           trigger: 'axis',
           formatter(params) {
             let content = '';
-            const paramsContent = params.map(item => (
+            const paramsContent = params.map((item) => (
               `<div style="font-size: 11px">
                 <div style={display:inline-block; width: 10px; height: 10px; margin-right: 3px; border-radius: 50%; background:${item.color}}></div>
                 ${item.seriesName}：${item.data} ${item.data ? ' 个' : ''}
@@ -407,7 +413,7 @@ class AccumulationHome extends Component {
   getFilterData() {
     return [{
       data: AccumulationStore.getBoardList,
-      onChecked: id => String(this.getTimeType(AccumulationStore.getBoardList, 'boardId')) === String(id),
+      onChecked: (id) => String(this.getTimeType(AccumulationStore.getBoardList, 'boardId')) === String(id),
       onChange: (id, bool) => {
         AccumulationStore.setBoardList(this.setStoreCheckData(AccumulationStore.getBoardList, id, 'boardId'));
         this.getColumnData(id, true);
@@ -416,7 +422,7 @@ class AccumulationHome extends Component {
       text: '看板',
     }, {
       data: AccumulationStore.getFilterList,
-      onChecked: id => this.getTimeType(AccumulationStore.getFilterList, 'filterId', 'array').indexOf(String(id)) !== -1,
+      onChecked: (id) => this.getTimeType(AccumulationStore.getFilterList, 'filterId', 'array').indexOf(String(id)) !== -1,
       onChange: (id, bool) => {
         AccumulationStore.changeFilterData(id, bool);
         this.getData();
@@ -459,18 +465,19 @@ class AccumulationHome extends Component {
   }
 
   render() {
-    const { history } = this.props;
     const { linkFromParamUrl } = this.state;
-    const urlParams = AppState.currentMenuType;
     return (
       <Page service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.cumulative_flow_diagram']}>
         <Header
           title="累积流量图"
-          // backPath={`/agile/${linkFromParamUrl || 'reporthost'}?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}
-          backPath={`/charts?type=${urlParams.type}&id=${urlParams.id}&name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}&orgId=${urlParams.organizationId}`}
+          /**
+            backPath={`/agile/${linkFromParamUrl ||
+           'reporthost'}?type=${urlParams.type}&id=${urlParams.id}&
+           name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}
+           */
+          backPath={linkUrl(LINK_URL.report)}
         >
           <SwithChart
-            history={this.props.history}
             current="accumulation"
           />
           <Button funcType="flat" onClick={() => { this.getData(); }}>
@@ -488,9 +495,11 @@ class AccumulationHome extends Component {
           <div className="c7n-accumulation-filter">
             <RangePicker
               // value={[moment(AccumulationStore.getProjectInfo.creationDate), moment()]}
-              value={[AccumulationStore.getStartDate && moment(AccumulationStore.getStartDate), AccumulationStore.getEndDate && moment(AccumulationStore.getEndDate)]}
+              value={[AccumulationStore.getStartDate
+                && moment(AccumulationStore.getStartDate), AccumulationStore.getEndDate
+              && moment(AccumulationStore.getEndDate)]}
               allowClear={false}
-              disabledDate={current => current && (current < moment(AccumulationStore.getProjectInfo.creationDate).subtract(1, 'days').endOf('day') || current > moment().endOf('day'))}
+              disabledDate={(current) => current && (current < moment(AccumulationStore.getProjectInfo.creationDate).subtract(1, 'days').endOf('day') || current > moment().endOf('day'))}
               onChange={(date, dateString) => {
                 AccumulationStore.setStartDate(moment(dateString[0]));
                 AccumulationStore.setEndDate(moment(dateString[1]));
@@ -511,7 +520,7 @@ class AccumulationHome extends Component {
                       }}
                     >
                       {
-                        item.data && item.data.length > 0 && item.data.map(items => (
+                        item.data && item.data.length > 0 && item.data.map((items) => (
                           <Checkbox
                             checked={item.onChecked(items[item.id])}
                             onChange={(e) => {
@@ -533,7 +542,7 @@ class AccumulationHome extends Component {
                   <Button
                     type="primary"
                     style={{
-                      marginLeft: index === 0 ? 20 : 0,                     
+                      marginLeft: index === 0 ? 20 : 0,
                     }}
                   >
                     {item.text}
@@ -546,9 +555,9 @@ class AccumulationHome extends Component {
               this.state.optionsVisible ? (
                 <AccumulationFilter
                   visible={this.state.optionsVisible}
-                  getTimeType={this.getTimeType.bind(this)}
-                  getColumnData={this.getColumnData.bind(this)}
-                  getData={this.getData.bind(this)}
+                  getTimeType={(data, type, array) => this.getTimeType(data, type, array)}
+                  getColumnData={(id, type) => this.getColumnData(id, type)}
+                  getData={() => this.getData()}
                   onCancel={() => {
                     this.getColumnData(this.getTimeType(AccumulationStore.getBoardList, 'boardId'));
                     this.setState({

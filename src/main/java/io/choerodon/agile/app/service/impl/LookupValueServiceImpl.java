@@ -26,12 +26,12 @@ import java.util.stream.Collectors;
 public class LookupValueServiceImpl implements LookupValueService {
 
     @Autowired
-    private LookupValueMapper lookupValueMapper;
+    protected LookupValueMapper lookupValueMapper;
     @Autowired
-    private ModelMapper modelMapper;
+    protected ModelMapper modelMapper;
 
     @Override
-    public LookupTypeWithValuesVO queryLookupValueByCode(String typeCode) {
+    public LookupTypeWithValuesVO queryLookupValueByCode(String typeCode, Long projectId) {
         LookupTypeWithValuesDTO typeWithValues = lookupValueMapper.queryLookupValueByCode(typeCode);
         LookupTypeWithValuesVO result = modelMapper.map(typeWithValues, new TypeToken<LookupTypeWithValuesVO>() {
         }.getType());

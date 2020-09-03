@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import {
   Modal, Form, Select, Input,
 } from 'choerodon-ui';
+import { observer } from 'mobx-react';
 import { issueApi, issueTypeApi, statusApi } from '@/api';
-import IsInProgramStore from '../../stores/common/program/IsInProgramStore';
 import TypeTag from '../TypeTag';
 import './TransformFromSubIssue.less';
 
@@ -59,7 +59,7 @@ class TransformFromSubIssue extends Component {
     form.validateFields((err, values) => {
       if (!err) {
         const { originTypes, isEpicType } = this.state;
-        const { typeCode } = originTypes.find(t => t.id === values.typeId);
+        const { typeCode } = originTypes.find((t) => t.id === values.typeId);
         const issueUpdateTypeVO = {
           epicName: isEpicType ? values.epicName : undefined,
           issueId,
@@ -88,7 +88,7 @@ class TransformFromSubIssue extends Component {
     form.setFieldsValue({
       statusId: undefined,
     });
-    const epicType = originTypes.find(t => t.typeCode === 'issue_epic');
+    const epicType = originTypes.find((t) => t.typeCode === 'issue_epic');
     this.setState({
       issueTypeId: typeId,
       isEpicType: epicType && epicType.id === typeId,
@@ -98,11 +98,12 @@ class TransformFromSubIssue extends Component {
   };
 
   axiosGetIssueTypes() {
+    const { isInProgram } = this.props;
     issueTypeApi.loadAllWithStateMachineId()
       .then((data) => {
         this.setState({
           selectLoading: false,
-          originTypes: data.filter(type => !(IsInProgramStore.isInProgram ? ['issue_epic', 'feature'] : ['feature']).includes(type.typeCode)),
+          originTypes: data.filter((type) => !(isInProgram ? ['issue_epic', 'feature'] : ['feature']).includes(type.typeCode)),
         });
       });
   }
@@ -122,7 +123,7 @@ class TransformFromSubIssue extends Component {
       loading,
       isEpicType,
     } = this.state;
-    
+
     return (
       <Sidebar
         className="c7n-transformFromSubIssue"
@@ -134,7 +135,7 @@ class TransformFromSubIssue extends Component {
         cancelText="取消"
         confirmLoading={loading}
         width={380}
-      >       
+      >
         <Form layout="vertical">
           <FormItem label="问题类型">
             {getFieldDecorator('typeId', {
@@ -142,10 +143,10 @@ class TransformFromSubIssue extends Component {
             })(
               <Select
                 label="问题类型"
-                getPopupContainer={triggerNode => triggerNode.parentNode}
+                getPopupContainer={(triggerNode) => triggerNode.parentNode}
                 onChange={this.onTypeChange}
               >
-                {originTypes.filter(t => t.typeCode !== 'sub_task').map(type => (
+                {originTypes.filter((t) => t.typeCode !== 'sub_task').map((type) => (
                   <Option key={type.id} value={type.id}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', padding: '2px' }}>
                       <TypeTag
@@ -167,7 +168,7 @@ class TransformFromSubIssue extends Component {
                 loading={selectLoading}
               >
                 {
-                    originStatus.map(status => (
+                    originStatus.map((status) => (
                       <Option key={status.id} value={status.id}>
                         <div style={{ display: 'inline-flex', alignItems: 'center' }}>
                           <div
@@ -198,9 +199,9 @@ class TransformFromSubIssue extends Component {
                 </FormItem>
               )
             }
-        </Form>       
+        </Form>
       </Sidebar>
     );
   }
 }
-export default Form.create({})(TransformFromSubIssue);
+export default Form.create({})(observer(TransformFromSubIssue));
