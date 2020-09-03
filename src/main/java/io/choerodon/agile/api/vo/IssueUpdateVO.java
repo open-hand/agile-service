@@ -114,6 +114,28 @@ public class IssueUpdateVO {
     @ApiModelProperty(value = "状态是否自动流转更新")
     private Boolean autoTranferFlag;
 
+    @ApiModelProperty(value = "自动触发issueId")
+    private Long autoTriggerId;
+
+    @ApiModelProperty(value = "自动触发issueNum")
+    private String autoTriggerNum;
+
+    public Long getAutoTriggerId() {
+        return autoTriggerId;
+    }
+
+    public void setAutoTriggerId(Long autoTriggerId) {
+        this.autoTriggerId = autoTriggerId;
+    }
+
+    public String getAutoTriggerNum() {
+        return autoTriggerNum;
+    }
+
+    public void setAutoTriggerNum(String autoTriggerNum) {
+        this.autoTriggerNum = autoTriggerNum;
+    }
+
     public Boolean getAutoTranferFlag() {
         return autoTranferFlag;
     }

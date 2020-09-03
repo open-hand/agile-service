@@ -82,7 +82,8 @@ public interface IssueService {
      * @param transformId
      * @return
      */
-    IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber, String applyType, boolean autoTranferFlag);
+    IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber,
+                              String applyType, IssueDTO triggerIssue, boolean autoTranferFlag);
 
     /**
      * 更新issue自己的字段

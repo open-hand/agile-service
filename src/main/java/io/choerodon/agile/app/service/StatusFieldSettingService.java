@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.StatusFieldSettingVO;
+import io.choerodon.agile.infra.dto.IssueDTO;
 import io.choerodon.agile.infra.dto.StatusFieldSettingDTO;
 
 import java.util.List;
@@ -20,5 +21,5 @@ public interface StatusFieldSettingService {
 
    void handlerSettingToUpdateIssue(Long projectId,Long issueId);
 
-   void handlerSettingToUpdateIssue(Long projectId,Long issueId, boolean autoTranferFlag);
+   void handlerSettingToUpdateIssue(Long projectId, Long issueId, IssueDTO triggerIssue, boolean autoTranferFlag);
 }
