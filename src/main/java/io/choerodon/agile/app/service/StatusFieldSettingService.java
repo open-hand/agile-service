@@ -19,4 +19,6 @@ public interface StatusFieldSettingService {
    List<StatusFieldSettingVO> listByStatusIds(Long projectId, Long issueType, List<Long> statusIds);
 
    void handlerSettingToUpdateIssue(Long projectId,Long issueId);
+
+   void handlerSettingToUpdateIssue(Long projectId,Long issueId, boolean autoTranferFlag);
 }

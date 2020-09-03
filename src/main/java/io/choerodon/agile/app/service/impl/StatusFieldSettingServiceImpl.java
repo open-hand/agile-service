@@ -172,9 +172,15 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
 
     @Override
     public void handlerSettingToUpdateIssue(Long projectId, Long issueId) {
+        handlerSettingToUpdateIssue(projectId, issueId, false);
+    }
+
+    @Override
+    public void handlerSettingToUpdateIssue(Long projectId, Long issueId, boolean autoTranferFlag) {
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         List<StatusFieldSettingVO> list = statusFieldSettingMapper.listByStatusIds(projectId, issueDTO.getIssueTypeId(), Arrays.asList(issueDTO.getStatusId()));
         IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
+        issueUpdateVO.setAutoTranferFlag(autoTranferFlag);
         List<PageFieldViewUpdateVO> customField = new ArrayList<>();
         List<String> field = new ArrayList<>();
         Map<String,List<VersionIssueRelVO>> versionMap = new HashMap<>();
@@ -200,6 +206,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         // 执行更新
         updateIssue(issueDTO,field,issueUpdateVO,customField,versionMap);
     }
+
     private void updateIssue(IssueDTO issueDTO,List<String> field,IssueUpdateVO issueUpdateVO,List<PageFieldViewUpdateVO> customField,Map<String,List<VersionIssueRelVO>> versionMap){
         Long organizationId = ConvertUtil.getOrganizationId(issueDTO.getProjectId());
         Long objectVersionNumber = issueDTO.getObjectVersionNumber();

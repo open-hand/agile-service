@@ -82,6 +82,19 @@ public class IssueConvertDTO {
 
     private Date estimatedEndTime;
 
+    /**
+     * 状态是否自动流转更新
+     */
+    private Boolean autoTranferFlag;
+
+    public Boolean getAutoTranferFlag() {
+        return autoTranferFlag;
+    }
+
+    public void setAutoTranferFlag(Boolean autoTranferFlag) {
+        this.autoTranferFlag = autoTranferFlag;
+    }
+
     public Date getEstimatedStartTime() {
         return estimatedStartTime;
     }

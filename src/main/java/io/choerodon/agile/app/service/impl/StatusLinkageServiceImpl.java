@@ -195,7 +195,7 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
             throw new CommonException("error.status.transform.not.exist");
         }
         StatusMachineTransformDTO statusTransform = statusMachineTransformDTOS.get(0);
-        issueService.updateIssueStatus(projectId, parentIssue.getIssueId(), statusTransform.getId(), parentIssue.getObjectVersionNumber(), applyType);
+        issueService.updateIssueStatus(projectId, parentIssue.getIssueId(), statusTransform.getId(), parentIssue.getObjectVersionNumber(), applyType, true);
     }
 
     private void handlerMultiSetting(Map<String, Object> variables, List<StatusLinkageDTO> select, IssueDTO issueDTO, Map<String, List<IssueDTO>> issueMap, Map<Long, StatusLinkageDTO> linkageDTOMap, List<IssueDTO> issueDTOS) {

@@ -75,6 +75,16 @@ public interface IssueService {
     IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber, String applyType);
 
     /**
+     * 更新issue的状态
+     *
+     * @param projectId
+     * @param issueId
+     * @param transformId
+     * @return
+     */
+    IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber, String applyType, boolean autoTranferFlag);
+
+    /**
      * 更新issue自己的字段
      *
      * @param issueUpdateVO

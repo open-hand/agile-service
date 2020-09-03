@@ -566,6 +566,12 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber, String applyType) {
+        return updateIssueStatus(projectId, issueId, transformId, objectVersionNumber, applyType, false);
+    }
+
+    @Override
+    public IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber,
+                                     String applyType, boolean autoTranferFlag) {
         stateMachineClientService.executeTransform(projectId, issueId, transformId, objectVersionNumber, applyType, new InputDTO(issueId, "updateStatus", null));
         if ("agile".equals(applyType)) {
             IssueConvertDTO issueConvertDTO = new IssueConvertDTO();
@@ -579,7 +585,7 @@ public class IssueServiceImpl implements IssueService {
          * 抛异常并清空当前实例的状态机的状态信息
          */
         try {
-            statusFieldSettingService.handlerSettingToUpdateIssue(projectId,issueId);
+            statusFieldSettingService.handlerSettingToUpdateIssue(projectId,issueId, autoTranferFlag);
             statusLinkageService.updateParentStatus(projectId,issueId,applyType);
         }
         catch (Exception e) {

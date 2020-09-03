@@ -10,6 +10,7 @@ import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
+import org.apache.commons.lang3.BooleanUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -95,6 +96,7 @@ public class DataLogAspect {
     private static final String FIELD_TIMEESTIMATE = "timeestimate";
     private static final String STATUS_ID = "statusId";
     private static final String FIELD_STATUS = "status";
+    private static final String FIELD_AUTO_TRANSFER_STATUS = "Auto transfer status";
     private static final String FIELD_RESOLUTION = "resolution";
     private static final String RANK_FIELD = "rank";
     private static final String FIELD_RANK = "Rank";
@@ -1117,7 +1119,8 @@ public class DataLogAspect {
             StatusVO currentStatusVO = statusService.queryStatusById(ConvertUtil.getOrganizationId(originIssueDTO.getProjectId()), issueConvertDTO.getStatusId());
             IssueStatusDTO originStatus = issueStatusMapper.selectByStatusId(originIssueDTO.getProjectId(), originIssueDTO.getStatusId());
             IssueStatusDTO currentStatus = issueStatusMapper.selectByStatusId(originIssueDTO.getProjectId(), issueConvertDTO.getStatusId());
-            createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), FIELD_STATUS, originStatusVO.getName(),
+            createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
+                    BooleanUtils.isTrue(issueConvertDTO.getAutoTranferFlag())? FIELD_AUTO_TRANSFER_STATUS : FIELD_STATUS, originStatusVO.getName(),
                     currentStatusVO.getName(), originIssueDTO.getStatusId().toString(), issueConvertDTO.getStatusId().toString());
             Boolean condition = (originStatus.getCompleted() != null && originStatus.getCompleted()) || (currentStatus.getCompleted() != null && currentStatus.getCompleted());
             if (condition) {
