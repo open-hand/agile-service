@@ -425,7 +425,8 @@ public class BoardServiceImpl implements BoardService {
         return jsonObject;
     }
 
-    private List<SearchVO> getSearchVO(List<Long> personFilterIds) {
+    @Override
+    public List<SearchVO> getSearchVO(List<Long> personFilterIds) {
         if (CollectionUtils.isEmpty(personFilterIds)){
             return Collections.emptyList();
         }

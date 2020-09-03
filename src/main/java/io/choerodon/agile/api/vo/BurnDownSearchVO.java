@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.util.ObjectUtils;
@@ -22,9 +23,30 @@ public class BurnDownSearchVO {
     @Encrypt
     private List<Long> quickFilterIds;
 
+    private List<Long> personalFilterIds;
+
     private String ordinalType;
 
+    @JsonIgnore
     private String filterSql;
+    @JsonIgnore
+    private List<SearchVO> searchList;
+
+    public List<SearchVO> getSearchList() {
+        return searchList;
+    }
+
+    public void setSearchList(List<SearchVO> searchList) {
+        this.searchList = searchList;
+    }
+
+    public List<Long> getPersonalFilterIds() {
+        return personalFilterIds;
+    }
+
+    public void setPersonalFilterIds(List<Long> personalFilterIds) {
+        this.personalFilterIds = personalFilterIds;
+    }
 
     public String getFilterSql() {
         return filterSql;
@@ -78,16 +100,25 @@ public class BurnDownSearchVO {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         String delimiter = ":";
-        builder.append(type);
-        if (!ObjectUtils.isEmpty(assigneeId)) {
-            builder.append(delimiter).append(assigneeId);
-        }
-        if (!ObjectUtils.isEmpty(onlyStory)) {
-            builder.append(delimiter).append(onlyStory);
-        }
+        builder
+                .append(type)
+                .append(delimiter)
+                .append(assigneeId)
+                .append(delimiter)
+                .append(onlyStory)
+                .append(delimiter)
+        ;
         if (!ObjectUtils.isEmpty(quickFilterIds)) {
             Collections.sort(quickFilterIds);
-            builder.append(delimiter).append(StringUtils.join(quickFilterIds, delimiter));
+            builder.append(StringUtils.join(quickFilterIds, ","));
+        } else {
+            builder.append("null");
+        }
+        if (!ObjectUtils.isEmpty(personalFilterIds)) {
+            Collections.sort(personalFilterIds);
+            builder.append(delimiter).append(StringUtils.join(personalFilterIds, ","));
+        } else {
+            builder.append(delimiter).append("null");
         }
         return builder.toString();
     }

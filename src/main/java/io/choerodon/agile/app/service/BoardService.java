@@ -57,4 +57,12 @@ public interface BoardService {
      */
     String getQuickFilter(List<Long> quickFilterIds);
 
+    /**
+     * 根据个人查询id获取对象集合
+     *
+     * @param personFilterIds
+     * @return
+     */
+    List<SearchVO> getSearchVO(List<Long> personFilterIds);
+
 }
