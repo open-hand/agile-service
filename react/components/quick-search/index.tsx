@@ -211,8 +211,8 @@ class QuickSearch extends Component<Props, State> {
         {...omit(this.props, ['value', 'onChange'])}
       >
         {this.renderCommonlyUsedOptions()}
-        {this.renderQuickFiltersOptions()}
         {this.renderUserFiltersOptions()}
+        {this.renderQuickFiltersOptions()}
       </Select>
     );
   }

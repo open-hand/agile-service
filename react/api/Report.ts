@@ -15,41 +15,60 @@ class ReportApi {
 
   /**
    * 根据冲刺id查询冲刺燃尽图详情
-   * @param sprintId 
+   * @param sprintId
    * @param type  storyPoints、remainingEstimatedTime、issueCount
    * @param ordinalType  asc,desc
    */
-  loadSprintBurnDown(sprintId: number, type: string, ordinalType = 'asc') {
+  loadSprintBurnDown(sprintId: number, type: string, ordinalType = 'asc', filter: {
+    assigneeId?: string
+    onlyStory?: boolean
+    quickFilterIds?: string[]
+  } = {}) {
+    const { assigneeId, onlyStory, quickFilterIds } = filter;
     return axios({
-      method: 'get',
+      method: 'post',
       url: `${this.prefix}/reports/${sprintId}/burn_down_report`,
-      params: {
+      data: {
         type,
         ordinalType,
+        assigneeId,
+        onlyStory,
+        quickFilterIds,
       },
     });
   }
 
   /**
-   * 查询燃尽图坐标信息 
-   * @param sprintId 
-   * @param type 
-   * @param ordinalType 
+   * 查询燃尽图坐标信息
+   * @param sprintId
+   * @param type
    */
-  loadBurnDownCoordinate(sprintId: number, type: string) {
+  loadBurnDownCoordinate(sprintId: number, type: string, filter: {
+    assigneeId?: string
+    onlyStory?: boolean
+    quickFilterIds?: string[]
+    personalFilterIds?: string[]
+  } = {}) {
+    const {
+      assigneeId, onlyStory, quickFilterIds, personalFilterIds,
+    } = filter;
     return axios({
-      method: 'get',
+      method: 'post',
       url: `${this.prefix}/reports/${sprintId}/burn_down_report/coordinate`,
-      params: {
+      data: {
         type,
+        assigneeId,
+        onlyStory,
+        quickFilterIds,
+        personalFilterIds,
       },
     });
   }
 
   /**
-   * 
+   *
    * 加载累积流量图信息
-   * @param data 
+   * @param data
    */
   loadCumulativeData(data: ICumulativeData) {
     return axios.post(`${this.prefix}/reports/cumulative_flow_diagram`, data);
@@ -57,10 +76,10 @@ class ReportApi {
 
   /**
    * 加载版本报告图
-   * @param versionId 
-   * @param type 
+   * @param versionId
+   * @param type
    */
-  loadVersionChart(versionId:number, type:string) {
+  loadVersionChart(versionId: number, type: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/reports/version_chart`,
@@ -73,9 +92,9 @@ class ReportApi {
 
   /**
    * 加载版本报告问题列表
-   * @param versionId 
+   * @param versionId
    */
-  loadVersionTable(versionId:number) {
+  loadVersionTable(versionId: number) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'get',
@@ -89,10 +108,10 @@ class ReportApi {
 
   /**
    * 加载史诗或版本燃耗图信息
-   * @param id 
+   * @param id
    * @param type Epic Version
    */
-  loadEpicOrVersionBurnDown(id:number, type:string) {
+  loadEpicOrVersionBurnDown(id: number, type: string) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'get',
@@ -106,10 +125,10 @@ class ReportApi {
 
   /**
    * 加载史诗或版本燃耗图坐标信息
-   * @param id 
+   * @param id
    * @param type  Epic Version
    */
-  loadEpicOrVersionBurnDownCoordinate(id:number, type:string) {
+  loadEpicOrVersionBurnDownCoordinate(id: number, type: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/reports/burn_down_coordinate_type/${id}`,
@@ -118,13 +137,13 @@ class ReportApi {
       },
     });
   }
-  
+
   /**
    * 加载史诗图
-   * @param epicId 
-   * @param type 
+   * @param epicId
+   * @param type
    */
-  loadEpicChart(epicId:number, type:string) {
+  loadEpicChart(epicId: number, type: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/reports/epic_chart`,
@@ -137,9 +156,9 @@ class ReportApi {
 
   /**
    * 加载史诗图问题列表
-   * @param epicId 
+   * @param epicId
    */
-  loadIssuesForEpic(epicId:number) {
+  loadIssuesForEpic(epicId: number) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'get',
@@ -148,14 +167,14 @@ class ReportApi {
         epicId,
         organizationId,
       },
-    }); 
+    });
   }
 
   /**
    * 加载速度图
-   * @param type 
+   * @param type
    */
-  loadVelocity(type:string) {
+  loadVelocity(type: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/reports/velocity_chart`,
@@ -167,10 +186,10 @@ class ReportApi {
 
   /**
    * 加载饼图
-   * @param versionId 
-   * @param type 
+   * @param versionId
+   * @param type
    */
-  loadPie(fieldName:string, sprintId:number, versionId:number, startDate:string, endDate:string) {
+  loadPie(fieldName: string, sprintId: number, versionId: number, startDate: string, endDate: string) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'get',

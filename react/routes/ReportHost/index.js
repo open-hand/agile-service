@@ -13,14 +13,12 @@ const VersionReport = asyncRouter(() => (import('./VersionReport')));
 const EpicBurndown = asyncRouter(() => (import('./EpicBurndown')));
 const VersionBurndown = asyncRouter(() => (import('./VersionBurndown')));
 
-
 const ReportHostIndex = ({ match }) => (
   <Switch>
     <Route exact path={match.url} component={ReportHostHome} />
     <Route path={`${match.url}/burndownchart`} component={BurndownChart} />
     <Route path={`${match.url}/sprintreport`} component={sprintReport} />
     <Route path={`${match.url}/accumulation`} component={Accumulation} />
-    {/* <Route path={`${match.url}/versionReport`} component={VersionReport} /> */}
     <Route path={`${match.url}/velocityChart`} component={VelocityReport} />
     <Route path={`${match.url}/EpicReport`} component={EpicReport} />
     <Route path={`${match.url}/pieReport`} component={PieChartReport} />

@@ -1,7 +1,6 @@
 import {
-  observable, action, computed, toJS, 
+  observable, action, computed,
 } from 'mobx';
-import { store, stores } from '@choerodon/boot';
 import _ from 'lodash';
 import { versionApi, reportApi } from '@/api';
 
@@ -25,7 +24,6 @@ const UNIT2NAME = {
   remain_time: '剩余时间',
 };
 
-@store('VersionReportStore')
 class VersionReportStore {
   @observable tableLoading = false;
 
@@ -138,9 +136,8 @@ class VersionReportStore {
         return item.toFixed(1);
       }
       return item || 0;
-    } else {
-      return 0;
     }
+    return 0;
   });
 
   @computed get getChartDataYAll() {
@@ -181,7 +178,7 @@ class VersionReportStore {
     if (this.beforeCurrentUnit === 'issue_count') {
       return [];
     }
-    const all = _.map(this.chartData, v => (v.unEstimateIssueCount <= 0 ? 0 : (v.unEstimateIssueCount / v.issueCount).toFixed(2) * 100).toFixed(0));
+    const all = _.map(this.chartData, (v) => (v.unEstimateIssueCount <= 0 ? 0 : (v.unEstimateIssueCount / v.issueCount).toFixed(2) * 100).toFixed(0));
     return all;
   }
 
@@ -199,7 +196,7 @@ class VersionReportStore {
   }
 
   @computed get getCurrentVersion() {
-    const currentVersion = this.versions.find(x => x.versionId === this.currentVersionId);
+    const currentVersion = this.versions.find((x) => x.versionId === this.currentVersionId);
     return currentVersion || {};
   }
 }

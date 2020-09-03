@@ -3,14 +3,13 @@ import {
 } from 'mobx';
 import axios from 'axios';
 import _ from 'lodash';
-import { store, stores, Choerodon } from '@choerodon/boot';
+import { stores, Choerodon } from '@choerodon/boot';
 import {
-  sprintApi, versionApi, priorityApi, quickFilterApi, 
+  sprintApi, versionApi, priorityApi, quickFilterApi,
 } from '@/api';
 
 const { AppState } = stores;
 
-@store('UserMapStore')
 class UserMapStore {
   @observable epics = [];
 
@@ -89,11 +88,11 @@ class UserMapStore {
   @computed get getTitle() {
     if (this.mode === 'sprint') {
       if (this.sprints[this.currentIndex]) return this.sprints[this.currentIndex].sprintName;
-      else return '未规划部分';
+      return '未规划部分';
     }
     if (this.mode === 'version') {
       if (this.versions[this.currentIndex]) return this.versions[this.currentIndex].name;
-      else return '未规划部分';
+      return '未规划部分';
     }
     return 'issue';
   }
@@ -185,7 +184,6 @@ class UserMapStore {
   get getFilters() {
     return toJS(this.filters);
   }
-
 
   @action
   setCurrentFilter(onlyMeChecked = false, onlyStoryChecked = false, moreChecked = []) {
@@ -315,7 +313,6 @@ class UserMapStore {
   @action setAssigneeProps(data) {
     this.assigneeProps = data;
   }
-
 
   loadEpic = () => {
     this.setIsLoading(true);
@@ -487,7 +484,7 @@ class UserMapStore {
     if (filters.includes('story')) {
       onlyStory = true;
     }
-    filterIds = filters.filter(v => v !== 'mine' && v !== 'story');
+    filterIds = filters.filter((v) => v !== 'mine' && v !== 'story');
     return {
       userId,
       onlyStory,
@@ -544,15 +541,15 @@ class UserMapStore {
 
   modifyEpic(issueId, epicName, objectVersionNumber) {
     const epicsCopy = _.cloneDeep(toJS(this.epics));
-    const index = _.findIndex(epicsCopy, epic => epic.issueId === issueId);
+    const index = _.findIndex(epicsCopy, (epic) => epic.issueId === issueId);
     epicsCopy[index].epicName = epicName;
     epicsCopy[index].objectVersionNumber = objectVersionNumber;
     this.setEpics(epicsCopy);
   }
 
   freshIssue = (issueId, objectVersionNumber, summary) => {
-    const index = this.issues.findIndex(issue => issue.issueId === issueId);
-    const cacheIndex = this.cacheIssues.findIndex(issue => issue.issueId === issueId);
+    const index = this.issues.findIndex((issue) => issue.issueId === issueId);
+    const cacheIndex = this.cacheIssues.findIndex((issue) => issue.issueId === issueId);
     if (index !== -1) {
       this.issues[index].objectVersionNumber = objectVersionNumber;
       this.issues[index].summary = summary;
@@ -563,7 +560,7 @@ class UserMapStore {
     }
   };
 
-  handleEpicDrag = data => axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/epic_drag`, data)
+  handleEpicDrag = (data) => axios.put(`/agile/v1/projects/${AppState.currentMenuType.id}/issues/epic_drag`, data)
     .then((res) => {
       this.loadEpic();
     })
@@ -584,7 +581,7 @@ class UserMapStore {
     });
 
   deleteIssue = (issueId) => {
-    const issue = _.find(this.issues, v => v.issueId === issueId);
+    const issue = _.find(this.issues, (v) => v.issueId === issueId);
     const key = `${this.mode}Id`;
     const postData = {
       before: false,
@@ -599,7 +596,7 @@ class UserMapStore {
       epicId: 0,
     };
     const resIssues = _.clone(toJS(this.issues));
-    const issueIndex = resIssues.findIndex(v => v.issueId === issueId);
+    const issueIndex = resIssues.findIndex((v) => v.issueId === issueId);
     if (issueIndex) {
       resIssues.splice(issueIndex, 1);
     }

@@ -6,10 +6,8 @@ import {
   Button, Spin, Icon, Select, Table, Checkbox, Tabs, Tooltip, Pagination,
 } from 'choerodon-ui';
 import {
-  Page, Header, Content, stores, Breadcrumb,
+  Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
-import ReactEcharts from 'echarts-for-react';
-import _ from 'lodash';
 import moment from 'moment';
 import querystring from 'querystring';
 import BurndownChartStore from '@/stores/project/burndownChart/BurndownChartStore';
@@ -19,6 +17,7 @@ import epicSvg from '@/assets/image/emptyChart.svg';
 import StatusTag from '@/components/StatusTag';
 import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';
+import BurnDownChart from '@/components/charts/burn-down';
 import STATUS from '@/constants/STATUS';
 import { sprintApi, reportApi } from '@/api';
 import to, { linkUrl } from '@/utils/to';
@@ -27,7 +26,6 @@ import NoDataComponent from '../Component/noData';
 import SwithChart from '../Component/switchChart';
 import './SprintReport.less';
 
-const { AppState } = stores;
 const { Option } = Select;
 const { TabPane } = Tabs;
 
@@ -36,16 +34,13 @@ class SprintReport extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      xAxis: [],
-      yAxis: [],
       select: 'issueCount',
       defaultSprint: '',
       loading: false,
       endDate: '',
       restDayShow: true,
       restDays: [],
-      exportAxis: [],
-      markAreaData: [],
+      chartData: null,
     };
   }
 
@@ -66,45 +61,6 @@ class SprintReport extends Component {
     }
   }
 
-  getBetweenDateStr(start, end) {
-    // 是否显示非工作日
-    const { restDayShow, restDays } = this.state;
-    const result = [];
-    const rest = [];
-    const beginDay = start.split('-');
-    const endDay = end.split('-');
-    const diffDay = new Date();
-    const dateList = [];
-    let i = 0;
-    diffDay.setDate(beginDay[2]);
-    diffDay.setMonth(beginDay[1] - 1);
-    diffDay.setFullYear(beginDay[0]);
-    while (i === 0) {
-      const countDay = diffDay.getTime();
-      if (restDays.includes(moment(diffDay).format('YYYY-MM-DD'))) {
-        rest.push(moment(diffDay).format('YYYY-MM-DD'));
-      }
-      dateList[2] = diffDay.getDate();
-      dateList[1] = diffDay.getMonth() + 1;
-      dateList[0] = diffDay.getFullYear();
-      if (String(dateList[1]).length === 1) {
-        dateList[1] = `0${dateList[1]}`;
-      }
-      if (String(dateList[2]).length === 1) {
-        dateList[2] = `0${dateList[2]}`;
-      }
-      if (restDayShow || !restDays.includes(moment(diffDay).format('YYYY-MM-DD'))) {
-        result.push(`${dateList[0]}-${dateList[1]}-${dateList[2]}`);
-      }
-      diffDay.setTime(countDay + 24 * 60 * 60 * 1000);
-      if (String(dateList[0]) === endDay[0]
-        && String(dateList[1]) === endDay[1] && String(dateList[2]) === endDay[2]) {
-        i = 1;
-      }
-    }
-    return { result, rest };
-  }
-
   getSprintData() {
     BurndownChartStore.axiosGetSprintList().then((res) => {
       const { defaultSprint } = this.state;
@@ -119,262 +75,12 @@ class SprintReport extends Component {
     });
   }
 
-  // axiosGetRestDays1 = () => {
-  //   sprintApi.getRestDays(this.state.defaultSprint).then((res) => {
-  //     this.setState({
-  //       restDays: res.map((date) => moment(date).format('YYYY-MM-DD')),
-  //     }, () => {
-  //       this.getChartCoordinate();
-  //     });
-  //   });
-  // };
-
   getChartCoordinate() {
     reportApi.loadBurnDownCoordinate(this.state.defaultSprint, this.state.select).then((res) => {
-      const keys = Object.keys(res.coordinate);
-      let [minDate, maxDate] = [keys[0], keys[0]];
-      for (let a = 1, len = keys.length; a < len; a += 1) {
-        if (moment(keys[a]).isAfter(maxDate)) {
-          maxDate = keys[a];
-        }
-        if (moment(keys[a]).isBefore(minDate)) {
-          minDate = keys[a];
-        }
-      }
-      // 如果后端给的最大日期小于结束日期
-      let allDate;
-      let rest = [];
-      if (moment(maxDate).isBefore(this.state.endDate.split(' ')[0])) {
-        const result = this.getBetweenDateStr(minDate, this.state.endDate.split(' ')[0]);
-        allDate = result.result;
-        rest = result.rest;
-      } else if (moment(minDate).isSame(maxDate)) {
-        allDate = [minDate];
-      } else {
-        const result = this.getBetweenDateStr(minDate, maxDate);
-        allDate = result.result;
-        rest = result.rest;
-      }
-      // const allDate = this.getBetweenDateStr(minDate, maxDate);
-      const allDateValues = [res.expectCount];
-      const markAreaData = [];
-      let exportAxisData = [res.expectCount];
-      const { restDayShow } = this.state;
-      // 如果展示非工作日，期望为一条连续斜线
-      if (!restDayShow) {
-        if (allDate.length) {
-          exportAxisData = [
-            ['', res.expectCount],
-            [allDate[allDate.length - 1].split(' ')[0].slice(5).replace('-', '/'), 0],
-          ];
-        }
-      }
-      for (let b = 0, len = allDate.length; b < len; b += 1) {
-        const nowKey = allDate[b];
-        // 显示非工作日，则非工作日期望为水平线
-        if (restDayShow) {
-          // 工作日天数
-          const countWorkDay = (allDate.length - rest.length) || 1;
-          // 日工作量
-          const dayAmount = res.expectCount / countWorkDay;
-          if (rest.includes(allDate[b])) {
-            // 非工作日
-            if (b < len) {
-              markAreaData.push([
-                {
-                  xAxis: b === 0 ? '' : allDate[b - 1].split(' ')[0].slice(5).replace('-', '/'),
-                },
-                {
-                  xAxis: allDate[b].split(' ')[0].slice(5).replace('-', '/'),
-                },
-              ]);
-            }
-            exportAxisData[b + 1] = exportAxisData[b];
-          } else {
-            // 工作量取整
-            exportAxisData[b + 1] = (exportAxisData[b] - dayAmount) < 0
-              ? 0 : exportAxisData[b] - dayAmount;
-          }
-        }
-        // eslint-disable-next-line no-prototype-builtins
-        if (res.coordinate.hasOwnProperty(nowKey)) {
-          allDateValues.push(res.coordinate[allDate[b]]);
-        } else if (moment(nowKey).isAfter(moment())) {
-          allDateValues.push(null);
-        } else {
-          const beforeKey = allDate[b - 1];
-          allDateValues.push(res.coordinate[beforeKey]);
-          res.coordinate[nowKey] = res.coordinate[beforeKey];
-        }
-      }
-      const sliceDate = _.map(allDate, (item) => item.slice(5).replace('-', '/'));
       this.setState({
-        xAxis: ['', ...sliceDate],
-        yAxis: allDateValues,
-        exportAxis: exportAxisData,
-        markAreaData,
+        chartData: res,
       });
     });
-  }
-
-  getMaxY() {
-    const data = this.state.yAxis;
-    let max = 0;
-    for (let index = 0, len = data.length; index < len; index += 1) {
-      if (data[index] > max) {
-        max = data[index];
-      }
-    }
-    return max;
-  }
-
-  getOption() {
-    return {
-      tooltip: {
-        trigger: 'axis',
-        backgroundColor: '#fff',
-        textStyle: {
-          color: '#000',
-        },
-        extraCssText:
-          'box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2); border: 1px solid #ddd; border-radius: 0;',
-        formatter(params) {
-          let content = '';
-          params.forEach((item) => {
-            if (item.seriesName === '剩余值') {
-              content = `${item.axisValue || '冲刺开启'}<br />${item.marker}${item.seriesName} : ${(item.value || item.value === 0) ? item.value : '-'}${item.value ? ' 个' : ''}`;
-            }
-          });
-          return content;
-        },
-      },
-      legend: {
-        top: '24px',
-        right: '0%',
-        data: [{
-          name: '期望值',
-          icon: 'line',
-        }, {
-          name: '剩余值',
-          icon: 'line',
-        }],
-      },
-      grid: {
-        y2: 30,
-        top: '60',
-        left: '20',
-        right: '40',
-        containLabel: true,
-      },
-      xAxis: {
-        axisTick: { show: false },
-        axisLine: {
-          show: true,
-          lineStyle: {
-            color: '#eee',
-            type: 'solid',
-            width: 2,
-          },
-        },
-        axisLabel: {
-          show: true,
-          // eslint-disable-next-line radix
-          interval: parseInt(this.state.xAxis.length / 7)
-            ? parseInt(this.state.xAxis.length / 7, 10) - 1 : 0,
-          textStyle: {
-            color: 'rgba(0, 0, 0, 0.65)',
-            fontSize: 12,
-            fontStyle: 'normal',
-          },
-        },
-        splitLine: {
-          show: true,
-          onGap: false,
-          interval: 0,
-          lineStyle: {
-            color: ['#eee'],
-            width: 1,
-            type: 'solid',
-          },
-        },
-        type: 'category',
-        boundaryGap: false,
-        data: this.state.xAxis,
-      },
-      yAxis: {
-        name: '问题计数',
-        nameTextStyle: {
-          color: '#000',
-        },
-        nameGap: 22,
-        type: 'value',
-        axisTick: { show: false },
-        axisLine: {
-          show: true,
-          lineStyle: {
-            color: '#eee',
-            type: 'solid',
-            width: 2,
-          },
-        },
-        axisLabel: {
-          show: true,
-          interval: 'auto',
-          margin: 18,
-          textStyle: {
-            color: 'rgba(0, 0, 0, 0.65)',
-            fontSize: 12,
-            fontStyle: 'normal',
-          },
-        },
-        splitLine: {
-          show: true,
-          onGap: false,
-          interval: 0,
-          lineStyle: {
-            color: ['#eee'],
-            width: 1,
-            type: 'solid',
-          },
-        },
-      },
-      series: [
-        {
-          symbol: 'none',
-          name: '期望值',
-          type: 'line',
-          data: this.state.exportAxis,
-          itemStyle: {
-            color: 'rgba(0,0,0,0.65)',
-          },
-          lineStyle: {
-            type: 'dotted',
-            color: 'rgba(0,0,0,0.65)',
-          },
-          markArea: {
-            itemStyle: {
-              color: 'rgba(235,235,235,0.65)',
-            },
-            emphasis: {
-              itemStyle: {
-                color: 'rgba(220,220,220,0.65)',
-              },
-            },
-            data: this.state.markAreaData,
-          },
-        },
-        {
-          symbol: 'none',
-          name: '剩余值',
-          type: 'line',
-          itemStyle: {
-            color: '#4f9bff',
-          },
-          // stack: '总量',
-          data: this.state.yAxis,
-        },
-      ],
-    };
   }
 
   callback = (key) => {
@@ -480,6 +186,9 @@ class SprintReport extends Component {
   }
 
   render() {
+    const {
+      select, chartData, endDate, restDayShow, restDays,
+    } = this.state;
     const column = [
       {
         width: '15%',
@@ -585,7 +294,6 @@ class SprintReport extends Component {
       },
     ];
 
-    const urlParams = AppState.currentMenuType;
     return (
       <Page className="c7n-report" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.sprintreport']}>
         <Header
@@ -636,16 +344,16 @@ class SprintReport extends Component {
                           pageSize: 10,
                           total: undefined,
                         });
-                        let endDate;
+                        let newEndDate;
                         for (let index = 0, len = BurndownChartStore.getSprintList.length;
                           index < len; index += 1) {
                           if (BurndownChartStore.getSprintList[index].sprintId === value) {
-                            endDate = BurndownChartStore.getSprintList[index].endDate;
+                            newEndDate = BurndownChartStore.getSprintList[index].endDate;
                           }
                         }
                         this.setState({
                           defaultSprint: value,
-                          endDate,
+                          endDate: newEndDate,
                         }, () => {
                           this.axiosGetRestDays();
                         });
@@ -697,7 +405,14 @@ class SprintReport extends Component {
                       </p>
                     </div>
                   </div>
-                  <ReactEcharts option={this.getOption()} />
+                  <BurnDownChart
+                    select={select}
+                    loading={false}
+                    data={chartData}
+                    endDate={endDate}
+                    restDayShow={restDayShow}
+                    restDays={restDays}
+                  />
                   <Tabs activeKey={ReportStore.activeKey} onChange={this.callback}>
                     <TabPane tab="已完成的问题" key="done">
                       {this.renderDoneIssue(column)}

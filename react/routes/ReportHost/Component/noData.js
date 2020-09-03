@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import { stores } from '@choerodon/boot';
-import { withRouter } from 'react-router-dom';
 import './nodata.less';
 import to from '@/utils/to';
 

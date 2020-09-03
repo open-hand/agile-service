@@ -1,5 +1,5 @@
 import {
-  observable, action, computed, toJS, 
+  observable, action, computed,
 } from 'mobx';
 import { store } from '@choerodon/boot';
 import _ from 'lodash';
@@ -33,9 +33,8 @@ function transformZero2Placeholder(arr) {
         return item.toFixed(1);
       }
       return item;
-    } else {
-      return '-';
     }
+    return '-';
   });
 }
 
@@ -75,15 +74,15 @@ function getChartDataFromServerData(data) {
   && !completedAgain[i] ? 0 : '-',
     );
   });
-  
-  if (showZero.every(v => v === 0)) {
+
+  if (showZero.every((v) => v === 0)) {
     showZeroBottom = showZero;
     showZeroTop = Array.from({ length: showZero.length });
-    showZeroTop = showZeroTop.map(v => '-');
+    showZeroTop = showZeroTop.map((v) => '-');
   } else {
     showZero.forEach((v, i) => {
-      showZeroBottom.push(v === 0 && assistant[i] === 0 ? '0.00001' : '-'); 
-      showZeroTop.push(v === 0 && assistant[i] !== 0 ? '0.00001' : '-'); 
+      showZeroBottom.push(v === 0 && assistant[i] === 0 ? '0.00001' : '-');
+      showZeroTop.push(v === 0 && assistant[i] !== 0 ? '0.00001' : '-');
     });
   }
   return [
