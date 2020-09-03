@@ -12,6 +12,14 @@ class ProjectApi {
   loadInfo() {
     return axios.get(`${this.prefix}/project_info`);
   }
+
+  /**
+ * 获取项目基本信息
+ * @param projectId
+ */
+  loadBasicInfo(projectId?: string) {
+    return axios.get(`/iam/choerodon/v1/projects/${projectId}/basic_info`);
+  }
 }
 
 const projectApi = new ProjectApi();
