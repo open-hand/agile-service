@@ -1,6 +1,3 @@
-/* eslint-disable react/sort-comp */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable prefer-destructuring */
 /* eslint-disable no-param-reassign */
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
@@ -8,7 +5,7 @@ import {
   Button, Icon, DatePicker, Popover, Form, Checkbox, Spin,
 } from 'choerodon-ui';
 import {
-  Page, Header, Content, stores, Breadcrumb,
+  Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
 import _ from 'lodash';
 import moment from 'moment';
@@ -19,15 +16,13 @@ import {
 import { linkUrl } from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import ScrumBoardStore from '../../../../stores/project/scrumBoard/ScrumBoardStore';
-import AccumulationStore from '../../../../stores/project/accumulation/AccumulationStore';
-import AccumulationFilter from '../AccumulationComponent/AccumulationFilter';
+import AccumulationStore from '../AccumulationStore';
 import './AccumulationHome.less';
 import '../../BurndownChart/BurndownChartHome/BurndownChartHome.less';
 import NoDataComponent from '../../Component/noData';
 import pic from '../../../../assets/image/emptyChart.svg';
 import SwithChart from '../../Component/switchChart';
 
-const { AppState } = stores;
 const { RangePicker } = DatePicker;
 
 @observer
@@ -36,19 +31,11 @@ class AccumulationHome extends Component {
     super(props);
     this.state = {
       options: {},
-      optionsVisible: false,
       loading: true,
-      linkFromParamUrl: undefined,
     };
   }
 
   componentDidMount() {
-    const { location: { search } } = this.props;
-    const linkFromParamUrl = _.last(search.split('&')).split('=')[0] === 'paramUrl' ? _.last(search.split('&')).split('=')[1] : undefined;
-    this.setState({
-      linkFromParamUrl,
-    });
-
     quickFilterApi.loadAll().then((data) => {
       const newData = _.clone(data);
       for (let index = 0, len = newData.length; index < len; index += 1) {
@@ -128,6 +115,7 @@ class AccumulationHome extends Component {
     const startDate = AccumulationStore.getStartDate && AccumulationStore.getStartDate.format('YYYY-MM-DD 00:00:00');
     const columnIds = [];
     const quickFilterIds = [];
+    // TODO: 这一块逻辑可以优化一下
     let boardId;
     for (let index = 0, len = AccumulationStore.getBoardList.length; index < len; index += 1) {
       if (AccumulationStore.getBoardList[index].check) {
@@ -371,7 +359,6 @@ class AccumulationHome extends Component {
           // left: '0%',
         }],
       },
-      optionsVisible: false,
     });
   }
 
@@ -465,16 +452,10 @@ class AccumulationHome extends Component {
   }
 
   render() {
-    const { linkFromParamUrl } = this.state;
     return (
       <Page service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.cumulative_flow_diagram']}>
         <Header
           title="累积流量图"
-          /**
-            backPath={`/agile/${linkFromParamUrl ||
-           'reporthost'}?type=${urlParams.type}&id=${urlParams.id}&
-           name=${encodeURIComponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}
-           */
           backPath={linkUrl(LINK_URL.report)}
         >
           <SwithChart
@@ -494,7 +475,6 @@ class AccumulationHome extends Component {
         >
           <div className="c7n-accumulation-filter">
             <RangePicker
-              // value={[moment(AccumulationStore.getProjectInfo.creationDate), moment()]}
               value={[AccumulationStore.getStartDate
                 && moment(AccumulationStore.getStartDate), AccumulationStore.getEndDate
               && moment(AccumulationStore.getEndDate)]}
@@ -550,22 +530,6 @@ class AccumulationHome extends Component {
                   </Button>
                 </Popover>
               ))
-            }
-            {
-              this.state.optionsVisible ? (
-                <AccumulationFilter
-                  visible={this.state.optionsVisible}
-                  getTimeType={(data, type, array) => this.getTimeType(data, type, array)}
-                  getColumnData={(id, type) => this.getColumnData(id, type)}
-                  getData={() => this.getData()}
-                  onCancel={() => {
-                    this.getColumnData(this.getTimeType(AccumulationStore.getBoardList, 'boardId'));
-                    this.setState({
-                      optionsVisible: false,
-                    });
-                  }}
-                />
-              ) : ''
             }
           </div>
           {this.renderContent()}

@@ -1,10 +1,7 @@
 import {
-  observable, action, computed, toJS, 
+  observable, action, computed, toJS,
 } from 'mobx';
-import { store } from '@choerodon/boot';
 
-
-@store('AccumulationStore')
 class AccumulationStore {
   @observable filterList = [];
 
@@ -13,7 +10,7 @@ class AccumulationStore {
   @observable timeData = [{
     id: 1,
     name: '上周',
-    check: false,   
+    check: false,
   }, {
     id: 2,
     name: '上两周',

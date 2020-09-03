@@ -459,7 +459,6 @@ class ReleaseDetail extends Component {
     const data = VersionReportStore.getPieData;
     const sourceData = VersionReportStore.getSourceData;
     const colors = VersionReportStore.getColors;
-    const urlParams = AppState.currentMenuType;
     const type = [
       { title: '经办人', value: 'assignee' },
       { title: '模块', value: 'component' },
