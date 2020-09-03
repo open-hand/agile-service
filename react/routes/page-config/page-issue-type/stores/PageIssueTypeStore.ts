@@ -212,7 +212,7 @@ class PageIssueTypeStore {
   }
 
   transformDefaultValue = (fieldType: string, defaultValue: any,
-    defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null) => {
+    defaultValueObj?: any, fieldOptions?: Array<any> | null) => {
     if (!defaultValue && !defaultValueObj) {
       return defaultValue;
     }
