@@ -6,7 +6,8 @@ import PriorityTag from '@/components/PriorityTag';
 import StatusTag from '@/components/StatusTag';
 import TypeTag from '@/components/TypeTag';
 import styled from '@emotion/styled';
-import { LINK_URL_TO } from '@/constants/LINK_URL';
+import LINK_URL from '@/constants/LINK_URL';
+import to from '@/utils/to';
 
 const Link = styled.a`
   overflow:hidden;
@@ -21,7 +22,14 @@ function IssueItem({ issue }) {
     statusVO, projectVO, totalCount, completedCount,
   } = issue;
   const handleSummaryClick = () => {
-    LINK_URL_TO.issueLinkTo(issueId, issueNum);
+    to(LINK_URL.workListIssue, {
+      type: 'project',
+      id: projectVO.id,
+      params: {
+        paramIssueId: issueId,
+        paramName: issueNum,
+      },
+    });
   };
 
   return (
