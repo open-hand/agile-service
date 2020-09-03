@@ -13,12 +13,22 @@ export enum PageConfigIssueType {
   demand = 'demand',
   null = '',
 }
+interface IFieldOption {
+  id: string,
+  fieldId: string,
+  code: string,
+  value: string,
+}
+export type IFieldOptionProps = IFieldOption;
 interface IFiled {
   created: boolean,
   defaultValue: any,
   edited: boolean,
   fieldId: string,
   fieldName: string,
+  fieldType: string,
+  defaultValueObj: any,
+  fieldOptions: Array<IFieldOption> | null
   id: string,
   issueType: PageConfigIssueType,
   objectVersionNumber: number,
@@ -26,6 +36,7 @@ interface IFiled {
   required: boolean,
   source: string,
 }
+
 interface IFiledListItem {
   code: string,
   context: 'feature' | 'bug' | 'sub_task' | 'issue_epic' | 'task' | 'story' | 'backlog',

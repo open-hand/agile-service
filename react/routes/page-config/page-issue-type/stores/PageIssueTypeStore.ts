@@ -2,8 +2,9 @@ import {
   observable, action, runInAction, computed, ObservableMap,
 } from 'mobx';
 import { findIndex } from 'lodash';
+import moment from 'moment';
 import {
-  PageConfigIssueType, pageConfigApi, IFiledProps, IFiledListItemProps,
+  PageConfigIssueType, pageConfigApi, IFiledProps, IFiledListItemProps, IFieldOptionProps,
 } from '@/api';
 import { DataSet } from 'choerodon-ui/pro/lib';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
@@ -14,6 +15,7 @@ export enum PageIssueTypeStoreStatusCode {
   add = 'add',
   null = '',
 }
+
 interface IDescriptionTempleProps {
   id: string | undefined,
   template: undefined | string | Array<any>,
@@ -209,12 +211,40 @@ class PageIssueTypeStore {
     });
   }
 
+  transformDefaultValue = (fieldType: string, defaultValue: any,
+    defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null) => {
+    if (!defaultValue && !defaultValueObj) {
+      return defaultValue;
+    }
+    switch (fieldType) {
+      case 'datetime':
+        return moment(defaultValue).format('YYYY-MM-DD hh:mm:ss');
+      case 'time':
+        return moment(defaultValue).format('hh:mm:ss');
+      case 'date':
+        return moment(defaultValue).format('YYYY-MM-DD');
+      case 'multiple':
+      case 'checkbox':
+      case 'single':
+      case 'radio': {
+        const valueArr = String(defaultValue).split(',');
+        return fieldOptions?.filter((option) => valueArr.some((v) => v === option.id)).map((item) => item.value).join(',') || defaultValue;
+      }
+      case 'member': {
+        const { realName } = defaultValueObj || {};
+        return realName || defaultValue;
+      }
+      default:
+        return defaultValue;
+    }
+  };
+
   loadData = () => {
     this.clear();
     this.addUnselectedDataSet.clear();
     this.setLoading(true);
     pageConfigApi.loadByIssueType(this.getCurrentIssueType).then((res) => {
-      this.sortTableDataSet.loadData(res.fields);
+      this.sortTableDataSet.loadData(res.fields.map((field) => ({ ...field, defaultValue: this.transformDefaultValue(field.fieldType, field.defaultValue, field.defaultValueObj, field.fieldOptions) })));
       if (res.issueTypeFieldVO) {
         this.setDescriptionObj({
           ...res.issueTypeFieldVO,
