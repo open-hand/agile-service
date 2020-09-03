@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.choerodon.agile.api.vo.*;
@@ -68,13 +69,13 @@ public class ProjectOverviewController {
         return Results.success(reportService.selectBugBysprint(projectId, sprintId));
     }
 
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("查看每人每日工作量")
-    @GetMapping("/{sprintId}/one_jobs")
-    public ResponseEntity<List<OneJobVO>> selectOneJobsBysprint(@ApiParam(value = "项目id", required = true)
-                                                               @PathVariable(name = "project_id") Long projectId,
-                                                                @ApiParam(value = "冲刺Id", required = true)
-                                                               @PathVariable @Encrypt Long sprintId) {
-        return Results.success(projectOverviewService.selectOneJobsBysprint(projectId, sprintId));
-    }
+//    @Permission(level = ResourceLevel.ORGANIZATION)
+//    @ApiOperation("查看每人每日工作量")
+//    @GetMapping("/{sprintId}/one_jobs")
+//    public ResponseEntity<List<OneJobVO>> selectOneJobsBysprint(@ApiParam(value = "项目id", required = true)
+//                                                               @PathVariable(name = "project_id") Long projectId,
+//                                                                @ApiParam(value = "冲刺Id", required = true)
+//                                                               @PathVariable @Encrypt Long sprintId) {
+//        return Results.success(projectOverviewService.selectOneJobsBysprint(projectId, sprintId));
+//    }
 }
