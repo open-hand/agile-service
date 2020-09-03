@@ -2,6 +2,7 @@ import queryString from 'querystring';
 import { find } from 'lodash';
 import { stores } from '@choerodon/boot';
 import { History } from 'history';
+import { projectApi } from '@/api';
 import { error } from './log';
 
 const { HeaderStore, AppState } = stores;
@@ -57,13 +58,15 @@ const defaultDescriptor: ProjectLocationDescriptor = {
 };
 type IParams = NodeJS.Dict<string | number | boolean | ReadonlyArray<string> |
   ReadonlyArray<number> | ReadonlyArray<boolean> | null>
+
 // eslint-disable-next-line max-len
-function getParams(path: Path, descriptor: LocationDescriptor = defaultDescriptor): IParams | null {
+function getParams(path: Path, descriptor: LocationDescriptor = defaultDescriptor): IParams | null | Promise<IParams | null> {
   const { type = 'project', params: otherParams } = descriptor;
   let params;
   switch (type) {
     case 'project': {
       const { id } = descriptor as ProjectLocationDescriptor;
+
       if (!id) {
         const {
           id: projectId, name, category, organizationId,
@@ -76,24 +79,30 @@ function getParams(path: Path, descriptor: LocationDescriptor = defaultDescripto
           organizationId: String(organizationId),
         };
       } else {
-        const projects: IProject[] = HeaderStore.getProData;
-        const targetProject = find(projects, (v) => String(v.id) === String(id));
-        if (!targetProject) {
-          error('链接错误，未找到目标项目，请检查参数', path, descriptor);
-          return null;
-        }
-        const {
-          name,
-          category,
-          organizationId,
-        } = targetProject;
-        params = {
-          type: 'project',
-          id: String(id),
-          name,
-          category,
-          organizationId: String(organizationId),
-        };
+        return projectApi.loadBasicInfo(String(id)).then((targetProject: IProject) => {
+          if (!targetProject) {
+            error('链接错误，未找到目标项目，请检查参数', path, descriptor);
+            return null;
+          }
+          const {
+            name,
+            category,
+            organizationId,
+          } = targetProject;
+          params = {
+            type: 'project',
+            id: String(id),
+            name,
+            category,
+            organizationId: String(organizationId),
+          };
+
+          const asyncTotalParams = {
+            ...params,
+            ...otherParams,
+          };
+          return asyncTotalParams;
+        });
       }
       break;
     }
@@ -154,27 +163,30 @@ function getParams(path: Path, descriptor: LocationDescriptor = defaultDescripto
     ...params,
     ...otherParams,
   };
-
   return totalParams;
 }
 
 const to = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
-  const params = getParams(path, descriptor);
-  if (!params) {
-    return;
-  }
-  const search = queryString.stringify(params);
-  if (!history) {
-    error('跳转失败，未设置history');
-    return;
-  }
-  history.push({
-    pathname: path,
-    search,
+  new Promise<IParams | null>((resolve) => {
+    const params = getParams(path, descriptor);
+    resolve(params);
+  }).then((params) => {
+    if (!params) {
+      return;
+    }
+    const search = queryString.stringify(params);
+    if (!history) {
+      error('跳转失败，未设置history');
+      return;
+    }
+    history.push({
+      pathname: path,
+      search,
+    });
   });
 };
-const linkUrl = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
-  const params = getParams(path, descriptor);
+const linkUrl = (path: Path) => {
+  const params = getParams(path) as IParams;
   if (!params) {
     return path;
   }
