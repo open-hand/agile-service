@@ -49,4 +49,12 @@ public interface BoardService {
 
     Boolean checkName(Long projectId, String boardName);
 
+    /**
+     * 根据快速筛选id返回查询sql
+     *
+     * @param quickFilterIds
+     * @return
+     */
+    String getQuickFilter(List<Long> quickFilterIds);
+
 }

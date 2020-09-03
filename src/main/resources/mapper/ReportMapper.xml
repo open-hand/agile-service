@@ -19,24 +19,38 @@
     </resultMap>
 
     <select id="queryIssueIdsBeforeSprintStart" resultType="java.lang.Long">
-        SELECT adl5.issue_id
-        FROM agile_data_log adl5
-        WHERE adl5.project_id = #{sprintDTO.projectId}
-        and adl5.field = 'Sprint'
-        and adl5.log_id IN
-        (SELECT MAX(adl.log_id) AS log_id
-                              FROM agile_data_log adl
-                              WHERE adl.project_id = #{sprintDTO.projectId} and adl.field = 'Sprint' AND adl.creation_date &lt;= #{sprintDTO.startDate}
-                              GROUP BY
-                                  adl.issue_id)
-        AND adl5.new_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$'
-        UNION
-        SELECT aisr2.issue_id
-        FROM
-            agile_issue_sprint_rel aisr2
-        WHERE
-            aisr2.creation_date &lt;= #{sprintDTO.startDate}
+        select t1.issue_id
+        from agile_issue t1
+        join (
+            SELECT adl5.issue_id
+            FROM agile_data_log adl5
+            WHERE adl5.project_id = #{sprintDTO.projectId}
+            and adl5.field = 'Sprint'
+            and adl5.log_id IN (
+                SELECT MAX(adl.log_id) AS log_id
+                FROM agile_data_log adl
+                WHERE adl.project_id = #{sprintDTO.projectId}
+                and adl.field = 'Sprint'
+                AND adl.creation_date &lt;= #{sprintDTO.startDate}
+                GROUP BY adl.issue_id
+            )
+            AND adl5.new_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$'
+            UNION
+            SELECT aisr2.issue_id
+            FROM agile_issue_sprint_rel aisr2
+            WHERE aisr2.creation_date &lt;= #{sprintDTO.startDate}
             AND aisr2.sprint_id = #{sprintDTO.sprintId}
+        ) t2 on t1.issue_id = t2.issue_id
+        where 1=1
+        <if test='burnDownSearchVO.onlyStory != null and burnDownSearchVO.onlyStory == true'>
+            AND t1.type_code = 'story'
+        </if>
+        <if test='burnDownSearchVO.assigneeId != null'>
+            AND t1.assignee_id = #{burnDownSearchVO.assigneeId}
+        </if>
+        <if test='burnDownSearchVO.filterSql != null'>
+            AND t1.issue_id IN (${burnDownSearchVO.filterSql})
+        </if>
     </select>
 
     <select id="queryValueBeforeSprintStart" resultType="io.choerodon.agile.infra.dto.ReportIssueDTO">
@@ -93,15 +107,31 @@
     </select>
 
     <select id="queryAddIssueIdsDuringSprint" resultType="java.lang.Long">
-        SELECT DISTINCT adl2.issue_id
-        FROM agile_data_log adl2
-        WHERE
-            adl2.project_id = #{sprintDTO.projectId}
-            and  adl2.field = 'Sprint'
-            AND adl2.creation_date &gt; #{sprintDTO.startDate} AND
-            adl2.creation_date &lt;= #{sprintDTO.actualEndDate}
+        select t1.issue_id
+        from agile_issue t1
+        join (
+            SELECT DISTINCT adl2.issue_id
+            FROM agile_data_log adl2
+            WHERE adl2.project_id = #{sprintDTO.projectId}
+            and adl2.field = 'Sprint'
+            AND adl2.creation_date &gt; #{sprintDTO.startDate}
+            AND adl2.creation_date &lt;= #{sprintDTO.actualEndDate}
             AND adl2.new_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$'
-            AND (adl2.old_value is null or not (adl2.old_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$'))
+            AND (
+                adl2.old_value is null
+                or not (adl2.old_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$')
+            )
+        ) t2 on t1.issue_id = t2.issue_id
+        where 1=1
+        <if test='burnDownSearchVO.onlyStory != null and burnDownSearchVO.onlyStory == true'>
+            AND t1.type_code = 'story'
+        </if>
+        <if test='burnDownSearchVO.assigneeId != null'>
+            AND t1.assignee_id = #{burnDownSearchVO.assigneeId}
+        </if>
+        <if test='burnDownSearchVO.filterSql != null'>
+            AND t1.issue_id IN (${burnDownSearchVO.filterSql})
+        </if>
     </select>
 
     <select id="queryAddIssueValueDuringSprint" resultType="io.choerodon.agile.infra.dto.ReportIssueDTO">
@@ -935,13 +965,31 @@
     </select>
 
     <select id="queryRemoveIssueIdsDuringSprint" resultType="java.lang.Long">
-        SELECT DISTINCT adl2.issue_id
-        FROM agile_data_log adl2
-        WHERE
-            adl2.project_id = #{sprintDTO.projectId} and  adl2.field = 'Sprint' AND adl2.creation_date &gt; #{sprintDTO.startDate} AND
-            adl2.creation_date &lt;= #{sprintDTO.actualEndDate}
+        select t1.issue_id
+        from agile_issue t1
+        join (
+            SELECT DISTINCT adl2.issue_id
+            FROM agile_data_log adl2
+            WHERE adl2.project_id = #{sprintDTO.projectId}
+            and adl2.field = 'Sprint'
+            AND adl2.creation_date &gt; #{sprintDTO.startDate}
+            AND adl2.creation_date &lt;= #{sprintDTO.actualEndDate}
             AND adl2.old_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$'
-            AND (adl2.new_value is null or not (adl2.new_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$' ))
+            AND (
+                adl2.new_value is null
+                or not (adl2.new_value REGEXP '^${sprintDTO.sprintId},|,${sprintDTO.sprintId},|^${sprintDTO.sprintId}$|,${sprintDTO.sprintId}$' )
+            )
+        ) t2 on t1.issue_id = t2.issue_id
+        where 1=1
+        <if test='burnDownSearchVO.onlyStory != null and burnDownSearchVO.onlyStory == true'>
+            AND t1.type_code = 'story'
+        </if>
+        <if test='burnDownSearchVO.assigneeId != null'>
+            AND t1.assignee_id = #{burnDownSearchVO.assigneeId}
+        </if>
+        <if test='burnDownSearchVO.filterSql != null'>
+            AND t1.issue_id IN (${burnDownSearchVO.filterSql})
+        </if>
     </select>
 
 
