@@ -6,7 +6,6 @@ import io.choerodon.agile.infra.dto.GroupDataChartDTO;
 import io.choerodon.agile.infra.dto.GroupDataChartListDTO;
 import io.choerodon.agile.infra.mapper.ReportMapper;
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.domain.PageInfo;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.Date;
@@ -24,11 +23,10 @@ public interface ReportService {
      *
      * @param projectId   projectId
      * @param sprintId    sprintId
-     * @param type        storyPoints、remainingEstimatedTime、originalEstimatedTime、issueCount
-     * @param ordinalType asc、desc
+     * @param burnDownSearchVO
      * @return ReportIssueVO
      */
-    List<ReportIssueVO> queryBurnDownReport(Long projectId, Long sprintId, String type, String ordinalType);
+    List<ReportIssueVO> queryBurnDownReport(Long projectId, Long sprintId, BurnDownSearchVO burnDownSearchVO);
 
     /**
      * 查看累积流量图
@@ -72,10 +70,10 @@ public interface ReportService {
      *
      * @param projectId projectId
      * @param sprintId  sprintId
-     * @param type      type
+     * @param burnDownSearchVO
      * @return Coordinate
      */
-    JSONObject queryBurnDownCoordinate(Long projectId, Long sprintId, String type);
+    JSONObject queryBurnDownCoordinate(Long projectId, Long sprintId, BurnDownSearchVO burnDownSearchVO);
 
     /**
      * 查询epic和版本燃耗图坐标信息

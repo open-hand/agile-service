@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -46,30 +47,26 @@ public class ReportController {
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询冲刺对应的燃尽图报告信息")
-    @GetMapping(value = "/{sprintId}/burn_down_report")
+    @PostMapping(value = "/{sprintId}/burn_down_report")
     public ResponseEntity<List<ReportIssueVO>> queryBurnDownReport(@ApiParam(value = "项目id", required = true)
-                                                                    @PathVariable(name = "project_id") Long projectId,
+                                                                   @PathVariable(name = "project_id") Long projectId,
                                                                    @ApiParam(value = "sprintId", required = true)
-                                                                    @PathVariable @Encrypt Long sprintId,
-                                                                   @ApiParam(value = "类型(storyPoints、remainingEstimatedTime、issueCount)", required = true)
-                                                                    @RequestParam String type,
-                                                                   @ApiParam(value = "排序方式(asc,desc)", required = true)
-                                                                    @RequestParam String ordinalType) {
-        return Optional.ofNullable(reportService.queryBurnDownReport(projectId, sprintId, type, ordinalType))
+                                                                   @PathVariable @Encrypt Long sprintId,
+                                                                   @RequestBody @Validated BurnDownSearchVO burnDownSearchVO) {
+        return Optional.ofNullable(reportService.queryBurnDownReport(projectId, sprintId, burnDownSearchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.report.queryBurnDownReport"));
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询燃尽图坐标信息")
-    @GetMapping(value = "/{sprintId}/burn_down_report/coordinate")
+    @PostMapping(value = "/{sprintId}/burn_down_report/coordinate")
     public ResponseEntity<JSONObject> queryBurnDownCoordinate(@ApiParam(value = "项目id", required = true)
                                                               @PathVariable(name = "project_id") Long projectId,
                                                               @ApiParam(value = "sprintId", required = true)
                                                               @PathVariable @Encrypt Long sprintId,
-                                                              @ApiParam(value = "类型(storyPoints、remainingEstimatedTime、issueCount)", required = true)
-                                                              @RequestParam String type) {
-        return Optional.ofNullable(reportService.queryBurnDownCoordinate(projectId, sprintId, type))
+                                                              @RequestBody @Validated BurnDownSearchVO burnDownSearchVO) {
+        return Optional.ofNullable(reportService.queryBurnDownCoordinate(projectId, sprintId, burnDownSearchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.report.queryBurnDownCoordinate"));
     }
