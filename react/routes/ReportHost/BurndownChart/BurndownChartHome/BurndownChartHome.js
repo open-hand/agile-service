@@ -4,7 +4,7 @@ import {
   Button, Icon, Select, Checkbox,
 } from 'choerodon-ui';
 import {
-  Page, Header, Content, Breadcrumb,
+  Page, Header, Content, Breadcrumb, stores,
 } from '@choerodon/boot';
 import { some, groupBy } from 'lodash';
 import Moment from 'moment';
@@ -21,6 +21,7 @@ import SwithChart from '../../Component/switchChart';
 import BurndownTable from './components/burndown-table';
 import './BurndownChartHome.less';
 
+const { AppState } = stores;
 const moment = extendMoment(Moment);
 const { Option } = Select;
 
@@ -59,7 +60,7 @@ class BurndownChartHome extends Component {
         endDate: defaultSprint.endDate,
       }, () => {
         if (this.state.defaultSprintId) {
-          this.getChartData();
+          this.getTableData();
           this.axiosGetRestDays();
         }
       });
@@ -68,8 +69,14 @@ class BurndownChartHome extends Component {
   }
 
   getChartCoordinate() {
+    const { defaultSprintId, select, quickFilter } = this.state;
     this.setState({ chartLoading: true });
-    reportApi.loadBurnDownCoordinate(this.state.defaultSprintId, this.state.select).then((res) => {
+    reportApi.loadBurnDownCoordinate(defaultSprintId, select, {
+      assigneeId: quickFilter.onlyMe ? AppState.getUserId : undefined,
+      onlyStory: quickFilter.onlyStory,
+      quickFilterIds: quickFilter.quickFilters,
+      personalFilterIds: quickFilter.personalFilters,
+    }).then((res) => {
       this.setState({
         chartLoading: false,
         chartData: res,
@@ -77,11 +84,17 @@ class BurndownChartHome extends Component {
     });
   }
 
-  getChartData() {
+  getTableData() {
+    const { defaultSprintId, select, quickFilter } = this.state;
     this.setState({
       tableLoading: true,
     });
-    reportApi.loadSprintBurnDown(this.state.defaultSprintId, this.state.select).then((res) => {
+    reportApi.loadSprintBurnDown(defaultSprintId, select, 'asc', {
+      assigneeId: quickFilter.onlyMe ? AppState.getUserId : undefined,
+      onlyStory: quickFilter.onlyStory,
+      quickFilterIds: quickFilter.quickFilters,
+      personalFilterIds: quickFilter.personalFilters,
+    }).then((res) => {
       const data = res;
       const newData = [];
       // 将操作日期相同的合并
@@ -187,7 +200,7 @@ class BurndownChartHome extends Component {
     this.setState({
       select: value,
     }, () => {
-      this.getChartData();
+      this.getTableData();
       this.getChartCoordinate();
     });
   }
@@ -196,7 +209,8 @@ class BurndownChartHome extends Component {
     this.setState({
       quickFilter: value,
     }, () => {
-      this.getChartData();
+      this.getTableData();
+      this.getChartCoordinate();
     });
   }
 
@@ -225,7 +239,7 @@ class BurndownChartHome extends Component {
           <Button
             funcType="flat"
             onClick={() => {
-              this.getChartData();
+              this.getTableData();
               this.axiosGetRestDays();
             }}
           >
@@ -255,7 +269,7 @@ class BurndownChartHome extends Component {
                         defaultSprintId: value,
                         endDate: newEndDate,
                       }, () => {
-                        this.getChartData();
+                        this.getTableData();
                         this.axiosGetRestDays();
                       });
                     }}
