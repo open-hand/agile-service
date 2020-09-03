@@ -1,14 +1,11 @@
 /* eslint-disable no-return-assign */
 /* eslint-disable no-param-reassign */
 import {
-  observable, action, computed, toJS, 
+  observable, action, computed, toJS,
 } from 'mobx';
-import { store, stores } from '@choerodon/boot';
 import _ from 'lodash';
 import { reportApi } from '@/api';
 
-
-@store('VersionReportStore')
 class VersionReportStore {
     @observable versionList = [];
 
@@ -56,10 +53,10 @@ class VersionReportStore {
   @action setPieData(data) {
     this.pieData = data;
   }
-  
+
   @action setSourceData(data) {
     this.sourceData = data;
-  } 
+  }
 
   @action setColors(data) {
     this.colors = data;
@@ -93,7 +90,6 @@ class VersionReportStore {
     this.issues[type][type2] = data;
   }
 
-
   @computed get getVersionList() {
     return toJS(this.versionList);
   }
@@ -117,9 +113,9 @@ class VersionReportStore {
           }
           this.setColors(colors);
           this.setSourceData(data);
-          const bigData = data.filter(item => item.percent >= 2);
+          const bigData = data.filter((item) => item.percent >= 2);
           const otherData = {
-            name: '其它', typeName: null, value: _.reduce(_.filter(data, item => item.percent < 2), (sum, item) => sum += item.value, 0), percent: _.reduce(_.filter(data, item => item.percent < 2), (sum, item) => sum += item.percent, 0).toFixed(2),
+            name: '其它', typeName: null, value: _.reduce(_.filter(data, (item) => item.percent < 2), (sum, item) => sum += item.value, 0), percent: _.reduce(_.filter(data, (item) => item.percent < 2), (sum, item) => sum += item.percent, 0).toFixed(2),
           };
           if (otherData.value > 0) {
             bigData.push(otherData);

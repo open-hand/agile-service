@@ -1,11 +1,9 @@
 import {
-  observable, action, computed, toJS,
+  observable, action, computed,
 } from 'mobx';
-import { store, stores } from '@choerodon/boot';
 import _ from 'lodash';
 import { reportApi } from '@/api';
 
-const { AppState } = stores;
 const UNIT_STATUS = {
   issue_count: {
     committed: 'committedIssueCount',
@@ -26,7 +24,6 @@ const UNIT2NAME = {
   remain_time: '剩余时间',
 };
 
-@store('VelocityChartStore')
 class VelocityChartStore {
   @observable tableLoading = false;
 
