@@ -1,10 +1,14 @@
+/* eslint-disable react/require-default-props */
+/* eslint-disable react/state-in-constructor */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Choerodon } from '@choerodon/boot';
 import {
   Button, Icon, Dropdown, Input, Menu, Form,
 } from 'choerodon-ui';
 import { getProjectId } from '@/utils/common';
 import { issueApi, fieldApi } from '@/api';
+import { checkCanQuickCreate } from '@/utils/quickCreate';
 import TypeTag from '../TypeTag';
 import { deBounce } from './Utils';
 import './QuickCreateIssue.less';
@@ -22,9 +26,8 @@ class QuickCreateIssue extends Component {
   state = {
     create: false,
     loading: false,
-    currentTypeCode: 'task',    
+    currentTypeCode: 'task',
   }
-
 
   handleChangeType = ({ key }) => {
     this.setState({
@@ -37,11 +40,19 @@ class QuickCreateIssue extends Component {
     const {
       form, issueTypes, sprintId, epicId, versionIssueRelVOList, chosenFeatureId,
     } = this.props;
-    form.validateFields((err, values) => {
+    form.validateFields(async (err, values) => {
       const { summary } = values;
       if (summary && summary.trim()) {
         if (!err) {
-          const currentType = issueTypes.find(t => t.typeCode === currentTypeCode);
+          const currentType = issueTypes.find((t) => t.typeCode === currentTypeCode);
+          if (!await checkCanQuickCreate(currentType.typeCode)) {
+            Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
+            this.setState({
+              loading: false,
+              create: false,
+            });
+            return;
+          }
           const {
             defaultPriority, onCreate,
           } = this.props;
@@ -51,16 +62,16 @@ class QuickCreateIssue extends Component {
                 priorityCode: `priority-${defaultPriority.id}`,
                 priorityId: defaultPriority.id,
                 projectId: getProjectId(),
-                programId: getProjectId(),          
+                programId: getProjectId(),
                 epicId: epicId || 0,
                 summary: summary.trim(),
                 issueTypeId: currentType.id,
                 typeCode: currentType.typeCode,
-                parentIssueId: 0,       
-                relateIssueId: 0,   
+                parentIssueId: 0,
+                relateIssueId: 0,
                 featureVO: {},
-                sprintId: sprintId || 0,      
-                epicName: currentTypeCode === 'issue_epic' ? summary.trim() : undefined,    
+                sprintId: sprintId || 0,
+                epicName: currentTypeCode === 'issue_epic' ? summary.trim() : undefined,
                 componentIssueRelVOList: [],
                 description: '',
                 issueLinkCreateVOList: [],
@@ -101,8 +112,8 @@ class QuickCreateIssue extends Component {
     const {
       create, loading, currentTypeCode,
     } = this.state;
-    const { issueTypes, form: { getFieldDecorator } } = this.props;    
-    const currentType = issueTypes.find(t => t.typeCode === currentTypeCode);
+    const { issueTypes, form: { getFieldDecorator } } = this.props;
+    const currentType = issueTypes.find((t) => t.typeCode === currentTypeCode);
 
     const typeList = (
       <Menu
@@ -114,7 +125,7 @@ class QuickCreateIssue extends Component {
         onClick={this.handleChangeType}
       >
         {
-          issueTypes.map(type => (
+          issueTypes.map((type) => (
             <Menu.Item key={type.typeCode}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <TypeTag
@@ -167,14 +178,14 @@ class QuickCreateIssue extends Component {
                         placeholder="请输入问题概要"
                       />,
                     )}
-                  </FormItem>                 
+                  </FormItem>
                   <Button
                     funcType="raised"
                     type="primary"
                     // htmlType="submit"
                     onClick={this.handleCreate}
                     style={{ margin: '0 10px' }}
-                    loading={loading}                   
+                    loading={loading}
                   >
                     确定
                   </Button>
@@ -197,7 +208,7 @@ class QuickCreateIssue extends Component {
               icon="playlist_add"
               onClick={() => {
                 this.setState({
-                  create: true,                  
+                  create: true,
                 });
               }}
             >

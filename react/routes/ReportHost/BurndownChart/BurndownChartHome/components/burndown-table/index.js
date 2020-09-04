@@ -78,9 +78,9 @@ class BurndownTable extends Component {
       result = '用户修改剩余时间';
     }
     if (text === 'valueChange') {
-      if (this.state.select === 'remainingEstimatedTime') {
+      if (this.props.select === 'remainingEstimatedTime') {
         result = '用户修改预估时间';
-      } else if (this.state.select === 'storyPoints') {
+      } else if (this.props.select === 'storyPoints') {
         result = '用户修改故事点';
       } else {
         result = '用户修改问题计数';
