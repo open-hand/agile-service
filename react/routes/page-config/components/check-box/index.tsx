@@ -65,7 +65,6 @@ const CheckBox: React.FC<Props> = ({
         checked={checked}
         // onClick=
         onChange={(e) => {
-          console.log('e', e);
           // onChange && onChange(e.target.checked);
         }}
       />
