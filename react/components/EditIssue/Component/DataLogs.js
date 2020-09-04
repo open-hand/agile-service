@@ -25,21 +25,6 @@ class DataLogs extends Component {
     } = this.props;
     return (
       <div>
-        {/* {
-          datalogs.map((datalog, i) => (
-            <DataLog
-              key={datalog.id}
-              i={i}
-              // key={datalog.logId}
-              datalog={datalog}
-              typeCode={typeCode}
-              origin={datalogs}
-              expand={expand}
-              user={user}
-              callback={this.setUser.bind(this)}
-            />
-          ))
-        } */}
         <Logs datalogs={datalogs} expand={expand} />
         {
           datalogs.length > 5 && !expand ? (
