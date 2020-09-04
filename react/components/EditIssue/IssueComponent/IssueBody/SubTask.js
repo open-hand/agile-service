@@ -7,6 +7,7 @@ import {
 import { stores, Choerodon } from '@choerodon/boot';
 import { useIssueTypes } from '@/hooks';
 import { issueApi, fieldApi } from '@/api';
+import { checkCanQuickCreate } from '@/utils/quickCreate';
 import CreateSubTask from '../../../CreateIssue/CreateSubTask';
 import IssueList from '../../Component/IssueList';
 import EditIssueContext from '../../stores';
@@ -20,7 +21,7 @@ const SubTask = observer(({
 }) => {
   const creatingRef = useRef(false);
   const { store, disabled } = useContext(EditIssueContext);
-  
+
   const [expand, setExpand] = useState(false);
   const [summary, setSummary] = useState(false);
   const [issueTypes] = useIssueTypes();
@@ -76,14 +77,13 @@ const SubTask = observer(({
   };
 
   const getPercent = () => {
-    const completeList = subIssueVOList.filter(issue => issue.completed);
+    const completeList = subIssueVOList.filter((issue) => issue.completed);
     const allLength = (subIssueVOList && subIssueVOList.length) || 0;
     const completeLength = completeList.length;
     if (allLength === 0) {
       return 100;
-    } else {
-      return parseInt(completeLength / allLength * 100, 10);
     }
+    return parseInt(completeLength / allLength * 100, 10);
   };
 
   const handleCancel = () => {
@@ -91,12 +91,17 @@ const SubTask = observer(({
     setSummary(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (creatingRef.current) {
       return;
     }
-    const subIssueType = issueTypes.find(t => t.typeCode === 'sub_task');
+    const subIssueType = issueTypes.find((t) => t.typeCode === 'sub_task');
     if (summary) {
+      if (!await checkCanQuickCreate(subIssueType.typeCode)) {
+        Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
+        handleCancel();
+        return;
+      }
       creatingRef.current = true;
       const issue = {
         summary,
@@ -140,7 +145,7 @@ const SubTask = observer(({
           </div>
           {!disableCreate && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
-            <Tooltip placement="topRight" title="创建子任务" getPopupContainer={triggerNode => triggerNode.parentNode}>
+            <Tooltip placement="topRight" title="创建子任务" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
               <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => store.setCreateSubTaskShow(true)}>
                 <Icon type="playlist_add icon" />
               </Button>
@@ -154,8 +159,7 @@ const SubTask = observer(({
               <Progress percent={getPercent()} style={{ marginRight: 5 }} />
               已完成
             </div>
-          ) : ''
-      }
+          ) : ''}
         {renderSubIssues()}
         {!disableCreate && (
         <div className="c7n-subTask-quickCreate">
@@ -196,8 +200,7 @@ const SubTask = observer(({
                 <Icon type="playlist_add" />
                 {'快速创建子任务'}
               </Button>
-            )
-          }
+            )}
         </div>
         )}
         {
