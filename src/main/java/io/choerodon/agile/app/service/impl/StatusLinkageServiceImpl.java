@@ -192,7 +192,8 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
                     .selectTransformByStatusId(organizationId, stateMachineId, parentIssue.getStatusId(), changeStatus, true);
         }
         if (CollectionUtils.isEmpty(statusMachineTransformDTOS)) {
-            throw new CommonException("error.status.transform.not.exist");
+            // todo 返回提示信息给前端
+            return;
         }
         StatusMachineTransformDTO statusTransform = statusMachineTransformDTOS.get(0);
         issueService.updateIssueStatus(projectId, parentIssue.getIssueId(), statusTransform.getId(),
