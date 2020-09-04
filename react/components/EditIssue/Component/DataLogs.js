@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Icon, Button } from 'choerodon-ui';
-import Logs from './Logs';
+import Logs from '@/components/Logs';
+import fieldsMap from './DataLogFieldsMap';
 
 class DataLogs extends Component {
   constructor(props, context) {
@@ -20,11 +21,11 @@ class DataLogs extends Component {
   render() {
     const { expand, user } = this.state;
     const {
-      datalogs, typeCode, createdById, creationDate,
+      datalogs,
     } = this.props;
     return (
       <div>
-        <Logs datalogs={datalogs} expand={expand} />
+        <Logs datalogs={datalogs} expand={expand} fieldsMap={fieldsMap} />
         {
           datalogs.length > 5 && !expand ? (
             <div style={{ marginTop: 5 }}>
