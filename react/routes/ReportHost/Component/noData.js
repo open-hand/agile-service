@@ -8,7 +8,7 @@ class NoDataComponent extends Component {
   }
 
   render() {
-    const { links: { data }, title, img } = this.props;
+    const { links: data, title, img } = this.props;
     let linkDom = [];
     if (data.length) {
       if (data.length === 1) {
