@@ -132,3 +132,20 @@ export interface IField {
   system: boolean,
   extraConfig?: boolean,
 }
+
+export interface ILog {
+  logId: string,
+  field: string,
+  fieldName: string,
+  oldString: string,
+  oldValue: any,
+  newString: string,
+  newValue: any,
+  lastUpdateDate: string,
+  email: string,
+  lastUpdatedBy: string,
+  name: string,
+  loginName: string,
+  realName: string,
+  imageUrl: string,
+}
