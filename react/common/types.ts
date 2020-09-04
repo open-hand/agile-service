@@ -148,4 +148,7 @@ export interface ILog {
   loginName: string,
   realName: string,
   imageUrl: string,
+  newStatus?: string,
+  trigger?: string,
+  autoRelutionUpdate?: boolean,
 }

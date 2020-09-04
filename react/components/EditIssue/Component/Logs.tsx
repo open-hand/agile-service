@@ -535,7 +535,41 @@ fieldsMap = new Map([
       dontJudge: true,
     },
   }
-]
+],
+[
+  'autoUpdate', {
+    create: {
+      dontJudge: true,
+    },
+    update: {
+      dontJudge: true,
+    },
+    delete: {
+      dontJudge: true,
+    },
+    customRender: (log: ILog) => {
+      const { newStatus, trigger, autoRelutionUpdate} = log;
+      return (
+        <span>
+           <span>
+            变更了
+            <span className="c7n-Log-value">{`【${trigger}】`}</span>
+            ，使得当前问题自动流转到
+            <span className="c7n-Log-value">{`【${newStatus}】`}</span>
+            {
+              autoRelutionUpdate && (
+                <>
+                  ，更新
+                <span className="c7n-Log-value">【解决状态】</span>
+                </>
+              )
+            }
+          </span>
+        </span>
+      )
+    }
+  }
+],
 ]);
 
 const getFieldConfig = (log: ILog) => {
@@ -643,7 +677,7 @@ if (fieldConfig) {
     } else if (!deleteDontJudge && (deleteCondition?.({ newString, oldString }) || isDelete)) { // 删除
       return (fieldConfig.delete?.render || renderDeleteDefault)(log);
     } else {
-      return '';
+      return fieldConfig?.customRender ?  fieldConfig?.customRender(log) : '';
     }
   };
     
