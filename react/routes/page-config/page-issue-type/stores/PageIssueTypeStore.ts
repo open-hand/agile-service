@@ -211,8 +211,7 @@ class PageIssueTypeStore {
     });
   }
 
-  transformDefaultValue = (fieldType: string, defaultValue: any,
-    defaultValueObj?: any, fieldOptions?: Array<any> | null) => {
+  transformDefaultValue = (fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null) => {
     if (!defaultValue && !defaultValueObj) {
       return defaultValue;
     }

@@ -24,7 +24,7 @@ const FormItem = Form.Item;
 let sign = -1;
 const OPTION_FILTER = {
   assignee: {
-    url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=0`,
+    url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=999`,
     prop: 'list',
     id: 'id',
     name: 'realName',
@@ -45,21 +45,21 @@ const OPTION_FILTER = {
     state: 'originStatus',
   },
   reporter: {
-    url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=0`,
+    url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=999`,
     prop: 'list',
     id: 'id',
     name: 'realName',
     state: 'originUsers',
   },
   created_user: {
-    url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=0`,
+    url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=999`,
     prop: 'list',
     id: 'id',
     name: 'realName',
     state: 'originUsers',
   },
   last_updated_user: {
-    url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=0`,
+    url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=999`,
     prop: 'list',
     id: 'id',
     name: 'realName',
@@ -411,112 +411,8 @@ class AddComponent extends Component {
   tempOption = (filter, addEmpty) => {
     const { state } = this;
     const { quickFilterFiled } = state;
-    const customFields = quickFilterFiled.filter(item => item.id);
-    const customMemberField = quickFilterFiled.find(item => item.type === 'member') || {};
-    const OPTION_FILTER = {
-      assignee: {
-        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=999`,
-        prop: 'list',
-        id: 'id',
-        name: 'realName',
-        state: 'originUsers',
-      },
-      priority: {
-        url: `/agile/v1/projects/${projectId}/priority/list_by_org`,
-        prop: '',
-        id: 'id',
-        name: 'name',
-        state: 'originPriorities',
-      },
-      status: {
-        url: `/agile/v1/projects/${projectId}/schemes/query_status_by_project_id?apply_type=agile`,
-        prop: '',
-        id: 'id',
-        name: 'name',
-        state: 'originStatus',
-      },
-      reporter: {
-        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=999`,
-        prop: 'list',
-        id: 'id',
-        name: 'realName',
-        state: 'originUsers',
-      },
-      created_user: {
-        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=999`,
-        prop: 'list',
-        id: 'id',
-        name: 'realName',
-        state: 'originUsers',
-      },
-      last_updated_user: {
-        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=999`,
-        prop: 'list',
-        id: 'id',
-        name: 'realName',
-        state: 'originUsers',
-      },
-      epic: {
-        url: `/agile/v1/projects/${projectId}/issues/epics/select_data`,
-        prop: '',
-        id: 'issueId',
-        name: 'epicName',
-        state: 'originEpics',
-      },
-      sprint: {
-        // post
-        url: `/agile/v1/projects/${projectId}/sprint/names`,
-        prop: '',
-        id: 'sprintId',
-        name: 'sprintName',
-        state: 'originSprints',
-      },
-      label: {
-        url: `/agile/v1/projects/${projectId}/issue_labels`,
-        prop: '',
-        id: 'labelId',
-        name: 'labelName',
-        state: 'originLabels',
-      },
-      component: {
-        url: `/agile/v1/projects/${projectId}/component`,
-        prop: '',
-        id: 'componentId',
-        name: 'name',
-        state: 'originComponents',
-      },
-      influence_version: {
-        // post
-        url: `/agile/v1/projects/${projectId}/product_version/names`,
-        prop: '',
-        id: 'versionId',
-        name: 'name',
-        state: 'originVersions',
-      },
-      fix_version: {
-        // post
-        url: `/agile/v1/projects/${projectId}/product_version/names`,
-        prop: '',
-        id: 'versionId',
-        name: 'name',
-        state: 'originVersions',
-      },
-      issue_type: {
-        url: '',
-        prop: '',
-        id: 'typeCode',
-        name: 'name',
-        state: 'originTypes',
-      },
-      feature: {
-        url: `/agile/v1/projects/${projectId}/issues/feature/all?organizationId=${orgId}&page=0&size=0&param=`,
-        prop: '',
-        id: 'issueId',
-        name: 'summary',
-        state: 'originFeatures',
-      },
-    };
-
+    const customFields = quickFilterFiled.filter((item) => item.id);
+    const customMemberField = quickFilterFiled.find((item) => item.type === 'member') || {};
     customFields.forEach((item) => {
       OPTION_FILTER[item.code] = {
         url: '',
@@ -672,112 +568,8 @@ class AddComponent extends Component {
     const projectId = AppState.currentMenuType.id;
     const orgId = AppState.currentMenuType.organizationId;
     const { quickFilterFiled } = state;
-    const customFields = quickFilterFiled.filter(item => item.id);
-    const customMemberField = quickFilterFiled.find(item => item.type === 'member') || {};
-    const OPTION_FILTER = {
-      assignee: {
-        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=999`,
-        prop: 'list',
-        id: 'id',
-        name: 'realName',
-        state: 'originUsers',
-      },
-      priority: {
-        url: `/agile/v1/projects/${projectId}/priority/list_by_org`,
-        prop: '',
-        id: 'id',
-        name: 'name',
-        state: 'originPriorities',
-      },
-      status: {
-        url: `/agile/v1/projects/${projectId}/schemes/query_status_by_project_id?apply_type=agile`,
-        prop: '',
-        id: 'id',
-        name: 'name',
-        state: 'originStatus',
-      },
-      reporter: {
-        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=999`,
-        prop: 'list',
-        id: 'id',
-        name: 'realName',
-        state: 'originUsers',
-      },
-      created_user: {
-        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=999`,
-        prop: 'list',
-        id: 'id',
-        name: 'realName',
-        state: 'originUsers',
-      },
-      last_updated_user: {
-        url: `/iam/choerodon/v1/projects/${AppState.currentMenuType.id}/users?page=1&size=999`,
-        prop: 'list',
-        id: 'id',
-        name: 'realName',
-        state: 'originUsers',
-      },
-      epic: {
-        url: `/agile/v1/projects/${projectId}/issues/epics/select_data`,
-        prop: '',
-        id: 'issueId',
-        name: 'epicName',
-        state: 'originEpics',
-      },
-      sprint: {
-        // post
-        url: `/agile/v1/projects/${projectId}/sprint/names`,
-        prop: '',
-        id: 'sprintId',
-        name: 'sprintName',
-        state: 'originSprints',
-      },
-      label: {
-        url: `/agile/v1/projects/${projectId}/issue_labels`,
-        prop: '',
-        id: 'labelId',
-        name: 'labelName',
-        state: 'originLabels',
-      },
-      component: {
-        url: `/agile/v1/projects/${projectId}/component`,
-        prop: '',
-        id: 'componentId',
-        name: 'name',
-        state: 'originComponents',
-      },
-      influence_version: {
-        // post
-        url: `/agile/v1/projects/${projectId}/product_version/names`,
-        prop: '',
-        id: 'versionId',
-        name: 'name',
-        state: 'originVersions',
-      },
-      fix_version: {
-        // post
-        url: `/agile/v1/projects/${projectId}/product_version/names`,
-        prop: '',
-        id: 'versionId',
-        name: 'name',
-        state: 'originVersions',
-      },
-      issue_type: {
-        url: '',
-        prop: '',
-        id: 'typeCode',
-        name: 'name',
-        state: 'originTypes',
-      },
-      feature: {
-        url: `/agile/v1/projects/${projectId}/issues/feature/all?organizationId=${orgId}&page=0&size=0&param=`,
-        prop: '',
-        id: 'issueId',
-        name: 'summary',
-        state: 'originFeatures',
-      },
-    };
-
+    const customFields = quickFilterFiled.filter((item) => item.id);
+    const customMemberField = quickFilterFiled.find((item) => item.type === 'member') || {};
     customFields.forEach((item) => {
       OPTION_FILTER[item.code] = {
         url: '',
@@ -789,7 +581,7 @@ class AddComponent extends Component {
     });
 
     OPTION_FILTER[customMemberField.code] = {
-      url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=0`,
+      url: `/iam/choerodon/v1/projects/${getProjectId()}/users?page=1&size=999`,
       prop: 'list',
       id: 'id',
       name: 'realName',
@@ -949,20 +741,20 @@ class AddComponent extends Component {
 
   loadQuickFilter() {
     const projectId = AppState.currentMenuType.id;
-    userApi.getAllInProject('', 1, undefined, 999).then(res => this.setState({
+    userApi.getAllInProject('', 1, undefined, 999).then((res) => this.setState({
       originUsers: res.list.map(
-        item => ({ ...item, id: item.id.toString() }),
+        (item) => ({ ...item, id: item.id.toString() }),
       ),
     }));
-    priorityApi.loadByProject().then(res => this.setState({ originPriorities: res }));
-    statusApi.loadByProject().then(res => this.setState({ originStatus: res }));
-    epicApi.loadEpicsForSelect().then(res => this.setState({ originEpics: res }));
-    sprintApi.loadSprints().then(res => this.setState({ originSprints: res }));
-    issueLabelApi.loads().then(res => this.setState({ originLabels: res }));
-    componentApi.loadAll().then(res => this.setState({ originComponents: res }));
-    versionApi.loadNamesByStatus().then(res => this.setState({ originVersions: res }));
-    issueTypeApi.loadAll().then(res => this.setState({ originTypes: res }));
-    featureApi.queryAllInSubProject([], undefined, 1, 0).then(res => this.setState(
+    priorityApi.loadByProject().then((res) => this.setState({ originPriorities: res }));
+    statusApi.loadByProject().then((res) => this.setState({ originStatus: res }));
+    epicApi.loadEpicsForSelect().then((res) => this.setState({ originEpics: res }));
+    sprintApi.loadSprints().then((res) => this.setState({ originSprints: res }));
+    issueLabelApi.loads().then((res) => this.setState({ originLabels: res }));
+    componentApi.loadAll().then((res) => this.setState({ originComponents: res }));
+    versionApi.loadNamesByStatus().then((res) => this.setState({ originVersions: res }));
+    issueTypeApi.loadAll().then((res) => this.setState({ originTypes: res }));
+    featureApi.queryAllInSubProject([], undefined, 1, 0).then((res) => this.setState(
       { originFeatures: res.content },
     ));
     fieldApi.getCustomFields().then((res) => {
