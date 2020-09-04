@@ -13,7 +13,7 @@ export enum PageConfigIssueType {
   demand = 'demand',
   null = '',
 }
-interface IFieldOption {
+export interface IFieldOption {
   id: string,
   fieldId: string,
   code: string,
