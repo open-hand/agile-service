@@ -403,6 +403,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         stateMachineNodeService.baseUpdate(nodeDTO);
         // 修改初始转换
         changeInitTransform(organizationId, stateMachineId, olderDefaultNode.getId(), nodeDTO.getId());
+        //清理状态机实例
+        instanceCache.cleanStateMachine(stateMachineId);
     }
 
     private void changeInitTransform(Long organizationId, Long stateMachineId, Long oldNodeId, Long newNodeId) {
@@ -441,6 +443,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 transformService.deleteTransformByNodeId(organizationId, stateMachine, transformUpdateVO.getStartNodeId(), transformUpdateVO.getEndNodeId());
             }
         }
+        //清理状态机实例
+        instanceCache.cleanStateMachine(stateMachine);
         return list;
     }
 
@@ -559,6 +563,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (CollectionUtils.isEmpty(issueStatusExist)){
             boardColumnMapper.deleteByStatusId(projectId, currentStatusId);
         }
+        // 清除状态机实例
+        instanceCache.cleanStateMachine(stateMachineId);
     }
 
     private StatusMachineNodeDTO checkStatusLink(Long projectId, Long issueTypeId, Long nodeId) {
