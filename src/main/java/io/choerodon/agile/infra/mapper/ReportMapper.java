@@ -49,19 +49,25 @@ public interface ReportMapper {
      * 获取冲刺开启前的issue
      *
      * @param sprintDTO sprintDTO
+     * @param burnDownSearchVO
+     * @param projectId
      * @return issueIds
      */
     List<Long> queryIssueIdsBeforeSprintStart(@Param("sprintDTO") SprintDTO sprintDTO,
-                                              @Param("burnDownSearchVO") BurnDownSearchVO burnDownSearchVO);
+                                              @Param("burnDownSearchVO") BurnDownSearchVO burnDownSearchVO,
+                                              @Param("projectId") Long projectId);
 
     /**
      * 获取冲刺期间加入的issue
      *
      * @param sprintDTO sprintDTO
+     * @param burnDownSearchVO
+     * @param projectId
      * @return issueIdList
      */
     List<Long> queryAddIssueIdsDuringSprint(@Param("sprintDTO") SprintDTO sprintDTO,
-                                            @Param("burnDownSearchVO") BurnDownSearchVO burnDownSearchVO);
+                                            @Param("burnDownSearchVO") BurnDownSearchVO burnDownSearchVO,
+                                            @Param("projectId") Long projectId);
 
     /**
      * 获取冲刺期间移除的issue(不包含子任务和epic)
@@ -213,10 +219,13 @@ public interface ReportMapper {
      * 冲刺期间移出的issue
      *
      * @param sprintDTO sprintDTO
+     * @param projectId
+     * @param burnDownSearchVO
      * @return Long
      */
     List<Long> queryRemoveIssueIdsDuringSprint(@Param("sprintDTO") SprintDTO sprintDTO,
-                                               @Param("burnDownSearchVO") BurnDownSearchVO burnDownSearchVO);
+                                               @Param("burnDownSearchVO") BurnDownSearchVO burnDownSearchVO,
+                                               @Param("projectId") Long projectId);
 
     /**
      * 判断issue是否在冲刺外

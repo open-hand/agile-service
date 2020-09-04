@@ -51,6 +51,11 @@
         <if test='burnDownSearchVO.filterSql != null'>
             AND t1.issue_id IN (${burnDownSearchVO.filterSql})
         </if>
+        <if test='burnDownSearchVO.searchList != null and burnDownSearchVO.searchList.size > 0'>
+            <foreach collection="burnDownSearchVO.searchList" item="searchVO">
+                AND t1.issue_id IN (<include refid="io.choerodon.agile.infra.mapper.BoardColumnMapper.selectIssueIdBySearchVoWithoutFilterSql"/>)
+            </foreach>
+        </if>
     </select>
 
     <select id="queryValueBeforeSprintStart" resultType="io.choerodon.agile.infra.dto.ReportIssueDTO">
@@ -131,6 +136,11 @@
         </if>
         <if test='burnDownSearchVO.filterSql != null'>
             AND t1.issue_id IN (${burnDownSearchVO.filterSql})
+        </if>
+        <if test='burnDownSearchVO.searchList != null and burnDownSearchVO.searchList.size > 0'>
+            <foreach collection="burnDownSearchVO.searchList" item="searchVO">
+                AND t1.issue_id IN (<include refid="io.choerodon.agile.infra.mapper.BoardColumnMapper.selectIssueIdBySearchVoWithoutFilterSql"/>)
+            </foreach>
         </if>
     </select>
 
@@ -989,6 +999,11 @@
         </if>
         <if test='burnDownSearchVO.filterSql != null'>
             AND t1.issue_id IN (${burnDownSearchVO.filterSql})
+        </if>
+        <if test='burnDownSearchVO.searchList != null and burnDownSearchVO.searchList.size > 0'>
+            <foreach collection="burnDownSearchVO.searchList" item="searchVO">
+                AND t1.issue_id IN (<include refid="io.choerodon.agile.infra.mapper.BoardColumnMapper.selectIssueIdBySearchVoWithoutFilterSql"/>)
+            </foreach>
         </if>
     </select>
 
