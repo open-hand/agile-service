@@ -10,7 +10,6 @@ import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
-import org.apache.commons.lang3.BooleanUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -1122,9 +1121,9 @@ public class DataLogAspect {
             IssueStatusDTO originStatus = issueStatusMapper.selectByStatusId(originIssueDTO.getProjectId(), originIssueDTO.getStatusId());
             IssueStatusDTO currentStatus = issueStatusMapper.selectByStatusId(originIssueDTO.getProjectId(), issueConvertDTO.getStatusId());
             createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
-                    BooleanUtils.isTrue(issueConvertDTO.getAutoTranferFlag())? FIELD_AUTO_STATUS : FIELD_STATUS, originStatusVO.getName(),
+                    isTrue(issueConvertDTO.getAutoTranferFlag()) ? FIELD_AUTO_STATUS : FIELD_STATUS, originStatusVO.getName(),
                     currentStatusVO.getName(), originIssueDTO.getStatusId().toString(), issueConvertDTO.getStatusId().toString());
-            if (BooleanUtils.isTrue(issueConvertDTO.getAutoTranferFlag())){
+            if (isTrue(issueConvertDTO.getAutoTranferFlag())){
                 // 添加自动触发日志
                 createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), FIELD_AUTO_TRIGGER, null,
                         issueConvertDTO.getAutoTriggerNum(), null, issueConvertDTO.getAutoTriggerId().toString());
@@ -1137,6 +1136,13 @@ public class DataLogAspect {
             //删除缓存
             dataLogRedisUtil.deleteByHandleStatus(issueConvertDTO, originIssueDTO, condition);
         }
+    }
+
+    private boolean isTrue(Boolean flag) {
+        if (flag == null) {
+            return false;
+        }
+        return flag;
     }
 
     private void handleRemainTime(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
@@ -1306,7 +1312,7 @@ public class DataLogAspect {
                 newValue = currentStatus.getStatusId().toString();
                 newString = currentStatusVO.getName();
             }
-            createDataLog(projectId, issueId, BooleanUtils.isTrue(autoTranferFlag)? FIELD_AUTO_RESOLUTION : FIELD_RESOLUTION, oldString, newString, oldValue, newValue);
+            createDataLog(projectId, issueId, isTrue(autoTranferFlag)? FIELD_AUTO_RESOLUTION : FIELD_RESOLUTION, oldString, newString, oldValue, newValue);
             redisUtil.deleteRedisCache(new String[]{PIECHART + projectId + ':' + FIELD_RESOLUTION + "*"});
         }
     }
