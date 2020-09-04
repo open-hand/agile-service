@@ -32,7 +32,7 @@ class ReportApi {
         type,
         ordinalType,
         assigneeId,
-        onlyStory,
+        onlyStory: onlyStory ? true : undefined,
         quickFilterIds,
       },
     });
@@ -58,7 +58,7 @@ class ReportApi {
       data: {
         type,
         assigneeId,
-        onlyStory,
+        onlyStory: onlyStory ? true : undefined,
         quickFilterIds,
         personalFilterIds,
       },
