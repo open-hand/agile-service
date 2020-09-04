@@ -369,10 +369,10 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         IssueUpdateVO issueUpdateVO = issueAssembler.toTarget(issue, IssueUpdateVO.class);
         issueUpdateVO.setStatusId(targetStatusId);
         if (Objects.nonNull(triggerIssueId)){
-            IssueDTO issueDTO = issueMapper.selectByPrimaryKey(targetStatusId);
+            IssueDTO issueDTO = issueMapper.selectByPrimaryKey(triggerIssueId);
             issueUpdateVO.setAutoTranferFlag(autoTranferFlag);
             issueUpdateVO.setAutoTriggerId(triggerIssueId);
-            issueUpdateVO.setAutoTriggerNum(ConvertUtil.getCode(issueDTO.getProjectId()) + "-" + issueDTO.getIssueNum());
+            issueUpdateVO.setAutoTriggerNum(projectInfoMapper.selectProjectCodeByProjectId(issueDTO.getProjectId()) + "-" + issueDTO.getIssueNum());
         }
         issueService.handleUpdateIssue(issueUpdateVO, Collections.singletonList(STATUS_ID), issue.getProjectId());
         logger.info("stateMachine updateStatus successful");
