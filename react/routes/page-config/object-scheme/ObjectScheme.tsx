@@ -140,7 +140,7 @@ function ObjectScheme() {
   const renderDropDown = ({ text, record }: RenderProps) => {
     const system = record?.get('system');
     const projectId = record?.get('projectId');
-    if (system) {
+    if (system || !projectId) {
       return text;
     }
     const menu = (
