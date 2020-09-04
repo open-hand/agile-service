@@ -211,7 +211,7 @@ public class EncryptionUtils {
                                 && Arrays.asList(encrypt.ignoreValue()).contains(valueNode.textValue())) {
                             field.set(object, Long.valueOf(valueNode.textValue()));
                         } else {
-                            field.set(object, valueNode == null ? null : Long.valueOf(valueNode.textValue()));
+                            field.set(object, valueNode == null ? null : Long.valueOf(valueNode.asText()));
                         }
                     } else if (field.getType() == Date.class) {
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
