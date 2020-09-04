@@ -695,8 +695,6 @@ interface Props {
   expand: boolean,
 }
 const Logs: React.FC<Props> = ({ datalogs, expand }) => {
-  console.log('datalogs:');
-  console.log(datalogs);
   return (
     <div className="c7n-Logs">
     {

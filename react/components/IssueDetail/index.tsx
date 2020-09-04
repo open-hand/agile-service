@@ -9,7 +9,6 @@ import Container from './Container';
 import store from './store';
 import IssueDetailContext from './context';
 
-
 export function useIssueDetailStore() {
   return store;
 }
@@ -33,7 +32,6 @@ const IssueDetail: React.FC<Props> = ({ events, projectId }) => {
   }, [events]);
   useEffect(() => {
     // eslint-disable-next-line no-console
-    console.log('changed', selected);
     store.load();
   }, [selected]);
   return (
@@ -45,7 +43,7 @@ const IssueDetail: React.FC<Props> = ({ events, projectId }) => {
       {
         visible ? (
           <IssueDetailContext.Provider value={{ store, projectId }}>
-            <Container />            
+            <Container />
           </IssueDetailContext.Provider>
         ) : null
       }

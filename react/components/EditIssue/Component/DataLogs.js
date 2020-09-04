@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Icon, Button } from 'choerodon-ui';
 import Logs from './Logs';
-import DataLog from './DataLog';
 
 class DataLogs extends Component {
   constructor(props, context) {
