@@ -200,6 +200,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         // 执行更新
         updateIssue(issueDTO,field,issueUpdateVO,customField,versionMap);
     }
+
     private void updateIssue(IssueDTO issueDTO,List<String> field,IssueUpdateVO issueUpdateVO,List<PageFieldViewUpdateVO> customField,Map<String,List<VersionIssueRelVO>> versionMap){
         Long organizationId = ConvertUtil.getOrganizationId(issueDTO.getProjectId());
         Long objectVersionNumber = issueDTO.getObjectVersionNumber();

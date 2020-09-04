@@ -95,7 +95,10 @@ public class DataLogAspect {
     private static final String FIELD_TIMEESTIMATE = "timeestimate";
     private static final String STATUS_ID = "statusId";
     private static final String FIELD_STATUS = "status";
+    private static final String FIELD_AUTO_STATUS = "Auto Status";
     private static final String FIELD_RESOLUTION = "resolution";
+    private static final String FIELD_AUTO_RESOLUTION = "Auto Resolution";
+    private static final String FIELD_AUTO_TRIGGER = "Auto Trigger";
     private static final String RANK_FIELD = "rank";
     private static final String FIELD_RANK = "Rank";
     private static final String RANK_HIGHER = "评级更高";
@@ -1117,16 +1120,29 @@ public class DataLogAspect {
             StatusVO currentStatusVO = statusService.queryStatusById(ConvertUtil.getOrganizationId(originIssueDTO.getProjectId()), issueConvertDTO.getStatusId());
             IssueStatusDTO originStatus = issueStatusMapper.selectByStatusId(originIssueDTO.getProjectId(), originIssueDTO.getStatusId());
             IssueStatusDTO currentStatus = issueStatusMapper.selectByStatusId(originIssueDTO.getProjectId(), issueConvertDTO.getStatusId());
-            createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), FIELD_STATUS, originStatusVO.getName(),
+            createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
+                    isTrue(issueConvertDTO.getAutoTranferFlag()) ? FIELD_AUTO_STATUS : FIELD_STATUS, originStatusVO.getName(),
                     currentStatusVO.getName(), originIssueDTO.getStatusId().toString(), issueConvertDTO.getStatusId().toString());
+            if (isTrue(issueConvertDTO.getAutoTranferFlag())){
+                // 添加自动触发日志
+                createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), FIELD_AUTO_TRIGGER, null,
+                        issueConvertDTO.getAutoTriggerNum(), null, issueConvertDTO.getAutoTriggerId().toString());
+            }
             Boolean condition = (originStatus.getCompleted() != null && originStatus.getCompleted()) || (currentStatus.getCompleted() != null && currentStatus.getCompleted());
             if (condition) {
                 //生成解决问题日志
-                dataLogResolution(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), originStatus, currentStatus, originStatusVO, currentStatusVO);
+                dataLogResolution(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(), originStatus, currentStatus, originStatusVO, currentStatusVO, issueConvertDTO.getAutoTranferFlag());
             }
             //删除缓存
             dataLogRedisUtil.deleteByHandleStatus(issueConvertDTO, originIssueDTO, condition);
         }
+    }
+
+    private boolean isTrue(Boolean flag) {
+        if (flag == null) {
+            return false;
+        }
+        return flag;
     }
 
     private void handleRemainTime(List<String> field, IssueDTO originIssueDTO, IssueConvertDTO issueConvertDTO) {
@@ -1282,7 +1298,7 @@ public class DataLogAspect {
         }
     }
 
-    private void dataLogResolution(Long projectId, Long issueId, IssueStatusDTO originStatus, IssueStatusDTO currentStatus, StatusVO originStatusVO, StatusVO currentStatusVO) {
+    private void dataLogResolution(Long projectId, Long issueId, IssueStatusDTO originStatus, IssueStatusDTO currentStatus, StatusVO originStatusVO, StatusVO currentStatusVO, Boolean autoTranferFlag) {
         Boolean condition = (originStatus.getCompleted() == null || !originStatus.getCompleted()) || (currentStatus.getCompleted() == null || !currentStatus.getCompleted());
         if (condition) {
             String oldValue = null;
@@ -1296,7 +1312,7 @@ public class DataLogAspect {
                 newValue = currentStatus.getStatusId().toString();
                 newString = currentStatusVO.getName();
             }
-            createDataLog(projectId, issueId, FIELD_RESOLUTION, oldString, newString, oldValue, newValue);
+            createDataLog(projectId, issueId, isTrue(autoTranferFlag)? FIELD_AUTO_RESOLUTION : FIELD_RESOLUTION, oldString, newString, oldValue, newValue);
             redisUtil.deleteRedisCache(new String[]{PIECHART + projectId + ':' + FIELD_RESOLUTION + "*"});
         }
     }

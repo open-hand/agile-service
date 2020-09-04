@@ -210,6 +210,8 @@ public class IssueServiceImpl implements IssueService {
     private static final String FIELD_CODES = "fieldCodes";
     private static final String FIELD_NAMES = "fieldNames";
     private static final String BACKETNAME = "agile-service";
+    private static final String TRIGGER_ISSUE_ID = "triggerIssueId";
+    private static final String AUTO_TRANFER_FLAG = "autoTranferFlag";
 
     @Autowired
     private ModelMapper modelMapper;
@@ -566,7 +568,13 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber, String applyType) {
-        stateMachineClientService.executeTransform(projectId, issueId, transformId, objectVersionNumber, applyType, new InputDTO(issueId, "updateStatus", null));
+        return updateIssueStatus(projectId, issueId, transformId, objectVersionNumber, applyType, null, false);
+    }
+
+    @Override
+    public IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber,
+                                     String applyType, IssueDTO triggerIssue, boolean autoTranferFlag) {
+        stateMachineClientService.executeTransform(projectId, issueId, transformId, objectVersionNumber, applyType, new InputDTO(issueId, "updateStatus", updateTrigger(autoTranferFlag, triggerIssue)));
         if ("agile".equals(applyType)) {
             IssueConvertDTO issueConvertDTO = new IssueConvertDTO();
             issueConvertDTO.setIssueId(issueId);
@@ -579,7 +587,7 @@ public class IssueServiceImpl implements IssueService {
          * 抛异常并清空当前实例的状态机的状态信息
          */
         try {
-            statusFieldSettingService.handlerSettingToUpdateIssue(projectId,issueId);
+            statusFieldSettingService.handlerSettingToUpdateIssue(projectId, issueId);
             statusLinkageService.updateParentStatus(projectId,issueId,applyType);
         }
         catch (Exception e) {
@@ -587,6 +595,15 @@ public class IssueServiceImpl implements IssueService {
             throw new CommonException("error.update.status.transform.setting",e);
         }
         return queryIssueByUpdate(projectId, issueId, Collections.singletonList("statusId"));
+    }
+
+    private String updateTrigger(boolean autoTranferFlag, IssueDTO triggerIssue) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(AUTO_TRANFER_FLAG, autoTranferFlag);
+        if(Objects.nonNull(triggerIssue)){
+            jsonObject.put(TRIGGER_ISSUE_ID, triggerIssue.getIssueId());
+        }
+        return JSON.toJSONString(jsonObject);
     }
 
     @Override

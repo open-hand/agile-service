@@ -57,6 +57,8 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     private static final String UPDATE_STATUS = "updateStatus";
     private static final String UPDATE_STATUS_MOVE = "updateStatusMove";
     private static final String ISSUE_FEATURE = "feature";
+    private static final String TRIGGER_ISSUE_ID = "triggerIssueId";
+    private static final String AUTO_TRANFER_FLAG = "autoTranferFlag";
 
     @Autowired
     private IssueMapper issueMapper;
@@ -354,12 +356,26 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (targetStatusId == null) {
             throw new CommonException("error.updateStatus.targetStateId.null");
         }
-        if (!issue.getStatusId().equals(targetStatusId)) {
-            IssueUpdateVO issueUpdateVO = issueAssembler.toTarget(issue, IssueUpdateVO.class);
-            issueUpdateVO.setStatusId(targetStatusId);
-            issueService.handleUpdateIssue(issueUpdateVO, Collections.singletonList(STATUS_ID), issue.getProjectId());
-            logger.info("stateMachine updateStatus successful");
+        if (issue.getStatusId().equals(targetStatusId)) {
+            return;
         }
+        Long triggerIssueId = null;
+        Boolean autoTranferFlag = null;
+        if (input != null && !Objects.equals(input, "null")) {
+            JSONObject jsonObject = JSON.parseObject(input, JSONObject.class);
+            triggerIssueId = jsonObject.getLong(TRIGGER_ISSUE_ID);
+            autoTranferFlag = jsonObject.getBoolean(AUTO_TRANFER_FLAG);
+        }
+        IssueUpdateVO issueUpdateVO = issueAssembler.toTarget(issue, IssueUpdateVO.class);
+        issueUpdateVO.setStatusId(targetStatusId);
+        if (Objects.nonNull(triggerIssueId)){
+            IssueDTO issueDTO = issueMapper.selectByPrimaryKey(triggerIssueId);
+            issueUpdateVO.setAutoTranferFlag(autoTranferFlag);
+            issueUpdateVO.setAutoTriggerId(triggerIssueId);
+            issueUpdateVO.setAutoTriggerNum(projectInfoMapper.selectProjectCodeByProjectId(issueDTO.getProjectId()) + "-" + issueDTO.getIssueNum());
+        }
+        issueService.handleUpdateIssue(issueUpdateVO, Collections.singletonList(STATUS_ID), issue.getProjectId());
+        logger.info("stateMachine updateStatus successful");
     }
 
     @UpdateStatus(code = UPDATE_STATUS_MOVE)

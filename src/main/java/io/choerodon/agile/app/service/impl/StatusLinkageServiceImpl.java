@@ -173,11 +173,11 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         }
         // 判断是否改变父任务的状态
         if (Boolean.TRUE.equals(isChange)) {
-            changeParentStatus(projectId, applyType, parentIssue, changeStatus);
+            changeParentStatus(projectId, applyType, parentIssue, changeStatus, issueDTO);
         }
     }
 
-    private void changeParentStatus(Long projectId, String applyType, IssueDTO parentIssue, Long changeStatus) {
+    private void changeParentStatus(Long projectId, String applyType, IssueDTO parentIssue, Long changeStatus, IssueDTO triggerIssue) {
         if (parentIssue.getStatusId().equals(changeStatus)) {
             return;
         }
@@ -195,7 +195,8 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
             throw new CommonException("error.status.transform.not.exist");
         }
         StatusMachineTransformDTO statusTransform = statusMachineTransformDTOS.get(0);
-        issueService.updateIssueStatus(projectId, parentIssue.getIssueId(), statusTransform.getId(), parentIssue.getObjectVersionNumber(), applyType);
+        issueService.updateIssueStatus(projectId, parentIssue.getIssueId(), statusTransform.getId(),
+                parentIssue.getObjectVersionNumber(), applyType, triggerIssue, true);
     }
 
     private void handlerMultiSetting(Map<String, Object> variables, List<StatusLinkageDTO> select, IssueDTO issueDTO, Map<String, List<IssueDTO>> issueMap, Map<Long, StatusLinkageDTO> linkageDTOMap, List<IssueDTO> issueDTOS) {
