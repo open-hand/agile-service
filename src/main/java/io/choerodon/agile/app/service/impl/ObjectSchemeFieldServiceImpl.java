@@ -164,7 +164,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
         }
         createSystemFieldIfNotExisted(organizationId);
-        List<ObjectSchemeFieldDTO> fields = objectSchemeFieldMapper.selectByOptions(organizationId, projectId, schemeCode, null, null);
+        List<ObjectSchemeFieldDTO> fields = selectFieldsByOptions(organizationId, projectId, schemeCode, null, null);
         List<ObjectSchemeFieldVO> fieldViews = new ArrayList<>();
         fields.forEach(f -> {
             ObjectSchemeFieldVO vo = modelMapper.map(f, ObjectSchemeFieldVO.class);
@@ -184,6 +184,14 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         result.put("name", objectSchemeMapper.selectOne(select).getName());
         result.put("content", fieldViews);
         return result;
+    }
+
+    protected List<ObjectSchemeFieldDTO> selectFieldsByOptions(Long organizationId,
+                                                               Long projectId,
+                                                               String schemeCode,
+                                                               Long fieldId,
+                                                               Long issueTypeId) {
+        return objectSchemeFieldMapper.selectByOptions(organizationId, projectId, schemeCode, fieldId, issueTypeId);
     }
 
     @Override
@@ -813,7 +821,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     @Override
     public PageConfigVO listConfigs(Long organizationId, Long projectId, String issueType) {
         PageConfigVO result = new PageConfigVO();
-        List<PageConfigFieldVO> pageConfigFields = objectSchemeFieldExtendMapper.listConfigs(organizationId, projectId, issueType);
+        List<PageConfigFieldVO> pageConfigFields = queryPageConfigFields(organizationId, projectId, issueType);
         result.setFields(pageConfigFields);
         //处理默认值
         processDefaultValue(pageConfigFields, organizationId);
@@ -834,6 +842,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             }
         }
         return result;
+    }
+
+    protected List<PageConfigFieldVO> queryPageConfigFields(Long organizationId, Long projectId, String issueType) {
+        return objectSchemeFieldExtendMapper.listConfigs(organizationId, projectId, issueType);
     }
 
     private void processFieldEdited(String issueType, List<PageConfigFieldVO> pageConfigFields) {

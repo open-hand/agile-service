@@ -61,11 +61,11 @@ public class PageFieldServiceImpl implements PageFieldService {
     @Autowired
     private FieldValueMapper fieldValueMapper;
     @Autowired
-    private ObjectSchemeFieldService objectSchemeFieldService;
+    protected ObjectSchemeFieldService objectSchemeFieldService;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
-    private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
+    protected ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
 
     @Override
     public PageFieldDTO baseCreate(PageFieldDTO field) {
@@ -154,6 +154,10 @@ public class PageFieldServiceImpl implements PageFieldService {
         if (PageCode.AGILE_ISSUE_EDIT.equals(pageCode)) {
             edited = true;
         }
+        return selectPageField(organizationId, projectId, issueType, created, edited);
+    }
+
+    protected List<PageFieldDTO> selectPageField(Long organizationId, Long projectId, String issueType, Boolean created, Boolean edited) {
         List<PageFieldDTO> pageFields =
                 objectSchemeFieldExtendMapper.selectFields(organizationId, projectId, issueType, created, edited);
         if (pageFields.isEmpty()) {
