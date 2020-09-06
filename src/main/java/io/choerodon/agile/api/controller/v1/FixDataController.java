@@ -140,4 +140,12 @@ public class FixDataController {
         fixDataService.fixDateStateMachine();
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @Permission(level = ResourceLevel.SITE)
+    @ApiOperation("【0.24】修复页面数据")
+    @GetMapping("/fix_page")
+    public ResponseEntity fixPage() {
+        fixDataService.fixPage();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
