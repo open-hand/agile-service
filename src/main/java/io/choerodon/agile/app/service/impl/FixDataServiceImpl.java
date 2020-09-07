@@ -170,7 +170,7 @@ public class FixDataServiceImpl implements FixDataService {
         LOGGER.info("已修复数据，项目id:{}", projectId);
     }
 
-    public void fixDateStateMachine(){
+    public void fixDateStateMachineAndPage(){
         long start = System.currentTimeMillis();
         LOGGER.info("开始修复数据");
         // 迁移数据
@@ -587,7 +587,7 @@ public class FixDataServiceImpl implements FixDataService {
             });
             // 批量增加
             statusMachineTransformMapper.batchInsert(addTransform);
-            LOGGER.info("修复状态机:{}-{}的转换完成",statusMachineDTO.getId(),statusMachineDTO.getName());
+            LOGGER.info("修复状态机:Id:{},名称:{}的转换完成",statusMachineDTO.getId(),statusMachineDTO.getName());
         }
         // 删除所有type为transform_all的转换
         StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO();
@@ -597,7 +597,7 @@ public class FixDataServiceImpl implements FixDataService {
     }
 
     protected void fixStateMachineByIssueTypeId(){
-        LOGGER.info("开始修复问题类型的状态机");
+        LOGGER.info("开始修复项目所有问题类型的状态机");
         // 查询所有的项目
         List<Long> projectIds = projectInfoMapper.selectAll().stream().map(ProjectInfoDTO::getProjectId).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(projectIds)) {
@@ -611,8 +611,11 @@ public class FixDataServiceImpl implements FixDataService {
             List<Long> list = projectIds.subList(page * size > total ? total : page * size, (page + 1) * size > total ? total : (page + 1) * size);
             List<ProjectVO> projectVOS = baseFeignClient.queryByIds(new HashSet<>(list)).getBody();
             for (ProjectVO projectVO : projectVOS) {
-                LOGGER.info("开始修复{}:{}", projectVO.getId(),projectVO.getName());
+                LOGGER.info("开始修复{}-{}项目所有问题类型的状态机",projectVO.getId(),projectVO.getName());
                 String applyType = "PROGRAM".equals(projectVO.getCategory()) ? "program" : "agile";
+                if ("program".equals(applyType)) {
+                    continue;
+                }
                 // 查询单个项目的问题类型(故事、特性、任务、子任务、bug)
                 fixStateMachineApplyType(projectVO,applyType);
             }
@@ -641,6 +644,12 @@ public class FixDataServiceImpl implements FixDataService {
             return;
         }
         List<Long> issueTypeIds = issueTypeSchemeConfigDTOS.stream().map(IssueTypeSchemeConfigDTO::getIssueTypeId).collect(Collectors.toList());
+        if ("agile".equals(applyType)) {
+            List<IssueTypeWithInfoDTO> issueTypeWithInfoDTOS = issueTypeMapper.queryIssueTypeList(projectVO.getOrganizationId(), issueTypeIds);
+            if (!CollectionUtils.isEmpty(issueTypeSchemeConfigDTOS)) {
+                issueTypeIds = issueTypeWithInfoDTOS.stream().filter(v -> !"feature".equals(v.getTypeCode())).map(IssueTypeWithInfoDTO::getId).collect(Collectors.toList());
+            }
+        }
         for (Long issueTypeId : issueTypeIds) {
             stateMachineSchemeConfigService.queryStatusMachineBySchemeIdAndIssueType(projectVO.getOrganizationId(), stateMachineSchemeId, issueTypeId);
         }
