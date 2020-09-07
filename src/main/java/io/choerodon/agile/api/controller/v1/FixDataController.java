@@ -135,9 +135,9 @@ public class FixDataController {
 
     @Permission(level = ResourceLevel.SITE)
     @ApiOperation("【0.24】修复状态机和页面数据")
-    @GetMapping("/fix_data_state_machine")
-    public ResponseEntity fixDataStateMachine() {
-        fixDataService.fixDateStateMachine();
+    @GetMapping("/fix_data_state_machine_and_page")
+    public ResponseEntity fixDataStateMachineAndPage() {
+        fixDataService.fixDateStateMachineAndPage();
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

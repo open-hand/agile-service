@@ -6,7 +6,7 @@ public interface FixDataService {
 
     void fixCreateProjectSingle(Long projectId);
 
-    void fixDateStateMachine();
+    void fixDateStateMachineAndPage();
 
     void fixPage();
 }
