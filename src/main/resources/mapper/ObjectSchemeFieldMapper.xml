@@ -243,6 +243,12 @@
         <if test="issueTypeId != null">
             and t1.issue_type_id = #{issueTypeId}
         </if>
+        <if test="issueTypes != null and issueTypes.size > 0">
+            and t1.issue_type in
+            <foreach collection="issueTypes" open="(" close=")" separator="," item="issueType">
+                #{issueType}
+            </foreach>
+        </if>
         <if test="projectId != null">
             and t1.field_id not in (
             select t3.field_id
@@ -251,6 +257,12 @@
             and t3.project_id = #{projectId}
             <if test="issueTypeId != null">
                 and t3.issue_type_id = #{issueTypeId}
+            </if>
+            <if test="issueTypes != null and issueTypes.size > 0">
+                and t3.issue_type in
+                <foreach collection="issueTypes" open="(" close=")" separator="," item="issueType">
+                    #{issueType}
+                </foreach>
             </if>
             )
             union
@@ -264,6 +276,12 @@
             and t2.project_id = #{projectId}
             <if test="issueTypeId != null">
                 and t2.issue_type_id = #{issueTypeId}
+            </if>
+            <if test="issueTypes != null and issueTypes.size > 0">
+                and t2.issue_type in
+                <foreach collection="issueTypes" open="(" close=")" separator="," item="issueType">
+                    #{issueType}
+                </foreach>
             </if>
         </if>
     </sql>

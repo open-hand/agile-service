@@ -139,7 +139,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                                     Long projectId,
                                                     Long fieldId) {
         List<ObjectSchemeFieldDTO> dtoList =
-                objectSchemeFieldMapper.selectByOptions(organizationId, projectId, ObjectSchemeCode.AGILE_ISSUE, fieldId, null);
+                objectSchemeFieldMapper.selectByOptions(organizationId, projectId, ObjectSchemeCode.AGILE_ISSUE, fieldId, null, null);
         if (dtoList.isEmpty()) {
             throw new CommonException(ERROR_FIELD_NOTFOUND);
         } else {
@@ -191,7 +191,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                                                String schemeCode,
                                                                Long fieldId,
                                                                Long issueTypeId) {
-        return objectSchemeFieldMapper.selectByOptions(organizationId, projectId, schemeCode, fieldId, issueTypeId);
+        return objectSchemeFieldMapper.selectByOptions(organizationId, projectId, schemeCode, fieldId, issueTypeId, null);
     }
 
     @Override

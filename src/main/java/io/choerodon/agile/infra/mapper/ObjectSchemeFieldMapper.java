@@ -47,7 +47,8 @@ public interface ObjectSchemeFieldMapper extends BaseMapper<ObjectSchemeFieldDTO
                                                @Param("projectId") Long projectId,
                                                @Param("schemeCode") String schemeCode,
                                                @Param("fieldId") Long fieldId,
-                                               @Param("issueTypeId") Long issueTypeId);
+                                               @Param("issueTypeId") Long issueTypeId,
+                                               @Param("issueTypes") List<String> issueTypes);
 
     /**
      * 查询类型对应的字段以及自定义字段的选项
