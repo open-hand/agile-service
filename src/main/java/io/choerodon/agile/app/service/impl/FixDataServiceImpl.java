@@ -222,12 +222,14 @@ public class FixDataServiceImpl implements FixDataService {
         objectSchemeField.setSchemeCode(schemeCode);
         objectSchemeField.setSystem(true);
 
-        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap);
+        //旧数据没有设置的字段，但业务上是必须的
+        Set<Long> specialFieldIds = new HashSet<>();
+        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap, specialFieldIds);
 
         processEstimatedTime(dataMap, rankMap, editPageId);
 
         objectSchemeField.setSystem(false);
-        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap);
+        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap, specialFieldIds);
         List<ObjectSchemeFieldExtendDTO> insertList = new ArrayList<>();
         MapIterator mapIterator = dataMap.mapIterator();
         LOGGER.info("同一个字段，优先使用编辑页面的排序值作为页面配置的排序值");
@@ -235,7 +237,13 @@ public class FixDataServiceImpl implements FixDataService {
             mapIterator.next();
             ObjectSchemeFieldExtendDTO dto = (ObjectSchemeFieldExtendDTO)mapIterator.getValue();
             dto.setCreated(Optional.ofNullable(dto.getCreated()).orElse(false));
-            dto.setEdited(Optional.ofNullable(dto.getEdited()).orElse(false));
+            Boolean edited = dto.getEdited();
+            if (specialFieldIds.contains(dto.getFieldId()) && ObjectUtils.isEmpty(edited)) {
+                edited = true;
+            } else {
+                edited = Optional.ofNullable(dto.getEdited()).orElse(false);
+            }
+            dto.setEdited(edited);
             String rank = getRank(rankMap, createPageId, editPageId, dto);
             dto.setRank(rank);
             if (objectSchemeFieldExtendMapper.selectExtendFieldCount(dto.getIssueType(), dto.getOrganizationId(), dto.getFieldId(), dto.getProjectId()) == 0) {
@@ -381,10 +389,11 @@ public class FixDataServiceImpl implements FixDataService {
     }
 
     protected void generateDataMap(Long createPageId,
-                                 Long editPageId,
-                                 MultiKeyMap dataMap,
-                                 ObjectSchemeFieldDTO objectSchemeField,
-                                 MultiKeyMap rankMap) {
+                                   Long editPageId,
+                                   MultiKeyMap dataMap,
+                                   ObjectSchemeFieldDTO objectSchemeField,
+                                   MultiKeyMap rankMap,
+                                   Set<Long> specialFieldIds) {
         if (Boolean.TRUE.equals(objectSchemeField.getSystem())) {
             LOGGER.info("处理系统字段");
         } else {
@@ -393,7 +402,15 @@ public class FixDataServiceImpl implements FixDataService {
         List<ObjectSchemeFieldDTO> fields = objectSchemeFieldMapper.selectFieldsWithPages(objectSchemeField);
         LOGGER.info("查询到{}条字段", fields.size());
         List<PageFieldDTO> pages = new ArrayList<>();
-        fields.forEach(s -> pages.addAll(s.getPages()));
+        fields.forEach(s -> {
+            String code = s.getCode();
+            pages.addAll(s.getPages());
+            if (FieldCode.SUMMARY.equals(code)
+                    || FieldCode.DESCRIPTION.equals(code)
+                    || FieldCode.ISSUE_TYPE.equals(code)) {
+                specialFieldIds.add(s.getId());
+            }
+        });
         Set<Long> organizationIds = pages.stream().map(PageFieldDTO::getOrganizationId).collect(Collectors.toSet());
         List<IssueTypeDTO> issueTypeList = issueTypeMapper.selectByOrganizationIds(organizationIds);
         Map<Long, List<IssueTypeDTO>> issueTypeMap = issueTypeList.stream().collect(Collectors.groupingBy(IssueTypeDTO::getOrganizationId));
