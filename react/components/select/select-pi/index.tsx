@@ -26,9 +26,10 @@ const renderPi = (pi: any) => {
 interface Props extends SelectProps {
   statusList: string[]
   multiple?: boolean
+  disabledCurrentPI?: boolean
 }
 const SelectPI: React.FC<Props> = forwardRef(({
-  statusList, multiple, ...otherProps
+  statusList, multiple, disabledCurrentPI = false, ...otherProps
 }, ref: React.Ref<Select>) => {
   const [isOwner] = useIsOwner();
   const config = useMemo((): SelectConfig<PI> => ({
@@ -44,7 +45,7 @@ const SelectPI: React.FC<Props> = forwardRef(({
     props: {
       // @ts-ignore
       onOption: ({ record }) => {
-        if (!isOwner && record.get('statusCode') === 'doing') {
+        if (disabledCurrentPI && !isOwner && record.get('statusCode') === 'doing') {
           return {
             disabled: true,
           };
