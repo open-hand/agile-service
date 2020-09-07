@@ -1,10 +1,11 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import useSelect, { SelectConfig } from '@/hooks/useSelect';
-import { FragmentForSearch } from '@/hooks/useSelect';
+import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
+
 import { piApi } from '@/api';
 import type { PI } from '@/common/types';
+import { useIsOwner } from '@/hooks';
 import styles from './index.less';
 
 const renderPi = (pi: any) => {
@@ -27,20 +28,32 @@ interface Props extends SelectProps {
   multiple?: boolean
 }
 const SelectPI: React.FC<Props> = forwardRef(({
-  statusList, multiple, ...otherProps 
+  statusList, multiple, ...otherProps
 }, ref: React.Ref<Select>) => {
+  const [isOwner] = useIsOwner();
   const config = useMemo((): SelectConfig<PI> => ({
     name: 'all_pi',
     textField: 'piName',
     valueField: 'id',
     request: () => piApi.getPiListByStatus(statusList),
-    optionRenderer: pi => (
+    optionRenderer: (pi) => (
       <FragmentForSearch name={`${pi.code}-${pi.name}`}>
         {renderPi(pi)}
       </FragmentForSearch>
     ),
+    props: {
+      // @ts-ignore
+      onOption: ({ record }) => {
+        if (!isOwner && record.get('statusCode') === 'doing') {
+          return {
+            disabled: true,
+          };
+        }
+        return {};
+      },
+    },
     paging: false,
-  }), [JSON.stringify(statusList)]);
+  }), [JSON.stringify(statusList), isOwner]);
   const props = useSelect(config);
   return (
     <Select
