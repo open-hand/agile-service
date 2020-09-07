@@ -15,6 +15,7 @@ import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -169,7 +170,8 @@ public class FixDataServiceImpl implements FixDataService {
         issueTypeSchemeService.initByConsumeCreateProject(projectEvent.getProjectId(), projectEvent.getProjectCode());
         LOGGER.info("已修复数据，项目id:{}", projectId);
     }
-
+    @Override
+    @Async
     public void fixDateStateMachineAndPage(){
         long start = System.currentTimeMillis();
         LOGGER.info("开始修复数据");
