@@ -7,7 +7,7 @@ package io.choerodon.agile.infra.enums;
 public class SystemFieldPageConfig {
 
     public enum CommonField {
-        ISSUE_TYPE(FieldCode.ISSUE_TYPE, true, false),
+        ISSUE_TYPE(FieldCode.ISSUE_TYPE, true, true),
         PRIORITY(FieldCode.PRIORITY, true, true),
         EPIC_NAME(FieldCode.EPIC_NAME, true, true),
         SUMMARY(FieldCode.SUMMARY, true, true),
