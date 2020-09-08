@@ -23,17 +23,9 @@ class SelectNumber extends Component {
   }
 
   handleChange = (value) => {
-    const { value: preValue } = this.state;    
-    // 只允许输入整数，选择时可选0.5
-    if (value === '0.5') {
-      this.triggerChange('0.5');      
-    } else if (/^(0|[1-9][0-9]*)(\[0-9]*)?$/.test(value) || value === '') {
-      this.triggerChange(String(value).slice(0, 3));
-    } else if (value.toString().charAt(value.length - 1) === '.') {
-      this.triggerChange(value.slice(0, -1));    
-    } else {
-      this.triggerChange(preValue);         
-    }
+    const { value: preValue } = this.state;
+
+    this.triggerChange(String(value));
   };
 
   triggerChange = (value) => {
@@ -52,15 +44,15 @@ class SelectNumber extends Component {
     const options = selectNumbers || selectValues;
     return (
       <Select
-        getPopupContainer={triggerNode => triggerNode.parentNode}
+        getPopupContainer={(triggerNode) => triggerNode.parentNode}
         // autoFocus
-        {...this.props}    
+        {...this.props}
         value={value}
-        mode="combobox"        
-        tokenSeparators={[',']}        
-        onChange={this.handleChange}        
+        mode="combobox"
+        tokenSeparators={[',']}
+        onChange={this.handleChange}
       >
-        {options.map(sp => (
+        {options.map((sp) => (
           <Option key={sp.toString()} value={sp}>
             {sp}
           </Option>
