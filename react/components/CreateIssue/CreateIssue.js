@@ -643,9 +643,11 @@ class CreateIssue extends Component {
                 loadWhenMount
                 type="version"
                 afterLoad={() => {
-                  form.setFieldsValue({
-                    fixVersionIssueRel: [this.props.chosenVersion],
-                  });
+                  if (this.props.chosenVersion) {
+                    form.setFieldsValue({
+                      fixVersionIssueRel: [this.props.chosenVersion],
+                    });
+                  }
                 }}
               />,
             )}
