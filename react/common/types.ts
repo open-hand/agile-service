@@ -10,6 +10,12 @@ export interface User {
   realName: string
 }
 
+export interface ISprint {
+  sprintId: string
+  sprintName: string
+  endDate: string
+}
+
 export interface Issue {
   issueId: string
   summary: string
@@ -152,3 +158,4 @@ export interface ILog {
   trigger?: string,
   autoRelutionUpdate?: boolean,
 }
+export type IReportContentType = 'chart' | 'text' | 'list' | 'static_list'

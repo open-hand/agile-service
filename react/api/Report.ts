@@ -43,7 +43,7 @@ class ReportApi {
    * @param sprintId
    * @param type
    */
-  loadBurnDownCoordinate(sprintId: number, type: string, filter: {
+  loadBurnDownCoordinate(sprintId: string, type: string, filter: {
     assigneeId?: string
     onlyStory?: boolean
     quickFilterIds?: string[]

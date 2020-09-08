@@ -3,12 +3,12 @@ import { extendMoment } from 'moment-range';
 import { map } from 'lodash';
 // @ts-ignore
 const moment = extendMoment(originMoment);
-export interface IBurnDownData {
+export type IBurnDownData = {
   coordinate: {
     [key: string]: number
   },
   expectCount: number
-}
+} | null
 function getBetweenDateStr(start: Moment, end: Moment, restDays: string[]): {
   result: string[]
   rest: string[]

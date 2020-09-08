@@ -30,10 +30,10 @@ interface IPersonalFilter {
   userId: string
 }
 interface Props extends Partial<SelectProps> {
-  value?: string[] | null
+  value?: IQuickSearchValue
   onChange?: (value: IQuickSearchValue) => void
 }
-interface IQuickSearchValue {
+export interface IQuickSearchValue {
   onlyStory: boolean
   onlyMe: boolean
   quickFilters: string[]
