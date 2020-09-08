@@ -47,7 +47,7 @@ public interface StatusMachineNodeMapper extends BaseMapper<StatusMachineNodeDTO
      */
     int batchInsert(@Param("list") List<StatusMachineNodeDTO> nodeList);
 
-    List<IssueCountDTO> countIssueTypeByStatusIds(@Param("organizationId") Long organizationId,@Param("schemeId") Long schemeId, @Param("statusIds") List<Long> statusIds);
+    List<IssueCountDTO> countIssueTypeByStatusIds(@Param("organizationId") Long organizationId,@Param("schemeId") Long schemeId, @Param("statusIds") List<Long> statusIds,@Param("applyType") String applyType);
 
     List<StatusMachineNodeDTO> selectInitNode(@Param("organizationId")  Long organizationId, @Param("schemeId") Long schemeId,@Param("statusId") Long statusId);
 

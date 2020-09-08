@@ -287,10 +287,10 @@ public class StateMachineTransformServiceImpl implements StateMachineTransformSe
             for (StatusMachineNodeDTO node : nodes) {
                 List<TransformVO> nodeTransforms = startListMap.get(node.getId()) != null ? startListMap.get(node.getId()) : new ArrayList<>();
                 nodeTransforms.addAll(typeAll);
-                //增加一个自身状态的转换（用于拖动时的转换显示）
-                TransformVO self = new TransformVO();
-                self.setEndStatusId(node.getStatusId());
-                nodeTransforms.add(self);
+//                //增加一个自身状态的转换（用于拖动时的转换显示）
+//                TransformVO self = new TransformVO();
+//                self.setEndStatusId(node.getStatusId());
+//                nodeTransforms.add(self);
                 statusMap.put(node.getStatusId(), nodeTransforms);
             }
             resultMap.put(stateMachineId, statusMap);

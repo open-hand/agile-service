@@ -626,6 +626,7 @@
         sprint_name,
         start_date,
         end_date,
+        actual_end_date,
         status_code
         FROM agile_sprint
         WHERE project_id = #{projectId}
