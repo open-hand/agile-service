@@ -625,6 +625,7 @@ class CreateIssue extends Component {
                 label="特性"
                 allowClear
                 type="feature"
+                loadWhenMount
               />,
             )}
           </FormItem>
@@ -641,6 +642,11 @@ class CreateIssue extends Component {
                 mode="multiple"
                 loadWhenMount
                 type="version"
+                afterLoad={() => {
+                  form.setFieldsValue({
+                    fixVersionIssueRel: [this.props.chosenVersion],
+                  });
+                }}
               />,
             )}
           </FormItem>
@@ -654,7 +660,7 @@ class CreateIssue extends Component {
                 if (!isInProgram) {
                   return (
                     ['issue_epic', 'sub_task'].includes(newIssueTypeCode) ? null : (
-                      <FormItem label="史诗">
+                      <FormItem label="史诗" key="epicId">
                         {getFieldDecorator('epicId', {
                           rules: [{ required: field.required, message: '请选择史诗' }],
                         })(
@@ -676,12 +682,22 @@ class CreateIssue extends Component {
                   );
                 } if (isShowFeature && newIssueTypeCode === 'story') {
                   return (
-                    <FormItem label="特性">
+                    <FormItem label="特性" key="featureId">
                       {getFieldDecorator('featureId', {})(
                         <SelectFocusLoad
                           label="特性"
                           allowClear
                           type="feature"
+                          loadWhenMount
+                          selectedFeature={{
+                            issueId: this.props.chosenFeature,
+                            summary: this.props.chosenFeatureName,
+                          }}
+                          afterLoad={() => {
+                            form.setFieldsValue({
+                              featureId: this.props.chosenFeature,
+                            });
+                          }}
                         />,
                       )}
                     </FormItem>

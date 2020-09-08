@@ -459,6 +459,20 @@ export default {
       filterOption,
       loadWhenMount: true,
     },
+    avoidShowError: (props, List) => new Promise((resolve) => {
+      console.log(props);
+      const { selectedFeature } = props;
+      const extraList = [];
+      const values = selectedFeature instanceof Array ? selectedFeature : [selectedFeature];
+      values.forEach((feature) => {
+        if (!find(List, { issueId: feature.issueId })) {
+          extraList.push(feature);
+        }
+      });
+      resolve(extraList);
+    }).catch(() => {
+      resolve(extraList);
+    }),
   }, // 特性列表
   feature_all: {
     request: ({ filter, page }, requestArgs) => featureApi.queryAllInSubProject(requestArgs, filter, page),
