@@ -490,7 +490,7 @@ class CreateIssue extends Component {
                               const { fields } = this.state;
                               form.resetFields(['assigneedId', 'sprintId', 'priorityId', 'epicId', 'componentIssueRel',
                                 'estimatedTime', 'storyPoints', 'description', 'fixVersionIssueRel', 'issueLabel',
-                                ...fields.map((f) => f.fieldCode).filter((code) => code !== 'typeId')]);
+                                ...fields.map((f) => f.fieldCode).filter((code) => !['typeId', 'summary'].some((i) => i === code))]);
                               this.setState({
                                 fields: res,
                               });
@@ -777,7 +777,8 @@ class CreateIssue extends Component {
           newIssueTypeCode !== 'issue_epic' && (
             <FormItem>
               {getFieldDecorator('estimatedTime', {
-                rules: [{ required: field.required, message: '请选择预估时间' }],
+                rules: [{ required: field.required, message: '请选择预估时间' },
+                  { pattern: /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/, message: '请输入小于3位的整数或者整数位小于3位小数点后一位的小数' }],
               })(
                 <SelectNumber
                   label="预估时间"
@@ -792,7 +793,8 @@ class CreateIssue extends Component {
           newIssueTypeCode === 'story' && (
             <FormItem>
               {getFieldDecorator('storyPoints', {
-                rules: [{ required: field.required, message: '请填写故事点' }],
+                rules: [{ required: field.required, message: '请填写故事点' },
+                  { pattern: /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/, message: '请输入小于3位的整数或者整数位小于3位小数点后一位的小数' }],
               })(
                 <SelectNumber
                   label="故事点"
