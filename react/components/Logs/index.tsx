@@ -34,45 +34,45 @@ interface Props {
 const Logs: React.FC<Props> = ({ datalogs, expand, fieldsMap }) => (
   <div className="c7n-Logs">
     {
-      (datalogs || []).map((log: ILog, i: number, arr: ILog[]) => ((i > 4 && expand) || i < 4) && (
-      <div key={log.logId} className="c7n-Logs-log">
-        <div
-          className="c7n-Logs-log-user"
-        >
-          {
-              i && log.lastUpdatedBy === arr[i - 1].lastUpdatedBy ? null : (
-                <UserHead
-                // @ts-ignore
-                  user={{
-                    id: log.lastUpdatedBy,
-                    name: log.name,
-                    loginName: log.loginName,
-                    realName: log.realName,
-                    avatar: log.imageUrl,
-                  }}
-                  hiddenText
-                  type="datalog"
+      (datalogs || []).map((log: ILog, i: number, arr: ILog[]) => ((i >= 4 && expand) || i < 4) && (
+        <div key={log.logId} className="c7n-Logs-log">
+          <div
+            className="c7n-Logs-log-user"
+          >
+            {
+                i && log.lastUpdatedBy === arr[i - 1].lastUpdatedBy ? null : (
+                  <UserHead
+                  // @ts-ignore
+                    user={{
+                      id: log.lastUpdatedBy,
+                      name: log.name,
+                      loginName: log.loginName,
+                      realName: log.realName,
+                      avatar: log.imageUrl,
+                    }}
+                    hiddenText
+                    type="datalog"
+                  />
+                )
+            }
+          </div>
+          <div className="c7n-Logs-log-right">
+            <div className="c7n-Logs-log-logOperation">
+              <span className="c7n-Logs-log-userName">{log.realName}</span>
+              <Log log={log} fieldsMap={fieldsMap} />
+            </div>
+            <div className="c7n-Logs-log-lastUpdateDate">
+              <Tooltip placement="top" title={log.lastUpdateDate || ''}>
+                <TimeAgo
+                  datetime={log.lastUpdateDate || ''}
+                  locale="zh_CN"
                 />
-              )
-          }
-        </div>
-        <div className="c7n-Logs-log-right">
-          <div className="c7n-Logs-log-logOperation">
-            <span className="c7n-Logs-log-userName">{log.realName}</span>
-            <Log log={log} fieldsMap={fieldsMap} />
-          </div>
-          <div className="c7n-Logs-log-lastUpdateDate">
-            <Tooltip placement="top" title={log.lastUpdateDate || ''}>
-              <TimeAgo
-                datetime={log.lastUpdateDate || ''}
-                locale="zh_CN"
-              />
-            </Tooltip>
+              </Tooltip>
+            </div>
           </div>
         </div>
-      </div>
       ))
-    }
+      }
   </div>
 );
 export default Logs;
