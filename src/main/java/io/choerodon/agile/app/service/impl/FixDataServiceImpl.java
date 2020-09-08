@@ -245,6 +245,8 @@ public class FixDataServiceImpl implements FixDataService {
                 insertList.add(dto);
             }
         }
+        //处理字段rank值相同的情况
+        resetSameRank(insertList);
         int total = insertList.size();
         int step = 5000;
         int totalPage = total / step + 1;
@@ -256,6 +258,60 @@ public class FixDataServiceImpl implements FixDataService {
             LOGGER.info("第{}次插入成功", i+1);
         }
         LOGGER.info("迁移页面数据完成");
+    }
+
+    private void resetSameRank(List<ObjectSchemeFieldExtendDTO> insertList) {
+        List<ObjectSchemeFieldExtendDTO> organizationLevels =
+                insertList.stream().filter(i -> ObjectUtils.isEmpty(i.getProjectId())).collect(Collectors.toList());
+        //根据组织id和issueType分组
+        Map<Long, Map<String, List<ObjectSchemeFieldExtendDTO>>> organizationMap =
+                organizationLevels
+                        .stream()
+                        .collect(Collectors.groupingBy(ObjectSchemeFieldExtendDTO::getOrganizationId,
+                                Collectors.groupingBy(ObjectSchemeFieldExtendDTO::getIssueType)));
+        foreachAndResetRank(organizationMap, "organization");
+
+        List<ObjectSchemeFieldExtendDTO> projectLevels =
+                insertList.stream().filter(i -> !ObjectUtils.isEmpty(i.getProjectId())).collect(Collectors.toList());
+        //根据项目id和issueType分组
+        Map<Long, Map<String, List<ObjectSchemeFieldExtendDTO>>> projectMap =
+                projectLevels
+                        .stream()
+                        .collect(Collectors.groupingBy(ObjectSchemeFieldExtendDTO::getProjectId,
+                                Collectors.groupingBy(ObjectSchemeFieldExtendDTO::getIssueType)));
+        foreachAndResetRank(projectMap, "project");
+    }
+
+    private void foreachAndResetRank(Map<Long, Map<String, List<ObjectSchemeFieldExtendDTO>>> map,
+                                     String level) {
+        for (Map.Entry<Long, Map<String, List<ObjectSchemeFieldExtendDTO>>> entry : map.entrySet()) {
+            Long id = entry.getKey();
+            Map<String, List<ObjectSchemeFieldExtendDTO>> issueTypeMap = entry.getValue();
+            for (Map.Entry<String, List<ObjectSchemeFieldExtendDTO>> e : issueTypeMap.entrySet()) {
+                List<ObjectSchemeFieldExtendDTO> list = e.getValue();
+                resetRank(list);
+            }
+            LOGGER.info("{} id = {}的字段重置rank值成功", level, id);
+        }
+    }
+
+    private void resetRank(List<ObjectSchemeFieldExtendDTO> list) {
+        //先按rank升序排列，rank值相同，按fieldId升序排列
+        Collections.sort(list, new Comparator<ObjectSchemeFieldExtendDTO>() {
+            @Override
+            public int compare(ObjectSchemeFieldExtendDTO o1, ObjectSchemeFieldExtendDTO o2) {
+                int result = o1.getRank().compareTo(o2.getRank());
+                if (result == 0) {
+                    return o2.getFieldId().compareTo(o1.getFieldId());
+                }
+                return result;
+            }
+        });
+        String mid = RankUtil.mid();
+        for (ObjectSchemeFieldExtendDTO dto : list) {
+            dto.setRank(mid);
+            mid = RankUtil.genNext(mid);
+        }
     }
 
     protected void processFields(Long createPageId, Long editPageId, String schemeCode, MultiKeyMap dataMap, MultiKeyMap rankMap, Set<Long> specialFieldIds) {
