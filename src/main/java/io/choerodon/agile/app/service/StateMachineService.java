@@ -1,8 +1,8 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.core.domain.Page;
-import io.choerodon.agile.api.vo.StateMachineListVO;
-import io.choerodon.agile.api.vo.StateMachineVO;
+import io.choerodon.agile.api.vo.StatusMachineListVO;
+import io.choerodon.agile.api.vo.StatusMachineVO;
 import io.choerodon.agile.api.vo.StateMachineWithStatusVO;
 import io.choerodon.agile.api.vo.event.ChangeStatus;
 import io.choerodon.agile.api.vo.event.DeployStateMachinePayload;
@@ -28,26 +28,26 @@ public interface StateMachineService {
      * @param param          模糊查询参数
      * @return 状态机列表
      */
-    Page<StateMachineListVO> pageQuery(Long organizationId, PageRequest pageRequest, String name, String description, String param);
+    Page<StatusMachineListVO> pageQuery(Long organizationId, PageRequest pageRequest, String name, String description, String param);
 
     /**
      * 创建状态机及配置
      *
      * @param organizationId 组织id
-     * @param stateMachineVO 状态机及配置对象
+     * @param statusMachineVO 状态机及配置对象
      * @return 状态机
      */
-    StateMachineVO create(Long organizationId, StateMachineVO stateMachineVO);
+    StatusMachineVO create(Long organizationId, StatusMachineVO statusMachineVO);
 
     /**
      * 更新状态机
      *
      * @param organizationId 组织id
      * @param stateMachineId 状态机id
-     * @param stateMachineVO 状态机对象
+     * @param statusMachineVO 状态机对象
      * @return 更新状态机
      */
-    StateMachineVO update(Long organizationId, Long stateMachineId, StateMachineVO stateMachineVO);
+    StatusMachineVO update(Long organizationId, Long stateMachineId, StatusMachineVO statusMachineVO);
 
     /**
      * 发布状态机
@@ -113,7 +113,7 @@ public interface StateMachineService {
      * @param isDraft        是否为草稿
      * @return
      */
-    StateMachineVO queryStateMachineWithConfigById(Long organizationId, Long stateMachineId, Boolean isDraft);
+    StatusMachineVO queryStateMachineWithConfigById(Long organizationId, Long stateMachineId, Boolean isDraft);
 
     /**
      * 获取状态机及配置，用于内部状态机实例构建
@@ -129,7 +129,7 @@ public interface StateMachineService {
      * @param stateMachineId 状态机Id
      * @return 状态机对象
      */
-    StateMachineVO deleteDraft(Long organizationId, Long stateMachineId);
+    StatusMachineVO deleteDraft(Long organizationId, Long stateMachineId);
 
     /**
      * 获取状态机
@@ -137,7 +137,7 @@ public interface StateMachineService {
      * @param stateMachineId 状态机id
      * @return
      */
-    StateMachineVO queryStateMachineById(Long organizationId, Long stateMachineId);
+    StatusMachineVO queryStateMachineById(Long organizationId, Long stateMachineId);
 
     /**
      * 获取组织默认状态机
@@ -145,7 +145,7 @@ public interface StateMachineService {
      * @param organizationId
      * @return
      */
-    StateMachineVO queryDefaultStateMachine(Long organizationId);
+    StatusMachineVO queryDefaultStateMachine(Long organizationId);
 
     /**
      * 校验问题状态机名字是否未被使用
@@ -162,7 +162,7 @@ public interface StateMachineService {
      * @param organizationId 组织id
      * @return 状态机列表
      */
-    List<StateMachineVO> queryAll(Long organizationId);
+    List<StatusMachineVO> queryAll(Long organizationId);
 
     /**
      * 修改状态机状态
@@ -205,7 +205,7 @@ public interface StateMachineService {
      * @param organizationId
      * @return
      */
-    List<StateMachineVO> queryByOrgId(Long organizationId);
+    List<StatusMachineVO> queryByOrgId(Long organizationId);
 
     /**
      * issue服务修改状态机方案时，校验变更的问题类型影响的issue数量

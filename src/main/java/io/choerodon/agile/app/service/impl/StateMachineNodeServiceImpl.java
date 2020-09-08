@@ -1,7 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.api.vo.StateMachineNodeVO;
-import io.choerodon.agile.api.vo.StateMachineTransformVO;
+import io.choerodon.agile.api.vo.StatusMachineNodeVO;
+import io.choerodon.agile.api.vo.StatusMachineTransformVO;
 import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.app.service.StateMachineClientService;
 import io.choerodon.agile.app.service.StateMachineNodeService;
@@ -51,7 +51,7 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
 
     @Override
     @ChangeStateMachineStatus
-    public List<StateMachineNodeVO> create(Long organizationId, Long stateMachineId, StateMachineNodeVO nodeVO) {
+    public List<StatusMachineNodeVO> create(Long organizationId, Long stateMachineId, StatusMachineNodeVO nodeVO) {
         nodeVO.setStateMachineId(stateMachineId);
         nodeVO.setOrganizationId(organizationId);
         createStatus(organizationId, nodeVO);
@@ -70,7 +70,7 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
 
     @Override
     @ChangeStateMachineStatus
-    public List<StateMachineNodeVO> update(Long organizationId, Long stateMachineId, Long nodeId, StateMachineNodeVO nodeVO) {
+    public List<StatusMachineNodeVO> update(Long organizationId, Long stateMachineId, Long nodeId, StatusMachineNodeVO nodeVO) {
         nodeVO.setStateMachineId(stateMachineId);
         nodeVO.setOrganizationId(organizationId);
         createStatus(organizationId, nodeVO);
@@ -85,7 +85,7 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
 
     @Override
     @ChangeStateMachineStatus
-    public List<StateMachineNodeVO> delete(Long organizationId, Long stateMachineId, Long nodeId) {
+    public List<StatusMachineNodeVO> delete(Long organizationId, Long stateMachineId, Long nodeId) {
         StateMachineNodeDraftDTO node = nodeDraftMapper.queryById(organizationId, nodeId);
         if (node == null) {
             throw new CommonException("error.node.notFound");
@@ -128,24 +128,24 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
     }
 
     @Override
-    public StateMachineNodeVO queryById(Long organizationId, Long nodeId) {
+    public StatusMachineNodeVO queryById(Long organizationId, Long nodeId) {
         StateMachineNodeDraftDTO node = nodeDraftMapper.getNodeById(nodeId);
         if (node == null) {
             throw new CommonException("error.stateMachineNode.noFound");
         }
-        StateMachineNodeVO nodeVO = modelMapper.map(node, StateMachineNodeVO.class);
+        StatusMachineNodeVO nodeVO = modelMapper.map(node, StatusMachineNodeVO.class);
         nodeVO.setStatusVO(modelMapper.map(node.getStatus(), StatusVO.class));
         //获取进入的转换
         StateMachineTransformDraftDTO intoTransformSearch = new StateMachineTransformDraftDTO();
         intoTransformSearch.setEndNodeId(nodeId);
         List<StateMachineTransformDraftDTO> intoTransforms = transformDraftMapper.select(intoTransformSearch);
-        nodeVO.setIntoTransform(modelMapper.map(intoTransforms, new TypeToken<List<StateMachineTransformVO>>() {
+        nodeVO.setIntoTransform(modelMapper.map(intoTransforms, new TypeToken<List<StatusMachineTransformVO>>() {
         }.getType()));
         //获取出去的转换
         StateMachineTransformDraftDTO outTransformSerach = new StateMachineTransformDraftDTO();
         outTransformSerach.setStartNodeId(nodeId);
         List<StateMachineTransformDraftDTO> outTransforms = transformDraftMapper.select(outTransformSerach);
-        nodeVO.setOutTransform(modelMapper.map(outTransforms, new TypeToken<List<StateMachineTransformVO>>() {
+        nodeVO.setOutTransform(modelMapper.map(outTransforms, new TypeToken<List<StatusMachineTransformVO>>() {
         }.getType()));
         return nodeVO;
     }
@@ -156,7 +156,7 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
      * @param organizationId 组织id
      * @param nodeVO         节点
      */
-    private void createStatus(Long organizationId, StateMachineNodeVO nodeVO) {
+    private void createStatus(Long organizationId, StatusMachineNodeVO nodeVO) {
         if (nodeVO.getStatusId() == null && nodeVO.getStatusVO() != null && nodeVO.getStatusVO().getName() != null) {
             StatusDTO status = modelMapper.map(nodeVO.getStatusVO(), StatusDTO.class);
             status.setOrganizationId(organizationId);
@@ -189,15 +189,15 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
     }
 
     @Override
-    public List<StateMachineNodeVO> queryByStateMachineId(Long organizationId, Long stateMachineId, Boolean isDraft) {
-        List<StateMachineNodeVO> nodeVOS;
+    public List<StatusMachineNodeVO> queryByStateMachineId(Long organizationId, Long stateMachineId, Boolean isDraft) {
+        List<StatusMachineNodeVO> nodeVOS;
         if (isDraft) {
             //获取节点
             List<StateMachineNodeDraftDTO> nodes = nodeDraftMapper.selectByStateMachineId(stateMachineId);
             Map<Long, StatusDTO> map = nodes.stream().filter(x -> x.getStatus() != null).collect(Collectors.toMap(StateMachineNodeDraftDTO::getId, StateMachineNodeDraftDTO::getStatus));
-            nodeVOS = modelMapper.map(nodes, new TypeToken<List<StateMachineNodeVO>>() {
+            nodeVOS = modelMapper.map(nodes, new TypeToken<List<StatusMachineNodeVO>>() {
             }.getType());
-            for (StateMachineNodeVO nodeVO : nodeVOS) {
+            for (StatusMachineNodeVO nodeVO : nodeVOS) {
                 StatusDTO status = map.get(nodeVO.getId());
                 if (status != null) {
                     nodeVO.setStatusVO(modelMapper.map(status, StatusVO.class));
@@ -206,9 +206,9 @@ public class StateMachineNodeServiceImpl implements StateMachineNodeService {
         } else {
             List<StatusMachineNodeDTO> nodes = nodeDeployMapper.selectByStateMachineId(stateMachineId);
             Map<Long, StatusDTO> map = nodes.stream().filter(x -> x.getStatus() != null).collect(Collectors.toMap(StatusMachineNodeDTO::getId, StatusMachineNodeDTO::getStatus));
-            nodeVOS = modelMapper.map(nodes, new TypeToken<List<StateMachineNodeVO>>() {
+            nodeVOS = modelMapper.map(nodes, new TypeToken<List<StatusMachineNodeVO>>() {
             }.getType());
-            for (StateMachineNodeVO nodeVO : nodeVOS) {
+            for (StatusMachineNodeVO nodeVO : nodeVOS) {
                 StatusDTO status = map.get(nodeVO.getId());
                 if (status != null) {
                     nodeVO.setStatusVO(modelMapper.map(status, StatusVO.class));

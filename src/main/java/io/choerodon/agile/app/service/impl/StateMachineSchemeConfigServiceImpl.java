@@ -96,7 +96,7 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
 
     @Override
     @ChangeSchemeStatus
-    public StateMachineSchemeVO create(Long organizationId, Long schemeId, Long stateMachineId, List<StateMachineSchemeConfigVO> schemeVOS) {
+    public StateMachineSchemeVO create(Long organizationId, Long schemeId, Long stateMachineId, List<StatusMachineSchemeConfigVO> schemeVOS) {
         List<StateMachineSchemeConfigDraftDTO> configs = modelMapper.map(schemeVOS, new TypeToken<List<StateMachineSchemeConfigDraftDTO>>() {
         }.getType());
         //删除之前的草稿配置
@@ -147,12 +147,12 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
     }
 
     @Override
-    public StateMachineSchemeConfigVO selectDefault(Boolean isDraft, Long organizationId, Long schemeId) {
-        StateMachineSchemeConfigVO configVO;
+    public StatusMachineSchemeConfigVO selectDefault(Boolean isDraft, Long organizationId, Long schemeId) {
+        StatusMachineSchemeConfigVO configVO;
         if (isDraft) {
-            configVO = modelMapper.map(configDraftMapper.selectDefault(organizationId, schemeId), StateMachineSchemeConfigVO.class);
+            configVO = modelMapper.map(configDraftMapper.selectDefault(organizationId, schemeId), StatusMachineSchemeConfigVO.class);
         } else {
-            configVO = modelMapper.map(configMapper.selectDefault(organizationId, schemeId), StateMachineSchemeConfigVO.class);
+            configVO = modelMapper.map(configMapper.selectDefault(organizationId, schemeId), StatusMachineSchemeConfigVO.class);
         }
         return configVO;
     }
@@ -206,19 +206,19 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
     }
 
     @Override
-    public List<StateMachineSchemeConfigVO> queryBySchemeId(Boolean isDraft, Long organizationId, Long schemeId) {
-        List<StateMachineSchemeConfigVO> configVOS;
+    public List<StatusMachineSchemeConfigVO> queryBySchemeId(Boolean isDraft, Long organizationId, Long schemeId) {
+        List<StatusMachineSchemeConfigVO> configVOS;
         if (isDraft) {
             StateMachineSchemeConfigDraftDTO select = new StateMachineSchemeConfigDraftDTO();
             select.setOrganizationId(organizationId);
             select.setSchemeId(schemeId);
-            configVOS = modelMapper.map(configDraftMapper.select(select), new TypeToken<List<StateMachineSchemeConfigVO>>() {
+            configVOS = modelMapper.map(configDraftMapper.select(select), new TypeToken<List<StatusMachineSchemeConfigVO>>() {
             }.getType());
         } else {
             StatusMachineSchemeConfigDTO select = new StatusMachineSchemeConfigDTO();
             select.setOrganizationId(organizationId);
             select.setSchemeId(schemeId);
-            configVOS = modelMapper.map(configMapper.select(select), new TypeToken<List<StateMachineSchemeConfigVO>>() {
+            configVOS = modelMapper.map(configMapper.select(select), new TypeToken<List<StatusMachineSchemeConfigVO>>() {
             }.getType());
         }
         return configVOS;

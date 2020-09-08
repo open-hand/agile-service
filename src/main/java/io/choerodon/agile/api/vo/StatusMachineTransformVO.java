@@ -10,7 +10,7 @@ import java.util.List;
  * @author shinan.chen
  * @since 2019/2/19
  */
-public class StateMachineTransformVO {
+public class StatusMachineTransformVO {
     @ApiModelProperty(value = "转换id")
     @Encrypt
     private Long id;
@@ -43,9 +43,9 @@ public class StateMachineTransformVO {
     @Encrypt
     private Long endStatusId;
     @ApiModelProperty(value = "起始节点对象")
-    private StateMachineNodeVO startNodeVO;
+    private StatusMachineNodeVO startNodeVO;
     @ApiModelProperty(value = "目标节点对象")
-    private StateMachineNodeVO endNodeVO;
+    private StatusMachineNodeVO endNodeVO;
     @ApiModelProperty(value = "条件列表")
     private List<StateMachineConfigVO> conditions;
     @ApiModelProperty(value = "验证列表")
@@ -167,19 +167,19 @@ public class StateMachineTransformVO {
         this.postpositions = postpositions;
     }
 
-    public StateMachineNodeVO getStartNodeVO() {
+    public StatusMachineNodeVO getStartNodeVO() {
         return startNodeVO;
     }
 
-    public void setStartNodeVO(StateMachineNodeVO startNodeVO) {
+    public void setStartNodeVO(StatusMachineNodeVO startNodeVO) {
         this.startNodeVO = startNodeVO;
     }
 
-    public StateMachineNodeVO getEndNodeVO() {
+    public StatusMachineNodeVO getEndNodeVO() {
         return endNodeVO;
     }
 
-    public void setEndNodeVO(StateMachineNodeVO endNodeVO) {
+    public void setEndNodeVO(StatusMachineNodeVO endNodeVO) {
         this.endNodeVO = endNodeVO;
     }
 

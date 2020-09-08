@@ -5,7 +5,7 @@ import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
-import io.choerodon.agile.api.vo.StateMachineTransformVO;
+import io.choerodon.agile.api.vo.StatusMachineTransformVO;
 import io.choerodon.agile.api.vo.event.TransformInfo;
 import io.choerodon.agile.app.service.InstanceService;
 import io.choerodon.agile.infra.cache.InstanceCache;
@@ -89,8 +89,8 @@ public class InstanceController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建实例时，获取状态机的初始转换，包括转换的configs")
     @GetMapping(value = "/query_init_transform")
-    public ResponseEntity<StateMachineTransformVO> queryInitTransform(@PathVariable("organization_id") Long organizationId,
-                                                                      @RequestParam("state_machine_id") @Encrypt Long stateMachineId) {
+    public ResponseEntity<StatusMachineTransformVO> queryInitTransform(@PathVariable("organization_id") Long organizationId,
+                                                                       @RequestParam("state_machine_id") @Encrypt Long stateMachineId) {
         return new ResponseEntity<>(instanceService.queryInitTransform(organizationId, stateMachineId), HttpStatus.OK);
     }
 

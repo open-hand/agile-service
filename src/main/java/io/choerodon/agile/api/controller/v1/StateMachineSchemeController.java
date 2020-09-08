@@ -8,7 +8,7 @@ import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.agile.api.validator.StateMachineSchemeValidator;
-import io.choerodon.agile.api.vo.StateMachineSchemeConfigVO;
+import io.choerodon.agile.api.vo.StatusMachineSchemeConfigVO;
 import io.choerodon.agile.api.vo.StateMachineSchemeVO;
 import io.choerodon.agile.api.vo.event.StateMachineSchemeChangeItem;
 import io.choerodon.agile.app.service.StateMachineSchemeConfigService;
@@ -93,7 +93,7 @@ public class StateMachineSchemeController {
     public ResponseEntity<StateMachineSchemeVO> createConfig(@PathVariable("organization_id") Long organizationId,
                                                              @PathVariable("scheme_id") @Encrypt Long schemeId,
                                                              @PathVariable("state_machine_id") @Encrypt Long stateMachineId,
-                                                             @RequestBody List<StateMachineSchemeConfigVO> schemeDTOs) {
+                                                             @RequestBody List<StatusMachineSchemeConfigVO> schemeDTOs) {
         return new ResponseEntity<>(configService.create(organizationId, schemeId, stateMachineId, schemeDTOs), HttpStatus.OK);
     }
 

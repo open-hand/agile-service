@@ -1,7 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.StateMachineTransformUpdateVO;
-import io.choerodon.agile.api.vo.StateMachineTransformVO;
+import io.choerodon.agile.api.vo.StatusMachineTransformVO;
 import io.choerodon.agile.api.vo.TransformVO;
 import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
 
@@ -20,7 +20,7 @@ public interface StateMachineTransformService {
      * @param transformVO
      * @return
      */
-    StateMachineTransformVO create(Long organizationId, Long stateMachineId, StateMachineTransformVO transformVO);
+    StatusMachineTransformVO create(Long organizationId, Long stateMachineId, StatusMachineTransformVO transformVO);
 
     /**
      * 更新转换
@@ -30,7 +30,7 @@ public interface StateMachineTransformService {
      * @param transformVO   转换对象
      * @return 更新转换
      */
-    StateMachineTransformVO update(Long organizationId, Long stateMachineId, Long transformId, StateMachineTransformVO transformVO);
+    StatusMachineTransformVO update(Long organizationId, Long stateMachineId, Long transformId, StatusMachineTransformVO transformVO);
 
     /**
      * 删除转换
@@ -56,7 +56,7 @@ public interface StateMachineTransformService {
      * @param transformId
      * @return
      */
-    StateMachineTransformVO queryById(Long organizationId, Long transformId);
+    StatusMachineTransformVO queryById(Long organizationId, Long transformId);
 
     /**
      * 获取当前状态拥有的转换列表，包括【全部】类型的转换
@@ -75,7 +75,7 @@ public interface StateMachineTransformService {
      * @param endNodeId
      * @return
      */
-    StateMachineTransformVO createAllStatusTransform(Long organizationId, Long stateMachineId, Long endNodeId);
+    StatusMachineTransformVO createAllStatusTransform(Long organizationId, Long stateMachineId, Long endNodeId);
 
     /**
      * 删除【全部转换到此状态】转换

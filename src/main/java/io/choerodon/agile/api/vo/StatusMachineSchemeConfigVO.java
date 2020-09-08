@@ -8,7 +8,7 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
  * @author shinan.chen
  * @since 2018/11/25
  */
-public class StateMachineSchemeConfigVO {
+public class StatusMachineSchemeConfigVO {
     @ApiModelProperty(value = "状态机方案配置id")
     @Encrypt
     private Long id;

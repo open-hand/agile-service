@@ -138,14 +138,14 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     @Override
     public List<IssueTypeVO> queryIssueTypeByStateMachineSchemeId(Long organizationId, Long schemeId) {
         List<IssueTypeVO> issueTypeVOS = queryByOrgId(organizationId);
-        List<StateMachineSchemeConfigVO> configVOS = stateMachineSchemeConfigService.queryBySchemeId(true, organizationId, schemeId);
-        Map<Long, StateMachineSchemeConfigVO> configMap = configVOS.stream().collect(Collectors.toMap(StateMachineSchemeConfigVO::getIssueTypeId, x -> x));
+        List<StatusMachineSchemeConfigVO> configVOS = stateMachineSchemeConfigService.queryBySchemeId(true, organizationId, schemeId);
+        Map<Long, StatusMachineSchemeConfigVO> configMap = configVOS.stream().collect(Collectors.toMap(StatusMachineSchemeConfigVO::getIssueTypeId, x -> x));
         for (IssueTypeVO issueTypeVO : issueTypeVOS) {
-            StateMachineSchemeConfigVO configVO = configMap.get(issueTypeVO.getId());
+            StatusMachineSchemeConfigVO configVO = configMap.get(issueTypeVO.getId());
             if (configVO != null) {
-                StateMachineVO stateMachineVO = stateMachineService.queryStateMachineById(organizationId, configVO.getStateMachineId());
-                issueTypeVO.setStateMachineName(stateMachineVO.getName());
-                issueTypeVO.setStateMachineId(stateMachineVO.getId());
+                StatusMachineVO statusMachineVO = stateMachineService.queryStateMachineById(organizationId, configVO.getStateMachineId());
+                issueTypeVO.setStateMachineName(statusMachineVO.getName());
+                issueTypeVO.setStateMachineId(statusMachineVO.getId());
             }
         }
         return issueTypeVOS;
