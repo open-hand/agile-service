@@ -86,38 +86,38 @@ public class StateMachineServiceImpl implements StateMachineService {
     private IssueTypeMapper issueTypeMapper;
 
     @Override
-    public Page<StateMachineListVO> pageQuery(Long organizationId, PageRequest pageRequest, String name, String description, String param) {
-        StatusMachineDTO stateMachine = new StatusMachineDTO();
-        stateMachine.setName(name);
-        stateMachine.setDescription(description);
-        stateMachine.setOrganizationId(organizationId);
+    public Page<StatusMachineListVO> pageQuery(Long organizationId, PageRequest pageRequest, String name, String description, String param) {
+        StatusMachineDTO statusMachine = new StatusMachineDTO();
+        statusMachine.setName(name);
+        statusMachine.setDescription(description);
+        statusMachine.setOrganizationId(organizationId);
 
         Page<StatusMachineDTO> page = PageHelper.doPageAndSort(pageRequest,
-                () -> statusMachineMapper.fulltextSearch(stateMachine, param));
-        List<StateMachineListVO> stateMachineVOS = modelMapper.map(page.getContent(), new TypeToken<List<StateMachineListVO>>() {
+                () -> statusMachineMapper.fulltextSearch(statusMachine, param));
+        List<StatusMachineListVO> statusMachineVOS = modelMapper.map(page.getContent(), new TypeToken<List<StatusMachineListVO>>() {
         }.getType());
-        for (StateMachineListVO stateMachineVO : stateMachineVOS) {
-            List<StateMachineSchemeVO> list = schemeService.querySchemeByStateMachineId(organizationId, stateMachineVO.getId());
+        for (StatusMachineListVO statusMachineVO : statusMachineVOS) {
+            List<StateMachineSchemeVO> list = schemeService.querySchemeByStateMachineId(organizationId, statusMachineVO.getId());
             //列表去重
             List<StateMachineSchemeVO> unique = list.stream().collect(
                     collectingAndThen(
                             toCollection(() -> new TreeSet<>(comparingLong(StateMachineSchemeVO::getId))), ArrayList::new)
             );
-            stateMachineVO.setStateMachineSchemeVOS(unique);
+            statusMachineVO.setStateMachineSchemeVOS(unique);
         }
-        return PageUtil.buildPageInfoWithPageInfoList(page, stateMachineVOS);
+        return PageUtil.buildPageInfoWithPageInfoList(page, statusMachineVOS);
     }
 
     @Override
-    public StateMachineVO create(Long organizationId, StateMachineVO stateMachineVO) {
-        if (checkName(organizationId, stateMachineVO.getName())) {
+    public StatusMachineVO create(Long organizationId, StatusMachineVO statusMachineVO) {
+        if (checkName(organizationId, statusMachineVO.getName())) {
             throw new CommonException("error.stateMachineName.exist");
         }
-        stateMachineVO.setId(null);
-        stateMachineVO.setStatus(StateMachineStatus.CREATE);
-        stateMachineVO.setOrganizationId(organizationId);
-        stateMachineVO.setDefault(false);
-        StatusMachineDTO stateMachine = modelMapper.map(stateMachineVO, StatusMachineDTO.class);
+        statusMachineVO.setId(null);
+        statusMachineVO.setStatus(StateMachineStatus.CREATE);
+        statusMachineVO.setOrganizationId(organizationId);
+        statusMachineVO.setDefault(false);
+        StatusMachineDTO stateMachine = modelMapper.map(statusMachineVO, StatusMachineDTO.class);
         int isInsert = statusMachineMapper.insertSelective(stateMachine);
         if (isInsert != 1) {
             throw new CommonException("error.stateMachine.create");
@@ -172,11 +172,11 @@ public class StateMachineServiceImpl implements StateMachineService {
     }
 
     @Override
-    public StateMachineVO update(Long organizationId, Long stateMachineId, StateMachineVO stateMachineVO) {
-        if (stateMachineVO.getName() != null && checkNameUpdate(organizationId, stateMachineId, stateMachineVO.getName())) {
+    public StatusMachineVO update(Long organizationId, Long stateMachineId, StatusMachineVO statusMachineVO) {
+        if (statusMachineVO.getName() != null && checkNameUpdate(organizationId, stateMachineId, statusMachineVO.getName())) {
             throw new CommonException("error.stateMachineName.exist");
         }
-        StatusMachineDTO stateMachine = modelMapper.map(stateMachineVO, StatusMachineDTO.class);
+        StatusMachineDTO stateMachine = modelMapper.map(statusMachineVO, StatusMachineDTO.class);
         stateMachine.setId(stateMachineId);
         stateMachine.setOrganizationId(organizationId);
         int isUpdate = statusMachineMapper.updateByPrimaryKeySelective(stateMachine);
@@ -184,7 +184,7 @@ public class StateMachineServiceImpl implements StateMachineService {
             throw new CommonException("error.stateMachine.update");
         }
         stateMachine = statusMachineMapper.queryById(organizationId, stateMachine.getId());
-        return modelMapper.map(stateMachine, StateMachineVO.class);
+        return modelMapper.map(stateMachine, StatusMachineVO.class);
     }
 
     @Override
@@ -320,16 +320,16 @@ public class StateMachineServiceImpl implements StateMachineService {
     }
 
     @Override
-    public StateMachineVO queryStateMachineById(Long organizationId, Long stateMachineId) {
+    public StatusMachineVO queryStateMachineById(Long organizationId, Long stateMachineId) {
         StatusMachineDTO stateMachine = statusMachineMapper.queryById(organizationId, stateMachineId);
-        return stateMachine != null ? modelMapper.map(stateMachine, StateMachineVO.class) : null;
+        return stateMachine != null ? modelMapper.map(stateMachine, StatusMachineVO.class) : null;
     }
 
     @Override
     public Map<String, Object> checkDelete(Long organizationId, Long stateMachineId) {
         Map<String, Object> map = new HashMap<>();
-        StateMachineVO stateMachineVO = queryStateMachineById(organizationId, stateMachineId);
-        if (stateMachineVO == null) {
+        StatusMachineVO statusMachineVO = queryStateMachineById(organizationId, stateMachineId);
+        if (statusMachineVO == null) {
             map.put(CloopmCommonString.CAN_DELETE, false);
             map.put("reason", "noFound");
             return map;
@@ -434,11 +434,11 @@ public class StateMachineServiceImpl implements StateMachineService {
         statusMachineMapper.insert(map);
         Long stateMachineId = map.getId();
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        List<StateMachineNodeVO> stateMachineNodeVOS = nodeService.queryByStateMachineId(organizationId, currentStateMachineId, false);
+        List<StatusMachineNodeVO> statusMachineNodeVOS = nodeService.queryByStateMachineId(organizationId, currentStateMachineId, false);
         // 复制node
         List<Long> nodeIds = new ArrayList<>();
         List<StatusMachineNodeDTO> nodeList = new ArrayList<>();
-        stateMachineNodeVOS.forEach(v -> {
+        statusMachineNodeVOS.forEach(v -> {
             nodeIds.add(v.getId());
             StatusMachineNodeDTO stateMachineNode = modelMapper.map(v, StatusMachineNodeDTO.class);
             stateMachineNode.setId(null);
@@ -658,7 +658,7 @@ public class StateMachineServiceImpl implements StateMachineService {
     }
 
     @Override
-    public StateMachineVO queryStateMachineWithConfigById(Long organizationId, Long stateMachineId, Boolean isDraft) {
+    public StatusMachineVO queryStateMachineWithConfigById(Long organizationId, Long stateMachineId, Boolean isDraft) {
         StatusMachineDTO stateMachine = statusMachineMapper.queryById(organizationId, stateMachineId);
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.notFound");
@@ -669,31 +669,31 @@ public class StateMachineServiceImpl implements StateMachineService {
             updateStateMachineStatus(organizationId, stateMachineId);
         }
 
-        List<StateMachineNodeVO> nodeVOS = nodeService.queryByStateMachineId(organizationId, stateMachineId, isDraft);
-        List<StateMachineTransformVO> transformVOS;
+        List<StatusMachineNodeVO> nodeVOS = nodeService.queryByStateMachineId(organizationId, stateMachineId, isDraft);
+        List<StatusMachineTransformVO> transformVOS;
         if (isDraft) {
             //获取转换
             StateMachineTransformDraftDTO select = new StateMachineTransformDraftDTO();
             select.setStateMachineId(stateMachineId);
             select.setOrganizationId(organizationId);
             List<StateMachineTransformDraftDTO> transforms = transformDraftMapper.select(select);
-            transformVOS = modelMapper.map(transforms, new TypeToken<List<StateMachineTransformVO>>() {
+            transformVOS = modelMapper.map(transforms, new TypeToken<List<StatusMachineTransformVO>>() {
             }.getType());
         } else {
             StatusMachineTransformDTO select = new StatusMachineTransformDTO();
             select.setStateMachineId(stateMachineId);
             select.setOrganizationId(organizationId);
             List<StatusMachineTransformDTO> transforms = transformDeployMapper.select(select);
-            transformVOS = modelMapper.map(transforms, new TypeToken<List<StateMachineTransformVO>>() {
+            transformVOS = modelMapper.map(transforms, new TypeToken<List<StatusMachineTransformVO>>() {
             }.getType());
         }
 
-        StateMachineVO stateMachineVO = modelMapper.map(stateMachine, StateMachineVO.class);
-        stateMachineVO.setNodeVOS(nodeVOS);
-        stateMachineVO.setTransformVOS(transformVOS);
+        StatusMachineVO statusMachineVO = modelMapper.map(stateMachine, StatusMachineVO.class);
+        statusMachineVO.setNodeVOS(nodeVOS);
+        statusMachineVO.setTransformVOS(transformVOS);
 
         //获取转换中的配置
-        for (StateMachineTransformVO transformVO : transformVOS) {
+        for (StatusMachineTransformVO transformVO : transformVOS) {
             List<StateMachineConfigVO> configVOS;
             if (isDraft) {
                 StateMachineConfigDraftDTO config = new StateMachineConfigDraftDTO();
@@ -718,7 +718,7 @@ public class StateMachineServiceImpl implements StateMachineService {
                 transformVO.setPostpositions(Optional.ofNullable(map.get(ConfigType.ACTION)).orElse(Collections.emptyList()));
             }
         }
-        return stateMachineVO;
+        return statusMachineVO;
     }
 
     @Override
@@ -750,7 +750,7 @@ public class StateMachineServiceImpl implements StateMachineService {
     }
 
     @Override
-    public StateMachineVO deleteDraft(Long organizationId, Long stateMachineId) {
+    public StatusMachineVO deleteDraft(Long organizationId, Long stateMachineId) {
         StatusMachineDTO stateMachine = statusMachineMapper.queryById(organizationId, stateMachineId);
         if (stateMachine == null) {
             throw new CommonException("error.stateMachine.deleteDraft.noFound");
@@ -840,20 +840,20 @@ public class StateMachineServiceImpl implements StateMachineService {
     }
 
     @Override
-    public StateMachineVO queryDefaultStateMachine(Long organizationId) {
+    public StatusMachineVO queryDefaultStateMachine(Long organizationId) {
         StatusMachineDTO defaultStateMachine = new StatusMachineDTO();
         defaultStateMachine.setOrganizationId(organizationId);
         defaultStateMachine.setDefault(true);
         StatusMachineDTO stateMachine = statusMachineMapper.selectOne(defaultStateMachine);
-        return stateMachine != null ? modelMapper.map(stateMachine, StateMachineVO.class) : null;
+        return stateMachine != null ? modelMapper.map(stateMachine, StatusMachineVO.class) : null;
     }
 
     @Override
-    public List<StateMachineVO> queryAll(Long organizationId) {
+    public List<StatusMachineVO> queryAll(Long organizationId) {
         StatusMachineDTO stateMachine = new StatusMachineDTO();
         stateMachine.setOrganizationId(organizationId);
         List<StatusMachineDTO> list = statusMachineMapper.select(stateMachine);
-        return modelMapper.map(list, new TypeToken<List<StateMachineVO>>() {
+        return modelMapper.map(list, new TypeToken<List<StatusMachineVO>>() {
         }.getType());
     }
 
@@ -973,11 +973,11 @@ public class StateMachineServiceImpl implements StateMachineService {
     }
 
     @Override
-    public List<StateMachineVO> queryByOrgId(Long organizationId) {
+    public List<StatusMachineVO> queryByOrgId(Long organizationId) {
         StatusMachineDTO select = new StatusMachineDTO();
         select.setOrganizationId(organizationId);
         List<StatusMachineDTO> stateMachines = statusMachineMapper.select(select);
-        return modelMapper.map(stateMachines, new TypeToken<List<StateMachineVO>>() {
+        return modelMapper.map(stateMachines, new TypeToken<List<StatusMachineVO>>() {
         }.getType());
     }
 

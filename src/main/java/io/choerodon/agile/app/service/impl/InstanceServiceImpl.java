@@ -2,7 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
 import io.choerodon.agile.api.vo.StateMachineConfigVO;
-import io.choerodon.agile.api.vo.StateMachineTransformVO;
+import io.choerodon.agile.api.vo.StatusMachineTransformVO;
 import io.choerodon.agile.api.vo.event.TransformInfo;
 import io.choerodon.agile.app.service.InstanceService;
 import io.choerodon.agile.app.service.StateMachineConfigService;
@@ -230,17 +230,17 @@ public class InstanceServiceImpl implements InstanceService {
      * @return
      */
     @Override
-    public StateMachineTransformVO queryInitTransform(Long organizationId, Long stateMachineId) {
+    public StatusMachineTransformVO queryInitTransform(Long organizationId, Long stateMachineId) {
         //获取初始转换
         StatusMachineTransformDTO initTransform = transformService.getInitTransform(organizationId, stateMachineId);
-        StateMachineTransformVO stateMachineTransformVO = modelMapper.map(initTransform, StateMachineTransformVO.class);
+        StatusMachineTransformVO statusMachineTransformVO = modelMapper.map(initTransform, StatusMachineTransformVO.class);
         //获取转换配置
         List<StateMachineConfigVO> configDTOS = configService.queryByTransformId(organizationId, initTransform.getId(), null, false);
         Map<String, List<StateMachineConfigVO>> configMap = configDTOS.stream().collect(Collectors.groupingBy(StateMachineConfigVO::getType));
-        stateMachineTransformVO.setConditions(configMap.get(ConfigType.CONDITION));
-        stateMachineTransformVO.setTriggers(configMap.get(ConfigType.TRIGGER));
-        stateMachineTransformVO.setValidators(configMap.get(ConfigType.VALIDATOR));
-        stateMachineTransformVO.setPostpositions(configMap.get(ConfigType.ACTION));
-        return stateMachineTransformVO;
+        statusMachineTransformVO.setConditions(configMap.get(ConfigType.CONDITION));
+        statusMachineTransformVO.setTriggers(configMap.get(ConfigType.TRIGGER));
+        statusMachineTransformVO.setValidators(configMap.get(ConfigType.VALIDATOR));
+        statusMachineTransformVO.setPostpositions(configMap.get(ConfigType.ACTION));
+        return statusMachineTransformVO;
     }
 }

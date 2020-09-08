@@ -5,7 +5,7 @@ import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.base.BaseController;
 import io.choerodon.agile.api.validator.StateMachineNodeValidator;
-import io.choerodon.agile.api.vo.StateMachineNodeVO;
+import io.choerodon.agile.api.vo.StatusMachineNodeVO;
 import io.choerodon.agile.app.service.StateMachineNodeService;
 import io.swagger.annotations.ApiOperation;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -34,9 +34,9 @@ public class StateMachineNodeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建节点（草稿）")
     @PostMapping
-    public ResponseEntity<List<StateMachineNodeVO>> create(@PathVariable("organization_id") Long organizationId,
-                                                           @RequestParam("stateMachineId") @Encrypt Long stateMachineId,
-                                                           @RequestBody StateMachineNodeVO nodeDTO) {
+    public ResponseEntity<List<StatusMachineNodeVO>> create(@PathVariable("organization_id") Long organizationId,
+                                                            @RequestParam("stateMachineId") @Encrypt Long stateMachineId,
+                                                            @RequestBody StatusMachineNodeVO nodeDTO) {
         nodeValidator.createValidate(nodeDTO);
         return new ResponseEntity<>(nodeService.create(organizationId, stateMachineId, nodeDTO), HttpStatus.CREATED);
     }
@@ -44,10 +44,10 @@ public class StateMachineNodeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更新节点（草稿）")
     @PutMapping(value = "/{node_id}")
-    public ResponseEntity<List<StateMachineNodeVO>> update(@PathVariable("organization_id") Long organizationId,
-                                                           @PathVariable("node_id") @Encrypt Long nodeId,
-                                                           @RequestParam("stateMachineId") @Encrypt Long stateMachineId,
-                                                           @RequestBody StateMachineNodeVO nodeDTO) {
+    public ResponseEntity<List<StatusMachineNodeVO>> update(@PathVariable("organization_id") Long organizationId,
+                                                            @PathVariable("node_id") @Encrypt Long nodeId,
+                                                            @RequestParam("stateMachineId") @Encrypt Long stateMachineId,
+                                                            @RequestBody StatusMachineNodeVO nodeDTO) {
         nodeValidator.updateValidate(nodeDTO);
         return new ResponseEntity<>(nodeService.update(organizationId, stateMachineId, nodeId, nodeDTO), HttpStatus.CREATED);
     }
@@ -55,9 +55,9 @@ public class StateMachineNodeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "删除节点（草稿）")
     @DeleteMapping(value = "/{node_id}")
-    public ResponseEntity<List<StateMachineNodeVO>> deleteNode(@PathVariable("organization_id") Long organizationId,
-                                                               @PathVariable("node_id") @Encrypt Long nodeId,
-                                                               @RequestParam("stateMachineId") @Encrypt Long stateMachineId) {
+    public ResponseEntity<List<StatusMachineNodeVO>> deleteNode(@PathVariable("organization_id") Long organizationId,
+                                                                @PathVariable("node_id") @Encrypt Long nodeId,
+                                                                @RequestParam("stateMachineId") @Encrypt Long stateMachineId) {
         return new ResponseEntity<>(nodeService.delete(organizationId, stateMachineId, nodeId), HttpStatus.OK);
     }
 
@@ -73,8 +73,8 @@ public class StateMachineNodeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id获取节点（草稿）")
     @GetMapping(value = "/{node_id}")
-    public ResponseEntity<StateMachineNodeVO> queryById(@PathVariable("organization_id") Long organizationId,
-                                                        @PathVariable("node_id") @Encrypt Long nodeId) {
+    public ResponseEntity<StatusMachineNodeVO> queryById(@PathVariable("organization_id") Long organizationId,
+                                                         @PathVariable("node_id") @Encrypt Long nodeId) {
         return new ResponseEntity<>(nodeService.queryById(organizationId, nodeId), HttpStatus.OK);
     }
 

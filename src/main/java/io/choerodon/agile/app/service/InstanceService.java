@@ -2,7 +2,7 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
 import io.choerodon.agile.api.vo.StateMachineConfigVO;
-import io.choerodon.agile.api.vo.StateMachineTransformVO;
+import io.choerodon.agile.api.vo.StatusMachineTransformVO;
 import io.choerodon.agile.api.vo.event.TransformInfo;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import org.springframework.statemachine.StateContext;
@@ -126,5 +126,5 @@ public interface InstanceService {
      * @param stateMachineId
      * @return
      */
-    StateMachineTransformVO queryInitTransform(Long organizationId, Long stateMachineId);
+    StatusMachineTransformVO queryInitTransform(Long organizationId, Long stateMachineId);
 }

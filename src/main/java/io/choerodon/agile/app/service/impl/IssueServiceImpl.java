@@ -49,7 +49,6 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
@@ -1021,17 +1020,17 @@ public class IssueServiceImpl implements IssueService {
         IssueConvertDTO issueConvertDTO = queryIssueByProjectIdAndIssueId(projectId, issueUpdateTypeVO.getIssueId());
         Long currentStateMachineId = projectConfigService.queryStateMachineId(projectId, AGILE, issueUpdateTypeVO.getIssueTypeId());
         // 查询状态机里面的状态
-        List<StateMachineNodeVO> stateMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(ConvertUtil.getOrganizationId(projectId), currentStateMachineId, false);
-        if (CollectionUtils.isEmpty(stateMachineNodeVOS)) {
+        List<StatusMachineNodeVO> statusMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(ConvertUtil.getOrganizationId(projectId), currentStateMachineId, false);
+        if (CollectionUtils.isEmpty(statusMachineNodeVOS)) {
             throw new CommonException("error.current.state.machine.node.null");
         }
-        List<Long> list = stateMachineNodeVOS.stream().map(StateMachineNodeVO::getStatusId).collect(Collectors.toList());
+        List<Long> list = statusMachineNodeVOS.stream().map(StatusMachineNodeVO::getStatusId).collect(Collectors.toList());
         if (!list.contains(issueConvertDTO.getStatusId())) {
-            StateMachineNodeVO stateMachineNodeVO = stateMachineNodeVOS.stream().filter(v -> NodeType.INIT.equals(v.getType())).findAny().orElse(null);
-            if (ObjectUtils.isEmpty(stateMachineNodeVO)) {
+            StatusMachineNodeVO statusMachineNodeVO = statusMachineNodeVOS.stream().filter(v -> NodeType.INIT.equals(v.getType())).findAny().orElse(null);
+            if (ObjectUtils.isEmpty(statusMachineNodeVO)) {
                 throw new CommonException("error.init.node.not.found");
             }
-            issueConvertDTO.setStatusId(stateMachineNodeVO.getStatusId());
+            issueConvertDTO.setStatusId(statusMachineNodeVO.getStatusId());
             issueAccessDataService.update(issueConvertDTO, new String[]{"statusId"});
         }
     }

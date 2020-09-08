@@ -1,7 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.ProjectVO;
-import io.choerodon.agile.api.vo.StateMachineNodeVO;
+import io.choerodon.agile.api.vo.StatusMachineNodeVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
@@ -550,12 +550,12 @@ public class FixDataServiceImpl implements FixDataService {
         // 遍历修改
         for (StatusMachineDTO statusMachineDTO : stateMachines) {
             // 查询当前状态机所有的node
-            List<StateMachineNodeVO> stateMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(statusMachineDTO.getOrganizationId(), statusMachineDTO.getId(), false);
-            if (CollectionUtils.isEmpty(stateMachineNodeVOS)) {
+            List<StatusMachineNodeVO> statusMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(statusMachineDTO.getOrganizationId(), statusMachineDTO.getId(), false);
+            if (CollectionUtils.isEmpty(statusMachineNodeVOS)) {
                 continue;
             }
-            List<StateMachineNodeVO> machineNodeVOS = stateMachineNodeVOS.stream().filter(v -> !NodeType.START.equals(v.getType())).collect(Collectors.toList());
-            Map<Long, StateMachineNodeVO> nodeVOMap = machineNodeVOS.stream().collect(Collectors.toMap(StateMachineNodeVO::getId, Function.identity()));
+            List<StatusMachineNodeVO> machineNodeVOS = statusMachineNodeVOS.stream().filter(v -> !NodeType.START.equals(v.getType())).collect(Collectors.toList());
+            Map<Long, StatusMachineNodeVO> nodeVOMap = machineNodeVOS.stream().collect(Collectors.toMap(StatusMachineNodeVO::getId, Function.identity()));
             // 将转换到所有转换为多个transform
             List<StatusMachineTransformDTO> statusMachineTransformDTOS = statusMachineTransformMapper.queryByStateMachineIds(statusMachineDTO.getOrganizationId(), Arrays.asList(statusMachineDTO.getId()));
             List<StatusMachineTransformDTO> allTransforms = statusMachineTransformDTOS.stream().filter(x -> x.getType().equals(TransformType.ALL)).collect(Collectors.toList());
@@ -571,10 +571,10 @@ public class FixDataServiceImpl implements FixDataService {
                 if (CollectionUtils.isEmpty(endNodes)) {
                     endNodes = new ArrayList<>();
                 }
-                for (StateMachineNodeVO node : machineNodeVOS) {
+                for (StatusMachineNodeVO node : machineNodeVOS) {
                     if (Boolean.FALSE.equals(endNodes.contains(node.getId()))) {
-                        StateMachineNodeVO nodeVO = nodeVOMap.get(startNode);
-                        StateMachineNodeVO endNodeVO = nodeVOMap.get(node.getId());
+                        StatusMachineNodeVO nodeVO = nodeVOMap.get(startNode);
+                        StatusMachineNodeVO endNodeVO = nodeVOMap.get(node.getId());
                         StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO();
                         statusMachineTransformDTO.setOrganizationId(statusMachineDTO.getOrganizationId());
                         statusMachineTransformDTO.setStartNodeId(startNode);

@@ -216,11 +216,11 @@ public class SchemeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "关联已有状态")
     @GetMapping(value = "/state_machine/link_status")
-    public ResponseEntity<StateMachineNodeVO> linkStatus(@PathVariable("project_id") Long projectId,
-                                                 @RequestParam @Encrypt Long issueTypeId,
-                                                 @RequestParam String applyType,
-                                                 @RequestParam @Encrypt Long statusId,
-                                                 @RequestParam Boolean defaultStatus) {
+    public ResponseEntity<StatusMachineNodeVO> linkStatus(@PathVariable("project_id") Long projectId,
+                                                          @RequestParam @Encrypt Long issueTypeId,
+                                                          @RequestParam String applyType,
+                                                          @RequestParam @Encrypt Long statusId,
+                                                          @RequestParam Boolean defaultStatus) {
         return new ResponseEntity(projectConfigService.linkStatus(projectId, issueTypeId,applyType, statusId,defaultStatus), HttpStatus.OK);
     }
 

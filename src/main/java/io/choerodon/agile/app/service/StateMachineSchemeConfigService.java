@@ -1,6 +1,6 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.StateMachineSchemeConfigVO;
+import io.choerodon.agile.api.vo.StatusMachineSchemeConfigVO;
 import io.choerodon.agile.api.vo.StateMachineSchemeVO;
 import io.choerodon.agile.api.vo.event.StateMachineSchemeChangeItem;
 
@@ -37,7 +37,7 @@ public interface StateMachineSchemeConfigService {
      * @param schemeVOS
      * @return
      */
-    StateMachineSchemeVO create(Long organizationId, Long schemeId, Long stateMachineId, List<StateMachineSchemeConfigVO> schemeVOS);
+    StateMachineSchemeVO create(Long organizationId, Long schemeId, Long stateMachineId, List<StatusMachineSchemeConfigVO> schemeVOS);
 
     /**
      * 创建默认配置
@@ -62,7 +62,7 @@ public interface StateMachineSchemeConfigService {
      *
      * @return
      */
-    StateMachineSchemeConfigVO selectDefault(Boolean isDraft, Long organizationId, Long schemeId);
+    StatusMachineSchemeConfigVO selectDefault(Boolean isDraft, Long organizationId, Long schemeId);
 
     /**
      * 通过状态机方案id和问题类型id查询出状态机id
@@ -91,7 +91,7 @@ public interface StateMachineSchemeConfigService {
      * @param schemeId
      * @return
      */
-    List<StateMachineSchemeConfigVO> queryBySchemeId(Boolean isDraft, Long organizationId, Long schemeId);
+    List<StatusMachineSchemeConfigVO> queryBySchemeId(Boolean isDraft, Long organizationId, Long schemeId);
 
     /**
      * 查询状态机关联的方案

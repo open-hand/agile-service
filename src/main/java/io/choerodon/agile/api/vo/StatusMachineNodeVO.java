@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author peng.jiang, dinghuang123@gmail.com
  */
-public class StateMachineNodeVO {
+public class StatusMachineNodeVO {
     @ApiModelProperty(value = "状态机节点id")
     @Encrypt
     private Long id;
@@ -43,9 +43,9 @@ public class StateMachineNodeVO {
      * 前端要用到
      */
     @ApiModelProperty(value = "转入该节点的转换列表")
-    private List<StateMachineTransformVO> intoTransform;
+    private List<StatusMachineTransformVO> intoTransform;
     @ApiModelProperty(value = "转出该节点的转换列表")
-    private List<StateMachineTransformVO> outTransform;
+    private List<StatusMachineTransformVO> outTransform;
 
     public Long getId() {
         return id;
@@ -127,19 +127,19 @@ public class StateMachineNodeVO {
         this.type = type;
     }
 
-    public List<StateMachineTransformVO> getIntoTransform() {
+    public List<StatusMachineTransformVO> getIntoTransform() {
         return intoTransform;
     }
 
-    public void setIntoTransform(List<StateMachineTransformVO> intoTransform) {
+    public void setIntoTransform(List<StatusMachineTransformVO> intoTransform) {
         this.intoTransform = intoTransform;
     }
 
-    public List<StateMachineTransformVO> getOutTransform() {
+    public List<StatusMachineTransformVO> getOutTransform() {
         return outTransform;
     }
 
-    public void setOutTransform(List<StateMachineTransformVO> outTransform) {
+    public void setOutTransform(List<StatusMachineTransformVO> outTransform) {
         this.outTransform = outTransform;
     }
 

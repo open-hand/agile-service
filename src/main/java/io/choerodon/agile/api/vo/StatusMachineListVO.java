@@ -7,9 +7,10 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 import java.util.List;
 
 /**
- * @author peng.jiang, dinghuang123@gmail.com
+ * @author shinan.chen
+ * @date 2019/7/9
  */
-public class StateMachineVO {
+public class StatusMachineListVO {
     @ApiModelProperty(value = "状态机id")
     @Encrypt
     private Long id;
@@ -23,12 +24,10 @@ public class StateMachineVO {
     private Long organizationId;
     @ApiModelProperty(value = "是否默认状态机")
     private Boolean isDefault;
-    @ApiModelProperty(value = "乐观锁")
+    @ApiModelProperty(value = "版本号")
     private Long objectVersionNumber;
-    @ApiModelProperty(value = "状态机节点列表")
-    private List<StateMachineNodeVO> nodeVOS;
-    @ApiModelProperty(value = "状态机转换列表")
-    private List<StateMachineTransformVO> transformVOS;
+    @ApiModelProperty(value = "状态机方案列表")
+    List<StateMachineSchemeVO> stateMachineSchemeVOS;
 
     public Long getId() {
         return id;
@@ -70,20 +69,20 @@ public class StateMachineVO {
         this.organizationId = organizationId;
     }
 
-    public List<StateMachineNodeVO> getNodeVOS() {
-        return nodeVOS;
+    public Boolean getDefault() {
+        return isDefault;
     }
 
-    public void setNodeVOS(List<StateMachineNodeVO> nodeVOS) {
-        this.nodeVOS = nodeVOS;
+    public void setDefault(Boolean aDefault) {
+        isDefault = aDefault;
     }
 
-    public List<StateMachineTransformVO> getTransformVOS() {
-        return transformVOS;
+    public List<StateMachineSchemeVO> getStateMachineSchemeVOS() {
+        return stateMachineSchemeVOS;
     }
 
-    public void setTransformVOS(List<StateMachineTransformVO> transformVOS) {
-        this.transformVOS = transformVOS;
+    public void setStateMachineSchemeVOS(List<StateMachineSchemeVO> stateMachineSchemeVOS) {
+        this.stateMachineSchemeVOS = stateMachineSchemeVOS;
     }
 
     public Long getObjectVersionNumber() {
@@ -92,13 +91,5 @@ public class StateMachineVO {
 
     public void setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
-    }
-
-    public Boolean getDefault() {
-        return isDefault;
-    }
-
-    public void setDefault(Boolean aDefault) {
-        isDefault = aDefault;
     }
 }

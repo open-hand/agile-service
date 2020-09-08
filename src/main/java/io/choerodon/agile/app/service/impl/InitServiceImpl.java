@@ -88,21 +88,21 @@ public class InitServiceImpl implements InitService {
     @Override
     public Long initDefaultStateMachine(Long organizationId) {
         //初始化默认状态机
-        StatusMachineDTO stateMachine = new StatusMachineDTO();
-        stateMachine.setOrganizationId(organizationId);
-        stateMachine.setName("默认状态机");
-        stateMachine.setDescription("默认状态机");
-        stateMachine.setStatus(StateMachineStatus.CREATE);
-        stateMachine.setDefault(true);
-        List<StatusMachineDTO> selects = statusMachineMapper.select(stateMachine);
+        StatusMachineDTO statusMachine = new StatusMachineDTO();
+        statusMachine.setOrganizationId(organizationId);
+        statusMachine.setName("默认状态机");
+        statusMachine.setDescription("默认状态机");
+        statusMachine.setStatus(StateMachineStatus.CREATE);
+        statusMachine.setDefault(true);
+        List<StatusMachineDTO> selects = statusMachineMapper.select(statusMachine);
         Long stateMachineId;
         if (selects.isEmpty()) {
-            if (statusMachineMapper.insert(stateMachine) != 1) {
+            if (statusMachineMapper.insert(statusMachine) != 1) {
                 throw new CommonException(ERROR_STATEMACHINE_CREATE);
             }
             //创建状态机节点和转换
-            createStateMachineDetail(organizationId, stateMachine.getId(), "default");
-            stateMachineId = stateMachine.getId();
+            createStateMachineDetail(organizationId, statusMachine.getId(), "default");
+            stateMachineId = statusMachine.getId();
         } else {
             stateMachineId = selects.get(0).getId();
         }
@@ -113,19 +113,19 @@ public class InitServiceImpl implements InitService {
     public Long initAGStateMachine(Long organizationId, ProjectEvent projectEvent) {
         String projectCode = projectEvent.getProjectCode();
         //初始化状态机
-        StatusMachineDTO stateMachine = new StatusMachineDTO();
-        stateMachine.setOrganizationId(organizationId);
-        stateMachine.setName(projectCode + "默认状态机【敏捷】");
-        stateMachine.setDescription(projectCode + "默认状态机【敏捷】");
-        stateMachine.setStatus(StateMachineStatus.ACTIVE);
-        stateMachine.setDefault(false);
-        if (statusMachineMapper.insert(stateMachine) != 1) {
+        StatusMachineDTO statusMachine = new StatusMachineDTO();
+        statusMachine.setOrganizationId(organizationId);
+        statusMachine.setName(projectCode + "默认状态机【敏捷】");
+        statusMachine.setDescription(projectCode + "默认状态机【敏捷】");
+        statusMachine.setStatus(StateMachineStatus.ACTIVE);
+        statusMachine.setDefault(false);
+        if (statusMachineMapper.insert(statusMachine) != 1) {
             throw new CommonException(ERROR_STATEMACHINE_CREATE);
         }
         //创建状态机节点和转换
-        createStateMachineDetail(organizationId, stateMachine.getId(), SchemeApplyType.AGILE);
+        createStateMachineDetail(organizationId, statusMachine.getId(), SchemeApplyType.AGILE);
         //发布状态机
-        Long stateMachineId = stateMachine.getId();
+        Long stateMachineId = statusMachine.getId();
 //        stateMachineService.deploy(organizationId, stateMachineId, false);
         //敏捷创建完状态机后需要到敏捷创建列
         List<StatusPayload> statusPayloads = statusMachineMapper.getStatusBySmId(projectEvent.getProjectId(), stateMachineId);
@@ -137,19 +137,19 @@ public class InitServiceImpl implements InitService {
     public Long initTEStateMachine(Long organizationId, ProjectEvent projectEvent) {
         String projectCode = projectEvent.getProjectCode();
         //初始化状态机
-        StatusMachineDTO stateMachine = new StatusMachineDTO();
-        stateMachine.setOrganizationId(organizationId);
-        stateMachine.setName(projectCode + "默认状态机【测试】");
-        stateMachine.setDescription(projectCode + "默认状态机【测试】");
-        stateMachine.setStatus(StateMachineStatus.ACTIVE);
-        stateMachine.setDefault(false);
-        if (statusMachineMapper.insert(stateMachine) != 1) {
+        StatusMachineDTO statusMachine = new StatusMachineDTO();
+        statusMachine.setOrganizationId(organizationId);
+        statusMachine.setName(projectCode + "默认状态机【测试】");
+        statusMachine.setDescription(projectCode + "默认状态机【测试】");
+        statusMachine.setStatus(StateMachineStatus.ACTIVE);
+        statusMachine.setDefault(false);
+        if (statusMachineMapper.insert(statusMachine) != 1) {
             throw new CommonException(ERROR_STATEMACHINE_CREATE);
         }
         //创建状态机节点和转换
-        createStateMachineDetail(organizationId, stateMachine.getId(), SchemeApplyType.TEST);
+        createStateMachineDetail(organizationId, statusMachine.getId(), SchemeApplyType.TEST);
         //发布状态机
-        Long stateMachineId = stateMachine.getId();
+        Long stateMachineId = statusMachine.getId();
 //        stateMachineService.deploy(organizationId, stateMachineId, false);
         return stateMachineId;
     }
