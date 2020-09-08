@@ -37,7 +37,7 @@ import SelectComponent from '@/components/select/select-component';
           componentList.push(target);
         } else {
           componentList.push({
-            name: component,
+            name: component && component.slice(0, 20),
             projectId: AppState.currentMenuType.id,
           });
         }
