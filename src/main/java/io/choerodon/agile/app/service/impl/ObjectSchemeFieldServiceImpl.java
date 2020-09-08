@@ -666,7 +666,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     @Override
     public List<ObjectSchemeFieldDetailVO> listFieldsWithOptionals(Long projectId, Long issueTypeId, Long organizationId) {
-        return objectSchemeFieldMapper.selectFieldsWithOptionals(organizationId, projectId, issueTypeId);
+        return objectSchemeFieldMapper.selectFieldsWithOptionals(organizationId, projectId, issueTypeId, null);
     }
 
     @Override
