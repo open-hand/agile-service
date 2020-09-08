@@ -27,6 +27,9 @@ public class SprintNameVO {
     @ApiModelProperty(value = "冲刺状态")
     private String statusCode;
 
+    @ApiModelProperty(value = "冲刺实际结束时间")
+    private Date actualEndDate;
+
     public Long getSprintId() {
         return sprintId;
     }
@@ -65,5 +68,13 @@ public class SprintNameVO {
 
     public String getStatusCode() {
         return statusCode;
+    }
+
+    public Date getActualEndDate() {
+        return actualEndDate;
+    }
+
+    public void setActualEndDate(Date actualEndDate) {
+        this.actualEndDate = actualEndDate;
     }
 }

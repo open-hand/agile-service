@@ -10,6 +10,7 @@ public class SprintNameDTO {
     private String sprintName;
     private Long issueId;
     private Date startDate;
+    private Date actualEndDate;
     private Date endDate;
     private String statusCode;
 
@@ -59,5 +60,13 @@ public class SprintNameDTO {
 
     public String getStatusCode() {
         return statusCode;
+    }
+
+    public Date getActualEndDate() {
+        return actualEndDate;
+    }
+
+    public void setActualEndDate(Date actualEndDate) {
+        this.actualEndDate = actualEndDate;
     }
 }

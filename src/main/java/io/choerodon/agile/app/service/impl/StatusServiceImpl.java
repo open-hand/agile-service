@@ -287,7 +287,7 @@ public class StatusServiceImpl implements StatusService {
         String applyType = "PROGRAM".equals(projectVO.getCategory()) ? "program" : "agile";
         ProjectConfigDetailVO projectConfigDetailVO = projectConfigService.queryById(projectId);
         StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
-        List<IssueCountDTO> countDTOS = nodeDeployMapper.countIssueTypeByStatusIds(projectVO.getOrganizationId(),stateMachineSchemeVO.getId(),statusIds);
+        List<IssueCountDTO> countDTOS = nodeDeployMapper.countIssueTypeByStatusIds(projectVO.getOrganizationId(),stateMachineSchemeVO.getId(),statusIds,applyType);
         Map<Long, List<String>> map = new HashMap<>();
         if (!CollectionUtils.isEmpty(countDTOS)) {
             map.putAll(countDTOS.stream().collect(Collectors.groupingBy(IssueCountDTO::getId, Collectors.mapping(IssueCountDTO::getName, Collectors.toList()))));

@@ -74,7 +74,7 @@
         smt.*,
         smn.status_id as endStatusId
         FROM fd_status_machine_transform smt
-        LEFT JOIN fd_status_machine_node smn ON smn.id = smt.end_node_id
+        LEFT JOIN fd_status_machine_node smn ON smn.organization_id = smt.organization_id AND  smn.id = smt.end_node_id
         where smt.organization_id = #{organizationId}
         and smt.state_machine_id in
         <foreach collection="stateMachineIds" item="id" open="(" separator="," close=")">

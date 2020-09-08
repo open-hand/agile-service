@@ -304,7 +304,16 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             throw new CommonException("error.queryTransformsMapByProjectId.issueTypeSchemeId.null");
         }
         List<IssueTypeDTO> issueTypes = issueTypeMapper.queryBySchemeId(organizationId, itProjectConfig.getSchemeId());
-        List<Long> stateMachineIds = smsConfigVO.stream().map(StatusMachineSchemeConfigVO::getStateMachineId).collect(Collectors.toList());
+        // 史诗和普通项目群的特性类型没必要在查询转换
+        List<Long> skipIssueTypeId = new ArrayList<>();
+        skipIssueTypeId.add(0L);
+        issueTypes.forEach(v -> {
+            boolean isSkip = "issue_epic".equals(v.getTypeCode()) || (SchemeApplyType.AGILE.equals(applyType) && "feature".equals(v.getTypeCode()));
+            if (Boolean.TRUE.equals(isSkip)) {
+                skipIssueTypeId.add(v.getId());
+            }
+        });
+        List<Long> stateMachineIds = smsConfigVO.stream().filter(v -> !skipIssueTypeId.contains(v.getIssueTypeId())).map(StatusMachineSchemeConfigVO::getStateMachineId).collect(Collectors.toList());
         //状态机id->状态id->转换列表
         Map<Long, Map<Long, List<TransformVO>>> statusMap = transformService.queryStatusTransformsMap(organizationId, stateMachineIds);
         Map<Long, Long> idMap = smsConfigVO.stream().collect(Collectors.toMap(StatusMachineSchemeConfigVO::getIssueTypeId, StatusMachineSchemeConfigVO::getStateMachineId));
@@ -313,17 +322,16 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         //获取组织所有状态
         List<StatusVO> statusVOS = statusService.queryAllStatus(organizationId);
         Map<Long, StatusVO> sMap = statusVOS.stream().collect(Collectors.toMap(StatusVO::getId, x -> x));
-        statusMap.entrySet().forEach(x -> x.getValue().entrySet().forEach(y -> y.getValue().forEach(transformVO -> {
-            StatusVO statusVO = sMap.get(transformVO.getEndStatusId());
-            if (statusVO != null) {
-                transformVO.setStatusType(statusVO.getType());
-            }
-        })));
         //匹配默认状态机的问题类型映射
-        Long defaultStateMachineId = idMap.get(0L);
-        resultMap.put(0L, statusMap.get(defaultStateMachineId));
+//        Long defaultStateMachineId = idMap.get(0L);
+//        resultMap.put(0L, statusMap.get(defaultStateMachineId));
+
         //匹配状态机的问题类型映射
         for (IssueTypeDTO issueType : issueTypes) {
+            boolean isSkip = "issue_epic".equals(issueType.getTypeCode()) || (SchemeApplyType.AGILE.equals(applyType) && "feature".equals(issueType.getTypeCode()));
+            if (Boolean.TRUE.equals(isSkip)) {
+                continue;
+            }
             Long stateMachineId = idMap.get(issueType.getId());
             if (stateMachineId != null) {
                 Map<Long, List<TransformVO>> statusTransferMap = statusMap.get(stateMachineId);
@@ -332,8 +340,15 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 List<Long> canTransferStatus = statusTransferSettingService.checkStatusTransform(projectId, issueType.getId(), new ArrayList<>(allStatus));
                 // 过滤掉不能转换的状态
                 Map<Long, List<TransformVO>> transferMap = new HashMap<>();
-                statusTransferMap.entrySet().stream().forEach(entry ->
-                        transferMap.put(entry.getKey(),entry.getValue().stream().filter(v -> canTransferStatus.contains(v.getEndStatusId())).collect(Collectors.toList())));
+                statusTransferMap.entrySet().stream().filter(entry -> entry.getKey() != 0L).forEach(entry -> {
+                    transferMap.put(entry.getKey(),entry.getValue().stream().filter(v ->  canTransferStatus.contains(v.getEndStatusId())).map(v -> {
+                        StatusVO statusVO = sMap.get(v.getEndStatusId());
+                        if (statusVO != null) {
+                            v.setStatusType(statusVO.getType());
+                        }
+                        return v;
+                    }).collect(Collectors.toList()));
+                });
                 resultMap.put(issueType.getId(),transferMap);
             }
         }

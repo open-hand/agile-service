@@ -165,6 +165,9 @@
            #{statusId}
         </foreach>
         AND fit.id = fsmsc.issue_type_id
+        <if test="applyType == 'agile'">
+            AND fit.type_code != 'feature'
+        </if>
         AND fit.type_code not in ('issue_auto_test','issue_auto_test')
         AND fsmsc.issue_type_id != 0
         group by fsmn.status_id,fit.name
