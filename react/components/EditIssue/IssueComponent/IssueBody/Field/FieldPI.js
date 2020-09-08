@@ -49,6 +49,7 @@ class FieldPI extends Component {
                 multiple={false}
                 allowClear
                 onChange={submit}
+                disabledCurrentPI
               />
             )}
           >
