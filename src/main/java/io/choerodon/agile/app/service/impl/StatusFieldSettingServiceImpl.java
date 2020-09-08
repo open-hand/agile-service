@@ -254,7 +254,11 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             StatusFieldValueSettingDTO statusFieldValueSettingDTO = statusFieldValueSettingDTOS.get(0);
             fieldList.add(fieldName);
             if (CLEAR.equals(statusFieldValueSettingDTO.getOperateType())) {
-                field.set(issueUpdateVO, null);
+                if (FieldCode.COMPONENT.equals(v.getFieldCode()) || FieldCode.LABEL.equals(v.getFieldCode())) {
+                    field.set(issueUpdateVO, new ArrayList<>());
+                } else {
+                    field.set(issueUpdateVO, null);
+                }
                 return;
             }
             handlerFieldName(issueUpdateVO, statusFieldValueSettingDTOS, issueDTO, statusFieldValueSettingDTO, v, field);
