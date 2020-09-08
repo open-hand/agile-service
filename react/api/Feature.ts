@@ -20,7 +20,7 @@ class FeatureApi {
 
   /**
    * 批量创建特性关联
-   * @param data 
+   * @param data
    */
   createLink(data:IFeatureLink) {
     return axios.post(`${this.prefix}/board_depend/batch_create_depend`, data);
@@ -28,7 +28,7 @@ class FeatureApi {
 
   /**
    * 刪除特性关联
-   * @param featureDependId 
+   * @param featureDependId
    */
   deleteLink(featureDependId:number) {
     return axios.delete(`${this.prefix}/board_depend/${featureDependId}`);
@@ -54,7 +54,6 @@ class FeatureApi {
       },
     );
   }
-
 
   /**
    * 在子项目根据piId查询项目群的特性
@@ -104,7 +103,7 @@ class FeatureApi {
 
   /**
    * 更新特性关联的团队或冲刺
-   * @param data 
+   * @param data
    */
   updateTeamAndSprint(data: {
     piId?: number,
@@ -119,17 +118,16 @@ class FeatureApi {
 
   /**
    * 更新特性颜色
-   * @param data 
+   * @param data
    */
   updateColor(data: UFeatureColor) {
     return axios.put(`${this.prefix}/issues/update_feature`, data);
   }
 
-
   /**
    * 根据summary查询史诗下是否有同名特性
-   * @param summary 
-   * @param epicId 
+   * @param summary
+   * @param epicId
    */
   hasSameInEpicBySummary(summary: string, epicId: number) {
     return axios.post(`${this.prefix}/issues/check_feature_summary`, {
@@ -140,8 +138,8 @@ class FeatureApi {
 
   /**
    * 根据id查询史诗下是否有同名特性
-   * @param featureId 
-   * @param epicId 
+   * @param featureId
+   * @param epicId
    */
   hasSameInEpicById(featureId: number, epicId: number) {
     return axios.post(`${this.prefix}/issues/check_feature_summary`, {
@@ -150,13 +148,12 @@ class FeatureApi {
     });
   }
 
-
   /**
    * 分页查询特性列表
-   * @param page 
-   * @param size 
-   * @param issueId 
-   * @param content 
+   * @param page
+   * @param size
+   * @param issueId
+   * @param content
    */
   loadFeaturesInLink(page: number = 1, size: number = 10, issueId: number, content: string) {
     return axios({
@@ -183,7 +180,7 @@ class FeatureApi {
 
   /**
    * 查询特性下拆分的故事
-   * @param issueId 
+   * @param issueId
    */
   getSplitStory(issueId: number) {
     return axios({
@@ -195,11 +192,10 @@ class FeatureApi {
     });
   }
 
-  
   /**
    * 将批量的issue加入到特性中
-   * @param featureId 
-   * @param issueIds 
+   * @param featureId
+   * @param issueIds
    */
   addIssues(featureId: number, issueIds: Array<number>) {
     return axios.post(`${this.prefix}/issues/to_feature/${featureId}`, issueIds);
