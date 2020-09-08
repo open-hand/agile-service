@@ -81,7 +81,7 @@ public class FixDataServiceImpl implements FixDataService {
     @Autowired
     private StatusMachineNodeMapper statusMachineNodeMapper;
     @Autowired
-    private PageFieldMapper pageFieldMapper;
+    protected PageFieldMapper pageFieldMapper;
 
     @Override
     public void fixCreateProject() {
@@ -220,18 +220,11 @@ public class FixDataServiceImpl implements FixDataService {
         //key1 fieldId, key2 organizationId, key3 projectId, key4 pageId
         MultiKeyMap rankMap = new MultiKeyMap();
 
-        ObjectSchemeFieldDTO objectSchemeField = new ObjectSchemeFieldDTO();
-        objectSchemeField.setSchemeCode(schemeCode);
-        objectSchemeField.setSystem(true);
-
         //旧数据没有设置的字段，但业务上是必须的
         Set<Long> specialFieldIds = new HashSet<>();
-        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap, specialFieldIds);
 
-        processEstimatedTime(dataMap, rankMap, editPageId);
+        processFields(createPageId, editPageId, schemeCode, dataMap, rankMap, specialFieldIds);
 
-        objectSchemeField.setSystem(false);
-        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap, specialFieldIds);
         List<ObjectSchemeFieldExtendDTO> insertList = new ArrayList<>();
         MapIterator mapIterator = dataMap.mapIterator();
         LOGGER.info("同一个字段，优先使用编辑页面的排序值作为页面配置的排序值");
@@ -265,7 +258,20 @@ public class FixDataServiceImpl implements FixDataService {
         LOGGER.info("迁移页面数据完成");
     }
 
-    private void processEstimatedTime(MultiKeyMap dataMap, MultiKeyMap rankMap,
+    protected void processFields(Long createPageId, Long editPageId, String schemeCode, MultiKeyMap dataMap, MultiKeyMap rankMap, Set<Long> specialFieldIds) {
+        ObjectSchemeFieldDTO objectSchemeField = new ObjectSchemeFieldDTO();
+        objectSchemeField.setSchemeCode(schemeCode);
+        objectSchemeField.setSystem(true);
+
+        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap, specialFieldIds);
+
+        processEstimatedTime(dataMap, rankMap, editPageId);
+
+        objectSchemeField.setSystem(false);
+        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap, specialFieldIds);
+    }
+
+    protected void processEstimatedTime(MultiKeyMap dataMap, MultiKeyMap rankMap,
                                       Long editPageId) {
         LOGGER.info("处理预计开始时间和预计结束时间");
         String estimatedStartTime = "estimatedStartTime";
@@ -305,7 +311,7 @@ public class FixDataServiceImpl implements FixDataService {
         }
     }
 
-    private void fillInData(List<IssueTypeDTO> filterIssueTypeList,
+    protected void fillInData(List<IssueTypeDTO> filterIssueTypeList,
                             ObjectSchemeFieldDTO field,
                             Long organizationId,
                             MultiKeyMap dataMap,
@@ -336,7 +342,7 @@ public class FixDataServiceImpl implements FixDataService {
         });
     }
 
-    private Map<Long, String> getMinRankMap(MultiKeyMap rankMap) {
+    protected Map<Long, String> getMinRankMap(MultiKeyMap rankMap) {
         Map<Long, String> result = new HashMap<>();
         MapIterator iterator = rankMap.mapIterator();
         while (iterator.hasNext()) {
@@ -449,7 +455,7 @@ public class FixDataServiceImpl implements FixDataService {
         });
     }
 
-    private List<IssueTypeDTO> filterIssueType(List<IssueTypeDTO> issueTypes,
+    protected List<IssueTypeDTO> filterIssueType(List<IssueTypeDTO> issueTypes,
                                                String[] contextArray) {
         List<IssueTypeDTO> result = new ArrayList<>();
         List<String> contextList = Arrays.asList(contextArray);
