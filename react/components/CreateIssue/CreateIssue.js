@@ -187,6 +187,14 @@ class CreateIssue extends Component {
         form.setFieldsValue({
           description: text2Delta(template),
         });
+        if (!template) {
+          form.setFieldsValue({
+            description: [],
+          });
+          form.setFieldsValue({
+            description: undefined,
+          });
+        }
         this.originDescription = template;
       });
     }
@@ -243,6 +251,7 @@ class CreateIssue extends Component {
   handleCreateIssue = () => {
     const { form, parentIssueId, relateIssueId } = this.props;
     const {
+      fields,
       originComponents,
       originLabels,
       originIssueTypes,
@@ -281,6 +290,12 @@ class CreateIssue extends Component {
           estimatedStartTime,
         } = values;
         const { typeCode } = originIssueTypes.find((t) => t.id === typeId);
+        // 手动检验描述是否必输校验
+        const descriptionField = fields.find((f) => f.fieldCode === 'description');
+        if (descriptionField && descriptionField.required && this.checkSameDescription(undefined, description)) {
+          Choerodon.prompt('请填写描述');
+          return;
+        }
         if (typeCode === 'feature' && epicId) {
           const hasSame = await featureApi.hasSameInEpicBySummary(summary, epicId);
           if (hasSame) {
@@ -462,6 +477,7 @@ class CreateIssue extends Component {
                             const { typeCode } = originIssueTypes.find(
                               (item) => item.id === value,
                             );
+                            const currentDes = form.getFieldValue('description');
                             this.setState({
                               newIssueTypeCode: typeCode,
                             });
@@ -470,7 +486,6 @@ class CreateIssue extends Component {
                               context: typeCode,
                               pageCode: 'agile_issue_create',
                             };
-                            this.loadDefaultTemplate(typeCode);
                             fieldApi.getFields(param).then((res) => {
                               const { fields } = this.state;
                               form.resetFields(['assigneedId', 'sprintId', 'priorityId', 'epicId', 'componentIssueRel',
@@ -479,6 +494,11 @@ class CreateIssue extends Component {
                               this.setState({
                                 fields: res,
                               });
+                              form.setFieldsValue({
+                                description: currentDes,
+                              });
+
+                              this.loadDefaultTemplate(typeCode);
                             });
                           })}
                         >
@@ -785,9 +805,8 @@ class CreateIssue extends Component {
       case 'description':
         return (
           <>
-            <FormItem key={newIssueTypeCode} label={fieldName} className="c7nagile-line">
+            <FormItem key={newIssueTypeCode} label={fieldName} className="c7nagile-line" required={field.required}>
               {getFieldDecorator(fieldCode, {
-                rules: [{ required: field.required, message: '请填写描述' }],
               })(
                 <WYSIWYGEditor
                   style={{ height: 200, width: '100%' }}
