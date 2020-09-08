@@ -4,7 +4,10 @@ import { commonApi } from '@/api';
 import { stores } from '@choerodon/boot';
 
 const { AppState } = stores;
-
+const isDEV = process.env.NODE_ENV === 'development';
+// @ts-ignore
+const HAS_AGILE_PRO = C7NHasModule('@choerodon/agile-pro');
+const shouldRequest = isDEV || HAS_AGILE_PRO;
 interface ChildrenProps {
   isInProgram: boolean,
   program: object | boolean,
@@ -30,7 +33,7 @@ const useIsInProgram = (): ChildrenProps => {
   const refresh = useCallback(async () => {
     if (!isProgram) {
       setLoading(true);
-      const projectProgram = await commonApi.getProjectsInProgram();
+      const projectProgram = shouldRequest ? await commonApi.getProjectsInProgram() : Promise.resolve(false);
       const hasProgram = Boolean(projectProgram);
       let art = false;
       let showFeature = false;

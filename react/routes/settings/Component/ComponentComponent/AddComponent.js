@@ -131,7 +131,7 @@ function AddComponent(props) {
             validator: checkComponentNameRepeat,
           }],
         })(
-          <Input label="模块名称" maxLength={10} />,
+          <Input label="模块名称" maxLength={20} />,
         )}
       </FormItem>
       <FormItem style={{ marginBottom: 20 }}>
