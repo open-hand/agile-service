@@ -4,10 +4,12 @@ import {
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import BurnDownComponent from './components/burndown';
+import SprintComponent from './components/sprint';
 
 const { Option } = Select;
 const ChartMap = new Map([
   ['burndown', BurnDownComponent],
+  ['sprint', SprintComponent],
 ]);
 const AddChart: React.FC = () => {
   const dataSet = useMemo(() => new DataSet({
