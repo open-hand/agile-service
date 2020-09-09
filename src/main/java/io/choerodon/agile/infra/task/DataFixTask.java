@@ -1,7 +1,6 @@
 //package io.choerodon.agile.infra.task;
 //
 //import io.choerodon.agile.app.service.FixDataService;
-//import io.choerodon.agile.infra.feign.NotifyFeignClient;
 //import io.choerodon.asgard.schedule.QuartzDefinition;
 //import io.choerodon.asgard.schedule.annotation.JobTask;
 //import io.choerodon.asgard.schedule.annotation.TimedTask;
@@ -13,9 +12,9 @@
 //import java.util.Map;
 //
 //@Component
-//public class DataMigrationTask {
+//public class DataFixTask {
 //
-//    private static final Logger LOGGER = LoggerFactory.getLogger(DataMigrationTask.class);
+//    private static final Logger LOGGER = LoggerFactory.getLogger(DataFixTask.class);
 //
 //    @Autowired
 //    private FixDataService fixDataService;
