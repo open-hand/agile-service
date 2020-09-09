@@ -185,8 +185,10 @@ const to = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
     });
   });
 };
-const linkUrl = (path: Path) => {
-  const params = getParams(path) as IParams;
+const linkUrl = (path: Path, descriptor: LocationDescriptor = defaultDescriptor) => {
+  const { id } = descriptor as ProjectLocationDescriptor;
+  id && error('链接url获取包含非本项目id,请检查参数,去除id', path, descriptor);
+  const params = getParams(path, descriptor) as IParams;
   if (!params) {
     return path;
   }
