@@ -33,11 +33,4 @@ public interface ProjectOverviewService {
      */
     SprintStatisticsVO selectSprintStatistics(Long projectId, Long sprintId);
 
-    /**
-     * 查看每人每日工作量
-     * @param projectId 项目id
-     * @param sprintId 冲刺id
-     * @return 工作量统计
-     */
-    List<OneJobVO> selectOneJobsBysprint(Long projectId, Long sprintId);
 }
