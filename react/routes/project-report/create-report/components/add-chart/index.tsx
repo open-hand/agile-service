@@ -5,11 +5,13 @@ import {
 import { observer } from 'mobx-react-lite';
 import BurnDownComponent from './components/burndown';
 import SprintComponent from './components/sprint';
+import AccumulationComponent from './components/accumulation';
 
 const { Option } = Select;
 const ChartMap = new Map([
   ['burndown', BurnDownComponent],
   ['sprint', SprintComponent],
+  ['accumulation', AccumulationComponent],
 ]);
 const AddChart: React.FC = () => {
   const dataSet = useMemo(() => new DataSet({
@@ -33,6 +35,7 @@ const AddChart: React.FC = () => {
         <Select name="chart">
           <Option value="burndown">燃尽图</Option>
           <Option value="sprint">冲刺报告图</Option>
+          <Option value="accumulation">累计流量图</Option>
         </Select>
       </Form>
       {ChartComponent && <ChartComponent />}

@@ -1,20 +1,18 @@
 import React from 'react';
 import { DatePicker } from 'choerodon-ui/pro';
-import { IBoard } from '@/common/types';
 import { Moment } from 'moment';
 import SelectBoard from './SelectBoard';
 import QuickFilter from './QuickFilter';
 
-export interface BurnDownSearchProps {
-  range: []
+export interface AccumulationSearchProps {
+  range: [Moment, Moment]
   onRangeChange: (value: [Moment, Moment]) => void
-  boardList: IBoard[]
   onBoardChange: (boardId: string, checked: boolean) => void
   boardId: string
   quickFilterIds: string[]
   onQuickSearchChange: (quickFilterIds: string[]) => void
 }
-const AccumulationSearch: React.FC<BurnDownSearchProps> = ({
+const AccumulationSearch: React.FC<AccumulationSearchProps> = ({
   range,
   boardId,
   onRangeChange,

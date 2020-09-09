@@ -6,7 +6,6 @@ import {
 import {
   Page, Header, Content, Breadcrumb,
 } from '@choerodon/boot';
-import _ from 'lodash';
 import moment from 'moment';
 import {
   reportApi, boardApi,
@@ -15,8 +14,6 @@ import { linkUrl } from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
 import AccumulationChart from '@/components/charts/accumulation';
 import AccumulationSearch from '@/components/charts/accumulation/search';
-import ScrumBoardStore from '../../../../stores/project/scrumBoard/ScrumBoardStore';
-import AccumulationStore from '../AccumulationStore';
 import './AccumulationHome.less';
 import '../../BurndownChart/BurndownChartHome/BurndownChartHome.less';
 import NoDataComponent from '../../Component/noData';
@@ -35,17 +32,6 @@ class AccumulationHome extends Component {
       range: [moment().subtract(2, 'months'), moment()],
       columnIds: [],
     };
-  }
-
-  getColumnData(id, type) {
-    ScrumBoardStore.axiosGetBoardData(id).then((res2) => {
-      const data2 = res2.columnsData.columns;
-      for (let index = 0, len = data2.length; index < len; index += 1) {
-        data2[index].check = true;
-      }
-      AccumulationStore.setColumnData(data2);
-    }).catch((error) => {
-    });
   }
 
   handleBoardChange = async (boardId) => {
@@ -135,8 +121,6 @@ class AccumulationHome extends Component {
           <div className="c7n-accumulation-filter">
             <AccumulationSearch
               range={range}
-              onBoardChange={this.handleBoardChange}
-              boardId={boardId}
               onRangeChange={(value) => {
                 this.setState({
                   range: value,
@@ -144,6 +128,8 @@ class AccumulationHome extends Component {
                   this.getData();
                 });
               }}
+              boardId={boardId}
+              onBoardChange={this.handleBoardChange}
               quickFilterIds={quickFilterIds}
               onQuickSearchChange={(value) => {
                 this.setState({

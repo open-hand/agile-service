@@ -1,77 +1,67 @@
 import { useEffect, useState, useCallback } from 'react';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
-import moment from 'moment';
-import { stores } from '@choerodon/boot';
-import { BurnDownProps, IBurndownChartType } from '@/components/charts/burn-down';
-import { BurnDownSearchProps } from '@/components/charts/burn-down/search';
-import { IBurnDownData } from '@/components/charts/burn-down/utils';
-import { reportApi, sprintApi } from '@/api';
-import { IQuickSearchValue } from '@/components/quick-search';
+import moment, { Moment } from 'moment';
+import { reportApi, boardApi } from '@/api';
+import { AccumulationSearchProps } from './search';
+import { AccumulationChartProps } from '.';
+import { IAccumulationData } from './utils';
 
-const { AppState } = stores;
+interface AccumulationConfig {
 
-interface BurnDownConfig {
-  defaultType?: IBurndownChartType
 }
 
-function useAccumulationReport(config?: BurnDownConfig): [BurnDownSearchProps, BurnDownProps] {
-  const [quickFilter, setQuickFilter] = useState<IQuickSearchValue>({
-    onlyStory: false,
-    onlyMe: false,
-    quickFilters: [],
-    personalFilters: [],
-  });
-  const [type, setType] = useState<IBurndownChartType>(config?.defaultType || 'remainingEstimatedTime');
-  const [data, setData] = useState<IBurnDownData>(null);
+function useAccumulationReport(config?: AccumulationConfig): [AccumulationSearchProps, AccumulationChartProps] {
+  const [quickFilterIds, setQuickFilterIds] = useState<string[]>([]);
+  const [data, setData] = useState<IAccumulationData[]>([]);
+  const [boardId, setBoardId] = useState<string>('');
+  const [columnIds, setColumnIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [endDate, setEndDate] = useState('');
-  const [restDayShow, setRestDayShow] = useState(true);
-  const [restDays, setRestDays] = useState<string[]>([]);
-  const [sprintId, setSprintId] = useState<string | null>(null);
+  const [range, setRange] = useState<[Moment, Moment]>([moment().subtract(2, 'months'), moment()]);
   const loadData = useCallback(async () => {
-    if (sprintId) {
+    if (boardId !== '') {
       setLoading(true);
-      const [burnDownData, resetDaysData] = await Promise.all([reportApi.loadBurnDownCoordinate(sprintId, type, {
-        assigneeId: quickFilter.onlyMe ? AppState.getUserId : undefined,
-        onlyStory: quickFilter.onlyStory,
-        quickFilterIds: quickFilter.quickFilters,
-        personalFilterIds: quickFilter.personalFilters,
-      }), sprintApi.getRestDays(sprintId)]);
+      const [startDate, endDate] = range;
+      const burnDownData = await reportApi.loadCumulativeData({
+        columnIds,
+        endDate: `${endDate.format('YYYY-MM-DD')} 23:59:59`,
+        quickFilterIds,
+        startDate: startDate.format('YYYY-MM-DD 00:00:00'),
+        boardId,
+      });
       batchedUpdates(() => {
         setData(burnDownData);
-        setRestDays(resetDaysData.map((date) => moment(date).format('YYYY-MM-DD')));
         setLoading(false);
       });
     }
-  }, [
-    quickFilter.onlyMe,
-    quickFilter.onlyStory,
-    quickFilter.personalFilters,
-    quickFilter.quickFilters,
-    sprintId,
-    type]);
+  }, [boardId, columnIds, quickFilterIds, range]);
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  const searchProps: BurnDownSearchProps = {
-    sprintId,
-    setSprintId,
-    setEndDate,
-    type,
-    setType,
-    quickFilter,
-    setQuickFilter,
-    restDayShow,
-    setRestDayShow,
+  const handleBoardChange = async (newBoardId: string) => {
+    const boardData = await boardApi.load(newBoardId, {});
+    // @ts-ignore
+    const newColumnIds = boardData.columnsData.columns.map((column) => column.columnId);
+    batchedUpdates(() => {
+      setBoardId(newBoardId);
+      setColumnIds(newColumnIds);
+    });
   };
-  const props: BurnDownProps = {
+  const searchProps: AccumulationSearchProps = {
+    range,
+    onRangeChange: (value) => {
+      setRange(value);
+    },
+    boardId,
+    onBoardChange: handleBoardChange,
+    quickFilterIds,
+    onQuickSearchChange: (value) => {
+      setQuickFilterIds(value);
+    },
+  };
+  const props: AccumulationChartProps = {
     loading,
-    type,
     data,
-    endDate,
-    restDayShow,
-    restDays,
   };
   return [searchProps, props];
 }

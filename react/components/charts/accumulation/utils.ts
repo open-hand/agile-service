@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { orderBy, map } from 'lodash';
+import { orderBy } from 'lodash';
 
 export type IAccumulationData = {
   categoryCode: string

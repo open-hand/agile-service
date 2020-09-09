@@ -2,11 +2,11 @@ import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 
 interface ICumulativeData {
-  columnIds: Array<number>, // 看板列id
+  columnIds: Array<string>, // 看板列id
   endDate: string,
-  quickFilterIds: Array<number> | [], // 快速搜索的id列表
+  quickFilterIds: Array<string> | [], // 快速搜索的id列表
   startDate: string,
-  boardId: number,
+  boardId: string,
 }
 class ReportApi {
   get prefix() {
