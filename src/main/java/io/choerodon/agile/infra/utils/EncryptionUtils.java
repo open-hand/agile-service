@@ -441,6 +441,9 @@ public class EncryptionUtils {
     }
 
     public static List<String> encryptListToStr(List<String> ids) {
+        if (!EncryptContext.isEncrypt()) {
+            return ids;
+        }
         List<String> list = new ArrayList<>();
         if (!CollectionUtils.isEmpty(ids)) {
             ids.forEach(v -> list.add(encryptionService.encrypt(v, BLANK_KEY)));
