@@ -45,7 +45,7 @@ class PageIssueTypeStore {
 
   @observable loading: boolean = false;
 
-  @observable allFieldData: ObservableMap<any, IFiledListItemProps> = observable.map();
+  @observable currentTypeAllFieldData: ObservableMap<any, IFiledListItemProps> = observable.map();
 
   @observable currentIssueType: PageConfigIssueType = PageConfigIssueType.null;
 
@@ -204,11 +204,9 @@ class PageIssueTypeStore {
     return this.currentIssueType;
   }
 
-  @action loadAllField = () => {
-    pageConfigApi.load().then((res: any) => {
-      res?.content?.map((item: any) => {
-        this.allFieldData.set(item.id, item);
-      });
+  @action loadCurrentTypeAllField = (data: Array<IFiledListItemProps>) => {
+    data.forEach((item) => {
+      this.currentTypeAllFieldData.set(item.id, item);
     });
   }
 
@@ -228,6 +226,7 @@ class PageIssueTypeStore {
       case 'single':
       case 'radio': {
         const valueArr = String(defaultValue).split(',');
+        console.log('valueArr', valueArr, fieldOptions?.filter((option) => valueArr.some((v) => v === option[optionKey])).map((item) => item.value).join(','));
         return fieldOptions?.filter((option) => valueArr.some((v) => v === option[optionKey])).map((item) => item.value).join(',') || defaultValue;
       }
       case 'member': {
