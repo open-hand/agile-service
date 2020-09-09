@@ -219,4 +219,8 @@ public interface ProjectConfigService {
     void updateNodeObjectVersionNumber(Long project, Long issueType, Long statusId, Long objectVersionNumber, String applyType);
 
     void initIssueTypeStatusMachine(Long project, String applyType);
+
+    void checkDeleteStatusByProject(Long projectId, String applyType, Long statusId);
+
+    void checkDeleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId);
 }

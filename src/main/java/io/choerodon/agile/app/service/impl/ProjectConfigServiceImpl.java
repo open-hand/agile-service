@@ -583,6 +583,18 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         instanceCache.cleanStateMachine(stateMachineId);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void checkDeleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId) {
+        Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
+        StatusMachineNodeDTO statusMachineNodeDTO = new StatusMachineNodeDTO();
+        statusMachineNodeDTO.setOrganizationId(organizationId);
+        statusMachineNodeDTO.setStateMachineId(stateMachineId);
+        checkStatusLink(projectId, issueTypeId, nodeId);
+    }
+
     private StatusMachineNodeDTO checkStatusLink(Long projectId, Long issueTypeId, Long nodeId) {
         StatusMachineNodeDTO machineNodeDTO = statusMachineNodeMapper.selectByPrimaryKey(nodeId);
         Assert.notNull(machineNodeDTO, BaseConstants.ErrorCode.DATA_NOT_EXISTS);
@@ -693,6 +705,26 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             Long tansferStatusId = handlerTransferStatus(machineNodeDTO, map, schemeConfigVO);
             // 删除node
             deleteNode(projectId, schemeConfigVO.getIssueTypeId(), applyType, machineNodeDTO.getId(), tansferStatusId);
+        }
+    }
+
+    @Override
+    public void checkDeleteStatusByProject(Long projectId, String applyType, Long statusId) {
+        Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        List<StatusMachineSchemeConfigVO> stateMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, stateMachineSchemeId);
+        for (StatusMachineSchemeConfigVO schemeConfigVO : stateMachineSchemeConfigVOS) {
+            // 查询状态的node
+            StatusMachineNodeDTO statusMachineNodeDTO = new StatusMachineNodeDTO();
+            statusMachineNodeDTO.setStatusId(statusId);
+            statusMachineNodeDTO.setStateMachineId(schemeConfigVO.getStateMachineId());
+            statusMachineNodeDTO.setOrganizationId(organizationId);
+            StatusMachineNodeDTO machineNodeDTO = statusMachineNodeMapper.selectOne(statusMachineNodeDTO);
+            if (ObjectUtils.isEmpty(machineNodeDTO)) {
+                continue;
+            }
+            // 检查是否能删除node
+            checkDeleteNode(projectId, schemeConfigVO.getIssueTypeId(), applyType, machineNodeDTO.getId());
         }
     }
 

@@ -16,6 +16,7 @@ import io.choerodon.agile.infra.utils.PageUtil;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
+import org.hzero.core.message.MessageAccessor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -313,19 +314,26 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
-    public List<IssueTypeVO> checkDeleteStatus(Long projectId,String applyType, Long statusId) {
+    @Transactional(rollbackFor = Exception.class)
+    public void checkStatus(Long projectId, Long statusId, String applyType) {
+        // 检查对应问题类型状态机里面的节点和转换
+        projectConfigService.checkDeleteStatusByProject(projectId, applyType, statusId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Map<String, Object> checkDeleteStatus(Long projectId,String applyType, Long statusId) {
          // 校验是不是初始状态
-        checkInitStatus(projectId,applyType,statusId);
-        List<Long> list = issueMapper.selectIssueTypeIdsByStatusId(projectId, statusId);
-        if (CollectionUtils.isEmpty(list)) {
-            return new ArrayList<>();
+        Map<String, Object> result = new HashMap<>();
+        result.put("checkResult", true);
+        try {
+            checkInitStatus(projectId,applyType,statusId);
+            checkStatus(projectId, statusId, applyType);
+        }catch (Exception e){
+            result.put("checkResult", false);
+            result.put("errorMsg", MessageAccessor.getMessage(e.getMessage()).getDesc());
         }
-        List<IssueTypeVO> issueTypeVOS = list.stream().map(v -> {
-            IssueTypeVO issueTypeVO = new IssueTypeVO();
-            issueTypeVO.setId(v);
-            return issueTypeVO;
-        }).collect(Collectors.toList());
-        return issueTypeVOS;
+        return result;
     }
 
     private void checkInitStatus(Long projectId, String applyType, Long statusId) {
@@ -334,7 +342,7 @@ public class StatusServiceImpl implements StatusService {
         StateMachineSchemeVO stateMachineSchemeVO = projectConfigDetailVO.getStateMachineSchemeMap().get(applyType);
         List<StatusMachineNodeDTO> list = nodeDeployMapper.selectInitNode(organizationId, stateMachineSchemeVO.getId(), statusId);
         if (!CollectionUtils.isEmpty(list)) {
-            throw new CommonException("error.status.has.init");
+            throw new CommonException("error.delete.init.status");
         }
     }
 
