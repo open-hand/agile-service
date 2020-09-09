@@ -300,11 +300,6 @@ public class StatusServiceImpl implements StatusService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteStatus(Long projectId, Long statusId, String applyType, List<DeleteStatusTransferVO> statusTransferVOS) {
-        // 查询状态被使用的情况
-        StatusDTO statusDTO = statusMapper.selectByPrimaryKey(statusId);
-        if (!ObjectUtils.isEmpty(statusDTO.getCode())) {
-            throw new CommonException("error.delete.init.status");
-        }
         // 删掉对应问题类型状态机里面的节点和转换
         projectConfigService.handlerDeleteStatusByProject(projectId, applyType, statusId, statusTransferVOS);
         // 解除状态和项目的关联

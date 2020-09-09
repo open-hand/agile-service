@@ -18,6 +18,7 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -583,10 +584,14 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     private StatusMachineNodeDTO checkStatusLink(Long projectId, Long issueTypeId, Long nodeId) {
-        // 校验当前node的状态有没有被项目下的issue使用
         StatusMachineNodeDTO machineNodeDTO = statusMachineNodeMapper.selectByPrimaryKey(nodeId);
         Assert.notNull(machineNodeDTO, BaseConstants.ErrorCode.DATA_NOT_EXISTS);
         Long currentStatusId = machineNodeDTO.getStatusId();
+        // 校验是否是初始状态
+        if (StringUtils.equals("node_init", machineNodeDTO.getType())) {
+            throw new CommonException("error.delete.init.status");
+        }
+        // 校验当前node的状态有没有被项目下的issue使用
         Boolean checkIssueUse = checkIssueUse(projectId, issueTypeId,machineNodeDTO.getStatusId());
         if (Boolean.TRUE.equals(checkIssueUse)) {
             // 报错
