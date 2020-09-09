@@ -189,7 +189,7 @@ class ReportApi {
    * @param versionId
    * @param type
    */
-  loadPie(fieldName: string, sprintId: number, versionId: number, startDate: string, endDate: string) {
+  loadPie(fieldName: string, sprintId: number, versionId: number, startDate?: string, endDate?: string) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'get',

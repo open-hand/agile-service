@@ -6,7 +6,7 @@ import {
 import _ from 'lodash';
 import { reportApi } from '@/api';
 
-class VersionReportStore {
+class PieChartStore {
     @observable versionList = [];
 
     @observable issues = {
@@ -98,9 +98,9 @@ class VersionReportStore {
     this.versionList = data;
   }
 
-  getPieDatas = (projectId, type, sprintId, versionId, startDate, endDate) => {
+  getPieDatas = (type, sprintId, versionId) => {
     this.changePieLoading(true);
-    reportApi.loadPie(type, sprintId, versionId, startDate, endDate)
+    reportApi.loadPie(type, sprintId, versionId)
       .then((data) => {
         const len = data.length;
         if (len) {
@@ -132,5 +132,5 @@ class VersionReportStore {
   }
 }
 
-const versionReportStore = new VersionReportStore();
-export default versionReportStore;
+const pieChartStore = new PieChartStore();
+export default pieChartStore;
