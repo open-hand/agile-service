@@ -93,6 +93,12 @@ public class IssueVO {
     @ApiModelProperty(value = "子缺陷列表")
     private List<IssueSubListVO> subBugVOList;
 
+    @ApiModelProperty(value = "同父亲子任务列表")
+    private List<IssueSubListVO> sameParentIssueVOList;
+
+    @ApiModelProperty(value = "同父亲子缺陷列表")
+    private List<IssueSubListVO> sameParentBugVOList;
+
     @ApiModelProperty(value = "问题版本号")
     private Long objectVersionNumber;
 
@@ -198,6 +204,22 @@ public class IssueVO {
     private Date estimatedStartTime;
 
     private Date estimatedEndTime;
+
+    public List<IssueSubListVO> getSameParentIssueVOList() {
+        return sameParentIssueVOList;
+    }
+
+    public void setSameParentIssueVOList(List<IssueSubListVO> sameParentIssueVOList) {
+        this.sameParentIssueVOList = sameParentIssueVOList;
+    }
+
+    public List<IssueSubListVO> getSameParentBugVOList() {
+        return sameParentBugVOList;
+    }
+
+    public void setSameParentBugVOList(List<IssueSubListVO> sameParentBugVOList) {
+        this.sameParentBugVOList = sameParentBugVOList;
+    }
 
     public Date getEstimatedStartTime() {
         return estimatedStartTime;
