@@ -150,5 +150,6 @@ export interface ILog {
   imageUrl: string,
   newStatus?: string,
   trigger?: string,
-  autoRelutionUpdate?: boolean,
+  removeResolution?: boolean,
+  resolutionChanged?: boolean,
 }
