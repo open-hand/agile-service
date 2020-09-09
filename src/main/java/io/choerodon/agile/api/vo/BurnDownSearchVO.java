@@ -22,7 +22,7 @@ public class BurnDownSearchVO {
     private Boolean onlyStory;
     @Encrypt
     private List<Long> quickFilterIds;
-
+    @Encrypt
     private List<Long> personalFilterIds;
 
     private String ordinalType;
