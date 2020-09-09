@@ -12,7 +12,7 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import './index.less';
 
 const { Option, OptGroup } = Select;
-interface IQuickFilter {
+export interface IQuickFilter {
   description: string
   expressQuery: string
   filterId: string

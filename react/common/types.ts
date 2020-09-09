@@ -159,3 +159,15 @@ export interface ILog {
   autoRelutionUpdate?: boolean,
 }
 export type IReportContentType = 'chart' | 'text' | 'list' | 'static_list'
+
+export interface IBoard {
+  boardId: string
+  columnConstraint: string
+  estimationStatistic: string
+  name: string
+  objectVersionNumber: number
+  projectId: string
+  swimlaneBasedCode: string
+  userDefault: boolean
+  userDefaultBoard: string
+}

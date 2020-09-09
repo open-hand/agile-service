@@ -35,7 +35,6 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
       label="迭代冲刺"
       labelLayout={'float' as LabelLayout}
       clearButton={false}
-
       statusList={['started', 'closed']}
       afterLoad={(sprints) => {
         if (!sprintId && sprints.length > 0) {
