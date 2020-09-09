@@ -12,6 +12,7 @@ import UserInfo from '@/components/UserInfo';
 import { randomString } from '@/utils/random';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
+import { userApi } from '@/api';
 import Store from './stores';
 import DragList from '../drag-list';
 import './index.less';
@@ -93,7 +94,7 @@ function CreateField() {
   // 创建或者编辑的提交操作
   async function handleOk() {
     const { current } = formDataSet;
-    const obj: FiledOptions = {
+    const obj: FiledOptions & { localDefaultObj?: any } = {
       fieldOptions: null,
       fieldType: current?.get('fieldType'),
       defaultValue: String(current?.get('defaultValue') || ''),
@@ -132,6 +133,10 @@ function CreateField() {
     formDataSet.current?.set('updateFieldOptions', obj.fieldOptions);
     if (onSubmitLocal) {
       const validResult = await formDataSet.validate();
+      if (obj.fieldType === 'member') {
+        const { list: userInfoList } = await userApi.getById(obj.defaultValue);
+        obj.localDefaultObj = userInfoList && userInfoList.length > 0 ? userInfoList[0] : {};
+      }
       return validResult && onSubmitLocal(dataTransformPostData(obj));
     }
     const url = isEdit ? `/agile/v1/${type}s/${id}/object_scheme_field/${formDataSet.current?.get('id')}?organizationId=${organizationId}` : `/agile/v1/${type}s/${id}/object_scheme_field?organizationId=${organizationId}`;

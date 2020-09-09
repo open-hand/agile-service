@@ -137,9 +137,9 @@ const DraggableItem: React.FC<Props> = ({
       <div className={`${prefixCls}-item`}>
         {renderFieldName({ value: data.get('fieldName'), record: data, dataSet: data.dataSet })}
       </div>
-      <Tooltip title={data.get('defaultValue')} placement="top">
+      <Tooltip title={data.get('_localDefaultValue') || data.get('defaultValue')} placement="top">
         <div className={`${prefixCls}-item ${prefixCls}-item-text`}>
-          {data.get('defaultValue')}
+          {data.get('_localDefaultValue') || data.get('defaultValue')}
         </div>
       </Tooltip>
       <div className={`${prefixCls}-item`}>
