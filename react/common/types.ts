@@ -16,11 +16,6 @@ export interface ISprint {
   endDate: string
 }
 
-export interface Issue {
-  issueId: string
-  summary: string
-}
-
 export interface PI {
   code: string
   name: string
@@ -137,6 +132,20 @@ export interface IField {
   name: string,
   system: boolean,
   extraConfig?: boolean,
+}
+
+export interface Issue {
+  issueId: string
+  summary: string
+  typeCode?: string,
+  issueTypeVO?: IIssueType,
+  parentIssueId?: string
+  parentIssueNum?: string
+  parentIssueSummary?: string
+  relateIssueId?: string
+  parentRelateSummary?: string
+  sameParentIssueVOList?: Issue[],
+  sameParentBugVOList?: Issue[]
 }
 
 export interface ILog {

@@ -2,6 +2,7 @@ import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { Tooltip } from 'choerodon-ui';
 import { LINK_URL_TO } from '@/constants/LINK_URL';
+import IssueSwitch from './IssueSwitch';
 
 const IssueNumber = ({
   parentIssueId, resetIssue, reloadIssue, typeCode, parentSummary, issue, type, disabled,
@@ -67,6 +68,7 @@ const IssueNumber = ({
           </a>
         )
       }
+      <IssueSwitch issue={issue} reloadIssue={reloadIssue} />
     </div>
   );
 };
