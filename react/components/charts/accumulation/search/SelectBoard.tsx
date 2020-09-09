@@ -52,7 +52,7 @@ const SelectBoard: React.FC<Props> = ({
         }}
       >
         看板
-        <Icon type="baseline-arrow_drop_down" />
+        <Icon type="baseline-arrow_drop_down" style={{ marginTop: -3 }} />
       </Button>
     </Popover>
   );

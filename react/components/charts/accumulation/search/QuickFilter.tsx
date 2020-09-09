@@ -52,7 +52,7 @@ const QuickFilter: React.FC<Props> = ({
         }}
       >
         快速搜索
-        <Icon type="baseline-arrow_drop_down" />
+        <Icon type="baseline-arrow_drop_down" style={{ marginTop: -3 }} />
       </Button>
     </Popover>
   );

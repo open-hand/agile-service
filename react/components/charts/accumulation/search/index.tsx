@@ -1,6 +1,7 @@
 import React from 'react';
 import { DatePicker } from 'choerodon-ui/pro';
 import { Moment } from 'moment';
+import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import SelectBoard from './SelectBoard';
 import QuickFilter from './QuickFilter';
 
@@ -26,6 +27,7 @@ const AccumulationSearch: React.FC<AccumulationSearchProps> = ({
       value={range}
       onChange={onRangeChange}
       clearButton={false}
+      labelLayout={'float' as LabelLayout}
     />
     <SelectBoard
       onChange={onBoardChange}

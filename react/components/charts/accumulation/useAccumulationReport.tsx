@@ -10,7 +10,7 @@ interface AccumulationConfig {
 
 }
 
-function useAccumulationReport(config?: AccumulationConfig): [AccumulationSearchProps, AccumulationChartProps] {
+function useAccumulationReport(config?: AccumulationConfig): [AccumulationSearchProps, AccumulationChartProps, Function] {
   const [quickFilterIds, setQuickFilterIds] = useState<string[]>([]);
   const [data, setData] = useState<IAccumulationData[]>([]);
   const [boardId, setBoardId] = useState<string>('');
@@ -63,7 +63,7 @@ function useAccumulationReport(config?: AccumulationConfig): [AccumulationSearch
     loading,
     data,
   };
-  return [searchProps, props];
+  return [searchProps, props, loadData];
 }
 
 export default useAccumulationReport;
