@@ -31,7 +31,6 @@ const AddChart: React.FC = () => {
     <>
       <Form dataSet={dataSet} style={{ width: 512 }}>
         <TextField name="title" />
-        <br />
         <Select name="chart">
           <Option value="burndown">燃尽图</Option>
           <Option value="sprint">冲刺报告图</Option>

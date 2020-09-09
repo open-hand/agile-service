@@ -9,7 +9,7 @@ import { IBoard } from '@/common/types';
 import { boardApi } from '@/api';
 
 interface Props {
-  onChange: (boardId: string, checked: boolean) => void
+  onChange: (boardId: string) => void
   value: string
 }
 const SelectBoard: React.FC<Props> = ({
@@ -20,7 +20,7 @@ const SelectBoard: React.FC<Props> = ({
     const list = await boardApi.loadAll();
     const defaultBoard = find(list, { userDefault: true });
     if (list.length > 0) {
-      onChange(defaultBoard ? defaultBoard.boardId : list[0].boardId, true);
+      onChange(defaultBoard ? defaultBoard.boardId : list[0].boardId);
     }
     setBoardList(list);
   }, []);
@@ -38,7 +38,9 @@ const SelectBoard: React.FC<Props> = ({
           style={{ display: 'block', margin: '5px 0' }}
           checked={board.boardId === value}
           onChange={(checked) => {
-            onChange(board.boardId, checked);
+            if (board.boardId !== value) {
+              onChange(board.boardId);
+            }
           }}
         >
           {board.name}

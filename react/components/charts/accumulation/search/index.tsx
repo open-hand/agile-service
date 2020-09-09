@@ -8,7 +8,7 @@ import QuickFilter from './QuickFilter';
 export interface AccumulationSearchProps {
   range: [Moment, Moment]
   onRangeChange: (value: [Moment, Moment]) => void
-  onBoardChange: (boardId: string, checked: boolean) => void
+  onBoardChange: (boardId: string) => void
   boardId: string
   quickFilterIds: string[]
   onQuickSearchChange: (quickFilterIds: string[]) => void

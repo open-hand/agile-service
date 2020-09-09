@@ -5,6 +5,7 @@ import {
 import { observer } from 'mobx-react-lite';
 import { IModalProps, IReportContentType } from '@/common/types';
 import AddChart from '../add-chart';
+import AddText from '../add-text';
 
 interface Props {
   modal?: IModalProps,
@@ -12,7 +13,7 @@ interface Props {
 }
 const Components = new Map<IReportContentType, React.ComponentType>([
   ['chart', AddChart],
-  ['text', AddChart],
+  ['text', AddText],
   ['list', AddChart],
   ['static_list', AddChart],
 ]);
@@ -51,7 +52,7 @@ const openAddModal = (props: Props) => {
     key: Modal.key(),
     title: '添加',
     style: {
-      width: 1088,
+      width: props.type === 'text' ? 380 : 1088,
     },
     drawer: true,
     children: <AddModal {...props} />,

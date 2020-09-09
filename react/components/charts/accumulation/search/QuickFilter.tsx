@@ -4,7 +4,7 @@ import {
 } from 'choerodon-ui/pro';
 import { Popover } from 'choerodon-ui';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
-import { remove } from 'lodash';
+import { pull } from 'lodash';
 import { quickFilterApi } from '@/api';
 import { IQuickFilter } from '@/components/quick-search';
 
@@ -37,7 +37,7 @@ const QuickFilter: React.FC<Props> = ({
             if (checked) {
               onChange(value.concat(quickFilter.filterId));
             } else {
-              onChange(remove([...value], quickFilter.filterId));
+              onChange(pull([...value], quickFilter.filterId));
             }
           }}
         >

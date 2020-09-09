@@ -45,6 +45,7 @@
     "@choerodon/master": "0.24.0",
     "@types/classnames": "^2.2.10",
     "@types/echarts": "^4.6.5",
+    "@types/quill": "^2.0.3",
     "@types/react": "^16.9.35",
     "@types/react-dom": "^16.9.8",
     "@types/react-intl": "^2.3.18",
