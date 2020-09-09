@@ -28,9 +28,9 @@ const AddFiled: React.FC<Props> = observer(({
   async function handleSubmit() {
     if (dataSet.validate()) {
       const id = dataSet.current?.toData().field;
-      const addFiledData = store.allFieldData.get(id);
+      const addFiledData = store.currentTypeAllFieldData.get(id);
       if (addFiledData) {
-        onSubmitLocal(store.allFieldData.get(id), true);
+        onSubmitLocal(store.currentTypeAllFieldData.get(id), true);
       } else {
         const deleteRecord = store.getDeleteRecords.find((record) => record.get('id') === id);
         deleteRecord && onRestoreLocal(deleteRecord);
@@ -45,6 +45,7 @@ const AddFiled: React.FC<Props> = observer(({
   }, []);
   useEffect(() => {
     pageConfigApi.loadUnSelected(store.currentIssueType).then((res) => {
+      store.loadCurrentTypeAllField(res);
       const currentDataArr = dataSet.toData();
       const deleteRecords = store.getDeleteRecords.map((record) => {
         const recordData = record.toData();

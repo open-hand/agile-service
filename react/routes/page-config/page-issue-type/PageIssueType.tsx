@@ -101,10 +101,11 @@ function PageIssueType() {
    * @param data 本地所需数据
    * @param oldField 是否是已有字段
    */
-  const onSubmitLocal = async (data: IFieldPostDataProps & { localDefaultObj: any }, oldField: boolean = false) => {
+  const onSubmitLocal = async (data: IFieldPostDataProps & { localDefaultObj: any, defaultValueObj: any, }, oldField: boolean = false) => {
     const newData = Object.assign(data, {
       local: true,
-      localDefaultValue: oldField ? '' : pageIssueTypeStore.transformDefaultValue(data.fieldType, data.defaultValue, data.localDefaultObj, data.fieldOptions, 'code'),
+      localDefaultValue: oldField ? pageIssueTypeStore.transformDefaultValue(data.fieldType, data.defaultValue, data.defaultValueObj, data.fieldOptions)
+        : pageIssueTypeStore.transformDefaultValue(data.fieldType, data.defaultValue, data.localDefaultObj, data.fieldOptions, 'code'),
       localSource: oldField ? 'add' : 'created',
       fieldName: data.name,
       edited: true,
@@ -112,6 +113,7 @@ function PageIssueType() {
       required: false,
       rank: undefined, // 本地提交数据如需在列表显示需要一个可靠rank
     });
+    console.log('onSubmitLocal', newData);
     pageIssueTypeStore.changeDataStatusCode(PageIssueTypeStoreStatusCode.add);
     !oldField && pageIssueTypeStore.addCreatedField(newData);
     // 当是增添的已有字段 或是当前类型字段时 增添数据至表格
