@@ -35,6 +35,9 @@ public class SiteMsgUtil {
     private static final String NOTIFY_TYPE = "agile";
     private static final String PROJECT_NAME = "projectName";
     private static final String USER_NAME = "userName";
+    private static final String MSG_TYPE_EMAIL = "EMAIL";
+    private static final String MSG_TYPE_WEB = "WEB";
+    private static final String MSG_TYPE_WEBHOOK = "WEB_HOOK";
 
     @Autowired
     private BaseFeignClient baseFeignClient;
@@ -134,15 +137,24 @@ public class SiteMsgUtil {
         Map<String,Object> objectMap=new HashMap<>();
         objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
         messageSender.setAdditionalInformation(objectMap);
+        if (CollectionUtils.isEmpty(receiverList)) {
+            return;
+        }
+        // webhook消息单独发送
+        if (CollectionUtils.isNotEmpty(noticeTypeList) && noticeTypeList.contains(SiteMsgUtil.MSG_TYPE_WEBHOOK)){
+            noticeTypeList.remove(SiteMsgUtil.MSG_TYPE_WEBHOOK);
+            messageSender.setTypeCodeList(Collections.singletonList(SiteMsgUtil.MSG_TYPE_WEBHOOK));
+            messageSender.setArgs(templateArgsMap);
+            messageSender.setReceiverAddressList(receiverList);
+            messageClient.async().sendMessage(messageSender);
+        }
         messageSender.setTypeCodeList(noticeTypeList);
-        if (CollectionUtils.isNotEmpty(receiverList)){
-            for (Receiver receiver : receiverList) {
-                // 设置接收者和用户名
-                templateArgsMap.put(USER_NAME, userMap.getOrDefault(receiver.getUserId(), new UserDTO()).getRealName());
-                messageSender.setArgs(templateArgsMap);
-                messageSender.setReceiverAddressList(Collections.singletonList(receiver));
-                messageClient.async().sendMessage(messageSender);
-            }
+        for (Receiver receiver : receiverList) {
+            // 设置接收者和用户名
+            templateArgsMap.put(USER_NAME, userMap.getOrDefault(receiver.getUserId(), new UserDTO()).getRealName());
+            messageSender.setArgs(templateArgsMap);
+            messageSender.setReceiverAddressList(Collections.singletonList(receiver));
+            messageClient.async().sendMessage(messageSender);
         }
     }
 }
