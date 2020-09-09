@@ -6,6 +6,7 @@ import autobind from 'choerodon-ui/pro/lib/_util/autobind';
 // @ts-ignore
 import WYSIWYGEditor from '@/components/WYSIWYGEditor';
 import { FormField, FormFieldProps } from 'choerodon-ui/pro/lib/field/FormField';
+// @ts-ignore
 import Delta from 'quill-delta';
 
 interface TestProps extends FormFieldProps {
