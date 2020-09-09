@@ -24,8 +24,27 @@ class SelectNumber extends Component {
 
   handleChange = (value) => {
     const { value: preValue } = this.state;
-
-    this.triggerChange(String(value));
+    const { loose } = this.props;
+    // 宽松模式，可以输入小数点，外部校验格式
+    if (loose) {
+      if ((/^[0-9.]+$/.test(value) || value === '')) {
+        this.triggerChange(value);
+      } else {
+        this.triggerChange(preValue);
+      }
+    } else {
+      // 只允许输入整数，选择时可选0.5
+      // eslint-disable-next-line no-lonely-if
+      if (value === '0.5') {
+        this.triggerChange('0.5');
+      } else if (/^(0|[1-9][0-9]*)(\[0-9]*)?$/.test(value) || value === '') {
+        this.triggerChange(String(value).slice(0, 3));
+      } else if (value.toString().charAt(value.length - 1) === '.') {
+        this.triggerChange(value.slice(0, -1));
+      } else {
+        this.triggerChange(preValue);
+      }
+    }
   };
 
   triggerChange = (value) => {
