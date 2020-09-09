@@ -434,21 +434,6 @@ export default {
       </Option>
     ),
   },
-  all_pi: {
-    props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
-      filterOption,
-      onFilterChange: false,
-      loadWhenMount: true,
-      label: 'PI',
-    },
-    request: () => piApi.getPiListByStatus(),
-    render: (pi) => (
-      <Option disabled={!IsInProgramStore.isOwner && pi.statusCode === 'doing'} key={pi.id} value={pi.id}>
-        {pi.code ? `${pi.code}-${pi.name}` : pi.name}
-      </Option>
-    ),
-  },
   feature: {
     request: ({ filter, page }, requestArgs) => featureApi.getByEpicId(undefined, filter, page),
     render: (item) => (
