@@ -173,7 +173,6 @@ public class FixDataServiceImpl implements FixDataService {
     @Override
     @Async
     public void fixDateStateMachineAndPage(){
-        long start = System.currentTimeMillis();
         LOGGER.info("开始修复数据");
         // 迁移数据
         migrateData();
@@ -183,7 +182,7 @@ public class FixDataServiceImpl implements FixDataService {
         fixStateMachineByIssueTypeId();
         // 修复页面配置
         fixPage();
-        LOGGER.info("修复数据完成,耗时{}",System.currentTimeMillis() - start);
+        LOGGER.info("==============================>>>>>>>> AGILE Data Fixed Finished <<<<<<<<=================================");
     }
 
     private  void migrateData() {
