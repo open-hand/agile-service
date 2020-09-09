@@ -49,7 +49,6 @@ class QuickCreateIssue extends Component {
             Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
             this.setState({
               loading: false,
-              create: false,
             });
             return;
           }

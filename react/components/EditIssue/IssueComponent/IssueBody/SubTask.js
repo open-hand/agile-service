@@ -99,7 +99,6 @@ const SubTask = observer(({
     if (summary) {
       if (!await checkCanQuickCreate(subIssueType.typeCode)) {
         Choerodon.prompt('该问题类型含有必填选项，请使用弹框创建');
-        handleCancel();
         return;
       }
       creatingRef.current = true;
