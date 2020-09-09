@@ -25,6 +25,7 @@ interface IDescriptionTempleProps {
 }
 export type PageIFieldPostDataProps = IFieldPostDataProps & {
   local?: boolean, fieldName: string, localSource: string, // 'add' | 'created'
+  localDefaultValue?: any,
   edited: boolean, created: boolean, required: boolean, rank?: string,
   dataSetRecord?: Record,
 };
@@ -211,15 +212,15 @@ class PageIssueTypeStore {
     });
   }
 
-  transformDefaultValue = (fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null) => {
+  transformDefaultValue = (fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null, optionKey: 'code' | 'id' = 'id') => {
     if (!defaultValue && !defaultValueObj) {
       return defaultValue;
     }
     switch (fieldType) {
       case 'datetime':
-        return moment(defaultValue).format('YYYY-MM-DD hh:mm:ss');
+        return moment(defaultValue).format('YYYY-MM-DD HH:mm:ss');
       case 'time':
-        return moment(defaultValue).format('hh:mm:ss');
+        return moment(defaultValue).format('HH:mm:ss');
       case 'date':
         return moment(defaultValue).format('YYYY-MM-DD');
       case 'multiple':
@@ -227,7 +228,7 @@ class PageIssueTypeStore {
       case 'single':
       case 'radio': {
         const valueArr = String(defaultValue).split(',');
-        return fieldOptions?.filter((option) => valueArr.some((v) => v === option.id)).map((item) => item.value).join(',') || defaultValue;
+        return fieldOptions?.filter((option) => valueArr.some((v) => v === option[optionKey])).map((item) => item.value).join(',') || defaultValue;
       }
       case 'member': {
         const { realName } = defaultValueObj || {};

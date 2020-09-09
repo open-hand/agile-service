@@ -54,11 +54,9 @@ const AddFiled: React.FC<Props> = observer(({
           deleteAgainAdd: true, // 标记创建过的字段重新增添
         };
       });
-
       // 第一次进入时不进行过滤 并且会过滤已增添字段  过滤系统字段
       const data = res.filter((item) => currentDataArr.length === 1
-        || !currentDataArr.some((d: any) => d.field === item.id))
-        .map((item) => store.allFieldData.get(item.id)!).filter((item) => !item.system);
+        || !currentDataArr.some((d: any) => d.field === item.id));
       setPageList(data.concat(deleteRecords));
     });
     return () => {

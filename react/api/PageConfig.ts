@@ -217,7 +217,7 @@ class PageConfigApi extends Api {
    * 查询当前类型未选择的字段列表
    * @param issueType
    */
-  loadUnSelected(issueType: PageConfigIssueType): Promise<{ id: string }[]> {
+  loadUnSelected(issueType: PageConfigIssueType): Promise<{ id: string, name: string }[]> {
     return axios({
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/unselected`,

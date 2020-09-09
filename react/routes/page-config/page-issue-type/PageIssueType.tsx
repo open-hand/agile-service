@@ -54,7 +54,7 @@ function PageIssueType() {
           newRank = item.dataSetRecord.get('rank');
         }
         return {
-          ...omit(item, 'dataSetRecord'),
+          ...omit(item, 'dataSetRecord', 'local', 'localDefaultValue', 'localSource'),
           rank: newRank,
         };
       });
@@ -101,9 +101,10 @@ function PageIssueType() {
    * @param data 本地所需数据
    * @param oldField 是否是已有字段
    */
-  const onSubmitLocal = async (data: IFieldPostDataProps, oldField: boolean = false) => {
+  const onSubmitLocal = async (data: IFieldPostDataProps & { localDefaultObj: any }, oldField: boolean = false) => {
     const newData = Object.assign(data, {
       local: true,
+      localDefaultValue: oldField ? '' : pageIssueTypeStore.transformDefaultValue(data.fieldType, data.defaultValue, data.localDefaultObj, data.fieldOptions, 'code'),
       localSource: oldField ? 'add' : 'created',
       fieldName: data.name,
       edited: true,
