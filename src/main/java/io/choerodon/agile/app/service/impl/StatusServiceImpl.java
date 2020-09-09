@@ -315,20 +315,14 @@ public class StatusServiceImpl implements StatusService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void checkStatus(Long projectId, Long statusId, String applyType) {
-        // 检查对应问题类型状态机里面的节点和转换
-        projectConfigService.checkDeleteStatusByProject(projectId, applyType, statusId);
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> checkDeleteStatus(Long projectId,String applyType, Long statusId) {
-         // 校验是不是初始状态
         Map<String, Object> result = new HashMap<>();
         result.put("checkResult", true);
         try {
+            // 校验是不是初始状态
             checkInitStatus(projectId,applyType,statusId);
-            checkStatus(projectId, statusId, applyType);
+            // 检查对应问题类型状态机里面的节点和转换
+            projectConfigService.checkDeleteStatusByProject(projectId, applyType, statusId);
         }catch (Exception e){
             result.put("checkResult", false);
             result.put("errorMsg", MessageAccessor.getMessage(e.getMessage()).getDesc());
