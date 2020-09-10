@@ -181,24 +181,18 @@ class CreateIssue extends Component {
   loadDefaultTemplate = (issueTypeId) => {
     const { form } = this.props;
     const currentDes = form.getFieldValue('description');
-    if (this.checkSameDescription(this.originDescription, currentDes)) {
-      pageConfigApi.loadTemplateByType(issueTypeId).then((res) => {
-        const { template } = res || {};
-        form.setFieldsValue({
-          description: text2Delta(template),
-        });
-        if (!template) {
-          form.setFieldsValue({
-            description: [],
-          });
-          form.setFieldsValue({
-            description: undefined,
-          });
-        }
-        this.originDescription = template;
+    pageConfigApi.loadTemplateByType(issueTypeId).then((res) => {
+      const { template } = res || {};
+      form.setFieldsValue({
+        description: text2Delta(template),
       });
-    }
-  };
+      if (!template) {
+        form.setFieldsValue({
+          description: currentDes,
+        });
+      }
+    });
+  }
 
   loadIssueTypes = () => {
     const { applyType, form } = this.props;
@@ -477,7 +471,6 @@ class CreateIssue extends Component {
                             const { typeCode } = originIssueTypes.find(
                               (item) => item.id === value,
                             );
-                            const currentDes = form.getFieldValue('description');
                             this.setState({
                               newIssueTypeCode: typeCode,
                             });
@@ -489,15 +482,11 @@ class CreateIssue extends Component {
                             fieldApi.getFields(param).then((res) => {
                               const { fields } = this.state;
                               form.resetFields(['assigneedId', 'sprintId', 'priorityId', 'epicId', 'componentIssueRel',
-                                'estimatedTime', 'storyPoints', 'description', 'fixVersionIssueRel', 'issueLabel',
-                                ...fields.map((f) => f.fieldCode).filter((code) => !['typeId', 'summary'].some((i) => i === code))]);
+                                'estimatedTime', 'storyPoints', 'fixVersionIssueRel', 'issueLabel',
+                                ...fields.map((f) => f.fieldCode).filter((code) => !['typeId', 'summary', 'description'].some((i) => i === code))]);
                               this.setState({
                                 fields: res,
                               });
-                              form.setFieldsValue({
-                                description: currentDes,
-                              });
-
                               this.loadDefaultTemplate(typeCode);
                             });
                           })}
@@ -824,7 +813,7 @@ class CreateIssue extends Component {
             <FormItem key={newIssueTypeCode} label={fieldName} className="c7nagile-line" required={field.required}>
               {getFieldDecorator(fieldCode, {
               })(
-                <WYSIWYGEditor
+                <DebounceEditor
                   style={{ height: 200, width: '100%' }}
                 />,
               )}

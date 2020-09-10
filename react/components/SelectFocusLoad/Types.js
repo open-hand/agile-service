@@ -1,3 +1,4 @@
+/* eslint-disable import/no-anonymous-default-export */
 /* eslint-disable camelcase */
 import React from 'react';
 import { Select } from 'choerodon-ui';
@@ -460,7 +461,6 @@ export default {
       loadWhenMount: true,
     },
     avoidShowError: (props, List) => new Promise((resolve) => {
-      console.log(props);
       const { selectedFeature } = props;
       const extraList = [];
       const values = selectedFeature instanceof Array ? selectedFeature : [selectedFeature];
@@ -469,8 +469,6 @@ export default {
           extraList.push(feature);
         }
       });
-      resolve(extraList);
-    }).catch(() => {
       resolve(extraList);
     }),
   }, // 特性列表
