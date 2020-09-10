@@ -4,6 +4,7 @@ import {
   Select, Input, InputNumber,
   Checkbox, TimePicker, Row, Col, Radio, DatePicker,
 } from 'choerodon-ui';
+import { findIndex } from 'lodash';
 import moment from 'moment';
 import SelectFocusLoad from '../SelectFocusLoad';
 
@@ -160,6 +161,15 @@ export default function renderField(field) {
         label={fieldName}
         allowClear
         type="user"
+        saveList={(v) => {
+          // 假如本项目无此人，则将默认值手动增添进去
+          if (field.defaultValue && field.defaultValueObj) {
+            const index = findIndex(v, { id: field.defaultValue });
+            if (index === -1) {
+              v.push(field.defaultValueObj);
+            }
+          }
+        }}
         loadWhenMount
       />
     );
