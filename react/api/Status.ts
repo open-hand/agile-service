@@ -132,11 +132,12 @@ class StatusApi extends Api {
   /**
    * 查询所有问题类型的全部状态的对应的转换
    */
-  loadAllTransformForAllIssueType = (applyType = 'agile') => axios({
+  loadAllTransformForAllIssueType = (boardId: string) => axios({
     method: 'get',
     url: `${this.prefix}/schemes/query_transforms_map`,
     params: {
-      apply_type: applyType,
+      apply_type: 'agile',
+      boardId,
     },
   })
 
@@ -189,7 +190,7 @@ class StatusApi extends Api {
    * 校验是否能删除状态 [敏捷]
    * @param code
    */
-  checkCanDelStatus(statusId:number, applyType = 'agile') {
+  checkCanDelStatus(statusId: number, applyType = 'agile') {
     return axios({
       method: 'get',
       url: `${this.prefix}/schemes/check_remove_status_for_agile`,
