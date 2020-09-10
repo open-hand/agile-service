@@ -4,7 +4,7 @@ import {
   TabPage as Page, Header, Content, Action, Permission, Breadcrumb,
 } from '@choerodon/boot';
 import {
-  Button, Icon, Table, Tooltip, Modal,
+  Button, Icon, Table, Modal,
 } from 'choerodon-ui/pro';
 import ClickText from '@/components/ClickText';
 
@@ -106,25 +106,6 @@ function IssueLinkHome() {
     return <Action data={actionData} />;
   }
 
-  function renderDesc({ text }) {
-    return (
-      <div style={{ width: '100%', overflow: 'hidden' }}>
-        <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={text}>
-          <p
-            style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              marginBottom: 0,
-              lineHeight: '24px',
-            }}
-          >
-            {text}
-          </p>
-        </Tooltip>
-      </div>
-    );
-  }
   return (
     <Page
       service={[
@@ -149,8 +130,8 @@ function IssueLinkHome() {
         <Table dataSet={issueLinkTableDs} pristine>
           <Column name="linkName" renderer={renderLinkName} />
           <Column renderer={renderAction} width="0.7rem" />
-          <Column name="outWard" renderer={renderDesc} />
-          <Column name="inWard" renderer={renderDesc} />
+          <Column name="outWard" />
+          <Column name="inWard" />
         </Table>
       </Content>
     </Page>
