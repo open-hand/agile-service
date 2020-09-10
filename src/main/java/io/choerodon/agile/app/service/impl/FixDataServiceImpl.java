@@ -655,7 +655,7 @@ public class FixDataServiceImpl implements FixDataService {
             List<Long> existTransferOwnerNodeId = statusMachineTransformMapper.existTransferOwner(statusMachineDTO.getId());
             // 获取没有转换自身的节点
             Set<Long> allNodeId = nodeVOMap.keySet();
-            allNodeId.remove(existTransferOwnerNodeId);
+            allNodeId.removeAll(existTransferOwnerNodeId);
             if (!CollectionUtils.isEmpty(allNodeId)) {
                 // 添加转换
                 List<StatusMachineTransformDTO> transform = new ArrayList<>();
