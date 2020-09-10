@@ -90,7 +90,8 @@ const DraggableItem: React.FC<Props> = ({
   };
   function onClickDel(record: Record, dataSet: DataSet) {
     Modal.confirm({
-      title: `是否删除【${record?.get('fieldName')}】字段`,
+      title: `删除【${record?.get('fieldName')}】字段`,
+      content: `确认删除【${record?.get('fieldName')}】字段吗？删除后会从当前问题类型移除此字段，并且字段数据会清空。`,
       onOk: handleDelete.bind(this, record, dataSet),
     });
   }
