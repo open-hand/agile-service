@@ -146,6 +146,9 @@ const StoryMapHome = observer(() => {
           <Button
             icon="view_module"
             onClick={handleOpenIssueList}
+            style={{
+              marginLeft: 0,
+            }}
           >
             需求池
           </Button>
