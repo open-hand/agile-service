@@ -15,13 +15,19 @@ class WYSIWYGViewer extends Component {
   }
 
   componentDidMount() {
+    window.addEventListener('click', this.handleClick);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('click', this.handleClick);
+  }
+
+  handleClick=(e) => {
     const { data } = this.props;
-    window.addEventListener('click', (e) => {
-      if (e.target.nodeName === 'IMG' && data && data.search(e.target.src) > -1) {
-        e.stopPropagation();
-        this.open(e.target.src);
-      }
-    });
+    if (e.target.nodeName === 'IMG' && data && data.search(e.target.src) > -1) {
+      e.stopPropagation();
+      this.open(e.target.src);
+    }
   }
 
   open = (src) => {
