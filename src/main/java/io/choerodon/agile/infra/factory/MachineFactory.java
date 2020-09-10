@@ -202,13 +202,25 @@ public class MachineFactory {
     }
 
     private boolean isInstanceLatest(StatusMachineTransformDTO transform, StateMachine<String, String> instance) {
-        Long endNodeId = transform.getEndNodeId();
+        boolean flag = false;
+        // 检查状态机配置是否改变
         for (State<String, String> s :instance.getStates()) {
-            if (Long.valueOf(s.getId()).equals(endNodeId)) {
-                return true;
+            if (Long.valueOf(s.getId()).equals(transform.getEndNodeId())) {
+                flag = true;
+                break;
             }
         }
-        return false;
+        // 检查instance当前状态是否改变
+        if (!Long.valueOf(instance.getState().getId()).equals(transform.getStartNodeId())){
+            //恢复节点
+            String id = instance.getId();
+            instance.getStateMachineAccessor()
+                    .doWithAllRegions(access ->
+                            access.resetStateMachine(new DefaultStateMachineContext<>(transform.getStartNodeId().toString(),
+                                    null, null, null, null, id)));
+            logger.info("restore stateMachine current status successful, stateMachineId:{}", instance.getId());
+        }
+        return flag;
     }
 
     private StateMachine<String, String> getInstance(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long currentNodeId) {
