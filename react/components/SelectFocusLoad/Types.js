@@ -460,7 +460,6 @@ export default {
       loadWhenMount: true,
     },
     avoidShowError: (props, List) => new Promise((resolve) => {
-      console.log(props);
       const { selectedFeature } = props;
       const extraList = [];
       const values = selectedFeature instanceof Array ? selectedFeature : [selectedFeature];
