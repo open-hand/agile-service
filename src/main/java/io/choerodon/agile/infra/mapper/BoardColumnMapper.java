@@ -8,6 +8,7 @@ import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/5/14.
@@ -96,4 +97,6 @@ public interface BoardColumnMapper extends BaseMapper<BoardColumnDTO> {
     List<BoardColumnStatusRelDTO> selectByStatusId(@Param("projectId") Long projectId, @Param("statusId") Long statusId);
 
     void deleteByStatusId(@Param("projectId") Long projectId, @Param("statusId") Long statusId);
+
+    Set<Long> queryStatusByBoardId(@Param("projectId") Long projectId, @Param("boardId") Long boardId);
 }

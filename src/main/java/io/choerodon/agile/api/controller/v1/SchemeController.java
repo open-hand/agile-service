@@ -75,9 +75,10 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "查询项目下所有问题类型所有状态对应的转换")
     @GetMapping(value = "/schemes/query_transforms_map")
     public ResponseEntity<Map<String, Map<String, List>>> queryTransformsMapByProjectId(@PathVariable("project_id") Long projectId,
+                                                                                                 @RequestParam(required = false) Long boardId,
                                                                                                  @RequestParam("apply_type") String applyType) {
 
-        return new ResponseEntity<>(EncryptionUtils.encryptMapValueMap(projectConfigService.queryTransformsMapByProjectId(projectId, applyType)), HttpStatus.OK);
+        return new ResponseEntity<>(EncryptionUtils.encryptMapValueMap(projectConfigService.queryTransformsMapByProjectId(projectId,boardId,applyType)), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
