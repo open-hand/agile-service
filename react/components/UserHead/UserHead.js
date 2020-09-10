@@ -36,15 +36,14 @@ const UserHead = memo(({
     }
     if (name) {
       return name;
-    } else {
-      return ldap ? `${realName}(${loginName})` : `${realName}(${email})`;
     }
+    return ldap ? `${realName}(${loginName})` : `${realName}(${email})`;
   };
 
   const renderContent = () => (
     <div
       className={`c7n-userHead ${className}`}
-      style={{        
+      style={{
         display: (id || loginName) ? 'flex' : 'none',
         maxWidth: 108,
         ...style,
