@@ -210,17 +210,8 @@ public class MachineFactory {
                 break;
             }
         }
-        // 检查instance当前状态是否改变
-        if (!Long.valueOf(instance.getState().getId()).equals(transform.getStartNodeId())){
-            //恢复节点
-            String id = instance.getId();
-            instance.getStateMachineAccessor()
-                    .doWithAllRegions(access ->
-                            access.resetStateMachine(new DefaultStateMachineContext<>(transform.getStartNodeId().toString(),
-                                    null, null, null, null, id)));
-            logger.info("restore stateMachine current status successful, stateMachineId:{}", instance.getId());
-        }
-        return flag;
+        // 检查状态机内当前状态是否与传入状态相同
+        return flag && Long.valueOf(instance.getState().getId()).equals(transform.getStartNodeId());
     }
 
     private StateMachine<String, String> getInstance(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long currentNodeId) {
