@@ -205,7 +205,7 @@ function CreateField() {
       current?.set('defaultValue', newValue);
     } else if (singleList.indexOf(fieldType) !== -1) {
       if (newDefaultValue === String(tempKey)) {
-        current?.set('defaultValue', '');
+        current?.set('defaultValue', undefined);
       }
     }
   };
