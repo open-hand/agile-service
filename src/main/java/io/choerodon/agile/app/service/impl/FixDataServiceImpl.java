@@ -643,6 +643,8 @@ public class FixDataServiceImpl implements FixDataService {
                         statusMachineTransformDTO.setName(nodeVO.getStatusVO().getName() + "转换到" + endNodeVO.getStatusVO().getName());
                         statusMachineTransformDTO.setStateMachineId(v.getStateMachineId());
                         statusMachineTransformDTO.setType(TransformType.CUSTOM);
+                        statusMachineTransformDTO.setCreatedBy(0L);
+                        statusMachineTransformDTO.setLastUpdatedBy(0L);
                         statusMachineTransformDTO.setConditionStrategy("condition_all");
                         addTransform.add(statusMachineTransformDTO);
                     }
@@ -650,6 +652,30 @@ public class FixDataServiceImpl implements FixDataService {
             });
             // 批量增加
             statusMachineTransformMapper.batchInsert(addTransform);
+            // 查询有转换到自身的节点
+            List<Long> existTransferOwnerNodeId = statusMachineTransformMapper.existTransferOwner(statusMachineDTO.getId());
+            // 获取没有转换自身的节点
+            Set<Long> allNodeId = nodeVOMap.keySet();
+            allNodeId.remove(existTransferOwnerNodeId);
+            if (!CollectionUtils.isEmpty(allNodeId)) {
+                // 添加转换
+                List<StatusMachineTransformDTO> transform = new ArrayList<>();
+                allNodeId.forEach(v -> {
+                    StatusMachineNodeVO nodeVO = nodeVOMap.get(v);
+                    StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO();
+                    statusMachineTransformDTO.setOrganizationId(statusMachineDTO.getOrganizationId());
+                    statusMachineTransformDTO.setStartNodeId(v);
+                    statusMachineTransformDTO.setEndNodeId(v);
+                    statusMachineTransformDTO.setName(nodeVO.getStatusVO().getName() + "转换到" + nodeVO.getStatusVO().getName());
+                    statusMachineTransformDTO.setStateMachineId(statusMachineDTO.getId());
+                    statusMachineTransformDTO.setType(TransformType.CUSTOM);
+                    statusMachineTransformDTO.setCreatedBy(0L);
+                    statusMachineTransformDTO.setLastUpdatedBy(0L);
+                    statusMachineTransformDTO.setConditionStrategy("condition_all");
+                    transform.add(statusMachineTransformDTO);
+                });
+                statusMachineTransformMapper.batchInsert(transform);
+            }
             LOGGER.info("修复状态机:Id:{},名称:{}的转换完成",statusMachineDTO.getId(),statusMachineDTO.getName());
         }
         // 删除所有type为transform_all的转换
