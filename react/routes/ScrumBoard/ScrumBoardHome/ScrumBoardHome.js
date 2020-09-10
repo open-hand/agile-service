@@ -304,7 +304,7 @@ class ScrumBoardHome extends Component {
   refresh = (defaultBoard, url, boardListData) => {
     ScrumBoardStore.setSpinIf(true);
     Promise.all([issueTypeApi.loadAllWithStateMachineId(),
-      statusApi.loadAllTransformForAllIssueType(),
+      statusApi.loadAllTransformForAllIssueType(defaultBoard.boardId),
       ScrumBoardStore.axiosGetBoardData(defaultBoard.boardId),
       epicApi.loadEpics()]).then(([issueTypes, stateMachineMap, defaultBoardData, epicData]) => {
       this.dataConverter.setSourceData(epicData, defaultBoardData);
