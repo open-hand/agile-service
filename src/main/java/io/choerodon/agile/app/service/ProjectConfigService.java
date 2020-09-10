@@ -135,7 +135,7 @@ public interface ProjectConfigService {
 
     Long queryWorkFlowFirstStatus(Long projectId, String applyType, Long issueTypeId, Long organizationId);
 
-    Map<Long, Map<Long, List<TransformVO>>> queryTransformsMapByProjectId(Long projectId, String applyType);
+    Map<Long, Map<Long, List<TransformVO>>> queryTransformsMapByProjectId(Long projectId,Long boardId,String applyType);
 
     /**
      * 查询项目下问题类型的状态与流转列表
