@@ -216,17 +216,16 @@ class PageIssueTypeStore {
     }
     switch (fieldType) {
       case 'datetime':
-        return moment(defaultValue).format('YYYY-MM-DD HH:mm:ss');
+        return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
       case 'time':
-        return moment(defaultValue).format('HH:mm:ss');
+        return moment(defaultValue, 'HH:mm:ss').format('HH:mm:ss');
       case 'date':
-        return moment(defaultValue).format('YYYY-MM-DD');
+        return moment(defaultValue, 'YYYY-MM-DD').format('YYYY-MM-DD');
       case 'multiple':
       case 'checkbox':
       case 'single':
       case 'radio': {
         const valueArr = String(defaultValue).split(',');
-        console.log('valueArr', valueArr, fieldOptions?.filter((option) => valueArr.some((v) => v === option[optionKey])).map((item) => item.value).join(','));
         return fieldOptions?.filter((option) => valueArr.some((v) => v === option[optionKey])).map((item) => item.value).join(',') || defaultValue;
       }
       case 'member': {

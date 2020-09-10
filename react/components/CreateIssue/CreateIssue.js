@@ -437,7 +437,9 @@ class CreateIssue extends Component {
   };
 
   getFieldComponent = (field) => {
-    const { form, mode, hiddenIssueType } = this.props;
+    const {
+      form, mode, hiddenIssueType, teamProjectIds,
+    } = this.props;
     const { getFieldDecorator } = form;
     const {
       defaultValue, fieldName, fieldCode, fieldType, required,
@@ -878,6 +880,9 @@ class CreateIssue extends Component {
             field={field || {}}
           />
         );
+      case 'subProject':
+        return newIssueTypeCode === 'feature'
+        && <FieldTeam form={form} teamProjectIds={teamProjectIds} field={field || {}} />;
       default:
         return (
           <FormItem label={fieldName} style={{ width: 330 }}>
@@ -963,7 +968,6 @@ class CreateIssue extends Component {
       // contentDescription,
       // contentLink,
       hiddenFields,
-      teamProjectIds,
     } = this.props;
     const {
       createLoading, fields, loading, newIssueTypeCode,
@@ -991,7 +995,6 @@ class CreateIssue extends Component {
                 )}
                 {fields && fields.filter((field) => !hiddenFields.includes(field.fieldCode))
                   .map((field) => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
-                {newIssueTypeCode === 'feature' && <FieldTeam form={form} teamProjectIds={teamProjectIds} />}
                 {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}
               </div>
               {mode !== 'feature' && mode !== 'sub_task' && !['issue_epic', 'feature'].includes(newIssueTypeCode) && <FieldIssueLinks form={form} />}

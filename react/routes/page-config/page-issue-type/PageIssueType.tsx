@@ -206,7 +206,7 @@ function PageIssueType() {
           </div>
         </Spin>
         <div className={styles.bottom}>
-          <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} loading={btnLoading} onClick={handleSubmit}>
+          <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} disabled={!pageIssueTypeStore.getDirty} loading={btnLoading} onClick={handleSubmit}>
             保存
           </Button>
           <Button funcType={'raised' as FuncType} onClick={pageIssueTypeStore.loadData}>
