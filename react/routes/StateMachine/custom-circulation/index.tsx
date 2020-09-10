@@ -51,9 +51,9 @@ interface IStatusNoticeSettingVOS {
   projectId: number,
   statusId: string,
   userTypeList: ['projectOwner', 'assignee', 'reporter', 'specifier'],
-  userList: {id: string, realName: string}[],
-  noticeTypeList: ['WEB_HOOK'| 'EMAIL'| 'WEB'];
-  memberList: {id: string, name: string}[]
+  userList: { id: string, realName: string }[],
+  noticeTypeList: ['WEB_HOOK' | 'EMAIL' | 'WEB'];
+  memberList: { id: string, name: string }[]
 }
 
 interface IFieldValue {
@@ -66,7 +66,7 @@ interface IFieldValue {
   statusFieldSettingId: string,
   projectId: number,
   optionId: null | string | string[],
-  fieldType: 'member' | 'radio' | 'single' |'checkbox' | 'multiple' | 'text' | 'input' | 'number' | 'date' | 'time' | 'datetime',
+  fieldType: 'member' | 'radio' | 'single' | 'checkbox' | 'multiple' | 'text' | 'input' | 'number' | 'date' | 'time' | 'datetime',
   operateType: 'clear' | 'specifier' | 'current_time' | 'add' | 'reportor' | 'creator' | 'operator',
   numberValue: null | number,
   numberAddValue: null | number,
@@ -84,7 +84,7 @@ interface IStatusFieldSettingVOS {
   fieldId: string,
   fieldName: string,
   fieldCode: string,
-  fieldType: 'member' | 'radio' | 'single' |'checkbox' | 'multiple' | 'text' | 'input' | 'number' | 'date' | 'time' | 'datetime',
+  fieldType: 'member' | 'radio' | 'single' | 'checkbox' | 'multiple' | 'text' | 'input' | 'number' | 'date' | 'time' | 'datetime',
   fieldValueList: IFieldValue[],
 }
 
@@ -145,7 +145,7 @@ const transformFieldValue = (fieldSetting) => {
       const { operateType } = firstField;
       const isSpecifier = operateType === 'specifier';
       transformedValue = isSpecifier
-      // @ts-ignore
+        // @ts-ignore
         ? fieldValueList.map((item) => item.name) : transformedMember[operateType];
       break;
     }
@@ -306,7 +306,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
   };
 
   const renderAction = ({
-  // @ts-ignore
+    // @ts-ignore
     value, text, name, record, dataSet,
   }) => {
     const selectedTypeCode = find(issueTypes, (
@@ -350,7 +350,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
     const noticeTypes: string[] = [];
     if (((userTypeList && userTypeList.length) || (userList && userList.length) || (
       memberList && memberList.length))
-    && noticeTypeList && noticeTypeList.length) {
+      && noticeTypeList && noticeTypeList.length) {
       userTypeList.forEach((type: string) => {
         if (type !== 'specifier') {
           // @ts-ignore
@@ -420,11 +420,11 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       <div className={styles.setting}>
         {
           (isProjectOwnerExist || (assigners && assigners.length > 0)) && (
-          <div className={styles.settingItem}>
-            <Tooltip title={transferRender}>
-              {transferRender}
-            </Tooltip>
-          </div>
+            <div className={styles.settingItem}>
+              <Tooltip title={transferRender}>
+                {transferRender}
+              </Tooltip>
+            </div>
           )
         }
         {
@@ -505,6 +505,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
             className={styles.table}
             dataSet={customCirculationDataSet}
             columns={columns as ColumnProps[]}
+            filterBarFieldName="param"
           />
         </div>
       </Content>
