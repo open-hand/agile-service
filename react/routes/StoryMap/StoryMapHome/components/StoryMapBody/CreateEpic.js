@@ -4,6 +4,7 @@ import { Input } from 'choerodon-ui';
 import { Choerodon } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
 import { issueApi, fieldApi } from '@/api';
+import { checkCanQuickCreate } from '@/utils/quickCreate';
 import Card from './Card';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 import clickOutSide from '../../../../../components/CommonComponent/ClickOutSide';
@@ -20,7 +21,7 @@ class CreateEpic extends Component {
     this.handleCreateIssue();
   };
 
-  handleCreateIssue = () => {
+  handleCreateIssue = async () => {
     if (!this.canAdd) {
       return;
     }
@@ -42,13 +43,19 @@ class CreateEpic extends Component {
         priorityId: defaultPriority.id,
         rankVO: {
           projectId: getProjectId(),
-          // objectVersionNumber: source.epicRankObjectVersionNumber, // 乐观锁     
+          // objectVersionNumber: source.epicRankObjectVersionNumber, // 乐观锁
           // issueId: source.issueId,
           type: 'epic',
-          before: false, // 是否拖动到第一个  
+          before: false, // 是否拖动到第一个
           referenceIssueId: preEpic ? preEpic.issueId : 0,
         },
       };
+      if (!await checkCanQuickCreate(epicType.typeCode)) {
+        Choerodon.prompt('该问题类型含有必填选项，请使用创建问题弹框创建');
+        this.canAdd = true;
+        StoryMapStore.removeAddingEpic();
+        return;
+      }
       issueApi.create(req).then((res) => {
         if (res.failed) {
           if (res.code === 'error.epicName.exist') {
