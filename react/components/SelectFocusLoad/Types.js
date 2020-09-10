@@ -1,3 +1,4 @@
+/* eslint-disable import/no-anonymous-default-export */
 /* eslint-disable camelcase */
 import React from 'react';
 import { Select } from 'choerodon-ui';
@@ -468,8 +469,6 @@ export default {
           extraList.push(feature);
         }
       });
-      resolve(extraList);
-    }).catch(() => {
       resolve(extraList);
     }),
   }, // 特性列表
