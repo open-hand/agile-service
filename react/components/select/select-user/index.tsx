@@ -43,7 +43,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
         { ...item, id: item.id.toString() }
       ));
     },
-  }), [extraOptions, selectedUser]);
+  }), [selectedUser]);
   const props = useSelect(config);
   return (
     <Select
