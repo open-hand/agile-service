@@ -543,7 +543,7 @@ public class EncryptionUtils {
                     LOGGER.error("string to object error: {}", e);
                 }
                 if (!CollectionUtils.isEmpty(value)) {
-                    object = value.stream().map(v -> encrypt ? encrypt(Long.valueOf(v)) : decrypt(v)).collect(Collectors.toList());
+                    object = value.stream().map(v -> encrypt ? (StringUtils.isNumeric(v) ? encrypt(Long.parseLong(v)) : v) : decrypt(v)).collect(Collectors.toList());
                 }
                 else {
                     object = new ArrayList<>();
