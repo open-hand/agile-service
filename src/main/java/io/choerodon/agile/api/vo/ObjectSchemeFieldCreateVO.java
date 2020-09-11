@@ -34,6 +34,12 @@ public class ObjectSchemeFieldCreateVO {
     @ApiModelProperty(value = "字段选项列表")
     private List<FieldOptionUpdateVO> fieldOptions;
 
+    private Boolean required;
+
+    private Boolean created;
+
+    private Boolean edited;
+
     private String rank;
 
     public String getRank() {
@@ -114,5 +120,29 @@ public class ObjectSchemeFieldCreateVO {
 
     public void setSchemeCode(String schemeCode) {
         this.schemeCode = schemeCode;
+    }
+
+    public Boolean getRequired() {
+        return required;
+    }
+
+    public void setRequired(Boolean required) {
+        this.required = required;
+    }
+
+    public Boolean getCreated() {
+        return created;
+    }
+
+    public void setCreated(Boolean created) {
+        this.created = created;
+    }
+
+    public Boolean getEdited() {
+        return edited;
+    }
+
+    public void setEdited(Boolean edited) {
+        this.edited = edited;
     }
 }
