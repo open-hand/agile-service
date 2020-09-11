@@ -82,6 +82,7 @@ public class SiteMsgUtil {
         for (Map.Entry<Long, UserDTO> entry : userDTOMap.entrySet()) {
             Receiver receiver = new Receiver();
             UserDTO userDTO = entry.getValue();
+            receiver.setUserId(userDTO.getId());
             receiver.setEmail(userDTO.getEmail());
             receiver.setPhone(userDTO.getPhone());
             receiver.setTargetUserTenantId(userDTO.getOrganizationId());
