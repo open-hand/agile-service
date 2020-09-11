@@ -78,10 +78,11 @@ public class SiteMsgUtil {
     private Map<Long, UserDTO> handleReceiver(List<Receiver> receivers,Collection<Long> userIds){
         List<UserDTO> users = baseFeignClient.listUsersByIds(userIds.toArray(new Long[]{}), true).getBody();
         Map<Long, UserDTO> userDTOMap = users.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity()));
-        for (Long userId:userIds) {
+        // 未启用用户则不进行发消息
+        for (Map.Entry<Long, UserDTO> entry : userDTOMap.entrySet()) {
             Receiver receiver = new Receiver();
-            receiver.setUserId(userId);
-            UserDTO userDTO = userDTOMap.get(userId);
+            UserDTO userDTO = entry.getValue();
+            receiver.setUserId(userDTO.getId());
             receiver.setEmail(userDTO.getEmail());
             receiver.setPhone(userDTO.getPhone());
             receiver.setTargetUserTenantId(userDTO.getOrganizationId());
