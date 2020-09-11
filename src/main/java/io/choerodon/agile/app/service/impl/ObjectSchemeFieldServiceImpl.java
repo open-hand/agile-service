@@ -373,8 +373,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             field.setDefaultValue(defaultValue);
         }
         field = baseCreate(field, issueTypes, issueTypeForRank);
-        Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
-        insertObjectSchemeFieldExtend(organizationId,projectId,field.getId(),fieldCreateDTO.getRequired(),issueTypeMap,issueTypeForRank,fieldCreateDTO.getCreated(),fieldCreateDTO.getEdited());
+        if (!ObjectUtils.isEmpty(issueTypeForRank)) {
+            Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
+            insertObjectSchemeFieldExtend(organizationId, projectId, field.getId(), fieldCreateDTO.getRequired(), issueTypeMap, issueTypeForRank, fieldCreateDTO.getCreated(), fieldCreateDTO.getEdited());
+        }
         //处理字段选项
         if (fieldCreateDTO.getFieldOptions() != null) {
             String defaultIds = fieldOptionService.handleFieldOption(organizationId, field.getId(), fieldCreateDTO.getFieldOptions());
