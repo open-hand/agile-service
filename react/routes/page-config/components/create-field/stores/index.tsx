@@ -89,7 +89,7 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
           const dateIndex = dateList.indexOf(data.fieldType);
           if (dateIndex !== -1) {
             // 格式化日期类型
-            formDataSet.current?.set('defaultValue', data?.defaultValue !== '' ? moment(data.defaultValue, 'YYYY-MM-DD HH:mm:ss').format(dateFormat[dateIndex]) : undefined);
+            formDataSet.current?.set('defaultValue', data.defaultValue && data.defaultValue !== '' ? moment(data.defaultValue, 'YYYY-MM-DD HH:mm:ss').format(dateFormat[dateIndex]) : undefined);
             // 变换数据，从extraConfig -> check
             formDataSet.current?.set('check', data.extraConfig);
           }
