@@ -112,8 +112,8 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
         Set<Long> userSet = new HashSet<>();
         noticeList.forEach(noticeDTO -> this.receiverType2User(projectId, noticeDTO, issue, userSet));
         // 根据通知类型发消息
-        sendMsgUtil.noticeIssueStatus(projectId, userSet, Arrays.asList(StringUtils.split(noticeList.stream()
-                .map(StatusNoticeSettingDTO::getNoticeType).findFirst().orElse(""), BaseConstants.Symbol.COMMA)),
+        sendMsgUtil.noticeIssueStatus(projectId, userSet, new ArrayList<>(Arrays.asList(StringUtils.split(noticeList.stream()
+                        .map(StatusNoticeSettingDTO::getNoticeType).findFirst().orElse(""), BaseConstants.Symbol.COMMA))),
                 issue, DetailsHelper.getUserDetails());
     }
 
