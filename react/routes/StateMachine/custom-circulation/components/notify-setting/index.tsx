@@ -5,8 +5,7 @@ import {
   DataSet, Form, Select, Dropdown, CheckBox,
 } from 'choerodon-ui/pro';
 import { Icon } from 'choerodon-ui';
-import SelectUser from '@/components/select/select-user';
-import { find } from 'lodash';
+import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { statusTransformApi, IUpdateNotifySetting, statusTransformApiConfig } from '@/api';
@@ -16,6 +15,7 @@ import { User } from '@/common/types';
 import Loading from '@/components/Loading';
 import styles from './index.less';
 
+const { AppState } = stores;
 interface NotifySelectProps {
   notifySettingDataSet: DataSet,
   memberOptionsDataSet: DataSet,
@@ -154,7 +154,7 @@ const NotifySetting = ({
             const members = memberOptionsDataSet.toData() || [];
             for (let i = 0; i < members.length; i += 1) {
               // @ts-ignore
-              if (record.get(members[i].code)) {
+              if (record.get(members[i].code) && !record.get('webhook')) {
                 return true;
               }
             }
@@ -327,12 +327,16 @@ const NotifySetting = ({
           </div>
         </Dropdown>
         <Select name="noticeTypeList" />
-        <CheckBox
-          name="webhook"
-          style={{
-            marginTop: -30,
-          }}
-        />
+        {
+          AppState.currentMenuType.category !== 'PROGRAM' && (
+          <CheckBox
+            name="webhook"
+            style={{
+              marginTop: -30,
+            }}
+          />
+          )
+        }
       </Form>
     </div>
   );
