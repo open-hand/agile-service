@@ -18,10 +18,9 @@ const clearIdMap = new Map([
 ]);
 
 const extraOptionsMap = new Map();
-
 export default function renderField({
   code, fieldType, fieldOptions, required,
-}, data) {
+}, data, selectUserMap) {
   switch (code) {
     case 'component': {
       return (
@@ -319,6 +318,7 @@ export default function renderField({
           style={{ width: '100%' }}
           name={code}
           extraOptions={extraOptionsMap.member}
+          selectedUser={selectUserMap.get(code)}
         />
       );
     }
