@@ -18,6 +18,7 @@ export interface IFieldOption {
   fieldId: string,
   code: string,
   value: string,
+  tempKey?: string,
 }
 export type IFieldOptionProps = IFieldOption;
 interface IFiled {

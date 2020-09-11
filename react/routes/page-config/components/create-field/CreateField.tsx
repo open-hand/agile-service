@@ -76,6 +76,7 @@ function CreateField() {
   };
   const dataTransformPostData = (fieldOption: FiledOptions): IFieldPostData => {
     const data = formDataSet.toData()[0] as IFieldPostData;
+    const dateList = ['date', 'datetime', 'time'];
     const prefix = type === 'project' ? 'pro_' : 'org_';
     const { name, check } = data;
     const { context } = data;
@@ -83,16 +84,8 @@ function CreateField() {
     //   context = ['global'];
     // }
     const transformTime = {} as { defaultValue: string };
-    switch (fieldOption.fieldType) {
-      case 'time':
-        transformTime.defaultValue = moment(fieldOption.defaultValue).format('HH:mm:ss');
-        break;
-      case 'date':
-        transformTime.defaultValue = moment(fieldOption.defaultValue).format('YYYY-MM-DD');
-        break;
-      case 'datetime':
-        transformTime.defaultValue = moment(fieldOption.defaultValue).format('YYYY-MM-DD HH:mm:ss');
-        break;
+    if (dateList.indexOf(fieldOption.fieldType) !== -1 && fieldOption?.defaultValue !== '') {
+      transformTime.defaultValue = moment(fieldOption.defaultValue).format('YYYY-MM-DD HH:mm:ss');
     }
     const postData: IFieldPostData = {
       context,
@@ -147,7 +140,7 @@ function CreateField() {
     formDataSet.current?.set('updateFieldOptions', obj.fieldOptions);
     if (onSubmitLocal) {
       const validResult = await formDataSet.validate();
-      if (obj.fieldType === 'member') {
+      if (obj.fieldType === 'member' && obj?.defaultValue !== '') {
         const { list: userInfoList } = await userApi.getById(obj.defaultValue);
         obj.localDefaultObj = userInfoList && userInfoList.length > 0 ? userInfoList[0] : {};
       }

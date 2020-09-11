@@ -50,12 +50,22 @@ function PageIssueType() {
       let addFields: Array<Record> = [];
       const CreatedFields = pageIssueTypeStore.getCreatedFields.map((item) => {
         let newRank = item.rank;
+        let { created } = item;
+        let { edited } = item;
+        let { required } = item;
+
         if (item.dataSetRecord) {
           newRank = item.dataSetRecord.get('rank');
+          created = item.dataSetRecord.get('created');
+          edited = item.dataSetRecord.get('edited');
+          required = item.dataSetRecord.get('required');
         }
         return {
           ...omit(item, 'dataSetRecord', 'local', 'localDefaultValue', 'localSource'),
           rank: newRank,
+          created,
+          edited,
+          required,
         };
       });
       if (sortTableDataSet.dirty) {
@@ -105,7 +115,7 @@ function PageIssueType() {
     const newData = Object.assign(data, {
       local: true,
       localDefaultValue: oldField ? pageIssueTypeStore.transformDefaultValue(data.fieldType, data.defaultValue, data.defaultValueObj, data.fieldOptions)
-        : pageIssueTypeStore.transformDefaultValue(data.fieldType, data.defaultValue, data.localDefaultObj, data.fieldOptions, 'code'),
+        : pageIssueTypeStore.transformDefaultValue(data.fieldType, data.defaultValue, data.localDefaultObj, data.fieldOptions, 'tempKey'),
       localSource: oldField ? 'add' : 'created',
       fieldName: data.name,
       edited: true,
@@ -113,7 +123,6 @@ function PageIssueType() {
       required: false,
       rank: undefined, // 本地提交数据如需在列表显示需要一个可靠rank
     });
-    console.log('onSubmitLocal', newData);
     pageIssueTypeStore.changeDataStatusCode(PageIssueTypeStoreStatusCode.add);
     !oldField && pageIssueTypeStore.addCreatedField(newData);
     // 当是增添的已有字段 或是当前类型字段时 增添数据至表格

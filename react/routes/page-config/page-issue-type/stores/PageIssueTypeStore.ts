@@ -189,7 +189,7 @@ class PageIssueTypeStore {
 
   @computed get getDirty() {
     return this.getDataStatusCode !== PageIssueTypeStoreStatusCode.null
-      || this.getDescriptionObj.dirty || this.sortTableDataSet.dirty;
+      || this.getDescriptionObj.dirty || this.sortTableDataSet.dirty || this.createdFields.length > 0;
   }
 
   @computed get getDataStatusCode() {
@@ -210,7 +210,7 @@ class PageIssueTypeStore {
     });
   }
 
-  transformDefaultValue = (fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null, optionKey: 'code' | 'id' = 'id') => {
+  transformDefaultValue = (fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null, optionKey: 'tempKey' | 'id' = 'id') => {
     if (!defaultValue && !defaultValueObj) {
       return defaultValue;
     }
@@ -218,7 +218,7 @@ class PageIssueTypeStore {
       case 'datetime':
         return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
       case 'time':
-        return moment(defaultValue, 'HH:mm:ss').format('HH:mm:ss');
+        return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('HH:mm:ss');
       case 'date':
         return moment(defaultValue, 'YYYY-MM-DD').format('YYYY-MM-DD');
       case 'multiple':
