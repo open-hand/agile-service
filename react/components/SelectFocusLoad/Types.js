@@ -327,7 +327,7 @@ export default {
     request: () => priorityApi.loadByProject(),
     getDefaultValue: (priorities) => find(priorities, { default: true }).id,
     render: (priority) => (
-      <Option key={priority.id} value={priority.id}>
+      <Option key={priority.id} value={priority.id} label={priority.name}>
         <div style={{ display: 'inline-flex', alignItems: 'center', padding: 2 }}>
           <span>{priority.name}</span>
         </div>
