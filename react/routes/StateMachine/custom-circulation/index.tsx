@@ -106,6 +106,7 @@ const transformedMember = {
   operator: '当前操作人',
   assignee: '经办人',
   projectOwner: '项目所有者',
+  clear: '清空',
 };
 
 const transformedNoticeType = {
