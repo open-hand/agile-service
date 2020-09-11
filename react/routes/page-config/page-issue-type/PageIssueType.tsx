@@ -90,6 +90,9 @@ function PageIssueType() {
         } : undefined,
         addFields: addFields.map((item) => ({
           fieldId: item.get('id'),
+          required: item.get('required'),
+          created: item.get('created'),
+          edited: item.get('edited'),
           rank: item.get('rank'),
         })),
         createdFields: CreatedFields,
