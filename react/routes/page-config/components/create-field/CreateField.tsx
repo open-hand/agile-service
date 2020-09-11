@@ -84,8 +84,11 @@ function CreateField() {
     //   context = ['global'];
     // }
     const transformTime = {} as { defaultValue: string };
-    if (dateList.indexOf(fieldOption.fieldType) !== -1 && fieldOption?.defaultValue !== '') {
-      transformTime.defaultValue = moment(fieldOption.defaultValue).format('YYYY-MM-DD HH:mm:ss');
+    const dateFormat = ['YYYY-MM-DD', 'YYYY-MM-DD HH:mm:ss', 'HH:mm:ss'];
+    const dateIndex = dateList.indexOf(data.fieldType);
+    if (dateIndex !== -1 && fieldOption?.defaultValue !== '') {
+      const dateFormatVal = moment(fieldOption.defaultValue);
+      transformTime.defaultValue = dateFormatVal.isValid() ? dateFormatVal.format(dateFormat[1]) : moment(fieldOption.defaultValue, dateFormat).format(dateFormat[1]);
     }
     const postData: IFieldPostData = {
       context,
@@ -230,6 +233,7 @@ function CreateField() {
             <TimePicker
               name="defaultValue"
               disabled={isCheck}
+              format="HH:mm:ss"
               className="form-field-full-row"
             />
             <CheckBox
@@ -245,6 +249,7 @@ function CreateField() {
             <DateTimePicker
               name="defaultValue"
               disabled={isCheck}
+              format="YYYY-MM-DD HH:mm:ss"
               className="form-field-full-row"
             />
             <CheckBox
@@ -260,6 +265,7 @@ function CreateField() {
             <DatePicker
               name="defaultValue"
               disabled={isCheck}
+              format="YYYY-MM-DD"
               className="form-field-full-row"
             />
             <CheckBox
