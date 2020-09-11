@@ -93,4 +93,13 @@
             ,#{item.organizationId},#{item.createdBy},#{item.lastUpdatedBy})
         </foreach>
     </insert>
+
+    <select id="existTransferOwner" resultType="java.lang.Long">
+        select
+           fsnt.start_node_id
+        from fd_status_machine_transform fsnt
+        where
+            fsnt.state_machine_id = #{stateMachineId}
+            AND fsnt.start_node_id = fsnt.end_node_id
+    </select>
 </mapper>

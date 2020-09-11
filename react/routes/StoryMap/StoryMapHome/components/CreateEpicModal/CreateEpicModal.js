@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Modal, Form, Input } from 'choerodon-ui';
-import { stores } from '@choerodon/boot';
+import { stores, Choerodon } from '@choerodon/boot';
 import { epicApi, issueApi, fieldApi } from '@/api';
+import { checkCanQuickCreate } from '@/utils/quickCreate';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 
 const { AppState } = stores;
 const { Sidebar } = Modal;
 const FormItem = Form.Item;
 const { TextArea } = Input;
-
 
 class CreateEpicModal extends Component {
   constructor(props) {
@@ -24,18 +24,18 @@ class CreateEpicModal extends Component {
     if (this.props.visible && !prevProps.visible) {
       setTimeout(() => {
         this.input.focus();
-      });   
+      });
     }
   }
 
   handleCreateEpic =(e) => {
     const {
-      form, onOk, epicType, defaultPriority, 
-    } = this.props;   
+      form, onOk, epicType, defaultPriority,
+    } = this.props;
     const defaultPriorityId = defaultPriority ? defaultPriority.id : '';
     e.preventDefault();
-    form.validateFieldsAndScroll((err, value) => {
-      if (!err) {        
+    form.validateFieldsAndScroll(async (err, value) => {
+      if (!err) {
         const data = {
           projectId: AppState.currentMenuType.id,
           epicName: value.name.trim(),
@@ -48,6 +48,13 @@ class CreateEpicModal extends Component {
         this.setState({
           loading: true,
         });
+        if (!await checkCanQuickCreate(epicType.typeCode)) {
+          Choerodon.prompt('该问题类型含有必填选项，请使用创建问题弹框创建');
+          this.setState({
+            loading: false,
+          });
+          return;
+        }
         issueApi.create(data)
           .then((res) => {
             const dto = {
@@ -94,7 +101,7 @@ class CreateEpicModal extends Component {
 
     return (
       <Sidebar
-        title="创建史诗"       
+        title="创建史诗"
         visible={visible}
         okText="创建"
         cancelText="取消"
@@ -106,7 +113,7 @@ class CreateEpicModal extends Component {
         confirmLoading={loading}
         onOk={this.handleCreateEpic}
         width={380}
-      >        
+      >
         <Form>
           <FormItem>
             {getFieldDecorator('name', {
@@ -132,7 +139,7 @@ class CreateEpicModal extends Component {
               <TextArea autosize label="概要" maxLength={44} />,
             )}
           </FormItem>
-        </Form>        
+        </Form>
       </Sidebar>
     );
   }

@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Input } from 'choerodon-ui';
+import { Choerodon } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
+import { checkCanQuickCreate } from '@/utils/quickCreate';
 import { issueApi, fieldApi } from '@/api';
 import Card from '../Card';
 import './CreateStory.less';
@@ -24,7 +26,7 @@ class CreateStory extends Component {
     this.handleCreateIssue();
   };
 
-  handleCreateIssue = () => {
+  handleCreateIssue = async () => {
     if (!this.canAdd) {
       return;
     }
@@ -53,6 +55,15 @@ class CreateStory extends Component {
           }],
         } : {},
       };
+      if (!await checkCanQuickCreate(storyType.typeCode)) {
+        Choerodon.prompt('该问题类型含有必填选项，请使用创建问题弹框创建');
+        this.canAdd = true;
+        this.setState({
+          adding: false,
+          value: '',
+        });
+        return;
+      }
       issueApi.create(req).then((res) => {
         const dto = {
           schemeCode: 'agile_issue',

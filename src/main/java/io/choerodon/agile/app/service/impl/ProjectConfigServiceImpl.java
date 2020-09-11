@@ -288,7 +288,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
-    public Map<Long, Map<Long, List<TransformVO>>> queryTransformsMapByProjectId(Long projectId, String applyType) {
+    public Map<Long, Map<Long, List<TransformVO>>> queryTransformsMapByProjectId(Long projectId,Long boardId,String applyType) {
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
             throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
         }
@@ -327,6 +327,11 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 //        Long defaultStateMachineId = idMap.get(0L);
 //        resultMap.put(0L, statusMap.get(defaultStateMachineId));
 
+        Set<Long> boardStatus = new HashSet<>();
+        if (!ObjectUtils.isEmpty(boardId)) {
+            // 查询出面板上有的状态
+            boardStatus.addAll(boardColumnMapper.queryStatusByBoardId(projectId,boardId));
+        }
         //匹配状态机的问题类型映射
         for (IssueTypeDTO issueType : issueTypes) {
             boolean isSkip = "issue_epic".equals(issueType.getTypeCode()) || (SchemeApplyType.AGILE.equals(applyType) && "feature".equals(issueType.getTypeCode()));
@@ -336,12 +341,13 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             Long stateMachineId = idMap.get(issueType.getId());
             if (stateMachineId != null) {
                 Map<Long, List<TransformVO>> statusTransferMap = statusMap.get(stateMachineId);
-                Set<Long> allStatus = statusTransferMap.keySet();
+                Set<Long> allStatus = new HashSet<>();
+                allStatus.addAll(!ObjectUtils.isEmpty(boardId) ? boardStatus : statusTransferMap.keySet());
                 // 查询能转换的状态
                 List<Long> canTransferStatus = statusTransferSettingService.checkStatusTransform(projectId, issueType.getId(), new ArrayList<>(allStatus));
                 // 过滤掉不能转换的状态
                 Map<Long, List<TransformVO>> transferMap = new HashMap<>();
-                statusTransferMap.entrySet().stream().filter(entry -> entry.getKey() != 0L).forEach(entry -> {
+                statusTransferMap.entrySet().stream().filter(entry -> entry.getKey() != 0L && canTransferStatus.contains(entry.getKey())).forEach(entry -> {
                     transferMap.put(entry.getKey(),entry.getValue().stream().filter(v ->  canTransferStatus.contains(v.getEndStatusId())).map(v -> {
                         StatusVO statusVO = sMap.get(v.getEndStatusId());
                         if (statusVO != null) {

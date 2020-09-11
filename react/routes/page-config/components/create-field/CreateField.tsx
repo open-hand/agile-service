@@ -1,13 +1,14 @@
 import React, {
   Fragment, useState, useContext, useEffect, useMemo, FormEventHandler,
 } from 'react';
-import { observer } from 'mobx-react-lite';
+import { observer, Observer } from 'mobx-react-lite';
 import {
   Form, TextField, Select, DatePicker, TimePicker, DateTimePicker,
   CheckBox, NumberField, TextArea, UrlField,
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import { debounce } from 'lodash';
+import moment from 'moment';
 import UserInfo from '@/components/UserInfo';
 import { randomString } from '@/utils/random';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
@@ -23,8 +24,8 @@ const singleList = ['radio', 'single'];
 const multipleList = ['checkbox', 'multiple'];
 interface FiledOptions {
   fieldOptions: any,
-  fieldType: any,
-  defaultValue: string
+  fieldType: string,
+  defaultValue: string,
 }
 interface IFieldPostData extends FiledOptions {
   id?: string,
@@ -75,17 +76,23 @@ function CreateField() {
   };
   const dataTransformPostData = (fieldOption: FiledOptions): IFieldPostData => {
     const data = formDataSet.toData()[0] as IFieldPostData;
+    const dateList = ['date', 'datetime', 'time'];
     const prefix = type === 'project' ? 'pro_' : 'org_';
     const { name, check } = data;
     const { context } = data;
     // if (context && context.length === formDataSet.getField('context')?.options?.length) {
     //   context = ['global'];
     // }
+    const transformTime = {} as { defaultValue: string };
+    if (dateList.indexOf(fieldOption.fieldType) !== -1 && fieldOption?.defaultValue !== '') {
+      transformTime.defaultValue = moment(fieldOption.defaultValue).format('YYYY-MM-DD HH:mm:ss');
+    }
     const postData: IFieldPostData = {
       context,
       code: `${prefix}${data.code}`,
       name,
       ...fieldOption,
+      ...transformTime,
       schemeCode,
       extraConfig: check,
     };
@@ -125,15 +132,15 @@ function CreateField() {
         }
         return { ...o, isDefault: false };
       });
-      if (obj.defaultValue && Array.isArray(obj.defaultValue)) {
-        obj.defaultValue = obj.defaultValue.join(',');
-      }
+      // if (obj.defaultValue && Array.isArray(obj.defaultValue)) {
+      //   obj.defaultValue = obj.defaultValue.join(',');
+      // }
     }
     // 防止使用dataSet提交时 忽略filedOptions
     formDataSet.current?.set('updateFieldOptions', obj.fieldOptions);
     if (onSubmitLocal) {
       const validResult = await formDataSet.validate();
-      if (obj.fieldType === 'member') {
+      if (obj.fieldType === 'member' && obj?.defaultValue !== '') {
         const { list: userInfoList } = await userApi.getById(obj.defaultValue);
         obj.localDefaultObj = userInfoList && userInfoList.length > 0 ? userInfoList[0] : {};
       }
@@ -191,7 +198,7 @@ function CreateField() {
       current?.set('defaultValue', newValue);
     } else if (singleList.indexOf(fieldType) !== -1) {
       if (newDefaultValue === String(tempKey)) {
-        current?.set('defaultValue', '');
+        current?.set('defaultValue', undefined);
       }
     }
   };
@@ -298,11 +305,12 @@ function CreateField() {
             name="defaultValue"
           />
         );
-      case 'radio': case 'single': case 'checkbox': case 'multiple':
+      case 'radio': case 'single': case 'checkbox': case 'multiple': {
         return (
           <>
             <Select
               name="defaultValue"
+              key={`${singleList.indexOf(fieldType) !== -1 ? 'single' : 'multiple'}-defaultValue-select`}
               style={{ width: '100%', marginBottom: '20px' }}
               multiple={!(singleList.indexOf(fieldType) !== -1)}
             >
@@ -312,8 +320,8 @@ function CreateField() {
                   if (item.enabled) {
                     return (
                       <Option
-                        value={item.id || item.code}
-                        key={item.id || item.code}
+                        value={item.id || item.tempKey}
+                        key={item.id || item.tempKey}
                       >
                         {item.value}
                       </Option>
@@ -334,6 +342,7 @@ function CreateField() {
             />
           </>
         );
+      }
       case 'member':
         return (
           <Select

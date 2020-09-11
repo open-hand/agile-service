@@ -260,6 +260,7 @@ function EditIssue() {
               key={issueId}
               disabled={rightDisabled}
               store={store}
+              issueId={currentIssueId}
               reloadIssue={loadIssueDetail}
               onUpdate={onUpdate}
               onDeleteSubIssue={onDeleteSubIssue}

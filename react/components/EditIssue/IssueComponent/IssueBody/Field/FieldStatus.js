@@ -41,6 +41,7 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
     textField: 'statusVO.name',
     valueField: 'endStatusId',
   }), [JSON.stringify(statusArgs)]);
+
   const props = useSelect(config);
   return (
     <Select
@@ -81,13 +82,14 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
 
   render() {
     const {
-      store, disabled, projectId, applyType,
+      store, disabled, projectId, applyType, issueId: currentIssueId,
     } = this.props;
     const issue = store.getIssue;
     const {
       statusVO = {}, statusId, issueTypeVO = {},
       issueId,
     } = issue;
+
     const { type, name } = statusVO || {};
     const typeId = issueTypeVO.id;
     return (
@@ -103,13 +105,13 @@ const SelectStatus = forwardRef(({ statusArgs, ...otherProps }, ref) => {
             onSubmit={this.updateIssueStatus}
             initValue={statusId}
             submitTrigger={['blur', 'change']}
-            editor={() => (
+            editor={() => (issueId === currentIssueId ? (
               <SelectStatus
                 statusArgs={{
-                  statusId, issueId, typeId, applyType, projectId, name,
+                  statusId, issueId, typeId, projectId, applyType, name,
                 }}
               />
-            )}
+            ) : <span />)}
           >
             {
               statusId ? (

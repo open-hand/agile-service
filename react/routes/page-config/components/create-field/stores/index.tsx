@@ -83,12 +83,13 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
           },
         });
         formDataSet.query().then((data) => {
-          const dateList = ['time', 'datetime', 'date'];
+          const dateList = ['date', 'datetime', 'time'];
           const multipleList = ['checkbox', 'multiple'];
-          const dateFormat = 'YYYY-MM-DD HH:mm:ss';
-          if (dateList.indexOf(data.fieldType) !== -1) {
+          const dateFormat = ['YYYY-MM-DD', 'YYYY-MM-DD HH:mm:ss', 'HH:mm:ss'];
+          const dateIndex = dateList.indexOf(data.fieldType);
+          if (dateIndex !== -1) {
             // 格式化日期类型
-            formDataSet.current?.set('defaultValue', data.defaultValue ? moment(data.defaultValue).format(dateFormat) : undefined);
+            formDataSet.current?.set('defaultValue', data.defaultValue ? moment(data.defaultValue, dateFormat).format(dateFormat[dateIndex]) : undefined);
             // 变换数据，从extraConfig -> check
             formDataSet.current?.set('check', data.extraConfig);
           }

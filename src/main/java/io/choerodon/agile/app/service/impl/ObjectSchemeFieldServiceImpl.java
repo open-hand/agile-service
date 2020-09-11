@@ -373,7 +373,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             field.setDefaultValue(defaultValue);
         }
         field = baseCreate(field, issueTypes, issueTypeForRank);
-
+        Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
+        insertObjectSchemeFieldExtend(organizationId,projectId,field.getId(),fieldCreateDTO.getRequired(),issueTypeMap,issueTypeForRank,fieldCreateDTO.getCreated(),fieldCreateDTO.getEdited());
         //处理字段选项
         if (fieldCreateDTO.getFieldOptions() != null) {
             String defaultIds = fieldOptionService.handleFieldOption(organizationId, field.getId(), fieldCreateDTO.getFieldOptions());
@@ -382,7 +383,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 objectSchemeFieldMapper.updateOptional(field, "defaultValue");
             }
         }
-
         return queryById(organizationId, projectId, field.getId());
     }
 
@@ -792,7 +792,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             Long fieldId = a.getFieldId();
             String rank = a.getRank();
             ObjectSchemeFieldExtendDTO result =
-                    insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, false, issueTypeMap, issueType, true, true);
+                    insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, a.getRequired(), issueTypeMap, issueType, a.getCreated(), a.getEdited());
             if (!ObjectUtils.isEmpty(rank)) {
                 result.setRank(rank);
                 objectSchemeFieldExtendMapper.updateByPrimaryKeySelective(result);

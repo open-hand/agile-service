@@ -32,6 +32,10 @@ export type PageIFieldPostDataProps = IFieldPostDataProps & {
 interface IAddPostData {
   fieldId: string,
   rank: string,
+  created: boolean,
+  edited: boolean,
+  required: boolean,
+  localRecordIndexId: number,
 }
 class PageIssueTypeStore {
   constructor(props: { addUnselectedDataSet: DataSet, sortTableDataSet: DataSet }) {
@@ -117,7 +121,10 @@ class PageIssueTypeStore {
     let index = -1;
     if (id) { // id 存在 则删除已有字段集合
       index = this.addFields.findIndex((item) => item.fieldId === id);
-      index !== -1 && this.addFields.splice(index, 1);
+      if (index !== -1) {
+        this.addFields.splice(index, 1);
+        this.addUnselectedDataSet.splice(index, 1);
+      }
       return;
     }
     index = this.createdFields.findIndex((item) => item.code === code);
@@ -189,7 +196,7 @@ class PageIssueTypeStore {
 
   @computed get getDirty() {
     return this.getDataStatusCode !== PageIssueTypeStoreStatusCode.null
-      || this.getDescriptionObj.dirty || this.sortTableDataSet.dirty;
+      || this.getDescriptionObj.dirty || this.sortTableDataSet.dirty || this.createdFields.length > 0;
   }
 
   @computed get getDataStatusCode() {
@@ -210,23 +217,22 @@ class PageIssueTypeStore {
     });
   }
 
-  transformDefaultValue = (fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null, optionKey: 'code' | 'id' = 'id') => {
+  transformDefaultValue = (fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null, optionKey: 'tempKey' | 'id' = 'id') => {
     if (!defaultValue && !defaultValueObj) {
       return defaultValue;
     }
     switch (fieldType) {
       case 'datetime':
-        return moment(defaultValue).format('YYYY-MM-DD HH:mm:ss');
+        return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
       case 'time':
-        return moment(defaultValue).format('HH:mm:ss');
+        return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('HH:mm:ss');
       case 'date':
-        return moment(defaultValue).format('YYYY-MM-DD');
+        return moment(defaultValue, 'YYYY-MM-DD').format('YYYY-MM-DD');
       case 'multiple':
       case 'checkbox':
       case 'single':
       case 'radio': {
         const valueArr = String(defaultValue).split(',');
-        console.log('valueArr', valueArr, fieldOptions?.filter((option) => valueArr.some((v) => v === option[optionKey])).map((item) => item.value).join(','));
         return fieldOptions?.filter((option) => valueArr.some((v) => v === option[optionKey])).map((item) => item.value).join(',') || defaultValue;
       }
       case 'member': {

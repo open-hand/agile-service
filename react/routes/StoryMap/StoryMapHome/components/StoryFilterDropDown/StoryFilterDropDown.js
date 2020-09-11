@@ -2,7 +2,7 @@ import React, {
   useState, useCallback, useRef, useEffect, useMemo,
 } from 'react';
 import {
-  Button, Icon, DataSet, 
+  Button, Icon, DataSet,
 } from 'choerodon-ui/pro';
 import { Dropdown } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
@@ -10,13 +10,20 @@ import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 import StoryFilter from '../StoryFilter';
 import SelectDataSet from '../../store/selectDataSet';
 import './index.less';
-  
+
 function useClickOut(onClickOut) {
   const ref = useRef();
   const handleClick = useCallback((e) => {
-    const popupContainerEle = document.getElementsByClassName('c7n-pro-popup-container')[0];
+    const popupContainerEles = document.getElementsByClassName('c7n-pro-popup-container');
     const triggerBtn = document.getElementsByClassName('c7nagile-StoryMap-StoryFilterDropDown-triggerBtn')[0];
-    if (ref.current && (!ref.current.contains(e.target) && !popupContainerEle.contains(e.target) && e.target.tagName !== 'BODY' && !triggerBtn.contains(e.target))) {
+    let allIsNotContain = true;
+    for (let i = 0; i < popupContainerEles.length; i += 1) {
+      if (popupContainerEles[i].contains(e.target)) {
+        allIsNotContain = false;
+        break;
+      }
+    }
+    if (ref.current && (!ref.current.contains(e.target) && allIsNotContain && e.target.tagName !== 'BODY' && !triggerBtn.contains(e.target))) {
       onClickOut(e);
     }
   }, [onClickOut]);
@@ -28,16 +35,16 @@ function useClickOut(onClickOut) {
   }, [handleClick]);
   return ref;
 }
-    
-function StoryFilterDropDown() {  
-  const [hidden, setHidden] = useState(true);  
+
+function StoryFilterDropDown() {
+  const [hidden, setHidden] = useState(true);
   const handleClickOut = useCallback(() => {
     setHidden(true);
   }, []);
   const ref = useClickOut(handleClickOut);
   const selectDataSet = useMemo(() => new DataSet(SelectDataSet(StoryMapStore)), []);
   const {
-    isCompleted, components, sprints, prioritys, 
+    isCompleted, components, sprints, prioritys,
   } = (selectDataSet.current && selectDataSet.current.data) || {};
   const hasFilter = (isCompleted || isCompleted === false) || components || sprints || prioritys;
   return (
@@ -46,10 +53,10 @@ function StoryFilterDropDown() {
     >
       <Dropdown
         className="c7nagile-StoryMap-StoryFilterDropDown"
-        getPopupContainer={trigger => trigger.parentNode}
+        getPopupContainer={(trigger) => trigger.parentNode}
         visible={!hidden}
         overlay={(
-          <div            
+          <div
             ref={ref}
             onClick={(e) => {
               e.stopPropagation();
@@ -78,7 +85,7 @@ function StoryFilterDropDown() {
           </span>
         </Button>
       </Dropdown>
-    </div>    
+    </div>
   );
 }
 export default observer(StoryFilterDropDown);

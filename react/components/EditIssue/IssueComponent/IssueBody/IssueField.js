@@ -74,7 +74,7 @@ const IssueField = observer((props) => {
       case 'remainingTime':
       case 'storyPoints':
         return (<FieldStoryPoint {...props} field={field} />);
-      case 'teams':
+      case 'subProject':
         return ([
           <FieldTeam {...props} field={field} />,
           <FieldProgramSprint {...props} field={field} key={teamIds} />,
@@ -100,7 +100,7 @@ const IssueField = observer((props) => {
   } else if (typeCode === 'issue_epic') {
     fields = fields.filter((field) => field.fieldCode !== 'epic');
   } else if (typeCode === 'feature') {
-    fields.splice(4, 0, { fieldCode: 'teams', fieldName: '负责团队和冲刺' });
+    // fields.splice(4, 0, { fieldCode: 'teams', fieldName: '负责团队和冲刺' });
     // fields.splice(4, 0, { fieldCode: 'teamSprint', fieldName: '团队Sprint' });
   }
   if (!store.detailShow) {

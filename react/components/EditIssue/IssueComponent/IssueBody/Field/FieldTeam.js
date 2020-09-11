@@ -15,9 +15,9 @@ class FieldTeam extends Component {
     const issue = store.getIssue;
     const { issueId } = issue;
     const activePiTeams = issue.activePiTeams || [];
-    const originTeamIds = activePiTeams.map(team => team.id);
-    const addTeams = teamIds ? teamIds.filter(teamId => !originTeamIds.includes(teamId)) : [];
-    const removeTeams = teamIds ? originTeamIds.filter(teamId => !teamIds.includes(teamId)) : originTeamIds;
+    const originTeamIds = activePiTeams.map((team) => team.id);
+    const addTeams = teamIds ? teamIds.filter((teamId) => !originTeamIds.includes(teamId)) : [];
+    const removeTeams = teamIds ? originTeamIds.filter((teamId) => !teamIds.includes(teamId)) : originTeamIds;
     await featureApi.updateTeamAndSprint({
       piId: issue.activePi ? issue.activePi.id : null,
       deleteSprintIds: [],
@@ -36,7 +36,10 @@ class FieldTeam extends Component {
     const { store, disabled } = this.props;
     const issue = store.getIssue;
     const activePiTeams = issue.activePiTeams || [];
-    const teamIds = activePiTeams.map(team => team.id);
+    const teamIds = activePiTeams.map((team) => team.id);
+    const field = store.getFieldByCode('sprint');
+    const required = field?.required;
+
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -45,13 +48,14 @@ class FieldTeam extends Component {
           </span>
         </div>
         <div className="c7n-value-wrapper">
-          <TextEditToggle          
+          <TextEditToggle
             disabled={disabled}
             onSubmit={this.handleSubmit}
             initValue={teamIds}
             editor={(
               <SelectTeam
                 multiple
+                required={required}
                 label="团队"
                 style={{
                   width: '100%',
@@ -60,7 +64,7 @@ class FieldTeam extends Component {
               />
             )}
           >
-            {activePiTeams.length > 0 ? activePiTeams.map(team => team.name).join(' 、 ') : '无'}
+            {activePiTeams.length > 0 ? activePiTeams.map((team) => team.name).join(' 、 ') : '无'}
           </TextEditToggle>
         </div>
       </div>
