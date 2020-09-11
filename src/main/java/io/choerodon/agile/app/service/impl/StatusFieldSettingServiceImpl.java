@@ -354,7 +354,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         switch (v.getFieldType()) {
             case FieldType.CHECKBOX:
             case FieldType.MULTIPLE:
-                pageFieldViewUpdateVO.setValue(statusFieldValueSettingDTOS.stream().map(StatusFieldValueSettingDTO::getOptionId).collect(Collectors.toList()));
+                pageFieldViewUpdateVO.setValue(statusFieldValueSettingDTOS.stream().map(settingDTO -> settingDTO.getOptionId().toString()).collect(Collectors.toList()));
                 break;
             case FieldType.RADIO:
             case FieldType.SINGLE:
