@@ -347,7 +347,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
                 List<Long> canTransferStatus = statusTransferSettingService.checkStatusTransform(projectId, issueType.getId(), new ArrayList<>(allStatus));
                 // 过滤掉不能转换的状态
                 Map<Long, List<TransformVO>> transferMap = new HashMap<>();
-                statusTransferMap.entrySet().stream().filter(entry -> entry.getKey() != 0L && canTransferStatus.contains(entry.getKey())).forEach(entry -> {
+                statusTransferMap.entrySet().stream().filter(entry -> entry.getKey() != 0L && boardStatus.contains(entry.getKey())).forEach(entry -> {
                     transferMap.put(entry.getKey(),entry.getValue().stream().filter(v ->  canTransferStatus.contains(v.getEndStatusId())).map(v -> {
                         StatusVO statusVO = sMap.get(v.getEndStatusId());
                         if (statusVO != null) {
