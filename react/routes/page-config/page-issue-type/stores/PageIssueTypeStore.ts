@@ -227,7 +227,7 @@ class PageIssueTypeStore {
       case 'time':
         return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('HH:mm:ss');
       case 'date':
-        return moment(defaultValue, 'YYYY-MM-DD').format('YYYY-MM-DD');
+        return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD');
       case 'multiple':
       case 'checkbox':
       case 'single':
