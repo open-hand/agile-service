@@ -27,6 +27,7 @@ import { PageIssueTypeStoreStatusCode } from './stores/PageIssueTypeStore';
 import { IFieldPostDataProps } from '../components/create-field/CreateField';
 import PageDescription from './components/page-description';
 
+type ILocalFieldPostDataProps = IFieldPostDataProps & { localRecordIndexId?: number, localDefaultObj: any, defaultValueObj: any, };
 function PageIssueType() {
   const {
     sortTableDataSet, addUnselectedDataSet, intl, pageIssueTypeStore, isProject, prefixCls,
@@ -114,7 +115,7 @@ function PageIssueType() {
    * @param data 本地所需数据
    * @param oldField 是否是已有字段
    */
-  const onSubmitLocal = async (data: IFieldPostDataProps & { localDefaultObj: any, defaultValueObj: any, }, oldField: boolean = false) => {
+  const onSubmitLocal = async (data: ILocalFieldPostDataProps, oldField: boolean = false) => {
     const newData = Object.assign(data, {
       local: true,
       localDefaultValue: oldField ? pageIssueTypeStore.transformDefaultValue(data.fieldType, data.defaultValue, data.defaultValueObj, data.fieldOptions)
@@ -136,7 +137,14 @@ function PageIssueType() {
         nextRank: sortTableDataSet.data[sortTableDataSet.length - 1].get('rank'),
       });
       newData.rank = newRank;
-      oldField && pageIssueTypeStore.addNewLocalField({ fieldId: data.id!, rank: newRank });
+      oldField && pageIssueTypeStore.addNewLocalField({
+        fieldId: data.id!,
+        rank: newRank,
+        created: true,
+        edited: true,
+        required: false,
+        localRecordIndexId: data.localRecordIndexId!,
+      });
       const newRecord = sortTableDataSet.create(newData);
       !oldField && pageIssueTypeStore.bindRecordForCreated(newRecord);
     }

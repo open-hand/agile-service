@@ -30,7 +30,7 @@ const AddFiled: React.FC<Props> = observer(({
       const id = dataSet.current?.toData().field;
       const addFiledData = store.currentTypeAllFieldData.get(id);
       if (addFiledData) {
-        onSubmitLocal(store.currentTypeAllFieldData.get(id), true);
+        onSubmitLocal({ ...store.currentTypeAllFieldData.get(id), localRecordIndexId: dataSet.current?.index }, true);
       } else {
         const deleteRecord = store.getDeleteRecords.find((record) => record.get('id') === id);
         deleteRecord && onRestoreLocal(deleteRecord);

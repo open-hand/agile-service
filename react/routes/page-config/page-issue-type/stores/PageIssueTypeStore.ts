@@ -32,6 +32,10 @@ export type PageIFieldPostDataProps = IFieldPostDataProps & {
 interface IAddPostData {
   fieldId: string,
   rank: string,
+  created: boolean,
+  edited: boolean,
+  required: boolean,
+  localRecordIndexId: number,
 }
 class PageIssueTypeStore {
   constructor(props: { addUnselectedDataSet: DataSet, sortTableDataSet: DataSet }) {
@@ -117,7 +121,10 @@ class PageIssueTypeStore {
     let index = -1;
     if (id) { // id 存在 则删除已有字段集合
       index = this.addFields.findIndex((item) => item.fieldId === id);
-      index !== -1 && this.addFields.splice(index, 1);
+      if (index !== -1) {
+        this.addFields.splice(index, 1);
+        this.addUnselectedDataSet.splice(index, 1);
+      }
       return;
     }
     index = this.createdFields.findIndex((item) => item.code === code);
