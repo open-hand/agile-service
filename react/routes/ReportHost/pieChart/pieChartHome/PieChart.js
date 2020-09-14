@@ -18,33 +18,22 @@ import './pie.less';
 import { sprintApi, versionApi } from '@/api';
 import to, { linkUrl } from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
-import PieChart from '@/components/charts/pie-chart';
 import SwitchChart from '../../Component/switchChart';
 import PieChartStore from '../../../../stores/project/pieChart/PieChartStore';
 import NoDataComponent from '../../Component/noData';
 import pic from '../../../../assets/image/emptyChart.svg';
 
 const { Option } = Select;
-const { AppState } = stores;
 
 @observer
-class ReleaseDetail extends Component {
+class PieChart extends Component {
   constructor(props) {
     super(props);
     this.state = {
       type: '',
       sprints: [],
       versions: [],
-      chooseDimensionType: [
-        {
-          key: 'sprint',
-          name: '冲刺',
-        }, {
-          key: 'version',
-          name: '版本',
-        },
-      ],
-      currentChooseDimension: '',
+      chooseDimension: '',
       chooseId: '',
     };
     this.otherTooltipRef = createRef();
@@ -155,7 +144,7 @@ class ReleaseDetail extends Component {
   handelRefresh = () => {
     this.setState({
       type: 'assignee',
-      currentChooseDimension: '',
+      chooseDimension: '',
       chooseId: '',
     }, () => {
       PieChartStore.getPieDatas(this.state.type);
@@ -163,44 +152,11 @@ class ReleaseDetail extends Component {
   };
 
   changeType = (value, option) => {
-    console.log(value, option);
     this.setState({
       type: value,
-      currentChooseDimension: '',
+      chooseDimension: '',
 
     });
-    if (value === 'sprint') {
-      this.setState({
-        chooseDimensionType: [
-          {
-            key: 'version',
-            name: '版本',
-          },
-        ],
-      });
-    } else if (value === 'version') {
-      this.setState({
-        chooseDimensionType: [
-          {
-            key: 'sprint',
-            name: '冲刺',
-          },
-        ],
-      });
-    } else {
-      this.setState({
-        chooseDimensionType: [
-          {
-            key: 'sprint',
-            name: '冲刺',
-          }, {
-            key: 'version',
-            name: '版本',
-          },
-        ],
-      });
-    }
-
     PieChartStore.getPieDatas(value);
   };
 
@@ -235,28 +191,28 @@ class ReleaseDetail extends Component {
 
   getCurrentChoose() {
     const {
-      currentChooseDimension, chooseId,
+      chooseDimension, chooseId,
     } = this.state;
     const CHOOSEQUERY = {
       sprint: { paramChoose: 'sprint', paramCurrentSprint: chooseId },
       version: { paramChoose: 'version', paramCurrentSprint: chooseId },
     };
-    return currentChooseDimension ? CHOOSEQUERY[currentChooseDimension] : ({});
+    return chooseDimension ? CHOOSEQUERY[chooseDimension] : ({});
   }
 
   handleLinkToIssue(item) {
     const {
-      type, currentChooseDimension, sprints, versions, chooseId,
+      type, chooseDimension, sprints, versions, chooseId,
     } = this.state;
     const { typeName, name } = item;
     const queryString = this.getQueryString(type, typeName);
     const queryObj = this.getCurrentChoose();
     let paramName = name || '未分配';
-    if (currentChooseDimension === 'sprint') {
+    if (chooseDimension === 'sprint') {
       paramName += `、冲刺为${sprints.find((sprintItem) => sprintItem.sprintId === chooseId).sprintName}`;
     }
 
-    if (currentChooseDimension === 'version') {
+    if (chooseDimension === 'version') {
       paramName += `、版本为${versions.find((versionItem) => versionItem.versionId === chooseId).name}`;
     }
 
@@ -316,7 +272,7 @@ class ReleaseDetail extends Component {
 
   renderChooseDimension = () => {
     const {
-      sprints, versions, currentChooseDimension, chooseId,
+      sprints, versions, chooseDimension, chooseId,
     } = this.state;
     const chooseVersion = versions.find((item) => item.versionId === chooseId);
     const chooseSprint = sprints.find((item) => item.sprintId === chooseId);
@@ -326,17 +282,17 @@ class ReleaseDetail extends Component {
         <Select
           className="c7n-pieChart-filter-item"
           style={{ minWidth: 200 }}
-          value={currentChooseDimension === 'version' ? chooseVersion && chooseVersion.name : chooseSprint && chooseSprint.sprintName}
-          onChange={this.handleSecondChooseChange}
+          value={chooseDimension === 'version' ? chooseVersion && chooseVersion.name : chooseSprint && chooseSprint.sprintName}
+          onChange={this.handleChooseIdChange}
           allowClear
         >
           {
-            currentChooseDimension === 'version' && versions.map((item) => (
+            chooseDimension === 'version' && versions.map((item) => (
               <Option key={item.versionId} value={item.versionId}>{item.name}</Option>
             ))
           }
           {
-            currentChooseDimension === 'sprint' && sprints.map((item) => (
+            chooseDimension === 'sprint' && sprints.map((item) => (
               <Option key={item.sprintId} value={item.sprintId}>
                 {item.sprintName}
               </Option>
@@ -350,23 +306,23 @@ class ReleaseDetail extends Component {
   handleChooseDimensionChange = (chooseDimension) => {
     const { type, sprints, versions } = this.state;
     this.setState({
-      currentChooseDimension: chooseDimension,
+      chooseDimension,
       chooseId: chooseDimension === 'version' ? versions[0] && versions[0].versionId : sprints[0] && sprints[0].sprintId,
     });
     PieChartStore.getPieDatas(type, chooseDimension === 'sprint' ? sprints[0] && sprints[0].sprintId : '', chooseDimension === 'version' ? versions[0] && versions[0].versionId : '');
   }
 
-  handleSecondChooseChange = (chooseValue) => {
-    const { type, currentChooseDimension } = this.state;
+  handleChooseIdChange = (chooseValue) => {
+    const { type, chooseDimension } = this.state;
     this.setState({
       chooseId: chooseValue,
     });
-    PieChartStore.getPieDatas(type, currentChooseDimension === 'sprint' ? chooseValue : '', currentChooseDimension === 'version' ? chooseValue : '');
+    PieChartStore.getPieDatas(type, chooseDimension === 'sprint' ? chooseValue : '', chooseDimension === 'version' ? chooseValue : '');
   }
 
   render() {
     const {
-      type, chooseDimensionType, currentChooseDimension,
+      type, chooseDimension,
     } = this.state;
     const data = PieChartStore.getPieData;
     const sourceData = PieChartStore.getSourceData;
@@ -383,6 +339,34 @@ class ReleaseDetail extends Component {
       { title: '史诗', value: 'epic' },
       { title: '标签', value: 'label' },
     ];
+
+    let chooseDimensionType = [
+      {
+        key: 'sprint',
+        name: '冲刺',
+      }, {
+        key: 'version',
+        name: '版本',
+      },
+    ];
+
+    if (type === 'sprint') {
+      chooseDimensionType = [
+        {
+          key: 'version',
+          name: '版本',
+        },
+      ];
+    }
+
+    if (type === 'version') {
+      chooseDimensionType = [
+        {
+          key: 'sprint',
+          name: '冲刺',
+        },
+      ];
+    }
 
     return (
       <Page className="pie-chart" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.piechart']}>
@@ -422,8 +406,8 @@ class ReleaseDetail extends Component {
                 label="选择维度"
                 defaultValue={chooseDimensionType[0].name}
                 value={chooseDimensionType
-                  .find((item) => item.key === currentChooseDimension)
-                  && chooseDimensionType.find((item) => item.key === currentChooseDimension).name}
+                  .find((item) => item.key === chooseDimension)
+                  && chooseDimensionType.find((item) => item.key === chooseDimension).name}
                 onChange={this.handleChooseDimensionChange}
                 allowClear
               >
@@ -439,7 +423,7 @@ class ReleaseDetail extends Component {
                 }
               </Select>
               {
-                currentChooseDimension ? this.renderChooseDimension() : ''
+                chooseDimension ? this.renderChooseDimension() : ''
               }
             </div>
 
@@ -508,4 +492,4 @@ class ReleaseDetail extends Component {
   }
 }
 
-export default ReleaseDetail;
+export default PieChart;

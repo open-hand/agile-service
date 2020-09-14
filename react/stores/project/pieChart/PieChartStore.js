@@ -7,40 +7,9 @@ import _ from 'lodash';
 import { reportApi } from '@/api';
 
 class PieChartStore {
-    @observable versionList = [];
-
-    @observable issues = {
-      done: {
-        data: [],
-        pagination: {
-          current: 1,
-          total: 0,
-          pageSize: 10,
-        },
-      },
-      unfinished: {
-        data: [],
-        pagination: {
-          current: 1,
-          total: 0,
-          pageSize: 10,
-        },
-      },
-      unfinishedUnestimated: {
-        data: [],
-        pagination: {
-          current: 1,
-          total: 0,
-          pageSize: 10,
-        },
-      },
-    }
-
     @observable pieData = [];
 
     @observable sourceData=[];
-
-    @observable reportData = {};
 
     @observable colors = [];
 
@@ -72,30 +41,6 @@ class PieChartStore {
 
   @computed get getColors() {
     return this.colors;
-  }
-
-  @computed get getReportData() {
-    return toJS(this.reportData);
-  }
-
-  @action setReportData(data) {
-    this.reportData = data;
-  }
-
-  @computed get getIssues() {
-    return toJS(this.issues);
-  }
-
-  @action setIssues(type, type2, data) {
-    this.issues[type][type2] = data;
-  }
-
-  @computed get getVersionList() {
-    return toJS(this.versionList);
-  }
-
-  @action setVersionList(data) {
-    this.versionList = data;
   }
 
   getPieDatas = (type, sprintId, versionId) => {
