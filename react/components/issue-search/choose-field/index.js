@@ -2,7 +2,7 @@ import React, {
   useState, useCallback, useRef, useEffect,
 } from 'react';
 import {
-  Button, Icon,  
+  Button, Icon,
 } from 'choerodon-ui/pro';
 import { Dropdown } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
@@ -24,8 +24,8 @@ function useClickOut(onClickOut) {
   return ref;
 }
 
-function ChooseField() {  
-  const [hidden, setHidden] = useState(true);  
+function ChooseField() {
+  const [hidden, setHidden] = useState(true);
   const handleClickOut = useCallback(() => {
     setHidden(true);
   }, []);
@@ -35,10 +35,11 @@ function ChooseField() {
       style={{ marginLeft: 5, display: 'flex', alignItems: 'center' }}
     >
       <Dropdown
-        getPopupContainer={trigger => trigger.parentNode}
+        getPopupContainer={(trigger) => trigger.parentNode}
         visible={!hidden}
         overlay={(
-          <div            
+          <div
+            role="none"
             ref={ref}
             onClick={(e) => {
               e.stopPropagation();
@@ -59,7 +60,7 @@ function ChooseField() {
           <Icon type="arrow_drop_down" />
         </Button>
       </Dropdown>
-    </div>    
+    </div>
   );
 }
 export default observer(ChooseField);

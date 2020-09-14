@@ -31,31 +31,31 @@ class FilterManage extends Component {
     }
   }
 
-  checkMyFilterNameRepeat = filterName => personalFilterApi.checkName(filterName);
+  checkMyFilterNameRepeat = (filterName) => personalFilterApi.checkName(filterName);
 
   handleFNIBlurOrPressEnter = (filter, filterField) => {
     const editFilterInfo = IssueStore.getEditFilterInfo;
-    const { form } = this.props;
+    const { form, issueSearchStore } = this.props;
     form.validateFields([filterField], (err, value, modify) => {
       if (!err && modify) {
-        const myFilters = IssueStore.getMyFilters;
+        const myFilters = issueSearchStore.getMyFilters;
         IssueStore.setLoading(true);
         const updateData = {
-          objectVersionNumber: _.find(myFilters, item => item.filterId === filter.filterId).objectVersionNumber,
+          objectVersionNumber: _.find(myFilters, (item) => item.filterId === filter.filterId).objectVersionNumber,
           // name: form.getFieldValue(filterField),
           name: value[filterField],
           // projectId: AppState.currentMenuType.id,
           // userId: AppState.userInfo.id,
         };
         personalFilterApi.update(filter.filterId, updateData).then((res) => {
-          IssueStore.axiosGetMyFilterList();
+          issueSearchStore.loadMyFilterList();
           Choerodon.prompt('修改成功');
         }).catch(() => {
           IssueStore.setLoading(false);
           Choerodon.prompt('修改失败');
         });
       } else if (!modify) {
-        IssueStore.setEditFilterInfo(_.map(editFilterInfo, item => Object.assign(item, { isEditing: false })));
+        IssueStore.setEditFilterInfo(_.map(editFilterInfo, (item) => Object.assign(item, { isEditing: false })));
       }
     });
   };
@@ -83,10 +83,11 @@ class FilterManage extends Component {
   };
 
   deleteFilter = (filter) => {
+    const { issueSearchStore } = this.props;
     IssueStore.setLoading(true);
     personalFilterApi.delete(filter.filterId)
       .then((res) => {
-        IssueStore.axiosGetMyFilterList().then(() => {
+        issueSearchStore.loadMyFilterList().then(() => {
           if (IssueStore.getMyFilters.length === 0) {
             IssueStore.setFilterListVisible(false);
           }
@@ -99,10 +100,10 @@ class FilterManage extends Component {
   };
 
   render() {
+    const { form, issueSearchStore } = this.props;
     const filterListVisible = IssueStore.getFilterListVisible;
     const editFilterInfo = IssueStore.getEditFilterInfo;
-    const myFilters = IssueStore.getMyFilters;
-    const { form } = this.props;
+    const myFilters = issueSearchStore.getMyFilters;
     const { getFieldDecorator } = form;
     return (
       <div
@@ -116,7 +117,7 @@ class FilterManage extends Component {
             icon="close"
             onClick={() => {
               IssueStore.setFilterListVisible(false);
-              IssueStore.setEditFilterInfo(_.map(editFilterInfo, item => Object.assign(item, { isEditing: false })));
+              IssueStore.setEditFilterInfo(_.map(editFilterInfo, (item) => Object.assign(item, { isEditing: false })));
             }}
           />
         </div>
@@ -125,7 +126,7 @@ class FilterManage extends Component {
             <ul className="c7n-filterList-content">
               {
                 myFilters.map((filter) => {
-                  const isEditing = filter && editFilterInfo && editFilterInfo.find(item => item.filterId === filter.filterId) && editFilterInfo.find(item => item.filterId === filter.filterId).isEditing;
+                  const isEditing = filter && editFilterInfo && editFilterInfo.find((item) => item.filterId === filter.filterId) && editFilterInfo.find((item) => item.filterId === filter.filterId).isEditing;
                   return (
                     <li key={filter.filterId} className="c7n-filterList-item">
                       {
@@ -161,9 +162,9 @@ class FilterManage extends Component {
                               if (isEditing) {
                                 this.handleFNIBlurOrPressEnter(filter, `filterName_${filter.filterId}`);
                               } else {
-                                const { isEditingIndex } = editFilterInfo.find(item => item.filterId === filter.filterId);
+                                const { isEditingIndex } = editFilterInfo.find((item) => item.filterId === filter.filterId);
                                 IssueStore.setUpdateFilterName(filter.name);
-                                IssueStore.setEditFilterInfo([...(_.map(_.filter(editFilterInfo, item => item.isEditingIndex !== isEditingIndex), item => ({
+                                IssueStore.setEditFilterInfo([...(_.map(_.filter(editFilterInfo, (item) => item.isEditingIndex !== isEditingIndex), (item) => ({
                                   ...item,
                                   isEditing: false,
                                 }))), {
@@ -181,7 +182,7 @@ class FilterManage extends Component {
                             onClick={() => {
                               if (isEditing) {
                                 IssueStore.setEditFilterInfo(
-                                  _.map(editFilterInfo, item => ({
+                                  _.map(editFilterInfo, (item) => ({
                                     ...item,
                                     isEditing: false,
                                   })),

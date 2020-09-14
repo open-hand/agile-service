@@ -1,7 +1,6 @@
-/* eslint-disable max-len */
-import React, { useContext } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
-import _, { map } from 'lodash';
+import { map } from 'lodash';
 import { Tooltip, Tag } from 'choerodon-ui';
 import { Table } from 'choerodon-ui/pro';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
@@ -9,35 +8,21 @@ import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
 import UserHead from '@/components/UserHead';
-import IssueStore from '@/stores/project/issue/IssueStore';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import Store from '../../stores';
 import './index.less';
 
 const { Column } = Table;
-function IssueTable({ tableRef, onCreateIssue }) {
-  const {
-    dataSet, fields,
-  } = useContext(Store);
+function IssueTable({
+  tableRef, onCreateIssue, dataSet, fields, onRowClick, selectedIssue,
+}) {
   const { isInProgram } = useIsInProgram();
-  const handleRowClick = (record) => {
-    // dataSet.select(record);
-    const editFilterInfo = IssueStore.getEditFilterInfo;
-    IssueStore.setClickedRow({
-      selectedIssue: {
-        issueId: record.get('issueId'),
-      },
-      expand: true,
-    });
-    IssueStore.setFilterListVisible(false);
-    IssueStore.setEditFilterInfo(map(editFilterInfo, (item) => Object.assign(item, { isEditing: false })));
-  };
+
   const renderTag = (listField, nameField) => ({ record }) => {
     const list = record.get(listField);
     if (list) {
       if (list.length > 0) {
         return (
-          <Tooltip title={<div>{_.map(list, (item) => item[nameField]).map((name) => <div>{name}</div>)}</div>}>
+          <Tooltip title={<div>{map(list, (item) => item[nameField]).map((name) => <div>{name}</div>)}</div>}>
             <div style={{ display: 'inline-flex', maxWidth: '100%' }}>
               <Tag
                 color="blue"
@@ -88,7 +73,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
         dataSet={dataSet}
         footer={<div style={{ paddingTop: 5 }}><QuickCreateIssue onCreate={onCreateIssue} /></div>}
         onRow={({ record }) => ({
-          className: IssueStore.selectedIssue.issueId && record.get('issueId') === IssueStore.selectedIssue.issueId ? 'c7nagile-row-selected' : null,
+          className: selectedIssue.issueId && record.get('issueId') === selectedIssue.issueId ? 'c7nagile-row-selected' : null,
         })}
       >
         <Column
@@ -103,7 +88,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
           )}
           onCell={({ record }) => ({
             onClick: () => {
-              handleRowClick(record);
+              onRowClick(record);
             },
           })}
           renderer={({ record }) => (

@@ -1,10 +1,8 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Icon, Button } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
-import Store from '../../stores';
 
-function CollapseAll({ tableRef }) {
-  const { dataSet } = useContext(Store);
+function CollapseAll({ tableRef, dataSet }) {
   // 有需要展开的再显示
   const needShow = dataSet.some((record) => record.children);
   if (!needShow) {

@@ -21,7 +21,7 @@ export interface IQuickFilter {
   projectId: number
   sequence: number
 }
-interface IPersonalFilter {
+export interface IPersonalFilter {
   filterId: string
   filterJson: string
   name: string
