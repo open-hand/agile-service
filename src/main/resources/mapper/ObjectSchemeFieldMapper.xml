@@ -298,8 +298,7 @@
             t4.project_id,
             t4.is_system
         FROM fd_object_scheme_field t4
-        JOIN fd_object_scheme_field_extend t5 ON t4.id = t5.field_id
-            AND t5.organization_id = #{organizationId} AND t5.project_id = #{projectId}
+        JOIN (<include refid="selectExtendField"/>) t5 ON t4.id = t5.field_id
         LEFT JOIN fd_issue_type fit on (fit.organization_id = #{organizationId} and t5.issue_type_id = fit.id)
         LEFT JOIN lookup_value flv on flv.value_code = t4.field_type and flv.type_code = 'field_type'
         WHERE
