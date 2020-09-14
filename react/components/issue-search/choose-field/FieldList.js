@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   CheckBox, Button, TextField, Icon,
 } from 'choerodon-ui/pro';
-import IssueStore, { getSystemFields } from '@/stores/project/issue/IssueStore';
+import { getSystemFields } from '@/stores/project/issue/IssueStore';
+import IssueSearchContext from '../context';
 import './FieldList.less';
 
 const prefix = 'c7nagile-choose-field-list';
 function FieldList() {
+  const { store } = useContext(IssueSearchContext);
   const {
     fields, chosenFields, handleChosenFieldChange,
-  } = IssueStore;
+  } = store;
   const systemFields = getSystemFields();
   const selectableSystemFields = systemFields.filter((field) => !field.defaultShow);
   const defaultShowSystemFields = systemFields.filter((field) => field.defaultShow);
@@ -42,9 +44,9 @@ function FieldList() {
           checked={checked}
           onChange={(checkAll) => {
             if (checkAll) {
-              IssueStore.chooseAll([...filteredFields, ...filteredSystemFields]);
+              store.chooseAll([...filteredFields, ...filteredSystemFields]);
             } else {
-              IssueStore.unChooseAll();
+              store.unChooseAll();
             }
           }}
         >
@@ -53,7 +55,7 @@ function FieldList() {
         <Button
           style={{ display: checked || indeterminate ? 'inline-block' : 'none' }}
           onClick={() => {
-            IssueStore.unChooseAll();
+            store.unChooseAll();
           }}
         >
           清除筛选项
