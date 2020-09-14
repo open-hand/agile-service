@@ -1,7 +1,7 @@
 import to from '@/utils/to';
 
 interface IRouterToList {
-  issueLinkTo: (issueId: string, issueName: string | null, otherParams: any) => void,
+  issueLinkTo: (issueId: string, issueName: string | null, otherParams?: any) => void,
 }
 
 function issueLinkTo(issueId: string, issueName: string | null = null, otherParams: any = {}) {

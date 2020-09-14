@@ -8,6 +8,7 @@ import SprintComponent from './components/sprint';
 import AccumulationComponent from './components/accumulation';
 import PieComponent from './components/pie';
 import { RefProps } from '../add-modal';
+import EpicBurnDownComponent from './components/epic-burnDown';
 
 const { Option } = Select;
 const ChartMap = new Map([
@@ -15,6 +16,7 @@ const ChartMap = new Map([
   ['sprint', SprintComponent],
   ['accumulation', AccumulationComponent],
   ['pie', PieComponent],
+  ['epicBurnDown', EpicBurnDownComponent],
 ]);
 interface Props {
   innerRef: React.MutableRefObject<RefProps>
@@ -51,6 +53,7 @@ const AddChart: React.FC<Props> = ({ innerRef }) => {
           <Option value="sprint">冲刺报告图</Option>
           <Option value="accumulation">累计流量图</Option>
           <Option value="pie">统计图</Option>
+          <Option value="epicBurnDown">史诗燃尽图</Option>
         </Select>
       </Form>
       {ChartComponent && <ChartComponent />}
