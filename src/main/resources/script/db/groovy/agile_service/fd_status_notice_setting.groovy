@@ -31,7 +31,7 @@ databaseChangeLog(logicalFilePath: 'script/db/fd_status_notice_setting.groovy') 
         }
     }
 
-    changeSet(author: 'ztxemail@163.com',id: '2020-09-14-status-notice-setting-add-index'){
+    changeSet(author: 'ztxemail@163.com',id: '2020-09-14-fd-status-notice-setting-add-index'){
         createIndex(indexName: "idx_issue_type_id", tableName: "fd_status_notice_setting") {
             column(name: "issue_type_id")
         }

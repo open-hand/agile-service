@@ -28,7 +28,7 @@ databaseChangeLog(logicalFilePath: 'fd_status_transfer_setting.groovy') {
         }
     }
 
-    changeSet(author: 'ztxemail@163.com',id: '2020-09-14-status-transfer-setting-add-index'){
+    changeSet(author: 'ztxemail@163.com',id: '2020-09-14-fd-status-transfer-setting-add-index'){
         createIndex(indexName: "idx_issue_type_id", tableName: "fd_status_transfer_setting") {
             column(name: "issue_type_id")
         }

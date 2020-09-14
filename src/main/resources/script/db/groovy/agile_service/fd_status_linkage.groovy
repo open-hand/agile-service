@@ -30,7 +30,7 @@ databaseChangeLog(logicalFilePath: 'fd_status_linkage.groovy') {
         }
     }
 
-    changeSet(author: 'ztxemail@163.com',id: '2020-09-14-status-linkage-add-index'){
+    changeSet(author: 'ztxemail@163.com',id: '2020-09-14-fd-status-linkage-add-index'){
         createIndex(indexName: "idx_issue_type_id", tableName: "fd_status_linkage") {
             column(name: "issue_type_id")
         }
