@@ -159,10 +159,10 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         List<IssueDTO> issueDTOS = issueMapper.querySubIssueByParentIssueId(projectId, parentIssueId);
         List<Long> issueTypeIds = issueDTOS.stream().map(IssueDTO::getIssueTypeId).collect(Collectors.toList());
         List<StatusLinkageDTO> select = statusLinkageMapper.listByIssueTypeIdsParentTypeCode(projectId,parentIssue.getTypeCode(),issueTypeIds,statusLinkageDTO.getParentIssueStatusSetting());
-        Map<Long, StatusLinkageDTO> linkageDTOMap = select.stream().collect(Collectors.toMap(StatusLinkageDTO::getIssueTypeId, Function.identity()));
+        Map<Long, List<StatusLinkageDTO>> linkageDTOMap = select.stream().collect(Collectors.groupingBy(StatusLinkageDTO::getIssueTypeId));
         Map<String, List<IssueDTO>> issueMap = issueDTOS.stream().collect(Collectors.groupingBy(IssueDTO::getTypeCode));
         if (select.size() == 1 && statusLinkageDTO.getIssueTypeId().equals(issueDTO.getIssueTypeId())) {
-            isChange = handlerSingleIssueType(statusLinkageDTO, issueMap, issueDTO.getTypeCode());
+            isChange = handlerSingleIssueType(Arrays.asList(statusLinkageDTO), issueMap, issueDTO.getTypeCode());
             changeStatus = getChangeStatus(isChange, statusLinkageDTO);
         } else {
             Map<String, Object> variables = new HashMap<>();
@@ -200,27 +200,27 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
                 parentIssue.getObjectVersionNumber(), applyType, triggerIssue, true);
     }
 
-    private void handlerMultiSetting(Map<String, Object> variables, List<StatusLinkageDTO> select, IssueDTO issueDTO, Map<String, List<IssueDTO>> issueMap, Map<Long, StatusLinkageDTO> linkageDTOMap, List<IssueDTO> issueDTOS) {
+    private void handlerMultiSetting(Map<String, Object> variables, List<StatusLinkageDTO> select, IssueDTO issueDTO, Map<String, List<IssueDTO>> issueMap, Map<Long, List<StatusLinkageDTO>> linkageDTOMap, List<IssueDTO> issueDTOS) {
         // 判断两种子任务的设置的父级状态是不是相同
         Boolean isChange = false;
         Long changeStatus = null;
         Set<Long> ids = select.stream().map(StatusLinkageDTO::getParentIssueStatusSetting).collect(Collectors.toSet());
         if (ids.size() > 1) {
-            StatusLinkageDTO statusLink = linkageDTOMap.get(issueDTO.getIssueTypeId());
-            isChange = handlerSingleIssueType(statusLink, issueMap, issueDTO.getTypeCode());
-            changeStatus = getChangeStatus(isChange, statusLink);
+            List<StatusLinkageDTO> statusLinkageDTOS = linkageDTOMap.get(issueDTO.getIssueTypeId());
+            isChange = handlerSingleIssueType(statusLinkageDTOS, issueMap, issueDTO.getTypeCode());
+            changeStatus = statusLinkageDTOS.get(0).getParentIssueStatusSetting();
         } else {
             Map<Long, String> typeCodeMap = issueDTOS.stream().collect(Collectors.toMap(IssueDTO::getIssueTypeId, IssueDTO::getTypeCode,(code1,code2) -> code1));
-            Iterator<Map.Entry<Long, StatusLinkageDTO>> iterator = linkageDTOMap.entrySet().iterator();
+            Iterator<Map.Entry<Long, List<StatusLinkageDTO>>> iterator = linkageDTOMap.entrySet().iterator();
             while (iterator.hasNext()) {
-                Map.Entry<Long, StatusLinkageDTO> next = iterator.next();
+                Map.Entry<Long, List<StatusLinkageDTO>> next = iterator.next();
                 String typeCode = typeCodeMap.get(next.getKey());
-                StatusLinkageDTO value = next.getValue();
+                List<StatusLinkageDTO> value = next.getValue();
                 isChange = handlerSingleIssueType(value, issueMap, typeCode);
                 if (Boolean.FALSE.equals(isChange)) {
                     break;
                 }
-                changeStatus = getChangeStatus(isChange, value);
+                changeStatus = ids.iterator().next();
             }
         }
         variables.put("isChange", isChange);
@@ -244,12 +244,13 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         return Boolean.FALSE;
     }
 
-    private Boolean handlerSingleIssueType(StatusLinkageDTO statusLink, Map<String, List<IssueDTO>> issueMap, String typeCode) {
+    private Boolean handlerSingleIssueType(List<StatusLinkageDTO> statusLinks, Map<String, List<IssueDTO>> issueMap, String typeCode) {
         List<IssueDTO> sub = issueMap.get(typeCode);
         if (CollectionUtils.isEmpty(sub)) {
             return Boolean.TRUE;
         }
-        long count = sub.stream().filter(v -> v.getStatusId().equals(statusLink.getStatusId())).count();
+        List<Long> statusLinkStatus = statusLinks.stream().map(StatusLinkageDTO::getStatusId).collect(Collectors.toList());
+        long count = sub.stream().filter(v -> statusLinkStatus.contains(v.getStatusId())).count();
         if (Boolean.FALSE.equals((count == sub.size()))) {
             return Boolean.FALSE;
         }

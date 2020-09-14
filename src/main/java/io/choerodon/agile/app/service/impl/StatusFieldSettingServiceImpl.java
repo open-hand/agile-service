@@ -306,6 +306,11 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 List<LabelIssueRelVO> labelIssueRelVOS = statusFieldValueSettingDTOS.stream().map(settingDTO -> {
                     LabelIssueRelVO labelIssueRelVO = new LabelIssueRelVO();
                     labelIssueRelVO.setLabelId(settingDTO.getOptionId());
+                    labelIssueRelVO.setProjectId(issueDTO.getProjectId());
+                    IssueLabelDTO issueLabelDTO = issueLabelMapper.selectByPrimaryKey(settingDTO.getOptionId());
+                    if (!ObjectUtils.isEmpty(issueLabelDTO)) {
+                        labelIssueRelVO.setLabelName(issueLabelDTO.getLabelName());
+                    }
                     return labelIssueRelVO;
                 }).collect(Collectors.toList());
                 field.set(issueUpdateVO, labelIssueRelVOS);
