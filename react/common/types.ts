@@ -16,6 +16,11 @@ export interface ISprint {
   endDate: string
 }
 
+export interface IVersion {
+  versionId: string,
+  name: string,
+}
+
 export interface PI {
   code: string
   name: string

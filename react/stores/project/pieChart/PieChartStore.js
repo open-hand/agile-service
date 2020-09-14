@@ -6,41 +6,10 @@ import {
 import _ from 'lodash';
 import { reportApi } from '@/api';
 
-class VersionReportStore {
-    @observable versionList = [];
-
-    @observable issues = {
-      done: {
-        data: [],
-        pagination: {
-          current: 1,
-          total: 0,
-          pageSize: 10,
-        },
-      },
-      unfinished: {
-        data: [],
-        pagination: {
-          current: 1,
-          total: 0,
-          pageSize: 10,
-        },
-      },
-      unfinishedUnestimated: {
-        data: [],
-        pagination: {
-          current: 1,
-          total: 0,
-          pageSize: 10,
-        },
-      },
-    }
-
+class PieChartStore {
     @observable pieData = [];
 
     @observable sourceData=[];
-
-    @observable reportData = {};
 
     @observable colors = [];
 
@@ -74,33 +43,9 @@ class VersionReportStore {
     return this.colors;
   }
 
-  @computed get getReportData() {
-    return toJS(this.reportData);
-  }
-
-  @action setReportData(data) {
-    this.reportData = data;
-  }
-
-  @computed get getIssues() {
-    return toJS(this.issues);
-  }
-
-  @action setIssues(type, type2, data) {
-    this.issues[type][type2] = data;
-  }
-
-  @computed get getVersionList() {
-    return toJS(this.versionList);
-  }
-
-  @action setVersionList(data) {
-    this.versionList = data;
-  }
-
-  getPieDatas = (projectId, type, sprintId, versionId, startDate, endDate) => {
+  getPieDatas = (type, sprintId, versionId) => {
     this.changePieLoading(true);
-    reportApi.loadPie(type, sprintId, versionId, startDate, endDate)
+    reportApi.loadPie(type, sprintId, versionId)
       .then((data) => {
         const len = data.length;
         if (len) {
@@ -132,5 +77,5 @@ class VersionReportStore {
   }
 }
 
-const versionReportStore = new VersionReportStore();
-export default versionReportStore;
+const pieChartStore = new PieChartStore();
+export default pieChartStore;
