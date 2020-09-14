@@ -46,6 +46,8 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
         label: '操作',
       },
     ],
+    queryFields: [],
+
   }), []);
   const handleCreateStatusClick = () => {
     openCreateStatus({
@@ -71,6 +73,7 @@ const Status: React.FC<TabComponentProps> = ({ tab }) => {
             type: 'maxHeight' as TableAutoHeightType,
             diff: 100,
           }}
+          filterBarFieldName="param"
         >
           <Column name="name" renderer={({ value }) => <span className={styles.gray}>{value}</span>} />
           <Column

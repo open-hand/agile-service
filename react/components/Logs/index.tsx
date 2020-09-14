@@ -43,7 +43,14 @@ const Logs: React.FC<Props> = ({ datalogs, expand, fieldsMap }) => (
                 i && log.lastUpdatedBy === arr[i - 1].lastUpdatedBy ? null : (
                   <UserHead
                   // @ts-ignore
-                    user={{
+                    user={log.user ? {
+                      id: log.user.id,
+                      name: log.user.name,
+                      loginName: log.user.loginName,
+                      realName: log.user.realName,
+                      avatar: log.user.imageUrl,
+                      ldap: log.user.ldap,
+                    } : {
                       id: log.lastUpdatedBy,
                       name: log.name,
                       loginName: log.loginName,

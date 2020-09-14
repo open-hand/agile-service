@@ -25,7 +25,7 @@ function PriorityField({ field, value, onChange }) {
       placeholder={field.name}
       saveList={(v) => {
         const shouldRender = list.length === 0 && value && value.length > 0;
-        list = unionBy(list, v, 'id'); 
+        list = unionBy(list, v, 'id');
         // 已保存筛选条件含有用户，并且这个时候select并没有显示，那么选了自定义筛选，要渲染一次
         if (list.length > 0 && shouldRender) {
           setValue(Math.random());
@@ -34,7 +34,9 @@ function PriorityField({ field, value, onChange }) {
       filter
       onChange={onChange}
       value={value}
-      getPopupContainer={triggerNode => triggerNode.parentNode}    
+      onFilterChange={() => { }}
+      filterOption={(inputVal, option) => option.props.label && option.props.label.toLowerCase().indexOf((inputVal || '').toLowerCase()) >= 0}
+      getPopupContainer={(triggerNode) => triggerNode.parentNode}
       requestArgs={[]}
     />
   );

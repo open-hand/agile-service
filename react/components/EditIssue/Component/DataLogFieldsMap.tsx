@@ -537,7 +537,9 @@ const fieldsMap = new Map([
         dontJudge: true,
       },
       customRender: (log: ILog) => {
-        const { newStatus, trigger, autoRelutionUpdate } = log;
+        const {
+          newStatus, trigger, removeResolution, resolutionChanged,
+        } = log;
         return (
           <span>
             <span>
@@ -546,13 +548,21 @@ const fieldsMap = new Map([
               ，使得当前问题自动流转到
               <span className="c7n-Log-value">{`【${newStatus}】`}</span>
               {
-              autoRelutionUpdate && (
-                <>
-                  ，更新
-                  <span className="c7n-Log-value">【解决状态】</span>
-                </>
-              )
-            }
+                resolutionChanged && !removeResolution && (
+                  <>
+                    ，更新
+                    <span className="c7n-Log-value">【解决状态】</span>
+                  </>
+                )
+              }
+              {
+                resolutionChanged && removeResolution && (
+                  <>
+                    ，移除
+                    <span className="c7n-Log-value">【解决状态】</span>
+                  </>
+                )
+              }
             </span>
           </span>
         );

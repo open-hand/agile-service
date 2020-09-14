@@ -30,22 +30,10 @@ function CreateColumn({
   };
   const handleSubmit = useCallback(async () => {
     if (await dataSet.validate()) {
-      const data = dataSet.toData()[0];
-      const existStatus = find(statusList, { name: data.name });
-      if (existStatus) {
-        const button = await Modal.confirm({
-          title: '警告',
-          children: `已存在状态“${existStatus.name}”，如果创建该列，不会创建同名状态`,
-        });
-        if (button === 'ok') {
-          return submit();
-        }
-        return false;
-      }
       return submit();
     }
     return false;
-  }, [dataSet, onCreate]);
+  }, [dataSet]);
   useEffect(() => {
     modal.handleOk(handleSubmit);
   }, [modal, handleSubmit]);

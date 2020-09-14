@@ -25,7 +25,8 @@ const IssueLog = () => {
             field: 'autoUpdate',
             newStatus: autoTemp[0].newString,
             trigger: autoTemp[1].newString,
-            autoRelutionUpdate: autoTemp.length === 3,
+            resolutionChanged: autoTemp.length === 3,
+            removeResolution: autoTemp.length === 3 && autoTemp[2].oldValue && !autoTemp[2].newValue,
           });
           autoTemp = [];
         }

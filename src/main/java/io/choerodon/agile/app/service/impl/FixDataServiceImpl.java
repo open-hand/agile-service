@@ -173,7 +173,6 @@ public class FixDataServiceImpl implements FixDataService {
     @Override
     @Async
     public void fixDateStateMachineAndPage(){
-        long start = System.currentTimeMillis();
         LOGGER.info("开始修复数据");
         // 迁移数据
         migrateData();
@@ -183,7 +182,7 @@ public class FixDataServiceImpl implements FixDataService {
         fixStateMachineByIssueTypeId();
         // 修复页面配置
         fixPage();
-        LOGGER.info("修复数据完成,耗时{}",System.currentTimeMillis() - start);
+        LOGGER.info("==============================>>>>>>>> AGILE Data Fixed Finished <<<<<<<<=================================");
     }
 
     private  void migrateData() {
@@ -621,36 +620,61 @@ public class FixDataServiceImpl implements FixDataService {
             // 将转换到所有转换为多个transform
             List<StatusMachineTransformDTO> statusMachineTransformDTOS = statusMachineTransformMapper.queryByStateMachineIds(statusMachineDTO.getOrganizationId(), Arrays.asList(statusMachineDTO.getId()));
             List<StatusMachineTransformDTO> allTransforms = statusMachineTransformDTOS.stream().filter(x -> x.getType().equals(TransformType.ALL)).collect(Collectors.toList());
-            if (CollectionUtils.isEmpty(allTransforms)) {
-                continue;
-            }
-            // 对tansform_all进行转换
-            Map<Long, List<Long>> nodeMap = statusMachineTransformDTOS.stream().filter(x -> x.getType().equals(TransformType.CUSTOM)).collect(Collectors.groupingBy(StatusMachineTransformDTO::getStartNodeId, Collectors.mapping(StatusMachineTransformDTO::getEndNodeId, Collectors.toList())));
-            List<StatusMachineTransformDTO> addTransform = new ArrayList<>();
-            allTransforms.forEach(v -> {
-                Long startNode = v.getEndNodeId();
-                List<Long> endNodes = nodeMap.get(startNode);
-                if (CollectionUtils.isEmpty(endNodes)) {
-                    endNodes = new ArrayList<>();
-                }
-                for (StatusMachineNodeVO node : machineNodeVOS) {
-                    if (Boolean.FALSE.equals(endNodes.contains(node.getId()))) {
-                        StatusMachineNodeVO nodeVO = nodeVOMap.get(startNode);
-                        StatusMachineNodeVO endNodeVO = nodeVOMap.get(node.getId());
-                        StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO();
-                        statusMachineTransformDTO.setOrganizationId(statusMachineDTO.getOrganizationId());
-                        statusMachineTransformDTO.setStartNodeId(startNode);
-                        statusMachineTransformDTO.setEndNodeId(node.getId());
-                        statusMachineTransformDTO.setName(nodeVO.getStatusVO().getName() + "转换到" + endNodeVO.getStatusVO().getName());
-                        statusMachineTransformDTO.setStateMachineId(v.getStateMachineId());
-                        statusMachineTransformDTO.setType(TransformType.CUSTOM);
-                        statusMachineTransformDTO.setConditionStrategy("condition_all");
-                        addTransform.add(statusMachineTransformDTO);
+            if (!CollectionUtils.isEmpty(allTransforms)) {
+                // 对tansform_all进行转换
+                Map<Long, List<Long>> nodeMap = statusMachineTransformDTOS.stream().filter(x -> x.getType().equals(TransformType.CUSTOM)).collect(Collectors.groupingBy(StatusMachineTransformDTO::getStartNodeId, Collectors.mapping(StatusMachineTransformDTO::getEndNodeId, Collectors.toList())));
+                List<StatusMachineTransformDTO> addTransform = new ArrayList<>();
+                allTransforms.forEach(v -> {
+                    Long startNode = v.getEndNodeId();
+                    List<Long> endNodes = nodeMap.get(startNode);
+                    if (CollectionUtils.isEmpty(endNodes)) {
+                        endNodes = new ArrayList<>();
                     }
-                }
-            });
-            // 批量增加
-            statusMachineTransformMapper.batchInsert(addTransform);
+                    for (StatusMachineNodeVO node : machineNodeVOS) {
+                        if (Boolean.FALSE.equals(endNodes.contains(node.getId()))) {
+                            StatusMachineNodeVO nodeVO = nodeVOMap.get(startNode);
+                            StatusMachineNodeVO endNodeVO = nodeVOMap.get(node.getId());
+                            StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO();
+                            statusMachineTransformDTO.setOrganizationId(statusMachineDTO.getOrganizationId());
+                            statusMachineTransformDTO.setStartNodeId(startNode);
+                            statusMachineTransformDTO.setEndNodeId(node.getId());
+                            statusMachineTransformDTO.setName(nodeVO.getStatusVO().getName() + "转换到" + endNodeVO.getStatusVO().getName());
+                            statusMachineTransformDTO.setStateMachineId(v.getStateMachineId());
+                            statusMachineTransformDTO.setType(TransformType.CUSTOM);
+                            statusMachineTransformDTO.setCreatedBy(0L);
+                            statusMachineTransformDTO.setLastUpdatedBy(0L);
+                            statusMachineTransformDTO.setConditionStrategy("condition_all");
+                            addTransform.add(statusMachineTransformDTO);
+                        }
+                    }
+                });
+                // 批量增加
+                statusMachineTransformMapper.batchInsert(addTransform);
+            }
+            // 查询有转换到自身的节点
+            List<Long> existTransferOwnerNodeId = statusMachineTransformMapper.existTransferOwner(statusMachineDTO.getId());
+            // 获取没有转换自身的节点
+            Set<Long> allNodeId = nodeVOMap.keySet();
+            allNodeId.removeAll(existTransferOwnerNodeId);
+            if (!CollectionUtils.isEmpty(allNodeId)) {
+                // 添加转换
+                List<StatusMachineTransformDTO> transform = new ArrayList<>();
+                allNodeId.forEach(v -> {
+                    StatusMachineNodeVO nodeVO = nodeVOMap.get(v);
+                    StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO();
+                    statusMachineTransformDTO.setOrganizationId(statusMachineDTO.getOrganizationId());
+                    statusMachineTransformDTO.setStartNodeId(v);
+                    statusMachineTransformDTO.setEndNodeId(v);
+                    statusMachineTransformDTO.setName(nodeVO.getStatusVO().getName() + "转换到" + nodeVO.getStatusVO().getName());
+                    statusMachineTransformDTO.setStateMachineId(statusMachineDTO.getId());
+                    statusMachineTransformDTO.setType(TransformType.CUSTOM);
+                    statusMachineTransformDTO.setCreatedBy(0L);
+                    statusMachineTransformDTO.setLastUpdatedBy(0L);
+                    statusMachineTransformDTO.setConditionStrategy("condition_all");
+                    transform.add(statusMachineTransformDTO);
+                });
+                statusMachineTransformMapper.batchInsert(transform);
+            }
             LOGGER.info("修复状态机:Id:{},名称:{}的转换完成",statusMachineDTO.getId(),statusMachineDTO.getName());
         }
         // 删除所有type为transform_all的转换

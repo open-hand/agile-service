@@ -18,6 +18,7 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -287,7 +288,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
-    public Map<Long, Map<Long, List<TransformVO>>> queryTransformsMapByProjectId(Long projectId, String applyType) {
+    public Map<Long, Map<Long, List<TransformVO>>> queryTransformsMapByProjectId(Long projectId,Long boardId,String applyType) {
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
             throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
         }
@@ -326,6 +327,11 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 //        Long defaultStateMachineId = idMap.get(0L);
 //        resultMap.put(0L, statusMap.get(defaultStateMachineId));
 
+        Set<Long> boardStatus = new HashSet<>();
+        if (!ObjectUtils.isEmpty(boardId)) {
+            // 查询出面板上有的状态
+            boardStatus.addAll(boardColumnMapper.queryStatusByBoardId(projectId,boardId));
+        }
         //匹配状态机的问题类型映射
         for (IssueTypeDTO issueType : issueTypes) {
             boolean isSkip = "issue_epic".equals(issueType.getTypeCode()) || (SchemeApplyType.AGILE.equals(applyType) && "feature".equals(issueType.getTypeCode()));
@@ -335,12 +341,13 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             Long stateMachineId = idMap.get(issueType.getId());
             if (stateMachineId != null) {
                 Map<Long, List<TransformVO>> statusTransferMap = statusMap.get(stateMachineId);
-                Set<Long> allStatus = statusTransferMap.keySet();
+                Set<Long> allStatus = new HashSet<>();
+                allStatus.addAll(!ObjectUtils.isEmpty(boardId) ? boardStatus : statusTransferMap.keySet());
                 // 查询能转换的状态
                 List<Long> canTransferStatus = statusTransferSettingService.checkStatusTransform(projectId, issueType.getId(), new ArrayList<>(allStatus));
                 // 过滤掉不能转换的状态
                 Map<Long, List<TransformVO>> transferMap = new HashMap<>();
-                statusTransferMap.entrySet().stream().filter(entry -> entry.getKey() != 0L).forEach(entry -> {
+                statusTransferMap.entrySet().stream().filter(entry -> entry.getKey() != 0L && boardStatus.contains(entry.getKey())).forEach(entry -> {
                     transferMap.put(entry.getKey(),entry.getValue().stream().filter(v ->  canTransferStatus.contains(v.getEndStatusId())).map(v -> {
                         StatusVO statusVO = sMap.get(v.getEndStatusId());
                         if (statusVO != null) {
@@ -582,11 +589,27 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         instanceCache.cleanStateMachine(stateMachineId);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void checkDeleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId) {
+        Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
+        StatusMachineNodeDTO statusMachineNodeDTO = new StatusMachineNodeDTO();
+        statusMachineNodeDTO.setOrganizationId(organizationId);
+        statusMachineNodeDTO.setStateMachineId(stateMachineId);
+        checkStatusLink(projectId, issueTypeId, nodeId);
+    }
+
     private StatusMachineNodeDTO checkStatusLink(Long projectId, Long issueTypeId, Long nodeId) {
-        // 校验当前node的状态有没有被项目下的issue使用
         StatusMachineNodeDTO machineNodeDTO = statusMachineNodeMapper.selectByPrimaryKey(nodeId);
         Assert.notNull(machineNodeDTO, BaseConstants.ErrorCode.DATA_NOT_EXISTS);
         Long currentStatusId = machineNodeDTO.getStatusId();
+        // 校验是否是初始状态
+        if (StringUtils.equals("node_init", machineNodeDTO.getType())) {
+            throw new CommonException("error.delete.init.status");
+        }
+        // 校验当前node的状态有没有被项目下的issue使用
         Boolean checkIssueUse = checkIssueUse(projectId, issueTypeId,machineNodeDTO.getStatusId());
         if (Boolean.TRUE.equals(checkIssueUse)) {
             // 报错
@@ -594,8 +617,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         // 校验当前node的状态是否与其他状态有联动
         List<StatusLinkageDTO> linkExistList = statusLinkageMapper.selectByCondition(Condition.builder(StatusLinkageDTO.class)
-                .andWhere(Sqls.custom().andEqualTo("issueTypeId", issueTypeId)
-                        .andEqualTo("projectId", projectId))
+                .andWhere(Sqls.custom().andEqualTo("projectId", projectId))
                 .andWhere(Sqls.custom().andEqualTo("statusId", currentStatusId)
                                 .orEqualTo("parentIssueStatusSetting", currentStatusId)).build());
         if (CollectionUtils.isNotEmpty(linkExistList)){
@@ -688,6 +710,26 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             Long tansferStatusId = handlerTransferStatus(machineNodeDTO, map, schemeConfigVO);
             // 删除node
             deleteNode(projectId, schemeConfigVO.getIssueTypeId(), applyType, machineNodeDTO.getId(), tansferStatusId);
+        }
+    }
+
+    @Override
+    public void checkDeleteStatusByProject(Long projectId, String applyType, Long statusId) {
+        Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        List<StatusMachineSchemeConfigVO> stateMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, stateMachineSchemeId);
+        for (StatusMachineSchemeConfigVO schemeConfigVO : stateMachineSchemeConfigVOS) {
+            // 查询状态的node
+            StatusMachineNodeDTO statusMachineNodeDTO = new StatusMachineNodeDTO();
+            statusMachineNodeDTO.setStatusId(statusId);
+            statusMachineNodeDTO.setStateMachineId(schemeConfigVO.getStateMachineId());
+            statusMachineNodeDTO.setOrganizationId(organizationId);
+            StatusMachineNodeDTO machineNodeDTO = statusMachineNodeMapper.selectOne(statusMachineNodeDTO);
+            if (ObjectUtils.isEmpty(machineNodeDTO)) {
+                continue;
+            }
+            // 检查是否能删除node
+            checkDeleteNode(projectId, schemeConfigVO.getIssueTypeId(), applyType, machineNodeDTO.getId());
         }
     }
 

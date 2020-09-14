@@ -4,10 +4,15 @@ import { observer } from 'mobx-react-lite';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
 
 const FormItem = Form.Item;
-function FieldTeam({ form: { getFieldDecorator, setFieldsValue }, teamProjectIds }) {
+function FieldTeam({ form: { getFieldDecorator, setFieldsValue }, teamProjectIds, field }) {
   return (
     <FormItem key="teamProjectIds">
-      {getFieldDecorator('teamProjectIds', {})(
+      {getFieldDecorator('teamProjectIds', {
+        rules: [{
+          required: field.required,
+          message: '请填写故事点',
+        }],
+      })(
         <SelectFocusLoad
           label="负责的子项目"
           style={{

@@ -27,6 +27,7 @@ import { PageIssueTypeStoreStatusCode } from './stores/PageIssueTypeStore';
 import { IFieldPostDataProps } from '../components/create-field/CreateField';
 import PageDescription from './components/page-description';
 
+type ILocalFieldPostDataProps = IFieldPostDataProps & { localRecordIndexId?: number, localDefaultObj: any, defaultValueObj: any, };
 function PageIssueType() {
   const {
     sortTableDataSet, addUnselectedDataSet, intl, pageIssueTypeStore, isProject, prefixCls,
@@ -50,12 +51,22 @@ function PageIssueType() {
       let addFields: Array<Record> = [];
       const CreatedFields = pageIssueTypeStore.getCreatedFields.map((item) => {
         let newRank = item.rank;
+        let { created } = item;
+        let { edited } = item;
+        let { required } = item;
+
         if (item.dataSetRecord) {
           newRank = item.dataSetRecord.get('rank');
+          created = item.dataSetRecord.get('created');
+          edited = item.dataSetRecord.get('edited');
+          required = item.dataSetRecord.get('required');
         }
         return {
-          ...omit(item, 'dataSetRecord'),
+          ...omit(item, 'dataSetRecord', 'local', 'localDefaultValue', 'localSource'),
           rank: newRank,
+          created,
+          edited,
+          required,
         };
       });
       if (sortTableDataSet.dirty) {
@@ -80,6 +91,9 @@ function PageIssueType() {
         } : undefined,
         addFields: addFields.map((item) => ({
           fieldId: item.get('id'),
+          required: item.get('required'),
+          created: item.get('created'),
+          edited: item.get('edited'),
           rank: item.get('rank'),
         })),
         createdFields: CreatedFields,
@@ -101,9 +115,11 @@ function PageIssueType() {
    * @param data 本地所需数据
    * @param oldField 是否是已有字段
    */
-  const onSubmitLocal = async (data: IFieldPostDataProps, oldField: boolean = false) => {
+  const onSubmitLocal = async (data: ILocalFieldPostDataProps, oldField: boolean = false) => {
     const newData = Object.assign(data, {
       local: true,
+      localDefaultValue: oldField ? pageIssueTypeStore.transformDefaultValue(data.fieldType, data.defaultValue, data.defaultValueObj, data.fieldOptions)
+        : pageIssueTypeStore.transformDefaultValue(data.fieldType, data.defaultValue, data.localDefaultObj, data.fieldOptions, 'tempKey'),
       localSource: oldField ? 'add' : 'created',
       fieldName: data.name,
       edited: true,
@@ -121,7 +137,14 @@ function PageIssueType() {
         nextRank: sortTableDataSet.data[sortTableDataSet.length - 1].get('rank'),
       });
       newData.rank = newRank;
-      oldField && pageIssueTypeStore.addNewLocalField({ fieldId: data.id!, rank: newRank });
+      oldField && pageIssueTypeStore.addNewLocalField({
+        fieldId: data.id!,
+        rank: newRank,
+        created: true,
+        edited: true,
+        required: false,
+        localRecordIndexId: data.localRecordIndexId!,
+      });
       const newRecord = sortTableDataSet.create(newData);
       !oldField && pageIssueTypeStore.bindRecordForCreated(newRecord);
     }
@@ -203,7 +226,7 @@ function PageIssueType() {
           </div>
         </Spin>
         <div className={styles.bottom}>
-          <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} loading={btnLoading} onClick={handleSubmit}>
+          <Button funcType={'raised' as FuncType} color={'primary' as ButtonColor} disabled={!pageIssueTypeStore.getDirty} loading={btnLoading} onClick={handleSubmit}>
             保存
           </Button>
           <Button funcType={'raised' as FuncType} onClick={pageIssueTypeStore.loadData}>

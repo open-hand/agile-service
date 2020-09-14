@@ -17,16 +17,16 @@ class UserApi extends Api {
 
   /**
  * 根据用户id查询用户信息
- * @param userId 
+ * @param userId
  */
-  getById(userId: number) {
+  getById(userId: number | string) {
     return axios.get(`${this.prefix}/users?id=${userId}`);
   }
 
   /**
    * 在项目层查询用户列表（不包括离职用户）
    * @param param 模糊搜索
-   * @param page 
+   * @param page
    * @param id 根据id查询
    */
   getAllInProject(param?: string, page?: number, userId?: number, size?: number, projectId?: number) {
@@ -45,9 +45,9 @@ class UserApi extends Api {
 
   /**
    * 在项目层查询用户列表（包括离职用户）
-   * @param param 
-   * @param page 
-   * @param userId 
+   * @param param
+   * @param page
+   * @param userId
    */
   getAllInProjectIncludesLeaveUsers(param?: string, page?: number, userId?: number) {
     return this.request({

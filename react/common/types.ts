@@ -8,6 +8,7 @@ export interface User {
   ldap: boolean
   loginName: string
   realName: string
+  name?: string
 }
 
 export interface Issue {
@@ -148,7 +149,9 @@ export interface ILog {
   loginName: string,
   realName: string,
   imageUrl: string,
+  user: User,
   newStatus?: string,
   trigger?: string,
-  autoRelutionUpdate?: boolean,
+  removeResolution?: boolean,
+  resolutionChanged?: boolean,
 }

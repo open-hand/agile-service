@@ -45,4 +45,6 @@ public interface StatusMachineTransformMapper extends BaseMapper<StatusMachineTr
                                                               @Param("statusId") Long statusId,
                                                               @Param("changeStatus") Long changeStatus,
                                                               @Param("transformAllFlag") boolean transformAllFlag);
+
+    List<Long> existTransferOwner(@Param("stateMachineId") Long stateMachineId);
 }

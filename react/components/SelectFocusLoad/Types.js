@@ -1,3 +1,4 @@
+/* eslint-disable import/no-anonymous-default-export */
 /* eslint-disable camelcase */
 import React from 'react';
 import { Select } from 'choerodon-ui';
@@ -326,7 +327,7 @@ export default {
     request: () => priorityApi.loadByProject(),
     getDefaultValue: (priorities) => find(priorities, { default: true }).id,
     render: (priority) => (
-      <Option key={priority.id} value={priority.id}>
+      <Option key={priority.id} value={priority.id} label={priority.name}>
         <div style={{ display: 'inline-flex', alignItems: 'center', padding: 2 }}>
           <span>{priority.name}</span>
         </div>
@@ -460,7 +461,6 @@ export default {
       loadWhenMount: true,
     },
     avoidShowError: (props, List) => new Promise((resolve) => {
-      console.log(props);
       const { selectedFeature } = props;
       const extraList = [];
       const values = selectedFeature instanceof Array ? selectedFeature : [selectedFeature];
@@ -469,8 +469,6 @@ export default {
           extraList.push(feature);
         }
       });
-      resolve(extraList);
-    }).catch(() => {
       resolve(extraList);
     }),
   }, // 特性列表

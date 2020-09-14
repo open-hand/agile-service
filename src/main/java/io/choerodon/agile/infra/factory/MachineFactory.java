@@ -202,13 +202,16 @@ public class MachineFactory {
     }
 
     private boolean isInstanceLatest(StatusMachineTransformDTO transform, StateMachine<String, String> instance) {
-        Long endNodeId = transform.getEndNodeId();
+        boolean flag = false;
+        // 检查状态机配置是否改变
         for (State<String, String> s :instance.getStates()) {
-            if (Long.valueOf(s.getId()).equals(endNodeId)) {
-                return true;
+            if (Long.valueOf(s.getId()).equals(transform.getEndNodeId())) {
+                flag = true;
+                break;
             }
         }
-        return false;
+        // 检查状态机内当前状态是否与传入状态相同
+        return flag && Long.valueOf(instance.getState().getId()).equals(transform.getStartNodeId());
     }
 
     private StateMachine<String, String> getInstance(Long organizationId, String serviceCode, Long stateMachineId, Long instanceId, Long currentNodeId) {

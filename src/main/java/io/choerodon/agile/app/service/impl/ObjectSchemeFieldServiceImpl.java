@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
+import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import org.apache.commons.collections4.CollectionUtils;
@@ -372,7 +373,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             field.setDefaultValue(defaultValue);
         }
         field = baseCreate(field, issueTypes, issueTypeForRank);
-
+        if (!ObjectUtils.isEmpty(issueTypeForRank)) {
+            Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
+            insertObjectSchemeFieldExtend(organizationId, projectId, field.getId(), fieldCreateDTO.getRequired(), issueTypeMap, issueTypeForRank, fieldCreateDTO.getCreated(), fieldCreateDTO.getEdited());
+        }
         //处理字段选项
         if (fieldCreateDTO.getFieldOptions() != null) {
             String defaultIds = fieldOptionService.handleFieldOption(organizationId, field.getId(), fieldCreateDTO.getFieldOptions());
@@ -381,7 +385,6 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 objectSchemeFieldMapper.updateOptional(field, "defaultValue");
             }
         }
-
         return queryById(organizationId, projectId, field.getId());
     }
 
@@ -717,7 +720,34 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     @Override
     public List<ObjectSchemeFieldVO> unselected(Long organizationId, Long projectId, String issueType) {
-        return objectSchemeFieldExtendMapper.unselected(organizationId, projectId, issueType);
+        List<ObjectSchemeFieldVO> unselected = objectSchemeFieldExtendMapper.unselected(organizationId, projectId, issueType);
+        if (CollectionUtils.isEmpty(unselected)) {
+            return new ArrayList<>();
+        }
+        unselected.forEach(v -> {
+            //获取字段选项，并设置默认值
+            List<FieldOptionVO> fieldOptions = fieldOptionService.queryByFieldId(organizationId, v.getId());
+            if (!fieldOptions.isEmpty()) {
+                if (!ObjectUtils.isEmpty(v.getDefaultValue())) {
+                    List<String> defaultIds = Arrays.asList(v.getDefaultValue().split(","));
+                    List<String> encryptList = EncryptionUtils.encryptListToStr(defaultIds);
+                    v.setDefaultValue(StringUtils.join(encryptList.toArray(), ","));
+                }
+                v.setFieldOptions(fieldOptions);
+            }
+            if (FieldType.MEMBER.equals(v.getFieldType())) {
+                BaseFeignClient baseFeignClient = SpringBeanUtil.getBean(BaseFeignClient.class);
+                if (v.getDefaultValue() != null && !"".equals(v.getDefaultValue())) {
+                    Long defaultValue = Long.valueOf(String.valueOf(v.getDefaultValue()));
+                    v.setDefaultValue(EncryptionUtils.encrypt(defaultValue));
+                    List<UserDTO> list = baseFeignClient.listUsersByIds(Arrays.asList(defaultValue).toArray(new Long[1]), false).getBody();
+                    if (!list.isEmpty()) {
+                        v.setDefaultValueObj(list.get(0));
+                    }
+                }
+            }
+        });
+        return unselected;
     }
 
     @Override
@@ -764,7 +794,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             Long fieldId = a.getFieldId();
             String rank = a.getRank();
             ObjectSchemeFieldExtendDTO result =
-                    insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, false, issueTypeMap, issueType, true, true);
+                    insertObjectSchemeFieldExtend(organizationId, projectId, fieldId, a.getRequired(), issueTypeMap, issueType, a.getCreated(), a.getEdited());
             if (!ObjectUtils.isEmpty(rank)) {
                 result.setRank(rank);
                 objectSchemeFieldExtendMapper.updateByPrimaryKeySelective(result);

@@ -233,7 +233,7 @@ class ScrumBoardHome extends Component {
         }
         ScrumBoardStore.rewriteObjNumber(data, issueId, issue);
         // ScrumBoardStore.resetHeaderData(startColumn,destinationColumn)
-        if (issue.issueTypeVO.typeCode === 'bug' || issue.issueTypeVO.typeCode === 'sub_task') {
+        if ((issue.issueTypeVO.typeCode === 'bug' && issue.relateIssueId) || issue.issueTypeVO.typeCode === 'sub_task') {
           this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
         }
       }
@@ -304,7 +304,7 @@ class ScrumBoardHome extends Component {
   refresh = (defaultBoard, url, boardListData) => {
     ScrumBoardStore.setSpinIf(true);
     Promise.all([issueTypeApi.loadAllWithStateMachineId(),
-      statusApi.loadAllTransformForAllIssueType(),
+      statusApi.loadAllTransformForAllIssueType(defaultBoard.boardId),
       ScrumBoardStore.axiosGetBoardData(defaultBoard.boardId),
       epicApi.loadEpics()]).then(([issueTypes, stateMachineMap, defaultBoardData, epicData]) => {
       this.dataConverter.setSourceData(epicData, defaultBoardData);

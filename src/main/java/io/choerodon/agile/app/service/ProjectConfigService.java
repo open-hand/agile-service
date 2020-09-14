@@ -135,7 +135,7 @@ public interface ProjectConfigService {
 
     Long queryWorkFlowFirstStatus(Long projectId, String applyType, Long issueTypeId, Long organizationId);
 
-    Map<Long, Map<Long, List<TransformVO>>> queryTransformsMapByProjectId(Long projectId, String applyType);
+    Map<Long, Map<Long, List<TransformVO>>> queryTransformsMapByProjectId(Long projectId,Long boardId,String applyType);
 
     /**
      * 查询项目下问题类型的状态与流转列表
@@ -219,4 +219,8 @@ public interface ProjectConfigService {
     void updateNodeObjectVersionNumber(Long project, Long issueType, Long statusId, Long objectVersionNumber, String applyType);
 
     void initIssueTypeStatusMachine(Long project, String applyType);
+
+    void checkDeleteStatusByProject(Long projectId, String applyType, Long statusId);
+
+    void checkDeleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId);
 }
