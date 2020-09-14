@@ -30,4 +30,15 @@ databaseChangeLog(logicalFilePath: 'fd_status_field_value_setting.groovy') {
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
     }
+    changeSet(author: 'ztxemail@163.com',id: '2020-09-14-fd-status-field-value-setting-add-index'){
+        createIndex(indexName: "idx_status_field_setting_id", tableName: "fd_status_field_value_setting") {
+            column(name: "status_field_setting_id")
+        }
+        createIndex(indexName: "idx_project_id", tableName: "fd_status_field_value_setting") {
+            column(name: "project_id")
+        }
+        createIndex(indexName: "idx_field_type", tableName: "fd_status_field_value_setting") {
+            column(name: "field_type")
+        }
+    }
 }
