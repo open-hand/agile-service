@@ -2,7 +2,7 @@ package script.db.groovy.agile_service
 
 databaseChangeLog(logicalFilePath: 'script/db/agile_project_report_cc.groovy') {
     changeSet(id: '2020-09-15-agile-project-report-cc', author: 'jiaxu.cui@hand-china.com') {
-        createTable(tableName: "agile_project_report_cc", remarks: '项目报表') {
+        createTable(tableName: "agile_project_report_cc", remarks: '项目报表抄送人') {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: '主键') {
                 constraints(primaryKey: true)
             }
@@ -12,7 +12,7 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_project_report_cc.groovy') {
             column(name: 'project_report_id', type: 'BIGINT UNSIGNED', remarks: '项目报表Id') {
                 constraints(nullable: false)
             }
-            column(name: 'cc_id', type: 'BIGINT UNSIGNED', remarks: '抄送人Id') {
+            column(name: 'carbon_copy_id', type: 'BIGINT UNSIGNED', remarks: '抄送人Id') {
                 constraints(nullable: false)
             }
 
