@@ -128,7 +128,7 @@ class ReportApi {
    * @param id
    * @param type  Epic Version
    */
-  loadEpicOrVersionBurnDownCoordinate(id: number, type: string) {
+  loadEpicOrVersionBurnDownCoordinate(id: string, type: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/reports/burn_down_coordinate_type/${id}`,

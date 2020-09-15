@@ -1,28 +1,71 @@
 import {
   useEffect, useState, useCallback,
 } from 'react';
-import { axios } from '@choerodon/boot';
-import { EpicBurnDownChartProps } from '@/components/charts/epic-burnDown';
+import { EpicBurnDownChartProps, OriginData, ChartData } from '@/components/charts/epic-burnDown';
 import { EpicBurnDownSearchProps, IEpic } from '@/components/charts/epic-burnDown/search';
+import { reportApi, epicApi } from '@/api';
+import { getChartDataFromServerData } from './utils';
 
 function useEpicBurnDownReport(): [EpicBurnDownSearchProps, EpicBurnDownChartProps] {
   const [epics, setEpics] = useState<IEpic[]>([]);
-  const [epicFinishLoading, setEpicFinishLoading] = useState<boolean>(false);
+  const [epicIsLoading, setEpicIsLoading] = useState<boolean>(false);
   const [checked, setChecked] = useState<'checked' | undefined>();
   const [currentEpicId, setCurrentEpicId] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [data, setData] = useState<OriginData[]>([]);
+  const [chartData, setChartData] = useState<ChartData>([[], [], [], [], [], [], [], []]);
+
+  const loadChartData = useCallback((id?) => {
+    if (id || currentEpicId) {
+      setLoading(true);
+      reportApi.loadEpicOrVersionBurnDownCoordinate(id || currentEpicId, 'Epic')
+        .then((res: OriginData[]) => {
+          setData(res);
+          setChartData(getChartDataFromServerData(res));
+          setLoading(false);
+        }).catch(() => {
+          setLoading(false);
+        });
+    }
+  }, [currentEpicId]);
+
+  useEffect(() => {
+    loadChartData();
+  }, [loadChartData]);
+
+  const loadData = useCallback(() => {
+    setLoading(true);
+    setEpicIsLoading(true);
+    epicApi.loadEpics().then((epicList:IEpic[]) => {
+      setEpicIsLoading(false);
+      setEpics(epicList);
+      const firstEpicId = epicList.length && epicList[0].issueId;
+      setCurrentEpicId(firstEpicId || '');
+      if (firstEpicId) {
+        loadChartData(firstEpicId);
+      } else {
+        setLoading(false);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
   const searchProps: EpicBurnDownSearchProps = {
     epics,
-    epicFinishLoading,
+    epicIsLoading,
     checked,
     currentEpicId,
     setCurrentEpicId,
     setChecked,
   };
   const props: EpicBurnDownChartProps = {
-    epics,
-    epicFinishLoading,
+    data,
+    chartData,
+    loading,
     checked,
-    currentEpicId,
   };
   return [searchProps, props];
 }

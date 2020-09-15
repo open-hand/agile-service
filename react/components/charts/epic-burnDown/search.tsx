@@ -4,6 +4,7 @@ import { Icon } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import to, { linkUrl } from '@/utils/to';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
+import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import seeChangeRange from './image/seeChangeRange.svg';
 import seeProgress from './image/seeProgress.svg';
 import styles from './index.less';
@@ -16,7 +17,7 @@ export interface IEpic {
 }
 export interface EpicBurnDownSearchProps {
   epics: IEpic[]
-  epicFinishLoading: boolean,
+  epicIsLoading: boolean,
   checked: 'checked' | undefined,
   currentEpicId: string,
   setCurrentEpicId: Function,
@@ -26,7 +27,7 @@ export interface EpicBurnDownSearchProps {
 const { Option } = Select;
 
 const EpicBurnDownSearch:React.FC<EpicBurnDownSearchProps> = ({
-  epics, epicFinishLoading, checked, currentEpicId, setCurrentEpicId, setChecked,
+  epics, epicIsLoading, checked, currentEpicId, setCurrentEpicId, setChecked,
 }) => {
   const handleChangeCurrentEpic = (epicId: string) => {
     setCurrentEpicId(epicId);
@@ -37,13 +38,13 @@ const EpicBurnDownSearch:React.FC<EpicBurnDownSearchProps> = ({
   };
 
   const handleIconMouseEnter = () => {
-    const iconShowInfo = document.getElementsByClassName('icon-show-info')[0];
+    const iconShowInfo = document.getElementsByClassName(styles.icon_show_info)[0];
     // @ts-ignore
     iconShowInfo.style.display = 'flex';
   };
 
   const handleIconMouseLeave = () => {
-    const iconShowInfo = document.getElementsByClassName('icon-show-info')[0];
+    const iconShowInfo = document.getElementsByClassName(styles.icon_show_info)[0];
     // @ts-ignore
     iconShowInfo.style.display = 'none';
   };
@@ -61,9 +62,9 @@ const EpicBurnDownSearch:React.FC<EpicBurnDownSearchProps> = ({
     if (currentEpicId !== undefined) {
       const currentEpic = epics.find((item) => item.issueId === currentEpicId);
       return (
-        <p className="c7n-epicInfo">
+        <p className={styles.epicInfo}>
           <span
-            className="primary"
+            className={styles.primary}
             style={{
               cursor: 'pointer',
             }}
@@ -82,11 +83,14 @@ const EpicBurnDownSearch:React.FC<EpicBurnDownSearchProps> = ({
   return (
     <>
       {
-      (epics.length > 0 && !epicFinishLoading) && (
+      (epics.length > 0 && !epicIsLoading) && (
         <div className={styles.epicBurnDown_search}>
           <div style={{ display: 'flex' }}>
             <Select
-              style={{ width: 512, marginRight: 33, height: 35 }}
+              className={styles.epicBurnDown_search_select}
+              labelLayout={'float' as LabelLayout}
+              clearButton={false}
+              style={{ width: 500, marginRight: 33, height: 36 }}
               label="史诗"
               value={currentEpicId}
               onChange={handleChangeCurrentEpic}
@@ -99,37 +103,36 @@ const EpicBurnDownSearch:React.FC<EpicBurnDownSearchProps> = ({
                 ))
               }
             </Select>
-            <div className="c7n-epicSelectHeader">
+            <div className={styles.epicSelect}>
               <CheckBox
                 label="查看选项"
                 value="checked"
-                // @ts-ignore
-                checked={checked?.indexOf('checked') > -1}
+                checked={checked === 'checked'}
                 onChange={handleCheckedChange}
               >
                 根据图表校准冲刺
               </CheckBox>
-              <span className="icon-show" role="none" onMouseEnter={handleIconMouseEnter} onMouseLeave={handleIconMouseLeave}>
+              <span className={styles.icon_show} role="none" onMouseEnter={handleIconMouseEnter} onMouseLeave={handleIconMouseLeave}>
                 <Icon type="help icon" />
               </span>
 
-              <div className="icon-show-info" onMouseEnter={handleIconMouseEnter} onMouseLeave={handleIconMouseLeave}>
-                <figure className="icon-show-progress">
-                  <div className="icon-show-info-svg">
+              <div className={styles.icon_show_info} onMouseEnter={handleIconMouseEnter} onMouseLeave={handleIconMouseLeave}>
+                <figure className={styles.icon_show_progress}>
+                  <div className={styles.icon_show_info_svg}>
                     <img src={seeProgress} alt="查看进度" />
                   </div>
-                  <figcaption className="icon-show-info-detail">
-                    <p className="icon-show-info-detail-header">查看进度</p>
-                    <p className="icon-show-info-detail-content">按照史诗查看冲刺进度</p>
+                  <figcaption className={styles.icon_show_info_detail}>
+                    <p className={styles.icon_show_info_detail_header}>查看进度</p>
+                    <p className={styles.icon_show_info_detail_content}>按照史诗查看冲刺进度</p>
                   </figcaption>
                 </figure>
                 <figure>
-                  <div className="icon-show-info-svg">
+                  <div className="icon_show_info_svg">
                     <img src={seeChangeRange} alt="查看变更范围" />
                   </div>
-                  <figcaption className="icon-show-info-detail">
-                    <p className="icon-show-info-detail-header">查看变更范围</p>
-                    <p className="icon-show-info-detail-content">跟踪范围的扩大和缩小，由底部条状信息显示。</p>
+                  <figcaption className={styles.icon_show_info_detail}>
+                    <p className={styles.icon_show_info_detail_header}>查看变更范围</p>
+                    <p className={styles.icon_show_info_detail_content}>跟踪范围的扩大和缩小，由底部条状信息显示。</p>
                   </figcaption>
                 </figure>
               </div>
