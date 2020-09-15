@@ -4,10 +4,12 @@ import io.choerodon.agile.app.service.ProjectReportService;
 import io.choerodon.agile.infra.dto.ProjectReportDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.springframework.stereotype.Service;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/9/15 上午11:08
  */
+@Service
 public class ProjectReportServiceImpl implements ProjectReportService {
 
     @Override

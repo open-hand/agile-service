@@ -57,7 +57,7 @@ public class ProjectReportController {
 
     @ApiOperation(value = "删除项目报表")
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("project_id") Long projectId,
                                        @PathVariable("id") Long id,
                                        @RequestBody @Encrypt ProjectReportDTO projectReportDTO) {
