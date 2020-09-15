@@ -8,7 +8,6 @@ import { stores, Choerodon } from '@choerodon/boot';
 import { Spin } from 'choerodon-ui';
 import { throttle } from 'lodash';
 import './EditIssue.less';
-import useIsOwner from '@/hooks/useIsOwner';
 import { useIssueTypes } from '@/hooks';
 import {
   issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, devOpsApi, pageConfigApi,
@@ -56,7 +55,6 @@ function EditIssue() {
     isFullScreen,
     onChangeWidth,
   } = useContext(EditIssueContext);
-  const [isOwner] = useIsOwner();
   const [issueTypes] = useIssueTypes();
   const container = useRef();
   const idRef = useRef();
@@ -196,7 +194,6 @@ function EditIssue() {
   } = store;
   const { isInProgram } = useIsInProgram();
   const rightDisabled = disabled || (isInProgram && typeCode === 'issue_epic');
-  const HasPermission = (isOwner || createdBy === AppState.userInfo.id);
   return (
     <div style={{
       position: 'fixed',
@@ -252,7 +249,6 @@ function EditIssue() {
               backUrl={backUrl}
               onCancel={onCancel}
               loginUserId={AppState.userInfo.id}
-              hasPermission={HasPermission}
               onDeleteIssue={onDeleteIssue}
               onUpdate={onUpdate}
             />
@@ -265,7 +261,6 @@ function EditIssue() {
               onUpdate={onUpdate}
               onDeleteSubIssue={onDeleteSubIssue}
               loginUserId={AppState.userInfo.id}
-              hasPermission={isOwner}
               applyType={applyType}
               onDeleteIssue={onDeleteIssue}
               parentSummary={summary}

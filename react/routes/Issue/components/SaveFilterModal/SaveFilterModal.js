@@ -10,7 +10,7 @@ import { personalFilterApi } from '@/api';
 const FormItem = Form.Item;
 @observer
 class SaveFilterModal extends Component {
-  checkMyFilterNameRepeat = filterName => personalFilterApi.checkName(filterName);
+  checkMyFilterNameRepeat = (filterName) => personalFilterApi.checkName(filterName);
 
   checkMyFilterNameRepeatCreating = (rule, value, callback) => {
     this.checkMyFilterNameRepeat(value).then((res) => {
@@ -24,10 +24,10 @@ class SaveFilterModal extends Component {
   }
 
   handleSaveFilterOk = () => {
-    const { form } = this.props;
+    const { form, issueSearchStore } = this.props;
     form.validateFields(['filterName'], (err, value) => {
       if (!err) {
-        const searchDTO = IssueStore.getCustomFieldFilters();
+        const searchDTO = issueSearchStore.getCustomFieldFilters();
         const data = {
           name: value.filterName,
           filterJson: JSON.stringify(searchDTO),
@@ -36,7 +36,7 @@ class SaveFilterModal extends Component {
         IssueStore.setLoading(true);
         personalFilterApi.create(data)
           .then((res) => {
-            IssueStore.axiosGetMyFilterList();
+            issueSearchStore.loadMyFilterList();
             IssueStore.setSaveFilterVisible(false);
             form.setFieldsValue({ filterName: '' });
             Choerodon.prompt('保存成功');

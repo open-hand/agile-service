@@ -33,6 +33,8 @@ const SubTask = observer(({
   const renderIssueList = (issue, i) => (
     <IssueList
       showAssignee
+      showDelete
+      showPriority
       key={issue.issueId}
       issue={{
         ...issue,
