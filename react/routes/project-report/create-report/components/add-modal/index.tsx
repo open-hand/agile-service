@@ -1,8 +1,5 @@
-import React, { useEffect } from 'react';
-import {
-  Form, Select, DataSet, Modal,
-} from 'choerodon-ui/pro';
-import { observer } from 'mobx-react-lite';
+import React, { useEffect, useRef } from 'react';
+import { Modal } from 'choerodon-ui/pro';
 import { IModalProps, IReportContentType } from '@/common/types';
 import AddChart from '../add-chart';
 import AddText from '../add-text';
@@ -12,7 +9,10 @@ interface Props {
   modal?: IModalProps,
   type: IReportContentType
 }
-const Components = new Map<IReportContentType, React.ComponentType>([
+export interface RefProps {
+  submit: () => Promise<any>
+}
+const Components = new Map<IReportContentType, React.FC<{ innerRef: React.MutableRefObject<RefProps> }>>([
   ['chart', AddChart],
   ['text', AddText],
   ['list', AddIssueList],
@@ -21,19 +21,10 @@ const Components = new Map<IReportContentType, React.ComponentType>([
 const AddModal: React.FC<Props> = ({
   modal, type,
 }) => {
+  const ref = useRef<RefProps>({} as RefProps);
   async function handleSubmit() {
-    // if (dataSet.validate()) {
-    //   const id = dataSet.current?.toData().field;
-    //   const addFiledData = store.allFieldData.get(id);
-    //   if (addFiledData) {
-    //     onSubmitLocal(store.allFieldData.get(id), true);
-    //   } else {
-    //     const deleteRecord = store.getDeleteRecords.find((record) => record.get('id') === id);
-    //     deleteRecord && onRestoreLocal(deleteRecord);
-    //   }
-    //   dataSet.create();
-    //   return true;
-    // }
+    const data = await ref.current.submit();
+    console.log(data);
     return false;
   }
   useEffect(() => {
@@ -42,7 +33,7 @@ const AddModal: React.FC<Props> = ({
   const Component = Components.get(type);
   if (Component) {
     return (
-      <div><Component /></div>
+      <div><Component innerRef={ref} /></div>
     );
   }
   return null;

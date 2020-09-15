@@ -4,6 +4,7 @@ import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import styles from './index.less';
 import { IReportBlock } from '../../store';
 import TextBlock from './components/text-block';
+import ChartBlock from './components/chart-block';
 
 interface Props {
   data: IReportBlock
@@ -11,6 +12,7 @@ interface Props {
 }
 const BlockMap = new Map([
   ['text', TextBlock],
+  ['chart', ChartBlock],
 ]);
 const ReportBlock: React.FC<Props> = ({ data }) => {
   const { title, type } = data;

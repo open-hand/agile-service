@@ -28,6 +28,7 @@ class ProjectReportStore {
     title: '上周未完成的工作项（图表标题）',
     type: 'chart',
     data: {
+      chartType: 'burndown',
       filter: {},
     },
   }]
