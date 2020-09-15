@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useImperativeHandle, useCallback } from 'react';
 import {
   Form, Select, DataSet, TextField,
 } from 'choerodon-ui/pro';
@@ -7,6 +7,7 @@ import BurnDownComponent from './components/burndown';
 import SprintComponent from './components/sprint';
 import AccumulationComponent from './components/accumulation';
 import PieComponent from './components/pie';
+import { RefProps } from '../add-modal';
 
 const { Option } = Select;
 const ChartMap = new Map([
@@ -15,8 +16,12 @@ const ChartMap = new Map([
   ['accumulation', AccumulationComponent],
   ['pie', PieComponent],
 ]);
-const AddChart: React.FC = () => {
+interface Props {
+  innerRef: React.MutableRefObject<RefProps>
+}
+const AddChart: React.FC<Props> = ({ innerRef }) => {
   const dataSet = useMemo(() => new DataSet({
+    autoCreate: true,
     fields: [{
       name: 'title',
       label: '图表标题',
@@ -27,7 +32,15 @@ const AddChart: React.FC = () => {
       required: true,
     }],
   }), []);
-
+  const handleSubmit = useCallback(async () => {
+    if (dataSet.validate()) {
+      return 'data';
+    }
+    return false;
+  }, [dataSet]);
+  useImperativeHandle(innerRef, () => ({
+    submit: handleSubmit,
+  }), [handleSubmit]);
   const ChartComponent = ChartMap.get(dataSet.current?.get('chart'));
   return (
     <>
