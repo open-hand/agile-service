@@ -6,6 +6,7 @@ import { observer } from 'mobx-react-lite';
 import { IModalProps, IReportContentType } from '@/common/types';
 import AddChart from '../add-chart';
 import AddText from '../add-text';
+import AddIssueList from '../add-issue-list';
 
 interface Props {
   modal?: IModalProps,
@@ -14,8 +15,8 @@ interface Props {
 const Components = new Map<IReportContentType, React.ComponentType>([
   ['chart', AddChart],
   ['text', AddText],
-  ['list', AddChart],
-  ['static_list', AddChart],
+  ['list', AddIssueList],
+  ['static_list', AddIssueList],
 ]);
 const AddModal: React.FC<Props> = ({
   modal, type,

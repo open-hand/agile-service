@@ -219,10 +219,10 @@ const Issue = observer(() => {
             IssueStore.setFilterListVisible(false);
             IssueStore.setEditFilterInfo(map(editFilterInfo, (item) => Object.assign(item, { isEditing: false })));
           }}
-          selectedIssue={IssueStore.selectedIssue}
+          selectedIssue={IssueStore.selectedIssue?.issueId}
         />
         <SaveFilterModal issueSearchStore={issueSearchStore} />
-        <FilterManage issueSearchStore={issueSearchStore} />
+        <FilterManage />
         <ExportIssue issueSearchStore={issueSearchStore} dataSet={dataSet} tableRef={tableRef} onCreateIssue={handleCreateIssue} />
         {IssueStore.getCreateQuestion && (
           <CreateIssue
