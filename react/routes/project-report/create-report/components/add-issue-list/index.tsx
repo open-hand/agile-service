@@ -36,26 +36,6 @@ const AddIssueList: React.FC = () => {
     projectId: getProjectId(),
     organizationId: getOrganizationId(),
     issueSearchStore,
-    events: {
-      select: () => {
-
-      },
-      selectAll: () => {
-
-      },
-      unSelect: () => {
-
-      },
-      unSelectAll: () => {
-
-      },
-      load: () => {
-        // // 有筛选，自动展开
-        // if (issueSearchStore.isHasFilter) {
-
-        // }
-      },
-    },
   })), [issueSearchStore]);
   const refresh = useCallback(() => {
     dataSet.query();

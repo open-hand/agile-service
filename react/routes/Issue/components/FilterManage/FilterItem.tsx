@@ -7,7 +7,6 @@ import {
 } from 'choerodon-ui/pro';
 import { personalFilterApi } from '@/api';
 import { IPersonalFilter } from '@/components/quick-search';
-import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import ObserverTextField from 'choerodon-ui/pro/lib/text-field/TextField';
 import IssueStore from '@/stores/project/issue/IssueStore';
 
@@ -85,7 +84,6 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
             ref={inputRef}
             required
             validator={checkName}
-            labelLayout={'float' as LabelLayout}
             autoFocus
             defaultValue={name}
             onChange={(newValue) => {
@@ -96,9 +94,7 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
               inputRef.current.validate(e.target.value);
             }}
             onBlur={() => {
-              if (inputRef.current.isValid) {
-                setTimeout(handleCancel, 200);
-              }
+              setTimeout(handleCancel, 200);
             }}
             maxLength={10}
           />
