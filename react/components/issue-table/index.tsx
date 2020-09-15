@@ -1,20 +1,39 @@
+// @ts-nocheck
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { map } from 'lodash';
 import { Tooltip, Tag } from 'choerodon-ui';
-import { Table } from 'choerodon-ui/pro';
+import { Table, DataSet } from 'choerodon-ui/pro';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
 import UserHead from '@/components/UserHead';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import { IField } from '@/common/types';
+import { TableMode, ColumnAlign, ColumnLock } from 'choerodon-ui/pro/lib/table/enum';
+import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
 import './index.less';
 
 const { Column } = Table;
-function IssueTable({
-  tableRef, onCreateIssue, dataSet, fields, onRowClick, selectedIssue,
-}) {
+interface Props extends Partial<TableProps> {
+  tableRef?: React.RefObject<any>
+  onCreateIssue?: () => void
+  dataSet: DataSet
+  fields: IField[]
+  onRowClick?: (record: any) => void
+  selectedIssue?: string
+  createIssue?: boolean
+}
+const IssueTable: React.FC<Props> = ({
+  tableRef,
+  onCreateIssue,
+  dataSet,
+  fields,
+  onRowClick,
+  selectedIssue,
+  createIssue = true,
+}) => {
   const { isInProgram } = useIsInProgram();
 
   const renderTag = (listField, nameField) => ({ record }) => {
@@ -47,38 +66,44 @@ function IssueTable({
   function renderEpicOrFeature({ record, name: fieldName }) {
     const color = fieldName === 'epic' ? record.get('epicColor') : record.get('featureColor');
     const name = fieldName === 'epic' ? record.get('epicName') : record.get('featureName');
-    const style = {
-      width: '100%',
-      color,
-      borderWidth: '1px',
-      borderStyle: 'solid',
-      borderColor: color,
-      borderRadius: '2px',
-      fontSize: '13px',
-      lineHeight: '20px',
-      padding: '0 4px',
-      display: 'inline-block',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-    };
-    return name ? <Tooltip title={name}><span style={style}>{name}</span></Tooltip> : null;
+    return name ? (
+      <Tooltip title={name}>
+        <span style={{
+          width: '100%',
+          color,
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          borderColor: color,
+          borderRadius: '2px',
+          fontSize: '13px',
+          lineHeight: '20px',
+          padding: '0 4px',
+          display: 'inline-block',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+        >
+          {name}
+        </span>
+      </Tooltip>
+    ) : null;
   }
 
   return (
     <div className="c7nagile-issue-table">
       <Table
-        mode="tree"
+        mode={'tree' as TableMode}
         ref={tableRef}
         dataSet={dataSet}
-        footer={<div style={{ paddingTop: 5 }}><QuickCreateIssue onCreate={onCreateIssue} /></div>}
+        footer={createIssue && <div style={{ paddingTop: 5 }}><QuickCreateIssue onCreate={onCreateIssue} /></div>}
         onRow={({ record }) => ({
-          className: selectedIssue.issueId && record.get('issueId') === selectedIssue.issueId ? 'c7nagile-row-selected' : null,
+          className: selectedIssue && record.get('issueId') === selectedIssue ? 'c7nagile-row-selected' : null,
         })}
       >
         <Column
-          align="left"
-          lock="left"
+          align={'left' as ColumnAlign}
+          lock={'left' as ColumnLock}
           name="issueId"
           width={320}
           header={() => (
@@ -88,7 +113,9 @@ function IssueTable({
           )}
           onCell={({ record }) => ({
             onClick: () => {
-              onRowClick(record);
+              if (onRowClick) {
+                onRowClick(record);
+              }
             },
           })}
           renderer={({ record }) => (
@@ -146,14 +173,14 @@ function IssueTable({
           sortable
           name="statusId"
           renderer={({ record }) => (
-            <Tooltip title={record.get('statusVO')?.name}>
+            <Tooltip title={record?.get('statusVO')?.name}>
               <div style={{
                 display: 'inline-flex',
                 overflow: 'hidden',
               }}
               >
                 <StatusTag
-                  data={record.get('statusVO')}
+                  data={record?.get('statusVO')}
                   style={{ display: 'inline-block' }}
                 />
               </div>
@@ -166,14 +193,14 @@ function IssueTable({
           className="c7n-agile-table-cell"
           renderer={({ record }) => (
             <div style={{ display: 'inline-flex' }}>
-              {record.get('reporterId') && record.get('reporterId') !== '0' && (
+              {record?.get('reporterId') && record?.get('reporterId') !== '0' && (
                 <UserHead
                   user={{
-                    id: record.get('reporterId'),
-                    name: record.get('reporterName'),
-                    loginName: record.get('reporterLoginName'),
-                    realName: record.get('reporterRealName'),
-                    avatar: record.get('reporterImageUrl'),
+                    id: record?.get('reporterId'),
+                    name: record?.get('reporterName'),
+                    loginName: record?.get('reporterLoginName'),
+                    realName: record?.get('reporterRealName'),
+                    avatar: record?.get('reporterImageUrl'),
                   }}
                 />
               )}
@@ -219,7 +246,7 @@ function IssueTable({
             className="c7n-agile-table-cell"
             renderer={({ record }) => {
               const { fieldType, code } = field;
-              const value = record.get('foundationFieldValue')[code];
+              const value = record?.get('foundationFieldValue')[code];
               if (fieldType === 'member') {
                 return value && (
                   <div style={{ display: 'inline-flex' }}>
@@ -240,5 +267,5 @@ function IssueTable({
       </Table>
     </div>
   );
-}
+};
 export default observer(IssueTable);

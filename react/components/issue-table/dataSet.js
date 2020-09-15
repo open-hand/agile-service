@@ -1,6 +1,6 @@
 /* eslint-disable import/no-anonymous-default-export */
 export default ({
-  projectId, organizationId, issueSearchStore, IssueStore, events,
+  projectId, organizationId, issueSearchStore, events,
 }) => ({
   primaryKey: 'issueId',
   autoQuery: false,
