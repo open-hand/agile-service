@@ -10,10 +10,10 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_project_report_cc.groovy') {
                 constraints(nullable: false)
             }
             column(name: 'project_report_id', type: 'BIGINT UNSIGNED', remarks: '项目报表Id') {
-                constraints(nullable: true)
+                constraints(nullable: false)
             }
-            column(name: 'cc_id', type: 'BIGINT UNSIGNED', remarks: '收件人Id') {
-                constraints(nullable: true)
+            column(name: 'cc_id', type: 'BIGINT UNSIGNED', remarks: '抄送人Id') {
+                constraints(nullable: false)
             }
 
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")

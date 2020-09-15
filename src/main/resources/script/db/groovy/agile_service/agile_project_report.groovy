@@ -12,14 +12,14 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_project_report.groovy') {
             column(name: 'title', type: 'VARCHAR(120)', remarks: '报表标题') {
                 constraints(nullable: false)
             }
-            column(name: 'title', type: 'VARCHAR(30)', remarks: '报表状态') {
+            column(name: 'status', type: 'VARCHAR(30)', remarks: '报表状态') {
                 constraints(nullable: false)
             }
             column(name: 'job_id', type: 'BIGINT UNSIGNED', remarks: '定时任务Id') {
                 constraints(nullable: true)
             }
             column(name: 'receiver_id', type: 'BIGINT UNSIGNED', remarks: '收件人Id') {
-                constraints(nullable: true)
+                constraints(nullable: false)
             }
             column(name: 'report_data', type: 'text', remarks: '报表数据')
 
