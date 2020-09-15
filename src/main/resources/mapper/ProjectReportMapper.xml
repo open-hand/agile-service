@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.ProjectReportMapper">
+
+    <select id="page" resultType="io.choerodon.agile.api.vo.ProjectReportVO">
+        SELECT
+           *
+        FROM agile_project_report apr
+        WHERE apr.project_id = #{projectId}
+    </select>
+</mapper>

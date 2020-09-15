@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
+import io.choerodon.agile.api.vo.ProjectReportVO;
 import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
 import io.choerodon.agile.app.service.ProjectReportService;
 import io.choerodon.agile.infra.dto.ProjectReportDTO;
@@ -31,16 +32,18 @@ public class ProjectReportController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<Page<ProjectReportDTO>> page(@PathVariable("project_id") Long projectId,
+                                                       ProjectReportVO projectReport,
                                                        @SortDefault(value = "id", direction = Sort.Direction.ASC)
                                                        PageRequest pageRequest) {
-        return Results.success(projectReportService.page(projectId, pageRequest));
+        projectReport.setProjectId(projectId);
+        return Results.success(projectReportService.page(projectReport, pageRequest));
     }
 
     @ApiOperation(value = "项目报表详情")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectReportDTO> detail(@PathVariable("project_id") Long projectId,
-                                                        @PathVariable("id") @Encrypt Long id) {
+    public ResponseEntity<ProjectReportVO> detail(@PathVariable("project_id") Long projectId,
+                                                    @PathVariable("id") @Encrypt Long id) {
         return Results.success(projectReportService.detail(projectId, id));
     }
 
@@ -48,7 +51,7 @@ public class ProjectReportController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<Void> create(@PathVariable("project_id") Long projectId,
-                                     @RequestBody ProjectReportDTO projectReportDTO,
+                                     @RequestBody ProjectReportVO projectReportDTO,
                                      @ApiParam(value = "方案编码", required = true)
                                      @RequestParam String applyType) {
         projectReportService.create(projectId, projectReportDTO);
