@@ -1,8 +1,11 @@
-import useBurnDownReport from '../burn-down/useBurnDownReport';
+import useBurnDownReport, { BurnDownConfig } from '../burn-down/useBurnDownReport';
 
-function useSprintReport() {
+export type SprintConfig = Omit<BurnDownConfig, 'type'>
+
+function useSprintReport(config?: SprintConfig) {
   return useBurnDownReport({
     type: 'issueCount',
+    ...config,
   });
 }
 

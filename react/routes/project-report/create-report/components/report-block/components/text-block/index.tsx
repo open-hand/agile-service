@@ -1,9 +1,9 @@
 import React from 'react';
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
-import { IReportBlock } from '@/routes/project-report/create-report/store';
+import { IReportTextBlock } from '@/routes/project-report/create-report/store';
 
 interface Props {
-  data: IReportBlock
+  data: IReportTextBlock
 }
 const TextBlock: React.FC<Props> = ({ data: { data } }) => <WYSIWYGViewer data={data} />;
 

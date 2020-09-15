@@ -1,22 +1,30 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Button } from 'choerodon-ui/pro';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import styles from './index.less';
-import { IReportBlock } from '../../store';
+import { IReportBlock, IReportTextBlock, IReportChartBlock } from '../../store';
 import TextBlock from './components/text-block';
 import ChartBlock from './components/chart-block';
 
 interface Props {
   data: IReportBlock
-
 }
-const BlockMap = new Map([
-  ['text', TextBlock],
-  ['chart', ChartBlock],
-]);
+
 const ReportBlock: React.FC<Props> = ({ data }) => {
   const { title, type } = data;
-  const BlockComponent = BlockMap.get(type);
+  const renderBlock = useCallback(() => {
+    switch (type) {
+      case 'text': {
+        return <TextBlock data={data as IReportTextBlock} />;
+      }
+      case 'chart': {
+        return <ChartBlock data={data as IReportChartBlock} />;
+      }
+      default: {
+        return null;
+      }
+    }
+  }, [data, type]);
   return (
     <div className={styles.report_block}>
       <div className={styles.header}>
@@ -26,7 +34,7 @@ const ReportBlock: React.FC<Props> = ({ data }) => {
           <Button icon="delete" color={'blue' as ButtonColor}>删除</Button>
         </div>
       </div>
-      {BlockComponent && <BlockComponent data={data} />}
+      {renderBlock()}
     </div>
   );
 };
