@@ -28,11 +28,13 @@ const CreateReport: React.FC = () => {
         }}
         >
           <div className={styles.header}>
+            <div className={styles.tip} />
             <span className={styles.title}>基本信息</span>
           </div>
           <BaseInfo />
           <div>
             <div className={styles.header}>
+              <div className={styles.tip} />
               <span className={styles.title}>报告内容</span>
               <Dropdown
                 trigger={['click' as Action]}
