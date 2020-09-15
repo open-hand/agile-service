@@ -2,14 +2,32 @@ import {
   observable, action, computed, runInAction,
 } from 'mobx';
 import { IReportContentType } from '@/common/types';
+import { BurnDownConfig } from '@/components/charts/burn-down/useBurnDownReport';
+import { SprintConfig } from '@/components/charts/sprint/useSprintReport';
 
-export interface IReportBlock {
+export type IChartType = 'burndown' | 'sprint'
+
+interface IBaseReportBlock {
   id: string
   title: string
   type: IReportContentType
-  data: any
 }
 
+export interface IReportChartBlock extends IBaseReportBlock {
+  chartType: IChartType
+  data: {
+    filter: BurnDownConfig | SprintConfig
+  }
+}
+export interface IReportListBlock extends IBaseReportBlock {
+  data: {
+    filter: any
+  }
+}
+export interface IReportTextBlock extends IBaseReportBlock {
+  data: string
+}
+export type IReportBlock = IReportTextBlock | IReportListBlock | IReportChartBlock
 class ProjectReportStore {
   @observable blockList: IReportBlock[] = [{
     id: '1',
@@ -27,9 +45,36 @@ class ProjectReportStore {
     id: '2',
     title: '上周未完成的工作项（图表标题）',
     type: 'chart',
+    chartType: 'burndown',
     data: {
-      chartType: 'burndown',
-      filter: {},
+      filter: {
+        type: 'issueCount',
+        sprintId: '=xFlL48OlIBm6InJtxh7OA6pF-SWg1-_JQGrtR1P3sj4==',
+        quickFilter: {
+          onlyStory: false,
+          onlyMe: true,
+          quickFilters: [],
+          personalFilters: [],
+        },
+        restDayShow: false,
+      },
+    },
+  }, {
+    id: '3',
+    title: '上周未完成的工作项（图表标题）',
+    type: 'chart',
+    chartType: 'sprint',
+    data: {
+      filter: {
+        sprintId: '=xFlL48OlIBm6InJtxh7OA6pF-SWg1-_JQGrtR1P3sj4==',
+        quickFilter: {
+          onlyStory: false,
+          onlyMe: true,
+          quickFilters: [],
+          personalFilters: [],
+        },
+        restDayShow: false,
+      },
     },
   }]
 }
