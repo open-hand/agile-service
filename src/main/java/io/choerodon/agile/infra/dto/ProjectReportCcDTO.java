@@ -17,8 +17,8 @@ import io.swagger.annotations.ApiModelProperty;
 @VersionAudit
 public class ProjectReportCcDTO extends AuditDomain {
 
-    public ProjectReportCcDTO(Long id, Long projectId) {
-        this.id = id;
+    public ProjectReportCcDTO(Long projectReportId, Long projectId) {
+        this.projectReportId = projectReportId;
         this.projectId = projectId;
     }
 

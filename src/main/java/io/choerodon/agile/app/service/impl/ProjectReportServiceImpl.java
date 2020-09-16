@@ -1,11 +1,8 @@
 package io.choerodon.agile.app.service.impl;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +22,7 @@ import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hzero.core.base.BaseConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -85,10 +83,10 @@ public class ProjectReportServiceImpl implements ProjectReportService {
 
     @Override
     public void create(Long projectId, ProjectReportVO projectReportVO) {
-        Assert.notNull(projectReportVO.getTitle());
-        Assert.notNull(projectReportVO.getDescription());
-        Assert.notNull(projectReportVO.getReceiverId());
-        Assert.notNull(projectReportVO.getProjectId());
+        Assert.notNull(projectReportVO.getTitle(), BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.notNull(projectReportVO.getDescription(), BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.notNull(projectReportVO.getReceiverId(), BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.notNull(projectReportVO.getProjectId(), BaseConstants.ErrorCode.DATA_INVALID);
         ProjectReportDTO projectReportDTO = new ProjectReportDTO();
         BeanUtils.copyProperties(projectReportVO, projectReportDTO);
         projectReportDTO.setProjectId(projectId);
@@ -112,7 +110,24 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     }
 
     @Override
-    public void delete(Long projectId, ProjectReportDTO projectReportDTO) {
+    public void delete(Long projectId, Long projectReportId) {
+        Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.notNull(projectReportId, BaseConstants.ErrorCode.DATA_INVALID);
+        List<ProjectReportCcDTO> ccDTOList =
+                projectReportCcMapper.select(new ProjectReportCcDTO(projectReportId, projectId));
+        if (CollectionUtils.isNotEmpty(ccDTOList)){
+            for (ProjectReportCcDTO ccDTO : ccDTOList) {
+                projectReportCcMapper.deleteByPrimaryKey(ccDTO.getId());
+            }
+        }
+        ProjectReportDTO projectReportDTO = new ProjectReportDTO(projectReportId, projectId);
+        if (projectReportMapper.delete(projectReportDTO) != 1){
+            throw new CommonException("error.project-report.delete.failed");
+        }
+    }
+
+    @Override
+    public void update(Long projectId, ProjectReportVO projectReportDTO) {
 
     }
 }

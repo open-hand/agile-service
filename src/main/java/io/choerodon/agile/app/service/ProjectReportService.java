@@ -15,5 +15,7 @@ public interface ProjectReportService {
 
     void create(Long projectId, ProjectReportVO projectReportDTO);
 
-    void delete(Long projectId, ProjectReportDTO projectReportDTO);
+    void delete(Long projectId, Long projectReportId);
+
+    void update(Long projectId, ProjectReportVO projectReportDTO);
 }

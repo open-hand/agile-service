@@ -51,10 +51,18 @@ public class ProjectReportController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<Void> create(@PathVariable("project_id") Long projectId,
-                                     @RequestBody ProjectReportVO projectReportDTO,
-                                     @ApiParam(value = "方案编码", required = true)
-                                     @RequestParam String applyType) {
+                                     @RequestBody ProjectReportVO projectReportDTO) {
         projectReportService.create(projectId, projectReportDTO);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "更新项目报表")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> update(@PathVariable("project_id") Long projectId,
+                                       @RequestBody ProjectReportVO projectReportDTO) {
+        projectReportDTO.setProjectId(projectId);
+        projectReportService.update(projectId, projectReportDTO);
         return Results.success();
     }
 
@@ -62,9 +70,8 @@ public class ProjectReportController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("project_id") Long projectId,
-                                       @PathVariable("id") Long id,
-                                       @RequestBody @Encrypt ProjectReportDTO projectReportDTO) {
-        projectReportService.delete(projectId, projectReportDTO);
+                                       @PathVariable("id") Long id) {
+        projectReportService.delete(projectId, id);
         return Results.success();
     }
 }
