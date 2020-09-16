@@ -1,7 +1,8 @@
 package io.choerodon.agile.api.controller.v1;
 
+import javax.servlet.http.HttpServletResponse;
+
 import io.choerodon.agile.api.vo.ProjectReportVO;
-import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
 import io.choerodon.agile.app.service.ProjectReportService;
 import io.choerodon.agile.infra.dto.ProjectReportDTO;
 import io.choerodon.core.domain.Page;
@@ -11,12 +12,12 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.hzero.core.util.Results;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/9/15 上午10:48
@@ -74,6 +75,27 @@ public class ProjectReportController {
     public ResponseEntity<Void> delete(@PathVariable("project_id") Long projectId,
                                        @PathVariable("id") Long id) {
         projectReportService.delete(projectId, id);
+        return Results.success();
+    }
+    
+    @ApiOperation(value = "导出项目报表")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/export/{id}")
+    public ResponseEntity<Void> export(@PathVariable("project_id") Long projectId,
+                                       @PathVariable("id") Long id,
+                                       @RequestParam("file") MultipartFile multipartFile,
+                                       HttpServletResponse response) {
+        projectReportService.export(projectId, id, multipartFile, response);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "发送项目报表")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/send/{id}")
+    public ResponseEntity<Void> send(@PathVariable("project_id") Long projectId,
+                                     @PathVariable("id") Long id,
+                                     @RequestParam("file") MultipartFile multipartFile) {
+        projectReportService.send(projectId, id, multipartFile);
         return Results.success();
     }
 }

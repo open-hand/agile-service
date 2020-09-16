@@ -16,7 +16,6 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 public class ProjectReportVO {
     public static final String FIELD_TITLE = "title";
     public static final String FIELD_DESCRIPTION = "description";
-    public static final String FIELD_RECEIVERID = "receiverId";
 
     @ApiModelProperty("主键id")
     @Encrypt
@@ -29,11 +28,8 @@ public class ProjectReportVO {
     private String description;
     @ApiModelProperty("状态")
     private String status;
-    @ApiModelProperty("收件人Id")
-    @Encrypt
-    private Long receiverId;
-    @ApiModelProperty("收件人")
-    private UserDTO receiver;
+    @ApiModelProperty("收件人List")
+    private List<UserDTO> receiverList;
     @ApiModelProperty("抄送人List")
     private List<UserDTO> ccList;
     @ApiModelProperty("报表数据")
@@ -100,14 +96,6 @@ public class ProjectReportVO {
         this.status = status;
     }
 
-    public Long getReceiverId() {
-        return receiverId;
-    }
-
-    public void setReceiverId(Long receiverId) {
-        this.receiverId = receiverId;
-    }
-
     public List<ReportUnitVO> getReportUnitList() {
         return reportUnitList;
     }
@@ -124,11 +112,11 @@ public class ProjectReportVO {
         this.ccList = ccList;
     }
 
-    public UserDTO getReceiver() {
-        return receiver;
+    public List<UserDTO> getReceiverList() {
+        return receiverList;
     }
 
-    public void setReceiver(UserDTO receiver) {
-        this.receiver = receiver;
+    public void setReceiverList(List<UserDTO> receiverList) {
+        this.receiverList = receiverList;
     }
 }

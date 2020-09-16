@@ -12,17 +12,17 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * @author jiaxu.cui@hand-china.com 2020/9/15 下午2:31
  */
-@Table(name = "agile_project_report_cc")
+@Table(name = "agile_project_report_receiver")
 @ModifyAudit
 @VersionAudit
-public class ProjectReportCcDTO extends AuditDomain {
+public class ProjectReportReceiverDTO extends AuditDomain {
 
-    public ProjectReportCcDTO(Long projectReportId, Long projectId) {
+    public ProjectReportReceiverDTO(Long projectReportId, Long projectId) {
         this.projectReportId = projectReportId;
         this.projectId = projectId;
     }
 
-    public ProjectReportCcDTO() {
+    public ProjectReportReceiverDTO() {
     }
 
     @Id
@@ -33,8 +33,26 @@ public class ProjectReportCcDTO extends AuditDomain {
     private Long projectId;
     @ApiModelProperty("项目报告id")
     private Long projectReportId;
-    @ApiModelProperty("抄送人Id")
-    private Long carbonCopyId;
+    @ApiModelProperty("接收人类型: RECEIVER|CC")
+    private String type;
+    @ApiModelProperty("收件人Id")
+    private Long receiverId;
+
+    public Long getReceiverId() {
+        return receiverId;
+    }
+
+    public void setReceiverId(Long receiverId) {
+        this.receiverId = receiverId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public Long getId() {
         return id;
@@ -58,13 +76,5 @@ public class ProjectReportCcDTO extends AuditDomain {
 
     public void setProjectReportId(Long projectReportId) {
         this.projectReportId = projectReportId;
-    }
-
-    public Long getCarbonCopyId() {
-        return carbonCopyId;
-    }
-
-    public void setCarbonCopyId(Long carbonCopyId) {
-        this.carbonCopyId = carbonCopyId;
     }
 }
