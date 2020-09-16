@@ -90,13 +90,18 @@ public class QuickFilterServiceImpl implements QuickFilterService {
 
     private String inSql(String operation,String value){
         String sql = null;
-        if(NOT_IN.equals(operation) || "in".equals(operation)){
-            String[] split = EncryptionUtils.subString(value);
-            List<Long> list = EncryptionUtils.decryptList(Arrays.asList(split), EncryptionUtils.BLANK_KEY, null);
-            sql = "(" +StringUtils.join(list,",")+ ")";
+        if (NULL_STR.equals(value)) {
+            sql = value;
         }
         else {
-            sql = EncryptionUtils.decrypt(value,EncryptionUtils.BLANK_KEY).toString();
+            if(NOT_IN.equals(operation) || "in".equals(operation)){
+                String[] split = EncryptionUtils.subString(value);
+                List<Long> list = EncryptionUtils.decryptList(Arrays.asList(split), EncryptionUtils.BLANK_KEY, null);
+                sql = "(" +StringUtils.join(list,",")+ ")";
+            }
+            else {
+                sql = EncryptionUtils.decrypt(value,EncryptionUtils.BLANK_KEY).toString();
+            }
         }
         return sql;
     }
