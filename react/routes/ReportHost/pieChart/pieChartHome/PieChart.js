@@ -24,12 +24,6 @@ import NoDataComponent from '../../Component/noData';
 import pic from '../../../../assets/image/emptyChart.svg';
 
 const { Option } = Select;
-const queryParamTypeMap = new Map([
-  ['assignee', 'assigneeId'],
-  ['component', 'component'],
-  ['typeCode', 'typeCode'],
-  [''],
-]);
 @observer
 class PieChart extends Component {
   constructor(props) {
@@ -178,22 +172,6 @@ class PieChart extends Component {
     };
   }
 
-  getQueryString(type, value) {
-    const QUERY = {
-      assignee: 'paramType=assigneeId&paramId=',
-      component: 'paramType=component&paramId=',
-      typeCode: 'paramType=typeCode&paramId=',
-      version: 'paramType=fixVersion&paramId=',
-      priority: 'paramType=priority&paramId=',
-      status: 'paramType=statusId&paramId=',
-      sprint: 'paramType=sprint&paramId=',
-      epic: 'paramType=epic&paramId=',
-      label: 'paramType=label&paramId=',
-    };
-    if (!QUERY[type]) return null;
-    return `${QUERY[type]}${value === null ? '0' : value}`;
-  }
-
   getCurrentChoose() {
     const {
       chooseDimension, chooseId,
@@ -221,14 +199,15 @@ class PieChart extends Component {
     }
 
     paramName += '下的问题';
-
-    let paramType;
-    if (type === 'assignee') {
+    let paramType = type;
+    if (type === 'typeCode') {
+      paramType = 'issueTypeId';
+    } else if (type === 'priority') {
+      paramType = 'priorityId';
+    } else if (type === 'status') {
+      paramType = 'statusId';
+    } else if (type === 'assignee') {
       paramType = 'assigneeId';
-    } else if (type === 'version') {
-      paramType = 'fixVersion';
-    } else {
-      paramType = type;
     }
     to(LINK_URL.workListIssue, {
       params: {
@@ -340,7 +319,6 @@ class PieChart extends Component {
     const data = PieChartStore.getPieData;
     const sourceData = PieChartStore.getSourceData;
     const colors = PieChartStore.getColors;
-    const { pieLoading } = PieChartStore;
     const types = [
       { title: '经办人', value: 'assignee' },
       { title: '模块', value: 'component' },

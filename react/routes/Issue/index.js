@@ -69,10 +69,9 @@ const Issue = observer(() => {
     }
     const prefixs = {
       assigneeId: '经办人',
-      typeCode: '类型',
-      priority: '优先级',
+      issueTypeId: '类型',
+      priorityId: '优先级',
       statusId: '状态',
-      fixVersion: '版本',
       version: '版本',
       component: '模块',
       sprint: '冲刺',
