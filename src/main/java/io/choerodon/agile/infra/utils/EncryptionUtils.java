@@ -561,7 +561,7 @@ public class EncryptionUtils {
         return map1;
     }
 
-    private static Object handlerCustomField(Object value, Boolean encrypt) {
+    protected static Object handlerCustomField(Object value, Boolean encrypt) {
         try {
             JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(value));
             ObjectNode objectNode = (ObjectNode) jsonNode;
