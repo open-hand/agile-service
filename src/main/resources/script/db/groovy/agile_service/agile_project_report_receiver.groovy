@@ -12,11 +12,12 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_project_report_receiver.groo
             column(name: 'project_report_id', type: 'BIGINT UNSIGNED', remarks: '项目报表Id') {
                 constraints(nullable: false)
             }
-            column(name: 'type', type: 'VARCHAR(50)', remarks: '接收人类型: TO|CC') {
+            column(name: 'type', type: 'VARCHAR(50)', remarks: '接收人类型: RECEIVER(收件人)|CC(抄送人)') {
                 constraints(nullable: false)
             }
-            column(name: 'to_id', type: 'BIGINT UNSIGNED', remarks: '收件人Id')
-            column(name: 'cc_id', type: 'BIGINT UNSIGNED', remarks: '抄送人Id')
+            column(name: 'receiver_id', type: 'BIGINT UNSIGNED', remarks: '接收人Id') {
+                constraints(nullable: false)
+            }
 
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")
             column(name: "created_by", type: "BIGINT UNSIGNED", defaultValue: "0")

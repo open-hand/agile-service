@@ -3,11 +3,8 @@ package io.choerodon.agile.app.service.impl;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,13 +12,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.ProjectReportVO;
 import io.choerodon.agile.api.vo.report.ReportUnitVO;
 import io.choerodon.agile.app.service.ProjectReportService;
-import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
 import io.choerodon.agile.infra.dto.ProjectReportDTO;
+import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.enums.ProjectReportStatus;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.mapper.ProjectReportReceiverMapper;
 import io.choerodon.agile.infra.mapper.ProjectReportMapper;
+import io.choerodon.agile.infra.mapper.ProjectReportReceiverMapper;
 import io.choerodon.agile.infra.utils.SiteMsgUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -63,20 +60,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
 
     @Override
     public Page<ProjectReportDTO> page(ProjectReportVO projectReport, PageRequest pageRequest) {
-        return PageHelper.doPageAndSort(pageRequest, () -> {
-            List<ProjectReportVO> page = projectReportMapper.page(projectReport);
-            if (CollectionUtils.isEmpty(page)){
-                return page;
-            }
-            List<Long> ccList = page.stream().map(ProjectReportVO::getReceiverId).collect(Collectors.toList());
-            ccList.addAll(page.stream().map(ProjectReportVO::getCreatedBy).collect(Collectors.toList()));
-            Map<Long, UserDTO> userDTOMap = baseFeignClient.listUsersByIds(ccList.toArray(new Long[0]), false).getBody()
-                    .stream().collect(Collectors.toMap(UserDTO::getId, Function.identity()));
-            for (ProjectReportVO projectReportVO : page) {
-                projectReportVO.setReceiver(userDTOMap.get(projectReportVO.getReceiverId()));
-            }
-            return page;
-        });
+        return PageHelper.doPageAndSort(pageRequest, () -> projectReportMapper.page(projectReport));
     }
 
     @Override
@@ -89,7 +73,6 @@ public class ProjectReportServiceImpl implements ProjectReportService {
         ProjectReportVO projectReportVO = new ProjectReportVO();
         // 配置基本信息
         BeanUtils.copyProperties(projectReport, projectReportVO);
-        projectReportVO.setReceiver(baseFeignClient.listUsersByIds(new Long[]{projectReport.getReceiverId()}, false).getBody().get(0));
         // 翻译报表信息单元
         if (StringUtils.isNotBlank(projectReport.getReportData())){
             try {
@@ -104,7 +87,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
         if (CollectionUtils.isEmpty(ccList)){
             return projectReportVO;
         }
-        Long[] ccIds = ccList.stream().map(ProjectReportReceiverDTO::getCcId).toArray(Long[]::new);
+        Long[] ccIds = ccList.stream().map(ProjectReportReceiverDTO::getReceiverId).toArray(Long[]::new);
         List<UserDTO> userList = baseFeignClient.listUsersByIds(ccIds, false).getBody();
         projectReportVO.setCcList(userList);
         return projectReportVO;
@@ -114,7 +97,6 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     public void create(Long projectId, ProjectReportVO projectReportVO) {
         Assert.notNull(projectReportVO.getTitle(), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(projectReportVO.getDescription(), BaseConstants.ErrorCode.DATA_INVALID);
-        Assert.notNull(projectReportVO.getReceiverId(), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(projectReportVO.getProjectId(), BaseConstants.ErrorCode.DATA_INVALID);
         ProjectReportDTO projectReportDTO = new ProjectReportDTO();
         BeanUtils.copyProperties(projectReportVO, projectReportDTO);
@@ -151,11 +133,10 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     public void update(Long projectId, ProjectReportVO projectReportVO) {
         Assert.notNull(projectReportVO.getTitle(), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(projectReportVO.getDescription(), BaseConstants.ErrorCode.DATA_INVALID);
-        Assert.notNull(projectReportVO.getReceiverId(), BaseConstants.ErrorCode.DATA_INVALID);
         ProjectReportDTO projectReportDTO = new ProjectReportDTO();
         BeanUtils.copyProperties(projectReportVO, projectReportDTO);
         projectReportMapper.updateOptional(projectReportDTO,
-                ProjectReportVO.FIELD_TITLE, ProjectReportVO.FIELD_DESCRIPTION, ProjectReportVO.FIELD_RECEIVERID);
+                ProjectReportVO.FIELD_TITLE, ProjectReportVO.FIELD_DESCRIPTION);
         // 更新抄送人
         projectReportReceiverMapper.delete(new ProjectReportReceiverDTO(projectReportVO.getId(), projectId));
         createProjectReportCc(projectId, projectReportVO, projectReportDTO);
@@ -192,7 +173,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
             e.printStackTrace();
         }
         if (StringUtils.isNotBlank(imgData)){
-            siteMsgUtil.sendProjectReport(projectId, projectReportDTO.getReceiverId(), ccDTOList.stream().map(ProjectReportReceiverDTO::getCcId).collect(Collectors.toList()), imgData);
+            siteMsgUtil.sendProjectReport(projectId, ccDTOList.stream().map(ProjectReportReceiverDTO::getReceiverId).collect(Collectors.toList()), imgData);
         }
         
 
@@ -205,7 +186,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
                 ProjectReportReceiverDTO projectReportReceiverDTO = new ProjectReportReceiverDTO();
                 projectReportReceiverDTO.setProjectId(projectId);
                 projectReportReceiverDTO.setProjectReportId(projectReportDTO.getId());
-                projectReportReceiverDTO.setCcId(userDTO.getId());
+                projectReportReceiverDTO.setReceiverId(userDTO.getId());
                 projectReportReceiverMapper.insertSelective(projectReportReceiverDTO);
             }
         }

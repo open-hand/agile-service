@@ -33,8 +33,26 @@ public class ProjectReportReceiverDTO extends AuditDomain {
     private Long projectId;
     @ApiModelProperty("项目报告id")
     private Long projectReportId;
-    @ApiModelProperty("抄送人Id")
-    private Long ccId;
+    @ApiModelProperty("接收人类型: RECEIVER|CC")
+    private String type;
+    @ApiModelProperty("收件人Id")
+    private Long receiverId;
+
+    public Long getReceiverId() {
+        return receiverId;
+    }
+
+    public void setReceiverId(Long receiverId) {
+        this.receiverId = receiverId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public Long getId() {
         return id;
@@ -58,13 +76,5 @@ public class ProjectReportReceiverDTO extends AuditDomain {
 
     public void setProjectReportId(Long projectReportId) {
         this.projectReportId = projectReportId;
-    }
-
-    public Long getCcId() {
-        return ccId;
-    }
-
-    public void setCcId(Long ccId) {
-        this.ccId = ccId;
     }
 }

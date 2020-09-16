@@ -38,8 +38,6 @@ public class ProjectReportDTO extends AuditDomain {
     private String description;
     @ApiModelProperty("状态")
     private String status;
-    @ApiModelProperty("收件人Id")
-    private Long receiverId;
     @ApiModelProperty("报表数据")
     private String reportData;
     @ApiModelProperty("最近发送时间")
@@ -93,13 +91,6 @@ public class ProjectReportDTO extends AuditDomain {
         this.status = status;
     }
 
-    public Long getReceiverId() {
-        return receiverId;
-    }
-
-    public void setReceiverId(Long receiverId) {
-        this.receiverId = receiverId;
-    }
 
     public String getReportData() {
         return reportData;
