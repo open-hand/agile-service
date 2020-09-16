@@ -4,7 +4,11 @@
 
     <select id="page" resultType="io.choerodon.agile.api.vo.ProjectReportVO">
         SELECT
-           *
+           apr.id,
+           apr.title,
+           apr.receiver_id,
+           apr.recent_send_date,
+           apr.created_by
         FROM agile_project_report apr
         WHERE apr.project_id = #{projectId}
     </select>

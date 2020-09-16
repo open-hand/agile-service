@@ -2,7 +2,10 @@ package io.choerodon.agile.app.service.impl;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,7 +52,20 @@ public class ProjectReportServiceImpl implements ProjectReportService {
 
     @Override
     public Page<ProjectReportDTO> page(ProjectReportVO projectReport, PageRequest pageRequest) {
-        return PageHelper.doPageAndSort(pageRequest, () -> projectReportMapper.page(projectReport));
+        return PageHelper.doPageAndSort(pageRequest, () -> {
+            List<ProjectReportVO> page = projectReportMapper.page(projectReport);
+            if (CollectionUtils.isEmpty(page)){
+                return page;
+            }
+            List<Long> ccList = page.stream().map(ProjectReportVO::getReceiverId).collect(Collectors.toList());
+            ccList.addAll(page.stream().map(ProjectReportVO::getCreatedBy).collect(Collectors.toList()));
+            Map<Long, UserDTO> userDTOMap = baseFeignClient.listUsersByIds(ccList.toArray(new Long[0]), false).getBody()
+                    .stream().collect(Collectors.toMap(UserDTO::getId, Function.identity()));
+            for (ProjectReportVO projectReportVO : page) {
+                projectReportVO.setReceiver(userDTOMap.get(projectReportVO.getReceiverId()));
+            }
+            return page;
+        });
     }
 
     @Override

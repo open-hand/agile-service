@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import java.util.Date;
 import java.util.List;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -7,6 +8,7 @@ import javax.persistence.Id;
 import io.choerodon.agile.api.vo.report.ReportUnitVO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/9/15 下午5:53
@@ -17,6 +19,7 @@ public class ProjectReportVO {
     public static final String FIELD_RECEIVERID = "receiverId";
 
     @ApiModelProperty("主键id")
+    @Encrypt
     private Long id;
     @ApiModelProperty("项目id")
     private Long projectId;
@@ -27,6 +30,7 @@ public class ProjectReportVO {
     @ApiModelProperty("状态")
     private String status;
     @ApiModelProperty("收件人Id")
+    @Encrypt
     private Long receiverId;
     @ApiModelProperty("收件人")
     private UserDTO receiver;
@@ -34,6 +38,27 @@ public class ProjectReportVO {
     private List<UserDTO> ccList;
     @ApiModelProperty("报表数据")
     private List<ReportUnitVO> reportUnitList;
+    @ApiModelProperty("最近发送时间")
+    private Date recentSendDate;
+    @ApiModelProperty("创建人")
+    @Encrypt
+    private Long createdBy;
+
+    public Date getRecentSendDate() {
+        return recentSendDate;
+    }
+
+    public void setRecentSendDate(Date recentSendDate) {
+        this.recentSendDate = recentSendDate;
+    }
+
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
 
     public Long getProjectId() {
         return projectId;
