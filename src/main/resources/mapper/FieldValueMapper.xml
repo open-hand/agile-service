@@ -124,7 +124,7 @@
         JOIN fd_object_scheme_field fosf ON ffv.field_id = fosf.id
         WHERE
             fosf.CODE = #{userType}
-          AND fosf.project_id = #{projectId}
+          AND ffv.project_id = #{projectId}
           AND ffv.instance_id = #{issueId}
     </select>
 

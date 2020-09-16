@@ -622,23 +622,23 @@ public class FixDataServiceImpl implements FixDataService {
             List<StatusMachineTransformDTO> allTransforms = statusMachineTransformDTOS.stream().filter(x -> x.getType().equals(TransformType.ALL)).collect(Collectors.toList());
             if (!CollectionUtils.isEmpty(allTransforms)) {
                 // 对tansform_all进行转换
-                Map<Long, List<Long>> nodeMap = statusMachineTransformDTOS.stream().filter(x -> x.getType().equals(TransformType.CUSTOM)).collect(Collectors.groupingBy(StatusMachineTransformDTO::getStartNodeId, Collectors.mapping(StatusMachineTransformDTO::getEndNodeId, Collectors.toList())));
+                Map<Long, List<Long>> nodeMap = statusMachineTransformDTOS.stream().filter(x -> x.getType().equals(TransformType.CUSTOM)).collect(Collectors.groupingBy(StatusMachineTransformDTO::getEndNodeId, Collectors.mapping(StatusMachineTransformDTO::getStartNodeId, Collectors.toList())));
                 List<StatusMachineTransformDTO> addTransform = new ArrayList<>();
                 allTransforms.forEach(v -> {
-                    Long startNode = v.getEndNodeId();
-                    List<Long> endNodes = nodeMap.get(startNode);
-                    if (CollectionUtils.isEmpty(endNodes)) {
-                        endNodes = new ArrayList<>();
+                    Long endNodeId = v.getEndNodeId();
+                    List<Long> startNodeS = nodeMap.get(endNodeId);
+                    if (CollectionUtils.isEmpty(startNodeS)) {
+                        startNodeS = new ArrayList<>();
                     }
                     for (StatusMachineNodeVO node : machineNodeVOS) {
-                        if (Boolean.FALSE.equals(endNodes.contains(node.getId()))) {
-                            StatusMachineNodeVO nodeVO = nodeVOMap.get(startNode);
-                            StatusMachineNodeVO endNodeVO = nodeVOMap.get(node.getId());
+                        if (Boolean.FALSE.equals(startNodeS.contains(node.getId()))) {
+                            StatusMachineNodeVO startNodeVO = nodeVOMap.get(node.getId());
+                            StatusMachineNodeVO endNodeVO = nodeVOMap.get(endNodeId);
                             StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO();
                             statusMachineTransformDTO.setOrganizationId(statusMachineDTO.getOrganizationId());
-                            statusMachineTransformDTO.setStartNodeId(startNode);
-                            statusMachineTransformDTO.setEndNodeId(node.getId());
-                            statusMachineTransformDTO.setName(nodeVO.getStatusVO().getName() + "转换到" + endNodeVO.getStatusVO().getName());
+                            statusMachineTransformDTO.setStartNodeId(node.getId());
+                            statusMachineTransformDTO.setEndNodeId(endNodeId);
+                            statusMachineTransformDTO.setName(startNodeVO.getStatusVO().getName() + "转换到" + endNodeVO.getStatusVO().getName());
                             statusMachineTransformDTO.setStateMachineId(v.getStateMachineId());
                             statusMachineTransformDTO.setType(TransformType.CUSTOM);
                             statusMachineTransformDTO.setCreatedBy(0L);
