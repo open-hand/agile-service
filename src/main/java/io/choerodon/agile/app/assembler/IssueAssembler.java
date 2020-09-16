@@ -11,6 +11,7 @@ import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.*;
 
 import io.choerodon.core.exception.CommonException;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -62,6 +63,8 @@ public class IssueAssembler extends AbstractAssembler {
         issueVO.setIssueCommentVOList(modelMapper.map(issueDetailDTO.getIssueCommentDTOList(), new TypeToken<List<IssueCommentVO>>(){}.getType()));
         issueVO.setSubIssueVOList(issueDoToSubIssueDto(issueDetailDTO.getSubIssueDTOList(), issueTypeDTOMap, statusMapDTOMap, priorityDTOMap));
         issueVO.setSubBugVOList(issueDoToSubIssueDto(issueDetailDTO.getSubBugDOList(), issueTypeDTOMap, statusMapDTOMap, priorityDTOMap));
+        issueVO.setSameParentIssueVOList(issueDoToSubIssueDto(issueDetailDTO.getSameParentIssueDTOList(), issueTypeDTOMap, statusMapDTOMap, priorityDTOMap));
+        issueVO.setSameParentBugVOList(issueDoToSubIssueDto(issueDetailDTO.getSameParentBugDOList(), issueTypeDTOMap, statusMapDTOMap, priorityDTOMap));
         issueVO.setPriorityVO(priorityDTOMap.get(issueVO.getPriorityId()));
         issueVO.setIssueTypeVO(issueTypeDTOMap.get(issueVO.getIssueTypeId()));
         issueVO.setStatusVO(statusMapDTOMap.get(issueVO.getStatusId()));
@@ -294,6 +297,9 @@ public class IssueAssembler extends AbstractAssembler {
      * @return SubIssueDTO
      */
     protected List<IssueSubListVO> issueDoToSubIssueDto(List<IssueDTO> issueDTOList, Map<Long, IssueTypeVO> issueTypeDTOMap, Map<Long, StatusVO> statusMapDTOMap, Map<Long, PriorityVO> priorityDTOMap) {
+        if (CollectionUtils.isEmpty(issueDTOList)){
+            return Collections.emptyList();
+        }
         List<IssueSubListVO> subIssueVOList = new ArrayList<>(issueDTOList.size());
         List<Long> assigneeIds = issueDTOList.stream().filter(issue -> issue.getAssigneeId() != null && !Objects.equals(issue.getAssigneeId(), 0L)).map(IssueDTO::getAssigneeId).distinct().collect(Collectors.toList());
         Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(assigneeIds, true);

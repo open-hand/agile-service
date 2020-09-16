@@ -51,7 +51,7 @@ class IssueList extends Component {
 
   render() {
     const {
-      issue, i, showAssignee, onOpen,
+      issue, i, showAssignee, showDelete, showPriority, onOpen,
     } = this.props;
     const { typeCode } = issue;
     const menu = AppState.currentMenuType;
@@ -78,9 +78,9 @@ class IssueList extends Component {
         <Tooltip title={`${issueTypeName}编号概要： ${issue.issueNum} ${issue.summary}`}>
           <div style={{ marginLeft: 8, flex: 1, overflow: 'hidden' }}>
             <p
-              className="primary"
+              className="c7n-issueList-summary"
               style={{
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
+                color: '#3F51B5', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
               }}
               role="none"
               onClick={() => {
@@ -91,15 +91,19 @@ class IssueList extends Component {
             </p>
           </div>
         </Tooltip>
-        <div style={{ marginRight: '8px', overflow: 'hidden' }}>
-          <Tooltip mouseEnterDelay={0.5} title={`优先级： ${issue.priorityVO.name}`}>
-            <div>
-              <PriorityTag
-                priority={issue.priorityVO}
-              />
-            </div>
-          </Tooltip>
-        </div>
+        {
+          showPriority && (
+          <div style={{ marginRight: '8px', overflow: 'hidden' }}>
+            <Tooltip mouseEnterDelay={0.5} title={`优先级： ${issue.priorityVO.name}`}>
+              <div>
+                <PriorityTag
+                  priority={issue.priorityVO}
+                />
+              </div>
+            </Tooltip>
+          </div>
+          )
+        }
         {
           showAssignee ? (
             <div style={{ marginRight: 10, display: 'flex', justifyContent: 'flex-end' }}>
@@ -130,27 +134,31 @@ class IssueList extends Component {
             </div>
           </Tooltip>
         </div>
-        <Permission service={['agile-service.issue.deleteIssue']}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              fontSize: '16px',
-            }}
-          >
-            <Popconfirm
-              title={`确认要删除该${issueTypeName}吗?`}
-              placement="left"
-              onConfirm={this.confirm.bind(this, issue.issueId)}
-              onCancel={this.cancel}
-              okText="删除"
-              cancelText="取消"
-              okType="danger"
+        {
+          showDelete && (
+          <Permission service={['agile-service.issue.deleteIssue']}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: '16px',
+              }}
             >
-              <Icon type="delete_forever pointer" />
-            </Popconfirm>
-          </div>
-        </Permission>
+              <Popconfirm
+                title={`确认要删除该${issueTypeName}吗?`}
+                placement="left"
+                onConfirm={this.confirm.bind(this, issue.issueId)}
+                onCancel={this.cancel}
+                okText="删除"
+                cancelText="取消"
+                okType="danger"
+              >
+                <Icon type="delete_forever pointer" />
+              </Popconfirm>
+            </div>
+          </Permission>
+          )
+        }
       </div>
     );
   }

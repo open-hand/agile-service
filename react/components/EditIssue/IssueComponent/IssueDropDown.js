@@ -2,9 +2,10 @@ import React, { useContext } from 'react';
 import {
   Dropdown, Menu, Button, Modal,
 } from 'choerodon-ui';
+import { Permission } from '@choerodon/boot';
+import useIsInProgram from '@/hooks/useIsInProgram';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import { issueApi } from '@/api';
-import useIsOwner from '@/hooks/useIsOwner';
 import EditIssueContext from '../stores';
 import Assignee from '../../Assignee';
 
@@ -15,24 +16,11 @@ const IssueDropDown = ({
   const {
     store, onUpdate, isOnlyAgileProject, applyType,
   } = useContext(EditIssueContext);
-  const [isOwner] = useIsOwner();
   const issue = store.getIssue;
   const {
     issueId, typeCode, createdBy, issueNum, subIssueVOList = [], assigneeId, objectVersionNumber, activePi,
   } = issue;
   const disableFeatureDeleteWhilePiDoing = typeCode === 'feature' && activePi && activePi.statusCode === 'doing';
-  let disableDelete = true;
-  // 管理员什么时候都能删
-  if (isOwner) {
-    disableDelete = false;
-    // feature在doing的pi里不能删
-  } else if (disableFeatureDeleteWhilePiDoing) {
-    disableDelete = true;
-  } else {
-    // 可以删自己创建的
-    disableDelete = loginUserId !== createdBy;
-  }
-
   const handleDeleteIssue = () => {
     confirm({
       width: 560,
@@ -64,7 +52,7 @@ const IssueDropDown = ({
   const handleClickMenu = (e) => {
     if (e.key === '0') {
       store.setWorkLogShow(true);
-    } else if (e.key === '1') {
+    } else if (e.key === 'item_1') {
       handleDeleteIssue(issueId);
     } else if (e.key === '2') {
       store.setCreateSubTaskShow(true);
@@ -111,12 +99,24 @@ const IssueDropDown = ({
         </Menu.Item>
       )}
       {
-        <Menu.Item
-          key="1"
-          disabled={disableDelete}
+        <Permission
+          service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}
+          noAccessChildren={(
+            <Menu.Item
+              key="1"
+              disabled={(loginUserId && loginUserId.toString()) !== (createdBy && createdBy.toString())}
+            >
+              删除
+            </Menu.Item>
+        )}
         >
-          删除
-        </Menu.Item>
+          <Menu.Item
+            key="1"
+            disabled={disableFeatureDeleteWhilePiDoing}
+          >
+            删除
+          </Menu.Item>
+        </Permission>
       }
       {
         ['sub_task', 'feature', 'issue_epic'].indexOf(typeCode) === -1 && !(typeCode === 'bug' && issue.relateIssueId) ? (

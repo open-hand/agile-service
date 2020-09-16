@@ -1,8 +1,8 @@
 import React, {
-  useContext, useRef, useEffect, useState,
+  useContext, useRef, useEffect, useState, useCallback,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { withRouter } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   Header, Content, Page, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
@@ -12,23 +12,27 @@ import { map } from 'lodash';
 import CreateIssue from '@/components/CreateIssue';
 import { projectApi } from '@/api/Project';
 import { issueApi } from '@/api';
+import IssueSearch from '@/components/issue-search';
+import { linkUrl } from '@/utils/to';
+import LINK_URL, { getParams } from '@/constants/LINK_URL';
+import IssueTable from '@/components/issue-table';
 import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
-import Search from './components/search';
 import FilterManage from './components/FilterManage';
 import SaveFilterModal from './components/SaveFilterModal';
 import ExportIssue from './components/ExportIssue';
 import IssueDetail from './components/issue-detail';
 import ImportIssue from './components/ImportIssue';
-import IssueTable from './components/issue-table';
-import CollapseAll from './components/issue-table/CollapseAll';
+import CollapseAll from './components/CollapseAll';
 import Modal from './components/Modal';
 import './index.less';
 
-const Issue = withRouter(observer(() => {
+const Issue = observer(() => {
   const {
-    dataSet, projectId,
+    dataSet, projectId, issueSearchStore, fields,
   } = useContext(Store);
+  const history = useHistory();
+  const location = useLocation();
   const [urlFilter, setUrlFilter] = useState(null);
   const importRef = useRef();
   const tableRef = useRef();
@@ -105,9 +109,6 @@ const Issue = withRouter(observer(() => {
       await IssueStore.query();
     }
   };
-  const handleClear = () => {
-    setUrlFilter(null);
-  };
   const getProjectInfo = () => {
     projectApi.loadInfo().then((res) => {
       IssueStore.setProjectInfo(res);
@@ -116,7 +117,6 @@ const Issue = withRouter(observer(() => {
   };
   useEffect(() => {
     getProjectInfo();
-    IssueStore.initChosenFields();
     return () => {
       IssueStore.setClickedRow({ selectedIssue: {}, expand: false });
       IssueStore.setFilterListVisible(false);
@@ -139,6 +139,24 @@ const Issue = withRouter(observer(() => {
       false,
     })));
   };
+  const handleClear = useCallback(() => {
+    setUrlFilter(null);
+    const {
+      paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
+      paramType, paramIssueId, paramName, paramOpenIssueId, ...otherArgs
+    } = getParams(location.search);
+    if (paramOpenIssueId || paramIssueId || paramChoose || paramType) {
+      history.replace(linkUrl(LINK_URL.workListIssue));
+    }
+    IssueStore.query();
+  }, []);
+  const handleClickSaveFilter = useCallback(() => {
+    IssueStore.setSaveFilterVisible(true);
+    IssueStore.setFilterListVisible(false);
+    // IssueStore.setEditFilterInfo(map(editFilterInfo,
+    //   (item) => Object.assign(item, { isEditing: false })));
+  }, []);
+
   return (
     <Page
       className="c7nagile-issue"
@@ -173,15 +191,39 @@ const Issue = withRouter(observer(() => {
           导出问题
         </Button>
         <Button onClick={handleClickFilterManage} icon="settings">筛选管理</Button>
-        <CollapseAll tableRef={tableRef} />
+        <CollapseAll dataSet={dataSet} tableRef={tableRef} />
       </Header>
       <Breadcrumb />
       <Content style={{ paddingTop: 0 }} className="c7nagile-issue-content">
-        <Search urlFilter={urlFilter} onClear={handleClear} />
-        <IssueTable tableRef={tableRef} onCreateIssue={handleCreateIssue} />
-        <SaveFilterModal />
+        <IssueSearch
+          store={issueSearchStore}
+          urlFilter={urlFilter}
+          onClear={handleClear}
+          onChange={IssueStore.query}
+          onClickSaveFilter={handleClickSaveFilter}
+        />
+        <IssueTable
+          dataSet={dataSet}
+          fields={fields}
+          tableRef={tableRef}
+          onCreateIssue={handleCreateIssue}
+          onRowClick={(record) => {
+            // dataSet.select(record);
+            const editFilterInfo = IssueStore.getEditFilterInfo;
+            IssueStore.setClickedRow({
+              selectedIssue: {
+                issueId: record.get('issueId'),
+              },
+              expand: true,
+            });
+            IssueStore.setFilterListVisible(false);
+            IssueStore.setEditFilterInfo(map(editFilterInfo, (item) => Object.assign(item, { isEditing: false })));
+          }}
+          selectedIssue={IssueStore.selectedIssue?.issueId}
+        />
+        <SaveFilterModal issueSearchStore={issueSearchStore} />
         <FilterManage />
-        <ExportIssue dataSet={dataSet} tableRef={tableRef} onCreateIssue={handleCreateIssue} />
+        <ExportIssue issueSearchStore={issueSearchStore} dataSet={dataSet} tableRef={tableRef} onCreateIssue={handleCreateIssue} />
         {IssueStore.getCreateQuestion && (
           <CreateIssue
             visible={IssueStore.getCreateQuestion}
@@ -197,7 +239,7 @@ const Issue = withRouter(observer(() => {
       </Content>
     </Page>
   );
-}));
+});
 
 export default (props) => (
   <StoreProvider {...props}>

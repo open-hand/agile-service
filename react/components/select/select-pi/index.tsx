@@ -5,7 +5,6 @@ import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
 
 import { piApi } from '@/api';
 import type { PI } from '@/common/types';
-import { useIsOwner } from '@/hooks';
 import styles from './index.less';
 
 const renderPi = (pi: any) => {
@@ -31,7 +30,6 @@ interface Props extends SelectProps {
 const SelectPI: React.FC<Props> = forwardRef(({
   statusList, multiple, disabledCurrentPI = false, ...otherProps
 }, ref: React.Ref<Select>) => {
-  const [isOwner] = useIsOwner();
   const config = useMemo((): SelectConfig<PI> => ({
     name: 'all_pi',
     textField: 'piName',
@@ -45,7 +43,7 @@ const SelectPI: React.FC<Props> = forwardRef(({
     props: {
       // @ts-ignore
       onOption: ({ record }) => {
-        if (disabledCurrentPI && !isOwner && record.get('statusCode') === 'doing') {
+        if (disabledCurrentPI && record.get('statusCode') === 'doing') {
           return {
             disabled: true,
           };
@@ -54,7 +52,7 @@ const SelectPI: React.FC<Props> = forwardRef(({
       },
     },
     paging: false,
-  }), [JSON.stringify(statusList), isOwner]);
+  }), [JSON.stringify(statusList)]);
   const props = useSelect(config);
   return (
     <Select

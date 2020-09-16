@@ -358,6 +358,10 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public IssueVO queryIssue(Long projectId, Long issueId, Long organizationId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
+        issue.setSameParentIssueDTOList(Objects.nonNull(issue.getParentIssueId()) && !Objects.equals(issue.getParentIssueId(), 0L)?
+                issueMapper.querySubIssueByIssueId(issue.getParentIssueId()): null);
+        issue.setSameParentBugDOList(Objects.nonNull(issue.getRelateIssueId()) && !Objects.equals(issue.getRelateIssueId(), 0L)?
+                issueMapper.querySubBugByIssueId(issue.getRelateIssueId()): null);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + "/" + BACKETNAME + "/" + issueAttachmentDO.getUrl()));
         }

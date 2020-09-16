@@ -73,9 +73,9 @@ class ExportIssue extends Component {
    * 输出 excel
    */
   exportExcel = () => {
-    const searchDTO = IssueStore.getCustomFieldFilters();
+    const { dataSet, issueSearchStore } = this.props;
+    const searchDTO = issueSearchStore.getCustomFieldFilters();
     const { mode, sprints } = this.state;
-    const { dataSet } = this.props;
     const field = find([...dataSet.fields.values()], (f) => f.order);
     const tableShowColumns = mode === 'all' ? [] : this.getVisibleColumns();
     const search = {
@@ -85,7 +85,7 @@ class ExportIssue extends Component {
     this.setState({
       loading: true,
     });
-    if (!IssueStore.isHasFilter) {
+    if (!issueSearchStore.isHasFilter) {
       search.otherArgs.sprint = sprints;
     }
     issueApi.export(search, field ? `${field.name},${field.order}` : undefined)
@@ -110,6 +110,7 @@ class ExportIssue extends Component {
 
   render() {
     const { mode, loading, sprints } = this.state;
+    const { issueSearchStore } = this.props;
     const visible = IssueStore.exportModalVisible;
     const projectName = AppState.currentMenuType.name;
 
@@ -129,7 +130,7 @@ class ExportIssue extends Component {
             {' '}
             的问题，请选择你需要导出的字段
           </div>
-          {!IssueStore.isHasFilter && (
+          {!issueSearchStore.isHasFilter && (
             <div style={{ display: 'flex' }}>
               <SelectFocusLoad
                 style={{ flexGrow: 1, width: 0, marginTop: 10 }}
