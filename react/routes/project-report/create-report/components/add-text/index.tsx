@@ -15,6 +15,7 @@ const AddText: React.FC<Props> = ({ innerRef }) => {
     fields: [{
       name: 'title',
       label: '文本标题',
+      maxLength: 44,
       required: true,
     }, {
       name: 'description',

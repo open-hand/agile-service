@@ -22,13 +22,14 @@ const renderPi = (pi: any) => {
   }
   return null;
 };
-interface Props extends SelectProps {
+interface Props extends Partial<SelectProps> {
   statusList: string[]
+  afterLoad?: (sprints: PI[]) => void
   multiple?: boolean
   disabledCurrentPI?: boolean
 }
 const SelectPI: React.FC<Props> = forwardRef(({
-  statusList, multiple, disabledCurrentPI = false, ...otherProps
+  statusList, multiple, disabledCurrentPI = false, afterLoad, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<PI> => ({
     name: 'all_pi',
@@ -40,6 +41,12 @@ const SelectPI: React.FC<Props> = forwardRef(({
         {renderPi(pi)}
       </FragmentForSearch>
     ),
+    middleWare: (sprints) => {
+      if (afterLoad) {
+        afterLoad(sprints);
+      }
+      return sprints;
+    },
     props: {
       // @ts-ignore
       onOption: ({ record }) => {

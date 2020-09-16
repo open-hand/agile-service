@@ -23,8 +23,13 @@ export interface IVersion {
 }
 
 export interface PI {
+  id: string
   code: string
   name: string
+  startDate: string
+  endDate: string
+  actualStartDate: string | null
+  actualEndDate: string | null
 }
 
 export interface IStatus {

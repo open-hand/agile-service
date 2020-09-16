@@ -33,6 +33,7 @@ const AddIssueList: React.FC = () => {
     fields: [{
       name: 'title',
       label: '列表标题',
+      maxLength: 44,
       required: true,
     }, {
       name: 'fields',
