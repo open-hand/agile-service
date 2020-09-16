@@ -1,4 +1,4 @@
-import React, { useMemo, forwardRef } from 'react';
+import React, { useMemo, forwardRef, useRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
@@ -31,6 +31,8 @@ interface Props extends Partial<SelectProps> {
 const SelectPI: React.FC<Props> = forwardRef(({
   statusList, multiple, disabledCurrentPI = false, afterLoad, ...otherProps
 }, ref: React.Ref<Select>) => {
+  const afterLoadRef = useRef<Function>();
+  afterLoadRef.current = afterLoad;
   const config = useMemo((): SelectConfig<PI> => ({
     name: 'all_pi',
     textField: 'piName',
@@ -42,8 +44,8 @@ const SelectPI: React.FC<Props> = forwardRef(({
       </FragmentForSearch>
     ),
     middleWare: (sprints) => {
-      if (afterLoad) {
-        afterLoad(sprints);
+      if (afterLoadRef.current) {
+        afterLoadRef.current(sprints);
       }
       return sprints;
     },

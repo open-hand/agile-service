@@ -1,4 +1,4 @@
-import React, { useMemo, forwardRef } from 'react';
+import React, { useMemo, forwardRef, useRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { Tooltip } from 'choerodon-ui';
 import { sprintApi } from '@/api';
@@ -15,14 +15,16 @@ const SelectSprint: React.FC<Props> = forwardRef(({
   statusList = ['sprint_planning', 'started'],
   afterLoad, ...otherProps
 }, ref: React.Ref<Select>) => {
+  const afterLoadRef = useRef<Function>();
+  afterLoadRef.current = afterLoad;
   const config = useMemo((): SelectConfig<ISprint> => ({
     name: 'sprint',
     textField: 'sprintName',
     valueField: 'sprintId',
     request: () => sprintApi.loadSprints(statusList),
     middleWare: (sprints) => {
-      if (afterLoad) {
-        afterLoad(sprints);
+      if (afterLoadRef.current) {
+        afterLoadRef.current(sprints);
       }
       return sprints;
     },
