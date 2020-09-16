@@ -37,6 +37,7 @@ const AddChart: React.FC<Props> = ({ innerRef }) => {
     fields: [{
       name: 'title',
       label: '图表标题',
+      maxLength: 44,
       required: true,
     }, {
       name: 'chart',

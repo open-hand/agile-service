@@ -12,11 +12,11 @@ const BaseInfo: React.FC<Props> = () => {
     fields: [{
       name: 'title',
       label: '报告主题',
+      maxLength: 44,
       required: true,
     }, {
       name: 'description',
       label: '报告说明',
-      required: true,
     }, {
       name: 'receiver',
       label: '收件人',
