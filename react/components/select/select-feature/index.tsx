@@ -18,6 +18,7 @@ const SelectFeature: React.FC<Props> = forwardRef(({
     textField: 'summary',
     valueField: 'issueId',
     request: ({ filter, page }) => featureApi.getByEpicId(undefined, filter, page),
+    // @ts-ignore
     middleWare: (features) => {
       if (featureId && featureName) {
         return (find(features, (

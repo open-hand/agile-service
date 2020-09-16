@@ -152,6 +152,8 @@ export interface Issue {
   parentRelateSummary?: string
   sameParentIssueVOList?: Issue[],
   sameParentBugVOList?: Issue[]
+  assigneeRealName: string
+  statusVO: IStatus
 }
 
 export interface ILog {

@@ -2,9 +2,12 @@ import React, { useCallback } from 'react';
 import { Button } from 'choerodon-ui/pro';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import styles from './index.less';
-import { IReportBlock, IReportTextBlock, IReportChartBlock } from '../../store';
+import {
+  IReportBlock, IReportTextBlock, IReportChartBlock, IReportListBlock,
+} from '../../store';
 import TextBlock from './components/text-block';
 import ChartBlock from './components/chart-block';
+import ListBlock from './components/list-block';
 
 interface Props {
   data: IReportBlock
@@ -19,6 +22,9 @@ const ReportBlock: React.FC<Props> = ({ data }) => {
       }
       case 'chart': {
         return <ChartBlock data={data as IReportChartBlock} />;
+      }
+      case 'list': {
+        return <ListBlock data={data as IReportListBlock} />;
       }
       default: {
         return null;
