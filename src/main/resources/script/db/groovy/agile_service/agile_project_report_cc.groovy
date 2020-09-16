@@ -12,7 +12,7 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_project_report_cc.groovy') {
             column(name: 'project_report_id', type: 'BIGINT UNSIGNED', remarks: '项目报表Id') {
                 constraints(nullable: false)
             }
-            column(name: 'carbon_copy_id', type: 'BIGINT UNSIGNED', remarks: '抄送人Id') {
+            column(name: 'cc_id', type: 'BIGINT UNSIGNED', remarks: '抄送人Id') {
                 constraints(nullable: false)
             }
 

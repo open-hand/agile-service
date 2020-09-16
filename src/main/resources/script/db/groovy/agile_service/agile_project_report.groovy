@@ -12,9 +12,7 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_project_report.groovy') {
             column(name: 'title', type: 'VARCHAR(255)', remarks: '报表标题') {
                 constraints(nullable: false)
             }
-            column(name: 'description', type: 'VARCHAR(255)', remarks: '报表说明') {
-                constraints(nullable: false)
-            }
+            column(name: 'description', type: 'text', remarks: '报表说明')
             column(name: 'status', type: 'VARCHAR(50)', remarks: '报表状态: ENABLE|DISABLE|FINISHED') {
                 constraints(nullable: false)
             }
