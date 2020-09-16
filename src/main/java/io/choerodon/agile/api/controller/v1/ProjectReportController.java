@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
  * @author jiaxu.cui@hand-china.com 2020/9/15 上午10:48
  */
 @RestController
-@RequestMapping(value = "/v1/projects/{project_id}/project_reports")
+@RequestMapping(value = "/v1/projects/{project_id}/project_report")
 public class ProjectReportController {
 
     @Autowired
