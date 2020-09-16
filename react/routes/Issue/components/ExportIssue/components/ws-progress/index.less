@@ -1,0 +1,53 @@
+@progress-text-color: rgba(0, 0, 0, 0.65);
+@progress-area-background: #FFFFFF;
+@progress-area-box-shadow1: rgba(0, 0, 0, 0.20);
+@progress-area-box-shadow2: rgba(0, 0, 0, 0.14);
+@progress-area-box-shadow3: rgba(0, 0, 0, 0.12);
+@progress-area-text: #000000;
+
+.c7n-agile-ws {
+  &-progress-area {
+    background: @progress-area-background;
+    box-shadow: 0 0.01rem 0.05rem 0 @progress-area-box-shadow1, 0 0.02rem 0.02rem 0 @progress-area-box-shadow2, 0 0.03rem 0.01rem -0.02rem@progress-area-box-shadow3;
+    border-radius: 0.04rem;
+    width: 3.3rem;
+    height: 1.85rem;
+    text-align: center;
+    margin-top: .24rem;
+    padding-top: 0.18rem;
+
+    &-text {
+      font-size: 0.2rem;
+      color: @progress-area-text;
+      line-height: 0.28rem;
+      margin: .2rem 0 0.07rem 0;
+      display: block;
+    }
+
+    &-prompt {
+      font-size: 0.14rem;
+      line-height: 0.2rem;
+      color: #000;
+      text-align: left;
+    }
+  }
+
+  &-finish {
+
+    font-size: .13rem;
+    font-family: PingFangSC-Regular, PingFang SC;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.65);
+    line-height: .18rem;
+
+    span {
+      display: inline-block;
+      margin-bottom: .1rem;
+      width: 100%;
+    }
+
+    a {
+      color: #3F51B5;
+    }
+  }
+}

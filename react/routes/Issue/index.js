@@ -20,7 +20,7 @@ import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
 import FilterManage from './components/FilterManage';
 import SaveFilterModal from './components/SaveFilterModal';
-import ExportIssue from './components/ExportIssue';
+import { openExportIssueModal } from './components/ExportIssue';
 import IssueDetail from './components/issue-detail';
 import ImportIssue from './components/ImportIssue';
 import CollapseAll from './components/CollapseAll';
@@ -31,6 +31,7 @@ const Issue = observer(() => {
   const {
     dataSet, projectId, issueSearchStore, fields,
   } = useContext(Store);
+  
   const history = useHistory();
   const location = useLocation();
   const [urlFilter, setUrlFilter] = useState(null);
@@ -44,8 +45,8 @@ const Issue = observer(() => {
    */
   const refresh = (isDelete = false) => dataSet.query(
     isDelete
-    && dataSet.length === 1
-    && dataSet.totalCount > 1
+      && dataSet.length === 1
+      && dataSet.totalCount > 1
       ? dataSet.currentPage - 1
       : dataSet.currentPage,
   );
@@ -128,7 +129,6 @@ const Issue = observer(() => {
     IssueStore.createQuestion(false);
     dataSet.query();
   };
-
   const handleClickFilterManage = () => {
     const editFilterInfo = IssueStore.getEditFilterInfo;
     const filterListVisible = IssueStore.getFilterListVisible;
@@ -136,7 +136,7 @@ const Issue = observer(() => {
     IssueStore.setFilterListVisible(!filterListVisible);
     IssueStore.setEditFilterInfo(map(editFilterInfo, (item) => Object.assign(item, {
       isEditing:
-      false,
+        false,
     })));
   };
   const handleClear = useCallback(() => {
@@ -184,9 +184,7 @@ const Issue = observer(() => {
           className="leftBtn"
           icon="unarchive"
           funcType="flat"
-          onClick={() => {
-            IssueStore.setExportModalVisible(true);
-          }}
+          onClick={() => openExportIssueModal(issueSearchStore.getAllFields, issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()] : [], dataSet, { tableRef })}
         >
           导出问题
         </Button>
@@ -223,7 +221,7 @@ const Issue = observer(() => {
         />
         <SaveFilterModal issueSearchStore={issueSearchStore} />
         <FilterManage />
-        <ExportIssue issueSearchStore={issueSearchStore} dataSet={dataSet} tableRef={tableRef} onCreateIssue={handleCreateIssue} />
+        {/* <ExportIssue issueSearchStore={issueSearchStore} dataSet={dataSet} tableRef={tableRef} onCreateIssue={handleCreateIssue} /> */}
         {IssueStore.getCreateQuestion && (
           <CreateIssue
             visible={IssueStore.getCreateQuestion}
