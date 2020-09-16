@@ -75,9 +75,10 @@ public class SchemeController extends BaseController {
     @ApiOperation(value = "查询项目下所有问题类型所有状态对应的转换")
     @GetMapping(value = "/schemes/query_transforms_map")
     public ResponseEntity<Map<String, Map<String, List>>> queryTransformsMapByProjectId(@PathVariable("project_id") Long projectId,
+                                                                                                 @RequestParam(required = false) @Encrypt Long boardId,
                                                                                                  @RequestParam("apply_type") String applyType) {
 
-        return new ResponseEntity<>(EncryptionUtils.encryptMapValueMap(projectConfigService.queryTransformsMapByProjectId(projectId, applyType)), HttpStatus.OK);
+        return new ResponseEntity<>(EncryptionUtils.encryptMapValueMap(projectConfigService.queryTransformsMapByProjectId(projectId,boardId,applyType)), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -216,11 +217,11 @@ public class SchemeController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "关联已有状态")
     @GetMapping(value = "/state_machine/link_status")
-    public ResponseEntity<StateMachineNodeVO> linkStatus(@PathVariable("project_id") Long projectId,
-                                                 @RequestParam @Encrypt Long issueTypeId,
-                                                 @RequestParam String applyType,
-                                                 @RequestParam @Encrypt Long statusId,
-                                                 @RequestParam Boolean defaultStatus) {
+    public ResponseEntity<StatusMachineNodeVO> linkStatus(@PathVariable("project_id") Long projectId,
+                                                          @RequestParam @Encrypt Long issueTypeId,
+                                                          @RequestParam String applyType,
+                                                          @RequestParam @Encrypt Long statusId,
+                                                          @RequestParam Boolean defaultStatus) {
         return new ResponseEntity(projectConfigService.linkStatus(projectId, issueTypeId,applyType, statusId,defaultStatus), HttpStatus.OK);
     }
 

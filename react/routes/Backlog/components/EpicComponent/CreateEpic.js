@@ -3,10 +3,11 @@ import { observer } from 'mobx-react';
 import {
   Modal, Form, Input,
 } from 'choerodon-ui';
-import { stores } from '@choerodon/boot';
+import { stores, Choerodon } from '@choerodon/boot';
 import {
-  epicApi, issueApi, fileApi, fieldApi, 
+  epicApi, issueApi, fieldApi,
 } from '@/api';
+import { checkCanQuickCreate } from '@/utils/quickCreate';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 
 const { AppState } = stores;
@@ -37,9 +38,9 @@ class CreateEpic extends Component {
     const issueTypes = BacklogStore.getIssueTypes || [];
     const defaultPriorityId = BacklogStore.getDefaultPriority ? BacklogStore.getDefaultPriority.id : '';
     e.preventDefault();
-    form.validateFieldsAndScroll((err, value) => {
+    form.validateFieldsAndScroll(async (err, value) => {
       if (!err) {
-        const epicType = issueTypes.find(t => t.typeCode === 'issue_epic');
+        const epicType = issueTypes.find((t) => t.typeCode === 'issue_epic');
         const req = {
           projectId: AppState.currentMenuType.id,
           epicName: value.name.trim(),
@@ -52,6 +53,13 @@ class CreateEpic extends Component {
         this.setState({
           loading: true,
         });
+        if (!await checkCanQuickCreate(epicType.typeCode)) {
+          Choerodon.prompt('该问题类型含有必填选项，请使用创建问题弹框创建');
+          this.setState({
+            loading: false,
+          });
+          return;
+        }
         issueApi.create(req).then((res) => {
           const dto = {
             schemeCode: 'agile_issue',
@@ -94,7 +102,7 @@ class CreateEpic extends Component {
       form, onCancel, visible, store,
     } = this.props;
     const issueTypes = BacklogStore.getIssueTypes || [];
-    const epicType = issueTypes.find(t => t.typeCode === 'issue_epic');
+    const epicType = issueTypes.find((t) => t.typeCode === 'issue_epic');
     const { loading } = this.state;
     const { getFieldDecorator } = form;
     return (
@@ -110,7 +118,7 @@ class CreateEpic extends Component {
         confirmLoading={loading}
         onOk={this.handleCreateEpic}
         width={380}
-      >        
+      >
         <Form>
           <FormItem>
             {getFieldDecorator('name', {
@@ -136,7 +144,7 @@ class CreateEpic extends Component {
               <TextArea autosize={{ minRows: 3, maxRows: 10 }} label="概要" maxLength={44} />,
             )}
           </FormItem>
-        </Form>       
+        </Form>
       </Sidebar>
     );
   }

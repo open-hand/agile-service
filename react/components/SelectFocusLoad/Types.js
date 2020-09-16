@@ -1,3 +1,4 @@
+/* eslint-disable import/no-anonymous-default-export */
 /* eslint-disable camelcase */
 import React from 'react';
 import { Select } from 'choerodon-ui';
@@ -326,7 +327,7 @@ export default {
     request: () => priorityApi.loadByProject(),
     getDefaultValue: (priorities) => find(priorities, { default: true }).id,
     render: (priority) => (
-      <Option key={priority.id} value={priority.id}>
+      <Option key={priority.id} value={priority.id} label={priority.name}>
         <div style={{ display: 'inline-flex', alignItems: 'center', padding: 2 }}>
           <span>{priority.name}</span>
         </div>
@@ -434,21 +435,6 @@ export default {
       </Option>
     ),
   },
-  all_pi: {
-    props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
-      filterOption,
-      onFilterChange: false,
-      loadWhenMount: true,
-      label: 'PI',
-    },
-    request: () => piApi.getPiListByStatus(),
-    render: (pi) => (
-      <Option disabled={!IsInProgramStore.isOwner && pi.statusCode === 'doing'} key={pi.id} value={pi.id}>
-        {pi.code ? `${pi.code}-${pi.name}` : pi.name}
-      </Option>
-    ),
-  },
   feature: {
     request: ({ filter, page }, requestArgs) => featureApi.getByEpicId(undefined, filter, page),
     render: (item) => (
@@ -459,6 +445,17 @@ export default {
       filterOption,
       loadWhenMount: true,
     },
+    avoidShowError: (props, List) => new Promise((resolve) => {
+      const { selectedFeature } = props;
+      const extraList = [];
+      const values = selectedFeature instanceof Array ? selectedFeature : [selectedFeature];
+      values.forEach((feature) => {
+        if (!find(List, { issueId: feature.issueId })) {
+          extraList.push(feature);
+        }
+      });
+      resolve(extraList);
+    }),
   }, // 特性列表
   feature_all: {
     request: ({ filter, page }, requestArgs) => featureApi.queryAllInSubProject(requestArgs, filter, page),

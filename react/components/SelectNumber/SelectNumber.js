@@ -23,16 +23,27 @@ class SelectNumber extends Component {
   }
 
   handleChange = (value) => {
-    const { value: preValue } = this.state;    
-    // 只允许输入整数，选择时可选0.5
-    if (value === '0.5') {
-      this.triggerChange('0.5');      
-    } else if (/^(0|[1-9][0-9]*)(\[0-9]*)?$/.test(value) || value === '') {
-      this.triggerChange(String(value).slice(0, 3));
-    } else if (value.toString().charAt(value.length - 1) === '.') {
-      this.triggerChange(value.slice(0, -1));    
+    const { value: preValue } = this.state;
+    const { loose } = this.props;
+    // 宽松模式，可以输入小数点，外部校验格式
+    if (loose) {
+      if ((/^[0-9.]+$/.test(value) || value === '')) {
+        this.triggerChange(value);
+      } else {
+        this.triggerChange(preValue);
+      }
     } else {
-      this.triggerChange(preValue);         
+      // 只允许输入整数，选择时可选0.5
+      // eslint-disable-next-line no-lonely-if
+      if (value === '0.5') {
+        this.triggerChange('0.5');
+      } else if (/^(0|[1-9][0-9]*)(\[0-9]*)?$/.test(value) || value === '') {
+        this.triggerChange(String(value).slice(0, 3));
+      } else if (value.toString().charAt(value.length - 1) === '.') {
+        this.triggerChange(value.slice(0, -1));
+      } else {
+        this.triggerChange(preValue);
+      }
     }
   };
 
@@ -52,15 +63,15 @@ class SelectNumber extends Component {
     const options = selectNumbers || selectValues;
     return (
       <Select
-        getPopupContainer={triggerNode => triggerNode.parentNode}
+        getPopupContainer={(triggerNode) => triggerNode.parentNode}
         // autoFocus
-        {...this.props}    
+        {...this.props}
         value={value}
-        mode="combobox"        
-        tokenSeparators={[',']}        
-        onChange={this.handleChange}        
+        mode="combobox"
+        tokenSeparators={[',']}
+        onChange={this.handleChange}
       >
-        {options.map(sp => (
+        {options.map((sp) => (
           <Option key={sp.toString()} value={sp}>
             {sp}
           </Option>

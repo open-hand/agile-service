@@ -370,4 +370,19 @@
             abcsr.project_id = #{projectId}
         AND abcsr.status_id = #{statusId}
     </select>
+
+    <select id="queryStatusByBoardId" resultType="java.lang.Long">
+           SELECT
+            abcsr.status_id
+           FROM
+            agile_board_column_status_rel abcsr,agile_issue_status ais
+           where  abcsr.project_id = #{projectId}
+           and abcsr.column_id in (
+             select abc.column_id from agile_board_column abc
+             where abc.project_id = #{projectId}
+             AND abc.board_id = #{boardId}
+           )
+           AND ais.project_id = abcsr.project_id
+           AND ais.status_id = abcsr.status_id
+    </select>
 </mapper>

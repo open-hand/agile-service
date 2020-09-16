@@ -441,6 +441,9 @@ public class EncryptionUtils {
     }
 
     public static List<String> encryptListToStr(List<String> ids) {
+        if (!EncryptContext.isEncrypt()) {
+            return ids;
+        }
         List<String> list = new ArrayList<>();
         if (!CollectionUtils.isEmpty(ids)) {
             ids.forEach(v -> list.add(encryptionService.encrypt(v, BLANK_KEY)));
@@ -490,6 +493,9 @@ public class EncryptionUtils {
 
 
     public static String handlerPersonFilterJson(String filterJson, boolean encrypt) {
+        if (!EncryptContext.isEncrypt()){
+            return filterJson;
+        }
         try {
             JsonNode jsonNode = objectMapper.readTree(filterJson);
             ObjectNode objectNode = objectMapper.createObjectNode();
@@ -540,7 +546,7 @@ public class EncryptionUtils {
                     LOGGER.error("string to object error: {}", e);
                 }
                 if (!CollectionUtils.isEmpty(value)) {
-                    object = value.stream().map(v -> encrypt ? encrypt(Long.valueOf(v)) : decrypt(v)).collect(Collectors.toList());
+                    object = value.stream().map(v -> encrypt ? (StringUtils.isNumeric(v) ? encrypt(Long.parseLong(v)) : v) : decrypt(v)).collect(Collectors.toList());
                 }
                 else {
                     object = new ArrayList<>();

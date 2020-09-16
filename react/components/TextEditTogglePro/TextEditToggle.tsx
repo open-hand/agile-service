@@ -80,7 +80,7 @@ const TextEditToggle: React.FC<Props> = ({
       submit();
     }
   };
-  const submit = () => {    
+  const submit = () => {
     // 延缓submit，因为有时候blur之后才会onchange，保证拿到的值是最新的
     setTimeout(() => {
       // @ts-ignore
@@ -116,10 +116,10 @@ const TextEditToggle: React.FC<Props> = ({
       };
     }
     return (
-      <Fragment>
+      <>
         {cloneElement(editorElement, editorProps)}
         {extraContent}
-      </Fragment>
+      </>
     );
   };
   const renderText = () => {
@@ -127,13 +127,13 @@ const TextEditToggle: React.FC<Props> = ({
     return textElement;
   };
   const getCellRenderer = () => (
-    <Fragment>
+    <>
       {/* 在没编辑的时候也会渲染，目的是提前加载数据 */}
       {!disabled && (
         <div
           className={classNames(styles.editor, {
             [styles.hidden]: !editing,
-          })}          
+          })}
         >
           {renderEditor()}
         </div>
@@ -144,7 +144,7 @@ const TextEditToggle: React.FC<Props> = ({
       >
         {renderText()}
       </div>
-    </Fragment>
+    </>
   );
   const handleFocus = () => {
     if (!disabled) {

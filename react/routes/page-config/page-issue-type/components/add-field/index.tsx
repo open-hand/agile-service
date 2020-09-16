@@ -28,9 +28,9 @@ const AddFiled: React.FC<Props> = observer(({
   async function handleSubmit() {
     if (dataSet.validate()) {
       const id = dataSet.current?.toData().field;
-      const addFiledData = store.allFieldData.get(id);
+      const addFiledData = store.currentTypeAllFieldData.get(id);
       if (addFiledData) {
-        onSubmitLocal(store.allFieldData.get(id), true);
+        onSubmitLocal({ ...store.currentTypeAllFieldData.get(id), localRecordIndexId: dataSet.current?.index }, true);
       } else {
         const deleteRecord = store.getDeleteRecords.find((record) => record.get('id') === id);
         deleteRecord && onRestoreLocal(deleteRecord);
@@ -45,6 +45,7 @@ const AddFiled: React.FC<Props> = observer(({
   }, []);
   useEffect(() => {
     pageConfigApi.loadUnSelected(store.currentIssueType).then((res) => {
+      store.loadCurrentTypeAllField(res);
       const currentDataArr = dataSet.toData();
       const deleteRecords = store.getDeleteRecords.map((record) => {
         const recordData = record.toData();
@@ -54,11 +55,9 @@ const AddFiled: React.FC<Props> = observer(({
           deleteAgainAdd: true, // 标记创建过的字段重新增添
         };
       });
-
       // 第一次进入时不进行过滤 并且会过滤已增添字段  过滤系统字段
       const data = res.filter((item) => currentDataArr.length === 1
-        || !currentDataArr.some((d: any) => d.field === item.id))
-        .map((item) => store.allFieldData.get(item.id)!).filter((item) => !item.system);
+        || !currentDataArr.some((d: any) => d.field === item.id));
       setPageList(data.concat(deleteRecords));
     });
     return () => {

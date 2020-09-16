@@ -1,7 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.ProjectVO;
-import io.choerodon.agile.api.vo.StateMachineNodeVO;
+import io.choerodon.agile.api.vo.StatusMachineNodeVO;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
@@ -15,6 +15,7 @@ import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -80,7 +81,7 @@ public class FixDataServiceImpl implements FixDataService {
     @Autowired
     private StatusMachineNodeMapper statusMachineNodeMapper;
     @Autowired
-    private PageFieldMapper pageFieldMapper;
+    protected PageFieldMapper pageFieldMapper;
 
     @Override
     public void fixCreateProject() {
@@ -169,9 +170,9 @@ public class FixDataServiceImpl implements FixDataService {
         issueTypeSchemeService.initByConsumeCreateProject(projectEvent.getProjectId(), projectEvent.getProjectCode());
         LOGGER.info("已修复数据，项目id:{}", projectId);
     }
-
-    public void fixDateStateMachine(){
-        long start = System.currentTimeMillis();
+    @Override
+    @Async
+    public void fixDateStateMachineAndPage(){
         LOGGER.info("开始修复数据");
         // 迁移数据
         migrateData();
@@ -181,7 +182,7 @@ public class FixDataServiceImpl implements FixDataService {
         fixStateMachineByIssueTypeId();
         // 修复页面配置
         fixPage();
-        LOGGER.info("修复数据完成,耗时{}",System.currentTimeMillis() - start);
+        LOGGER.info("==============================>>>>>>>> AGILE Data Fixed Finished <<<<<<<<=================================");
     }
 
     private  void migrateData() {
@@ -218,16 +219,11 @@ public class FixDataServiceImpl implements FixDataService {
         //key1 fieldId, key2 organizationId, key3 projectId, key4 pageId
         MultiKeyMap rankMap = new MultiKeyMap();
 
-        ObjectSchemeFieldDTO objectSchemeField = new ObjectSchemeFieldDTO();
-        objectSchemeField.setSchemeCode(schemeCode);
-        objectSchemeField.setSystem(true);
+        //旧数据没有设置的字段，但业务上是必须的
+        Set<Long> specialFieldIds = new HashSet<>();
 
-        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap);
+        processFields(createPageId, editPageId, schemeCode, dataMap, rankMap, specialFieldIds);
 
-        processEstimatedTime(dataMap, rankMap, editPageId);
-
-        objectSchemeField.setSystem(false);
-        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap);
         List<ObjectSchemeFieldExtendDTO> insertList = new ArrayList<>();
         MapIterator mapIterator = dataMap.mapIterator();
         LOGGER.info("同一个字段，优先使用编辑页面的排序值作为页面配置的排序值");
@@ -235,13 +231,21 @@ public class FixDataServiceImpl implements FixDataService {
             mapIterator.next();
             ObjectSchemeFieldExtendDTO dto = (ObjectSchemeFieldExtendDTO)mapIterator.getValue();
             dto.setCreated(Optional.ofNullable(dto.getCreated()).orElse(false));
-            dto.setEdited(Optional.ofNullable(dto.getEdited()).orElse(false));
+            Boolean edited = dto.getEdited();
+            if (specialFieldIds.contains(dto.getFieldId()) && ObjectUtils.isEmpty(edited)) {
+                edited = true;
+            } else {
+                edited = Optional.ofNullable(dto.getEdited()).orElse(false);
+            }
+            dto.setEdited(edited);
             String rank = getRank(rankMap, createPageId, editPageId, dto);
             dto.setRank(rank);
             if (objectSchemeFieldExtendMapper.selectExtendFieldCount(dto.getIssueType(), dto.getOrganizationId(), dto.getFieldId(), dto.getProjectId()) == 0) {
                 insertList.add(dto);
             }
         }
+        //处理字段rank值相同的情况
+        resetSameRank(insertList);
         int total = insertList.size();
         int step = 5000;
         int totalPage = total / step + 1;
@@ -255,7 +259,74 @@ public class FixDataServiceImpl implements FixDataService {
         LOGGER.info("迁移页面数据完成");
     }
 
-    private void processEstimatedTime(MultiKeyMap dataMap, MultiKeyMap rankMap,
+    private void resetSameRank(List<ObjectSchemeFieldExtendDTO> insertList) {
+        List<ObjectSchemeFieldExtendDTO> organizationLevels =
+                insertList.stream().filter(i -> ObjectUtils.isEmpty(i.getProjectId())).collect(Collectors.toList());
+        //根据组织id和issueType分组
+        Map<Long, Map<String, List<ObjectSchemeFieldExtendDTO>>> organizationMap =
+                organizationLevels
+                        .stream()
+                        .collect(Collectors.groupingBy(ObjectSchemeFieldExtendDTO::getOrganizationId,
+                                Collectors.groupingBy(ObjectSchemeFieldExtendDTO::getIssueType)));
+        foreachAndResetRank(organizationMap, "organization");
+
+        List<ObjectSchemeFieldExtendDTO> projectLevels =
+                insertList.stream().filter(i -> !ObjectUtils.isEmpty(i.getProjectId())).collect(Collectors.toList());
+        //根据项目id和issueType分组
+        Map<Long, Map<String, List<ObjectSchemeFieldExtendDTO>>> projectMap =
+                projectLevels
+                        .stream()
+                        .collect(Collectors.groupingBy(ObjectSchemeFieldExtendDTO::getProjectId,
+                                Collectors.groupingBy(ObjectSchemeFieldExtendDTO::getIssueType)));
+        foreachAndResetRank(projectMap, "project");
+    }
+
+    private void foreachAndResetRank(Map<Long, Map<String, List<ObjectSchemeFieldExtendDTO>>> map,
+                                     String level) {
+        for (Map.Entry<Long, Map<String, List<ObjectSchemeFieldExtendDTO>>> entry : map.entrySet()) {
+            Long id = entry.getKey();
+            Map<String, List<ObjectSchemeFieldExtendDTO>> issueTypeMap = entry.getValue();
+            for (Map.Entry<String, List<ObjectSchemeFieldExtendDTO>> e : issueTypeMap.entrySet()) {
+                List<ObjectSchemeFieldExtendDTO> list = e.getValue();
+                resetRank(list);
+            }
+            LOGGER.info("{} id = {}的字段重置rank值成功", level, id);
+        }
+    }
+
+    private void resetRank(List<ObjectSchemeFieldExtendDTO> list) {
+        //先按rank升序排列，rank值相同，按fieldId升序排列
+        Collections.sort(list, new Comparator<ObjectSchemeFieldExtendDTO>() {
+            @Override
+            public int compare(ObjectSchemeFieldExtendDTO o1, ObjectSchemeFieldExtendDTO o2) {
+                int result = o1.getRank().compareTo(o2.getRank());
+                if (result == 0) {
+                    return o2.getFieldId().compareTo(o1.getFieldId());
+                }
+                return result;
+            }
+        });
+        String mid = RankUtil.mid();
+        for (ObjectSchemeFieldExtendDTO dto : list) {
+            dto.setRank(mid);
+            mid = RankUtil.genNext(mid);
+        }
+    }
+
+    protected void processFields(Long createPageId, Long editPageId, String schemeCode, MultiKeyMap dataMap, MultiKeyMap rankMap, Set<Long> specialFieldIds) {
+        ObjectSchemeFieldDTO objectSchemeField = new ObjectSchemeFieldDTO();
+        objectSchemeField.setSchemeCode(schemeCode);
+        objectSchemeField.setSystem(true);
+
+        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap, specialFieldIds);
+
+        processEstimatedTime(dataMap, rankMap, editPageId);
+
+        objectSchemeField.setSystem(false);
+        generateDataMap(createPageId, editPageId, dataMap, objectSchemeField, rankMap, specialFieldIds);
+    }
+
+    protected void processEstimatedTime(MultiKeyMap dataMap, MultiKeyMap rankMap,
                                       Long editPageId) {
         LOGGER.info("处理预计开始时间和预计结束时间");
         String estimatedStartTime = "estimatedStartTime";
@@ -295,7 +366,7 @@ public class FixDataServiceImpl implements FixDataService {
         }
     }
 
-    private void fillInData(List<IssueTypeDTO> filterIssueTypeList,
+    protected void fillInData(List<IssueTypeDTO> filterIssueTypeList,
                             ObjectSchemeFieldDTO field,
                             Long organizationId,
                             MultiKeyMap dataMap,
@@ -326,7 +397,7 @@ public class FixDataServiceImpl implements FixDataService {
         });
     }
 
-    private Map<Long, String> getMinRankMap(MultiKeyMap rankMap) {
+    protected Map<Long, String> getMinRankMap(MultiKeyMap rankMap) {
         Map<Long, String> result = new HashMap<>();
         MapIterator iterator = rankMap.mapIterator();
         while (iterator.hasNext()) {
@@ -381,10 +452,11 @@ public class FixDataServiceImpl implements FixDataService {
     }
 
     protected void generateDataMap(Long createPageId,
-                                 Long editPageId,
-                                 MultiKeyMap dataMap,
-                                 ObjectSchemeFieldDTO objectSchemeField,
-                                 MultiKeyMap rankMap) {
+                                   Long editPageId,
+                                   MultiKeyMap dataMap,
+                                   ObjectSchemeFieldDTO objectSchemeField,
+                                   MultiKeyMap rankMap,
+                                   Set<Long> specialFieldIds) {
         if (Boolean.TRUE.equals(objectSchemeField.getSystem())) {
             LOGGER.info("处理系统字段");
         } else {
@@ -393,7 +465,15 @@ public class FixDataServiceImpl implements FixDataService {
         List<ObjectSchemeFieldDTO> fields = objectSchemeFieldMapper.selectFieldsWithPages(objectSchemeField);
         LOGGER.info("查询到{}条字段", fields.size());
         List<PageFieldDTO> pages = new ArrayList<>();
-        fields.forEach(s -> pages.addAll(s.getPages()));
+        fields.forEach(s -> {
+            String code = s.getCode();
+            pages.addAll(s.getPages());
+            if (FieldCode.SUMMARY.equals(code)
+                    || FieldCode.DESCRIPTION.equals(code)
+                    || FieldCode.ISSUE_TYPE.equals(code)) {
+                specialFieldIds.add(s.getId());
+            }
+        });
         Set<Long> organizationIds = pages.stream().map(PageFieldDTO::getOrganizationId).collect(Collectors.toSet());
         List<IssueTypeDTO> issueTypeList = issueTypeMapper.selectByOrganizationIds(organizationIds);
         Map<Long, List<IssueTypeDTO>> issueTypeMap = issueTypeList.stream().collect(Collectors.groupingBy(IssueTypeDTO::getOrganizationId));
@@ -430,7 +510,7 @@ public class FixDataServiceImpl implements FixDataService {
         });
     }
 
-    private List<IssueTypeDTO> filterIssueType(List<IssueTypeDTO> issueTypes,
+    protected List<IssueTypeDTO> filterIssueType(List<IssueTypeDTO> issueTypes,
                                                String[] contextArray) {
         List<IssueTypeDTO> result = new ArrayList<>();
         List<String> contextList = Arrays.asList(contextArray);
@@ -531,46 +611,71 @@ public class FixDataServiceImpl implements FixDataService {
         // 遍历修改
         for (StatusMachineDTO statusMachineDTO : stateMachines) {
             // 查询当前状态机所有的node
-            List<StateMachineNodeVO> stateMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(statusMachineDTO.getOrganizationId(), statusMachineDTO.getId(), false);
-            if (CollectionUtils.isEmpty(stateMachineNodeVOS)) {
+            List<StatusMachineNodeVO> statusMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(statusMachineDTO.getOrganizationId(), statusMachineDTO.getId(), false);
+            if (CollectionUtils.isEmpty(statusMachineNodeVOS)) {
                 continue;
             }
-            List<StateMachineNodeVO> machineNodeVOS = stateMachineNodeVOS.stream().filter(v -> !NodeType.START.equals(v.getType())).collect(Collectors.toList());
-            Map<Long, StateMachineNodeVO> nodeVOMap = machineNodeVOS.stream().collect(Collectors.toMap(StateMachineNodeVO::getId, Function.identity()));
+            List<StatusMachineNodeVO> machineNodeVOS = statusMachineNodeVOS.stream().filter(v -> !NodeType.START.equals(v.getType())).collect(Collectors.toList());
+            Map<Long, StatusMachineNodeVO> nodeVOMap = machineNodeVOS.stream().collect(Collectors.toMap(StatusMachineNodeVO::getId, Function.identity()));
             // 将转换到所有转换为多个transform
             List<StatusMachineTransformDTO> statusMachineTransformDTOS = statusMachineTransformMapper.queryByStateMachineIds(statusMachineDTO.getOrganizationId(), Arrays.asList(statusMachineDTO.getId()));
             List<StatusMachineTransformDTO> allTransforms = statusMachineTransformDTOS.stream().filter(x -> x.getType().equals(TransformType.ALL)).collect(Collectors.toList());
-            if (CollectionUtils.isEmpty(allTransforms)) {
-                continue;
-            }
-            // 对tansform_all进行转换
-            Map<Long, List<Long>> nodeMap = statusMachineTransformDTOS.stream().filter(x -> x.getType().equals(TransformType.CUSTOM)).collect(Collectors.groupingBy(StatusMachineTransformDTO::getStartNodeId, Collectors.mapping(StatusMachineTransformDTO::getEndNodeId, Collectors.toList())));
-            List<StatusMachineTransformDTO> addTransform = new ArrayList<>();
-            allTransforms.forEach(v -> {
-                Long startNode = v.getEndNodeId();
-                List<Long> endNodes = nodeMap.get(startNode);
-                if (CollectionUtils.isEmpty(endNodes)) {
-                    endNodes = new ArrayList<>();
-                }
-                for (StateMachineNodeVO node : machineNodeVOS) {
-                    if (Boolean.FALSE.equals(endNodes.contains(node.getId()))) {
-                        StateMachineNodeVO nodeVO = nodeVOMap.get(startNode);
-                        StateMachineNodeVO endNodeVO = nodeVOMap.get(node.getId());
-                        StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO();
-                        statusMachineTransformDTO.setOrganizationId(statusMachineDTO.getOrganizationId());
-                        statusMachineTransformDTO.setStartNodeId(startNode);
-                        statusMachineTransformDTO.setEndNodeId(node.getId());
-                        statusMachineTransformDTO.setName(nodeVO.getStatusVO().getName() + "转换到" + endNodeVO.getStatusVO().getName());
-                        statusMachineTransformDTO.setStateMachineId(v.getStateMachineId());
-                        statusMachineTransformDTO.setType(TransformType.CUSTOM);
-                        statusMachineTransformDTO.setConditionStrategy("condition_all");
-                        addTransform.add(statusMachineTransformDTO);
+            if (!CollectionUtils.isEmpty(allTransforms)) {
+                // 对tansform_all进行转换
+                Map<Long, List<Long>> nodeMap = statusMachineTransformDTOS.stream().filter(x -> x.getType().equals(TransformType.CUSTOM)).collect(Collectors.groupingBy(StatusMachineTransformDTO::getEndNodeId, Collectors.mapping(StatusMachineTransformDTO::getStartNodeId, Collectors.toList())));
+                List<StatusMachineTransformDTO> addTransform = new ArrayList<>();
+                allTransforms.forEach(v -> {
+                    Long endNodeId = v.getEndNodeId();
+                    List<Long> startNodeS = nodeMap.get(endNodeId);
+                    if (CollectionUtils.isEmpty(startNodeS)) {
+                        startNodeS = new ArrayList<>();
                     }
-                }
-            });
-            // 批量增加
-            statusMachineTransformMapper.batchInsert(addTransform);
-            LOGGER.info("修复状态机:{}-{}的转换完成",statusMachineDTO.getId(),statusMachineDTO.getName());
+                    for (StatusMachineNodeVO node : machineNodeVOS) {
+                        if (Boolean.FALSE.equals(startNodeS.contains(node.getId()))) {
+                            StatusMachineNodeVO startNodeVO = nodeVOMap.get(node.getId());
+                            StatusMachineNodeVO endNodeVO = nodeVOMap.get(endNodeId);
+                            StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO();
+                            statusMachineTransformDTO.setOrganizationId(statusMachineDTO.getOrganizationId());
+                            statusMachineTransformDTO.setStartNodeId(node.getId());
+                            statusMachineTransformDTO.setEndNodeId(endNodeId);
+                            statusMachineTransformDTO.setName(startNodeVO.getStatusVO().getName() + "转换到" + endNodeVO.getStatusVO().getName());
+                            statusMachineTransformDTO.setStateMachineId(v.getStateMachineId());
+                            statusMachineTransformDTO.setType(TransformType.CUSTOM);
+                            statusMachineTransformDTO.setCreatedBy(0L);
+                            statusMachineTransformDTO.setLastUpdatedBy(0L);
+                            statusMachineTransformDTO.setConditionStrategy("condition_all");
+                            addTransform.add(statusMachineTransformDTO);
+                        }
+                    }
+                });
+                // 批量增加
+                statusMachineTransformMapper.batchInsert(addTransform);
+            }
+            // 查询有转换到自身的节点
+            List<Long> existTransferOwnerNodeId = statusMachineTransformMapper.existTransferOwner(statusMachineDTO.getId());
+            // 获取没有转换自身的节点
+            Set<Long> allNodeId = nodeVOMap.keySet();
+            allNodeId.removeAll(existTransferOwnerNodeId);
+            if (!CollectionUtils.isEmpty(allNodeId)) {
+                // 添加转换
+                List<StatusMachineTransformDTO> transform = new ArrayList<>();
+                allNodeId.forEach(v -> {
+                    StatusMachineNodeVO nodeVO = nodeVOMap.get(v);
+                    StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO();
+                    statusMachineTransformDTO.setOrganizationId(statusMachineDTO.getOrganizationId());
+                    statusMachineTransformDTO.setStartNodeId(v);
+                    statusMachineTransformDTO.setEndNodeId(v);
+                    statusMachineTransformDTO.setName(nodeVO.getStatusVO().getName() + "转换到" + nodeVO.getStatusVO().getName());
+                    statusMachineTransformDTO.setStateMachineId(statusMachineDTO.getId());
+                    statusMachineTransformDTO.setType(TransformType.CUSTOM);
+                    statusMachineTransformDTO.setCreatedBy(0L);
+                    statusMachineTransformDTO.setLastUpdatedBy(0L);
+                    statusMachineTransformDTO.setConditionStrategy("condition_all");
+                    transform.add(statusMachineTransformDTO);
+                });
+                statusMachineTransformMapper.batchInsert(transform);
+            }
+            LOGGER.info("修复状态机:Id:{},名称:{}的转换完成",statusMachineDTO.getId(),statusMachineDTO.getName());
         }
         // 删除所有type为transform_all的转换
         StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO();
@@ -580,7 +685,7 @@ public class FixDataServiceImpl implements FixDataService {
     }
 
     protected void fixStateMachineByIssueTypeId(){
-        LOGGER.info("开始修复问题类型的状态机");
+        LOGGER.info("开始修复项目所有问题类型的状态机");
         // 查询所有的项目
         List<Long> projectIds = projectInfoMapper.selectAll().stream().map(ProjectInfoDTO::getProjectId).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(projectIds)) {
@@ -594,8 +699,11 @@ public class FixDataServiceImpl implements FixDataService {
             List<Long> list = projectIds.subList(page * size > total ? total : page * size, (page + 1) * size > total ? total : (page + 1) * size);
             List<ProjectVO> projectVOS = baseFeignClient.queryByIds(new HashSet<>(list)).getBody();
             for (ProjectVO projectVO : projectVOS) {
-                LOGGER.info("开始修复{}:{}", projectVO.getId(),projectVO.getName());
+                LOGGER.info("开始修复{}-{}项目所有问题类型的状态机",projectVO.getId(),projectVO.getName());
                 String applyType = "PROGRAM".equals(projectVO.getCategory()) ? "program" : "agile";
+                if ("program".equals(applyType)) {
+                    continue;
+                }
                 // 查询单个项目的问题类型(故事、特性、任务、子任务、bug)
                 fixStateMachineApplyType(projectVO,applyType);
             }
@@ -624,6 +732,12 @@ public class FixDataServiceImpl implements FixDataService {
             return;
         }
         List<Long> issueTypeIds = issueTypeSchemeConfigDTOS.stream().map(IssueTypeSchemeConfigDTO::getIssueTypeId).collect(Collectors.toList());
+        if ("agile".equals(applyType)) {
+            List<IssueTypeWithInfoDTO> issueTypeWithInfoDTOS = issueTypeMapper.queryIssueTypeList(projectVO.getOrganizationId(), issueTypeIds);
+            if (!CollectionUtils.isEmpty(issueTypeSchemeConfigDTOS)) {
+                issueTypeIds = issueTypeWithInfoDTOS.stream().filter(v -> !"feature".equals(v.getTypeCode())).map(IssueTypeWithInfoDTO::getId).collect(Collectors.toList());
+            }
+        }
         for (Long issueTypeId : issueTypeIds) {
             stateMachineSchemeConfigService.queryStatusMachineBySchemeIdAndIssueType(projectVO.getOrganizationId(), stateMachineSchemeId, issueTypeId);
         }

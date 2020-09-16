@@ -29,7 +29,7 @@ class PersonalFilterApi {
 
   /**
             * 创建我的筛选
-            * @param data 
+            * @param data
             */
   create(data: IPersonalFilter) {
     return axios.post(`${this.prefix}/personal_filter`, data);
@@ -37,24 +37,24 @@ class PersonalFilterApi {
 
   /**
            * 更新我的筛选
-           * @param filterId 
-           * @param updateData 
+           * @param filterId
+           * @param updateData
            */
-  update(filterId: number, updateData: UPersonalFilter) {
+  update(filterId: string, updateData: UPersonalFilter) {
     return axios.put(`${this.prefix}/personal_filter/${filterId}`, updateData);
   }
 
   /**
     * 删除我的筛选
-    * @param filterId 
+    * @param filterId
     */
-  delete(filterId: number) {
+  delete(filterId: string) {
     return axios.delete(`${this.prefix}/personal_filter/${filterId}`);
   }
 
-  /** 
+  /**
     * 检查名字是否重复
-    * @param name 
+    * @param name
     */
   checkName(name: string) {
     const userId = AppState.userInfo.id;

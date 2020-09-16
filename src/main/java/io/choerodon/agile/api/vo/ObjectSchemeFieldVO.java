@@ -4,6 +4,8 @@ package io.choerodon.agile.api.vo;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import java.util.List;
+
 /**
  * @author shinan.chen
  * @since 2019/3/29
@@ -41,6 +43,10 @@ public class ObjectSchemeFieldVO {
     private Long organizationId;
     @ApiModelProperty(value = "乐观锁")
     private Long objectVersionNumber;
+    @ApiModelProperty(value = "选项")
+    private List<FieldOptionVO> fieldOptions;
+    @ApiModelProperty(value = "默认值（用于显示，仅member类型）")
+    private Object defaultValueObj;
 
     public String getRequiredScope() {
         return requiredScope;
@@ -168,5 +174,21 @@ public class ObjectSchemeFieldVO {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public List<FieldOptionVO> getFieldOptions() {
+        return fieldOptions;
+    }
+
+    public void setFieldOptions(List<FieldOptionVO> fieldOptions) {
+        this.fieldOptions = fieldOptions;
+    }
+
+    public Object getDefaultValueObj() {
+        return defaultValueObj;
+    }
+
+    public void setDefaultValueObj(Object defaultValueObj) {
+        this.defaultValueObj = defaultValueObj;
     }
 }

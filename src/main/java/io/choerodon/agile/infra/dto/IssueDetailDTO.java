@@ -84,6 +84,10 @@ public class IssueDetailDTO {
 
     private List<IssueDTO> subBugDOList;
 
+    private List<IssueDTO> sameParentIssueDTOList;
+
+    private List<IssueDTO> sameParentBugDOList;
+
     private Date creationDate;
 
     private Date lastUpdateDate;
@@ -123,6 +127,22 @@ public class IssueDetailDTO {
     private String relateIssueNum;
 
     private String parentRelateSummary;
+
+    public List<IssueDTO> getSameParentIssueDTOList() {
+        return sameParentIssueDTOList;
+    }
+
+    public void setSameParentIssueDTOList(List<IssueDTO> sameParentIssueDTOList) {
+        this.sameParentIssueDTOList = sameParentIssueDTOList;
+    }
+
+    public List<IssueDTO> getSameParentBugDOList() {
+        return sameParentBugDOList;
+    }
+
+    public void setSameParentBugDOList(List<IssueDTO> sameParentBugDOList) {
+        this.sameParentBugDOList = sameParentBugDOList;
+    }
 
     public String getIssueTypeCode() {
         return issueTypeCode;

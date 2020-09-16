@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from 'choerodon-ui/pro';
+import { Button, message } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
 import { useStateMachineContext } from '@/routes/StateMachine/context';
@@ -17,6 +17,7 @@ const Save: React.FC = () => {
         funcType={'raised' as FuncType}
         onClick={async () => {
           await store.batchUpdateStatusTransform(selectedType);
+          message.success('保存成功');
         }}
       >
         保存

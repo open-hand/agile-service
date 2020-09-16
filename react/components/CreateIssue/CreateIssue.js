@@ -181,16 +181,18 @@ class CreateIssue extends Component {
   loadDefaultTemplate = (issueTypeId) => {
     const { form } = this.props;
     const currentDes = form.getFieldValue('description');
-    if (this.checkSameDescription(this.originDescription, currentDes)) {
-      pageConfigApi.loadTemplateByType(issueTypeId).then((res) => {
-        const { template } = res || {};
-        form.setFieldsValue({
-          description: text2Delta(template),
-        });
-        this.originDescription = template;
+    pageConfigApi.loadTemplateByType(issueTypeId).then((res) => {
+      const { template } = res || {};
+      form.setFieldsValue({
+        description: text2Delta(template),
       });
-    }
-  };
+      if (!template) {
+        form.setFieldsValue({
+          description: currentDes,
+        });
+      }
+    });
+  }
 
   loadIssueTypes = () => {
     const { applyType, form } = this.props;
@@ -243,6 +245,7 @@ class CreateIssue extends Component {
   handleCreateIssue = () => {
     const { form, parentIssueId, relateIssueId } = this.props;
     const {
+      fields,
       originComponents,
       originLabels,
       originIssueTypes,
@@ -281,6 +284,12 @@ class CreateIssue extends Component {
           estimatedStartTime,
         } = values;
         const { typeCode } = originIssueTypes.find((t) => t.id === typeId);
+        // 手动检验描述是否必输校验
+        const descriptionField = fields.find((f) => f.fieldCode === 'description');
+        if (descriptionField && descriptionField.required && this.checkSameDescription(undefined, description)) {
+          Choerodon.prompt('请填写描述');
+          return;
+        }
         if (typeCode === 'feature' && epicId) {
           const hasSame = await featureApi.hasSameInEpicBySummary(summary, epicId);
           if (hasSame) {
@@ -428,7 +437,9 @@ class CreateIssue extends Component {
   };
 
   getFieldComponent = (field) => {
-    const { form, mode, hiddenIssueType } = this.props;
+    const {
+      form, mode, hiddenIssueType, teamProjectIds,
+    } = this.props;
     const { getFieldDecorator } = form;
     const {
       defaultValue, fieldName, fieldCode, fieldType, required,
@@ -470,15 +481,15 @@ class CreateIssue extends Component {
                               context: typeCode,
                               pageCode: 'agile_issue_create',
                             };
-                            this.loadDefaultTemplate(typeCode);
                             fieldApi.getFields(param).then((res) => {
                               const { fields } = this.state;
                               form.resetFields(['assigneedId', 'sprintId', 'priorityId', 'epicId', 'componentIssueRel',
-                                'estimatedTime', 'storyPoints', 'description', 'fixVersionIssueRel', 'issueLabel',
-                                ...fields.map((f) => f.fieldCode).filter((code) => code !== 'typeId')]);
+                                'estimatedTime', 'storyPoints', 'fixVersionIssueRel', 'issueLabel',
+                                ...fields.map((f) => f.fieldCode).filter((code) => !['typeId', 'summary', 'description'].some((i) => i === code))]);
                               this.setState({
                                 fields: res,
                               });
+                              this.loadDefaultTemplate(typeCode);
                             });
                           })}
                         >
@@ -625,6 +636,7 @@ class CreateIssue extends Component {
                 label="特性"
                 allowClear
                 type="feature"
+                loadWhenMount
               />,
             )}
           </FormItem>
@@ -641,6 +653,13 @@ class CreateIssue extends Component {
                 mode="multiple"
                 loadWhenMount
                 type="version"
+                afterLoad={() => {
+                  if (this.props.chosenVersion) {
+                    form.setFieldsValue({
+                      fixVersionIssueRel: [this.props.chosenVersion],
+                    });
+                  }
+                }}
               />,
             )}
           </FormItem>
@@ -654,7 +673,7 @@ class CreateIssue extends Component {
                 if (!isInProgram) {
                   return (
                     ['issue_epic', 'sub_task'].includes(newIssueTypeCode) ? null : (
-                      <FormItem label="史诗">
+                      <FormItem label="史诗" key="epicId">
                         {getFieldDecorator('epicId', {
                           rules: [{ required: field.required, message: '请选择史诗' }],
                         })(
@@ -676,12 +695,22 @@ class CreateIssue extends Component {
                   );
                 } if (isShowFeature && newIssueTypeCode === 'story') {
                   return (
-                    <FormItem label="特性">
+                    <FormItem label="特性" key="featureId">
                       {getFieldDecorator('featureId', {})(
                         <SelectFocusLoad
                           label="特性"
                           allowClear
                           type="feature"
+                          loadWhenMount
+                          selectedFeature={{
+                            issueId: this.props.chosenFeature,
+                            summary: this.props.chosenFeatureName,
+                          }}
+                          afterLoad={() => {
+                            form.setFieldsValue({
+                              featureId: this.props.chosenFeature,
+                            });
+                          }}
                         />,
                       )}
                     </FormItem>
@@ -741,10 +770,17 @@ class CreateIssue extends Component {
           newIssueTypeCode !== 'issue_epic' && (
             <FormItem>
               {getFieldDecorator('estimatedTime', {
-                rules: [{ required: field.required, message: '请选择预估时间' }],
+                rules: [{
+                  required: field.required,
+                  message: '请选择预估时间',
+                }, {
+                  pattern: /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/,
+                  message: '请输入小于3位的整数或者整数位小于3位小数点后一位的小数',
+                }],
               })(
                 <SelectNumber
                   label="预估时间"
+                  loose
                   getPopupContainer={(triggerNode) => triggerNode.parentNode}
                 />,
               )}
@@ -756,10 +792,17 @@ class CreateIssue extends Component {
           newIssueTypeCode === 'story' && (
             <FormItem>
               {getFieldDecorator('storyPoints', {
-                rules: [{ required: field.required, message: '请填写故事点' }],
+                rules: [{
+                  required: field.required,
+                  message: '请填写故事点',
+                }, {
+                  pattern: /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/,
+                  message: '请输入小于3位的整数或者整数位小于3位小数点后一位的小数',
+                }],
               })(
                 <SelectNumber
                   label="故事点"
+                  loose
                   getPopupContainer={(triggerNode) => triggerNode.parentNode}
                 />,
               )}
@@ -769,11 +812,10 @@ class CreateIssue extends Component {
       case 'description':
         return (
           <>
-            <FormItem key={newIssueTypeCode} label={fieldName} className="c7nagile-line">
+            <FormItem key={newIssueTypeCode} label={fieldName} className="c7nagile-line" required={field.required}>
               {getFieldDecorator(fieldCode, {
-                rules: [{ required: field.required, message: '请填写描述' }],
               })(
-                <WYSIWYGEditor
+                <DebounceEditor
                   style={{ height: 200, width: '100%' }}
                 />,
               )}
@@ -838,6 +880,9 @@ class CreateIssue extends Component {
             field={field || {}}
           />
         );
+      case 'subProject':
+        return newIssueTypeCode === 'feature'
+        && <FieldTeam form={form} teamProjectIds={teamProjectIds} field={field || {}} />;
       default:
         return (
           <FormItem label={fieldName} style={{ width: 330 }}>
@@ -923,7 +968,6 @@ class CreateIssue extends Component {
       // contentDescription,
       // contentLink,
       hiddenFields,
-      teamProjectIds,
     } = this.props;
     const {
       createLoading, fields, loading, newIssueTypeCode,
@@ -951,7 +995,6 @@ class CreateIssue extends Component {
                 )}
                 {fields && fields.filter((field) => !hiddenFields.includes(field.fieldCode))
                   .map((field) => <span key={field.id}>{this.getFieldComponent(field)}</span>)}
-                {newIssueTypeCode === 'feature' && <FieldTeam form={form} teamProjectIds={teamProjectIds} />}
                 {newIssueTypeCode === 'feature' && <WSJF getFieldDecorator={form.getFieldDecorator} />}
               </div>
               {mode !== 'feature' && mode !== 'sub_task' && !['issue_epic', 'feature'].includes(newIssueTypeCode) && <FieldIssueLinks form={form} />}

@@ -19,7 +19,6 @@ import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
-import org.hzero.mybatis.common.Criteria;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,8 +66,8 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
         List<IssueTypeDTO> issueTypes = issueTypeMapper.queryByOrgId(organizationId);
         Map<Long, IssueTypeDTO> issueTypeMap = issueTypes.stream().collect(Collectors.toMap(IssueTypeDTO::getId, x -> x));
         //查询组织下的所有状态机
-        List<StateMachineVO> stateMachineVOS = stateMachineService.queryByOrgId(organizationId);
-        Map<Long, StateMachineVO> stateMachineVOMap = stateMachineVOS.stream().collect(Collectors.toMap(StateMachineVO::getId, x -> x));
+        List<StatusMachineVO> statusMachineVOS = stateMachineService.queryByOrgId(organizationId);
+        Map<Long, StatusMachineVO> stateMachineVOMap = statusMachineVOS.stream().collect(Collectors.toMap(StatusMachineVO::getId, x -> x));
 
         StateMachineSchemeDTO scheme = modelMapper.map(schemeVO, StateMachineSchemeDTO.class);
         Page<StateMachineSchemeDTO> page = PageHelper.doPageAndSort(pageRequest, () -> schemeMapper.fulltextSearch(scheme, params));
@@ -100,8 +99,8 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
         }
 
         //创建一个defaultConfig
-        StateMachineVO stateMachineVO = stateMachineService.queryDefaultStateMachine(organizationId);
-        configService.createDefaultConfig(organizationId, scheme.getId(), stateMachineVO.getId());
+        StatusMachineVO statusMachineVO = stateMachineService.queryDefaultStateMachine(organizationId);
+        configService.createDefaultConfig(organizationId, scheme.getId(), statusMachineVO.getId());
 
         scheme = schemeMapper.selectByPrimaryKey(scheme);
         return modelMapper.map(scheme, StateMachineSchemeVO.class);
@@ -158,11 +157,11 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
         }
         StateMachineSchemeVO schemeVO = modelMapper.map(scheme, StateMachineSchemeVO.class);
         //处理配置信息
-        List<StateMachineSchemeConfigVO> configs = configService.queryBySchemeId(isDraft, organizationId, schemeId);
+        List<StatusMachineSchemeConfigVO> configs = configService.queryBySchemeId(isDraft, organizationId, schemeId);
         Map<Long, List<IssueTypeDTO>> map = new HashMap<>(configs.size());
         //取默认配置到第一个
         Long defaultStateMachineId = null;
-        for (StateMachineSchemeConfigVO config : configs) {
+        for (StatusMachineSchemeConfigVO config : configs) {
             List<IssueTypeDTO> issueTypes = map.get(config.getStateMachineId());
             if (issueTypes == null) {
                 issueTypes = new ArrayList<>();
@@ -188,9 +187,9 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
         for (Map.Entry<Long, List<IssueTypeDTO>> entry : map.entrySet()) {
             Long stateMachineId = entry.getKey();
             List<IssueTypeDTO> issueTypes = entry.getValue();
-            StateMachineVO stateMachineVO = stateMachineService.queryStateMachineById(organizationId, stateMachineId);
+            StatusMachineVO statusMachineVO = stateMachineService.queryStateMachineById(organizationId, stateMachineId);
             StateMachineSchemeConfigViewVO viewVO = new StateMachineSchemeConfigViewVO();
-            viewVO.setStateMachineVO(stateMachineVO);
+            viewVO.setStatusMachineVO(statusMachineVO);
             List<IssueTypeVO> issueTypeVOS = modelMapper.map(issueTypes, new TypeToken<List<IssueTypeVO>>() {
             }.getType());
             viewVO.setIssueTypeVOS(issueTypeVOS);
@@ -210,8 +209,8 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
      */
     private StateMachineSchemeConfigViewVO handleDefaultConfig(Long organizationId, Long defaultStateMachineId, Map<Long, List<IssueTypeDTO>> map) {
         StateMachineSchemeConfigViewVO firstVO = new StateMachineSchemeConfigViewVO();
-        StateMachineVO stateMachineVO = stateMachineService.queryStateMachineById(organizationId, defaultStateMachineId);
-        firstVO.setStateMachineVO(stateMachineVO);
+        StatusMachineVO statusMachineVO = stateMachineService.queryStateMachineById(organizationId, defaultStateMachineId);
+        firstVO.setStatusMachineVO(statusMachineVO);
         firstVO.setIssueTypeVOS(modelMapper.map(map.get(defaultStateMachineId), new TypeToken<ArrayList<IssueTypeVO>>() {
         }.getType()));
         map.remove(defaultStateMachineId);
@@ -225,9 +224,9 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
      * @param issueTypeMap
      * @param stateMachineVOMap
      */
-    private void handleSchemeConfig(List<StateMachineSchemeVO> schemeVOS, Map<Long, IssueTypeDTO> issueTypeMap, Map<Long, StateMachineVO> stateMachineVOMap) {
+    private void handleSchemeConfig(List<StateMachineSchemeVO> schemeVOS, Map<Long, IssueTypeDTO> issueTypeMap, Map<Long, StatusMachineVO> stateMachineVOMap) {
         schemeVOS.stream().map(StateMachineSchemeVO::getConfigVOS).filter(Objects::nonNull).forEach(machineSchemeVOS -> {
-            for (StateMachineSchemeConfigVO configVO : machineSchemeVOS) {
+            for (StatusMachineSchemeConfigVO configVO : machineSchemeVOS) {
                 if (!configVO.getDefault()) {
                     IssueTypeDTO issueType = issueTypeMap.get(configVO.getIssueTypeId());
                     if (issueType != null) {
@@ -241,9 +240,9 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
                     configVO.setIssueTypeIcon(WITHOUT_CONFIG_ISSUE_TYPE_ICON);
                     configVO.setIssueTypeColour(WITHOUT_CONFIG_ISSUE_TYPE_COLOUR);
                 }
-                StateMachineVO stateMachineVO = stateMachineVOMap.get(configVO.getStateMachineId());
-                if (stateMachineVO != null) {
-                    configVO.setStateMachineName(stateMachineVO.getName());
+                StatusMachineVO statusMachineVO = stateMachineVOMap.get(configVO.getStateMachineId());
+                if (statusMachineVO != null) {
+                    configVO.setStateMachineName(statusMachineVO.getName());
                 }
             }
         });
@@ -338,8 +337,8 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
         //复制草稿配置到发布
         configService.copyDraftToDeploy(false, scheme.getOrganizationId(), schemeId);
         //活跃方案下的所有新建状态机
-        List<StateMachineSchemeConfigVO> configs = configService.queryBySchemeId(false, scheme.getOrganizationId(), schemeId);
-        stateMachineService.activeStateMachines(scheme.getOrganizationId(), configs.stream().map(StateMachineSchemeConfigVO::getStateMachineId).distinct().collect(Collectors.toList()));
+        List<StatusMachineSchemeConfigVO> configs = configService.queryBySchemeId(false, scheme.getOrganizationId(), schemeId);
+        stateMachineService.activeStateMachines(scheme.getOrganizationId(), configs.stream().map(StatusMachineSchemeConfigVO::getStateMachineId).distinct().collect(Collectors.toList()));
     }
 
     @Override

@@ -305,7 +305,7 @@ class BurndownChartHome extends Component {
                   </Checkbox>
                 </div>
                 <BurnDownChart
-                  select={select}
+                  type={select}
                   loading={chartLoading}
                   data={chartData}
                   endDate={endDate}

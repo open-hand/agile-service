@@ -2,9 +2,13 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { commonApi } from '@/api';
 import { stores } from '@choerodon/boot';
+import { AppStateProps } from '@/common/types';
 
-const { AppState } = stores;
-
+const { AppState }: { AppState: AppStateProps } = stores;
+const isDEV = process.env.NODE_ENV === 'development';
+// @ts-ignore
+const HAS_AGILE_PRO = C7NHasModule('@choerodon/agile-pro');
+const shouldRequest = isDEV || HAS_AGILE_PRO;
 interface ChildrenProps {
   isInProgram: boolean,
   program: object | boolean,
@@ -25,12 +29,12 @@ const useIsInProgram = (): ChildrenProps => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const type = AppState.currentMenuType.category === 'PROGRAM' ? 'program' : 'agile';
+  const { id } = AppState.currentMenuType;
   const isProgram = type === 'program';
-
   const refresh = useCallback(async () => {
     if (!isProgram) {
       setLoading(true);
-      const projectProgram = await commonApi.getProjectsInProgram();
+      const projectProgram = shouldRequest ? await commonApi.getProjectsInProgram() : Promise.resolve(false);
       const hasProgram = Boolean(projectProgram);
       let art = false;
       let showFeature = false;
@@ -46,7 +50,7 @@ const useIsInProgram = (): ChildrenProps => {
         setLoading(false);
       });
     }
-  }, [isProgram]);
+  }, [isProgram, id]);
 
   useEffect(() => {
     refresh();

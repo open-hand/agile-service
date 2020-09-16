@@ -254,7 +254,11 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
             StatusFieldValueSettingDTO statusFieldValueSettingDTO = statusFieldValueSettingDTOS.get(0);
             fieldList.add(fieldName);
             if (CLEAR.equals(statusFieldValueSettingDTO.getOperateType())) {
-                field.set(issueUpdateVO, null);
+                if (FieldCode.COMPONENT.equals(v.getFieldCode()) || FieldCode.LABEL.equals(v.getFieldCode())) {
+                    field.set(issueUpdateVO, new ArrayList<>());
+                } else {
+                    field.set(issueUpdateVO, null);
+                }
                 return;
             }
             handlerFieldName(issueUpdateVO, statusFieldValueSettingDTOS, issueDTO, statusFieldValueSettingDTO, v, field);
@@ -302,6 +306,11 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
                 List<LabelIssueRelVO> labelIssueRelVOS = statusFieldValueSettingDTOS.stream().map(settingDTO -> {
                     LabelIssueRelVO labelIssueRelVO = new LabelIssueRelVO();
                     labelIssueRelVO.setLabelId(settingDTO.getOptionId());
+                    labelIssueRelVO.setProjectId(issueDTO.getProjectId());
+                    IssueLabelDTO issueLabelDTO = issueLabelMapper.selectByPrimaryKey(settingDTO.getOptionId());
+                    if (!ObjectUtils.isEmpty(issueLabelDTO)) {
+                        labelIssueRelVO.setLabelName(issueLabelDTO.getLabelName());
+                    }
                     return labelIssueRelVO;
                 }).collect(Collectors.toList());
                 field.set(issueUpdateVO, labelIssueRelVOS);
@@ -350,7 +359,7 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         switch (v.getFieldType()) {
             case FieldType.CHECKBOX:
             case FieldType.MULTIPLE:
-                pageFieldViewUpdateVO.setValue(statusFieldValueSettingDTOS.stream().map(StatusFieldValueSettingDTO::getOptionId).collect(Collectors.toList()));
+                pageFieldViewUpdateVO.setValue(statusFieldValueSettingDTOS.stream().map(settingDTO -> settingDTO.getOptionId().toString()).collect(Collectors.toList()));
                 break;
             case FieldType.RADIO:
             case FieldType.SINGLE:
@@ -493,7 +502,26 @@ public class StatusFieldSettingServiceImpl implements StatusFieldSettingService 
         StatusFieldValueSettingDTO statusFieldValueSettingDTO = new StatusFieldValueSettingDTO();
         statusFieldValueSettingDTO.setProjectId(projectId);
         statusFieldValueSettingDTO.setStatusFieldSettingId(fieldSettingId);
-        return statusFieldValueSettingMapper.select(statusFieldValueSettingDTO);
+        List<StatusFieldValueSettingDTO> select = statusFieldValueSettingMapper.select(statusFieldValueSettingDTO);
+        if(CollectionUtils.isEmpty(select)){
+            return new ArrayList<>();
+        }
+        handlerDTO(select);
+        return select;
+    }
+
+    private void handlerDTO(List<StatusFieldValueSettingDTO> statusFieldValueSetting) {
+        List<Long> userIds = statusFieldValueSetting.stream().filter(v -> FieldType.MEMBER.equals(v.getFieldType()) && !ObjectUtils.isEmpty(v.getUserId())).map(StatusFieldValueSettingDTO::getUserId).collect(Collectors.toList());
+        Map<Long, String> userMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(userIds)) {
+            List<UserDTO> userDTOS = baseFeignClient.listUsersByIds(userIds.toArray(new Long[userIds.size()]), true).getBody();
+            userMap.putAll(userDTOS.stream().collect(Collectors.toMap(UserDTO::getId, UserDTO::getRealName)));
+        }
+        statusFieldValueSetting.forEach(v -> {
+            if (FieldType.MEMBER.equals(v.getFieldType()) && !ObjectUtils.isEmpty(v.getUserId())) {
+                v.setName(userMap.get(v.getUserId()));
+            }
+        });
     }
 
     private void deleteStatusFieldSetting(List<StatusFieldSettingDTO> statusFieldSettingDTOS) {

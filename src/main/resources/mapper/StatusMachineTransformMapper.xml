@@ -74,7 +74,7 @@
         smt.*,
         smn.status_id as endStatusId
         FROM fd_status_machine_transform smt
-        LEFT JOIN fd_status_machine_node smn ON smn.id = smt.end_node_id
+        LEFT JOIN fd_status_machine_node smn ON smn.organization_id = smt.organization_id AND  smn.id = smt.end_node_id
         where smt.organization_id = #{organizationId}
         and smt.state_machine_id in
         <foreach collection="stateMachineIds" item="id" open="(" separator="," close=")">
@@ -93,4 +93,13 @@
             ,#{item.organizationId},#{item.createdBy},#{item.lastUpdatedBy})
         </foreach>
     </insert>
+
+    <select id="existTransferOwner" resultType="java.lang.Long">
+        select
+           fsnt.start_node_id
+        from fd_status_machine_transform fsnt
+        where
+            fsnt.state_machine_id = #{stateMachineId}
+            AND fsnt.start_node_id = fsnt.end_node_id
+    </select>
 </mapper>

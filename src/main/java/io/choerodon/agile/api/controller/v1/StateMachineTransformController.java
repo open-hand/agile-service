@@ -7,7 +7,7 @@ import io.choerodon.core.base.BaseController;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.iam.InitRoleCode;
 import io.choerodon.agile.api.validator.StateMachineTransformValidator;
-import io.choerodon.agile.api.vo.StateMachineTransformVO;
+import io.choerodon.agile.api.vo.StatusMachineTransformVO;
 import io.choerodon.agile.app.service.StateMachineTransformService;
 import io.swagger.annotations.ApiOperation;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -35,9 +35,9 @@ public class StateMachineTransformController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建转换（草稿）")
     @PostMapping
-    public ResponseEntity<StateMachineTransformVO> create(@PathVariable("organization_id") Long organizationId,
-                                                          @RequestParam @Encrypt Long stateMachineId,
-                                                          @RequestBody StateMachineTransformVO transformDTO) {
+    public ResponseEntity<StatusMachineTransformVO> create(@PathVariable("organization_id") Long organizationId,
+                                                           @RequestParam @Encrypt Long stateMachineId,
+                                                           @RequestBody StatusMachineTransformVO transformDTO) {
         transformValidator.createValidate(transformDTO);
         return new ResponseEntity<>(transformService.create(organizationId, stateMachineId, transformDTO), HttpStatus.CREATED);
     }
@@ -45,10 +45,10 @@ public class StateMachineTransformController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "更新转换（草稿）")
     @PutMapping(value = "/{transform_id}")
-    public ResponseEntity<StateMachineTransformVO> update(@PathVariable("organization_id") Long organizationId,
-                                                          @PathVariable("transform_id")  @Encrypt Long transformId,
-                                                          @RequestParam @Encrypt  Long stateMachineId,
-                                                          @RequestBody StateMachineTransformVO transformDTO) {
+    public ResponseEntity<StatusMachineTransformVO> update(@PathVariable("organization_id") Long organizationId,
+                                                           @PathVariable("transform_id")  @Encrypt Long transformId,
+                                                           @RequestParam @Encrypt  Long stateMachineId,
+                                                           @RequestBody StatusMachineTransformVO transformDTO) {
         transformValidator.updateValidate(transformDTO);
         return new ResponseEntity<>(transformService.update(organizationId, stateMachineId, transformId, transformDTO), HttpStatus.CREATED);
     }
@@ -65,17 +65,17 @@ public class StateMachineTransformController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "根据id获取转换（草稿）")
     @GetMapping(value = "/{transform_id}")
-    public ResponseEntity<StateMachineTransformVO> queryById(@PathVariable("organization_id") Long organizationId,
-                                                             @PathVariable("transform_id") @Encrypt Long transformId) {
+    public ResponseEntity<StatusMachineTransformVO> queryById(@PathVariable("organization_id") Long organizationId,
+                                                              @PathVariable("transform_id") @Encrypt Long transformId) {
         return new ResponseEntity<>(transformService.queryById(organizationId, transformId), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation(value = "创建【全部】转换，所有节点均可转换到当前节点（草稿）")
     @PostMapping(value = "/create_type_all")
-    public ResponseEntity<StateMachineTransformVO> createAllStatusTransform(@PathVariable("organization_id") Long organizationId,
-                                                                            @RequestParam("state_machine_id") @Encrypt Long stateMachineId,
-                                                                            @RequestParam("end_node_id") @Encrypt Long endNodeId) {
+    public ResponseEntity<StatusMachineTransformVO> createAllStatusTransform(@PathVariable("organization_id") Long organizationId,
+                                                                             @RequestParam("state_machine_id") @Encrypt Long stateMachineId,
+                                                                             @RequestParam("end_node_id") @Encrypt Long endNodeId) {
         return new ResponseEntity<>(transformService.createAllStatusTransform(organizationId, stateMachineId, endNodeId), HttpStatus.CREATED);
     }
 

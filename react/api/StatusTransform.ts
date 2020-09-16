@@ -145,7 +145,7 @@ class StatusTransformApi extends Api {
     });
   }
 
-  checkStatusNeedTransform(statusId: string) {
+  checkStatusDelete(statusId: string) {
     return this.request({
       method: 'get',
       url: `${this.prefix}/status/check_delete_status`,
@@ -283,9 +283,11 @@ class StatusTransformApi extends Api {
   getCustomMember(issueTypeId: string, schemeCode: string = 'agile_issue') {
     const arr = [
       { code: 'projectOwner', name: '项目所有者' },
-      { code: 'assignee', name: '经办人' },
       { code: 'reporter', name: '报告人' },
     ];
+    if (getApplyType() === 'agile') {
+      arr.push({ code: 'assignee', name: '经办人' });
+    }
     return this.request({
       method: 'get',
       url: `${this.prefix}/object_scheme_field/member_list`,

@@ -1,6 +1,6 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.StateMachineNodeVO;
+import io.choerodon.agile.api.vo.StatusMachineNodeVO;
 import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.infra.dto.StatusMachineNodeDTO;
 
@@ -18,7 +18,7 @@ public interface StateMachineNodeService {
      * @param nodeVO
      * @return
      */
-    List<StateMachineNodeVO> create(Long organizationId, Long stateMachineId, StateMachineNodeVO nodeVO);
+    List<StatusMachineNodeVO> create(Long organizationId, Long stateMachineId, StatusMachineNodeVO nodeVO);
 
     /**
      * 更新节点
@@ -28,7 +28,7 @@ public interface StateMachineNodeService {
      * @param nodeVO        节点对象
      * @return 更新节点
      */
-    List<StateMachineNodeVO> update(Long organizationId, Long stateMachineId, Long nodeId, StateMachineNodeVO nodeVO);
+    List<StatusMachineNodeVO> update(Long organizationId, Long stateMachineId, Long nodeId, StatusMachineNodeVO nodeVO);
 
     /**
      * 删除状态节点
@@ -37,7 +37,7 @@ public interface StateMachineNodeService {
      * @param nodeId         节点id
      * @return
      */
-    List<StateMachineNodeVO> delete(Long organizationId, Long stateMachineId, Long nodeId);
+    List<StatusMachineNodeVO> delete(Long organizationId, Long stateMachineId, Long nodeId);
 
     /**
      * 校验是否能删除状态节点
@@ -63,7 +63,7 @@ public interface StateMachineNodeService {
      * @param nodeId
      * @return
      */
-    StateMachineNodeVO queryById(Long organizationId, Long nodeId);
+    StatusMachineNodeVO queryById(Long organizationId, Long nodeId);
 
     /**
      * 根据状态机id获取所有节点
@@ -72,7 +72,7 @@ public interface StateMachineNodeService {
      * @param stateMachineId
      * @return
      */
-    List<StateMachineNodeVO> queryByStateMachineId(Long organizationId, Long stateMachineId, Boolean isDraft);
+    List<StatusMachineNodeVO> queryByStateMachineId(Long organizationId, Long stateMachineId, Boolean isDraft);
 
     /**
      * 敏捷创建节点

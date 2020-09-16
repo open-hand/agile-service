@@ -14,13 +14,13 @@ interface IssueOption {
   type: 'organization' | 'common',
 }
 const issueTypeOptions: Array<IssueOption> = [
-  { value: 'issue_epic', text: '史诗', type: 'common' },
   { value: 'feature', text: '特性', type: 'organization' },
   { value: 'story', text: '故事', type: 'common' },
   { value: 'task', text: '任务', type: 'common' },
   { value: 'sub_task', text: '子任务', type: 'common' },
   { value: 'bug', text: '缺陷', type: 'common' },
   { value: 'backlog', text: '需求', type: 'common' },
+  { value: 'issue_epic', text: '史诗', type: 'common' },
 ];
 function PageSwitch() {
   const [switchOptions, setSwitchOption] = useState<Array<IssueOption>>();
@@ -51,17 +51,17 @@ function PageSwitch() {
   // 加载全部字段 用于增添已有字段
   useEffect(() => {
     pageIssueTypeStore.setLoading(true);
-    pageIssueTypeStore.loadAllField();
+    // pageIssueTypeStore.loadAllField();
     const showOptions = isProgram
       ? [
         { value: 'feature', text: '特性', type: 'organization' },
-        { value: 'issue_epic', text: '史诗', type: 'common' },
         { value: 'backlog', text: '需求', type: 'common' },
+        { value: 'issue_epic', text: '史诗', type: 'common' },
       ] as Array<IssueOption> : issueTypeOptions.filter((item) => item.type === 'common' || !isProject);
     pageConfigApi.loadAvailableIssueType().then((res) => {
       // const showOptions = res.map((item) => ({ value: item.typeCode, text: item.name }));
       if (!res.some((item) => item.typeCode === 'backlog')) {
-        showOptions.pop();
+        showOptions.splice(-2, 1); // 删除需求
       }
       pageIssueTypeStore.init(showOptions[0].value as PageConfigIssueType);
       setSwitchOption(showOptions);

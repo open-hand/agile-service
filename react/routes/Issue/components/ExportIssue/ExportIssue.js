@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { stores, Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react';
+import moment from 'moment';
 import { Modal, Radio } from 'choerodon-ui';
 import FileSaver from 'file-saver';
 import IssueStore from '@/stores/project/issue/IssueStore';
@@ -72,9 +73,9 @@ class ExportIssue extends Component {
    * 输出 excel
    */
   exportExcel = () => {
-    const searchDTO = IssueStore.getCustomFieldFilters();
+    const { dataSet, issueSearchStore } = this.props;
+    const searchDTO = issueSearchStore.getCustomFieldFilters();
     const { mode, sprints } = this.state;
-    const { dataSet } = this.props;
     const field = find([...dataSet.fields.values()], (f) => f.order);
     const tableShowColumns = mode === 'all' ? [] : this.getVisibleColumns();
     const search = {
@@ -84,7 +85,7 @@ class ExportIssue extends Component {
     this.setState({
       loading: true,
     });
-    if (!IssueStore.isHasFilter) {
+    if (!issueSearchStore.isHasFilter) {
       search.otherArgs.sprint = sprints;
     }
     issueApi.export(search, field ? `${field.name},${field.order}` : undefined)
@@ -109,6 +110,7 @@ class ExportIssue extends Component {
 
   render() {
     const { mode, loading, sprints } = this.state;
+    const { issueSearchStore } = this.props;
     const visible = IssueStore.exportModalVisible;
     const projectName = AppState.currentMenuType.name;
 
@@ -128,7 +130,7 @@ class ExportIssue extends Component {
             {' '}
             的问题，请选择你需要导出的字段
           </div>
-          {!IssueStore.isHasFilter && (
+          {!issueSearchStore.isHasFilter && (
             <div style={{ display: 'flex' }}>
               <SelectFocusLoad
                 style={{ flexGrow: 1, width: 0, marginTop: 10 }}
@@ -144,9 +146,29 @@ class ExportIssue extends Component {
                 }}
                 afterLoad={(data) => {
                   if (data && data.length > 0) {
-                    this.setState({
-                      sprints: [data[0].sprintId],
-                    });
+                    const startedSprint = data.find((item) => item.statusCode === 'started');
+                    if (startedSprint) {
+                      this.setState({
+                        sprints: [startedSprint.sprintId],
+                      });
+                    } else {
+                      const closedSprints = data.filter((item) => item.statusCode === 'closed');
+                      if (closedSprints && closedSprints.length) {
+                        const closedSprintsSortByEndDate = closedSprints.sort((sprint1, sprint2) => { // 将团队下的冲刺按照开始时间先后进行排列，避免出现自定义冲刺开始时间比较小，确在后边的情况
+                          if (moment(sprint1.actualEndDate).isBefore(moment(sprint2.actualEndDate))) {
+                            return 1;
+                          }
+                          return -1;
+                        });
+                        this.setState({
+                          sprints: [closedSprintsSortByEndDate[0].sprintId],
+                        });
+                      } else {
+                        this.setState({
+                          sprints: [data[0].sprintId],
+                        });
+                      }
+                    }
                   }
                 }}
                 filter

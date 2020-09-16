@@ -90,7 +90,8 @@ const DraggableItem: React.FC<Props> = ({
   };
   function onClickDel(record: Record, dataSet: DataSet) {
     Modal.confirm({
-      title: `是否删除【${record?.get('fieldName')}】字段`,
+      title: `删除【${record?.get('fieldName')}】字段`,
+      content: `确认删除【${record?.get('fieldName')}】字段吗？删除后会从当前问题类型移除此字段，并且字段数据会清空。`,
       onOk: handleDelete.bind(this, record, dataSet),
     });
   }
@@ -137,9 +138,9 @@ const DraggableItem: React.FC<Props> = ({
       <div className={`${prefixCls}-item`}>
         {renderFieldName({ value: data.get('fieldName'), record: data, dataSet: data.dataSet })}
       </div>
-      <Tooltip title={data.get('defaultValue')} placement="top">
+      <Tooltip title={data.get('localDefaultValue') || data.get('defaultValue')} placement="top">
         <div className={`${prefixCls}-item ${prefixCls}-item-text`}>
-          {data.get('defaultValue')}
+          {data.get('localDefaultValue') || data.get('defaultValue')}
         </div>
       </Tooltip>
       <div className={`${prefixCls}-item`}>

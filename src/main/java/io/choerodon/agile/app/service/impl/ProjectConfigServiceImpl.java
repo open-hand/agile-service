@@ -18,6 +18,7 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
@@ -206,8 +207,8 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         //根据方案配置表获取 问题类型
         List<IssueTypeDTO> issueTypes = issueTypeMapper.queryBySchemeId(organizationId, issueTypeSchemeId);
         //根据方案配置表获取 状态机与问题类型的对应关系
-        List<StateMachineSchemeConfigVO> configs = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, stateMachineSchemeId);
-        Map<Long, Long> map = configs.stream().collect(Collectors.toMap(StateMachineSchemeConfigVO::getIssueTypeId, StateMachineSchemeConfigVO::getStateMachineId));
+        List<StatusMachineSchemeConfigVO> configs = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, stateMachineSchemeId);
+        Map<Long, Long> map = configs.stream().collect(Collectors.toMap(StatusMachineSchemeConfigVO::getIssueTypeId, StatusMachineSchemeConfigVO::getStateMachineId));
         Long defaultStateMachineId = stateMachineSchemeConfigService.selectDefault(false, organizationId, stateMachineSchemeId).getStateMachineId();
         List<IssueTypeWithStateMachineIdVO> issueTypeWithStateMachineIds = modelMapper.map(issueTypes, new TypeToken<List<IssueTypeWithStateMachineIdVO>>() {
         }.getType());
@@ -243,7 +244,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         //获取状态机ids
         List<Long> stateMachineIds = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, stateMachineSchemeId)
-                .stream().map(StateMachineSchemeConfigVO::getStateMachineId).collect(Collectors.toList());
+                .stream().map(StatusMachineSchemeConfigVO::getStateMachineId).collect(Collectors.toList());
         return statusService.queryByStateMachineIds(organizationId, stateMachineIds);
     }
 
@@ -287,7 +288,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
-    public Map<Long, Map<Long, List<TransformVO>>> queryTransformsMapByProjectId(Long projectId, String applyType) {
+    public Map<Long, Map<Long, List<TransformVO>>> queryTransformsMapByProjectId(Long projectId,Long boardId,String applyType) {
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
             throw new CommonException(ERROR_APPLYTYPE_ILLEGAL);
         }
@@ -297,43 +298,64 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (smProjectConfig.getSchemeId() == null) {
             throw new CommonException("error.queryTransformsMapByProjectId.stateMachineSchemeId.null");
         }
-        List<StateMachineSchemeConfigVO> smsConfigVO = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, smProjectConfig.getSchemeId());
+        List<StatusMachineSchemeConfigVO> smsConfigVO = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, smProjectConfig.getSchemeId());
         //获取问题类型方案
         ProjectConfigDTO itProjectConfig = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.ISSUE_TYPE, applyType);
         if (itProjectConfig.getSchemeId() == null) {
             throw new CommonException("error.queryTransformsMapByProjectId.issueTypeSchemeId.null");
         }
         List<IssueTypeDTO> issueTypes = issueTypeMapper.queryBySchemeId(organizationId, itProjectConfig.getSchemeId());
-        List<Long> stateMachineIds = smsConfigVO.stream().map(StateMachineSchemeConfigVO::getStateMachineId).collect(Collectors.toList());
+        // 史诗和普通项目群的特性类型没必要在查询转换
+        List<Long> skipIssueTypeId = new ArrayList<>();
+        skipIssueTypeId.add(0L);
+        issueTypes.forEach(v -> {
+            boolean isSkip = "issue_epic".equals(v.getTypeCode()) || (SchemeApplyType.AGILE.equals(applyType) && "feature".equals(v.getTypeCode()));
+            if (Boolean.TRUE.equals(isSkip)) {
+                skipIssueTypeId.add(v.getId());
+            }
+        });
+        List<Long> stateMachineIds = smsConfigVO.stream().filter(v -> !skipIssueTypeId.contains(v.getIssueTypeId())).map(StatusMachineSchemeConfigVO::getStateMachineId).collect(Collectors.toList());
         //状态机id->状态id->转换列表
         Map<Long, Map<Long, List<TransformVO>>> statusMap = transformService.queryStatusTransformsMap(organizationId, stateMachineIds);
-        Map<Long, Long> idMap = smsConfigVO.stream().collect(Collectors.toMap(StateMachineSchemeConfigVO::getIssueTypeId, StateMachineSchemeConfigVO::getStateMachineId));
+        Map<Long, Long> idMap = smsConfigVO.stream().collect(Collectors.toMap(StatusMachineSchemeConfigVO::getIssueTypeId, StatusMachineSchemeConfigVO::getStateMachineId));
         //问题类型id->状态id->转换列表
         Map<Long, Map<Long, List<TransformVO>>> resultMap = new HashMap<>(issueTypes.size());
         //获取组织所有状态
         List<StatusVO> statusVOS = statusService.queryAllStatus(organizationId);
         Map<Long, StatusVO> sMap = statusVOS.stream().collect(Collectors.toMap(StatusVO::getId, x -> x));
-        statusMap.entrySet().forEach(x -> x.getValue().entrySet().forEach(y -> y.getValue().forEach(transformVO -> {
-            StatusVO statusVO = sMap.get(transformVO.getEndStatusId());
-            if (statusVO != null) {
-                transformVO.setStatusType(statusVO.getType());
-            }
-        })));
         //匹配默认状态机的问题类型映射
-        Long defaultStateMachineId = idMap.get(0L);
-        resultMap.put(0L, statusMap.get(defaultStateMachineId));
+//        Long defaultStateMachineId = idMap.get(0L);
+//        resultMap.put(0L, statusMap.get(defaultStateMachineId));
+
+        Set<Long> boardStatus = new HashSet<>();
+        if (!ObjectUtils.isEmpty(boardId)) {
+            // 查询出面板上有的状态
+            boardStatus.addAll(boardColumnMapper.queryStatusByBoardId(projectId,boardId));
+        }
         //匹配状态机的问题类型映射
         for (IssueTypeDTO issueType : issueTypes) {
+            boolean isSkip = "issue_epic".equals(issueType.getTypeCode()) || (SchemeApplyType.AGILE.equals(applyType) && "feature".equals(issueType.getTypeCode()));
+            if (Boolean.TRUE.equals(isSkip)) {
+                continue;
+            }
             Long stateMachineId = idMap.get(issueType.getId());
             if (stateMachineId != null) {
                 Map<Long, List<TransformVO>> statusTransferMap = statusMap.get(stateMachineId);
-                Set<Long> allStatus = statusTransferMap.keySet();
+                Set<Long> allStatus = new HashSet<>();
+                allStatus.addAll(!ObjectUtils.isEmpty(boardId) ? boardStatus : statusTransferMap.keySet());
                 // 查询能转换的状态
                 List<Long> canTransferStatus = statusTransferSettingService.checkStatusTransform(projectId, issueType.getId(), new ArrayList<>(allStatus));
                 // 过滤掉不能转换的状态
                 Map<Long, List<TransformVO>> transferMap = new HashMap<>();
-                statusTransferMap.entrySet().stream().forEach(entry ->
-                        transferMap.put(entry.getKey(),entry.getValue().stream().filter(v -> canTransferStatus.contains(v.getEndStatusId())).collect(Collectors.toList())));
+                statusTransferMap.entrySet().stream().filter(entry -> entry.getKey() != 0L && boardStatus.contains(entry.getKey())).forEach(entry -> {
+                    transferMap.put(entry.getKey(),entry.getValue().stream().filter(v ->  canTransferStatus.contains(v.getEndStatusId())).map(v -> {
+                        StatusVO statusVO = sMap.get(v.getEndStatusId());
+                        if (statusVO != null) {
+                            v.setStatusType(statusVO.getType());
+                        }
+                        return v;
+                    }).collect(Collectors.toList()));
+                });
                 resultMap.put(issueType.getId(),transferMap);
             }
         }
@@ -473,7 +495,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     }
 
     @Override
-    public StateMachineNodeVO linkStatus(Long projectId, Long issueTypeId, String applyType, Long statusId, Boolean defaultStatus) {
+    public StatusMachineNodeVO linkStatus(Long projectId, Long issueTypeId, String applyType, Long statusId, Boolean defaultStatus) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         IssueStatusDTO issueStatusDTO = issueStatusMapper.selectByStatusId(projectId, statusId);
         if (ObjectUtils.isEmpty(issueStatusDTO)) {
@@ -496,29 +518,29 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         // 校验是否已存在关联的状态
         List<StatusMachineNodeDTO> select = statusMachineNodeMapper.select(stateMachineNode);
         if (CollectionUtils.isEmpty(select)) {
-            List<StateMachineNodeVO> stateMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(organizationId, stateMachineId, false);
+            List<StatusMachineNodeVO> statusMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(organizationId, stateMachineId, false);
             stateMachineNodeService.baseCreate(stateMachineNode);
             if (Boolean.TRUE.equals(defaultStatus)) {
                 defaultStatus(projectId, issueTypeId, stateMachineId, statusId);
             }
             // 默认可以全部流转到当前状态
-            transformAll(stateMachineNodeVOS,organizationId,statusId,stateMachineId,stateMachineNode.getId());
+            transformAll(statusMachineNodeVOS,organizationId,statusId,stateMachineId,stateMachineNode.getId());
         }
         instanceCache.cleanStateMachine(stateMachineId);
-        return modelMapper.map(stateMachineNode,StateMachineNodeVO.class);
+        return modelMapper.map(stateMachineNode, StatusMachineNodeVO.class);
     }
 
-    private void transformAll(List<StateMachineNodeVO> stateMachineNodeVOS, Long organizationId, Long statusId, Long stateMachineId, Long nodeId) {
-        if (!CollectionUtils.isEmpty(stateMachineNodeVOS)) {
+    private void transformAll(List<StatusMachineNodeVO> statusMachineNodeVOS, Long organizationId, Long statusId, Long stateMachineId, Long nodeId) {
+        if (!CollectionUtils.isEmpty(statusMachineNodeVOS)) {
             StatusVO statusVO = statusService.queryStatusById(organizationId, statusId);
             List<StatusMachineTransformDTO> list = new ArrayList<>();
-            List<StateMachineNodeVO> collect = stateMachineNodeVOS.stream().filter(v -> !NodeType.START.equals(v.getType())).collect(Collectors.toList());
-            for (StateMachineNodeVO stateMachineNodeVO : collect) {
-                String name = statusVO.getName() + "转换到" + stateMachineNodeVO.getStatusVO().getName();
-                StatusMachineTransformDTO stateMachineTransform = new StatusMachineTransformDTO(name, stateMachineId, nodeId, stateMachineNodeVO.getId(), TransformType.CUSTOM, TransformConditionStrategy.ALL, organizationId);
+            List<StatusMachineNodeVO> collect = statusMachineNodeVOS.stream().filter(v -> !NodeType.START.equals(v.getType())).collect(Collectors.toList());
+            for (StatusMachineNodeVO statusMachineNodeVO : collect) {
+                String name = statusVO.getName() + "转换到" + statusMachineNodeVO.getStatusVO().getName();
+                StatusMachineTransformDTO stateMachineTransform = new StatusMachineTransformDTO(name, stateMachineId, nodeId, statusMachineNodeVO.getId(), TransformType.CUSTOM, TransformConditionStrategy.ALL, organizationId);
                 list.add(stateMachineTransform);
-                String name1 = stateMachineNodeVO.getStatusVO().getName()  + "转换到" + statusVO.getName();
-                StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO(name1, stateMachineId, stateMachineNodeVO.getId(), nodeId, TransformType.CUSTOM, TransformConditionStrategy.ALL, organizationId);
+                String name1 = statusMachineNodeVO.getStatusVO().getName()  + "转换到" + statusVO.getName();
+                StatusMachineTransformDTO statusMachineTransformDTO = new StatusMachineTransformDTO(name1, stateMachineId, statusMachineNodeVO.getId(), nodeId, TransformType.CUSTOM, TransformConditionStrategy.ALL, organizationId);
                 list.add(statusMachineTransformDTO);
             }
             // 转换到自身
@@ -567,11 +589,27 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         instanceCache.cleanStateMachine(stateMachineId);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void checkDeleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId) {
+        Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        Long stateMachineId = queryStateMachineIdAndCheck(projectId, applyType, issueTypeId);
+        StatusMachineNodeDTO statusMachineNodeDTO = new StatusMachineNodeDTO();
+        statusMachineNodeDTO.setOrganizationId(organizationId);
+        statusMachineNodeDTO.setStateMachineId(stateMachineId);
+        checkStatusLink(projectId, issueTypeId, nodeId);
+    }
+
     private StatusMachineNodeDTO checkStatusLink(Long projectId, Long issueTypeId, Long nodeId) {
-        // 校验当前node的状态有没有被项目下的issue使用
         StatusMachineNodeDTO machineNodeDTO = statusMachineNodeMapper.selectByPrimaryKey(nodeId);
         Assert.notNull(machineNodeDTO, BaseConstants.ErrorCode.DATA_NOT_EXISTS);
         Long currentStatusId = machineNodeDTO.getStatusId();
+        // 校验是否是初始状态
+        if (StringUtils.equals("node_init", machineNodeDTO.getType())) {
+            throw new CommonException("error.delete.init.status");
+        }
+        // 校验当前node的状态有没有被项目下的issue使用
         Boolean checkIssueUse = checkIssueUse(projectId, issueTypeId,machineNodeDTO.getStatusId());
         if (Boolean.TRUE.equals(checkIssueUse)) {
             // 报错
@@ -579,8 +617,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
         // 校验当前node的状态是否与其他状态有联动
         List<StatusLinkageDTO> linkExistList = statusLinkageMapper.selectByCondition(Condition.builder(StatusLinkageDTO.class)
-                .andWhere(Sqls.custom().andEqualTo("issueTypeId", issueTypeId)
-                        .andEqualTo("projectId", projectId))
+                .andWhere(Sqls.custom().andEqualTo("projectId", projectId))
                 .andWhere(Sqls.custom().andEqualTo("statusId", currentStatusId)
                                 .orEqualTo("parentIssueStatusSetting", currentStatusId)).build());
         if (CollectionUtils.isNotEmpty(linkExistList)){
@@ -658,9 +695,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
     public void handlerDeleteStatusByProject(Long projectId, String applyType, Long statusId, List<DeleteStatusTransferVO> statusTransferVOS) {
         Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
-        List<StateMachineSchemeConfigVO> stateMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, stateMachineSchemeId);
+        List<StatusMachineSchemeConfigVO> statusMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, stateMachineSchemeId);
         Map<Long, DeleteStatusTransferVO> map = statusTransferVOS.stream().collect(Collectors.toMap(DeleteStatusTransferVO::getIssueTypeId, Function.identity()));
-        for (StateMachineSchemeConfigVO schemeConfigVO : stateMachineSchemeConfigVOS) {
+        for (StatusMachineSchemeConfigVO schemeConfigVO : statusMachineSchemeConfigVOS) {
             // 查询状态的node
             StatusMachineNodeDTO statusMachineNodeDTO = new StatusMachineNodeDTO();
             statusMachineNodeDTO.setStatusId(statusId);
@@ -673,6 +710,26 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             Long tansferStatusId = handlerTransferStatus(machineNodeDTO, map, schemeConfigVO);
             // 删除node
             deleteNode(projectId, schemeConfigVO.getIssueTypeId(), applyType, machineNodeDTO.getId(), tansferStatusId);
+        }
+    }
+
+    @Override
+    public void checkDeleteStatusByProject(Long projectId, String applyType, Long statusId) {
+        Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
+        Long organizationId = ConvertUtil.getOrganizationId(projectId);
+        List<StatusMachineSchemeConfigVO> stateMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, stateMachineSchemeId);
+        for (StatusMachineSchemeConfigVO schemeConfigVO : stateMachineSchemeConfigVOS) {
+            // 查询状态的node
+            StatusMachineNodeDTO statusMachineNodeDTO = new StatusMachineNodeDTO();
+            statusMachineNodeDTO.setStatusId(statusId);
+            statusMachineNodeDTO.setStateMachineId(schemeConfigVO.getStateMachineId());
+            statusMachineNodeDTO.setOrganizationId(organizationId);
+            StatusMachineNodeDTO machineNodeDTO = statusMachineNodeMapper.selectOne(statusMachineNodeDTO);
+            if (ObjectUtils.isEmpty(machineNodeDTO)) {
+                continue;
+            }
+            // 检查是否能删除node
+            checkDeleteNode(projectId, schemeConfigVO.getIssueTypeId(), applyType, machineNodeDTO.getId());
         }
     }
 
@@ -720,7 +777,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         }
     }
 
-    private Long handlerTransferStatus(StatusMachineNodeDTO machineNodeDTO, Map<Long, DeleteStatusTransferVO> map, StateMachineSchemeConfigVO schemeConfigVO){
+    private Long handlerTransferStatus(StatusMachineNodeDTO machineNodeDTO, Map<Long, DeleteStatusTransferVO> map, StatusMachineSchemeConfigVO schemeConfigVO){
         // 判断是不是默认状态
         if (!Objects.equals(schemeConfigVO.getIssueTypeId(), 0L) && NodeType.INIT.equals(machineNodeDTO.getType())) {
             throw new CommonException("error.node.is.default.status");

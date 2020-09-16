@@ -1,12 +1,12 @@
 /* eslint-disable no-shadow */
 import React, {
-  useState, useEffect, 
+  useState, useEffect,
 } from 'react';
 import {
   Form, Input, Select, Button,
 } from 'choerodon-ui';
 import {
-  Content, stores, Choerodon, 
+  Content, stores, Choerodon,
 } from '@choerodon/boot';
 import _ from 'lodash';
 import { userApi, componentApi } from '@/api';
@@ -63,7 +63,7 @@ const EditComponent = (props) => {
     });
     return false;
   };
-  modal.handleOk(handleOk); 
+  modal.handleOk(handleOk);
   const debounceFilterIssues = _.debounce((text) => {
     setSelectLoading(true);
     setPage(1);
@@ -71,7 +71,7 @@ const EditComponent = (props) => {
       setSelectLoading(false);
       setInput(text);
       setPage(1);
-      setOriginUsers(res.list.filter(u => u.enabled));
+      setOriginUsers(res.list.filter((u) => u.enabled));
       setCanLoadMore(res.hasNextPage);
     });
   }, 500);
@@ -81,7 +81,7 @@ const EditComponent = (props) => {
       setSelectLoading(true);
       userApi.getAllInProject(input, page).then((res) => {
         setInput(input);
-        setOriginUsers(res.list.filter(u => u.enabled));
+        setOriginUsers(res.list.filter((u) => u.enabled));
         setCanLoadMore(res.hasNextPage);
         setSelectLoading(false);
       });
@@ -115,7 +115,6 @@ const EditComponent = (props) => {
       });
   };
 
-
   const checkComponentNameRepeat = (rule, value, callback) => {
     if (value && value.trim() && value.trim() !== name) {
       componentApi.checkName(value.trim()).then((res) => {
@@ -134,7 +133,7 @@ const EditComponent = (props) => {
     e.preventDefault();
     setSelectLoading(true);
     userApi.getAllInProject(input, undefined, page + 1).then((res) => {
-      setOriginUsers([...originUsers, ...res.list.filter(u => u.enabled)]);
+      setOriginUsers([...originUsers, ...res.list.filter((u) => u.enabled)]);
       setSelectLoading(false);
       setCanLoadMore(res.hasNextPage);
       setPage(page + 1);
@@ -163,7 +162,7 @@ const EditComponent = (props) => {
               validator: checkComponentNameRepeat,
             }],
           })(
-            <Input label="模块名称" maxLength={10} />,
+            <Input label="模块名称" maxLength={20} />,
           )}
         </FormItem>
         <FormItem style={{ marginBottom: 20 }}>
@@ -182,7 +181,7 @@ const EditComponent = (props) => {
             }],
           })(
             <Select label="默认经办人">
-              {['模块负责人', '无'].map(defaultAssigneeRole => (
+              {['模块负责人', '无'].map((defaultAssigneeRole) => (
                 <Option key={defaultAssigneeRole} value={defaultAssigneeRole}>
                   {defaultAssigneeRole}
                 </Option>
@@ -206,7 +205,7 @@ const EditComponent = (props) => {
                   dropdownClassName="hidden-text hidden-label"
                 // getPopupContainer={trigger => (trigger.parentNode)}
                 >
-                  {originUsers.map(user => (
+                  {originUsers.map((user) => (
                     <Option key={JSON.stringify(user)} value={JSON.stringify(user)}>
                       <div style={{ display: 'inline-flex', alignItems: 'center', padding: '2px' }}>
                         <UserHead

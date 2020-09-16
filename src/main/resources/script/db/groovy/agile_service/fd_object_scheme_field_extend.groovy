@@ -40,4 +40,22 @@ databaseChangeLog(logicalFilePath: 'fd_object_scheme_field_extend.groovy') {
             column(name: "LAST_UPDATE_DATE", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
     }
+
+    changeSet(id: '2020-09-14-fd-object-scheme-field-extend-add-index', author: 'jiaxu.cui@hand-china.com') {
+        createIndex(tableName: "fd_object_scheme_field_extend", indexName: "idx_issue_type_id") {
+            column(name: "issue_type_id")
+        }
+        createIndex(tableName: "fd_object_scheme_field_extend", indexName: "idx_issue_type") {
+            column(name: "issue_type")
+        }
+        createIndex(tableName: "fd_object_scheme_field_extend", indexName: "idx_organization_id") {
+            column(name: "organization_id")
+        }
+        createIndex(tableName: "fd_object_scheme_field_extend", indexName: "idx_project_id") {
+            column(name: "project_id")
+        }
+        createIndex(tableName: "fd_object_scheme_field_extend", indexName: "idx_field_id") {
+            column(name: "field_id")
+        }
+    }
 }

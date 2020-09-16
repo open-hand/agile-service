@@ -1,7 +1,7 @@
 import React, {
-  useEffect, useCallback,
+  useEffect, useCallback, useState,
 } from 'react';
-import { Modal } from 'choerodon-ui/pro';
+import { Spin, Modal } from 'choerodon-ui/pro';
 import { ITotalStatus, statusTransformApi } from '@/api';
 import './index.less';
 
@@ -10,10 +10,51 @@ interface Props {
   data: ITotalStatus
   modal?: any
 }
+
 const DeleteStatus: React.FC<Props> = ({
   modal, onSubmit, data,
 }) => {
+  const [loading, setLoading] = useState(false);
+  const [reason, setReason] = useState();
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      try {
+        const {
+          checkResult,
+          errorMsg,
+        } = await statusTransformApi.checkStatusDelete(data.id);
+        if (errorMsg) {
+          setReason(errorMsg);
+          modal.update({
+            okProps: {
+              disabled: true,
+            },
+          });
+        } else {
+          modal.update({
+            okProps: {
+              disabled: false,
+            },
+          });
+        }
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
+        setLoading(false);
+        modal.update({
+          okProps: {
+            disabled: false,
+          },
+        });
+      }
+    })();
+  }, [data.id]);
+
   const handleSubmit = useCallback(async () => {
+    if (reason) {
+      return true;
+    }
     try {
       await statusTransformApi.deleteStatus(data.id);
       onSubmit();
@@ -21,17 +62,26 @@ const DeleteStatus: React.FC<Props> = ({
     } catch (error) {
       return false;
     }
-  }, [data.id, onSubmit]);
+  }, [data.id, onSubmit, reason]);
   useEffect(() => {
     modal.handleOk(handleSubmit);
   }, [modal, handleSubmit]);
 
-  return null;
+  return (
+    <Spin spinning={loading}>
+      <div>
+        {reason}
+      </div>
+    </Spin>
+  );
 };
 const openDeleteStatus = (props: Omit<Props, 'modal'>) => {
   Modal.open({
     key: 'delete',
     title: `确认删除状态“${props.data.name}”`,
+    okProps: {
+      disabled: true,
+    },
     children: <DeleteStatus {...props} />,
   });
 };

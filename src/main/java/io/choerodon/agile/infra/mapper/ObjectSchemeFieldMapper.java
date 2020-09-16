@@ -59,8 +59,9 @@ public interface ObjectSchemeFieldMapper extends BaseMapper<ObjectSchemeFieldDTO
      * @return
      */
     List<ObjectSchemeFieldDetailVO> selectFieldsWithOptionals(@Param("organizationId") Long organizationId,
-                                                         @Param("projectId") Long projectId,
-                                                         @Param("issueTypeId") Long issueTypeId);
+                                                              @Param("projectId") Long projectId,
+                                                              @Param("issueTypeId") Long issueTypeId,
+                                                              @Param("issueTypes") List<String> issueTypes);
 
     /**
      * 删除字段，级联删除字段扩展数据
@@ -85,7 +86,8 @@ public interface ObjectSchemeFieldMapper extends BaseMapper<ObjectSchemeFieldDTO
                                                @Param("projectId") Long projectId,
                                                @Param("schemeCode") String schemeCode,
                                                @Param("issueTypeId") Long issueTypeId,
-                                               @Param("fieldCodeList") List<String> fieldCodeList);
+                                               @Param("fieldCodeList") List<String> fieldCodeList,
+                                               @Param("issueTypes") List<String> issueTypes);
     /**
      * 查询字段附带页面配置数据
      * @param objectSchemeField

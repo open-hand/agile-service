@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "module": "esnext",
     "baseUrl": ".",
     "strictNullChecks": true,
     "moduleResolution": "node",
@@ -10,11 +11,15 @@
     "noUnusedLocals": false,
     "noImplicitAny": true,
     "allowJs": true,
-    "allowSyntheticDefaultImports":true,
-    "noEmitOnError":false,
+    "allowSyntheticDefaultImports": true,
+    "noEmitOnError": false,
     "noEmit": true,
     "target": "es6",
-    "lib": ["dom", "es2017"],
+    "resolveJsonModule": true,
+    "lib": [
+      "dom",
+      "es2017"
+    ],
     "skipLibCheck": true,
     "paths": {
       "@/*": [

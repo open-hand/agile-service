@@ -25,12 +25,17 @@ interface IDescriptionTempleProps {
 }
 export type PageIFieldPostDataProps = IFieldPostDataProps & {
   local?: boolean, fieldName: string, localSource: string, // 'add' | 'created'
+  localDefaultValue?: any,
   edited: boolean, created: boolean, required: boolean, rank?: string,
   dataSetRecord?: Record,
 };
 interface IAddPostData {
   fieldId: string,
   rank: string,
+  created: boolean,
+  edited: boolean,
+  required: boolean,
+  localRecordIndexId: number,
 }
 class PageIssueTypeStore {
   constructor(props: { addUnselectedDataSet: DataSet, sortTableDataSet: DataSet }) {
@@ -44,7 +49,7 @@ class PageIssueTypeStore {
 
   @observable loading: boolean = false;
 
-  @observable allFieldData: ObservableMap<any, IFiledListItemProps> = observable.map();
+  @observable currentTypeAllFieldData: ObservableMap<any, IFiledListItemProps> = observable.map();
 
   @observable currentIssueType: PageConfigIssueType = PageConfigIssueType.null;
 
@@ -116,7 +121,10 @@ class PageIssueTypeStore {
     let index = -1;
     if (id) { // id 存在 则删除已有字段集合
       index = this.addFields.findIndex((item) => item.fieldId === id);
-      index !== -1 && this.addFields.splice(index, 1);
+      if (index !== -1) {
+        this.addFields.splice(index, 1);
+        this.addUnselectedDataSet.splice(index, 1);
+      }
       return;
     }
     index = this.createdFields.findIndex((item) => item.code === code);
@@ -188,7 +196,7 @@ class PageIssueTypeStore {
 
   @computed get getDirty() {
     return this.getDataStatusCode !== PageIssueTypeStoreStatusCode.null
-      || this.getDescriptionObj.dirty || this.sortTableDataSet.dirty;
+      || this.getDescriptionObj.dirty || this.sortTableDataSet.dirty || this.createdFields.length > 0;
   }
 
   @computed get getDataStatusCode() {
@@ -203,31 +211,29 @@ class PageIssueTypeStore {
     return this.currentIssueType;
   }
 
-  @action loadAllField = () => {
-    pageConfigApi.load().then((res: any) => {
-      res?.content?.map((item: any) => {
-        this.allFieldData.set(item.id, item);
-      });
+  @action loadCurrentTypeAllField = (data: Array<IFiledListItemProps>) => {
+    data.forEach((item) => {
+      this.currentTypeAllFieldData.set(item.id, item);
     });
   }
 
-  transformDefaultValue = (fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null) => {
+  transformDefaultValue = (fieldType: string, defaultValue: any, defaultValueObj?: any, fieldOptions?: Array<IFieldOptionProps> | null, optionKey: 'tempKey' | 'id' = 'id') => {
     if (!defaultValue && !defaultValueObj) {
       return defaultValue;
     }
     switch (fieldType) {
       case 'datetime':
-        return moment(defaultValue).format('YYYY-MM-DD hh:mm:ss');
+        return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD HH:mm:ss');
       case 'time':
-        return moment(defaultValue).format('hh:mm:ss');
+        return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('HH:mm:ss');
       case 'date':
-        return moment(defaultValue).format('YYYY-MM-DD');
+        return moment(defaultValue, 'YYYY-MM-DD HH:mm:ss').format('YYYY-MM-DD');
       case 'multiple':
       case 'checkbox':
       case 'single':
       case 'radio': {
         const valueArr = String(defaultValue).split(',');
-        return fieldOptions?.filter((option) => valueArr.some((v) => v === option.id)).map((item) => item.value).join(',') || defaultValue;
+        return fieldOptions?.filter((option) => valueArr.some((v) => v === option[optionKey])).map((item) => item.value).join(',') || defaultValue;
       }
       case 'member': {
         const { realName } = defaultValueObj || {};

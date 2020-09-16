@@ -28,7 +28,7 @@ public class StateMachineSchemeVO {
     @ApiModelProperty(value = "关联的项目列表")
     private List<ProjectVO> projectVOS;
     @ApiModelProperty(value = "方案配置列表")
-    private List<StateMachineSchemeConfigVO> configVOS;
+    private List<StatusMachineSchemeConfigVO> configVOS;
     @ApiModelProperty(value = "方案配置列表（用于列表）")
     private List<StateMachineSchemeConfigViewVO> viewVOS;
 
@@ -96,11 +96,11 @@ public class StateMachineSchemeVO {
         this.deployStatus = deployStatus;
     }
 
-    public List<StateMachineSchemeConfigVO> getConfigVOS() {
+    public List<StatusMachineSchemeConfigVO> getConfigVOS() {
         return configVOS;
     }
 
-    public void setConfigVOS(List<StateMachineSchemeConfigVO> configVOS) {
+    public void setConfigVOS(List<StatusMachineSchemeConfigVO> configVOS) {
         this.configVOS = configVOS;
     }
 
