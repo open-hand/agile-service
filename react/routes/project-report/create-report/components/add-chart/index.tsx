@@ -9,6 +9,7 @@ import AccumulationComponent from './components/accumulation';
 import PieComponent from './components/pie';
 import { RefProps } from '../add-modal';
 import EpicBurnDownComponent from './components/epic-burnDown';
+import versionBurnDownComponent from './components/version-burnDown';
 
 const { Option } = Select;
 const ChartMap = new Map([
@@ -17,6 +18,7 @@ const ChartMap = new Map([
   ['accumulation', AccumulationComponent],
   ['pie', PieComponent],
   ['epicBurnDown', EpicBurnDownComponent],
+  ['versionBurnDown', versionBurnDownComponent],
 ]);
 interface Props {
   innerRef: React.MutableRefObject<RefProps>
@@ -54,6 +56,7 @@ const AddChart: React.FC<Props> = ({ innerRef }) => {
           <Option value="accumulation">累计流量图</Option>
           <Option value="pie">统计图</Option>
           <Option value="epicBurnDown">史诗燃尽图</Option>
+          <Option value="versionBurnDown">版本燃尽图</Option>
         </Select>
       </Form>
       {ChartComponent && <ChartComponent />}
