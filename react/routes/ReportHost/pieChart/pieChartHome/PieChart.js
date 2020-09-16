@@ -24,7 +24,12 @@ import NoDataComponent from '../../Component/noData';
 import pic from '../../../../assets/image/emptyChart.svg';
 
 const { Option } = Select;
-
+const queryParamTypeMap = new Map([
+  ['assignee', 'assigneeId'],
+  ['component', 'component'],
+  ['typeCode', 'typeCode'],
+  [''],
+]);
 @observer
 class PieChart extends Component {
   constructor(props) {
@@ -205,7 +210,6 @@ class PieChart extends Component {
       type, chooseDimension, sprints, versions, chooseId,
     } = this.state;
     const { typeName, name } = item;
-    const queryString = this.getQueryString(type, typeName);
     const queryObj = this.getCurrentChoose();
     let paramName = name || '未分配';
     if (chooseDimension === 'sprint') {
@@ -218,10 +222,19 @@ class PieChart extends Component {
 
     paramName += '下的问题';
 
-    if (!queryString) return;
+    let paramType;
+    if (type === 'assignee') {
+      paramType = 'assigneeId';
+    } else if (type === 'version') {
+      paramType = 'fixVersion';
+    } else {
+      paramType = type;
+    }
     to(LINK_URL.workListIssue, {
       params: {
         paramName,
+        paramType,
+        paramId: typeName === null ? '0' : typeName,
         ...queryObj,
       },
     });
