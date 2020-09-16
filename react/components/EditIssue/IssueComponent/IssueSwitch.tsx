@@ -79,7 +79,7 @@ const IssueSwitch: React.FC<Props> = ({ issue, reloadIssue }) => {
     <>
       {
         // @ts-ignore
-        ['sub_task', 'bug'].includes(typeCode) && Boolean(parentId) && (
+        ['sub_task', 'bug'].includes(typeCode) && Boolean(parentId) && sameParentList.length > 0 && (
           // @ts-ignore
           <span className={styles.issue_switch} ref={ref}>
             <Icon
