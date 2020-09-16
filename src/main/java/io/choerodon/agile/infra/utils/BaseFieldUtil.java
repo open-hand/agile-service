@@ -147,7 +147,7 @@ public class BaseFieldUtil {
         T update = mapper.selectOne(t);
         if (Objects.isNull(update)) {
             LOGGER.error("数据不存在,请检查。实体对象: [{}] ", t);
-            throw new CommonException(BaseConstants.ErrorCode.DATA_NOT_EXISTS);
+            return null;
         }
         mapper.updateOptional(update);
         return update;

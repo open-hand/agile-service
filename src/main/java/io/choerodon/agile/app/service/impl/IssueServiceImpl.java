@@ -704,6 +704,10 @@ public class IssueServiceImpl implements IssueService {
                 issueDTOList.forEach(subIssue -> deleteIssue(subIssue.getProjectId(), subIssue.getIssueId()));
             }
         }
+        // 清除故事或者任务与子bug的关联
+        if ("task".equals(issueConvertDTO.getTypeCode()) || "story".equals(issueConvertDTO.getTypeCode())) {
+            issueMapper.updateSubBugRelateIssueId(projectId, issueId);
+        }
         //删除日志信息
         dataLogDeleteByIssueId(projectId, issueId);
         issueAccessDataService.delete(projectId, issueConvertDTO.getIssueId());
