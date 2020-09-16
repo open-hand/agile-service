@@ -195,7 +195,7 @@ class PieChart extends Component {
     } = this.state;
     const CHOOSEQUERY = {
       sprint: { paramChoose: 'sprint', paramCurrentSprint: chooseId },
-      version: { paramChoose: 'version', paramCurrentSprint: chooseId },
+      version: { paramChoose: 'version', paramCurrentVersion: chooseId },
     };
     return chooseDimension ? CHOOSEQUERY[chooseDimension] : ({});
   }
