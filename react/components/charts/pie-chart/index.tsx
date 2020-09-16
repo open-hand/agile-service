@@ -125,13 +125,16 @@ const PieChart:React.FC<PieChartProps> = ({
     }
 
     paramName += '下的问题';
-    let paramType;
-    if (type === 'assignee') {
+
+    let paramType: string = type;
+    if (type === 'typeCode') {
+      paramType = 'issueTypeId';
+    } else if (type === 'priority') {
+      paramType = 'priorityId';
+    } else if (type === 'status') {
+      paramType = 'statusId';
+    } else if (type === 'assignee') {
       paramType = 'assigneeId';
-    } else if (type === 'version') {
-      paramType = 'fixVersion';
-    } else {
-      paramType = type;
     }
     to(LINK_URL.workListIssue, {
       type: 'project',
@@ -271,6 +274,7 @@ const PieChart:React.FC<PieChartProps> = ({
                     <span
                       style={{
                         color: '#3F51B5',
+                        cursor: 'pointer',
                       }}
                       role="none"
                       onClick={handleLinkToIssue.bind(this, item)}

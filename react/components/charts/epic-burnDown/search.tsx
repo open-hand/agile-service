@@ -53,6 +53,7 @@ const EpicBurnDownSearch:React.FC<EpicBurnDownSearchProps> = ({
     if (JSON.stringify(item) !== '{}') {
       if (linkType === 'epic') {
         LINK_URL_TO.issueLinkTo(item.issueId, item.issueNum);
+        return;
       }
       to(LINK_URL.workListIssue);
     }
