@@ -60,9 +60,11 @@ public class ProjectReportController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/{id}")
     public ResponseEntity<Void> update(@PathVariable("project_id") Long projectId,
-                                       @RequestBody ProjectReportVO projectReportDTO) {
-        projectReportDTO.setProjectId(projectId);
-        projectReportService.update(projectId, projectReportDTO);
+                                       @PathVariable("id") Long id,
+                                       @RequestBody ProjectReportVO projectReportVO) {
+        projectReportVO.setProjectId(projectId);
+        projectReportVO.setId(id);
+        projectReportService.update(projectId, projectReportVO);
         return Results.success();
     }
 

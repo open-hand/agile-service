@@ -22,6 +22,7 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_project_report.groovy') {
                 constraints(nullable: false)
             }
             column(name: 'report_data', type: 'text', remarks: '报表数据')
+            column(name: 'recent_send_date', type: 'DATETIME', remarks: '最近发送时间')
 
             column(name: "object_version_number", type: "BIGINT UNSIGNED", defaultValue: "1")
             column(name: "created_by", type: "BIGINT UNSIGNED", defaultValue: "0")

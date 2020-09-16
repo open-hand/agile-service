@@ -12,6 +12,9 @@ import io.swagger.annotations.ApiModelProperty;
  * @author jiaxu.cui@hand-china.com 2020/9/15 下午5:53
  */
 public class ProjectReportVO {
+    public static final String FIELD_TITLE = "title";
+    public static final String FIELD_DESCRIPTION = "description";
+    public static final String FIELD_RECEIVERID = "receiverId";
 
     @ApiModelProperty("主键id")
     private Long id;

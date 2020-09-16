@@ -1,8 +1,6 @@
 package io.choerodon.agile.infra.mapper;
 
-import java.util.List;
 
-import io.choerodon.agile.api.vo.ProjectReportVO;
 import io.choerodon.agile.infra.dto.ProjectReportCcDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 
@@ -11,6 +9,4 @@ import io.choerodon.mybatis.common.BaseMapper;
  */
 public interface ProjectReportCcMapper extends BaseMapper<ProjectReportCcDTO> {
 
-
-    List<ProjectReportVO> List(ProjectReportVO projectReport);
 }

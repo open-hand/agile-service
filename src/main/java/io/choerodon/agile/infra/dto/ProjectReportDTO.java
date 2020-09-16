@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.dto;
 
+import java.util.Date;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -41,6 +42,16 @@ public class ProjectReportDTO extends AuditDomain {
     private Long receiverId;
     @ApiModelProperty("报表数据")
     private String reportData;
+    @ApiModelProperty("最近发送时间")
+    private Date recentSendDate;
+
+    public Date getRecentSendDate() {
+        return recentSendDate;
+    }
+
+    public void setRecentSendDate(Date recentSendDate) {
+        this.recentSendDate = recentSendDate;
+    }
 
     public Long getId() {
         return id;

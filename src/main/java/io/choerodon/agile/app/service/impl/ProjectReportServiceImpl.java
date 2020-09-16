@@ -28,12 +28,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/9/15 上午11:08
  */
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class ProjectReportServiceImpl implements ProjectReportService {
     public static final Logger log = LoggerFactory.getLogger(ProjectReportServiceImpl.class);
 
@@ -98,15 +100,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
             log.error("json convert failed");
         }
         projectReportMapper.insertSelective(projectReportDTO);
-        if (Objects.nonNull(projectReportVO.getCcList())){
-            for (UserDTO userDTO : projectReportVO.getCcList()) {
-                ProjectReportCcDTO projectReportCcDTO = new ProjectReportCcDTO();
-                projectReportCcDTO.setProjectId(projectId);
-                projectReportCcDTO.setProjectReportId(projectReportDTO.getId());
-                projectReportCcDTO.setCarbonCopyId(userDTO.getId());
-                projectReportCcMapper.insertSelective(projectReportCcDTO);
-            }
-        }
+        createProjectReportCc(projectId, projectReportVO, projectReportDTO);
     }
 
     @Override
@@ -127,7 +121,29 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     }
 
     @Override
-    public void update(Long projectId, ProjectReportVO projectReportDTO) {
+    public void update(Long projectId, ProjectReportVO projectReportVO) {
+        Assert.notNull(projectReportVO.getTitle(), BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.notNull(projectReportVO.getDescription(), BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.notNull(projectReportVO.getReceiverId(), BaseConstants.ErrorCode.DATA_INVALID);
+        ProjectReportDTO projectReportDTO = new ProjectReportDTO();
+        BeanUtils.copyProperties(projectReportVO, projectReportDTO);
+        projectReportMapper.updateOptional(projectReportDTO,
+                ProjectReportVO.FIELD_TITLE, ProjectReportVO.FIELD_DESCRIPTION, ProjectReportVO.FIELD_RECEIVERID);
+        // 更新抄送人
+        projectReportCcMapper.delete(new ProjectReportCcDTO(projectReportVO.getId(), projectId));
+        createProjectReportCc(projectId, projectReportVO, projectReportDTO);
+    }
 
+    public void createProjectReportCc(Long projectId, ProjectReportVO projectReportVO,
+                                      ProjectReportDTO projectReportDTO) {
+        if (Objects.nonNull(projectReportVO.getCcList())) {
+            for (UserDTO userDTO : projectReportVO.getCcList()) {
+                ProjectReportCcDTO projectReportCcDTO = new ProjectReportCcDTO();
+                projectReportCcDTO.setProjectId(projectId);
+                projectReportCcDTO.setProjectReportId(projectReportDTO.getId());
+                projectReportCcDTO.setCarbonCopyId(userDTO.getId());
+                projectReportCcMapper.insertSelective(projectReportCcDTO);
+            }
+        }
     }
 }
