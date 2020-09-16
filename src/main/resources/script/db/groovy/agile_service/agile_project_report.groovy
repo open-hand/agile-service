@@ -16,9 +16,6 @@ databaseChangeLog(logicalFilePath: 'script/db/agile_project_report.groovy') {
             column(name: 'status', type: 'VARCHAR(50)', remarks: '报表状态: ENABLE|DISABLE|FINISHED') {
                 constraints(nullable: false)
             }
-            column(name: 'receiver_id', type: 'BIGINT UNSIGNED', remarks: '收件人Id') {
-                constraints(nullable: false)
-            }
             column(name: 'report_data', type: 'text', remarks: '报表数据')
             column(name: 'recent_send_date', type: 'DATETIME', remarks: '最近发送时间')
 

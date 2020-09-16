@@ -12,17 +12,17 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * @author jiaxu.cui@hand-china.com 2020/9/15 下午2:31
  */
-@Table(name = "agile_project_report_cc")
+@Table(name = "agile_project_report_receiver")
 @ModifyAudit
 @VersionAudit
-public class ProjectReportCcDTO extends AuditDomain {
+public class ProjectReportReceiverDTO extends AuditDomain {
 
-    public ProjectReportCcDTO(Long projectReportId, Long projectId) {
+    public ProjectReportReceiverDTO(Long projectReportId, Long projectId) {
         this.projectReportId = projectReportId;
         this.projectId = projectId;
     }
 
-    public ProjectReportCcDTO() {
+    public ProjectReportReceiverDTO() {
     }
 
     @Id

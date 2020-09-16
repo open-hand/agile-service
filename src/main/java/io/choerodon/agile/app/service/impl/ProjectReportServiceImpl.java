@@ -15,12 +15,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.ProjectReportVO;
 import io.choerodon.agile.api.vo.report.ReportUnitVO;
 import io.choerodon.agile.app.service.ProjectReportService;
-import io.choerodon.agile.infra.dto.ProjectReportCcDTO;
+import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
 import io.choerodon.agile.infra.dto.ProjectReportDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.enums.ProjectReportStatus;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
-import io.choerodon.agile.infra.mapper.ProjectReportCcMapper;
+import io.choerodon.agile.infra.mapper.ProjectReportReceiverMapper;
 import io.choerodon.agile.infra.mapper.ProjectReportMapper;
 import io.choerodon.agile.infra.utils.SiteMsgUtil;
 import io.choerodon.core.domain.Page;
@@ -54,7 +54,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     @Autowired
     private ProjectReportMapper projectReportMapper;
     @Autowired
-    private ProjectReportCcMapper projectReportCcMapper;
+    private ProjectReportReceiverMapper projectReportReceiverMapper;
     @Autowired
     private BaseFeignClient baseFeignClient;
     @Autowired
@@ -100,11 +100,11 @@ public class ProjectReportServiceImpl implements ProjectReportService {
             }
         }
         // 添加抄送人信息
-        List<ProjectReportCcDTO> ccList = projectReportCcMapper.select(new ProjectReportCcDTO(id, projectId));
+        List<ProjectReportReceiverDTO> ccList = projectReportReceiverMapper.select(new ProjectReportReceiverDTO(id, projectId));
         if (CollectionUtils.isEmpty(ccList)){
             return projectReportVO;
         }
-        Long[] ccIds = ccList.stream().map(ProjectReportCcDTO::getCcId).toArray(Long[]::new);
+        Long[] ccIds = ccList.stream().map(ProjectReportReceiverDTO::getCcId).toArray(Long[]::new);
         List<UserDTO> userList = baseFeignClient.listUsersByIds(ccIds, false).getBody();
         projectReportVO.setCcList(userList);
         return projectReportVO;
@@ -134,11 +134,11 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     public void delete(Long projectId, Long projectReportId) {
         Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(projectReportId, BaseConstants.ErrorCode.DATA_INVALID);
-        List<ProjectReportCcDTO> ccDTOList =
-                projectReportCcMapper.select(new ProjectReportCcDTO(projectReportId, projectId));
+        List<ProjectReportReceiverDTO> ccDTOList =
+                projectReportReceiverMapper.select(new ProjectReportReceiverDTO(projectReportId, projectId));
         if (CollectionUtils.isNotEmpty(ccDTOList)){
-            for (ProjectReportCcDTO ccDTO : ccDTOList) {
-                projectReportCcMapper.deleteByPrimaryKey(ccDTO.getId());
+            for (ProjectReportReceiverDTO ccDTO : ccDTOList) {
+                projectReportReceiverMapper.deleteByPrimaryKey(ccDTO.getId());
             }
         }
         ProjectReportDTO projectReportDTO = new ProjectReportDTO(projectReportId, projectId);
@@ -157,7 +157,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
         projectReportMapper.updateOptional(projectReportDTO,
                 ProjectReportVO.FIELD_TITLE, ProjectReportVO.FIELD_DESCRIPTION, ProjectReportVO.FIELD_RECEIVERID);
         // 更新抄送人
-        projectReportCcMapper.delete(new ProjectReportCcDTO(projectReportVO.getId(), projectId));
+        projectReportReceiverMapper.delete(new ProjectReportReceiverDTO(projectReportVO.getId(), projectId));
         createProjectReportCc(projectId, projectReportVO, projectReportDTO);
     }
 
@@ -184,7 +184,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     public void send(Long projectId, Long id, MultipartFile multipartFile) {
 
         ProjectReportDTO projectReportDTO = projectReportMapper.selectOne(new ProjectReportDTO(id, projectId));
-        List<ProjectReportCcDTO> ccDTOList = projectReportCcMapper.select(new ProjectReportCcDTO(id, projectId));
+        List<ProjectReportReceiverDTO> ccDTOList = projectReportReceiverMapper.select(new ProjectReportReceiverDTO(id, projectId));
         String imgData = null;
         try {
             imgData = Base64Utils.encodeToString(multipartFile.getBytes());
@@ -192,7 +192,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
             e.printStackTrace();
         }
         if (StringUtils.isNotBlank(imgData)){
-            siteMsgUtil.sendProjectReport(projectId, projectReportDTO.getReceiverId(), ccDTOList.stream().map(ProjectReportCcDTO::getCcId).collect(Collectors.toList()), imgData);
+            siteMsgUtil.sendProjectReport(projectId, projectReportDTO.getReceiverId(), ccDTOList.stream().map(ProjectReportReceiverDTO::getCcId).collect(Collectors.toList()), imgData);
         }
         
 
@@ -202,11 +202,11 @@ public class ProjectReportServiceImpl implements ProjectReportService {
                                       ProjectReportDTO projectReportDTO) {
         if (Objects.nonNull(projectReportVO.getCcList())) {
             for (UserDTO userDTO : projectReportVO.getCcList()) {
-                ProjectReportCcDTO projectReportCcDTO = new ProjectReportCcDTO();
-                projectReportCcDTO.setProjectId(projectId);
-                projectReportCcDTO.setProjectReportId(projectReportDTO.getId());
-                projectReportCcDTO.setCcId(userDTO.getId());
-                projectReportCcMapper.insertSelective(projectReportCcDTO);
+                ProjectReportReceiverDTO projectReportReceiverDTO = new ProjectReportReceiverDTO();
+                projectReportReceiverDTO.setProjectId(projectId);
+                projectReportReceiverDTO.setProjectReportId(projectReportDTO.getId());
+                projectReportReceiverDTO.setCcId(userDTO.getId());
+                projectReportReceiverMapper.insertSelective(projectReportReceiverDTO);
             }
         }
     }
