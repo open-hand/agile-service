@@ -15,7 +15,7 @@ const { Option } = Select;
 const { AppState } = stores;
 const FormItem = Form.Item;
 const { TextArea } = Input;
-
+let firstIndex = 0;
 const customFieldType = {
   radio: 'option',
   checkbox: 'option',
@@ -191,8 +191,12 @@ const CreateFilter = (props) => {
       prop: undefined,
       rule: undefined,
       value: undefined,
+      status: 'create', // 标记此筛选状态
     },
   ]);
+  useEffect(() => {
+    firstIndex = 0;
+  }, []);
   const [quickFilterFiled, setQuickFilterFiled] = useState([]);
   const [deleteItem, setDeleteItem] = useState([]);
   const [temp, setTemp] = useState([]);
@@ -443,7 +447,7 @@ const CreateFilter = (props) => {
             customFieldType: id ? customFieldType[type] : undefined,
           };
           // 如果不是第一项
-          if (i) {
+          if (firstIndex !== i) {
             o.push(values[`filter-${i}-ao`]);
             expressQueryArr.push(values[`filter-${i}-ao`].toUpperCase());
           }
@@ -629,10 +633,10 @@ const CreateFilter = (props) => {
         }}
       >
         {
-            getOperation(!id ? filter : type).map((v) => (
-              <Option key={v.value} value={v.value}>{v.text}</Option>
-            ))
-          }
+          getOperation(!id ? filter : type).map((v) => (
+            <Option key={v.value} value={v.value}>{v.text}</Option>
+          ))
+        }
       </Select>
     );
   };
@@ -715,7 +719,7 @@ const CreateFilter = (props) => {
               .indexOf(input.toLowerCase()) >= 0}
             onFocus={!id ? () => {
               getOption(filter, false, page);
-            } : () => {}}
+            } : () => { }}
           >
             {!id ? tempOption(filter, false) : fieldOptions.map((option) => (
               <Option key={option.id} value={option.id}>{option.value}</Option>
@@ -753,7 +757,7 @@ const CreateFilter = (props) => {
             .indexOf(input.toLowerCase()) >= 0}
           onFocus={!id ? () => {
             getOption(filter, false, page);
-          } : () => {}}
+          } : () => { }}
         >
           {!id ? tempOption(filter, false) : fieldOptions.map((option) => (
             <Option key={option.id} value={option.id}>{option.value}</Option>
@@ -829,12 +833,10 @@ const CreateFilter = (props) => {
   };
 
   useEffect(loadQuickFilterFiled, []);
-
   useImperativeHandle(props.forwardref, () => (
     {
       handleSubmit: handleOk,
     }));
-
   return (
     <Form layout="vertical">
       <FormItem style={{ width: 520 }}>
@@ -860,7 +862,7 @@ const CreateFilter = (props) => {
               deleteItem.indexOf(index) === -1 && (
                 <div>
                   {
-                    index !== 0 && (
+                    firstIndex !== index && (
                       <FormItem style={{
                         width: 80, display: 'inline-block', marginRight: 10,
                       }}
@@ -880,7 +882,7 @@ const CreateFilter = (props) => {
                     )
                   }
                   <FormItem style={{
-                    width: index === 0 ? 210 : 120, display: 'inline-block', marginRight: 10,
+                    width: (index === firstIndex) ? 210 : 120, display: 'inline-block', marginRight: 10,
                   }}
                   >
                     {getFieldDecorator(`filter-${index}-prop`, {
@@ -934,6 +936,15 @@ const CreateFilter = (props) => {
                     shape="circle"
                     icon="delete"
                     onClick={() => {
+                      filters[index].status = 'delete';
+                      if (index === firstIndex) {
+                        for (let i = firstIndex + 1; i < filters.length; i += 1) {
+                          if (filters[i].status !== 'delete') {
+                            firstIndex = i;
+                            break;
+                          }
+                        }
+                      }
                       const arr = deleteItem.slice();
                       arr.push(index);
                       setDeleteItem(arr);
@@ -956,6 +967,7 @@ const CreateFilter = (props) => {
             prop: undefined,
             rule: undefined,
             value: undefined,
+            status: 'create',
           });
           setFilters(arr);
         }}
