@@ -12,14 +12,22 @@ import EpicBurnDownComponent from './components/epic-burnDown';
 import versionBurnDownComponent from './components/version-burnDown';
 
 const { Option } = Select;
-const ChartMap = new Map([
-  ['burndown', BurnDownComponent],
-  ['sprint', SprintComponent],
-  ['accumulation', AccumulationComponent],
-  ['pie', PieComponent],
-  ['epicBurnDown', EpicBurnDownComponent],
-  ['versionBurnDown', versionBurnDownComponent],
+export const defaultCharts = new Map([
+  ['burndown', { component: BurnDownComponent, name: '燃尽图' }],
+  ['sprint', { component: SprintComponent, name: '冲刺报告图' }],
+  ['accumulation', { component: AccumulationComponent, name: '累计流量图' }],
+  ['pie', { component: PieComponent, name: '统计图' }],
+  ['epicBurnDown', { component: EpicBurnDownComponent, name: '史诗燃尽图' }],
+  ['versionBu rnDown', { component: versionBurnDownComponent, name: '版本燃尽图' }],
 ]);
+type GetOptionalCharts = () => Map<string, { component: React.FC<any>, name: string }>
+
+let getOptionalCharts: GetOptionalCharts = () => defaultCharts;
+
+export function setGetOptionalCharts(newGetOptionalCharts: GetOptionalCharts) {
+  getOptionalCharts = newGetOptionalCharts;
+}
+
 interface Props {
   innerRef: React.MutableRefObject<RefProps>
 }
@@ -45,18 +53,14 @@ const AddChart: React.FC<Props> = ({ innerRef }) => {
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,
   }), [handleSubmit]);
-  const ChartComponent = ChartMap.get(dataSet.current?.get('chart'));
+  const optionalCharts = getOptionalCharts();
+  const ChartComponent = optionalCharts.get(dataSet.current?.get('chart'))?.component;
   return (
     <>
       <Form dataSet={dataSet} style={{ width: 512 }}>
         <TextField name="title" />
         <Select name="chart">
-          <Option value="burndown">燃尽图</Option>
-          <Option value="sprint">冲刺报告图</Option>
-          <Option value="accumulation">累计流量图</Option>
-          <Option value="pie">统计图</Option>
-          <Option value="epicBurnDown">史诗燃尽图</Option>
-          <Option value="versionBurnDown">版本燃尽图</Option>
+          {[...optionalCharts.entries()].map(([key, { name }]) => <Option value={key}>{name}</Option>)}
         </Select>
       </Form>
       {ChartComponent && <ChartComponent />}
