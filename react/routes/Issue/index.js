@@ -55,15 +55,15 @@ const Issue = observer(() => {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
       paramType, paramIssueId, paramName, paramOpenIssueId,
       // eslint-disable-next-line no-restricted-globals
-    } = queryString.parse(location.href);
+    } = queryString.parse(location.search);
     let prefix = '';
     if (paramChoose) {
       if (paramChoose === 'version' && paramCurrentVersion) {
-        IssueStore.handleFilterChange(paramChoose, [paramCurrentVersion]);
+        issueSearchStore.handleFilterChange(paramChoose, [paramCurrentVersion]);
         prefix = '版本';
       }
       if (paramChoose === 'sprint' && paramCurrentSprint) {
-        IssueStore.handleFilterChange(paramChoose, [paramCurrentSprint]);
+        issueSearchStore.handleFilterChange(paramChoose, [paramCurrentSprint]);
         prefix = '冲刺';
       }
     }
@@ -81,7 +81,7 @@ const Issue = observer(() => {
     };
     if (paramType) {
       prefix = prefixs[paramType];
-      IssueStore.handleFilterChange(paramType, [paramId]);
+      issueSearchStore.handleFilterChange(paramType, [paramId]);
     }
     setUrlFilter(`${prefix ? `${prefix}:` : ''}${paramName || ''}`);
     // this.paramName = decodeURI(paramName);
@@ -97,8 +97,8 @@ const Issue = observer(() => {
           Choerodon.prompt(error.message, 'error');
         }
       }
-      IssueStore.handleFilterChange('issueIds', [id]);
-      IssueStore.handleFilterChange('contents', [`${IssueStore.getProjectInfo.projectCode}-${paramName.split('-')[paramName.split('-').length - 1]}`]);
+      issueSearchStore.handleFilterChange('issueIds', [id]);
+      issueSearchStore.handleFilterChange('contents', [`${IssueStore.getProjectInfo.projectCode}-${paramName.split('-')[paramName.split('-').length - 1]}`]);
       IssueStore.setClickedRow({
         selectedIssue: {
           issueId: id,
