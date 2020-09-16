@@ -34,7 +34,7 @@ public class ProjectReportCcDTO extends AuditDomain {
     @ApiModelProperty("项目报告id")
     private Long projectReportId;
     @ApiModelProperty("抄送人Id")
-    private Long carbonCopyId;
+    private Long ccId;
 
     public Long getId() {
         return id;
@@ -60,11 +60,11 @@ public class ProjectReportCcDTO extends AuditDomain {
         this.projectReportId = projectReportId;
     }
 
-    public Long getCarbonCopyId() {
-        return carbonCopyId;
+    public Long getCcId() {
+        return ccId;
     }
 
-    public void setCarbonCopyId(Long carbonCopyId) {
-        this.carbonCopyId = carbonCopyId;
+    public void setCcId(Long ccId) {
+        this.ccId = ccId;
     }
 }
