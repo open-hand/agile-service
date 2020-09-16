@@ -17,8 +17,8 @@ export const defaultCharts = new Map([
   ['sprint', { component: SprintComponent, name: '冲刺报告图' }],
   ['accumulation', { component: AccumulationComponent, name: '累计流量图' }],
   ['pie', { component: PieComponent, name: '统计图' }],
-  ['epicBurnDown', { component: EpicBurnDownComponent, name: '史诗燃尽图' }],
-  ['versionBu rnDown', { component: versionBurnDownComponent, name: '版本燃尽图' }],
+  ['epicBurnDown', { component: EpicBurnDownComponent, name: '史诗燃耗图' }],
+  ['versionBurnDown', { component: versionBurnDownComponent, name: '版本燃耗图' }],
 ]);
 type GetOptionalCharts = () => Map<string, { component: React.FC<any>, name: string }>
 
