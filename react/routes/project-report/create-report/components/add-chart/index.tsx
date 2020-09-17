@@ -15,6 +15,7 @@ import { RefProps } from '../add-modal';
 import EpicBurnDownComponent from './components/epic-burnDown';
 import versionBurnDownComponent from './components/version-burnDown';
 import { IReportChartBlock } from '../../store';
+import IterationSpeedComponent from './components/iteration_speed';
 
 const { Option } = Select;
 export const defaultCharts = new Map([
@@ -24,6 +25,7 @@ export const defaultCharts = new Map([
   ['pie', { component: PieComponent, name: '统计图' }],
   ['epicBurnDown', { component: EpicBurnDownComponent, name: '史诗燃耗图' }],
   ['versionBurnDown', { component: versionBurnDownComponent, name: '版本燃耗图' }],
+  ['iterationSpeed', { component: IterationSpeedComponent, name: '迭代速度图' }],
 ]);
 type GetOptionalCharts = () => Map<string, { component: React.FC<any>, name: string }>
 
