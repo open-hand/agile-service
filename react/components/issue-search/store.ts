@@ -100,6 +100,13 @@ class IssueSearchStore {
     this.query();
   }
 
+  // 获取所有字段 包括系统字段
+  @computed get getAllFields() {
+    const allField = [...this.fields, ...this.getSystemFields()];
+    console.log('allField', allField);
+    return allField;
+  }
+
   @action setFieldFilter = (code: string, value: any) => {
     const field = this.chosenFields.get(code);
     // 说明这时候没有被选择，那么要自动选上

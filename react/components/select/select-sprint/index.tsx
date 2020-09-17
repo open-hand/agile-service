@@ -36,11 +36,15 @@ const SelectSprint: React.FC<Props> = forwardRef(({
       ref={ref}
       {...props}
       {...otherProps}
-      optionRenderer={({ record, text, value }) => (
-        <Tooltip title={text}>
-          <span>{text}</span>
-        </Tooltip>
-      )}
+      // @ts-ignore
+      optionRenderer={({ record, text, value }) => {
+        console.log('text:', text, record);
+        return (
+          <Tooltip title={text}>
+            <span>{text}</span>
+          </Tooltip>
+        );
+      }}
     />
   );
 });
