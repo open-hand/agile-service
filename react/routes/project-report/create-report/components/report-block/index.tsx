@@ -9,6 +9,7 @@ import TextBlock from './components/text-block';
 import ChartBlock from './components/chart-block';
 import ListBlock from './components/list-block';
 import { useProjectReportContext } from '../../context';
+import openAddModal from '../add-modal';
 
 interface Props {
   data: IReportBlock
@@ -35,13 +36,19 @@ const ReportBlock: React.FC<Props> = ({ data }) => {
   }, [data, type]);
   const handleDelete = useCallback(() => {
     store.removeBlock(data.id);
-  }, []);
+  }, [data.id, store]);
+  const handleEdit = useCallback(() => {
+    openAddModal({
+      data,
+      store,
+    });
+  }, [data, store]);
   return (
     <div className={styles.report_block}>
       <div className={styles.header}>
         <span className={styles.title}>{title}</span>
         <div className={styles.operation}>
-          <Button icon="edit-o" color={'blue' as ButtonColor}>编辑</Button>
+          <Button icon="edit-o" color={'blue' as ButtonColor} onClick={handleEdit}>编辑</Button>
           <Button icon="delete" color={'blue' as ButtonColor} onClick={handleDelete}>删除</Button>
         </div>
       </div>

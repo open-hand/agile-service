@@ -35,14 +35,16 @@ export function setGetOptionalCharts(newGetOptionalCharts: GetOptionalCharts) {
 
 interface Props {
   innerRef: React.MutableRefObject<RefProps>
+  data?: IReportChartBlock
 }
 export interface ChartRefProps {
   submit: () => Promise<BurnDownConfig | SprintConfig>
 }
-const AddChart: React.FC<Props> = ({ innerRef }) => {
+const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
   const chartRef = useRef<ChartRefProps>({} as ChartRefProps);
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
+    data: editData ? [{ title: editData.title, chart: editData.chartType }] : undefined,
     fields: [{
       name: 'title',
       label: '图表标题',
@@ -53,13 +55,13 @@ const AddChart: React.FC<Props> = ({ innerRef }) => {
       label: '选择图表',
       required: true,
     }],
-  }), []);
+  }), [editData]);
   const handleSubmit = useCallback(async () => {
     if (dataSet.validate()) {
       const data = dataSet.current?.toData();
       const search = await chartRef.current.submit();
       const block: IReportChartBlock = {
-        id: '2',
+        id: editData?.id || String(Math.random()),
         title: data.title,
         type: 'chart',
         chartType: data.chart,
@@ -70,7 +72,7 @@ const AddChart: React.FC<Props> = ({ innerRef }) => {
       return block;
     }
     return false;
-  }, [dataSet]);
+  }, [dataSet, editData?.id]);
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,
   }), [handleSubmit]);
@@ -84,7 +86,7 @@ const AddChart: React.FC<Props> = ({ innerRef }) => {
           {[...optionalCharts.entries()].map(([key, { name }]) => <Option key={key} value={key}>{name}</Option>)}
         </Select>
       </Form>
-      {ChartComponent && <ChartComponent innerRef={chartRef} />}
+      {ChartComponent && <ChartComponent innerRef={chartRef} data={editData} />}
     </>
   );
 };

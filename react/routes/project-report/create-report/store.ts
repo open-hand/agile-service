@@ -1,7 +1,7 @@
 import {
   observable, action,
 } from 'mobx';
-import { remove } from 'lodash';
+import { remove, findIndex } from 'lodash';
 import { IReportContentType } from '@/common/types';
 import { BurnDownConfig } from '@/components/charts/burn-down/useBurnDownReport';
 import { SprintConfig } from '@/components/charts/sprint/useSprintReport';
@@ -87,6 +87,14 @@ class ProjectReportStore {
   @action('添加一个block')
   addBlock(block: IReportBlock) {
     this.blockList.push(block);
+  }
+
+  @action('更新一个block')
+  updateBlock(block: IReportBlock) {
+    console.log(block);
+    const { id } = block;
+    const index = findIndex(this.blockList, { id });
+    this.blockList[index] = block;
   }
 
   @action('移除一个block')
