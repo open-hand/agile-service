@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.utils;
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.UserDTO;
+import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.core.enums.MessageAdditionalType;
 import org.apache.commons.collections4.CollectionUtils;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -157,5 +159,21 @@ public class SiteMsgUtil {
             messageSender.setReceiverAddressList(Collections.singletonList(receiver));
             messageClient.async().sendMessage(messageSender);
         }
+    }
+
+    public void sendProjectReport(Long projectId, List<Long> ccList, String imgData) {
+        // 设置参数
+        Map<String, String> argsMap = new HashMap<>();
+        argsMap.put("data", "<img style=\"width: 780px;\" src=\""+imgData+"\">" );
+        // 获取接收人
+        Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(ccList, false);
+        MessageSender sender = new MessageSender();
+        sender.setMessageCode("PROJECT_REPORT");
+        sender.setTenantId(ConvertUtil.getOrganizationId(projectId));
+        Receiver receiver = new Receiver();
+        sender.setReceiverAddressList(Collections.singletonList(receiver));
+        sender.setCcList(userMap.values().stream().map(UserMessageDTO::getEmail).collect(Collectors.toList()));
+        sender.setArgs(argsMap);
+        messageClient.async().sendMessage(sender);
     }
 }

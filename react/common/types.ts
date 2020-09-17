@@ -11,14 +11,25 @@ export interface User {
   name?: string
 }
 
-export interface Issue {
-  issueId: string
-  summary: string
+export interface ISprint {
+  sprintId: string
+  sprintName: string
+  endDate: string
+}
+
+export interface IVersion {
+  versionId: string,
+  name: string,
 }
 
 export interface PI {
+  id: string
   code: string
   name: string
+  startDate: string
+  endDate: string
+  actualStartDate: string | null
+  actualEndDate: string | null
 }
 
 export interface IStatus {
@@ -134,6 +145,22 @@ export interface IField {
   extraConfig?: boolean,
 }
 
+export interface Issue {
+  issueId: string
+  summary: string
+  typeCode?: string,
+  issueTypeVO?: IIssueType,
+  parentIssueId?: string
+  parentIssueNum?: string
+  parentIssueSummary?: string
+  relateIssueId?: string
+  parentRelateSummary?: string
+  sameParentIssueVOList?: Issue[],
+  sameParentBugVOList?: Issue[]
+  assigneeRealName: string
+  statusVO: IStatus
+}
+
 export interface ILog {
   logId: string,
   field: string,
@@ -154,4 +181,17 @@ export interface ILog {
   trigger?: string,
   removeResolution?: boolean,
   resolutionChanged?: boolean,
+}
+export type IReportContentType = 'chart' | 'text' | 'list' | 'static_list'
+
+export interface IBoard {
+  boardId: string
+  columnConstraint: string
+  estimationStatistic: string
+  name: string
+  objectVersionNumber: number
+  projectId: string
+  swimlaneBasedCode: string
+  userDefault: boolean
+  userDefaultBoard: string
 }

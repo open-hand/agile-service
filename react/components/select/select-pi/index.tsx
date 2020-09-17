@@ -1,11 +1,10 @@
-import React, { useMemo, forwardRef } from 'react';
+import React, { useMemo, forwardRef, useRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import useSelect, { SelectConfig, FragmentForSearch } from '@/hooks/useSelect';
 
 import { piApi } from '@/api';
 import type { PI } from '@/common/types';
-import { useIsOwner } from '@/hooks';
 import styles from './index.less';
 
 const renderPi = (pi: any) => {
@@ -23,15 +22,17 @@ const renderPi = (pi: any) => {
   }
   return null;
 };
-interface Props extends SelectProps {
+interface Props extends Partial<SelectProps> {
   statusList: string[]
+  afterLoad?: (sprints: PI[]) => void
   multiple?: boolean
   disabledCurrentPI?: boolean
 }
 const SelectPI: React.FC<Props> = forwardRef(({
-  statusList, multiple, disabledCurrentPI = false, ...otherProps
+  statusList, multiple, disabledCurrentPI = false, afterLoad, ...otherProps
 }, ref: React.Ref<Select>) => {
-  const [isOwner] = useIsOwner();
+  const afterLoadRef = useRef<Function>();
+  afterLoadRef.current = afterLoad;
   const config = useMemo((): SelectConfig<PI> => ({
     name: 'all_pi',
     textField: 'piName',
@@ -42,10 +43,16 @@ const SelectPI: React.FC<Props> = forwardRef(({
         {renderPi(pi)}
       </FragmentForSearch>
     ),
+    middleWare: (sprints) => {
+      if (afterLoadRef.current) {
+        afterLoadRef.current(sprints);
+      }
+      return sprints;
+    },
     props: {
       // @ts-ignore
       onOption: ({ record }) => {
-        if (disabledCurrentPI && !isOwner && record.get('statusCode') === 'doing') {
+        if (disabledCurrentPI && record.get('statusCode') === 'doing') {
           return {
             disabled: true,
           };
@@ -54,7 +61,7 @@ const SelectPI: React.FC<Props> = forwardRef(({
       },
     },
     paging: false,
-  }), [JSON.stringify(statusList), isOwner]);
+  }), [JSON.stringify(statusList)]);
   const props = useSelect(config);
   return (
     <Select

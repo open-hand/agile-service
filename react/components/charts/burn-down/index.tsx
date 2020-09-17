@@ -4,8 +4,9 @@ import { EChartOption } from 'echarts';
 import ReactEcharts from 'echarts-for-react';
 import { transformBurnDownChartData, IBurnDownData } from './utils';
 
-interface Props {
-  select: 'remainingEstimatedTime' | 'storyPoints' | 'issueCount',
+export type IBurndownChartType = 'remainingEstimatedTime' | 'storyPoints' | 'issueCount';
+export interface BurnDownProps {
+  type: IBurndownChartType,
   loading: boolean
   data: IBurnDownData
   endDate: string
@@ -13,8 +14,8 @@ interface Props {
   restDays: string[],
 }
 
-const BurndownChart: React.FC<Props> = ({
-  select,
+const BurndownChart: React.FC<BurnDownProps> = ({
+  type,
   loading,
   data,
   endDate,
@@ -30,13 +31,13 @@ const BurndownChart: React.FC<Props> = ({
   }), [data, endDate, restDayShow, restDays]);
   const renderChartTitle = () => {
     let result = '';
-    if (select === 'remainingEstimatedTime') {
+    if (type === 'remainingEstimatedTime') {
       result = '剩余时间';
     }
-    if (select === 'storyPoints') {
+    if (type === 'storyPoints') {
       result = '故事点';
     }
-    if (select === 'issueCount') {
+    if (type === 'issueCount') {
       result = '问题计数';
     }
     return result;
@@ -56,13 +57,13 @@ const BurndownChart: React.FC<Props> = ({
         if (params instanceof Array) {
           params.forEach((item) => {
             if (item.seriesName === '剩余值') {
-              if (item.value && select === 'remainingEstimatedTime') {
+              if (item.value && type === 'remainingEstimatedTime') {
                 unit = ' 小时';
               }
-              if (item.value && select === 'storyPoints') {
+              if (item.value && type === 'storyPoints') {
                 unit = ' 点';
               }
-              if (item.value && select === 'issueCount') {
+              if (item.value && type === 'issueCount') {
                 unit = ' 个';
               }
               content = `${item.axisValue || '冲刺开启'}<br />${item.marker}${item.seriesName} : ${(item.value || item.value === 0) ? item.value : '-'}${unit && unit}`;
@@ -144,7 +145,7 @@ const BurndownChart: React.FC<Props> = ({
         fontSize: 12,
         fontStyle: 'normal',
         formatter(value: string) {
-          if (select === 'remainingEstimatedTime' && value) {
+          if (type === 'remainingEstimatedTime' && value) {
             return `${value}h`;
           }
           return value;

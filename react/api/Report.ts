@@ -2,11 +2,11 @@ import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 
 interface ICumulativeData {
-  columnIds: Array<number>, // 看板列id
+  columnIds: Array<string>, // 看板列id
   endDate: string,
-  quickFilterIds: Array<number> | [], // 快速搜索的id列表
+  quickFilterIds: Array<string> | [], // 快速搜索的id列表
   startDate: string,
-  boardId: number,
+  boardId: string,
 }
 class ReportApi {
   get prefix() {
@@ -43,7 +43,7 @@ class ReportApi {
    * @param sprintId
    * @param type
    */
-  loadBurnDownCoordinate(sprintId: number, type: string, filter: {
+  loadBurnDownCoordinate(sprintId: string, type: string, filter: {
     assigneeId?: string
     onlyStory?: boolean
     quickFilterIds?: string[]
@@ -128,7 +128,7 @@ class ReportApi {
    * @param id
    * @param type  Epic Version
    */
-  loadEpicOrVersionBurnDownCoordinate(id: number, type: string) {
+  loadEpicOrVersionBurnDownCoordinate(id: string, type: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/reports/burn_down_coordinate_type/${id}`,
@@ -189,7 +189,7 @@ class ReportApi {
    * @param versionId
    * @param type
    */
-  loadPie(fieldName: string, sprintId: number, versionId: number, startDate: string, endDate: string) {
+  loadPie(fieldName: string, sprintId?: string, versionId?: string, startDate?: string, endDate?: string) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'get',

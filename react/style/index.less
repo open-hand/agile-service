@@ -13,12 +13,15 @@
 
 }
 
-#agile {
+#agile,
+.agile-portal {
   --theme: #3F51B5; //这样可以在jsx中的style使用
   height: 100%;
-  .c7n-pro-select > ul > li>input[type="text"] { // 解决在pro组件下拉框 游览器默认样式导致的字显示一半
+
+  .c7n-pro-select > ul > li > input[type="text"] {
+    // 解决在pro组件下拉框 游览器默认样式导致的字显示一半
     padding: 0;
-    font-size:.13rem;
+    font-size: .13rem;
   }
 
   > div:first-child {
@@ -197,14 +200,17 @@
       .c7n-calendar-range-picker-separator {
         display: none;
       }
+
       .c7n-calendar-range-picker-input::placeholder {
         color: rgba(0, 0, 0, 0.6)
       }
+
       .c7n-calendar-range-picker-input:nth-of-type(1) {
         width: calc(~'100% - 33px');
         text-overflow: ellipsis;
         text-align: left;
-      }      
+      }
+
       .c7n-calendar-range-picker-input:nth-of-type(2) {
         display: none;
       }
@@ -303,6 +309,7 @@
       }
     }
   }
+
   .c7n-input-label-wrapper {
     .c7n-input-label {
       display: block;

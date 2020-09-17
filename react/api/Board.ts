@@ -42,7 +42,7 @@ class BoardApi {
     return `/agile/v1/projects/${getProjectId()}`;
   }
 
-  load(boardId: number, searchVO: BoardSearchVO) {
+  load(boardId: string, searchVO: BoardSearchVO) {
     return axios({
       method: 'post',
       url: `${this.prefix}/board/${boardId}/all_data/${getOrganizationId()}`,

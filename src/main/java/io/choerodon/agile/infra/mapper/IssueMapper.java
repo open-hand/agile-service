@@ -513,4 +513,8 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<Long> selectIssueTypeIdsByStatusId(@Param("projectId") Long projectId, @Param("statusId") Long statusId);
 
     List<IssueDTO> querySubIssueByParentIssueId(@Param("projectId") Long projectId, @Param("parentIssueId") Long parentIssueId);
+
+    List<IssueDTO> querySubIssueByIssueId(@Param("issueId") Long issueId);
+
+    List<IssueDTO> querySubBugByIssueId(@Param("issueId") Long issueId);
 }

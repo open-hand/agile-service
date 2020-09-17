@@ -493,6 +493,9 @@ public class EncryptionUtils {
 
 
     public static String handlerPersonFilterJson(String filterJson, boolean encrypt) {
+        if (!EncryptContext.isEncrypt()){
+            return filterJson;
+        }
         try {
             JsonNode jsonNode = objectMapper.readTree(filterJson);
             ObjectNode objectNode = objectMapper.createObjectNode();
@@ -558,7 +561,7 @@ public class EncryptionUtils {
         return map1;
     }
 
-    private static Object handlerCustomField(Object value, Boolean encrypt) {
+    protected static Object handlerCustomField(Object value, Boolean encrypt) {
         try {
             JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(value));
             ObjectNode objectNode = (ObjectNode) jsonNode;

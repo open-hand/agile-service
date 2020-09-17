@@ -5,7 +5,7 @@
     <select id="queryLatestRecode" resultType="io.choerodon.agile.infra.dto.FileOperationHistoryDTO">
         select *
         from agile_file_operation_history
-        where project_id = #{projectId} and user_id = #{userId}
+        where project_id = #{projectId} and user_id = #{userId} and action = #{action}
         order by id desc limit 1
     </select>
 
