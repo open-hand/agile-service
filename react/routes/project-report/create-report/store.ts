@@ -91,7 +91,6 @@ class ProjectReportStore {
 
   @action('更新一个block')
   updateBlock(block: IReportBlock) {
-    console.log(block);
     const { id } = block;
     const index = findIndex(this.blockList, { id });
     this.blockList[index] = block;

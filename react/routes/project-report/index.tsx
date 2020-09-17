@@ -10,6 +10,7 @@ const ProjectReport: React.FC<RouteChildrenProps> = ({ match }) => (
   <Switch>
     <Route exact path={match?.url} component={ReportList} />
     <Route exact path={`${match?.url}/create`} component={CreateReport} />
+    <Route exact path={`${match?.url}/edit/:id`} component={CreateReport} />
     <Route path="*" component={nomatch} />
   </Switch>
 );

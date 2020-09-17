@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   Page, Header, Breadcrumb, Content,
 } from '@choerodon/boot';
@@ -10,12 +10,13 @@ import openAddModal from './components/add-modal';
 import BlockList from './components/block-list';
 import BaseInfo from './components/base-info';
 import Operation from './components/operation';
-import ProjectReportContext from './context';
+import ProjectReportContext, { BaseInfoRef } from './context';
 import ProjectReportStore from './store';
 import styles from './index.less';
 
 const CreateReport: React.FC = () => {
   const store = useMemo(() => new ProjectReportStore(), []);
+  const baseInfoRef = useRef<BaseInfoRef>({} as BaseInfoRef);
   return (
     <Page>
       <Header>
@@ -25,6 +26,7 @@ const CreateReport: React.FC = () => {
       <Content style={{ paddingBottom: 0 }}>
         <ProjectReportContext.Provider value={{
           store,
+          baseInfoRef,
         }}
         >
           <div className={styles.header}>
