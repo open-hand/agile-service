@@ -103,7 +103,6 @@ class IssueSearchStore {
   // 获取所有字段 包括系统字段
   @computed get getAllFields() {
     const allField = [...this.fields, ...this.getSystemFields()];
-    console.log('allField', allField);
     return allField;
   }
 

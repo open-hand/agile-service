@@ -11,8 +11,7 @@ import { IChosenFieldField } from '@/components/chose-field/types';
 import ChoseFieldStore from '@/components/chose-field/store';
 import { useTableColumnCheckBoxesDataSet } from '@/components/table-column-check-boxes';
 import { useIssueFilterFormDataSet } from '@/components/issue-filter-form';
-import ExportIssueDataSet from './ExportIssueDataSet';
-import ExportIssueFilterStore from './ExportIssueFilterStore';
+import { getFilterFormSystemFields } from '../utils';
 
 interface Context {
   tableDataSet: DataSet,
@@ -62,7 +61,7 @@ const ExportIssueContextProvider = injectIntl(observer(
     });
 
     const choseFieldStore = useChoseFieldStore({ systemFields, customFields, chosenFields });
-    const issueFilterFormDataSet = useIssueFilterFormDataSet({ fields, isInProgram });
+    const issueFilterFormDataSet = useIssueFilterFormDataSet({ fields, systemFields: getFilterFormSystemFields(isInProgram) });
     const tableColumnCheckBoxesDataSet = useTableColumnCheckBoxesDataSet('exportFieldCodes', columns.map((column) => column.name));
 
     const value = {

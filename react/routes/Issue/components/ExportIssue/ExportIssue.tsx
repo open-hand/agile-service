@@ -3,23 +3,17 @@ import { stores, Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import moment from 'moment';
 import { omit, find, unionBy } from 'lodash';
-import {
-  Radio, Divider, Icon, Row, Col, Dropdown, Menu,
-} from 'choerodon-ui';
+import { Divider } from 'choerodon-ui';
 import FileSaver from 'file-saver';
-import IssueStore, { getSystemFields } from '@/stores/project/issue/IssueStore';
-
 import { issueApi } from '@/api';
-import {
-  DataSet, Table, Form, Select, Button, CheckBox,
-} from 'choerodon-ui/pro';
-import SelectSprint from '@/components/select/select-sprint';
+import { Button, CheckBox } from 'choerodon-ui/pro';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import IssueFilterForm from '@/components/issue-filter-form';
 import ChooseField from '@/components/chose-field';
 import TableColumnCheckBoxes from '@/components/table-column-check-boxes';
+import WsProgress from '@/components/ws-progress';
 import { useExportIssueStore } from './stores';
-import WsProgress from './components/ws-progress';
+import { getCustomFieldFilters, getExportFieldCodes } from './utils';
 
 interface FormPartProps {
   title: string | ReactElement,
@@ -58,30 +52,6 @@ const FormPart: React.FC<FormPartProps> = (props) => {
     </div>
   );
 };
-const fieldTransform = {
-  issueNum: 'issueNum',
-  issueId: 'summary',
-  //  "description":
-  issueTypeId: 'typeName',
-  //  "projectName":
-  assigneeId: 'assigneeName',
-  // "assigneeRealName":
-  reporterId: 'reporterName',
-  //  "reporterRealName":
-  //   "resolution":
-  statusId: 'statusName',
-  issueSprintVOS: 'sprintName',
-  // "creationDate":
-  lastUpdateDate: 'lastUpdateDate',
-  priorityId: 'priorityName',
-  //  "subTask":
-  //  "remainingTime":
-  version: 'versionName',
-  epic: 'epicName',
-  label: 'labelName',
-  storyPoints: 'storyPoints',
-  component: 'componentName',
-};
 
 const ExportIssue: React.FC<{}> = () => {
   const {
@@ -92,17 +62,21 @@ const ExportIssue: React.FC<{}> = () => {
   /**
  * 输出 excel
  */
-  const exportExcel = () => {
-    // console.log('dataSet', exportIssueDataSet.toData());
-    // console.log('customFieldFilters', choseFieldStore.getCustomFieldFilters(exportIssueDataSet.current!));
-    // console.log('exportFieldCodes', choseFieldStore.getExportFieldCodes(exportIssueDataSet.current!));
+  const exportExcel = async () => {
+    // return;
+    let search: any = {};
+    if (await issueFilterFormDataSet.current?.validate()) {
+      search = getCustomFieldFilters(choseFieldStore.getAllChosenField, issueFilterFormDataSet.current!);
+    } else {
+      return false;
+    }
+    if (await tableColumnCheckBoxesDataSet.current?.validate()) {
+      search.exportFieldCodes = getExportFieldCodes(tableColumnCheckBoxesDataSet.current!);
+    }
     const field = find(checkOptions, (f) => f.order) as { value: string, label: string, order?: string, };
-    const search = {
-      // ...choseFieldStore.getCustomFieldFilters(exportIssueDataSet.current!),
-      // ...choseFieldStore.getExportFieldCodes(exportIssueDataSet.current!),
-    };
+    console.log('search:', search);
     // @ts-ignore
-    issueApi.export(search, field ? `${field.name},${field.order}` : undefined)
+    return issueApi.export(search, field ? `${field.name},${field.order}` : undefined)
       .then((blobData: any) => {
         // const blob = new Blob([blobData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         // const fileName = 'AppState.currentMenuType.name.xlsx';
@@ -126,7 +100,7 @@ const ExportIssue: React.FC<{}> = () => {
     <div>
       <FormPart title="筛选问题">
         <IssueFilterForm dataSet={issueFilterFormDataSet} chosenFields={choseFieldStore.getAllChosenField} onDelete={(item) => choseFieldStore.delChosenFields(item.code)}>
-          <ChooseField store={choseFieldStore} />
+          <ChooseField store={choseFieldStore} dropDownBtnProps={{ icon: 'add', style: { color: '#3f51b5' } }} />
         </IssueFilterForm>
       </FormPart>
       <Divider className={`${prefixCls}-horizontal`} />

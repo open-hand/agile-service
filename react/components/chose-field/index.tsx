@@ -9,6 +9,7 @@ import {
 } from 'choerodon-ui/pro';
 import { Dropdown } from 'choerodon-ui';
 import { DropDownProps } from 'choerodon-ui/lib/dropdown';
+import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import { observer } from 'mobx-react-lite';
 import FieldList from './FieldList';
 import ChoseFieldStore from './store';
@@ -17,6 +18,7 @@ interface Props {
   store: ChoseFieldStore,
   dropDownProps?: Partial<DropDownProps>,
   dropDownBtnChildren?: ReactElement | ReactElement[] | string | null,
+  dropDownBtnProps?: Partial<ButtonProps>,
 
 }
 function useClickOut(onClickOut: (e?: any) => void) {
@@ -66,6 +68,7 @@ function ChooseField(props: Props) {
             e.nativeEvent.stopImmediatePropagation();
             setHidden(false);
           }}
+          {...props.dropDownBtnProps}
         >
           {dropDownBtnChildren}
         </Button>

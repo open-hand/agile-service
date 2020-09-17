@@ -1,21 +1,8 @@
-import React, {
-  Component, ReactElement, useMemo, useState, useEffect, useCallback,
-} from 'react';
-import { stores, Choerodon } from '@choerodon/boot';
-import { observer, useObservable, useObserver } from 'mobx-react-lite';
-import moment from 'moment';
-import { omit, find, unionBy } from 'lodash';
-import {
-  Radio, Divider, Icon, Row, Col, Dropdown, Menu,
-} from 'choerodon-ui';
-import FileSaver from 'file-saver';
-import IssueStore from '@/stores/project/issue/IssueStore';
-import { issueApi } from '@/api';
-import {
-  DataSet, Table, Form, Select, Button, CheckBox,
-} from 'choerodon-ui/pro';
-import SelectSprint from '@/components/select/select-sprint';
-import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import React, { useMemo, useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
+import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
+import { Row, Col } from 'choerodon-ui';
+import { DataSet, Form, Icon } from 'choerodon-ui/pro';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import renderField from './components/renderField';
 import IssueFilterFormDataSet from './IssueFilterFormDataSet';
@@ -29,28 +16,22 @@ interface Props {
   defaultValue?: any,
 }
 
-export function useIssueFilterFormDataSet(props: { fields: IChosenFieldField[], isInProgram?: boolean }) {
-  return useMemo(() => new DataSet(IssueFilterFormDataSet({ fields: props.fields, isInProgram: props.isInProgram })), []);
+export function useIssueFilterFormDataSet(props: { fields: IChosenFieldField[], systemFields?: FieldProps[] }) {
+  return useMemo(() => new DataSet(IssueFilterFormDataSet({ fields: props.fields, systemFields: props.systemFields })), []);
 }
 const IssueFilterForm: React.FC<Props> = (props) => {
   const prefixCls = 'c7n-agile-issue-filter-form';
-  // const chosenFieldsMaps = useObservable(new Map<string, IChosenFieldField>());
   const dataSet = useMemo(() => {
     if (props.dataSet) {
       return props.dataSet;
     }
     return new DataSet(IssueFilterFormDataSet({ fields: props.fields || [] }));
-  }, []);
-  // function handleDelete(code: string) {
-  //   dataSet.current?.set(code, undefined);
-  //   chosenFieldsMaps.delete(code);
-  //   return true;
-  // }
+  }, [props.dataSet, props.fields]);
+
   useEffect(() => {
+    // 初始化值
     if (props.chosenFields) {
-      console.log('props', props.chosenFields);
       props.chosenFields.forEach((field) => {
-        // chosenFieldsMaps.set(field.code, field);
         dataSet.current?.set(field.code, field.value);
       });
     }
@@ -74,15 +55,7 @@ const IssueFilterForm: React.FC<Props> = (props) => {
                   className={`${prefixCls}-del`}
                   onClick={() => {
                     const { onDelete } = props;
-                    if (onDelete) {
-                      const result = onDelete(item);
-                      // if (typeof (result) === 'boolean' && result) {
-                      //   handleDelete(item.code);
-                      // }
-                      return true;
-                    }
-                    return false;
-                    // return handleDelete(item.code);
+                    onDelete!(item);
                   }}
                 />
               </Col>
