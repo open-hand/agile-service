@@ -34,7 +34,7 @@ public class ProjectReportController {
     @GetMapping
     public ResponseEntity<Page<ProjectReportDTO>> page(@PathVariable("project_id") Long projectId,
                                                        ProjectReportVO projectReport,
-                                                       @SortDefault(value = "id", direction = Sort.Direction.ASC)
+                                                       @SortDefault(value = "id", direction = Sort.Direction.DESC)
                                                        PageRequest pageRequest) {
         projectReport.setProjectId(projectId);
         return Results.success(projectReportService.page(projectReport, pageRequest));

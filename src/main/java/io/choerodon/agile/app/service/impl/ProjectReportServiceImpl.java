@@ -112,7 +112,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
                 .stream().map(ProjectReportReceiverDTO::getReceiverId).toArray(Long[]::new);
         if (ArrayUtils.isNotEmpty(receiverIds)){
             List<UserDTO> userList = baseFeignClient.listUsersByIds(receiverIds, false).getBody();
-            projectReportVO.setCcList(userList);
+            projectReportVO.setReceiverList(userList);
         }
         // 设置抄送人列表
         Long[] ccIds = group.getOrDefault(ProjectReportReceiverDTO.TYPE_CC, Collections.emptyList())
@@ -127,7 +127,6 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     @Override
     public void create(Long projectId, ProjectReportVO projectReportVO) {
         Assert.notNull(projectReportVO.getTitle(), BaseConstants.ErrorCode.DATA_INVALID);
-        Assert.notNull(projectReportVO.getDescription(), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(projectReportVO.getProjectId(), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(projectReportVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
         ProjectReportDTO projectReportDTO = new ProjectReportDTO();
@@ -160,7 +159,6 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     @Override
     public void update(Long projectId, ProjectReportVO projectReportVO) {
         Assert.notNull(projectReportVO.getTitle(), BaseConstants.ErrorCode.DATA_INVALID);
-        Assert.notNull(projectReportVO.getDescription(), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(projectReportVO.getReceiverList()), BaseConstants.ErrorCode.DATA_NOT_EXISTS);
         ProjectReportDTO projectReportDTO = new ProjectReportDTO();
         BeanUtils.copyProperties(projectReportVO, projectReportDTO);
@@ -175,7 +173,13 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     }
 
     public void convertReportUnits(ProjectReportVO projectReportVO, ProjectReportDTO projectReportDTO) {
+        if (CollectionUtils.isEmpty(projectReportVO.getReportUnitList())){
+            return;
+        }
         try {
+            for (ReportUnitVO reportUnitVO : projectReportVO.getReportUnitList()) {
+                reportUnitVO.validate();
+            }
             projectReportDTO.setReportData(commmonMapper.writeValueAsString(projectReportVO.getReportUnitList()));
         } catch (JsonProcessingException e) {
             log.error("json convert failed");
