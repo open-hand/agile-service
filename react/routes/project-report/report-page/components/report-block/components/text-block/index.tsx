@@ -1,6 +1,6 @@
 import React from 'react';
 import WYSIWYGViewer from '@/components/WYSIWYGViewer';
-import { IReportTextBlock } from '@/routes/project-report/create-report/store';
+import { IReportTextBlock } from '@/routes/project-report/report-page/store';
 
 interface Props {
   data: IReportTextBlock

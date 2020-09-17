@@ -3,11 +3,13 @@ import {
   DataSet,
   Table,
 } from 'choerodon-ui/pro';
+import { Link } from 'react-router-dom';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import { projectReportApiConfig } from '@/api';
 import UserHead from '@/components/UserHead';
 import { User } from '@/common/types';
+import { linkUrl } from '@/utils/to';
 
 const { Column } = Table;
 
@@ -43,6 +45,13 @@ const ReportTable = () => {
       <Column
         name="title"
         tooltip={'overflow' as TableColumnTooltip}
+        renderer={({ record }) => (
+          <Link
+            to={linkUrl(`/agile/project-report/edit/${record?.get('id')}`)}
+          >
+            {record?.get('title')}
+          </Link>
+        )}
       />
       <Column
         name="receiverList"

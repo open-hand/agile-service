@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { axios } from '@choerodon/boot';
-import { IReportListBlock } from '@/routes/project-report/create-report/store';
+import { IReportListBlock } from '@/routes/project-report/report-page/store';
 import StatusTag from '@/components/StatusTag';
 import { Issue } from '@/common/types';
 import { getProjectId, getOrganizationId } from '@/utils/common';
