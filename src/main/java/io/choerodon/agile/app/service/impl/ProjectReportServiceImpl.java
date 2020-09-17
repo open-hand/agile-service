@@ -175,7 +175,13 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     }
 
     public void convertReportUnits(ProjectReportVO projectReportVO, ProjectReportDTO projectReportDTO) {
+        if (CollectionUtils.isEmpty(projectReportVO.getReportUnitList())){
+            return;
+        }
         try {
+            for (ReportUnitVO reportUnitVO : projectReportVO.getReportUnitList()) {
+                reportUnitVO.validate();
+            }
             projectReportDTO.setReportData(commmonMapper.writeValueAsString(projectReportVO.getReportUnitList()));
         } catch (JsonProcessingException e) {
             log.error("json convert failed");

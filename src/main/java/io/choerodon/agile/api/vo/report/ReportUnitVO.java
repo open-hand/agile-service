@@ -3,6 +3,8 @@ package io.choerodon.agile.api.vo.report;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.hzero.core.base.BaseConstants;
+import org.springframework.util.Assert;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/9/15 下午6:59
@@ -15,6 +17,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReportUnitVO {
+
+    public void validate(){
+        Assert.notNull(title, BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.notNull(type, BaseConstants.ErrorCode.DATA_INVALID);
+    }
 
     private String title;
 

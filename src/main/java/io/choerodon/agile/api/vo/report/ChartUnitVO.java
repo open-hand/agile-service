@@ -69,7 +69,7 @@ public class ChartUnitVO extends ReportUnitVO {
     /**
      * 各图表必输校验
      */
-    public void validateChartParams(){
+    public void validate(){
         Assert.notNull(chartSearchVO, BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(chartSearchVO.getProjectId(), BaseConstants.ErrorCode.DATA_INVALID);
 

@@ -51,10 +51,6 @@ public class ChartSearchVO {
      */
     private Long assigneeId;
     /**
-     * 燃尽图： onlyMe(可选)
-     */
-    private Boolean onlyMe;
-    /**
      * 燃尽图： displayNonWorkingDay(可选)
      */
     private Boolean displayNonWorkingDay;
@@ -151,14 +147,6 @@ public class ChartSearchVO {
 
     public void setAssigneeId(Long assigneeId) {
         this.assigneeId = assigneeId;
-    }
-
-    public Boolean getOnlyMe() {
-        return onlyMe;
-    }
-
-    public void setOnlyMe(Boolean onlyMe) {
-        this.onlyMe = onlyMe;
     }
 
     public Boolean getDisplayNonWorkingDay() {
