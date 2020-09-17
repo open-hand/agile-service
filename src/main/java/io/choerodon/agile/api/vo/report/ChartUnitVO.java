@@ -5,63 +5,28 @@ package io.choerodon.agile.api.vo.report;
  */
 public class ChartUnitVO extends ReportUnitVO {
 
-    private String chart;
+    /**
+     * 图表代码
+     */
+    private String chartCode;
+    /**
+     * 图表查询参数
+     */
+    private ChartSearchVO chartSearchVO;
 
-    private Long projectId;
-
-    private Long organizationId;
-
-    private Long sprintId;
-
-    private Long epicId;
-
-    private Long versionId;
-
-    public String getChart() {
-        return chart;
+    public String getChartCode() {
+        return chartCode;
     }
 
-    public void setChart(String chart) {
-        this.chart = chart;
+    public void setChartCode(String chartCode) {
+        this.chartCode = chartCode;
     }
 
-    public Long getProjectId() {
-        return projectId;
+    public ChartSearchVO getChartSearchVO() {
+        return chartSearchVO;
     }
 
-    public void setProjectId(Long projectId) {
-        this.projectId = projectId;
-    }
-
-    public Long getOrganizationId() {
-        return organizationId;
-    }
-
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
-    }
-
-    public Long getSprintId() {
-        return sprintId;
-    }
-
-    public void setSprintId(Long sprintId) {
-        this.sprintId = sprintId;
-    }
-
-    public Long getEpicId() {
-        return epicId;
-    }
-
-    public void setEpicId(Long epicId) {
-        this.epicId = epicId;
-    }
-
-    public Long getVersionId() {
-        return versionId;
-    }
-
-    public void setVersionId(Long versionId) {
-        this.versionId = versionId;
+    public void setChartSearchVO(ChartSearchVO chartSearchVO) {
+        this.chartSearchVO = chartSearchVO;
     }
 }

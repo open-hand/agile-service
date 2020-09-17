@@ -4,7 +4,11 @@
 
     <select id="selectReceiver" resultType="io.choerodon.agile.infra.dto.ProjectReportReceiverDTO">
         SELECT
-            *
+            aprr.id,
+            aprr.project_id,
+            aprr.project_report_id,
+            aprr.type,
+            aprr.receiver_id
         FROM 
             agile_project_report_receiver aprr
         WHERE 
