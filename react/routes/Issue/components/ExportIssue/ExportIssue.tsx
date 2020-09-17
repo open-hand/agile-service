@@ -15,12 +15,10 @@ import {
 } from 'choerodon-ui/pro';
 import SelectSprint from '@/components/select/select-sprint';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
-import { IssueFilterForm } from '@/components/issue-filter-form';
+import IssueFilterForm from '@/components/issue-filter-form';
 import ChooseField from '@/components/chose-field';
-import { useChoseFieldStore } from '@/components/chose-field/FieldList';
 import TableColumnCheckBoxes from '@/components/table-column-check-boxes';
 import { useExportIssueStore } from './stores';
-import renderField from './components/renderField';
 import WsProgress from './components/ws-progress';
 
 interface FormPartProps {
@@ -87,7 +85,8 @@ const fieldTransform = {
 
 const ExportIssue: React.FC<{}> = () => {
   const {
-    prefixCls, checkOptions, tableDataSet, choseFieldStore, fields,
+    prefixCls, checkOptions, tableDataSet, choseFieldStore,
+    tableColumnCheckBoxesDataSet, issueFilterFormDataSet,
   } = useExportIssueStore();
 
   /**
@@ -105,35 +104,34 @@ const ExportIssue: React.FC<{}> = () => {
     // @ts-ignore
     issueApi.export(search, field ? `${field.name},${field.order}` : undefined)
       .then((blobData: any) => {
-        const blob = new Blob([blobData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const fileName = 'AppState.currentMenuType.name.xlsx';
-        FileSaver.saveAs(blob, fileName);
+        // const blob = new Blob([blobData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        // const fileName = 'AppState.currentMenuType.name.xlsx';
+        // FileSaver.saveAs(blob, fileName);
         Choerodon.prompt('导出成功');
-        IssueStore.setExportModalVisible(false);
+        // IssueStore.setExportModalVisible(false);
       }).finally(() => {
 
       });
   };
   const handleChangeFieldStatus = (status: 'ALL' | 'NONE') => {
-    // if (status !== 'ALL') {
-    //   exportIssueDataSet.current?.set('selectedFields', checkOptions.map((column) => column.name));
-    // } else {
-    //   exportIssueDataSet.current?.set('selectedFields', []);
-    // }
-    console.log('--');
+    if (status !== 'ALL') {
+      tableColumnCheckBoxesDataSet.current?.set('exportFieldCodes', checkOptions.map((column) => column.value));
+    } else {
+      tableColumnCheckBoxesDataSet.current?.set('exportFieldCodes', []);
+    }
     return true;
   };
 
   return (
     <div>
       <FormPart title="筛选问题">
-        <IssueFilterForm fields={fields} chosenFields={choseFieldStore.getAllChosenField} onDelete={(item) => choseFieldStore.delChosenFields(item.code)}>
+        <IssueFilterForm dataSet={issueFilterFormDataSet} chosenFields={choseFieldStore.getAllChosenField} onDelete={(item) => choseFieldStore.delChosenFields(item.code)}>
           <ChooseField store={choseFieldStore} />
         </IssueFilterForm>
       </FormPart>
       <Divider className={`${prefixCls}-horizontal`} />
       <FormPart title="选择字段" btnOnClick={handleChangeFieldStatus}>
-        <TableColumnCheckBoxes options={checkOptions} />
+        <TableColumnCheckBoxes options={checkOptions} dataSet={tableColumnCheckBoxesDataSet} name="exportFieldCodes" />
         <Button icon="unarchive" style={{ color: '#3f51b5' }} onClick={exportExcel}>导出问题</Button>
       </FormPart>
       <WsProgress messageKey="agile" />

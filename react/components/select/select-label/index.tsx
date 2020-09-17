@@ -14,9 +14,12 @@ const SelectLabel: React.FC<Props> = forwardRef(({ dataRef, ...otherProps }, ref
     valueField: 'labelName',
     request: () => issueLabelApi.loads(),
     middleWare: (data) => {
-      // @ts-ignore
+      if (dataRef) {
+        // @ts-ignore
       // eslint-disable-next-line no-param-reassign
-      dataRef.current = data;
+        dataRef.current = data;
+      }
+
       return data;
     },
     paging: false,

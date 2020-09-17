@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import {
   TextField, Select, DatePicker, TimePicker, DateTimePicker, NumberField, TextArea, UrlField,
 } from 'choerodon-ui/pro';
+import { toJS } from 'mobx';
 import SelectUser from '@/components/select/select-user';
 import SelectFeature from '@/components/select/select-feature';
 import SelectSprint from '@/components/select/select-sprint';
@@ -14,42 +15,45 @@ import SelectComponent from '@/components/select/select-component';
 import SelectVersion from '@/components/select/select-version';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IChosenFieldField } from '@/components/chose-field/types';
+import { userApi } from '@/api';
 import SelectStatus from './field/StatusField';
+import FeatureProjectField from './field/FeatureProjectField';
 
 const { Option } = Select;
 const singleList = ['radio', 'single'];
 
 export default function renderField<T extends Partial<SelectProps>>(field: IChosenFieldField, selectOtherProps?: T) {
   const {
-    code, fieldType, name, fieldOptions, value: defaultValue, id,
+    code, fieldType, name, fieldOptions, value, id,
   } = field;
+  const defaultValue = toJS(value);
   if (!id) {
     switch (code) {
       case 'sprint':
-        return <Select name={code} required />;
+        // return <Select name={code} required />;
         return <SelectSprint name={code} statusList={[]} {...selectOtherProps} />;
       case 'statusId':
-        return <SelectStatus name={code} {...selectOtherProps} />;
+        return <SelectStatus name={code} multiple {...selectOtherProps} />;
       case 'issueTypeId':
         return <SelectIssueType name={code} multiple {...selectOtherProps} />;
-      case 'epicId':
+      case 'epic':
         // @ts-ignore
-        return <SelectEpic name={code} {...selectOtherProps} />;
+        return <SelectEpic name={code} multiple {...selectOtherProps} />;
       case 'priorityId':
         // @ts-ignore
-        return <SelectPriority name={code} {...selectOtherProps} />;
-      case 'labelIssueRelVOList':
+        return <SelectPriority name={code} multiple {...selectOtherProps} />;
+      case 'label':
         // @ts-ignore
-        return <SelectLabel name={code} {...selectOtherProps} />;
-      case 'componentIssueRelVOList':
+        return <SelectLabel name={code} multiple {...selectOtherProps} />;
+      case 'component':
         // @ts-ignore
-        return <SelectComponent name={code} {...selectOtherProps} />;
+        return <SelectComponent name={code} multiple {...selectOtherProps} />;
       case 'version':
         // @ts-ignore
         return <SelectVersion name={code} {...selectOtherProps} />;
-      case 'featureId': {
+      case 'feature': {
         // @ts-ignore
-        return <SelectFeature name={code} {...selectOtherProps} />;// label={name} style={{ width: '100%' }}
+        return <FeatureProjectField name={code} multiple featureIds={defaultValue} {...selectOtherProps} />;// label={name} style={{ width: '100%' }}
       }
       default:
         break;
@@ -124,7 +128,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
           name={code}
           label={name}
           style={{ width: '100%' }}
-          multiple={!(singleList.indexOf(fieldType) !== -1)}
+          multiple
         >
           {fieldOptions
             && fieldOptions.length > 0
@@ -142,13 +146,23 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
         </Select>
       );
     case 'member':
+    {
       return (
         <SelectUser
           label="user"
+          multiple
+          // @ts-ignore
+          selectedUser={defaultValue.map((item: string) => ({ id: item }))}
+          // request={(({ filter, page }) => userApi.getAllInProject(filter, page).then((res) => {
+          //   if (res.list && Array.isArray(res.list)) {
+
+          //   }
+          // }))}
           style={{ width: '100%' }}
           name={code}
         />
       );
+    }
     default:
       return null;
   }
