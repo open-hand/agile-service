@@ -1,21 +1,21 @@
 import React from 'react';
-import { IReportChartBlock } from '@/routes/project-report/report-page/store';
+import { IReportChartBlock, IChartCode } from '@/routes/project-report/report-page/store';
 import BurnDownBlock from './components/burndown';
 import SprintBlock from './components/sprint';
 
-const ChartMap = new Map([
-  ['burndown', BurnDownBlock],
-  ['sprint', SprintBlock],
+const ChartMap = new Map<IChartCode, React.FC<any>>([
+  ['burn_down_report', BurnDownBlock],
+  ['sprint_report', SprintBlock],
 ]);
 interface Props {
   data: IReportChartBlock
 }
-const ChartBlock: React.FC<Props> = ({ data: { data, chartType } }) => {
-  const ChartBlockComponent = ChartMap.get(chartType);
+const ChartBlock: React.FC<Props> = ({ data: { chartSearchVO, chartCode } }) => {
+  const ChartBlockComponent = ChartMap.get(chartCode);
   return (
     <>
       {ChartBlockComponent && (
-        <ChartBlockComponent filter={data.filter} />
+        <ChartBlockComponent filter={chartSearchVO} />
       )}
     </>
   );

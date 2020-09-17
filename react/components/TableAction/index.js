@@ -9,17 +9,17 @@ const TableAction = (props) => {
   } = props;
   const renderMenu = () => (
     <Menu onClick={onMenuClick}>
-      {menus.map(menu => (
+      {menus.map((menu) => (
         <Menu.Item key={menu.key}>
           {menu.text}
         </Menu.Item>
-      ))}      
+      ))}
     </Menu>
   );
   return (
     <div className={prefix}>
       <span style={{ display: 'flex', overflow: 'hidden' }}>
-        <a style={{ overflow: 'hidden' }} role="button" onClick={onEditClick} onKeyDown={null}>
+        <a style={{ overflow: 'hidden', lineHeight: '32px' }} role="button" onClick={onEditClick} onKeyDown={null}>
           {text}
         </a>
       </span>

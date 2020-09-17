@@ -43,6 +43,13 @@ class ProjectReportApi extends Api {
       url: `${this.prefix}/project_report/${reportId}`,
     });
   }
+
+  delete(reportId: string) {
+    return this.request({
+      method: 'delete',
+      url: `${this.prefix}/project_report/${reportId}`,
+    });
+  }
 }
 
 const projectReportApi = new ProjectReportApi();

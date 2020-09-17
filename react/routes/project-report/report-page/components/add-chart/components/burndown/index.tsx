@@ -1,21 +1,46 @@
 import React, { useCallback, useImperativeHandle } from 'react';
+import { stores } from '@choerodon/boot';
 import BurnDown from '@/components/charts/burn-down';
 import BurnDownSearch from '@/components/charts/burn-down/search';
 import useBurnDownReport, { BurnDownConfig } from '@/components/charts/burn-down/useBurnDownReport';
-import { IReportChartBlock } from '@/routes/project-report/report-page/store';
+import { IReportChartBlock, BurnDownSearchVO } from '@/routes/project-report/report-page/store';
+import { getProjectId } from '@/utils/common';
 import { ChartRefProps } from '../..';
 
+const { AppState } = stores;
+
+export const transform = (searchVO: BurnDownSearchVO | undefined): BurnDownConfig | undefined => {
+  if (!searchVO) {
+    return undefined;
+  }
+  return {
+    type: searchVO.type,
+    restDayShow: searchVO.displayNonWorkingDay,
+    sprintId: searchVO.sprintId,
+    quickFilter: {
+      onlyStory: searchVO.onlyStory,
+      onlyMe: searchVO.assigneeId === AppState.userInfo.id,
+      quickFilters: searchVO.quickFilterIds,
+      personalFilters: searchVO.personalFilterIds,
+    },
+  };
+};
 interface Props {
   innerRef: React.MutableRefObject<ChartRefProps>
   data?: IReportChartBlock
 }
 const BurnDownComponent: React.FC<Props> = ({ innerRef, data }) => {
-  const [searchProps, props] = useBurnDownReport(data?.data.filter);
-  const handleSubmit = useCallback(async (): Promise<BurnDownConfig> => ({
+  const [searchProps, props] = useBurnDownReport(transform(data?.chartSearchVO as BurnDownSearchVO));
+  const handleSubmit = useCallback(async (): Promise<BurnDownSearchVO> => ({
     type: searchProps.type,
-    restDayShow: searchProps.restDayShow,
+    displayNonWorkingDay: searchProps.restDayShow,
     sprintId: searchProps.sprintId,
-    quickFilter: searchProps.quickFilter,
+    quickFilterIds: searchProps.quickFilter.quickFilters,
+    onlyMe: searchProps.quickFilter.onlyMe,
+    onlyStory: searchProps.quickFilter.onlyStory,
+    assigneeId: searchProps.quickFilter.onlyMe ? AppState.userInfo.id : undefined,
+    personalFilterIds: searchProps.quickFilter.personalFilters,
+    projectId: getProjectId(),
   }),
   [searchProps]);
   useImperativeHandle(innerRef, () => ({

@@ -1,15 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   DataSet,
   Table,
 } from 'choerodon-ui/pro';
-import { Link } from 'react-router-dom';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
-import { projectReportApiConfig } from '@/api';
+import { projectReportApiConfig, projectReportApi } from '@/api';
 import UserHead from '@/components/UserHead';
+import TableAction from '@/components/TableAction';
 import { User } from '@/common/types';
-import { linkUrl } from '@/utils/to';
+import to from '@/utils/to';
 
 const { Column } = Table;
 
@@ -35,7 +35,14 @@ const ReportTable = () => {
       },
     ],
   }), []);
-
+  const handleMenuClick = useCallback(async (key, record) => {
+    switch (key) {
+      case 'delete': {
+        await projectReportApi.delete(record.get('id'));
+        dataSet.query();
+      }
+    }
+  }, [dataSet]);
   return (
     <Table
       key="user"
@@ -46,11 +53,15 @@ const ReportTable = () => {
         name="title"
         tooltip={'overflow' as TableColumnTooltip}
         renderer={({ record }) => (
-          <Link
-            to={linkUrl(`/agile/project-report/edit/${record?.get('id')}`)}
-          >
-            {record?.get('title')}
-          </Link>
+          <TableAction
+            onEditClick={() => to(`/agile/project-report/edit/${record?.get('id')}`)}
+            onMenuClick={({ key }: { key: string }) => handleMenuClick(key, record)}
+            menus={[{
+              key: 'delete',
+              text: '删除',
+            }]}
+            text={record?.get('title')}
+          />
         )}
       />
       <Column
