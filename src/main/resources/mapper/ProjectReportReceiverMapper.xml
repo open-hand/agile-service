@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.ProjectReportReceiverMapper">
+
+    <select id="selectReceiver" resultType="io.choerodon.agile.infra.dto.ProjectReportReceiverDTO">
+        SELECT
+            *
+        FROM 
+            agile_project_report_receiver aprr
+        WHERE 
+            aprr.project_report_id IN
+        <foreach collection="reportIdList" item="reportId" separator="," open="(" close=")">
+            #{reportId}
+        </foreach>
+      <if test="type != null">
+          AND aprr.type = #{type}
+      </if>
+    </select>
+</mapper>

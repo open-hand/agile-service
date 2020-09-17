@@ -16,6 +16,9 @@ import io.swagger.annotations.ApiModelProperty;
 @ModifyAudit
 @VersionAudit
 public class ProjectReportReceiverDTO extends AuditDomain {
+    
+    public static final String TYPE_RECEIVER = "RECEIVER";
+    public static final String TYPE_CC = "CC";
 
     public ProjectReportReceiverDTO(Long projectReportId, Long projectId) {
         this.projectReportId = projectReportId;
