@@ -6,7 +6,7 @@ import {
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import { projectReportApiConfig } from '@/api';
-import { UserHead } from '@/components';
+import UserHead from '@/components/UserHead';
 import { User } from '@/common/types';
 
 const { Column } = Table;
