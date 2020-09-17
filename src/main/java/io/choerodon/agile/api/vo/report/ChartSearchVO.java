@@ -43,6 +43,10 @@ public class ChartSearchVO {
      */
     private List<Long> quickFilterIds;
     /**
+     * 燃尽图： 个人筛选(可选)
+     */
+    private List<Long> personalFilterIds;
+    /**
      * 燃尽图： 经办人Id(可选)
      */
     private Long assigneeId;
@@ -92,6 +96,14 @@ public class ChartSearchVO {
      * 统计图：统计类型(必选)
      */
     private String fieldName;
+
+    public List<Long> getPersonalFilterIds() {
+        return personalFilterIds;
+    }
+
+    public void setPersonalFilterIds(List<Long> personalFilterIds) {
+        this.personalFilterIds = personalFilterIds;
+    }
 
     public Long getProjectId() {
         return projectId;
