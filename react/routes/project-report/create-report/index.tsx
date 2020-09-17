@@ -42,6 +42,7 @@ const CreateReport: React.FC = () => {
                   <Menu onClick={({ key }) => {
                     openAddModal({
                       type: key as IReportContentType,
+                      store,
                     });
                   }}
                   >

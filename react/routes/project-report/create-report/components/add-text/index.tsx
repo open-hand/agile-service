@@ -5,13 +5,16 @@ import {
 import { observer } from 'mobx-react-lite';
 import Editor from '@/components/Editor';
 import { RefProps } from '../add-modal';
+import { IReportTextBlock } from '../../store';
 
 interface Props {
   innerRef: React.MutableRefObject<RefProps>
+  data?:IReportTextBlock
 }
-const AddText: React.FC<Props> = ({ innerRef }) => {
+const AddText: React.FC<Props> = ({ innerRef, data: editData }) => {
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
+    data: editData ? [{ title: editData.title, description: JSON.parse(editData.content) }] : undefined,
     fields: [{
       name: 'title',
       label: '文本标题',
@@ -21,13 +24,20 @@ const AddText: React.FC<Props> = ({ innerRef }) => {
       name: 'description',
       required: true,
     }],
-  }), []);
+  }), [editData]);
   const handleSubmit = useCallback(async () => {
-    if (dataSet.validate()) {
-      return 'data';
+    if (await dataSet.validate()) {
+      const data = dataSet.current?.toData();
+      const block: IReportTextBlock = {
+        id: editData?.id || String(Math.random()),
+        title: data.title,
+        type: 'text',
+        content: JSON.stringify(data.description),
+      };
+      return block;
     }
     return false;
-  }, [dataSet]);
+  }, [dataSet, editData?.id]);
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,
   }), [handleSubmit]);

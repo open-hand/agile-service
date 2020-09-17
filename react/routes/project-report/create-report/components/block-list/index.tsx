@@ -1,4 +1,5 @@
 import React from 'react';
+import { observer } from 'mobx-react-lite';
 import { useProjectReportContext } from '../../context';
 import ReportBlock from '../report-block';
 
@@ -10,4 +11,4 @@ const BlockList: React.FC = () => {
     </>
   );
 };
-export default BlockList;
+export default observer(BlockList);

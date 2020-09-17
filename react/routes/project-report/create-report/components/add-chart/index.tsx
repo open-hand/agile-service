@@ -1,8 +1,12 @@
-import React, { useMemo, useImperativeHandle, useCallback } from 'react';
+import React, {
+  useMemo, useImperativeHandle, useCallback, useRef,
+} from 'react';
 import {
   Form, Select, DataSet, TextField,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
+import { BurnDownConfig } from '@/components/charts/burn-down/useBurnDownReport';
+import { SprintConfig } from '@/components/charts/sprint/useSprintReport';
 import BurnDownComponent from './components/burndown';
 import SprintComponent from './components/sprint';
 import AccumulationComponent from './components/accumulation';
@@ -10,6 +14,7 @@ import PieComponent from './components/pie';
 import { RefProps } from '../add-modal';
 import EpicBurnDownComponent from './components/epic-burnDown';
 import versionBurnDownComponent from './components/version-burnDown';
+import { IReportChartBlock } from '../../store';
 
 const { Option } = Select;
 export const defaultCharts = new Map([
@@ -30,10 +35,16 @@ export function setGetOptionalCharts(newGetOptionalCharts: GetOptionalCharts) {
 
 interface Props {
   innerRef: React.MutableRefObject<RefProps>
+  data?: IReportChartBlock
 }
-const AddChart: React.FC<Props> = ({ innerRef }) => {
+export interface ChartRefProps {
+  submit: () => Promise<BurnDownConfig | SprintConfig>
+}
+const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
+  const chartRef = useRef<ChartRefProps>({} as ChartRefProps);
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
+    data: editData ? [{ title: editData.title, chart: editData.chartType }] : undefined,
     fields: [{
       name: 'title',
       label: '图表标题',
@@ -44,13 +55,24 @@ const AddChart: React.FC<Props> = ({ innerRef }) => {
       label: '选择图表',
       required: true,
     }],
-  }), []);
+  }), [editData]);
   const handleSubmit = useCallback(async () => {
     if (dataSet.validate()) {
-      return 'data';
+      const data = dataSet.current?.toData();
+      const search = await chartRef.current.submit();
+      const block: IReportChartBlock = {
+        id: editData?.id || String(Math.random()),
+        title: data.title,
+        type: 'chart',
+        chartType: data.chart,
+        data: {
+          filter: search,
+        },
+      };
+      return block;
     }
     return false;
-  }, [dataSet]);
+  }, [dataSet, editData?.id]);
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,
   }), [handleSubmit]);
@@ -61,10 +83,10 @@ const AddChart: React.FC<Props> = ({ innerRef }) => {
       <Form dataSet={dataSet} style={{ width: 512 }}>
         <TextField name="title" />
         <Select name="chart">
-          {[...optionalCharts.entries()].map(([key, { name }]) => <Option value={key}>{name}</Option>)}
+          {[...optionalCharts.entries()].map(([key, { name }]) => <Option key={key} value={key}>{name}</Option>)}
         </Select>
       </Form>
-      {ChartComponent && <ChartComponent />}
+      {ChartComponent && <ChartComponent innerRef={chartRef} data={editData} />}
     </>
   );
 };

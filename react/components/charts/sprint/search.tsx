@@ -5,8 +5,8 @@ import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import { ISprint } from '@/common/types';
 
 export interface SprintSearchProps {
-  sprintId: string | null
-  setSprintId: (sprintId: string | null) => void
+  sprintId: string | undefined
+  setSprintId: (sprintId: string | undefined) => void
   setEndDate: (endDate: string) => void
   restDayShow: boolean
   setRestDayShow: (restDayShow: boolean) => void
@@ -37,7 +37,7 @@ const SprintSearch: React.FC<SprintSearchProps> = ({
           setSprintId(sprint.sprintId);
           setEndDate(sprint.endDate);
         } else {
-          setSprintId(null);
+          setSprintId(undefined);
           setEndDate('');
         }
       }}

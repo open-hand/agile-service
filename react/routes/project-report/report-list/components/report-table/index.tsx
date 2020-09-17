@@ -5,42 +5,31 @@ import {
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
+import { projectReportApiConfig } from '@/api';
+import { UserHead } from '@/components';
+import { User } from '@/common/types';
 
 const { Column } = Table;
 
 const ReportTable = () => {
   const dataSet = useMemo(() => new DataSet({
-    primaryKey: 'userid',
-    name: 'user',
-    autoQuery: false,
+    primaryKey: 'id',
+    autoQuery: true,
+    selection: false,
     pageSize: 10,
+    transport: {
+      read: () => projectReportApiConfig.load(),
+    },
     fields: [
       {
-        name: 'userid',
+        name: 'title',
         type: 'string' as FieldType,
-        label: '编号',
-        required: true,
-        unique: true,
+        label: '标题',
       },
       {
-        name: 'name',
-        type: 'intl' as FieldType,
-        label: '姓名',
-      },
-      {
-        name: 'age',
-        type: 'number' as FieldType,
-        label: '年龄',
-        unique: 'uniqueGroup',
-        max: 100,
-        step: 1,
-        help: '用户年龄，可以排序',
-      },
-      {
-        name: 'email',
-        type: 'string' as FieldType,
-        label: '邮箱',
-        help: '用户邮箱，可以自动补全',
+        name: 'receiverList',
+        type: 'array' as FieldType,
+        label: '收件人',
       },
     ],
   }), []);
@@ -52,23 +41,25 @@ const ReportTable = () => {
       autoMaxWidth
     >
       <Column
-        name="userid"
-        style={{ color: 'red' }}
+        name="title"
         tooltip={'overflow' as TableColumnTooltip}
-        editor
-        width={200}
-        minWidth={150}
-        lock
       />
       <Column
-        name="age"
-        editor
-        width={150}
+        name="receiverList"
+        renderer={({ value: receiverList }) => {
+          if (!receiverList) {
+            return null;
+          }
+          return receiverList.map((user: User) => (
+            <UserHead
+              // @ts-ignore
+              style={{ display: 'inline-block' }}
+              hiddenText
+              user={user}
+            />
+          ));
+        }}
       />
-      <Column
-        name="email"
-      />
-
     </Table>
   );
 };
