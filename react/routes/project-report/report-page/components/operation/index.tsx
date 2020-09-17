@@ -12,7 +12,7 @@ interface Props {
 
 }
 const Operation: React.FC<Props> = () => {
-  const { store, baseInfoRef } = useProjectReportContext();
+  const { store, baseInfoRef, edit } = useProjectReportContext();
   const handleSubmit = useCallback(async () => {
     const baseInfo = await baseInfoRef.current.submit();
     if (baseInfo && baseInfo instanceof Object) {
@@ -21,10 +21,14 @@ const Operation: React.FC<Props> = () => {
         projectId: getProjectId(),
         reportUnitList: toJS(store.blockList),
       } as IProjectReportCreate;
-      await projectReportApi.create(data);
+      if (edit) {
+        await projectReportApi.update(store?.baseInfo?.id as string, data);
+      } else {
+        await projectReportApi.create(data);
+      }
       to('/agile/project-report');
     }
-  }, [baseInfoRef, store.blockList]);
+  }, [baseInfoRef, edit, store.baseInfo?.id, store.blockList]);
   return (
     <div
       className={styles.bar}
