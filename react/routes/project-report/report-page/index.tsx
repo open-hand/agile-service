@@ -33,40 +33,44 @@ const ReportPage: React.FC<Props> = ({ store, edit }) => {
           edit: edit || false,
         }}
         >
-          <div className={styles.header}>
-            <div className={styles.tip} />
-            <span className={styles.title}>基本信息</span>
-          </div>
-          <BaseInfo />
-          <div>
-            <div className={styles.header}>
-              <div className={styles.tip} />
-              <span className={styles.title}>报告内容</span>
-              <Dropdown
-                trigger={['click' as Action]}
-                overlay={(
-                  <Menu onClick={({ key }) => {
-                    openAddModal({
-                      type: key as IReportContentType,
-                      store,
-                    });
-                  }}
+          <div className={styles.container}>
+            <div className={styles.content}>
+              <div className={styles.header}>
+                <div className={styles.tip} />
+                <span className={styles.title}>基本信息</span>
+              </div>
+              <BaseInfo />
+              <div>
+                <div className={styles.header}>
+                  <div className={styles.tip} />
+                  <span className={styles.title}>报告内容</span>
+                  <Dropdown
+                    trigger={['click' as Action]}
+                    overlay={(
+                      <Menu onClick={({ key }) => {
+                        openAddModal({
+                          type: key as IReportContentType,
+                          store,
+                        });
+                      }}
+                      >
+                        <Menu.Item key="text">文本</Menu.Item>
+                        <Menu.Item key="static_list">静态列表</Menu.Item>
+                        <Menu.Item key="list">动态列表</Menu.Item>
+                        <Menu.Item key="chart">图表</Menu.Item>
+                      </Menu>
+                    )}
                   >
-                    <Menu.Item key="text">文本</Menu.Item>
-                    <Menu.Item key="static_list">静态列表</Menu.Item>
-                    <Menu.Item key="list">动态列表</Menu.Item>
-                    <Menu.Item key="chart">图表</Menu.Item>
-                  </Menu>
-                )}
-              >
-                <Button icon="add" color={'blue' as ButtonColor} style={{ marginLeft: 10 }}>
-                  添加报告内容
-                </Button>
-              </Dropdown>
+                    <Button icon="add" color={'blue' as ButtonColor} style={{ marginLeft: 10 }}>
+                      添加报告内容
+                    </Button>
+                  </Dropdown>
+                </div>
+                <BlockList />
+              </div>
             </div>
-            <BlockList />
+            <Operation />
           </div>
-          <Operation />
         </ProjectReportContext.Provider>
       </Content>
     </Page>

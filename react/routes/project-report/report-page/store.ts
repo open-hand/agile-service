@@ -3,23 +3,31 @@ import {
 } from 'mobx';
 import { remove, findIndex } from 'lodash';
 import { IReportContentType } from '@/common/types';
-import { BurnDownConfig } from '@/components/charts/burn-down/useBurnDownReport';
 import { SprintConfig } from '@/components/charts/sprint/useSprintReport';
+import { IBurndownChartType } from '@/components/charts/burn-down';
 
-export type IChartType = 'burndown' | 'sprint'
+export type IChartCode = 'burn_down_report' | 'sprint_report'
 
 interface IBaseReportBlock {
   id: string
   title: string
   type: IReportContentType
 }
-
+export type BurnDownSearchVO = {
+  projectId: string
+  type?: IBurndownChartType
+  sprintId?: string
+  displayNonWorkingDay: boolean
+  onlyMe: boolean
+  onlyStory: boolean
+  assigneeId?: string
+  quickFilterIds: string[]
+  personalFilterIds: string[]
+}
 export interface IReportChartBlock extends IBaseReportBlock {
   type: 'chart'
-  chartType: IChartType
-  data: {
-    filter: BurnDownConfig | SprintConfig
-  }
+  chartCode: IChartCode
+  chartSearchVO: BurnDownSearchVO | SprintConfig
 }
 export interface IReportListBlock extends IBaseReportBlock {
   type: 'list'

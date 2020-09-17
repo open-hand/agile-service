@@ -20,13 +20,13 @@ import VersionReportComponent from './components/version-report';
 
 const { Option } = Select;
 export const defaultCharts = new Map([
-  ['burndown', { component: BurnDownComponent, name: '燃尽图' }],
-  ['sprint', { component: SprintComponent, name: '冲刺报告图' }],
-  ['accumulation', { component: AccumulationComponent, name: '累计流量图' }],
-  ['pie', { component: PieComponent, name: '统计图' }],
-  ['epicBurnDown', { component: EpicBurnDownComponent, name: '史诗燃耗图' }],
-  ['versionBurnDown', { component: versionBurnDownComponent, name: '版本燃耗图' }],
-  ['iterationSpeed', { component: IterationSpeedComponent, name: '迭代速度图' }],
+  ['burn_down_report', { component: BurnDownComponent, name: '燃尽图' }],
+  ['sprint_report', { component: SprintComponent, name: '冲刺报告图' }],
+  ['cumulative_flow_diagram', { component: AccumulationComponent, name: '累计流量图' }],
+  ['pie_chart', { component: PieComponent, name: '统计图' }],
+  ['epic_burn_down_report', { component: EpicBurnDownComponent, name: '史诗燃耗图' }],
+  ['version_burn_down_report', { component: versionBurnDownComponent, name: '版本燃耗图' }],
+  ['velocity_chart', { component: IterationSpeedComponent, name: '迭代速度图' }],
   ['versionReport', { component: VersionReportComponent, name: '版本报告图' }],
 ]);
 type GetOptionalCharts = () => Map<string, { component: React.FC<any>, name: string }>
@@ -48,7 +48,7 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
   const chartRef = useRef<ChartRefProps>({} as ChartRefProps);
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
-    data: editData ? [{ title: editData.title, chart: editData.chartType }] : undefined,
+    data: editData ? [{ title: editData.title, chart: editData.chartCode }] : undefined,
     fields: [{
       name: 'title',
       label: '图表标题',
@@ -61,17 +61,15 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
     }],
   }), [editData]);
   const handleSubmit = useCallback(async () => {
-    if (dataSet.validate()) {
+    if (await dataSet.validate()) {
       const data = dataSet.current?.toData();
       const search = await chartRef.current.submit();
       const block: IReportChartBlock = {
         id: editData?.id || String(Math.random()),
         title: data.title,
         type: 'chart',
-        chartType: data.chart,
-        data: {
-          filter: search,
-        },
+        chartCode: data.chart,
+        chartSearchVO: search,
       };
       return block;
     }
