@@ -15,7 +15,7 @@
         WHERE 
            apr.project_id = #{projectId}
         <if test="title != null and title != ''">
-          <bind name="titleLike" value="'%' + title + 'title'"/>
+          <bind name="titleLike" value="'%' + title + '%'"/>
             AND apr.title LIKE #{titleLike}
         </if>
         <if test="createdBy != null">
