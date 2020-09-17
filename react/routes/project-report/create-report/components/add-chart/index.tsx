@@ -1,8 +1,12 @@
-import React, { useMemo, useImperativeHandle, useCallback } from 'react';
+import React, {
+  useMemo, useImperativeHandle, useCallback, useRef,
+} from 'react';
 import {
   Form, Select, DataSet, TextField,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
+import { BurnDownConfig } from '@/components/charts/burn-down/useBurnDownReport';
+import { SprintConfig } from '@/components/charts/sprint/useSprintReport';
 import BurnDownComponent from './components/burndown';
 import SprintComponent from './components/sprint';
 import AccumulationComponent from './components/accumulation';
@@ -10,6 +14,7 @@ import PieComponent from './components/pie';
 import { RefProps } from '../add-modal';
 import EpicBurnDownComponent from './components/epic-burnDown';
 import versionBurnDownComponent from './components/version-burnDown';
+import { IReportChartBlock } from '../../store';
 
 const { Option } = Select;
 export const defaultCharts = new Map([
@@ -31,7 +36,11 @@ export function setGetOptionalCharts(newGetOptionalCharts: GetOptionalCharts) {
 interface Props {
   innerRef: React.MutableRefObject<RefProps>
 }
+export interface ChartRefProps {
+  submit: () => Promise<BurnDownConfig | SprintConfig>
+}
 const AddChart: React.FC<Props> = ({ innerRef }) => {
+  const chartRef = useRef<ChartRefProps>({} as ChartRefProps);
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [{
@@ -47,7 +56,18 @@ const AddChart: React.FC<Props> = ({ innerRef }) => {
   }), []);
   const handleSubmit = useCallback(async () => {
     if (dataSet.validate()) {
-      return 'data';
+      const data = dataSet.current?.toData();
+      const search = await chartRef.current.submit();
+      const block: IReportChartBlock = {
+        id: '2',
+        title: data.title,
+        type: 'chart',
+        chartType: data.chart,
+        data: {
+          filter: search,
+        },
+      };
+      return block;
     }
     return false;
   }, [dataSet]);
@@ -61,10 +81,10 @@ const AddChart: React.FC<Props> = ({ innerRef }) => {
       <Form dataSet={dataSet} style={{ width: 512 }}>
         <TextField name="title" />
         <Select name="chart">
-          {[...optionalCharts.entries()].map(([key, { name }]) => <Option value={key}>{name}</Option>)}
+          {[...optionalCharts.entries()].map(([key, { name }]) => <Option key={key} value={key}>{name}</Option>)}
         </Select>
       </Form>
-      {ChartComponent && <ChartComponent />}
+      {ChartComponent && <ChartComponent innerRef={chartRef} />}
     </>
   );
 };

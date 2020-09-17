@@ -36,7 +36,7 @@ function useBurnDownReport(config?: BurnDownConfig): [BurnDownSearchProps, BurnD
       : true,
   );
   const [restDays, setRestDays] = useState<string[]>([]);
-  const [sprintId, setSprintId] = useState<string | null>(config?.sprintId || null);
+  const [sprintId, setSprintId] = useState<string | undefined>(config?.sprintId || undefined);
   const loadData = useCallback(async () => {
     if (sprintId) {
       setLoading(true);

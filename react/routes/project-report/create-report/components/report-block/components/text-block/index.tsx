@@ -5,9 +5,9 @@ import { IReportTextBlock } from '@/routes/project-report/create-report/store';
 interface Props {
   data: IReportTextBlock
 }
-const TextBlock: React.FC<Props> = ({ data: { data } }) => (
+const TextBlock: React.FC<Props> = ({ data: { content } }) => (
   <div style={{ padding: '10px 26px' }}>
-    <WYSIWYGViewer data={data} />
+    <WYSIWYGViewer data={content} />
   </div>
 );
 

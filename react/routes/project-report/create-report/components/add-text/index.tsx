@@ -5,6 +5,7 @@ import {
 import { observer } from 'mobx-react-lite';
 import Editor from '@/components/Editor';
 import { RefProps } from '../add-modal';
+import { IReportTextBlock } from '../../store';
 
 interface Props {
   innerRef: React.MutableRefObject<RefProps>
@@ -24,7 +25,15 @@ const AddText: React.FC<Props> = ({ innerRef }) => {
   }), []);
   const handleSubmit = useCallback(async () => {
     if (dataSet.validate()) {
-      return 'data';
+      const data = dataSet.current?.toData();
+      console.log(data);
+      const block: IReportTextBlock = {
+        id: String(Math.random()),
+        title: data.title,
+        type: 'text',
+        content: JSON.stringify(data.description),
+      };
+      return block;
     }
     return false;
   }, [dataSet]);

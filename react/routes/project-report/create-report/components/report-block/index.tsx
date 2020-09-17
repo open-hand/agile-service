@@ -8,6 +8,7 @@ import {
 import TextBlock from './components/text-block';
 import ChartBlock from './components/chart-block';
 import ListBlock from './components/list-block';
+import { useProjectReportContext } from '../../context';
 
 interface Props {
   data: IReportBlock
@@ -15,6 +16,7 @@ interface Props {
 
 const ReportBlock: React.FC<Props> = ({ data }) => {
   const { title, type } = data;
+  const { store } = useProjectReportContext();
   const renderBlock = useCallback(() => {
     switch (type) {
       case 'text': {
@@ -31,13 +33,16 @@ const ReportBlock: React.FC<Props> = ({ data }) => {
       }
     }
   }, [data, type]);
+  const handleDelete = useCallback(() => {
+    store.removeBlock(data.id);
+  }, []);
   return (
     <div className={styles.report_block}>
       <div className={styles.header}>
         <span className={styles.title}>{title}</span>
         <div className={styles.operation}>
           <Button icon="edit-o" color={'blue' as ButtonColor}>编辑</Button>
-          <Button icon="delete" color={'blue' as ButtonColor}>删除</Button>
+          <Button icon="delete" color={'blue' as ButtonColor} onClick={handleDelete}>删除</Button>
         </div>
       </div>
       {renderBlock()}

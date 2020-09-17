@@ -9,8 +9,8 @@ import { IBurndownChartType } from '.';
 const { Option } = Select;
 
 export interface BurnDownSearchProps {
-  sprintId: string | null
-  setSprintId: (sprintId: string | null) => void
+  sprintId: string | undefined
+  setSprintId: (sprintId: string | undefined) => void
   setEndDate: (endDate: string) => void
   type: IBurndownChartType
   setType: (type: IBurndownChartType) => void
@@ -48,7 +48,7 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
           setSprintId(sprint.sprintId);
           setEndDate(sprint.endDate);
         } else {
-          setSprintId(null);
+          setSprintId(undefined);
           setEndDate('');
         }
       }}
