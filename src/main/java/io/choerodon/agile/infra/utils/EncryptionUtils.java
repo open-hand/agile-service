@@ -604,7 +604,7 @@ public class EncryptionUtils {
                             throw new CommonException(e);
                         }
                     }else {
-                        nodeObjValue.put("value", value1.textValue());
+                        nodeObjValue.put("value", value1.isNumber() ? value1.numberValue() : value1.textValue());
                     }
                     objects.add(nodeObjValue);
                 }
