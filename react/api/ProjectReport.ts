@@ -29,6 +29,14 @@ class ProjectReportApi extends Api {
     });
   }
 
+  update(reportId: string, data: IProjectReportCreate) {
+    return this.request({
+      method: 'put',
+      url: `${this.prefix}/project_report/${reportId}`,
+      data,
+    });
+  }
+
   getById(reportId: string) {
     return this.request({
       method: 'get',

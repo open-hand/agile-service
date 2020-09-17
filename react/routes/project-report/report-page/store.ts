@@ -35,7 +35,7 @@ export type IReportBlock = IReportTextBlock | IReportListBlock | IReportChartBlo
 class ProjectReportStore {
   @observable blockList: IReportBlock[] = []
 
-  @observable baseInfo: Object | null = null
+  @observable baseInfo: { id: string } | null = null
 
   @action('添加一个block')
   addBlock(block: IReportBlock) {
