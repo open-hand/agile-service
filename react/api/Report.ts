@@ -79,7 +79,7 @@ class ReportApi {
    * @param versionId
    * @param type
    */
-  loadVersionChart(versionId: number, type: string) {
+  loadVersionChart(versionId: string, type: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/reports/version_chart`,
@@ -94,7 +94,7 @@ class ReportApi {
    * 加载版本报告问题列表
    * @param versionId
    */
-  loadVersionTable(versionId: number) {
+  loadVersionTable(versionId: string) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'get',
