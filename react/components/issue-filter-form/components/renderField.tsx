@@ -1,11 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-
 import {
   TextField, Select, DatePicker, TimePicker, DateTimePicker, NumberField, TextArea, UrlField,
 } from 'choerodon-ui/pro';
 import { toJS } from 'mobx';
 import SelectUser from '@/components/select/select-user';
-import SelectFeature from '@/components/select/select-feature';
 import SelectSprint from '@/components/select/select-sprint';
 import SelectIssueType from '@/components/select/select-issue-type';
 import SelectEpic from '@/components/select/select-epic';
@@ -15,7 +13,6 @@ import SelectComponent from '@/components/select/select-component';
 import SelectVersion from '@/components/select/select-version';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IChosenFieldField } from '@/components/chose-field/types';
-import { userApi } from '@/api';
 import SelectStatus from './field/StatusField';
 import FeatureProjectField from './field/FeatureProjectField';
 
