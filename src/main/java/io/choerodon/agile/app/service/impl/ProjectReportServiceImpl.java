@@ -127,7 +127,6 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     @Override
     public void create(Long projectId, ProjectReportVO projectReportVO) {
         Assert.notNull(projectReportVO.getTitle(), BaseConstants.ErrorCode.DATA_INVALID);
-        Assert.notNull(projectReportVO.getDescription(), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(projectReportVO.getProjectId(), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(projectReportVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
         ProjectReportDTO projectReportDTO = new ProjectReportDTO();
@@ -160,7 +159,6 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     @Override
     public void update(Long projectId, ProjectReportVO projectReportVO) {
         Assert.notNull(projectReportVO.getTitle(), BaseConstants.ErrorCode.DATA_INVALID);
-        Assert.notNull(projectReportVO.getDescription(), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(projectReportVO.getReceiverList()), BaseConstants.ErrorCode.DATA_NOT_EXISTS);
         ProjectReportDTO projectReportDTO = new ProjectReportDTO();
         BeanUtils.copyProperties(projectReportVO, projectReportDTO);
