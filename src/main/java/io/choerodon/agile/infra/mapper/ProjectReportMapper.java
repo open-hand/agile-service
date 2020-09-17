@@ -12,5 +12,5 @@ import io.choerodon.mybatis.common.BaseMapper;
 public interface ProjectReportMapper extends BaseMapper<ProjectReportDTO> {
 
 
-    List<ProjectReportVO> page(ProjectReportVO projectReport);
+    List<ProjectReportVO> list(ProjectReportVO projectReport);
 }

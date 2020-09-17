@@ -18,6 +18,10 @@ import io.swagger.annotations.ApiModelProperty;
 @VersionAudit
 public class ProjectReportDTO extends AuditDomain {
 
+    public static final String FIELD_TITLE = "title";
+    public static final String FIELD_DESCRIPTION = "description";
+    public static final String FIELD_REPORTDATA = "reportData";
+
     public ProjectReportDTO(Long id, Long projectId) {
         this.id = id;
         this.projectId = projectId;

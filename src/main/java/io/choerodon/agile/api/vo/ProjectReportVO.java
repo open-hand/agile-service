@@ -2,9 +2,8 @@ package io.choerodon.agile.api.vo;
 
 import java.util.Date;
 import java.util.List;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.agile.api.vo.report.ReportUnitVO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.swagger.annotations.ApiModelProperty;
@@ -13,9 +12,9 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 /**
  * @author jiaxu.cui@hand-china.com 2020/9/15 下午5:53
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProjectReportVO {
-    public static final String FIELD_TITLE = "title";
-    public static final String FIELD_DESCRIPTION = "description";
+
 
     @ApiModelProperty("主键id")
     @Encrypt
@@ -39,6 +38,16 @@ public class ProjectReportVO {
     @ApiModelProperty("创建人")
     @Encrypt
     private Long createdBy;
+    @ApiModelProperty("版本号")
+    private Long objectVersionNumber;
+
+    public Long getObjectVersionNumber() {
+        return objectVersionNumber;
+    }
+
+    public void setObjectVersionNumber(Long objectVersionNumber) {
+        this.objectVersionNumber = objectVersionNumber;
+    }
 
     public Date getRecentSendDate() {
         return recentSendDate;
