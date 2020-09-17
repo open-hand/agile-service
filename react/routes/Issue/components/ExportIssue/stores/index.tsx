@@ -4,26 +4,29 @@ import React, {
 import { injectIntl, InjectedIntl } from 'react-intl';
 import { DataSet, Table } from 'choerodon-ui/pro/lib';
 import { observer } from 'mobx-react-lite';
+import { findIndex } from 'lodash';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { useChoseFieldStore } from '@/components/chose-field/FieldList';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import ChoseFieldStore from '@/components/chose-field/store';
+import { useTableColumnCheckBoxesDataSet } from '@/components/table-column-check-boxes';
+import { useIssueFilterFormDataSet } from '@/components/issue-filter-form';
 import ExportIssueDataSet from './ExportIssueDataSet';
 import ExportIssueFilterStore from './ExportIssueFilterStore';
-import { IExportIssueField, IExportIssueChosenField } from '../types';
 
 interface Context {
   tableDataSet: DataSet,
   tableRef: React.RefObject<Table>,
   checkOptions: Array<{ value: string, label: string, order?: string, }>,
-  // exportIssueDataSet: DataSet,
+  tableColumnCheckBoxesDataSet: DataSet,
+  issueFilterFormDataSet: DataSet,
   choseFieldStore: ChoseFieldStore,
   intl: InjectedIntl,
   prefixCls: string,
   chosenFields: Array<IChosenFieldField>,
   fields: IChosenFieldField[],
 }
-type Props = Omit<Context, 'prefixCls' | 'exportIssueDataSet'> & { children: React.Component }
+type Props = Omit<Context, 'prefixCls' | 'issueFilterFormDataSet' | 'tableColumnCheckBoxesDataSet'> & { children: React.Component }
 const ExportIssueContext = createContext({} as Context);
 
 export function useExportIssueStore() {
@@ -39,7 +42,6 @@ const ExportIssueContextProvider = injectIntl(observer(
       : [];
     const systemFields: Array<IChosenFieldField> = [];
     const customFields: Array<IChosenFieldField> = [];
-    const specialFields: Array<IChosenFieldField & { immutableCheck: boolean }> = [];
     fields.forEach((field) => {
       if (field.id) {
         customFields.push(field);
@@ -47,28 +49,27 @@ const ExportIssueContextProvider = injectIntl(observer(
         // 冲刺特殊处理
         let newField = field;
         if (field.code === 'sprint') {
-          newField = { ...field, immutableCheck: true };
-          specialFields.push(newField as IChosenFieldField & { immutableCheck: boolean });
+          const index = findIndex(chosenFields, (f) => f.code === 'sprint');
+          if (index !== -1) {
+            chosenFields[index].immutableCheck = true;
+          } else {
+            newField = { ...field, immutableCheck: true };
+            chosenFields.push(newField);
+          }
         }
         systemFields.push(newField);
       }
     });
 
     const choseFieldStore = useChoseFieldStore({ systemFields, customFields, chosenFields });
-    useEffect(() => {
-      // 设置已选中的初始值
-      // choseFieldStore.addChosenFields('sprint',)
-      specialFields.forEach((field) => {
-        choseFieldStore.addSpecialFields(field.code, field);
-        console.log('field0', field);
-        // exportIssueDataSet.current?.set(field.code, field.value);
-      });
-    }, []);
+    const issueFilterFormDataSet = useIssueFilterFormDataSet({ fields, isInProgram });
+    const tableColumnCheckBoxesDataSet = useTableColumnCheckBoxesDataSet('exportFieldCodes', columns.map((column) => column.name));
 
     const value = {
       ...props,
-      // exportIssueDataSet,
+      issueFilterFormDataSet,
       choseFieldStore,
+      tableColumnCheckBoxesDataSet,
       prefixCls: 'c7n-agile-export-issue-modal',
     };
     return (

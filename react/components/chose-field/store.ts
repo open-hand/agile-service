@@ -10,8 +10,13 @@ class ChoseFieldStore {
     this.fields.set('system', systemFields);
     this.fields.set('custom', customFields);
     chosenFields?.forEach((field) => {
-      if (typeof (field.value) !== 'undefined') {
-        this.chosenFields.set(field.code, field);
+      if (typeof (field.immutableCheck) === 'undefined') {
+        if (typeof (field.value) !== 'undefined') {
+          this.chosenFields.set(field.code, field);
+        }
+      } else {
+        // 设置特殊值 不可更改
+        this.addSpecialFields(field.code, field as IChosenSpecialFieldField);
       }
     });
   }

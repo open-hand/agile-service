@@ -33,27 +33,40 @@ const IssueFilterFormDataSet = ({ fields, isInProgram = true }: Props): DataSetP
       textField: 'name',
     },
     ...isInProgram ? [{
-      name: 'featureId',
+      name: 'feature',
       label: '所属特性',
       valueField: 'issueId',
       textField: 'summary',
     }] : [{
-      name: 'epicId',
+      name: 'epic',
+      label: '史诗',
+      valueField: 'issueId',
+      textField: 'epicName',
+    }],
+    {
+      name: 'feature',
+      label: '特性',
+      valueField: 'issueId',
+      textField: 'summary',
+    },
+    {
+      name: 'epic',
       label: '所属史诗',
       valueField: 'issueId',
       textField: 'epicName',
-    }], {
+    },
+    {
       name: 'priorityId',
       label: '优先级',
       valueField: 'id',
       textField: 'name',
     }, {
-      name: 'labelIssueRelVOList',
+      name: 'label',
       label: '标签',
       valueField: 'labelId',
       textField: 'labelName',
     }, {
-      name: 'componentIssueRelVOList',
+      name: 'component',
       label: '模块',
       valueField: 'componentId',
       textField: 'name',

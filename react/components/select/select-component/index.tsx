@@ -16,9 +16,12 @@ const SelectComponent: React.FC<Props> = forwardRef(({ dataRef, ...otherProps },
     middleWare: (components) => {
       // @ts-ignore
       const data = components.content || [];
-      Object.assign(dataRef, {
-        current: data,
-      });
+      if (dataRef) {
+        Object.assign(dataRef, {
+          current: data,
+        });
+      }
+
       return data;
     },
     paging: false,

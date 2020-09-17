@@ -1,6 +1,8 @@
 import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
-import { issueTypeApi, IStatusCirculation, statusTransformApi } from '@/api';
+import {
+  issueTypeApi, IStatusCirculation, statusApi, statusTransformApi,
+} from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IIssueType } from '@/common/types';
@@ -14,7 +16,7 @@ const SelectStatus: React.FC<Props> = (otherProps) => {
     name: 'statusId',
     textField: 'name',
     valueField: 'id',
-    request: () => issueTypeApi.loadAllWithStateMachineId(),
+    request: ({ filter, page }) => statusApi.loadByProject('agile'),
     paging: false,
   }), []);
   const props = useSelect(config);
