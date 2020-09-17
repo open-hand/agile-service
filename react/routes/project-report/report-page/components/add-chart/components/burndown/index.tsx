@@ -2,7 +2,7 @@ import React, { useCallback, useImperativeHandle } from 'react';
 import BurnDown from '@/components/charts/burn-down';
 import BurnDownSearch from '@/components/charts/burn-down/search';
 import useBurnDownReport, { BurnDownConfig } from '@/components/charts/burn-down/useBurnDownReport';
-import { IReportChartBlock } from '@/routes/project-report/create-report/store';
+import { IReportChartBlock } from '@/routes/project-report/report-page/store';
 import { ChartRefProps } from '../..';
 
 interface Props {

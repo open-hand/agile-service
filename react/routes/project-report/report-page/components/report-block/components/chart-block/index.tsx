@@ -1,5 +1,5 @@
 import React from 'react';
-import { IReportChartBlock } from '@/routes/project-report/create-report/store';
+import { IReportChartBlock } from '@/routes/project-report/report-page/store';
 import BurnDownBlock from './components/burndown';
 import SprintBlock from './components/sprint';
 

@@ -2,6 +2,7 @@ import React, { useMemo, useImperativeHandle, useCallback } from 'react';
 import {
   Form, DataSet, TextField, TextArea,
 } from 'choerodon-ui/pro';
+import { observer } from 'mobx-react-lite';
 import SelectUser from '@/components/select/select-user';
 import { useProjectReportContext } from '../../context';
 
@@ -9,9 +10,10 @@ interface Props {
 
 }
 const BaseInfo: React.FC<Props> = () => {
-  const { baseInfoRef } = useProjectReportContext();
+  const { store, baseInfoRef, edit } = useProjectReportContext();
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
+    data: edit ? [store.baseInfo || {}] : undefined,
     fields: [{
       name: 'title',
       label: '报告主题',
@@ -59,4 +61,4 @@ const BaseInfo: React.FC<Props> = () => {
     </Form>
   );
 };
-export default BaseInfo;
+export default observer(BaseInfo);
