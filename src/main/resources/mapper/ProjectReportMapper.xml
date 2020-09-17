@@ -14,5 +14,12 @@
            agile_project_report apr
         WHERE 
            apr.project_id = #{projectId}
+        <if test="title != null and title != ''">
+          <bind name="titleLike" value="'%' + title + 'title'"/>
+            AND apr.title LIKE #{titleLike}
+        </if>
+        <if test="createdBy != null">
+            AND apr.created_by = #{createdBy}
+        </if>
     </select>
 </mapper>

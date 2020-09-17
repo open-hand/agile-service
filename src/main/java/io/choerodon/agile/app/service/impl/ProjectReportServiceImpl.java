@@ -112,7 +112,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
                 .stream().map(ProjectReportReceiverDTO::getReceiverId).toArray(Long[]::new);
         if (ArrayUtils.isNotEmpty(receiverIds)){
             List<UserDTO> userList = baseFeignClient.listUsersByIds(receiverIds, false).getBody();
-            projectReportVO.setCcList(userList);
+            projectReportVO.setReceiverList(userList);
         }
         // 设置抄送人列表
         Long[] ccIds = group.getOrDefault(ProjectReportReceiverDTO.TYPE_CC, Collections.emptyList())
