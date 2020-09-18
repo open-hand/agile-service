@@ -65,7 +65,6 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
       const data = dataSet.current?.toData();
       const search = await chartRef.current.submit();
       const block: IReportChartBlock = {
-        id: editData?.id || String(Math.random()),
         title: data.title,
         type: 'chart',
         chartCode: data.chart,
@@ -74,7 +73,7 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
       return block;
     }
     return false;
-  }, [dataSet, editData?.id]);
+  }, [dataSet]);
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,
   }), [handleSubmit]);

@@ -29,7 +29,6 @@ const AddText: React.FC<Props> = ({ innerRef, data: editData }) => {
     if (await dataSet.validate()) {
       const data = dataSet.current?.toData();
       const block: IReportTextBlock = {
-        id: editData?.id || String(Math.random()),
         title: data.title,
         type: 'text',
         content: JSON.stringify(data.description),
@@ -37,7 +36,7 @@ const AddText: React.FC<Props> = ({ innerRef, data: editData }) => {
       return block;
     }
     return false;
-  }, [dataSet, editData?.id]);
+  }, [dataSet]);
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,
   }), [handleSubmit]);

@@ -1,4 +1,4 @@
-import React, { useCallback, useImperativeHandle } from 'react';
+import React, { useCallback, useImperativeHandle, useMemo } from 'react';
 import { stores } from '@choerodon/boot';
 import BurnDown from '@/components/charts/burn-down';
 import BurnDownSearch from '@/components/charts/burn-down/search';
@@ -30,7 +30,8 @@ interface Props {
   data?: IReportChartBlock
 }
 const BurnDownComponent: React.FC<Props> = ({ innerRef, data }) => {
-  const [searchProps, props] = useBurnDownReport(transform(data?.chartSearchVO as BurnDownSearchVO));
+  const config = useMemo(() => transform(data?.chartSearchVO as BurnDownSearchVO), [data?.chartSearchVO]);
+  const [searchProps, props] = useBurnDownReport(config);
   const handleSubmit = useCallback(async (): Promise<BurnDownSearchVO> => ({
     type: searchProps.type,
     displayNonWorkingDay: searchProps.restDayShow,

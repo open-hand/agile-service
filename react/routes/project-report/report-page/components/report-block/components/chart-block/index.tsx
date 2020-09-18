@@ -1,4 +1,5 @@
 import React from 'react';
+import { observer } from 'mobx-react-lite';
 import { IReportChartBlock, IChartCode } from '@/routes/project-report/report-page/store';
 import BurnDownBlock from './components/burndown';
 import SprintBlock from './components/sprint';
@@ -20,4 +21,4 @@ const ChartBlock: React.FC<Props> = ({ data: { chartSearchVO, chartCode } }) => 
     </>
   );
 };
-export default ChartBlock;
+export default observer(ChartBlock);
