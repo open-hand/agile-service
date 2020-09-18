@@ -7,6 +7,8 @@ import AccumulationBlock from './components/accumulation';
 import PieBlock from './components/pie';
 import VersionBlock from './components/version-report';
 import EpicBlock from './components/epic-report';
+import VersionBurndownBlock from './components/version-burndown';
+import EpicBurndownBlock from './components/epic-burndown';
 
 const ChartMap = new Map<IChartCode, React.FC<any>>([
   ['burn_down_report', BurnDownBlock],
@@ -15,6 +17,8 @@ const ChartMap = new Map<IChartCode, React.FC<any>>([
   ['pie_chart', PieBlock],
   ['version_chart', VersionBlock],
   ['epic_chart', EpicBlock],
+  ['version_burn_down_report', VersionBurndownBlock],
+  ['epic_burn_down_report', EpicBurndownBlock],
 ]);
 interface Props {
   data: IReportChartBlock
