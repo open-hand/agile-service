@@ -25,7 +25,7 @@ export const transformBurnDownSearch = (searchVO: BurnDownSearchVO | undefined):
     },
   };
 };
-interface Props {
+export interface Props {
   innerRef: React.MutableRefObject<ChartRefProps>
   data?: IReportChartBlock
 }
