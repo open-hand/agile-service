@@ -1,4 +1,6 @@
-import React, { Component, ReactElement, useState } from 'react';
+import React, {
+  Component, ReactElement, useEffect, useState,
+} from 'react';
 import { stores, Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import moment from 'moment';
@@ -52,13 +54,23 @@ const FormPart: React.FC<FormPartProps> = (props) => {
     </div>
   );
 };
-
+interface IDownLoadInfo {
+  id: string | null,
+  fileUrl: string | null,
+  creationDate: string | null,
+  lastUpdateDate: string | null,
+}
 const ExportIssue: React.FC<{}> = () => {
   const {
     prefixCls, checkOptions, tableDataSet, choseFieldStore,
     tableColumnCheckBoxesDataSet, issueFilterFormDataSet,
   } = useExportIssueStore();
-
+  const [downloadInfo, setDownloadInfo] = useState({} as IDownLoadInfo);
+  useEffect(() => {
+    issueApi.loadLastImportOrExport('download_file').then((res: IDownLoadInfo) => {
+      setDownloadInfo(res);
+    });
+  }, []);
   /**
  * 输出 excel
  */
@@ -80,7 +92,6 @@ const ExportIssue: React.FC<{}> = () => {
       .then((blobData: any) => {
         // const blob = new Blob([blobData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         // const fileName = 'AppState.currentMenuType.name.xlsx';
-        console.log('blobData', blobData);
         // FileSaver.saveAs(blob, fileName);
         Choerodon.prompt('导出成功');
         // IssueStore.setExportModalVisible(false);
@@ -96,7 +107,10 @@ const ExportIssue: React.FC<{}> = () => {
     }
     return true;
   };
-
+  const handleFinish = (messageData: any) => {
+    console.log('handleFinish::', messageData);
+    setDownloadInfo(messageData);
+  };
   return (
     <div>
       <FormPart title="筛选问题">
@@ -109,7 +123,15 @@ const ExportIssue: React.FC<{}> = () => {
         <TableColumnCheckBoxes options={checkOptions} dataSet={tableColumnCheckBoxesDataSet} name="exportFieldCodes" />
         <Button icon="unarchive" style={{ color: '#3f51b5' }} onClick={exportExcel}>导出问题</Button>
       </FormPart>
-      <WsProgress messageKey="agile-export-issue" />
+      <WsProgress
+        messageKey="agile-export-issue"
+        onFinish={(handleFinish)}
+        downloadInfo={downloadInfo.id ? {
+          url: downloadInfo.fileUrl!,
+          lastUpdateDate: downloadInfo.lastUpdateDate!,
+          createDate: downloadInfo.creationDate!,
+        } : undefined}
+      />
     </div>
   );
 };

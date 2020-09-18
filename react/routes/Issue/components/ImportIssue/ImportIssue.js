@@ -1,3 +1,4 @@
+/* eslint-disable react/state-in-constructor */
 import React, { Component } from 'react';
 import { stores, WSHandler, Choerodon } from '@choerodon/boot';
 import {
@@ -21,7 +22,7 @@ class ImportIssue extends Component {
   };
 
   loadLatestImport = () => {
-    issueApi.loadLastImport().then((res) => {
+    issueApi.loadLastImportOrExport('upload_file').then((res) => {
       if (res) {
         this.setState({
           latestInfo: res,
@@ -137,17 +138,16 @@ class ImportIssue extends Component {
         <Button onClick={this.onCancel}>取消</Button>,
         <Button type="primary" onClick={() => this.changeStep(1)}>下一步</Button>,
       ];
-    } else if (step === 2) {
+    } if (step === 2) {
       return [
         <Button onClick={this.onCancel}>取消</Button>,
         <Button type="primary" onClick={() => this.changeStep(-1)}>上一步</Button>,
       ];
-    } else {
-      return [
-        <Button type="primary" onClick={this.finish}>完成</Button>,
-        <Button disabled={wsData.status && wsData.status !== 'doing'} onClick={this.onCancel}>取消上传</Button>,
-      ];
     }
+    return [
+      <Button type="primary" onClick={this.finish}>完成</Button>,
+      <Button disabled={wsData.status && wsData.status !== 'doing'} onClick={this.onCancel}>取消上传</Button>,
+    ];
   };
 
   renderProgress = () => {
@@ -169,8 +169,7 @@ class ImportIssue extends Component {
                 <span>{fileName}</span>
               </span>
             )
-            : ''
-          }
+            : ''}
           <span className="c7n-importIssue-text">正在导入</span>
           <Progress
             className="c7n-importIssue-progress"
@@ -181,7 +180,7 @@ class ImportIssue extends Component {
           />
         </div>
       );
-    } else if (status === 'failed') {
+    } if (status === 'failed') {
       return (
         <div>
           {fileName
@@ -191,10 +190,9 @@ class ImportIssue extends Component {
                 <span>{fileName}</span>
               </span>
             )
-            : ''
-          }
+            : ''}
           <span className="c7n-importIssue-text">
-            导入失败 
+            导入失败
             <span style={{ color: '#FF0000' }}>{failCount}</span>
             问题，
             <a href={fileUrl}>
@@ -203,7 +201,7 @@ class ImportIssue extends Component {
           </span>
         </div>
       );
-    } else if (status === 'success') {
+    } if (status === 'success') {
       return (
         <div>
           {fileName
@@ -213,16 +211,15 @@ class ImportIssue extends Component {
                 <span>{fileName}</span>
               </span>
             )
-            : ''
-          }
+            : ''}
           <span className="c7n-importIssue-text">
-            导入成功 
+            导入成功
             <span style={{ color: '#0000FF' }}>{successCount}</span>
             问题
           </span>
         </div>
       );
-    } else if (status === 'template_error') {
+    } if (status === 'template_error') {
       return (
         <div>
           {fileName
@@ -232,20 +229,18 @@ class ImportIssue extends Component {
                 <span>{fileName}</span>
               </span>
             )
-            : ''
-          }
+            : ''}
           <span className="c7n-importIssue-text">
             导入模板错误，或无数据。
           </span>
         </div>
       );
-    } else {
-      return (
-        <div>
-          正在查询导入信息，请稍后
-        </div>
-      );
     }
+    return (
+      <div>
+        正在查询导入信息，请稍后
+      </div>
+    );
   };
 
   renderForm = () => {
@@ -253,7 +248,7 @@ class ImportIssue extends Component {
     const { failCount, fileUrl } = latestInfo;
     if (step === 1) {
       return (
-        <React.Fragment>
+        <>
           <Button
             type="primary"
             // funcType="flat"
@@ -268,27 +263,25 @@ class ImportIssue extends Component {
                 {failCount && failCount !== 0
                   ? (
                     <span>
-                      导入失败 
+                      导入失败
                       <span style={{ color: '#F44336' }}>
                         {failCount}
                       </span>
                       问题，
                     </span>
-                  ) : ''
-                }
+                  ) : ''}
                 {fileUrl && (
                   <a href={fileUrl}>
                     点击下载失败详情
                   </a>
                 )}
               </div>
-            ) : ''
-          }
-        </React.Fragment>
+            ) : ''}
+        </>
       );
-    } else if (step === 2) {
+    } if (step === 2) {
       return (
-        <React.Fragment>
+        <>
           <Button
             loading={uploading}
             type="primary"
@@ -308,18 +301,17 @@ class ImportIssue extends Component {
             style={{ display: 'none' }}
             accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           />
-        </React.Fragment>
-      );
-    } else {
-      return (
-        <WSHandler
-          messageKey="agile-import-issues"
-          onMessage={this.handleMessage}
-        >
-          {this.renderProgress()}
-        </WSHandler>
+        </>
       );
     }
+    return (
+      <WSHandler
+        messageKey="agile-import-issues"
+        onMessage={this.handleMessage}
+      >
+        {this.renderProgress()}
+      </WSHandler>
+    );
   };
 
   render() {
@@ -343,6 +335,5 @@ class ImportIssue extends Component {
     );
   }
 }
-
 
 export default ImportIssue;

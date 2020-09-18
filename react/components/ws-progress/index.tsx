@@ -12,8 +12,16 @@ import { ProgressStatus, ProgressType } from 'choerodon-ui/lib/progress/enum';
 import './index.less';
 
 interface Props {
-  handleMessage?: (messageData: any) => void,
-  downloadInfo?: { url: string, timeLine: string, children?: React.ReactElement }
+  handleMessage?: (messageData: any) => void | boolean,
+  percentCode?: string,
+  downloadInfo?: {
+    url: string,
+    timeLine?: any,
+    createDate?: string,
+    lastUpdateDate?: string,
+    timeFormat?: string,
+    children?: React.ReactElement
+  } | null,
   renderEndProgress?: (messageData: any) => React.ReactElement | React.ReactElement[] | null | string,
   visible?: boolean, // 可控类型 控制进度条是否显示
   messageKey: string,
@@ -21,11 +29,12 @@ interface Props {
 }
 interface StateProps {
   visible: boolean,
-  data: { rate: number, [propsName: string]: any },
+  data: { [propsName: string]: any },
 }
 
 type ActionProps = Partial<StateProps> & { type: 'init' | 'transmission' | 'visible' | 'finish' }
 function WsProgress(props: Props) { // <StateProps, ActionProps>
+  const { percentCode = 'process' } = props;
   const [stateProgress, dispatch] = useReducer((state: StateProps, action: ActionProps) => {
     switch (action.type) {
       case 'init':
@@ -59,17 +68,26 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
         return state;
     }
   }, {
-    data: { rate: 0 },
+    data: { [percentCode]: 0 },
     visible: false,
   });
   const { messageKey } = props;
   function handleMessage(data: any) {
     const newData = JSON.parse(data);
-    if (!stateProgress.visible && stateProgress.data?.rate === 0) {
+    const { status } = newData;
+    if (!stateProgress.visible && stateProgress.data?.[percentCode] === 0) {
+      props.handleMessage && props.handleMessage(newData);
       dispatch({ type: 'init', data: newData });
+      return;
     }
     dispatch({ type: 'transmission', data: newData });
-    props.handleMessage && props.handleMessage(newData);
+    if (props.handleMessage && props.handleMessage(newData)) {
+      dispatch({ type: 'finish', data: newData });
+      return;
+    }
+    if (status && status === 'success') {
+      dispatch({ type: 'finish', data: newData });
+    }
   }
   const renderFinish: any = useCallback(() => {
     const { downloadInfo, renderEndProgress } = props;
@@ -82,12 +100,10 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
       <div className="c7n-agile-ws-finish">
         {downloadInfo.children ?? (
           <>
-            <span>{downloadInfo.timeLine}</span>
+            <span>{downloadInfo.timeLine ?? `导出完成时间${downloadInfo.lastUpdateDate}（耗时1分钟）`}</span>
             <a href={downloadInfo.url}>点击下载</a>
           </>
         )}
-        <span>{downloadInfo.timeLine}</span>
-
         {/* <span>导出完成时间2019-08-02 09:08（耗时1分钟）</span> */}
       </div>
     ) : <></>;
@@ -97,25 +113,27 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
       dispatch({ type: 'visible', visible: props.visible });
     }
   }, [props.visible]);
-  return stateProgress.visible ? (
+  return (
     <WSHandler
       messageKey={messageKey}
       onMessage={handleMessage}
     >
-      <div className="c7n-agile-ws-progress-area">
-        <Progress
-          className="c7n-agile-ws-progress"
-          status={'active' as ProgressStatus}
-          type={'circle' as ProgressType}
-          width={50}
-          percent={stateProgress.data?.rate}
-          strokeWidth={16}
-          showInfo={false}
-        />
-        <span className="c7n-agile-ws-progress-area-text">正在导入中</span>
-        <span className="c7n-agile-ws-progress-area-prompt">（本次导入耗时较长，您可先返回进行其他操作）</span>
-      </div>
+      {stateProgress.visible ? (
+        <div className="c7n-agile-ws-progress-area">
+          <Progress
+            className="c7n-agile-ws-progress"
+            status={'active' as ProgressStatus}
+            type={'circle' as ProgressType}
+            width={50}
+            percent={stateProgress.data?.[percentCode]}
+            strokeWidth={16}
+            showInfo={false}
+          />
+          <span className="c7n-agile-ws-progress-area-text">正在导入中</span>
+          <span className="c7n-agile-ws-progress-area-prompt">（本次导入耗时较长，您可先返回进行其他操作）</span>
+        </div>
+      ) : renderFinish()}
     </WSHandler>
-  ) : renderFinish();
+  );
 }
 export default WsProgress;

@@ -280,11 +280,17 @@ class IssueApi {
   }
 
   /**
- * 查询最新的导入记录
+ * 查询最新的导入导出记录
  * @returns {V|*}
  */
-  loadLastImport() {
-    return axios.get(`${this.prefix}/excel/latest`);
+  loadLastImportOrExport(action: 'upload_file' | 'download_file') {
+    return axios({
+      url: `${this.prefix}/excel/latest`,
+      method: 'get',
+      params: {
+        action,
+      },
+    });
   }
 
   /**
