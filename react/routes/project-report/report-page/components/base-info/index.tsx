@@ -11,9 +11,20 @@ interface Props {
 }
 const BaseInfo: React.FC<Props> = () => {
   const { store, baseInfoRef, edit } = useProjectReportContext();
+  const initData = useMemo(() => {
+    if (edit) {
+      const { ccList = [], receiverList = [] } = store.baseInfo || {};
+      return [{
+        ...store.baseInfo,
+        ccList: ccList.map((user) => user.id),
+        receiverList: receiverList.map((user) => user.id),
+      }];
+    }
+    return undefined;
+  }, [edit, store.baseInfo]);
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
-    data: edit ? [store.baseInfo || {}] : undefined,
+    data: initData,
     fields: [{
       name: 'title',
       label: '报告主题',
@@ -36,7 +47,7 @@ const BaseInfo: React.FC<Props> = () => {
       valueField: 'id',
       multiple: true,
     }],
-  }), []);
+  }), [initData]);
   const handleSubmit = useCallback(async () => {
     if (await dataSet.validate()) {
       const data = dataSet.current?.toData();

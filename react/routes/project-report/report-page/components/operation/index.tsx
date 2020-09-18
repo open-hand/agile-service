@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { toJS } from 'mobx';
 import { Button } from 'choerodon-ui/pro';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
-import { projectReportApi, IProjectReportCreate } from '@/api';
+import { projectReportApi, IProjectReportCreate, IProjectReportUpdate } from '@/api';
 import { getProjectId } from '@/utils/common';
 import to from '@/utils/to';
 import styles from './index.less';
@@ -16,19 +16,25 @@ const Operation: React.FC<Props> = () => {
   const handleSubmit = useCallback(async () => {
     const baseInfo = await baseInfoRef.current.submit();
     if (baseInfo && baseInfo instanceof Object) {
-      const data: IProjectReportCreate = {
-        ...baseInfo,
-        projectId: getProjectId(),
-        reportUnitList: toJS(store.blockList),
-      } as IProjectReportCreate;
       if (edit) {
+        const data: IProjectReportUpdate = {
+          ...baseInfo,
+          objectVersionNumber: store.baseInfo?.objectVersionNumber,
+          projectId: getProjectId(),
+          reportUnitList: toJS(store.blockList),
+        } as IProjectReportUpdate;
         await projectReportApi.update(store?.baseInfo?.id as string, data);
       } else {
+        const data: IProjectReportCreate = {
+          ...baseInfo,
+          projectId: getProjectId(),
+          reportUnitList: toJS(store.blockList),
+        } as IProjectReportCreate;
         await projectReportApi.create(data);
       }
       to('/agile/project-report');
     }
-  }, [baseInfoRef, edit, store.baseInfo?.id, store.blockList]);
+  }, [baseInfoRef, edit, store.baseInfo?.id, store.baseInfo?.objectVersionNumber, store.blockList]);
   return (
     <div
       className={styles.bar}
