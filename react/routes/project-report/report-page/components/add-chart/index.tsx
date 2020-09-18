@@ -26,8 +26,8 @@ export const defaultCharts = new Map([
   ['epic_burn_down_report', { component: EpicBurnDownComponent, name: '史诗燃耗图' }],
   ['version_burn_down_report', { component: versionBurnDownComponent, name: '版本燃耗图' }],
   ['velocity_chart', { component: IterationSpeedComponent, name: '迭代速度图' }],
-  ['versionReport', { component: VersionReportComponent, name: '版本报告图' }],
-  ['epicReport', { component: EpicReportComponent, name: '史诗报告图' }],
+  ['version_chart', { component: VersionReportComponent, name: '版本报告图' }],
+  ['epic_chart', { component: EpicReportComponent, name: '史诗报告图' }],
 ]);
 type GetOptionalCharts = () => Map<string, { component: React.FC<any>, name: string }>
 
