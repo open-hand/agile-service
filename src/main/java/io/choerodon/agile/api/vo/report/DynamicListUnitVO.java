@@ -11,12 +11,6 @@ import org.springframework.util.Assert;
  */
 public class DynamicListUnitVO extends ReportUnitVO {
 
-    @Override
-    public void validate() {
-        super.validate();
-        Assert.notNull(searchVO, BaseConstants.ErrorCode.DATA_INVALID);
-    }
-
     private List<String> colList;
 
     private SearchVO searchVO;
