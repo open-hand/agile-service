@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
+import { DraggableProvided } from 'react-beautiful-dnd';
 import styles from './index.less';
 import {
   IReportBlock, IReportTextBlock, IReportChartBlock, IReportListBlock,
@@ -15,9 +16,10 @@ import openAddModal from '../add-modal';
 interface Props {
   data: IReportBlock
   index: number
+  provided: DraggableProvided
 }
 
-const ReportBlock: React.FC<Props> = ({ data, index }) => {
+const ReportBlock: React.FC<Props> = ({ data, index, provided }) => {
   const { title, type } = data;
   const { store } = useProjectReportContext();
   const renderBlock = useCallback(() => {
@@ -51,7 +53,10 @@ const ReportBlock: React.FC<Props> = ({ data, index }) => {
   }, [data, index, store]);
   return (
     <div className={styles.report_block}>
-      <div className={styles.header}>
+      <div
+        className={styles.header}
+        {...provided.dragHandleProps}
+      >
         <span className={styles.title}>{title}</span>
         <div className={styles.operation}>
           <Button icon="edit-o" color={'blue' as ButtonColor} onClick={handleEdit}>编辑</Button>

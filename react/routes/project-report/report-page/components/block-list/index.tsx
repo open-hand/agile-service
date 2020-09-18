@@ -29,9 +29,8 @@ const BlockList: React.FC = () => {
                         <div
                           ref={innerProvided.innerRef}
                           {...innerProvided.draggableProps}
-                          {...innerProvided.dragHandleProps}
                         >
-                          <ReportBlock index={index} data={block} />
+                          <ReportBlock provided={innerProvided} index={index} data={block} />
                         </div>
                       )}
                     </Draggable>
@@ -39,6 +38,7 @@ const BlockList: React.FC = () => {
                 </>
               )}
             </Observer>
+            {provided.placeholder}
           </div>
         )}
       </Droppable>
