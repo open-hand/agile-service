@@ -127,6 +127,7 @@ export interface IIssueType {
   stateMachineId: string,
   typeCode: string,
 }
+export type IFeatureType = 'business' | 'enabler'
 
 interface FieldOption {
   id: string,
@@ -149,7 +150,7 @@ export interface Issue {
   issueId: string
   summary: string
   typeCode?: string,
-  issueTypeVO?: IIssueType,
+  issueTypeVO: IIssueType,
   parentIssueId?: string
   parentIssueNum?: string
   parentIssueSummary?: string
