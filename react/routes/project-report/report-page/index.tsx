@@ -22,10 +22,10 @@ const ReportPage: React.FC<Props> = ({ store, edit }) => {
   const baseInfoRef = useRef<BaseInfoRef>({} as BaseInfoRef);
   return (
     <Page>
-      <Header>
+      {/* <Header>
         <Button icon="playlist_add">添加报告内容</Button>
-      </Header>
-      <Breadcrumb />
+      </Header> */}
+      <Breadcrumb title={edit ? '编辑项目报告' : '创建项目报告'} />
       <Content style={{ paddingBottom: 0 }}>
         <ProjectReportContext.Provider value={{
           store,

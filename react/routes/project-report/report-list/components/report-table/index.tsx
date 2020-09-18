@@ -2,6 +2,7 @@ import React, { useMemo, useCallback } from 'react';
 import {
   DataSet,
   Table,
+  Modal,
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
@@ -38,8 +39,13 @@ const ReportTable = () => {
   const handleMenuClick = useCallback(async (key, record) => {
     switch (key) {
       case 'delete': {
-        await projectReportApi.delete(record.get('id'));
-        dataSet.query();
+        Modal.confirm({
+          title: `确认删除报告“${record.get('title')}”`,
+          onOk: async () => {
+            await projectReportApi.delete(record.get('id'));
+            dataSet.query();
+          },
+        });
       }
     }
   }, [dataSet]);
