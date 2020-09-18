@@ -1,8 +1,11 @@
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, {
+  useMemo, useCallback, useEffect, useImperativeHandle,
+} from 'react';
 import {
   Form, DataSet, TextField, Select,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
+import { Choerodon } from '@choerodon/boot';
 import IssueTable from '@/components/issue-table';
 import IssueTableDataSet from '@/components/issue-table/dataSet';
 import IssueSearch, { useIssueSearchStore } from '@/components/issue-search';
@@ -12,6 +15,8 @@ import {
 } from '@/routes/Issue/stores/utils';
 import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
+import { IReportListBlock } from '../../store';
+import { RefProps } from '../add-modal';
 
 const { Option } = Select;
 const defaultVisibleColumns = [
@@ -22,21 +27,26 @@ const defaultVisibleColumns = [
   'statusId',
   'reporterId',
 ];
-const AddIssueList: React.FC = () => {
+interface Props {
+  innerRef: React.MutableRefObject<RefProps>
+  data?: IReportListBlock
+}
+const AddIssueList: React.FC<Props> = ({ innerRef }) => {
   const issueSearchStore = useIssueSearchStore({
     // @ts-ignore
     getSystemFields,
     transformFilter,
   });
   const formDataSet = useMemo(() => new DataSet({
-    data: [{ fields: defaultVisibleColumns }],
+    autoCreate: true,
+    data: [{ visibleColumns: defaultVisibleColumns }],
     fields: [{
       name: 'title',
       label: '列表标题',
       maxLength: 44,
       required: true,
     }, {
-      name: 'fields',
+      name: 'visibleColumns',
       required: true,
       label: '列表显示字段',
     }],
@@ -53,11 +63,36 @@ const AddIssueList: React.FC = () => {
   useEffect(() => {
     refresh();
   }, [refresh]);
+  const handleSubmit = useCallback(async () => {
+    if (await formDataSet.current?.validate(true)) {
+      const data = formDataSet.current?.toData();
+      const issueIds = dataSet.selected.map((record) => record.get('issueId'));
+      if (issueIds.length === 0) {
+        Choerodon.prompt('请至少勾选一个问题');
+        return false;
+      }
+      const block: IReportListBlock = {
+        key: String(Math.random()),
+        title: data.title,
+        type: 'static_list',
+        searchVO: {
+          otherArgs: {
+            issueIds,
+          },
+        },
+      };
+      return block;
+    }
+    return false;
+  }, [dataSet, formDataSet]);
+  useImperativeHandle(innerRef, () => ({
+    submit: handleSubmit,
+  }), [handleSubmit]);
   return (
     <div className="agile-portal">
       <Form dataSet={formDataSet} style={{ width: 512 }}>
         <TextField name="title" />
-        <Select name="fields" multiple help="为了保证最佳的预览效果，请将字段控制在6个以内">
+        <Select name="visibleColumns" multiple help="为了保证最佳的预览效果，请将字段控制在6个以内">
           <Option value="issueId">概要</Option>
           <Option value="issueNum">编号</Option>
           <Option value="priorityId">优先级</Option>
@@ -93,7 +128,7 @@ const AddIssueList: React.FC = () => {
         dataSet={dataSet}
         fields={issueSearchStore.fields}
         createIssue={false}
-        visibleColumns={formDataSet.current?.get('fields') || []}
+        visibleColumns={formDataSet.current?.get('visibleColumns') || []}
       />
     </div>
   );

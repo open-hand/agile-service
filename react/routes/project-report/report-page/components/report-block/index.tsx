@@ -28,7 +28,10 @@ const ReportBlock: React.FC<Props> = ({ data, index }) => {
       case 'chart': {
         return <ChartBlock data={data as IReportChartBlock} />;
       }
-      case 'list': {
+      case 'static_list': {
+        return <ListBlock data={data as IReportListBlock} />;
+      }
+      case 'dynamic_list': {
         return <ListBlock data={data as IReportListBlock} />;
       }
       default: {

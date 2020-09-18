@@ -22,8 +22,8 @@ const Components = new Map<IReportContentType, React.FC<{
 }>>([
   ['chart', AddChart],
   ['text', AddText],
-  ['list', AddIssueList],
   ['static_list', AddIssueList],
+  ['dynamic_list', AddIssueList],
 ]);
 const AddModal: React.FC<Props> = (props) => {
   const {
