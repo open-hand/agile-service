@@ -98,6 +98,12 @@ public class ChartSearchVO {
     private Long epicId;
 
     /**
+     * 版本燃耗图: 根据图表校准冲刺(可选)
+     * 史诗燃耗图： 根据图表校准冲刺(可选)
+     */
+    private Boolean calibrationSprint;
+
+    /**
      * 统计图：组织id(必选)
      */
     private Long organizationId;
@@ -105,6 +111,14 @@ public class ChartSearchVO {
      * 统计图：统计类型(必选)
      */
     private String fieldName;
+
+    public Boolean getCalibrationSprint() {
+        return calibrationSprint;
+    }
+
+    public void setCalibrationSprint(Boolean calibrationSprint) {
+        this.calibrationSprint = calibrationSprint;
+    }
 
     public List<Long> getPersonalFilterIds() {
         return personalFilterIds;
