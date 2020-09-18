@@ -9,6 +9,7 @@ import VersionBlock from './components/version-report';
 import EpicBlock from './components/epic-report';
 import VersionBurndownBlock from './components/version-burndown';
 import EpicBurndownBlock from './components/epic-burndown';
+import IterationSpeedBlock from './components/iteration-speed';
 
 const ChartMap = new Map<IChartCode, React.FC<any>>([
   ['burn_down_report', BurnDownBlock],
@@ -19,6 +20,7 @@ const ChartMap = new Map<IChartCode, React.FC<any>>([
   ['epic_chart', EpicBlock],
   ['version_burn_down_report', VersionBurndownBlock],
   ['epic_burn_down_report', EpicBurndownBlock],
+  ['velocity_chart', IterationSpeedBlock],
 ]);
 interface Props {
   data: IReportChartBlock
