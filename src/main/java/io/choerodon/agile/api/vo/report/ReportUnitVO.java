@@ -13,7 +13,8 @@ import org.springframework.util.Assert;
 @JsonSubTypes({
         @JsonSubTypes.Type(name = "text",value = TextUnitVO.class),
         @JsonSubTypes.Type(name = "chart",value = ChartUnitVO.class),
-        @JsonSubTypes.Type(name = "list",value = ListUnitVO.class)
+        @JsonSubTypes.Type(name = "static_list",value = StaticListUnitVO.class),
+        @JsonSubTypes.Type(name = "dynamic_list",value = StaticListUnitVO.class)
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReportUnitVO {

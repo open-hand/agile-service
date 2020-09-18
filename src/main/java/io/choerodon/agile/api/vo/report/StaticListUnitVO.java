@@ -3,15 +3,23 @@ package io.choerodon.agile.api.vo.report;
 import java.util.List;
 
 import io.choerodon.agile.api.vo.SearchVO;
+import org.hzero.core.base.BaseConstants;
+import org.springframework.util.Assert;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/9/15 下午7:02
  */
-public class ListUnitVO extends ReportUnitVO {
+public class StaticListUnitVO extends ReportUnitVO {
+    
+    @Override
+    public void validate() {
+        super.validate();
+        Assert.notNull(searchVO, BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.notNull(searchVO.getOtherArgs(), BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.notNull(searchVO.getOtherArgs().get("issueIds"), BaseConstants.ErrorCode.DATA_INVALID);
+    }
 
     private List<String> colList;
-
-    private List<Long> issueIdList;
 
     private SearchVO searchVO;
 
@@ -21,14 +29,6 @@ public class ListUnitVO extends ReportUnitVO {
 
     public void setColList(List<String> colList) {
         this.colList = colList;
-    }
-
-    public List<Long> getIssueIdList() {
-        return issueIdList;
-    }
-
-    public void setIssueIdList(List<Long> issueIdList) {
-        this.issueIdList = issueIdList;
     }
 
     public SearchVO getSearchVO() {

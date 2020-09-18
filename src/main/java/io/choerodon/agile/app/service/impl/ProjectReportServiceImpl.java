@@ -180,9 +180,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
             return;
         }
         try {
-            for (ReportUnitVO reportUnitVO : projectReportVO.getReportUnitList()) {
-                reportUnitVO.validate();
-            }
+            projectReportVO.getReportUnitList().forEach(ReportUnitVO::validate);
             projectReportDTO.setReportData(commmonMapper.writeValueAsString(projectReportVO.getReportUnitList()));
         } catch (JsonProcessingException e) {
             log.error("json convert failed");
@@ -210,9 +208,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
 
     @Override
     public void send(Long projectId, Long id, MultipartFile multipartFile) {
-
-        ProjectReportDTO projectReportDTO = projectReportMapper.selectOne(new ProjectReportDTO(id, projectId));
-        List<ProjectReportReceiverDTO> ccDTOList = projectReportReceiverMapper.select(new ProjectReportReceiverDTO(id, projectId));
+        List<ProjectReportReceiverDTO> receiverList = projectReportReceiverMapper.select(new ProjectReportReceiverDTO(id, projectId));
         String imgData = null;
         try {
             imgData = Base64Utils.encodeToString(multipartFile.getBytes());
@@ -220,7 +216,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
             e.printStackTrace();
         }
         if (StringUtils.isNotBlank(imgData)){
-            siteMsgUtil.sendProjectReport(projectId, ccDTOList.stream().map(ProjectReportReceiverDTO::getReceiverId).collect(Collectors.toList()), imgData);
+            siteMsgUtil.sendProjectReport(projectId, receiverList, imgData);
         }
         
 

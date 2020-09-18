@@ -77,17 +77,6 @@ public class ProjectReportController {
         projectReportService.delete(projectId, id);
         return Results.success();
     }
-    
-    @ApiOperation(value = "导出项目报表")
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @PostMapping("/export/{id}")
-    public ResponseEntity<Void> export(@PathVariable("project_id") Long projectId,
-                                       @PathVariable("id") @Encrypt Long id,
-                                       @RequestParam("file") MultipartFile multipartFile,
-                                       HttpServletResponse response) {
-        projectReportService.export(projectId, id, multipartFile, response);
-        return Results.success();
-    }
 
     @ApiOperation(value = "发送项目报表")
     @Permission(level = ResourceLevel.ORGANIZATION)
