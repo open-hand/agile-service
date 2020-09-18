@@ -3,8 +3,9 @@ import {
 } from 'mobx';
 import { IReportContentType, User } from '@/common/types';
 import { IBurndownChartType } from '@/components/charts/burn-down';
+import { IPieChartType } from '@/components/charts/pie-chart';
 
-export type IChartCode = 'burn_down_report' | 'sprint_report' | 'cumulative_flow_diagram'
+export type IChartCode = 'burn_down_report' | 'sprint_report' | 'cumulative_flow_diagram' | 'pie_chart'
 
 const reorder = <T>(list: T[], startIndex: number, endIndex: number): T[] => {
   const result = Array.from(list);
@@ -42,7 +43,15 @@ export type AccumulationSearchVO = {
   endDate: string
   quickFilterIds?: string[]
 }
-export type ChartSearchVO = BurnDownSearchVO | SprintSearchVO | AccumulationSearchVO
+
+export type PieSearchVO = {
+  sprintId?: string
+  versionId?: string
+  projectId: string,
+  organizationId: string,
+  fieldName: IPieChartType,
+}
+export type ChartSearchVO = BurnDownSearchVO | SprintSearchVO | AccumulationSearchVO | PieSearchVO
 export interface IReportChartBlock extends IBaseReportBlock {
   type: 'chart'
   chartCode: IChartCode
