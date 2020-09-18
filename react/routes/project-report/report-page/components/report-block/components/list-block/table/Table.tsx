@@ -29,8 +29,17 @@ function Table<T extends { [key: string]: any }>({
         <tr key={item[primaryKey]} data-level={level}>
           {columns.map((column, index) => (
             <td>
-              {index === 0 && <span style={{ display: 'inline-block', width: 10 + level * 20 }} />}
-              {index === 0 && hasChildren && <Icon type="arrow_drop_down" />}
+              {index === 0 && <span style={{ display: 'inline-block', width: level * 20 }} />}
+              {index === 0 && (
+              <Icon
+                type="arrow_drop_down"
+                style={{
+                  visibility: hasChildren ? 'visible' : 'hidden',
+                  marginRight: 5,
+                  marginTop: -2,
+                }}
+              />
+              )}
               {column.render
                 ? column.render(item) : item[column.dataIndex]}
             </td>
@@ -44,7 +53,12 @@ function Table<T extends { [key: string]: any }>({
     <table className={styles.table}>
       <thead>
         <tr>
-          {columns.map((column) => <th key={column.dataIndex}>{column.title}</th>)}
+          {columns.map((column, index) => (
+            <th key={column.dataIndex}>
+              {index === 0 && <span style={{ width: 22, display: 'inline-block' }} />}
+              {column.title}
+            </th>
+          ))}
         </tr>
       </thead>
       <tbody>
