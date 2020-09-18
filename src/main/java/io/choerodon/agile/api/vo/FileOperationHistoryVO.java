@@ -41,6 +41,9 @@ public class FileOperationHistoryVO {
     @ApiModelProperty(value = "版本号")
     private Long objectVersionNumber;
 
+    @ApiModelProperty(value = "创建时间")
+    private Date creationDate;
+
     @ApiModelProperty(value = "最后更新日期")
     private Date lastUpdateDate;
 
@@ -114,6 +117,14 @@ public class FileOperationHistoryVO {
 
     public Long getObjectVersionNumber() {
         return objectVersionNumber;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 
     public Date getLastUpdateDate() {
