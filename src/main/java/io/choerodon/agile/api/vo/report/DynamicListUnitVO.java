@@ -3,15 +3,20 @@ package io.choerodon.agile.api.vo.report;
 import java.util.List;
 
 import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 
 /**
- * @author jiaxu.cui@hand-china.com 2020/9/15 下午7:02
+ * @author jiaxu.cui@hand-china.com 2020/9/18 下午2:32
  */
-public class ListUnitVO extends ReportUnitVO {
+public class DynamicListUnitVO extends ReportUnitVO {
+
+    @Override
+    public void validateAndconvert() {
+        super.validateAndconvert();
+        EncryptionUtils.decryptSearchVO(searchVO);
+    }
 
     private List<String> colList;
-
-    private List<Long> issueIdList;
 
     private SearchVO searchVO;
 
@@ -21,14 +26,6 @@ public class ListUnitVO extends ReportUnitVO {
 
     public void setColList(List<String> colList) {
         this.colList = colList;
-    }
-
-    public List<Long> getIssueIdList() {
-        return issueIdList;
-    }
-
-    public void setIssueIdList(List<Long> issueIdList) {
-        this.issueIdList = issueIdList;
     }
 
     public SearchVO getSearchVO() {

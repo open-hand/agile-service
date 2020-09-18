@@ -69,8 +69,8 @@ public class ChartUnitVO extends ReportUnitVO {
     /**
      * 各图表必输校验
      */
-    public void validate(){
-        super.validate();
+    public void validateAndconvert(){
+        super.validateAndconvert();
         Assert.notNull(chartSearchVO, BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(chartSearchVO.getProjectId(), BaseConstants.ErrorCode.DATA_INVALID);
 
@@ -81,11 +81,9 @@ public class ChartUnitVO extends ReportUnitVO {
                 break;
             case SPRINT_REPORT:
                 Assert.notNull(chartSearchVO.getSprintId(), BaseConstants.ErrorCode.DATA_INVALID);
-                Assert.isTrue(StringUtils.equals(CHART_TYPE_ISSUE_COUNT, chartSearchVO.getType()), BaseConstants.ErrorCode.DATA_INVALID);
                 break;
             case CUMULATIVE_FLOW_DIAGRAM:
                 Assert.notNull(chartSearchVO.getBoardId(), BaseConstants.ErrorCode.DATA_INVALID);
-                Assert.notNull(chartSearchVO.getColumnIds(), BaseConstants.ErrorCode.DATA_INVALID);
                 Assert.notNull(chartSearchVO.getStartDate(), BaseConstants.ErrorCode.DATA_INVALID);
                 Assert.notNull(chartSearchVO.getEndDate(), BaseConstants.ErrorCode.DATA_INVALID);
                 break;
@@ -105,11 +103,9 @@ public class ChartUnitVO extends ReportUnitVO {
                 Assert.notNull(chartSearchVO.getFieldName(), BaseConstants.ErrorCode.DATA_INVALID);
                 break;
             case EPIC_BURN_DOWN_REPORT:
-                Assert.isTrue(StringUtils.equals(CHART_TYPE_EPIC, chartSearchVO.getType()), BaseConstants.ErrorCode.DATA_INVALID);
                 Assert.notNull(chartSearchVO.getEpicId(), BaseConstants.ErrorCode.DATA_INVALID);
                 break;
             case VERSION_BURN_DOWN_REPORT:
-                Assert.isTrue(StringUtils.equals(CHART_TYPE_VERSION, chartSearchVO.getType()), BaseConstants.ErrorCode.DATA_INVALID);
                 break;
             case UNCOMPLETED_CHART:
             case ISSUE_CHART:

@@ -2,8 +2,8 @@ package io.choerodon.agile.infra.utils;
 
 import io.choerodon.agile.api.vo.ProjectVO;
 import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
-import io.choerodon.agile.infra.dto.UserMessageDTO;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.core.enums.MessageAdditionalType;
 import org.apache.commons.collections4.CollectionUtils;
@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.Assert;
 
 import java.util.*;
 import java.util.function.Function;
@@ -161,18 +161,29 @@ public class SiteMsgUtil {
         }
     }
 
-    public void sendProjectReport(Long projectId, List<Long> ccList, String imgData) {
+    public void sendProjectReport(Long projectId, List<ProjectReportReceiverDTO> receiverList, String imgData) {
+        // 获取接收人, 抄送人
+        Map<String, List<ProjectReportReceiverDTO>> group =
+                receiverList.stream().collect(Collectors.groupingBy(ProjectReportReceiverDTO::getType));
+        List<Long> toList = group.get(ProjectReportReceiverDTO.TYPE_RECEIVER).stream()
+                .map(ProjectReportReceiverDTO::getReceiverId).collect(Collectors.toList());
+        Assert.notNull(toList, BaseConstants.ErrorCode.DATA_NOT_EXISTS);
+        List<Long> ccList = group.get(ProjectReportReceiverDTO.TYPE_CC).stream()
+                .map(ProjectReportReceiverDTO::getReceiverId).collect(Collectors.toList());
+        List<Receiver> toReceiver = new ArrayList<>();
+        List<Receiver> ccReceiver = new ArrayList<>();
+        handleReceiver(toReceiver, toList);
+        Assert.isTrue(CollectionUtils.isNotEmpty(toList), BaseConstants.ErrorCode.DATA_NOT_EXISTS);
+        handleReceiver(ccReceiver, ccList);
         // 设置参数
         Map<String, String> argsMap = new HashMap<>();
         argsMap.put("data", "<img style=\"width: 780px;\" src=\""+imgData+"\">" );
-        // 获取接收人
-        Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(ccList, false);
+        // 设置sender
         MessageSender sender = new MessageSender();
         sender.setMessageCode("PROJECT_REPORT");
         sender.setTenantId(ConvertUtil.getOrganizationId(projectId));
-        Receiver receiver = new Receiver();
-        sender.setReceiverAddressList(Collections.singletonList(receiver));
-        sender.setCcList(userMap.values().stream().map(UserMessageDTO::getEmail).collect(Collectors.toList()));
+        sender.setReceiverAddressList(toReceiver);
+        sender.setCcList(ccReceiver.stream().map(Receiver::getEmail).collect(Collectors.toList()));
         sender.setArgs(argsMap);
         messageClient.async().sendMessage(sender);
     }
