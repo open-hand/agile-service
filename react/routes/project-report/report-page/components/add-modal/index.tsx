@@ -11,13 +11,14 @@ interface Props {
   type?: IReportContentType
   store: ProjectReportStore
   data?: IReportBlock
+  index?: number
 }
 export interface RefProps {
   submit: () => Promise<any>
 }
 const Components = new Map<IReportContentType, React.FC<{
   innerRef: React.MutableRefObject<RefProps>
-  data?:IReportBlock
+  data?: IReportBlock
 }>>([
   ['chart', AddChart],
   ['text', AddText],
@@ -26,7 +27,7 @@ const Components = new Map<IReportContentType, React.FC<{
 ]);
 const AddModal: React.FC<Props> = (props) => {
   const {
-    modal, type, store, data: editData,
+    modal, type, store, data: editData, index,
   } = props;
   const isEdit = editData !== undefined;
   const ref = useRef<RefProps>({} as RefProps);
@@ -35,7 +36,7 @@ const AddModal: React.FC<Props> = (props) => {
     console.log(data);
     if (data) {
       if (isEdit) {
-        store.updateBlock(data as IReportBlock);
+        store.updateBlock(index as number, data as IReportBlock);
       } else {
         store.addBlock(data as IReportBlock);
       }

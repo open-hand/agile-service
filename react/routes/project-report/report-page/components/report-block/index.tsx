@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { Button } from 'choerodon-ui/pro';
+import { observer } from 'mobx-react-lite';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import styles from './index.less';
 import {
@@ -13,9 +14,10 @@ import openAddModal from '../add-modal';
 
 interface Props {
   data: IReportBlock
+  index: number
 }
 
-const ReportBlock: React.FC<Props> = ({ data }) => {
+const ReportBlock: React.FC<Props> = ({ data, index }) => {
   const { title, type } = data;
   const { store } = useProjectReportContext();
   const renderBlock = useCallback(() => {
@@ -35,14 +37,15 @@ const ReportBlock: React.FC<Props> = ({ data }) => {
     }
   }, [data, type]);
   const handleDelete = useCallback(() => {
-    store.removeBlock(data.id);
-  }, [data.id, store]);
+    store.removeBlock(index);
+  }, [index, store]);
   const handleEdit = useCallback(() => {
     openAddModal({
       data,
       store,
+      index,
     });
-  }, [data, store]);
+  }, [data, index, store]);
   return (
     <div className={styles.report_block}>
       <div className={styles.header}>
@@ -57,4 +60,4 @@ const ReportBlock: React.FC<Props> = ({ data }) => {
   );
 };
 
-export default ReportBlock;
+export default observer(ReportBlock);

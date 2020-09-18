@@ -7,7 +7,7 @@ const BlockList: React.FC = () => {
   const { store } = useProjectReportContext();
   return (
     <>
-      {store.blockList.map((block) => <ReportBlock key={block.id} data={block} />)}
+      {store.blockList.map((block, index) => <ReportBlock index={index} data={block} />)}
     </>
   );
 };

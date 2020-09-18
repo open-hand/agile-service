@@ -1,5 +1,5 @@
 import {
-  observable, action,
+  observable, action, toJS,
 } from 'mobx';
 import { remove, findIndex } from 'lodash';
 import { IReportContentType } from '@/common/types';
@@ -9,7 +9,6 @@ import { IBurndownChartType } from '@/components/charts/burn-down';
 export type IChartCode = 'burn_down_report' | 'sprint_report'
 
 interface IBaseReportBlock {
-  id: string
   title: string
   type: IReportContentType
 }
@@ -51,15 +50,15 @@ class ProjectReportStore {
   }
 
   @action('更新一个block')
-  updateBlock(block: IReportBlock) {
-    const { id } = block;
-    const index = findIndex(this.blockList, { id });
+  updateBlock(index: number, block: IReportBlock) {
+    console.log(index);
     this.blockList[index] = block;
+    console.log(toJS(this.blockList));
   }
 
   @action('移除一个block')
-  removeBlock(id: string) {
-    remove(this.blockList, (block) => block.id === id);
+  removeBlock(index: number) {
+    this.blockList.splice(index, 1);
   }
 
   @action('设置ReportData')

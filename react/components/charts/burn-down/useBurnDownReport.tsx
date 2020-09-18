@@ -62,6 +62,24 @@ function useBurnDownReport(config?: BurnDownConfig): [BurnDownSearchProps, BurnD
   useEffect(() => {
     loadData();
   }, [loadData]);
+  useEffect(() => {
+    if (config?.type) {
+      setType(config?.type);
+    }
+  }, [config?.type]);
+  useEffect(() => {
+    if (config && 'restDayShow' in config) {
+      setRestDayShow(config.restDayShow as boolean);
+    }
+  }, [config, config?.restDayShow]);
+  useEffect(() => {
+    setSprintId(config?.sprintId);
+  }, [config?.sprintId]);
+  useEffect(() => {
+    if (config && 'quickFilter' in config) {
+      setQuickFilter(config.quickFilter as IQuickSearchValue);
+    }
+  }, [config, config?.quickFilter]);
 
   const searchProps: BurnDownSearchProps = {
     sprintId,
