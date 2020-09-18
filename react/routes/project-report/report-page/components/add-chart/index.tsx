@@ -5,8 +5,6 @@ import {
   Form, Select, DataSet, TextField,
 } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
-import { BurnDownConfig } from '@/components/charts/burn-down/useBurnDownReport';
-import { SprintConfig } from '@/components/charts/sprint/useSprintReport';
 import BurnDownComponent from './components/burndown';
 import SprintComponent from './components/sprint';
 import AccumulationComponent from './components/accumulation';

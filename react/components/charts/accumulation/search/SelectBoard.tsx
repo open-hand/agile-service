@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {
+  useState, useEffect, useCallback, useRef,
+} from 'react';
 import {
   CheckBox, Button, Icon,
 } from 'choerodon-ui/pro';
@@ -16,14 +18,16 @@ const SelectBoard: React.FC<Props> = ({
   onChange, value,
 }) => {
   const [boardList, setBoardList] = useState<IBoard[]>([]);
+  const valueRef = useRef(value);
+  valueRef.current = value;
   const refresh = useCallback(async () => {
     const list = await boardApi.loadAll();
     const defaultBoard = find(list, { userDefault: true });
-    if (list.length > 0) {
+    if (!valueRef.current && list.length > 0) {
       onChange(defaultBoard ? defaultBoard.boardId : list[0].boardId);
     }
     setBoardList(list);
-  }, []);
+  }, [onChange]);
   useEffect(() => {
     refresh();
   }, [refresh]);

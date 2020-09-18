@@ -4,7 +4,7 @@ import {
 import { IReportContentType, User } from '@/common/types';
 import { IBurndownChartType } from '@/components/charts/burn-down';
 
-export type IChartCode = 'burn_down_report' | 'sprint_report'
+export type IChartCode = 'burn_down_report' | 'sprint_report' | 'cumulative_flow_diagram'
 
 interface IBaseReportBlock {
   title: string
@@ -26,7 +26,14 @@ export type SprintSearchVO = {
   sprintId?: string
   displayNonWorkingDay: boolean
 }
-export type ChartSearchVO = BurnDownSearchVO | SprintSearchVO
+export type AccumulationSearchVO = {
+  projectId: string
+  boardId: string
+  startDate: string
+  endDate: string
+  quickFilterIds?: string[]
+}
+export type ChartSearchVO = BurnDownSearchVO | SprintSearchVO | AccumulationSearchVO
 export interface IReportChartBlock extends IBaseReportBlock {
   type: 'chart'
   chartCode: IChartCode
