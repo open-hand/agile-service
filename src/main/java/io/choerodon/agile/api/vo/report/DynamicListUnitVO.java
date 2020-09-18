@@ -3,13 +3,18 @@ package io.choerodon.agile.api.vo.report;
 import java.util.List;
 
 import io.choerodon.agile.api.vo.SearchVO;
-import org.hzero.core.base.BaseConstants;
-import org.springframework.util.Assert;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/9/18 下午2:32
  */
 public class DynamicListUnitVO extends ReportUnitVO {
+
+    @Override
+    public void validateAndconvert() {
+        super.validateAndconvert();
+        EncryptionUtils.decryptSearchVO(searchVO);
+    }
 
     private List<String> colList;
 

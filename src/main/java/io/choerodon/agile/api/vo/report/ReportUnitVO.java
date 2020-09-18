@@ -19,7 +19,7 @@ import org.springframework.util.Assert;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReportUnitVO {
 
-    public void validate(){
+    public void validateAndconvert(){
         Assert.notNull(title, BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(type, BaseConstants.ErrorCode.DATA_INVALID);
     }

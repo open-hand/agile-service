@@ -10,7 +10,10 @@ import javax.servlet.http.HttpServletResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.ProjectReportVO;
+import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.report.DynamicListUnitVO;
 import io.choerodon.agile.api.vo.report.ReportUnitVO;
+import io.choerodon.agile.api.vo.report.StaticListUnitVO;
 import io.choerodon.agile.app.service.ProjectReportService;
 import io.choerodon.agile.infra.dto.ProjectReportDTO;
 import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
@@ -19,6 +22,7 @@ import io.choerodon.agile.infra.enums.ProjectReportStatus;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.ProjectReportMapper;
 import io.choerodon.agile.infra.mapper.ProjectReportReceiverMapper;
+import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.SiteMsgUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
@@ -56,7 +60,9 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     @Autowired
     private BaseFeignClient baseFeignClient;
     @Autowired
-    private SiteMsgUtil siteMsgUtil; 
+    private SiteMsgUtil siteMsgUtil;
+    @Autowired
+    private ObjectMapper objectMapper;
     private ObjectMapper commmonMapper = new ObjectMapper();
 
     @Override
@@ -100,6 +106,19 @@ public class ProjectReportServiceImpl implements ProjectReportService {
             try {
                 projectReportVO.setReportUnitList(commmonMapper.readValue(projectReport.getReportData(),
                         commmonMapper.getTypeFactory().constructParametricType(List.class, ReportUnitVO.class)));
+                for (ReportUnitVO reportUnitVO : projectReportVO.getReportUnitList()) {
+                    if (reportUnitVO instanceof StaticListUnitVO){
+                        SearchVO searchVO = ((StaticListUnitVO) reportUnitVO).getSearchVO();
+                        ((StaticListUnitVO) reportUnitVO).setSearchVO(
+                                objectMapper.readValue(EncryptionUtils.handlerPersonFilterJson(
+                                        objectMapper.writeValueAsString(searchVO), true), SearchVO.class));
+                    }else if (reportUnitVO instanceof DynamicListUnitVO){
+                        SearchVO searchVO = ((DynamicListUnitVO) reportUnitVO).getSearchVO();
+                        ((DynamicListUnitVO) reportUnitVO).setSearchVO(
+                                objectMapper.readValue(EncryptionUtils.handlerPersonFilterJson(
+                                        objectMapper.writeValueAsString(searchVO), true), SearchVO.class));
+                    }
+                }
             } catch (IOException e) {
                 log.error("json convert failed");
             }
@@ -180,7 +199,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
             return;
         }
         try {
-            projectReportVO.getReportUnitList().forEach(ReportUnitVO::validate);
+            projectReportVO.getReportUnitList().forEach(ReportUnitVO::validateAndconvert);
             projectReportDTO.setReportData(commmonMapper.writeValueAsString(projectReportVO.getReportUnitList()));
         } catch (JsonProcessingException e) {
             log.error("json convert failed");
