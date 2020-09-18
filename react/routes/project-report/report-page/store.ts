@@ -1,9 +1,7 @@
 import {
-  observable, action, toJS,
+  observable, action,
 } from 'mobx';
-import { remove, findIndex } from 'lodash';
 import { IReportContentType, User } from '@/common/types';
-import { SprintConfig } from '@/components/charts/sprint/useSprintReport';
 import { IBurndownChartType } from '@/components/charts/burn-down';
 
 export type IChartCode = 'burn_down_report' | 'sprint_report'
@@ -23,10 +21,16 @@ export type BurnDownSearchVO = {
   quickFilterIds: string[]
   personalFilterIds: string[]
 }
+export type SprintSearchVO = {
+  projectId: string
+  sprintId?: string
+  displayNonWorkingDay: boolean
+}
+export type ChartSearchVO = BurnDownSearchVO | SprintSearchVO
 export interface IReportChartBlock extends IBaseReportBlock {
   type: 'chart'
   chartCode: IChartCode
-  chartSearchVO: BurnDownSearchVO | SprintConfig
+  chartSearchVO: ChartSearchVO
 }
 export interface IReportListBlock extends IBaseReportBlock {
   type: 'list'
