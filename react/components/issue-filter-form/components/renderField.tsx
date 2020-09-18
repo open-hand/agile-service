@@ -42,7 +42,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
             afterLoad={code === 'sprintList' ? () => { } : (sprints) => {
               if (!defaultValue && Array.isArray(sprints) && sprints.length > 0) {
                 const data = find<any>(sprints, { statusCode: 'sprint_planning' }) ?? sprints[0];
-                dataSet.current?.set(field.code, data.sprintId);
+                dataSet.current?.set(field.code, [data.sprintId]);
               }
             }}
             selectSprints={value}
@@ -53,8 +53,8 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
       case 'statusList':
         return <SelectStatus name={code} isProgram={code === 'statusList'} multiple {...selectOtherProps} />;
       case 'issueTypeId':
-      case 'featureTypeList':
-        return <SelectIssueType name={code} filterList={code === 'featureTypeList' ? [] : undefined} multiple {...selectOtherProps} />;
+      case 'issueTypeList':
+        return <SelectIssueType name={code} filterList={code === 'issueTypeList' ? [] : undefined} multiple {...selectOtherProps} />;
       case 'epic':
       case 'epicList':
         // @ts-ignore
@@ -79,7 +79,19 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
         return <SelectSubProject name={code} multiple {...selectOtherProps} />;// label={name} style={{ width: '100%' }}
       }
       case 'piList': {
-        return <PIField name={code} multiple {...selectOtherProps} />;// label={name} style={{ width: '100%' }}
+        return (
+          <PIField
+            name={code}
+            multiple
+            afterLoad={(piList) => {
+              if (!defaultValue && Array.isArray(piList) && piList.length > 0) {
+                const data = find(piList, { statusCode: 'doing' }) ?? piList[0];
+                dataSet.current?.set(field.code, [data.id]);
+              }
+            }}
+            {...selectOtherProps}
+          />
+        );// label={name} style={{ width: '100%' }}
       }
       default:
         break;

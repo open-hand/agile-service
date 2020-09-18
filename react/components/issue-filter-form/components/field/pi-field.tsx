@@ -7,7 +7,7 @@ import { piApi } from '@/api';
 import type { PI } from '@/common/types';
 
 interface Props extends Partial<SelectProps> {
-  afterLoad?: (sprints: PI[]) => void
+  afterLoad?: (piList: PI[]) => void
   disabledCurrentPI?: boolean
 }
 const PIField: React.FC<Props> = forwardRef(({
@@ -26,6 +26,9 @@ const PIField: React.FC<Props> = forwardRef(({
       </FragmentForSearch>
     ),
     middleWare: (piList) => {
+      if (afterLoadRef.current) {
+        afterLoadRef.current(piList);
+      }
       const newPiList = [{
         id: 'none',
         name: '未分配PI',
@@ -33,6 +36,7 @@ const PIField: React.FC<Props> = forwardRef(({
         code: 'none',
         startDate: '',
         endDate: '',
+        statusCode: '',
         actualStartDate: null,
         actualEndDate: null,
       }, ...piList];
