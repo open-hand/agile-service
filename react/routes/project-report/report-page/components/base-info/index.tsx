@@ -33,6 +33,7 @@ const BaseInfo: React.FC<Props> = () => {
     }, {
       name: 'description',
       label: '报告说明',
+      maxLength: 255,
     }, {
       name: 'receiverList',
       label: '收件人',
