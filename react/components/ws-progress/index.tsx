@@ -7,9 +7,11 @@ import {
   Choerodon,
 } from '@choerodon/boot';
 import _ from 'lodash';
+import moment from 'moment';
 import { Progress } from 'choerodon-ui/pro';
 import { ProgressStatus, ProgressType } from 'choerodon-ui/lib/progress/enum';
 import './index.less';
+import { humanizeDuration } from '@/utils/common';
 
 interface Props {
   handleMessage?: (messageData: any) => void | boolean,
@@ -30,6 +32,18 @@ interface Props {
 interface StateProps {
   visible: boolean,
   data: { [propsName: string]: any },
+}
+function onHumanizeDuration(createDate?: string, lastUpdateDate?: string): string | null {
+  if (!createDate || !lastUpdateDate) {
+    return null;
+  }
+  const startTime = moment(createDate);
+  const lastTime = moment(lastUpdateDate);
+  let diff = lastTime.diff(startTime);
+  if (diff <= 0) {
+    diff = moment().diff(startTime);
+  }
+  return humanizeDuration(diff);
 }
 
 type ActionProps = Partial<StateProps> & { type: 'init' | 'transmission' | 'visible' | 'finish' }
@@ -100,7 +114,7 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
       <div className="c7n-agile-ws-finish">
         {downloadInfo.children ?? (
           <>
-            <span>{downloadInfo.timeLine ?? `导出完成时间${downloadInfo.lastUpdateDate}（耗时1分钟）`}</span>
+            <span>{downloadInfo.timeLine ?? `导出完成时间${downloadInfo.lastUpdateDate}（耗时${onHumanizeDuration(downloadInfo.createDate, downloadInfo.lastUpdateDate)}）`}</span>
             <a href={downloadInfo.url}>点击下载</a>
           </>
         )}

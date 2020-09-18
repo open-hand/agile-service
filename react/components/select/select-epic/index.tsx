@@ -4,14 +4,21 @@ import { epicApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 
 interface Props {
+  isProgram?: boolean
 }
 
-const SelectEpic: React.FC<Props> = forwardRef((otherProps, ref: React.Ref<Select>) => {
+const SelectEpic: React.FC<Props> = forwardRef(({ isProgram, ...otherProps }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'epic',
     textField: 'epicName',
     valueField: 'issueId',
-    request: () => epicApi.loadEpics(),
+    request: () => (isProgram ? epicApi.loadProgramEpics() : epicApi.loadEpics()),
+    middleWare: (epicList) => {
+      if (isProgram) {
+        epicList.unshift({ issueId: '0', epicName: '未分配史诗' });
+      }
+      return epicList;
+    },
     paging: false,
   }), []);
   const props = useSelect(config);

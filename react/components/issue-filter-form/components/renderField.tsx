@@ -13,8 +13,10 @@ import SelectComponent from '@/components/select/select-component';
 import SelectVersion from '@/components/select/select-version';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IChosenFieldField } from '@/components/chose-field/types';
+import SelectSubProject from '@/components/select/select-sub-project';
 import SelectStatus from './field/StatusField';
 import FeatureProjectField from './field/FeatureProjectField';
+import PIField from './field/pi-field';
 
 const { Option } = Select;
 const singleList = ['radio', 'single'];
@@ -27,15 +29,27 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
   if (!id) {
     switch (code) {
       case 'sprint':
-        // return <Select name={code} required />;
-        return <SelectSprint name={code} statusList={[]} {...selectOtherProps} />;
+      case 'sprintList':
+        return (
+          <SelectSprint
+            name={code}
+            statusList={[]}
+            isProgram={code === 'sprintList'}
+            multiple
+            selectSprints={value}
+            {...selectOtherProps}
+          />
+        );
       case 'statusId':
-        return <SelectStatus name={code} multiple {...selectOtherProps} />;
+      case 'statusList':
+        return <SelectStatus name={code} isProgram={code === 'statusList'} multiple {...selectOtherProps} />;
       case 'issueTypeId':
-        return <SelectIssueType name={code} multiple {...selectOtherProps} />;
+      case 'featureTypeList':
+        return <SelectIssueType name={code} filterList={code === 'featureTypeList' ? [] : undefined} multiple {...selectOtherProps} />;
       case 'epic':
+      case 'epicList':
         // @ts-ignore
-        return <SelectEpic name={code} multiple {...selectOtherProps} />;
+        return <SelectEpic name={code} isProgram={code === 'epicList'} multiple {...selectOtherProps} />;
       case 'priorityId':
         // @ts-ignore
         return <SelectPriority name={code} multiple {...selectOtherProps} />;
@@ -51,6 +65,12 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
       case 'feature': {
         // @ts-ignore
         return <FeatureProjectField name={code} multiple featureIds={defaultValue} {...selectOtherProps} />;// label={name} style={{ width: '100%' }}
+      }
+      case 'teamProjectList': {
+        return <SelectSubProject name={code} multiple {...selectOtherProps} />;// label={name} style={{ width: '100%' }}
+      }
+      case 'piList': {
+        return <PIField name={code} multiple {...selectOtherProps} />;// label={name} style={{ width: '100%' }}
       }
       default:
         break;
@@ -148,13 +168,13 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
         <SelectUser
           label="user"
           multiple
-          // @ts-ignore
+            // @ts-ignore
           selectedUser={defaultValue.map((item: string) => ({ id: item }))}
-          // request={(({ filter, page }) => userApi.getAllInProject(filter, page).then((res) => {
-          //   if (res.list && Array.isArray(res.list)) {
+            // request={(({ filter, page }) => userApi.getAllInProject(filter, page).then((res) => {
+            //   if (res.list && Array.isArray(res.list)) {
 
-          //   }
-          // }))}
+            //   }
+            // }))}
           style={{ width: '100%' }}
           name={code}
         />
