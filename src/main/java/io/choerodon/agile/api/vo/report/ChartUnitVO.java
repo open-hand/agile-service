@@ -85,7 +85,6 @@ public class ChartUnitVO extends ReportUnitVO {
                 break;
             case CUMULATIVE_FLOW_DIAGRAM:
                 Assert.notNull(chartSearchVO.getBoardId(), BaseConstants.ErrorCode.DATA_INVALID);
-                Assert.notNull(chartSearchVO.getColumnIds(), BaseConstants.ErrorCode.DATA_INVALID);
                 Assert.notNull(chartSearchVO.getStartDate(), BaseConstants.ErrorCode.DATA_INVALID);
                 Assert.notNull(chartSearchVO.getEndDate(), BaseConstants.ErrorCode.DATA_INVALID);
                 break;

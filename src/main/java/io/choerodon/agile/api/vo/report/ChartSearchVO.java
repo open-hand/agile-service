@@ -60,6 +60,7 @@ public class ChartSearchVO {
     private Long assigneeId;
     /**
      * 燃尽图： displayNonWorkingDay(可选)
+     * 冲刺报告图: displayNonWorkingDay(可选)
      */
     private Boolean displayNonWorkingDay;
 
