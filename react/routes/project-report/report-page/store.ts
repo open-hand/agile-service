@@ -68,12 +68,14 @@ export type EpicReportSearchVO = {
 export type VersionBurndownSearchVO = {
   type: 'version',
   versionId: string,
+  calibrationSprint: boolean,
   projectId: string,
 }
 
 export type EpicBurndownSearchVO = {
   type: 'epic',
   epicId: string,
+  calibrationSprint: boolean,
   projectId: string,
 }
 

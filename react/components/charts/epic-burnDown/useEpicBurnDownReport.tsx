@@ -9,12 +9,13 @@ import { getChartDataFromServerData } from './utils';
 
 interface EpicBurnConfig {
   epicId: string
+  checked: 'checked' | undefined
 }
 
 function useEpicBurnDownReport(config?: EpicBurnConfig): [EpicBurnDownSearchProps, EpicBurnDownChartProps] {
   const [epics, setEpics] = useState<IEpic[]>([]);
   const [epicIsLoading, setEpicIsLoading] = useState<boolean>(false);
-  const [checked, setChecked] = useState<'checked' | undefined>();
+  const [checked, setChecked] = useControlledDefaultValue<'checked' | undefined>(config?.checked);
   const [currentEpicId, setCurrentEpicId] = useControlledDefaultValue<string>(config?.epicId || '');
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<OriginData[]>([]);
