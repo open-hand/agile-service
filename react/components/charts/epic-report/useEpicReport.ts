@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { reportApi, epicApi } from '@/api';
+import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
 import { EpicReportProps, IEpicReportChart, IEpicReportTable } from './index';
 import { EpicReportSearchProps, IEpic } from './search';
 import { IUnit } from '../iteration-speed/search';
@@ -15,11 +16,16 @@ interface IOriginChartData {
   unEstimateIssueCount: number
 }
 
-const useEpicReport = (): [EpicReportProps, EpicReportSearchProps] => {
+interface EpicReportConfig {
+  unit: IUnit,
+  epicId: string
+}
+
+const useEpicReport = (config?: EpicReportConfig): [EpicReportProps, EpicReportSearchProps] => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [unit, setUnit] = useState<IUnit>('story_point');
+  const [unit, setUnit] = useControlledDefaultValue<IUnit>(config?.unit || 'story_point');
   const [epics, setEpics] = useState<IEpic[]>([]);
-  const [epicId, setEpicId] = useState<string>('');
+  const [epicId, setEpicId] = useControlledDefaultValue<string>(config?.epicId || '');
   const [data, setData] = useState<IEpicReportChart[]>([]);
   const [tableData, setTableData] = useState<IEpicReportTable[]>([]);
 
@@ -29,9 +35,15 @@ const useEpicReport = (): [EpicReportProps, EpicReportSearchProps] => {
       .then((res: IEpic[]) => {
         setLoading(false);
         setEpics(res);
-        setEpicId(res.length ? res[0].issueId : '');
+        let initEpicId = '';
+        if (config?.epicId) {
+          initEpicId = config.epicId;
+        } else {
+          initEpicId = res.length ? res[0].issueId : '';
+        }
+        setEpicId(initEpicId);
       });
-  }, []);
+  }, [config?.epicId, setEpicId]);
 
   const loadTableData = useCallback(() => {
     if (epicId) {
