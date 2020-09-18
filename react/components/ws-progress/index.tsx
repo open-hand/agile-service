@@ -113,10 +113,13 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
     return downloadInfo ? (
       <div className="c7n-agile-ws-finish">
         {downloadInfo.children ?? (
-          <>
-            <span>{downloadInfo.timeLine ?? `导出完成时间${downloadInfo.lastUpdateDate}（耗时${onHumanizeDuration(downloadInfo.createDate, downloadInfo.lastUpdateDate)}）`}</span>
-            <a href={downloadInfo.url}>点击下载</a>
-          </>
+          downloadInfo.url
+            ? (
+              <>
+                <span>{downloadInfo.timeLine ?? `导出完成时间${downloadInfo.lastUpdateDate}（耗时${onHumanizeDuration(downloadInfo.createDate, downloadInfo.lastUpdateDate)}）`}</span>
+                <a href={downloadInfo.url}>点击下载</a>
+              </>
+            ) : ''
         )}
         {/* <span>导出完成时间2019-08-02 09:08（耗时1分钟）</span> */}
       </div>

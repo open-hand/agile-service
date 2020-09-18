@@ -30,6 +30,7 @@ export interface PI {
   endDate: string
   actualStartDate: string | null
   actualEndDate: string | null
+  statusCode: 'todo' | 'doing' | 'done' | string,
 }
 
 export interface IStatus {
