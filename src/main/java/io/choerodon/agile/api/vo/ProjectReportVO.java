@@ -38,8 +38,18 @@ public class ProjectReportVO {
     @ApiModelProperty("创建人")
     @Encrypt
     private Long createdBy;
+    @ApiModelProperty("创建人信息")
+    private UserDTO createdUser;
     @ApiModelProperty("版本号")
     private Long objectVersionNumber;
+
+    public UserDTO getCreatedUser() {
+        return createdUser;
+    }
+
+    public void setCreatedUser(UserDTO createdUser) {
+        this.createdUser = createdUser;
+    }
 
     public Long getObjectVersionNumber() {
         return objectVersionNumber;
