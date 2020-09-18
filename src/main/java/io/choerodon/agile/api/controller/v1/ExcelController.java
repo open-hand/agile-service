@@ -16,10 +16,13 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -105,7 +108,7 @@ public class ExcelController {
                              HttpServletRequest request,
                              HttpServletResponse response) {
         EncryptionUtils.decryptSearchVO(searchVO);
-        excelService.asyncExportIssues(projectId, searchVO, request, response, organizationId, pageRequest.getSort());
+        excelService.asyncExportIssues(projectId, searchVO, request, response, organizationId, pageRequest.getSort(), (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
     }
 
 }

@@ -28,6 +28,7 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hzero.boot.file.FileClient;
 import org.hzero.boot.message.MessageClient;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -1330,7 +1333,8 @@ public class ExcelServiceImpl implements ExcelService {
     @Override
     @Async
     public void asyncExportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request,
-                                  HttpServletResponse response, Long organizationId, Sort sort) {
+                                  HttpServletResponse response, Long organizationId, Sort sort, ServletRequestAttributes requestAttributes) {
+        RequestContextHolder.setRequestAttributes(requestAttributes);
         Long userId = DetailsHelper.getUserDetails().getUserId();
         FileOperationHistoryDTO fileOperationHistoryDTO = initFileOperationHistory(projectId, userId, DOING, DOWNLOAD_FILE);
         //处理根据界面筛选结果导出的字段
