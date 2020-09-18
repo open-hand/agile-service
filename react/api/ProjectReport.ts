@@ -9,6 +9,9 @@ export interface IProjectReportCreate {
   reportUnitList: any[],
   title: string
 }
+export interface IProjectReportUpdate extends IProjectReportCreate {
+  objectVersionNumber: number
+}
 class ProjectReportApi extends Api {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
@@ -29,7 +32,7 @@ class ProjectReportApi extends Api {
     });
   }
 
-  update(reportId: string, data: IProjectReportCreate) {
+  update(reportId: string, data: IProjectReportUpdate) {
     return this.request({
       method: 'put',
       url: `${this.prefix}/project_report/${reportId}`,

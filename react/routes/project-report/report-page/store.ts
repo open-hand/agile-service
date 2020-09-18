@@ -2,7 +2,7 @@ import {
   observable, action, toJS,
 } from 'mobx';
 import { remove, findIndex } from 'lodash';
-import { IReportContentType } from '@/common/types';
+import { IReportContentType, User } from '@/common/types';
 import { SprintConfig } from '@/components/charts/sprint/useSprintReport';
 import { IBurndownChartType } from '@/components/charts/burn-down';
 
@@ -39,10 +39,20 @@ export interface IReportTextBlock extends IBaseReportBlock {
   content: string
 }
 export type IReportBlock = IReportTextBlock | IReportListBlock | IReportChartBlock
+
+export interface IProjectReport {
+  id: string
+  title: string
+  description?: string
+  ccList: User[]
+  receiverList: User[]
+  reportUnitList: IReportBlock[]
+  objectVersionNumber: number
+}
 class ProjectReportStore {
   @observable blockList: IReportBlock[] = []
 
-  @observable baseInfo: { id: string } | null = null
+  @observable baseInfo: IProjectReport | null = null
 
   @action('添加一个block')
   addBlock(block: IReportBlock) {
@@ -51,9 +61,7 @@ class ProjectReportStore {
 
   @action('更新一个block')
   updateBlock(index: number, block: IReportBlock) {
-    console.log(index);
     this.blockList[index] = block;
-    console.log(toJS(this.blockList));
   }
 
   @action('移除一个block')
