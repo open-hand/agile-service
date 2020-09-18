@@ -57,11 +57,14 @@ export interface IReportChartBlock extends IBaseReportBlock {
   chartCode: IChartCode
   chartSearchVO: ChartSearchVO
 }
+export interface SearchVO {
+  otherArgs: {
+    issueIds: string[],
+  },
+}
 export interface IReportListBlock extends IBaseReportBlock {
-  type: 'list'
-  data: {
-    filter: any
-  }
+  type: 'static_list' | 'dynamic_list'
+  searchVO: SearchVO
 }
 export interface IReportTextBlock extends IBaseReportBlock {
   type: 'text'

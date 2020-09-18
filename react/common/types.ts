@@ -182,7 +182,7 @@ export interface ILog {
   removeResolution?: boolean,
   resolutionChanged?: boolean,
 }
-export type IReportContentType = 'chart' | 'text' | 'list' | 'static_list'
+export type IReportContentType = 'chart' | 'text' | 'static_list' | 'dynamic_list'
 
 export interface IBoard {
   boardId: string

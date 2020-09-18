@@ -56,7 +56,7 @@ const ReportPage: React.FC<Props> = ({ store, edit }) => {
                       >
                         <Menu.Item key="text">文本</Menu.Item>
                         <Menu.Item key="static_list">静态列表</Menu.Item>
-                        <Menu.Item key="list">动态列表</Menu.Item>
+                        <Menu.Item key="dynamic_list">动态列表</Menu.Item>
                         <Menu.Item key="chart">图表</Menu.Item>
                       </Menu>
                     )}

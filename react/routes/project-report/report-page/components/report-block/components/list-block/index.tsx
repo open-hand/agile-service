@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { axios } from '@choerodon/boot';
 import { IReportListBlock } from '@/routes/project-report/report-page/store';
 import StatusTag from '@/components/StatusTag';
 import { Issue } from '@/common/types';
 import { getProjectId, getOrganizationId } from '@/utils/common';
-import Table from './Table';
+import Table from './table';
+import { flat2tree } from './utils';
 
 interface Props {
   data: IReportListBlock
 }
-const ListBlock: React.FC<Props> = () => {
+const ListBlock: React.FC<Props> = ({ data: { searchVO } }) => {
   const [data, setData] = useState([]);
   useEffect(() => {
     (async () => {
@@ -21,23 +22,26 @@ const ListBlock: React.FC<Props> = () => {
           size: 10,
           organizationId: getOrganizationId(),
         },
-        data: {
-          advancedSearchArgs: {},
-          otherArgs: {
-            customField: {
-              option: [], date: [], date_hms: [], number: [], string: [], text: [],
-            },
-          },
-          searchArgs: {},
-        },
+        data: searchVO,
+        // data: {
+        //   advancedSearchArgs: {},
+        //   otherArgs: {
+        //     customField: {
+        //       option: [], date: [], date_hms: [], number: [], string: [], text: [],
+        //     },
+        //   },
+        //   searchArgs: {},
+        // },
       });
       setData(res.content);
     })();
-  }, []);
+  }, [searchVO]);
+  const treeData = useMemo(() => flat2tree(data, { idKey: 'issueId' }), [data]);
   return (
     <div style={{ padding: '10px 26px' }}>
       <Table<Issue>
-        data={data}
+        data={treeData}
+        primaryKey="issueId"
         columns={[{
           title: '概要',
           dataIndex: 'summary',
