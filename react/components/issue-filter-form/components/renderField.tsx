@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import {
-  TextField, Select, DatePicker, TimePicker, DateTimePicker, NumberField, TextArea, UrlField,
+  TextField, Select, DatePicker, TimePicker, DateTimePicker, NumberField, TextArea, UrlField, DataSet,
 } from 'choerodon-ui/pro';
 import { toJS } from 'mobx';
+import { find } from 'lodash';
 import SelectUser from '@/components/select/select-user';
 import SelectSprint from '@/components/select/select-sprint';
 import SelectIssueType from '@/components/select/select-issue-type';
@@ -21,7 +22,9 @@ import PIField from './field/pi-field';
 const { Option } = Select;
 const singleList = ['radio', 'single'];
 
-export default function renderField<T extends Partial<SelectProps>>(field: IChosenFieldField, selectOtherProps?: T) {
+export default function renderField<T extends Partial<SelectProps>>(field: IChosenFieldField, selectOtherProps: T, { dataSet }: {
+  dataSet: DataSet,
+}) {
   const {
     code, fieldType, name, fieldOptions, value, id,
   } = field;
@@ -36,6 +39,12 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
             statusList={[]}
             isProgram={code === 'sprintList'}
             multiple
+            afterLoad={code === 'sprintList' ? () => { } : (sprints) => {
+              if (!defaultValue && Array.isArray(sprints) && sprints.length > 0) {
+                const data = find<any>(sprints, { statusCode: 'sprint_planning' }) ?? sprints[0];
+                dataSet.current?.set(field.code, data.sprintId);
+              }
+            }}
             selectSprints={value}
             {...selectOtherProps}
           />
@@ -169,10 +178,9 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
           label="user"
           multiple
             // @ts-ignore
-          selectedUser={defaultValue.map((item: string) => ({ id: item }))}
+          selectedUser={defaultValue ? defaultValue.map((item: string) => ({ id: item })) : undefined}
             // request={(({ filter, page }) => userApi.getAllInProject(filter, page).then((res) => {
             //   if (res.list && Array.isArray(res.list)) {
-
             //   }
             // }))}
           style={{ width: '100%' }}
