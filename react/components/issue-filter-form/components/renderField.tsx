@@ -41,7 +41,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
             multiple
             afterLoad={code === 'sprintList' ? () => { } : (sprints) => {
               if (!defaultValue && Array.isArray(sprints) && sprints.length > 0) {
-                const data = find<any>(sprints, { statusCode: 'sprint_planning' }) ?? sprints[0];
+                const data = find<any>(sprints, { statusCode: 'started' }) ?? sprints[0];
                 dataSet.current?.set(field.code, [data.sprintId]);
               }
             }}
