@@ -65,6 +65,7 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
       const data = dataSet.current?.toData();
       const search = await chartRef.current.submit();
       const block: IReportChartBlock = {
+        key: String(Math.random()),
         title: data.title,
         type: 'chart',
         chartCode: data.chart,

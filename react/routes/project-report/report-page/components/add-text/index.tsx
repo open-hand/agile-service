@@ -29,6 +29,7 @@ const AddText: React.FC<Props> = ({ innerRef, data: editData }) => {
     if (await dataSet.validate()) {
       const data = dataSet.current?.toData();
       const block: IReportTextBlock = {
+        key: String(Math.random()),
         title: data.title,
         type: 'text',
         content: JSON.stringify(data.description),

@@ -6,7 +6,16 @@ import { IBurndownChartType } from '@/components/charts/burn-down';
 
 export type IChartCode = 'burn_down_report' | 'sprint_report' | 'cumulative_flow_diagram'
 
+const reorder = <T>(list: T[], startIndex: number, endIndex: number): T[] => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+};
+
 interface IBaseReportBlock {
+  key: string
   title: string
   type: IReportContentType
 }
@@ -81,9 +90,18 @@ class ProjectReportStore {
   }
 
   @action('设置ReportData')
-  setReportData(reportData: any) {
-    this.blockList = reportData.reportUnitList;
+  setReportData(reportData: IProjectReport) {
+    this.blockList = reportData.reportUnitList.map((block) => ({ ...block, key: String(Math.random()) }));
     this.baseInfo = reportData;
+  }
+
+  @action('block排序')
+  sortBlock(sourceIndex: number, destinationIndex: number) {
+    this.blockList = reorder(
+      this.blockList,
+      sourceIndex,
+      destinationIndex,
+    );
   }
 }
 
