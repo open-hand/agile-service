@@ -14,25 +14,30 @@ interface Props {
   innerRef: React.MutableRefObject<ChartRefProps>
   data?: IReportChartBlock
 }
-export const transformEpicBurndownSearch = (searchVO: EpicBurndownSearchVO) => {
+export const transformEpicBurndownSearch = (searchVO: EpicBurndownSearchVO): {
+  epicId: string,
+  checked: 'checked' | undefined,
+} | undefined => {
   if (!searchVO) {
     return undefined;
   }
   return ({
     epicId: searchVO.epicId,
+    checked: searchVO.calibrationSprint ? 'checked' : undefined,
   });
 };
 
 const EpicBurnDownComponent:React.FC<Props> = ({ innerRef, data }) => {
   const config = useMemo(() => transformEpicBurndownSearch(data?.chartSearchVO as EpicBurndownSearchVO), [data?.chartSearchVO]);
   const [searchProps, props] = useEpicBurnDownReport(config);
-  const { epics, currentEpicId } = searchProps;
+  const { epics, currentEpicId, checked } = searchProps;
   const handleSubmit = useCallback(async (): Promise<EpicBurndownSearchVO> => ({
     type: 'epic',
     epicId: currentEpicId,
+    calibrationSprint: checked === 'checked',
     projectId: getProjectId(),
   }),
-  [currentEpicId]);
+  [checked, currentEpicId]);
 
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,

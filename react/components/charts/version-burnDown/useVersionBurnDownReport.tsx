@@ -9,12 +9,13 @@ import { getChartDataFromServerData } from './utils';
 
 interface VersionBurnConfig {
   versionId: string
+  checked: 'checked' | undefined
 }
 
 function useVersionBurnDownReport(config?: VersionBurnConfig): [VersionBurnDownSearchProps, VersionBurnDownChartProps] {
   const [versions, setVersions] = useState<IVersion[]>([]);
   const [versionIsLoading, setVersionIsLoading] = useState<boolean>(false);
-  const [checked, setChecked] = useState<'checked' | undefined>();
+  const [checked, setChecked] = useControlledDefaultValue<'checked' | undefined>(config?.checked);
   const [currentVersionId, setCurrentVersionId] = useControlledDefaultValue<string>(config?.versionId || '');
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<OriginData[]>([]);

@@ -14,25 +14,30 @@ interface Props {
   innerRef: React.MutableRefObject<ChartRefProps>
   data?: IReportChartBlock
 }
-export const transformVersionBurndownSearch = (searchVO: VersionBurndownSearchVO) => {
+export const transformVersionBurndownSearch = (searchVO: VersionBurndownSearchVO): {
+  versionId: string,
+  checked: 'checked' | undefined,
+} | undefined => {
   if (!searchVO) {
     return undefined;
   }
   return ({
     versionId: searchVO.versionId,
+    checked: searchVO.calibrationSprint ? 'checked' : undefined,
   });
 };
 
 const EpicBurnDownComponent:React.FC<Props> = ({ innerRef, data }) => {
   const config = useMemo(() => transformVersionBurndownSearch(data?.chartSearchVO as VersionBurndownSearchVO), [data?.chartSearchVO]);
   const [searchProps, props] = useVersionBurnDownReport(config);
-  const { versions, currentVersionId } = searchProps;
+  const { versions, currentVersionId, checked } = searchProps;
   const handleSubmit = useCallback(async (): Promise<VersionBurndownSearchVO> => ({
     type: 'version',
+    calibrationSprint: checked === 'checked',
     versionId: currentVersionId,
     projectId: getProjectId(),
   }),
-  [currentVersionId]);
+  [checked, currentVersionId]);
 
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,
