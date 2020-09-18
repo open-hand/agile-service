@@ -17,6 +17,7 @@ import versionBurnDownComponent from './components/version-burnDown';
 import { IReportChartBlock, ChartSearchVO } from '../../store';
 import IterationSpeedComponent from './components/iteration-speed';
 import VersionReportComponent from './components/version-report';
+import EpicReportComponent from './components/epic-report';
 
 const { Option } = Select;
 export const defaultCharts = new Map([
@@ -28,6 +29,7 @@ export const defaultCharts = new Map([
   ['version_burn_down_report', { component: versionBurnDownComponent, name: '版本燃耗图' }],
   ['velocity_chart', { component: IterationSpeedComponent, name: '迭代速度图' }],
   ['versionReport', { component: VersionReportComponent, name: '版本报告图' }],
+  ['epicReport', { component: EpicReportComponent, name: '史诗报告图' }],
 ]);
 type GetOptionalCharts = () => Map<string, { component: React.FC<any>, name: string }>
 
