@@ -125,7 +125,7 @@ const ExportIssue: React.FC<{}> = () => {
       </FormPart>
       <WsProgress
         messageKey="agile-export-issue"
-        onFinish={(handleFinish)}
+        onFinish={handleFinish}
         downloadInfo={downloadInfo.id ? {
           url: downloadInfo.fileUrl!,
           lastUpdateDate: downloadInfo.lastUpdateDate!,

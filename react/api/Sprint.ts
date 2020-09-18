@@ -88,6 +88,25 @@ class SprintApi {
   }
 
   /**
+   * 加载全部子项目下的冲刺
+   * @param param
+   * @param page
+   * @param selectedIds
+   */
+  loadSubProjectSprints(param: string, page: number, selectedIds?: number[]) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/sprint/sub_project/page_sprints`,
+      params: {
+        page,
+        size: 10,
+        param,
+      },
+      data: selectedIds,
+    });
+  }
+
+  /**
    * 根据冲刺id加载冲刺
    * @param sprintId
    */

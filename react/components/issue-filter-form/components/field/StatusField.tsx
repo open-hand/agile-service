@@ -8,15 +8,18 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IIssueType } from '@/common/types';
 
 interface Props extends Partial<SelectProps> {
-    issueTypeId?: string
-    expectStatusId?: string
+  issueTypeId?: string
+  expectStatusId?: string
+  isProgram?: boolean,
 }
-const SelectStatus: React.FC<Props> = (otherProps) => {
+const SelectStatus: React.FC<Props> = ({
+  issueTypeId, expectStatusId, isProgram, ...otherProps
+}) => {
   const config = useMemo((): SelectConfig<IIssueType> => ({
     name: 'statusId',
     textField: 'name',
     valueField: 'id',
-    request: ({ filter, page }) => statusApi.loadByProject('agile'),
+    request: ({ filter, page }) => statusApi.loadByProject(isProgram ? 'program' : 'agile'),
     paging: false,
   }), []);
   const props = useSelect(config);
