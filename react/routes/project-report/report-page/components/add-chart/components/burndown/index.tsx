@@ -9,7 +9,7 @@ import { ChartRefProps } from '../..';
 
 const { AppState } = stores;
 
-export const transform = (searchVO: BurnDownSearchVO | undefined): BurnDownConfig | undefined => {
+export const transformBurnDownSearch = (searchVO: BurnDownSearchVO | undefined): BurnDownConfig | undefined => {
   if (!searchVO) {
     return undefined;
   }
@@ -30,7 +30,7 @@ interface Props {
   data?: IReportChartBlock
 }
 const BurnDownComponent: React.FC<Props> = ({ innerRef, data }) => {
-  const config = useMemo(() => transform(data?.chartSearchVO as BurnDownSearchVO), [data?.chartSearchVO]);
+  const config = useMemo(() => transformBurnDownSearch(data?.chartSearchVO as BurnDownSearchVO), [data?.chartSearchVO]);
   const [searchProps, props] = useBurnDownReport(config);
   const handleSubmit = useCallback(async (): Promise<BurnDownSearchVO> => ({
     type: searchProps.type,

@@ -1,6 +1,6 @@
 import useBurnDownReport, { BurnDownConfig } from '../burn-down/useBurnDownReport';
 
-export type SprintConfig = Omit<BurnDownConfig, 'type'>
+export type SprintConfig = Pick<BurnDownConfig, 'sprintId' | 'restDayShow'>
 
 function useSprintReport(config?: SprintConfig) {
   return useBurnDownReport({

@@ -14,7 +14,7 @@ import PieComponent from './components/pie';
 import { RefProps } from '../add-modal';
 import EpicBurnDownComponent from './components/epic-burnDown';
 import versionBurnDownComponent from './components/version-burnDown';
-import { IReportChartBlock } from '../../store';
+import { IReportChartBlock, ChartSearchVO } from '../../store';
 import IterationSpeedComponent from './components/iteration-speed';
 import VersionReportComponent from './components/version-report';
 
@@ -42,7 +42,7 @@ interface Props {
   data?: IReportChartBlock
 }
 export interface ChartRefProps {
-  submit: () => Promise<BurnDownConfig | SprintConfig>
+  submit: () => Promise<ChartSearchVO>
 }
 const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
   const chartRef = useRef<ChartRefProps>({} as ChartRefProps);
