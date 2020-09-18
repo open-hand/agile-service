@@ -1,9 +1,17 @@
 import React, { memo } from 'react';
 import { Icon } from 'choerodon-ui';
 import './TypeTag.less';
+import { IIssueType, IFeatureType } from '@/common/types';
 
-const TypeTag = ({
-  data, showName, style, featureType, iconSize,
+interface Props {
+  data: IIssueType
+  showName?: boolean
+  style?: React.CSSProperties
+  featureType?: IFeatureType
+  iconSize?: number
+}
+const TypeTag: React.FC<Props> = ({
+  data, showName, style, featureType, iconSize = 26,
 }) => {
   let {
     colour, name = '', icon,
