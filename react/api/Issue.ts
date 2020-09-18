@@ -230,14 +230,14 @@ class IssueApi {
   export(searchVO: IExportSearch, sort?: string) {
     const organizationId = getOrganizationId();
     return axios({
-      url: `${this.prefix}/issues/export`,
+      url: `${this.prefix}/excel/export`,
       method: 'post',
       data: searchVO,
       params: {
         organizationId,
         sort,
       },
-      responseType: 'arraybuffer',
+      // responseType: 'arraybuffer',
     });
   }
 

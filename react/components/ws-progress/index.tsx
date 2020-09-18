@@ -13,16 +13,18 @@ import './index.less';
 
 interface Props {
   handleMessage?: (messageData: any) => void,
-  downloadInfo?: { url: string, timeLine: string, children: React.ReactElement }
+  downloadInfo?: { url: string, timeLine: string, children?: React.ReactElement }
   renderEndProgress?: (messageData: any) => React.ReactElement | React.ReactElement[] | null | string,
+  visible?: boolean, // 可控类型 控制进度条是否显示
   messageKey: string,
+  onFinish?: (messageData: any) => void,
 }
 interface StateProps {
-  visible: false,
+  visible: boolean,
   data: { rate: number, [propsName: string]: any },
 }
 
-type ActionProps = Partial<StateProps> & { type: 'init' | 'transmission' }
+type ActionProps = Partial<StateProps> & { type: 'init' | 'transmission' | 'visible' | 'finish' }
 function WsProgress(props: Props) { // <StateProps, ActionProps>
   const [stateProgress, dispatch] = useReducer((state: StateProps, action: ActionProps) => {
     switch (action.type) {
@@ -32,6 +34,27 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
           data: action.data,
           visible: true,
         };
+      case 'visible':
+        return {
+          ...state,
+          visible: action.visible,
+        };
+      case 'transmission':
+        return {
+          ...state,
+          data: action.data,
+        };
+      case 'finish': {
+        if (props.onFinish && typeof (props.onFinish) === 'function') {
+          props.onFinish(action.data);
+        }
+        return {
+          ...state,
+          visible: false,
+          data: action.data,
+        };
+      }
+
       default:
         return state;
     }
@@ -41,11 +64,12 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
   });
   const { messageKey } = props;
   function handleMessage(data: any) {
+    const newData = JSON.parse(data);
     if (!stateProgress.visible && stateProgress.data?.rate === 0) {
-      dispatch({ type: 'init', data });
+      dispatch({ type: 'init', data: newData });
     }
-    dispatch({ type: 'transmission', data });
-    props.handleMessage && props.handleMessage(data);
+    dispatch({ type: 'transmission', data: newData });
+    props.handleMessage && props.handleMessage(newData);
   }
   const renderFinish: any = useCallback(() => {
     const { downloadInfo, renderEndProgress } = props;
@@ -57,10 +81,10 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
     return downloadInfo ? (
       <div className="c7n-agile-ws-finish">
         {downloadInfo.children ?? (
-        <>
-          <span>{downloadInfo.timeLine}</span>
-          <a href={downloadInfo.url}>点击下载</a>
-        </>
+          <>
+            <span>{downloadInfo.timeLine}</span>
+            <a href={downloadInfo.url}>点击下载</a>
+          </>
         )}
         <span>{downloadInfo.timeLine}</span>
 
@@ -68,7 +92,11 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
       </div>
     ) : <></>;
   }, [props.downloadInfo, stateProgress.data]);
-
+  useEffect(() => {
+    if (typeof (props.visible) !== 'undefined') {
+      dispatch({ type: 'visible', visible: props.visible });
+    }
+  }, [props.visible]);
   return stateProgress.visible ? (
     <WSHandler
       messageKey={messageKey}

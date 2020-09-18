@@ -80,6 +80,7 @@ const ExportIssue: React.FC<{}> = () => {
       .then((blobData: any) => {
         // const blob = new Blob([blobData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         // const fileName = 'AppState.currentMenuType.name.xlsx';
+        console.log('blobData', blobData);
         // FileSaver.saveAs(blob, fileName);
         Choerodon.prompt('导出成功');
         // IssueStore.setExportModalVisible(false);
@@ -108,7 +109,7 @@ const ExportIssue: React.FC<{}> = () => {
         <TableColumnCheckBoxes options={checkOptions} dataSet={tableColumnCheckBoxesDataSet} name="exportFieldCodes" />
         <Button icon="unarchive" style={{ color: '#3f51b5' }} onClick={exportExcel}>导出问题</Button>
       </FormPart>
-      <WsProgress messageKey="agile" />
+      <WsProgress messageKey="agile-export-issue" />
     </div>
   );
 };
