@@ -85,7 +85,7 @@ class ChoseFieldStore {
     //   this.chosenFields.set(key, data);
     const [systemFiled, customFiled] = this.getFields;
     [...systemFiled, ...customFiled].forEach((field) => {
-      if (!this.chosenFields.has(field.code)) {
+      if (!this.chosenFields.has(field.code) && !this.specialFields.has(field.code)) {
         this.chosenFields.set(field.code, { ...field, value: undefined });
       }
     });

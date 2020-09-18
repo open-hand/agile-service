@@ -38,7 +38,7 @@ const SelectSprint: React.FC<Props> = forwardRef(({
       return sprints;
     },
     paging: !!isProgram,
-  }), [isProgram, selectSprints, statusList]);
+  }), [isProgram, selectSprints]);
   const props = useSelect(config);
   return (
     <Select
