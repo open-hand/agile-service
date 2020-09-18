@@ -61,7 +61,7 @@ public class ProjectReportController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/{id}")
     public ResponseEntity<Void> update(@PathVariable("project_id") Long projectId,
-                                       @PathVariable("id") Long id,
+                                       @PathVariable("id") @Encrypt Long id,
                                        @RequestBody ProjectReportVO projectReportVO) {
         projectReportVO.setProjectId(projectId);
         projectReportVO.setId(id);
@@ -73,7 +73,7 @@ public class ProjectReportController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("project_id") Long projectId,
-                                       @PathVariable("id") Long id) {
+                                       @PathVariable("id") @Encrypt Long id) {
         projectReportService.delete(projectId, id);
         return Results.success();
     }
@@ -82,7 +82,7 @@ public class ProjectReportController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/export/{id}")
     public ResponseEntity<Void> export(@PathVariable("project_id") Long projectId,
-                                       @PathVariable("id") Long id,
+                                       @PathVariable("id") @Encrypt Long id,
                                        @RequestParam("file") MultipartFile multipartFile,
                                        HttpServletResponse response) {
         projectReportService.export(projectId, id, multipartFile, response);
@@ -93,7 +93,7 @@ public class ProjectReportController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/send/{id}")
     public ResponseEntity<Void> send(@PathVariable("project_id") Long projectId,
-                                     @PathVariable("id") Long id,
+                                     @PathVariable("id") @Encrypt Long id,
                                      @RequestParam("file") MultipartFile multipartFile) {
         projectReportService.send(projectId, id, multipartFile);
         return Results.success();

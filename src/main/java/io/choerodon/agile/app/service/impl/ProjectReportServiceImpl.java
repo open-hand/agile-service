@@ -63,6 +63,9 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     public Page<ProjectReportDTO> page(ProjectReportVO projectReport, PageRequest pageRequest) {
         return PageHelper.doPageAndSort(pageRequest, () -> {
             List<ProjectReportVO> page = projectReportMapper.list(projectReport);
+            if (CollectionUtils.isEmpty(page)){
+                return page;
+            }
             List<Long> reportIdList = page.stream().map(ProjectReportVO::getId).collect(Collectors.toList());
             List<ProjectReportReceiverDTO> receiverDTOList = projectReportReceiverMapper.selectReceiver(reportIdList, 
                     ProjectReportReceiverDTO.TYPE_RECEIVER);

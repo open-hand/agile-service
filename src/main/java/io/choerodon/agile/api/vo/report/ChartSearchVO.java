@@ -3,9 +3,13 @@ package io.choerodon.agile.api.vo.report;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 /**
  * @author jiaxu.cui@hand-china.com 2020/9/17 上午10:46
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ChartSearchVO {
 
     /**
@@ -22,6 +26,7 @@ public class ChartSearchVO {
      * 迭代统计图： 冲刺id(必选)
      * 缺陷累计趋势图： 冲刺id(必选)
      */
+    @Encrypt
     private Long sprintId;
     /**
      * 燃尽图： 类型(必选)
@@ -41,14 +46,17 @@ public class ChartSearchVO {
      * 燃尽图： 快速筛选(可选)
      * 累积流量图： 快速筛选(可选)
      */
+    @Encrypt
     private List<Long> quickFilterIds;
     /**
      * 燃尽图： 个人筛选(可选)
      */
+    @Encrypt
     private List<Long> personalFilterIds;
     /**
      * 燃尽图： 经办人Id(可选)
      */
+    @Encrypt
     private Long assigneeId;
     /**
      * 燃尽图： displayNonWorkingDay(可选)
@@ -58,10 +66,12 @@ public class ChartSearchVO {
     /**
      * 累积流量图：面板id(必选)
      */
+    @Encrypt
     private Long boardId;
     /**
      * 累积流量图：列id(必选)
      */
+    @Encrypt
     private List<Long> columnIds;
     /**
      * 累积流量图：起始时间(必选)
@@ -76,12 +86,14 @@ public class ChartSearchVO {
      * 版本报告图: 版本id(必选)
      * 统计图： 版本id(可选)
      */
+    @Encrypt
     private Long versionId;
 
     /**
      * 史诗报告图: 史诗id(必选)
      * 史诗燃耗图： 史诗id(必选)
      */
+    @Encrypt
     private Long epicId;
 
     /**
