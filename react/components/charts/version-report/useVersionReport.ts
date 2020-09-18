@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { reportApi, versionApi } from '@/api';
-import VersionReport, { VersionReportProps, IVersionReportChart, IVersionReportTable } from './index';
-import VersionReportSearch, { VersionReportSearchProps, IVersion } from './search';
+import { VersionReportProps, IVersionReportChart, IVersionReportTable } from './index';
+import { VersionReportSearchProps, IVersion } from './search';
 import { IUnit } from '../iteration-speed/search';
 
 const useVersionReport = (): [VersionReportProps, VersionReportSearchProps] => {
