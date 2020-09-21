@@ -28,7 +28,6 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hzero.boot.file.FileClient;
 import org.hzero.boot.message.MessageClient;
-import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +85,7 @@ public class ExcelServiceImpl implements ExcelService {
     private static final String EXCELCONTENTTYPE = "application/vnd.ms-excel";
     private static final String FILESUFFIX = ".xlsx";
     protected static final String DOWNLOAD_FILE = "download_file";
-    protected static final String DOWNLOAD_FILE_PI = "download_file_PI";
+    protected static final String DOWNLOAD_FILE_PI = "download_file_pi";
     private static final String EXPORT_ERROR_WORKBOOK_CLOSE = "error.issue.close.workbook";
     private static final String PROJECT_ERROR = "error.project.notFound";
     private static final String FIX_RELATION_TYPE = "fix";
