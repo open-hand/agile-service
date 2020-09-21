@@ -9,19 +9,20 @@ import { IIssueType, ISprint } from '@/common/types';
 
 interface Props extends Partial<SelectProps> {
   filterList?: string[]
+  isProgram?: boolean
   afterLoad?: (sprints: IIssueType[]) => void
 }
 
 const SelectIssueType: React.FC<Props> = forwardRef(({
-  filterList = ['feature'],
+  filterList = ['feature'], isProgram,
   afterLoad, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IIssueType> => ({
     name: 'issueType',
     textField: 'name',
     valueField: 'id',
-    request: () => issueTypeApi.loadAllWithStateMachineId(filterList.length === 0 ? 'program' : undefined).then((issueTypes) => {
-      if (filterList.length === 0) {
+    request: () => issueTypeApi.loadAllWithStateMachineId(isProgram ? 'program' : undefined).then((issueTypes) => {
+      if (isProgram) {
         const featureTypes = [{
           id: 'business',
           name: '特性',
@@ -41,6 +42,9 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
         }];
         const epicType: IIssueType = find<IIssueType>(issueTypes, { typeCode: 'issue_epic' }) as IIssueType;
         return [...featureTypes, epicType];
+      }
+      if (Array.isArray(filterList) && filterList.length > 0) {
+        return issueTypes.filter((issueType) => !filterList.some((filter) => filter === issueType.typeCode));
       }
       return issueTypes;
     }),

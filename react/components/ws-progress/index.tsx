@@ -146,7 +146,7 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
             strokeWidth={16}
             showInfo={false}
           />
-          <span className="c7n-agile-ws-progress-area-text">正在导入中</span>
+          <span className="c7n-agile-ws-progress-area-text">正在导出中</span>
           <span className="c7n-agile-ws-progress-area-prompt">（本次导入耗时较长，您可先返回进行其他操作）</span>
         </div>
       ) : renderFinish()}
