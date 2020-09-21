@@ -71,6 +71,7 @@ public class ChartUnitVO extends ReportUnitVO {
      */
     public void validateAndconvert(){
         super.validateAndconvert();
+        ChartSearchVO chartSearchVO = getChartSearchVO();
         Assert.notNull(chartSearchVO, BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(chartSearchVO.getProjectId(), BaseConstants.ErrorCode.DATA_INVALID);
 
