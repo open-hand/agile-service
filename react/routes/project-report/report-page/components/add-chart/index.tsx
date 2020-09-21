@@ -4,7 +4,10 @@ import React, {
 import {
   Form, Select, DataSet, TextField,
 } from 'choerodon-ui/pro';
+import { stores } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
+import SelectTeam from '@/components/select/select-team';
+import { FieldIgnore } from 'choerodon-ui/pro/lib/data-set/enum';
 import BurnDownComponent from './components/burndown';
 import SprintComponent from './components/sprint';
 import AccumulationComponent from './components/accumulation';
@@ -17,6 +20,7 @@ import IterationSpeedComponent from './components/iteration-speed';
 import VersionReportComponent from './components/version-report';
 import EpicReportComponent from './components/epic-report';
 
+const { AppState } = stores;
 const { Option } = Select;
 export const defaultCharts = new Map([
   ['burn_down_report', { component: BurnDownComponent, name: '燃尽图' }],
@@ -46,9 +50,11 @@ export interface ChartRefProps {
 }
 const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
   const chartRef = useRef<ChartRefProps>({} as ChartRefProps);
+  const type = AppState.currentMenuType.category === 'PROGRAM' ? 'program' : 'agile';
+  const isProgram = type === 'program';
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
-    data: editData ? [{ title: editData.title, chart: editData.chartCode }] : undefined,
+    data: editData ? [{ title: editData.title, chart: editData.chartCode, subProjectId: editData.chartSearchVO.projectId }] : undefined,
     fields: [{
       name: 'title',
       label: '图表标题',
@@ -58,8 +64,19 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
       name: 'chart',
       label: '选择图表',
       required: true,
-    }],
-  }), [editData]);
+    },
+    {
+      name: 'subProjectId',
+      label: '子项目',
+      textField: 'projName',
+      valueField: 'projectId',
+      required: true,
+      dynamicProps: ({ dataSet: ds }) => ({
+        ignore: !isProgram || (isProgram && ![...defaultCharts.keys()].includes(ds.current?.get('chart'))) ? 'always' as FieldIgnore : undefined,
+      }),
+    },
+    ],
+  }), [editData, isProgram]);
   const handleSubmit = useCallback(async () => {
     if (await dataSet.validate()) {
       const data = dataSet.current?.toData();
@@ -79,7 +96,10 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
     submit: handleSubmit,
   }), [handleSubmit]);
   const optionalCharts = getOptionalCharts();
-  const ChartComponent = optionalCharts.get(dataSet.current?.get('chart'))?.component;
+  const chart = dataSet.current?.get('chart');
+  const subProjectId = dataSet.current?.get('subProjectId');
+  const ChartComponent = optionalCharts.get(chart)?.component;
+  const isSubProjectChart = isProgram && [...defaultCharts.keys()].includes(chart);
   return (
     <>
       <Form dataSet={dataSet} style={{ width: 512 }}>
@@ -87,8 +107,16 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
         <Select name="chart">
           {[...optionalCharts.entries()].map(([key, { name }]) => <Option key={key} value={key}>{name}</Option>)}
         </Select>
+        {isSubProjectChart && chart && <SelectTeam label="子项目" name="subProjectId" />}
       </Form>
-      {ChartComponent && <ChartComponent innerRef={chartRef} data={editData} />}
+      {(ChartComponent && (isSubProjectChart ? subProjectId : true)) ? (
+        <ChartComponent
+          key={subProjectId}
+          innerRef={chartRef}
+          data={editData}
+          projectId={isProgram ? subProjectId : undefined}
+        />
+      ) : null}
     </>
   );
 };

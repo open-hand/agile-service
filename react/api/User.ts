@@ -3,7 +3,7 @@ import { getProjectId } from '@/utils/common';
 import './Cache';
 import Api from './Api';
 
-class UserApi extends Api {
+class UserApi extends Api<UserApi> {
   get prefix() {
     return `/iam/choerodon/v1/projects/${getProjectId()}`;
   }

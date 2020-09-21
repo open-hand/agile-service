@@ -3,7 +3,7 @@ import { getProjectId, getOrganizationId } from '@/utils/common';
 import { IIssueType } from '@/common/types';
 import Api from './Api';
 
-class IssueTypeApi extends Api {
+class IssueTypeApi extends Api<IssueTypeApi> {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }

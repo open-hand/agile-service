@@ -8,6 +8,7 @@ import { IBurnDownData } from '@/components/charts/burn-down/utils';
 import { reportApi, sprintApi } from '@/api';
 import { IQuickSearchValue } from '@/components/quick-search';
 import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
+import { getProjectId } from '@/utils/common';
 
 const { AppState } = stores;
 
@@ -16,9 +17,11 @@ export interface BurnDownConfig {
   restDayShow?: boolean
   sprintId?: string
   quickFilter?: IQuickSearchValue
+  projectId?: string
 }
 
 function useBurnDownReport(config?: BurnDownConfig): [BurnDownSearchProps, BurnDownProps] {
+  const projectId = config?.projectId || getProjectId();
   const [quickFilter, setQuickFilter] = useControlledDefaultValue<IQuickSearchValue>(
     config?.quickFilter || {
       onlyStory: false,
@@ -41,30 +44,25 @@ function useBurnDownReport(config?: BurnDownConfig): [BurnDownSearchProps, BurnD
   const loadData = useCallback(async () => {
     if (sprintId) {
       setLoading(true);
-      const [burnDownData, resetDaysData] = await Promise.all([reportApi.loadBurnDownCoordinate(sprintId, type, {
+      const [burnDownData, resetDaysData] = await Promise.all([reportApi.project(projectId).loadBurnDownCoordinate(sprintId, type, {
         assigneeId: quickFilter.onlyMe ? AppState.getUserId : undefined,
         onlyStory: quickFilter.onlyStory,
         quickFilterIds: quickFilter.quickFilters,
         personalFilterIds: quickFilter.personalFilters,
-      }), sprintApi.getRestDays(sprintId)]);
+      }), sprintApi.project(projectId).getRestDays(sprintId)]);
       batchedUpdates(() => {
         setData(burnDownData);
         setRestDays(resetDaysData.map((date) => moment(date).format('YYYY-MM-DD')));
         setLoading(false);
       });
     }
-  }, [
-    quickFilter.onlyMe,
-    quickFilter.onlyStory,
-    quickFilter.personalFilters,
-    quickFilter.quickFilters,
-    sprintId,
-    type]);
+  }, [projectId, quickFilter.onlyMe, quickFilter.onlyStory, quickFilter.personalFilters, quickFilter.quickFilters, sprintId, type]);
   useEffect(() => {
     loadData();
   }, [loadData]);
 
   const searchProps: BurnDownSearchProps = {
+    projectId,
     sprintId,
     setSprintId,
     setEndDate,

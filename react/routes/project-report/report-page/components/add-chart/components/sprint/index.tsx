@@ -15,7 +15,7 @@ export const transformSprintSearch = (searchVO: SprintSearchVO | undefined): Spr
     sprintId: searchVO.sprintId,
   };
 };
-interface Props {
+export interface Props {
   innerRef: React.MutableRefObject<ChartRefProps>
   data?: IReportChartBlock
 }
