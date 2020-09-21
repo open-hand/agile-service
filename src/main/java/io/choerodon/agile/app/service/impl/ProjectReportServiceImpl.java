@@ -75,6 +75,10 @@ public class ProjectReportServiceImpl implements ProjectReportService {
             List<Long> reportIdList = page.stream().map(ProjectReportVO::getId).collect(Collectors.toList());
             List<ProjectReportReceiverDTO> receiverDTOList = projectReportReceiverMapper.selectReceiver(reportIdList, 
                     ProjectReportReceiverDTO.TYPE_RECEIVER);
+            List<UserDTO> createList = baseFeignClient.listUsersByIds(page.stream().map(ProjectReportVO::getCreatedBy)
+                    .toArray(Long[]::new), false).getBody();
+            Map<Long, UserDTO> createMap = createList.stream().collect(Collectors.toMap(UserDTO::getId,
+                    Function.identity()));
             List<UserDTO> userList = baseFeignClient.listUsersByIds(receiverDTOList.stream()
                     .map(ProjectReportReceiverDTO::getReceiverId).toArray(Long[]::new), false).getBody();
             Map<Long, UserDTO> userDTOMap = userList.stream().collect(Collectors.toMap(UserDTO::getId,
@@ -86,6 +90,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
                         .getOrDefault(reportVO.getId(), Collections.emptyList())
                         .stream().map(receiver -> userDTOMap.get(receiver.getReceiverId()))
                         .collect(Collectors.toList()));
+                reportVO.setCreatedUser(createMap.get(reportVO.getCreatedBy()));
             }
             return page;
         });

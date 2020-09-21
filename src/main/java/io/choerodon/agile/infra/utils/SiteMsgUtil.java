@@ -168,7 +168,7 @@ public class SiteMsgUtil {
         List<Long> toList = group.get(ProjectReportReceiverDTO.TYPE_RECEIVER).stream()
                 .map(ProjectReportReceiverDTO::getReceiverId).collect(Collectors.toList());
         Assert.notNull(toList, BaseConstants.ErrorCode.DATA_NOT_EXISTS);
-        List<Long> ccList = group.get(ProjectReportReceiverDTO.TYPE_CC).stream()
+        List<Long> ccList = group.getOrDefault(ProjectReportReceiverDTO.TYPE_CC, Collections.emptyList()).stream()
                 .map(ProjectReportReceiverDTO::getReceiverId).collect(Collectors.toList());
         List<Receiver> toReceiver = new ArrayList<>();
         List<Receiver> ccReceiver = new ArrayList<>();
@@ -177,7 +177,7 @@ public class SiteMsgUtil {
         handleReceiver(ccReceiver, ccList);
         // 设置参数
         Map<String, String> argsMap = new HashMap<>();
-        argsMap.put("data", "<img style=\"width: 780px;\" src=\""+imgData+"\">" );
+        argsMap.put("data", "<img style='width: 780px;' src='data:image/png;base64,"+imgData+"'>" );
         // 设置sender
         MessageSender sender = new MessageSender();
         sender.setMessageCode("PROJECT_REPORT");
