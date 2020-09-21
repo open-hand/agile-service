@@ -1,7 +1,7 @@
 import {
   observable, action,
 } from 'mobx';
-import { IReportContentType, User } from '@/common/types';
+import { IReportContentType, User, IIssueColumnName } from '@/common/types';
 import { IBurndownChartType } from '@/components/charts/burn-down';
 import { IPieChartType } from '@/components/charts/pie-chart';
 import { IUnit } from '@/components/charts/version-report/search';
@@ -97,6 +97,7 @@ export interface SearchVO {
 }
 export interface IReportListBlock extends IBaseReportBlock {
   type: 'static_list' | 'dynamic_list'
+  colList: IIssueColumnName[]
   searchVO: SearchVO
 }
 export interface IReportTextBlock extends IBaseReportBlock {

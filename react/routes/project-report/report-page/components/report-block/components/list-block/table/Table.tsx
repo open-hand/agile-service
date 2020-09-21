@@ -2,7 +2,7 @@ import React, { useCallback, ReactNode } from 'react';
 import { Icon } from 'choerodon-ui';
 import styles from './Table.less';
 
-interface Column<T = {}> {
+export interface Column<T = {}> {
   title: string
   dataIndex: string
   render?: (record: T) => React.ReactNode
