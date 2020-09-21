@@ -17,6 +17,17 @@ export interface ISprint {
   endDate: string
 }
 
+export interface IPriority {
+  colour: string
+  default: boolean
+  description: string
+  enable: boolean
+  id: string
+  name: string
+  objectVersionNumber: number
+  organizationId: string
+  sequence: number
+}
 export interface IVersion {
   versionId: string,
   name: string,
@@ -160,7 +171,16 @@ export interface Issue {
   sameParentIssueVOList?: Issue[],
   sameParentBugVOList?: Issue[]
   assigneeRealName: string
+  reporterRealName: string
   statusVO: IStatus
+  priorityVO: IPriority
+  featureColor: string
+  featureName: string
+  epicColor: string
+  epicName: string
+  foundationFieldValue: {
+    [key: string]: any
+  }
 }
 
 export interface ILog {
@@ -196,4 +216,28 @@ export interface IBoard {
   swimlaneBasedCode: string
   userDefault: boolean
   userDefaultBoard: string
+}
+export type IIssueColumnName =
+  'summary' |
+  'issueNum' |
+  'priority' |
+  'sprint' |
+  'reporter' |
+  'creationDate' |
+  'assign' |
+  'status' |
+  'lastUpdateDate' |
+  'estimatedStartTime' |
+  'estimatedEndTime' |
+  'label' |
+  'component' |
+  'storyPoints' |
+  'version' |
+  'epic' |
+  'feature';
+
+export interface IFoundationHeader {
+  title: string
+  fieldType: string
+  code: string
 }

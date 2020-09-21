@@ -2,20 +2,23 @@ import React, {
   useEffect, useState, useMemo, useCallback, useRef,
 } from 'react';
 import { axios } from '@choerodon/boot';
+import { find } from 'lodash';
 import { IReportListBlock } from '@/routes/project-report/report-page/store';
-import StatusTag from '@/components/StatusTag';
-import { Issue } from '@/common/types';
+import { Issue, IFoundationHeader } from '@/common/types';
 import { getProjectId, getOrganizationId } from '@/utils/common';
-import TypeTag from '@/components/TypeTag';
+import { fieldApi } from '@/api';
+import UserHead from '@/components/UserHead';
 import Table from './table';
-import { flat2tree } from './utils';
+import { flat2tree, getColumnByName } from './utils';
 
 interface Props {
   data: IReportListBlock
 }
-const ListBlock: React.FC<Props> = ({ data: { searchVO } }) => {
+const ListBlock: React.FC<Props> = ({ data: { searchVO, colList } }) => {
   const [data, setData] = useState([]);
+  const [fields, setFields] = useState<IFoundationHeader[]>([]);
   const dataRef = useRef([]);
+
   const loadData = useCallback(async (page = 1) => {
     if (page === 1) {
       dataRef.current = [];
@@ -47,47 +50,49 @@ const ListBlock: React.FC<Props> = ({ data: { searchVO } }) => {
       setData(dataRef.current);
     }
   }, [searchVO]);
-
-  useEffect(() => {
+  const loadFields = useCallback(async () => {
+    const Fields = await fieldApi.getFoundationHeader();
+    setFields(Fields);
     loadData();
-  }, [loadData, searchVO]);
+  }, [loadData]);
+  useEffect(() => {
+    loadFields();
+  }, [loadFields]);
   const treeData = useMemo(() => flat2tree(data, { idKey: 'issueId' }), [data]);
+  const columns = colList.map((name) => {
+    const column = getColumnByName(name);
+    if (column) {
+      return column;
+    }
+    const field = find(fields, { code: name });
+    return {
+      title: field?.title || '',
+      dataIndex: name,
+      render: (issue: Issue) => {
+        const { fieldType, code } = (field || {}) as IFoundationHeader;
+        const value = issue.foundationFieldValue[code];
+        if (fieldType === 'member') {
+          return value && (
+            <div style={{ display: 'inline-flex' }}>
+              <UserHead
+                // @ts-ignore
+                user={value}
+              />
+            </div>
+          );
+        }
+        return (
+          <span>{value || ''}</span>
+        );
+      },
+    };
+  });
   return (
     <div style={{ padding: '10px 26px' }}>
       <Table<Issue>
         data={treeData}
         primaryKey="issueId"
-        columns={[{
-          title: '概要',
-          dataIndex: 'summary',
-          render: (item) => (
-            <div style={{ display: 'inline-flex', alignItems: 'center' }}>
-              <TypeTag data={item.issueTypeVO} />
-              <span style={{ marginLeft: 5 }}>{item.summary}</span>
-            </div>
-          ),
-        }, {
-          title: '编号',
-          dataIndex: 'issueNum',
-        }, {
-          title: '经办人',
-          dataIndex: 'assign',
-          render: (item) => item.assigneeRealName,
-        }, {
-          title: '状态',
-          dataIndex: 'status',
-          render: (item) => (
-            <StatusTag
-              data={item.statusVO}
-              style={{
-                display: 'inline-block',
-              }}
-            />
-          ),
-        }, {
-          title: '最后更新时间',
-          dataIndex: 'lastUpdateDate',
-        }]}
+        columns={columns}
       />
     </div>
   );
