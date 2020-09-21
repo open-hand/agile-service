@@ -346,7 +346,7 @@ public class PageFieldServiceImpl implements PageFieldService {
     @Override
     public Map<Long, Map<String, Object>> queryFieldValueWithIssueIdsForAgileExport(Long organizationId, Long projectId, List<Long> instanceIds, Boolean isJustStr) {
         Map<Long, Map<String, Object>> result = new HashMap<>();
-        List<FieldValueDTO> values = fieldValueMapper.queryList(projectId, null, null, null);
+        List<FieldValueDTO> values = fieldValueMapper.queryListByInstanceIds(projectId, instanceIds, null, null);
         ObjectSchemeFieldSearchVO searchDTO = new ObjectSchemeFieldSearchVO();
         searchDTO.setSchemeCode(ObjectSchemeCode.AGILE_ISSUE);
         List<ObjectSchemeFieldDTO> fieldDTOS = objectSchemeFieldService.listQuery(organizationId, projectId, searchDTO);
