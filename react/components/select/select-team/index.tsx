@@ -9,7 +9,7 @@ interface Props extends Partial<SelectProps> {
   afterLoad?: (projects: any[]) => void
 }
 
-const SelectTeam: React.FC<Props> = forwardRef(({ projectDataRef, afterLoad, ...otherProps }, ref: React.Ref<Select>) => {
+const SelectTeam: React.FC<Props> = forwardRef(({ projectDataRef = { current: null }, afterLoad, ...otherProps }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
   afterLoadRef.current = afterLoad;
   const config = useMemo((): SelectConfig => ({
@@ -19,11 +19,9 @@ const SelectTeam: React.FC<Props> = forwardRef(({ projectDataRef, afterLoad, ...
     request: () => commonApi.getSubProjects(true),
     paging: false,
     middleWare: (projects) => {
-      if (projectDataRef) {
-        // @ts-ignore
-        // eslint-disable-next-line
+      // @ts-ignore
+      // eslint-disable-next-line
         projectDataRef.current = projects;
-      }
       if (afterLoadRef.current) {
         afterLoadRef.current(projects);
       }
