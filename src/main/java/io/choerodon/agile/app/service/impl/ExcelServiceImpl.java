@@ -186,6 +186,8 @@ public class ExcelServiceImpl implements ExcelService {
         FIELD_MAP.put("componentName", "模块");
         FIELD_MAP.put("creationDate", "创建时间");
         FIELD_MAP.put("lastUpdateDate", "最后更新时间");
+        FIELD_MAP.put("estimatedStartTime", "预计开始时间");
+        FIELD_MAP.put("estimatedEndTime", "预计结束时间");
         FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
         FIELDS_NAMES = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
     }
