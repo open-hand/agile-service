@@ -54,7 +54,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
         return <SelectStatus name={code} isProgram={code === 'statusList'} multiple {...selectOtherProps} />;
       case 'issueTypeId':
       case 'issueTypeList':
-        return <SelectIssueType name={code} filterList={code === 'issueTypeList' ? [] : undefined} multiple {...selectOtherProps} />;
+        return <SelectIssueType name={code} isProgram={code === 'issueTypeList'} filterList={code === 'issueTypeList' ? [] : undefined} multiple {...selectOtherProps} />;
       case 'epic':
       case 'epicList':
         // @ts-ignore
