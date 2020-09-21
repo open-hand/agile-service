@@ -1,14 +1,13 @@
 import React, {
-  Component, ReactElement, useEffect, useState,
+  ReactElement, useEffect, useState,
 } from 'react';
 import { stores, Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
-import moment from 'moment';
 import { omit, find, unionBy } from 'lodash';
 import { Divider } from 'choerodon-ui';
 import FileSaver from 'file-saver';
 import { issueApi } from '@/api';
-import { Button, CheckBox } from 'choerodon-ui/pro';
+import { Button } from 'choerodon-ui/pro';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import IssueFilterForm from '@/components/issue-filter-form';
 import ChooseField from '@/components/chose-field';
@@ -86,7 +85,6 @@ const ExportIssue: React.FC<{}> = () => {
       search.exportFieldCodes = getExportFieldCodes(tableColumnCheckBoxesDataSet.current!);
     }
     const field = find(checkOptions, (f) => f.order) as { value: string, label: string, order?: string, };
-    console.log('search:', search);
     // @ts-ignore
     return issueApi.export(search, field ? `${field.name},${field.order}` : undefined)
       .then((blobData: any) => {
@@ -108,7 +106,6 @@ const ExportIssue: React.FC<{}> = () => {
     return true;
   };
   const handleFinish = (messageData: any) => {
-    console.log('handleFinish::', messageData);
     setDownloadInfo(messageData);
   };
   return (
