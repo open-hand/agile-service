@@ -32,7 +32,7 @@ const SelectSprint: React.FC<Props> = forwardRef(({
         afterLoadRef.current(sprints);
       }
       if (isProgram) {
-        const newSprint = [{ sprintId: '0', sprintName: '未分配冲刺', endDate: '' }, ...sprints];
+        const newSprint = [{ sprintId: '0', sprintName: '未分配冲刺', endDate: '' } as ISprint, ...sprints];
         return newSprint;
       }
       return sprints;
