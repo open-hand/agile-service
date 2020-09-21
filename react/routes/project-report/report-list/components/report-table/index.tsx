@@ -1,50 +1,54 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   DataSet,
   Table,
+  Modal,
 } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
+import { projectReportApiConfig, projectReportApi } from '@/api';
+import UserHead from '@/components/UserHead';
+import TableAction from '@/components/TableAction';
+import { User } from '@/common/types';
+import to from '@/utils/to';
 
 const { Column } = Table;
 
 const ReportTable = () => {
   const dataSet = useMemo(() => new DataSet({
-    primaryKey: 'userid',
-    name: 'user',
-    autoQuery: false,
+    primaryKey: 'id',
+    autoQuery: true,
+    selection: false,
     pageSize: 10,
+    transport: {
+      read: () => projectReportApiConfig.load(),
+    },
     fields: [
       {
-        name: 'userid',
+        name: 'title',
         type: 'string' as FieldType,
-        label: '编号',
-        required: true,
-        unique: true,
+        label: '标题',
       },
       {
-        name: 'name',
-        type: 'intl' as FieldType,
-        label: '姓名',
-      },
-      {
-        name: 'age',
-        type: 'number' as FieldType,
-        label: '年龄',
-        unique: 'uniqueGroup',
-        max: 100,
-        step: 1,
-        help: '用户年龄，可以排序',
-      },
-      {
-        name: 'email',
-        type: 'string' as FieldType,
-        label: '邮箱',
-        help: '用户邮箱，可以自动补全',
+        name: 'receiverList',
+        type: 'array' as FieldType,
+        label: '收件人',
       },
     ],
   }), []);
-
+  const handleMenuClick = useCallback(async (key, record) => {
+    switch (key) {
+      case 'delete': {
+        Modal.confirm({
+          title: `确认删除报告“${record.get('title')}”`,
+          onOk: async () => {
+            await projectReportApi.delete(record.get('id'));
+            dataSet.query();
+          },
+        });
+      }
+    }
+  }, [dataSet]);
   return (
     <Table
       key="user"
@@ -52,23 +56,36 @@ const ReportTable = () => {
       autoMaxWidth
     >
       <Column
-        name="userid"
-        style={{ color: 'red' }}
+        name="title"
         tooltip={'overflow' as TableColumnTooltip}
-        editor
-        width={200}
-        minWidth={150}
-        lock
+        renderer={({ record }) => (
+          <TableAction
+            onEditClick={() => to(`/agile/project-report/edit/${record?.get('id')}`)}
+            onMenuClick={({ key }: { key: string }) => handleMenuClick(key, record)}
+            menus={[{
+              key: 'delete',
+              text: '删除',
+            }]}
+            text={record?.get('title')}
+          />
+        )}
       />
       <Column
-        name="age"
-        editor
-        width={150}
+        name="receiverList"
+        renderer={({ value: receiverList }) => {
+          if (!receiverList) {
+            return null;
+          }
+          return receiverList.map((user: User) => (
+            <UserHead
+              // @ts-ignore
+              style={{ display: 'inline-block' }}
+              hiddenText
+              user={user}
+            />
+          ));
+        }}
       />
-      <Column
-        name="email"
-      />
-
     </Table>
   );
 };

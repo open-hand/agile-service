@@ -20,7 +20,7 @@ import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
 import FilterManage from './components/FilterManage';
 import SaveFilterModal from './components/SaveFilterModal';
-import ExportIssue from './components/ExportIssue';
+import { openExportIssueModal } from './components/ExportIssue';
 import IssueDetail from './components/issue-detail';
 import ImportIssue from './components/ImportIssue';
 import CollapseAll from './components/CollapseAll';
@@ -31,6 +31,7 @@ const Issue = observer(() => {
   const {
     dataSet, projectId, issueSearchStore, fields,
   } = useContext(Store);
+  
   const history = useHistory();
   const location = useLocation();
   const [urlFilter, setUrlFilter] = useState(null);
@@ -44,8 +45,8 @@ const Issue = observer(() => {
    */
   const refresh = (isDelete = false) => dataSet.query(
     isDelete
-    && dataSet.length === 1
-    && dataSet.totalCount > 1
+      && dataSet.length === 1
+      && dataSet.totalCount > 1
       ? dataSet.currentPage - 1
       : dataSet.currentPage,
   );
@@ -55,24 +56,23 @@ const Issue = observer(() => {
       paramChoose, paramCurrentVersion, paramCurrentSprint, paramId,
       paramType, paramIssueId, paramName, paramOpenIssueId,
       // eslint-disable-next-line no-restricted-globals
-    } = queryString.parse(location.href);
+    } = queryString.parse(location.search);
     let prefix = '';
     if (paramChoose) {
       if (paramChoose === 'version' && paramCurrentVersion) {
-        IssueStore.handleFilterChange(paramChoose, [paramCurrentVersion]);
+        issueSearchStore.handleFilterChange(paramChoose, [paramCurrentVersion]);
         prefix = '版本';
       }
       if (paramChoose === 'sprint' && paramCurrentSprint) {
-        IssueStore.handleFilterChange(paramChoose, [paramCurrentSprint]);
+        issueSearchStore.handleFilterChange(paramChoose, [paramCurrentSprint]);
         prefix = '冲刺';
       }
     }
     const prefixs = {
       assigneeId: '经办人',
-      typeCode: '类型',
-      priority: '优先级',
+      issueTypeId: '类型',
+      priorityId: '优先级',
       statusId: '状态',
-      fixVersion: '版本',
       version: '版本',
       component: '模块',
       sprint: '冲刺',
@@ -81,7 +81,7 @@ const Issue = observer(() => {
     };
     if (paramType) {
       prefix = prefixs[paramType];
-      IssueStore.handleFilterChange(paramType, [paramId]);
+      issueSearchStore.handleFilterChange(paramType, [paramId]);
     }
     setUrlFilter(`${prefix ? `${prefix}:` : ''}${paramName || ''}`);
     // this.paramName = decodeURI(paramName);
@@ -97,8 +97,8 @@ const Issue = observer(() => {
           Choerodon.prompt(error.message, 'error');
         }
       }
-      IssueStore.handleFilterChange('issueIds', [id]);
-      IssueStore.handleFilterChange('contents', [`${IssueStore.getProjectInfo.projectCode}-${paramName.split('-')[paramName.split('-').length - 1]}`]);
+      issueSearchStore.handleFilterChange('issueIds', [id]);
+      issueSearchStore.handleFilterChange('contents', [`${IssueStore.getProjectInfo.projectCode}-${paramName.split('-')[paramName.split('-').length - 1]}`]);
       IssueStore.setClickedRow({
         selectedIssue: {
           issueId: id,
@@ -128,7 +128,6 @@ const Issue = observer(() => {
     IssueStore.createQuestion(false);
     dataSet.query();
   };
-
   const handleClickFilterManage = () => {
     const editFilterInfo = IssueStore.getEditFilterInfo;
     const filterListVisible = IssueStore.getFilterListVisible;
@@ -136,7 +135,7 @@ const Issue = observer(() => {
     IssueStore.setFilterListVisible(!filterListVisible);
     IssueStore.setEditFilterInfo(map(editFilterInfo, (item) => Object.assign(item, {
       isEditing:
-      false,
+        false,
     })));
   };
   const handleClear = useCallback(() => {
@@ -184,9 +183,7 @@ const Issue = observer(() => {
           className="leftBtn"
           icon="unarchive"
           funcType="flat"
-          onClick={() => {
-            IssueStore.setExportModalVisible(true);
-          }}
+          onClick={() => openExportIssueModal(issueSearchStore.getAllFields, issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()] : [], dataSet, { tableRef })}
         >
           导出问题
         </Button>
@@ -223,7 +220,7 @@ const Issue = observer(() => {
         />
         <SaveFilterModal issueSearchStore={issueSearchStore} />
         <FilterManage />
-        <ExportIssue issueSearchStore={issueSearchStore} dataSet={dataSet} tableRef={tableRef} onCreateIssue={handleCreateIssue} />
+        {/* <ExportIssue issueSearchStore={issueSearchStore} dataSet={dataSet} tableRef={tableRef} onCreateIssue={handleCreateIssue} /> */}
         {IssueStore.getCreateQuestion && (
           <CreateIssue
             visible={IssueStore.getCreateQuestion}

@@ -14,17 +14,37 @@ export interface User {
 export interface ISprint {
   sprintId: string
   sprintName: string
+  startDate: string
   endDate: string
+  actualEndDate: string
+  statusCode: string
 }
 
+export interface IPriority {
+  colour: string
+  default: boolean
+  description: string
+  enable: boolean
+  id: string
+  name: string
+  objectVersionNumber: number
+  organizationId: string
+  sequence: number
+}
 export interface IVersion {
   versionId: string,
   name: string,
 }
 
 export interface PI {
+  id: string
   code: string
   name: string
+  startDate: string
+  endDate: string
+  actualStartDate: string | null
+  actualEndDate: string | null
+  statusCode: 'todo' | 'doing' | 'done' | string,
 }
 
 export interface IStatus {
@@ -122,6 +142,7 @@ export interface IIssueType {
   stateMachineId: string,
   typeCode: string,
 }
+export type IFeatureType = 'business' | 'enabler'
 
 interface FieldOption {
   id: string,
@@ -144,7 +165,7 @@ export interface Issue {
   issueId: string
   summary: string
   typeCode?: string,
-  issueTypeVO?: IIssueType,
+  issueTypeVO: IIssueType,
   parentIssueId?: string
   parentIssueNum?: string
   parentIssueSummary?: string
@@ -153,7 +174,16 @@ export interface Issue {
   sameParentIssueVOList?: Issue[],
   sameParentBugVOList?: Issue[]
   assigneeRealName: string
+  reporterRealName: string
   statusVO: IStatus
+  priorityVO: IPriority
+  featureColor: string
+  featureName: string
+  epicColor: string
+  epicName: string
+  foundationFieldValue: {
+    [key: string]: any
+  }
 }
 
 export interface ILog {
@@ -177,7 +207,7 @@ export interface ILog {
   removeResolution?: boolean,
   resolutionChanged?: boolean,
 }
-export type IReportContentType = 'chart' | 'text' | 'list' | 'static_list'
+export type IReportContentType = 'chart' | 'text' | 'static_list' | 'dynamic_list'
 
 export interface IBoard {
   boardId: string
@@ -189,4 +219,28 @@ export interface IBoard {
   swimlaneBasedCode: string
   userDefault: boolean
   userDefaultBoard: string
+}
+export type IIssueColumnName =
+  'summary' |
+  'issueNum' |
+  'priority' |
+  'sprint' |
+  'reporter' |
+  'creationDate' |
+  'assign' |
+  'status' |
+  'lastUpdateDate' |
+  'estimatedStartTime' |
+  'estimatedEndTime' |
+  'label' |
+  'component' |
+  'storyPoints' |
+  'version' |
+  'epic' |
+  'feature';
+
+export interface IFoundationHeader {
+  title: string
+  fieldType: string
+  code: string
 }

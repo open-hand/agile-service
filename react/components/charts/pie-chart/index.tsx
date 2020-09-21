@@ -48,22 +48,6 @@ function compare(pro: string) {
   };
 }
 
-function getQueryString(type: IPieChartType, value: null | string) {
-  const QUERY = {
-    assignee: 'paramType=assigneeId&paramId=',
-    component: 'paramType=component&paramId=',
-    typeCode: 'paramType=typeCode&paramId=',
-    version: 'paramType=fixVersion&paramId=',
-    priority: 'paramType=priority&paramId=',
-    status: 'paramType=statusId&paramId=',
-    sprint: 'paramType=sprint&paramId=',
-    epic: 'paramType=epic&paramId=',
-    label: 'paramType=label&paramId=',
-  };
-  if (!QUERY[type]) return null;
-  return `${QUERY[type]}${value === null ? '0' : value}`;
-}
-
 const PieChart:React.FC<PieChartProps> = ({
   loading, data, colors, chooseDimension, chooseId, type, sprints, versions,
 }) => {
@@ -123,14 +107,13 @@ const PieChart:React.FC<PieChartProps> = ({
   const getCurrentChoose = () => {
     const CHOOSEQUERY = {
       sprint: { paramChoose: 'sprint', paramCurrentSprint: chooseId },
-      version: { paramChoose: 'version', paramCurrentSprint: chooseId },
+      version: { paramChoose: 'version', paramCurrentVersion: chooseId },
     };
     return chooseDimension ? CHOOSEQUERY[chooseDimension] : ({});
   };
 
   const handleLinkToIssue = (item: any) => {
     const { typeName, name } = item;
-    const queryString = getQueryString(type, typeName);
     const queryObj = getCurrentChoose();
     let paramName = name || '未分配';
     if (chooseDimension === 'sprint') {
@@ -143,11 +126,22 @@ const PieChart:React.FC<PieChartProps> = ({
 
     paramName += '下的问题';
 
-    if (!queryString) return;
+    let paramType: string = type;
+    if (type === 'typeCode') {
+      paramType = 'issueTypeId';
+    } else if (type === 'priority') {
+      paramType = 'priorityId';
+    } else if (type === 'status') {
+      paramType = 'statusId';
+    } else if (type === 'assignee') {
+      paramType = 'assigneeId';
+    }
     to(LINK_URL.workListIssue, {
       type: 'project',
       params: {
         paramName,
+        paramType,
+        paramId: typeName === null ? '0' : typeName,
         ...queryObj,
       },
     });
@@ -278,6 +272,10 @@ const PieChart:React.FC<PieChartProps> = ({
                   </td>
                   <td style={{ width: '150px' }}>
                     <span
+                      style={{
+                        color: '#3F51B5',
+                        cursor: 'pointer',
+                      }}
                       role="none"
                       onClick={handleLinkToIssue.bind(this, item)}
                     >

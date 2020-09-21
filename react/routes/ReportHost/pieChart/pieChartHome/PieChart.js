@@ -24,7 +24,6 @@ import NoDataComponent from '../../Component/noData';
 import pic from '../../../../assets/image/emptyChart.svg';
 
 const { Option } = Select;
-
 @observer
 class PieChart extends Component {
   constructor(props) {
@@ -173,29 +172,13 @@ class PieChart extends Component {
     };
   }
 
-  getQueryString(type, value) {
-    const QUERY = {
-      assignee: 'paramType=assigneeId&paramId=',
-      component: 'paramType=component&paramId=',
-      typeCode: 'paramType=typeCode&paramId=',
-      version: 'paramType=fixVersion&paramId=',
-      priority: 'paramType=priority&paramId=',
-      status: 'paramType=statusId&paramId=',
-      sprint: 'paramType=sprint&paramId=',
-      epic: 'paramType=epic&paramId=',
-      label: 'paramType=label&paramId=',
-    };
-    if (!QUERY[type]) return null;
-    return `${QUERY[type]}${value === null ? '0' : value}`;
-  }
-
   getCurrentChoose() {
     const {
       chooseDimension, chooseId,
     } = this.state;
     const CHOOSEQUERY = {
       sprint: { paramChoose: 'sprint', paramCurrentSprint: chooseId },
-      version: { paramChoose: 'version', paramCurrentSprint: chooseId },
+      version: { paramChoose: 'version', paramCurrentVersion: chooseId },
     };
     return chooseDimension ? CHOOSEQUERY[chooseDimension] : ({});
   }
@@ -205,7 +188,6 @@ class PieChart extends Component {
       type, chooseDimension, sprints, versions, chooseId,
     } = this.state;
     const { typeName, name } = item;
-    const queryString = this.getQueryString(type, typeName);
     const queryObj = this.getCurrentChoose();
     let paramName = name || '未分配';
     if (chooseDimension === 'sprint') {
@@ -217,11 +199,21 @@ class PieChart extends Component {
     }
 
     paramName += '下的问题';
-
-    if (!queryString) return;
+    let paramType = type;
+    if (type === 'typeCode') {
+      paramType = 'issueTypeId';
+    } else if (type === 'priority') {
+      paramType = 'priorityId';
+    } else if (type === 'status') {
+      paramType = 'statusId';
+    } else if (type === 'assignee') {
+      paramType = 'assigneeId';
+    }
     to(LINK_URL.workListIssue, {
       params: {
         paramName,
+        paramType,
+        paramId: typeName === null ? '0' : typeName,
         ...queryObj,
       },
     });
@@ -327,7 +319,6 @@ class PieChart extends Component {
     const data = PieChartStore.getPieData;
     const sourceData = PieChartStore.getSourceData;
     const colors = PieChartStore.getColors;
-    const { pieLoading } = PieChartStore;
     const types = [
       { title: '经办人', value: 'assignee' },
       { title: '模块', value: 'component' },

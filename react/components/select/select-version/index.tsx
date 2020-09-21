@@ -14,8 +14,10 @@ const SelectVersion: React.FC<Props> = forwardRef(({ dataRef, statusArr = [], ..
     valueField: 'name',
     request: () => versionApi.loadNamesByStatus(statusArr),
     middleWare: (versions) => {
-      // eslint-disable-next-line no-param-reassign
-      dataRef.current = versions;
+      if (dataRef?.current) {
+        // eslint-disable-next-line no-param-reassign
+        dataRef.current = versions;
+      }
       return versions;
     },
     paging: false,

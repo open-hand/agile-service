@@ -8,16 +8,19 @@ import {
 import { PieSearchProps } from '@/components/charts/pie-chart/search';
 import { reportApi, sprintApi, versionApi } from '@/api';
 import { ISprint, IVersion } from '@/common/types';
+import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
 
 interface PieConfig {
-  defaultType?: IPieChartType
+  type: IPieChartType
+  chooseId: string,
+  chooseDimension: IDimension,
 }
 
 function usePieChartReport(config?: PieConfig): [PieSearchProps, PieChartProps] {
-  const [type, setType] = useState<IPieChartType>(config?.defaultType || 'assignee');
+  const [type, setType] = useControlledDefaultValue<IPieChartType>(config?.type || 'assignee');
   const [loading, setLoading] = useState(false);
-  const [chooseId, setChooseId] = useState<string | ''>('');
-  const [chooseDimension, setChooseDimension] = useState<IDimension>('');
+  const [chooseId, setChooseId] = useControlledDefaultValue<string | ''>(config?.chooseId || '');
+  const [chooseDimension, setChooseDimension] = useControlledDefaultValue<IDimension>(config?.chooseDimension || '');
   const [data, setData] = useState<IPieData[]>([]);
   const [colors, setColors] = useState<string[]>([]);
   const [sprints, setSprints] = useState<ISprint[]>([]);

@@ -26,7 +26,6 @@ import './EpicReport.less';
 const { TabPane } = Tabs;
 const { AppState } = stores;
 const { Option } = Select;
-const MONTH = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
 
 @observer
 class EpicReport extends Component {

@@ -10,7 +10,7 @@ import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
 import UserHead from '@/components/UserHead';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import { IField } from '@/common/types';
+import { IField, IIssueColumnName } from '@/common/types';
 import { TableMode, ColumnAlign, ColumnLock } from 'choerodon-ui/pro/lib/table/enum';
 import { TableProps } from 'choerodon-ui/pro/lib/table/Table';
 import './index.less';
@@ -24,16 +24,35 @@ interface Props extends Partial<TableProps> {
   onRowClick?: (record: any) => void
   selectedIssue?: string
   createIssue?: boolean
-  visibleColumns?: []
+  visibleColumns?: IIssueColumnName[]
 }
-const defaultVisibleColumns = [
-  'issueId',
+const mapper = (key: IIssueColumnName): string => ({
+  summary: 'issueId',
+  issueNum: 'issueNum',
+  priority: 'priorityId',
+  sprint: 'issueSprintVOS',
+  reporter: 'reporterId',
+  creationDate: 'creationDate',
+  assign: 'assigneeId',
+  status: 'statusId',
+  lastUpdateDate: 'lastUpdateDate',
+  estimatedStartTime: 'estimatedStartTime',
+  estimatedEndTime: 'estimatedEndTime',
+  label: 'label',
+  component: 'component',
+  storyPoints: 'storyPoints',
+  version: 'version',
+  epic: 'epic',
+  feature: 'feature',
+}[key] || key);
+const defaultVisibleColumns: IIssueColumnName[] = [
+  'summary',
   'issueNum',
-  'priorityId',
-  'assigneeId',
-  'statusId',
-  'issueSprintVOS',
-  'reporterId',
+  'priority',
+  'assign',
+  'status',
+  'sprint',
+  'reporter',
   'lastUpdateDate',
 ];
 const IssueTable: React.FC<Props> = ({
@@ -45,9 +64,10 @@ const IssueTable: React.FC<Props> = ({
   selectedIssue,
   createIssue = true,
   visibleColumns = defaultVisibleColumns,
+  ...otherProps
 }) => {
   const { isInProgram } = useIsInProgram();
-  const columnHidden = (name) => !visibleColumns.includes(name);
+  const columnHidden = (name: string) => !visibleColumns.map((n) => mapper(n)).includes(name);
   const renderTag = (listField, nameField) => ({ record }) => {
     const list = record.get(listField);
     if (list) {
@@ -112,6 +132,7 @@ const IssueTable: React.FC<Props> = ({
         onRow={({ record }) => ({
           className: selectedIssue && record.get('issueId') === selectedIssue ? 'c7nagile-row-selected' : null,
         })}
+        {...otherProps}
       >
         <Column
           align={'left' as ColumnAlign}
@@ -259,7 +280,7 @@ const IssueTable: React.FC<Props> = ({
         <Column hidden={columnHidden('issueSprintVOS')} name="issueSprintVOS" renderer={renderTag('issueSprintVOS', 'sprintName')} />
         {fields.map((field) => (
           <Column
-            hidden={columnHidden('field.code')}
+            hidden={columnHidden(field.code)}
             name={field.code}
             header={field.title}
             className="c7n-agile-table-cell"

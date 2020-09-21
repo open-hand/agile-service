@@ -30,6 +30,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     middleWare: (data) => {
       if (selectedUser) {
         const temp: User[] = [];
+        const requestQue: User[] = [];
         (toArray(selectedUser).forEach((user) => {
           if (!find(data, (item) => String(item.id) === user.id)) {
             temp.push(user);

@@ -20,7 +20,6 @@ const { TextArea } = Input;
 const { Option } = Select;
 const { AppState } = stores;
 const FormItem = Form.Item;
-
 let sign = -1;
 const OPTION_FILTER = {
   assignee: {
@@ -142,6 +141,7 @@ const customFieldType = {
 class AddComponent extends Component {
   constructor(props) {
     super(props);
+    this.firstIndex = 0;
     this.state = {
       origin: {},
       arr: [],
@@ -700,7 +700,7 @@ class AddComponent extends Component {
             predefined: !field.id,
             customFieldType: field.id ? customFieldType[field.type] : undefined,
           };
-          if (i) {
+          if (i !== this.firstIndex) {
             o.push(values[`filter-${i}-ao`]);
             expressQueryArr.push(values[`filter-${i}-ao`].toUpperCase());
           }
@@ -973,7 +973,7 @@ class AddComponent extends Component {
                   deleteItem.indexOf(index) === -1 && (
                     <div>
                       {
-                        index !== 0 && (
+                        this.firstIndex !== index && (
                           <FormItem style={{
                             width: 80, display: 'inline-block', marginRight: 10,
                           }}
@@ -994,7 +994,7 @@ class AddComponent extends Component {
                         )
                       }
                       <FormItem style={{
-                        width: index === 0 ? 210 : 120, display: 'inline-block', marginRight: 10,
+                        width: index === this.firstIndex ? 210 : 120, display: 'inline-block', marginRight: 10,
                       }}
                       >
                         {getFieldDecorator(`filter-${index}-prop`, {
@@ -1051,7 +1051,18 @@ class AddComponent extends Component {
                         disabled={(arr.length - deleteItem.length) < 2}
                         shape="circle"
                         onClick={() => {
+                          arr[index].status = 'delete';
+                          if (index === this.firstIndex) {
+                            for (let i = this.firstIndex + 1; i < arr.length; i += 1) {
+                              if (arr[i].status !== 'delete') {
+                                this.firstIndex = i;
+                                break;
+                              }
+                            }
+                          }
+
                           const arrCopy = deleteItem.slice();
+
                           arrCopy.push(index);
                           this.setState({
                             deleteItem: arrCopy,
@@ -1077,7 +1088,9 @@ class AddComponent extends Component {
                 prop: undefined,
                 rule: undefined,
                 value: undefined,
+                status: 'create', // 标记此筛选状态
               });
+
               this.setState({
                 arr: arrCopy,
               });

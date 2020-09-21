@@ -156,8 +156,8 @@ public interface IssueService {
 
     Page<IssueNumVO> queryIssueByOption(Long projectId, Long issueId, String issueNum, Boolean onlyActiveSprint, Boolean self, String content, PageRequest pageRequest);
 
-    void exportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request,
-                      HttpServletResponse response, Long organizationId, Sort sort);
+//    void exportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request,
+//                      HttpServletResponse response, Long organizationId, Sort sort);
 
     /**
      * 根据issueId复制一个issue

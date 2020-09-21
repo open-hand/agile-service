@@ -7,6 +7,7 @@ import { BurnDownSearchProps } from '@/components/charts/burn-down/search';
 import { IBurnDownData } from '@/components/charts/burn-down/utils';
 import { reportApi, sprintApi } from '@/api';
 import { IQuickSearchValue } from '@/components/quick-search';
+import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
 
 const { AppState } = stores;
 
@@ -18,7 +19,7 @@ export interface BurnDownConfig {
 }
 
 function useBurnDownReport(config?: BurnDownConfig): [BurnDownSearchProps, BurnDownProps] {
-  const [quickFilter, setQuickFilter] = useState<IQuickSearchValue>(
+  const [quickFilter, setQuickFilter] = useControlledDefaultValue<IQuickSearchValue>(
     config?.quickFilter || {
       onlyStory: false,
       onlyMe: false,
@@ -26,17 +27,17 @@ function useBurnDownReport(config?: BurnDownConfig): [BurnDownSearchProps, BurnD
       personalFilters: [],
     },
   );
-  const [type, setType] = useState<IBurndownChartType>(config?.type || 'remainingEstimatedTime');
+  const [type, setType] = useControlledDefaultValue<IBurndownChartType>(config?.type || 'remainingEstimatedTime');
   const [data, setData] = useState<IBurnDownData>(null);
   const [loading, setLoading] = useState(false);
   const [endDate, setEndDate] = useState('');
-  const [restDayShow, setRestDayShow] = useState(
+  const [restDayShow, setRestDayShow] = useControlledDefaultValue(
     config?.restDayShow !== undefined
       ? config.restDayShow
       : true,
   );
   const [restDays, setRestDays] = useState<string[]>([]);
-  const [sprintId, setSprintId] = useState<string | null>(config?.sprintId || null);
+  const [sprintId, setSprintId] = useControlledDefaultValue<string | undefined>(config?.sprintId || undefined);
   const loadData = useCallback(async () => {
     if (sprintId) {
       setLoading(true);
