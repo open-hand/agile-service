@@ -57,12 +57,18 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
         return true;
       },
     }],
-  }), []);
+  }), [editData]);
   // @ts-ignore
   const dataSet = useMemo(() => new DataSet(IssueTableDataSet({
     projectId: getProjectId(),
     organizationId: getOrganizationId(),
     issueSearchStore,
+    // searchDTO: editData?.searchVO,
+    // events: {
+    //   load: ({ dataSet: ds }) => {
+    //     ds.selectAll();
+    //   },
+    // },
   })), [issueSearchStore]);
   const refresh = useCallback(() => {
     dataSet.query();
@@ -132,6 +138,7 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
         onClickSaveFilter={() => { }}
       />
       <IssueTable
+        style={{ marginTop: 10 }}
         queryBar={'none' as TableQueryBarType}
         dataSet={dataSet}
         fields={issueSearchStore.fields}

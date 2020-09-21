@@ -1,6 +1,6 @@
 /* eslint-disable import/no-anonymous-default-export */
 export default ({
-  projectId, organizationId, issueSearchStore, events,
+  projectId, organizationId, issueSearchStore, events, searchDTO,
 }) => ({
   primaryKey: 'issueId',
   autoQuery: false,
@@ -19,8 +19,8 @@ export default ({
         organizationId,
       },
       transformRequest: () => {
-        const searchDTO = issueSearchStore.getCustomFieldFilters();
-        return JSON.stringify(searchDTO);
+        const search = searchDTO || issueSearchStore.getCustomFieldFilters();
+        return JSON.stringify(search);
       },
     }),
   },

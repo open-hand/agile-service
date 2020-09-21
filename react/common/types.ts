@@ -14,7 +14,10 @@ export interface User {
 export interface ISprint {
   sprintId: string
   sprintName: string
+  startDate: string
   endDate: string
+  actualEndDate: string
+  statusCode: string
 }
 
 export interface IPriority {
