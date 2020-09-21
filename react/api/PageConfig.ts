@@ -78,7 +78,7 @@ export interface UIssueTypeConfig {
   createdFields?: Array<any>,
 
 }
-class PageConfigApi extends Api {
+class PageConfigApi extends Api<PageConfigApi> {
   get prefixOrgOrPro() {
     return `/agile/v1/${getMenuType() === 'project' ? `projects/${getProjectId()}` : `organizations/${getOrganizationId()}`}`;
   }

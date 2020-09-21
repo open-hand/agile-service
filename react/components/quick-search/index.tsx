@@ -30,6 +30,7 @@ export interface IPersonalFilter {
   userId: string
 }
 interface Props extends Partial<SelectProps> {
+  projectId?: string
   value?: IQuickSearchValue
   onChange?: (value: IQuickSearchValue) => void
 }
@@ -125,9 +126,10 @@ class QuickSearch extends Component<Props, State> {
   }
 
   componentDidMount() {
+    const { projectId } = this.props;
     Promise.all([
-      quickFilterApi.loadAll(),
-      personalFilterApi.loadAll(),
+      quickFilterApi.project(projectId).loadAll(),
+      personalFilterApi.project(projectId).loadAll(),
     ]).then(([quickFilters, personalFilters]) => {
       this.setState({
         quickFilters,

@@ -9,6 +9,7 @@ import { IBurndownChartType } from '.';
 const { Option } = Select;
 
 export interface BurnDownSearchProps {
+  projectId?: string
   sprintId: string | undefined
   setSprintId: (sprintId: string | undefined) => void
   setEndDate: (endDate: string) => void
@@ -20,6 +21,7 @@ export interface BurnDownSearchProps {
   setRestDayShow: (restDayShow: boolean) => void
 }
 const BurndownSearch: React.FC<BurnDownSearchProps> = ({
+  projectId,
   sprintId,
   setSprintId,
   setEndDate,
@@ -35,6 +37,7 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
       label="迭代冲刺"
       labelLayout={'float' as LabelLayout}
       clearButton={false}
+      projectId={projectId}
       statusList={['started', 'closed']}
       afterLoad={(sprints) => {
         if (!sprintId && sprints.length > 0) {
@@ -66,6 +69,7 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
       <Option value="issueCount">问题计数</Option>
     </Select>
     <QuickSearch
+      projectId={projectId}
       style={{ marginLeft: 24, width: 244 }}
       onChange={setQuickFilter}
       value={quickFilter}

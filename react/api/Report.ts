@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { getOrganizationId } from '@/utils/common';
+import Api from './Api';
 
 interface ICumulativeData {
   columnIds: Array<string>, // 看板列id
@@ -8,9 +9,9 @@ interface ICumulativeData {
   startDate: string,
   boardId: string,
 }
-class ReportApi {
+class ReportApi extends Api<ReportApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
@@ -52,7 +53,7 @@ class ReportApi {
     const {
       assigneeId, onlyStory, quickFilterIds, personalFilterIds,
     } = filter;
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/reports/${sprintId}/burn_down_report/coordinate`,
       data: {

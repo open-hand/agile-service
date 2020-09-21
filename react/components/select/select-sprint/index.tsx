@@ -11,13 +11,14 @@ interface Props extends Partial<SelectProps> {
   statusList?: string[],
   selectSprints?: number[],
   afterLoad?: (sprints: ISprint[]) => void
+  projectId?: string
 }
 
 const SelectSprint: React.FC<Props> = forwardRef(({
   statusList = ['sprint_planning', 'started'],
   isProgram,
   selectSprints,
-  afterLoad, ...otherProps
+  afterLoad, projectId, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
   afterLoadRef.current = afterLoad;
@@ -26,7 +27,7 @@ const SelectSprint: React.FC<Props> = forwardRef(({
     textField: 'sprintName',
     valueField: 'sprintId',
     request: ({ filter, page }) => (isProgram ? sprintApi.loadSubProjectSprints(filter || '', page!, selectSprints)
-      : sprintApi.loadSprints(statusList)),
+      : sprintApi.project(projectId).loadSprints(statusList)),
     middleWare: (sprints) => {
       if (afterLoadRef.current) {
         afterLoadRef.current(sprints);
@@ -38,7 +39,7 @@ const SelectSprint: React.FC<Props> = forwardRef(({
       return sprints;
     },
     paging: !!isProgram,
-  }), [isProgram, selectSprints]);
+  }), [isProgram, projectId, selectSprints, JSON.stringify(statusList)]);
   const props = useSelect(config);
   return (
     <Select

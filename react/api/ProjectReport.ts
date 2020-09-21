@@ -1,4 +1,4 @@
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { getProjectId } from '@/utils/common';
 import Api from './Api';
 
 export interface IProjectReportCreate {
@@ -12,7 +12,7 @@ export interface IProjectReportCreate {
 export interface IProjectReportUpdate extends IProjectReportCreate {
   objectVersionNumber: number
 }
-class ProjectReportApi extends Api {
+class ProjectReportApi extends Api<ProjectReportApi> {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }

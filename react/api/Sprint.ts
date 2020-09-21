@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
+import Api from './Api';
 
 interface ISprint {
   sprintName: string
@@ -40,9 +41,9 @@ interface MoveIssueCardsInfo {
   outsetIssueId: number, // 移动参照问题id 0代表无问题
   rankIndex: number, // 是否生成移动日志
 }
-class SprintApi {
+class SprintApi extends Api<SprintApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
@@ -84,7 +85,11 @@ class SprintApi {
  * @param {*} arr
  */
   loadSprints(arr: Array<string> = [], projectId?:number) {
-    return axios.post(`/agile/v1/projects/${projectId || getProjectId()}/sprint/names`, arr);
+    return this.request({
+      method: 'post',
+      url: `/agile/v1/projects/${projectId || this.projectId}/sprint/names`,
+      data: arr,
+    });
   }
 
   /**

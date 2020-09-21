@@ -1,4 +1,5 @@
 import React, { useCallback, useImperativeHandle, useMemo } from 'react';
+import { observer } from 'mobx-react-lite';
 import { stores } from '@choerodon/boot';
 import BurnDown from '@/components/charts/burn-down';
 import BurnDownSearch from '@/components/charts/burn-down/search';
@@ -23,25 +24,31 @@ export const transformBurnDownSearch = (searchVO: BurnDownSearchVO | undefined):
       quickFilters: searchVO.quickFilterIds,
       personalFilters: searchVO.personalFilterIds,
     },
+    projectId: searchVO.projectId,
   };
 };
 export interface Props {
   innerRef: React.MutableRefObject<ChartRefProps>
+  projectId?: string
   data?: IReportChartBlock
 }
-const BurnDownComponent: React.FC<Props> = ({ innerRef, data }) => {
-  const config = useMemo(() => transformBurnDownSearch(data?.chartSearchVO as BurnDownSearchVO), [data?.chartSearchVO]);
+const BurnDownComponent: React.FC<Props> = ({ innerRef, projectId, data }) => {
+  const config = useMemo(() => ({
+    ...transformBurnDownSearch(data?.chartSearchVO as BurnDownSearchVO),
+    projectId,
+  }),
+  [data?.chartSearchVO, projectId]);
   const [searchProps, props] = useBurnDownReport(config);
   const handleSubmit = useCallback(async (): Promise<BurnDownSearchVO> => ({
     type: searchProps.type,
     displayNonWorkingDay: searchProps.restDayShow,
+    projectId: searchProps.projectId || getProjectId(),
     sprintId: searchProps.sprintId,
     quickFilterIds: searchProps.quickFilter.quickFilters,
     onlyMe: searchProps.quickFilter.onlyMe,
     onlyStory: searchProps.quickFilter.onlyStory,
     assigneeId: searchProps.quickFilter.onlyMe ? AppState.userInfo.id : undefined,
     personalFilterIds: searchProps.quickFilter.personalFilters,
-    projectId: getProjectId(),
   }),
   [searchProps]);
   useImperativeHandle(innerRef, () => ({
@@ -54,4 +61,4 @@ const BurnDownComponent: React.FC<Props> = ({ innerRef, data }) => {
     </div>
   );
 };
-export default BurnDownComponent;
+export default observer(BurnDownComponent);
