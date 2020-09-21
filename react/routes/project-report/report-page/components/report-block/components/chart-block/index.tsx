@@ -11,7 +11,7 @@ import VersionBurndownBlock from './components/version-burndown';
 import EpicBurndownBlock from './components/epic-burndown';
 import IterationSpeedBlock from './components/iteration-speed';
 
-const ChartMap = new Map<IChartCode, React.FC<any>>([
+export const defaultChartBlockMap = new Map<IChartCode, React.FC<any>>([
   ['burn_down_report', BurnDownBlock],
   ['sprint_report', SprintBlock],
   ['cumulative_flow_diagram', AccumulationBlock],
@@ -22,11 +22,17 @@ const ChartMap = new Map<IChartCode, React.FC<any>>([
   ['epic_burn_down_report', EpicBurndownBlock],
   ['velocity_chart', IterationSpeedBlock],
 ]);
+let chartBlockMap = defaultChartBlockMap;
+
+export function setChartBlockMap(newChartBlockMap: Map<IChartCode, React.FC<any>>) {
+  chartBlockMap = newChartBlockMap;
+}
+
 interface Props {
   data: IReportChartBlock
 }
 const ChartBlock: React.FC<Props> = ({ data: { chartSearchVO, chartCode } }) => {
-  const ChartBlockComponent = ChartMap.get(chartCode);
+  const ChartBlockComponent = chartBlockMap.get(chartCode);
   return (
     <>
       {ChartBlockComponent && (
