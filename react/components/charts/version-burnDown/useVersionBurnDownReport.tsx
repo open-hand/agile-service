@@ -14,7 +14,7 @@ export interface VersionBurnConfig {
   projectId?: string
 }
 
-function useVersionBurnDownReport(config?: VersionBurnConfig): [VersionBurnDownSearchProps, VersionBurnDownChartProps] {
+function useVersionBurnDownReport(config?: VersionBurnConfig, onFinish?: Function): [VersionBurnDownSearchProps, VersionBurnDownChartProps] {
   const projectId = config?.projectId || getProjectId();
   const [versions, setVersions] = useState<IVersion[]>([]);
   const [versionIsLoading, setVersionIsLoading] = useState<boolean>(false);
@@ -52,11 +52,12 @@ function useVersionBurnDownReport(config?: VersionBurnConfig): [VersionBurnDownS
           setData(res);
           setChartData(getChartDataFromServerData(res));
           setLoading(false);
+          onFinish && setTimeout(onFinish);
         }).catch(() => {
           setLoading(false);
         });
     }
-  }, [currentVersionId, projectId]);
+  }, [currentVersionId, onFinish, projectId]);
 
   useEffect(() => {
     loadChartData();

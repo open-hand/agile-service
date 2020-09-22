@@ -21,6 +21,7 @@ export interface IterationSpeedProps {
   loading: boolean,
   unit: IUnit,
   data: ISprintSpeed[],
+  animation?:boolean
 }
 
 const UnitNameMap = new Map([
@@ -50,7 +51,9 @@ const UNIT_STATUS = {
   },
 };
 
-const IterationSpeed: React.FC<IterationSpeedProps> = ({ loading, unit, data }) => {
+const IterationSpeed: React.FC<IterationSpeedProps> = ({
+  loading, unit, data, animation = true,
+}) => {
   const getChartDataYCommitted = () => {
     const prop = UNIT_STATUS[unit].committed;
     const committed = map(data, prop);
@@ -64,6 +67,7 @@ const IterationSpeed: React.FC<IterationSpeedProps> = ({ loading, unit, data }) 
   };
 
   const getOption = (): EChartOption => ({
+    animation,
     tooltip: {
       trigger: 'axis',
       axisPointer: {

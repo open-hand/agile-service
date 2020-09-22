@@ -6,12 +6,13 @@ import { transformEpicBurndownSearch } from '@/routes/project-report/report-page
 
 interface Props {
   filter: EpicBurndownSearchVO
+  onFinish?: Function
 }
-const EpicBurndownComponent: React.FC<Props> = ({ filter }) => {
-  const [, props] = useEpicBurndown(transformEpicBurndownSearch(filter));
+const EpicBurndownComponent: React.FC<Props> = ({ filter, onFinish }) => {
+  const [, props] = useEpicBurndown(transformEpicBurndownSearch(filter), onFinish);
   return (
     <div>
-      <EpicBurndown {...props} />
+      <EpicBurndown {...props} animation={false} />
     </div>
   );
 };

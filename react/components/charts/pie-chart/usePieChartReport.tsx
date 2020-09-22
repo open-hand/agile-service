@@ -18,7 +18,7 @@ export interface PieConfig {
   projectId?: string,
 }
 
-function usePieChartReport(config?: PieConfig): [PieSearchProps, PieChartProps] {
+function usePieChartReport(config?: PieConfig, onFinish?: Function): [PieSearchProps, PieChartProps] {
   const projectId = config?.projectId || getProjectId();
   const [type, setType] = useControlledDefaultValue<IPieChartType>(config?.type || 'assignee');
   const [loading, setLoading] = useState(false);
@@ -57,11 +57,12 @@ function usePieChartReport(config?: PieConfig): [PieSearchProps, PieChartProps] 
           setData(res);
         }
         setLoading(false);
+        onFinish && setTimeout(onFinish);
       })
       .catch(() => {
         setLoading(false);
       });
-  }, [chooseDimension, chooseId, type]);
+  }, [chooseDimension, chooseId, onFinish, projectId, type]);
 
   useEffect(() => {
     loadData();

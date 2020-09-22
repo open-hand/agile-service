@@ -12,6 +12,7 @@ interface Context extends ITask{
 const TaskContext = createContext({
   register: () => {},
   finish: () => {},
+  reset: () => {},
 } as Context);
 
 function useTaskContext() {
