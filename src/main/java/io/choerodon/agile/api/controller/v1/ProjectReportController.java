@@ -81,8 +81,8 @@ public class ProjectReportController {
     @PostMapping("/send/{id}")
     public ResponseEntity<Void> send(@PathVariable("project_id") Long projectId,
                                      @PathVariable("id") @Encrypt Long id,
-                                     @RequestBody ImageVO imgData) {
-        projectReportService.send(projectId, id, imgData.getImgData());
+                                     @RequestBody ProjectReportVO projectReportVO) {
+        projectReportService.send(projectId, id, projectReportVO.getImgData());
         return Results.success();
     }
 }
