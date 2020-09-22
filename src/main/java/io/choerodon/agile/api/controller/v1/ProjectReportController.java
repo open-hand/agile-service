@@ -1,6 +1,5 @@
 package io.choerodon.agile.api.controller.v1;
 
-import javax.servlet.http.HttpServletResponse;
 
 import io.choerodon.agile.api.vo.ProjectReportVO;
 import io.choerodon.agile.app.service.ProjectReportService;
@@ -17,7 +16,6 @@ import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/9/15 上午10:48
@@ -83,8 +81,8 @@ public class ProjectReportController {
     @PostMapping("/send/{id}")
     public ResponseEntity<Void> send(@PathVariable("project_id") Long projectId,
                                      @PathVariable("id") @Encrypt Long id,
-                                     @RequestParam("file") MultipartFile multipartFile) {
-        projectReportService.send(projectId, id, multipartFile);
+                                     @RequestBody ImageVO imgData) {
+        projectReportService.send(projectId, id, imgData.getImgData());
         return Results.success();
     }
 }

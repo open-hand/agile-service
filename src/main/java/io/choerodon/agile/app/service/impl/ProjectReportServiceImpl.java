@@ -11,9 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.ProjectReportVO;
 import io.choerodon.agile.api.vo.SearchVO;
-import io.choerodon.agile.api.vo.report.DynamicListUnitVO;
-import io.choerodon.agile.api.vo.report.ReportUnitVO;
-import io.choerodon.agile.api.vo.report.StaticListUnitVO;
+import io.choerodon.agile.api.vo.report.*;
 import io.choerodon.agile.app.service.ProjectReportService;
 import io.choerodon.agile.infra.dto.ProjectReportDTO;
 import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
@@ -22,6 +20,7 @@ import io.choerodon.agile.infra.enums.ProjectReportStatus;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.ProjectReportMapper;
 import io.choerodon.agile.infra.mapper.ProjectReportReceiverMapper;
+import io.choerodon.agile.infra.utils.CommonMapperUtil;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.SiteMsgUtil;
 import io.choerodon.core.domain.Page;
@@ -42,7 +41,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -63,7 +61,9 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     private SiteMsgUtil siteMsgUtil;
     @Autowired
     private ObjectMapper objectMapper;
-    private ObjectMapper commmonMapper = new ObjectMapper();
+    @Autowired
+    private CommonMapperUtil commonMapperUtil;
+
 
     @Override
     public Page<ProjectReportDTO> page(ProjectReportVO projectReport, PageRequest pageRequest) {
@@ -109,8 +109,8 @@ public class ProjectReportServiceImpl implements ProjectReportService {
         // 翻译报表信息单元
         if (StringUtils.isNotBlank(projectReport.getReportData())){
             try {
-                projectReportVO.setReportUnitList(commmonMapper.readValue(projectReport.getReportData(),
-                        commmonMapper.getTypeFactory().constructParametricType(List.class, ReportUnitVO.class)));
+                projectReportVO.setReportUnitList(commonMapperUtil.readValue(projectReport.getReportData(),
+                        commonMapperUtil.getTypeFactory().constructParametricType(List.class, ReportUnitVO.class)));
                 for (ReportUnitVO reportUnitVO : projectReportVO.getReportUnitList()) {
                     if (reportUnitVO instanceof StaticListUnitVO){
                         SearchVO searchVO = ((StaticListUnitVO) reportUnitVO).getSearchVO();
@@ -205,7 +205,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
         }
         try {
             projectReportVO.getReportUnitList().forEach(ReportUnitVO::validateAndconvert);
-            projectReportDTO.setReportData(commmonMapper.writeValueAsString(projectReportVO.getReportUnitList()));
+            projectReportDTO.setReportData(commonMapperUtil.writeValueAsString(projectReportVO.getReportUnitList()));
         } catch (JsonProcessingException e) {
             log.error("json convert failed");
         }
@@ -231,14 +231,8 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     }
 
     @Override
-    public void send(Long projectId, Long id, MultipartFile multipartFile) {
+    public void send(Long projectId, Long id, String imgData) {
         List<ProjectReportReceiverDTO> receiverList = projectReportReceiverMapper.select(new ProjectReportReceiverDTO(id, projectId));
-        String imgData = null;
-        try {
-            imgData = Base64Utils.encodeToString(multipartFile.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         if (StringUtils.isNotBlank(imgData)){
             siteMsgUtil.sendProjectReport(projectId, receiverList, imgData);
         }
