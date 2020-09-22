@@ -26,7 +26,7 @@ export const transformPieSearch = (searchVO: PieSearchVO) => {
     chooseId,
   });
 };
-interface Props {
+export interface Props {
   innerRef: React.MutableRefObject<ChartRefProps>
   data?: IReportChartBlock
 }

@@ -72,7 +72,7 @@ const AddChart: React.FC<Props> = ({ innerRef, data: editData }) => {
       valueField: 'projectId',
       required: true,
       dynamicProps: ({ dataSet: ds }) => ({
-        ignore: !isProgram || (isProgram && ![...defaultCharts.keys()].includes(ds.current?.get('chart'))) ? 'always' as FieldIgnore : undefined,
+        required: isProgram && [...defaultCharts.keys()].includes(ds.current?.get('chart')),
       }),
     },
     ],
