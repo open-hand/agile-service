@@ -12,6 +12,7 @@ export interface AccumulationSearchProps {
   boardId: string
   quickFilterIds: string[]
   onQuickSearchChange: (quickFilterIds: string[]) => void
+  projectId?: string
 }
 const AccumulationSearch: React.FC<AccumulationSearchProps> = ({
   range,
@@ -20,6 +21,7 @@ const AccumulationSearch: React.FC<AccumulationSearchProps> = ({
   onBoardChange,
   quickFilterIds,
   onQuickSearchChange,
+  projectId,
 }) => (
   <div>
     <DatePicker
@@ -30,10 +32,12 @@ const AccumulationSearch: React.FC<AccumulationSearchProps> = ({
       labelLayout={'float' as LabelLayout}
     />
     <SelectBoard
+      projectId={projectId}
       onChange={onBoardChange}
       value={boardId}
     />
     <QuickFilter
+      projectId={projectId}
       onChange={onQuickSearchChange}
       value={quickFilterIds}
     />

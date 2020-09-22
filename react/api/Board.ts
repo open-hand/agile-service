@@ -1,6 +1,7 @@
 import { omit } from 'lodash';
 import { axios, stores } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
+import Api from './Api';
 
 const { AppState } = stores;
 
@@ -37,9 +38,9 @@ interface BoardSearchVO {
  * 迭代看板
  * @author dzc
  */
-class BoardApi {
+class BoardApi extends Api<BoardApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   load(boardId: string, searchVO: BoardSearchVO) {
