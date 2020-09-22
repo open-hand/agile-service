@@ -11,9 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.ProjectReportVO;
 import io.choerodon.agile.api.vo.SearchVO;
-import io.choerodon.agile.api.vo.report.DynamicListUnitVO;
-import io.choerodon.agile.api.vo.report.ReportUnitVO;
-import io.choerodon.agile.api.vo.report.StaticListUnitVO;
+import io.choerodon.agile.api.vo.report.*;
 import io.choerodon.agile.app.service.ProjectReportService;
 import io.choerodon.agile.infra.dto.ProjectReportDTO;
 import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
@@ -22,6 +20,7 @@ import io.choerodon.agile.infra.enums.ProjectReportStatus;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.ProjectReportMapper;
 import io.choerodon.agile.infra.mapper.ProjectReportReceiverMapper;
+import io.choerodon.agile.infra.utils.CommonMapper;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.SiteMsgUtil;
 import io.choerodon.core.domain.Page;
@@ -63,7 +62,9 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     private SiteMsgUtil siteMsgUtil;
     @Autowired
     private ObjectMapper objectMapper;
-    private ObjectMapper commmonMapper = new ObjectMapper();
+    @Autowired
+    private CommonMapper commmonMapper;
+
 
     @Override
     public Page<ProjectReportDTO> page(ProjectReportVO projectReport, PageRequest pageRequest) {

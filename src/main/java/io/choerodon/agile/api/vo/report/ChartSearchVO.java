@@ -112,21 +112,24 @@ public class ChartSearchVO {
      */
     private String fieldName;
 
-    public Boolean getCalibrationSprint() {
-        return calibrationSprint;
-    }
+    /**
+     * 特性进度图： piId(必填)
+     * 子项目工作量： piId(必填)
+     */
+    @Encrypt
+    private Long piId;
 
-    public void setCalibrationSprint(Boolean calibrationSprint) {
-        this.calibrationSprint = calibrationSprint;
-    }
+    /**
+     * 子项目燃尽图：子项目id(必填)
+     */
+    @Encrypt
+    private Long subProjectId;
 
-    public List<Long> getPersonalFilterIds() {
-        return personalFilterIds;
-    }
-
-    public void setPersonalFilterIds(List<Long> personalFilterIds) {
-        this.personalFilterIds = personalFilterIds;
-    }
+    /**
+     * 与其余图表的type字段意义等同
+     * 子项目工作量： 单位(必填)
+     */
+    private String latitude;
 
     public Long getProjectId() {
         return projectId;
@@ -166,6 +169,14 @@ public class ChartSearchVO {
 
     public void setQuickFilterIds(List<Long> quickFilterIds) {
         this.quickFilterIds = quickFilterIds;
+    }
+
+    public List<Long> getPersonalFilterIds() {
+        return personalFilterIds;
+    }
+
+    public void setPersonalFilterIds(List<Long> personalFilterIds) {
+        this.personalFilterIds = personalFilterIds;
     }
 
     public Long getAssigneeId() {
@@ -232,6 +243,14 @@ public class ChartSearchVO {
         this.epicId = epicId;
     }
 
+    public Boolean getCalibrationSprint() {
+        return calibrationSprint;
+    }
+
+    public void setCalibrationSprint(Boolean calibrationSprint) {
+        this.calibrationSprint = calibrationSprint;
+    }
+
     public Long getOrganizationId() {
         return organizationId;
     }
@@ -246,5 +265,29 @@ public class ChartSearchVO {
 
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
+    }
+
+    public Long getPiId() {
+        return piId;
+    }
+
+    public void setPiId(Long piId) {
+        this.piId = piId;
+    }
+
+    public Long getSubProjectId() {
+        return subProjectId;
+    }
+
+    public void setSubProjectId(Long subProjectId) {
+        this.subProjectId = subProjectId;
+    }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
     }
 }

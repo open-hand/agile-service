@@ -1,6 +1,5 @@
 package io.choerodon.agile.api.vo.report;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
 import org.springframework.util.Assert;
 
@@ -8,10 +7,6 @@ import org.springframework.util.Assert;
  * @author jiaxu.cui@hand-china.com 2020/9/15 下午7:01
  */
 public class ChartUnitVO extends ReportUnitVO {
-    
-    public static final String CHART_TYPE_ISSUE_COUNT = "issueCount";
-    public static final String CHART_TYPE_EPIC = "Epic";
-    public static final String CHART_TYPE_VERSION = "Version";
 
     /**
      * 燃尽图
@@ -67,6 +62,19 @@ public class ChartUnitVO extends ReportUnitVO {
     public static final String ISSUE_COUNT_CHART = "issue_count_chart";
 
     /**
+     * 特性进度图（校验piId和type）
+     */
+    public static final String FEATURE_PROGRESS_CHART = "feature_progress_chart";
+    /**
+     * 子项目燃尽图（校验subProjectId,piId和type）
+     */
+    public static final String SUB_PROJECT_BURN_DOWN_REPORT = "sub_project_burn_down_report";
+    /**
+     * 子项目工作量（校验spiId和latitude）
+     */
+    public static final String SUB_PROJECT_WORKLOAD_CHART = "sub_project_workload_chart";
+
+    /**
      * 各图表必输校验
      */
     public void validateAndconvert(){
@@ -79,9 +87,6 @@ public class ChartUnitVO extends ReportUnitVO {
             case BURN_DOWN_REPORT:
                 Assert.notNull(chartSearchVO.getSprintId(), BaseConstants.ErrorCode.DATA_INVALID);
                 Assert.notNull(chartSearchVO.getType(), BaseConstants.ErrorCode.DATA_INVALID);
-                break;
-            case SPRINT_REPORT:
-                Assert.notNull(chartSearchVO.getSprintId(), BaseConstants.ErrorCode.DATA_INVALID);
                 break;
             case CUMULATIVE_FLOW_DIAGRAM:
                 Assert.notNull(chartSearchVO.getBoardId(), BaseConstants.ErrorCode.DATA_INVALID);
@@ -106,8 +111,21 @@ public class ChartUnitVO extends ReportUnitVO {
             case EPIC_BURN_DOWN_REPORT:
                 Assert.notNull(chartSearchVO.getEpicId(), BaseConstants.ErrorCode.DATA_INVALID);
                 break;
-            case VERSION_BURN_DOWN_REPORT:
+            case FEATURE_PROGRESS_CHART:
+                Assert.notNull(chartSearchVO.getPiId(), BaseConstants.ErrorCode.DATA_INVALID);
+                Assert.notNull(chartSearchVO.getType(), BaseConstants.ErrorCode.DATA_INVALID);
                 break;
+            case SUB_PROJECT_BURN_DOWN_REPORT:
+                Assert.notNull(chartSearchVO.getSubProjectId(), BaseConstants.ErrorCode.DATA_INVALID);
+                Assert.notNull(chartSearchVO.getPiId(), BaseConstants.ErrorCode.DATA_INVALID);
+                Assert.notNull(chartSearchVO.getType(), BaseConstants.ErrorCode.DATA_INVALID);
+                break;
+            case SUB_PROJECT_WORKLOAD_CHART:
+                Assert.notNull(chartSearchVO.getPiId(), BaseConstants.ErrorCode.DATA_INVALID);
+                Assert.notNull(chartSearchVO.getLatitude(), BaseConstants.ErrorCode.DATA_INVALID);
+                break;
+            case SPRINT_REPORT:
+            case VERSION_BURN_DOWN_REPORT:
             case UNCOMPLETED_CHART:
             case ISSUE_CHART:
             case SPRINT_STATISTICS_CHART:
