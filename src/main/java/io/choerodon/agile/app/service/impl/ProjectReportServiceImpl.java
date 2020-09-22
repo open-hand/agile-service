@@ -232,14 +232,8 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     }
 
     @Override
-    public void send(Long projectId, Long id, MultipartFile multipartFile) {
+    public void send(Long projectId, Long id, String imgData) {
         List<ProjectReportReceiverDTO> receiverList = projectReportReceiverMapper.select(new ProjectReportReceiverDTO(id, projectId));
-        String imgData = null;
-        try {
-            imgData = Base64Utils.encodeToString(multipartFile.getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         if (StringUtils.isNotBlank(imgData)){
             siteMsgUtil.sendProjectReport(projectId, receiverList, imgData);
         }
