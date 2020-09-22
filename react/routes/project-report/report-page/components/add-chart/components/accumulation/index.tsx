@@ -15,20 +15,25 @@ export const transformAccumulationSearch = (searchVO: AccumulationSearchVO | und
     boardId: searchVO.boardId,
     quickFilterIds: searchVO.quickFilterIds,
     range: [moment(searchVO.startDate), moment(searchVO.endDate)],
+    projectId: searchVO.projectId,
   };
 };
 interface Props {
   innerRef: React.MutableRefObject<ChartRefProps>
   data?: IReportChartBlock
+  projectId?: string
 }
-const AccumulationComponent: React.FC<Props> = ({ innerRef, data }) => {
-  const [searchProps, props] = useAccumulationReport(transformAccumulationSearch(data?.chartSearchVO as AccumulationSearchVO));
+const AccumulationComponent: React.FC<Props> = ({ innerRef, data, projectId }) => {
+  const [searchProps, props] = useAccumulationReport({
+    ...transformAccumulationSearch(data?.chartSearchVO as AccumulationSearchVO),
+    projectId,
+  });
   const handleSubmit = useCallback(async (): Promise<AccumulationSearchVO> => ({
     boardId: searchProps.boardId,
     startDate: searchProps.range[0].format('YYYY-MM-DD 00:00:00'),
     endDate: `${searchProps.range[1].format('YYYY-MM-DD')} 23:59:59`,
     quickFilterIds: searchProps.quickFilterIds,
-    projectId: getProjectId(),
+    projectId: searchProps.projectId || getProjectId(),
   }),
   [searchProps]);
   useImperativeHandle(innerRef, () => ({

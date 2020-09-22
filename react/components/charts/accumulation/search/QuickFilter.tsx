@@ -11,13 +11,14 @@ import { IQuickFilter } from '@/components/quick-search';
 interface Props {
   onChange: (filterIds: string[]) => void
   value: string[]
+  projectId?: string
 }
 const QuickFilter: React.FC<Props> = ({
-  onChange, value,
+  onChange, value, projectId,
 }) => {
   const [quickFilterList, setQuickFilterList] = useState<IQuickFilter[]>([]);
   const refresh = useCallback(async () => {
-    const list = await quickFilterApi.loadAll();
+    const list = await quickFilterApi.project(projectId).loadAll();
     setQuickFilterList(list);
   }, []);
   useEffect(() => {

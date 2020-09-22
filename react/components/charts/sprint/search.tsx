@@ -10,6 +10,7 @@ export interface SprintSearchProps {
   setEndDate: (endDate: string) => void
   restDayShow: boolean
   setRestDayShow: (restDayShow: boolean) => void
+  projectId?:string
 }
 const SprintSearch: React.FC<SprintSearchProps> = ({
   sprintId,
@@ -17,13 +18,14 @@ const SprintSearch: React.FC<SprintSearchProps> = ({
   setEndDate,
   restDayShow,
   setRestDayShow,
+  projectId,
 }) => (
   <div>
     <SelectSprint
       label="迭代冲刺"
       labelLayout={'float' as LabelLayout}
       clearButton={false}
-
+      projectId={projectId}
       statusList={['started', 'closed']}
       afterLoad={(sprints) => {
         if (!sprintId && sprints.length > 0) {

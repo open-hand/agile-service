@@ -13,21 +13,22 @@ import { boardApi } from '@/api';
 interface Props {
   onChange: (boardId: string) => void
   value: string
+  projectId?: string
 }
 const SelectBoard: React.FC<Props> = ({
-  onChange, value,
+  onChange, value, projectId,
 }) => {
   const [boardList, setBoardList] = useState<IBoard[]>([]);
   const valueRef = useRef(value);
   valueRef.current = value;
   const refresh = useCallback(async () => {
-    const list = await boardApi.loadAll();
+    const list = await boardApi.project(projectId).loadAll();
     const defaultBoard = find(list, { userDefault: true });
     if (!valueRef.current && list.length > 0) {
       onChange(defaultBoard ? defaultBoard.boardId : list[0].boardId);
     }
     setBoardList(list);
-  }, [onChange]);
+  }, [onChange, projectId]);
   useEffect(() => {
     refresh();
   }, [refresh]);

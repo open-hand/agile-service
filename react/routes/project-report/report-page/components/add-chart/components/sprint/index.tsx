@@ -13,18 +13,23 @@ export const transformSprintSearch = (searchVO: SprintSearchVO | undefined): Spr
   return {
     restDayShow: searchVO.displayNonWorkingDay,
     sprintId: searchVO.sprintId,
+    projectId: searchVO.projectId,
   };
 };
 export interface Props {
   innerRef: React.MutableRefObject<ChartRefProps>
   data?: IReportChartBlock
+  projectId?: string
 }
-const SprintComponent: React.FC<Props> = ({ innerRef, data }) => {
-  const [searchProps, props] = useSprintReport(transformSprintSearch(data?.chartSearchVO as SprintSearchVO));
+const SprintComponent: React.FC<Props> = ({ innerRef, projectId, data }) => {
+  const [searchProps, props] = useSprintReport({
+    ...transformSprintSearch(data?.chartSearchVO as SprintSearchVO),
+    projectId,
+  });
   const handleSubmit = useCallback(async (): Promise<SprintSearchVO> => ({
     displayNonWorkingDay: searchProps.restDayShow,
     sprintId: searchProps.sprintId,
-    projectId: getProjectId(),
+    projectId: searchProps.projectId || getProjectId(),
   }),
   [searchProps]);
   useImperativeHandle(innerRef, () => ({
