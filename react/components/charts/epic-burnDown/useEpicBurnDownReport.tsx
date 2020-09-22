@@ -14,7 +14,7 @@ export interface EpicBurnConfig {
   projectId?: string
 }
 
-function useEpicBurnDownReport(config?: EpicBurnConfig): [EpicBurnDownSearchProps, EpicBurnDownChartProps] {
+function useEpicBurnDownReport(config?: EpicBurnConfig, onFinish?: Function): [EpicBurnDownSearchProps, EpicBurnDownChartProps] {
   const projectId = config?.projectId || getProjectId();
   const [epics, setEpics] = useState<IEpic[]>([]);
   const [epicIsLoading, setEpicIsLoading] = useState<boolean>(false);
@@ -52,12 +52,12 @@ function useEpicBurnDownReport(config?: EpicBurnConfig): [EpicBurnDownSearchProp
           setData(res);
           setChartData(getChartDataFromServerData(res));
           setLoading(false);
+          onFinish && setTimeout(onFinish);
         }).catch(() => {
           setLoading(false);
         });
     }
-  }, [currentEpicId, projectId]);
-
+  }, [currentEpicId, projectId, onFinish]);
   useEffect(() => {
     loadChartData();
   }, [loadChartData]);

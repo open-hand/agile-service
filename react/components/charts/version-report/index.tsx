@@ -49,6 +49,7 @@ export interface VersionReportProps {
   data: IVersionReportChart[]
   tableData: IVersionReportTable[]
   unit: IUnit
+  animation?: boolean
 }
 
 // 处理后端返回值为null或小数精度问题
@@ -62,8 +63,8 @@ const dealNullValue = (list: number[] = []) => map(list, (item: number) => {
   return 0;
 });
 
-const VersionReport:React.FC<VersionReportProps> = ({
-  loading, data, tableData, unit,
+const VersionReport: React.FC<VersionReportProps> = ({
+  loading, data, tableData, unit, animation = false,
 }) => {
   const getChartDataYAll = () => {
     const prop = UNIT_STATUS[unit].committed;
@@ -120,6 +121,7 @@ const VersionReport:React.FC<VersionReportProps> = ({
       总计剩余时间: '小时',
     };
     const commonOption: EChartOption = {
+      animation,
       tooltip: {
         trigger: 'axis',
         formatter: (params: any[]) => {

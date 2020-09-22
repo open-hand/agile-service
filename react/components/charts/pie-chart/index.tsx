@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import React, { useRef } from 'react';
 import { Tooltip } from 'choerodon-ui';
 import { EChartOption } from 'echarts/lib/echarts';
@@ -33,6 +34,7 @@ export interface PieChartProps {
   chooseId: '' | string,
   sprints: ISprint[],
   versions: IVersion[],
+  animation?:boolean
 }
 
 function compare(pro: string) {
@@ -49,7 +51,7 @@ function compare(pro: string) {
 }
 
 const PieChart:React.FC<PieChartProps> = ({
-  loading, data, colors, chooseDimension, chooseId, type, sprints, versions,
+  loading, data, colors, chooseDimension, chooseId, type, sprints, versions, animation = true,
 }) => {
   const otherTooltipRef = useRef();
   const renderOtherTooltip = () => {
@@ -162,6 +164,7 @@ const PieChart:React.FC<PieChartProps> = ({
     }
 
     return {
+      animation,
       color: colors,
       tooltip: {
         trigger: 'item',

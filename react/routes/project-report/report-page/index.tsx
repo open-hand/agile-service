@@ -39,6 +39,7 @@ const ReportPage: React.FC<Props> = ({ store, edit }) => {
         windowHeight: element.scrollHeight,
       }).then((canvas) => {
         setExporting(false);
+        task.reset();
         // const img = canvas.toDataURL();
         canvas.toBlob((blob: Blob) => {
           fileSaver.saveAs(blob, `${'test'}.png`);
@@ -50,24 +51,6 @@ const ReportPage: React.FC<Props> = ({ store, edit }) => {
   const [exporting, setExporting] = useState(false);
   const handleExport = useCallback(() => {
     setExporting(true);
-    // setTimeout(() => {
-    //   if (containerRef.current) {
-    //     const element = containerRef.current;
-    //     html2canvas(element, {
-    //       allowTaint: true,
-    //       useCORS: true,
-    //       logging: false,
-    //       height: element.scrollHeight,
-    //       windowHeight: element.scrollHeight,
-    //     }).then((canvas) => {
-    //       setExporting(false);
-    //       // const img = canvas.toDataURL();
-    //       canvas.toBlob((blob: Blob) => {
-    //         fileSaver.saveAs(blob, `${'test'}.png`);
-    //       });
-    //     });
-    //   }
-    // });
   }, []);
   return (
     <ProjectReportContext.Provider value={{

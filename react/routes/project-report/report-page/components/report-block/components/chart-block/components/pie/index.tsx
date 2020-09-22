@@ -6,13 +6,14 @@ import { transformPieSearch } from '@/routes/project-report/report-page/componen
 
 interface Props {
   filter: PieSearchVO
+  onFinish?: Function
 }
-const PieComponent: React.FC<Props> = ({ filter }) => {
+const PieComponent: React.FC<Props> = ({ filter, onFinish }) => {
   const config = useMemo(() => transformPieSearch(filter), [filter]);
-  const [, props] = usePieChartReport(config);
+  const [, props] = usePieChartReport(config, onFinish);
   return (
     <div>
-      <Pie {...props} />
+      <Pie {...props} animation={false} />
     </div>
   );
 };

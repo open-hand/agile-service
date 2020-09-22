@@ -6,12 +6,13 @@ import { transformIterationSpeedSearch } from '@/routes/project-report/report-pa
 
 interface Props {
   filter: IterationSpeedSearchVO
+  onFinish?: Function
 }
-const IterationSpeedComponent: React.FC<Props> = ({ filter }) => {
-  const [props] = useIterationSpeedReport(transformIterationSpeedSearch(filter));
+const IterationSpeedComponent: React.FC<Props> = ({ filter, onFinish }) => {
+  const [props] = useIterationSpeedReport(transformIterationSpeedSearch(filter), onFinish);
   return (
     <div>
-      <IterationSpeed {...props} />
+      <IterationSpeed {...props} animation={false} />
     </div>
   );
 };

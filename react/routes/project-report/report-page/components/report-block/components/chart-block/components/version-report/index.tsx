@@ -6,12 +6,13 @@ import { transformVersionReportSearch } from '@/routes/project-report/report-pag
 
 interface Props {
   filter: VersionReportSearchVO
+  onFinish?: Function
 }
-const VersionReportComponent: React.FC<Props> = ({ filter }) => {
-  const [props] = useVersionReport(transformVersionReportSearch(filter));
+const VersionReportComponent: React.FC<Props> = ({ filter, onFinish }) => {
+  const [props] = useVersionReport(transformVersionReportSearch(filter), onFinish);
   return (
     <div>
-      <VersionReport {...props} />
+      <VersionReport {...props} animation={false} />
     </div>
   );
 };

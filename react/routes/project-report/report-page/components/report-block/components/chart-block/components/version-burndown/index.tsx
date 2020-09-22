@@ -6,12 +6,13 @@ import { transformVersionBurndownSearch } from '@/routes/project-report/report-p
 
 interface Props {
   filter: VersionBurndownSearchVO
+  onFinish?: Function
 }
-const VersionBurndownComponent: React.FC<Props> = ({ filter }) => {
-  const [, props] = useVersionBurndown(transformVersionBurndownSearch(filter));
+const VersionBurndownComponent: React.FC<Props> = ({ filter }, onFinish) => {
+  const [, props] = useVersionBurndown(transformVersionBurndownSearch(filter), onFinish);
   return (
     <div>
-      <VersionBurndown {...props} />
+      <VersionBurndown {...props} animation={false} />
     </div>
   );
 };

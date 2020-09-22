@@ -1,6 +1,7 @@
-export interface ITask{
+export interface ITask {
   register: (taskCode: string) => void
   finish: (taskCode: string) => void
+  reset: () => void
 }
 
 function generateTask(code: string, onFinish: Function) {
@@ -25,9 +26,13 @@ function generateTask(code: string, onFinish: Function) {
       }
     }
   };
+  const reset = () => {
+    taskMap.clear();
+  };
   return {
     register,
     finish,
+    reset,
   };
 }
 

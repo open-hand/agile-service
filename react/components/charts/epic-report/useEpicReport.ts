@@ -23,7 +23,7 @@ export interface EpicReportConfig {
   projectId?: string
 }
 
-const useEpicReport = (config?: EpicReportConfig): [EpicReportProps, EpicReportSearchProps] => {
+const useEpicReport = (config?: EpicReportConfig, onFinish?: Function): [EpicReportProps, EpicReportSearchProps] => {
   const projectId = config?.projectId || getProjectId();
   const [loading, setLoading] = useState<boolean>(false);
   const [unit, setUnit] = useControlledDefaultValue<IUnit>(config?.unit || 'story_point');
@@ -54,9 +54,10 @@ const useEpicReport = (config?: EpicReportConfig): [EpicReportProps, EpicReportS
       reportApi.project(projectId).loadIssuesForEpic(epicId).then((res: IEpicReportTable[]) => {
         setTableData(res);
         setLoading(false);
+        onFinish && setTimeout(onFinish);
       });
     }
-  }, [epicId, projectId]);
+  }, [epicId, projectId, onFinish]);
 
   const loadData = useCallback(() => {
     if (epicId) {

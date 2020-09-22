@@ -13,7 +13,7 @@ const AccumulationComponent: React.FC<Props> = ({ filter, onFinish }) => {
   const [, props] = useAccumulationReport(transformAccumulationSearch(filter), onFinish);
   return (
     <div>
-      <Accumulation {...props} />
+      <Accumulation {...props} animation={false} />
     </div>
   );
 };
