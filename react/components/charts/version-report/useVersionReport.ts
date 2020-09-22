@@ -1,16 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { reportApi, versionApi } from '@/api';
 import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
+import { getProjectId } from '@/utils/common';
 import { VersionReportProps, IVersionReportChart, IVersionReportTable } from './index';
 import { VersionReportSearchProps, IVersion } from './search';
 import { IUnit } from '../iteration-speed/search';
 
-interface VersionReportConfig {
-  unit: IUnit,
-  versionId: string
+export interface VersionReportConfig {
+  unit?: IUnit,
+  versionId?: string
+  projectId?: string
 }
 
 const useVersionReport = (config?: VersionReportConfig): [VersionReportProps, VersionReportSearchProps] => {
+  const projectId = config?.projectId || getProjectId();
   const [loading, setLoading] = useState<boolean>(false);
   const [unit, setUnit] = useControlledDefaultValue<IUnit>(config?.unit || 'story_point');
   const [versions, setVersions] = useState<IVersion[]>([]);
@@ -20,7 +23,7 @@ const useVersionReport = (config?: VersionReportConfig): [VersionReportProps, Ve
 
   const loadVersions = useCallback(() => {
     setLoading(true);
-    versionApi.loadNamesByStatus(['version_planning', 'released'])
+    versionApi.project(projectId).loadNamesByStatus(['version_planning', 'released'])
       .then((res: IVersion[]) => {
         let initVersionId = '';
         setLoading(false);
@@ -32,28 +35,28 @@ const useVersionReport = (config?: VersionReportConfig): [VersionReportProps, Ve
         }
         setVersionId(initVersionId);
       });
-  }, [config?.versionId, setVersionId]);
+  }, [config?.versionId, projectId, setVersionId]);
 
   const loadTableData = useCallback(() => {
     if (versionId) {
       setLoading(true);
-      reportApi.loadVersionTable(versionId).then((res: IVersionReportTable[]) => {
+      reportApi.project(projectId).loadVersionTable(versionId).then((res: IVersionReportTable[]) => {
         setTableData(res);
         setLoading(false);
       });
     }
-  }, [versionId]);
+  }, [projectId, versionId]);
 
   const loadData = useCallback(() => {
     if (versionId) {
       setLoading(true);
-      reportApi.loadVersionChart(versionId, unit)
+      reportApi.project(projectId).loadVersionChart(versionId, unit)
         .then((res: IVersionReportChart[]) => {
           setData(res);
           setLoading(false);
         });
     }
-  }, [unit, versionId]);
+  }, [projectId, unit, versionId]);
 
   useEffect(() => {
     loadVersions();
@@ -71,7 +74,7 @@ const useVersionReport = (config?: VersionReportConfig): [VersionReportProps, Ve
     loading, data, tableData, unit,
   };
   const searchProps: VersionReportSearchProps = {
-    unit, setUnit, versions, versionId, setVersionId,
+    unit, setUnit, versions, versionId, setVersionId, projectId,
   };
   return [props, searchProps];
 };

@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback, useImperativeHandle } from 'react';
 import VersionBurnDown from '@/components/charts/version-burnDown';
 import VersionBurnDownSearch from '@/components/charts/version-burnDown/search';
-import useVersionBurnDownReport from '@/components/charts/version-burnDown/useVersionBurnDownReport';
+import useVersionBurnDownReport, { VersionBurnConfig } from '@/components/charts/version-burnDown/useVersionBurnDownReport';
 import pic from '@/assets/image/emptyChart.svg';
 import EmptyBlock from '@/components/EmptyBlock';
 import to from '@/utils/to';
@@ -13,31 +13,33 @@ import { ChartRefProps } from '../..';
 interface Props {
   innerRef: React.MutableRefObject<ChartRefProps>
   data?: IReportChartBlock
+  projectId?: string
 }
-export const transformVersionBurndownSearch = (searchVO: VersionBurndownSearchVO): {
-  versionId: string,
-  checked: 'checked' | undefined,
-} | undefined => {
+export const transformVersionBurndownSearch = (searchVO: VersionBurndownSearchVO | undefined): VersionBurnConfig | undefined => {
   if (!searchVO) {
     return undefined;
   }
   return ({
     versionId: searchVO.versionId,
     checked: searchVO.calibrationSprint ? 'checked' : undefined,
+    projectId: searchVO.projectId,
   });
 };
 
-const EpicBurnDownComponent:React.FC<Props> = ({ innerRef, data }) => {
-  const config = useMemo(() => transformVersionBurndownSearch(data?.chartSearchVO as VersionBurndownSearchVO), [data?.chartSearchVO]);
+const EpicBurnDownComponent:React.FC<Props> = ({ innerRef, projectId, data }) => {
+  const config = useMemo(() => ({
+    ...transformVersionBurndownSearch(data?.chartSearchVO as VersionBurndownSearchVO),
+    projectId,
+  }), [data?.chartSearchVO, projectId]);
   const [searchProps, props] = useVersionBurnDownReport(config);
   const { versions, currentVersionId, checked } = searchProps;
   const handleSubmit = useCallback(async (): Promise<VersionBurndownSearchVO> => ({
     type: 'version',
     calibrationSprint: checked === 'checked',
     versionId: currentVersionId,
-    projectId: getProjectId(),
+    projectId: searchProps.projectId || getProjectId(),
   }),
-  [checked, currentVersionId]);
+  [checked, currentVersionId, searchProps.projectId]);
 
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,

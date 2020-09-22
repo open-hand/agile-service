@@ -29,6 +29,7 @@ export interface PieSearchProps {
   setType: Function,
   setChooseDimension: Function,
   setChooseId: Function,
+  projectId?: string
 }
 const PieSearch: React.FC<PieSearchProps> = ({
   chooseId, versions, sprints, type, chooseDimension, setType, setChooseDimension, setChooseId,

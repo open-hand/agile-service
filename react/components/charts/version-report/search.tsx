@@ -24,6 +24,7 @@ export interface VersionReportSearchProps {
   versions: IVersion[]
   versionId: string
   setVersionId: Function
+  projectId?: string
 }
 
 const VersionReportSearch:React.FC<VersionReportSearchProps> = ({

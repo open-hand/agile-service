@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
+import Api from './Api';
 
 interface VersionCreateVO {
   name: string,
@@ -29,15 +30,14 @@ interface DragVersionData {
   objectVersionNumber: number,
   versionId: number
 }
-class VersionApi {
+class VersionApi extends Api<VersionApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
-
 
   /**
    * 根据版本id查询版本详情及issue统计信息
-   * @param versionId 
+   * @param versionId
    */
   load(versionId: number) {
     return axios.get(`${this.prefix}/product_version/${versionId}`);
@@ -52,10 +52,10 @@ class VersionApi {
 
   /**
    * 查找此项目下版本信息列表
-   * @param page 
-   * @param size 
-   * @param filters 
-   * 
+   * @param page
+   * @param size
+   * @param filters
+   *
    */
   loadVersionList(page: number = 1, size: number = 20, filters: AdvancedSearch) {
     return axios({
@@ -71,10 +71,10 @@ class VersionApi {
 
   /**
    * 根据状态查询版本名
-   * @param statusArr 
+   * @param statusArr
    */
-  loadNamesByStatus(statusArr: Array<string> = [], projectId?: number) {
-    return axios.post(`/agile/v1/projects/${projectId || getProjectId()}/product_version/names`, statusArr);
+  loadNamesByStatus(statusArr: Array<string> = []) {
+    return axios.post(`${this.prefix}/product_version/names`, statusArr);
   }
 
   /**
@@ -87,7 +87,7 @@ class VersionApi {
 
   /**
    * 根据版本id查询的版本详细信息 用于查询规划中的版本
-   * @param versionId 
+   * @param versionId
    */
   loadPublicVersionDetail(versionId: number) {
     return axios.get(`${this.prefix}/product_version/${versionId}/plan_names`);
@@ -95,7 +95,7 @@ class VersionApi {
 
   /**
    * 创建版本
-   * @param versionCreateVO 
+   * @param versionCreateVO
    */
   create(versionCreateVO: VersionCreateVO) {
     return axios.post(`${this.prefix}/product_version`, versionCreateVO);
@@ -103,7 +103,7 @@ class VersionApi {
 
   /**
    * 将版本归档
-   * @param versionId 
+   * @param versionId
    */
   archived(versionId: number) {
     return axios.post(`${this.prefix}/product_version/${versionId}/archived`);
@@ -111,7 +111,7 @@ class VersionApi {
 
   /**
    * 撤销归档版本
-   * @param versionId 
+   * @param versionId
    */
   revokeArchived(versionId: number) {
     return axios.post(`${this.prefix}/product_version/${versionId}/revoke_archived`);
@@ -119,7 +119,7 @@ class VersionApi {
 
   /**
    * 发布版本
-   * @param publishVersion 
+   * @param publishVersion
    */
   publish(publishVersion: PublishVersion) {
     return axios.post(`${this.prefix}/product_version/release`, publishVersion);
@@ -127,16 +127,15 @@ class VersionApi {
 
   /**
    * 撤销发布版本
-   * @param versionId 
+   * @param versionId
    */
   revokePublish(versionId: number) {
     return axios.post(`${this.prefix}/product_version/${versionId}/revoke_release`);
   }
 
-
   /**
    * 检查版本名是否重复
-   * @param name 
+   * @param name
    */
   checkName(name: string) {
     return axios({
@@ -150,8 +149,8 @@ class VersionApi {
 
   /**
    * 更新版本信息
-   * @param versionId 
-   * @param data 
+   * @param versionId
+   * @param data
    */
   update(versionId: number, data: UVersionVO) {
     return axios.put(`${this.prefix}/product_version/update/${versionId}`, data);
@@ -159,8 +158,8 @@ class VersionApi {
 
   /**
    * 根据版本id删除版本
-   * @param versionId 
-   * @param targetVersionId 要移动到的目标版本id 
+   * @param versionId
+   * @param targetVersionId 要移动到的目标版本id
    */
   delete(versionId: number, targetVersionId?: number) {
     return axios({
@@ -174,7 +173,7 @@ class VersionApi {
 
   /**
    * 拖拽版本
-   * @param dragVersionData 
+   * @param dragVersionData
    */
   drag(dragVersionData: DragVersionData) {
     return axios.put(`${this.prefix}/product_version/drag`, dragVersionData);
@@ -183,7 +182,7 @@ class VersionApi {
   /**
    * 将批量的issue加入到版本中
    * @param versionId 版本id
-   * @param issueIds 
+   * @param issueIds
    */
   addIssues(versionId: number, issueIds: Array<number>) {
     return axios.post(`${this.prefix}/issues/to_version/${versionId}`, issueIds);
@@ -191,5 +190,4 @@ class VersionApi {
 }
 
 const versionApi = new VersionApi();
-
 export { versionApi };

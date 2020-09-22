@@ -5,14 +5,17 @@ import { EpicBurnDownChartProps, OriginData, ChartData } from '@/components/char
 import { EpicBurnDownSearchProps, IEpic } from '@/components/charts/epic-burnDown/search';
 import { reportApi, epicApi } from '@/api';
 import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
+import { getProjectId } from '@/utils/common';
 import { getChartDataFromServerData } from './utils';
 
-interface EpicBurnConfig {
-  epicId: string
-  checked: 'checked' | undefined
+export interface EpicBurnConfig {
+  epicId?: string
+  checked?: 'checked' | undefined
+  projectId?: string
 }
 
 function useEpicBurnDownReport(config?: EpicBurnConfig): [EpicBurnDownSearchProps, EpicBurnDownChartProps] {
+  const projectId = config?.projectId || getProjectId();
   const [epics, setEpics] = useState<IEpic[]>([]);
   const [epicIsLoading, setEpicIsLoading] = useState<boolean>(false);
   const [checked, setChecked] = useControlledDefaultValue<'checked' | undefined>(config?.checked);
@@ -24,7 +27,7 @@ function useEpicBurnDownReport(config?: EpicBurnConfig): [EpicBurnDownSearchProp
   const loadEpic = useCallback(() => {
     setLoading(true);
     setEpicIsLoading(true);
-    epicApi.loadEpics().then((epicList:IEpic[]) => {
+    epicApi.project(projectId).loadEpics().then((epicList:IEpic[]) => {
       setEpicIsLoading(false);
       setEpics(epicList);
       let initEpicId = '';
@@ -35,7 +38,7 @@ function useEpicBurnDownReport(config?: EpicBurnConfig): [EpicBurnDownSearchProp
       }
       setCurrentEpicId(initEpicId);
     });
-  }, [config?.epicId, setCurrentEpicId]);
+  }, [config?.epicId, projectId, setCurrentEpicId]);
 
   useEffect(() => {
     loadEpic();
@@ -44,7 +47,7 @@ function useEpicBurnDownReport(config?: EpicBurnConfig): [EpicBurnDownSearchProp
   const loadChartData = useCallback((id?) => {
     if (id || currentEpicId) {
       setLoading(true);
-      reportApi.loadEpicOrVersionBurnDownCoordinate(id || currentEpicId, 'Epic')
+      reportApi.project(projectId).loadEpicOrVersionBurnDownCoordinate(id || currentEpicId, 'Epic')
         .then((res: OriginData[]) => {
           setData(res);
           setChartData(getChartDataFromServerData(res));
@@ -53,7 +56,7 @@ function useEpicBurnDownReport(config?: EpicBurnConfig): [EpicBurnDownSearchProp
           setLoading(false);
         });
     }
-  }, [currentEpicId]);
+  }, [currentEpicId, projectId]);
 
   useEffect(() => {
     loadChartData();
@@ -76,6 +79,7 @@ function useEpicBurnDownReport(config?: EpicBurnConfig): [EpicBurnDownSearchProp
     epicIsLoading,
     checked,
     currentEpicId,
+    projectId,
     setCurrentEpicId,
     setChecked,
   };

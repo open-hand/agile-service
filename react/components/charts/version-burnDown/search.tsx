@@ -2,8 +2,6 @@ import React from 'react';
 import { Select, CheckBox } from 'choerodon-ui/pro';
 import { Icon } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
-import to, { linkUrl } from '@/utils/to';
-import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import seeChangeRange from './image/seeChangeRange.svg';
 import seeProgress from './image/seeProgress.svg';
@@ -21,6 +19,7 @@ export interface VersionBurnDownSearchProps {
   currentVersionId: string,
   setCurrentVersionId: Function,
   setChecked: Function,
+  projectId?: string,
 }
 
 const { Option } = Select;
