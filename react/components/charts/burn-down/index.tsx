@@ -12,6 +12,7 @@ export interface BurnDownProps {
   endDate: string
   restDayShow: boolean
   restDays: string[],
+  animation?:boolean
 }
 
 const BurndownChart: React.FC<BurnDownProps> = ({
@@ -21,6 +22,7 @@ const BurndownChart: React.FC<BurnDownProps> = ({
   endDate,
   restDayShow,
   restDays,
+  animation = true,
 }) => {
   const {
     xAxis, yAxis, exportAxis, markAreaData,
@@ -43,6 +45,7 @@ const BurndownChart: React.FC<BurnDownProps> = ({
     return result;
   };
   const getOption = (): EChartOption => ({
+    animation,
     tooltip: {
       trigger: 'axis',
       backgroundColor: '#fff',

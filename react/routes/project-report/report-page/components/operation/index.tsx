@@ -12,7 +12,9 @@ interface Props {
 
 }
 const Operation: React.FC<Props> = () => {
-  const { store, baseInfoRef, edit } = useProjectReportContext();
+  const {
+    store, baseInfoRef, edit, setPreview, doExport,
+  } = useProjectReportContext();
   const handleSubmit = useCallback(async () => {
     const baseInfo = await baseInfoRef.current.submit();
     if (baseInfo && baseInfo instanceof Object) {
@@ -36,8 +38,11 @@ const Operation: React.FC<Props> = () => {
     }
   }, [baseInfoRef, edit, store.baseInfo?.id, store.baseInfo?.objectVersionNumber, store.blockList]);
   const handlePreview = useCallback(() => {
-    to(`/agile/project-report/preview/${store.baseInfo?.id}`);
-  }, [store.baseInfo?.id]);
+    setPreview(true);
+  }, [setPreview]);
+  const handleExportClick = useCallback(() => {
+    doExport();
+  }, [doExport]);
 
   return (
     <div
@@ -45,7 +50,7 @@ const Operation: React.FC<Props> = () => {
     >
       <Button funcType={'raised' as FuncType} color={'blue' as ButtonColor} onClick={handleSubmit}>保存</Button>
       <Button funcType={'raised' as FuncType} onClick={handlePreview}>预览</Button>
-      <Button funcType={'raised' as FuncType}>导出</Button>
+      <Button funcType={'raised' as FuncType} onClick={handleExportClick}>导出</Button>
       <Button funcType={'raised' as FuncType}>发送</Button>
       <Button funcType={'raised' as FuncType}>取消</Button>
     </div>

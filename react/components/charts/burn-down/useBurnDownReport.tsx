@@ -20,7 +20,7 @@ export interface BurnDownConfig {
   projectId?: string
 }
 
-function useBurnDownReport(config?: BurnDownConfig): [BurnDownSearchProps, BurnDownProps] {
+function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnDownSearchProps, BurnDownProps] {
   const projectId = config?.projectId || getProjectId();
   const [quickFilter, setQuickFilter] = useControlledDefaultValue<IQuickSearchValue>(
     config?.quickFilter || {
@@ -54,9 +54,10 @@ function useBurnDownReport(config?: BurnDownConfig): [BurnDownSearchProps, BurnD
         setData(burnDownData);
         setRestDays(resetDaysData.map((date) => moment(date).format('YYYY-MM-DD')));
         setLoading(false);
+        onFinish && setTimeout(onFinish);
       });
     }
-  }, [projectId, quickFilter.onlyMe, quickFilter.onlyStory, quickFilter.personalFilters, quickFilter.quickFilters, sprintId, type]);
+  }, [onFinish, projectId, quickFilter.onlyMe, quickFilter.onlyStory, quickFilter.personalFilters, quickFilter.quickFilters, sprintId, type]);
   useEffect(() => {
     loadData();
   }, [loadData]);

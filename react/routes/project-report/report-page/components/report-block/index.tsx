@@ -1,9 +1,9 @@
 import React, { useCallback } from 'react';
+import classNames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { DraggableProvided } from 'react-beautiful-dnd';
-import styles from './index.less';
 import {
   IReportBlock, IReportTextBlock, IReportChartBlock, IReportListBlock,
 } from '../../store';
@@ -12,14 +12,24 @@ import ChartBlock from './components/chart-block';
 import ListBlock from './components/list-block';
 import { useProjectReportContext } from '../../context';
 import openAddModal from '../add-modal';
+import styles from './index.less';
+import listStyles from '../../index.less';
 
-interface Props {
+interface BlockProps {
   data: IReportBlock
   index: number
   provided: DraggableProvided
 }
+interface BlockPreviewProps {
+  data: IReportBlock
+  index: number
+  preview: true
+}
+type Props = BlockProps | BlockPreviewProps
 
-const ReportBlock: React.FC<Props> = ({ data, index, provided }) => {
+const ReportBlock: React.FC<Props> = (props) => {
+  const { data, index, provided } = props as BlockProps;
+  const isPreview = (props as BlockPreviewProps).preview;
   const { title, type } = data;
   const { store } = useProjectReportContext();
   const renderBlock = useCallback(() => {
@@ -54,16 +64,23 @@ const ReportBlock: React.FC<Props> = ({ data, index, provided }) => {
   return (
     <div className={styles.report_block}>
       <div
-        className={styles.header}
-        {...provided.dragHandleProps}
+        className={classNames(styles.header, {
+          [styles.header_preview]: isPreview,
+        })}
+        {...provided ? provided.dragHandleProps : {}}
       >
+        {isPreview && <div className={listStyles.tip} />}
         <span className={styles.title}>{title}</span>
-        <div className={styles.operation}>
-          <Button icon="edit-o" color={'blue' as ButtonColor} onClick={handleEdit}>编辑</Button>
-          <Button icon="delete" color={'blue' as ButtonColor} onClick={handleDelete}>删除</Button>
-        </div>
+        {!isPreview && (
+          <div className={styles.operation}>
+            <Button icon="edit-o" color={'blue' as ButtonColor} onClick={handleEdit}>编辑</Button>
+            <Button icon="delete" color={'blue' as ButtonColor} onClick={handleDelete}>删除</Button>
+          </div>
+        )}
       </div>
-      {renderBlock()}
+      <div className={styles.content}>
+        {renderBlock()}
+      </div>
     </div>
   );
 };

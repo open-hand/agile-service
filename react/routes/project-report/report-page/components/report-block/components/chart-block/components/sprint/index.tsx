@@ -6,12 +6,13 @@ import { SprintSearchVO } from '@/routes/project-report/report-page/store';
 
 interface Props {
   filter: SprintSearchVO
+  onFinish?: Function
 }
-const SprintComponent: React.FC<Props> = ({ filter }) => {
-  const [, props] = useSprintReport(transformSprintSearch(filter));
+const SprintComponent: React.FC<Props> = ({ filter, onFinish }) => {
+  const [, props] = useSprintReport(transformSprintSearch(filter), onFinish);
   return (
     <div>
-      <Sprint {...props} />
+      <Sprint {...props} animation={false} />
     </div>
   );
 };

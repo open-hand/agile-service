@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { IReportChartBlock, IChartCode } from '@/routes/project-report/report-page/store';
+import { useTaskContext } from '@/routes/project-report/report-preview/taskContext';
 import BurnDownBlock from './components/burndown';
 import SprintBlock from './components/sprint';
 import AccumulationBlock from './components/accumulation';
@@ -33,10 +34,15 @@ interface Props {
 }
 const ChartBlock: React.FC<Props> = ({ data: { chartSearchVO, chartCode } }) => {
   const ChartBlockComponent = chartBlockMap.get(chartCode);
+  const { register, finish } = useTaskContext();
+  register(chartCode);
+  const onFinish = useCallback(() => {
+    finish(chartCode);
+  }, [chartCode, finish]);
   return (
     <>
       {ChartBlockComponent && (
-        <ChartBlockComponent filter={chartSearchVO} />
+        <ChartBlockComponent filter={chartSearchVO} onFinish={onFinish} />
       )}
     </>
   );
