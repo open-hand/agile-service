@@ -9,14 +9,17 @@ import { PieSearchProps } from '@/components/charts/pie-chart/search';
 import { reportApi, sprintApi, versionApi } from '@/api';
 import { ISprint, IVersion } from '@/common/types';
 import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
+import { getProjectId } from '@/utils/common';
 
-interface PieConfig {
-  type: IPieChartType
-  chooseId: string,
-  chooseDimension: IDimension,
+export interface PieConfig {
+  type?: IPieChartType
+  chooseId?: string,
+  chooseDimension?: IDimension,
+  projectId?: string,
 }
 
 function usePieChartReport(config?: PieConfig): [PieSearchProps, PieChartProps] {
+  const projectId = config?.projectId || getProjectId();
   const [type, setType] = useControlledDefaultValue<IPieChartType>(config?.type || 'assignee');
   const [loading, setLoading] = useState(false);
   const [chooseId, setChooseId] = useControlledDefaultValue<string | ''>(config?.chooseId || '');
@@ -28,18 +31,18 @@ function usePieChartReport(config?: PieConfig): [PieSearchProps, PieChartProps] 
 
   const loadSprintsAndVersions = useCallback(() => {
     axios.all([
-      sprintApi.loadSprints(['started', 'closed']),
-      versionApi.loadNamesByStatus(),
+      sprintApi.project(projectId).loadSprints(['started', 'closed']),
+      versionApi.project(projectId).loadNamesByStatus(),
     ])
       .then(axios.spread((sprintList: ISprint[], versionList: IVersion[]) => {
         setSprints(sprintList);
         setVersions(versionList);
       }));
-  }, []);
+  }, [projectId]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    reportApi.loadPie(type, chooseDimension === 'sprint' ? chooseId : '', chooseDimension === 'version' ? chooseId : '')
+    reportApi.project(projectId).loadPie(type, chooseDimension === 'sprint' ? chooseId : '', chooseDimension === 'version' ? chooseId : '')
       .then((res: IPieData[]) => {
         const len = res.length;
         if (len) {
@@ -77,6 +80,7 @@ function usePieChartReport(config?: PieConfig): [PieSearchProps, PieChartProps] 
     setType,
     setChooseDimension,
     setChooseId,
+    projectId,
   };
   const props: PieChartProps = {
     loading,

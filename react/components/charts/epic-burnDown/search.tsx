@@ -22,6 +22,7 @@ export interface EpicBurnDownSearchProps {
   currentEpicId: string,
   setCurrentEpicId: Function,
   setChecked: Function,
+  projectId?: string,
 }
 
 const { Option } = Select;

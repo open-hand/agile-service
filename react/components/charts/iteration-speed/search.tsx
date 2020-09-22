@@ -9,6 +9,7 @@ export type IUnit = 'story_point' | 'issue_count' | 'remain_time';
 export interface IterationSpeedSearchProps {
   unit: IUnit,
   setUnit: Function,
+  projectId: string,
 }
 
 const IterationSpeedSearch: React.FC<IterationSpeedSearchProps> = ({ unit, setUnit }) => {

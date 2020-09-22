@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback, useImperativeHandle } from 'react';
 import EpicBurnDown from '@/components/charts/epic-burnDown';
 import EpicBurnDownSearch from '@/components/charts/epic-burnDown/search';
-import useEpicBurnDownReport from '@/components/charts/epic-burnDown/useEpicBurnDownReport';
+import useEpicBurnDownReport, { EpicBurnConfig } from '@/components/charts/epic-burnDown/useEpicBurnDownReport';
 import pic from '@/assets/image/emptyChart.svg';
 import EmptyBlock from '@/components/EmptyBlock';
 import to from '@/utils/to';
@@ -13,31 +13,33 @@ import { ChartRefProps } from '../..';
 interface Props {
   innerRef: React.MutableRefObject<ChartRefProps>
   data?: IReportChartBlock
+  projectId?: string
 }
-export const transformEpicBurndownSearch = (searchVO: EpicBurndownSearchVO): {
-  epicId: string,
-  checked: 'checked' | undefined,
-} | undefined => {
+export const transformEpicBurndownSearch = (searchVO: EpicBurndownSearchVO | undefined): EpicBurnConfig | undefined => {
   if (!searchVO) {
     return undefined;
   }
   return ({
     epicId: searchVO.epicId,
     checked: searchVO.calibrationSprint ? 'checked' : undefined,
+    projectId: searchVO.projectId,
   });
 };
 
-const EpicBurnDownComponent:React.FC<Props> = ({ innerRef, data }) => {
-  const config = useMemo(() => transformEpicBurndownSearch(data?.chartSearchVO as EpicBurndownSearchVO), [data?.chartSearchVO]);
+const EpicBurnDownComponent:React.FC<Props> = ({ innerRef, projectId, data }) => {
+  const config = useMemo(() => ({
+    ...transformEpicBurndownSearch(data?.chartSearchVO as EpicBurndownSearchVO),
+    projectId,
+  }), [data?.chartSearchVO, projectId]);
   const [searchProps, props] = useEpicBurnDownReport(config);
   const { epics, currentEpicId, checked } = searchProps;
   const handleSubmit = useCallback(async (): Promise<EpicBurndownSearchVO> => ({
     type: 'epic',
     epicId: currentEpicId,
     calibrationSprint: checked === 'checked',
-    projectId: getProjectId(),
+    projectId: searchProps.projectId || getProjectId(),
   }),
-  [checked, currentEpicId]);
+  [checked, currentEpicId, searchProps.projectId]);
 
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,

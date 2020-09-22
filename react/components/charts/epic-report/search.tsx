@@ -22,6 +22,7 @@ export interface EpicReportSearchProps {
   epics: IEpic[]
   epicId: string
   setEpicId: Function
+  projectId?: string
 }
 
 const EpicReportSearch:React.FC<EpicReportSearchProps> = ({

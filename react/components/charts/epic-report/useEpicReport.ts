@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { reportApi, epicApi } from '@/api';
 import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
+import { getProjectId } from '@/utils/common';
 import { EpicReportProps, IEpicReportChart, IEpicReportTable } from './index';
 import { EpicReportSearchProps, IEpic } from './search';
 import { IUnit } from '../iteration-speed/search';
@@ -16,12 +17,14 @@ interface IOriginChartData {
   unEstimateIssueCount: number
 }
 
-interface EpicReportConfig {
-  unit: IUnit,
-  epicId: string
+export interface EpicReportConfig {
+  unit?: IUnit,
+  epicId?: string
+  projectId?: string
 }
 
 const useEpicReport = (config?: EpicReportConfig): [EpicReportProps, EpicReportSearchProps] => {
+  const projectId = config?.projectId || getProjectId();
   const [loading, setLoading] = useState<boolean>(false);
   const [unit, setUnit] = useControlledDefaultValue<IUnit>(config?.unit || 'story_point');
   const [epics, setEpics] = useState<IEpic[]>([]);
@@ -31,7 +34,7 @@ const useEpicReport = (config?: EpicReportConfig): [EpicReportProps, EpicReportS
 
   const loadEpics = useCallback(() => {
     setLoading(true);
-    epicApi.loadEpics()
+    epicApi.project(projectId).loadEpics()
       .then((res: IEpic[]) => {
         setLoading(false);
         setEpics(res);
@@ -43,22 +46,22 @@ const useEpicReport = (config?: EpicReportConfig): [EpicReportProps, EpicReportS
         }
         setEpicId(initEpicId);
       });
-  }, [config?.epicId, setEpicId]);
+  }, [config?.epicId, projectId, setEpicId]);
 
   const loadTableData = useCallback(() => {
     if (epicId) {
       setLoading(true);
-      reportApi.loadIssuesForEpic(epicId).then((res: IEpicReportTable[]) => {
+      reportApi.project(projectId).loadIssuesForEpic(epicId).then((res: IEpicReportTable[]) => {
         setTableData(res);
         setLoading(false);
       });
     }
-  }, [epicId]);
+  }, [epicId, projectId]);
 
   const loadData = useCallback(() => {
     if (epicId) {
       setLoading(true);
-      reportApi.loadEpicChart(epicId, unit).then((res: IOriginChartData[]) => {
+      reportApi.project(projectId).loadEpicChart(epicId, unit).then((res: IOriginChartData[]) => {
         const chartData = res.map((item) => ({
           ...item,
           allRemainTimes: item.allRemainTimes || 0,
@@ -73,7 +76,7 @@ const useEpicReport = (config?: EpicReportConfig): [EpicReportProps, EpicReportS
         setLoading(false);
       });
     }
-  }, [unit, epicId]);
+  }, [epicId, projectId, unit]);
 
   useEffect(() => {
     loadEpics();
@@ -91,7 +94,7 @@ const useEpicReport = (config?: EpicReportConfig): [EpicReportProps, EpicReportS
     loading, data, tableData, unit, epicId, epics,
   };
   const searchProps: EpicReportSearchProps = {
-    unit, setUnit, epics, epicId, setEpicId,
+    unit, setUnit, epics, epicId, setEpicId, projectId,
   };
   return [props, searchProps];
 };

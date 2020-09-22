@@ -5,14 +5,17 @@ import { VersionBurnDownChartProps, OriginData, ChartData } from '@/components/c
 import { VersionBurnDownSearchProps, IVersion } from '@/components/charts/version-burnDown/search';
 import { reportApi, versionApi } from '@/api';
 import useControlledDefaultValue from '@/hooks/useControlledDefaultValue';
+import { getProjectId } from '@/utils/common';
 import { getChartDataFromServerData } from './utils';
 
-interface VersionBurnConfig {
-  versionId: string
-  checked: 'checked' | undefined
+export interface VersionBurnConfig {
+  versionId?: string
+  checked?: 'checked' | undefined
+  projectId?: string
 }
 
 function useVersionBurnDownReport(config?: VersionBurnConfig): [VersionBurnDownSearchProps, VersionBurnDownChartProps] {
+  const projectId = config?.projectId || getProjectId();
   const [versions, setVersions] = useState<IVersion[]>([]);
   const [versionIsLoading, setVersionIsLoading] = useState<boolean>(false);
   const [checked, setChecked] = useControlledDefaultValue<'checked' | undefined>(config?.checked);
@@ -24,7 +27,7 @@ function useVersionBurnDownReport(config?: VersionBurnConfig): [VersionBurnDownS
   const loadVersions = useCallback(() => {
     setVersionIsLoading(true);
     setLoading(true);
-    versionApi.loadNamesByStatus(['version_planning', 'released']).then((versionList:IVersion[]) => {
+    versionApi.project(projectId).loadNamesByStatus(['version_planning', 'released']).then((versionList:IVersion[]) => {
       setVersionIsLoading(false);
       setVersions(versionList);
       let initVersionId = '';
@@ -35,7 +38,7 @@ function useVersionBurnDownReport(config?: VersionBurnConfig): [VersionBurnDownS
       }
       setCurrentVersionId(initVersionId);
     });
-  }, [config?.versionId, setCurrentVersionId]);
+  }, [config?.versionId, projectId, setCurrentVersionId]);
 
   useEffect(() => {
     loadVersions();
@@ -44,7 +47,7 @@ function useVersionBurnDownReport(config?: VersionBurnConfig): [VersionBurnDownS
   const loadChartData = useCallback((id?) => {
     if (id || currentVersionId) {
       setLoading(true);
-      reportApi.loadEpicOrVersionBurnDownCoordinate(id || currentVersionId, 'Vpic')
+      reportApi.project(projectId).loadEpicOrVersionBurnDownCoordinate(id || currentVersionId, 'Vpic')
         .then((res: OriginData[]) => {
           setData(res);
           setChartData(getChartDataFromServerData(res));
@@ -53,7 +56,7 @@ function useVersionBurnDownReport(config?: VersionBurnConfig): [VersionBurnDownS
           setLoading(false);
         });
     }
-  }, [currentVersionId]);
+  }, [currentVersionId, projectId]);
 
   useEffect(() => {
     loadChartData();
@@ -77,6 +80,7 @@ function useVersionBurnDownReport(config?: VersionBurnConfig): [VersionBurnDownS
     versionIsLoading,
     checked,
     currentVersionId,
+    projectId,
     setCurrentVersionId,
     setChecked,
   };

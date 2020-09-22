@@ -1,9 +1,10 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
+import Api from './Api';
 
-class EpicApi {
+class EpicApi extends Api<EpicApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
@@ -15,7 +16,7 @@ class EpicApi {
 
   /**
    * 史诗名检查
-   * @param epicName 
+   * @param epicName
    */
   checkName(epicName: string, epicId: number) {
     return axios({
@@ -44,8 +45,8 @@ class EpicApi {
 
   /**
    * 将批量的issue加入到史诗中
-   * @param epicId 
-   * @param issueIds 
+   * @param epicId
+   * @param issueIds
    */
   addIssues(epicId: number, issueIds: Array<number>) {
     return axios.post(`${this.prefix}/issues/to_epic/${epicId}`, issueIds);
