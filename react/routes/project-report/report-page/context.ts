@@ -12,7 +12,6 @@ interface Context {
   edit: boolean
   preview: boolean
   setPreview: React.Dispatch<React.SetStateAction<boolean>>
-  doExport: () => void
 }
 const ProjectReportContext = createContext({} as Context);
 
