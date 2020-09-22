@@ -1,48 +1,16 @@
 import React from 'react';
-import { Observer } from 'mobx-react-lite';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useProjectReportContext } from '../../context';
-import ReportBlock from '../report-block';
+import BlockList from './BlockList';
+import BlockListPreview from './Preview';
 
-const BlockList: React.FC = () => {
-  const { store } = useProjectReportContext();
-  return (
-    <DragDropContext onDragEnd={(result) => {
-      if (!result.destination) {
-        return;
-      }
-      store.sortBlock(result.source.index, result.destination.index);
-    }}
-    >
-      <Droppable droppableId="droppable">
-        {(provided) => (
-          <div
-            {...provided.droppableProps}
-            ref={provided.innerRef}
-          >
-            <Observer>
-              {() => (
-                <>
-                  {store.blockList.map((block, index) => (
-                    <Draggable key={block.key} draggableId={block.key} index={index}>
-                      {(innerProvided) => (
-                        <div
-                          ref={innerProvided.innerRef}
-                          {...innerProvided.draggableProps}
-                        >
-                          <ReportBlock provided={innerProvided} index={index} data={block} />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                </>
-              )}
-            </Observer>
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
-  );
+interface Props {
+  preview?: boolean
+}
+const BlockListIndex: React.FC<Props> = ({
+  preview: forcePreview,
+}) => {
+  const { preview } = useProjectReportContext();
+  const isPreview = forcePreview || preview;
+  return isPreview ? <BlockListPreview /> : <BlockList />;
 };
-export default BlockList;
+export default BlockListIndex;

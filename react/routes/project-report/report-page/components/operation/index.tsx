@@ -12,7 +12,9 @@ interface Props {
 
 }
 const Operation: React.FC<Props> = () => {
-  const { store, baseInfoRef, edit } = useProjectReportContext();
+  const {
+    store, baseInfoRef, edit, setPreview,
+  } = useProjectReportContext();
   const handleSubmit = useCallback(async () => {
     const baseInfo = await baseInfoRef.current.submit();
     if (baseInfo && baseInfo instanceof Object) {
@@ -36,8 +38,8 @@ const Operation: React.FC<Props> = () => {
     }
   }, [baseInfoRef, edit, store.baseInfo?.id, store.baseInfo?.objectVersionNumber, store.blockList]);
   const handlePreview = useCallback(() => {
-    to(`/agile/project-report/preview/${store.baseInfo?.id}`);
-  }, [store.baseInfo?.id]);
+    setPreview(true);
+  }, [setPreview]);
 
   return (
     <div

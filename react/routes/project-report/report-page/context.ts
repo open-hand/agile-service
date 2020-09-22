@@ -10,6 +10,8 @@ interface Context {
   store: ProjectReportStore
   baseInfoRef: React.MutableRefObject<BaseInfoRef>
   edit: boolean
+  preview: boolean
+  setPreview: React.Dispatch<React.SetStateAction<boolean>>
 }
 const ProjectReportContext = createContext({} as Context);
 
