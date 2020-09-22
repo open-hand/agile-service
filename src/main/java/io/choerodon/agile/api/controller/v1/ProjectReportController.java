@@ -1,7 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
 
-import io.choerodon.agile.api.vo.ImageVO;
 import io.choerodon.agile.api.vo.ProjectReportVO;
 import io.choerodon.agile.app.service.ProjectReportService;
 import io.choerodon.agile.infra.dto.ProjectReportDTO;
