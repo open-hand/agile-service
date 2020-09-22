@@ -42,6 +42,16 @@ public class ProjectReportVO {
     private UserDTO createdUser;
     @ApiModelProperty("版本号")
     private Long objectVersionNumber;
+    @ApiModelProperty("图片的base64数据")
+    private String imgData;
+    
+    public String getImgData() {
+        return imgData;
+    }
+
+    public void setImgData(String imgData) {
+        this.imgData = imgData;
+    }
 
     public UserDTO getCreatedUser() {
         return createdUser;
