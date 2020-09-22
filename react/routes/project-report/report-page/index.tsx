@@ -1,8 +1,12 @@
-import React, { useRef, useState } from 'react';
+import React, {
+  useRef, useState, useCallback, useMemo,
+} from 'react';
 import {
   Page, Breadcrumb, Content,
 } from '@choerodon/boot';
 import { Button, Dropdown, Menu } from 'choerodon-ui/pro';
+import html2canvas from 'html2canvas';
+import fileSaver from 'file-saver';
 import { IReportContentType } from '@/common/types';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
@@ -14,6 +18,7 @@ import PreviewReport from '../report-preview';
 import ProjectReportContext, { BaseInfoRef } from './context';
 import ProjectReportStore from './store';
 import styles from './index.less';
+import generateTask from '../report-preview/generateTask';
 
 interface Props {
   store: ProjectReportStore
@@ -21,7 +26,49 @@ interface Props {
 }
 const ReportPage: React.FC<Props> = ({ store, edit }) => {
   const baseInfoRef = useRef<BaseInfoRef>({} as BaseInfoRef);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const task = useMemo(() => generateTask('export', () => {
+    console.log('finish');
+    if (containerRef.current) {
+      const element = containerRef.current;
+      html2canvas(element, {
+        allowTaint: true,
+        useCORS: true,
+        logging: false,
+        height: element.scrollHeight,
+        windowHeight: element.scrollHeight,
+      }).then((canvas) => {
+        setExporting(false);
+        // const img = canvas.toDataURL();
+        canvas.toBlob((blob: Blob) => {
+          fileSaver.saveAs(blob, `${'test'}.png`);
+        });
+      });
+    }
+  }), []);
   const [preview, setPreview] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const handleExport = useCallback(() => {
+    setExporting(true);
+    // setTimeout(() => {
+    //   if (containerRef.current) {
+    //     const element = containerRef.current;
+    //     html2canvas(element, {
+    //       allowTaint: true,
+    //       useCORS: true,
+    //       logging: false,
+    //       height: element.scrollHeight,
+    //       windowHeight: element.scrollHeight,
+    //     }).then((canvas) => {
+    //       setExporting(false);
+    //       // const img = canvas.toDataURL();
+    //       canvas.toBlob((blob: Blob) => {
+    //         fileSaver.saveAs(blob, `${'test'}.png`);
+    //       });
+    //     });
+    //   }
+    // });
+  }, []);
   return (
     <ProjectReportContext.Provider value={{
       store,
@@ -29,9 +76,11 @@ const ReportPage: React.FC<Props> = ({ store, edit }) => {
       edit: edit || false,
       preview,
       setPreview,
+      doExport: handleExport,
     }}
     >
-      {preview ? <PreviewReport /> : (
+      {exporting && <div style={{ position: 'fixed', top: -100000, left: -100000 }}><PreviewReport task={task} innerRef={containerRef} /></div>}
+      {preview ? <PreviewReport fullPage /> : (
         <Page>
           <Breadcrumb title={edit ? '编辑项目报告' : '创建项目报告'} />
           <Content style={{ paddingBottom: 0 }}>
@@ -61,7 +110,7 @@ const ReportPage: React.FC<Props> = ({ store, edit }) => {
                           <Menu.Item key="dynamic_list">动态列表</Menu.Item>
                           <Menu.Item key="chart">图表</Menu.Item>
                         </Menu>
-                  )}
+                      )}
                     >
                       <Button icon="add" color={'blue' as ButtonColor} style={{ marginLeft: 10 }}>
                         添加报告内容

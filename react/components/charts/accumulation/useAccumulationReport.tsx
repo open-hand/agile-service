@@ -17,7 +17,7 @@ export interface AccumulationConfig {
   projectId?: string
 }
 
-function useAccumulationReport(config?: AccumulationConfig): [AccumulationSearchProps, AccumulationChartProps, Function] {
+function useAccumulationReport(config?: AccumulationConfig, onFinish?: Function): [AccumulationSearchProps, AccumulationChartProps, Function] {
   const projectId = config?.projectId || getProjectId();
   const defaultDate = useMemo<[Moment, Moment]>(() => [moment().subtract(2, 'months'), moment()], []);
   const [quickFilterIds, setQuickFilterIds] = useControlledDefaultValue<string[]>(config?.quickFilterIds || []);
@@ -40,9 +40,10 @@ function useAccumulationReport(config?: AccumulationConfig): [AccumulationSearch
       batchedUpdates(() => {
         setData(burnDownData);
         setLoading(false);
+        onFinish && setTimeout(onFinish);
       });
     }
-  }, [boardId, columnIds, projectId, quickFilterIds, range]);
+  }, [boardId, columnIds, onFinish, projectId, quickFilterIds, range]);
   useEffect(() => {
     loadData();
   }, [loadData]);

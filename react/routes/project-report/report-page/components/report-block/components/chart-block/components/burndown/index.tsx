@@ -7,13 +7,14 @@ import { transformBurnDownSearch } from '../../../../../add-chart/components/bur
 
 interface Props {
   filter: BurnDownSearchVO
+  onFinish?: Function
 }
-const BurnDownComponent: React.FC<Props> = ({ filter }) => {
+const BurnDownComponent: React.FC<Props> = ({ filter, onFinish }) => {
   const config = useMemo(() => transformBurnDownSearch(filter), [filter]);
-  const [, props] = useBurnDownReport(config);
+  const [, props] = useBurnDownReport(config, onFinish);
   return (
     <div>
-      <BurnDown {...props} />
+      <BurnDown {...props} animation={false} />
     </div>
   );
 };

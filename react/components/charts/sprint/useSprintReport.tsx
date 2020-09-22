@@ -2,11 +2,11 @@ import useBurnDownReport, { BurnDownConfig } from '../burn-down/useBurnDownRepor
 
 export type SprintConfig = Pick<BurnDownConfig, 'sprintId' | 'restDayShow' | 'projectId'>
 
-function useSprintReport(config?: SprintConfig) {
+function useSprintReport(config?: SprintConfig, onFinish?: Function) {
   return useBurnDownReport({
     type: 'issueCount',
     ...config,
-  });
+  }, onFinish);
 }
 
 export default useSprintReport;
