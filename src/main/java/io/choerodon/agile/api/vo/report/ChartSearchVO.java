@@ -85,6 +85,7 @@ public class ChartSearchVO {
     
     /**
      * 版本报告图: 版本id(必选)
+     * 版本燃耗图: 版本id(必选)
      * 统计图： 版本id(可选)
      */
     @Encrypt
