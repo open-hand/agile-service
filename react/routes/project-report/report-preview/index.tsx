@@ -21,7 +21,12 @@ const PreviewReport: React.FC<Props> = ({ innerRef, task, fullPage = false }) =>
   }, []);
 
   return (
-    <TaskContext.Provider value={task as ITask}>
+    <TaskContext.Provider value={task || {
+      register: () => { },
+      finish: () => { },
+      reset: () => { },
+    }}
+    >
       <div className={styles.preview} ref={innerRef}>
         <BaseInfo preview />
         <div style={{

@@ -7,15 +7,15 @@ import PreviewReport from '@/routes/project-report/report-preview';
 import ReactDOM from 'react-dom';
 
 export interface IExportProps {
-  export: () => void
+  export: (callback: (canvas: HTMLCanvasElement) => void) => void
 }
 interface Props {
   innerRef: React.Ref<IExportProps>
-  onExport: (canvas: HTMLCanvasElement) => void
 }
 
-const Export: React.FC<Props> = ({ innerRef, onExport }) => {
+const Export: React.FC<Props> = ({ innerRef }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const callbackRef = useRef<(canvas: HTMLCanvasElement) => void>();
   const task = useMemo(() => generateTask('export', () => {
     if (containerRef.current) {
       const element = containerRef.current;
@@ -30,13 +30,14 @@ const Export: React.FC<Props> = ({ innerRef, onExport }) => {
       }).then((canvas) => {
         setExporting(false);
         task.reset();
-        onExport(canvas);
+        callbackRef.current && callbackRef.current(canvas);
       });
     }
-  }), [onExport]);
+  }), []);
   const [exporting, setExporting] = useState(false);
-  const handleExport = useCallback(() => {
+  const handleExport = useCallback((callback) => {
     setExporting(true);
+    callbackRef.current = callback;
   }, []);
   useImperativeHandle(innerRef, () => ({
     export: handleExport,
