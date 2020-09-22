@@ -26,7 +26,6 @@ export type BurnDownSearchVO = {
   type?: IBurndownChartType
   sprintId?: string
   displayNonWorkingDay: boolean
-  onlyMe: boolean
   onlyStory: boolean
   assigneeId?: string
   quickFilterIds: string[]

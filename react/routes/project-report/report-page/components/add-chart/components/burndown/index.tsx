@@ -45,7 +45,6 @@ const BurnDownComponent: React.FC<Props> = ({ innerRef, projectId, data }) => {
     projectId: searchProps.projectId || getProjectId(),
     sprintId: searchProps.sprintId,
     quickFilterIds: searchProps.quickFilter.quickFilters,
-    onlyMe: searchProps.quickFilter.onlyMe,
     onlyStory: searchProps.quickFilter.onlyStory,
     assigneeId: searchProps.quickFilter.onlyMe ? AppState.userInfo.id : undefined,
     personalFilterIds: searchProps.quickFilter.personalFilters,
