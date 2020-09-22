@@ -1,6 +1,6 @@
 package io.choerodon.agile.infra.config;
 
-import io.choerodon.agile.infra.utils.CommonMapper;
+import io.choerodon.agile.infra.utils.CommonMapperUtil;
 import org.hzero.core.jackson.config.ObjectMapperPostProcess;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -22,8 +22,8 @@ public class BeanConfiguration {
     }
     
     @Bean
-    public CommonMapper commonMapper(ObjectMapperPostProcess objectMapperPostProcess){
-        return (CommonMapper) objectMapperPostProcess.postProcessAfterInitialization(new CommonMapper(), "commonMapper");
+    public CommonMapperUtil commonMapperUtil(ObjectMapperPostProcess objectMapperPostProcess){
+        return (CommonMapperUtil) objectMapperPostProcess.postProcessAfterInitialization(new CommonMapperUtil(), "commonMapperUtil");
     }
 
 }

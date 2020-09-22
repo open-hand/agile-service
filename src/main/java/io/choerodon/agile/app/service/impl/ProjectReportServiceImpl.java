@@ -20,7 +20,7 @@ import io.choerodon.agile.infra.enums.ProjectReportStatus;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.ProjectReportMapper;
 import io.choerodon.agile.infra.mapper.ProjectReportReceiverMapper;
-import io.choerodon.agile.infra.utils.CommonMapper;
+import io.choerodon.agile.infra.utils.CommonMapperUtil;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.SiteMsgUtil;
 import io.choerodon.core.domain.Page;
@@ -41,7 +41,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -63,7 +62,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private CommonMapper commmonMapper;
+    private CommonMapperUtil commonMapperUtil;
 
 
     @Override
@@ -110,8 +109,8 @@ public class ProjectReportServiceImpl implements ProjectReportService {
         // 翻译报表信息单元
         if (StringUtils.isNotBlank(projectReport.getReportData())){
             try {
-                projectReportVO.setReportUnitList(commmonMapper.readValue(projectReport.getReportData(),
-                        commmonMapper.getTypeFactory().constructParametricType(List.class, ReportUnitVO.class)));
+                projectReportVO.setReportUnitList(commonMapperUtil.readValue(projectReport.getReportData(),
+                        commonMapperUtil.getTypeFactory().constructParametricType(List.class, ReportUnitVO.class)));
                 for (ReportUnitVO reportUnitVO : projectReportVO.getReportUnitList()) {
                     if (reportUnitVO instanceof StaticListUnitVO){
                         SearchVO searchVO = ((StaticListUnitVO) reportUnitVO).getSearchVO();
@@ -206,7 +205,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
         }
         try {
             projectReportVO.getReportUnitList().forEach(ReportUnitVO::validateAndconvert);
-            projectReportDTO.setReportData(commmonMapper.writeValueAsString(projectReportVO.getReportUnitList()));
+            projectReportDTO.setReportData(commonMapperUtil.writeValueAsString(projectReportVO.getReportUnitList()));
         } catch (JsonProcessingException e) {
             log.error("json convert failed");
         }
