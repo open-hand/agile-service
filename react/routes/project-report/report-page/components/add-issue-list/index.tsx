@@ -1,9 +1,10 @@
 import React, {
-  useMemo, useCallback, useEffect, useImperativeHandle,
+  useMemo, useCallback, useEffect, useImperativeHandle, useRef,
 } from 'react';
 import {
   Form, DataSet, TextField, Select,
 } from 'choerodon-ui/pro';
+import { pull } from 'lodash';
 import { observer } from 'mobx-react-lite';
 import { Choerodon } from '@choerodon/boot';
 import IssueTable from '@/components/issue-table';
@@ -33,6 +34,8 @@ interface Props {
   data?: IReportListBlock
 }
 const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
+  const isEdit = Boolean(editData);
+  const selectedRef = useRef<Set<string>>(new Set([...(editData?.searchVO.otherArgs.issueIds || [])]));
   const issueSearchStore = useIssueSearchStore({
     // @ts-ignore
     getSystemFields,
@@ -64,12 +67,40 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
     organizationId: getOrganizationId(),
     issueSearchStore,
     // searchDTO: editData?.searchVO,
-    // events: {
-    //   load: ({ dataSet: ds }) => {
-    //     ds.selectAll();
-    //   },
-    // },
-  })), [issueSearchStore]);
+    events: isEdit ? {
+      // @ts-ignore
+      load: ({ dataSet: ds }) => {
+        // @ts-ignore
+        ds.forEach((record) => {
+          if (selectedRef.current.has(record.get('issueId'))) {
+            ds.select(record);
+          }
+        });
+      },
+      // @ts-ignore
+      select: ({ record }) => {
+        selectedRef.current.add(record.get('issueId'));
+      },
+      // @ts-ignore
+      unSelect: ({ record }) => {
+        selectedRef.current.delete(record.get('issueId'));
+      },
+      // @ts-ignore
+      selectAll: ({ dataSet: ds }) => {
+        // @ts-ignore
+        ds.forEach((record) => {
+          selectedRef.current.add(record.get('issueId'));
+        });
+      },
+      // @ts-ignore
+      unSelectAll: ({ dataSet: ds }) => {
+        // @ts-ignore
+        ds.forEach((record) => {
+          selectedRef.current.delete(record.get('issueId'));
+        });
+      },
+    } : undefined,
+  })), [isEdit, issueSearchStore]);
   const refresh = useCallback(() => {
     dataSet.query();
   }, [dataSet]);
@@ -79,7 +110,7 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
   const handleSubmit = useCallback(async () => {
     if (await formDataSet.current?.validate(true)) {
       const data = formDataSet.current?.toData();
-      const issueIds = dataSet.selected.map((record) => record.get('issueId'));
+      const issueIds = isEdit ? [...selectedRef.current] : dataSet.selected.map((record) => record.get('issueId'));
       if (issueIds.length === 0) {
         Choerodon.prompt('请至少勾选一个问题');
         return false;
@@ -98,7 +129,7 @@ const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
       return block;
     }
     return false;
-  }, [dataSet, formDataSet]);
+  }, [dataSet.selected, formDataSet, isEdit]);
   useImperativeHandle(innerRef, () => ({
     submit: handleSubmit,
   }), [handleSubmit]);
