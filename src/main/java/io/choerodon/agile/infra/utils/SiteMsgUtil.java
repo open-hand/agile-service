@@ -177,7 +177,7 @@ public class SiteMsgUtil {
         handleReceiver(ccReceiver, ccList);
         // 设置参数
         Map<String, String> argsMap = new HashMap<>();
-        argsMap.put("data", "<img style='width: 780px;' src='data:image/png;base64,"+imgData+"'>" );
+        argsMap.put("data", "<img style='width: 780px;' src='"+imgData+"'>" );
         // 设置sender
         MessageSender sender = new MessageSender();
         sender.setMessageCode("PROJECT_REPORT");
