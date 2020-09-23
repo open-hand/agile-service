@@ -6,6 +6,7 @@ import _ from 'lodash';
 import { issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectComponent from '@/components/select/select-component';
+import { Tooltip } from 'choerodon-ui';
 
 @inject('AppState')
 @observer class FieldComponent extends Component {
@@ -37,7 +38,7 @@ import SelectComponent from '@/components/select/select-component';
           componentList.push(target);
         } else {
           componentList.push({
-            name: component && component.slice(0, 20),
+            name: component && component.slice(0, 100),
             projectId: AppState.currentMenuType.id,
           });
         }
@@ -58,6 +59,26 @@ import SelectComponent from '@/components/select/select-component';
         });
     }
   };
+
+  renderComponent(name, symbol = ',') {
+    if (name && [...name].length > 20) {
+      return (
+        <Tooltip title={name}>
+          <span>
+            {name.substring(0, 20)}
+            ...
+          </span>
+          {symbol}
+        </Tooltip>
+      );
+    }
+    return (
+      <span>
+        {name}
+        {symbol}
+      </span>
+    );
+  }
 
   render() {
     const { store, disabled } = this.props;
@@ -84,13 +105,13 @@ import SelectComponent from '@/components/select/select-component';
                 getPopupContainer={() => document.getElementById('detail')}
                 style={{ marginTop: 0, paddingTop: 0 }}
               />
-          )}
+            )}
           >
             {componentIssueRelVOList && componentIssueRelVOList.length
               ? (
                 <div>
                   <p className="primary" style={{ wordBreak: 'break-word', marginTop: 2 }}>
-                    {this.transToArr(componentIssueRelVOList, 'name', 'array').join(',')}
+                    {this.transToArr(componentIssueRelVOList, 'name', 'array').map((item, index, arr) => this.renderComponent(item, index === arr.length - 1 ? '' : undefined))}
                   </p>
                 </div>
               ) : (
