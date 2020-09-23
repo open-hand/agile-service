@@ -50,6 +50,7 @@ export interface PI {
 export interface IStatus {
   id: string
   valueCode: 'todo' | 'doing' | 'done' | 'prepare'
+  type: 'todo' | 'doing' | 'done' | 'prepare'
   name: string
 }
 export interface Priority {
