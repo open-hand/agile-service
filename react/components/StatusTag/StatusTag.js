@@ -40,6 +40,7 @@ class StatusTag extends Component {
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
+          color: '#fff',
         }}
         >
           {name || (data && data.name) || ''}

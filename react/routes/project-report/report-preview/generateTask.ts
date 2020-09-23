@@ -9,8 +9,8 @@ function generateTask(code: string, onFinish: Function) {
   let taskCount = 0;
   let finishCount = 0;
   const register = (taskCode: string) => {
-    console.log('register', taskCode);
     if (!taskMap.has(taskCode)) {
+      console.log('register', taskCode);
       taskMap.set(taskCode, {
         status: 'pending',
       });
@@ -18,11 +18,15 @@ function generateTask(code: string, onFinish: Function) {
     }
   };
   const finish = (taskCode: string) => {
-    console.log('finish', taskCode);
     if (taskMap.has(taskCode)) {
-      finishCount += 1;
-      if (finishCount === taskCount) {
-        onFinish();
+      const task = taskMap.get(taskCode);
+      if (task.status === 'pending') {
+        task.status = 'done';
+        console.log('finish', taskCode);
+        finishCount += 1;
+        if (finishCount === taskCount) {
+          onFinish();
+        }
       }
     }
   };
