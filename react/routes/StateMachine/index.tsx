@@ -12,7 +12,7 @@ import useSelectedType from './useSelectedType';
 import styles from './index.less';
 
 const { AppState } = stores;
-const { currentMenuType: { category } } = AppState;
+
 export interface TabComponentProps<Params extends { [K in keyof Params]?: string } = {}> {
   tab: ReactNode
 }
@@ -51,7 +51,7 @@ const StateMachine: React.FC = (props) => {
       setSelectedType: handleChangeSelectedType,
     }}
     >
-      <IsProgramContext.Provider value={{ isProgram: category === 'PROGRAM' }}>
+      <IsProgramContext.Provider value={{ isProgram: AppState.currentMenuType.category === 'PROGRAM' }}>
         {Component && <Component {...props} tab={tabComponent} />}
       </IsProgramContext.Provider>
     </StateMachineContext.Provider>

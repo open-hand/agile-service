@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import {
-  Page, Breadcrumb, Content,
+  Page, Breadcrumb, Content, stores,
 } from '@choerodon/boot';
 import { Button, Dropdown, Menu } from 'choerodon-ui/pro';
 import { IReportContentType } from '@/common/types';
@@ -15,6 +15,7 @@ import ProjectReportContext, { BaseInfoRef } from './context';
 import ProjectReportStore from './store';
 import styles from './index.less';
 
+const { AppState } = stores;
 interface Props {
   store: ProjectReportStore
   edit?: boolean
@@ -22,7 +23,7 @@ interface Props {
 const ReportPage: React.FC<Props> = ({ store, edit }) => {
   const baseInfoRef = useRef<BaseInfoRef>({} as BaseInfoRef);
   const [preview, setPreview] = useState(false);
-
+  const isProgram = AppState.currentMenuType.category === 'PROGRAM';
   return (
     <ProjectReportContext.Provider value={{
       store,
@@ -58,8 +59,10 @@ const ReportPage: React.FC<Props> = ({ store, edit }) => {
                         }}
                         >
                           <Menu.Item key="text">文本</Menu.Item>
-                          <Menu.Item key="static_list">静态列表</Menu.Item>
-                          <Menu.Item key="dynamic_list">动态列表</Menu.Item>
+                          {!isProgram && [
+                            <Menu.Item key="static_list">静态列表</Menu.Item>,
+                            <Menu.Item key="dynamic_list">动态列表</Menu.Item>,
+                          ]}
                           <Menu.Item key="chart">图表</Menu.Item>
                         </Menu>
                       )}

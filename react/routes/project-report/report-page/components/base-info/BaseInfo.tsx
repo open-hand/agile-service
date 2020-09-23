@@ -2,6 +2,7 @@ import React, { useMemo, useImperativeHandle, useCallback } from 'react';
 import {
   Form, DataSet, TextField, TextArea,
 } from 'choerodon-ui/pro';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import SelectUser from '@/components/select/select-user';
 import { useProjectReportContext } from '../../context';
@@ -63,12 +64,14 @@ const BaseInfo: React.FC = () => {
   useImperativeHandle(baseInfoRef, () => ({
     submit: handleSubmit,
   }));
+  const selectedReceiverList = useMemo(() => (edit ? toJS(store.baseInfo?.receiverList) : undefined), [edit, store.baseInfo?.receiverList]);
+  const selectedCCList = useMemo(() => (edit ? toJS(store.baseInfo?.ccList) : undefined), [edit, store.baseInfo?.ccList]);
   return (
     <Form style={{ width: 512, marginLeft: 18 }} dataSet={dataSet}>
       <TextField name="title" />
       <TextArea name="description" />
-      <SelectUser name="receiverList" />
-      <SelectUser name="ccList" clearButton />
+      <SelectUser name="receiverList" selectedUser={selectedReceiverList} />
+      <SelectUser name="ccList" selectedUser={selectedCCList} clearButton />
     </Form>
   );
 };
