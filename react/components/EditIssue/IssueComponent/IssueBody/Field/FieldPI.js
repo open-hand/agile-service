@@ -4,6 +4,7 @@ import { Tooltip } from 'choerodon-ui';
 import SelectPI from '@/components/select/select-pi';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import { piApi } from '@/api';
+import { IsInProgramStore } from '@/exports';
 
 @observer
 class FieldPI extends Component {
@@ -38,8 +39,8 @@ class FieldPI extends Component {
           </span>
         </div>
         <div className="c7n-value-wrapper">
-          <TextEditToggle
-            disabled={(disabled) || (!hasPermission && statusCode === 'doing')}
+          <TextEditToggle // IsInProgramStore
+            disabled={(disabled) || (!IsInProgramStore.isOwner && !hasPermission && statusCode === 'doing')}
             onSubmit={this.updateIssuePI}
             initValue={id}
             editor={({ submit }) => (
@@ -49,7 +50,7 @@ class FieldPI extends Component {
                 multiple={false}
                 allowClear
                 onChange={submit}
-                disabledCurrentPI={!hasPermission}
+                disabledCurrentPI={!IsInProgramStore.isOwner && !hasPermission}
               />
             )}
           >
