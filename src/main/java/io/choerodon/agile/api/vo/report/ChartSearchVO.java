@@ -122,7 +122,6 @@ public class ChartSearchVO {
     /**
      * 子项目燃尽图：子项目id(必填)
      */
-    @Encrypt
     private Long subProjectId;
 
     /**
