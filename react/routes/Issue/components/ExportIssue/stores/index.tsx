@@ -41,26 +41,36 @@ const ExportIssueContextProvider = injectIntl(observer(
       : [];
     const systemFields: Array<IChosenFieldField> = [];
     const customFields: Array<IChosenFieldField> = [];
+    const currentChosenFields: Map<string, IChosenFieldField> = new Map();
     fields.forEach((field) => {
+      let newField = field;
+
+      if (['time', 'datetime', 'date'].indexOf(field.fieldType ?? '') !== -1) {
+        newField = { ...field, otherComponentProps: { range: true } };
+      }
       if (field.id) {
-        customFields.push(field);
+        customFields.push(newField);
       } else if (!field.noDisplay) {
         // 冲刺特殊处理
-        let newField = field;
         if (field.code === 'sprint') {
-          const index = findIndex(chosenFields, (f) => f.code === 'sprint');
-          if (index !== -1) {
-            chosenFields[index].immutableCheck = true;
-          } else {
-            newField = { ...field, immutableCheck: true };
-            chosenFields.push(newField);
-          }
+          newField.immutableCheck = true;
+          currentChosenFields.set(field.code, newField);
         }
         systemFields.push(newField);
       }
     });
-
-    const choseFieldStore = useChoseFieldStore({ systemFields, customFields, chosenFields });
+    chosenFields.forEach((field) => {
+      let newField = field;
+      if (['time', 'datetime', 'date'].indexOf(field.fieldType ?? '') !== -1) {
+        newField = { ...field, otherComponentProps: { range: true } };
+      }
+      // 冲刺特殊处理
+      if (field.code === 'sprint') {
+        newField.immutableCheck = true;
+      }
+      currentChosenFields.set(field.code, newField);
+    });
+    const choseFieldStore = useChoseFieldStore({ systemFields, customFields, chosenFields: [...currentChosenFields.values()] });
     const issueFilterFormDataSet = useIssueFilterFormDataSet({ fields, systemFields: getFilterFormSystemFields(isInProgram) });
     const tableColumnCheckBoxesDataSet = useTableColumnCheckBoxesDataSet('exportFieldCodes', columns.map((column) => column.name));
 

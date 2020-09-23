@@ -12,7 +12,6 @@ interface Props extends Partial<SelectProps> {
   featureIds?: number[],
 }
 const FeatureProjectField: React.FC<Props> = forwardRef(({ featureIds, ...otherProps }, ref: React.Ref<Select>) => {
-  console.log('FeatureProjectField...', otherProps);
   const config = useMemo((): SelectConfig<IIssueType> => ({
     name: 'featureId',
     textField: 'summary',

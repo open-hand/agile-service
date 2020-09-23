@@ -1,7 +1,9 @@
 import React, { useMemo, useEffect } from 'react';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import { Row, Col } from 'choerodon-ui';
+import moment from 'moment';
 import { DataSet, Form, Icon } from 'choerodon-ui/pro';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import renderField from './components/renderField';
@@ -31,8 +33,17 @@ const IssueFilterForm: React.FC<Props> = (props) => {
   useEffect(() => {
     // 初始化值
     if (props.chosenFields) {
+      const dateFormatArr = ['HH:mm:ss', 'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD'];
       props.chosenFields.forEach((field) => {
-        dataSet.current?.set(field.code, field.value);
+        const dateIndex = ['time', 'datetime', 'date'].indexOf(field.fieldType ?? '');
+        let values = toJS(field.value);
+        if (dateIndex !== -1) {
+          values = Array.isArray(values) ? values.map((item) => moment(item, dateFormatArr[dateIndex]))
+            : moment(values, dateFormatArr);
+        }
+        if (values) {
+          dataSet.current?.set(field.code, values);
+        }
       });
     }
   }, []);
@@ -41,7 +52,7 @@ const IssueFilterForm: React.FC<Props> = (props) => {
     <>
       <Form dataSet={dataSet}>
         {props.chosenFields?.map((item, index) => (typeof (item.immutableCheck) === 'boolean' || typeof (props.onDelete) === 'undefined'
-          ? renderField(item, { style: { width: '100%' }, label: item.name }, { dataSet })
+          ? renderField(item, { style: { width: '100%' }, label: item.name, ...item.otherComponentProps }, { dataSet })
           : (
             <Row key={item.code}>
               <Col span={22}>

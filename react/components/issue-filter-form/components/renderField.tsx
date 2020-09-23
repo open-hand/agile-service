@@ -15,6 +15,7 @@ import SelectVersion from '@/components/select/select-version';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import SelectSubProject from '@/components/select/select-sub-project';
+import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import SelectStatus from './field/StatusField';
 import FeatureProjectField from './field/FeatureProjectField';
 import PIField from './field/pi-field';
@@ -22,7 +23,7 @@ import PIField from './field/pi-field';
 const { Option } = Select;
 const singleList = ['radio', 'single'];
 
-export default function renderField<T extends Partial<SelectProps>>(field: IChosenFieldField, selectOtherProps: T, { dataSet }: {
+export default function renderField<T extends Partial<SelectProps>>(field: IChosenFieldField, otherComponentProps: T | Partial<DatePickerProps>, { dataSet }: {
   dataSet: DataSet,
 }) {
   const {
@@ -39,44 +40,44 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
             statusList={[]}
             isProgram={code === 'sprintList'}
             multiple
-            afterLoad={code === 'sprintList' ? () => { } : (sprints) => {
+            afterLoad={code === 'sprintList' ? () => { } : (sprints: any) => {
               if (!defaultValue && Array.isArray(sprints) && sprints.length > 0) {
                 const data = find<any>(sprints, { statusCode: 'started' }) ?? sprints[0];
                 dataSet.current?.set(field.code, [data.sprintId]);
               }
             }}
             selectSprints={value}
-            {...selectOtherProps}
+            {...otherComponentProps}
           />
         );
       case 'statusId':
       case 'statusList':
-        return <SelectStatus name={code} isProgram={code === 'statusList'} multiple {...selectOtherProps} />;
+        return <SelectStatus name={code} isProgram={code === 'statusList'} multiple {...otherComponentProps} />;
       case 'issueTypeId':
       case 'issueTypeList':
-        return <SelectIssueType name={code} isProgram={code === 'issueTypeList'} filterList={code === 'issueTypeList' ? [] : undefined} multiple {...selectOtherProps} />;
+        return <SelectIssueType name={code} isProgram={code === 'issueTypeList'} filterList={code === 'issueTypeList' ? [] : undefined} multiple {...otherComponentProps} />;
       case 'epic':
       case 'epicList':
         // @ts-ignore
-        return <SelectEpic name={code} isProgram={code === 'epicList'} multiple {...selectOtherProps} />;
+        return <SelectEpic name={code} isProgram={code === 'epicList'} multiple {...otherComponentProps} />;
       case 'priorityId':
         // @ts-ignore
-        return <SelectPriority name={code} multiple {...selectOtherProps} />;
+        return <SelectPriority name={code} multiple {...otherComponentProps} />;
       case 'label':
         // @ts-ignore
-        return <SelectLabel name={code} multiple {...selectOtherProps} />;
+        return <SelectLabel name={code} multiple {...otherComponentProps} />;
       case 'component':
         // @ts-ignore
-        return <SelectComponent name={code} multiple {...selectOtherProps} />;
+        return <SelectComponent name={code} multiple {...otherComponentProps} />;
       case 'version':
         // @ts-ignore
-        return <SelectVersion name={code} {...selectOtherProps} />;
+        return <SelectVersion name={code} {...otherComponentProps} />;
       case 'feature': {
         // @ts-ignore
-        return <FeatureProjectField name={code} multiple featureIds={defaultValue} {...selectOtherProps} />;// label={name} style={{ width: '100%' }}
+        return <FeatureProjectField name={code} multiple featureIds={defaultValue} {...otherComponentProps} />;// label={name} style={{ width: '100%' }}
       }
       case 'teamProjectList': {
-        return <SelectSubProject name={code} multiple {...selectOtherProps} />;// label={name} style={{ width: '100%' }}
+        return <SelectSubProject name={code} multiple {...otherComponentProps} />;// label={name} style={{ width: '100%' }}
       }
       case 'piList': {
         return (
@@ -89,7 +90,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
                 dataSet.current?.set(field.code, [data.id]);
               }
             }}
-            {...selectOtherProps}
+            {...otherComponentProps}
           />
         );// label={name} style={{ width: '100%' }}
       }
@@ -99,20 +100,25 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
   }
 
   switch (fieldType) {
-    case 'time':
+    case 'time': {
       return (
         <TimePicker
           label={name}
           name={code}
           style={{ width: '100%' }}
+          {...otherComponentProps}
+
         />
       );
+    }
+
     case 'datetime':
       return (
         <DateTimePicker
           name={code}
           label={name}
           style={{ width: '100%' }}
+          {...otherComponentProps}
         />
       );
     case 'date':
@@ -121,6 +127,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
           name={code}
           label={name}
           style={{ width: '100%' }}
+          {...otherComponentProps}
         />
       );
     case 'number':

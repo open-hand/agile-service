@@ -1,4 +1,5 @@
 import { toJS } from 'mobx';
+import moment from 'moment';
 import { ICustomFieldData, IExportSearch } from '@/api';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
@@ -62,9 +63,21 @@ const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: R
     text: [],
   };
   const systemFilter = {} as any;
+  const dateFormatArr = ['HH:mm:ss', 'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD'];
   for (let index = 0; index < chosenFields.length; index += 1) {
     const { fieldType, id, code } = chosenFields[index];
     const value = toJS(record.get(code));
+
+    const dateIndex = ['time', 'datetime', 'date'].indexOf(fieldType!);
+    if (dateIndex !== -1) {
+      if (Array.isArray(value)) {
+        for (let j = 0; j < value.length; j += 1) {
+          if (moment.isMoment(value[j])) {
+            value[j] = value[j].format(dateFormatArr[dateIndex]);
+          }
+        }
+      }
+    }
     if (value === undefined || value === null || value === '') {
       // eslint-disable-next-line no-continue
       continue;
