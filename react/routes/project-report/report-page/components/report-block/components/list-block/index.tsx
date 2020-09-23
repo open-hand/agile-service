@@ -15,15 +15,15 @@ import { flat2tree, getColumnByName } from './utils';
 interface Props {
   data: IReportListBlock
 }
-const ListBlock: React.FC<Props> = ({ data: { searchVO, colList } }) => {
+const ListBlock: React.FC<Props> = ({ data: { searchVO, colList, type } }) => {
   const [data, setData] = useState([]);
   const [fields, setFields] = useState<IFoundationHeader[]>([]);
   const dataRef = useRef([]);
   const { register, finish } = useTaskContext();
-  register('static_list');
+  register(type);
   const onFinish = useCallback(() => {
-    finish('static_list');
-  }, [finish]);
+    finish(type);
+  }, [finish, type]);
   const loadData = useCallback(async (page = 1) => {
     if (page === 1) {
       dataRef.current = [];

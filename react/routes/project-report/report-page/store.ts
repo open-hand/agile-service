@@ -84,15 +84,38 @@ export type IterationSpeedSearchVO = {
 }
 
 export type ChartSearchVO = BurnDownSearchVO | SprintSearchVO | AccumulationSearchVO | PieSearchVO | VersionReportSearchVO | EpicReportSearchVO | VersionBurndownSearchVO | EpicBurndownSearchVO | IterationSpeedSearchVO
+
 export interface IReportChartBlock extends IBaseReportBlock {
   type: 'chart'
   chartCode: IChartCode
   chartSearchVO: ChartSearchVO
 }
 export interface SearchVO {
-  otherArgs: {
-    issueIds: string[],
+  advancedSearchArgs?: {
+    issueTypeId?: string[],
+    reporterIds?: string[],
+    statusId?: string[],
+    priorityId?: string[],
   },
+  otherArgs?: {
+    assigneeId?: string[],
+    issueIds?: string[],
+    component?: string[],
+    epic?: string[],
+    feature?: string[],
+    label?: string[],
+    sprint?: string[],
+    summary?: string[],
+    version?: string[],
+  },
+  searchArgs?: {
+    createStartDate?: string,
+    createEndDate?: string,
+    updateStartDate?: string,
+    updateEndDate?: string,
+  },
+  quickFilterIds?: string[],
+  contents?: string[],
 }
 export interface IReportListBlock extends IBaseReportBlock {
   type: 'static_list' | 'dynamic_list'

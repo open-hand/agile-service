@@ -4,6 +4,7 @@ import { IModalProps, IReportContentType } from '@/common/types';
 import AddChart from '../add-chart';
 import AddText from '../add-text';
 import AddIssueList from '../add-issue-list';
+import AddDynamicIssueList from '../add-dynamic-list';
 import ProjectReportStore, { IReportBlock } from '../../store';
 
 interface Props {
@@ -23,7 +24,7 @@ const Components = new Map<IReportContentType, React.FC<{
   ['chart', AddChart],
   ['text', AddText],
   ['static_list', AddIssueList],
-  ['dynamic_list', AddIssueList],
+  ['dynamic_list', AddDynamicIssueList],
 ]);
 const AddModal: React.FC<Props> = (props) => {
   const {
@@ -60,11 +61,12 @@ const AddModal: React.FC<Props> = (props) => {
 const openAddModal = (props: Props) => {
   const { data: editData } = props;
   const isEdit = editData !== undefined;
+  const type = props.type || props.data?.type;
   Modal.open({
     key: 'modal',
     title: isEdit ? '编辑' : '添加',
     style: {
-      width: props.type === 'text' ? 380 : 1088,
+      width: type === 'text' || type === 'dynamic_list' ? 380 : 1088,
     },
     drawer: true,
     children: <AddModal {...props} />,
