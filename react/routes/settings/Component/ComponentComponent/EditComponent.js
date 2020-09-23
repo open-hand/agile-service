@@ -162,7 +162,7 @@ const EditComponent = (props) => {
               validator: checkComponentNameRepeat,
             }],
           })(
-            <Input label="模块名称" maxLength={20} />,
+            <Input label="模块名称" maxLength={100} />,
           )}
         </FormItem>
         <FormItem style={{ marginBottom: 20 }}>
