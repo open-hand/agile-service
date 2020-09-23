@@ -2,10 +2,11 @@ import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { versionApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 
-interface Props {
-  dataRef: React.MutableRefObject<Array<any>>
-  statusArr: Array<string>
+interface Props extends Partial<SelectProps> {
+  dataRef?: React.MutableRefObject<Array<any>>
+  statusArr?: Array<string>
 }
 const SelectVersion: React.FC<Props> = forwardRef(({ dataRef = { current: null }, statusArr = [], ...otherProps }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
