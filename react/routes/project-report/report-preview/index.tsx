@@ -9,8 +9,12 @@ interface Props {
   innerRef?: React.Ref<HTMLDivElement>
   fullPage?: boolean
   task?: ITask
+  className?: string
+  style?: React.CSSProperties
 }
-const PreviewReport: React.FC<Props> = ({ innerRef, task, fullPage = false }) => {
+const PreviewReport: React.FC<Props> = ({
+  innerRef, task, fullPage = false, ...otherProps
+}) => {
   if (fullPage) {
     if (!document.body.classList.contains('hidden')) {
       document.body.classList.add('hidden');
@@ -27,7 +31,7 @@ const PreviewReport: React.FC<Props> = ({ innerRef, task, fullPage = false }) =>
       reset: () => { },
     }}
     >
-      <div className={styles.preview} ref={innerRef}>
+      <div className={styles.preview} ref={innerRef} {...otherProps}>
         <BaseInfo preview />
         <div style={{
           height: 1,

@@ -48,7 +48,7 @@ const Export: React.FC<Props> = ({ innerRef }) => {
         position: 'fixed', top: -100000, left: -100000, width: '100%',
       }}
       >
-        <PreviewReport task={task} innerRef={containerRef} />
+        <PreviewReport task={task} innerRef={containerRef} style={{ padding: '20px 0' }} />
       </div>,
       document.body,
     )
