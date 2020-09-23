@@ -2,8 +2,9 @@ import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { priorityApi } from '@/api';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 
-interface Props {
+interface Props extends Partial<SelectProps> {
   priorityId?: number
 }
 
