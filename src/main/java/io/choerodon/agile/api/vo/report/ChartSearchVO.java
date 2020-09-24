@@ -29,6 +29,11 @@ public class ChartSearchVO {
     @Encrypt
     private Long sprintId;
     /**
+     * 燃尽图： 是否为当前冲刺(可选)
+     * 冲刺报告图： 是否为当前冲刺(可选)
+     */
+    private Boolean currentSprint;
+    /**
      * 燃尽图： 类型(必选)
      * 冲刺报告图： 必为issueCount
      * 版本报告图： 类型(必选)
@@ -85,6 +90,7 @@ public class ChartSearchVO {
     
     /**
      * 版本报告图: 版本id(必选)
+     * 版本燃耗图: 版本id(必选)
      * 统计图： 版本id(可选)
      */
     @Encrypt
@@ -129,6 +135,14 @@ public class ChartSearchVO {
      * 子项目工作量： 单位(必填)
      */
     private String latitude;
+
+    public Boolean getCurrentSprint() {
+        return currentSprint;
+    }
+
+    public void setCurrentSprint(Boolean currentSprint) {
+        this.currentSprint = currentSprint;
+    }
 
     public Long getProjectId() {
         return projectId;

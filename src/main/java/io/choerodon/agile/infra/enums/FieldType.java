@@ -7,6 +7,16 @@ package io.choerodon.agile.infra.enums;
 public class FieldType {
     private FieldType() {
     }
+    
+    public class RulePredefind{
+        private RulePredefind(){
+        }
+        
+        public static final String LONG_TYPE = "long";
+        public static final String DATE_TYPE = "date";
+        public static final String TEXT_TYPE = "text";
+        public static final String DECIMAL_TYPE = "decimal";
+    }
 
     public static final String TEXT = "text";
     public static final String RADIO = "radio";
