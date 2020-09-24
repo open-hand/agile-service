@@ -21,6 +21,7 @@ import io.choerodon.agile.infra.utils.CommonMapperUtil;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
 import org.modelmapper.ModelMapper;
@@ -117,30 +118,52 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Long fieldId = objectSchemeField.getId();
         String operation = ruleExpressVO.getOperation();
         String preOp = ConfigurationRule.OpSqlMapping.getPreOp(operation).name();
-        Object value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueIdList() : ruleExpressVO.getValueId();
+        Object value;
         
         String customFieldType = ruleExpressVO.getFieldType();
         CustomFieldType.contains(customFieldType, true);
 
         if (CustomFieldType.isOption(customFieldType)) {
+            value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueIdList() : ruleExpressVO.getValueId();
             return renderCustomSql(preOp, projectId, fieldId, 
                     Collections.singletonList(() ->  conditionSql("ffv.option_id", operation, value)));
         } else if (CustomFieldType.isDate(customFieldType)) {
+            value = ruleExpressVO.getValueDate();
             return renderCustomSql(preOp, projectId, fieldId, Collections.singletonList(() -> 
                     conditionSql(getUnixTimeExpress("ffv.date_value"), operation, getUnixTimeExpress(df.format(value)))));
         } else if (CustomFieldType.isDateHms(customFieldType)) {
+            value = ruleExpressVO.getValueDateHms();
             return renderCustomSql(preOp, projectId, fieldId, Collections.singletonList(() ->
                     conditionSql(getTimeFieldExpress("ffv.date_value"), operation, getTimeValueExpress(df.format(value)))));
         } else if (CustomFieldType.isNumber(customFieldType)) {
+            value = getNumber(operation, ruleExpressVO);
             return renderCustomSql(preOp, projectId, fieldId, 
                     Collections.singletonList(() -> conditionSql("ffv.number_value", operation, value)));
         } else if (CustomFieldType.isString(customFieldType)) {
+            value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueStrList() : ruleExpressVO.getValueStr();
             return renderCustomSql(preOp, projectId, fieldId,
                     Collections.singletonList(() ->  conditionSql("ffv.string_value", operation, value)));
         } else  {
             //text
+            value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueStrList() : ruleExpressVO.getValueStr();
             return renderCustomSql(preOp, projectId, fieldId,
                     Collections.singletonList(() ->  conditionSql("ffv.text_value", operation, value)));
+        }
+    }
+    
+    private Object getNumber(String operation, RuleExpressVO ruleExpressVO){
+        if (ConfigurationRule.OpSqlMapping.isCollOp(operation)){
+            if (BooleanUtils.isTrue(ruleExpressVO.getAllowDecimals())){
+                return ruleExpressVO.getValueDecimalList();
+            }else {
+                return ruleExpressVO.getValueNumList();
+            }
+        }else {
+            if (BooleanUtils.isTrue(ruleExpressVO.getAllowDecimals())){
+                return ruleExpressVO.getValueDecimal();
+            }else {
+                return ruleExpressVO.getValueNum();
+            }
         }
     }
 
@@ -177,12 +200,12 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         processPredefinedField(sqlQuery, ruleExpressVO, value, operation);
     }
 
-    protected void processPredefinedField(StringBuilder sqlQuery, RuleExpressVO quickFilterValueVO, Object value, String operation) {
+    protected void processPredefinedField(StringBuilder sqlQuery, RuleExpressVO ruleExpressVO, Object value, String operation) {
         String preOp = ConfigurationRule.OpSqlMapping.getPreOp(operation).name();
-        String field = configurationRuleFiledMapper.selectByPrimaryKey(quickFilterValueVO.getFieldCode()).getField();
+        String field = configurationRuleFiledMapper.selectByPrimaryKey(ruleExpressVO.getFieldCode()).getField();
         switch (field) {
             case "version_id":
-                dealCaseVersion(quickFilterValueVO, field, value, preOp, operation, sqlQuery);
+                dealCaseVersion(ruleExpressVO, field, value, preOp, operation, sqlQuery);
                 break;
             case "component_id":
             case "label_id":

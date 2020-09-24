@@ -499,21 +499,21 @@ public class EncryptionUtils {
         try {
             JsonNode jsonNode = objectMapper.readTree(filterJson);
             ObjectNode objectNode = objectMapper.createObjectNode();
-            if (!ObjectUtils.isEmpty(jsonNode.get("advancedSearchArgs"))) {
+            if (!ObjectUtils.isEmpty(jsonNode.get("advancedSearchArgs")) && !jsonNode.get("advancedSearchArgs").isNull()) {
                 Map<String, Object> adMapOptional = objectMapper.readValue(objectMapper.writeValueAsString(jsonNode.get("advancedSearchArgs")), new TypeReference<Map<String, Object>>() {
                 });
                 objectNode.set("advancedSearchArgs",objectMapper.readTree(objectMapper.writeValueAsString(handlerOtherArgs(adMapOptional, encrypt))));
             } else {
                 objectNode.set("advancedSearchArgs",objectMapper.readTree(objectMapper.writeValueAsString(new HashMap())));
             }
-            if (!ObjectUtils.isEmpty(jsonNode.get("otherArgs"))) {
+            if (!ObjectUtils.isEmpty(jsonNode.get("otherArgs")) && !jsonNode.get("otherArgs").isNull()) {
                 Map<String, Object> oAMap = objectMapper.readValue(objectMapper.writeValueAsString(jsonNode.get("otherArgs")),new TypeReference<Map<String,Object>>(){});
                 objectNode.set("otherArgs",objectMapper.readTree(objectMapper.writeValueAsString(handlerOtherArgs(oAMap, encrypt))));
             }
             else {
                 objectNode.set("otherArgs", objectMapper.readTree(objectMapper.writeValueAsString(new HashMap())));
             }
-            if(!ObjectUtils.isEmpty(jsonNode.get("quickFilterIds"))){
+            if(!ObjectUtils.isEmpty(jsonNode.get("quickFilterIds")) && !jsonNode.get("quickFilterIds").isNull()){
                List<String> list =  objectMapper.readValue(objectMapper.writeValueAsString(jsonNode.get("quickFilterIds")),new TypeReference<List<String>>() {});
                if(encrypt){
                    objectNode.set("quickFilterIds",objectMapper.readTree(objectMapper.writeValueAsString(encryptListToStr(list))));
