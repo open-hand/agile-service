@@ -84,7 +84,7 @@ const ExportIssue: React.FC<{}> = () => {
       return false;
     }
     if (await tableColumnCheckBoxesDataSet.current?.validate()) {
-      if (!Array.isArray(tableColumnCheckBoxesDataSet.current?.get('exportFieldCodes'))
+      if (!tableColumnCheckBoxesDataSet.current?.get('exportFieldCodes')
       || tableColumnCheckBoxesDataSet.current?.get('exportFieldCodes').length === 0) {
         Choerodon.prompt('请至少选择一个字段导出');
         return false;
