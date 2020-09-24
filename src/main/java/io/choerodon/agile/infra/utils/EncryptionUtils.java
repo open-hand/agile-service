@@ -50,7 +50,7 @@ public class EncryptionUtils {
 
     public static final String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList","assigneeId","reporterIds"};
 
-    public static final String[] IGNORE_VALUES = {"0"};
+    public static final String[] IGNORE_VALUES = {"0","none"};
     public static final String BLANK_KEY = "";
 
     /**
@@ -543,7 +543,7 @@ public class EncryptionUtils {
                     LOGGER.error("string to object error: {}", e);
                 }
                 if (!CollectionUtils.isEmpty(value)) {
-                    object = value.stream().map(v -> encrypt ? (StringUtils.isNumeric(v) ? encrypt(Long.parseLong(v)) : v) : decrypt(v)).collect(Collectors.toList());
+                    object = value.stream().map(v -> handlerEncrypt(encrypt,v)).collect(Collectors.toList());
                 }
                 else {
                     object = new ArrayList<>();
@@ -556,6 +556,16 @@ public class EncryptionUtils {
             map1.put(next.getKey(), object);
         }
         return map1;
+    }
+
+    private static String handlerEncrypt(Boolean encrypt,String v){
+        List<String> ignore = Arrays.asList(IGNORE_VALUES);
+        if(Boolean.TRUE.equals(encrypt)){
+            return (StringUtils.isNumeric(v) ? (!ignore.contains(v) ? encrypt(Long.parseLong(v)) : v) : v);
+        }
+        else {
+           return  (ignore.contains(v) ? v : decrypt(v));
+        }
     }
 
     private static Object handlerCustomField(Object value, Boolean encrypt) {
