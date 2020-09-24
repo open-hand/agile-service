@@ -35,6 +35,7 @@ export type BurnDownSearchVO = {
 export type SprintSearchVO = {
   projectId: string
   sprintId?: string
+  currentSprint?: boolean
   displayNonWorkingDay: boolean
 }
 export type AccumulationSearchVO = {
