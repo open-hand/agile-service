@@ -3,20 +3,22 @@ package io.choerodon.agile.api.controller.v1;
 import java.util.List;
 
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
-import io.choerodon.core.iam.ResourceLevel;
-import io.choerodon.swagger.annotation.Permission;
-import org.hzero.core.util.Results;
-import org.hzero.core.base.BaseController;
-import io.choerodon.agile.infra.dto.ConfigurationRuleDTO;
+import io.choerodon.agile.app.service.ConfigurationRuleFiledService;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+import io.choerodon.agile.infra.dto.ConfigurationRuleDTO;
+import io.choerodon.agile.infra.dto.ConfigurationRuleFiledDTO;
+import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
+import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import org.hzero.core.base.BaseController;
+import org.hzero.core.util.Results;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 /**
@@ -31,6 +33,8 @@ public class ConfigurationRuleController extends BaseController {
 
     @Autowired
     private ConfigurationRuleService configurationRuleService;
+    @Autowired
+    private ConfigurationRuleFiledService configurationRuleFiledService;
 
     /**
      * 列表
@@ -94,6 +98,14 @@ public class ConfigurationRuleController extends BaseController {
                                     @PathVariable Long ruleId) {
         configurationRuleService.deleteById(projectId, ruleId);
         return Results.success();
+    }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询configuration rule field列表")
+    @GetMapping("/fields")
+    public ResponseEntity<List<ConfigurationRuleFiledDTO>> list(@ApiParam(value = "项目id", required = true)
+                                                         @PathVariable(name = "project_id") Long projectId) {
+        return Results.success(configurationRuleFiledService.list(projectId));
     }
 
 }

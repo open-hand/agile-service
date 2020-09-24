@@ -1,7 +1,10 @@
 package io.choerodon.agile.app.service.impl;
 
+import java.util.List;
+
+import io.choerodon.agile.infra.mapper.ConfigurationRuleFiledMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.hzero.mybatis.base.impl.BaseRepositoryImpl;
 import io.choerodon.agile.infra.dto.ConfigurationRuleFiledDTO;
 import io.choerodon.agile.app.service.ConfigurationRuleFiledService;
 
@@ -12,7 +15,13 @@ import io.choerodon.agile.app.service.ConfigurationRuleFiledService;
  * @date 2020-09-23 09:29:15
  */
 @Service
-public class ConfigurationRuleFiledServiceImpl extends  BaseRepositoryImpl<ConfigurationRuleFiledDTO> implements ConfigurationRuleFiledService {
+public class ConfigurationRuleFiledServiceImpl implements ConfigurationRuleFiledService {
+    
+    @Autowired
+    private ConfigurationRuleFiledMapper configurationRuleFiledMapper;
 
-
+    @Override
+    public List<ConfigurationRuleFiledDTO> list(Long projectId) {
+        return configurationRuleFiledMapper.selectAll();
+    }
 }

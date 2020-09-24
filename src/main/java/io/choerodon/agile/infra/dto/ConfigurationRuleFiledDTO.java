@@ -23,19 +23,6 @@ import io.swagger.annotations.ApiModelProperty;
 @Table(name = "agile_configuration_rule_filed")
 public class ConfigurationRuleFiledDTO extends AuditDomain {
 
-    public static final String FIELD_FIELD_CODE = "fieldCode";
-    public static final String FIELD_TYPE = "type";
-    public static final String FIELD_NAME = "name";
-    public static final String FIELD_FIELD = "field";
-
-//
-// 业务方法(按public protected private顺序排列)
-// ------------------------------------------------------------------------------
-
-//
-// 数据库字段
-// ------------------------------------------------------------------------------
-
     @Id
     @GeneratedValue
     private String fieldCode;
@@ -43,53 +30,35 @@ public class ConfigurationRuleFiledDTO extends AuditDomain {
     private String name;
     private String field;
 
-//
-// 非数据库字段
-// ------------------------------------------------------------------------------
-
-//
-// getter/setter
-// ------------------------------------------------------------------------------
-
-
-    /**
-     * @return 
-     */
     public String getFieldCode() {
-            return fieldCode;
+        return fieldCode;
     }
 
     public void setFieldCode(String fieldCode) {
-            this.fieldCode = fieldCode;
+        this.fieldCode = fieldCode;
     }
-    /**
-     * @return type
-     */
+
     public String getType() {
-            return type;
+        return type;
     }
 
     public void setType(String type) {
-            this.type = type;
+        this.type = type;
     }
-    /**
-     * @return name
-     */
+
     public String getName() {
-            return name;
+        return name;
     }
 
     public void setName(String name) {
-            this.name = name;
+        this.name = name;
     }
-    /**
-     * @return field
-     */
+
     public String getField() {
-            return field;
+        return field;
     }
 
     public void setField(String field) {
-            this.field = field;
+        this.field = field;
     }
 }

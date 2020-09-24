@@ -24,18 +24,6 @@ import io.swagger.annotations.ApiModelProperty;
 public class ConfigurationRuleReceiverDTO extends AuditDomain {
 
     public static final String FIELD_ID = "id";
-    public static final String FIELD_RULE_ID = "ruleId";
-    public static final String FIELD_USER_ID = "userId";
-    public static final String FIELD_USER_TYPE = "userType";
-    public static final String FIELD_PROJECT_ID = "projectId";
-
-//
-// 业务方法(按public protected private顺序排列)
-// ------------------------------------------------------------------------------
-
-//
-// 数据库字段
-// ------------------------------------------------------------------------------
 
     @Id
     @GeneratedValue
@@ -45,63 +33,43 @@ public class ConfigurationRuleReceiverDTO extends AuditDomain {
     private String userType;
     private Long projectId;
 
-//
-// 非数据库字段
-// ------------------------------------------------------------------------------
-
-//
-// getter/setter
-// ------------------------------------------------------------------------------
-
-
-    /**
-     * @return 
-     */
     public Long getId() {
-            return id;
+        return id;
     }
 
     public void setId(Long id) {
-            this.id = id;
+        this.id = id;
     }
-    /**
-     * @return rule id
-     */
+
     public Long getRuleId() {
-            return ruleId;
+        return ruleId;
     }
 
     public void setRuleId(Long ruleId) {
-            this.ruleId = ruleId;
+        this.ruleId = ruleId;
     }
-    /**
-     * @return rule id
-     */
+
     public Long getUserId() {
-            return userId;
+        return userId;
     }
 
     public void setUserId(Long userId) {
-            this.userId = userId;
+        this.userId = userId;
     }
-    /**
-     * @return user type
-     */
+
     public String getUserType() {
-            return userType;
+        return userType;
     }
 
     public void setUserType(String userType) {
-            this.userType = userType;
+        this.userType = userType;
     }
-    /**
-     * @return project id
-     */
+
     public Long getProjectId() {
-            return projectId;
+        return projectId;
     }
 
     public void setProjectId(Long projectId) {
-            this.projectId = projectId;
+        this.projectId = projectId;
     }
 }
