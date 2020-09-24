@@ -2,9 +2,10 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import {
-  Modal, Table, Tooltip, Popover, Button, Icon, 
+  Modal, Table, Tooltip, Popover, Button, Icon,
 } from 'choerodon-ui';
 import { stores, Content } from '@choerodon/boot';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { devOpsApi } from '@/api';
 
 const { AppState } = stores;
@@ -68,18 +69,18 @@ class Commits extends Component {
 
   render() {
     const {
-      issueId, issueNum, time, visible, onCancel, 
+      issueId, issueNum, time, visible, onCancel,
     } = this.props;
     const column = [
       {
         title: '应用名称',
         dataIndex: 'appServiceName',
         width: '25%',
-        render: appName => (
+        render: (appName) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={appName}>
               <p style={{
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, 
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
               }}
               >
                 {appName}
@@ -92,11 +93,11 @@ class Commits extends Component {
         title: '分支',
         dataIndex: 'branchName',
         width: '30%',
-        render: branchName => (
+        render: (branchName) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={branchName}>
               <p style={{
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, 
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
               }}
               >
                 {branchName}
@@ -113,7 +114,7 @@ class Commits extends Component {
           <div style={{ width: '100%', overflow: 'hidden' }}>
             <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={status}>
               <p style={{
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, 
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
               }}
               >
                 {record.commits.length}
@@ -138,7 +139,7 @@ class Commits extends Component {
                   record.mergeRequests && record.mergeRequests.length ? (
                     <ul>
                       {
-                        record.mergeRequests.map(v => (
+                        record.mergeRequests.map((v) => (
                           <li style={{ listStyleType: 'none' }}>
                             <span style={{ display: 'inline-block', width: 150 }}>{v.title}</span>
                             <span style={{ display: 'inline-block', width: 50 }}>{['opened', 'merged', 'closed'].includes(v.state) ? STATUS_SHOW[v.state] : ''}</span>
@@ -152,7 +153,7 @@ class Commits extends Component {
 )}
             >
               <p style={{
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, 
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0,
               }}
               >
                 {this.getStatus(record.mergeRequests)}
@@ -184,6 +185,7 @@ class Commits extends Component {
         okText="关闭"
         okCancel={false}
         onOk={onCancel}
+        width={MODAL_WIDTH.middle}
       >
         <Content
           style={{
@@ -194,7 +196,7 @@ class Commits extends Component {
         >
           <Table
             filterBar={false}
-            rowKey={record => record.id}
+            rowKey={(record) => record.id}
             columns={column}
             dataSource={this.state.commits}
             loading={this.state.loading}

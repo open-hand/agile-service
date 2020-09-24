@@ -10,6 +10,7 @@ import {
   Content, Header, TabPage as Page, Breadcrumb, Choerodon,
 } from '@choerodon/boot';
 import { getStageMap, getStageList } from '@/utils/stateMachine';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { statusApi } from '@/api';
 import Store from './stores';
 import './StateList.less';
@@ -480,7 +481,7 @@ function StateList(props) {
             cancelText={<FormattedMessage id="cancel" />}
             confirmLoading={submitting}
             onCancel={hideSidebar}
-            width={380}
+            width={MODAL_WIDTH.small}
           >
             {formContent}
           </Sidebar>

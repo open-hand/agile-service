@@ -6,6 +6,7 @@ import {
 import { Button } from 'choerodon-ui/pro';
 import moment from 'moment';
 import { stores } from '@choerodon/boot';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { versionApi } from '@/api';
 
 const { Sidebar } = Modal;
@@ -102,7 +103,7 @@ class AddRelease extends Component {
         okText="创建"
         cancelText="取消"
         confirmLoading={loading}
-        width={380}
+        width={MODAL_WIDTH.small}
         footer={[
           <Button key="submit" color="primary" funcType="raised" loading={loading} onClick={this.handleOk}>
             确定

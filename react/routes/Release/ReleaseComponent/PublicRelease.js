@@ -8,6 +8,7 @@ import moment from 'moment';
 import { withRouter } from 'react-router-dom';
 import { versionApi } from '@/api';
 import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import to from '@/utils/to';
 import ReleaseStore from '../../../stores/project/release/ReleaseStore';
 
@@ -81,7 +82,7 @@ class PublicRelease extends Component {
         onOk={(e) => this.handlePublic(e)}
         okText="确定"
         cancelText="取消"
-        width={380}
+        width={MODAL_WIDTH.small}
       >
         {
           JSON.stringify(ReleaseStore.getPublicVersionDetail) !== '{}' ? (

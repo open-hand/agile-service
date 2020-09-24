@@ -7,7 +7,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { CompactPicker } from 'react-color';
-
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import './priorityCreate.less';
 import { priorityApi } from '@/api';
 
@@ -123,7 +123,7 @@ class PriorityCreate extends Component {
         onOk={this.handleCreatingOk}
         onCancel={this.handleCreatingCancel}
         confirmLoading={loading}
-        width={380}
+        width={MODAL_WIDTH.small}
       >
         <Form>
           <FormItem
