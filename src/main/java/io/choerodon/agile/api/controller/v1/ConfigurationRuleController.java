@@ -105,7 +105,7 @@ public class ConfigurationRuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询configuration rule field列表")
     @GetMapping("/fields")
-    public ResponseEntity<List<ConfigurationRuleFiledDTO>> list(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<List<ConfigurationRuleFiledDTO>> fieldList(@ApiParam(value = "项目id", required = true)
                                                          @PathVariable(name = "project_id") Long projectId) {
         return Results.success(configurationRuleFiledService.list(projectId));
     }
