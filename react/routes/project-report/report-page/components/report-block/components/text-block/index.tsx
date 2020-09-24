@@ -6,12 +6,12 @@ import { useTaskContext } from '@/routes/project-report/report-preview/taskConte
 interface Props {
   data: IReportTextBlock
 }
-const TextBlock: React.FC<Props> = ({ data: { content } }) => {
+const TextBlock: React.FC<Props> = ({ data: { content, key } }) => {
   const { register, finish } = useTaskContext();
-  register('text');
+  register(`text-${key}`);
   const onFinish = useCallback(() => {
-    finish('text');
-  }, [finish]);
+    finish(`text-${key}`);
+  }, [finish, key]);
   useEffect(() => {
     onFinish();
   }, [onFinish]);

@@ -16,16 +16,20 @@ import { flat2tree, getColumnByName } from './utils';
 interface Props {
   data: IReportListBlock
 }
-const ListBlock: React.FC<Props> = ({ data: { searchVO, colList, type } }) => {
+const ListBlock: React.FC<Props> = ({
+  data: {
+    searchVO, colList, type, key,
+  },
+}) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fields, setFields] = useState<IFoundationHeader[]>([]);
   const dataRef = useRef([]);
   const { register, finish } = useTaskContext();
-  register(type);
+  register(`${type}-${key}`);
   const onFinish = useCallback(() => {
-    finish(type);
-  }, [finish, type]);
+    finish(`${type}-${key}`);
+  }, [finish, key, type]);
   const loadData = useCallback(async (page = 1) => {
     if (page === 1) {
       dataRef.current = [];
