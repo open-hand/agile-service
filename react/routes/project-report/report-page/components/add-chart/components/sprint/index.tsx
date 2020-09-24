@@ -14,6 +14,7 @@ export const transformSprintSearch = (searchVO: SprintSearchVO | undefined): Spr
     restDayShow: searchVO.displayNonWorkingDay,
     sprintId: searchVO.sprintId,
     projectId: searchVO.projectId,
+    useCurrentSprint: searchVO.currentSprint,
   };
 };
 export interface Props {
@@ -29,6 +30,7 @@ const SprintComponent: React.FC<Props> = ({ innerRef, projectId, data }) => {
   const handleSubmit = useCallback(async (): Promise<SprintSearchVO> => ({
     displayNonWorkingDay: searchProps.restDayShow,
     sprintId: searchProps.sprintId,
+    currentSprint: searchProps.useCurrentSprint,
     projectId: searchProps.projectId || getProjectId(),
   }),
   [searchProps]);
