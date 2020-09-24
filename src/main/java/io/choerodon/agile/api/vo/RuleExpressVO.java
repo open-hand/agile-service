@@ -18,6 +18,14 @@ public class RuleExpressVO {
     private String fieldCode;
     @ApiModelProperty("快速搜索表达式操作关系：and、or等")
     private String operation;
+    @ApiModelProperty("与上一条表达式关系")
+    private String relationshipWithPervious;
+    @ApiModelProperty("是否为预定义字段，必填")
+    private Boolean predefined;
+    @ApiModelProperty("字段类型")
+    private String fieldType;
+    @ApiModelProperty("是否允许小数")
+    private Boolean allowDecimals;
     @ApiModelProperty("快速搜索值")
     private Object value;
     @ApiModelProperty("字符串快速搜索值")
@@ -42,12 +50,24 @@ public class RuleExpressVO {
     private Boolean valueBool;
     @ApiModelProperty("时间快速搜索值")
     private Date valueDate;
-    @ApiModelProperty("与上一条表达式关系")
-    private String relationshipWithPervious;
-    @ApiModelProperty("是否为预定义字段，必填")
-    private Boolean predefined;
-    @ApiModelProperty("字段类型")
-    private String fieldType;
+    @ApiModelProperty("时分秒快速搜索值")
+    private Date valueDateHms;
+
+    public Boolean getAllowDecimals() {
+        return allowDecimals;
+    }
+
+    public void setAllowDecimals(Boolean allowDecimals) {
+        this.allowDecimals = allowDecimals;
+    }
+
+    public Date getValueDateHms() {
+        return valueDateHms;
+    }
+
+    public void setValueDateHms(Date valueDateHms) {
+        this.valueDateHms = valueDateHms;
+    }
 
     public BigDecimal getValueDecimal() {
         return valueDecimal;
