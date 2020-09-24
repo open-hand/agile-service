@@ -92,7 +92,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         StringBuilder sqlQuery = new StringBuilder();
         for (RuleExpressVO ruleExpressVO : ruleExpressVOList) {
             if (StringUtils.isNotBlank(ruleExpressVO.getRelationshipWithPervious())){
-                sqlQuery.append(ruleExpressVO.getRelationshipWithPervious());
+                sqlQuery.append(ConfigurationRule.OpSqlMapping.valueOf(ruleExpressVO.getRelationshipWithPervious()).getSqlOp());
             }
             Boolean predefined = ruleExpressVO.getPredefined();
             String fieldCode = ruleExpressVO.getFieldCode();
@@ -134,7 +134,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         } else if (CustomFieldType.isDateHms(customFieldType)) {
             value = ruleExpressVO.getValueDateHms();
             return renderCustomSql(preOp, projectId, fieldId, Collections.singletonList(() ->
-                    conditionSql(getTimeFieldExpress("ffv.date_value"), operation, getTimeValueExpress(df.format(value)))));
+                    conditionSql(getTimeFieldExpress("ffv.date_value"), operation, getTimeValueExpress((String) value))));
         } else if (CustomFieldType.isNumber(customFieldType)) {
             value = getNumber(operation, ruleExpressVO);
             return renderCustomSql(preOp, projectId, fieldId, 
