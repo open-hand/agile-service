@@ -23,13 +23,6 @@ import io.swagger.annotations.ApiModelProperty;
 @Table(name = "agile_configuration_rule")
 public class ConfigurationRuleDTO extends AuditDomain {
 
-    public static final String FIELD_ID = "id";
-    public static final String FIELD_PROJECT_ID = "projectId";
-    public static final String FIELD_NAME = "name";
-    public static final String FIELD_SQL_QUERY = "sqlQuery";
-    public static final String FIELD_EXPRESS_QUERY = "expressQuery";
-    public static final String FIELD_EXPRESS_FORMAT = "expressFormat";
-
     @Id
     @GeneratedValue
     private Long id;
@@ -39,66 +32,51 @@ public class ConfigurationRuleDTO extends AuditDomain {
     private String expressQuery;
     private String expressFormat;
 
-
-
-    /**
-     * @return 
-     */
     public Long getId() {
-            return id;
+        return id;
     }
 
     public void setId(Long id) {
-            this.id = id;
+        this.id = id;
     }
-    /**
-     * @return project id
-     */
+
     public Long getProjectId() {
-            return projectId;
+        return projectId;
     }
 
     public void setProjectId(Long projectId) {
-            this.projectId = projectId;
+        this.projectId = projectId;
     }
-    /**
-     * @return name
-     */
+
     public String getName() {
-            return name;
+        return name;
     }
 
     public void setName(String name) {
-            this.name = name;
+        this.name = name;
     }
-    /**
-     * @return long query
-     */
+
     public String getSqlQuery() {
-            return sqlQuery;
+        return sqlQuery;
     }
 
     public void setSqlQuery(String sqlQuery) {
-            this.sqlQuery = sqlQuery;
+        this.sqlQuery = sqlQuery;
     }
-    /**
-     * @return express query
-     */
+
     public String getExpressQuery() {
-            return expressQuery;
+        return expressQuery;
     }
 
     public void setExpressQuery(String expressQuery) {
-            this.expressQuery = expressQuery;
+        this.expressQuery = expressQuery;
     }
-    /**
-     * @return 表达式数据
-     */
+
     public String getExpressFormat() {
-            return expressFormat;
+        return expressFormat;
     }
 
     public void setExpressFormat(String expressFormat) {
-            this.expressFormat = expressFormat;
+        this.expressFormat = expressFormat;
     }
 }

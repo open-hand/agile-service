@@ -31,6 +31,8 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/projects/{project_id}/configuration_rule")
 public class ConfigurationRuleController extends BaseController {
 
+    public static final String FIELD_ID = "id";
+
     @Autowired
     private ConfigurationRuleService configurationRuleService;
     @Autowired
@@ -43,7 +45,7 @@ public class ConfigurationRuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<List<ConfigurationRuleVO>> list(@PathVariable("project_id") Long projectId,
-                                                          @ApiIgnore @SortDefault(value = ConfigurationRuleDTO.FIELD_ID,
+                                                          @ApiIgnore @SortDefault(value = FIELD_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest){
         return Results.success(configurationRuleService.listByProjectId(projectId));
     }
