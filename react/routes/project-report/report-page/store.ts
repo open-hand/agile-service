@@ -25,6 +25,7 @@ export type BurnDownSearchVO = {
   projectId: string
   type?: IBurndownChartType
   sprintId?: string
+  currentSprint?: boolean
   displayNonWorkingDay: boolean
   onlyStory: boolean
   assigneeId?: string

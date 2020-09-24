@@ -1,5 +1,6 @@
 import React from 'react';
 import { Select, CheckBox } from 'choerodon-ui/pro';
+import { find } from 'lodash';
 import QuickSearch, { IQuickSearchValue } from '@/components/quick-search';
 import SelectSprint from '@/components/select/select-sprint';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
@@ -12,6 +13,8 @@ export interface BurnDownSearchProps {
   projectId?: string
   sprintId: string | undefined
   setSprintId: (sprintId: string | undefined) => void
+  currentSprintId: string | undefined
+  setCurrentSprintId: (sprintId: string | undefined) => void
   setEndDate: (endDate: string) => void
   type: IBurndownChartType
   setType: (type: IBurndownChartType) => void
@@ -19,11 +22,15 @@ export interface BurnDownSearchProps {
   setQuickFilter: (quickFilter: IQuickSearchValue) => void
   restDayShow: boolean
   setRestDayShow: (restDayShow: boolean) => void
+  useCurrentSprint?: boolean
+  setUseCurrentSprint: (useCurrentSprint: boolean) => void
 }
 const BurndownSearch: React.FC<BurnDownSearchProps> = ({
   projectId,
   sprintId,
   setSprintId,
+  currentSprintId,
+  setCurrentSprintId,
   setEndDate,
   type,
   setType,
@@ -31,6 +38,8 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
   setQuickFilter,
   restDayShow,
   setRestDayShow,
+  useCurrentSprint,
+  setUseCurrentSprint,
 }) => (
   <div>
     <SelectSprint
@@ -39,20 +48,34 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
       clearButton={false}
       projectId={projectId}
       statusList={['started', 'closed']}
+      currentSprintOption
       afterLoad={(sprints) => {
-        if (!sprintId && sprints.length > 0) {
+        if (useCurrentSprint && !currentSprintId) {
+          const current = find(sprints, { statusCode: 'started' });
+          if (current) {
+            setSprintId(current.sprintId);
+            setCurrentSprintId(current.sprintId);
+          }
+        } else if (!sprintId && sprints.length > 0) {
           setSprintId(sprints[0].sprintId);
         }
       }}
-      value={sprintId}
+      value={useCurrentSprint ? 'current' : sprintId}
       primitiveValue={false}
       onChange={(sprint: ISprint | null) => {
+        if (sprint && sprint.sprintId === 'current') {
+          setSprintId(currentSprintId);
+          setUseCurrentSprint(true);
+          return;
+        }
         if (sprint) {
           setSprintId(sprint.sprintId);
           setEndDate(sprint.endDate);
+          setUseCurrentSprint(false);
         } else {
           setSprintId(undefined);
           setEndDate('');
+          setUseCurrentSprint(false);
         }
       }}
     />
