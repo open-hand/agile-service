@@ -124,8 +124,10 @@ public class ChartUnitVO extends ReportUnitVO {
                 Assert.notNull(chartSearchVO.getPiId(), BaseConstants.ErrorCode.DATA_INVALID);
                 Assert.notNull(chartSearchVO.getLatitude(), BaseConstants.ErrorCode.DATA_INVALID);
                 break;
-            case SPRINT_REPORT:
             case VERSION_BURN_DOWN_REPORT:
+                Assert.notNull(chartSearchVO.getVersionId(), BaseConstants.ErrorCode.DATA_INVALID);
+                break;
+            case SPRINT_REPORT:
             case UNCOMPLETED_CHART:
             case ISSUE_CHART:
             case SPRINT_STATISTICS_CHART:
