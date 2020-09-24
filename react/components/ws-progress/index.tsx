@@ -7,12 +7,22 @@ import {
   Choerodon,
 } from '@choerodon/boot';
 import _ from 'lodash';
+import fileSever, { FileSaverOptions } from 'file-saver';
 import moment from 'moment';
 import { Progress } from 'choerodon-ui/pro';
 import { ProgressStatus, ProgressType } from 'choerodon-ui/lib/progress/enum';
 import './index.less';
 import { humanizeDuration } from '@/utils/common';
-
+/**
+ * @param fieldKey websocket传输信息下载url的key  默认fileUrl
+ * @param fileName 下载文件名  默认为url 最后一个‘/’后的名
+ * @param  fileSaverOptions
+ */
+interface AutoDownloadProps {
+  fieldKey?: string,
+  fileName?: string,
+  fileSaverOptions?: FileSaverOptions,
+}
 interface Props {
   handleMessage?: (messageData: any) => void | boolean,
   percentCode?: string,
@@ -27,6 +37,7 @@ interface Props {
   renderEndProgress?: (messageData: any) => React.ReactElement | React.ReactElement[] | null | string,
   visible?: boolean, // 可控类型 控制进度条是否显示
   messageKey: string,
+  autoDownload?: boolean | AutoDownloadProps, /** 完成后是否自动下载 */
   onFinish?: (messageData: any) => void,
 }
 interface StateProps {
@@ -86,6 +97,16 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
     visible: false,
   });
   const { messageKey } = props;
+  function handleFinish(data: any) {
+    const { autoDownload } = props;
+    dispatch({ type: 'finish', data });
+    if (autoDownload) {
+      const autoDownLoadFieldCode = typeof (autoDownload) === 'boolean' ? 'fileUrl' : autoDownload.fieldKey;
+      const url = data[autoDownLoadFieldCode || 'fileUrl'];
+      const fileName = url.substring(url.lastIndexOf('/') + 1);
+      fileSever.saveAs(data[autoDownLoadFieldCode || 'fileUrl'], fileName);
+    }
+  }
   function handleMessage(data: any) {
     const newData = JSON.parse(data);
     const { status } = newData;
@@ -96,11 +117,11 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
     }
     dispatch({ type: 'transmission', data: newData });
     if (props.handleMessage && props.handleMessage(newData)) {
-      dispatch({ type: 'finish', data: newData });
+      handleFinish(newData);
       return;
     }
     if (status && status === 'success') {
-      dispatch({ type: 'finish', data: newData });
+      handleFinish(newData);
     }
   }
   const renderFinish: any = useCallback(() => {
@@ -154,3 +175,4 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
   );
 }
 export default WsProgress;
+export { onHumanizeDuration as calculateHumanizeDuration };
