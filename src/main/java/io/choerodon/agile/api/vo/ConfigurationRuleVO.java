@@ -2,12 +2,14 @@ package io.choerodon.agile.api.vo;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/9/23 上午9:50
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConfigurationRuleVO extends AuditDomain {
 
     private Long id;

@@ -1,5 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
+import java.util.List;
+
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
@@ -11,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
@@ -37,8 +38,8 @@ public class ConfigurationRuleController extends BaseController {
     @ApiOperation(value = "列表")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
-    public ResponseEntity<?> list(@PathVariable("project_id") Long projectId,
-                                  @ApiIgnore @SortDefault(value = ConfigurationRuleDTO.FIELD_ID,
+    public ResponseEntity<List<ConfigurationRuleVO>> list(@PathVariable("project_id") Long projectId,
+                                                          @ApiIgnore @SortDefault(value = ConfigurationRuleDTO.FIELD_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest){
         return Results.success(configurationRuleService.listByProjectId(projectId));
     }
@@ -50,9 +51,9 @@ public class ConfigurationRuleController extends BaseController {
     @ApiOperation(value = "明细")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @RequestMapping("/{ruldId}")
-    public ResponseEntity<?> detail(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<ConfigurationRuleVO> detail(@PathVariable("project_id") Long projectId,
                                     @PathVariable Long ruldId) {
-        return Results.success();
+        return Results.success(configurationRuleService.queryById(projectId, ruldId));
     }
 
     /**
@@ -61,10 +62,11 @@ public class ConfigurationRuleController extends BaseController {
     @ApiOperation(value = "创建")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
-    public ResponseEntity<?> create(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<Void> create(@PathVariable("project_id") Long projectId,
                                     @RequestBody ConfigurationRuleVO configurationRuleVO) {
         configurationRuleVO.setProjectId(projectId);
-        return Results.success(configurationRuleService.create(projectId, configurationRuleVO));
+        configurationRuleService.create(projectId, configurationRuleVO);
+        return Results.success();
     }
 
     /**
@@ -73,12 +75,13 @@ public class ConfigurationRuleController extends BaseController {
     @ApiOperation(value = "修改")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/{ruldId}")
-    public ResponseEntity<?> update(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<Void> update(@PathVariable("project_id") Long projectId,
                                     @PathVariable Long ruldId,
                                     @RequestBody ConfigurationRuleVO configurationRuleVO) {
         configurationRuleVO.setProjectId(projectId);
         configurationRuleVO.setId(ruldId);
-        return Results.success(configurationRuleService.update(projectId, ruldId, configurationRuleVO));
+        configurationRuleService.update(projectId, ruldId, configurationRuleVO);
+        return Results.success();
     }
 
     /**
@@ -87,8 +90,9 @@ public class ConfigurationRuleController extends BaseController {
     @ApiOperation(value = "删除")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping("/{ruleId}")
-    public ResponseEntity<?> remove(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<Void> remove(@PathVariable("project_id") Long projectId,
                                     @PathVariable Long ruleId) {
+        configurationRuleService.deleteById(projectId, ruleId);
         return Results.success();
     }
 
