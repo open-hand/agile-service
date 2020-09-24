@@ -24,7 +24,7 @@ export const isFilterSame = (obj, obj2) => {
  */
 export function flattenObject(object) {
   const result = {};
-  for (const [key, value] of Object.entries(object)) {
+  for (const [key, value] of Object.entries(object || {})) {
     if (Object.prototype.toString.call(value) === '[object Object]') {
       Object.assign(result, flattenObject(value));
     } else {
