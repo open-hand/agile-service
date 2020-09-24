@@ -70,12 +70,14 @@ const ExportIssueContextProvider = injectIntl(observer(
       }
       currentChosenFields.set(field.code, newField);
     });
+    const checkOptions = customFields.map((option) => ({ value: option.code, label: option.name })); // 自定义字段
     const choseFieldStore = useChoseFieldStore({ systemFields, customFields, chosenFields: [...currentChosenFields.values()] });
     const issueFilterFormDataSet = useIssueFilterFormDataSet({ fields, systemFields: getFilterFormSystemFields(isInProgram) });
     const tableColumnCheckBoxesDataSet = useTableColumnCheckBoxesDataSet('exportFieldCodes', columns.map((column) => column.name));
 
     const value = {
       ...props,
+      checkOptions: props.checkOptions.concat(...checkOptions),
       issueFilterFormDataSet,
       choseFieldStore,
       tableColumnCheckBoxesDataSet,
