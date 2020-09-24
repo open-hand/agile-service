@@ -1,6 +1,7 @@
 import React, {
   useEffect, useState, useMemo, useCallback, useRef,
 } from 'react';
+import { Spin } from 'choerodon-ui';
 import { axios } from '@choerodon/boot';
 import { find } from 'lodash';
 import { IReportListBlock } from '@/routes/project-report/report-page/store';
@@ -17,6 +18,7 @@ interface Props {
 }
 const ListBlock: React.FC<Props> = ({ data: { searchVO, colList, type } }) => {
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [fields, setFields] = useState<IFoundationHeader[]>([]);
   const dataRef = useRef([]);
   const { register, finish } = useTaskContext();
@@ -53,6 +55,7 @@ const ListBlock: React.FC<Props> = ({ data: { searchVO, colList, type } }) => {
       loadData(page + 1);
     } else {
       setData(dataRef.current);
+      setLoading(false);
       setTimeout(onFinish);
     }
   }, [onFinish, searchVO]);
@@ -62,6 +65,7 @@ const ListBlock: React.FC<Props> = ({ data: { searchVO, colList, type } }) => {
     loadData();
   }, [loadData]);
   useEffect(() => {
+    setLoading(true);
     loadFields();
   }, [loadFields]);
   const treeData = useMemo(() => flat2tree(data, { idKey: 'issueId' }), [data]);
@@ -95,11 +99,13 @@ const ListBlock: React.FC<Props> = ({ data: { searchVO, colList, type } }) => {
   });
   return (
     <div style={{ padding: '10px 26px' }}>
-      <Table<Issue>
-        data={treeData}
-        primaryKey="issueId"
-        columns={columns}
-      />
+      <Spin spinning={loading}>
+        <Table<Issue>
+          data={treeData}
+          primaryKey="issueId"
+          columns={columns}
+        />
+      </Spin>
     </div>
   );
 };
