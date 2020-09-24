@@ -25,6 +25,7 @@ public class CumulativeFlowFilterVO {
     private Long boardId;
 
     @ApiModelProperty(value = "快速搜索传值")
+    @Encrypt
     private List<Long> quickFilterIds;
 
     @ApiModelProperty(value = "看板列id集合")
