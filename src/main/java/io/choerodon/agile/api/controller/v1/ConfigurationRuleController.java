@@ -24,7 +24,7 @@ import springfox.documentation.annotations.ApiIgnore;
  * @author jiaxu.cui@hand-china.com
  * @date 2020-09-23 09:29:15
  */
-@RestController("configurationRuleController.v1")
+@RestController
 @RequestMapping("/v1/projects/{project_id}/configuration_rule")
 public class ConfigurationRuleController extends BaseController {
 
@@ -37,10 +37,10 @@ public class ConfigurationRuleController extends BaseController {
     @ApiOperation(value = "列表")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
-    public ResponseEntity<?> list(ConfigurationRuleDTO configurationRuleDTO, @ApiIgnore @SortDefault(value = ConfigurationRuleDTO.FIELD_ID,
+    public ResponseEntity<?> list(@PathVariable("project_id") Long projectId,
+                                  @ApiIgnore @SortDefault(value = ConfigurationRuleDTO.FIELD_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest){
-        Page<ConfigurationRuleDTO> list = configurationRuleService.pageAndSort(pageRequest, configurationRuleDTO);
-        return Results.success(list);
+        return Results.success(configurationRuleService.listByProjectId(projectId));
     }
 
 
@@ -49,10 +49,10 @@ public class ConfigurationRuleController extends BaseController {
      */
     @ApiOperation(value = "明细")
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @RequestMapping("/{id}")
-    public ResponseEntity<?> detail(@PathVariable Long id) {
-        ConfigurationRuleDTO configurationRuleDTO = configurationRuleService.selectByPrimaryKey(id);
-        return Results.success(configurationRuleDTO);
+    @RequestMapping("/{ruldId}")
+    public ResponseEntity<?> detail(@PathVariable("project_id") Long projectId,
+                                    @PathVariable Long ruldId) {
+        return Results.success();
     }
 
     /**
@@ -72,13 +72,13 @@ public class ConfigurationRuleController extends BaseController {
      */
     @ApiOperation(value = "修改")
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/{id}")
+    @PutMapping("/{ruldId}")
     public ResponseEntity<?> update(@PathVariable("project_id") Long projectId,
-                                    @PathVariable("id") Long id,
+                                    @PathVariable Long ruldId,
                                     @RequestBody ConfigurationRuleVO configurationRuleVO) {
         configurationRuleVO.setProjectId(projectId);
-        configurationRuleVO.setId(id);
-        return Results.success(configurationRuleService.update(projectId, id, configurationRuleVO));
+        configurationRuleVO.setId(ruldId);
+        return Results.success(configurationRuleService.update(projectId, ruldId, configurationRuleVO));
     }
 
     /**
@@ -86,9 +86,9 @@ public class ConfigurationRuleController extends BaseController {
      */
     @ApiOperation(value = "删除")
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> remove(@PathVariable Long id) {
-            configurationRuleService.deleteByPrimaryKey(id);
+    @DeleteMapping("/{ruleId}")
+    public ResponseEntity<?> remove(@PathVariable("project_id") Long projectId,
+                                    @PathVariable Long ruleId) {
         return Results.success();
     }
 
