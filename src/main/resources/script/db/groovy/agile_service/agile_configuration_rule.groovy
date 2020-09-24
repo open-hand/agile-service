@@ -1,6 +1,6 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_configuration_rule.groovy') {
-    changeSet(id: '2018-06-14-agile-configuration-rule', author: 'jiaxu.cui@hand-china.com') {
+    changeSet(id: '2020-09-24-agile-configuration-rule', author: 'jiaxu.cui@hand-china.com') {
         createTable(tableName: "agile_configuration_rule") {
             column(name: 'id', type: 'BIGINT UNSIGNED', autoIncrement: true, remarks: 'rule id') {
                 constraints(primaryKey: true)

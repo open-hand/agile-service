@@ -1,6 +1,6 @@
 package script.db.groovy.agile_service
 databaseChangeLog(logicalFilePath:'agile_configuration_rule_filed.groovy'){
-    changeSet(id: '2018-06-14-agile-configuration-rule-filed', author: 'jiaxu.cui@hand-china.com') {
+    changeSet(id: '2020-09-24-agile-configuration-rule-filed', author: 'jiaxu.cui@hand-china.com') {
         createTable(tableName: "agile_configuration_rule_filed") {
             column(name: 'field_code', type: 'VARCHAR(255)',  remarks: 'field code') {
                 constraints(primaryKey: true)
