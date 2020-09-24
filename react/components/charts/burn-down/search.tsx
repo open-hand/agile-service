@@ -24,6 +24,7 @@ export interface BurnDownSearchProps {
   setRestDayShow: (restDayShow: boolean) => void
   useCurrentSprint?: boolean
   setUseCurrentSprint: (useCurrentSprint: boolean) => void
+  onEmpty: () => void
 }
 const BurndownSearch: React.FC<BurnDownSearchProps> = ({
   projectId,
@@ -40,6 +41,7 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
   setRestDayShow,
   useCurrentSprint,
   setUseCurrentSprint,
+  onEmpty,
 }) => (
   <div>
     <SelectSprint
@@ -55,6 +57,10 @@ const BurndownSearch: React.FC<BurnDownSearchProps> = ({
           if (current) {
             setSprintId(current.sprintId);
             setCurrentSprintId(current.sprintId);
+          } else {
+            setSprintId(undefined);
+            setCurrentSprintId(undefined);
+            onEmpty();
           }
         } else if (!sprintId && sprints.length > 0) {
           setSprintId(sprints[0].sprintId);

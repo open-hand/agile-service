@@ -164,6 +164,7 @@ export interface IField {
 
 export interface Issue {
   issueId: string
+  issueNum: string
   summary: string
   typeCode?: string,
   issueTypeVO: IIssueType,

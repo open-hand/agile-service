@@ -59,6 +59,7 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
     ['issueNum', {
       title: '编号',
       dataIndex: 'issueNum',
+      render: (item) => <span style={{ whiteSpace: 'nowrap' }}>{item.issueNum}</span>,
     }],
     ['priority', {
       title: '优先级',
@@ -87,6 +88,7 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
           color: 'white',
           borderRadius: '2px',
           padding: '0 4px',
+          whiteSpace: 'nowrap',
         }}
         >
           {statusVO.name}
