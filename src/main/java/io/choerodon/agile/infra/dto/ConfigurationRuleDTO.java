@@ -23,11 +23,18 @@ import io.swagger.annotations.ApiModelProperty;
 @Table(name = "agile_configuration_rule")
 public class ConfigurationRuleDTO extends AuditDomain {
 
+    public ConfigurationRuleDTO(Long id, Long projectId) {
+        this.id = id;
+        this.projectId = projectId;
+    }
+
+    public ConfigurationRuleDTO() {
+    }
+
     @Id
     @GeneratedValue
     private Long id;
     private Long projectId;
-    private String name;
     private String sqlQuery;
     private String expressQuery;
     private String expressFormat;
@@ -46,14 +53,6 @@ public class ConfigurationRuleDTO extends AuditDomain {
 
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getSqlQuery() {
