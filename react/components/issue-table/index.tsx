@@ -282,7 +282,7 @@ const IssueTable: React.FC<Props> = ({
           <Column
             hidden={columnHidden(field.code)}
             name={field.code}
-            header={field.title}
+            header={field.title || field.name}
             className="c7n-agile-table-cell"
             renderer={({ record }) => {
               const { fieldType, code } = field;
