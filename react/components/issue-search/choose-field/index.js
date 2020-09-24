@@ -56,8 +56,10 @@ function ChooseField() {
             setHidden(false);
           }}
         >
-          添加筛选
-          <Icon type="arrow_drop_down" />
+          <span style={{ display: 'flex', alignItems: 'center' }}>
+            添加筛选
+            <Icon type="arrow_drop_down" />
+          </span>
         </Button>
       </Dropdown>
     </div>

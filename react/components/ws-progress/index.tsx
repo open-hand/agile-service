@@ -2,10 +2,7 @@
 import React, {
   useState, useReducer, useEffect, useCallback, useMemo,
 } from 'react';
-import {
-  WSHandler, stores,
-  Choerodon,
-} from '@choerodon/boot';
+import { WSHandler, Choerodon } from '@choerodon/boot';
 import _ from 'lodash';
 import fileSever, { FileSaverOptions } from 'file-saver';
 import moment from 'moment';
@@ -27,7 +24,7 @@ interface Props {
   handleMessage?: (messageData: any) => void | boolean,
   percentCode?: string,
   downloadInfo?: {
-    url: string,
+    url: string | null,
     timeLine?: any,
     createDate?: string,
     lastUpdateDate?: string,
@@ -138,7 +135,7 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
       // eslint-disable-next-line react-hooks/exhaustive-deps
       return renderEndProgress(stateProgress.data);
     }
-    const fileName = downLoadProps?.fileName ?? downloadInfo?.url.substring(downloadInfo.url.lastIndexOf('/') + 1);
+    const fileName = downLoadProps?.fileName ?? downloadInfo?.url?.substring(downloadInfo.url.lastIndexOf('/') + 1);
     return downloadInfo ? (
       <div className="c7n-agile-ws-finish">
         {downloadInfo.children ?? (
@@ -146,7 +143,7 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
             ? (
               <>
                 <span>{downloadInfo.timeLine ?? `导出完成时间${downloadInfo.lastUpdateDate}（耗时${onHumanizeDuration(downloadInfo.createDate, downloadInfo.lastUpdateDate)}）`}</span>
-                <span role="none" className="c7n-agile-ws-finish-url" onClick={() => fileSever.saveAs(downloadInfo.url, fileName, downLoadProps?.fileSaverOptions)}>点击下载</span>
+                <span role="none" className="c7n-agile-ws-finish-url" onClick={() => downloadInfo.url && fileSever.saveAs(downloadInfo.url, fileName, downLoadProps?.fileSaverOptions)}>点击下载</span>
               </>
             ) : ''
         )}
