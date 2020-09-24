@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.BatchUpdateFieldsValueVo;
+import org.hzero.starter.keyencrypt.core.EncryptType;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
@@ -15,6 +16,6 @@ public interface IssueFieldValueService {
      * @param schemeCode
      * @param batchUpdateFieldsValueVo
      */
-    void asyncUpdateFields(Long projectId, String schemeCode, BatchUpdateFieldsValueVo batchUpdateFieldsValueVo,String applyType, ServletRequestAttributes requestAttributes);
+    void asyncUpdateFields(Long projectId, String schemeCode, BatchUpdateFieldsValueVo batchUpdateFieldsValueVo, String applyType, ServletRequestAttributes requestAttributes, EncryptType encryptType);
 
 }
