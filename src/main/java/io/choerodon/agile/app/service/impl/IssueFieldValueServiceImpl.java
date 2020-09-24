@@ -13,6 +13,8 @@ import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.hzero.boot.message.MessageClient;
+import org.hzero.starter.keyencrypt.core.EncryptContext;
+import org.hzero.starter.keyencrypt.core.EncryptType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -44,8 +46,9 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
     @Async
     @Override
     public void asyncUpdateFields(Long projectId, String schemeCode, BatchUpdateFieldsValueVo batchUpdateFieldsValueVo,
-                                  String applyType, ServletRequestAttributes requestAttributes) {
+                                  String applyType, ServletRequestAttributes requestAttributes, EncryptType encryptType) {
         RequestContextHolder.setRequestAttributes(requestAttributes);
+        EncryptContext.setEncryptType(encryptType.name());
         Long userId = DetailsHelper.getUserDetails().getUserId();
         String messageCode = WEBSOCKET_BATCH_UPDATE_FIELD+"-"+projectId;
         BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
