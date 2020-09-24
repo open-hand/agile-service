@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { find, debounce } from 'lodash';
 import { Select, Form, Modal } from 'choerodon-ui';
 import { issueApi, issueTypeApi } from '@/api';
-
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import IssueOption from '../IssueOption';
 import './RelateStory.less';
 
@@ -36,7 +36,6 @@ class RelateStory extends Component {
   componentDidMount() {
     this.init();
   }
-
 
   onFilterChange(input) {
     if (!sign) {
@@ -127,12 +126,12 @@ class RelateStory extends Component {
       selectLoading: true,
     });
     issueTypeApi.loadAllWithStateMachineId().then((issueTypes) => {
-      const types = issueTypes.filter(type => type.typeCode === 'story' || type.typeCode === 'task');
+      const types = issueTypes.filter((type) => type.typeCode === 'story' || type.typeCode === 'task');
       if (types) {
         this.types = types;
         this.filters = {
           advancedSearchArgs: {
-            issueTypeId: types.map(type => type.id),
+            issueTypeId: types.map((type) => type.id),
           },
         };
         this.loadIssues(true);
@@ -158,7 +157,7 @@ class RelateStory extends Component {
         okText="确定"
         cancelText="取消"
         confirmLoading={createLoading}
-        width={380}
+        width={MODAL_WIDTH.small}
       >
         <Form layout="vertical">
           <FormItem label="问题">
@@ -173,7 +172,7 @@ class RelateStory extends Component {
                 onFilterChange={this.onFilterChange.bind(this)}
                 getPopupContainer={() => document.getElementsByClassName('c7n-RelateStory')[0]}
               >
-                {storys.map(issue => (
+                {storys.map((issue) => (
                   <Option
                     value={issue.issueId}
                   >

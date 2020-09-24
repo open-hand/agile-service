@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import { Modal, Table } from 'choerodon-ui';
 import _ from 'lodash';
 import { Content } from '@choerodon/boot';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 
 const { Sidebar } = Modal;
 
@@ -17,12 +18,10 @@ class AssigneeModal extends Component {
     if (value) {
       if (value % 1 > 0) {
         return value.toFixed(1);
-      } else {
-        return value;
       }
-    } else {
-      return 0;
+      return value;
     }
+    return 0;
   };
 
   render() {
@@ -31,39 +30,39 @@ class AssigneeModal extends Component {
       title: '经办人',
       dataIndex: 'assigneeName',
       key: 'assigneeName',
-      render: text => (text === '合计' ? (
+      render: (text) => (text === '合计' ? (
         <span>{text}</span>
       ) : (<span>{text || '未分配'}</span>)),
     }, {
       title: '总问题数',
       dataIndex: 'issueCount',
       key: 'issueCount',
-      render: text => (text || '无'),
+      render: (text) => (text || '无'),
     }, {
       title: '剩余问题数',
       dataIndex: 'remainingIssueCount',
       key: 'remainingIssueCount',
-      render: text => (text || '无'),
+      render: (text) => (text || '无'),
     }, {
       title: '总故事点',
       dataIndex: 'totalStoryPoints',
       key: 'totalStoryPoints',
-      render: text => (text || '无'),
+      render: (text) => (text || '无'),
     }, {
       title: '剩余故事点',
       dataIndex: 'remainingStoryPoints',
       key: 'remainingStoryPoints',
-      render: text => (text || '无'),
+      render: (text) => (text || '无'),
     }, {
       title: '总任务工时',
       dataIndex: 'totalRemainingTime',
       key: 'totalRemainingTime',
-      render: text => (text || '无'),
+      render: (text) => (text || '无'),
     }, {
       title: '剩余任务工时',
       dataIndex: 'remainingTime',
       index: 'remainingTime',
-      render: text => (text || '无'),
+      render: (text) => (text || '无'),
     }];
     const assignData = data.assigneeIssues;
     let totalIssue = 0;
@@ -105,8 +104,8 @@ class AssigneeModal extends Component {
     let noAssign = [];
     let dataSource = [];
     if (data.assigneeIssues) {
-      noAssign = data.assigneeIssues.filter(item => !item.assigneeName);
-      dataSource = data.assigneeIssues.filter(item => item.assigneeName).concat(noAssign);
+      noAssign = data.assigneeIssues.filter((item) => !item.assigneeName);
+      dataSource = data.assigneeIssues.filter((item) => item.assigneeName).concat(noAssign);
     }
     return (
       <Sidebar
@@ -115,6 +114,7 @@ class AssigneeModal extends Component {
         onOk={onCancel.bind(this)}
         okText="关闭"
         okCancel={false}
+        width={MODAL_WIDTH.middle}
       >
         {data.assigneeIssues && (
           <Content

@@ -8,6 +8,7 @@ import {
   epicApi, issueApi, fieldApi,
 } from '@/api';
 import { checkCanQuickCreate } from '@/utils/quickCreate';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import BacklogStore from '../../../../stores/project/backlog/BacklogStore';
 
 const { AppState } = stores;
@@ -117,7 +118,7 @@ class CreateEpic extends Component {
         }}
         confirmLoading={loading}
         onOk={this.handleCreateEpic}
-        width={380}
+        width={MODAL_WIDTH.small}
       >
         <Form>
           <FormItem>

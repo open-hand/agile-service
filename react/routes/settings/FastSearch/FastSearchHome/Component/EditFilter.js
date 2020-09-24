@@ -10,6 +10,7 @@ import {
   issueLabelApi, priorityApi, statusApi, quickFilterApi, commonApi, componentApi, issueTypeApi,
 } from '@/api';
 import useIsInProgram from '@/hooks/useIsInProgram';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 
 import { NumericInput } from '../../../../../components/CommonComponent';
@@ -946,7 +947,7 @@ class AddComponent extends Component {
         confirmLoading={loading}
         onOk={(e) => this.handleOk(e)}
         onCancel={onCancel}
-        width={740}
+        width={MODAL_WIDTH.middle}
       >
         <Form layout="vertical">
           <FormItem style={{ width: 520 }}>

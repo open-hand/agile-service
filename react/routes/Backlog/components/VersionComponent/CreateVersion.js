@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Modal, Form, Input, DatePicker, 
+  Modal, Form, Input, DatePicker,
 } from 'choerodon-ui';
 import {
-  Content, stores, Choerodon, 
+  Content, stores, Choerodon,
 } from '@choerodon/boot';
 import moment from 'moment';
 import { versionApi } from '@/api';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 // import this.props.store from "../../../../stores/project/backlog/this.props.store";
 
 const { Sidebar } = Modal;
@@ -25,7 +26,6 @@ class CreateVersion extends Component {
       expectReleaseDate: null,
     };
   }
-
 
   /**
    *验证版本名称是否重复
@@ -87,7 +87,6 @@ class CreateVersion extends Component {
     });
   }
 
-
   render() {
     const { form: { getFieldDecorator, resetFields }, onCancel, visible } = this.props;
     const { loading, expectReleaseDate, startDate } = this.state;
@@ -103,6 +102,7 @@ class CreateVersion extends Component {
         }}
         confirmLoading={loading}
         onOk={this.handleCreateVersion.bind(this)}
+        width={MODAL_WIDTH.middle}
       >
         <Content
           style={{
@@ -137,7 +137,7 @@ class CreateVersion extends Component {
                       startDate: date,
                     });
                   }}
-                  disabledDate={expectReleaseDate ? current => current > moment(expectReleaseDate) : ''}
+                  disabledDate={expectReleaseDate ? (current) => current > moment(expectReleaseDate) : ''}
                 />,
               )}
             </FormItem>
@@ -151,7 +151,7 @@ class CreateVersion extends Component {
                       expectReleaseDate: date,
                     });
                   }}
-                  disabledDate={startDate ? current => current < moment(startDate) : ''}
+                  disabledDate={startDate ? (current) => current < moment(startDate) : ''}
                 />,
               )}
             </FormItem>

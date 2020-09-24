@@ -7,6 +7,7 @@ import {
 import './Doc.less';
 import { produce } from 'immer';
 import { knowledgeApi } from '@/api';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 
 const { AppState } = stores;
 const { Sidebar } = Modal;
@@ -108,7 +109,7 @@ class Doc extends Component {
     }
   };
 
-  handleChange=(pagination, filters, sorter, content) => {  
+  handleChange=(pagination, filters, sorter, content) => {
     const keyWord = content[0] || '';
     this.setState({
       filter: keyWord,
@@ -120,9 +121,9 @@ class Doc extends Component {
     return produce(data, (draft) => {
       draft.forEach((base) => {
         // eslint-disable-next-line no-param-reassign
-        base.children = base.children.filter(doc => doc.name.indexOf(filter) + 1);
+        base.children = base.children.filter((doc) => doc.name.indexOf(filter) + 1);
       });
-    }).filter(base => base.children.length);
+    }).filter((base) => base.children.length);
   }
 
   render() {
@@ -132,7 +133,7 @@ class Doc extends Component {
     } = this.props;
     const {
       createLoading,
-      selectedRowKeys,      
+      selectedRowKeys,
       loading,
     } = this.state;
     const { name } = AppState.currentMenuType;
@@ -152,7 +153,7 @@ class Doc extends Component {
         okText="创建"
         cancelText="取消"
         confirmLoading={createLoading}
-        width={740}
+        width={MODAL_WIDTH.middle}
       >
         <div>
           <p>{`你当前项目为"${name}"，知识文档的内容所属为当前项目。`}</p>
@@ -162,7 +163,7 @@ class Doc extends Component {
             rowSelection={rowSelection}
             onChange={this.handleChange}
             // onExpand={this.onExpand}
-            rowKey={record => record.id}
+            rowKey={(record) => record.id}
             pagination={false}
             loading={loading}
             noFilter

@@ -22,6 +22,7 @@ import {
 } from '@/utils/common';
 import { observer } from 'mobx-react';
 import { IsInProgram } from '@/hooks/useIsInProgram';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { UploadButton } from '../CommonComponent';
 import SelectNumber from '../SelectNumber';
 import WYSIWYGEditor from '../WYSIWYGEditor';
@@ -983,6 +984,7 @@ class CreateIssue extends Component {
         okText="创建"
         cancelText="取消"
         confirmLoading={createLoading}
+        width={MODAL_WIDTH.middle}
       >
         <Content>
           <Spin spinning={loading}>
