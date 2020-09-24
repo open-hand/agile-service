@@ -18,6 +18,7 @@ export interface BurnDownConfig {
   sprintId?: string
   quickFilter?: IQuickSearchValue
   projectId?: string
+  useCurrentSprint?: boolean
 }
 
 function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnDownSearchProps, BurnDownProps] {
@@ -41,8 +42,14 @@ function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnD
   );
   const [restDays, setRestDays] = useState<string[]>([]);
   const [sprintId, setSprintId] = useControlledDefaultValue<string | undefined>(config?.sprintId || undefined);
+  const [useCurrentSprint, setUseCurrentSprint] = useControlledDefaultValue<boolean>(
+    config?.useCurrentSprint !== undefined
+      ? config.useCurrentSprint
+      : false,
+  );
+  const [currentSprintId, setCurrentSprintId] = useState<string | undefined>(undefined);
   const loadData = useCallback(async () => {
-    if (sprintId) {
+    if ((!useCurrentSprint && sprintId) || (useCurrentSprint && sprintId && currentSprintId === sprintId)) {
       setLoading(true);
       const [burnDownData, resetDaysData] = await Promise.all([reportApi.project(projectId).loadBurnDownCoordinate(sprintId, type, {
         assigneeId: quickFilter.onlyMe ? AppState.getUserId : undefined,
@@ -57,7 +64,18 @@ function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnD
         onFinish && setTimeout(onFinish);
       });
     }
-  }, [onFinish, projectId, quickFilter.onlyMe, quickFilter.onlyStory, quickFilter.personalFilters, quickFilter.quickFilters, sprintId, type]);
+  }, [
+    currentSprintId,
+    onFinish,
+    projectId,
+    quickFilter.onlyMe,
+    quickFilter.onlyStory,
+    quickFilter.personalFilters,
+    quickFilter.quickFilters,
+    sprintId,
+    type,
+    useCurrentSprint,
+  ]);
   useEffect(() => {
     loadData();
   }, [loadData]);
@@ -66,6 +84,10 @@ function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnD
     projectId,
     sprintId,
     setSprintId,
+    useCurrentSprint,
+    setUseCurrentSprint,
+    currentSprintId,
+    setCurrentSprintId,
     setEndDate,
     type,
     setType,
