@@ -30,10 +30,11 @@ export interface VersionBurnDownChartProps {
   checked: 'checked' | undefined,
   data: OriginData[],
   chartData: ChartData,
+  animation?:boolean
 }
 
 const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
-  checked, chartData, data, loading,
+  checked, chartData, data, loading, animation = false,
 }) => {
   const transformPlaceholder2Zero = (arr:any[]) => arr.map((v) => (v === '-' ? 0 : v));
 
@@ -126,7 +127,7 @@ const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
   const getOption = ():EChartOption => {
     const inverse = !checked;
     const option:EChartOption = {
-      animation: false,
+      animation,
       grid: {
         top: 30,
         left: 40,

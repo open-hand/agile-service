@@ -7,11 +7,13 @@ import { transformAccumulationData, IAccumulationData } from './utils';
 export interface AccumulationChartProps {
   loading: boolean
   data: IAccumulationData[]
+  animation?: boolean
 }
 
 const AccumulationChart: React.FC<AccumulationChartProps> = ({
   loading,
   data,
+  animation = true,
 }) => {
   const {
     legendData,
@@ -19,6 +21,7 @@ const AccumulationChart: React.FC<AccumulationChartProps> = ({
     legendSeries,
   } = useMemo(() => transformAccumulationData(data), [data]);
   const getOption = (): EChartOption => ({
+    animation,
     tooltip: {
       trigger: 'axis',
       formatter(params) {

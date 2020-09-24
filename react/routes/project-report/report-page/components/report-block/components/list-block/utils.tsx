@@ -3,6 +3,7 @@ import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
 import PriorityTag from '@/components/PriorityTag';
 import { Issue, IIssueColumnName } from '@/common/types';
+import STATUS from '@/constants/STATUS';
 import type { Column } from './table';
 
 type TreeShapeData<T> = T & {
@@ -35,10 +36,10 @@ export function flat2tree<T extends { [key: string]: any }>(flattered: T[], {
   return result;
 }
 const renderTag = (listField: string, nameField: string) => (record: { [key: string]: any }) => {
-  const list = record.listField;
+  const list = record[listField];
   if (list) {
     if (list.length > 0) {
-      return list.map((item: any) => item.nameField).join(',');
+      return list.map((item: any) => item[nameField]).join(',');
     }
   }
   return null;
@@ -77,13 +78,19 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
     ['status', {
       title: '状态',
       dataIndex: 'status',
-      render: (item) => (
-        <StatusTag
-          data={item.statusVO}
-          style={{
-            display: 'inline-block',
-          }}
-        />
+      render: ({ statusVO }) => (
+        <div style={{
+          background: STATUS[statusVO.type] || 'transparent',
+          lineHeight: '20px',
+          height: '20px',
+          display: 'inline-block',
+          color: 'white',
+          borderRadius: '2px',
+          padding: '0 4px',
+        }}
+        >
+          {statusVO.name}
+        </div>
       ),
     }],
     ['creationDate', {
@@ -155,8 +162,8 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
       ),
     }],
     ['label', {
-      title: '史诗',
-      dataIndex: 'epic',
+      title: '标签',
+      dataIndex: 'label',
       render: renderTag('labelIssueRelVOS', 'labelName'),
     }],
     ['component', {

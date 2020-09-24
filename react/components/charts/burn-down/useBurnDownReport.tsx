@@ -18,9 +18,10 @@ export interface BurnDownConfig {
   sprintId?: string
   quickFilter?: IQuickSearchValue
   projectId?: string
+  useCurrentSprint?: boolean
 }
 
-function useBurnDownReport(config?: BurnDownConfig): [BurnDownSearchProps, BurnDownProps] {
+function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnDownSearchProps, BurnDownProps] {
   const projectId = config?.projectId || getProjectId();
   const [quickFilter, setQuickFilter] = useControlledDefaultValue<IQuickSearchValue>(
     config?.quickFilter || {
@@ -41,8 +42,14 @@ function useBurnDownReport(config?: BurnDownConfig): [BurnDownSearchProps, BurnD
   );
   const [restDays, setRestDays] = useState<string[]>([]);
   const [sprintId, setSprintId] = useControlledDefaultValue<string | undefined>(config?.sprintId || undefined);
+  const [useCurrentSprint, setUseCurrentSprint] = useControlledDefaultValue<boolean>(
+    config?.useCurrentSprint !== undefined
+      ? config.useCurrentSprint
+      : false,
+  );
+  const [currentSprintId, setCurrentSprintId] = useState<string | undefined>(undefined);
   const loadData = useCallback(async () => {
-    if (sprintId) {
+    if ((!useCurrentSprint && sprintId) || (useCurrentSprint && sprintId && currentSprintId === sprintId)) {
       setLoading(true);
       const [burnDownData, resetDaysData] = await Promise.all([reportApi.project(projectId).loadBurnDownCoordinate(sprintId, type, {
         assigneeId: quickFilter.onlyMe ? AppState.getUserId : undefined,
@@ -54,9 +61,21 @@ function useBurnDownReport(config?: BurnDownConfig): [BurnDownSearchProps, BurnD
         setData(burnDownData);
         setRestDays(resetDaysData.map((date) => moment(date).format('YYYY-MM-DD')));
         setLoading(false);
+        onFinish && setTimeout(onFinish);
       });
     }
-  }, [projectId, quickFilter.onlyMe, quickFilter.onlyStory, quickFilter.personalFilters, quickFilter.quickFilters, sprintId, type]);
+  }, [
+    currentSprintId,
+    onFinish,
+    projectId,
+    quickFilter.onlyMe,
+    quickFilter.onlyStory,
+    quickFilter.personalFilters,
+    quickFilter.quickFilters,
+    sprintId,
+    type,
+    useCurrentSprint,
+  ]);
   useEffect(() => {
     loadData();
   }, [loadData]);
@@ -65,6 +84,10 @@ function useBurnDownReport(config?: BurnDownConfig): [BurnDownSearchProps, BurnD
     projectId,
     sprintId,
     setSprintId,
+    useCurrentSprint,
+    setUseCurrentSprint,
+    currentSprintId,
+    setCurrentSprintId,
     setEndDate,
     type,
     setType,

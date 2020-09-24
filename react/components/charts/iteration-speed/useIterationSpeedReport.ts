@@ -10,7 +10,7 @@ export interface IterationSpeedConfig {
   projectId?: string
 }
 
-const useIterationSpeedReport = (config?: IterationSpeedConfig):[IterationSpeedProps, IterationSpeedSearchProps] => {
+const useIterationSpeedReport = (config?: IterationSpeedConfig, onFinish?: Function):[IterationSpeedProps, IterationSpeedSearchProps] => {
   const projectId = config?.projectId || getProjectId();
   const [loading, setLoading] = useState<boolean>(false);
   const [unit, setUnit] = useControlledDefaultValue<IUnit>(config?.unit || 'story_point');
@@ -22,8 +22,9 @@ const useIterationSpeedReport = (config?: IterationSpeedConfig):[IterationSpeedP
       setUnit(unit);
       setData(res);
       setLoading(false);
+      onFinish && setTimeout(onFinish);
     });
-  }, [projectId, setUnit, unit]);
+  }, [projectId, setUnit, unit, onFinish]);
 
   useEffect(() => {
     loadChartData();

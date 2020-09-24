@@ -12,7 +12,7 @@ export interface VersionReportConfig {
   projectId?: string
 }
 
-const useVersionReport = (config?: VersionReportConfig): [VersionReportProps, VersionReportSearchProps] => {
+const useVersionReport = (config?: VersionReportConfig, onFinish?: Function): [VersionReportProps, VersionReportSearchProps] => {
   const projectId = config?.projectId || getProjectId();
   const [loading, setLoading] = useState<boolean>(false);
   const [unit, setUnit] = useControlledDefaultValue<IUnit>(config?.unit || 'story_point');
@@ -54,9 +54,10 @@ const useVersionReport = (config?: VersionReportConfig): [VersionReportProps, Ve
         .then((res: IVersionReportChart[]) => {
           setData(res);
           setLoading(false);
+          onFinish && setTimeout(onFinish);
         });
     }
-  }, [projectId, unit, versionId]);
+  }, [onFinish, projectId, unit, versionId]);
 
   useEffect(() => {
     loadVersions();

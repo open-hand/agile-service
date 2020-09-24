@@ -1,11 +1,7 @@
 /* eslint-disable react/require-default-props */
-import React, {
-  createContext, useContext, useMemo, useEffect,
-} from 'react';
-import { injectIntl, InjectedIntl } from 'react-intl';
-import { toJS } from 'mobx';
+import React, { useMemo } from 'react';
 import {
-  CheckBox, DataSet, Form, Table,
+  CheckBox, DataSet, Form,
 } from 'choerodon-ui/pro/lib';
 import { observer } from 'mobx-react-lite';
 import { CheckBoxProps } from 'choerodon-ui/pro/lib/check-box/CheckBox';

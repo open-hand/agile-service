@@ -6,12 +6,13 @@ import { transformEpicReportSearch } from '@/routes/project-report/report-page/c
 
 interface Props {
   filter: EpicReportSearchVO
+  onFinish?: Function
 }
-const EpicReportComponent: React.FC<Props> = ({ filter }) => {
-  const [props] = useEpicReport(transformEpicReportSearch(filter));
+const EpicReportComponent: React.FC<Props> = ({ filter, onFinish }) => {
+  const [props] = useEpicReport(transformEpicReportSearch(filter), onFinish);
   return (
     <div>
-      <EpicReport {...props} />
+      <EpicReport {...props} animation={false} />
     </div>
   );
 };

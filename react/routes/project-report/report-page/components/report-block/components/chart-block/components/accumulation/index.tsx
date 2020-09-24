@@ -7,12 +7,13 @@ import { transformAccumulationSearch } from '@/routes/project-report/report-page
 
 interface Props {
   filter: AccumulationSearchVO
+  onFinish?: Function
 }
-const AccumulationComponent: React.FC<Props> = ({ filter }) => {
-  const [, props] = useAccumulationReport(transformAccumulationSearch(filter));
+const AccumulationComponent: React.FC<Props> = ({ filter, onFinish }) => {
+  const [, props] = useAccumulationReport(transformAccumulationSearch(filter), onFinish);
   return (
     <div>
-      <Accumulation {...props} />
+      <Accumulation {...props} animation={false} />
     </div>
   );
 };

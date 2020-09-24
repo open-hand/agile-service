@@ -25,6 +25,7 @@ export const transformBurnDownSearch = (searchVO: BurnDownSearchVO | undefined):
       personalFilters: searchVO.personalFilterIds,
     },
     projectId: searchVO.projectId,
+    useCurrentSprint: searchVO.currentSprint,
   };
 };
 export interface Props {
@@ -44,8 +45,8 @@ const BurnDownComponent: React.FC<Props> = ({ innerRef, projectId, data }) => {
     displayNonWorkingDay: searchProps.restDayShow,
     projectId: searchProps.projectId || getProjectId(),
     sprintId: searchProps.sprintId,
+    currentSprint: searchProps.useCurrentSprint,
     quickFilterIds: searchProps.quickFilter.quickFilters,
-    onlyMe: searchProps.quickFilter.onlyMe,
     onlyStory: searchProps.quickFilter.onlyStory,
     assigneeId: searchProps.quickFilter.onlyMe ? AppState.userInfo.id : undefined,
     personalFilterIds: searchProps.quickFilter.personalFilters,

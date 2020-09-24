@@ -35,7 +35,7 @@ interface Props {
 }
 const AddIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
   const isEdit = Boolean(editData);
-  const selectedRef = useRef<Set<string>>(new Set([...(editData?.searchVO.otherArgs.issueIds || [])]));
+  const selectedRef = useRef<Set<string>>(new Set([...(editData?.searchVO?.otherArgs?.issueIds || [])]));
   const issueSearchStore = useIssueSearchStore({
     // @ts-ignore
     getSystemFields,

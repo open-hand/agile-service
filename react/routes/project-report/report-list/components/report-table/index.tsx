@@ -34,6 +34,11 @@ const ReportTable = () => {
         type: 'array' as FieldType,
         label: '收件人',
       },
+      {
+        name: 'createdUser',
+        type: 'object' as FieldType,
+        label: '创建人',
+      },
     ],
   }), []);
   const handleMenuClick = useCallback(async (key, record) => {
@@ -84,6 +89,22 @@ const ReportTable = () => {
               user={user}
             />
           ));
+        }}
+      />
+      <Column
+        name="createdUser"
+        renderer={({ value: createdUser }) => {
+          if (!createdUser) {
+            return null;
+          }
+          return (
+            <UserHead
+              // @ts-ignore
+              style={{ display: 'inline-block' }}
+              hiddenText
+              user={createdUser as User}
+            />
+          );
         }}
       />
     </Table>

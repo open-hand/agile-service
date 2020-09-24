@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckBox } from 'choerodon-ui/pro';
+import { find } from 'lodash';
 import SelectSprint from '@/components/select/select-sprint';
 import { LabelLayout } from 'choerodon-ui/pro/lib/form/enum';
 import { ISprint } from '@/common/types';
@@ -7,17 +8,25 @@ import { ISprint } from '@/common/types';
 export interface SprintSearchProps {
   sprintId: string | undefined
   setSprintId: (sprintId: string | undefined) => void
+  currentSprintId: string | undefined
+  setCurrentSprintId: (sprintId: string | undefined) => void
   setEndDate: (endDate: string) => void
   restDayShow: boolean
   setRestDayShow: (restDayShow: boolean) => void
+  useCurrentSprint?: boolean
+  setUseCurrentSprint: (useCurrentSprint: boolean) => void
   projectId?:string
 }
 const SprintSearch: React.FC<SprintSearchProps> = ({
   sprintId,
   setSprintId,
+  currentSprintId,
+  setCurrentSprintId,
   setEndDate,
   restDayShow,
   setRestDayShow,
+  useCurrentSprint,
+  setUseCurrentSprint,
   projectId,
 }) => (
   <div>
@@ -27,20 +36,34 @@ const SprintSearch: React.FC<SprintSearchProps> = ({
       clearButton={false}
       projectId={projectId}
       statusList={['started', 'closed']}
+      currentSprintOption
       afterLoad={(sprints) => {
-        if (!sprintId && sprints.length > 0) {
+        if (useCurrentSprint && !currentSprintId) {
+          const current = find(sprints, { statusCode: 'started' });
+          if (current) {
+            setSprintId(current.sprintId);
+            setCurrentSprintId(current.sprintId);
+          }
+        } else if (!sprintId && sprints.length > 0) {
           setSprintId(sprints[0].sprintId);
         }
       }}
-      value={sprintId}
+      value={useCurrentSprint ? 'current' : sprintId}
       primitiveValue={false}
       onChange={(sprint: ISprint | null) => {
+        if (sprint && sprint.sprintId === 'current') {
+          setSprintId(currentSprintId);
+          setUseCurrentSprint(true);
+          return;
+        }
         if (sprint) {
           setSprintId(sprint.sprintId);
           setEndDate(sprint.endDate);
+          setUseCurrentSprint(false);
         } else {
           setSprintId(undefined);
           setEndDate('');
+          setUseCurrentSprint(false);
         }
       }}
     />

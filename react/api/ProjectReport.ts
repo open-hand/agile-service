@@ -53,6 +53,16 @@ class ProjectReportApi extends Api<ProjectReportApi> {
       url: `${this.prefix}/project_report/${reportId}`,
     });
   }
+
+  send(reportId: string, imgData: string) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/project_report/send/${reportId}`,
+      data: {
+        imgData,
+      },
+    });
+  }
 }
 
 const projectReportApi = new ProjectReportApi();

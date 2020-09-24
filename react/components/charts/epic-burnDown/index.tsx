@@ -30,12 +30,13 @@ export interface EpicBurnDownChartProps {
   checked: 'checked' | undefined,
   data: OriginData[],
   chartData: ChartData,
+  animation?: boolean
 }
 
 const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
-  checked, chartData, data, loading,
+  checked, chartData, data, loading, animation = true,
 }) => {
-  const transformPlaceholder2Zero = (arr:any[]) => arr.map((v) => (v === '-' ? 0 : v));
+  const transformPlaceholder2Zero = (arr: any[]) => arr.map((v) => (v === '-' ? 0 : v));
 
   const getStoryPoints = () => {
     const lastRemain = last(transformPlaceholder2Zero(chartData[2]));
@@ -46,7 +47,7 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
   const getSprintSpeed = () => {
     if (data.length > 3) {
       const lastThree = data.slice(data.length - 3, data.length);
-      const lastThreeDone:number[] = [];
+      const lastThreeDone: number[] = [];
       lastThree.forEach((item) => {
         lastThreeDone.push(item.done);
       });
@@ -113,7 +114,7 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
 
   const getLegendData = () => {
     const arr = ['工作已完成', '工作剩余', '工作增加'];
-    const legendData:{name: string, textStyle: object}[] = [];
+    const legendData: { name: string, textStyle: object }[] = [];
     arr.forEach((item) => {
       legendData.push({
         name: item,
@@ -123,10 +124,10 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
     return legendData;
   };
 
-  const getOption = ():EChartOption => {
+  const getOption = (): EChartOption => {
     const inverse = !checked;
-    const option:EChartOption = {
-      animation: false,
+    const option: EChartOption = {
+      animation,
       grid: {
         top: 30,
         left: 40,
@@ -242,7 +243,7 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
         borderColor: '#ddd',
         borderWidth: 1,
         extraCssText: 'box-shadow: 0 2px 4px 0 rgba(0,0,0,0.20);',
-        formatter(params:any[]) {
+        formatter(params: any[]) {
           // eslint-disable-next-line no-param-reassign
           params[0].name = trim(params[0].name, '\n\n');
           const sprint = data.filter((item) => item.name === params[0].name)[0];
@@ -462,8 +463,8 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
     <Spin spinning={loading}>
       <div className={styles.epicBurnDown_chart}>
         {
-        renderChart()
-      }
+          renderChart()
+        }
       </div>
     </Spin>
 

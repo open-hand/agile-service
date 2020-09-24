@@ -52,6 +52,7 @@ export interface EpicReportProps {
   unit: IUnit
   epicId: string
   epics: IEpic[]
+  animation?: boolean
 }
 
 // 处理后端返回值为null或小数精度问题
@@ -83,8 +84,8 @@ const transformRemainTime = (remainTime: number) => {
   return `${w ? `${w} 周 ` : ''}${d ? `${d} 天 ` : ''}${time ? `${time} 小时 ` : ''}`;
 };
 
-const EpicReport:React.FC<EpicReportProps> = ({
-  loading, data, tableData, unit, epicId, epics,
+const EpicReport: React.FC<EpicReportProps> = ({
+  loading, data, tableData, unit, epicId, epics, animation = true,
 }) => {
   const getChartDataYAll = () => {
     const prop = UNIT_STATUS[unit].committed;
@@ -160,6 +161,7 @@ const EpicReport:React.FC<EpicReportProps> = ({
       总计剩余时间: '小时',
     };
     const commonOption: EChartOption = {
+      animation,
       tooltip: {
         trigger: 'axis',
         formatter: (params: any[]) => {

@@ -8,17 +8,22 @@ import { Issue, IFoundationHeader } from '@/common/types';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import { fieldApi } from '@/api';
 import UserHead from '@/components/UserHead';
+import { useTaskContext } from '@/routes/project-report/report-preview/taskContext';
 import Table from './table';
 import { flat2tree, getColumnByName } from './utils';
 
 interface Props {
   data: IReportListBlock
 }
-const ListBlock: React.FC<Props> = ({ data: { searchVO, colList } }) => {
+const ListBlock: React.FC<Props> = ({ data: { searchVO, colList, type } }) => {
   const [data, setData] = useState([]);
   const [fields, setFields] = useState<IFoundationHeader[]>([]);
   const dataRef = useRef([]);
-
+  const { register, finish } = useTaskContext();
+  register(type);
+  const onFinish = useCallback(() => {
+    finish(type);
+  }, [finish, type]);
   const loadData = useCallback(async (page = 1) => {
     if (page === 1) {
       dataRef.current = [];
@@ -48,8 +53,9 @@ const ListBlock: React.FC<Props> = ({ data: { searchVO, colList } }) => {
       loadData(page + 1);
     } else {
       setData(dataRef.current);
+      setTimeout(onFinish);
     }
-  }, [searchVO]);
+  }, [onFinish, searchVO]);
   const loadFields = useCallback(async () => {
     const Fields = await fieldApi.getFoundationHeader();
     setFields(Fields);
