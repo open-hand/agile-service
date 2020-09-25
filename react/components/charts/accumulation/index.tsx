@@ -3,6 +3,7 @@ import { Spin } from 'choerodon-ui';
 import { EChartOption } from 'echarts';
 import ReactEcharts from 'echarts-for-react';
 import { transformAccumulationData, IAccumulationData } from './utils';
+import { useFontSize } from '../context';
 
 export interface AccumulationChartProps {
   loading: boolean
@@ -20,8 +21,12 @@ const AccumulationChart: React.FC<AccumulationChartProps> = ({
     newxAxis,
     legendSeries,
   } = useMemo(() => transformAccumulationData(data), [data]);
+  const getFontSize = useFontSize();
   const getOption = (): EChartOption => ({
     animation,
+    textStyle: {
+      fontSize: getFontSize(12),
+    },
     tooltip: {
       trigger: 'axis',
       formatter(params) {
@@ -75,6 +80,7 @@ const AccumulationChart: React.FC<AccumulationChartProps> = ({
         boundaryGap: false,
         data: newxAxis,
         axisLabel: {
+          fontSize: getFontSize(12),
           show: true,
           formatter(value: string) {
             // return `${value.split('-')[2]}/${MONTH[value.split('-')[1] * 1]}月`;
@@ -97,6 +103,9 @@ const AccumulationChart: React.FC<AccumulationChartProps> = ({
         name: '问题数',
         type: 'value',
         minInterval: 1,
+        axisLabel: {
+          fontSize: getFontSize(12),
+        },
       },
     ],
     series: legendSeries,

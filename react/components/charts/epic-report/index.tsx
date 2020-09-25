@@ -9,6 +9,7 @@ import LINK_URL from '@/constants/LINK_URL';
 import { IUnit, IEpic } from './search';
 import finish from './image/finish.svg';
 import styles from './index.less';
+import { useFontSize } from '../context';
 
 const UNIT_STATUS = {
   issue_count: {
@@ -87,6 +88,7 @@ const transformRemainTime = (remainTime: number) => {
 const EpicReport: React.FC<EpicReportProps> = ({
   loading, data, tableData, unit, epicId, epics, animation = true,
 }) => {
+  const getFontSize = useFontSize();
   const getChartDataYAll = () => {
     const prop = UNIT_STATUS[unit].committed;
     if (!prop) {
@@ -162,6 +164,9 @@ const EpicReport: React.FC<EpicReportProps> = ({
     };
     const commonOption: EChartOption = {
       animation,
+      textStyle: {
+        fontSize: getFontSize(12),
+      },
       tooltip: {
         trigger: 'axis',
         formatter: (params: any[]) => {
@@ -217,7 +222,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
         ],
       },
       grid: {
-        top: '30',
+        top: getFontSize(12) / 12 * (30),
         left: 0,
         right: '50',
         containLabel: true,
@@ -246,7 +251,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
           interval: map(data, 'groupDay').length >= 20 ? 4 : 0,
           margin: 13,
           color: 'rgba(0, 0, 0, 0.65)',
-          fontSize: 12,
+          fontSize: getFontSize(12),
           fontStyle: 'normal',
           formatter(value: string) {
             return value.slice(5);
@@ -308,7 +313,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
               show: true,
               margin: 18,
               color: 'rgba(0, 0, 0, 0.65)',
-              fontSize: 12,
+              fontSize: getFontSize(12),
               fontStyle: 'normal',
             },
             splitLine: {
@@ -374,7 +379,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
               show: true,
               margin: 18,
               color: 'rgba(0, 0, 0, 0.65)',
-              fontSize: 12,
+              fontSize: getFontSize(12),
               fontStyle: 'normal',
               formatter(value: string) {
                 if (value && unit === 'remain_time') {
@@ -412,7 +417,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
               show: true,
               margin: 18,
               color: 'rgba(0, 0, 0, 0.65)',
-              fontSize: 12,
+              fontSize: getFontSize(12),
               fontStyle: 'normal',
             },
             splitLine: {
@@ -565,7 +570,7 @@ const EpicReport: React.FC<EpicReportProps> = ({
                     }}
                   >
                     在“问题管理”中查看
-                    <Icon style={{ fontSize: 13 }} type="open_in_new" />
+                    <Icon style={{ fontSize: getFontSize(13) }} type="open_in_new" />
                   </p>
                 </div>
               </div>

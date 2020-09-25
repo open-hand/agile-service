@@ -14,6 +14,7 @@ import sprintIcon from './image/sprintIcon.svg';
 import storyPointIcon from './image/storyPointIcon.svg';
 import speedIcon from './image/speedIcon.svg';
 import styles from './index.less';
+import { useFontSize } from '../context';
 
 export type ChartData = [number[], (string | number)[], (string | number)[], (string | number)[], (string | number)[], (0 | '0.00001' | '-')[], ('-' | '0.00001')[], (0 | '-')[]];
 export interface OriginData {
@@ -36,6 +37,7 @@ export interface VersionBurnDownChartProps {
 const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
   checked, chartData, data, loading, animation = false,
 }) => {
+  const getFontSize = useFontSize();
   const transformPlaceholder2Zero = (arr:any[]) => arr.map((v) => (v === '-' ? 0 : v));
 
   const getStoryPoints = () => {
@@ -118,7 +120,7 @@ const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
     arr.forEach((item) => {
       legendData.push({
         name: item,
-        textStyle: { fontSize: 12 },
+        textStyle: { fontSize: getFontSize(12) },
       });
     });
     return legendData;
@@ -128,8 +130,11 @@ const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
     const inverse = !checked;
     const option:EChartOption = {
       animation,
+      textStyle: {
+        fontSize: getFontSize(12),
+      },
       grid: {
-        top: 30,
+        top: getFontSize(12) / 12 * (30),
         left: 40,
         right: 50,
         containLabel: true,
@@ -155,6 +160,7 @@ const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
             // @ts-ignore
             textStyle: {
               color: 'rgba(0,0,0,0.65)',
+              fontSize: getFontSize(12),
             },
             formatter(value: string) {
               if (data.length >= 7) {
@@ -238,7 +244,7 @@ const EpicBurnDown: React.FC<VersionBurnDownChartProps> = ({
         backgroundColor: '#fff',
         textStyle: {
           color: '#000',
-          fontSize: 13,
+          fontSize: getFontSize(13),
         },
         borderColor: '#ddd',
         borderWidth: 1,
