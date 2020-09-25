@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/9/23 上午9:50
@@ -13,6 +14,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConfigurationRuleVO extends AuditDomain {
 
+    @Encrypt
     private Long id;
     private Long projectId;
     private String sqlQuery;
