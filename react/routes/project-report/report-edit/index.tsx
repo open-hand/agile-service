@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 import { useParams } from 'react-router-dom';
 import { projectReportApi } from '@/api';
+import Loading from '@/components/Loading';
 import ReportPage from '../report-page';
 import ProjectReportStore from '../report-page/store';
 
@@ -19,6 +20,6 @@ const EditReport: React.FC = () => {
   useEffect(() => {
     refresh();
   }, [refresh]);
-  return loading ? null : <ReportPage edit store={store} />;
+  return loading ? <Loading loading /> : <ReportPage edit store={store} />;
 };
 export default EditReport;

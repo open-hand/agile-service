@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import generateTask from '@/routes/project-report/report-preview/generateTask';
 import html2canvas from 'html2canvas';
-import PreviewReport from '@/routes/project-report/report-preview';
+import PreviewReport from '@/routes/project-report/report-preview/Preview';
 import ReactDOM from 'react-dom';
 
 export interface IExportProps {

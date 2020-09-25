@@ -7,7 +7,7 @@ import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { projectReportApi, IProjectReportCreate, IProjectReportUpdate } from '@/api';
 import { getProjectId } from '@/utils/common';
 import fileSaver from 'file-saver';
-import to from '@/utils/to';
+import to, { linkUrl } from '@/utils/to';
 import styles from './index.less';
 import { useProjectReportContext } from '../../context';
 import Export, { IExportProps } from '../export';
@@ -45,8 +45,13 @@ const Operation: React.FC<Props> = () => {
     }
   }, [baseInfoRef, edit, store.baseInfo?.id, store.baseInfo?.objectVersionNumber, store.blockList]);
   const handlePreview = useCallback(() => {
-    setPreview(true);
-  }, [setPreview]);
+    window.open(`/#${linkUrl(`/agile/project-report/preview/${store.baseInfo?.id}`, {
+      type: 'project',
+      params: {
+        fullPage: 'true',
+      },
+    })}`);
+  }, [store.baseInfo?.id]);
   const handleExport = useCallback((canvas: HTMLCanvasElement) => {
     setExporting(false);
     canvas.toBlob((blob: Blob) => {
