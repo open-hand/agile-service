@@ -27,9 +27,10 @@ interface Props extends Partial<SelectProps> {
   afterLoad?: (sprints: PI[]) => void
   multiple?: boolean
   disabledCurrentPI?: boolean
+  dataRef?: React.MutableRefObject<any>
 }
 const SelectPI: React.FC<Props> = forwardRef(({
-  statusList, multiple, disabledCurrentPI = false, afterLoad, ...otherProps
+  dataRef, statusList, multiple, disabledCurrentPI = false, afterLoad, ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
   afterLoadRef.current = afterLoad;
@@ -46,6 +47,11 @@ const SelectPI: React.FC<Props> = forwardRef(({
     middleWare: (sprints) => {
       if (afterLoadRef.current) {
         afterLoadRef.current(sprints);
+      }
+      if (dataRef) {
+        Object.assign(dataRef, {
+          current: sprints,
+        });
       }
       return sprints;
     },

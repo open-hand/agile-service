@@ -12,6 +12,7 @@ const { Option } = Select;
 export interface IEpic {
   issueId: string
   epicName: string
+  summary?: string
 }
 
 export type IUnit = 'story_point' | 'issue_count' | 'remain_time';

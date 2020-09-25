@@ -11,15 +11,24 @@ interface Props extends Partial<SelectProps> {
   issueTypeId?: string
   expectStatusId?: string
   isProgram?: boolean,
+  dataRef?: React.MutableRefObject<any>,
 }
 const SelectStatus: React.FC<Props> = ({
-  issueTypeId, expectStatusId, isProgram, ...otherProps
+  issueTypeId, expectStatusId, dataRef, isProgram, ...otherProps
 }) => {
   const config = useMemo((): SelectConfig<IIssueType> => ({
     name: 'statusId',
     textField: 'name',
     valueField: 'id',
     request: ({ filter, page }) => statusApi.loadByProject(isProgram ? 'program' : 'agile'),
+    middleWare: (data) => {
+      if (dataRef) {
+        Object.assign(dataRef, {
+          current: data,
+        });
+      }
+      return data;
+    },
     paging: false,
   }), []);
   const props = useSelect(config);
