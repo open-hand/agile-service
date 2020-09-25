@@ -3,8 +3,10 @@ package io.choerodon.agile.api.vo;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.mybatis.domain.AuditDomain;
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/9/23 上午9:50
@@ -12,14 +14,34 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConfigurationRuleVO extends AuditDomain {
 
+    @Encrypt
     private Long id;
     private Long projectId;
-    private String name;
     private String sqlQuery;
     private String expressQuery;
     private String expressFormat;
-    @ApiModelProperty(value = "快速搜索创建传值")
+    @ApiModelProperty("快速搜索创建传值")
     private List<RuleExpressVO> expressList;
+    @ApiModelProperty("通知对象")
+    private List<UserDTO> receiverList;
+    @ApiModelProperty("抄送人")
+    private List<UserDTO> ccList;
+
+    public List<UserDTO> getReceiverList() {
+        return receiverList;
+    }
+
+    public void setReceiverList(List<UserDTO> receiverList) {
+        this.receiverList = receiverList;
+    }
+
+    public List<UserDTO> getCcList() {
+        return ccList;
+    }
+
+    public void setCcList(List<UserDTO> ccList) {
+        this.ccList = ccList;
+    }
 
     public List<RuleExpressVO> getExpressList() {
         return expressList;
@@ -44,15 +66,7 @@ public class ConfigurationRuleVO extends AuditDomain {
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
+    
     public String getSqlQuery() {
         return sqlQuery;
     }

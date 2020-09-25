@@ -18,6 +18,14 @@ import io.swagger.annotations.ApiModel;
 @Table(name = "agile_configuration_rule_receiver")
 public class ConfigurationRuleReceiverDTO extends AuditDomain {
 
+    public ConfigurationRuleReceiverDTO(Long ruleId, Long projectId) {
+        this.ruleId = ruleId;
+        this.projectId = projectId;
+    }
+
+    public ConfigurationRuleReceiverDTO() {
+    }
+
     @Id
     @GeneratedValue
     private Long id;

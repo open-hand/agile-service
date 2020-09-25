@@ -47,7 +47,7 @@ public class ConfigurationRuleController extends BaseController {
     public ResponseEntity<List<ConfigurationRuleVO>> list(@PathVariable("project_id") Long projectId,
                                                           @ApiIgnore @SortDefault(value = FIELD_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest){
-        return Results.success(configurationRuleService.listByProjectId(projectId));
+        return Results.success(configurationRuleService.listByProjectId(projectId, pageRequest));
     }
 
 

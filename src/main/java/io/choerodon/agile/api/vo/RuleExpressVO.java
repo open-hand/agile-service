@@ -51,7 +51,7 @@ public class RuleExpressVO {
     @ApiModelProperty("时间快速搜索值")
     private Date valueDate;
     @ApiModelProperty("时分秒快速搜索值")
-    private Date valueDateHms;
+    private String valueDateHms;
 
     public Boolean getAllowDecimals() {
         return allowDecimals;
@@ -61,11 +61,11 @@ public class RuleExpressVO {
         this.allowDecimals = allowDecimals;
     }
 
-    public Date getValueDateHms() {
+    public String getValueDateHms() {
         return valueDateHms;
     }
 
-    public void setValueDateHms(Date valueDateHms) {
+    public void setValueDateHms(String valueDateHms) {
         this.valueDateHms = valueDateHms;
     }
 

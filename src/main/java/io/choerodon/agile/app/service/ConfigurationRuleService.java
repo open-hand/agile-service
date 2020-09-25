@@ -3,6 +3,8 @@ package io.choerodon.agile.app.service;
 import java.util.List;
 
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+
 /**
  * 服务接口
  *
@@ -24,8 +26,6 @@ public interface ConfigurationRuleService {
      * @param projectId            projectId
      * @return ConfigurationRuleVO
      */
-    List<ConfigurationRuleVO> listByProjectId(Long projectId);
-
-    Boolean checkName(Long projectId, String quickFilterName);
+    List<ConfigurationRuleVO> listByProjectId(Long projectId, PageRequest pageRequest);
 }
 
