@@ -58,11 +58,13 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
     }],
     ['issueNum', {
       title: '编号',
+      width: 150,
       dataIndex: 'issueNum',
       render: (item) => <span style={{ whiteSpace: 'nowrap' }}>{item.issueNum}</span>,
     }],
     ['priority', {
       title: '优先级',
+      width: 80,
       dataIndex: 'priorityVO',
       render: (issue) => <PriorityTag priority={issue.priorityVO} />,
     }],
@@ -101,14 +103,17 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
     }],
     ['lastUpdateDate', {
       title: '最后更新时间',
+      width: 150,
       dataIndex: 'lastUpdateDate',
     }],
     ['estimatedStartTime', {
       title: '预计开始时间',
+      width: 150,
       dataIndex: 'estimatedStartTime',
     }],
     ['estimatedEndTime', {
       title: '预计结束时间',
+      width: 150,
       dataIndex: 'estimatedEndTime',
     }],
     ['feature', {
