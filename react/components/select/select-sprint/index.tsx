@@ -11,6 +11,7 @@ interface Props extends Partial<SelectProps> {
   statusList?: string[],
   selectSprints?: number[],
   afterLoad?: (sprints: ISprint[]) => void
+  addExtraOptions?: (sprints: ISprint[]) => ISprint[]
   projectId?: string
   currentSprintOption?: boolean
 }
@@ -20,6 +21,7 @@ const SelectSprint: React.FC<Props> = forwardRef(({
   isProgram,
   selectSprints,
   afterLoad,
+  addExtraOptions,
   projectId,
   currentSprintOption,
   ...otherProps
@@ -37,8 +39,8 @@ const SelectSprint: React.FC<Props> = forwardRef(({
         afterLoadRef.current(sprints);
       }
       let newSprint = sprints;
-      if (isProgram) {
-        newSprint = [{ sprintId: '0', sprintName: '未分配冲刺', endDate: '' } as ISprint, ...sprints];
+      if (addExtraOptions) {
+        newSprint = addExtraOptions(sprints);
       }
       if (currentSprintOption) {
         newSprint = [{ sprintId: 'current', sprintName: '当前冲刺' } as ISprint, ...newSprint];

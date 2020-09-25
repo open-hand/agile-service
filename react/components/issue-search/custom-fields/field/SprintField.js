@@ -26,16 +26,17 @@ function SprintField({ field, value, onChange }) {
       placeholder="冲刺"
       saveList={(v) => {
         const shouldRender = list.length === 0 && value && value.length > 0;
-        list = unionBy(list, v, 'sprintId'); 
+        list = unionBy(list, v, 'sprintId');
         // 已保存筛选条件含有用户，并且这个时候select并没有显示，那么选了自定义筛选，要渲染一次
         if (list.length > 0 && shouldRender) {
           setValue(Math.random());
         }
       }}
+      customList={(customList) => ([{ sprintId: '0', sprintName: '未分配冲刺' }].concat(customList))}
       filter
       onChange={onChange}
       value={value}
-      getPopupContainer={triggerNode => triggerNode.parentNode}    
+      getPopupContainer={(triggerNode) => triggerNode.parentNode}
       requestArgs={[]}
     />
   );
