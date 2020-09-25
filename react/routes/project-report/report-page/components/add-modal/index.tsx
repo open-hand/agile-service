@@ -57,14 +57,21 @@ const AddModal: React.FC<Props> = (props) => {
   }
   return null;
 };
-
+const TEXTS: {
+  [key: string]: string
+} = {
+  chart: '图表',
+  text: '文本',
+  static_list: '静态列表',
+  dynamic_list: '动态列表',
+};
 const openAddModal = (props: Props) => {
   const { data: editData } = props;
   const isEdit = editData !== undefined;
   const type = props.type || props.data?.type;
   Modal.open({
     key: 'modal',
-    title: isEdit ? '编辑' : '添加',
+    title: isEdit ? `编辑${TEXTS[type as string] || ''}` : `添加${TEXTS[type as string] || ''}`,
     style: {
       width: type === 'text' || type === 'dynamic_list' ? 380 : 1088,
     },

@@ -6,6 +6,7 @@ export interface Column<T = {}> {
   title: string
   dataIndex: string
   render?: (record: T) => React.ReactNode
+  width?: number
 }
 interface Props<T> {
   columns: Column<T>[]
@@ -22,35 +23,42 @@ function Table<T extends { [key: string]: any }>({
 }: Props<T>) {
   const renderTreeLikeData = useCallback((treeData: T[], level: number = 0): ReactNode => treeData.map((item) => {
     const hasChildren = item.children
-    && item.children instanceof Array
-    && item.children.length > 0;
+      && item.children instanceof Array
+      && item.children.length > 0;
     return (
       <>
         <tr key={item[primaryKey]} data-level={level}>
           {columns.map((column, index) => (
             <td>
-              {index === 0 && <span style={{ display: 'inline-block', width: level * 20 }} />}
-              {index === 0 && (
-              <Icon
-                type="arrow_drop_down"
-                style={{
-                  visibility: hasChildren ? 'visible' : 'hidden',
-                  marginRight: 5,
-                  marginTop: -2,
-                }}
-              />
-              )}
-              {column.render
-                ? column.render(item) : item[column.dataIndex]}
+              <span style={{ display: 'flex', alignItems: 'center' }}>
+                {index === 0 && <span style={{ display: 'inline-block', width: level * 20 }} />}
+                {index === 0 && (
+                <Icon
+                  type="arrow_drop_down"
+                  style={{
+                    visibility: hasChildren ? 'visible' : 'hidden',
+                    marginRight: 5,
+                    marginTop: -2,
+                  }}
+                />
+                )}
+                {column.render
+                  ? column.render(item) : item[column.dataIndex]}
+              </span>
             </td>
           ))}
         </tr>
-        { hasChildren && renderTreeLikeData(item.children, level + 1)}
+        {hasChildren && renderTreeLikeData(item.children, level + 1)}
       </>
     );
   }), [columns, primaryKey]);
   return (
     <table className={styles.table}>
+      <colgroup>
+        {columns.map((column) => (
+          <col key={column.dataIndex} width={column.width} />
+        ))}
+      </colgroup>
       <thead>
         <tr>
           {columns.map((column, index) => (
