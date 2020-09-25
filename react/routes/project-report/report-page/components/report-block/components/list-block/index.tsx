@@ -39,7 +39,7 @@ const ListBlock: React.FC<Props> = ({
       method: 'post',
       params: {
         page,
-        size: 10,
+        size: 50,
         organizationId: getOrganizationId(),
       },
       data: searchVO,
