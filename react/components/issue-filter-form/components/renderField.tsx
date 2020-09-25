@@ -16,6 +16,7 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import SelectSubProject from '@/components/select/select-sub-project';
 import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
+import { ISprint } from '@/common/types';
 import SelectStatus from './field/StatusField';
 import FeatureProjectField from './field/FeatureProjectField';
 import PIField from './field/pi-field';
@@ -47,6 +48,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
                 dataSet.current?.setState(`init_${code}`, true);
               }
             }}
+            addExtraOptions={(sprints) => [{ sprintId: '0', sprintName: '未分配冲刺', endDate: '' } as ISprint, ...sprints]}
             selectSprints={value}
             {...otherComponentProps}
           />

@@ -119,7 +119,9 @@ const ExportIssue: React.FC<{}> = () => {
     <div>
       <FormPart title="筛选问题" className={`${prefixCls}-form-filter`}>
         <IssueFilterForm dataSet={issueFilterFormDataSet} chosenFields={choseFieldStore.getAllChosenField} onDelete={(item) => choseFieldStore.delChosenFields(item.code)}>
-          <ChooseField store={choseFieldStore} dropDownBtnProps={{ icon: 'add', style: { color: '#3f51b5' } }} />
+          <div style={{ marginTop: 4 }}>
+            <ChooseField store={choseFieldStore} dropDownBtnProps={{ icon: 'add', style: { color: '#3f51b5' } }} />
+          </div>
         </IssueFilterForm>
       </FormPart>
       <Divider className={`${prefixCls}-horizontal`} />
