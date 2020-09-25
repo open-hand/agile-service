@@ -11,10 +11,11 @@ interface Props extends Partial<SelectProps> {
   filterList?: string[]
   isProgram?: boolean
   afterLoad?: (sprints: IIssueType[]) => void
+  dataRef?: React.MutableRefObject<any>
 }
 
 const SelectIssueType: React.FC<Props> = forwardRef(({
-  filterList = ['feature'], isProgram,
+  filterList = ['feature'], isProgram, dataRef,
   afterLoad, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IIssueType> => ({
@@ -51,6 +52,11 @@ const SelectIssueType: React.FC<Props> = forwardRef(({
     middleWare: (issueTypes) => {
       if (afterLoad) {
         afterLoad(issueTypes);
+      }
+      if (dataRef) {
+        Object.assign(dataRef, {
+          current: issueTypes,
+        });
       }
       return issueTypes;
     },

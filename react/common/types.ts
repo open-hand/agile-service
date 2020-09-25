@@ -36,6 +36,16 @@ export interface IVersion {
   name: string,
 }
 
+export interface IComponent {
+  name: string,
+  componentId: string
+}
+
+export interface ILabel {
+  labelId: string
+  labelName: string
+}
+
 export interface PI {
   id: string
   code: string

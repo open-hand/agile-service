@@ -10,6 +10,7 @@ const { OptGroup, Option } = Select;
 interface Props {
   teamIds: number[],
   piId: number
+  afterLoad?: (data: any[]) => void
 }
 interface Sprint {
   sprintId: number,
@@ -23,7 +24,7 @@ interface Team {
   sprints: Sprint[]
 }
 const SelectSprint: React.FC<Props> = forwardRef(({
-  teamIds, piId,
+  teamIds, piId, afterLoad,
   ...otherProps
 }, ref: React.Ref<Select>) => {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -35,8 +36,14 @@ const SelectSprint: React.FC<Props> = forwardRef(({
     if (piId && Array.isArray(teamIds) && teamIds.length > 0) {
       const res = await sprintApi.getTeamSprints(piId, teamIds);
       setTeams(res);
+      if (afterLoad) {
+        afterLoad(res);
+      }
     } else {
       setTeams([]);
+      if (afterLoad) {
+        afterLoad([]);
+      }
     }
   }, [piId, JSON.stringify(teamIds)]);
   useEffect(() => {

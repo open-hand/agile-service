@@ -13,6 +13,7 @@ interface Props extends Partial<SelectProps> {
   afterLoad?: (sprints: ISprint[]) => void
   projectId?: string
   currentSprintOption?: boolean
+  dataRef?: React.MutableRefObject<any>
 }
 
 const SelectSprint: React.FC<Props> = forwardRef(({
@@ -22,6 +23,7 @@ const SelectSprint: React.FC<Props> = forwardRef(({
   afterLoad,
   projectId,
   currentSprintOption,
+  dataRef,
   ...otherProps
 }, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
@@ -42,6 +44,11 @@ const SelectSprint: React.FC<Props> = forwardRef(({
       }
       if (currentSprintOption) {
         newSprint = [{ sprintId: 'current', sprintName: '当前冲刺' } as ISprint, ...newSprint];
+      }
+      if (dataRef) {
+        Object.assign(dataRef, {
+          current: newSprint,
+        });
       }
       return newSprint;
     },

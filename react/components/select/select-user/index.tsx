@@ -14,11 +14,13 @@ export interface SelectUserProps extends Partial<SelectProps> {
     id: string,
     realName: string,
   }[],
+  dataRef?: React.MutableRefObject<any>
   request?: SelectConfig['request']
+  afterLoad?: (users: User[]) => void
 }
 
 const SelectUser: React.FC<SelectUserProps> = forwardRef(({
-  selectedUser, extraOptions, request, ...otherProps
+  selectedUser, extraOptions, dataRef, request, afterLoad, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<User> => ({
     name: 'user',
@@ -27,6 +29,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     request: request || (({ filter, page }) => userApi.getAllInProject(filter, page)),
     // @ts-ignore
     middleWare: (data) => {
+      let newData = [];
       if (selectedUser) {
         const temp: User[] = [];
         (toArray(selectedUser).forEach((user) => {
@@ -34,13 +37,23 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
             temp.push(user);
           }
         }));
-        return [...(extraOptions || []), ...temp, ...data].map((item: User) => (
+        newData = [...(extraOptions || []), ...temp, ...data].map((item: User) => (
+          { ...item, id: item.id.toString() }
+        ));
+      } else {
+        newData = [...(extraOptions || []), ...data].map((item: User) => (
           { ...item, id: item.id.toString() }
         ));
       }
-      return [...(extraOptions || []), ...data].map((item: User) => (
-        { ...item, id: item.id.toString() }
-      ));
+      if (dataRef) {
+        Object.assign(dataRef, {
+          current: newData,
+        });
+      }
+      if (afterLoad) {
+        afterLoad(newData);
+      }
+      return newData;
     },
   }), [selectedUser]);
   const props = useSelect(config);
