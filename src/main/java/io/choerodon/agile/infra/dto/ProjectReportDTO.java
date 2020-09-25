@@ -21,6 +21,7 @@ public class ProjectReportDTO extends AuditDomain {
     public static final String FIELD_TITLE = "title";
     public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_REPORTDATA = "reportData";
+    public static final String FIELD_RECENT_SEND_DATE = "recentSendDate";
 
     public ProjectReportDTO(Long id, Long projectId) {
         this.id = id;
