@@ -18,7 +18,7 @@ const PreviewReport: React.FC<Props> = ({
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (ref.current) {
+    if (scale && ref.current) {
       const elements = ref.current.querySelectorAll('*');
       for (let i = 0; i <= elements.length; i += 1) {
         const element = elements[i];
@@ -33,7 +33,7 @@ const PreviewReport: React.FC<Props> = ({
         }
       }
     }
-  }, []);
+  }, [scale]);
   return (
     <ChartContext.Provider value={{ scale: scale || 1 }}>
       <TaskContext.Provider value={task || {
