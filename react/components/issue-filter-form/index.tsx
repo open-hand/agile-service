@@ -52,7 +52,9 @@ const IssueFilterForm: React.FC<Props> = (props) => {
     <>
       <Form dataSet={dataSet}>
         {props.chosenFields?.map((item, index) => (typeof (item.immutableCheck) === 'boolean' || typeof (props.onDelete) === 'undefined'
-          ? renderField(item, { style: { width: '100%' }, label: item.name, ...item.otherComponentProps }, { dataSet })
+          ? renderField(item, {
+            style: { width: '100%' }, label: item.name, key: item.code, ...item.otherComponentProps,
+          }, { dataSet })
           : (
             <Row key={item.code}>
               <Col span={22}>

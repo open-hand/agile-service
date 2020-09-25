@@ -41,9 +41,10 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
             isProgram={code === 'sprintList'}
             multiple
             afterLoad={code === 'sprintList' ? () => { } : (sprints: any) => {
-              if (!defaultValue && Array.isArray(sprints) && sprints.length > 0) {
+              if (!dataSet.current?.getState(`init_${code}`) && !defaultValue && Array.isArray(sprints) && sprints.length > 0) {
                 const data = find<any>(sprints, { statusCode: 'started' }) ?? sprints[0];
                 dataSet.current?.set(field.code, [data.sprintId]);
+                dataSet.current?.setState(`init_${code}`, true);
               }
             }}
             selectSprints={value}
@@ -85,9 +86,10 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
             name={code}
             multiple
             afterLoad={(piList) => {
-              if (!defaultValue && Array.isArray(piList) && piList.length > 0) {
+              if (!dataSet.current?.getState(`init_${code}`) && !defaultValue && Array.isArray(piList) && piList.length > 0) {
                 const data = find(piList, { statusCode: 'doing' }) ?? piList[0];
                 dataSet.current?.set(field.code, [data.id]);
+                dataSet.current?.setState(`init_${code}`, true);
               }
             }}
             {...otherComponentProps}
