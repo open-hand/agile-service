@@ -10,7 +10,7 @@ import openAddModal from './components/add-modal';
 import BlockList from './components/block-list';
 import BaseInfo from './components/base-info';
 import Operation from './components/operation';
-import PreviewReport from '../report-preview';
+import PreviewReport from '../report-preview/Preview';
 import ProjectReportContext, { BaseInfoRef } from './context';
 import ProjectReportStore from './store';
 import styles from './index.less';
@@ -19,10 +19,11 @@ const { AppState } = stores;
 interface Props {
   store: ProjectReportStore
   edit?: boolean
+  preview?:boolean
 }
-const ReportPage: React.FC<Props> = ({ store, edit }) => {
+const ReportPage: React.FC<Props> = ({ store, edit, preview: forcePreview }) => {
   const baseInfoRef = useRef<BaseInfoRef>({} as BaseInfoRef);
-  const [preview, setPreview] = useState(false);
+  const [preview, setPreview] = useState(forcePreview !== undefined ? forcePreview : false);
   const isProgram = AppState.currentMenuType.category === 'PROGRAM';
   return (
     <ProjectReportContext.Provider value={{
@@ -33,7 +34,7 @@ const ReportPage: React.FC<Props> = ({ store, edit }) => {
       setPreview,
     }}
     >
-      {preview ? <PreviewReport fullPage /> : (
+      {preview ? <PreviewReport /> : (
         <Page>
           <Breadcrumb title={edit ? '编辑项目报告' : '创建项目报告'} />
           <Content style={{ paddingBottom: 0 }}>
