@@ -21,35 +21,35 @@ interface DownloadProps {
   fileSaverOptions?: FileSaverOptions,
 }
 interface Props {
-  handleMessage?: (messageData: any) => void | boolean,
-  percentCode?: string,
+  handleMessage?: (messageData: any) => void | boolean, /** 当回调返回true时代表websocket任务完成 */
+  percentKey?: string, /** 在websocket 信息中进程属性的key 默认为 process */
   downloadInfo?: {
     url: string | null,
     timeLine?: any,
     createDate?: string,
     lastUpdateDate?: string,
-    timeFormat?: string,
+    timeFormat?: string, /** 默认时间解析格式  YYYY-MM-DD HH:mm:ss */
     children?: React.ReactElement
   } | null,
   renderEndProgress?: (messageData: any) => React.ReactElement | React.ReactElement[] | null | string,
-  visible?: boolean, // 可控类型 控制进度条是否显示
+  visible?: boolean, /**  可控类型 控制进度条是否显示 */
   messageKey: string,
   autoDownload?: boolean | DownloadProps, /** 完成后是否自动下载 */
-  downloadProps?: DownloadProps,
-  onFinish?: (messageData: any) => void,
+  downloadProps?: DownloadProps, /** 下载文件配置，当存在自动下载配置时，以自动下载配置为最高优先级 */
+  onFinish?: (messageData: any) => void, /** websocket任务完成后回调 */
 }
 interface StateProps {
   visible: boolean,
   data: { [propsName: string]: any },
 }
-function onHumanizeDuration(createDate?: string, lastUpdateDate?: string): string | null {
+function onHumanizeDuration(createDate?: string, lastUpdateDate?: string, timeFormat: string = 'YYYY-MM-DD HH:mm:ss'): string | null {
   if (!createDate || !lastUpdateDate) {
     return null;
   }
-  const startTime = moment(createDate);
-  const lastTime = moment(lastUpdateDate);
+  const startTime = moment(createDate, timeFormat);
+  const lastTime = moment(lastUpdateDate, timeFormat);
   let diff = lastTime.diff(startTime);
-  if (diff <= 0) {
+  if (diff < 0) {
     diff = moment().diff(startTime);
   }
   return humanizeDuration(diff);
@@ -57,7 +57,7 @@ function onHumanizeDuration(createDate?: string, lastUpdateDate?: string): strin
 
 type ActionProps = Partial<StateProps> & { type: 'init' | 'transmission' | 'visible' | 'finish' }
 function WsProgress(props: Props) { // <StateProps, ActionProps>
-  const { percentCode = 'process' } = props;
+  const { percentKey = 'process' } = props;
   const downLoadProps = useMemo(() => {
     const tempProps = props.downloadProps;
     if (typeof (props.autoDownload) === 'object') {
@@ -98,7 +98,7 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
         return state;
     }
   }, {
-    data: { [percentCode]: 0 },
+    data: { [percentKey]: 0 },
     visible: false,
   });
   const { messageKey } = props;
@@ -115,7 +115,7 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
   function handleMessage(data: any) {
     const newData = JSON.parse(data);
     const { status } = newData;
-    if (!stateProgress.visible && stateProgress.data?.[percentCode] === 0) {
+    if (!stateProgress.visible && stateProgress.data?.[percentKey] === 0) {
       props.handleMessage && props.handleMessage(newData);
       dispatch({ type: 'init', data: newData });
       return;
@@ -142,7 +142,7 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
           downloadInfo.url
             ? (
               <>
-                <span>{downloadInfo.timeLine ?? `导出完成时间${downloadInfo.lastUpdateDate}（耗时${onHumanizeDuration(downloadInfo.createDate, downloadInfo.lastUpdateDate)}）`}</span>
+                <span>{downloadInfo.timeLine ?? `导出完成时间${downloadInfo.lastUpdateDate}（耗时${onHumanizeDuration(downloadInfo.createDate, downloadInfo.lastUpdateDate, downloadInfo.timeFormat)}）`}</span>
                 <span role="none" className="c7n-agile-ws-finish-url" onClick={() => downloadInfo.url && fileSever.saveAs(downloadInfo.url, fileName, downLoadProps?.fileSaverOptions)}>点击下载</span>
               </>
             ) : ''
@@ -167,7 +167,7 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
             status={'active' as ProgressStatus}
             type={'circle' as ProgressType}
             width={50}
-            percent={stateProgress.data?.[percentCode]}
+            percent={stateProgress.data?.[percentKey]}
             strokeWidth={16}
             showInfo={false}
           />
