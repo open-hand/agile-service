@@ -53,7 +53,7 @@ const PieComponent: React.FC<Props> = ({ innerRef, projectId, data }) => {
   return (
     <div>
       <PieSearch {...searchProps} />
-      <Pie {...props} />
+      <Pie {...props} link={false} />
     </div>
   );
 };

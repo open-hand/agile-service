@@ -109,6 +109,7 @@ const ListBlock: React.FC<Props> = ({
           primaryKey="issueId"
           columns={columns}
         />
+        {!loading && treeData.length === 0 && <div style={{ textAlign: 'center' }}>暂无数据</div>}
       </Spin>
     </div>
   );

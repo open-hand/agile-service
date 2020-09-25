@@ -34,7 +34,8 @@ export interface PieChartProps {
   chooseId: '' | string,
   sprints: ISprint[],
   versions: IVersion[],
-  animation?:boolean
+  animation?: boolean
+  link?: boolean
 }
 
 function compare(pro: string) {
@@ -50,8 +51,8 @@ function compare(pro: string) {
   };
 }
 
-const PieChart:React.FC<PieChartProps> = ({
-  loading, data, colors, chooseDimension, chooseId, type, sprints, versions, animation = true,
+const PieChart: React.FC<PieChartProps> = ({
+  loading, data, colors, chooseDimension, chooseId, type, sprints, versions, animation = true, link = true,
 }) => {
   const otherTooltipRef = useRef();
   const renderOtherTooltip = () => {
@@ -274,16 +275,18 @@ const PieChart:React.FC<PieChartProps> = ({
                     </Tooltip>
                   </td>
                   <td style={{ width: '150px' }}>
-                    <span
-                      style={{
-                        color: '#3F51B5',
-                        cursor: 'pointer',
-                      }}
-                      role="none"
-                      onClick={handleLinkToIssue.bind(this, item)}
-                    >
-                      {item.value}
-                    </span>
+                    {link ? (
+                      <span
+                        style={{
+                          color: '#3F51B5',
+                          cursor: 'pointer',
+                        }}
+                        role="none"
+                        onClick={handleLinkToIssue.bind(this, item)}
+                      >
+                        {item.value}
+                      </span>
+                    ) : item.value}
                   </td>
                   <td style={{ width: '150px', paddingRight: 15 }}>{`${(item.percent).toFixed(2)}%`}</td>
                 </tr>
