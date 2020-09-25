@@ -56,7 +56,7 @@ public class ConfigurationRuleController extends BaseController {
      */
     @ApiOperation(value = "明细")
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @RequestMapping("/{ruldId}")
+    @GetMapping("/{ruldId}")
     public ResponseEntity<ConfigurationRuleVO> detail(@PathVariable("project_id") Long projectId,
                                     @PathVariable Long ruldId) {
         return Results.success(configurationRuleService.queryById(projectId, ruldId));
