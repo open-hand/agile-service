@@ -10,6 +10,7 @@ import LINK_URL from '@/constants/LINK_URL';
 import { Priority, ISprint, IVersion } from '@/common/types';
 import { types } from './search';
 import styles from './index.less';
+import { useFontSize } from '../context';
 
 export type IPieChartType = 'assignee' | 'component' | 'typeCode' | 'version' | 'priority' | 'status' | 'sprint' | 'epic' | 'label'
 
@@ -34,7 +35,7 @@ export interface PieChartProps {
   chooseId: '' | string,
   sprints: ISprint[],
   versions: IVersion[],
-  animation?: boolean
+  option?: EChartOption
   link?: boolean
 }
 
@@ -52,9 +53,11 @@ function compare(pro: string) {
 }
 
 const PieChart: React.FC<PieChartProps> = ({
-  loading, data, colors, chooseDimension, chooseId, type, sprints, versions, animation = true, link = true,
+  loading, data, colors, chooseDimension, chooseId, type, sprints, versions, link = true, option,
 }) => {
   const otherTooltipRef = useRef();
+  const getFontSize = useFontSize();
+  const FontSize = getFontSize(12);
   const renderOtherTooltip = () => {
     const otherDates = data.filter((item) => item.percent < 2).sort(compare('percent'));
     if (otherDates && otherDates.length > 0) {
@@ -165,7 +168,9 @@ const PieChart: React.FC<PieChartProps> = ({
     }
 
     return {
-      animation,
+      textStyle: {
+        fontSize: FontSize,
+      },
       color: colors,
       tooltip: {
         trigger: 'item',
@@ -187,7 +192,6 @@ const PieChart: React.FC<PieChartProps> = ({
         padding: 10,
         textStyle: {
           color: '#000',
-          fontSize: 12,
           lineHeight: 20,
         },
         extraCssText: 'background: #FFFFFF;\n'
@@ -221,6 +225,7 @@ const PieChart: React.FC<PieChartProps> = ({
           },
         },
       ],
+      ...option,
     };
   };
 
@@ -237,7 +242,7 @@ const PieChart: React.FC<PieChartProps> = ({
         }}
         >
           <ReactEcharts
-            style={{ width: '58%', height: 500 }}
+            style={{ height: 500 }}
             option={getOption()}
           />
           <div
@@ -268,7 +273,7 @@ const PieChart: React.FC<PieChartProps> = ({
             {
               data.map((item, index) => (
                 <tr>
-                  <td style={{ width: '280px' }}>
+                  <td style={{ width: '280px', display: 'flex', alignItems: 'center' }}>
                     <div className={styles.pie_legend_icon} style={{ background: colors[index] }} />
                     <Tooltip title={item && item.name}>
                       <div className={styles.pie_legend_text}>{item.name ? (item.realName || item.name) : '未分配'}</div>

@@ -86,14 +86,7 @@ const ListBlock: React.FC<Props> = ({
         const { fieldType, code } = (field || {}) as IFoundationHeader;
         const value = issue.foundationFieldValue[code];
         if (fieldType === 'member') {
-          return value && (
-            <div style={{ display: 'inline-flex' }}>
-              <UserHead
-                // @ts-ignore
-                user={value}
-              />
-            </div>
-          );
+          return value && value.realName;
         }
         return (
           <span>{value || ''}</span>

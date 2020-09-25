@@ -5,6 +5,7 @@ import { map } from 'lodash';
 import { Spin } from 'choerodon-ui';
 import { EChartOption } from 'echarts';
 import { IUnit } from './search';
+import { useFontSize } from '../context';
 
 export interface ISprintSpeed {
   committedIssueCount: number
@@ -21,7 +22,7 @@ export interface IterationSpeedProps {
   loading: boolean,
   unit: IUnit,
   data: ISprintSpeed[],
-  animation?:boolean
+  option?: EChartOption
 }
 
 const UnitNameMap = new Map([
@@ -52,7 +53,7 @@ const UNIT_STATUS = {
 };
 
 const IterationSpeed: React.FC<IterationSpeedProps> = ({
-  loading, unit, data, animation = true,
+  loading, unit, data, option,
 }) => {
   const getChartDataYCommitted = () => {
     const prop = UNIT_STATUS[unit].committed;
@@ -65,9 +66,12 @@ const IterationSpeed: React.FC<IterationSpeedProps> = ({
     const completed = map(data, prop);
     return completed;
   };
-
+  const getFontSize = useFontSize();
+  const FontSize = getFontSize(12);
   const getOption = (): EChartOption => ({
-    animation,
+    textStyle: {
+      fontSize: FontSize,
+    },
     tooltip: {
       trigger: 'axis',
       axisPointer: {
@@ -124,8 +128,7 @@ const IterationSpeed: React.FC<IterationSpeedProps> = ({
         show: true,
         interval: 0,
         color: 'rgba(0, 0, 0, 0.65)',
-        fontSize: 12,
-        fontStyle: 'normal',
+        fontSize: FontSize,
         formatter(value: string) {
           if (value.length > 10) {
             return `${value.slice(0, 11)}...`;
@@ -162,8 +165,7 @@ const IterationSpeed: React.FC<IterationSpeedProps> = ({
       axisLabel: {
         show: true,
         color: 'rgba(0, 0, 0, 0.65)',
-        fontSize: 12,
-        fontStyle: 'normal',
+        fontSize: FontSize,
       },
       splitLine: {
         show: true,
@@ -221,6 +223,7 @@ const IterationSpeed: React.FC<IterationSpeedProps> = ({
         },
       },
     ],
+    ...option,
   });
 
   return (

@@ -13,7 +13,13 @@ const PieComponent: React.FC<Props> = ({ filter, onFinish }) => {
   const [, props] = usePieChartReport(config, onFinish);
   return (
     <div>
-      <Pie {...props} animation={false} link={false} />
+      <Pie
+        {...props}
+        option={{
+          animation: false,
+        }}
+        link={false}
+      />
     </div>
   );
 };

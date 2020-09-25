@@ -8,6 +8,7 @@ import { IUnit } from './search';
 import total from './image/total.svg';
 import noEstimated from './image/noEstimated.svg';
 import finish from './image/finish.svg';
+import { useFontSize } from '../context';
 
 const UNIT_STATUS = {
   issue_count: {
@@ -66,6 +67,7 @@ const dealNullValue = (list: number[] = []) => map(list, (item: number) => {
 const VersionReport: React.FC<VersionReportProps> = ({
   loading, data, tableData, unit, animation = false,
 }) => {
+  const getFontSize = useFontSize();
   const getChartDataYAll = () => {
     const prop = UNIT_STATUS[unit].committed;
     if (!prop) {
@@ -174,7 +176,7 @@ const VersionReport: React.FC<VersionReportProps> = ({
         ],
       },
       grid: {
-        top: '30',
+        top: getFontSize(12) / 12 * (30),
         left: 0,
         right: '20',
         containLabel: true,
@@ -203,7 +205,7 @@ const VersionReport: React.FC<VersionReportProps> = ({
           interval: map(data, 'groupDay').length >= 20 ? 4 : 0,
           margin: 13,
           color: 'rgba(0, 0, 0, 0.65)',
-          fontSize: 12,
+          fontSize: getFontSize(12),
           fontStyle: 'normal',
           formatter(value: string) {
             return value.slice(5);
@@ -265,7 +267,7 @@ const VersionReport: React.FC<VersionReportProps> = ({
               show: true,
               margin: 18,
               color: 'rgba(0, 0, 0, 0.65)',
-              fontSize: 12,
+              fontSize: getFontSize(12),
               fontStyle: 'normal',
             },
             splitLine: {
@@ -340,7 +342,7 @@ const VersionReport: React.FC<VersionReportProps> = ({
               show: true,
               margin: 18,
               color: 'rgba(0, 0, 0, 0.65)',
-              fontSize: 12,
+              fontSize: getFontSize(12),
               fontStyle: 'normal',
               formatter(value: string) {
                 if (value && unit === 'remain_time') {
@@ -378,7 +380,7 @@ const VersionReport: React.FC<VersionReportProps> = ({
               show: true,
               margin: 18,
               color: 'rgba(0, 0, 0, 0.65)',
-              fontSize: 12,
+              fontSize: getFontSize(12),
               fontStyle: 'normal',
             },
             splitLine: {
@@ -455,7 +457,13 @@ const VersionReport: React.FC<VersionReportProps> = ({
         ],
       };
     }
-    return { ...commonOption, ...option };
+    return {
+      ...commonOption,
+      ...option,
+      textStyle: {
+        fontSize: getFontSize(12),
+      },
+    };
   };
 
   return (

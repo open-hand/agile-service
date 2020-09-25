@@ -18,7 +18,19 @@ const BurnDownComponent: React.FC<Props> = ({ filter, onFinish }) => {
       <div style={{ display: 'none' }}>
         <BurnDownSearch {...searchProps} />
       </div>
-      <BurnDown {...props} animation={false} />
+      <BurnDown
+        {...props}
+        option={{
+          animation: false,
+          grid: {
+            top: 10,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            containLabel: true,
+          },
+        }}
+      />
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, {
-  useRef, useMemo, useState, useCallback, useImperativeHandle,
+  useRef, useMemo, useState, useCallback, useImperativeHandle, useEffect,
 } from 'react';
 import generateTask from '@/routes/project-report/report-preview/generateTask';
 import html2canvas from 'html2canvas';
@@ -44,11 +44,17 @@ const Export: React.FC<Props> = ({ innerRef }) => {
   }));
   return exporting ? (
     ReactDOM.createPortal(
-      <div style={{
-        position: 'fixed', top: -100000, left: -100000, width: '100%',
-      }}
+      <div
+        style={{
+          position: 'fixed', top: -100000, left: -100000, width: '100%',
+        }}
       >
-        <PreviewReport task={task} innerRef={containerRef} style={{ padding: '20px 10px' }} />
+        <PreviewReport
+          task={task}
+          innerRef={containerRef}
+          style={{ padding: '20px 10px' }}
+          scale={1.5}
+        />
       </div>,
       document.body,
     )

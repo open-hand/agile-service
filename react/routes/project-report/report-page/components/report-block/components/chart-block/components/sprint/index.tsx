@@ -16,7 +16,7 @@ const SprintComponent: React.FC<Props> = ({ filter, onFinish }) => {
       <div style={{ display: 'none' }}>
         <SprintSearch {...searchProps} />
       </div>
-      <Sprint {...props} animation={false} />
+      <Sprint {...props} />
     </div>
   );
 };

@@ -14,6 +14,7 @@ import sprintIcon from './image/sprintIcon.svg';
 import storyPointIcon from './image/storyPointIcon.svg';
 import speedIcon from './image/speedIcon.svg';
 import styles from './index.less';
+import { useFontSize } from '../context';
 
 export type ChartData = [number[], (string | number)[], (string | number)[], (string | number)[], (string | number)[], (0 | '0.00001' | '-')[], ('-' | '0.00001')[], (0 | '-')[]];
 export interface OriginData {
@@ -30,12 +31,13 @@ export interface EpicBurnDownChartProps {
   checked: 'checked' | undefined,
   data: OriginData[],
   chartData: ChartData,
-  animation?: boolean
+  option?: EChartOption
 }
 
 const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
-  checked, chartData, data, loading, animation = true,
+  checked, chartData, data, loading, option: propsOption,
 }) => {
+  const getFontSize = useFontSize();
   const transformPlaceholder2Zero = (arr: any[]) => arr.map((v) => (v === '-' ? 0 : v));
 
   const getStoryPoints = () => {
@@ -118,7 +120,7 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
     arr.forEach((item) => {
       legendData.push({
         name: item,
-        textStyle: { fontSize: 12 },
+        textStyle: { fontSize: getFontSize(12) },
       });
     });
     return legendData;
@@ -127,7 +129,9 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
   const getOption = (): EChartOption => {
     const inverse = !checked;
     const option: EChartOption = {
-      animation,
+      textStyle: {
+        fontSize: getFontSize(12),
+      },
       grid: {
         top: 30,
         left: 40,
@@ -155,6 +159,7 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
             // @ts-ignore
             textStyle: {
               color: 'rgba(0,0,0,0.65)',
+              fontSize: getFontSize(12),
             },
             formatter(value: string) {
               if (data.length >= 7) {
@@ -238,7 +243,7 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
         backgroundColor: '#fff',
         textStyle: {
           color: '#000',
-          fontSize: 13,
+          fontSize: getFontSize(13),
         },
         borderColor: '#ddd',
         borderWidth: 1,
@@ -401,6 +406,7 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
           data: inverse ? chartData[6] : chartData[7],
         },
       ],
+      ...propsOption,
     };
     return option;
   };
@@ -414,8 +420,8 @@ const EpicBurnDown: React.FC<EpicBurnDownChartProps> = ({
         >
           <img src={pic} alt="没有预估故事点" />
           <div style={{ textAlign: 'left', marginLeft: '50px' }}>
-            <span style={{ fontSize: 12, color: 'rgba(0, 0, 0, 0.65)' }}>报表不能显示</span>
-            <p style={{ marginTop: 10, fontSize: 20 }}>
+            <span style={{ fontSize: getFontSize(12), color: 'rgba(0, 0, 0, 0.65)' }}>报表不能显示</span>
+            <p style={{ marginTop: 10, fontSize: getFontSize(20) }}>
               在此史诗中没有预估的故事，请在
               <span
                 style={{

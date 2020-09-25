@@ -84,8 +84,6 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
       render: ({ statusVO }) => (
         <div style={{
           background: STATUS[statusVO.type] || 'transparent',
-          lineHeight: '20px',
-          height: '20px',
           display: 'inline-block',
           color: 'white',
           borderRadius: '2px',

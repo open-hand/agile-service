@@ -12,7 +12,12 @@ const IterationSpeedComponent: React.FC<Props> = ({ filter, onFinish }) => {
   const [props] = useIterationSpeedReport(transformIterationSpeedSearch(filter), onFinish);
   return (
     <div>
-      <IterationSpeed {...props} animation={false} />
+      <IterationSpeed
+        {...props}
+        option={{
+          animation: false,
+        }}
+      />
     </div>
   );
 };

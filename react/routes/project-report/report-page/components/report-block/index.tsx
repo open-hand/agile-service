@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import classNames from 'classnames';
-import { Button } from 'choerodon-ui/pro';
+import { Button, Icon } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react-lite';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { DraggableProvided } from 'react-beautiful-dnd';
@@ -70,6 +70,7 @@ const ReportBlock: React.FC<Props> = (props) => {
         {...provided ? provided.dragHandleProps : {}}
       >
         {isPreview && <div className={listStyles.tip} />}
+        {!isPreview && <Icon type="baseline-drag_indicator" style={{ color: 'rgba(0, 0, 0, 0.54)', marginRight: 8 }} />}
         <span className={styles.title}>{title}</span>
         {!isPreview && (
           <div className={styles.operation}>

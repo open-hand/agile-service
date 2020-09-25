@@ -3,6 +3,7 @@ import { Spin } from 'choerodon-ui';
 import { EChartOption } from 'echarts';
 import ReactEcharts from 'echarts-for-react';
 import { transformBurnDownChartData, IBurnDownData } from './utils';
+import { useFontSize } from '../context';
 
 export type IBurndownChartType = 'remainingEstimatedTime' | 'storyPoints' | 'issueCount';
 export interface BurnDownProps {
@@ -12,7 +13,7 @@ export interface BurnDownProps {
   endDate: string
   restDayShow: boolean
   restDays: string[],
-  animation?:boolean
+  option?: EChartOption
 }
 
 const BurndownChart: React.FC<BurnDownProps> = ({
@@ -22,8 +23,10 @@ const BurndownChart: React.FC<BurnDownProps> = ({
   endDate,
   restDayShow,
   restDays,
-  animation = true,
+  option,
 }) => {
+  const getFontSize = useFontSize();
+  const FontSize = getFontSize(12);
   const {
     xAxis, yAxis, exportAxis, markAreaData,
   } = useMemo(() => transformBurnDownChartData(data, {
@@ -45,7 +48,9 @@ const BurndownChart: React.FC<BurnDownProps> = ({
     return result;
   };
   const getOption = (): EChartOption => ({
-    animation,
+    textStyle: {
+      fontSize: FontSize,
+    },
     tooltip: {
       trigger: 'axis',
       backgroundColor: '#fff',
@@ -111,7 +116,7 @@ const BurndownChart: React.FC<BurnDownProps> = ({
         show: true,
         interval: Math.floor(xAxis.length / 7) - 1 || 0,
         color: 'rgba(0, 0, 0, 0.65)',
-        fontSize: 12,
+        fontSize: FontSize,
         fontStyle: 'normal',
       },
       splitLine: {
@@ -145,7 +150,7 @@ const BurndownChart: React.FC<BurnDownProps> = ({
         // interval: 'auto',
         margin: 18,
         color: 'rgba(0, 0, 0, 0.65)',
-        fontSize: 12,
+        fontSize: FontSize,
         fontStyle: 'normal',
         formatter(value: string) {
           if (type === 'remainingEstimatedTime' && value) {
@@ -200,6 +205,7 @@ const BurndownChart: React.FC<BurnDownProps> = ({
         data: yAxis,
       },
     ],
+    ...option,
   });
 
   return (

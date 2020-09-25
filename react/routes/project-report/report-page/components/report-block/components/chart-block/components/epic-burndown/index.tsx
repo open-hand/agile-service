@@ -12,7 +12,12 @@ const EpicBurndownComponent: React.FC<Props> = ({ filter, onFinish }) => {
   const [, props] = useEpicBurndown(transformEpicBurndownSearch(filter), onFinish);
   return (
     <div>
-      <EpicBurndown {...props} animation={false} />
+      <EpicBurndown
+        {...props}
+        option={{
+          animation: false,
+        }}
+      />
     </div>
   );
 };
