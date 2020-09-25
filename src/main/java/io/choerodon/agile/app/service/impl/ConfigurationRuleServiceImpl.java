@@ -1,6 +1,5 @@
 package io.choerodon.agile.app.service.impl;
 
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -9,15 +8,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
-import io.choerodon.agile.api.vo.ProjectReportVO;
 import io.choerodon.agile.api.vo.RuleExpressVO;
-import io.choerodon.agile.api.vo.SearchVO;
-import io.choerodon.agile.api.vo.report.DynamicListUnitVO;
-import io.choerodon.agile.api.vo.report.ReportUnitVO;
-import io.choerodon.agile.api.vo.report.StaticListUnitVO;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
-import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.ConfigurationRuleDTO;
+import io.choerodon.agile.infra.dto.ConfigurationRuleReceiverDTO;
+import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
+import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.enums.ConfigurationRule;
 import io.choerodon.agile.infra.enums.CustomFieldType;
 import io.choerodon.agile.infra.enums.FieldType;
@@ -27,7 +24,6 @@ import io.choerodon.agile.infra.mapper.ConfigurationRuleMapper;
 import io.choerodon.agile.infra.mapper.ConfigurationRuleReceiverMapper;
 import io.choerodon.agile.infra.utils.CommonMapperUtil;
 import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -55,8 +51,6 @@ import org.springframework.util.ObjectUtils;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(QuickFilterServiceImpl.class);
 
     protected static final String TYPE_RECEIVER = "RECEIVER";
     protected static final String TYPE_CC = "CC";
@@ -96,7 +90,10 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         ConfigurationRuleVO.setId(ruleId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(ConfigurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setSqlQuery(getSqlQuery(ConfigurationRuleVO, projectId));
-        updateBySelective(configurationRuleDTO);
+        if (configurationRuleMapper.updateOptional(configurationRuleDTO, ConfigurationRuleDTO.FIELD_SQL_QUERY,
+                ConfigurationRuleDTO.FIELD_EXPRESS_QUERY, ConfigurationRuleDTO.FIELD_EXPRESS_FORMAT) != 1) {
+            throw new CommonException("error.rule.update");
+        }
         // 更新通知对象
         configurationRuleReceiverMapper.delete(new ConfigurationRuleReceiverDTO(ConfigurationRuleVO.getId(), projectId));
         createProjectReportReceiver(projectId, ConfigurationRuleVO, configurationRuleDTO);
@@ -189,13 +186,6 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
             }
             return page;
         });
-    }
-
-    public ConfigurationRuleVO updateBySelective(ConfigurationRuleDTO configurationRuleDTO) {
-        if (configurationRuleMapper.updateByPrimaryKeySelective(configurationRuleDTO) != 1) {
-            throw new CommonException("error.rule.update");
-        }
-        return modelMapper.map(configurationRuleDTO, ConfigurationRuleVO.class);
     }
 
     private String renderPredefinedSql(String operation, String field, List<Supplier<String>> conditionList) {
