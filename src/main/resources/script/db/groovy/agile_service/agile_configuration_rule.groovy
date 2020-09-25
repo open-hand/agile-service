@@ -8,7 +8,6 @@ databaseChangeLog(logicalFilePath:'agile_configuration_rule.groovy') {
             column(name: 'project_id', type: 'BIGINT UNSIGNED', remarks: 'project id') {
                 constraints(nullable: false)
             }
-            column(name: 'name', type: 'VARCHAR(255)', remarks: 'name')
             column(name: 'sql_query', type: 'VARCHAR(1000)', remarks: 'long query')
             column(name: 'express_query', type: 'VARCHAR(1000)', remarks: 'express query')
             column(name: 'express_format', type: 'VARCHAR(5000)', remarks: '表达式数据')
