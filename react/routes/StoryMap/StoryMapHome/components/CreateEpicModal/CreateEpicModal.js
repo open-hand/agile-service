@@ -4,6 +4,7 @@ import { Modal, Form, Input } from 'choerodon-ui';
 import { stores, Choerodon } from '@choerodon/boot';
 import { epicApi, issueApi, fieldApi } from '@/api';
 import { checkCanQuickCreate } from '@/utils/quickCreate';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 
 const { AppState } = stores;
@@ -112,7 +113,7 @@ class CreateEpicModal extends Component {
         destroyOnClose
         confirmLoading={loading}
         onOk={this.handleCreateEpic}
-        width={380}
+        width={MODAL_WIDTH.small}
       >
         <Form>
           <FormItem>

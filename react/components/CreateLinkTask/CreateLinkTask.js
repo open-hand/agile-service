@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import { Select, Form, Modal } from 'choerodon-ui';
 import { issueLinkTypeApi, issueLinkApi, featureApi } from '@/api';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import SelectFocusLoad from '../SelectFocusLoad';
 import './CreateLinkTask.less';
-
 
 const { Sidebar } = Modal;
 const { Option } = Select;
@@ -23,7 +23,6 @@ class CreateLinkTask extends Component {
   componentDidMount() {
     this.getLinks();
   }
-
 
   getLinks() {
     const { issueType } = this.props;
@@ -53,7 +52,7 @@ class CreateLinkTask extends Component {
     const { issueType } = this.props;
     if (issueType !== 'feature') {
       // split active and passive
-      const active = links.map(link => ({
+      const active = links.map((link) => ({
         name: link.outWard,
         linkTypeId: link.linkTypeId,
       }));
@@ -100,13 +99,12 @@ class CreateLinkTask extends Component {
                 linkedIssueId: issue,
                 issueId,
               });
-            } else {
-              return ({
-                linkTypeId: linkTypeId.split('+')[0],
-                issueId: issue,
-                linkedIssueId: issueId,
-              });
             }
+            return ({
+              linkTypeId: linkTypeId.split('+')[0],
+              issueId: issue,
+              linkedIssueId: issueId,
+            });
           });
           this.setState({ createLoading: true });
           issueLinkApi.create(issueId, labelIssueRelVOList)
@@ -153,8 +151,8 @@ class CreateLinkTask extends Component {
         okText="创建"
         cancelText="取消"
         confirmLoading={createLoading}
-        width={380}
-      >        
+        width={MODAL_WIDTH.small}
+      >
         <Form layout="vertical">
           <FormItem label="关系">
             {getFieldDecorator('linkTypeId', {
@@ -162,12 +160,12 @@ class CreateLinkTask extends Component {
                 { required: true, message: '请选择所要创建的关系' },
               ],
             })(
-              <Select           
+              <Select
                 defaultOpen
                 label="关系"
                 loading={selectLoading}
               >
-                {show.map(link => (
+                {show.map((link) => (
                   <Option key={`${link.linkTypeId}+${link.name}`} value={`${link.linkTypeId}+${link.name}`}>
                     {link.name}
                   </Option>
@@ -190,7 +188,7 @@ class CreateLinkTask extends Component {
               />,
             )}
           </FormItem>
-        </Form>  
+        </Form>
       </Sidebar>
     );
   }

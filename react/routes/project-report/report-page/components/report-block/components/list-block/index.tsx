@@ -1,6 +1,7 @@
 import React, {
   useEffect, useState, useMemo, useCallback, useRef,
 } from 'react';
+import { Spin } from 'choerodon-ui';
 import { axios } from '@choerodon/boot';
 import { find } from 'lodash';
 import { IReportListBlock } from '@/routes/project-report/report-page/store';
@@ -15,15 +16,20 @@ import { flat2tree, getColumnByName } from './utils';
 interface Props {
   data: IReportListBlock
 }
-const ListBlock: React.FC<Props> = ({ data: { searchVO, colList, type } }) => {
+const ListBlock: React.FC<Props> = ({
+  data: {
+    searchVO, colList, type, key,
+  },
+}) => {
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [fields, setFields] = useState<IFoundationHeader[]>([]);
   const dataRef = useRef([]);
   const { register, finish } = useTaskContext();
-  register(type);
+  register(`${type}-${key}`);
   const onFinish = useCallback(() => {
-    finish(type);
-  }, [finish, type]);
+    finish(`${type}-${key}`);
+  }, [finish, key, type]);
   const loadData = useCallback(async (page = 1) => {
     if (page === 1) {
       dataRef.current = [];
@@ -53,6 +59,7 @@ const ListBlock: React.FC<Props> = ({ data: { searchVO, colList, type } }) => {
       loadData(page + 1);
     } else {
       setData(dataRef.current);
+      setLoading(false);
       setTimeout(onFinish);
     }
   }, [onFinish, searchVO]);
@@ -62,6 +69,7 @@ const ListBlock: React.FC<Props> = ({ data: { searchVO, colList, type } }) => {
     loadData();
   }, [loadData]);
   useEffect(() => {
+    setLoading(true);
     loadFields();
   }, [loadFields]);
   const treeData = useMemo(() => flat2tree(data, { idKey: 'issueId' }), [data]);
@@ -95,11 +103,14 @@ const ListBlock: React.FC<Props> = ({ data: { searchVO, colList, type } }) => {
   });
   return (
     <div style={{ padding: '10px 26px' }}>
-      <Table<Issue>
-        data={treeData}
-        primaryKey="issueId"
-        columns={columns}
-      />
+      <Spin spinning={loading}>
+        <Table<Issue>
+          data={treeData}
+          primaryKey="issueId"
+          columns={columns}
+        />
+        {!loading && treeData.length === 0 && <div style={{ textAlign: 'center' }}>暂无数据</div>}
+      </Spin>
     </div>
   );
 };

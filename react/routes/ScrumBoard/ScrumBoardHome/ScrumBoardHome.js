@@ -353,7 +353,7 @@ class ScrumBoardHome extends Component {
         <Header title="活跃冲刺">
           <Select
             ref={(SelectBoard) => { this.SelectBoard = SelectBoard; }}
-            className="SelectTheme primary autoWidth"
+            className="SelectTheme  autoWidth"
             value={ScrumBoardStore.getSelectedBoard}
             style={{
               marginRight: 15, fontWeight: 500, lineHeight: '28px',
@@ -387,8 +387,8 @@ class ScrumBoardHome extends Component {
               ))
             }
           </Select>
-          <ScrumBoardFullScreen />
           <HeaderLine />
+          <ScrumBoardFullScreen />
           <Button
             className="c7n-scrumboard-settingButton"
             funcType="flat"

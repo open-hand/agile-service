@@ -4,6 +4,7 @@ import {
 } from 'choerodon-ui';
 import { observer } from 'mobx-react';
 import { issueApi, issueTypeApi, statusApi } from '@/api';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import TypeTag from '../TypeTag';
 import './TransformFromSubIssue.less';
 
@@ -134,7 +135,7 @@ class TransformFromSubIssue extends Component {
         okText="转化"
         cancelText="取消"
         confirmLoading={loading}
-        width={380}
+        width={MODAL_WIDTH.small}
       >
         <Form layout="vertical">
           <FormItem label="问题类型">

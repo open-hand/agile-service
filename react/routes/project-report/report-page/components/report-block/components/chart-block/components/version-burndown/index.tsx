@@ -8,7 +8,7 @@ interface Props {
   filter: VersionBurndownSearchVO
   onFinish?: Function
 }
-const VersionBurndownComponent: React.FC<Props> = ({ filter }, onFinish) => {
+const VersionBurndownComponent: React.FC<Props> = ({ filter, onFinish }) => {
   const [, props] = useVersionBurndown(transformVersionBurndownSearch(filter), onFinish);
   return (
     <div>

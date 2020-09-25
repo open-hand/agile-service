@@ -4,6 +4,7 @@ import {
   Modal, Form, Input, Select,
 } from 'choerodon-ui';
 import { Content, stores } from '@choerodon/boot';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { issueApi, fieldApi } from '@/api';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 
@@ -26,7 +27,7 @@ class CreateFeatureModal extends Component {
     if (this.props.visible && !prevProps.visible) {
       setTimeout(() => {
         this.input.focus();
-      });   
+      });
     }
   }
 
@@ -39,11 +40,11 @@ class CreateFeatureModal extends Component {
   handleCreateFeature =(e) => {
     const {
       form, onCancel, featureType, defaultPriority, onOk,
-    } = this.props;   
+    } = this.props;
     const defaultPriorityId = defaultPriority ? defaultPriority.id : '';
     e.preventDefault();
     form.validateFieldsAndScroll((err, value) => {
-      if (!err) {        
+      if (!err) {
         const req = {
           projectId: AppState.currentMenuType.id,
           summary: value.summary,
@@ -71,7 +72,7 @@ class CreateFeatureModal extends Component {
             loading: false,
           });
           form.resetFields();
-          onOk(res); 
+          onOk(res);
         }).catch((error) => {
           this.setState({
             loading: false,
@@ -81,10 +82,9 @@ class CreateFeatureModal extends Component {
     });
   };
 
-
   render() {
     const {
-      form, onCancel, visible, 
+      form, onCancel, visible,
     } = this.props;
     const { loading } = this.state;
     const { getFieldDecorator } = form;
@@ -100,6 +100,7 @@ class CreateFeatureModal extends Component {
         }}
         confirmLoading={loading}
         onOk={this.handleCreateFeature}
+        width={MODAL_WIDTH.middle}
       >
         <Content
           style={{
@@ -113,7 +114,7 @@ class CreateFeatureModal extends Component {
                   required: true,
                   message: '特性名称不能为空',
                   // transform: value => value && value.trim(),
-                }, 
+                },
                 // {
                 //   validator: this.checkEpicNameRepeat,
                 // }
@@ -129,7 +130,7 @@ class CreateFeatureModal extends Component {
               })(
                 <Select
                   label="特性类型"
-                  getPopupContainer={triggerNode => triggerNode.parentNode}
+                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
                 >
                   <Option key="business" value="business">
                     特性
@@ -139,7 +140,7 @@ class CreateFeatureModal extends Component {
                   </Option>
                 </Select>,
               )}
-            </FormItem>            
+            </FormItem>
           </Form>
         </Content>
       </Sidebar>

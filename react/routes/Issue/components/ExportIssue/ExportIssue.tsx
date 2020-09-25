@@ -5,7 +5,7 @@ import { stores, Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import { omit, find, unionBy } from 'lodash';
 import { Divider } from 'choerodon-ui';
-import FileSaver from 'file-saver';
+import classnames from 'classnames';
 import { issueApi } from '@/api';
 import { Button } from 'choerodon-ui/pro';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
@@ -13,11 +13,13 @@ import IssueFilterForm from '@/components/issue-filter-form';
 import ChooseField from '@/components/chose-field';
 import TableColumnCheckBoxes from '@/components/table-column-check-boxes';
 import WsProgress from '@/components/ws-progress';
+import { getProjectName } from '@/utils/common';
 import { useExportIssueStore } from './stores';
 import { getCustomFieldFilters, getExportFieldCodes } from './utils';
 
 interface FormPartProps {
   title: string | ReactElement,
+  className?: string,
   children: ReactElement | ReactElement[] | null,
   btnOnClick?: (nextBtnStatusCode: 'ALL' | 'NONE') => boolean,
 }
@@ -36,7 +38,7 @@ const FormPart: React.FC<FormPartProps> = (props) => {
     result && setBtnStatus(nextBtnStatus);
   }
   return (
-    <div className={`${prefixCls}-form`}>
+    <div className={classnames(`${prefixCls}-form`, props.className)}>
       <div className={`${prefixCls}-form-title`}>
         <span>{title}</span>
         {!!btnOnClick && (
@@ -82,6 +84,11 @@ const ExportIssue: React.FC<{}> = () => {
       return false;
     }
     if (await tableColumnCheckBoxesDataSet.current?.validate()) {
+      if (!tableColumnCheckBoxesDataSet.current?.get('exportFieldCodes')
+      || tableColumnCheckBoxesDataSet.current?.get('exportFieldCodes').length === 0) {
+        Choerodon.prompt('请至少选择一个字段导出');
+        return false;
+      }
       search.exportFieldCodes = getExportFieldCodes(tableColumnCheckBoxesDataSet.current!);
     }
     const field = find(checkOptions, (f) => f.order) as { value: string, label: string, order?: string, };
@@ -110,7 +117,7 @@ const ExportIssue: React.FC<{}> = () => {
   };
   return (
     <div>
-      <FormPart title="筛选问题">
+      <FormPart title="筛选问题" className={`${prefixCls}-form-filter`}>
         <IssueFilterForm dataSet={issueFilterFormDataSet} chosenFields={choseFieldStore.getAllChosenField} onDelete={(item) => choseFieldStore.delChosenFields(item.code)}>
           <ChooseField store={choseFieldStore} dropDownBtnProps={{ icon: 'add', style: { color: '#3f51b5' } }} />
         </IssueFilterForm>
@@ -123,7 +130,8 @@ const ExportIssue: React.FC<{}> = () => {
       <WsProgress
         messageKey="agile-export-issue"
         onFinish={handleFinish}
-        autoDownload
+        autoDownload={{ fileName: `${getProjectName()}.xlsx` }}
+        // visible
         downloadInfo={downloadInfo.id ? {
           url: downloadInfo.fileUrl!,
           lastUpdateDate: downloadInfo.lastUpdateDate!,

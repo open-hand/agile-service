@@ -7,6 +7,7 @@ import {
 } from 'choerodon-ui';
 import { beforeTextUpload } from '@/utils/richText';
 import { workLogApi } from '@/api';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import WYSIWYGEditor from '../WYSIWYGEditor';
 import './DailyLog.less';
 
@@ -265,7 +266,7 @@ class DailyLog extends Component {
           </Button>,
           <Button key="back" onClick={onCancel} funcType="raised">取消</Button>,
         ]}
-        width={740}
+        width={MODAL_WIDTH.middle}
       >
         <div>
           <section className="info">

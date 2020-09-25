@@ -32,13 +32,13 @@ export function setChartBlockMap(newChartBlockMap: Map<IChartCode, React.FC<any>
 interface Props {
   data: IReportChartBlock
 }
-const ChartBlock: React.FC<Props> = ({ data: { chartSearchVO, chartCode } }) => {
+const ChartBlock: React.FC<Props> = ({ data: { chartSearchVO, chartCode, key } }) => {
   const ChartBlockComponent = chartBlockMap.get(chartCode);
   const { register, finish } = useTaskContext();
-  register(chartCode);
+  register(`${chartCode}-${key}`);
   const onFinish = useCallback(() => {
-    finish(chartCode);
-  }, [chartCode, finish]);
+    finish(`${chartCode}-${key}`);
+  }, [chartCode, finish, key]);
   return (
     <>
       {ChartBlockComponent && (

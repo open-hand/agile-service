@@ -1,11 +1,8 @@
 /* eslint-disable react/require-default-props */
 import React, {
-  useState, useReducer, useEffect, useCallback,
+  useState, useReducer, useEffect, useCallback, useMemo,
 } from 'react';
-import {
-  WSHandler, stores,
-  Choerodon,
-} from '@choerodon/boot';
+import { WSHandler, Choerodon } from '@choerodon/boot';
 import _ from 'lodash';
 import fileSever, { FileSaverOptions } from 'file-saver';
 import moment from 'moment';
@@ -18,7 +15,7 @@ import { humanizeDuration } from '@/utils/common';
  * @param fileName 下载文件名  默认为url 最后一个‘/’后的名
  * @param  fileSaverOptions
  */
-interface AutoDownloadProps {
+interface DownloadProps {
   fieldKey?: string,
   fileName?: string,
   fileSaverOptions?: FileSaverOptions,
@@ -27,7 +24,7 @@ interface Props {
   handleMessage?: (messageData: any) => void | boolean,
   percentCode?: string,
   downloadInfo?: {
-    url: string,
+    url: string | null,
     timeLine?: any,
     createDate?: string,
     lastUpdateDate?: string,
@@ -37,7 +34,8 @@ interface Props {
   renderEndProgress?: (messageData: any) => React.ReactElement | React.ReactElement[] | null | string,
   visible?: boolean, // 可控类型 控制进度条是否显示
   messageKey: string,
-  autoDownload?: boolean | AutoDownloadProps, /** 完成后是否自动下载 */
+  autoDownload?: boolean | DownloadProps, /** 完成后是否自动下载 */
+  downloadProps?: DownloadProps,
   onFinish?: (messageData: any) => void,
 }
 interface StateProps {
@@ -60,6 +58,13 @@ function onHumanizeDuration(createDate?: string, lastUpdateDate?: string): strin
 type ActionProps = Partial<StateProps> & { type: 'init' | 'transmission' | 'visible' | 'finish' }
 function WsProgress(props: Props) { // <StateProps, ActionProps>
   const { percentCode = 'process' } = props;
+  const downLoadProps = useMemo(() => {
+    const tempProps = props.downloadProps;
+    if (typeof (props.autoDownload) === 'object') {
+      return { ...tempProps, ...props.autoDownload };
+    }
+    return tempProps;
+  }, [props.downloadProps]);
   const [stateProgress, dispatch] = useReducer((state: StateProps, action: ActionProps) => {
     switch (action.type) {
       case 'init':
@@ -103,8 +108,8 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
     if (autoDownload) {
       const autoDownLoadFieldCode = typeof (autoDownload) === 'boolean' ? 'fileUrl' : autoDownload.fieldKey;
       const url = data[autoDownLoadFieldCode || 'fileUrl'];
-      const fileName = url.substring(url.lastIndexOf('/') + 1);
-      fileSever.saveAs(data[autoDownLoadFieldCode || 'fileUrl'], fileName);
+      const fileName = downLoadProps?.fileName ?? url.substring(url.lastIndexOf('/') + 1);
+      fileSever.saveAs(data[autoDownLoadFieldCode || 'fileUrl'], fileName, downLoadProps?.fileSaverOptions);
     }
   }
   function handleMessage(data: any) {
@@ -126,11 +131,11 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
   }
   const renderFinish: any = useCallback(() => {
     const { downloadInfo, renderEndProgress } = props;
-
     if (renderEndProgress && typeof (props.renderEndProgress) === 'function') {
       // eslint-disable-next-line react-hooks/exhaustive-deps
       return renderEndProgress(stateProgress.data);
     }
+    const fileName = downLoadProps?.fileName ?? downloadInfo?.url?.substring(downloadInfo.url.lastIndexOf('/') + 1);
     return downloadInfo ? (
       <div className="c7n-agile-ws-finish">
         {downloadInfo.children ?? (
@@ -138,11 +143,10 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
             ? (
               <>
                 <span>{downloadInfo.timeLine ?? `导出完成时间${downloadInfo.lastUpdateDate}（耗时${onHumanizeDuration(downloadInfo.createDate, downloadInfo.lastUpdateDate)}）`}</span>
-                <a href={downloadInfo.url}>点击下载</a>
+                <span role="none" className="c7n-agile-ws-finish-url" onClick={() => downloadInfo.url && fileSever.saveAs(downloadInfo.url, fileName, downLoadProps?.fileSaverOptions)}>点击下载</span>
               </>
             ) : ''
         )}
-        {/* <span>导出完成时间2019-08-02 09:08（耗时1分钟）</span> */}
       </div>
     ) : <></>;
   }, [props.downloadInfo, stateProgress.data]);

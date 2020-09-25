@@ -48,6 +48,9 @@ function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnD
       : false,
   );
   const [currentSprintId, setCurrentSprintId] = useState<string | undefined>(undefined);
+  const handleEmpty = useCallback(() => {
+    onFinish && setTimeout(onFinish);
+  }, [onFinish]);
   const loadData = useCallback(async () => {
     if ((!useCurrentSprint && sprintId) || (useCurrentSprint && sprintId && currentSprintId === sprintId)) {
       setLoading(true);
@@ -63,6 +66,8 @@ function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnD
         setLoading(false);
         onFinish && setTimeout(onFinish);
       });
+    } else {
+      setData(null);
     }
   }, [
     currentSprintId,
@@ -88,6 +93,7 @@ function useBurnDownReport(config?: BurnDownConfig, onFinish?: Function): [BurnD
     setUseCurrentSprint,
     currentSprintId,
     setCurrentSprintId,
+    onEmpty: handleEmpty,
     setEndDate,
     type,
     setType,
