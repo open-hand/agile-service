@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
 import io.choerodon.agile.infra.dto.ConfigurationRuleDTO;
@@ -14,6 +15,8 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface ConfigurationRuleMapper extends BaseMapper<ConfigurationRuleDTO> {
 
-    List<ConfigurationRuleVO> queryFiltersByProjectId(@Param("projectId") Long projectId);
+    List<ConfigurationRuleVO> selectByProjectId(@Param("projectId") Long projectId);
+
+    Map<String, Long> selectByRuleList(@Param("issueId") Long issueId, @Param("ruleList") List<ConfigurationRuleVO> ruleList);
 }
 

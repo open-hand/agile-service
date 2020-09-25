@@ -34,8 +34,6 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -154,12 +152,12 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     @Override
     public Page<ConfigurationRuleVO> listByProjectId(Long projectId, PageRequest pageRequest) {
         return PageHelper.doPageAndSort(pageRequest, () -> {
-            List<ConfigurationRuleVO> page = configurationRuleMapper.queryFiltersByProjectId(projectId);
+            List<ConfigurationRuleVO> page = configurationRuleMapper.selectByProjectId(projectId);
             if (CollectionUtils.isEmpty(page)){
                 return page;
             }
             List<Long> ruleIdList = page.stream().map(ConfigurationRuleVO::getId).collect(Collectors.toList());
-            List<ConfigurationRuleReceiverDTO> receiverDTOList = configurationRuleReceiverMapper.selectReceiver(ruleIdList,TYPE_RECEIVER);
+            List<ConfigurationRuleReceiverDTO> receiverDTOList = configurationRuleReceiverMapper.selectReceiver(ruleIdList, null);
             Map<String, List<ConfigurationRuleReceiverDTO>> group =
                     receiverDTOList.stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getUserType));
             Map<Long, List<ConfigurationRuleReceiverDTO>> receiverGroup = new HashMap<>();
