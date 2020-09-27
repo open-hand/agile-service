@@ -66,8 +66,8 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
   const cacheRef = useRef<Map<any, T>>(new Map());
   const defaultRender = useCallback((item: T) => getValueByPath(item, config.textField), [config.textField]);
   const {
-    textField = 'name',
-    valueField = 'id',
+    textField = 'meaning',
+    valueField = 'value',
     optionRenderer = defaultRender,
     // renderer,
     request,
@@ -138,7 +138,11 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     }
     return name.toLowerCase().indexOf(text.toLowerCase()) >= 0;
   }, [defaultRender, optionRenderer, textField]);
-  const optionData: Array<T> = useMemo(() => applyMiddleWares<T>(data, [middleWare]), [data, middleWare]);
+  const optionData: Array<T> = useMemo(() => applyMiddleWares<T>(data, [middleWare]).map((item) => ({
+    ...item,
+    meaning: item[textField],
+    value: item[valueField],
+  })), [data, middleWare, textField, valueField]);
   const finalData: Array<T | { loadMoreButton: boolean }> = useMemo(() => (canLoadMore ? [...optionData, { loadMoreButton: true }] : optionData), [canLoadMore, optionData]);
   const loadMoreButton = useMemo(() => (
     <Button
@@ -153,14 +157,16 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
   ), [handleLoadMore]);
   const options = useMemo(() => {
     if (!dataSetRef.current) {
-      dataSetRef.current = new DataSet({ data: finalData, paging: false });
+      dataSetRef.current = new DataSet({
+        data: finalData,
+        paging: false,
+      });
     } else {
       dataSetRef.current.loadData(finalData);
     }
     optionData.forEach((item) => {
       cacheRef.current?.set(item[valueField], item);
     });
-
     return dataSetRef.current;
   }, [finalData, optionData, valueField]);
   const renderOption: Renderer = ({ record }) => {

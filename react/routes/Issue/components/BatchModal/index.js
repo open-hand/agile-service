@@ -266,7 +266,7 @@ function BatchModal({
       }),
       valueField: 'versionId',
       textField: 'name',
-    }, ...userFields],
+    }],
   }), []);
   const getData = () => {
     const temp = dataSet.current ? dataSet.current.toData() : {};
