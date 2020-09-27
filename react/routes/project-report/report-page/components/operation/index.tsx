@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { Choerodon } from '@choerodon/boot';
 import { toJS } from 'mobx';
-import { Button } from 'choerodon-ui/pro';
+import { Button, Modal } from 'choerodon-ui/pro';
 import { omit } from 'lodash';
 import { FuncType, ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import { projectReportApi, IProjectReportCreate, IProjectReportUpdate } from '@/api';
@@ -17,7 +17,7 @@ interface Props {
 }
 const Operation: React.FC<Props> = () => {
   const {
-    store, baseInfoRef, edit, setPreview,
+    store, baseInfoRef, edit,
   } = useProjectReportContext();
   const [exporting, setExporting] = useState(false);
   const [sending, setSending] = useState(false);
@@ -74,6 +74,14 @@ const Operation: React.FC<Props> = () => {
     setSending(true);
     exportRef.current?.export(handleSend);
   }, [handleSend]);
+  const handleCancelClick = useCallback(() => {
+    Modal.confirm({
+      title: `确认退出${edit ? '编辑' : '创建'}？`,
+      onOk: () => {
+        to('/agile/project-report');
+      },
+    });
+  }, [edit]);
   return (
     <div
       className={styles.bar}
@@ -92,7 +100,7 @@ const Operation: React.FC<Props> = () => {
           </Button>
         </>
       )}
-      <Button funcType={'raised' as FuncType}>取消</Button>
+      <Button funcType={'raised' as FuncType} onClick={handleCancelClick}>取消</Button>
       <Export innerRef={exportRef} />
     </div>
   );
