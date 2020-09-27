@@ -118,6 +118,24 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
     }
 
     @Override
+    public StatusNoticeSettingVO selectNoticeUserAndType(Long projectId, Long issueId) {
+        // 根据issueId找到对应的issueType和status
+        IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
+        Assert.notNull(issue, BaseConstants.ErrorCode.DATA_NOT_EXISTS);
+        // 找到通知内容
+        List<StatusNoticeSettingDTO> noticeList = statusNoticeSettingMapper.select(new StatusNoticeSettingDTO(projectId,
+                issue.getIssueTypeId(), issue.getStatusId()));
+        // 根据类型找到接收人
+        Set<Long> userSet = new HashSet<>();
+        noticeList.forEach(noticeDTO -> this.receiverType2User(projectId, noticeDTO, issue, userSet));
+        StatusNoticeSettingVO result = new StatusNoticeSettingVO();
+        result.setUserIdList(userSet);
+        result.setUserTypeList(new HashSet<>(Arrays.asList(StringUtils.split(noticeList.stream()
+                .map(StatusNoticeSettingDTO::getNoticeType).findFirst().orElse(""), BaseConstants.Symbol.COMMA))));
+        return result;
+    }
+
+    @Override
     public List<StatusNoticeSettingVO> list(Long projectId, Long issueTypeId, List<Long> statusIdList, String schemeCode) {
         if (Objects.isNull(projectId) || Objects.isNull(issueTypeId) || CollectionUtils.isEmpty(statusIdList)){
             return Collections.emptyList();

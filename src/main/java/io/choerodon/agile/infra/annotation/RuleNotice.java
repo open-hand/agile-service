@@ -2,6 +2,8 @@ package io.choerodon.agile.infra.annotation;
 
 import java.lang.annotation.*;
 
+import io.choerodon.agile.infra.enums.RuleNoticeEvent;
+
 /**
  * 页面规则消息通知
  * @author jiaxu.cui@hand-china.com 2020/9/25 下午2:33
@@ -12,4 +14,8 @@ import java.lang.annotation.*;
 public @interface RuleNotice {
     
     String value() default "issue";
+    
+    RuleNoticeEvent event();
+
+    String fieldListName();
 }

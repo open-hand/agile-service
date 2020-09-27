@@ -149,22 +149,9 @@ public class SiteMsgUtil {
         if (CollectionUtils.isEmpty(receiverList)) {
             return;
         }
-        // webhook消息单独发送
-        if (CollectionUtils.isNotEmpty(noticeTypeList) && noticeTypeList.contains(SiteMsgUtil.MSG_TYPE_WEBHOOK)){
-            noticeTypeList.remove(SiteMsgUtil.MSG_TYPE_WEBHOOK);
-            messageSender.setTypeCodeList(Collections.singletonList(SiteMsgUtil.MSG_TYPE_WEBHOOK));
-            messageSender.setArgs(templateArgsMap);
-            messageSender.setReceiverAddressList(receiverList);
-            messageClient.async().sendMessage(messageSender);
-        }
         messageSender.setTypeCodeList(noticeTypeList);
-        for (Receiver receiver : receiverList) {
-            // 设置接收者和用户名
-            templateArgsMap.put(USER_NAME, userMap.getOrDefault(receiver.getUserId(), new UserDTO()).getRealName());
-            messageSender.setArgs(templateArgsMap);
-            messageSender.setReceiverAddressList(Collections.singletonList(receiver));
-            messageClient.async().sendMessage(messageSender);
-        }
+        messageSender.setReceiverAddressList(receiverList);
+        messageClient.async().sendMessage(messageSender);
     }
 
     public void sendProjectReport(Long projectId, List<ProjectReportReceiverDTO> receiverList, String imgData) {
@@ -207,6 +194,61 @@ public class SiteMsgUtil {
         //发送站内信
         MessageSender messageSender = handlerMessageSender(0L,"ISSUECREATE",userIds,map);
         messageSender.setAdditionalInformation(objectMap);
+        return messageSender;
+    }
+
+    public MessageSender issueAssigneeSender(List<Long> userIds, String assigneeName, String summary, String url, Long projectId, String operatorName) {
+        // 设置模板参数
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        Map<String,String> map = new HashMap<>();
+        map.put(ASSIGNEENAME, assigneeName);
+        map.put(SUMMARY, summary);
+        map.put(URL, url);
+        map.put(PROJECT_NAME, projectVO.getName());
+        map.put(OPERATOR_NAME, operatorName);
+        // 额外参数
+        Map<String,Object> objectMap=new HashMap<>();
+        objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
+        //发送站内信
+        MessageSender messageSender = handlerMessageSender(0L,"ISSUEASSIGNEE",userIds,map);
+        messageSender.setAdditionalInformation(objectMap);
+        return messageSender;
+    }
+
+    public MessageSender issueSolveSender(List<Long> userIds, String assigneeName, String summary, String url, Long projectId, String operatorName) {
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        Map<String,String> map = new HashMap<>();
+        map.put(ASSIGNEENAME, assigneeName);
+        map.put(OPERATOR_NAME, operatorName);
+        map.put(SUMMARY, summary);
+        map.put(URL, url);
+        map.put(PROJECT_NAME, projectVO.getName());
+        // 额外参数
+        Map<String,Object> objectMap=new HashMap<>();
+        objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
+        //发送站内信
+        MessageSender messageSender = handlerMessageSender(0L,"ISSUESOLVE",userIds,map);
+        messageSender.setAdditionalInformation(objectMap);
+        return messageSender;
+    }
+
+    public MessageSender sendChangeIssueStatusSender(Long projectId, Set<Long> userSet, List<String> noticeTypeList, Map<String, String> templateArgsMap){
+        MessageSender messageSender = new MessageSender();
+        messageSender.setTenantId(BaseConstants.DEFAULT_TENANT_ID);
+        messageSender.setMessageCode("ISSUECHANGESTATUS");
+        List<Receiver> receiverList = new ArrayList<>();
+        Map<Long, UserDTO> userMap = handleReceiver(receiverList, userSet);
+        // 设置模板参数
+        messageSender.setArgs(templateArgsMap);
+        // 设置额外参数
+        Map<String,Object> objectMap=new HashMap<>();
+        objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
+        messageSender.setAdditionalInformation(objectMap);
+        if (CollectionUtils.isEmpty(receiverList)) {
+            return null;
+        }
+        messageSender.setTypeCodeList(noticeTypeList);
+        messageSender.setReceiverAddressList(receiverList);
         return messageSender;
     }
 }

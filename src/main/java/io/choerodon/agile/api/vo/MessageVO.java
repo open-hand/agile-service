@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.persistence.Transient;
 import java.util.List;
