@@ -23,10 +23,9 @@ function StatusField({ field, value, onChange }) {
       dropdownMatchSelectWidth={false}
       placeholder="状态"
       saveList={(v) => { issueStatus = unionBy(issueStatus, v, 'id'); }}
-      filter={false}
       onChange={onChange}
       value={value}
-      getPopupContainer={triggerNode => triggerNode.parentNode}
+      getPopupContainer={(triggerNode) => triggerNode.parentNode}
     />
   );
 }
