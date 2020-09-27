@@ -3,7 +3,6 @@ package io.choerodon.agile.infra.mapper;
 import java.util.List;
 
 import io.choerodon.agile.infra.dto.ConfigurationRuleReceiverDTO;
-import io.choerodon.agile.infra.dto.ProjectReportReceiverDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -16,6 +15,5 @@ public interface ConfigurationRuleReceiverMapper extends BaseMapper<Configuratio
 
     List<ConfigurationRuleReceiverDTO> selectReceiver(@Param("ruleIdList") List<Long> ruleIdList,
                                                   @Param("type") String type);
-
 }
 

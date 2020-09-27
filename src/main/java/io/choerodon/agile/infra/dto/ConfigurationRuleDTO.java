@@ -22,6 +22,10 @@ import io.swagger.annotations.ApiModelProperty;
 @ModifyAudit
 @Table(name = "agile_configuration_rule")
 public class ConfigurationRuleDTO extends AuditDomain {
+    
+    public static final String FIELD_SQL_QUERY = "sqlQuery";
+    public static final String FIELD_EXPRESS_QUERY = "expressQuery";
+    public static final String FIELD_EXPRESS_FORMAT = "expressFormat";
 
     public ConfigurationRuleDTO(Long id, Long projectId) {
         this.id = id;

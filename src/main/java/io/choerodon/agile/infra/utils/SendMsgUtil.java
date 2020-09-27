@@ -12,6 +12,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hzero.boot.message.entity.MessageSender;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -75,8 +76,7 @@ public class SendMsgUtil {
             if (projectVO == null) {
                 throw new CommonException(ERROR_PROJECT_NOTEXIST);
             }
-            String projectName = convertProjectName(projectVO);
-            String url = URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + result.getIssueNum() + URL_TEMPLATE4 + result.getIssueId() + URL_TEMPLATE5 + result.getIssueId();
+            String url = getIssueCreateUrl(result, projectVO);
             siteMsgUtil.issueCreate(userIds, reporterName, summary, url, result.getReporterId(), projectId);
             if (result.getAssigneeId() != null) {
                 List<Long> assigneeIds = new ArrayList<>();
@@ -84,6 +84,16 @@ public class SendMsgUtil {
                 siteMsgUtil.issueAssignee(assigneeIds, result.getAssigneeName(), summary, url, projectId, reporterName);
             }
         }
+    }
+
+    public String getIssueCreateUrl(IssueVO result, ProjectVO projectVO) {
+        return URL_TEMPLATE1 + projectVO.getId() 
+                + URL_TEMPLATE2 + convertProjectName(projectVO) 
+                + URL_TEMPLATE6 + projectVO.getOrganizationId() 
+                + URL_TEMPLATE7 + projectVO.getOrganizationId() 
+                + URL_TEMPLATE3 + result.getIssueNum() 
+                + URL_TEMPLATE4 + result.getIssueId() 
+                + URL_TEMPLATE5 + result.getIssueId();
     }
 
     @Async
@@ -230,5 +240,21 @@ public class SendMsgUtil {
         templateArgsMap.put("operatorName", operatorName);
         templateArgsMap.put("status", status);
         siteMsgUtil.sendChangeIssueStatus(projectId, userSet, noticeTypeList, templateArgsMap);
+    }
+
+    public MessageSender generateIssueCreateMessageSender(Long projectId, IssueDTO issue) {
+        if (SchemeApplyType.AGILE.equals(issue.getApplyType())) {
+            return null;
+        }
+        IssueVO result = modelMapper.map(issue, IssueVO.class);
+        List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUECREATE", result);
+        String summary = result.getIssueNum() + "-" + result.getSummary();
+        String reporterName = result.getReporterName();
+        ProjectVO projectVO = userService.queryProject(projectId);
+        if (projectVO == null) {
+            throw new CommonException(ERROR_PROJECT_NOTEXIST);
+        }
+        String url = getIssueCreateUrl(result, projectVO);
+        return siteMsgUtil.issueCreateSender(userIds, reporterName, summary, url, result.getReporterId(), projectId);
     }
 }

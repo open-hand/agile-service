@@ -1,6 +1,5 @@
 package io.choerodon.agile.app.service.impl;
 
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -9,15 +8,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
-import io.choerodon.agile.api.vo.ProjectReportVO;
 import io.choerodon.agile.api.vo.RuleExpressVO;
-import io.choerodon.agile.api.vo.SearchVO;
-import io.choerodon.agile.api.vo.report.DynamicListUnitVO;
-import io.choerodon.agile.api.vo.report.ReportUnitVO;
-import io.choerodon.agile.api.vo.report.StaticListUnitVO;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
-import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.ConfigurationRuleDTO;
+import io.choerodon.agile.infra.dto.ConfigurationRuleReceiverDTO;
+import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
+import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.enums.ConfigurationRule;
 import io.choerodon.agile.infra.enums.CustomFieldType;
 import io.choerodon.agile.infra.enums.FieldType;
@@ -27,7 +24,6 @@ import io.choerodon.agile.infra.mapper.ConfigurationRuleMapper;
 import io.choerodon.agile.infra.mapper.ConfigurationRuleReceiverMapper;
 import io.choerodon.agile.infra.utils.CommonMapperUtil;
 import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
@@ -38,8 +34,6 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,8 +49,6 @@ import org.springframework.util.ObjectUtils;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(QuickFilterServiceImpl.class);
 
     protected static final String TYPE_RECEIVER = "RECEIVER";
     protected static final String TYPE_CC = "CC";
@@ -81,7 +73,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
         String sqlQuery = getSqlQuery(configurationRuleVO, projectId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
-        configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressFormat()));
+        configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
         configurationRuleDTO.setSqlQuery(sqlQuery);
         if (configurationRuleMapper.insert(configurationRuleDTO) != 1) {
             throw new CommonException("error.rule.insert");
@@ -91,16 +83,20 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     }
 
     @Override
-    public ConfigurationRuleVO update(Long projectId, Long ruleId, ConfigurationRuleVO ConfigurationRuleVO) {
-        Assert.isTrue(CollectionUtils.isNotEmpty(ConfigurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
-        ConfigurationRuleVO.setId(ruleId);
-        ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(ConfigurationRuleVO, ConfigurationRuleDTO.class);
-        configurationRuleDTO.setSqlQuery(getSqlQuery(ConfigurationRuleVO, projectId));
-        updateBySelective(configurationRuleDTO);
+    public ConfigurationRuleVO update(Long projectId, Long ruleId, ConfigurationRuleVO configurationRuleVO) {
+        Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
+        configurationRuleVO.setId(ruleId);
+        ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
+        configurationRuleDTO.setSqlQuery(getSqlQuery(configurationRuleVO, projectId));
+        configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
+        if (configurationRuleMapper.updateOptional(configurationRuleDTO, ConfigurationRuleDTO.FIELD_SQL_QUERY,
+                ConfigurationRuleDTO.FIELD_EXPRESS_QUERY, ConfigurationRuleDTO.FIELD_EXPRESS_FORMAT) != 1) {
+            throw new CommonException("error.rule.update");
+        }
         // 更新通知对象
-        configurationRuleReceiverMapper.delete(new ConfigurationRuleReceiverDTO(ConfigurationRuleVO.getId(), projectId));
-        createProjectReportReceiver(projectId, ConfigurationRuleVO, configurationRuleDTO);
-        return ConfigurationRuleVO;
+        configurationRuleReceiverMapper.delete(new ConfigurationRuleReceiverDTO(configurationRuleVO.getId(), projectId));
+        createProjectReportReceiver(projectId, configurationRuleVO, configurationRuleDTO);
+        return configurationRuleVO;
     }
 
     @Override
@@ -157,45 +153,50 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     @Override
     public Page<ConfigurationRuleVO> listByProjectId(Long projectId, PageRequest pageRequest) {
         return PageHelper.doPageAndSort(pageRequest, () -> {
-            List<ConfigurationRuleVO> page = configurationRuleMapper.queryFiltersByProjectId(projectId);
+            List<ConfigurationRuleVO> page = configurationRuleMapper.selectByProjectId(projectId);
             if (CollectionUtils.isEmpty(page)){
                 return page;
             }
             List<Long> ruleIdList = page.stream().map(ConfigurationRuleVO::getId).collect(Collectors.toList());
-            List<ConfigurationRuleReceiverDTO> receiverDTOList = configurationRuleReceiverMapper.selectReceiver(ruleIdList,TYPE_RECEIVER);
-            Map<String, List<ConfigurationRuleReceiverDTO>> group =
-                    receiverDTOList.stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getUserType));
-            Map<Long, List<ConfigurationRuleReceiverDTO>> receiverGroup = new HashMap<>();
-            Map<Long, List<ConfigurationRuleReceiverDTO>> ccGroup = new HashMap<>();
-            List<UserDTO> userList = baseFeignClient.listUsersByIds(receiverDTOList.stream()
-                    .map(ConfigurationRuleReceiverDTO::getUserId).toArray(Long[]::new), false).getBody();
-            Map<Long, UserDTO> userDTOMap = userList.stream().collect(Collectors.toMap(UserDTO::getId,
-                    Function.identity()));
-            if (CollectionUtils.isNotEmpty(group.get(TYPE_RECEIVER))){
-                receiverGroup = group.get(TYPE_RECEIVER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId));
-            }
-            if (CollectionUtils.isNotEmpty(group.get(TYPE_CC))){
-                ccGroup = group.get(TYPE_CC).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId));
-            }
+            Map<Long, ConfigurationRuleVO> map = selectRuleReceiverWithCc(ruleIdList);
             for (ConfigurationRuleVO reportVO : page) {
-                reportVO.setReceiverList(receiverGroup
-                        .getOrDefault(reportVO.getId(), Collections.emptyList())
-                        .stream().map(receiver -> userDTOMap.get(receiver.getUserId()))
-                        .collect(Collectors.toList()));
-                reportVO.setCcList(ccGroup
-                        .getOrDefault(reportVO.getId(), Collections.emptyList())
-                        .stream().map(receiver -> userDTOMap.get(receiver.getUserId()))
-                        .collect(Collectors.toList()));
+                reportVO.setReceiverList(map.get(reportVO.getId()).getReceiverList());
+                reportVO.setCcList(map.get(reportVO.getId()).getCcList());
             }
             return page;
         });
     }
-
-    public ConfigurationRuleVO updateBySelective(ConfigurationRuleDTO configurationRuleDTO) {
-        if (configurationRuleMapper.updateByPrimaryKeySelective(configurationRuleDTO) != 1) {
-            throw new CommonException("error.rule.update");
+    
+    @Override
+    public Map<Long, ConfigurationRuleVO> selectRuleReceiverWithCc(List<Long> ruleIdList){
+        List<ConfigurationRuleReceiverDTO> receiverDTOList = configurationRuleReceiverMapper.selectReceiver(ruleIdList, null);
+        Map<String, List<ConfigurationRuleReceiverDTO>> group =
+                receiverDTOList.stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getUserType));
+        Map<Long, List<ConfigurationRuleReceiverDTO>> receiverGroup = new HashMap<>();
+        Map<Long, List<ConfigurationRuleReceiverDTO>> ccGroup = new HashMap<>();
+        List<UserDTO> userList = baseFeignClient.listUsersByIds(receiverDTOList.stream()
+                .map(ConfigurationRuleReceiverDTO::getUserId).toArray(Long[]::new), false).getBody();
+        Map<Long, UserDTO> userDTOMap = userList.stream().collect(Collectors.toMap(UserDTO::getId,
+                Function.identity()));
+        if (CollectionUtils.isNotEmpty(group.get(TYPE_RECEIVER))){
+            receiverGroup.putAll(group.get(TYPE_RECEIVER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
         }
-        return modelMapper.map(configurationRuleDTO, ConfigurationRuleVO.class);
+        if (CollectionUtils.isNotEmpty(group.get(TYPE_CC))){
+            ccGroup.putAll(group.get(TYPE_CC).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
+        }
+        return ruleIdList.stream().map(ruleId -> {
+            ConfigurationRuleVO ruleVO = new ConfigurationRuleVO();
+            ruleVO.setId(ruleId);
+            ruleVO.setReceiverList(receiverGroup
+                    .getOrDefault(ruleId, Collections.emptyList())
+                    .stream().map(receiver -> userDTOMap.get(receiver.getUserId()))
+                    .collect(Collectors.toList()));
+            ruleVO.setCcList(ccGroup
+                    .getOrDefault(ruleId, Collections.emptyList())
+                    .stream().map(receiver -> userDTOMap.get(receiver.getUserId()))
+                    .collect(Collectors.toList()));
+            return ruleVO;
+        }).collect(Collectors.toMap(ConfigurationRuleVO::getId, Function.identity()));
     }
 
     private String renderPredefinedSql(String operation, String field, List<Supplier<String>> conditionList) {
@@ -274,7 +275,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         } else if (CustomFieldType.isDate(customFieldType)) {
             value = ruleExpressVO.getValueDate();
             return renderCustomSql(preOp, projectId, fieldId, Collections.singletonList(() -> 
-                    conditionSql(getUnixTimeExpress("ffv.date_value"), operation, getUnixTimeExpress(df.format(value)))));
+                    conditionSql(getUnixTimeExpress("ffv.date_value"), operation, getUnixTimeExpress(valueToString(value)))));
         } else if (CustomFieldType.isDateHms(customFieldType)) {
             value = ruleExpressVO.getValueDateHms();
             return renderCustomSql(preOp, projectId, fieldId, Collections.singletonList(() ->
@@ -358,7 +359,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                 break;
             case "creation_date":
             case "last_update_date":
-                sqlQuery.append(conditionSql(getUnixTimeExpress(field), operation, getUnixTimeExpress(df.format(value))));
+                sqlQuery.append(conditionSql(getUnixTimeExpress(field), operation, getUnixTimeExpress(valueToString(value))));
                 break;
             default:
                 if (ConfigurationRule.OpSqlMapping.isCollOp(operation)){
@@ -374,7 +375,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         if (value instanceof String){
             return "'" + value + "'";
         }else if(value instanceof Date){
-            return df.format(value);
+            return "'" + df.format(value) + "'";
         }else {
             return value.toString();
         }
@@ -402,7 +403,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         if (ConfigurationRule.OpSqlMapping.isLike(operation)){
             value = String.format(ConfigurationRule.TEMPLATE_LIKE_VALUE_SQL, value);
         }
-        return String.format(ConfigurationRule.TEMPLATE_CONDITION_SQL, field, operation, value);
+        return String.format(ConfigurationRule.TEMPLATE_CONDITION_SQL, field, ConfigurationRule.OpSqlMapping.valueOf(operation).getSqlOp(), value);
     }
 
     private void createProjectReportReceiver(Long projectId, ConfigurationRuleVO configurationRuleVO,

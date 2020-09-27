@@ -238,8 +238,10 @@ public class ProjectReportServiceImpl implements ProjectReportService {
         if (StringUtils.isNotBlank(imgData)){
             siteMsgUtil.sendProjectReport(projectId, receiverList, imgData);
         }
-        
-
+        // 更新最后发送时间
+        ProjectReportDTO projectReportDTO = projectReportMapper.selectOne(new ProjectReportDTO(id, projectId));
+        projectReportDTO.setRecentSendDate(new Date());
+        projectReportMapper.updateOptional(projectReportDTO, ProjectReportDTO.FIELD_RECENT_SEND_DATE);
     }
 
     private void createProjectReportReceiver(Long projectId, ProjectReportVO projectReportVO,
