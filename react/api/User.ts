@@ -1,6 +1,7 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
 import './Cache';
+import { User } from '@/common/types';
 import Api from './Api';
 
 class UserApi extends Api<UserApi> {
@@ -29,7 +30,10 @@ class UserApi extends Api<UserApi> {
    * @param page
    * @param id 根据id查询
    */
-  getAllInProject(param?: string, page?: number, userId?: number, size?: number, projectId?: number) {
+  getAllInProject(param?: string, page?: number, userId?: number, size?: number, projectId?: number): Promise<{
+    list: User[]
+    hasNextPage: boolean
+  }> {
     return this.request({
       method: 'get',
       url: `/iam/choerodon/v1/projects/${projectId || getProjectId()}/users`,

@@ -15,7 +15,7 @@ export interface SelectUserProps extends Partial<SelectProps> {
     realName: string,
   }[],
   dataRef?: React.MutableRefObject<any>
-  request?: SelectConfig['request']
+  request?: SelectConfig<User>['request']
   afterLoad?: (users: User[]) => void
 }
 
@@ -26,7 +26,11 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     name: 'user',
     textField: 'realName',
     valueField: 'id',
-    request: request || (({ filter, page }) => userApi.getAllInProject(filter, page)),
+    request: request || (async ({ filter, page }) => {
+      const res = await userApi.getAllInProject(filter, page);
+      res.list = res.list.filter((user: User) => user.enabled);
+      return res;
+    }),
     middleWare: (data) => {
       let newData = [];
       if (selectedUser) {
