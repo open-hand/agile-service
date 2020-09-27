@@ -1,7 +1,14 @@
-import React, { Component } from 'react';
+import React from 'react';
 import './Empty.less';
 
-const Empty = ({
+interface EmptyProps {
+  title: React.ReactNode,
+  description: React.ReactNode,
+  pic: string,
+  border?: boolean,
+  style?: React.CSSProperties,
+}
+const Empty: React.FC<EmptyProps> = ({
   style,
   border,
   pic,

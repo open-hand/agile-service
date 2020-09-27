@@ -3,7 +3,9 @@ import {
   DataSet,
   Table,
   Modal,
+  Button,
 } from 'choerodon-ui/pro';
+import { observer } from 'mobx-react-lite';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import { projectReportApiConfig, projectReportApi } from '@/api';
@@ -11,10 +13,17 @@ import UserHead from '@/components/UserHead';
 import TableAction from '@/components/TableAction';
 import { User } from '@/common/types';
 import to from '@/utils/to';
+import Empty from '@/components/Empty';
+import { ButtonColor, FuncType } from 'choerodon-ui/pro/lib/button/enum';
+import Loading from '@/components/Loading';
+import NoReport from './no-report.svg';
 
 const { Column } = Table;
 
-const ReportTable = () => {
+interface ReportTableProps {
+  onClick: () => void
+}
+const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
   const dataSet = useMemo(() => new DataSet({
     primaryKey: 'id',
     autoQuery: true,
@@ -54,7 +63,11 @@ const ReportTable = () => {
       }
     }
   }, [dataSet]);
-  return (
+  // 首次加载
+  if (dataSet.length === 0 && dataSet.status === 'loading') {
+    return <Loading loading />;
+  }
+  return (dataSet.length > 0 ? (
     <Table
       key="user"
       dataSet={dataSet}
@@ -83,7 +96,7 @@ const ReportTable = () => {
           }
           return receiverList.map((user: User) => (
             <UserHead
-              // @ts-ignore
+            // @ts-ignore
               style={{ display: 'inline-block' }}
               hiddenText
               user={user}
@@ -99,7 +112,7 @@ const ReportTable = () => {
           }
           return (
             <UserHead
-              // @ts-ignore
+            // @ts-ignore
               style={{ display: 'inline-block' }}
               hiddenText
               user={createdUser as User}
@@ -108,6 +121,26 @@ const ReportTable = () => {
         }}
       />
     </Table>
+  ) : (
+    <Empty
+      title="暂无项目报告"
+      description={(
+        <>
+          当前项目下无项目报告，请创建
+          <br />
+          <Button
+            style={{ fontSize: '14px', marginTop: 15 }}
+            color={'blue' as ButtonColor}
+            funcType={'raised' as FuncType}
+            onClick={onClick}
+          >
+            创建项目报告
+          </Button>
+        </>
+        )}
+      pic={NoReport}
+    />
+  )
   );
 };
-export default ReportTable;
+export default observer(ReportTable);
