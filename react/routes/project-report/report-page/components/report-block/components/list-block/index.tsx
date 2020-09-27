@@ -8,7 +8,6 @@ import { IReportListBlock } from '@/routes/project-report/report-page/store';
 import { Issue, IFoundationHeader } from '@/common/types';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import { fieldApi } from '@/api';
-import UserHead from '@/components/UserHead';
 import { useTaskContext } from '@/routes/project-report/report-preview/taskContext';
 import Table from './table';
 import { flat2tree, getColumnByName } from './utils';

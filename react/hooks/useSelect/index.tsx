@@ -1,11 +1,12 @@
 import React, {
-  useState, useMemo, useEffect, useRef, useImperativeHandle,
+  useState, useMemo, useEffect, useRef, useImperativeHandle, useCallback,
 } from 'react';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
+import { omit, debounce } from 'lodash';
 import { Button, DataSet } from 'choerodon-ui/pro';
 import { SearchMatcher } from 'choerodon-ui/pro/lib/select/Select';
 import { Renderer } from 'choerodon-ui/pro/lib/field/FormField';
-import { debounce } from 'lodash';
+
 import FragmentForSearch from './FragmentForSearch';
 import styles from './index.less';
 
@@ -56,57 +57,66 @@ export interface RefHandle {
   refresh: (config?: LoadConfig) => void
 }
 export type UseSelectRef = React.MutableRefObject<RefHandle>
-export default function useSelect<T extends {}>(config: SelectConfig<T>, ref?: React.MutableRefObject<RefHandle>) {
+export default function useSelect<T extends { [key: string]: any }>(config: SelectConfig<T>, ref?: React.MutableRefObject<RefHandle>) {
   const [data, setData] = useState<T[]>([]);
   const [currentPage, setPage] = useState(1);
   const [canLoadMore, setCanLoadMore] = useState(false);
   const textRef = useRef<string>('');
-  const defaultRender = (item: T) => getValueByPath(item, textField);
+  const dataSetRef = useRef<DataSet>();
+  const cacheRef = useRef<Map<any, T>>(new Map());
+  const defaultRender = useCallback((item: T) => getValueByPath(item, config.textField), [config.textField]);
   const {
     textField = 'name',
     valueField = 'id',
     optionRenderer = defaultRender,
-    renderer,
+    // renderer,
     request,
     middleWare = noop,
     paging = true,
     props,
   } = config;
+  const renderer = useCallback(({ value }) => {
+    const item = cacheRef.current?.get(value);
+    if (item) {
+      return optionRenderer(item);
+    }
+    return null;
+  }, [optionRenderer]);
   // 不分页时，本地搜索
   const localSearch = !paging;
-  const loadData = async ({ filter = textRef.current, page = 1 }: LoadConfig = {} as LoadConfig) => {
+  const loadData = useCallback(async ({ filter = textRef.current, page = 1 }: LoadConfig = {} as LoadConfig) => {
     const res = await request({ filter, page });
     batchedUpdates(() => {
       if (paging) {
         const { list, hasNextPage } = res as { list: T[], hasNextPage: boolean };
-        setData(page > 1 ? data.concat(list) : list);
+        setData((d) => (page > 1 ? d.concat(list) : list));
         setPage(page);
         setCanLoadMore(hasNextPage);
       } else {
         setData(res as T[]);
       }
     });
-  };
+  }, [paging, request]);
   const searchData = useMemo(() => debounce((filter: string) => {
     loadData({ filter });
-  }, 500), []);
+  }, 500), [loadData]);
   useEffect(() => {
     loadData({ filter: '' });
-  }, [config]);
+  }, [config, loadData]);
   useImperativeHandle<Object, RefHandle>(ref, () => ({
     refresh: loadData,
   }));
-  const handleLoadMore = () => {
+  const handleLoadMore = useCallback(() => {
     loadData({ page: currentPage + 1 });
-  };
-  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  }, [currentPage, loadData]);
+  const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     textRef.current = value;
     if (!localSearch) {
       searchData(value);
     }
-  };
-  const filterOptions: SearchMatcher = ({
+  }, [localSearch, searchData]);
+  const filterOptions: SearchMatcher = useCallback(({
     record, text,
   }) => {
     // @ts-ignore
@@ -127,12 +137,10 @@ export default function useSelect<T extends {}>(config: SelectConfig<T>, ref?: R
       return true;
     }
     return name.toLowerCase().indexOf(text.toLowerCase()) >= 0;
-  };
-  let finalData: Array<T | { loadMoreButton: boolean }> = applyMiddleWares<T>(data, [middleWare]);
-  if (canLoadMore) {
-    finalData = [...finalData, { loadMoreButton: true }];
-  }
-  const loadMoreButton = (
+  }, [defaultRender, optionRenderer, textField]);
+  const optionData: Array<T> = useMemo(() => applyMiddleWares<T>(data, [middleWare]), [data, middleWare]);
+  const finalData: Array<T | { loadMoreButton: boolean }> = useMemo(() => (canLoadMore ? [...optionData, { loadMoreButton: true }] : optionData), [canLoadMore, optionData]);
+  const loadMoreButton = useMemo(() => (
     <Button
       onClick={(e) => {
         e.stopPropagation();
@@ -142,8 +150,19 @@ export default function useSelect<T extends {}>(config: SelectConfig<T>, ref?: R
     >
       加载更多
     </Button>
-  );
-  const options = new DataSet({ data: finalData, paging: false });
+  ), [handleLoadMore]);
+  const options = useMemo(() => {
+    if (!dataSetRef.current) {
+      dataSetRef.current = new DataSet({ data: finalData, paging: false });
+    } else {
+      dataSetRef.current.loadData(finalData);
+    }
+    optionData.forEach((item) => {
+      cacheRef.current?.set(item[valueField], item);
+    });
+
+    return dataSetRef.current;
+  }, [finalData, optionData, valueField]);
   const renderOption: Renderer = ({ record }) => {
     if (!record) {
       return null;
@@ -175,6 +194,7 @@ export default function useSelect<T extends {}>(config: SelectConfig<T>, ref?: R
     // @ts-ignore
     optionRenderer: renderOption,
     // TODO: 考虑如何获取record，来渲染，例如用户
+    renderer,
     // renderer: renderer ? ({
     //   // @ts-ignore
     //   value, text, name, record, dataSet,
@@ -192,7 +212,7 @@ export default function useSelect<T extends {}>(config: SelectConfig<T>, ref?: R
       }
       return {};
     },
-    ...props,
+    ...omit(props, 'renderer', 'optionRenderer'),
   };
   return selectProps;
 }
