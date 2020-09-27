@@ -16,6 +16,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -58,7 +59,7 @@ public class ConfigurationRuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/{ruldId}")
     public ResponseEntity<ConfigurationRuleVO> detail(@PathVariable("project_id") Long projectId,
-                                    @PathVariable Long ruldId) {
+                                               @PathVariable @Encrypt Long ruldId) {
         return Results.success(configurationRuleService.queryById(projectId, ruldId));
     }
 
@@ -69,7 +70,7 @@ public class ConfigurationRuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
     public ResponseEntity<Void> create(@PathVariable("project_id") Long projectId,
-                                    @RequestBody ConfigurationRuleVO configurationRuleVO) {
+                                       @RequestBody ConfigurationRuleVO configurationRuleVO) {
         configurationRuleVO.setProjectId(projectId);
         configurationRuleService.create(projectId, configurationRuleVO);
         return Results.success();
@@ -82,8 +83,8 @@ public class ConfigurationRuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PutMapping("/{ruldId}")
     public ResponseEntity<Void> update(@PathVariable("project_id") Long projectId,
-                                    @PathVariable Long ruldId,
-                                    @RequestBody ConfigurationRuleVO configurationRuleVO) {
+                                       @PathVariable @Encrypt Long ruldId,
+                                       @RequestBody ConfigurationRuleVO configurationRuleVO) {
         configurationRuleVO.setProjectId(projectId);
         configurationRuleVO.setId(ruldId);
         configurationRuleService.update(projectId, ruldId, configurationRuleVO);
@@ -97,7 +98,7 @@ public class ConfigurationRuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping("/{ruleId}")
     public ResponseEntity<Void> remove(@PathVariable("project_id") Long projectId,
-                                    @PathVariable Long ruleId) {
+                                       @PathVariable @Encrypt Long ruleId) {
         configurationRuleService.deleteById(projectId, ruleId);
         return Results.success();
     }
@@ -106,7 +107,7 @@ public class ConfigurationRuleController extends BaseController {
     @ApiOperation("查询configuration rule field列表")
     @GetMapping("/fields")
     public ResponseEntity<List<ConfigurationRuleFiledDTO>> fieldList(@ApiParam(value = "项目id", required = true)
-                                                         @PathVariable(name = "project_id") Long projectId) {
+                                                                     @PathVariable(name = "project_id") Long projectId) {
         return Results.success(configurationRuleFiledService.list(projectId));
     }
 

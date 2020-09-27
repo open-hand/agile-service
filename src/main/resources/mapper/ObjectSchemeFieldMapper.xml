@@ -139,6 +139,7 @@
             osf.code,
             osf.name,
             osf.field_type,
+            osf.extra_config,
             flv.name as field_type_name,
             ffo.id as ffo_id,
             ffo.field_id as ffo_field_id,

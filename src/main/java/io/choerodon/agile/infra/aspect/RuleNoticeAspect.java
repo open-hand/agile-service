@@ -9,19 +9,25 @@ import java.util.stream.Collectors;
 
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
 import io.choerodon.agile.api.vo.MessageSenderUniqueVO;
+import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
+import io.choerodon.agile.app.service.StatusNoticeSettingService;
 import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.dto.IssueDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
+import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 import io.choerodon.agile.infra.mapper.ConfigurationRuleMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.SendMsgUtil;
+import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.CodeSignature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.MessageSender;
@@ -42,6 +48,10 @@ public class RuleNoticeAspect {
     public static final String ISSUE = "ISSUE";
     public static final String BACKLOG = "BACKLOG";
     public static final String EXIST_FLAG  = "exist";
+    public static final String ISSUECREATE = "ISSUECREATE";
+    public static final String ISSUEASSIGNEE = "ISSUEASSIGNEE";
+    public static final String ISSUESOLVE = "ISSUESOLVE";
+    public static final String ISSUECHANGESTATUS = "ISSUECHANGESTATUS";
     
     @Autowired
     private ConfigurationRuleMapper configurationRuleMapper;
@@ -51,6 +61,8 @@ public class RuleNoticeAspect {
     private MessageClient messageClient;
     @Autowired
     private ConfigurationRuleService configurationRuleService;
+    @Autowired
+    private StatusNoticeSettingService statusNoticeSettingService;
     @Autowired
     private SendMsgUtil sendMsgUtil;
     
@@ -62,11 +74,14 @@ public class RuleNoticeAspect {
         MethodSignature sign = (MethodSignature) jp.getSignature();
         Method method = sign.getMethod();
         RuleNotice ruleNotice = method.getAnnotation(RuleNotice.class);
+        // 这里fieldList如果没有传值，一定要为null，不可以为空集合，空集合代表存在指定字段更新但指定字段为空，后面需要根据是否为null来判断发消息
+        List<String> fieldList = StringUtils.isBlank(ruleNotice.fieldListName()) ? 
+                null : Arrays.asList((String[])getNameAndValue(jp).get(ruleNotice.fieldListName()));
         Long projectId = (Long)Reflections.getFieldValue(result, "projectId");
         switch (ruleNotice.value()){
             case ISSUE:
                 Long issueId = (Long)Reflections.getFieldValue(result, "issueId");
-                issueNoticeDetection(issueId, projectId);
+                issueNoticeDetection(ruleNotice.event(), issueId, projectId, fieldList);
                 break;
             case BACKLOG:
                 Long backlogId = (Long)Reflections.getFieldValue(result, "id");
@@ -81,7 +96,7 @@ public class RuleNoticeAspect {
         // TODO 
     }
 
-    private void issueNoticeDetection(Long issueId, Long projectId){
+    private void issueNoticeDetection(RuleNoticeEvent event, Long issueId, Long projectId, List<String> fieldList){
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         List<ConfigurationRuleVO> ruleVOList = configurationRuleMapper.selectByProjectId(projectId);
         if (CollectionUtils.isEmpty(ruleVOList)){
@@ -95,33 +110,55 @@ public class RuleNoticeAspect {
         // 获取所有符合的ruleId
         map.remove(EXIST_FLAG);
         List<Long> ruleIdList = map.values().stream().filter(Objects::nonNull).collect(Collectors.toList());
-        List<MessageSender> messageSenderList = new ArrayList<>();
-        // 查询收件人，抄送人，准备发消息
         // 组装符合条件的页面规则messageSender
-        List<MessageSender> ruleSenderList = generateRuleSender(projectId, ruleIdList, issueDTO);
-        messageSenderList.addAll(ruleSenderList);
-        // issue分配
-        // issue已解决
-        // issue状态变更
+        List<MessageSender> ruleSenderList = generateRuleSender(event, projectId, ruleIdList, issueDTO, fieldList);
         // 合并消息通知
-        mergeNotice(messageSenderList);
+        mergeNotice(ruleSenderList);
     }
 
-    private List<MessageSender> generateRuleSender(Long projectId,List<Long> ruleIdList, IssueDTO issue) {
-        List<MessageSender> list = new ArrayList<>();
+    private List<MessageSender> generateRuleSender(RuleNoticeEvent event,Long projectId,List<Long> ruleIdList, 
+                                                   IssueDTO issue, List<String> fieldList) {
         Map<Long, ConfigurationRuleVO> map = configurationRuleService.selectRuleReceiverWithCc(ruleIdList);
-        // issue创建
-        MessageSender issueCreate = sendMsgUtil.generateIssueCreateMessageSender(projectId, issue);
-        List<MessageSender> issueCreateList = map.values().stream().map(rule -> generateRuleSender(issueCreate, rule)).collect(Collectors.toList());
-        list.addAll(issueCreateList);
-        // issue分配
-        // issue已解决
-        // issue状态变更
-        
+        // 生成需要合并的messageSenderList
+        return Arrays.stream(event.getMessageCodeList())
+                .map(code ->getSenderList(generatedSenderByCode(code, projectId, issue, fieldList), map))
+                .flatMap(Collection::stream).collect(Collectors.toList());
+    }
+    
+    private Function<SendMsgUtil, MessageSender> generatedSenderByCode(String messageCode, Long projectId, 
+                                                                       IssueDTO issue, List<String> fieldList){
+        Function<SendMsgUtil, MessageSender> func = null;
+        switch (messageCode){
+            case ISSUECREATE: 
+                func = (sendMsgUtil) -> sendMsgUtil.generateIssueCreatesender(projectId, issue);
+                break;
+            case ISSUEASSIGNEE:
+                func = (sendMsgUtil) -> sendMsgUtil.generateIssueAsigneeSender(projectId, fieldList, issue);
+                break;
+            case ISSUESOLVE:
+                func = (sendMsgUtil) -> sendMsgUtil.generateIssueResolvSender(projectId, fieldList, issue);
+                break;
+            case ISSUECHANGESTATUS:
+                StatusNoticeSettingVO settingVO = statusNoticeSettingService.selectNoticeUserAndType(projectId, issue.getIssueId());
+                func = (sendMsgUtil1) -> sendMsgUtil1.generateNoticeIssueStatusSender(projectId, settingVO.getUserIdList(), 
+                        new ArrayList<>(settingVO.getUserTypeList()), issue, DetailsHelper.getUserDetails()); 
+                break;
+            default:
+                break;
+        }
+        return func;
+    }
+    
+
+    private List<MessageSender> getSenderList(Function<SendMsgUtil, MessageSender> func, Map<Long, ConfigurationRuleVO> map) {
+        List<MessageSender> list = new ArrayList<>();
+        MessageSender sourceSender = func.apply(sendMsgUtil);
+        list.add(sourceSender);
+        list.addAll(map.values().stream().map(rule -> generateSenderReceivetList(sourceSender, rule)).collect(Collectors.toList()));
         return list;
     }
 
-    private MessageSender generateRuleSender(MessageSender issueCreate, ConfigurationRuleVO rule) {
+    private MessageSender generateSenderReceivetList(MessageSender issueCreate, ConfigurationRuleVO rule) {
         MessageSender messageSender = new MessageSender(issueCreate);
         messageSender.setReceiverAddressList(handleUserDTO2Receiver(rule.getReceiverList()));
         messageSender.setCcList(handleUserDTO2Cc(rule.getCcList()));
@@ -173,5 +210,15 @@ public class RuleNoticeAspect {
             }
             return Objects.isNull(exist);
         };
+    }
+
+    Map<String, Object> getNameAndValue(JoinPoint joinPoint) {
+        Map<String, Object> param = new HashMap<>();
+        Object[] paramValues = joinPoint.getArgs();
+        String[] paramNames = ((CodeSignature) joinPoint.getSignature()).getParameterNames();
+        for (int i = 0; i < paramNames.length; i++) {
+            param.put(paramNames[i], paramValues[i]);
+        }
+        return param;
     }
 }

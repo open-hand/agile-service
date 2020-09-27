@@ -61,8 +61,7 @@ public class SendMsgUtil {
 
     private String convertProjectName(ProjectVO projectVO) {
         String projectName = projectVO.getName();
-        String result = projectName.replaceAll(" ", "%20");
-        return result;
+        return projectName.replaceAll(" ", "%20");
     }
 
     @Async
@@ -72,11 +71,8 @@ public class SendMsgUtil {
             List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUECREATE", result);
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String reporterName = result.getReporterName();
-            ProjectVO projectVO = userService.queryProject(projectId);
-            if (projectVO == null) {
-                throw new CommonException(ERROR_PROJECT_NOTEXIST);
-            }
-            String url = getIssueCreateUrl(result, projectVO);
+            ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
+            String url = getIssueCreateUrl(result, projectVO, result.getIssueId());
             siteMsgUtil.issueCreate(userIds, reporterName, summary, url, result.getReporterId(), projectId);
             if (result.getAssigneeId() != null) {
                 List<Long> assigneeIds = new ArrayList<>();
@@ -86,13 +82,13 @@ public class SendMsgUtil {
         }
     }
 
-    public String getIssueCreateUrl(IssueVO result, ProjectVO projectVO) {
+    public String getIssueCreateUrl(IssueVO result, ProjectVO projectVO, Long paramIssueId) {
         return URL_TEMPLATE1 + projectVO.getId() 
                 + URL_TEMPLATE2 + convertProjectName(projectVO) 
                 + URL_TEMPLATE6 + projectVO.getOrganizationId() 
                 + URL_TEMPLATE7 + projectVO.getOrganizationId() 
                 + URL_TEMPLATE3 + result.getIssueNum() 
-                + URL_TEMPLATE4 + result.getIssueId() 
+                + URL_TEMPLATE4 + paramIssueId 
                 + URL_TEMPLATE5 + result.getIssueId();
     }
 
@@ -105,10 +101,7 @@ public class SendMsgUtil {
             List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUECREATE", issueVO);
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String reporterName = result.getReporterName();
-            ProjectVO projectVO = userService.queryProject(projectId);
-            if (projectVO == null) {
-                throw new CommonException(ERROR_PROJECT_NOTEXIST);
-            }
+            ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
             String projectName = convertProjectName(projectVO);
             String url = URL_TEMPLATE1 + projectId + URL_TEMPLATE2 + projectName + URL_TEMPLATE6 + projectVO.getOrganizationId() + URL_TEMPLATE7 + projectVO.getOrganizationId() + URL_TEMPLATE3 + result.getIssueNum() + URL_TEMPLATE4 + result.getParentIssueId() + URL_TEMPLATE5 + result.getIssueId();
             siteMsgUtil.issueCreate(userIds, reporterName, summary, url, result.getReporterId(), projectId);
@@ -125,10 +118,7 @@ public class SendMsgUtil {
             List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUEASSIGNEE", result);
             String summary = result.getIssueNum() + "-" + result.getSummary();
             String assigneeName = result.getAssigneeName();
-            ProjectVO projectVO = userService.queryProject(projectId);
-            if (projectVO == null) {
-                throw new CommonException(ERROR_PROJECT_NOTEXIST);
-            }
+            ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
             String projectName = convertProjectName(projectVO);
             StringBuilder url = new StringBuilder();
             if (SUB_TASK.equals(result.getTypeCode())) {
@@ -160,10 +150,7 @@ public class SendMsgUtil {
         Boolean completed = issueStatusMapper.selectByStatusId(projectId, result.getStatusId()).getCompleted();
         if (fieldList.contains(STATUS_ID) && completed != null && completed && result.getAssigneeId() != null && SchemeApplyType.AGILE.equals(result.getApplyType())) {
             List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUESOLVE", result);
-            ProjectVO projectVO = userService.queryProject(projectId);
-            if (projectVO == null) {
-                throw new CommonException(ERROR_PROJECT_NOTEXIST);
-            }
+            ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
             String projectName = convertProjectName(projectVO);
             StringBuilder url = new StringBuilder();
             if (SUB_TASK.equals(result.getTypeCode())) {
@@ -186,10 +173,7 @@ public class SendMsgUtil {
         Boolean completed = issueStatusMapper.selectByStatusId(projectId, issueMoveVO.getStatusId()).getCompleted();
         if (completed != null && completed && issueDTO.getAssigneeId() != null && SchemeApplyType.AGILE.equals(issueDTO.getApplyType())) {
             List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUESOLVE", modelMapper.map(issueDTO, IssueVO.class));
-            ProjectVO projectVO = userService.queryProject(projectId);
-            if (projectVO == null) {
-                throw new CommonException("error.project.notExist");
-            }
+            ProjectVO projectVO = getProjectVO(projectId, "error.project.notExist");
             StringBuilder url = new StringBuilder();
             String projectName = convertProjectName(projectVO);
             ProjectInfoDTO projectInfoDTO = new ProjectInfoDTO();
@@ -242,19 +226,96 @@ public class SendMsgUtil {
         siteMsgUtil.sendChangeIssueStatus(projectId, userSet, noticeTypeList, templateArgsMap);
     }
 
-    public MessageSender generateIssueCreateMessageSender(Long projectId, IssueDTO issue) {
-        if (SchemeApplyType.AGILE.equals(issue.getApplyType())) {
+    public MessageSender generateIssueCreatesender(Long projectId, IssueDTO issue) {
+        if (!SchemeApplyType.AGILE.equals(issue.getApplyType())) {
             return null;
         }
         IssueVO result = modelMapper.map(issue, IssueVO.class);
         List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUECREATE", result);
         String summary = result.getIssueNum() + "-" + result.getSummary();
         String reporterName = result.getReporterName();
+        ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
+        String url = getIssueCreateUrl(result, projectVO, result.getIssueId());
+        return siteMsgUtil.issueCreateSender(userIds, reporterName, summary, url, result.getReporterId(), projectId);
+    }
+
+    public MessageSender generateIssueAsigneeSender(Long projectId, List<String> fieldList, IssueDTO issue) {
+        if (!SchemeApplyType.AGILE.equals(issue.getApplyType())) {
+            return null;
+        }
+        if (Objects.isNull(issue.getAssigneeId())) {
+            return null;
+        }
+        if (Objects.nonNull(fieldList) && !fieldList.contains("assigneeId")){
+            return null;
+        }
+        IssueVO result = modelMapper.map(issue, IssueVO.class);
+        String summary = result.getIssueNum() + "-" + result.getSummary();
+        String reporterName = result.getReporterName();
+        ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
+        String url = getIssueCreateUrl(result, projectVO, result.getIssueId());
+        return siteMsgUtil.issueAssigneeSender(Collections.singletonList(result.getAssigneeId()), 
+                result.getAssigneeName(), summary, url, projectId, reporterName);
+    }
+
+    public MessageSender generateIssueResolvSender(Long projectId, List<String> fieldList, IssueDTO issue) {
+        IssueVO result = modelMapper.map(issue, IssueVO.class);
+        Boolean completed = issueStatusMapper.selectByStatusId(projectId, result.getStatusId()).getCompleted();
+        if (!fieldList.contains(STATUS_ID) 
+                || completed == null 
+                || !completed 
+                || result.getAssigneeId() == null 
+                || !SchemeApplyType.AGILE.equals(result.getApplyType())) {
+            return null;
+        }
+        List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUESOLVE", result);
+        ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
+        StringBuilder url = new StringBuilder();
+        if (SUB_TASK.equals(result.getTypeCode())) {
+            url.append(getIssueCreateUrl(result, projectVO, result.getParentIssueId()));
+        } else {
+            url.append(getIssueCreateUrl(result, projectVO, result.getIssueId()));
+        }
+        Long[] ids = new Long[1];
+        ids[0] = result.getAssigneeId();
+        List<UserDTO> userDTOList = baseFeignClient.listUsersByIds(ids, false).getBody();
+        String userName = !userDTOList.isEmpty() && userDTOList.get(0) != null ? userDTOList.get(0).getRealName() + "(" + userDTOList.get(0).getLoginName() + ")" : "";
+        String summary = result.getIssueNum() + "-" + result.getSummary();
+        return siteMsgUtil.issueSolveSender(userIds, userName, summary, url.toString(), projectId, getOperatorNameFromUserDetail());
+    }
+
+    public MessageSender generateNoticeIssueStatusSender(Long projectId, Set<Long> userSet, List<String> noticeTypeList, IssueDTO issueDTO,
+                                  CustomUserDetails userDetails) {
+        if (CollectionUtils.isEmpty(userSet)){
+            return null;
+        }
+        Map<String, String> templateArgsMap = new HashMap<>();
+        // 设置经办人
+        Long[] ids = new Long[2];
+        ids[0] = issueDTO.getAssigneeId();
+        ids[1] = userDetails.getUserId();
+        List<UserDTO> userDTOList = userService.listUsersByIds(ids);
+        String assigneeName = userDTOList.stream().filter(user -> Objects.equals(user.getId(), issueDTO.getAssigneeId()))
+                .findFirst().map(UserDTO::getRealName).orElse("");
+        // 设置概要
+        String summary = issueDTO.getIssueNum() + "-" + issueDTO.getSummary();
+        // 设置操作人
+        String operatorName = userDTOList.stream().filter(user -> Objects.equals(user.getId(), userDetails.getUserId()))
+                .findFirst().map(UserDTO::getRealName).orElse("");
+        // 设置状态
+        String status = ConvertUtil.getIssueStatusMap(projectId).get(issueDTO.getStatusId()).getName();
+        templateArgsMap.put("assigneeName", assigneeName);
+        templateArgsMap.put("summary", summary);
+        templateArgsMap.put("operatorName", operatorName);
+        templateArgsMap.put("status", status);
+        return siteMsgUtil.sendChangeIssueStatusSender(projectId, userSet, noticeTypeList, templateArgsMap);
+    }
+
+    public ProjectVO getProjectVO(Long projectId, String errorProjectNotexist) {
         ProjectVO projectVO = userService.queryProject(projectId);
         if (projectVO == null) {
-            throw new CommonException(ERROR_PROJECT_NOTEXIST);
+            throw new CommonException(errorProjectNotexist);
         }
-        String url = getIssueCreateUrl(result, projectVO);
-        return siteMsgUtil.issueCreateSender(userIds, reporterName, summary, url, result.getReporterId(), projectId);
+        return projectVO;
     }
 }

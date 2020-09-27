@@ -1,12 +1,14 @@
 package io.choerodon.agile.infra.enums;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * 页面规则 常量类
  * @author jiaxu.cui@hand-china.com 2020/9/23 下午2:36
  */
 public class ConfigurationRule{
     
-    public static final String TEMPLATE_PREDEFINED_SQL = " issue_id %s ( SELECT issue_id FROM %s %s ) ";
+    public static final String TEMPLATE_LINK_TABLE_SQL = " issue_id %s ( SELECT issue_id FROM %s %s ) ";
     public static final String TEMPLATE_IN_SQL = " %s IN ( %s ) ";
     public static final String TEMPLATE_LIKE_VALUE_SQL = " '%%%%%s%%%%' ";
     public static final String TEMPLATE_SQL_WHERE = " WHERE ";
@@ -23,7 +25,8 @@ public class ConfigurationRule{
         component_id("agile_component_issue_rel"),
         version_id("agile_version_issue_rel"),
         label_id("agile_label_issue_rel"),
-        sprint_id("agile_issue_sprint_rel")
+        sprint_id("agile_issue_sprint_rel"),
+        issue("agile_issue")
         ;
 
         FieldTableMapping(String table) {
@@ -35,13 +38,38 @@ public class ConfigurationRule{
         public String getTable() {
             return table;
         }
+        
+        public static FieldTableMapping matches(String name){
+            for (FieldTableMapping value : FieldTableMapping.values()) {
+                if (StringUtils.equals(value.name(), name)){
+                    return value;
+                }
+            }
+            return issue;
+        }
     }
 
     public enum OpSqlMapping {
         in("IN"),
         not_in("NOT IN"),
-        is("NOT IN"),
-        is_not("IN"),
+        is("IS"){
+            @Override
+            public OpSqlMapping withField(String field) {
+                if (StringUtils.equalsAny(field, "version_id", "component_id", "label_id", "sprint_id")){
+                    return not_in;
+                }
+                return this;
+            }
+        },
+        is_not("IS NOT"){
+            @Override
+            public OpSqlMapping withField(String field) {
+                if (StringUtils.equalsAny(field, "version_id", "component_id", "label_id", "sprint_id")){
+                    return in;
+                }
+                return this;
+            }
+        },
         eq("="),
         not_eq("!="),
         gt(">"),
@@ -51,9 +79,8 @@ public class ConfigurationRule{
         like("LIKE"),
         not_like("NOT LIKE"),
         and("AND"),
-        or("or")
-        ;
-
+        or("OR");
+        
         OpSqlMapping(String sqlOp) {
             this.sqlOp = sqlOp;
         }
@@ -62,6 +89,10 @@ public class ConfigurationRule{
         
         public String getSqlOp() {
             return sqlOp;
+        }
+
+        public OpSqlMapping withField(String field){
+            return this;
         }
         
         public static boolean isCollOp(String op){
@@ -91,6 +122,14 @@ public class ConfigurationRule{
 
         public static boolean isLike(String op){
             if (OpSqlMapping.like.name().equals(op) || OpSqlMapping.not_like.name().equals(op)){
+                return true;
+            }else {
+                return false;
+            }
+        }
+
+        public static boolean isNullKey(String op){
+            if (OpSqlMapping.is.name().equals(op) || OpSqlMapping.is_not.name().equals(op)){
                 return true;
             }else {
                 return false;
