@@ -7,11 +7,11 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { ISprint } from '@/common/types';
 
 interface Props extends Partial<SelectProps> {
+  hasUnassign?: boolean,
   isProgram?: boolean,
   statusList?: string[],
   selectSprints?: number[],
   afterLoad?: (sprints: ISprint[]) => void
-  addExtraOptions?: (sprints: ISprint[]) => ISprint[]
   projectId?: string
   currentSprintOption?: boolean
   dataRef?: React.MutableRefObject<any>
@@ -20,9 +20,9 @@ interface Props extends Partial<SelectProps> {
 const SelectSprint: React.FC<Props> = forwardRef(({
   statusList = ['sprint_planning', 'started'],
   isProgram,
+  hasUnassign,
   selectSprints,
   afterLoad,
-  addExtraOptions,
   projectId,
   currentSprintOption,
   dataRef,
@@ -41,8 +41,8 @@ const SelectSprint: React.FC<Props> = forwardRef(({
         afterLoadRef.current(sprints);
       }
       let newSprint = sprints;
-      if (addExtraOptions) {
-        newSprint = addExtraOptions(sprints);
+      if (hasUnassign) {
+        newSprint = [{ sprintId: '0', sprintName: '未分配冲刺', endDate: '' } as ISprint, ...sprints];
       }
       if (currentSprintOption) {
         newSprint = [{ sprintId: 'current', sprintName: '当前冲刺' } as ISprint, ...newSprint];

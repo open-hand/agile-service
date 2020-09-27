@@ -1,21 +1,31 @@
-import React from 'react';
-import { DataSet, Modal } from 'choerodon-ui/pro/lib';
+import React, { useMemo } from 'react';
+import { DataSet, Modal, Table } from 'choerodon-ui/pro/lib';
 import Field from 'choerodon-ui/pro/lib/data-set/Field';
-import ExportIssue from './ExportIssue';
-import ExportIssueContextProvider from './stores';
-import './ExportIssue.less';
-import { IExportIssueField, IExportIssueChosenField } from './types';
+import ExportIssue from '@/components/issue-export';
+import { IExportIssueField } from '@/components/issue-export/types';
+import IssueExportStore from '@/components/issue-export/stores/store';
+import { issueApi } from '@/api';
+import { getExportFieldCodes, getTransformSystemFilter, getFilterFormSystemFields } from './utils';
 
-export default function Index(props: any) {
-  return (
-    <ExportIssueContextProvider {...props}>
-      <ExportIssue />
-    </ExportIssueContextProvider>
-  );
-}
-function openExportIssueModal(fields: Array<IExportIssueField>, chosenFields: Array<any>, tableDataSet: DataSet, otherProps: any) {
+function openExportIssueModal(fields: Array<IExportIssueField>, chosenFields: Array<any>,
+  tableDataSet: DataSet, tableRef: React.RefObject<Table>) {
+  const store = new IssueExportStore({
+    defaultInitFieldAction: (data) => {
+      if (data.code === 'sprint') {
+        return ({ ...data, immutableCheck: true });
+      }
+      return data;
+    },
+    dataSetSystemFields: getFilterFormSystemFields(),
+    transformSystemFilter: getTransformSystemFilter,
+    transformExportFieldCodes: getExportFieldCodes,
+    actions: {
+      exportAxios: (searchData, sort) => issueApi.export(searchData, sort),
+      loadRecordAxios: () => issueApi.loadLastImportOrExport('download_file'),
+    },
+  });
+
   const checkOptions: Array<Field> = [...tableDataSet.fields.values()];
-  console.log('openExportIssueModal', fields, chosenFields);
   Modal.open({
     key: Modal.key(),
     title: '导出问题',
@@ -24,11 +34,12 @@ function openExportIssueModal(fields: Array<IExportIssueField>, chosenFields: Ar
     },
     className: 'c7n-agile-export-issue-modal',
     drawer: true,
-    children: <Index
+    children: <ExportIssue
       fields={fields}
       chosenFields={chosenFields}
       checkOptions={checkOptions.map((option) => ({ value: option.props.name, label: option.props.label, order: option.order }))}
-      {...otherProps}
+      tableRef={tableRef}
+      store={store}
     />,
     okText: '关闭',
     okCancel: false,
