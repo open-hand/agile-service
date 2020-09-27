@@ -12,7 +12,7 @@
 
     <select id="selectByRuleList" resultType="java.util.Map">
         SELECT
-        <foreach collection="ruleList" item="rule" separator="AND" index="index">
+        <foreach collection="ruleList" item="rule" separator="," index="index">
             CASE WHEN t${index}.issue_id IS NOT NULL THEN ${rule.sqlQuery} END AS t${index}
         </foreach>
         CASE WHEN issue_id IS NULL THEN 0 ELSE 1 END AS exist

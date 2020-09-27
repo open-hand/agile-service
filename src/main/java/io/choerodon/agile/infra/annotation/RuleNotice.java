@@ -17,5 +17,5 @@ public @interface RuleNotice {
     
     RuleNoticeEvent event();
 
-    String fieldListName();
+    String fieldListName() default "";
 }

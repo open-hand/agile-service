@@ -84,4 +84,21 @@ public class MessageSenderUniqueVO {
     public void setCcList(Set<String> ccList) {
         this.ccList = ccList;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("{");
+        sb.append("\"tenantId\":")
+                .append(tenantId);
+        sb.append(",\"msgCode\":\"")
+                .append(msgCode).append('\"');
+        sb.append(",\"noticeTypeList\":")
+                .append(noticeTypeList);
+        sb.append(",\"receiverList\":")
+                .append(receiverList);
+        sb.append(",\"ccList\":")
+                .append(ccList);
+        sb.append('}');
+        return sb.toString();
+    }
 }

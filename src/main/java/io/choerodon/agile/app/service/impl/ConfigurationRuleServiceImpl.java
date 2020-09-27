@@ -169,6 +169,9 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     
     @Override
     public Map<Long, ConfigurationRuleVO> selectRuleReceiverWithCc(List<Long> ruleIdList){
+        if (CollectionUtils.isEmpty(ruleIdList)){
+            return new HashMap<>();
+        }
         List<ConfigurationRuleReceiverDTO> receiverDTOList = configurationRuleReceiverMapper.selectReceiver(ruleIdList, null);
         Map<String, List<ConfigurationRuleReceiverDTO>> group =
                 receiverDTOList.stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getUserType));
