@@ -7,9 +7,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import io.choerodon.agile.api.vo.ConfigurationRuleVO;
-import io.choerodon.agile.api.vo.MessageSenderUniqueVO;
-import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.app.assembler.IssueAssembler;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
 import io.choerodon.agile.app.service.StatusNoticeSettingService;
 import io.choerodon.agile.infra.annotation.RuleNotice;
@@ -33,6 +32,8 @@ import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.MessageSender;
 import org.hzero.boot.message.entity.Receiver;
 import org.hzero.core.util.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +53,8 @@ public class RuleNoticeAspect {
     public static final String ISSUEASSIGNEE = "ISSUEASSIGNEE";
     public static final String ISSUESOLVE = "ISSUESOLVE";
     public static final String ISSUECHANGESTATUS = "ISSUECHANGESTATUS";
+    
+    public static final Logger log = LoggerFactory.getLogger(RuleNoticeAspect.class);
     
     @Autowired
     private ConfigurationRuleMapper configurationRuleMapper;
@@ -78,6 +81,7 @@ public class RuleNoticeAspect {
         List<String> fieldList = StringUtils.isBlank(ruleNotice.fieldListName()) ? 
                 null : Arrays.asList((String[])getNameAndValue(jp).get(ruleNotice.fieldListName()));
         Long projectId = (Long)Reflections.getFieldValue(result, "projectId");
+        log.info("rule notice detcction, component: [{}], event: [{}]", ruleNotice.value(), ruleNotice.event());
         switch (ruleNotice.value()){
             case ISSUE:
                 Long issueId = (Long)Reflections.getFieldValue(result, "issueId");
@@ -104,11 +108,7 @@ public class RuleNoticeAspect {
         }
         // 检查issue是否符合页面规则条件
         Map<String, Long> map = configurationRuleMapper.selectByRuleList(issueId, ruleVOList);
-        if (!Objects.equals(map.get(EXIST_FLAG), 1L)){
-            return;
-        }
         // 获取所有符合的ruleId
-        map.remove(EXIST_FLAG);
         List<Long> ruleIdList = map.values().stream().filter(Objects::nonNull).collect(Collectors.toList());
         // 组装符合条件的页面规则messageSender
         List<MessageSender> ruleSenderList = generateRuleSender(event, projectId, ruleIdList, issueDTO, fieldList);
@@ -130,17 +130,17 @@ public class RuleNoticeAspect {
         Function<SendMsgUtil, MessageSender> func = null;
         switch (messageCode){
             case ISSUECREATE: 
-                func = (sendMsgUtil) -> sendMsgUtil.generateIssueCreatesender(projectId, issue);
+                func = msgUtil -> msgUtil.generateIssueCreatesender(projectId, issue);
                 break;
             case ISSUEASSIGNEE:
-                func = (sendMsgUtil) -> sendMsgUtil.generateIssueAsigneeSender(projectId, fieldList, issue);
+                func = msgUtil -> msgUtil.generateIssueAsigneeSender(projectId, fieldList, issue);
                 break;
             case ISSUESOLVE:
-                func = (sendMsgUtil) -> sendMsgUtil.generateIssueResolvSender(projectId, fieldList, issue);
+                func = msgUtil -> msgUtil.generateIssueResolvSender(projectId, fieldList, issue);
                 break;
             case ISSUECHANGESTATUS:
                 StatusNoticeSettingVO settingVO = statusNoticeSettingService.selectNoticeUserAndType(projectId, issue.getIssueId());
-                func = (sendMsgUtil1) -> sendMsgUtil1.generateNoticeIssueStatusSender(projectId, settingVO.getUserIdList(), 
+                func = msgUtil -> msgUtil.generateNoticeIssueStatusSender(projectId, settingVO.getUserIdList(), 
                         new ArrayList<>(settingVO.getUserTypeList()), issue, DetailsHelper.getUserDetails()); 
                 break;
             default:
@@ -155,6 +155,7 @@ public class RuleNoticeAspect {
         MessageSender sourceSender = func.apply(sendMsgUtil);
         list.add(sourceSender);
         list.addAll(map.values().stream().map(rule -> generateSenderReceivetList(sourceSender, rule)).collect(Collectors.toList()));
+        list.remove(null);
         return list;
     }
 
@@ -189,6 +190,7 @@ public class RuleNoticeAspect {
     private void mergeNotice(List<MessageSender> messageSenderList) {
         List<MessageSender> list =
                 messageSenderList.stream().filter(distinct(MessageSenderUniqueVO::new)).collect(Collectors.toList());
+        log.info("merge sender: before: [{}], after: [{}]", messageSenderList.size(), list.size());
         for (MessageSender messageSender : list) {
             messageClient.async().sendMessage(messageSender);
         }
@@ -197,9 +199,11 @@ public class RuleNoticeAspect {
     private Predicate<MessageSender> distinct(Function<MessageSender, MessageSenderUniqueVO> keyExtractor){
         Map<MultiKey, MessageSenderUniqueVO> map = new ConcurrentHashMap<>();
         return t -> {
-            MultiKey multiKey = new MultiKey(t.getTenantId(), t.getMessageCode(), new HashSet<>(t.getTypeCodeList()));
+            MultiKey multiKey = new MultiKey(t.getTenantId(), t.getMessageCode(), 
+                    Optional.ofNullable(t.getTypeCodeList()).map(HashSet::new).orElse(new HashSet<>()));
             MessageSenderUniqueVO value = keyExtractor.apply(t);
             MessageSenderUniqueVO exist = map.get(multiKey);
+            log.debug("currend sender: [{}], isRepeat: [{}]", value, Objects.isNull(exist));
             if (Objects.isNull(exist)) {
                 map.put(multiKey, value);
             }else {

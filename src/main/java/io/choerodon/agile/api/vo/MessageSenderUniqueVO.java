@@ -1,6 +1,7 @@
 package io.choerodon.agile.api.vo;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.hzero.boot.message.entity.MessageSender;
@@ -13,10 +14,10 @@ public class MessageSenderUniqueVO {
     
     public MessageSenderUniqueVO(MessageSender messageSender){
         this.msgCode = messageSender.getMessageCode();
-        this.receiverList = new HashSet<>(messageSender.getReceiverAddressList());
-        this.ccList = new HashSet<>(messageSender.getCcList());
+        this.receiverList = Optional.ofNullable(messageSender.getReceiverAddressList()).map(HashSet::new).orElse(new HashSet<>());
+        this.ccList = Optional.ofNullable(messageSender.getCcList()).map(HashSet::new).orElse(new HashSet<>());
         this.tenantId = messageSender.getTenantId();
-        this.noticeTypeList = new HashSet<>(messageSender.getTypeCodeList());
+        this.noticeTypeList = Optional.ofNullable(messageSender.getTypeCodeList()).map(HashSet::new).orElse(new HashSet<>());
     }
     
     public MessageSenderUniqueVO(){
@@ -83,5 +84,22 @@ public class MessageSenderUniqueVO {
 
     public void setCcList(Set<String> ccList) {
         this.ccList = ccList;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("{");
+        sb.append("\"tenantId\":")
+                .append(tenantId);
+        sb.append(",\"msgCode\":\"")
+                .append(msgCode).append('\"');
+        sb.append(",\"noticeTypeList\":")
+                .append(noticeTypeList);
+        sb.append(",\"receiverList\":")
+                .append(receiverList);
+        sb.append(",\"ccList\":")
+                .append(ccList);
+        sb.append('}');
+        return sb.toString();
     }
 }

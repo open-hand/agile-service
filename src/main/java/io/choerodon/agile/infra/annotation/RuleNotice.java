@@ -13,9 +13,9 @@ import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 @Target({ElementType.METHOD})
 public @interface RuleNotice {
     
-    String value() default "issue";
+    String value() default "ISSUE";
     
     RuleNoticeEvent event();
 
-    String fieldListName();
+    String fieldListName() default "";
 }
