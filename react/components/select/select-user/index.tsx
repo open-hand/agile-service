@@ -27,7 +27,6 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     textField: 'realName',
     valueField: 'id',
     request: request || (({ filter, page }) => userApi.getAllInProject(filter, page)),
-    // @ts-ignore
     middleWare: (data) => {
       let newData = [];
       if (selectedUser) {
