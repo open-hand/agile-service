@@ -24,6 +24,7 @@ spring:
     type: redis
 choerodon:
   saga:
+    service: choerodon-asgard
     consumer:
       enabled: true # 是否启用消费端
       thread-num: 5  # 消费线程数
