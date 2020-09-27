@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import {
-  Page, Breadcrumb, Content, stores,
+  Page, Breadcrumb, Content, Header, stores,
 } from '@choerodon/boot';
 import { Button, Dropdown, Menu } from 'choerodon-ui/pro';
 import { IReportContentType } from '@/common/types';
@@ -19,12 +19,37 @@ const { AppState } = stores;
 interface Props {
   store: ProjectReportStore
   edit?: boolean
-  preview?:boolean
+  preview?: boolean
 }
 const ReportPage: React.FC<Props> = ({ store, edit, preview: forcePreview }) => {
   const baseInfoRef = useRef<BaseInfoRef>({} as BaseInfoRef);
   const [preview, setPreview] = useState(forcePreview !== undefined ? forcePreview : false);
   const isProgram = AppState.currentMenuType.category === 'PROGRAM';
+  const addBlock = useMemo(() => (
+    <Dropdown
+      trigger={['click' as Action]}
+      overlay={(
+        <Menu onClick={({ key }) => {
+          openAddModal({
+            type: key as IReportContentType,
+            store,
+          });
+        }}
+        >
+          <Menu.Item key="text">文本</Menu.Item>
+          {!isProgram && [
+            <Menu.Item key="static_list">静态列表</Menu.Item>,
+            <Menu.Item key="dynamic_list">动态列表</Menu.Item>,
+          ]}
+          <Menu.Item key="chart">图表</Menu.Item>
+        </Menu>
+      )}
+    >
+      <Button icon="add" color={'blue' as ButtonColor}>
+        添加报告内容
+      </Button>
+    </Dropdown>
+  ), [isProgram, store]);
   return (
     <ProjectReportContext.Provider value={{
       store,
@@ -36,8 +61,11 @@ const ReportPage: React.FC<Props> = ({ store, edit, preview: forcePreview }) => 
     >
       {preview ? <PreviewReport /> : (
         <Page>
+          <Header>
+            {addBlock}
+          </Header>
           <Breadcrumb title={edit ? '编辑项目报告' : '创建项目报告'} />
-          <Content style={{ paddingBottom: 0 }}>
+          <Content style={{ paddingBottom: 0, paddingTop: 0 }}>
             <div className={styles.container}>
               <div className={styles.content}>
                 <div className={styles.header}>
@@ -49,29 +77,7 @@ const ReportPage: React.FC<Props> = ({ store, edit, preview: forcePreview }) => 
                   <div className={styles.header}>
                     <div className={styles.tip} />
                     <span className={styles.title}>报告内容</span>
-                    <Dropdown
-                      trigger={['click' as Action]}
-                      overlay={(
-                        <Menu onClick={({ key }) => {
-                          openAddModal({
-                            type: key as IReportContentType,
-                            store,
-                          });
-                        }}
-                        >
-                          <Menu.Item key="text">文本</Menu.Item>
-                          {!isProgram && [
-                            <Menu.Item key="static_list">静态列表</Menu.Item>,
-                            <Menu.Item key="dynamic_list">动态列表</Menu.Item>,
-                          ]}
-                          <Menu.Item key="chart">图表</Menu.Item>
-                        </Menu>
-                      )}
-                    >
-                      <Button icon="add" color={'blue' as ButtonColor} style={{ marginLeft: 10 }}>
-                        添加报告内容
-                      </Button>
-                    </Dropdown>
+                    {addBlock}
                   </div>
                   <BlockList />
                 </div>
