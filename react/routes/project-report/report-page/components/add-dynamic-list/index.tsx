@@ -2,7 +2,9 @@ import React, {
   useCallback, useEffect, useImperativeHandle, useState, useRef, useMemo,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Form, TextField, DataSet } from 'choerodon-ui/pro';
+import {
+  Form, TextField, DataSet, Select,
+} from 'choerodon-ui/pro';
 import { IField } from '@/common/types';
 import { find } from 'lodash';
 import { fieldApi } from '@/api';
@@ -13,64 +15,13 @@ import { RefProps } from '../add-modal';
 import ExportIssueContextProvider from './stores';
 import FormArea from './FormArea';
 
-const systemColumns = [{
-  value: 'summary',
-  label: '概要',
-}, {
-  value: 'issueNum',
-  label: '编号',
-}, {
-  value: 'priority',
-  label: '优先级',
-}, {
-  value: 'assign',
-  label: '经办人',
-}, {
-  value: 'status',
-  label: '状态',
-}, {
-  value: 'sprint',
-  label: '冲刺',
-}, {
-  value: 'reporter',
-  label: '报告人',
-}, {
-  value: 'creationDate',
-  label: '创建时间',
-}, {
-  value: 'lastUpdateDate',
-  label: '最后更新时间',
-}, {
-  value: 'estimatedStartTime',
-  label: '预计开始时间',
-}, {
-  value: 'estimatedEndTime',
-  label: '预计结束时间',
-}, {
-  value: 'label',
-  label: '标签',
-}, {
-  value: 'component',
-  label: '模块',
-}, {
-  value: 'storyPoints',
-  label: '故事点',
-}, {
-  value: 'version',
-  label: '版本',
-}, {
-  value: 'epic',
-  label: '史诗',
-}, {
-  value: 'feature',
-  label: '特性',
-}];
+const { Option } = Select;
 interface Props {
   innerRef: React.MutableRefObject<RefProps>
   data?: IReportListBlock
 }
 export interface ListRefProps {
-  submit: () => Promise<boolean | Pick<IReportListBlock, 'colList' | 'searchVO'>>
+  submit: () => Promise<boolean | Pick<IReportListBlock, 'searchVO'>>
 }
 const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
   const listRef = useRef<ListRefProps>({} as ListRefProps);
@@ -108,12 +59,22 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
   }, [editData, getFieldCodeById]);
   const formDataSet = useMemo(() => new DataSet({
     autoCreate: true,
-    data: editData ? [{ title: editData.title }] : undefined,
+    data: editData ? [{ title: editData.title, visibleColumns: editData.colList }] : undefined,
     fields: [{
       name: 'title',
       label: '列表标题',
       maxLength: 44,
       required: true,
+    }, {
+      name: 'visibleColumns',
+      required: true,
+      label: '列表显示字段',
+      validator: async (value) => {
+        if (value && value.length > 6) {
+          return '最多可选6个字段';
+        }
+        return true;
+      },
     }],
   }), [editData]);
   const refresh = useCallback(async () => {
@@ -130,12 +91,12 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
       const data = formDataSet.current?.toData();
       const search = await listRef.current.submit();
       if (typeof search === 'object') {
-        const { searchVO, colList } = search;
+        const { searchVO } = search;
         const block: IReportListBlock = {
           key: String(Math.random()),
           title: data.title,
           type: 'dynamic_list',
-          colList,
+          colList: data.visibleColumns,
           searchVO,
         };
         return block;
@@ -150,6 +111,30 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
     <>
       <Form dataSet={formDataSet}>
         <TextField name="title" />
+        <Select name="visibleColumns" multiple help="为了保证最佳的预览效果，请将字段控制在6个以内">
+          <Option value="summary">概要</Option>
+          <Option value="issueNum">编号</Option>
+          <Option value="priority">优先级</Option>
+          <Option value="assign">经办人</Option>
+          <Option value="status">状态</Option>
+          <Option value="sprint">冲刺</Option>
+          <Option value="reporter">报告人</Option>
+          <Option value="creationDate">创建时间</Option>
+          <Option value="lastUpdateDate">最后更新时间</Option>
+          <Option value="estimatedStartTime">预计开始时间</Option>
+          <Option value="estimatedEndTime">预计结束时间</Option>
+          <Option value="label">标签</Option>
+          <Option value="component">模块</Option>
+          <Option value="storyPoints">故事点</Option>
+          <Option value="version">版本</Option>
+          <Option value="epic">史诗</Option>
+          <Option value="feature">特性</Option>
+          {fields.map((field) => (
+            <Option value={field.code}>
+              {field.name}
+            </Option>
+          ))}
+        </Select>
       </Form>
       {!loading ? (
         <ExportIssueContextProvider
@@ -157,7 +142,6 @@ const AddDynamicIssueList: React.FC<Props> = ({ innerRef, data: editData }) => {
           fields={[...getSystemFields(), ...fields]}
           // @ts-ignore
           chosenFields={chosenFields}
-          checkOptions={[...systemColumns, ...fields.map((field) => ({ value: field.code, label: field.name }))]}
         >
           <FormArea
             innerRef={listRef}

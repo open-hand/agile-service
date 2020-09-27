@@ -8,21 +8,18 @@ import useIsInProgram from '@/hooks/useIsInProgram';
 import { useChoseFieldStore } from '@/components/chose-field/FieldList';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import ChoseFieldStore from '@/components/chose-field/store';
-import { useTableColumnCheckBoxesDataSet } from '@/components/table-column-check-boxes';
 import { useIssueFilterFormDataSet } from '@/components/issue-filter-form';
 import { IIssueColumnName } from '@/common/types';
 import { getFilterFormSystemFields } from '../utils';
 
 interface Context {
-  checkOptions: Array<{ value: string, label: string, order?: string, }>,
-  tableColumnCheckBoxesDataSet: DataSet,
   issueFilterFormDataSet: DataSet,
   choseFieldStore: ChoseFieldStore,
   prefixCls: string,
   chosenFields: Array<IChosenFieldField>,
   fields: IChosenFieldField[],
 }
-type Props = Pick<Context, 'fields' | 'chosenFields' | 'checkOptions'> & {
+type Props = Pick<Context, 'fields' | 'chosenFields'> & {
   colList: IIssueColumnName[]
 }
 const ExportIssueContext = createContext({} as Context);
@@ -56,12 +53,10 @@ const ExportIssueContextProvider: React.FC<Props> = (props) => {
   });
   const choseFieldStore = useChoseFieldStore({ systemFields, customFields, chosenFields });
   const issueFilterFormDataSet = useIssueFilterFormDataSet({ fields, systemFields: getFilterFormSystemFields(isInProgram) });
-  const tableColumnCheckBoxesDataSet = useTableColumnCheckBoxesDataSet('exportFieldCodes', colList);
   const value = {
     ...props,
     issueFilterFormDataSet,
     choseFieldStore,
-    tableColumnCheckBoxesDataSet,
     prefixCls: 'c7n-agile-project-report-modal',
   };
   return (
