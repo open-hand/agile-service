@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import {
-  Modal, Form, Input, Select, Icon,
+  Modal, Form, Input, Select, Icon, Tooltip,
 } from 'choerodon-ui';
 import {
   stores, Content, Choerodon,
@@ -153,7 +153,11 @@ class CreateBranch extends Component {
                   loading={selectLoading}
                 >
                   {originApps.map((app) => (
-                    <Option value={app.id} key={app.id}>{app.name}</Option>
+                    <Option value={app.id} key={app.id}>
+                      <Tooltip title={app.code}>
+                        {`${app.name}(${app.code})`}
+                      </Tooltip>
+                    </Option>
                   ))}
                 </Select>,
               )}
