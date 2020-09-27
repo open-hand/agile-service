@@ -16,7 +16,19 @@ const SprintComponent: React.FC<Props> = ({ filter, onFinish }) => {
       <div style={{ display: 'none' }}>
         <SprintSearch {...searchProps} />
       </div>
-      <Sprint {...props} />
+      <Sprint
+        {...props}
+        option={{
+          animation: false,
+          grid: {
+            top: 10,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            containLabel: true,
+          },
+        }}
+      />
     </div>
   );
 };

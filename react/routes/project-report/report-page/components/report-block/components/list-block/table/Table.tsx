@@ -31,7 +31,7 @@ function Table<T extends { [key: string]: any }>({
           {columns.map((column, index) => (
             <td>
               <span style={{ display: 'flex', alignItems: 'center' }}>
-                {index === 0 && <span style={{ display: 'inline-block', width: level * 20 }} />}
+                {index === 0 && <span style={{ display: 'inline-block', flexShrink: 0, width: level * 20 }} />}
                 {index === 0 && (
                 <Icon
                   type="arrow_drop_down"
