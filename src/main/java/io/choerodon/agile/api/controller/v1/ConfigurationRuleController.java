@@ -16,6 +16,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.core.base.BaseController;
 import org.hzero.core.util.Results;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -97,7 +98,7 @@ public class ConfigurationRuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping("/{ruleId}")
     public ResponseEntity<Void> remove(@PathVariable("project_id") Long projectId,
-                                    @PathVariable Long ruleId) {
+                                       @PathVariable @Encrypt Long ruleId) {
         configurationRuleService.deleteById(projectId, ruleId);
         return Results.success();
     }
