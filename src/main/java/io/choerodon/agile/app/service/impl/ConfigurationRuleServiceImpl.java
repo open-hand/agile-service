@@ -73,7 +73,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
         String sqlQuery = getSqlQuery(configurationRuleVO, projectId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
-        configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressFormat()));
+        configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
         configurationRuleDTO.setSqlQuery(sqlQuery);
         if (configurationRuleMapper.insert(configurationRuleDTO) != 1) {
             throw new CommonException("error.rule.insert");
@@ -83,19 +83,20 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     }
 
     @Override
-    public ConfigurationRuleVO update(Long projectId, Long ruleId, ConfigurationRuleVO ConfigurationRuleVO) {
-        Assert.isTrue(CollectionUtils.isNotEmpty(ConfigurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
-        ConfigurationRuleVO.setId(ruleId);
-        ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(ConfigurationRuleVO, ConfigurationRuleDTO.class);
-        configurationRuleDTO.setSqlQuery(getSqlQuery(ConfigurationRuleVO, projectId));
+    public ConfigurationRuleVO update(Long projectId, Long ruleId, ConfigurationRuleVO configurationRuleVO) {
+        Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
+        configurationRuleVO.setId(ruleId);
+        ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
+        configurationRuleDTO.setSqlQuery(getSqlQuery(configurationRuleVO, projectId));
+        configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
         if (configurationRuleMapper.updateOptional(configurationRuleDTO, ConfigurationRuleDTO.FIELD_SQL_QUERY,
                 ConfigurationRuleDTO.FIELD_EXPRESS_QUERY, ConfigurationRuleDTO.FIELD_EXPRESS_FORMAT) != 1) {
             throw new CommonException("error.rule.update");
         }
         // 更新通知对象
-        configurationRuleReceiverMapper.delete(new ConfigurationRuleReceiverDTO(ConfigurationRuleVO.getId(), projectId));
-        createProjectReportReceiver(projectId, ConfigurationRuleVO, configurationRuleDTO);
-        return ConfigurationRuleVO;
+        configurationRuleReceiverMapper.delete(new ConfigurationRuleReceiverDTO(configurationRuleVO.getId(), projectId));
+        createProjectReportReceiver(projectId, configurationRuleVO, configurationRuleDTO);
+        return configurationRuleVO;
     }
 
     @Override
@@ -274,7 +275,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         } else if (CustomFieldType.isDate(customFieldType)) {
             value = ruleExpressVO.getValueDate();
             return renderCustomSql(preOp, projectId, fieldId, Collections.singletonList(() -> 
-                    conditionSql(getUnixTimeExpress("ffv.date_value"), operation, getUnixTimeExpress(df.format(value)))));
+                    conditionSql(getUnixTimeExpress("ffv.date_value"), operation, getUnixTimeExpress(valueToString(value)))));
         } else if (CustomFieldType.isDateHms(customFieldType)) {
             value = ruleExpressVO.getValueDateHms();
             return renderCustomSql(preOp, projectId, fieldId, Collections.singletonList(() ->
@@ -358,7 +359,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                 break;
             case "creation_date":
             case "last_update_date":
-                sqlQuery.append(conditionSql(getUnixTimeExpress(field), operation, getUnixTimeExpress(df.format(value))));
+                sqlQuery.append(conditionSql(getUnixTimeExpress(field), operation, getUnixTimeExpress(valueToString(value))));
                 break;
             default:
                 if (ConfigurationRule.OpSqlMapping.isCollOp(operation)){
@@ -374,7 +375,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         if (value instanceof String){
             return "'" + value + "'";
         }else if(value instanceof Date){
-            return df.format(value);
+            return "'" + df.format(value) + "'";
         }else {
             return value.toString();
         }
@@ -402,7 +403,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         if (ConfigurationRule.OpSqlMapping.isLike(operation)){
             value = String.format(ConfigurationRule.TEMPLATE_LIKE_VALUE_SQL, value);
         }
-        return String.format(ConfigurationRule.TEMPLATE_CONDITION_SQL, field, operation, value);
+        return String.format(ConfigurationRule.TEMPLATE_CONDITION_SQL, field, ConfigurationRule.OpSqlMapping.valueOf(operation).getSqlOp(), value);
     }
 
     private void createProjectReportReceiver(Long projectId, ConfigurationRuleVO configurationRuleVO,
