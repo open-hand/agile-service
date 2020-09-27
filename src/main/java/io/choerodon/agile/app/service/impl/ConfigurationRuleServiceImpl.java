@@ -157,33 +157,45 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                 return page;
             }
             List<Long> ruleIdList = page.stream().map(ConfigurationRuleVO::getId).collect(Collectors.toList());
-            List<ConfigurationRuleReceiverDTO> receiverDTOList = configurationRuleReceiverMapper.selectReceiver(ruleIdList, null);
-            Map<String, List<ConfigurationRuleReceiverDTO>> group =
-                    receiverDTOList.stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getUserType));
-            Map<Long, List<ConfigurationRuleReceiverDTO>> receiverGroup = new HashMap<>();
-            Map<Long, List<ConfigurationRuleReceiverDTO>> ccGroup = new HashMap<>();
-            List<UserDTO> userList = baseFeignClient.listUsersByIds(receiverDTOList.stream()
-                    .map(ConfigurationRuleReceiverDTO::getUserId).toArray(Long[]::new), false).getBody();
-            Map<Long, UserDTO> userDTOMap = userList.stream().collect(Collectors.toMap(UserDTO::getId,
-                    Function.identity()));
-            if (CollectionUtils.isNotEmpty(group.get(TYPE_RECEIVER))){
-                receiverGroup = group.get(TYPE_RECEIVER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId));
-            }
-            if (CollectionUtils.isNotEmpty(group.get(TYPE_CC))){
-                ccGroup = group.get(TYPE_CC).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId));
-            }
+            Map<Long, ConfigurationRuleVO> map = selectRuleReceiverWithCc(ruleIdList);
             for (ConfigurationRuleVO reportVO : page) {
-                reportVO.setReceiverList(receiverGroup
-                        .getOrDefault(reportVO.getId(), Collections.emptyList())
-                        .stream().map(receiver -> userDTOMap.get(receiver.getUserId()))
-                        .collect(Collectors.toList()));
-                reportVO.setCcList(ccGroup
-                        .getOrDefault(reportVO.getId(), Collections.emptyList())
-                        .stream().map(receiver -> userDTOMap.get(receiver.getUserId()))
-                        .collect(Collectors.toList()));
+                reportVO.setReceiverList(map.get(reportVO.getId()).getReceiverList());
+                reportVO.setCcList(map.get(reportVO.getId()).getCcList());
             }
             return page;
         });
+    }
+    
+    @Override
+    public Map<Long, ConfigurationRuleVO> selectRuleReceiverWithCc(List<Long> ruleIdList){
+        List<ConfigurationRuleReceiverDTO> receiverDTOList = configurationRuleReceiverMapper.selectReceiver(ruleIdList, null);
+        Map<String, List<ConfigurationRuleReceiverDTO>> group =
+                receiverDTOList.stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getUserType));
+        Map<Long, List<ConfigurationRuleReceiverDTO>> receiverGroup = new HashMap<>();
+        Map<Long, List<ConfigurationRuleReceiverDTO>> ccGroup = new HashMap<>();
+        List<UserDTO> userList = baseFeignClient.listUsersByIds(receiverDTOList.stream()
+                .map(ConfigurationRuleReceiverDTO::getUserId).toArray(Long[]::new), false).getBody();
+        Map<Long, UserDTO> userDTOMap = userList.stream().collect(Collectors.toMap(UserDTO::getId,
+                Function.identity()));
+        if (CollectionUtils.isNotEmpty(group.get(TYPE_RECEIVER))){
+            receiverGroup.putAll(group.get(TYPE_RECEIVER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
+        }
+        if (CollectionUtils.isNotEmpty(group.get(TYPE_CC))){
+            ccGroup.putAll(group.get(TYPE_CC).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
+        }
+        return ruleIdList.stream().map(ruleId -> {
+            ConfigurationRuleVO ruleVO = new ConfigurationRuleVO();
+            ruleVO.setId(ruleId);
+            ruleVO.setReceiverList(receiverGroup
+                    .getOrDefault(ruleId, Collections.emptyList())
+                    .stream().map(receiver -> userDTOMap.get(receiver.getUserId()))
+                    .collect(Collectors.toList()));
+            ruleVO.setCcList(ccGroup
+                    .getOrDefault(ruleId, Collections.emptyList())
+                    .stream().map(receiver -> userDTOMap.get(receiver.getUserId()))
+                    .collect(Collectors.toList()));
+            return ruleVO;
+        }).collect(Collectors.toMap(ConfigurationRuleVO::getId, Function.identity()));
     }
 
     private String renderPredefinedSql(String operation, String field, List<Supplier<String>> conditionList) {

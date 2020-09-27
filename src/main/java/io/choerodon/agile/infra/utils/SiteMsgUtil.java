@@ -78,7 +78,13 @@ public class SiteMsgUtil {
     }
 
     private Map<Long, UserDTO> handleReceiver(List<Receiver> receivers,Collection<Long> userIds){
+        if (CollectionUtils.isEmpty(userIds)){
+            return new HashMap<>();
+        }
         List<UserDTO> users = baseFeignClient.listUsersByIds(userIds.toArray(new Long[]{}), true).getBody();
+        if (CollectionUtils.isEmpty(users)){
+            return new HashMap<>();
+        }
         Map<Long, UserDTO> userDTOMap = users.stream().collect(Collectors.toMap(UserDTO::getId, Function.identity()));
         // 未启用用户则不进行发消息
         for (Map.Entry<Long, UserDTO> entry : userDTOMap.entrySet()) {
@@ -186,5 +192,21 @@ public class SiteMsgUtil {
         sender.setCcList(ccReceiver.stream().map(Receiver::getEmail).collect(Collectors.toList()));
         sender.setArgs(argsMap);
         messageClient.async().sendMessage(sender);
+    }
+    
+    public MessageSender issueCreateSender(List<Long> userIds,String userName, String summary, String url, Long reporterId, Long projectId) {
+        ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+        Map<String,String> map = new HashMap<>();
+        map.put(ASSIGNEENAME, userName);
+        map.put(SUMMARY, summary);
+        map.put(URL, url);
+        map.put(PROJECT_NAME, projectVO.getName());
+        // 设置额外参数
+        Map<String,Object> objectMap=new HashMap<>();
+        objectMap.put(MessageAdditionalType.PARAM_PROJECT_ID.getTypeName(),projectId);
+        //发送站内信
+        MessageSender messageSender = handlerMessageSender(0L,"ISSUECREATE",userIds,map);
+        messageSender.setAdditionalInformation(objectMap);
+        return messageSender;
     }
 }
