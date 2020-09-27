@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(value = "hzero-message", fallback = NotifyFeignClientFallback.class)
+@FeignClient(value = "choerodon-message", fallback = NotifyFeignClientFallback.class)
 public interface NotifyFeignClient {
 
 
