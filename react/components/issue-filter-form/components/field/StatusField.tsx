@@ -5,18 +5,19 @@ import {
 } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import { IIssueType } from '@/common/types';
+import { IStatus } from '@/common/types';
 
 interface Props extends Partial<SelectProps> {
   issueTypeId?: string
   expectStatusId?: string
   isProgram?: boolean,
   dataRef?: React.MutableRefObject<any>,
+  afterLoad?: (statusList: IStatus[]) => void
 }
 const SelectStatus: React.FC<Props> = ({
-  issueTypeId, expectStatusId, dataRef, isProgram, ...otherProps
+  issueTypeId, expectStatusId, dataRef, isProgram, afterLoad, ...otherProps
 }) => {
-  const config = useMemo((): SelectConfig<IIssueType> => ({
+  const config = useMemo((): SelectConfig<IStatus> => ({
     name: 'statusId',
     textField: 'name',
     valueField: 'id',
@@ -26,6 +27,9 @@ const SelectStatus: React.FC<Props> = ({
         Object.assign(dataRef, {
           current: data,
         });
+      }
+      if (afterLoad) {
+        afterLoad(data);
       }
       return data;
     },
