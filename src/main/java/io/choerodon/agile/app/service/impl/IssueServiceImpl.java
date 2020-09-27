@@ -1349,7 +1349,7 @@ public class IssueServiceImpl implements IssueService {
                 //查询所有父节点问题
                 Page<IssueDTO> page =
                         PageHelper.doPage(cursor.getPage(), cursor.getSize(), () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr));
-                if (page.getTotalElements() < 1) {
+                if (CollectionUtils.isEmpty(page.getContent())) {
                     break;
                 }
                 List<Long> parentIds = page.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
@@ -1431,7 +1431,7 @@ public class IssueServiceImpl implements IssueService {
                 }
                 ExcelUtil.writeIssue(issueMap, parentSonMap, ExportIssuesVO.class, fieldNames, fieldCodes, sheetName, Arrays.asList(AUTO_SIZE_WIDTH), workbook, cursor);
 
-                boolean hasNextPage = cursor.getPage() < page.getTotalPages();
+                boolean hasNextPage = (cursor.getPage() + 1) < page.getTotalPages();
                 cursor.clean();
                 if (!hasNextPage) {
                     break;
