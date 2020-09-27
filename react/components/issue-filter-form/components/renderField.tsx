@@ -48,7 +48,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
                 dataSet.current?.setState(`init_${code}`, true);
               }
             }}
-            addExtraOptions={(sprints) => [{ sprintId: '0', sprintName: '未分配冲刺', endDate: '' } as ISprint, ...sprints]}
+            hasUnassign
             selectSprints={value}
             {...otherComponentProps}
           />

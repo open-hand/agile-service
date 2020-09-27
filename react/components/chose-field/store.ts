@@ -53,6 +53,10 @@ class ChoseFieldStore {
 
   filterFieldBySearchVal = (field: IChosenFieldField) => field.name.indexOf(this.searchVal!) > -1
 
+  @computed get getOriginalField() {
+    return this.fields;
+  }
+
   @computed get getFields() {
     if (this.searchVal && this.searchVal !== '') {
       return [this.fields.get('system')!.filter(this.filterFieldBySearchVal), this.fields.get('custom')!.filter(this.filterFieldBySearchVal)];

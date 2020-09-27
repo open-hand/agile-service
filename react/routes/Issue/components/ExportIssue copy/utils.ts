@@ -161,7 +161,7 @@ const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: R
   return filter;
 };
 
-const getExportFieldCodes = (data:Array<any>) => {
+const getExportFieldCodes = (record: Record) => {
   const fieldTransform = {
     issueNum: 'issueNum',
     issueId: 'summary',
@@ -187,10 +187,10 @@ const getExportFieldCodes = (data:Array<any>) => {
     component: 'componentName',
   };
   // @ts-ignore
-  return data.map((code: string) => fieldTransform[code] || code);
+  return record.get('exportFieldCodes').map((code: string) => fieldTransform[code] || code);
 };
 
-function getFilterFormSystemFields(): FieldProps[] {
+function getFilterFormSystemFields(isInProgram: boolean): FieldProps[] {
   return ([{
     name: 'statusId',
     label: '状态',
@@ -208,6 +208,17 @@ function getFilterFormSystemFields(): FieldProps[] {
     valueField: 'id',
     textField: 'name',
   },
+  ...isInProgram ? [{
+    name: 'feature',
+    label: '所属特性',
+    valueField: 'issueId',
+    textField: 'summary',
+  }] : [{
+    name: 'epic',
+    label: '史诗',
+    valueField: 'issueId',
+    textField: 'epicName',
+  }],
   {
     name: 'feature',
     label: '特性',
@@ -242,6 +253,4 @@ function getFilterFormSystemFields(): FieldProps[] {
     textField: 'name',
   }]);
 }
-export {
-  getCustomFieldFilters, getExportFieldCodes, getFilterFormSystemFields, transformSystemFilter as getTransformSystemFilter,
-};
+export { getCustomFieldFilters, getExportFieldCodes, getFilterFormSystemFields };

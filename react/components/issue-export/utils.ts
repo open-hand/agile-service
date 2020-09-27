@@ -5,55 +5,7 @@ import { IChosenFieldField } from '@/components/chose-field/types';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 
-function transformSystemFilter(data: any): Omit<IExportSearch, 'exportFieldCodes'> {
-  const {
-    issueTypeId,
-    assigneeId,
-    statusId,
-    priorityId,
-    issueIds,
-    quickFilterIds,
-    createDate = [],
-    updateDate = [],
-    contents,
-    component,
-    epic,
-    feature,
-    label,
-    reporterIds,
-    sprint,
-    summary,
-    version,
-  } = data;
-  return {
-    advancedSearchArgs: {
-      issueTypeId,
-      reporterIds,
-      statusId,
-      priorityId,
-    },
-    otherArgs: {
-      assigneeId,
-      issueIds,
-      component,
-      epic,
-      feature,
-      label,
-      sprint,
-      summary,
-      version,
-    },
-    searchArgs: {
-      createStartDate: createDate[0],
-      createEndDate: createDate[1],
-      updateStartDate: updateDate[0],
-      updateEndDate: updateDate[1],
-    },
-    quickFilterIds,
-    contents,
-  };
-}
-const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: Record) => {
+const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: Record, transformSystemFilter: Function) => {
   const customField: ICustomFieldData = {
     option: [],
     date: [],
@@ -152,16 +104,14 @@ const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: R
     }
   }
 
-  if (record.get('sprint')) {
-    systemFilter.sprint = record.get('sprint');
-  }
-
   const filter = transformSystemFilter(systemFilter);
+  const { otherArgs = {} } = filter;
+  filter.otherArgs = otherArgs;
   filter.otherArgs.customField = customField;
   return filter;
 };
 
-const getExportFieldCodes = (data:Array<any>) => {
+const getExportFieldCodes = (data: Array<any>) => {
   const fieldTransform = {
     issueNum: 'issueNum',
     issueId: 'summary',
@@ -190,7 +140,7 @@ const getExportFieldCodes = (data:Array<any>) => {
   return data.map((code: string) => fieldTransform[code] || code);
 };
 
-function getFilterFormSystemFields(): FieldProps[] {
+function getFilterFormSystemFields(isInProgram: boolean): FieldProps[] {
   return ([{
     name: 'statusId',
     label: '状态',
@@ -208,6 +158,17 @@ function getFilterFormSystemFields(): FieldProps[] {
     valueField: 'id',
     textField: 'name',
   },
+  ...isInProgram ? [{
+    name: 'feature',
+    label: '所属特性',
+    valueField: 'issueId',
+    textField: 'summary',
+  }] : [{
+    name: 'epic',
+    label: '史诗',
+    valueField: 'issueId',
+    textField: 'epicName',
+  }],
   {
     name: 'feature',
     label: '特性',
@@ -242,6 +203,4 @@ function getFilterFormSystemFields(): FieldProps[] {
     textField: 'name',
   }]);
 }
-export {
-  getCustomFieldFilters, getExportFieldCodes, getFilterFormSystemFields, transformSystemFilter as getTransformSystemFilter,
-};
+export { getCustomFieldFilters, getExportFieldCodes, getFilterFormSystemFields };

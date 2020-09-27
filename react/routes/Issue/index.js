@@ -1,5 +1,5 @@
 import React, {
-  useContext, useRef, useEffect, useState, useCallback,
+  useContext, useRef, useEffect, useState, useCallback, useMemo,
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -16,11 +16,14 @@ import IssueSearch from '@/components/issue-search';
 import { linkUrl } from '@/utils/to';
 import LINK_URL, { getParams } from '@/constants/LINK_URL';
 import IssueTable from '@/components/issue-table';
+import IssueExportStore from '@/components/issue-export/stores/store';
+import { openExportIssueModal } from './components/ExportIssue';
 import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
 import FilterManage from './components/FilterManage';
 import SaveFilterModal from './components/SaveFilterModal';
-import { openExportIssueModal } from './components/ExportIssue';
+// import { openExportIssueModal } from './components/ExportIssue';
+
 import IssueDetail from './components/issue-detail';
 import ImportIssue from './components/ImportIssue';
 import CollapseAll from './components/CollapseAll';
@@ -31,7 +34,6 @@ const Issue = observer(() => {
   const {
     dataSet, projectId, issueSearchStore, fields,
   } = useContext(Store);
-  
   const history = useHistory();
   const location = useLocation();
   const [urlFilter, setUrlFilter] = useState(null);
@@ -183,7 +185,7 @@ const Issue = observer(() => {
           className="leftBtn"
           icon="unarchive"
           funcType="flat"
-          onClick={() => openExportIssueModal(issueSearchStore.getAllFields, issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()] : [], dataSet, { tableRef })}
+          onClick={() => openExportIssueModal(issueSearchStore.getAllFields, issueSearchStore.isHasFilter ? [...issueSearchStore.chosenFields.values()] : [], dataSet, tableRef)}
         >
           导出问题
         </Button>
