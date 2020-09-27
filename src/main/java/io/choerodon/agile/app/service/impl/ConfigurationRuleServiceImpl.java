@@ -199,15 +199,15 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         }).collect(Collectors.toMap(ConfigurationRuleVO::getId, Function.identity()));
     }
 
-    private String renderPredefinedSql(String operation, String field, List<Supplier<String>> conditionList) {
+    private String renderLinkTableSql(String operation, String field, List<Supplier<String>> conditionList) {
         StringBuilder sb = new StringBuilder();
         String sqlOp = ConfigurationRule.OpSqlMapping.valueOf(operation).getSqlOp();
-        String table = ConfigurationRule.FieldTableMapping.valueOf(field).getTable();
+        String table = ConfigurationRule.FieldTableMapping.matches(field).getTable();
         if (CollectionUtils.isNotEmpty(conditionList)){
             sb.append(ConfigurationRule.TEMPLATE_SQL_WHERE)
               .append(conditionList.stream().map(Supplier::get).collect(Collectors.joining(ConfigurationRule.TEMPLATE_SQL_AND)));
         }
-        return String.format(ConfigurationRule.TEMPLATE_PREDEFINED_SQL, sqlOp, table, sb.toString());
+        return String.format(ConfigurationRule.TEMPLATE_LINK_TABLE_SQL, sqlOp, table, sb.toString());
     }
 
     private String inSql(String field, Collection<?> value){
@@ -223,10 +223,10 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
 
     protected void dealCaseVersion(RuleExpressVO quickFilterValueVO, String field, Object value,String preOp, String operation, StringBuilder sqlQuery) {
         if ("fix_version".equals(quickFilterValueVO.getFieldCode())) {
-            sqlQuery.append(renderPredefinedSql(preOp, field, 
+            sqlQuery.append(renderLinkTableSql(preOp, field, 
                     Arrays.asList(() -> this.conditionSql("relation_type", ConfigurationRule.OpSqlMapping.eq.name(), "fix"), () -> this.conditionSql(field, operation, value))));
         } else if ("influence_version".equals(quickFilterValueVO.getFieldCode())) {
-            sqlQuery.append(renderPredefinedSql(preOp, field,
+            sqlQuery.append(renderLinkTableSql(preOp, field,
                     Arrays.asList(() -> this.conditionSql("relation_type", ConfigurationRule.OpSqlMapping.eq.name(),"influence"), () -> this.conditionSql(field, operation, value))));
         }
     }
@@ -346,26 +346,27 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     }
 
     protected void processPredefinedField(StringBuilder sqlQuery, RuleExpressVO ruleExpressVO, Object value, String operation) {
-        String preOp = ConfigurationRule.OpSqlMapping.getPreOp(operation).name();
+        ConfigurationRule.OpSqlMapping preOp = ConfigurationRule.OpSqlMapping.getPreOp(operation);
         String field = configurationRuleFiledMapper.selectByPrimaryKey(ruleExpressVO.getFieldCode()).getField();
         switch (field) {
             case "version_id":
-                dealCaseVersion(ruleExpressVO, field, value, preOp, operation, sqlQuery);
+                dealCaseVersion(ruleExpressVO, field, value, preOp.withField(field).name(), operation, sqlQuery);
                 break;
             case "component_id":
             case "label_id":
             case "sprint_id":
-                sqlQuery.append(renderPredefinedSql(preOp, field, Collections.singletonList(() -> this.conditionSql(field, operation, value))));
+                sqlQuery.append(renderLinkTableSql(preOp.withField(field).name(), field, 
+                        Collections.singletonList(() -> this.conditionSql(field, operation, value))));
                 break;
             case "creation_date":
             case "last_update_date":
-                sqlQuery.append(conditionSql(getUnixTimeExpress(field), operation, getUnixTimeExpress(valueToString(value))));
+                sqlQuery.append(this.conditionSql(getUnixTimeExpress(field), operation, getUnixTimeExpress(valueToString(value))));
                 break;
             default:
                 if (ConfigurationRule.OpSqlMapping.isCollOp(operation)){
-                    sqlQuery.append(renderPredefinedSql(preOp, field, Collections.singletonList(() -> this.conditionSql(field, operation, value))));
+                    sqlQuery.append(this.conditionSql(field, operation, value));
                 }else {
-                    sqlQuery.append(conditionSql(field, operation, valueToString(value)));
+                    sqlQuery.append(this.conditionSql(field, operation, valueToString(value)));
                 }
                 break;
         }
@@ -394,11 +395,14 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     }
 
     private String conditionSql(String field, String operation, Object value) {
-        if (Objects.isNull(value)) {
+        if (Objects.isNull(value) && !ConfigurationRule.OpSqlMapping.isNullKey(operation)) {
             return "";
         }
         if (value instanceof Collection){
             return inSql(field, (Collection<?>)value);
+        }
+        if (Objects.isNull(value) && ConfigurationRule.OpSqlMapping.isNullKey(operation)){
+            value = "NULL";
         }
         if (ConfigurationRule.OpSqlMapping.isLike(operation)){
             value = String.format(ConfigurationRule.TEMPLATE_LIKE_VALUE_SQL, value);
