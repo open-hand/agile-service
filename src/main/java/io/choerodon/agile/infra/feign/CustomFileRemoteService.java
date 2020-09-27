@@ -15,7 +15,7 @@ import java.util.List;
  * @since 2020-05-22
  */
 @FeignClient(
-        value = "${hzero.service.file.name:hzero-file}",
+        value = "choerodon-file",
         fallback = CustomFileRemoteServiceFallback.class
 )
 public interface CustomFileRemoteService {
