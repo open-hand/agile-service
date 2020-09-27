@@ -104,6 +104,9 @@ export default {
     }),
   },
   issue_status: {
+    props: {
+      filterOption,
+    },
     request: () => statusApi.loadByProject('agile'),
     render: (status) => (
       <Option
@@ -180,6 +183,9 @@ export default {
     ),
   },
   issue_type: {
+    props: {
+      filterOption,
+    },
     request: () => issueTypeApi.loadAllWithStateMachineId('agile'),
     render: (issueType) => (
       <Option

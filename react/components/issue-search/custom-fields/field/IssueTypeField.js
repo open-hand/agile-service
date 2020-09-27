@@ -32,7 +32,6 @@ function IssueTypeField({ field, value, onChange }) {
           setValue(Math.random());
         }
       }}
-      filter={false}
       onChange={onChange}
       value={value}
       getPopupContainer={(triggerNode) => triggerNode.parentNode}
