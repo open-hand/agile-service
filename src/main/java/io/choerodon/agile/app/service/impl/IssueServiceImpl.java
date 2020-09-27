@@ -349,7 +349,6 @@ public class IssueServiceImpl implements IssueService {
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
         Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
         IssueVO result = issueAssembler.issueDetailDTOToVO(issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
-        sendMsgUtil.sendMsgByIssueCreate(projectId, result);
         return result;
     }
 

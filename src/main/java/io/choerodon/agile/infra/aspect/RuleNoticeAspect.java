@@ -7,9 +7,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import io.choerodon.agile.api.vo.ConfigurationRuleVO;
-import io.choerodon.agile.api.vo.MessageSenderUniqueVO;
-import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.app.assembler.IssueAssembler;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
 import io.choerodon.agile.app.service.StatusNoticeSettingService;
 import io.choerodon.agile.infra.annotation.RuleNotice;
@@ -110,7 +109,6 @@ public class RuleNoticeAspect {
         // 检查issue是否符合页面规则条件
         Map<String, Long> map = configurationRuleMapper.selectByRuleList(issueId, ruleVOList);
         // 获取所有符合的ruleId
-        map.remove(EXIST_FLAG);
         List<Long> ruleIdList = map.values().stream().filter(Objects::nonNull).collect(Collectors.toList());
         // 组装符合条件的页面规则messageSender
         List<MessageSender> ruleSenderList = generateRuleSender(event, projectId, ruleIdList, issueDTO, fieldList);
@@ -201,7 +199,8 @@ public class RuleNoticeAspect {
     private Predicate<MessageSender> distinct(Function<MessageSender, MessageSenderUniqueVO> keyExtractor){
         Map<MultiKey, MessageSenderUniqueVO> map = new ConcurrentHashMap<>();
         return t -> {
-            MultiKey multiKey = new MultiKey(t.getTenantId(), t.getMessageCode(), new HashSet<>(t.getTypeCodeList()));
+            MultiKey multiKey = new MultiKey(t.getTenantId(), t.getMessageCode(), 
+                    Optional.ofNullable(t.getTypeCodeList()).map(HashSet::new).orElse(new HashSet<>()));
             MessageSenderUniqueVO value = keyExtractor.apply(t);
             MessageSenderUniqueVO exist = map.get(multiKey);
             log.debug("currend sender: [{}], isRepeat: [{}]", value, Objects.isNull(exist));

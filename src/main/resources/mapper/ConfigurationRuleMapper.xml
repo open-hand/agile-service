@@ -13,14 +13,13 @@
     <select id="selectByRuleList" resultType="java.util.Map">
         SELECT
         <foreach collection="ruleList" item="rule" separator="," index="index">
-            CASE WHEN t${index}.issue_id IS NOT NULL THEN ${rule.sqlQuery} END AS t${index}
+            CASE WHEN t${index}.issue_id IS NOT NULL THEN ${rule.id} END AS t${index}
         </foreach>
-        CASE WHEN issue_id IS NULL THEN 0 ELSE 1 END AS exist
         FROM
         agile_issue ai
-        <foreach collection="ruleList" item="rule" separator="AND" index="index">
+        <foreach collection="ruleList" item="rule" index="index">
             LEFT JOIN (SELECT issue_id FROM agile_issue WHERE ${rule.sqlQuery}) t${index} ON ai.issue_id = t${index}.issue_id
         </foreach>
-        WHERE issue_id = #{issueId}
+        WHERE ai.issue_id = #{issueId}
     </select>
 </mapper>

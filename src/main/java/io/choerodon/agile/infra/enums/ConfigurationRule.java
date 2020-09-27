@@ -10,7 +10,7 @@ public class ConfigurationRule{
     
     public static final String TEMPLATE_LINK_TABLE_SQL = " issue_id %s ( SELECT issue_id FROM %s %s ) ";
     public static final String TEMPLATE_IN_SQL = " %s IN ( %s ) ";
-    public static final String TEMPLATE_LIKE_VALUE_SQL = " '%%%%%s%%%%' ";
+    public static final String TEMPLATE_LIKE_VALUE_SQL = " '%%%s%%' ";
     public static final String TEMPLATE_SQL_WHERE = " WHERE ";
     public static final String TEMPLATE_SQL_AND = " AND ";
     public static final String TEMPLATE_CONDITION_SQL = " %s %s %s ";

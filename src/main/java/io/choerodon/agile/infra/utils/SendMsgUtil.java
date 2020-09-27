@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/4/29.
@@ -233,11 +234,17 @@ public class SendMsgUtil {
         IssueVO result = modelMapper.map(issue, IssueVO.class);
         List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUECREATE", result);
         String summary = result.getIssueNum() + "-" + result.getSummary();
-        String reporterName = result.getReporterName();
+        String reporterName = queryUserName(result.getAssigneeId());
         ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
         String url = getIssueCreateUrl(result, projectVO, result.getIssueId());
-        return siteMsgUtil.issueCreateSender(userIds, reporterName, summary, url, result.getReporterId(), projectId);
+        return siteMsgUtil.issueCreateSender(userIds, reporterName, summary, url, projectId);
     }
+
+    public String queryUserName(Long userId) {
+        Map<Long, UserMessageDTO> userMessageDOMap = userService.queryUsersMap(Collections.singletonList(userId), true);
+        return Optional.ofNullable(userMessageDOMap.get(userId)).map(UserMessageDTO::getName).orElse("");
+    }
+
 
     public MessageSender generateIssueAsigneeSender(Long projectId, List<String> fieldList, IssueDTO issue) {
         if (!SchemeApplyType.AGILE.equals(issue.getApplyType())) {
@@ -251,7 +258,7 @@ public class SendMsgUtil {
         }
         IssueVO result = modelMapper.map(issue, IssueVO.class);
         String summary = result.getIssueNum() + "-" + result.getSummary();
-        String reporterName = result.getReporterName();
+        String reporterName = queryUserName(result.getAssigneeId());
         ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
         String url = getIssueCreateUrl(result, projectVO, result.getIssueId());
         return siteMsgUtil.issueAssigneeSender(Collections.singletonList(result.getAssigneeId()), 

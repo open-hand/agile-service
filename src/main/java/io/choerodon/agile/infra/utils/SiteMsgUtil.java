@@ -181,7 +181,7 @@ public class SiteMsgUtil {
         messageClient.async().sendMessage(sender);
     }
     
-    public MessageSender issueCreateSender(List<Long> userIds,String userName, String summary, String url, Long reporterId, Long projectId) {
+    public MessageSender issueCreateSender(List<Long> userIds,String userName, String summary, String url, Long projectId) {
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         Map<String,String> map = new HashMap<>();
         map.put(ASSIGNEENAME, userName);
