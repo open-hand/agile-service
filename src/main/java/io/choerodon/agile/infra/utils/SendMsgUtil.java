@@ -234,7 +234,7 @@ public class SendMsgUtil {
         IssueVO result = modelMapper.map(issue, IssueVO.class);
         List<Long> userIds = noticeService.queryUserIdsByProjectId(projectId, "ISSUECREATE", result);
         String summary = result.getIssueNum() + "-" + result.getSummary();
-        String reporterName = queryUserName(result.getAssigneeId());
+        String reporterName = queryUserName(result.getReporterId());
         ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
         String url = getIssueCreateUrl(result, projectVO, result.getIssueId());
         return siteMsgUtil.issueCreateSender(userIds, reporterName, summary, url, projectId);
@@ -258,11 +258,12 @@ public class SendMsgUtil {
         }
         IssueVO result = modelMapper.map(issue, IssueVO.class);
         String summary = result.getIssueNum() + "-" + result.getSummary();
-        String reporterName = queryUserName(result.getAssigneeId());
+        String reporterName = queryUserName(result.getReporterId());
+        String assigneeName = queryUserName(result.getAssigneeId());
         ProjectVO projectVO = getProjectVO(projectId, ERROR_PROJECT_NOTEXIST);
         String url = getIssueCreateUrl(result, projectVO, result.getIssueId());
-        return siteMsgUtil.issueAssigneeSender(Collections.singletonList(result.getAssigneeId()), 
-                result.getAssigneeName(), summary, url, projectId, reporterName);
+        return siteMsgUtil.issueAssigneeSender(Collections.singletonList(result.getAssigneeId()),
+                assigneeName, summary, url, projectId, reporterName);
     }
 
     public MessageSender generateIssueResolvSender(Long projectId, List<String> fieldList, IssueDTO issue) {
@@ -283,10 +284,7 @@ public class SendMsgUtil {
         } else {
             url.append(getIssueCreateUrl(result, projectVO, result.getIssueId()));
         }
-        Long[] ids = new Long[1];
-        ids[0] = result.getAssigneeId();
-        List<UserDTO> userDTOList = baseFeignClient.listUsersByIds(ids, false).getBody();
-        String userName = !userDTOList.isEmpty() && userDTOList.get(0) != null ? userDTOList.get(0).getRealName() + "(" + userDTOList.get(0).getLoginName() + ")" : "";
+        String userName = queryUserName(result.getAssigneeId());
         String summary = result.getIssueNum() + "-" + result.getSummary();
         return siteMsgUtil.issueSolveSender(userIds, userName, summary, url.toString(), projectId, getOperatorNameFromUserDetail());
     }
@@ -298,17 +296,12 @@ public class SendMsgUtil {
         }
         Map<String, String> templateArgsMap = new HashMap<>();
         // 设置经办人
-        Long[] ids = new Long[2];
-        ids[0] = issueDTO.getAssigneeId();
-        ids[1] = userDetails.getUserId();
-        List<UserDTO> userDTOList = userService.listUsersByIds(ids);
-        String assigneeName = userDTOList.stream().filter(user -> Objects.equals(user.getId(), issueDTO.getAssigneeId()))
-                .findFirst().map(UserDTO::getRealName).orElse("");
+        Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(Arrays.asList(issueDTO.getAssigneeId(), userDetails.getUserId()), true);
+        String assigneeName = Optional.ofNullable(userMap.get(issueDTO.getAssigneeId())).map(UserMessageDTO::getName).orElse("");
+        // 设置操作人
+        String operatorName = Optional.ofNullable(userMap.get(userDetails.getUserId())).map(UserMessageDTO::getName).orElse("");
         // 设置概要
         String summary = issueDTO.getIssueNum() + "-" + issueDTO.getSummary();
-        // 设置操作人
-        String operatorName = userDTOList.stream().filter(user -> Objects.equals(user.getId(), userDetails.getUserId()))
-                .findFirst().map(UserDTO::getRealName).orElse("");
         // 设置状态
         String status = ConvertUtil.getIssueStatusMap(projectId).get(issueDTO.getStatusId()).getName();
         templateArgsMap.put("assigneeName", assigneeName);
