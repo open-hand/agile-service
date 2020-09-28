@@ -31,8 +31,6 @@ import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
@@ -44,13 +42,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -377,8 +371,8 @@ public class IssueServiceImpl implements IssueService {
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
         Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
         IssueVO result = issueAssembler.issueDetailDTOToVO(issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
-        sendMsgUtil.sendMsgByIssueAssignee(projectId, fieldList, result);
-        sendMsgUtil.sendMsgByIssueComplete(projectId, fieldList, result);
+//        sendMsgUtil.sendMsgByIssueAssignee(projectId, fieldList, result);
+//        sendMsgUtil.sendMsgByIssueComplete(projectId, fieldList, result);
         return result;
     }
 
@@ -549,6 +543,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldListName = "fieldList")
     public IssueVO updateIssue(Long projectId, IssueUpdateVO issueUpdateVO, List<String> fieldList) {
         if (fieldList.contains("epicName")
                 && issueUpdateVO.getEpicName() != null
@@ -572,6 +567,7 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_STATAUS_CHANGE)
     public IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber,
                                      String applyType, IssueDTO triggerIssue, boolean autoTranferFlag) {
         stateMachineClientService.executeTransform(projectId, issueId, transformId, objectVersionNumber, applyType, new InputDTO(issueId, "updateStatus", updateTrigger(autoTranferFlag, triggerIssue)));
@@ -965,13 +961,14 @@ public class IssueServiceImpl implements IssueService {
     }
 
     @Override
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_CREATED)
     public IssueSubVO queryIssueSubByCreate(Long projectId, Long issueId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + issueAttachmentDO.getUrl()));
         }
         IssueSubVO result = issueAssembler.issueDetailDoToIssueSubDto(issue);
-        sendMsgUtil.sendMsgBySubIssueCreate(projectId, result);
+//        sendMsgUtil.sendMsgBySubIssueCreate(projectId, result);
         return result;
     }
 

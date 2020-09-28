@@ -140,6 +140,12 @@
         <dependency>
             <groupId>io.choerodon</groupId>
             <artifactId>choerodon-starter-asgard</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>hzero-boot-admin</artifactId>
+                    <groupId>org.hzero.boot</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- Spock测试相关依赖 -->
         <dependency>

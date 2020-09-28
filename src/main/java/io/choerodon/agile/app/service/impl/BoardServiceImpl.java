@@ -9,7 +9,9 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.StatusPayload;
 import io.choerodon.agile.app.assembler.BoardAssembler;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.DateUtil;
@@ -489,6 +491,7 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE)
     public IssueMoveVO move(Long projectId, Long issueId, Long transformId, IssueMoveVO issueMoveVO, Boolean isDemo) {
         //执行状态机转换
         if (Boolean.TRUE.equals(isDemo)) {
@@ -513,7 +516,7 @@ public class BoardServiceImpl implements BoardService {
         }
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         IssueMoveVO result = modelMapper.map(issueDTO, IssueMoveVO.class);
-        sendMsgUtil.sendMsgByIssueMoveComplete(projectId, issueMoveVO, issueDTO);
+//        sendMsgUtil.sendMsgByIssueMoveComplete(projectId, issueMoveVO, issueDTO);
         return result;
     }
 
