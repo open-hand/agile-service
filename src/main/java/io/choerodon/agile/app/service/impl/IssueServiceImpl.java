@@ -31,6 +31,7 @@ import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
+import org.hzero.core.base.AopProxy;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
@@ -55,7 +56,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class IssueServiceImpl implements IssueService {
+public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Autowired
     private IssueAccessDataService issueAccessDataService;
@@ -563,7 +564,7 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber, String applyType) {
-        return updateIssueStatus(projectId, issueId, transformId, objectVersionNumber, applyType, null, false);
+        return this.self().updateIssueStatus(projectId, issueId, transformId, objectVersionNumber, applyType, null, false);
     }
 
     @Override

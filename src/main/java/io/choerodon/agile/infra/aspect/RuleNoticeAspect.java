@@ -79,7 +79,7 @@ public class RuleNoticeAspect {
         RuleNotice ruleNotice = method.getAnnotation(RuleNotice.class);
         // 这里fieldList如果没有传值，一定要为null，不可以为空集合，空集合代表存在指定字段更新但指定字段为空，后面需要根据是否为null来判断发消息
         List<String> fieldList = StringUtils.isBlank(ruleNotice.fieldListName()) ? 
-                null : Arrays.asList((String[])getNameAndValue(jp).get(ruleNotice.fieldListName()));
+                null : (List<String>) getNameAndValue(jp).get(ruleNotice.fieldListName());
         Long projectId = (Long)Reflections.getFieldValue(result, "projectId");
         log.info("rule notice detcction, component: [{}], event: [{}]", ruleNotice.value(), ruleNotice.event());
         switch (ruleNotice.value()){
@@ -100,7 +100,7 @@ public class RuleNoticeAspect {
         // TODO 
     }
 
-    private void issueNoticeDetection(RuleNoticeEvent event, Long issueId, Long projectId, List<String> fieldList){
+    public void issueNoticeDetection(RuleNoticeEvent event, Long issueId, Long projectId, List<String> fieldList){
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
         List<ConfigurationRuleVO> ruleVOList = configurationRuleMapper.selectByProjectId(projectId);
         if (CollectionUtils.isEmpty(ruleVOList)){
@@ -109,7 +109,8 @@ public class RuleNoticeAspect {
         // 检查issue是否符合页面规则条件
         Map<String, Long> map = configurationRuleMapper.selectByRuleList(issueId, ruleVOList);
         // 获取所有符合的ruleId
-        List<Long> ruleIdList = map.values().stream().filter(Objects::nonNull).collect(Collectors.toList());
+        List<Long> ruleIdList = Optional.ofNullable(map).orElse(new HashMap<>())
+                .values().stream().filter(Objects::nonNull).collect(Collectors.toList());
         // 组装符合条件的页面规则messageSender
         List<MessageSender> ruleSenderList = generateRuleSender(event, projectId, ruleIdList, issueDTO, fieldList);
         // 合并消息通知
@@ -141,7 +142,7 @@ public class RuleNoticeAspect {
             case ISSUECHANGESTATUS:
                 StatusNoticeSettingVO settingVO = statusNoticeSettingService.selectNoticeUserAndType(projectId, issue.getIssueId());
                 func = msgUtil -> msgUtil.generateNoticeIssueStatusSender(projectId, settingVO.getUserIdList(), 
-                        new ArrayList<>(settingVO.getUserTypeList()), issue, DetailsHelper.getUserDetails()); 
+                        new ArrayList<>(settingVO.getUserTypeList()), issue, DetailsHelper.getUserDetails(), fieldList); 
                 break;
             default:
                 break;
@@ -153,6 +154,9 @@ public class RuleNoticeAspect {
     private List<MessageSender> getSenderList(Function<SendMsgUtil, MessageSender> func, Map<Long, ConfigurationRuleVO> map) {
         List<MessageSender> list = new ArrayList<>();
         MessageSender sourceSender = func.apply(sendMsgUtil);
+        if (Objects.isNull(sourceSender)){
+            return list;
+        }
         list.add(sourceSender);
         list.addAll(map.values().stream().map(rule -> generateSenderReceivetList(sourceSender, rule)).collect(Collectors.toList()));
         list.remove(null);
