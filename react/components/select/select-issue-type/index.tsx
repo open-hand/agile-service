@@ -12,16 +12,17 @@ interface Props extends Partial<SelectProps> {
   isProgram?: boolean
   afterLoad?: (sprints: IIssueType[]) => void
   dataRef?: React.MutableRefObject<any>
+  valueField?: string
 }
 
 const SelectIssueType: React.FC<Props> = forwardRef(({
-  filterList = ['feature'], isProgram, dataRef,
+  filterList = ['feature'], isProgram, valueField, dataRef,
   afterLoad, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig<IIssueType> => ({
     name: 'issueType',
     textField: 'name',
-    valueField: 'id',
+    valueField: valueField || 'id',
     request: () => issueTypeApi.loadAllWithStateMachineId(isProgram ? 'program' : undefined).then((issueTypes) => {
       if (isProgram) {
         const featureTypes = [{
