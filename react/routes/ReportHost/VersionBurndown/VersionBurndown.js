@@ -14,9 +14,9 @@ import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 import to, { linkUrl } from '@/utils/to';
 import pic from '../../../assets/image/emptyChart.svg';
 import SwithChart from '../Component/switchChart';
-import StatusTag from '../../../components/tag/status';
-import PriorityTag from '../../../components/tag/priority';
-import TypeTag from '../../../components/tag/type';
+import StatusTag from '../../../components/StatusTag';
+import PriorityTag from '../../../components/PriorityTag';
+import TypeTag from '../../../components/TypeTag';
 import ES from '../../../stores/project/versionBurndown';
 import EmptyBlock from '../../../components/EmptyBlock';
 import seeChangeRange from './seeChangeRange.svg';
@@ -472,7 +472,7 @@ class VersionBurndown extends Component {
             <div>
               <PriorityTag
                 style={{ minWidth: 55 }}
-                data={record.priorityVO}
+                priority={record.priorityVO}
               />
             </div>
           ),

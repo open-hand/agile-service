@@ -9,7 +9,7 @@ import {
 } from '@choerodon/boot';
 
 import './IssueTypeList.less';
-import TypeTag from '../../../components/tag/type';
+import TypeTag from '../../../components/TypeTag/TypeTag';
 import Store from '../stores';
 
 const { Column } = Table;
@@ -24,7 +24,7 @@ function IssueTypeList() {
 
   /**
    * render Name
-   * @param {*} param0
+   * @param {*} param0 
    */
   function renderName({ record }) {
     const colour = record.get('colour');

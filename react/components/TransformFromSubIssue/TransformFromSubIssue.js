@@ -5,7 +5,7 @@ import {
 import { observer } from 'mobx-react';
 import { issueApi, issueTypeApi, statusApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import TypeTag from '@/components/tag/type';
+import TypeTag from '../TypeTag';
 import './TransformFromSubIssue.less';
 
 const { Sidebar } = Modal;

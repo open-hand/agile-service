@@ -7,7 +7,7 @@ import { Modal } from 'choerodon-ui/pro';
 import { Content, stores, Choerodon } from '@choerodon/boot';
 import { componentApi } from '@/api';
 import _ from 'lodash';
-import UserHead from '../../../../components/tag/user';
+import UserHead from '../../../../components/UserHead';
 import './component.less';
 import { userApi } from '@/api';
 
@@ -171,7 +171,7 @@ function AddComponent(props) {
                   <Option key={JSON.stringify(user)} value={JSON.stringify(user)}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', padding: '2px' }}>
                       <UserHead
-                        data={user}
+                        user={user}
                       />
                     </div>
                   </Option>

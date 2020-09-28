@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Tooltip, Icon, Rate } from 'choerodon-ui';
-import TypeTag from '@/components/tag/type';
+import TypeTag from '@/components/TypeTag/TypeTag';
 
 /**
  * 任务编号呈现

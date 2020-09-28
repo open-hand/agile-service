@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { Icon, Popconfirm, Tooltip } from 'choerodon-ui';
 import { issueLinkApi, featureApi } from '@/api';
-import TypeTag from '@/components/tag/type';
-import UserHead from '../../tag/user';
-import PriorityTag from '../../tag/priority';
-import StatusTag from '../../tag/status';
+import UserHead from '../../UserHead';
+import PriorityTag from '../../PriorityTag';
+import StatusTag from '../../StatusTag';
+import TypeTag from '../../TypeTag';
 
 class LinkList extends Component {
   confirm(issueId) {
@@ -85,7 +85,7 @@ class LinkList extends Component {
               <Tooltip mouseEnterDelay={0.5} title={`优先级： ${issue.priorityVO.name}`}>
                 <div>
                   <PriorityTag
-                    data={issue.priorityVO}
+                    priority={issue.priorityVO}
                   />
                 </div>
               </Tooltip>
@@ -122,7 +122,7 @@ class LinkList extends Component {
               >
                 <div>
                   <UserHead
-                    data={{
+                    user={{
                       id: issue.assigneeId,
                       loginName: '',
                       realName: issue.assigneeName,

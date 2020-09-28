@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { Modal, Form, Select } from 'choerodon-ui';
 import { issueApi, statusApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import TypeTag from '@/components/tag/type';
+import TypeTag from '../TypeTag';
 
 import './TransformSubIssue.less';
 

@@ -5,10 +5,10 @@ import { map } from 'lodash';
 import { Tooltip, Tag } from 'choerodon-ui';
 import { Table, DataSet } from 'choerodon-ui/pro';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
-import PriorityTag from '@/components/tag/priority';
-import TypeTag from '@/components/tag/type';
-import StatusTag from '@/components/tag/status';
-import UserTag from '@/components/tag/user';
+import PriorityTag from '@/components/PriorityTag';
+import TypeTag from '@/components/TypeTag';
+import StatusTag from '@/components/StatusTag';
+import UserHead from '@/components/UserHead';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import { IField, IIssueColumnName } from '@/common/types';
 import { TableMode, ColumnAlign, ColumnLock } from 'choerodon-ui/pro/lib/table/enum';
@@ -178,7 +178,7 @@ const IssueTable: React.FC<Props> = ({
           renderer={({ record }) => (
             <Tooltip mouseEnterDelay={0.5} title={`优先级： ${record.get('priorityDTO') ? record.get('priorityDTO').name : ''}`}>
               <PriorityTag
-                data={record.get('priorityVO')}
+                priority={record.get('priorityVO')}
                 style={{ display: 'inline-block' }}
               />
             </Tooltip>
@@ -189,15 +189,21 @@ const IssueTable: React.FC<Props> = ({
           name="assigneeId"
           hidden={columnHidden('assigneeId')}
           renderer={({ record }) => (
-            <UserTag
-              data={{
-                id: record.get('assigneeId'),
-                name: record.get('assigneeName'),
-                loginName: record.get('assigneeLoginName'),
-                realName: record.get('assigneeRealName'),
-                avatar: record.get('assigneeImageUrl'),
-              }}
-            />
+            <div style={{ display: 'inline-flex' }}>
+              {
+                record.get('assigneeId') && record.get('assigneeId') !== '0' && (
+                  <UserHead
+                    user={{
+                      id: record.get('assigneeId'),
+                      name: record.get('assigneeName'),
+                      loginName: record.get('assigneeLoginName'),
+                      realName: record.get('assigneeRealName'),
+                      avatar: record.get('assigneeImageUrl'),
+                    }}
+                  />
+                )
+              }
+            </div>
           )}
         />
         <Column
@@ -213,6 +219,7 @@ const IssueTable: React.FC<Props> = ({
               >
                 <StatusTag
                   data={record?.get('statusVO')}
+                  style={{ display: 'inline-block' }}
                 />
               </div>
             </Tooltip>
@@ -224,15 +231,19 @@ const IssueTable: React.FC<Props> = ({
           sortable
           className="c7n-agile-table-cell"
           renderer={({ record }) => (
-            <UserTag
-              data={{
-                id: record?.get('reporterId'),
-                name: record?.get('reporterName'),
-                loginName: record?.get('reporterLoginName'),
-                realName: record?.get('reporterRealName'),
-                avatar: record?.get('reporterImageUrl'),
-              }}
-            />
+            <div style={{ display: 'inline-flex' }}>
+              {record?.get('reporterId') && record?.get('reporterId') !== '0' && (
+                <UserHead
+                  user={{
+                    id: record?.get('reporterId'),
+                    name: record?.get('reporterName'),
+                    loginName: record?.get('reporterLoginName'),
+                    realName: record?.get('reporterRealName'),
+                    avatar: record?.get('reporterImageUrl'),
+                  }}
+                />
+              )}
+            </div>
           )}
         />
         <Column
@@ -278,9 +289,11 @@ const IssueTable: React.FC<Props> = ({
               const value = record?.get('foundationFieldValue')[code];
               if (fieldType === 'member') {
                 return value && (
-                <UserTag
-                  data={value}
-                />
+                  <div style={{ display: 'inline-flex' }}>
+                    <UserHead
+                      user={value}
+                    />
+                  </div>
                 );
               }
               return (

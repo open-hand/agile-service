@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import UserHead from '@/components/tag/user';
+import UserHead from '@/components/UserHead/UserHead';
 
 /**
  * 任务经办人呈现
@@ -20,7 +20,7 @@ function Assignee({
               hiddenText
               size={28}
               style={{ marginLeft: 0 }}
-              data={{
+              user={{
                 id: assigneeId,
                 name: assigneeName,
                 loginName: assigneeLoginName,
