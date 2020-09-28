@@ -9,16 +9,23 @@ import ChoseFieldStore from './store';
 
 const prefix = 'c7nagile-choose-field-list';
 
-export function useChoseFieldStore(props:IUseChoseFieldProps) {
+export function useChoseFieldStore(props: IUseChoseFieldProps) {
   return useMemo(() => new ChoseFieldStore(props), []);
 }
-function FieldList({ store }:{store:ChoseFieldStore}) {
+interface Props {
+  store: ChoseFieldStore,
+  closeMenu: () => void,
+  onChose: ((v: IChosenFieldField | IChosenFieldField[], status: 'add' | 'del') => void) | undefined
+}
+function FieldList({ store, closeMenu, onChose }: Props) {
   const currentOptionStatus = store.getCurrentOptionStatus;
   const [systemFields, customFields] = store.getFields;
   function handleChange(value: string | undefined, field: IChosenFieldField) {
     if (value) {
+      onChose && onChose(field, 'add');
       store.addChosenFields(value, field);
     } else {
+      onChose && onChose(field, 'del');
       store.delChosenFields(field.code);
     }
   }
@@ -44,9 +51,12 @@ function FieldList({ store }:{store:ChoseFieldStore}) {
           checked={currentOptionStatus === 'ALL'}
           onChange={(checkAll) => {
             if (checkAll) {
-              store.addAllChosenFields();
+              closeMenu(); // 避免焦点丢失时无法再次点击添加筛选
+              const data = store.addAllChosenFields();
+              onChose && onChose(data, 'add');
             } else {
-              store.cancelAllChosenFields();
+              const data = store.cancelAllChosenFields();
+              onChose && onChose(data, 'del');
             }
           }}
         >
@@ -55,7 +65,8 @@ function FieldList({ store }:{store:ChoseFieldStore}) {
         <Button
           style={{ display: currentOptionStatus !== 'NONE' ? 'inline-block' : 'none' }}
           onClick={() => {
-            store.cancelAllChosenFields();
+            const data = store.cancelAllChosenFields();
+            onChose && onChose(data, 'del');
           }}
         >
           清除筛选项

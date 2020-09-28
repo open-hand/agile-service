@@ -43,6 +43,10 @@ class ChoseFieldStore {
     return this.chosenFields;
   }
 
+  @computed get getSpecialFields() {
+    return this.specialFields;
+  }
+
   @computed get getAllChosenField() {
     return [...this.specialFields.values(), ...this.chosenFields.values()];
   }
@@ -87,20 +91,24 @@ class ChoseFieldStore {
 
   @action('增添全部字段') addAllChosenFields() {
     //   this.chosenFields.set(key, data);
+    const currentChosenFields: IChosenFieldField[] = [];
     const [systemFiled, customFiled] = this.getFields;
     [...systemFiled, ...customFiled].forEach((field) => {
       if (!this.chosenFields.has(field.code) && !this.specialFields.has(field.code)) {
         this.chosenFields.set(field.code, { ...field, value: undefined });
+        currentChosenFields.push(field);
       }
     });
     this.currentOptionStatus = 'ALL';
+    return currentChosenFields;
   }
 
   @action('取消选择全部字段') cancelAllChosenFields() {
     //   this.chosenFields.set(key, data);
-
+    const data = [...this.chosenFields.values()];
     this.chosenFields.clear();
     this.currentOptionStatus = 'NONE';
+    return data;
   }
 }
 

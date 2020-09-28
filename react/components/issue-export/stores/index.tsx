@@ -14,7 +14,6 @@ interface Context {
   tableDataSet: DataSet,
   tableRef: React.RefObject<Table>,
   checkOptions: Array<{ value: string, label: string, order?: string, }>,
-  issueFilterFormDataSet: DataSet,
   store: IssueExportStore,
   intl: InjectedIntl,
   prefixCls: string,
@@ -33,6 +32,7 @@ const ExportIssueContextProvider = injectIntl(observer(
     const {
       tableRef, fields, chosenFields,
     } = props;
+    console.log('fields...', fields);
     const { isInProgram } = useIsInProgram();
     const columns = tableRef.current
       ? tableRef.current.tableStore.columns.filter((column) => column.name && !column.hidden)
@@ -51,10 +51,9 @@ const ExportIssueContextProvider = injectIntl(observer(
       newStore.setDefaultCurrentChosenFields(chosenFields);
       return newStore;
     }, []);
-    const issueFilterFormDataSet = useIssueFilterFormDataSet({ fields, systemFields: store.dataSetSystemFields });
+    // const issueFilterFormDataSet = useIssueFilterFormDataSet({ fields, systemFields: store.dataSetSystemFields });
     const value = {
       ...props,
-      issueFilterFormDataSet,
       store,
       prefixCls: 'c7n-agile-export-issue-modal',
     };
