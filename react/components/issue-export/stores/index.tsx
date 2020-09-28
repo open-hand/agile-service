@@ -39,12 +39,17 @@ const ExportIssueContextProvider = injectIntl(observer(
       : [];
     const store = useMemo(() => {
       if (props.store) {
+        // 设置默认选项
         props.store.setDefaultCheckedExportFields(columns.map((column) => column.name!));
+        // 设置默认选择
+        props.store.setDefaultCurrentChosenFields(chosenFields);
         return props.store;
       }
-      return new IssueExportStore({
+      const newStore = new IssueExportStore({
         defaultCheckedExportFields: columns.map((column) => column.name!),
       });
+      newStore.setDefaultCurrentChosenFields(chosenFields);
+      return newStore;
     }, []);
     const issueFilterFormDataSet = useIssueFilterFormDataSet({ fields, systemFields: store.dataSetSystemFields });
     const value = {

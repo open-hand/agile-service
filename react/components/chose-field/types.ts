@@ -23,8 +23,8 @@ interface IUseChoseFieldProps {
  * @param initField 初始化fields字段时的操作 返回false | undefined | void 则跳过此字段
  * @param initChosenField 初始化已选字段时的操作 返回false | undefined | void 则跳过此字段
  */
-interface IChosenFieldFieldActions {
+interface IChosenFieldFieldEvents {
     initField?: (data: IChosenFieldField, currentChosenField: Map<string, IChosenFieldField>) => IChosenFieldField | false | undefined | void,
     initChosenField?: (data: IChosenFieldField, currentChosenField: Map<string, IChosenFieldField>) => IChosenFieldField | false | undefined | void,
 }
-export { IChosenFieldField, IUseChoseFieldProps, IChosenFieldFieldActions };
+export { IChosenFieldField, IUseChoseFieldProps, IChosenFieldFieldEvents };

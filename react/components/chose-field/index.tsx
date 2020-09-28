@@ -1,19 +1,14 @@
-/* eslint-disable react/require-default-props */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import React, {
   useState, useCallback, useRef, useEffect, ReactElement, useMemo,
 } from 'react';
-import {
-  Button, Icon,
-} from 'choerodon-ui/pro';
+import { Button } from 'choerodon-ui/pro';
 import { Dropdown } from 'choerodon-ui';
 import { DropDownProps } from 'choerodon-ui/lib/dropdown';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import { observer } from 'mobx-react-lite';
 import FieldList, { useChoseFieldStore } from './FieldList';
 import ChoseFieldStore from './store';
-import { IChosenFieldField, IChosenFieldFieldActions } from './types';
+import { IChosenFieldField, IChosenFieldFieldEvents } from './types';
 
 interface Props {
   store: ChoseFieldStore,
@@ -29,7 +24,10 @@ interface Props {
 interface IChoseFieldConfig {
   fields?: IChosenFieldField[],
   defaultValue?: IChosenFieldField[],
-  actions?: IChosenFieldFieldActions,
+  events?: IChosenFieldFieldEvents,
+  dropDownProps?: Partial<DropDownProps>,
+  dropDownBtnChildren?: ReactElement | ReactElement[] | string | null,
+  dropDownBtnProps?: Partial<ButtonProps>,
 }
 interface IChoseFieldDataProps {
   store: ChoseFieldStore,
@@ -37,6 +35,9 @@ interface IChoseFieldDataProps {
 }
 interface IChoseFieldComponentProps {
   store: ChoseFieldStore,
+  dropDownProps?: Partial<DropDownProps>,
+  dropDownBtnChildren?: ReactElement | ReactElement[] | string | null,
+  dropDownBtnProps?: Partial<ButtonProps>,
 }
 const defaultInitFieldAction = {
   initField: (data: any) => data,
@@ -55,13 +56,14 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
       setFields(config?.fields);
     }
   }, [config?.fields]);
-  const actions = useMemo(() => {
-    let { initField, initChosenField }: IChosenFieldFieldActions = defaultInitFieldAction;
-    if (config?.actions?.initChosenField) {
-      initChosenField = config?.actions?.initChosenField;
+  // 操作函数只初始化一次  防止方法多次创建 多次更改
+  const events = useMemo(() => {
+    let { initField, initChosenField }: IChosenFieldFieldEvents = defaultInitFieldAction;
+    if (config?.events?.initChosenField) {
+      initChosenField = config?.events?.initChosenField;
     }
-    if (config?.actions?.initField) {
-      initField = config?.actions?.initField;
+    if (config?.events?.initField) {
+      initField = config?.events?.initField;
     }
     return { initField, initChosenField };
   }, []);
@@ -74,7 +76,7 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
       if (['time', 'datetime', 'date'].indexOf(field.fieldType ?? '') !== -1) {
         newField = { ...field, otherComponentProps: { range: true } };
       }
-      const result = actions.initField(newField, currentChosenFields);
+      const result = events.initField(newField, currentChosenFields);
       const { immutableCheck } = result || {};
       if (field.id) {
         result && customFields.push(result);
@@ -89,17 +91,20 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
       if (['time', 'datetime', 'date'].indexOf(field.fieldType ?? '') !== -1) {
         newField = { ...field, otherComponentProps: { range: true } };
       }
-      const result = actions.initChosenField(newField, currentChosenFields);
-      result && currentChosenFields.set(field.code, newField);
+      const result = events.initChosenField(newField, currentChosenFields);
+      result && currentChosenFields.set(field.code, result);
     });
     return new ChoseFieldStore({ systemFields, customFields, chosenFields: [...currentChosenFields.values()] });
-  }, [actions, fields]);
+  }, [events, config?.defaultValue, fields]);
   const dataProps = {
     store,
     fields,
   };
-  const componentProps = {
+  const componentProps: IChoseFieldComponentProps = {
     store,
+    dropDownBtnChildren: config?.dropDownBtnChildren || '添加筛选',
+    dropDownBtnProps: config?.dropDownBtnProps,
+    dropDownProps: config?.dropDownProps,
   };
   return [dataProps, componentProps];
 }
@@ -119,7 +124,7 @@ function useClickOut(onClickOut: (e?: any) => void) {
   return ref;
 }
 
-function ChooseField(props: Props) {
+const ChooseField: React.FC<Props> = (props) => {
   const [hidden, setHidden] = useState(true);
   const { dropDownBtnChildren = '添加筛选' } = props;
   const handleClickOut = useCallback(() => {
@@ -134,6 +139,7 @@ function ChooseField(props: Props) {
         visible={!hidden}
         overlay={(
           <div
+            role="none"
             ref={ref}
             onClick={(e) => {
               e.stopPropagation();
@@ -158,5 +164,5 @@ function ChooseField(props: Props) {
       </Dropdown>
     </div>
   );
-}
+};
 export default observer(ChooseField);

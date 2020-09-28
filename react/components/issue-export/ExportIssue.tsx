@@ -68,7 +68,7 @@ const ExportIssue: React.FC<{}> = () => {
   const [choseDataProps, choseComponentProps] = useChoseField({
     fields,
     defaultValue: store.getCurrentChosenFieldsArr,
-    actions: { initField: store.defaultInitFieldAction, initChosenField: store.defaultInitFieldAction },
+    events: { initField: (data) => store.initField(data), initChosenField: (data) => store.initChosenField(data) },
   });
   const { store: choseFieldStore } = choseDataProps;
   const checkOptions = useMemo(() => {
