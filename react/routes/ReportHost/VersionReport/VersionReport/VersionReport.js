@@ -15,9 +15,9 @@ import finish from './legend/finish.svg';
 import total from './legend/total.svg';
 import noEstimated from './legend/noEstimated.svg';
 import SwithChart from '../../Component/switchChart';
-import StatusTag from '../../../../components/tag/status';
-import PriorityTag from '../../../../components/tag/priority';
-import TypeTag from '../../../../components/tag/type';
+import StatusTag from '../../../../components/StatusTag';
+import PriorityTag from '../../../../components/PriorityTag';
+import TypeTag from '../../../../components/TypeTag';
 import VS from '../../../../stores/project/versionReportNew';
 import EmptyBlock from '../../../../components/EmptyBlock';
 import './VersionReport.less';
@@ -522,7 +522,7 @@ class EpicReport extends Component {
             <div>
               <PriorityTag
                 style={{ minWidth: 55 }}
-                data={record.priorityVO}
+                priority={record.priorityVO}
               />
             </div>
           ),

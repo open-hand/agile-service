@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { Spin } from 'choerodon-ui';
 import { priorityApi } from '@/api';
-import PriorityTag from '../../../../components/tag/priority';
+import PriorityTag from '../../../../components/PriorityTag';
 import EmptyBlockDashboard from '../../../../components/EmptyBlockDashboard';
 import pic from '../EmptyPics/no_sprint.svg';
 import pic2 from '../EmptyPics/no_version.svg';
 import './Priority.less';
+
 
 class Priority extends Component {
   constructor(props) {
@@ -75,7 +76,7 @@ class Priority extends Component {
       <div className="lists">
         <h3 className="title">已完成/总计数</h3>
         <div className="wrapper">
-          {priorityInfo.map((priority) => this.renderList(priority))}
+          {priorityInfo.map(priority => this.renderList(priority))}
         </div>
       </div>
     );
@@ -90,7 +91,7 @@ class Priority extends Component {
         <div className="body">
           <div>
             <PriorityTag
-              data={priority.priorityVO}
+              priority={priority.priorityVO}
             />
           </div>
           <div className="progress">

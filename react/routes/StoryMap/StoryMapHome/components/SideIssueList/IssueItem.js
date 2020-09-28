@@ -7,7 +7,7 @@ import { DragSource } from 'react-dnd';
 import { storyMapApi } from '@/api';
 import { linkUrl } from '@/utils/to';
 import LINK_URL from '@/constants/LINK_URL';
-import TypeTag from '../../../../../components/tag/type';
+import TypeTag from '../../../../../components/TypeTag';
 import StoryMapStore from '../../../../../stores/project/StoryMap/StoryMapStore';
 
 import './IssueItem.less';

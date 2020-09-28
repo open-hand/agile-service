@@ -5,7 +5,7 @@ import {
 } from 'choerodon-ui';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
-import UserHead from '@/components/tag/user';
+import UserHead from '@/components/UserHead';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
 import AssigneeModal from './AssigneeModal';
@@ -23,7 +23,7 @@ import './AssigneeInfo.less';
   };
 
   /**
- * 清除经办人筛选
+ * 清除经办人筛选 
  */
   handleClearAssignee = () => {
     const { data: { sprintId } } = this.props;
@@ -35,11 +35,11 @@ import './AssigneeInfo.less';
     const { assigneeIssues } = data;
     const filterSprintAssignId = BacklogStore.filterSprintAssign.get(data.sprintId);
     return (
-      <>
+      <Fragment>
         <div className="c7n-backlog-assignInfo">
           <div className="c7n-backlog-assignInfo-left">
             {assigneeIssues ? assigneeIssues
-              .filter((assignee) => assignee.assigneeId)
+              .filter(assignee => assignee.assigneeId)
               .map(({
                 assigneeId,
                 assigneeName,
@@ -76,7 +76,7 @@ import './AssigneeInfo.less';
                   })}
                   onClick={() => this.handleSearchAssignee(assigneeId)}
                   size={24}
-                  data={{
+                  user={{
                     id: assigneeId,
                     loginName: assigneeLoginName,
                     realName: assigneeRealName,
@@ -90,8 +90,8 @@ import './AssigneeInfo.less';
             {filterSprintAssignId && <Button color="blue" onClick={this.handleClearAssignee}>清除筛选</Button>}
           </div>
         </div>
-
-      </>
+       
+      </Fragment>
     );
   }
 }

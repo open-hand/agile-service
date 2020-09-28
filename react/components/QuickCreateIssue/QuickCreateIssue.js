@@ -9,7 +9,7 @@ import {
 import { getProjectId } from '@/utils/common';
 import { issueApi, fieldApi } from '@/api';
 import { checkCanQuickCreate } from '@/utils/quickCreate';
-import TypeTag from '@/components/tag/type';
+import TypeTag from '../TypeTag';
 import { deBounce } from './Utils';
 import './QuickCreateIssue.less';
 

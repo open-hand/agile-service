@@ -8,7 +8,7 @@ import {
 import TimeAgo from 'timeago-react';
 import { devOpsApi } from '@/api';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
-import UserHead from '../tag/user';
+import UserHead from '../UserHead';
 
 const { AppState } = stores;
 const { Sidebar } = Modal;
@@ -114,7 +114,7 @@ class MergeRequest extends Component {
           }}
           >
             <UserHead
-              data={{
+              user={{
                 id: record.assigneeId,
                 realName: record.assigneeName,
                 avatar: record.imageUrl,

@@ -9,7 +9,7 @@ import { observer } from 'mobx-react-lite';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import { projectReportApiConfig, projectReportApi } from '@/api';
-import UserHead from '@/components/tag/user';
+import UserHead from '@/components/UserHead';
 import TableAction from '@/components/TableAction';
 import { User } from '@/common/types';
 import to from '@/utils/to';
@@ -99,7 +99,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
             // @ts-ignore
               style={{ display: 'inline-block' }}
               hiddenText
-              data={user}
+              user={user}
             />
           ));
         }}
@@ -115,7 +115,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
             // @ts-ignore
               style={{ display: 'inline-block' }}
               hiddenText
-              data={createdUser as User}
+              user={createdUser as User}
             />
           );
         }}

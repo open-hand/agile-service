@@ -5,7 +5,7 @@ import { find } from 'lodash';
 import { useIssueTypes } from '@/hooks';
 import { issueApi } from '@/api';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import TypeTag from '@/components/tag/type';
+import TypeTag from '../../TypeTag';
 import EditIssueContext from '../stores';
 import './IssueComponent.less';
 

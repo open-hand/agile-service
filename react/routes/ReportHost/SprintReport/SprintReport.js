@@ -14,9 +14,9 @@ import BurndownChartStore from '@/stores/project/burndownChart/BurndownChartStor
 import ReportStore from '@/stores/project/Report';
 import { commonformatDate } from '@/utils/Date';
 import epicSvg from '@/assets/image/emptyChart.svg';
-import StatusTag from '@/components/tag/status';
-import PriorityTag from '@/components/tag/priority';
-import TypeTag from '@/components/tag/type';
+import StatusTag from '@/components/StatusTag';
+import PriorityTag from '@/components/PriorityTag';
+import TypeTag from '@/components/TypeTag';
 import BurnDownChart from '@/components/charts/burn-down';
 import STATUS from '@/constants/STATUS';
 import { sprintApi, reportApi } from '@/api';
@@ -259,7 +259,7 @@ class SprintReport extends Component {
               <div style={{ marginRight: 12 }}>
                 <PriorityTag
                   style={{ minWidth: 55 }}
-                  data={record.priorityVO}
+                  priority={record.priorityVO}
                 />
               </div>
             </Tooltip>

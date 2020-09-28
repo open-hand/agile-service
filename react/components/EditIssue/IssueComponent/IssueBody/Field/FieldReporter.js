@@ -5,7 +5,7 @@ import { injectIntl } from 'react-intl';
 import { issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
 import SelectUser from '@/components/select/select-user';
-import UserHead from '../../../../tag/user';
+import UserHead from '../../../../UserHead';
 
 @inject('AppState')
 @observer class FieldStatus extends Component {
@@ -74,7 +74,7 @@ import UserHead from '../../../../tag/user';
             {
               reporterId && reporterLoginName ? (
                 <UserHead
-                  data={{
+                  user={{
                     id: reporterId,
                     loginName: reporterLoginName,
                     realName: reporterRealName,

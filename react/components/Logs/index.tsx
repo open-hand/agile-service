@@ -3,7 +3,7 @@ import { Tooltip } from 'choerodon-ui';
 import TimeAgo from 'timeago-react';
 import _ from 'lodash';
 import { ILog } from '@/common/types';
-import UserHead from '../tag/user';
+import UserHead from '../UserHead';
 import './Logs.less';
 import Log from './Log';
 
@@ -43,7 +43,7 @@ const Logs: React.FC<Props> = ({ datalogs, expand, fieldsMap }) => (
                 i && log.lastUpdatedBy === arr[i - 1].lastUpdatedBy ? null : (
                   <UserHead
                   // @ts-ignore
-                    data={log.user ? {
+                    user={log.user ? {
                       id: log.user.id,
                       name: log.user.name,
                       loginName: log.user.loginName,

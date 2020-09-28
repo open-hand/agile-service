@@ -10,7 +10,7 @@ import {
 } from '@choerodon/boot';
 import _ from 'lodash';
 import { userApi, componentApi } from '@/api';
-import UserHead from '../../../../components/tag/user';
+import UserHead from '../../../../components/UserHead';
 import './component.less';
 
 const { Option } = Select;
@@ -209,7 +209,7 @@ const EditComponent = (props) => {
                     <Option key={JSON.stringify(user)} value={JSON.stringify(user)}>
                       <div style={{ display: 'inline-flex', alignItems: 'center', padding: '2px' }}>
                         <UserHead
-                          data={user}
+                          user={user}
                         />
                       </div>
                     </Option>

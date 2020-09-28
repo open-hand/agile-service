@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import classNames from 'classnames';
-import TypeTag from '@/components/tag/type';
+import TypeTag from '@/components/TypeTag';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
 import moment from 'moment';
 import { calcDays } from '@/utils/Date';

@@ -9,9 +9,9 @@ import _ from 'lodash';
 import { withRouter } from 'react-router-dom';
 import { sprintApi } from '@/api';
 import { LINK_URL_TO } from '@/constants/LINK_URL';
-import TypeTag from '../../../../components/tag/type';
-import PriorityTag from '../../../../components/tag/priority';
-import StatusTag from '../../../../components/tag/status';
+import TypeTag from '../../../../components/TypeTag';
+import PriorityTag from '../../../../components/PriorityTag';
+import StatusTag from '../../../../components/StatusTag';
 import './SprintDetails.less';
 
 const { TabPane } = Tabs;
@@ -282,7 +282,7 @@ class SprintDetails extends Component {
               <div style={{ marginRight: 12 }}>
                 <PriorityTag
                   style={{ minWidth: 40 }}
-                  data={record.priorityVO}
+                  priority={record.priorityVO}
                 />
               </div>
             </Tooltip>
