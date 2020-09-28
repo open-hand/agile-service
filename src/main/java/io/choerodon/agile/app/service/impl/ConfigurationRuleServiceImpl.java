@@ -71,6 +71,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     @Override
     public ConfigurationRuleVO create(Long projectId, ConfigurationRuleVO configurationRuleVO) {
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getExpressList()), BaseConstants.ErrorCode.DATA_INVALID);
         String sqlQuery = getSqlQuery(configurationRuleVO, projectId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
@@ -282,7 +283,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         } else if (CustomFieldType.isDateHms(customFieldType)) {
             value = ruleExpressVO.getValueDateHms();
             return renderCustomSql(preOp, projectId, fieldId, Collections.singletonList(() ->
-                    conditionSql(getTimeFieldExpress("ffv.date_value"), operation, getTimeValueExpress((String) value))));
+                    conditionSql(getTimeFieldExpress("ffv.date_value"), operation, getTimeValueExpress(valueToString(value)))));
         } else if (CustomFieldType.isNumber(customFieldType)) {
             value = getNumber(operation, ruleExpressVO);
             return renderCustomSql(preOp, projectId, fieldId, 
@@ -410,7 +411,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         if (ConfigurationRule.OpSqlMapping.isLike(operation)){
             value = String.format(ConfigurationRule.TEMPLATE_LIKE_VALUE_SQL, value);
         }
-        return String.format(ConfigurationRule.TEMPLATE_CONDITION_SQL, field, ConfigurationRule.OpSqlMapping.valueOf(operation).getSqlOp(), value);
+        return String.format(ConfigurationRule.TEMPLATE_CONDITION_SQL, field, ConfigurationRule.OpSqlMapping.valueOf(operation).getSqlOp(), valueToString(value));
     }
 
     private void createProjectReportReceiver(Long projectId, ConfigurationRuleVO configurationRuleVO,

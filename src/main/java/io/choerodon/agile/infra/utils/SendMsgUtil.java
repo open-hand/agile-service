@@ -269,7 +269,7 @@ public class SendMsgUtil {
     public MessageSender generateIssueResolvSender(Long projectId, List<String> fieldList, IssueDTO issue) {
         IssueVO result = modelMapper.map(issue, IssueVO.class);
         Boolean completed = issueStatusMapper.selectByStatusId(projectId, result.getStatusId()).getCompleted();
-        if (!fieldList.contains(STATUS_ID) 
+        if ((Objects.nonNull(fieldList) && !fieldList.contains(STATUS_ID))
                 || completed == null 
                 || !completed 
                 || result.getAssigneeId() == null 
@@ -289,9 +289,12 @@ public class SendMsgUtil {
         return siteMsgUtil.issueSolveSender(userIds, userName, summary, url.toString(), projectId, getOperatorNameFromUserDetail());
     }
 
-    public MessageSender generateNoticeIssueStatusSender(Long projectId, Set<Long> userSet, List<String> noticeTypeList, IssueDTO issueDTO,
-                                  CustomUserDetails userDetails) {
+    public MessageSender generateNoticeIssueStatusSender(Long projectId, Set<Long> userSet, List<String> noticeTypeList, 
+                                                         IssueDTO issueDTO, CustomUserDetails userDetails, List<String> fieldList) {
         if (CollectionUtils.isEmpty(userSet)){
+            return null;
+        }
+        if (Objects.nonNull(fieldList) && !fieldList.contains(STATUS_ID)){
             return null;
         }
         Map<String, String> templateArgsMap = new HashMap<>();

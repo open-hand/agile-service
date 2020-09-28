@@ -7,8 +7,9 @@ package io.choerodon.agile.infra.enums;
 public enum RuleNoticeEvent {
     
     ISSUE_CREATED(new String[]{"ISSUECREATE","ISSUEASSIGNEE"}),
-    ISSUE_ASIGNEED(new String[]{"ISSUEASSIGNEE"}),
-    ISSUE_RESOLVED(new String[]{"ISSUESOLVE"});
+    ISSUE_UPDATE(new String[]{"ISSUEASSIGNEE","ISSUESOLVE", "ISSUECHANGESTATUS"}),
+    ISSUE_RESOLVED(new String[]{"ISSUESOLVE"}),
+    ISSUE_STATAUS_CHANGE(new String[]{"ISSUESOLVE","ISSUECHANGESTATUS"});
     
     private String[] messageCodeList;
 
