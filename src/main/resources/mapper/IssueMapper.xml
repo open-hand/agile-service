@@ -807,14 +807,25 @@
                     on ai10.issue_id = aisr2.issue_id WHERE
                     aisr2.sprint_id is null ) OR
                 </if>
-                ai.issue_id in
-                (SELECT aisr2.issue_id FROM agile_issue_sprint_rel aisr2 WHERE
-                aisr2.sprint_id in
-                <foreach collection="searchVO.otherArgs.sprint" item="id" open="(" separator=","
-                         close=")">
-                    #{id}
+                <foreach collection="searchVO.otherArgs.sprint" item="id"  separator="or">
+                    <if test="id==0">
+                        ai.issue_id not in
+                        (
+                            SELECT issue_id
+                            FROM agile_issue_sprint_rel aisr
+                            WHERE project_id = #{projectId}
+                        )
+                    </if>
+                    <if test="id != 0 ">
+                        ai.issue_id in
+                        (
+                            SELECT aisr2.issue_id
+                            FROM agile_issue_sprint_rel aisr2
+                            WHERE aisr2.sprint_id = #{id}
+                        )
+                    </if>
                 </foreach>
-                ))
+                )
             </if>
             <if test='searchVO.otherArgs.epic != null and searchVO.otherArgs.epic.size > 0'>
                 AND (

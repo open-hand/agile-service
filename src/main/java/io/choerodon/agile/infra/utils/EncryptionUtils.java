@@ -365,7 +365,7 @@ public class EncryptionUtils {
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("sprint"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("sprint",
-                    temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // issueIds
