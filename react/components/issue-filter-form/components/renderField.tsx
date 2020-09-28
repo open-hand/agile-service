@@ -98,6 +98,9 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
           />
         );// label={name} style={{ width: '100%' }}
       }
+      case 'quickFilterIds': {
+        return <Select name={code} multiple />;
+      }
       default:
         break;
     }

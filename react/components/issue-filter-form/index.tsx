@@ -1,6 +1,6 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { toJS } from 'mobx';
-import { observer } from 'mobx-react-lite';
+import { observer, useObservable } from 'mobx-react-lite';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import { Row, Col } from 'choerodon-ui';
 import moment from 'moment';
@@ -9,13 +9,87 @@ import { IChosenFieldField } from '@/components/chose-field/types';
 import renderField from './components/renderField';
 import IssueFilterFormDataSet from './IssueFilterFormDataSet';
 import './index.less';
+import { IChosenFields } from '../issue-search/store';
 
 interface Props {
   dataSet?: DataSet, // 传入外部dataSet 将放弃组件内创建
   fields?: IChosenFieldField[], // 全部字段 用以保证dataSet内值能正常接收
   chosenFields?: IChosenFieldField[], // 可控已选字段
   onDelete?: (field: IChosenFieldField) => boolean | void,
-  defaultValue?: any,
+  // defaultValue?: any,
+  // extraFormItem?: React.ReactElement | React.ReactElement[]
+}
+interface IConfig {
+  fields?: IChosenFieldField[],
+  systemDataSetField?: FieldProps[],
+  actions?: {
+    onDelete?: (value: IChosenFieldField) => void | undefined | boolean,
+  },
+  extraFormItems?: IChosenFieldField | IChosenFieldField[]
+}
+interface IIssueFilterFormDataProps {
+  currentFormItems: Map<string, IChosenFieldField>,
+  fields: IChosenFieldField[],
+  dataSet: DataSet,
+}
+interface IIssueFilterComponentProps {
+  dataSet: DataSet, // 传入外部dataSet 将放弃组件内创建
+  fields: IChosenFieldField[], // 全部字段 用以保证dataSet内值能正常接收
+  chosenFields: IChosenFieldField[], // 可控已选字段
+  onDelete: (field: IChosenFieldField) => boolean | void,
+}
+const defaultIssueFilterFormActions = {
+  onDelete: () => { },
+};
+export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps, IIssueFilterComponentProps] {
+  const [fields, setFields] = useState<IChosenFieldField[]>([]);
+  const currentFormItems = useMemo(() => {
+    let maps: Map<string, IChosenFieldField> | undefined;
+    if (config?.extraFormItems) {
+      maps = Array.isArray(config.extraFormItems) ? new Map(config.extraFormItems.map((e) => [e.code, e]))
+        : new Map([[config.extraFormItems.code, config.extraFormItems]]);
+    }
+    return maps || new Map<string, IChosenFieldField>();
+  }, [config?.extraFormItems]);
+  const systemDataSetFieldConfig = useMemo(() => {
+    const localSystemDataSetFieldConfig: Map<string, FieldProps> = new Map();
+    if (config?.systemDataSetField && Array.isArray(config?.systemDataSetField)) {
+      config?.systemDataSetField.forEach((field) => localSystemDataSetFieldConfig.set(field.name!, field));
+    }
+    return [...localSystemDataSetFieldConfig.values()];
+  }, [config?.systemDataSetField]);
+  // 行为集合只初始化一次
+  const actions = useMemo(() => {
+    let { onDelete }: IConfig['actions'] = defaultIssueFilterFormActions;
+    if (config?.actions) {
+      if (config.actions.onDelete) {
+        onDelete = config.actions.onDelete;
+      }
+    }
+    return { onDelete };
+  }, []);
+  useEffect(() => {
+    if (config?.fields && Array.isArray(config?.fields)) { setFields(config.fields); }
+  }, [config?.fields]);
+  const dataSet = useMemo(() => new DataSet(IssueFilterFormDataSet({ fields, systemFields: systemDataSetFieldConfig })), []);
+  const handleDelete = (value: IChosenFieldField) => {
+    const result = actions.onDelete(value);
+    if (typeof (result) === 'undefined' || result) {
+      currentFormItems.delete(value.code);
+    }
+  };
+  const dataProps = {
+    currentFormItems,
+    fields,
+    dataSet,
+  };
+  const componentProps = {
+    fields,
+    dataSet,
+    chosenFields: Array.from(currentFormItems.values()),
+    onDelete: handleDelete,
+  };
+  return [dataProps, componentProps];
 }
 
 export function useIssueFilterFormDataSet(props: { fields: IChosenFieldField[], systemFields?: FieldProps[] }) {

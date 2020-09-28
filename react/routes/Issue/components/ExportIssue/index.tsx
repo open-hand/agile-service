@@ -12,14 +12,18 @@ function openExportIssueModal(fields: Array<IExportIssueField>, chosenFields: Ar
   const store = new IssueExportStore({
     defaultInitFieldAction: (data) => {
       if (data.code === 'sprint') {
+        console.log('defaultInitFieldAction...', data);
         return ({ ...data, immutableCheck: true });
+      }
+      if (data.code === 'quickFilterIds') {
+        return false;
       }
       return data;
     },
     dataSetSystemFields: getFilterFormSystemFields(),
     transformSystemFilter: getTransformSystemFilter,
     transformExportFieldCodes: getExportFieldCodes,
-    actions: {
+    events: {
       exportAxios: (searchData, sort) => issueApi.export(searchData, sort),
       loadRecordAxios: () => issueApi.loadLastImportOrExport('download_file'),
     },
