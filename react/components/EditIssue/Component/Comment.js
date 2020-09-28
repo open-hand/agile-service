@@ -4,12 +4,11 @@ import {
   text2Delta, beforeTextUpload,
 } from '@/utils/richText';
 import { issueCommentApi } from '@/api/IssueComment';
-import UserHead from '../../UserHead';
+import UserHead from '../../tag/user';
 import WYSIWYGEditor from '../../WYSIWYGEditor';
 import WYSIWYGViewer from '../../WYSIWYGViewer';
 import { DatetimeAgo } from '../../CommonComponent';
 import './Comment.less';
-
 
 class Comment extends Component {
   constructor(props, context) {
@@ -71,7 +70,7 @@ class Comment extends Component {
     const canEditOrDelete = (comment && comment.userId === loginUserId) || hasPermission;
     const deltaEdit = text2Delta(editComment);
     return (
-      <React.Fragment>
+      <>
         {
           i > 4 && !commentExpendAll ? null : (
             <div
@@ -82,7 +81,7 @@ class Comment extends Component {
                 expand ? (
                   <Icon
                     role="none"
-                    style={{ 
+                    style={{
                       position: 'absolute',
                       left: 5,
                       top: 15,
@@ -100,7 +99,7 @@ class Comment extends Component {
                 !expand ? (
                   <Icon
                     role="none"
-                    style={{ 
+                    style={{
                       position: 'absolute',
                       left: 5,
                       top: 15,
@@ -116,8 +115,8 @@ class Comment extends Component {
               } */}
                 <div className="c7n-title-commit" style={{ flex: 1 }}>
                   <UserHead
-                    user={{
-                      id: comment.userId,                    
+                    data={{
+                      id: comment.userId,
                       name: comment.userName,
                       realName: comment.userRealName,
                       loginName: comment.userLoginName,
@@ -206,7 +205,7 @@ class Comment extends Component {
             </div>
           )
         }
-      </React.Fragment>
+      </>
 
     );
   }

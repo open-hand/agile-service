@@ -3,10 +3,10 @@ import { Icon, Popconfirm, Tooltip } from 'choerodon-ui';
 import { stores, Permission } from '@choerodon/boot';
 import { withRouter } from 'react-router-dom';
 import { issueApi } from '@/api';
-import PriorityTag from '../../PriorityTag';
-import StatusTag from '../../StatusTag';
-import TypeTag from '../../TypeTag';
-import UserHead from '../../UserHead';
+import TypeTag from '@/components/tag/type';
+import PriorityTag from '../../tag/priority';
+import StatusTag from '../../tag/status';
+import UserHead from '../../tag/user';
 
 const { AppState } = stores;
 
@@ -97,7 +97,7 @@ class IssueList extends Component {
             <Tooltip mouseEnterDelay={0.5} title={`优先级： ${issue.priorityVO.name}`}>
               <div>
                 <PriorityTag
-                  priority={issue.priorityVO}
+                  data={issue.priorityVO}
                 />
               </div>
             </Tooltip>
@@ -110,7 +110,7 @@ class IssueList extends Component {
               <div>
                 <UserHead
                   hiddenText
-                  user={{
+                  data={{
                     id: issue.assigneeId,
                     name: issue.assigneeName,
                     loginName: issue.loginName,

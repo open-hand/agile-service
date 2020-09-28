@@ -6,7 +6,7 @@ import {
 import { find } from 'lodash';
 import { getProjectId } from '@/utils/common';
 import { issueApi, fieldApi } from '@/api';
-import TypeTag from '../../../../../../components/TypeTag';
+import TypeTag from '../../../../../../components/tag/type';
 import Card from '../Card';
 import clickOutSide from '../../../../../../components/CommonComponent/ClickOutSide';
 import StoryMapStore from '../../../../../../stores/project/StoryMap/StoryMapStore';

@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
-import { stores } from '@choerodon/boot';
 import _ from 'lodash';
 import { Modal, Form, Select } from 'choerodon-ui';
 import { issueApi } from '@/api';
-import TypeTag from '../TypeTag';
+import TypeTag from '@/components/tag/type';
 import './ChangeParent.less';
 
-const { AppState } = stores;
 const FormItem = Form.Item;
 const { Option } = Select;
 let sign = false;
@@ -97,7 +95,7 @@ class ChangeParent extends Component {
                 filterOption={false}
                 onFilterChange={this.handleFilterChange.bind(this)}
               >
-                {originIssues.map(issue => (
+                {originIssues.map((issue) => (
                   <Option
                     key={issue.issueId}
                     value={issue.issueId}

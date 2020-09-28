@@ -17,9 +17,9 @@ import LINK_URL, { LINK_URL_TO } from '@/constants/LINK_URL';
 import pic from '../../../assets/image/emptyChart.svg';
 // import finish from './legend/finish.svg';
 import SwithChart from '../Component/switchChart';
-import StatusTag from '../../../components/StatusTag';
-import PriorityTag from '../../../components/PriorityTag';
-import TypeTag from '../../../components/TypeTag';
+import StatusTag from '../../../components/tag/status';
+import PriorityTag from '../../../components/tag/priority';
+import TypeTag from '../../../components/tag/type';
 import ES from '../../../stores/project/epicBurndown';
 import EmptyBlock from '../../../components/EmptyBlock';
 import seeChangeRange from './seeChangeRange.svg';
@@ -488,7 +488,7 @@ class EpicBurndown extends Component {
             <div>
               <PriorityTag
                 style={{ minWidth: 55 }}
-                priority={record.priorityVO}
+                data={record.priorityVO}
               />
             </div>
           ),

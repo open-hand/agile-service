@@ -4,10 +4,10 @@ import { Tooltip } from 'choerodon-ui';
 import classnames from 'classnames';
 import moment from 'moment';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import TypeTag from '@/components/TypeTag';
-import UserHead from '@/components/UserHead';
-import StatusTag from '@/components/StatusTag';
-import PriorityTag from '@/components/PriorityTag';
+import TypeTag from '@/components/tag/type';
+import UserHead from '@/components/tag/user';
+import StatusTag from '@/components/tag/status';
+import PriorityTag from '@/components/tag/priority';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 
 import './IssueItem.less';
@@ -110,7 +110,7 @@ const Item = memo(({ issue, draggingNum }) => {
         ) : ''}
         {issue.assigneeId && (
           <UserHead
-            user={{
+            data={{
               id: issue.assigneeId,
               loginName: issue.assigneeLoginName,
               realName: issue.assigneeRealName,
@@ -127,7 +127,7 @@ const Item = memo(({ issue, draggingNum }) => {
           </div>
         </Tooltip>
         <Tooltip title={`优先级: ${issue.priorityVO ? issue.priorityVO.name : ''}`}>
-          <PriorityTag priority={issue.priorityVO} />
+          <PriorityTag data={issue.priorityVO} />
         </Tooltip>
         <Tooltip title={`故事点: ${issue.storyPoints}`}>
           <div

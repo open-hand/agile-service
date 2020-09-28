@@ -7,7 +7,7 @@ import {
 } from 'choerodon-ui/pro';
 import { fieldApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
-import UserHead from '@/components/UserHead';
+import UserHead from '@/components/tag/user';
 
 const EditorMap = new Map([
   ['text', TextArea],
@@ -131,7 +131,7 @@ const EditorMap = new Map([
               {fieldType === 'member' && valueStr
                 ? (
                   <UserHead
-                    user={valueStr}
+                    data={valueStr}
                   />
                 ) : (valueStr || '无')}
             </div>

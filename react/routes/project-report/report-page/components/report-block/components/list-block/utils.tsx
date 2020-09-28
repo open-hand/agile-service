@@ -1,7 +1,7 @@
 import React from 'react';
-import TypeTag from '@/components/TypeTag';
-import StatusTag from '@/components/StatusTag';
-import PriorityTag from '@/components/PriorityTag';
+import TypeTag from '@/components/tag/type';
+import StatusTag from '@/components/tag/status';
+import PriorityTag from '@/components/tag/priority';
 import { Issue, IIssueColumnName } from '@/common/types';
 import STATUS from '@/constants/STATUS';
 import type { Column } from './table';
@@ -66,7 +66,7 @@ export function getColumnByName(name: IIssueColumnName): Column<Issue> | undefin
       title: '优先级',
       width: 80,
       dataIndex: 'priorityVO',
-      render: (issue) => <PriorityTag priority={issue.priorityVO} />,
+      render: (issue) => <PriorityTag data={issue.priorityVO} />,
     }],
     ['assign', {
       title: '经办人',

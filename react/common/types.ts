@@ -5,6 +5,7 @@ export interface User {
   enabled?: boolean
   id: string
   imageUrl: string | null
+  avatar?: string
   ldap: boolean
   loginName: string
   realName: string
