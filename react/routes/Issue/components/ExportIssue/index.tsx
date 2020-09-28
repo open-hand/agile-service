@@ -10,11 +10,12 @@ import { getExportFieldCodes, getTransformSystemFilter, getFilterFormSystemField
 function openExportIssueModal(fields: Array<IExportIssueField>, chosenFields: Array<any>,
   tableDataSet: DataSet, tableRef: React.RefObject<Table>) {
   const store = new IssueExportStore({
-    defaultInitFieldAction: (data) => {
+    defaultInitFieldAction: (data, self) => {
       if (data.code === 'sprint') {
         return ({ ...data, immutableCheck: true });
       }
       if (data.code === 'quickFilterIds') {
+        self.addExtraField(data);
         return false;
       }
       return data;

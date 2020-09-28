@@ -1,4 +1,3 @@
-/* eslint-disable react/require-default-props */
 import React, {
   useState, useReducer, useEffect, useCallback, useMemo,
 } from 'react';
@@ -10,6 +9,7 @@ import { Progress } from 'choerodon-ui/pro';
 import { ProgressStatus, ProgressType } from 'choerodon-ui/lib/progress/enum';
 import './index.less';
 import { humanizeDuration } from '@/utils/common';
+import { observer } from 'mobx-react-lite';
 /**
  * @param fieldKey websocket传输信息下载url的key  默认fileUrl
  * @param fileName 下载文件名  默认为url 最后一个‘/’后的名
@@ -37,10 +37,12 @@ interface Props {
   autoDownload?: boolean | DownloadProps, /** 完成后是否自动下载 */
   downloadProps?: DownloadProps, /** 下载文件配置，当存在自动下载配置时，以自动下载配置为最高优先级 */
   onFinish?: (messageData: any) => void, /** websocket任务完成后回调 */
+  onStart?: (messageData: any) => void, /** websocket任务开始时回调 */
 }
 interface StateProps {
   visible: boolean,
   data: { [propsName: string]: any },
+  lastSuccessData: { [propsName: string]: any },
 }
 function onHumanizeDuration(createDate?: string, lastUpdateDate?: string, timeFormat: string = 'YYYY-MM-DD HH:mm:ss'): string | null {
   if (!createDate || !lastUpdateDate) {
@@ -56,7 +58,7 @@ function onHumanizeDuration(createDate?: string, lastUpdateDate?: string, timeFo
 }
 
 type ActionProps = Partial<StateProps> & { type: 'init' | 'transmission' | 'visible' | 'finish' }
-function WsProgress(props: Props) { // <StateProps, ActionProps>
+const WsProgress: React.FC<Props> = (props) => { // <StateProps, ActionProps>
   const { percentKey = 'process' } = props;
   const downLoadProps = useMemo(() => {
     const tempProps = props.downloadProps;
@@ -68,6 +70,9 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
   const [stateProgress, dispatch] = useReducer((state: StateProps, action: ActionProps) => {
     switch (action.type) {
       case 'init':
+        if (props.onStart && typeof (props.onStart) === 'function') {
+          props.onStart(action.data);
+        }
         return {
           ...state,
           data: action.data,
@@ -88,9 +93,9 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
           props.onFinish(action.data);
         }
         return {
-          ...state,
+          data: { [percentKey]: 0 },
           visible: false,
-          data: action.data,
+          lastSuccessData: action.data,
         };
       }
 
@@ -99,6 +104,7 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
     }
   }, {
     data: { [percentKey]: 0 },
+    lastSuccessData: {},
     visible: false,
   });
   const { messageKey } = props;
@@ -177,6 +183,6 @@ function WsProgress(props: Props) { // <StateProps, ActionProps>
       ) : renderFinish()}
     </WSHandler>
   );
-}
-export default WsProgress;
+};
+export default observer(WsProgress);
 export { onHumanizeDuration as calculateHumanizeDuration };

@@ -44,14 +44,16 @@ const FormPart: React.FC<FormPartProps> = (props) => {
         {!!btnOnClick && (
           <Button
             className={`${prefixCls}-form-btn`}
-            color={'blue' as ButtonColor}
+            // color={'blue' as ButtonColor}
             onClick={handleClick}
           >
             {btnStatus !== 'NONE' ? '全选' : '全不选'}
           </Button>
         )}
       </div>
-      {children}
+      <div className={`${prefixCls}-form-content`}>
+        {children}
+      </div>
     </div>
   );
 };
@@ -89,11 +91,10 @@ const ExportIssue: React.FC<{}> = () => {
   const [filterData, filterComponentProps] = useIssueFilterForm({
     fields,
     value: choseFieldStore.getAllChosenField,
-    extraFormItems: [...choseFieldStore.getSpecialFields.values()],
+    extraFormItems: store.getExtraFields,
     systemDataSetField: store.dataSetSystemFields,
     events: {
       afterDelete: (item) => {
-        console.log('item', item, choseFieldStore.getAllChosenField);
         choseFieldStore.delChosenFields(item.code);
       },
     },
@@ -112,7 +113,7 @@ const ExportIssue: React.FC<{}> = () => {
   const exportExcel = async () => {
     let search: any = {};
     if (await filterData.dataSet.current?.validate()) {
-      search = getCustomFieldFilters(choseFieldStore.getAllChosenField, filterData.dataSet.current!, store.transformSystemFilter);
+      search = getCustomFieldFilters([...choseFieldStore.getAllChosenField, ...store.getExtraFields], filterData.dataSet.current!, store.transformSystemFilter);
     } else {
       return false;
     }
@@ -127,7 +128,6 @@ const ExportIssue: React.FC<{}> = () => {
     // @ts-ignore
     return store.exportAxios(search, field ? `${field.name},${field.order}` : undefined)
       .then((blobData: any) => {
-        Choerodon.prompt('导出成功');
       }).finally(() => {
 
       });
@@ -141,6 +141,7 @@ const ExportIssue: React.FC<{}> = () => {
     return true;
   };
   const handleFinish = (messageData: any) => {
+    store.setExportBtnHidden(false);
     store.setDownloadInfo(messageData);
   };
   return (
@@ -156,11 +157,12 @@ const ExportIssue: React.FC<{}> = () => {
       <FormPart title="选择字段" btnOnClick={handleChangeFieldStatus}>
         <TableColumnCheckBoxes {...checkBoxComponentProps} />
         {/* <TableColumnCheckBoxes options={checkOptions} dataSet={tableColumnCheckBoxesDataSet} name="exportFieldCodes" /> */}
-        <Button icon="unarchive" style={{ color: '#3f51b5' }} onClick={exportExcel}>导出问题</Button>
+        <Button icon="unarchive" style={{ color: '#3f51b5' }} onClick={exportExcel} hidden={store.exportBtnHidden}>导出问题</Button>
       </FormPart>
       <WsProgress
         messageKey="agile-export-issue"
         onFinish={handleFinish}
+        onStart={() => store.setExportBtnHidden(true)}
         autoDownload={{ fileName: `${getProjectName()}.xlsx` }}
         // visible
         downloadInfo={store.downloadInfo.id ? {
