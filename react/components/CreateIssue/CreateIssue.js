@@ -23,10 +23,10 @@ import {
 import { observer } from 'mobx-react';
 import { IsInProgram } from '@/hooks/useIsInProgram';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
+import TypeTag from '@/components/tag/type';
 import { UploadButton } from '../CommonComponent';
 import SelectNumber from '../SelectNumber';
 import WYSIWYGEditor from '../WYSIWYGEditor';
-import TypeTag from '../TypeTag';
 import './CreateIssue.less';
 import SelectFocusLoad from '../SelectFocusLoad';
 import renderField from './renderField';

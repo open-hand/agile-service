@@ -90,6 +90,5 @@ class Agile extends React.Component {
 }
 export * from './exports';
 export * from '@/hooks';
-export * from '@/components';
 
 export default Agile;

@@ -2,9 +2,9 @@ import React, { useCallback } from 'react';
 import { useHistory } from 'react-router';
 import { Tooltip } from 'choerodon-ui';
 import ProjectHead from '@/components/ProjectHead';
-import PriorityTag from '@/components/PriorityTag';
-import StatusTag from '@/components/StatusTag';
-import TypeTag from '@/components/TypeTag';
+import PriorityTag from '@/components/tag/priority';
+import StatusTag from '@/components/tag/status';
+import TypeTag from '@/components/tag/type';
 import styled from '@emotion/styled';
 import LINK_URL from '@/constants/LINK_URL';
 import to from '@/utils/to';
@@ -90,7 +90,7 @@ function IssueItem({ issue }) {
       <div style={{ margin: '0 4px', overflow: 'hidden' }}>
         <Tooltip mouseEnterDelay={0.5} title={`优先级： ${priorityVO.name}`}>
           <PriorityTag
-            priority={priorityVO}
+            data={priorityVO}
           />
         </Tooltip>
       </div>

@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { Icon } from 'choerodon-ui';
-import './TypeTag.less';
 import { IIssueType, IFeatureType } from '@/common/types';
+import './index.less';
 
 interface Props {
   data: IIssueType

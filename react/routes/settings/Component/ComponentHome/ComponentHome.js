@@ -11,7 +11,7 @@ import TableAction from '@/components/TableAction';
 import CreateComponent from '../ComponentComponent/AddComponent';
 import EditComponent from '../ComponentComponent/EditComponent';
 import DeleteComponent from '../ComponentComponent/DeleteComponent';
-import UserHead from '../../../../components/UserHead';
+import UserHead from '../../../../components/tag/user';
 import Store from './stores';
 
 const { AppState } = stores;
@@ -140,7 +140,7 @@ function ComponentHome() {
           record.get('managerId') ? (
             <UserHead
               style={{ display: 'inline-flex' }}
-              user={{
+              data={{
                 id: record.get('managerId'),
                 loginName: record.get('managerLoginName'),
                 realName: record.get('managerRealName'),

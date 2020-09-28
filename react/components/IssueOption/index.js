@@ -1,5 +1,5 @@
 import React from 'react';
-import TypeTag from '../TypeTag';
+import TypeTag from '@/components/tag/type';
 
 const IssueOption = ({ issue }) => (
   <div style={{

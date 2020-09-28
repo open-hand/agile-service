@@ -7,7 +7,7 @@ import LINK_URL from '@/constants/LINK_URL';
 import to from '@/utils/to';
 import EmptyBlockDashboard from '../../../../components/EmptyBlockDashboard';
 import pic from '../EmptyPics/no_sprint.svg';
-import UserHead from '../../../../components/UserHead';
+import UserHead from '../../../../components/tag/user';
 import './Sprint.less';
 
 const { AppState } = stores;
@@ -115,7 +115,7 @@ class Sprint extends Component {
                         <div>
                           <UserHead
                             tooltip={false}
-                            user={{
+                            data={{
                               id: user.assigneeId,
                               name: user.assigneeName,
                               loginName: user.assigneeName,
