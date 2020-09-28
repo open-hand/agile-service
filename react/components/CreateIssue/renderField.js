@@ -77,6 +77,7 @@ export default function renderField(field) {
     return (
       <TimePicker
         label={fieldName}
+        placeholder={fieldName}
         style={{ display: 'block', width: 330 }}
         defaultOpenValue={moment('00:00:00', 'HH:mm:ss')}
         allowEmpty={!required}
@@ -87,6 +88,7 @@ export default function renderField(field) {
       <DatePicker
         showTime
         label={fieldName}
+        placeholder={fieldName}
         format="YYYY-MM-DD HH:mm:ss"
         style={{ display: 'block', width: 330 }}
         allowClear={!required}
@@ -96,6 +98,7 @@ export default function renderField(field) {
     return (
       <DatePicker
         label={fieldName}
+        placeholder={fieldName}
         format="YYYY-MM-DD"
         style={{ display: 'block', width: 330 }}
         allowClear={!required}
