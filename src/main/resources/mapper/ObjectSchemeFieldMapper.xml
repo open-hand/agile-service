@@ -134,7 +134,7 @@
     </select>
 
     <select id="selectCustomFieldList" resultMap="objectSchemeFieldDetailMap">
-        SELECT
+        SELECT DISTINCT
             osf.id,
             osf.code,
             osf.name,
@@ -148,10 +148,30 @@
         FROM fd_object_scheme_field osf
         LEFT JOIN lookup_value flv ON flv.value_code = osf.field_type and flv.type_code = 'field_type'
         LEFT JOIN fd_field_option ffo ON osf.id = ffo.field_id
+        LEFT JOIN fd_object_scheme_field_extend osfe ON osf.id = osfe.field_id
         WHERE
         osf.organization_id = #{organizationId}
         AND
         (osf.project_id = #{projectId} OR osf.project_id IS NULL)
+        <if test="issueType != null">
+            <if test="'issues'.equals(issueType)">
+                AND
+                (
+                osfe.issue_type = 'issue_epic'
+                or osfe.issue_type = 'story'
+                or osfe.issue_type = 'bug'
+                or osfe.issue_type = 'task'
+                or osfe.issue_type = 'sub_task'
+                )
+            </if>
+            <if test="'programIssues'.equals(issueType)">
+                AND
+                (
+                osfe.issue_type = 'issue_epic'
+                or osfe.issue_type = 'feature'
+                )
+            </if>
+        </if>
         order by osf.id DESC
     </select>
 
