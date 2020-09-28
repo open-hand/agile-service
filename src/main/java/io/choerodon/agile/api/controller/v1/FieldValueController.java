@@ -131,8 +131,9 @@ public class FieldValueController {
     @ApiOperation(value = "获取项目下的自定义字段")
     @GetMapping("/list/custom_field")
     public ResponseEntity<List<ObjectSchemeFieldDetailVO>> queryCustomFieldList(@ApiParam(value = "项目id", required = true)
-                                                                                @PathVariable("project_id") Long projectId) {
-        return new ResponseEntity<>(objectSchemeFieldService.queryCustomFieldList(projectId), HttpStatus.OK);
+                                                                                @PathVariable("project_id") Long projectId,
+                                                                                @RequestParam(defaultValue = "null") String issueType) {
+        return new ResponseEntity<>(objectSchemeFieldService.queryCustomFieldList(projectId, issueType), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
