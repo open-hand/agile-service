@@ -36,6 +36,7 @@ class Agile extends React.Component {
     super(props);
     setHistory(props.history);
   }
+
   // componentDidCatch(error, info) {
   //   Choerodon.prompt(error.message);
   // }
