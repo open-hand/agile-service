@@ -12,7 +12,6 @@ function openExportIssueModal(fields: Array<IExportIssueField>, chosenFields: Ar
   const store = new IssueExportStore({
     defaultInitFieldAction: (data) => {
       if (data.code === 'sprint') {
-        console.log('defaultInitFieldAction...', data);
         return ({ ...data, immutableCheck: true });
       }
       if (data.code === 'quickFilterIds') {

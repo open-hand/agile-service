@@ -26,5 +26,7 @@ interface IUseChoseFieldProps {
 interface IChosenFieldFieldEvents {
     initField?: (data: IChosenFieldField, currentChosenField: Map<string, IChosenFieldField>) => IChosenFieldField | false | undefined | void,
     initChosenField?: (data: IChosenFieldField, currentChosenField: Map<string, IChosenFieldField>) => IChosenFieldField | false | undefined | void,
+    choseField?: (data: IChosenFieldField | IChosenFieldField[], status: 'add' | 'del') => void,
+    cancelChosenField?: (data: IChosenFieldField) => void,
 }
 export { IChosenFieldField, IUseChoseFieldProps, IChosenFieldFieldEvents };

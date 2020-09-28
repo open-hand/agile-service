@@ -1,4 +1,6 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, {
+  useMemo, useEffect, useState, useCallback,
+} from 'react';
 import { toJS } from 'mobx';
 import { observer, useObservable } from 'mobx-react-lite';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
@@ -21,9 +23,13 @@ interface Props {
 }
 interface IConfig {
   fields?: IChosenFieldField[],
+  value?: IChosenFieldField[], /** 可控值value */
   systemDataSetField?: FieldProps[],
   actions?: {
-    onDelete?: (value: IChosenFieldField) => void | undefined | boolean,
+    onAdd?: (value: IChosenFieldField) => void | undefined,
+  },
+  events?: {
+    afterDelete?: (value: IChosenFieldField) => void | undefined | boolean,
   },
   extraFormItems?: IChosenFieldField | IChosenFieldField[]
 }
@@ -31,6 +37,7 @@ interface IIssueFilterFormDataProps {
   currentFormItems: Map<string, IChosenFieldField>,
   fields: IChosenFieldField[],
   dataSet: DataSet,
+  actions: Required<IConfig['actions']>,
 }
 interface IIssueFilterComponentProps {
   dataSet: DataSet, // 传入外部dataSet 将放弃组件内创建
@@ -38,19 +45,20 @@ interface IIssueFilterComponentProps {
   chosenFields: IChosenFieldField[], // 可控已选字段
   onDelete: (field: IChosenFieldField) => boolean | void,
 }
-const defaultIssueFilterFormActions = {
-  onDelete: () => { },
+const defaultIssueFilterFormEvents = {
+  afterDelete: () => { },
 };
 export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps, IIssueFilterComponentProps] {
   const [fields, setFields] = useState<IChosenFieldField[]>([]);
-  const currentFormItems = useMemo(() => {
-    let maps: Map<string, IChosenFieldField> | undefined;
+  const extraFormItems = useObservable<Map<string, IChosenFieldField>>(new Map());
+  const currentFormItems = useObservable<Map<string, IChosenFieldField>>(new Map());
+  useEffect(() => {
     if (config?.extraFormItems) {
-      maps = Array.isArray(config.extraFormItems) ? new Map(config.extraFormItems.map((e) => [e.code, e]))
-        : new Map([[config.extraFormItems.code, config.extraFormItems]]);
+      Array.isArray(config.extraFormItems) ? config.extraFormItems.forEach((e) => extraFormItems.set(e.code, e))
+        : extraFormItems.set(config.extraFormItems.code, config.extraFormItems);
     }
-    return maps || new Map<string, IChosenFieldField>();
   }, [config?.extraFormItems]);
+  // const chosenFields = useObservable<IChosenFieldField[]>([]);
   const systemDataSetFieldConfig = useMemo(() => {
     const localSystemDataSetFieldConfig: Map<string, FieldProps> = new Map();
     if (config?.systemDataSetField && Array.isArray(config?.systemDataSetField)) {
@@ -58,22 +66,26 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
     }
     return [...localSystemDataSetFieldConfig.values()];
   }, [config?.systemDataSetField]);
-  // 行为集合只初始化一次
-  const actions = useMemo(() => {
-    let { onDelete }: IConfig['actions'] = defaultIssueFilterFormActions;
-    if (config?.actions) {
-      if (config.actions.onDelete) {
-        onDelete = config.actions.onDelete;
+  const events = useMemo(() => {
+    let { afterDelete }: IConfig['events'] = defaultIssueFilterFormEvents;
+    if (config?.events) {
+      if (config.events.afterDelete) {
+        afterDelete = config.events.afterDelete;
       }
     }
-    return { onDelete };
-  }, []);
+    return { afterDelete };
+  }, [config?.events]);
+  const handleAdd = (value: IChosenFieldField) => {
+    currentFormItems.set(value.code, value);
+    console.log('cur', currentFormItems);
+  };
+
   useEffect(() => {
     if (config?.fields && Array.isArray(config?.fields)) { setFields(config.fields); }
   }, [config?.fields]);
-  const dataSet = useMemo(() => new DataSet(IssueFilterFormDataSet({ fields, systemFields: systemDataSetFieldConfig })), []);
+  const dataSet = useMemo(() => new DataSet(IssueFilterFormDataSet({ fields, systemFields: systemDataSetFieldConfig })), [fields, systemDataSetFieldConfig]);
   const handleDelete = (value: IChosenFieldField) => {
-    const result = actions.onDelete(value);
+    const result = events.afterDelete(value);
     if (typeof (result) === 'undefined' || result) {
       currentFormItems.delete(value.code);
     }
@@ -82,11 +94,14 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
     currentFormItems,
     fields,
     dataSet,
+    actions: { onAdd: handleAdd },
   };
   const componentProps = {
     fields,
     dataSet,
-    chosenFields: Array.from(currentFormItems.values()),
+    currentFormItems,
+    extraFormItems,
+    chosenFields: config?.value ?? [...currentFormItems.values()],
     onDelete: handleDelete,
   };
   return [dataProps, componentProps];
@@ -120,8 +135,7 @@ const IssueFilterForm: React.FC<Props> = (props) => {
         }
       });
     }
-  }, []);
-
+  }, [dataSet]);
   return (
     <>
       <Form dataSet={dataSet}>

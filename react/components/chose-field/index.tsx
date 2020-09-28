@@ -12,6 +12,7 @@ import { IChosenFieldField, IChosenFieldFieldEvents } from './types';
 
 interface Props {
   store: ChoseFieldStore,
+  choseField?: (data: IChosenFieldField | IChosenFieldField[], status: 'add' | 'del') => void,
   dropDownProps?: Partial<DropDownProps>,
   dropDownBtnChildren?: ReactElement | ReactElement[] | string | null,
   dropDownBtnProps?: Partial<ButtonProps>,
@@ -35,6 +36,7 @@ interface IChoseFieldDataProps {
 }
 interface IChoseFieldComponentProps {
   store: ChoseFieldStore,
+  choseField?: (data: IChosenFieldField | IChosenFieldField[], status: 'add' | 'del') => void,
   dropDownProps?: Partial<DropDownProps>,
   dropDownBtnChildren?: ReactElement | ReactElement[] | string | null,
   dropDownBtnProps?: Partial<ButtonProps>,
@@ -102,6 +104,7 @@ export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps
   };
   const componentProps: IChoseFieldComponentProps = {
     store,
+    choseField: config?.events?.choseField,
     dropDownBtnChildren: config?.dropDownBtnChildren || '添加筛选',
     dropDownBtnProps: config?.dropDownBtnProps,
     dropDownProps: config?.dropDownProps,
@@ -145,7 +148,7 @@ const ChooseField: React.FC<Props> = (props) => {
               e.stopPropagation();
             }}
           >
-            <FieldList store={props.store} />
+            <FieldList store={props.store} closeMenu={() => setHidden(true)} onChose={props.choseField} />
           </div>
         )}
         trigger={['click']}

@@ -65,10 +65,8 @@ class IssueExportStore {
   }
 
   @action setDefaultCurrentChosenFields(dataArr: IChosenFieldField[]) {
-    console.log('this.currentChosenFields', [...this.currentChosenFields.values()]);
     dataArr.forEach((v) => {
       if (this.currentChosenFields.has(v.code)) {
-        console.log('v......0', v);
         this.currentChosenFields.set(v.code, { ...this.currentChosenFields.get(v.code)!, value: v.code });
       } else {
         this.currentChosenFields.set(v.code, v);

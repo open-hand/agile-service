@@ -68,13 +68,13 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
         return <SelectPriority name={code} multiple {...otherComponentProps} />;
       case 'label':
         // @ts-ignore
-        return <SelectLabel name={code} multiple {...otherComponentProps} />;
+        return <SelectLabel name={code} multiple valueField="labelId" {...otherComponentProps} />;
       case 'component':
         // @ts-ignore
-        return <SelectComponent name={code} multiple {...otherComponentProps} />;
+        return <SelectComponent name={code} valueField="componentId" multiple {...otherComponentProps} />;
       case 'version':
         // @ts-ignore
-        return <SelectVersion name={code} {...otherComponentProps} />;
+        return <SelectVersion name={code} valueField="versionId" {...otherComponentProps} />;
       case 'feature': {
         // @ts-ignore
         return <FeatureProjectField name={code} multiple featureIds={defaultValue} {...otherComponentProps} />;// label={name} style={{ width: '100%' }}
