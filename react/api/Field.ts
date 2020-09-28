@@ -1,5 +1,5 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
 
 interface IFiled {
   context: string, // "task"
@@ -45,7 +45,7 @@ class FieldApi {
  * 加载字段配置
  * @returns {V|*}
  */
-  getFields(dto: IFiled, projectId?:number) {
+  getFields(dto: IFiled, projectId?: number) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'post',
@@ -76,8 +76,14 @@ class FieldApi {
   /**
    * 获取项目下自定义的字段
    */
-  getCustomFields() {
-    return axios.get(`${this.prefix}/field_value/list/custom_field`);
+  getCustomFields(issueType?: 'issues' | 'programIssues') {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/field_value/list/custom_field`,
+      params: {
+        issueType: issueType ?? getApplyType() === 'program' ? 'programIssues' : 'issues',
+      },
+    });
   }
 
   /**
@@ -85,7 +91,7 @@ class FieldApi {
    * @param dto 自定义字段列表
    * @returns {V|*}
    */
-  createFieldValue(issueId: number, schemeCode: string, dto?: Array<any>, projectId?:number) {
+  createFieldValue(issueId: number, schemeCode: string, dto?: Array<any>, projectId?: number) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'post',
