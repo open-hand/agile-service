@@ -283,7 +283,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         } else if (CustomFieldType.isDateHms(customFieldType)) {
             value = ruleExpressVO.getValueDateHms();
             return renderCustomSql(preOp, projectId, fieldId, Collections.singletonList(() ->
-                    conditionSql(getTimeFieldExpress("ffv.date_value"), operation, getTimeValueExpress((String) value))));
+                    conditionSql(getTimeFieldExpress("ffv.date_value"), operation, getTimeValueExpress(valueToString(value)))));
         } else if (CustomFieldType.isNumber(customFieldType)) {
             value = getNumber(operation, ruleExpressVO);
             return renderCustomSql(preOp, projectId, fieldId, 
@@ -411,7 +411,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         if (ConfigurationRule.OpSqlMapping.isLike(operation)){
             value = String.format(ConfigurationRule.TEMPLATE_LIKE_VALUE_SQL, value);
         }
-        return String.format(ConfigurationRule.TEMPLATE_CONDITION_SQL, field, ConfigurationRule.OpSqlMapping.valueOf(operation).getSqlOp(), value);
+        return String.format(ConfigurationRule.TEMPLATE_CONDITION_SQL, field, ConfigurationRule.OpSqlMapping.valueOf(operation).getSqlOp(), valueToString(value));
     }
 
     private void createProjectReportReceiver(Long projectId, ConfigurationRuleVO configurationRuleVO,
