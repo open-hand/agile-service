@@ -20,6 +20,7 @@ import { ISprint } from '@/common/types';
 import SelectStatus from './field/StatusField';
 import FeatureProjectField from './field/FeatureProjectField';
 import PIField from './field/pi-field';
+import QuickFilterField from './field/quick-filter-field';
 
 const { Option } = Select;
 const singleList = ['radio', 'single'];
@@ -99,7 +100,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
         );// label={name} style={{ width: '100%' }}
       }
       case 'quickFilterIds': {
-        return <Select name={code} multiple />;
+        return <QuickFilterField name={code} multiple {...otherComponentProps} />;
       }
       default:
         break;

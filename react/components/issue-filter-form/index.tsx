@@ -19,7 +19,7 @@ interface Props {
   chosenFields?: IChosenFieldField[], // 可控已选字段
   onDelete?: (field: IChosenFieldField) => boolean | void,
   // defaultValue?: any,
-  // extraFormItem?: React.ReactElement | React.ReactElement[]
+  extraFormItems?: IChosenFieldField[],
 }
 interface IConfig {
   fields?: IChosenFieldField[],
@@ -31,7 +31,7 @@ interface IConfig {
   events?: {
     afterDelete?: (value: IChosenFieldField) => void | undefined | boolean,
   },
-  extraFormItems?: IChosenFieldField | IChosenFieldField[]
+  extraFormItems?: IChosenFieldField[]
 }
 interface IIssueFilterFormDataProps {
   currentFormItems: Map<string, IChosenFieldField>,
@@ -52,10 +52,10 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
   const [fields, setFields] = useState<IChosenFieldField[]>([]);
   const extraFormItems = useObservable<Map<string, IChosenFieldField>>(new Map());
   const currentFormItems = useObservable<Map<string, IChosenFieldField>>(new Map());
+  // 初始化额外form项
   useEffect(() => {
-    if (config?.extraFormItems) {
-      Array.isArray(config.extraFormItems) ? config.extraFormItems.forEach((e) => extraFormItems.set(e.code, e))
-        : extraFormItems.set(config.extraFormItems.code, config.extraFormItems);
+    if (config?.extraFormItems && Array.isArray(config.extraFormItems)) {
+      config?.extraFormItems.forEach((item) => !extraFormItems.has(item.code) && extraFormItems.set(item.code, item));
     }
   }, [config?.extraFormItems]);
   // const chosenFields = useObservable<IChosenFieldField[]>([]);
@@ -100,7 +100,7 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
     fields,
     dataSet,
     currentFormItems,
-    extraFormItems,
+    extraFormItems: [...extraFormItems.values()],
     chosenFields: config?.value ?? [...currentFormItems.values()],
     onDelete: handleDelete,
   };
@@ -120,12 +120,12 @@ const IssueFilterForm: React.FC<Props> = (props) => {
   }, [props.dataSet, props.fields]);
 
   useEffect(() => {
+    const dateFormatArr = ['HH:mm:ss', 'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD'];
     // 初始化值
     if (props.chosenFields) {
-      const dateFormatArr = ['HH:mm:ss', 'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD'];
       props.chosenFields.forEach((field) => {
-        const dateIndex = ['time', 'datetime', 'date'].indexOf(field.fieldType ?? '');
         let values = toJS(field.value);
+        const dateIndex = ['time', 'datetime', 'date'].indexOf(field.fieldType ?? '');
         if (dateIndex !== -1) {
           values = Array.isArray(values) ? values.map((item) => moment(item, dateFormatArr[dateIndex]))
             : moment(values, dateFormatArr);
@@ -135,22 +135,31 @@ const IssueFilterForm: React.FC<Props> = (props) => {
         }
       });
     }
+    props.extraFormItems?.forEach((field) => {
+      let values = toJS(field.value);
+      const dateIndex = ['time', 'datetime', 'date'].indexOf(field.fieldType ?? '');
+      if (dateIndex !== -1) {
+        values = Array.isArray(values) ? values.map((item) => moment(item, dateFormatArr[dateIndex]))
+          : moment(values, dateFormatArr);
+      }
+      if (values) {
+        dataSet.current?.set(field.code, values);
+      }
+    });
   }, [dataSet]);
+  const render = (item: IChosenFieldField) => renderField(item, {
+    style: { width: '100%' }, label: item.name, key: item.code, ...item.otherComponentProps,
+  }, { dataSet });
   return (
     <>
       <Form dataSet={dataSet}>
+        {props.extraFormItems?.map((item) => render(item))}
         {props.chosenFields?.map((item, index) => (typeof (item.immutableCheck) === 'boolean' || typeof (props.onDelete) === 'undefined'
-          ? renderField(item, {
-            style: { width: '100%' }, label: item.name, key: item.code, ...item.otherComponentProps,
-          }, { dataSet })
+          ? render(item)
           : (
             <Row key={item.code}>
               <Col span={22}>
-                {renderField(item, {
-                  style: { width: '100%' }, label: item.name, key: item.code, ...item.otherComponentProps,
-                }, {
-                  dataSet,
-                })}
+                {render(item)}
               </Col>
               <Col span={2}>
                 <Icon

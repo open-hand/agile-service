@@ -1,5 +1,6 @@
 import { IChosenFieldField, IChosenFieldFieldEvents } from '@/components/chose-field/types';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
+import { findIndex } from 'lodash';
 import { useLocalStore } from 'mobx-react-lite';
 import { observable, action, computed } from 'mobx';
 
@@ -18,10 +19,11 @@ interface IDownLoadInfo {
 interface Props {
   dataSetSystemFields?: FieldProps[],
   defaultCheckedExportFields?: string[],
-  defaultInitFieldAction?: (data: IChosenFieldField) => IChosenFieldField | false | undefined | void,
+  defaultInitFieldAction?: (data: IChosenFieldField, store: IssueExportStore) => IChosenFieldField | false | undefined | void,
   transformSystemFilter?: (data: any) => any,
   transformExportFieldCodes?: (data: Array<string>) => Array<string>,
   events?: EventsProps,
+  extraFields?: IChosenFieldField[],
 }
 class IssueExportStore {
   dataSetSystemFields: FieldProps[] = [];
@@ -38,6 +40,8 @@ class IssueExportStore {
 
   defaultExportBefore = (data: any) => data;
 
+  @observable extraFields: IChosenFieldField[];
+
   setDefaultCheckedExportFields(data: any) {
     this.defaultCheckedExportFields = data;
   }
@@ -48,16 +52,33 @@ class IssueExportStore {
     this.transformSystemFilter = props?.transformSystemFilter || ((data) => data);
     this.transformExportFieldCodes = props?.transformExportFieldCodes || ((data) => data);
     this.defaultCheckedExportFields = props?.defaultCheckedExportFields || [];
-    this.defaultInitFieldAction = props?.defaultInitFieldAction || ((data: IChosenFieldField) => data);
+    this.defaultInitFieldAction = props?.defaultInitFieldAction || ((data: IChosenFieldField, store: IssueExportStore) => data);
+    this.extraFields = props?.extraFields || [];
   }
 
   @observable downloadInfo = {} as IDownLoadInfo;
+
+  @observable exportBtnHidden: boolean = false;
 
   @observable currentChosenFields = observable.map<string, IChosenFieldField>();
 
   @action
   setDownloadInfo(data: IDownLoadInfo) {
     this.downloadInfo = data;
+  }
+
+  @action addExtraField(data: IChosenFieldField) {
+    const fieldIndex = findIndex(this.extraFields, { code: data.code });
+    fieldIndex && this.extraFields.splice(fieldIndex, 1, data);
+  }
+
+  @computed get getExtraFields() {
+    return this.extraFields.slice();
+  }
+
+  @action
+  setExportBtnHidden(data: boolean) {
+    this.exportBtnHidden = data;
   }
 
   @computed get getDownloadInfo() {
@@ -81,14 +102,16 @@ class IssueExportStore {
 
   @action
   initField(field: IChosenFieldField): IChosenFieldField | false {
+    const that = this;
     const { initField = this.defaultInitFieldAction } = this.events;
-    return initField(field);
+    return initField(field, that);
   }
 
   @action
   initChosenField(field: IChosenFieldField): IChosenFieldField | false {
+    const that = this;
     const { initChosenField = this.defaultInitFieldAction } = this.events;
-    return initChosenField(field);
+    return initChosenField(field, that);
   }
 
   @action

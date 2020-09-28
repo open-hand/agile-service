@@ -3,9 +3,11 @@ import React, {
 } from 'react';
 import { Button } from 'choerodon-ui/pro';
 import { Dropdown } from 'choerodon-ui';
+import { omit } from 'lodash';
 import { DropDownProps } from 'choerodon-ui/lib/dropdown';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import { observer } from 'mobx-react-lite';
+import { IFiledListItemProps, pageConfigApi } from '@/api';
 import FieldList, { useChoseFieldStore } from './FieldList';
 import ChoseFieldStore from './store';
 import { IChosenFieldField, IChosenFieldFieldEvents } from './types';
@@ -48,8 +50,8 @@ const defaultInitFieldAction = {
 export function useChoseField(config?: IChoseFieldConfig): [IChoseFieldDataProps, IChoseFieldComponentProps] {
   const [fields, setFields] = useState<IChosenFieldField[]>([]);
   const loadData = async () => {
-    console.log('loadData...');
-    return [];
+    const { content } = await pageConfigApi.load(); //
+    setFields(content.map((item: IFiledListItemProps) => (item.system ? omit(item, 'id') : item)));
   };
   useEffect(() => {
     if (typeof (config?.fields) === 'undefined') {
