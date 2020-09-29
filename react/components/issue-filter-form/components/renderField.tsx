@@ -16,11 +16,12 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import SelectSubProject from '@/components/select/select-sub-project';
 import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
-import { ISprint } from '@/common/types';
+import { ISprint, User } from '@/common/types';
 import SelectStatus from './field/StatusField';
 import FeatureProjectField from './field/FeatureProjectField';
 import PIField from './field/pi-field';
 import QuickFilterField from './field/quick-filter-field';
+import MemberField from './field/member-field';
 
 const { Option } = Select;
 const singleList = ['radio', 'single'];
@@ -201,17 +202,18 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
     case 'member':
     {
       return (
-        <SelectUser
+        <MemberField
           label="user"
           multiple
             // @ts-ignore
-          selectedUser={defaultValue ? defaultValue.map((item: string) => ({ id: item })) : undefined}
+          selectedUserIds={defaultValue ? defaultValue.map((item: string) => ({ id: item })) : undefined}
             // request={(({ filter, page }) => userApi.getAllInProject(filter, page).then((res) => {
             //   if (res.list && Array.isArray(res.list)) {
             //   }
             // }))}
           style={{ width: '100%' }}
           name={code}
+          {...otherComponentProps}
         />
       );
     }
