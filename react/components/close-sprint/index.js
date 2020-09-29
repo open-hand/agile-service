@@ -35,7 +35,7 @@ class CloseSprint extends Component {
     } = this.props;
     const data = {
       incompleteIssuesDestination: selectChose,
-      projectId: parseInt(AppState.currentMenuType.id, 10),
+      projectId: AppState.currentMenuType.id,
       sprintId,
     };
     sprintApi.complete(data).then((res) => {
@@ -76,7 +76,7 @@ class CloseSprint extends Component {
           }}
         >
           {!_.isNull(completeMessage) ? (
-            completeMessage.sprintNames.map(item => (
+            completeMessage.sprintNames.map((item) => (
               <Option value={item.sprintId}>{item.sprintName}</Option>
             ))
           ) : ''}
