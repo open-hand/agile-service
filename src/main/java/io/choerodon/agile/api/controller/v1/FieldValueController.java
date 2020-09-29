@@ -123,8 +123,10 @@ public class FieldValueController {
                                                                        @ApiParam(value = "组织id", required = true)
                                                                        @RequestParam Long organizationId,
                                                                        @ApiParam(value = "方案编码", required = true)
-                                                                       @RequestParam String schemeCode) {
-        return new ResponseEntity<>(objectSchemeFieldService.getIssueHeadForAgile(organizationId, projectId, schemeCode), HttpStatus.OK);
+                                                                       @RequestParam String schemeCode,
+                                                                       @ApiParam(value = "字段类型", required = true)
+                                                                       @RequestParam(defaultValue = "null") String issueType) {
+        return new ResponseEntity<>(objectSchemeFieldService.getIssueHeadForAgile(organizationId, projectId, schemeCode, issueType), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
