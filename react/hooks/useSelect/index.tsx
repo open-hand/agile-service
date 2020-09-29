@@ -102,7 +102,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
   }, 500), [loadData]);
   useEffect(() => {
     loadData({ filter: '' });
-  }, [config, loadData]);
+  }, [loadData]);
   useImperativeHandle<Object, RefHandle>(ref, () => ({
     refresh: loadData,
   }));
