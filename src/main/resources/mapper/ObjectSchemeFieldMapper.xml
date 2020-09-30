@@ -38,17 +38,38 @@
     </delete>
 
     <select id="listQuery" resultMap="objectSchemeFieldMap">
-        SELECT  DISTINCT osf.*,
+        SELECT  osf.*,
         flv.name as field_type_name
         FROM fd_object_scheme_field osf
         LEFT JOIN lookup_value flv ON flv.value_code = osf.field_type and flv.type_code = 'field_type'
-        LEFT JOIN fd_object_scheme_field_extend osfe ON osf.id = osfe.field_id
-        WHERE (osf.is_system = 1 OR (
-        osf.organization_id = #{organizationId}
-        AND osf.project_id is null
-        <if test="projectId != null">
-            OR osf.project_id = #{projectId}
-        </if>
+        WHERE
+        (osf.is_system = 1
+        OR
+        (
+            osf.organization_id = #{organizationId}
+            AND
+            (
+                osf.project_id is null
+                <if test="projectId != null">
+                    OR osf.project_id = #{projectId}
+                </if>
+            )
+            <if test='searchVO.issueTypeList != null and searchVO.issueTypeList != ""'>
+            AND osf.id IN (
+                SELECT
+                osfe.field_id
+                FROM
+                fd_object_scheme_field_extend osfe
+                WHERE
+                osfe.field_id = osf.id
+                <if test='searchVO.issueTypeList == "agileIssueType"'>
+                    AND osfe.issue_type IN ('issue_epic', 'story', 'bug', 'task', 'sub_task')
+                </if>
+                <if test='searchVO.issueTypeList == "programIssueType"'>
+                    AND osfe.issue_type IN ('issue_epic', 'feature')
+                </if>
+            )
+            </if>
         ))
         <if test="searchVO.context != null">
             AND osf.context = #{searchVO.context}
@@ -61,27 +82,6 @@
         </if>
         <if test="searchVO.code != null">
             AND osf.code = #{searchVO.code}
-        </if>
-        <if test='searchVO.issueType != null and searchVO.issueType != ""'>
-            AND (
-            (
-            osf.is_system != 1
-            AND (
-            <if test='searchVO.issueType == "agileIssueType"'>
-                osfe.issue_type = 'issue_epic'
-                or osfe.issue_type = 'story'
-                or osfe.issue_type = 'bug'
-                or osfe.issue_type = 'task'
-                or osfe.issue_type = 'sub_task'
-            </if>
-            <if test='searchVO.issueType == "programIssueType"'>
-                osfe.issue_type = 'issue_epic'
-                OR osfe.issue_type = 'feature'
-            </if>
-            )
-            )
-            OR osf.is_system = 1
-            )
         </if>
         order by osf.id asc
     </select>
@@ -156,7 +156,7 @@
     </select>
 
     <select id="selectCustomFieldList" resultMap="objectSchemeFieldDetailMap">
-        SELECT DISTINCT
+        SELECT
             osf.id,
             osf.code,
             osf.name,
@@ -171,29 +171,22 @@
         FROM fd_object_scheme_field osf
         LEFT JOIN lookup_value flv ON flv.value_code = osf.field_type and flv.type_code = 'field_type'
         LEFT JOIN fd_field_option ffo ON osf.id = ffo.field_id
-        LEFT JOIN fd_object_scheme_field_extend osfe ON osf.id = osfe.field_id
         WHERE
         osf.organization_id = #{organizationId}
         AND
         (osf.project_id = #{projectId} OR osf.project_id IS NULL)
-        <if test='issueType != null and issueType != ""'>
-            <if test='issueType == "agileIssueType"'>
-                AND
-                (
-                osfe.issue_type = 'issue_epic'
-                or osfe.issue_type = 'story'
-                or osfe.issue_type = 'bug'
-                or osfe.issue_type = 'task'
-                or osfe.issue_type = 'sub_task'
-                )
+        <if test='issueTypeList != null and issueTypeList != ""'>
+        AND osf.id in (
+            SELECT osfe.field_id
+            FROM fd_object_scheme_field_extend osfe
+            WHERE osfe.field_id = osf.id
+            <if test='issueTypeList == "agileIssueType"'>
+                AND osfe.issue_type IN ('issue_epic', 'story', 'bug', 'task', 'sub_task')
             </if>
-            <if test='issueType == "programIssueType" '>
-                AND
-                (
-                osfe.issue_type = 'issue_epic'
-                or osfe.issue_type = 'feature'
-                )
+            <if test='issueTypeList == "programIssueType" '>
+                AND osfe.issue_type IN ('issue_epic', 'feature')
             </if>
+            )
         </if>
         order by osf.id DESC
     </select>
