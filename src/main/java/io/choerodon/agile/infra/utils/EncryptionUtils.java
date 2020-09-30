@@ -551,7 +551,9 @@ public class EncryptionUtils {
                     object = value.stream().map(v -> encrypt ?
                             (StringUtils.isNumeric(v) ?
                                     (Arrays.asList(ENCRYPT_INGORE_FIELD).contains(next.getKey()) && Arrays.asList(IGNORE_VALUES).contains(v) ?
-                                            v : encrypt(Long.parseLong(v))) : v) : decrypt(v)).collect(Collectors.toList());
+                                            v : encrypt(Long.parseLong(v))) : v) : (StringUtils.isNumeric(v) ?
+                                                (Arrays.asList(ENCRYPT_INGORE_FIELD).contains(next.getKey()) && Arrays.asList(IGNORE_VALUES).contains(v) ?
+                                                        v : decrypt(v)) : v)).collect(Collectors.toList());
                 }
                 else {
                     object = new ArrayList<>();
