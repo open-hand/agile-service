@@ -119,7 +119,7 @@ public class IssueController {
     public ResponseEntity<IssueVO> updateIssueStatus(@ApiParam(value = "项目id", required = true)
                                                       @PathVariable(name = "project_id") Long projectId,
                                                      @ApiParam(value = "转换id", required = true)
-                                                      @RequestParam Long transformId,
+                                                      @RequestParam @Encrypt Long transformId,
                                                      @ApiParam(value = "问题id", required = true)
                                                       @RequestParam @Encrypt Long issueId,
                                                      @ApiParam(value = "版本号", required = true)
