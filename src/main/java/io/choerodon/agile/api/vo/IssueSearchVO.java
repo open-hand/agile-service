@@ -33,7 +33,7 @@ public class IssueSearchVO {
     private String description;
 
     @ApiModelProperty(value = "经办人id")
-    @Encrypt
+    @Encrypt(ignoreValue = {"0"})
     private Long assigneeId;
 
     @ApiModelProperty(value = "经办人名称")
