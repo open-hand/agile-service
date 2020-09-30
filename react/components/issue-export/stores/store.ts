@@ -3,6 +3,9 @@ import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import { findIndex } from 'lodash';
 import { useLocalStore } from 'mobx-react-lite';
 import { observable, action, computed } from 'mobx';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
+import { DataSet } from 'choerodon-ui/pro/lib';
 
 interface EventsProps extends IChosenFieldFieldEvents {
   loadRecordAxios?: (store: IssueExportStore) => Promise<any>
@@ -23,6 +26,7 @@ interface Props {
   transformSystemFilter?: (data: any) => any,
   transformExportFieldCodes?: (data: Array<string>) => Array<string>,
   events?: EventsProps,
+  renderField?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet }) => React.ReactElement | false | null,
   extraFields?: IChosenFieldField[],
 }
 class IssueExportStore {
@@ -40,6 +44,8 @@ class IssueExportStore {
 
   defaultExportBefore = (data: any) => data;
 
+  renderField: any;
+
   @observable extraFields: IChosenFieldField[];
 
   setDefaultCheckedExportFields(data: any) {
@@ -54,6 +60,7 @@ class IssueExportStore {
     this.defaultCheckedExportFields = props?.defaultCheckedExportFields || [];
     this.defaultInitFieldAction = props?.defaultInitFieldAction || ((data: IChosenFieldField, store: IssueExportStore) => data);
     this.extraFields = props?.extraFields || [];
+    this.renderField = props?.renderField;
   }
 
   @observable downloadInfo = {} as IDownLoadInfo;
