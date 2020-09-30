@@ -202,15 +202,18 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
     case 'member':
     {
       return (
-        <MemberField
+        <SelectUser
           label="user"
           multiple
             // @ts-ignore
-          selectedUserIds={defaultValue ? defaultValue.map((item: string) => ({ id: item })) : undefined}
+          selectedUserIds={defaultValue ? defaultValue.map((item: string) => (String(item))) : undefined}
             // request={(({ filter, page }) => userApi.getAllInProject(filter, page).then((res) => {
             //   if (res.list && Array.isArray(res.list)) {
             //   }
             // }))}
+          autoQueryConfig={defaultValue ? {
+            selectedUserIds: defaultValue.map((item: string) => (String(item))),
+          } : undefined}
           style={{ width: '100%' }}
           name={code}
           {...otherComponentProps}
