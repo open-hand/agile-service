@@ -108,82 +108,13 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
   };
   return [dataProps, componentProps];
 }
-const userMaps = new Map<string, User>();
-const stacks = new Array<string>();
-const finishStack = new Array<string>();
-interface MemberLocalMapConfig {
-  events: {
-    onFinish: (val:string[])=> void,
-  }
-}
-export function useMemberLocalMap(config?:MemberLocalMapConfig): [{ userMaps: Map<string, User>, stacks: Array<string>, finishStack: Array<string>, finish: boolean | undefined }, (v: string) => void] {
-  const [finish, setFinish] = useState<boolean>();
-  const key = useMemo(() => Math.random(), []);
-  let timeoutId: any;
-  const autoAxiosGetUser = useCallback((ids: string[]) => {
-    while (ids.length > 0) {
-      const id = ids.pop();
-      if (id && !userMaps.has(id!)) {
-        // @ts-ignore
-        userMaps.set(id, { id });
-        userApi.getById(id).then((res: any) => {
-          const { list } = res;
-          if (list[0]) {
-            userMaps.set(id!, { ...list[0], id: String(list[0].id) });
-          }
-          finishStack.push(id);
-          console.log(`.user_id:${id}`, key, finishStack);
-          if (finishStack.length === userMaps.size) {
-            config?.events.onFinish(finishStack);
-          }
-        });
-      }
-    }
-  }, [config?.events, key]);
 
-  useEffect(() => {
-    if (stacks.length > 0 && typeof (finish) === 'boolean') {
-      autoAxiosGetUser(stacks);
-    }
-  }, [autoAxiosGetUser, finish]);
-
-  const startTask = () => {
-    if (typeof (timeoutId) !== 'undefined') {
-      clearTimeout(timeoutId);
-    }
-    timeoutId = setTimeout(() => {
-      setFinish(false);
-    }, 200);
-  };
-  const handleAdd = (id: string) => {
-    if (!stacks.find((item) => item === id)) {
-      stacks.push(id);
-      startTask();
-    }
-  };
-  const dataProp = {
-    userMaps,
-    stacks,
-    finishStack,
-    finish: finishStack.length !== 0 && finishStack.length === userMaps.size,
-  };
-  // const dataProps = useMemo(
-  //   () => {
-  //     console.log('dataProps....', finishStack);
-  //     return ({
-  //       userMaps,
-  //       stacks,
-  //       finish: finishStack.length !== 0 && finishStack.length === userMaps.size,
-  //     });
-  //   }, [finishStack.length, userMaps.size],
-  // );
-  return [dataProp, handleAdd];
-}
 export function useIssueFilterFormDataSet(props: { fields: IChosenFieldField[], systemFields?: FieldProps[] }) {
   return useMemo(() => new DataSet(IssueFilterFormDataSet({ fields: props.fields, systemFields: props.systemFields })), []);
 }
 const IssueFilterForm: React.FC<Props> = (props) => {
   const prefixCls = 'c7n-agile-issue-filter-form';
+  const dateFormatArr = useMemo(() => ['HH:mm:ss', 'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD'], []);
   const dataSet = useMemo(() => {
     if (props.dataSet) {
       return props.dataSet;
@@ -191,34 +122,29 @@ const IssueFilterForm: React.FC<Props> = (props) => {
     return new DataSet(IssueFilterFormDataSet({ fields: props.fields || [] }));
   }, [props.dataSet, props.fields]);
 
-  useEffect(() => {
-    const dateFormatArr = ['HH:mm:ss', 'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD'];
-    // 初始化值
-    if (props.chosenFields) {
-      props.chosenFields.forEach((field) => {
-        let values = toJS(field.value);
-        const dateIndex = ['time', 'datetime', 'date'].indexOf(field.fieldType ?? '');
-        if (dateIndex !== -1) {
-          values = Array.isArray(values) ? values.map((item) => moment(item, dateFormatArr[dateIndex]))
-            : moment(values, dateFormatArr);
-        }
-        if (values) {
-          dataSet.current?.set(field.code, values);
-        }
-      });
+  const initField = useCallback((field: IChosenFieldField) => {
+    let values = toJS(field.value);
+    const dateIndex = ['time', 'datetime', 'date'].indexOf(field.fieldType ?? '');
+    if (dateIndex !== -1) {
+      values = Array.isArray(values) ? values.map((item) => moment(item, dateFormatArr[dateIndex]))
+        : moment(values, dateFormatArr);
     }
-    props.extraFormItems?.forEach((field) => {
-      let values = toJS(field.value);
-      const dateIndex = ['time', 'datetime', 'date'].indexOf(field.fieldType ?? '');
-      if (dateIndex !== -1) {
-        values = Array.isArray(values) ? values.map((item) => moment(item, dateFormatArr[dateIndex]))
-          : moment(values, dateFormatArr);
+    if (values) {
+      if (field.fieldType === 'member') {
+        values = Array.isArray(values) ? values.map((item) => String(item)) : String(values);
       }
-      if (values) {
-        dataSet.current?.set(field.code, values);
-      }
+      dataSet.current?.set(field.code, values);
+    }
+  }, [dataSet, dateFormatArr]);
+  useEffect(() => {
+    // 初始化值
+    props.chosenFields?.forEach((field) => {
+      initField(field);
     });
-  }, [dataSet]);
+    props.extraFormItems?.forEach((field) => {
+      initField(field);
+    });
+  }, [initField]);
   const render = (item: IChosenFieldField) => renderField(item, {
     style: { width: '100%' }, label: item.name, key: item.code, ...item.otherComponentProps,
   }, { dataSet });

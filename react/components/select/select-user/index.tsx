@@ -41,6 +41,7 @@ interface MemberLocalMapConfig {
 }
 interface MemberLocalStoreMapDataProps {
   userMaps: Map<string, User>,
+  cacheMode: 'outer' | 'inner',
   taskStacks: Array<string>,
   finishStack: Array<string>,
   forceRefresh?: any,
@@ -51,8 +52,10 @@ interface MemberLocalStoreMapMethodProps {
 }
 function useMemberLocalStoreMap(config?: MemberLocalMapConfig): [MemberLocalStoreMapDataProps, MemberLocalStoreMapMethodProps] {
   const [finish, setFinish] = useState<boolean>();
+  const [innerMode, setInnerMode] = useState<'outer' | 'inner'>('inner');
   const userMaps = useMemo(() => {
     if (config?.userMaps) {
+      setInnerMode('outer');
       return config.userMaps;
     }
     return new Map<string, User>();
@@ -118,6 +121,7 @@ function useMemberLocalStoreMap(config?: MemberLocalMapConfig): [MemberLocalStor
   };
   const dataProp = {
     userMaps,
+    cacheMode: innerMode,
     taskStacks,
     finishStack,
     forceRefresh: config?.forceRefresh,
@@ -172,16 +176,17 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       if (autoQueryConfig?.selectedUserIds && data.length > 0 && (typeof (loadExtraData.finish) === 'undefined')) {
         autoQueryUsers(autoQueryConfig?.selectedUserIds, data);
       }
-      if (loadExtraData.finish || loadExtraData.forceRefresh) {
+      if (loadExtraData.finish || loadExtraData.forceRefresh || loadExtraData.cacheMode === 'outer') {
         (autoQueryConfig?.selectedUserIds || []).forEach((item) => {
           if (loadExtraData.userMaps.has(item)) {
+            console.log('item....', item);
             temp.push(loadExtraData.userMaps.get(item)!);
           }
         });
       }
 
       newData = [...(extraOptions || []), ...temp, ...data].map((item: User) => (
-        { ...item, id: item.id.toString() }
+        { ...item, id: String(item.id) }
       ));
 
       if (dataRef) {
@@ -192,6 +197,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       if (afterLoad) {
         afterLoad(newData);
       }
+      console.log('newData....', newData);
       return newData;
     },
   }), [selectedUser, autoQueryConfig?.selectedUserIds, loadExtraData.forceRefresh, loadExtraData.finish]);

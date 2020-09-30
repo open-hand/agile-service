@@ -21,11 +21,13 @@ import SelectStatus from './field/StatusField';
 import FeatureProjectField from './field/FeatureProjectField';
 import PIField from './field/pi-field';
 import QuickFilterField from './field/quick-filter-field';
-import MemberField from './field/member-field';
+import { useIssueFilterFormStore } from '../stores';
 
 const { Option } = Select;
 const singleList = ['radio', 'single'];
-
+const userMaps = new Map<string, User>();
+const stacks = new Array<string>();
+const finishStack = new Array<string>();
 export default function renderField<T extends Partial<SelectProps>>(field: IChosenFieldField, otherComponentProps: T | Partial<DatePickerProps>, { dataSet }: {
   dataSet: DataSet,
 }) {
@@ -201,18 +203,24 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
       );
     case 'member':
     {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const { noMemberLoadFinish, setNoMemberLoadFinish } = useIssueFilterFormStore();
       return (
         <SelectUser
           label="user"
           multiple
             // @ts-ignore
-          selectedUserIds={defaultValue ? defaultValue.map((item: string) => (String(item))) : undefined}
             // request={(({ filter, page }) => userApi.getAllInProject(filter, page).then((res) => {
             //   if (res.list && Array.isArray(res.list)) {
             //   }
-            // }))}
+            // }))} value.map((item: string) => (String(item)))
           autoQueryConfig={defaultValue ? {
-            selectedUserIds: defaultValue.map((item: string) => (String(item))),
+            selectedUserIds: defaultValue.map((item:any) => String(item)),
+            userMaps,
+            finishStack,
+            taskStacks: stacks,
+            forceRefresh: noMemberLoadFinish,
+            events: { onFinish: () => setNoMemberLoadFinish(true) },
           } : undefined}
           style={{ width: '100%' }}
           name={code}
