@@ -1,6 +1,8 @@
 # Changelog
 All notable changes about agile-service will be documented in this file.
 
+### Added
+
 ## [0.23.0] - 2020-09-30
 
 - Add Project Overview so that project members can quickly see the progress of the iteration.
@@ -11,6 +13,9 @@ All notable changes about agile-service will be documented in this file.
 - Optimize the filtering of the Work List.
 
 ### Fixed
+
+- Fixed incorrect template of in station messages and mails sent when issue was created, assigned and completed.
+
 
 ## [0.22.0] - 2020-08-01
 
