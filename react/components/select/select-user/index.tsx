@@ -2,7 +2,7 @@ import React, {
   useMemo, forwardRef, useState, useCallback, useEffect,
 } from 'react';
 import { Select } from 'choerodon-ui/pro';
-import { find } from 'lodash';
+import { find, unionBy } from 'lodash';
 import { userApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { User } from '@/common/types';
@@ -167,9 +167,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       const temp: User[] = [];
       if (selectedUser) {
         (toArray(selectedUser).forEach((user) => {
-          if (!find(data, (item) => String(item.id) === user.id)) {
-            temp.push(user);
-          }
+          temp.push({ ...user, id: String(user.id) });
         }));
       }
       // 存在待加载的id，第一页有数据，finish未准备状态（即值不boolean类型 false）则开始自动加载
@@ -185,10 +183,8 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
         });
       }
 
-      newData = [...(extraOptions || []), ...temp, ...data].map((item: User) => (
-        { ...item, id: String(item.id) }
-      ));
-
+      newData = [...(extraOptions || []), ...data].map((item: User) => ({ ...item, id: String(item.id) }));
+      newData = unionBy<User>(temp, newData, 'id');// 去重
       if (dataRef) {
         Object.assign(dataRef, {
           current: newData,
@@ -200,7 +196,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       console.log('newData....', newData);
       return newData;
     },
-  }), [selectedUser, autoQueryConfig?.selectedUserIds, loadExtraData.forceRefresh, loadExtraData.finish]);
+  }), [selectedUser, loadExtraData.forceRefresh, loadExtraData.finish]);
   const props = useSelect(config);
   return (
     <Select
