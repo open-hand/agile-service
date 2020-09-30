@@ -93,6 +93,7 @@ const ExportIssue: React.FC<{}> = () => {
     value: choseFieldStore.getAllChosenField,
     extraFormItems: store.getExtraFields,
     systemDataSetField: store.dataSetSystemFields,
+    extraRenderFields: store.renderField,
     events: {
       afterDelete: (item) => {
         choseFieldStore.delChosenFields(item.code);

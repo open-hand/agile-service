@@ -7,6 +7,8 @@ import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import { Row, Col } from 'choerodon-ui';
 import moment from 'moment';
 import { DataSet, Form, Icon } from 'choerodon-ui/pro';
+import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import { User } from '@/common/types';
 import { userApi } from '@/api';
@@ -21,6 +23,7 @@ interface Props {
   chosenFields?: IChosenFieldField[], // 可控已选字段
   onDelete?: (field: IChosenFieldField) => boolean | void,
   // defaultValue?: any,
+  extraRenderFields?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet }) => React.ReactElement,
   extraFormItems?: IChosenFieldField[],
 }
 interface IConfig {
@@ -33,7 +36,9 @@ interface IConfig {
   events?: {
     afterDelete?: (value: IChosenFieldField) => void | undefined | boolean,
   },
-  extraFormItems?: IChosenFieldField[]
+  extraFormItems?: IChosenFieldField[],
+  extraRenderFields?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet }) => React.ReactElement | false | null,
+
 }
 interface IIssueFilterFormDataProps {
   currentFormItems: Map<string, IChosenFieldField>,
@@ -45,6 +50,7 @@ interface IIssueFilterComponentProps {
   dataSet: DataSet, // 传入外部dataSet 将放弃组件内创建
   fields: IChosenFieldField[], // 全部字段 用以保证dataSet内值能正常接收
   chosenFields: IChosenFieldField[], // 可控已选字段
+  extraRenderFields?: IConfig['extraRenderFields'],
   onDelete: (field: IChosenFieldField) => boolean | void,
 }
 const defaultIssueFilterFormEvents = {
@@ -104,6 +110,7 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
     currentFormItems,
     extraFormItems: [...extraFormItems.values()],
     chosenFields: config?.value ?? [...currentFormItems.values()],
+    extraRenderFields: config?.extraRenderFields,
     onDelete: handleDelete,
   };
   return [dataProps, componentProps];
@@ -145,7 +152,9 @@ const IssueFilterForm: React.FC<Props> = (props) => {
       initField(field);
     });
   }, [initField]);
-  const render = (item: IChosenFieldField) => renderField(item, {
+  const render = (item: IChosenFieldField) => (props.extraRenderFields && props.extraRenderFields(item, {
+    style: { width: '100%' }, label: item.name, key: item.code, ...item.otherComponentProps,
+  }, { dataSet })) || renderField(item, {
     style: { width: '100%' }, label: item.name, key: item.code, ...item.otherComponentProps,
   }, { dataSet });
   return (
