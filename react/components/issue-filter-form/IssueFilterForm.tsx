@@ -118,7 +118,6 @@ interface MemberLocalMapConfig {
 }
 export function useMemberLocalMap(config?:MemberLocalMapConfig): [{ userMaps: Map<string, User>, stacks: Array<string>, finishStack: Array<string>, finish: boolean | undefined }, (v: string) => void] {
   const [finish, setFinish] = useState<boolean>();
-  const [innerFinish, setInnerFinish] = useState<Array<string>>([]);
   const key = useMemo(() => Math.random(), []);
   let timeoutId: any;
   const autoAxiosGetUser = useCallback((ids: string[]) => {
