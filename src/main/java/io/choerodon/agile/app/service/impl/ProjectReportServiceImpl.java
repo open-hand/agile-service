@@ -121,7 +121,6 @@ public class ProjectReportServiceImpl implements ProjectReportService {
                                         objectMapper.writeValueAsString(searchVO), true), SearchVO.class));
                     }else if (reportUnitVO instanceof DynamicListUnitVO){
                         SearchVO searchVO = ((DynamicListUnitVO) reportUnitVO).getSearchVO();
-                        EncryptionUtils.decryptSearchVO(searchVO);
                         ((DynamicListUnitVO) reportUnitVO).setSearchVO(
                                 objectMapper.readValue(EncryptionUtils.handlerPersonFilterJson(
                                         objectMapper.writeValueAsString(searchVO), true), SearchVO.class));

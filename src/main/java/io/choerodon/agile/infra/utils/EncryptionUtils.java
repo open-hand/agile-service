@@ -50,6 +50,8 @@ public class EncryptionUtils {
 
     public static final String[] FILTER_FIELD = {"issueTypeId", "statusId", "priorityId", "component", "epic", "feature", "label", "sprint", "version","issueTypeList","epicList","piList","issueIds", "statusList","assigneeId","reporterIds"};
 
+    private static final String[] ENCRYPT_INGORE_FIELD = {"assigneeId", "sprint"};
+
     public static final String[] IGNORE_VALUES = {"0"};
     public static final String BLANK_KEY = "";
 
@@ -546,7 +548,10 @@ public class EncryptionUtils {
                     LOGGER.error("string to object error: {}", e);
                 }
                 if (!CollectionUtils.isEmpty(value)) {
-                    object = value.stream().map(v -> encrypt ? (StringUtils.isNumeric(v) ? encrypt(Long.parseLong(v)) : v) : decrypt(v)).collect(Collectors.toList());
+                    object = value.stream().map(v -> encrypt ?
+                            (StringUtils.isNumeric(v) ?
+                                    (Arrays.asList(ENCRYPT_INGORE_FIELD).contains(next.getKey()) && Arrays.asList(IGNORE_VALUES).contains(v) ?
+                                            v : encrypt(Long.parseLong(v))) : v) : decrypt(v)).collect(Collectors.toList());
                 }
                 else {
                     object = new ArrayList<>();
