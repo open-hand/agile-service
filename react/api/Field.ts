@@ -76,12 +76,12 @@ class FieldApi {
   /**
    * 获取项目下自定义的字段
    */
-  getCustomFields(issueType?: 'agileIssueType' | 'programIssueType') {
+  getCustomFields(issueTypeList?: 'agileIssueType' | 'programIssueType') {
     return axios({
       method: 'get',
       url: `${this.prefix}/field_value/list/custom_field`,
       params: {
-        issueType: issueType ?? getApplyType() === 'program' ? 'programIssueType' : 'agileIssueType',
+        issueTypeList: issueTypeList ?? getApplyType() === 'program' ? 'programIssueType' : 'agileIssueType',
       },
     });
   }
@@ -146,13 +146,13 @@ class FieldApi {
   /**
    * 项目层，获取自定义字段表头
    */
-  getFoundationHeader(issueType?: 'agileIssueType' | 'programIssueType') {
+  getFoundationHeader(issueTypeList?: 'agileIssueType' | 'programIssueType') {
     return axios.get(`${this.prefix}/field_value/list/getFields`, {
       params: {
         project_id: getProjectId(),
         organizationId: getOrganizationId(),
         schemeCode: 'agile_issue',
-        issueType: issueType ?? getApplyType() === 'program' ? 'programIssueType' : 'agileIssueType',
+        issueTypeList: issueTypeList ?? getApplyType() === 'program' ? 'programIssueType' : 'agileIssueType',
       },
     });
   }
