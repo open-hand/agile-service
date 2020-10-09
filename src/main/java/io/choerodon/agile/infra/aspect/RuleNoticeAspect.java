@@ -53,7 +53,7 @@ public class RuleNoticeAspect {
         List<String> fieldList = StringUtils.isBlank(ruleNotice.fieldListName()) ? 
                 null : (List<String>) getNameAndValue(jp).get(ruleNotice.fieldListName());
         Long projectId = (Long)Reflections.getFieldValue(result, "projectId");
-        log.info("rule notice detcction, component: [{}], event: [{}]", ruleNotice.value(), ruleNotice.event());
+        log.info("rule notice detection, component: [{}], event: [{}]", ruleNotice.value(), ruleNotice.event());
         switch (ruleNotice.value()){
             case ISSUE:
                 Long issueId = (Long)Reflections.getFieldValue(result, "issueId");
