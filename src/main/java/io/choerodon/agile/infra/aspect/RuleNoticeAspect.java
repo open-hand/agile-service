@@ -7,6 +7,8 @@ import java.util.Map;
 
 import io.choerodon.agile.app.service.NoticeDetectionService;
 import io.choerodon.agile.infra.annotation.RuleNotice;
+import io.choerodon.agile.infra.dto.IssueDTO;
+import io.choerodon.agile.infra.mapper.IssueMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -36,6 +38,8 @@ public class RuleNoticeAspect {
     
     @Autowired
     private NoticeDetectionService noticeDetectionService;
+    @Autowired
+    private IssueMapper issueMapper;
     
     @Pointcut("@annotation(io.choerodon.agile.infra.annotation.RuleNotice)")
     public void pointCut(){}
@@ -53,7 +57,8 @@ public class RuleNoticeAspect {
         switch (ruleNotice.value()){
             case ISSUE:
                 Long issueId = (Long)Reflections.getFieldValue(result, "issueId");
-                noticeDetectionService.issueNoticeDetection(ruleNotice.event(), issueId, projectId, fieldList);
+                IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
+                noticeDetectionService.issueNoticeDetection(ruleNotice.event(), issueDTO, projectId, fieldList);
                 break;
             case BACKLOG:
                 Long backlogId = (Long)Reflections.getFieldValue(result, "id");
@@ -64,6 +69,10 @@ public class RuleNoticeAspect {
         }
     }
 
+    private void backlogNoticeDetection(Long backlogId, Long projectId) {
+        // TODO 
+    }
+
     Map<String, Object> getNameAndValue(JoinPoint joinPoint) {
         Map<String, Object> param = new HashMap<>();
         Object[] paramValues = joinPoint.getArgs();
@@ -72,10 +81,6 @@ public class RuleNoticeAspect {
             param.put(paramNames[i], paramValues[i]);
         }
         return param;
-    }
-
-    private void backlogNoticeDetection(Long backlogId, Long projectId) {
-        // TODO 
     }
 
 }

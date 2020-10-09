@@ -16,7 +16,6 @@ import io.choerodon.agile.infra.dto.IssueDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 import io.choerodon.agile.infra.mapper.ConfigurationRuleMapper;
-import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.SendMsgUtil;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections.keyvalue.MultiKey;
@@ -36,7 +35,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class NoticeDetectionServiceImpl implements NoticeDetectionService {
 
-    public static final String EXIST_FLAG  = "exist";
     public static final String ISSUECREATE = "ISSUECREATE";
     public static final String ISSUEASSIGNEE = "ISSUEASSIGNEE";
     public static final String ISSUESOLVE = "ISSUESOLVE";
@@ -46,8 +44,6 @@ public class NoticeDetectionServiceImpl implements NoticeDetectionService {
 
     @Autowired
     private ConfigurationRuleMapper configurationRuleMapper;
-    @Autowired
-    private IssueMapper issueMapper;
     @Autowired
     private MessageClient messageClient;
     @Autowired
@@ -59,14 +55,13 @@ public class NoticeDetectionServiceImpl implements NoticeDetectionService {
 
     @Async
     @Override
-    public void issueNoticeDetection(RuleNoticeEvent event, Long issueId, Long projectId, List<String> fieldList){
-        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
+    public void issueNoticeDetection(RuleNoticeEvent event, IssueDTO issueDTO, Long projectId, List<String> fieldList){
         List<ConfigurationRuleVO> ruleVOList = configurationRuleMapper.selectByProjectId(projectId);
         if (CollectionUtils.isEmpty(ruleVOList)){
             return;
         }
         // 检查issue是否符合页面规则条件
-        Map<String, Long> map = configurationRuleMapper.selectByRuleList(issueId, ruleVOList);
+        Map<String, Long> map = configurationRuleMapper.selectByRuleList(issueDTO.getIssueId(), ruleVOList);
         // 获取所有符合的ruleId
         List<Long> ruleIdList = Optional.ofNullable(map).orElse(new HashMap<>())
                 .values().stream().filter(Objects::nonNull).collect(Collectors.toList());

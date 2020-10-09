@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service;
 
 import java.util.List;
 
+import io.choerodon.agile.infra.dto.IssueDTO;
 import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 
 /**
@@ -12,9 +13,9 @@ public interface NoticeDetectionService {
     /**
      * issue通知检测
      * @param event 通知事件
-     * @param issueId issueId
+     * @param issueDTO issueDTO
      * @param projectId projectId
      * @param fieldList 若是批量更改，需要确认更改的字段是否触发消息
      */
-    void issueNoticeDetection(RuleNoticeEvent event, Long issueId, Long projectId, List<String> fieldList);
+    void issueNoticeDetection(RuleNoticeEvent event, IssueDTO issueDTO, Long projectId, List<String> fieldList);
 }
