@@ -17,6 +17,8 @@ public interface ConfigurationRuleMapper extends BaseMapper<ConfigurationRuleDTO
 
     List<ConfigurationRuleVO> selectByProjectId(@Param("projectId") Long projectId);
 
-    Map<String, Long> selectByRuleList(@Param("issueId") Long issueId, @Param("ruleList") List<ConfigurationRuleVO> ruleList);
+    Map<String, Long> selectByRuleList(@Param("issueId") Long issueId,
+                                       @Param("projectId") Long projectId,
+                                       @Param("ruleList") List<ConfigurationRuleVO> ruleList);
 }
 

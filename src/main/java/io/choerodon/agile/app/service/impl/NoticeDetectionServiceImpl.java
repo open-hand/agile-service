@@ -61,7 +61,7 @@ public class NoticeDetectionServiceImpl implements NoticeDetectionService {
             return;
         }
         // 检查issue是否符合页面规则条件
-        Map<String, Long> map = configurationRuleMapper.selectByRuleList(issueDTO.getIssueId(), ruleVOList);
+        Map<String, Long> map = configurationRuleMapper.selectByRuleList(issueDTO.getIssueId(), projectId, ruleVOList);
         // 获取所有符合的ruleId
         List<Long> ruleIdList = Optional.ofNullable(map).orElse(new HashMap<>())
                 .values().stream().filter(Objects::nonNull).collect(Collectors.toList());
