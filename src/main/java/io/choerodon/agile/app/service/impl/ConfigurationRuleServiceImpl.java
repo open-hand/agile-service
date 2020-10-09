@@ -377,9 +377,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     }
 
     private String valueToString(Object value) {
-        if (value instanceof String && StringUtils.containsAny((String)value, ConfigurationRule.EXPRESS_UNIX_TIMESTAMP, ConfigurationRule.EXPRESS_TIME, ConfigurationRule.EXPRESS_DATE_FORMAT)){
-            return (String)value;
-        }else if (value instanceof String){
+        if (value instanceof String){
             return "'" + value + "'";
         }else if(value instanceof Date){
             return "'" + df.format(value) + "'";
@@ -413,7 +411,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         if (ConfigurationRule.OpSqlMapping.isLike(operation)){
             value = String.format(ConfigurationRule.TEMPLATE_LIKE_VALUE_SQL, value);
         }
-        return String.format(ConfigurationRule.TEMPLATE_CONDITION_SQL, field, ConfigurationRule.OpSqlMapping.valueOf(operation).getSqlOp(), valueToString(value));
+        return String.format(ConfigurationRule.TEMPLATE_CONDITION_SQL, field, ConfigurationRule.OpSqlMapping.valueOf(operation).getSqlOp(), value);
     }
 
     private void createProjectReportReceiver(Long projectId, ConfigurationRuleVO configurationRuleVO,

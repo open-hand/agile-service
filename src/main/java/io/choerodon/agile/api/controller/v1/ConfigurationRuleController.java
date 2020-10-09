@@ -5,8 +5,8 @@ import java.util.List;
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
 import io.choerodon.agile.app.service.ConfigurationRuleFiledService;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
-import io.choerodon.agile.infra.dto.ConfigurationRuleDTO;
 import io.choerodon.agile.infra.dto.ConfigurationRuleFiledDTO;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -45,7 +45,7 @@ public class ConfigurationRuleController extends BaseController {
     @ApiOperation(value = "列表")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
-    public ResponseEntity<List<ConfigurationRuleVO>> list(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<Page<ConfigurationRuleVO>> list(@PathVariable("project_id") Long projectId,
                                                           @ApiIgnore @SortDefault(value = FIELD_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest){
         return Results.success(configurationRuleService.listByProjectId(projectId, pageRequest));
