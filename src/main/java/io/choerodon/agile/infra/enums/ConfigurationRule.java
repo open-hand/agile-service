@@ -8,18 +8,15 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class ConfigurationRule{
     
-    public static final String EXPRESS_UNIX_TIMESTAMP = "UNIX_TIMESTAMP";
-    public static final String EXPRESS_TIME = "TIME";
-    public static final String EXPRESS_DATE_FORMAT = "DATE_FORMAT";
     public static final String TEMPLATE_LINK_TABLE_SQL = " issue_id %s ( SELECT issue_id FROM %s %s ) ";
     public static final String TEMPLATE_IN_SQL = " %s IN ( %s ) ";
     public static final String TEMPLATE_LIKE_VALUE_SQL = " '%%%s%%' ";
     public static final String TEMPLATE_SQL_WHERE = " WHERE ";
     public static final String TEMPLATE_SQL_AND = " AND ";
     public static final String TEMPLATE_CONDITION_SQL = " %s %s %s ";
-    public static final String TEMPLATE_UNIX_TIMESTAMP_EXPRESS = " " + EXPRESS_UNIX_TIMESTAMP + "(%s) ";
-    public static final String TEMPLATE_TIME_FIELD_EXPRESS = " " + EXPRESS_TIME + "(" + EXPRESS_DATE_FORMAT + "(%s, '%%H:%%i:%%s')) ";
-    public static final String TEMPLATE_TIME_VALUE_EXPRESS = " " + EXPRESS_TIME + "(%s) ";
+    public static final String TEMPLATE_UNIX_TIMESTAMP_EXPRESS = " UNIX_TIMESTAMP(%s) ";
+    public static final String TEMPLATE_TIME_FIELD_EXPRESS = " TIME(DATE_FORMAT(%s, '%%H:%%i:%%s')) ";
+    public static final String TEMPLATE_TIME_VALUE_EXPRESS = " TIME(%s) ";
     public static final String TEMPLATE_CUSTOM_SQL = " issue_id %s ( select ffv.instance_id from fd_field_value ffv where ffv.project_id = %s and ffv.field_id = %s %s ) ";
     
     
