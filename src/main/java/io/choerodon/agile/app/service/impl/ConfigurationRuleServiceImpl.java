@@ -377,7 +377,9 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     }
 
     private String valueToString(Object value) {
-        if (value instanceof String){
+        if (value instanceof String && StringUtils.containsAny((String)value, ConfigurationRule.EXPRESS_UNIX_TIMESTAMP, ConfigurationRule.EXPRESS_TIME, ConfigurationRule.EXPRESS_DATE_FORMAT)){
+            return (String)value;
+        }else if (value instanceof String){
             return "'" + value + "'";
         }else if(value instanceof Date){
             return "'" + df.format(value) + "'";
