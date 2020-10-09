@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
+import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 /**
@@ -27,7 +28,7 @@ public interface ConfigurationRuleService {
      * @param projectId projectId
      * @return ConfigurationRuleVO
      */
-    List<ConfigurationRuleVO> listByProjectId(Long projectId, PageRequest pageRequest);
+    Page<ConfigurationRuleVO> listByProjectId(Long projectId, PageRequest pageRequest);
 
     /**
      * 获取ruleList对应的接收人和抄送人
