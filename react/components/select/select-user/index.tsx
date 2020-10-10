@@ -88,7 +88,6 @@ function useMemberLocalStoreMap(config?: MemberLocalMapConfig): [MemberLocalStor
             userMaps.set(id!, { ...list[0], id: String(list[0].id) });
           }
           finishStack.push(id);
-          console.log(`${key} Select.user_id:${id}`, finishStack);
           if (finishStack.length === userMaps.size) {
             setFinish(true);
             config?.events?.onFinish && config?.events?.onFinish(finishStack, userMaps);
@@ -100,7 +99,6 @@ function useMemberLocalStoreMap(config?: MemberLocalMapConfig): [MemberLocalStor
 
   useEffect(() => {
     if (taskStacks.length > 0 && typeof (finish) === 'boolean' && !finish) {
-      console.log('taskStacks....');
       autoAxiosGetUser(taskStacks);
     }
   }, [autoAxiosGetUser, finish, taskStacks]);
@@ -177,7 +175,6 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       if (loadExtraData.finish || loadExtraData.forceRefresh || loadExtraData.cacheMode === 'outer') {
         (autoQueryConfig?.selectedUserIds || []).forEach((item) => {
           if (loadExtraData.userMaps.has(item)) {
-            console.log('item....', item);
             temp.push(loadExtraData.userMaps.get(item)!);
           }
         });
@@ -193,10 +190,9 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       if (afterLoad) {
         afterLoad(newData);
       }
-      console.log('newData....', newData);
       return newData;
     },
-  }), [selectedUser, loadExtraData.forceRefresh, loadExtraData.finish]);
+  }), [selectedUser, loadExtraData.forceRefresh, loadExtraData.finish, JSON.stringify(autoQueryConfig?.selectedUserIds)]);
   const props = useSelect(config);
   return (
     <Select
