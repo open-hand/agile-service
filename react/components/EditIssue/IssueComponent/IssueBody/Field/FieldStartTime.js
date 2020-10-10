@@ -30,7 +30,7 @@ class FieldStartTime extends Component {
   };
 
   render() {
-    const { store } = this.props;
+    const { store, disabled } = this.props;
     const issue = store.getIssue;
     const { estimatedStartTime, estimatedEndTime } = issue;
     const field = store.getFieldByCode('estimatedStartTime');
@@ -49,6 +49,7 @@ class FieldStartTime extends Component {
             alwaysRender={false}
             editor={() => <DateTimePicker required={required} max={estimatedEndTime && moment(estimatedEndTime).subtract(1, 's')} />}
             submitTrigger={['blur']}
+            disabled={disabled}
           >
             {
               estimatedStartTime ? (
