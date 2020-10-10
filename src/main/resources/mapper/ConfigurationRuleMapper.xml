@@ -18,8 +18,10 @@
         FROM
         agile_issue ai
         <foreach collection="ruleList" item="rule" index="index">
-            LEFT JOIN (SELECT issue_id FROM agile_issue WHERE ${rule.sqlQuery}) t${index} ON ai.issue_id = t${index}.issue_id
+            LEFT JOIN (SELECT issue_id FROM agile_issue WHERE issue_id = #{issueId} AND (${rule.sqlQuery})) t${index} ON ai.issue_id = t${index}.issue_id
         </foreach>
-        WHERE ai.issue_id = #{issueId}
+        WHERE
+            project_id = #{projectId}
+        AND ai.issue_id = #{issueId}
     </select>
 </mapper>
