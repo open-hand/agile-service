@@ -147,31 +147,26 @@ public class NoticeDetectionServiceImpl implements NoticeDetectionService {
 
     private void mergeNotice(List<MessageSender> messageSenderList) {
         List<MessageSender> list =
-                messageSenderList.stream().filter(distinct(MessageSenderUniqueVO::new)).collect(Collectors.toList());
+                new ArrayList<>(messageSenderList.stream().collect(Collectors.toMap(
+                        t -> new MultiKey(t.getTenantId(), t.getMessageCode(),
+                                Optional.ofNullable(t.getTypeCodeList()).map(HashSet::new).orElse(new HashSet<>())),
+                        Function.identity(),
+                        (k1, k2) -> {
+                            if (CollectionUtils.isNotEmpty(k2.getCcList())){
+                                List<String> ccList = Optional.ofNullable(k1.getCcList()).orElse(new ArrayList<>());
+                                ccList.addAll(k2.getCcList());
+                                k1.setCcList(ccList);
+                            }
+                            if (CollectionUtils.isNotEmpty(k2.getReceiverAddressList())){
+                                List<Receiver> receiverList = Optional.ofNullable(k1.getReceiverAddressList()).orElse(new ArrayList<>());
+                                receiverList.addAll(k2.getReceiverAddressList());
+                                k1.setReceiverAddressList(receiverList);
+                            }
+                            return k1;
+                        })).values());
         log.info("merge sender: before: [{}], after: [{}]", messageSenderList.size(), list.size());
         for (MessageSender messageSender : list) {
             messageClient.async().sendMessage(messageSender);
         }
     }
-
-    private Predicate<MessageSender> distinct(Function<MessageSender, MessageSenderUniqueVO> keyExtractor){
-        Map<MultiKey, MessageSenderUniqueVO> map = new ConcurrentHashMap<>();
-        return t -> {
-            MultiKey multiKey = new MultiKey(t.getTenantId(), t.getMessageCode(),
-                    Optional.ofNullable(t.getTypeCodeList()).map(HashSet::new).orElse(new HashSet<>()));
-            MessageSenderUniqueVO value = keyExtractor.apply(t);
-            MessageSenderUniqueVO exist = map.get(multiKey);
-            log.debug("currend sender: [{}], isRepeat: [{}]", value, Objects.isNull(exist));
-            if (Objects.isNull(exist)) {
-                map.put(multiKey, value);
-            }else {
-                // merge receiverList and ccList
-                exist.getCcList().addAll(value.getCcList());
-                exist.getReceiverList().addAll(value.getReceiverList());
-                map.put(multiKey, exist);
-            }
-            return Objects.isNull(exist);
-        };
-    }
-
 }
