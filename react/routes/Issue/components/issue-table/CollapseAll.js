@@ -15,6 +15,7 @@ function CollapseAll({ tableRef }) {
   // 渲染到table的第一列的头里
   return (
     <Icon
+      className="c7nagile-table-collapse"
       onClick={() => {
         if (needExpand) {
           tableRef.current.tableStore.expandAll();
@@ -22,7 +23,7 @@ function CollapseAll({ tableRef }) {
           tableRef.current.tableStore.collapseAll();
         }
       }}
-      type="baseline-arrow_right"        
+      type="baseline-arrow_right"
       style={{
         cursor: 'pointer',
         marginLeft: -12,

@@ -82,7 +82,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
     };
     return name ? <Tooltip title={name}><span style={style}>{name}</span></Tooltip> : null;
   }
-  
+
   return (
     <div className="c7nagile-issue-table">
       <Table
@@ -100,7 +100,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
           name="issueId"
           width={320}
           header={() => (
-            <div>
+            <div style={{ display: "inline-block" }}>
               <CollapseAll tableRef={tableRef} />
               概要
             </div>
@@ -121,11 +121,11 @@ function IssueTable({ tableRef, onCreateIssue }) {
             </Fragment>
           )}
         />
-        <Column 
+        <Column
           sortable
           name="issueNum"
           width={120}
-          className="c7n-agile-table-cell" 
+          className="c7n-agile-table-cell"
         />
         <Column
           sortable
@@ -199,17 +199,17 @@ function IssueTable({ tableRef, onCreateIssue }) {
             </div>
           )}
         />
-        <Column 
+        <Column
           sortable
-          width={170} 
-          name="lastUpdateDate" 
-          className="c7n-agile-table-cell" 
+          width={170}
+          name="lastUpdateDate"
+          className="c7n-agile-table-cell"
         />
         <Column
-          width={170} 
+          width={170}
           hidden
-          name="creationDate" 
-          className="c7n-agile-table-cell" 
+          name="creationDate"
+          className="c7n-agile-table-cell"
         />
         <Column hidden name="label" className="c7n-agile-table-cell" renderer={renderTag('labelIssueRelVOS', 'labelName')} />
         <Column hidden name="component" className="c7n-agile-table-cell" renderer={renderTag('issueComponentBriefVOS', 'name')} />
@@ -244,7 +244,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
             }}
           />
         ))}
-      </Table>      
+      </Table>
     </div>
   );
 }
