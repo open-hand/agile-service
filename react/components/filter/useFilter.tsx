@@ -2,16 +2,17 @@
 /* eslint-disable no-param-reassign */
 import { useCallback } from 'react';
 import { useImmerReducer } from 'use-immer';
-import { pull } from 'lodash';
+import { pull, omit } from 'lodash';
 import { IFieldType, ISystemFieldCode } from '@/common/types';
 import { fieldApi } from '@/api';
 import useDeepCompareEffect from '@/hooks/useDeepCompareEffect';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 
 export interface ISystemField {
   code: ISystemFieldCode,
   title: string,
   fieldType: IFieldType,
-  required: boolean,
+  required?: boolean,
   system: true
 }
 interface IFieldOption {
@@ -32,23 +33,119 @@ export interface ICustomField {
 }
 export type IFilterField = ISystemField | ICustomField
 
-const defaultSystemFields: ISystemField[] = [{
-  code: 'sprint',
-  title: '冲刺',
-  fieldType: 'single',
-  required: true,
-  system: true,
-}, {
-  code: 'issueTypeId',
-  title: '问题类型',
-  fieldType: 'single',
-  required: false,
-  system: true,
-}];
+function getSystemFields(config?: FilterConfig): ISystemField[] {
+  const systemFields: ISystemField[] = [
+    // {
+    //   code: 'issueIds',
+    //   name: 'issueId',
+    //
+    //   noDisplay: true, // 不需要展示，仅作为一个筛选项
+    // }, {
+    //   code: 'quickFilterIds',
+    //   name: '快速筛选',
+    //
+    //   noDisplay: true,
+    // },
+    // {
+    //   code: 'contents',
+    //   name: '概要',
+    //
+    //   noDisplay: true,
+    // },
+    {
+      code: 'issueTypeId',
+      title: '问题类型',
+      fieldType: 'multiple',
+      system: true,
+    },
+    {
+      code: 'status',
+      title: '状态',
+      fieldType: 'multiple',
+      system: true,
+    },
+    {
+      code: 'assigneeId',
+      title: '经办人',
+      fieldType: 'member',
+      system: true,
+    },
+    {
+      code: 'reporterIds',
+      title: '报告人',
+      fieldType: 'member',
+      system: true,
+    },
+    {
+      code: 'sprint',
+      title: '冲刺',
+      fieldType: 'multiple',
+      system: true,
+    },
+    {
+      code: 'component',
+      title: '模块',
+      fieldType: 'multiple',
+      system: true,
+    },
+    {
+      code: 'label',
+      title: '标签',
+      fieldType: 'multiple',
+      system: true,
+    },
+    {
+      code: 'priorityId',
+      title: '优先级',
+      fieldType: 'multiple',
+      system: true,
+    },
+    {
+      code: 'version',
+      title: '版本',
+      fieldType: 'multiple',
+      system: true,
+    },
+    {
+      code: 'epic',
+      title: '史诗',
+      fieldType: 'multiple',
+      system: true,
+    },
+    {
+      code: 'feature',
+      title: '特性',
+      fieldType: 'multiple',
+      system: true,
+    },
+    {
+      code: 'createDate',
+      title: '创建时间',
+      fieldType: 'datetime',
+      system: true,
+    },
+    {
+      code: 'lastUpdateDate',
+      title: '更新时间',
+      fieldType: 'datetime',
+      system: true,
+    },
+  ];
+  const filtered = IsInProgramStore.isInProgram ? systemFields : systemFields.filter((f) => f.code !== 'feature');
+  if (config?.systemFields) {
+    if (Array.isArray(config.systemFields)) {
+      return config.systemFields;
+    } if (typeof config.systemFields === 'function') {
+      return config.systemFields(filtered);
+    }
+    return filtered;
+  }
+  return filtered;
+}
 const initialState: FilterState = {
   selected: [],
   filter: {},
-  systemFields: defaultSystemFields,
+  systemFields: [],
   customFields: [],
 };
 interface FilterState {
@@ -107,14 +204,19 @@ function filterReducer(draft: FilterState, action: FilterAction): FilterState {
     default: return draft;
   }
 }
-interface FilterConfig extends Partial<FilterState> {
-
+export interface FilterConfig {
+  selected?: string[]
+  filter?: { [key: string]: any }
+  systemFields?: ISystemField[] | ((systemFields: ISystemField[]) => ISystemField[])
+  customFields?: ICustomField[]
 }
 function useFilter(config?: FilterConfig) {
-  const [state, dispatch] = useImmerReducer<FilterState, FilterAction>(filterReducer, initialState, () => ({
+  const [state, dispatch] = useImmerReducer<FilterState, FilterAction>(filterReducer, {
     ...initialState,
-    ...config,
-  }));
+    ...omit(config, 'systemFields'),
+    systemFields: getSystemFields(config),
+  });
+  console.log('render');
   const handleSelectChange = useCallback((codes: string[], select: boolean) => {
     dispatch({
       type: 'CHANGE',
@@ -148,7 +250,7 @@ function useFilter(config?: FilterConfig) {
     if (!config || (config && !('customFields' in config))) {
       loadFields();
     }
-  }, [config, loadFields]);
+  }, [loadFields]);
   return {
     state,
     handleSelectChange,

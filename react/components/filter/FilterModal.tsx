@@ -1,11 +1,12 @@
 import React, {
-  useEffect, useRef, useCallback,
+  useEffect, useRef, useCallback, useMemo,
 } from 'react';
 import { Modal } from 'choerodon-ui/pro';
 import { IModalProps } from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import Filter, { useFilter } from '@/components/filter';
 import { filterToSearchVO, ISearchVO, SearchVOToFilter } from './utils';
+import { FilterConfig, ISystemField } from './useFilter';
 
 interface Props {
   modal?: IModalProps,
@@ -18,14 +19,17 @@ export interface RefProps {
 const FilterModal: React.FC<Props> = ({ modal, searchVO = {} }) => {
   const ref = useRef<RefProps>({} as RefProps);
   const initFilter = SearchVOToFilter(searchVO);
-  const { state, handleSelectChange, handleFilterChange } = useFilter({
+  const fieldFilter = useCallback((systemFields: ISystemField[]) => systemFields.filter((field) => field.code !== 'sprint'), []);
+  const config: FilterConfig = useMemo(() => ({
     filter: initFilter,
     selected: Object.keys(initFilter).filter((key) => initFilter[key] !== undefined),
-  });
+    systemFields: fieldFilter,
+  }), [fieldFilter, initFilter]);
+  const { state, handleSelectChange, handleFilterChange } = useFilter(config);
   const handleSubmit = useCallback(async () => {
     const validate = await ref.current.validate();
     if (validate) {
-      console.log(state, filterToSearchVO(state.filter, [...state.systemFields, ...state.customFields]));
+      console.log(filterToSearchVO(state.filter, [...state.systemFields, ...state.customFields]));
       return true;
     }
     return false;
