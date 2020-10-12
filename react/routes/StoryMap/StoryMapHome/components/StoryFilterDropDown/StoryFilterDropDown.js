@@ -13,10 +13,18 @@ import './index.less';
   
 function useClickOut(onClickOut) {
   const ref = useRef();
+  
   const handleClick = useCallback((e) => {
-    const popupContainerEle = document.getElementsByClassName('c7n-pro-popup-container')[0];
+    const popupContainerEles = document.getElementsByClassName('c7n-pro-popup-container');
     const triggerBtn = document.getElementsByClassName('c7nagile-StoryMap-StoryFilterDropDown-triggerBtn')[0];
-    if (ref.current && (!ref.current.contains(e.target) && !popupContainerEle.contains(e.target) && e.target.tagName !== 'BODY' && !triggerBtn.contains(e.target))) {
+    let allIsNotContain = true;
+    for (let i = 0; i < popupContainerEles.length; i += 1) {
+      if (popupContainerEles[i].contains(e.target)) {
+        allIsNotContain = false;
+        break;
+      }
+    }
+    if (ref.current && (!ref.current.contains(e.target) && allIsNotContain && e.target.tagName !== 'BODY' && !triggerBtn.contains(e.target))) {
       onClickOut(e);
     }
   }, [onClickOut]);
@@ -46,7 +54,7 @@ function StoryFilterDropDown() {
     >
       <Dropdown
         className="c7nagile-StoryMap-StoryFilterDropDown"
-        getPopupContainer={trigger => trigger.parentNode}
+        getPopupContainer={(trigger) => trigger.parentNode}
         visible={!hidden}
         overlay={(
           <div            
