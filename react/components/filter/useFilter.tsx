@@ -59,7 +59,7 @@ function getSystemFields(config?: FilterConfig): ISystemField[] {
       system: true,
     },
     {
-      code: 'status',
+      code: 'statusId',
       title: '状态',
       fieldType: 'multiple',
       system: true,
@@ -216,7 +216,6 @@ function useFilter(config?: FilterConfig) {
     ...omit(config, 'systemFields'),
     systemFields: getSystemFields(config),
   });
-  console.log('render');
   const handleSelectChange = useCallback((codes: string[], select: boolean) => {
     dispatch({
       type: 'CHANGE',

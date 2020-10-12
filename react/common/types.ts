@@ -264,7 +264,7 @@ export type ISystemFieldCode =
   'reporterIds' |
   'createDate' |
   'assigneeId' |
-  'status' |
+  'statusId' |
   'lastUpdateDate' |
   'estimatedStartTime' |
   'estimatedEndTime' |
