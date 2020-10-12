@@ -6,13 +6,13 @@ import io.choerodon.agile.app.service.IssueFieldValueService;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
 import io.choerodon.agile.app.service.PageFieldService;
 
-import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -145,7 +145,7 @@ public class FieldValueController {
                                                    @RequestParam String schemeCode,
                                                    @RequestParam String applyType,
                                                    @RequestBody @Encrypt BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
-        issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo,applyType, (ServletRequestAttributes)RequestContextHolder.currentRequestAttributes());
+        issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo,applyType, (ServletRequestAttributes)RequestContextHolder.currentRequestAttributes(), EncryptContext.encryptType().name());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -68,6 +70,8 @@ public class FieldValueServiceImpl implements FieldValueService {
     private ProjectConfigService projectConfigService;
     @Autowired
     private MessageClient messageClient;
+    @Autowired
+    private ObjectMapper objectMapper;
 //    @Autowired
 //    private NotifyFeignClient notifyFeignClient;
 
@@ -203,8 +207,15 @@ public class FieldValueServiceImpl implements FieldValueService {
         if (CollectionUtils.isEmpty(issueDTOS)) {
             throw new CommonException("error.issues.null");
         }
-        List<VersionIssueRelVO> fixVersion = StringUtil.cast(predefinedFields.get("fixVersion"));
-        List<VersionIssueRelVO> influenceVersion = StringUtil.cast(predefinedFields.get("influenceVersion"));
+        List<VersionIssueRelVO> fixVersion;
+        List<VersionIssueRelVO> influenceVersion;
+        try {
+            fixVersion = objectMapper.readValue(JSON.toJSONString(predefinedFields.get("fixVersion")), objectMapper.getTypeFactory().constructParametricType(List.class, VersionIssueRelVO.class));
+            influenceVersion = objectMapper.readValue(JSON.toJSONString(predefinedFields.get("influenceVersion")), objectMapper.getTypeFactory().constructParametricType(List.class, VersionIssueRelVO.class));
+        } catch (IOException e) {
+            throw new CommonException("decrypt failed");
+        }
+
         predefinedFields.remove("fixVersion");
         predefinedFields.remove("influenceVersion");
         issueDTOS.forEach(v -> {
