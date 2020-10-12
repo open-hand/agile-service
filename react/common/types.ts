@@ -259,11 +259,11 @@ export type ISystemFieldCode =
   'summary' |
   'issueTypeId' |
   'issueNum' |
-  'priority' |
+  'priorityId' |
   'sprint' |
-  'reporter' |
-  'creationDate' |
-  'assign' |
+  'reporterIds' |
+  'createDate' |
+  'assigneeId' |
   'status' |
   'lastUpdateDate' |
   'estimatedStartTime' |
