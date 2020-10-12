@@ -169,8 +169,11 @@
         LEFT JOIN fd_field_option fo ON fo.id = fv.option_id
         LEFT JOIN fd_object_scheme_field f ON f.id = fv.field_id
         WHERE 1 = 1
-        <if test="projectId != null">
-            AND fv.project_id = #{projectId}
+        <if test="projectIds != null and projectIds.size > 0">
+            AND fv.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
         </if>
         <if test="instanceIds != null">
             AND fv.instance_id in

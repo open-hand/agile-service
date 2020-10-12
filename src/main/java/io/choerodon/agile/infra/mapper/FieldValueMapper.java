@@ -30,5 +30,5 @@ public interface FieldValueMapper extends BaseMapper<FieldValueDTO> {
 
     Long selectUserIdByField(@Param("projectId") Long projectId, @Param("userType") String userType, @Param("issueId") Long issueId);
 
-    List<FieldValueDTO> queryListByInstanceIds(@Param("projectId") Long projectId, @Param("instanceIds") List<Long> instanceIds, @Param("schemeCode") String schemeCode, @Param("fieldId") Long fieldId);
+    List<FieldValueDTO> queryListByInstanceIds(@Param("projectIds") List<Long> projectIds, @Param("instanceIds") List<Long> instanceIds, @Param("schemeCode") String schemeCode, @Param("fieldId") Long fieldId);
 }

@@ -59,7 +59,7 @@ public class PageFieldServiceImpl implements PageFieldService {
     @Autowired
     private LookupValueMapper lookupValueMapper;
     @Autowired
-    private FieldValueMapper fieldValueMapper;
+    protected FieldValueMapper fieldValueMapper;
     @Autowired
     protected ObjectSchemeFieldService objectSchemeFieldService;
     @Autowired
@@ -345,11 +345,18 @@ public class PageFieldServiceImpl implements PageFieldService {
 
     @Override
     public Map<Long, Map<String, Object>> queryFieldValueWithIssueIdsForAgileExport(Long organizationId, Long projectId, List<Long> instanceIds, Boolean isJustStr) {
-        Map<Long, Map<String, Object>> result = new HashMap<>();
-        List<FieldValueDTO> values = fieldValueMapper.queryListByInstanceIds(projectId, instanceIds, null, null);
+        List<FieldValueDTO> values = fieldValueMapper.queryListByInstanceIds(Arrays.asList(projectId), instanceIds, null, null);
         ObjectSchemeFieldSearchVO searchDTO = new ObjectSchemeFieldSearchVO();
         searchDTO.setSchemeCode(ObjectSchemeCode.AGILE_ISSUE);
         List<ObjectSchemeFieldDTO> fieldDTOS = objectSchemeFieldService.listQuery(organizationId, projectId, searchDTO);
+        return getFieldValueMap(fieldDTOS, values, instanceIds, isJustStr);
+    }
+
+    protected Map<Long, Map<String, Object>> getFieldValueMap(List<ObjectSchemeFieldDTO> fieldDTOS,
+                                                              List<FieldValueDTO> values,
+                                                              List<Long> instanceIds,
+                                                              Boolean isJustStr) {
+        Map<Long, Map<String, Object>> result = new HashMap<>();
         Map<Long, ObjectSchemeFieldDTO> fieldMap = fieldDTOS.stream().collect(Collectors.toMap(ObjectSchemeFieldDTO::getId, Function.identity()));
         Map<Long, List<FieldValueDTO>> valuesMap = values.stream().collect(Collectors.groupingBy(FieldValueDTO::getInstanceId));
         Map<Long, UserDTO> userMap = FieldValueUtil.handleUserMap(values.stream().filter(x -> x.getFieldType().equals(FieldType.MEMBER)).map(FieldValueDTO::getOptionId).collect(Collectors.toList()));
