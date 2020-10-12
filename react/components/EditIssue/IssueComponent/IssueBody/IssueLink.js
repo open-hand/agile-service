@@ -28,7 +28,7 @@ import Divider from './Divider';
   }
 
   renderLinkList(link, i) {
-    const { reloadIssue, store } = this.props;
+    const { reloadIssue, store, disabled } = this.props;
     const { issueId: id } = store.getIssue;
     return (
       <LinkList
@@ -43,6 +43,7 @@ import Divider from './Divider';
         onRefresh={() => {
           reloadIssue(id);
         }}
+        canDelete={!disabled}
       />
     );
   }
@@ -80,12 +81,12 @@ import Divider from './Divider';
       <div id="link_task">
         <Divider />
         <div className="c7n-title-wrapper">
-          <div className="c7n-title-left">            
+          <div className="c7n-title-left">
             <span>{typeCode === 'feature' ? '关联Feature' : '关联问题'}</span>
-          </div>         
+          </div>
           {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
-            <Tooltip placement="topRight" title={typeCode === 'feature' ? '创建关联Feature' : '创建关联问题'} getPopupContainer={triggerNode => triggerNode.parentNode}>
+            <Tooltip placement="topRight" title={typeCode === 'feature' ? '创建关联Feature' : '创建关联问题'} getPopupContainer={(triggerNode) => triggerNode.parentNode}>
               <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => this.setState({ createLinkTaskShow: true })}>
                 <Icon type="playlist_add icon" />
               </Button>

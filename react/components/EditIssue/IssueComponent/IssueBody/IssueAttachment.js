@@ -10,17 +10,14 @@ const IssueAttachment = observer((props) => {
   const { reloadIssue, hasPermission } = props;
   const { store, disabled } = useContext(EditIssueContext);
   const { issueId, issueAttachmentVOList = [] } = store.getIssue;
-  
-  const initialFileList = issueAttachmentVOList.map(issueAttachment => ({
+  const initialFileList = issueAttachmentVOList.map((issueAttachment) => ({
     uid: issueAttachment.attachmentId,
     name: issueAttachment.fileName,
     url: issueAttachment.url,
     userId: issueAttachment.createdBy,
   }));
   const [fileList, setFileList] = useState(initialFileList);
-  useEffect(() => {
-    setFileList(initialFileList);
-  }, [JSON.stringify(issueAttachmentVOList)]);
+
   const refresh = () => {
     if (reloadIssue) {
       reloadIssue(issueId);
@@ -32,7 +29,7 @@ const IssueAttachment = observer((props) => {
    * @param arr
    */
   const onChangeFileList = (arr) => {
-    if (arr.length > 0 && arr.some(one => !one.url)) {
+    if (arr.length > 0 && arr.some((one) => !one.url)) {
       const config = {
         issueId,
         fileName: arr[0].name || 'AG_ATTACHMENT',
@@ -46,21 +43,20 @@ const IssueAttachment = observer((props) => {
     <div id="attachment">
       <Divider />
       <div className="c7n-title-wrapper">
-        <div className="c7n-title-left"> 
+        <div className="c7n-title-left">
           <span>附件</span>
-        </div>        
-      </div>
-      {!disabled && (
-        <div className="c7n-content-wrapper" style={{ marginTop: '-47px', justifyContent: 'flex-end' }}>
-          <UploadButtonNow
-            onRemove={setFileList}
-            onBeforeUpload={setFileList}
-            updateNow={onChangeFileList}
-            fileList={fileList}
-            hasPermission={hasPermission}
-          />
         </div>
-      )}
+      </div>
+      <div className="c7n-content-wrapper" style={{ marginTop: '-47px', justifyContent: 'flex-end' }}>
+        <UploadButtonNow
+          onRemove={setFileList}
+          onBeforeUpload={setFileList}
+          updateNow={onChangeFileList}
+          fileList={fileList}
+          hasPermission={hasPermission}
+          disabled={disabled}
+        />
+      </div>
     </div>
   );
 });
