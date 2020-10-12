@@ -121,6 +121,13 @@ public class EncryptionUtils {
         return encryptionService.decrypt(crypt, BLANK_KEY);
     }
 
+    public static String decrypt(String crypt, String[] ingoreValues) {
+        if (Arrays.stream(ingoreValues).anyMatch(v -> StringUtils.equals(crypt, v))) {
+            return crypt;
+        }
+        return encryptionService.decrypt(crypt, BLANK_KEY);
+    }
+
     /**
      * 解密List<String>形式的主键
      *
@@ -535,12 +542,8 @@ public class EncryptionUtils {
                     e.printStackTrace();
                 }
                 if (!CollectionUtils.isEmpty(value)) {
-                    object = value.stream().map(v -> encrypt ?
-                            (StringUtils.isNumeric(v) ?
-                                    (Arrays.asList(ENCRYPT_INGORE_FIELD).contains(next.getKey()) && Arrays.asList(IGNORE_VALUES).contains(v) ?
-                                            v : encrypt(Long.parseLong(v))) : v) : (StringUtils.isNumeric(v) ?
-                            (Arrays.asList(ENCRYPT_INGORE_FIELD).contains(next.getKey()) && Arrays.asList(IGNORE_VALUES).contains(v) ?
-                                    v : decrypt(v)) : v)).collect(Collectors.toList());
+                    object = value.stream().map(v -> encrypt ? encrypt(v, IGNORE_VALUES) : decrypt(v, IGNORE_VALUES)).collect(Collectors.toList());
+
                 }
                 else {
                     object = new ArrayList<>();
@@ -645,6 +648,16 @@ public class EncryptionUtils {
             return null;
         }
         return encryptionService.encrypt(value.toString(), BLANK_KEY);
+    }
+
+    public static String encrypt(String value, String[] ignoreValue) {
+        if (Objects.isNull(value)){
+            return null;
+        }
+        if (Arrays.stream(ignoreValue).anyMatch(v -> StringUtils.equals(v,value))){
+            return value;
+        }
+        return encryptionService.encrypt(value, BLANK_KEY);
     }
 
     public static String decryptSearchSourceVO(String filterJson) {
