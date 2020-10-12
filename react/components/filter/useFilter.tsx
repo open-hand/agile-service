@@ -125,7 +125,7 @@ function getSystemFields(config?: FilterConfig): ISystemField[] {
       system: true,
     },
     {
-      code: 'lastUpdateDate',
+      code: 'updateDate',
       title: '更新时间',
       fieldType: 'datetime',
       system: true,

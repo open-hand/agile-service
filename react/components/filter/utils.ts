@@ -194,11 +194,19 @@ export function filterToSearchVO(filter: IFilter, fields: IFilterField[]): ISear
  *
  * @param {*} object
  */
-export function SearchVOToFilter(object: Object): { [key: string]: any } {
+export function SearchVOToFilter(object: { [key: string]: any }): { [key: string]: any } {
   const result: { [key: string]: any } = {};
   for (const [key, value] of Object.entries(object)) {
     if (Object.prototype.toString.call(value) === '[object Object]') {
       Object.assign(result, SearchVOToFilter(value));
+    } else if (key === 'createStartDate' || key === 'createEndDate') {
+      if (object.createStartDate && object.createEndDate) {
+        result.createDate = [object.createStartDate, object.createEndDate];
+      }
+    } else if (key === 'updateStartDate' || key === 'updateEndDate') {
+      if (object.updateStartDate && object.updateEndDate) {
+        result.updateDate = [object.updateStartDate, object.updateEndDate];
+      }
     } else {
       result[key] = value;
     }
