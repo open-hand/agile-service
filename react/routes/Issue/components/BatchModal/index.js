@@ -7,7 +7,7 @@ import {
 import {
   stores, WSHandler, Choerodon,  
 } from '@choerodon/boot';
-import { find } from 'lodash';
+import { find, pick } from 'lodash';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import WSProvider from '@choerodon/master/lib/containers/components/c7n/tools/ws/WSProvider';
@@ -80,14 +80,14 @@ const systemFields = new Map([
     code: 'influenceVersion',
     name: '影响的版本',
     fieldType: 'multiple',
-    format: (value, influenceVersion) => influenceVersion,
+    format: (value, influenceVersion) => pick(influenceVersion, ['versionId', 'name']),
   }],
   ['fixVersion', {
     id: 'fixVersion',
     code: 'fixVersion',
     name: '修复的版本',
     fieldType: 'multiple',
-    format: (value, fixVersion) => fixVersion,
+    format: (value, fixVersion) => pick(fixVersion, ['versionId', 'name']),
   }],
   ['storyPoints', {
     id: 'storyPoints',
