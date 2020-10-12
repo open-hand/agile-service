@@ -34,26 +34,6 @@ public class VersionIssueRelVO implements Serializable {
 
     @ApiModelProperty(value = "版本状态")
     private String statusCode;
-    
-    private Date expectReleaseDate;
-    
-    private Date releaseDate;
-
-    public Date getExpectReleaseDate() {
-        return expectReleaseDate;
-    }
-
-    public void setExpectReleaseDate(Date expectReleaseDate) {
-        this.expectReleaseDate = expectReleaseDate;
-    }
-
-    public Date getReleaseDate() {
-        return releaseDate;
-    }
-
-    public void setReleaseDate(Date releaseDate) {
-        this.releaseDate = releaseDate;
-    }
 
     public Long getVersionId() {
         return versionId;
