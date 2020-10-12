@@ -20,7 +20,7 @@ import QuickFilterField from './components/quick-filter-field';
 import { IFilterField, ICustomField } from '../filter/useFilter';
 
 const { Option } = Select;
-export function getFieldElement(field: IFilterField) {
+export function getFieldElement(field: IFilterField): React.ReactNode {
   const { code, fieldType, system } = field;
   if (system) {
     switch (code) {
