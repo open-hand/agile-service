@@ -31,12 +31,13 @@ const IssueDoc = observer(({ reloadIssue }) => {
     <div>
       {
         docs && docs.knowledgeRelationList
-        && docs.knowledgeRelationList.map(doc => (
+        && docs.knowledgeRelationList.map((doc) => (
           <DocItem
             key={doc.id}
             doc={doc}
             onDeleteDoc={onDeleteDoc}
             type="narrow"
+            disabled={disabled}
           />
         ))
       }
@@ -47,12 +48,12 @@ const IssueDoc = observer(({ reloadIssue }) => {
     <div id="doc">
       <Divider />
       <div className="c7n-title-wrapper">
-        <div className="c7n-title-left">       
+        <div className="c7n-title-left">
           <span>知识</span>
-        </div>        
+        </div>
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
-            <Tooltip placement="topRight" title="关联知识" getPopupContainer={triggerNode => triggerNode.parentNode}>
+            <Tooltip placement="topRight" title="关联知识" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
               <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => setAddDocShow(true)}>
                 <Icon type="playlist_add icon" />
               </Button>
@@ -68,7 +69,7 @@ const IssueDoc = observer(({ reloadIssue }) => {
             visible={addDocShow}
             onCancel={() => setAddDocShow(false)}
             onOk={onDocCreate}
-            checkIds={docs && docs.knowledgeRelationList ? docs.knowledgeRelationList.map(doc => doc.spaceId) : []}
+            checkIds={docs && docs.knowledgeRelationList ? docs.knowledgeRelationList.map((doc) => doc.spaceId) : []}
           />
         ) : null
       }
