@@ -1,5 +1,6 @@
 import { axios, stores } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
+import Api from './Api';
 
 const { AppState } = stores;
 interface IIssue {
@@ -96,9 +97,9 @@ interface IExportSearch {
   contents?: string,
 }
 export { IExportSearch, ICustomFieldData };
-class IssueApi {
+class IssueApi extends Api<IssueApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
@@ -184,7 +185,7 @@ class IssueApi {
     */
   load(issueId: number) {
     const organizationId = getOrganizationId();
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/issues/${issueId}`,
       params: {
@@ -200,7 +201,7 @@ class IssueApi {
    */
   loadUnderProgram(issueId: number, programId: number) {
     const organizationId = getOrganizationId();
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/project_invoke_program/issue/${issueId}`,
       params: {

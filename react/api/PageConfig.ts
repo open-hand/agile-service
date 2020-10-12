@@ -80,7 +80,7 @@ export interface UIssueTypeConfig {
 }
 class PageConfigApi extends Api<PageConfigApi> {
   get prefixOrgOrPro() {
-    return `/agile/v1/${getMenuType() === 'project' ? `projects/${getProjectId()}` : `organizations/${getOrganizationId()}`}`;
+    return `/agile/v1/${getMenuType() === 'project' ? `projects/${this.projectId}` : `organizations/${this.projectId}`}`;
   }
 
   /**
@@ -118,7 +118,7 @@ class PageConfigApi extends Api<PageConfigApi> {
    * @param issueType
    */
   loadTemplateByType(issueType: string) {
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefixOrgOrPro}/object_scheme_field/description_template`,
       params: {
