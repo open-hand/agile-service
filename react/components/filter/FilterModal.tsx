@@ -6,34 +6,37 @@ import { IModalProps } from '@/common/types';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import Filter, { useFilter } from '@/components/filter';
 import { filterToSearchVO, ISearchVO, SearchVOToFilter } from './utils';
-import { FilterConfig, ISystemField } from './useFilter';
+import { FilterConfig } from './useFilter';
 
-interface Props {
-  modal?: IModalProps,
+interface Props extends FilterConfig {
+  modal?: IModalProps
   searchVO?: ISearchVO
+  onOK: (searchVO: ISearchVO) => void
 }
 export interface RefProps {
   validate: () => Promise<boolean>
 }
 
-const FilterModal: React.FC<Props> = ({ modal, searchVO = {} }) => {
+const FilterModal: React.FC<Props> = ({
+  modal, searchVO = {}, onOK, ...configProps
+}) => {
   const ref = useRef<RefProps>({} as RefProps);
   const initFilter = SearchVOToFilter(searchVO);
-  const fieldFilter = useCallback((systemFields: ISystemField[]) => systemFields.filter((field) => field.code !== 'sprint'), []);
   const config: FilterConfig = useMemo(() => ({
     filter: initFilter,
     selected: Object.keys(initFilter).filter((key) => initFilter[key] !== undefined),
-    systemFields: fieldFilter,
-  }), [fieldFilter, initFilter]);
+    ...configProps,
+  }), [configProps, initFilter]);
   const { state, handleSelectChange, handleFilterChange } = useFilter(config);
   const handleSubmit = useCallback(async () => {
     const validate = await ref.current.validate();
     if (validate) {
-      console.log(filterToSearchVO(state.filter, [...state.systemFields, ...state.customFields]));
+      const searchVOResult = filterToSearchVO(state.filter, [...state.systemFields, ...state.customFields]);
+      onOK(searchVOResult);
       return true;
     }
     return false;
-  }, [state]);
+  }, [onOK, state.customFields, state.filter, state.systemFields]);
   useEffect(() => {
     modal?.handleOk(handleSubmit);
   }, [handleSubmit, modal]);

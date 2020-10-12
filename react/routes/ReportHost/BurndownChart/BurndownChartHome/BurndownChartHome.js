@@ -45,6 +45,7 @@ class BurndownChartHome extends Component {
         personalFilters: [],
         quickFilters: [],
       },
+      searchVO: {},
     };
   }
 
@@ -223,9 +224,17 @@ class BurndownChartHome extends Component {
     });
   };
 
+  fieldFilter = (systemFields) => systemFields.filter((field) => field.code !== 'sprint');
+
+  handleFilterOk = (searchVO) => {
+    this.setState({
+      searchVO,
+    });
+  }
+
   render() {
     const {
-      quickFilter, select, chartLoading, chartData, endDate, restDayShow, restDays, tableLoading,
+      quickFilter, select, chartLoading, chartData, endDate, restDayShow, restDays, tableLoading, searchVO,
     } = this.state;
     const sprints = BurndownChartStore.getSprintList;
     return (
@@ -306,20 +315,9 @@ class BurndownChartHome extends Component {
                   </Checkbox>
                   <Button onClick={() => {
                     openFilterModal({
-                      searchVO: {
-                        advancedSearchArgs: { priorityId: ['16'] },
-                        otherArgs: {
-                          customField: {
-                            option: [{ fieldId: '96976041886511104', value: ['7631'] }],
-                            date: [],
-                            date_hms: [],
-                            number: [],
-                            string: [],
-                            text: [],
-                          },
-                        },
-                        searchArgs: {},
-                      },
+                      systemFields: this.fieldFilter,
+                      searchVO,
+                      onOK: this.handleFilterOk,
                     });
                   }}
                   >
