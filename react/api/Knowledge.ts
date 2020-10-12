@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
+import Api from './Api';
 
 interface IIssueRelation {
   issueId:number,
@@ -8,14 +9,14 @@ interface IIssueRelation {
   projectId: number,
   spaceId: number,
 }
-class KnowledgeApi {
+class KnowledgeApi extends Api<KnowledgeApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
    * 创建问题关联的知识关系
-   * @param data 
+   * @param data
    */
   createRelationForIssue(data:Array<IIssueRelation>) {
     return axios.post(`${this.prefix}/knowledge_relation`, data);
@@ -23,10 +24,13 @@ class KnowledgeApi {
 
   /**
    * 根据问题id加载知识
-   * @param issueId 
+   * @param issueId
    */
   loadByIssue(issueId: number) {
-    return axios.get(`${this.prefix}/knowledge_relation/issue/${issueId}`);
+    return this.request({
+      url: `${this.prefix}/knowledge_relation/issue/${issueId}`,
+      method: 'get',
+    });
   }
 
   /**
@@ -45,7 +49,7 @@ class KnowledgeApi {
 
   /**
    * 删除问题中的知识关联
-   * @param relationId 
+   * @param relationId
    */
   deleteRelationForIssue(relationId:number) {
     return axios.delete(`${this.prefix}/knowledge_relation/${relationId}`);

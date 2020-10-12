@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
+import Api from './Api';
 
 interface IComment {
     issueId: number,
@@ -8,34 +9,44 @@ interface IComment {
 interface UComment extends IComment {
     objectVersionNumber:number,
 }
-class IssueCommentApi {
+class IssueCommentApi extends Api<IssueCommentApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
      * 创建issue评论
-     * @param commitObj 
+     * @param commitObj
      */
   create(commitObj: IComment) {
-    return axios.post(`${this.prefix}/issue_comment`, commitObj);
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issue_comment`,
+      data: commitObj,
+    });
   }
-
 
   /**
    * 更新issue的评论
-   * @param commitObj 
+   * @param commitObj
    */
   update(commitUpdateObj:UComment) {
-    return axios.post(`${this.prefix}/issue_comment/update`, commitUpdateObj);
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issue_comment/update`,
+      data: commitUpdateObj,
+    });
   }
 
   /**
    * 根据commitId删除评论
-   * @param commitId 
+   * @param commitId
    */
   delete(commitId:number) {
-    return axios.delete(`${this.prefix}/issue_comment/${commitId}`);
+    return this.request({
+      method: 'delete',
+      url: `${this.prefix}/issue_comment/${commitId}`,
+    });
   }
 }
 

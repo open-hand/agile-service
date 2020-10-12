@@ -10,7 +10,6 @@ import WYSIWYGViewer from '../../WYSIWYGViewer';
 import { DatetimeAgo } from '../../CommonComponent';
 import './Comment.less';
 
-
 class Comment extends Component {
   constructor(props, context) {
     super(props, context);
@@ -25,8 +24,8 @@ class Comment extends Component {
   }
 
   handleDeleteCommit = (commentId) => {
-    const { onDeleteComment } = this.props;
-    issueCommentApi.delete(commentId)
+    const { onDeleteComment, projectId } = this.props;
+    issueCommentApi.project(projectId).delete(commentId)
       .then(() => {
         if (onDeleteComment) {
           onDeleteComment();
@@ -51,8 +50,8 @@ class Comment extends Component {
   };
 
   updateComment = (comment) => {
-    const { onUpdateComment } = this.props;
-    issueCommentApi.update(comment).then(() => {
+    const { onUpdateComment, projectId } = this.props;
+    issueCommentApi.project(projectId).update(comment).then(() => {
       this.setState({
         editCommentId: undefined,
         editComment: undefined,
@@ -68,10 +67,10 @@ class Comment extends Component {
       comment, loginUserId, hasPermission, i, commentExpendAll,
     } = this.props;
     const { editComment, editCommentId, expand } = this.state;
-    const canEditOrDelete = (comment && comment.userId === loginUserId) || hasPermission;
+    const canEditOrDelete = (comment && comment.userId.toString() === loginUserId.toString()) || hasPermission;
     const deltaEdit = text2Delta(editComment);
     return (
-      <React.Fragment>
+      <>
         {
           i > 4 && !commentExpendAll ? null : (
             <div
@@ -82,7 +81,7 @@ class Comment extends Component {
                 expand ? (
                   <Icon
                     role="none"
-                    style={{ 
+                    style={{
                       position: 'absolute',
                       left: 5,
                       top: 15,
@@ -100,7 +99,7 @@ class Comment extends Component {
                 !expand ? (
                   <Icon
                     role="none"
-                    style={{ 
+                    style={{
                       position: 'absolute',
                       left: 5,
                       top: 15,
@@ -117,7 +116,7 @@ class Comment extends Component {
                 <div className="c7n-title-commit" style={{ flex: 1 }}>
                   <UserHead
                     user={{
-                      id: comment.userId,                    
+                      id: comment.userId,
                       name: comment.userName,
                       realName: comment.userRealName,
                       loginName: comment.userLoginName,
@@ -206,7 +205,7 @@ class Comment extends Component {
             </div>
           )
         }
-      </React.Fragment>
+      </>
 
     );
   }

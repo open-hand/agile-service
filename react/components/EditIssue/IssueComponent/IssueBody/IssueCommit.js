@@ -8,7 +8,7 @@ import Comment from '../../Component/Comment';
 import EditIssueContext from '../../stores';
 
 function IssueCommit({
-  disabled, reloadIssue, store, loginUserId, hasPermission,
+  disabled, reloadIssue, store, loginUserId, hasPermission, projectId,
 }) {
   const { applyType } = useContext(EditIssueContext);
   const [addCommit, setAddCommit] = useState(false);
@@ -17,7 +17,7 @@ function IssueCommit({
   const delta = text2Delta(addCommitDes);
   const newCommit = (commit) => {
     const { issueId } = store.getIssue;
-    issueCommentApi.create(commit).then(() => {
+    issueCommentApi.project(projectId).create(commit).then(() => {
       if (reloadIssue) {
         reloadIssue(issueId);
       }
@@ -59,6 +59,7 @@ function IssueCommit({
           issueCommentVOList.map((comment, i) => (
             <Comment
               key={comment.commentId}
+              projectId={projectId}
               comment={comment}
               onDeleteComment={() => { reloadIssue(issueId); }}
               onUpdateComment={() => { reloadIssue(issueId); }}
@@ -92,7 +93,6 @@ function IssueCommit({
       </div>
     );
   };
-
 
   return (
     <div id="commit" style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>

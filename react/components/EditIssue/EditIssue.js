@@ -32,6 +32,7 @@ const defaultProps = {
 function EditIssue() {
   const [issueLoading, setIssueLoading] = useState(false);
   const {
+    projectId,
     afterIssueUpdate,
     store,
     forwardedRef,
@@ -66,7 +67,7 @@ function EditIssue() {
     try {
       // 1. 加载详情
       const issue = await (programId
-        ? issueApi.loadUnderProgram(id, programId) : issueApi.load(id));
+        ? issueApi.project(projectId).loadUnderProgram(id, programId) : issueApi.project(projectId).load(id));
       if (idRef.current !== id) {
         return;
       }
@@ -80,10 +81,10 @@ function EditIssue() {
         context: issue.typeCode,
         pageCode: 'agile_issue_edit',
       };
-      const fields = await fieldApi.getFieldAndValue(id, param);
+      const fields = await fieldApi.project(projectId).getFieldAndValue(id, param);
       const { description, issueTypeVO: { typeCode } } = issue;
       if (!description || description === JSON.stringify([{ insert: '\n' }])) { // 加载默认模版
-        const issueTemplateInfo = await pageConfigApi.loadTemplateByType(typeCode) || {};
+        const issueTemplateInfo = await pageConfigApi.project(projectId).loadTemplateByType(typeCode) || {};
         const { template } = issueTemplateInfo;
         issue.descriptionTemplate = template;
       }
@@ -100,11 +101,11 @@ function EditIssue() {
         linkIssues,
         branches,
       ] = await Promise.all([
-        knowledgeApi.loadByIssue(id),
-        programId || applyType === 'program' ? null : workLogApi.loadByIssue(id),
-        programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.loadByIssue(id),
-        programId || applyType === 'program' ? null : issueLinkApi.loadByIssueAndApplyType(id),
-        programId || applyType === 'program' ? null : devOpsApi.countBranches(id),
+        knowledgeApi.project(projectId).loadByIssue(id),
+        programId || applyType === 'program' ? null : workLogApi.project(projectId).loadByIssue(id),
+        programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.project(projectId).loadByIssue(id),
+        programId || applyType === 'program' ? null : issueLinkApi.project(projectId).loadByIssueAndApplyType(id),
+        programId || applyType === 'program' ? null : devOpsApi.project(projectId).countBranches(id),
       ]);
       if (idRef.current !== id) {
         return;
@@ -254,6 +255,7 @@ function EditIssue() {
             />
             <IssueBody
               key={issueId}
+              projectId={projectId}
               disabled={rightDisabled}
               store={store}
               issueId={currentIssueId}

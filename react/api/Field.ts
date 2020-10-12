@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
+import Api from './Api';
 
 interface IFiled {
   context: string, // "task"
@@ -18,9 +19,9 @@ interface BathUpdateField {
   issueIds: Array<number>,
   predefinedFields: Array<any>,
 }
-class FieldApi {
+class FieldApi extends Api<FieldApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
@@ -63,7 +64,7 @@ class FieldApi {
  */
   getFieldAndValue(issueId: number, dto: IFiled) {
     const organizationId = getOrganizationId();
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/field_value/list/${issueId}`,
       params: {
