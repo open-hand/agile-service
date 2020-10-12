@@ -265,7 +265,7 @@ export type ISystemFieldCode =
   'createDate' |
   'assigneeId' |
   'statusId' |
-  'lastUpdateDate' |
+  'updateDate' |
   'estimatedStartTime' |
   'estimatedEndTime' |
   'label' |
