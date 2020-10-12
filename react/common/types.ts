@@ -251,6 +251,30 @@ export type IIssueColumnName =
   'epic' |
   'feature';
 
+export type IFieldType =
+  'text' | 'input' | 'member' | 'single' | 'multiple' | 'radio' | 'checkbox' |
+  'number' | 'time' | 'date' | 'datetime'
+
+export type ISystemFieldCode =
+  'summary' |
+  'issueTypeId' |
+  'issueNum' |
+  'priority' |
+  'sprint' |
+  'reporter' |
+  'creationDate' |
+  'assign' |
+  'status' |
+  'lastUpdateDate' |
+  'estimatedStartTime' |
+  'estimatedEndTime' |
+  'label' |
+  'component' |
+  'storyPoints' |
+  'version' |
+  'epic' |
+  'feature';
+
 export interface IFoundationHeader {
   title: string
   fieldType: string

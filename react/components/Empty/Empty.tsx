@@ -22,7 +22,7 @@ const Empty: React.FC<EmptyProps> = ({
     <div
       className="c7nagile-Empty-content"
       style={{
-        // border: border ? '1px dashed rgba(0, 0, 0, 0.54)' : '',
+        border: border ? '1px dashed rgba(0, 0, 0, 0.54)' : '',
       }}
     >
       <div className="c7nagile-Empty-imgWrap">

@@ -6,7 +6,7 @@ import {
 import {
   Page, Header, Content, Breadcrumb, stores,
 } from '@choerodon/boot';
-import { some, groupBy } from 'lodash';
+import { some } from 'lodash';
 import Moment from 'moment';
 import { extendMoment } from 'moment-range';
 import { sprintApi, reportApi } from '@/api';
@@ -16,6 +16,7 @@ import QuickSearch from '@/components/quick-search';
 import BurnDownChart from '@/components/charts/burn-down';
 import BurndownChartStore from '@/stores/project/burndownChart/BurndownChartStore';
 import epicSvg from '@/assets/image/emptyChart.svg';
+import openFilterModal from '@/components/filter/FilterModal';
 import NoDataComponent from '../../Component/noData';
 import SwithChart from '../../Component/switchChart';
 import BurndownTable from './components/burndown-table';
@@ -303,6 +304,27 @@ class BurndownChartHome extends Component {
                   >
                     显示非工作日
                   </Checkbox>
+                  <Button onClick={() => {
+                    openFilterModal({
+                      searchVO: {
+                        advancedSearchArgs: { priorityId: ['16'] },
+                        otherArgs: {
+                          customField: {
+                            option: [{ fieldId: '96976041886511104', value: ['7631'] }],
+                            date: [],
+                            date_hms: [],
+                            number: [],
+                            string: [],
+                            text: [],
+                          },
+                        },
+                        searchArgs: {},
+                      },
+                    });
+                  }}
+                  >
+                    筛选
+                  </Button>
                 </div>
                 <BurnDownChart
                   type={select}
