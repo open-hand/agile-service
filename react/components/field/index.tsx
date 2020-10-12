@@ -16,12 +16,13 @@ interface IFieldProps extends Partial<FormFieldProps> {
   field: IFilterField
   value?: any
   onChange: (value: any) => void
+  render?: (field: IFilterField, element: React.ReactNode) => React.ReactNode
 }
 const Field: React.FC<IFieldProps> = ({
-  field, mode, value, onChange, ...otherProps
+  field, mode, value, onChange, render, ...otherProps
 }) => {
   const { fieldType, title } = field;
-  const element = getFieldElement(field);
+  const element = render ? render(field, getFieldElement(field)) : getFieldElement(field);
   const shouldMultipleOnFilter = useMemo(() => mode === 'filter'
     && ['member', 'radio', 'single', 'checkbox', 'multiple'].includes(fieldType),
   [fieldType, mode]);
@@ -37,7 +38,7 @@ const Field: React.FC<IFieldProps> = ({
     }
   }, [fieldType, onChange]);
   if (element) {
-    return React.cloneElement(element, {
+    return React.cloneElement(element as React.ReactElement, {
       label: title,
       multiple: isMultiple,
       range: shouldRangeOnFilter,

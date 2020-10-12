@@ -20,10 +20,12 @@ interface FilterProps {
   onSelectChange: (code: string | string[], select: boolean) => void
   systemFields: ISystemField[]
   customFields: ICustomField[]
+  render?: (field: ISystemField, element: React.ReactNode) => React.ReactNode
 }
 const Filter: React.FC<FilterProps> = ({
   systemFields,
   customFields,
+  render,
   onSelectChange,
   onFilterChange,
   selected,
@@ -57,6 +59,7 @@ const Filter: React.FC<FilterProps> = ({
         {selectedFields.map((field) => (
           <div key={field.code} style={{ display: 'flex', alignItems: 'center' }}>
             <Field
+              render={render}
               mode="filter"
               field={field}
               label={field.title}
