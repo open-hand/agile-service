@@ -237,7 +237,7 @@ public class FieldValueServiceImpl implements FieldValueService {
             issueUpdateVO.setIssueId(v.getIssueId());
             issueUpdateVO.setObjectVersionNumber(v.getObjectVersionNumber());
             IssueVO issueVO = issueService.updateIssue(projectId, issueUpdateVO, fieldList);
-            if ("bug".equals(v.getTypeCode()) && !ObjectUtils.isEmpty(v.getRelateIssueId())) {
+            if ("bug".equals(v.getTypeCode())) {
                 IssueUpdateVO issueUpdateVO1 = new IssueUpdateVO();
                 if (!CollectionUtils.isEmpty(influenceVersion)) {
                     issueUpdateVO1.setVersionType("influence");
