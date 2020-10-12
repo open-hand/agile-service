@@ -1,9 +1,8 @@
 import { toJS } from 'mobx';
 import moment from 'moment';
-import { ICustomFieldData, IExportSearch } from '@/api';
+import { ICustomFieldData } from '@/api';
 import { IChosenFieldField } from '@/components/chose-field/types';
 import Record from 'choerodon-ui/pro/lib/data-set/Record';
-import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 
 const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: Record, transformSystemFilter: Function) => {
   const customField: ICustomFieldData = {
@@ -111,96 +110,4 @@ const getCustomFieldFilters = (chosenFields: Array<IChosenFieldField>, record: R
   return filter;
 };
 
-const getExportFieldCodes = (data: Array<any>) => {
-  const fieldTransform = {
-    issueNum: 'issueNum',
-    issueId: 'summary',
-    //  "description":
-    issueTypeId: 'typeName',
-    //  "projectName":
-    assigneeId: 'assigneeName',
-    // "assigneeRealName":
-    reporterId: 'reporterName',
-    //  "reporterRealName":
-    //   "resolution":
-    statusId: 'statusName',
-    issueSprintVOS: 'sprintName',
-    // "creationDate":
-    lastUpdateDate: 'lastUpdateDate',
-    priorityId: 'priorityName',
-    //  "subTask":
-    //  "remainingTime":
-    version: 'versionName',
-    epic: 'epicName',
-    label: 'labelName',
-    storyPoints: 'storyPoints',
-    component: 'componentName',
-  };
-  // @ts-ignore
-  return data.map((code: string) => fieldTransform[code] || code);
-};
-
-function getFilterFormSystemFields(isInProgram: boolean): FieldProps[] {
-  return ([{
-    name: 'statusId',
-    label: '状态',
-    valueField: 'id',
-    textField: 'name',
-  }, {
-    name: 'sprint',
-    label: '冲刺',
-    required: true,
-    valueField: 'sprintId',
-    textField: 'sprintName',
-  }, {
-    name: 'issueTypeId',
-    label: '问题类型',
-    valueField: 'id',
-    textField: 'name',
-  },
-  ...isInProgram ? [{
-    name: 'feature',
-    label: '所属特性',
-    valueField: 'issueId',
-    textField: 'summary',
-  }] : [{
-    name: 'epic',
-    label: '史诗',
-    valueField: 'issueId',
-    textField: 'epicName',
-  }],
-  {
-    name: 'feature',
-    label: '特性',
-    valueField: 'issueId',
-    textField: 'summary',
-  },
-  {
-    name: 'epic',
-    label: '所属史诗',
-    valueField: 'issueId',
-    textField: 'epicName',
-  },
-  {
-    name: 'priorityId',
-    label: '优先级',
-    valueField: 'id',
-    textField: 'name',
-  }, {
-    name: 'label',
-    label: '标签',
-    valueField: 'labelId',
-    textField: 'labelName',
-  }, {
-    name: 'component',
-    label: '模块',
-    valueField: 'componentId',
-    textField: 'name',
-  }, {
-    name: 'version',
-    label: '版本',
-    valueField: 'versionId',
-    textField: 'name',
-  }]);
-}
-export { getCustomFieldFilters, getExportFieldCodes, getFilterFormSystemFields };
+export { getCustomFieldFilters };

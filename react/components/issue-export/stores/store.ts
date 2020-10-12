@@ -8,9 +8,9 @@ import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import { DataSet } from 'choerodon-ui/pro/lib';
 
 interface EventsProps extends IChosenFieldFieldEvents {
-  loadRecordAxios?: (store: IssueExportStore) => Promise<any>
-  exportBefore?: (data: any) => void | boolean,
-  exportAxios?: (searchData: any, fieldSort: string) => Promise<any>,
+  loadRecordAxios?: (store: IssueExportStore) => Promise<any> /** 查询导出记录 */
+  exportBefore?: (data: any) => any, /** 导出前对数据转换 */
+  exportAxios?: (searchData: any, fieldSort: string) => Promise<any>, /** 导出 */
 }
 interface IDownLoadInfo {
   id: string | null,
@@ -20,14 +20,14 @@ interface IDownLoadInfo {
 }
 
 interface Props {
-  dataSetSystemFields?: FieldProps[],
-  defaultCheckedExportFields?: string[],
-  defaultInitFieldAction?: (data: IChosenFieldField, store: IssueExportStore) => IChosenFieldField | false | undefined | void,
-  transformSystemFilter?: (data: any) => any,
-  transformExportFieldCodes?: (data: Array<string>) => Array<string>,
+  dataSetSystemFields?: FieldProps[], /** dataSet 数据管理 系统字段配置 */
+  defaultCheckedExportFields?: string[], /** 默认选中导出字段 */
+  defaultInitFieldAction?: (data: IChosenFieldField, store: IssueExportStore) => IChosenFieldField | false | undefined | void, /** 初始化字段时调用，当返回值不为IChosenFieldField 则跳过此字段 */
+  transformSystemFilter?: (data: any) => any, /** 提交数据前 对系统筛选字段数据转换 */
+  transformExportFieldCodes?: (data: Array<string>) => Array<string>, /** 提交数据 对系统导出字段数据转换 */
   events?: EventsProps,
-  renderField?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet }) => React.ReactElement | false | null,
-  extraFields?: IChosenFieldField[],
+  renderField?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet }) => React.ReactElement | false | null, /** 系统筛选字段项渲染 */
+  extraFields?: IChosenFieldField[], /** 额外的筛选字段项  不在下拉菜单中 */
 }
 class IssueExportStore {
   dataSetSystemFields: FieldProps[] = [];
