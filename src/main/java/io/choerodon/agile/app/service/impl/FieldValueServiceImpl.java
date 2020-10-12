@@ -207,15 +207,8 @@ public class FieldValueServiceImpl implements FieldValueService {
         if (CollectionUtils.isEmpty(issueDTOS)) {
             throw new CommonException("error.issues.null");
         }
-        List<VersionIssueRelVO> fixVersion;
-        List<VersionIssueRelVO> influenceVersion;
-        try {
-            fixVersion = objectMapper.readValue(JSON.toJSONString(predefinedFields.get("fixVersion")), objectMapper.getTypeFactory().constructParametricType(List.class, VersionIssueRelVO.class));
-            influenceVersion = objectMapper.readValue(JSON.toJSONString(predefinedFields.get("influenceVersion")), objectMapper.getTypeFactory().constructParametricType(List.class, VersionIssueRelVO.class));
-        } catch (IOException e) {
-            throw new CommonException("decrypt failed");
-        }
-
+        List<VersionIssueRelVO> fixVersion = ObjectUtils.isEmpty(predefinedFields.get("fixVersion")) ? null : EncryptionUtils.jsonToList(predefinedFields.get("fixVersion"),VersionIssueRelVO.class);
+        List<VersionIssueRelVO> influenceVersion = ObjectUtils.isEmpty(predefinedFields.get("influenceVersion")) ? null : EncryptionUtils.jsonToList(predefinedFields.get("influenceVersion"),VersionIssueRelVO.class);
         predefinedFields.remove("fixVersion");
         predefinedFields.remove("influenceVersion");
         issueDTOS.forEach(v -> {

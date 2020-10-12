@@ -155,7 +155,7 @@ public class EncryptionUtils {
     public static List jsonToList(Object object, Class clazz) {
         List list = new ArrayList();
         try {
-            JsonNode jsonNode = objectMapper.readTree(object.toString());
+            JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(object));
             if (jsonNode.isArray()) {
                 Iterator<JsonNode> elements = jsonNode.elements();
                 while (elements.hasNext()) {
