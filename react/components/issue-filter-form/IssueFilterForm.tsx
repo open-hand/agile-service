@@ -10,12 +10,9 @@ import { DataSet, Form, Icon } from 'choerodon-ui/pro';
 import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { IChosenFieldField } from '@/components/chose-field/types';
-import { User } from '@/common/types';
-import { userApi } from '@/api';
 import renderField from './components/renderField';
 import IssueFilterFormDataSet from './IssueFilterFormDataSet';
 import './index.less';
-import { IChosenFields } from '../issue-search/store';
 
 interface Props {
   dataSet?: DataSet, // 传入外部dataSet 将放弃组件内创建
@@ -85,7 +82,6 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
   }, [config?.events]);
   const handleAdd = (value: IChosenFieldField) => {
     currentFormItems.set(value.code, value);
-    console.log('cur', currentFormItems);
   };
 
   useEffect(() => {

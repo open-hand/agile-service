@@ -6,6 +6,7 @@ import { observable, action, computed } from 'mobx';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
 import { DataSet } from 'choerodon-ui/pro/lib';
+import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 
 interface EventsProps extends IChosenFieldFieldEvents {
   loadRecordAxios?: (store: IssueExportStore) => Promise<any> /** 查询导出记录 */
@@ -28,6 +29,11 @@ interface Props {
   events?: EventsProps,
   renderField?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet }) => React.ReactElement | false | null, /** 系统筛选字段项渲染 */
   extraFields?: IChosenFieldField[], /** 额外的筛选字段项  不在下拉菜单中 */
+  exportButtonConfig?: { /** 导出按钮配置 */
+    component?: React.ReactElement | ((exportEvent: (() => void)) => React.ReactElement),
+    buttonProps?: Partial<ButtonProps>,
+    buttonChildren?: any,
+  }
 }
 class IssueExportStore {
   dataSetSystemFields: FieldProps[] = [];
@@ -46,6 +52,8 @@ class IssueExportStore {
 
   renderField: any;
 
+  exportButtonConfig: Props['exportButtonConfig'];
+
   @observable extraFields: IChosenFieldField[];
 
   setDefaultCheckedExportFields(data: any) {
@@ -61,6 +69,7 @@ class IssueExportStore {
     this.defaultInitFieldAction = props?.defaultInitFieldAction || ((data: IChosenFieldField, store: IssueExportStore) => data);
     this.extraFields = props?.extraFields || [];
     this.renderField = props?.renderField;
+    this.exportButtonConfig = props?.exportButtonConfig || {};
   }
 
   @observable downloadInfo = {} as IDownLoadInfo;

@@ -25,7 +25,6 @@ const ExportIssueContextProvider = injectIntl(observer(
       tableRef, fields, chosenFields,
     } = props;
     console.log('fields...', fields);
-    const { isInProgram } = useIsInProgram();
     const columns = tableRef.current
       ? tableRef.current.tableStore.columns.filter((column) => column.name && !column.hidden)
       : [];
