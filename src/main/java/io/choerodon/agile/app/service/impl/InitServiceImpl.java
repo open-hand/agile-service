@@ -52,24 +52,10 @@ public class InitServiceImpl implements InitService {
     private StatusMachineTransformMapper statusMachineTransformMapper;
 
     @Override
-    public synchronized List<StatusDTO> initStatus(Long organizationId) {
+    public synchronized List<StatusDTO> initStatus(Long organizationId, List<InitStatus> initStatusList) {
         List<StatusDTO> initStatuses = new ArrayList<>();
-        for (InitStatus initStatus : InitStatus.values()) {
-            StatusDTO status = new StatusDTO();
-            status.setOrganizationId(organizationId);
-            status.setCode(initStatus.getCode());
-            List<StatusDTO> statuses = statusMapper.select(status);
-            if (statuses.isEmpty()) {
-                status.setName(initStatus.getName());
-                status.setDescription(initStatus.getName());
-                status.setType(initStatus.getType());
-                if (statusMapper.insert(status) != 1) {
-                    throw new CommonException("error.initStatus.create");
-                }
-                initStatuses.add(status);
-            } else {
-                initStatuses.add(statuses.get(0));
-            }
+        for (InitStatus initStatus : initStatusList) {
+            initStatuses.add(insertStatusByCode(organizationId, initStatus));
         }
         return initStatuses;
     }
@@ -166,7 +152,7 @@ public class InitServiceImpl implements InitService {
         select.setOrganizationId(organizationId);
         List<StatusDTO> initStatuses = statusMapper.select(select);
         //老的组织没有相关数据要重新创建
-        initStatuses = initOrganization(organizationId, initStatuses);
+        initStatuses = initOrganization(organizationId, initStatuses,applyType);
         //初始化节点
         Map<String, StatusMachineNodeDTO> nodeMap = new HashMap<>();
         Map<String, StatusDTO> statusMap = initStatuses.stream().filter(x -> x.getCode() != null).collect(Collectors.toMap(StatusDTO::getCode, x -> x, (code1, code2) -> code1));
@@ -232,10 +218,15 @@ public class InitServiceImpl implements InitService {
         }
     }
 
-    private List<StatusDTO> initOrganization(Long organizationId, List<StatusDTO> initStatuses) {
+    private List<StatusDTO> initOrganization(Long organizationId, List<StatusDTO> initStatuses,String applyType) {
         if (initStatuses == null || initStatuses.isEmpty()) {
             //初始化状态
-            initStatus(organizationId);
+            List<InitStatus> statusList = InitStatus.listByApplyType(applyType);
+            if (statusList == null || statusList.isEmpty()) {
+                throw new CommonException("error.statusArray.get");
+            }
+            //初始化状态
+            initStatus(organizationId,statusList);
             //初始化默认状态机
             initDefaultStateMachine(organizationId);
             StatusDTO select = new StatusDTO();
@@ -243,6 +234,24 @@ public class InitServiceImpl implements InitService {
             return statusMapper.select(select);
         } else {
             return initStatuses;
+        }
+    }
+
+    protected StatusDTO insertStatusByCode(Long organizationId, InitStatus initStatus) {
+        StatusDTO status = new StatusDTO();
+        status.setOrganizationId(organizationId);
+        status.setCode(initStatus.getCode());
+        List<StatusDTO> statuses = statusMapper.select(status);
+        if (statuses.isEmpty()) {
+            status.setName(initStatus.getName());
+            status.setDescription(initStatus.getName());
+            status.setType(initStatus.getType());
+            if (statusMapper.insert(status) != 1) {
+                throw new CommonException("error.initStatus.create");
+            }
+            return status;
+        } else {
+            return statuses.get(0);
         }
     }
 }

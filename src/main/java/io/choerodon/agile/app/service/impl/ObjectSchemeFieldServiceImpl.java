@@ -56,6 +56,10 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private IssueTypeFieldMapper issueTypeFieldMapper;
     @Autowired
     private FieldOptionService optionService;
+    @Autowired(required = false)
+    private BacklogExpandService backlogExpandService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Override
     public ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field,
@@ -192,7 +196,16 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                                                String schemeCode,
                                                                Long fieldId,
                                                                Long issueTypeId) {
-        return objectSchemeFieldMapper.selectByOptions(organizationId, projectId, schemeCode, fieldId, issueTypeId, null);
+        List<String> issueTypes = null;
+        if (!ObjectUtils.isEmpty(projectId)) {
+            issueTypes = new ArrayList<>(ObjectSchemeFieldContext.NORMAL_PROJECT);
+            if (backlogExpandService != null) {
+                if (Boolean.TRUE.equals(backlogExpandService.enabled(projectId))) {
+                    issueTypes.add(ObjectSchemeFieldContext.BACKLOG);
+                }
+            }
+        }
+        return objectSchemeFieldMapper.selectByOptions(organizationId, projectId, schemeCode, fieldId, issueTypeId, issueTypes);
     }
 
     @Override
@@ -209,7 +222,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             dto.setSystem(true);
             List<ObjectSchemeFieldDTO> systemFields = objectSchemeFieldMapper.select(dto);
             systemFields.forEach(field -> {
-                String context = field.getContext();
+                String context = getFieldContext(field.getCode());
                 List<IssueTypeDTO> issueTypes = convertContextToIssueTypes(context, organizationId);
                 String code = field.getCode();
                 Boolean required = field.getRequired();
@@ -243,7 +256,25 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     @Override
     public List<IssueTypeVO> issueTypes(Long organizationId, Long projectId) {
         List<IssueTypeVO> issueTypes = issueTypeService.queryByOrgId(organizationId);
-        return issueTypes.stream().filter(i -> ObjectSchemeFieldContext.ISSUE_TYPES_LIST.contains(i.getTypeCode())).collect(Collectors.toList());
+        //组织没有backlog类型的数据，则不反悔backlog类型
+        boolean containsBacklog =
+                !objectSchemeFieldExtendMapper
+                        .selectExtendField(Arrays.asList(ObjectSchemeFieldContext.BACKLOG), organizationId, null, null)
+                        .isEmpty();
+        List<IssueTypeVO> result = new ArrayList<>();
+        for (IssueTypeVO vo : issueTypes) {
+            String typeCode = vo.getTypeCode();
+            if (ObjectSchemeFieldContext.ISSUE_TYPES_LIST.contains(typeCode)) {
+                if (ObjectSchemeFieldContext.BACKLOG.equals(typeCode)) {
+                    if (containsBacklog) {
+                        result.add(vo);
+                    }
+                } else {
+                    result.add(vo);
+                }
+            }
+        }
+        return filterBacklog(projectId, result);
     }
 
     private List<IssueTypeDTO> convertContextToIssueTypes(String context, Long organizationId) {
@@ -313,11 +344,27 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                         .stream()
                         .filter(i -> ObjectSchemeFieldContext.ISSUE_TYPES_LIST.contains(i.getTypeCode()))
                         .collect(Collectors.toList());
+        issueTypeList = filterBacklog(projectId, issueTypeList);
         Boolean result = true;
         for (IssueTypeVO vo : issueTypeList) {
-            result = result && issueTypes.contains(vo.getTypeCode());
+            result =  result && issueTypes.contains(vo.getTypeCode());
         }
         return result;
+    }
+
+    private List<IssueTypeVO> filterBacklog(Long projectId, List<IssueTypeVO> issueTypeList) {
+        if (backlogExpandService == null) {
+            return issueTypeList;
+        }
+        if (!ObjectUtils.isEmpty(projectId) && Boolean.FALSE.equals(backlogExpandService.enabled(projectId))) {
+            //没有开启需求池，则去除backlog类型
+            issueTypeList =
+                    issueTypeList
+                            .stream()
+                            .filter(i -> !ObjectSchemeFieldContext.BACKLOG.equals(i.getTypeCode()))
+                            .collect(Collectors.toList());
+        }
+        return issueTypeList;
     }
 
     @Override
@@ -388,17 +435,58 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         return queryById(organizationId, projectId, field.getId());
     }
 
+    @Override
+    public String getFieldContext(String code) {
+        List<String> contexts = new ArrayList<>();
+        List<AgileSystemFieldContext> values = Arrays.asList(AgileSystemFieldContext.values());
+        AgileSystemFieldContext agileSystemFieldContext = values.stream().filter(v -> code.equals(v.getFieldCode())).findAny().orElse(null);
+        if (!ObjectUtils.isEmpty(agileSystemFieldContext)) {
+            String context = agileSystemFieldContext.getContext();
+            contexts.addAll(Arrays.asList(context.split(",")));
+        }
+        if (agilePluginService != null) {
+            String context = agilePluginService.getSystemFieldContext(code);
+            if (!ObjectUtils.isEmpty(context)) {
+                contexts.add(context);
+            }
+        }
+        if (backlogExpandService != null) {
+            String context = backlogExpandService.getSystemFieldContext(code);
+            if (!ObjectUtils.isEmpty(context)) {
+                contexts.add(context);
+            }
+        }
+        return contexts.stream().collect(Collectors.joining(","));
+    }
+
     protected List<IssueTypeVO> getIssueTypeByContexts(String[] contexts,
                                                        Long organizationId,
                                                        Long projectId) {
         ObjectSchemeFieldContext.isIllegalContexts(contexts);
         List<String> contextArray = Arrays.asList(contexts);
         List<IssueTypeVO> issueTypes = issueTypeService.queryByOrgId(organizationId);
-        return issueTypes
-                .stream()
-                .filter(i -> ObjectSchemeFieldContext.ISSUE_TYPES_LIST.contains(i.getTypeCode())
-                        && contextArray.contains(i.getTypeCode()))
-                .collect(Collectors.toList());
+        if (ObjectUtils.isEmpty(projectId)) {
+            return issueTypes
+                    .stream()
+                    .filter(i -> ObjectSchemeFieldContext.ISSUE_TYPES_LIST.contains(i.getTypeCode())
+                            && contextArray.contains(i.getTypeCode()))
+                    .collect(Collectors.toList());
+        } else {
+            List<IssueTypeVO> backlogs = queryBacklogIssueType(projectId, issueTypes, contextArray);
+            List<IssueTypeVO> issueTypeList = queryProjectIssueType(projectId, issueTypes, contextArray);
+            issueTypeList.addAll(backlogs);
+            return issueTypeList;
+        }
+    }
+
+    protected List<IssueTypeVO> queryProjectIssueType(Long projectId,
+                                                    List<IssueTypeVO> issueTypes,
+                                                    List<String> contextArray) {
+            return issueTypes
+                    .stream()
+                    .filter(i -> ObjectSchemeFieldContext.NORMAL_PROJECT.contains(i.getTypeCode())
+                            && contextArray.contains(i.getTypeCode()))
+                    .collect(Collectors.toList());
     }
 
     @Override
@@ -883,6 +971,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
 
     private void processFieldEdited(String issueType, List<PageConfigFieldVO> pageConfigFields) {
         Map<String, PageConfigFieldEditedVO> map = SystemFieldCanNotEdit.fieldEdited(issueType);
+        if (backlogExpandService != null) {
+            map.putAll(backlogExpandService.fieldEdited(issueType));
+        }
         if (!ObjectUtils.isEmpty(map)) {
             pageConfigFields.forEach(p -> {
                 String fieldCode = p.getFieldCode();
@@ -1008,5 +1099,24 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (objectSchemeFieldExtendMapper.updateByPrimaryKeySelective(target) != 1) {
             throw new CommonException("error.page.config.field.update");
         }
+    }
+
+    private List<IssueTypeVO> queryBacklogIssueType(Long projectId,
+                                                    List<IssueTypeVO> issueTypes,
+                                                    List<String> contextArray) {
+        if (backlogExpandService == null) {
+            return new ArrayList<>();
+        }
+        Boolean backlogEnabled = backlogExpandService.enabled(projectId);
+        List<IssueTypeVO> result = new ArrayList<>();
+        if (Boolean.TRUE.equals(backlogEnabled)) {
+            result.addAll(
+                    issueTypes
+                            .stream()
+                            .filter(i -> ObjectSchemeFieldContext.BACKLOG.equals(i.getTypeCode())
+                                    && contextArray.contains(i.getTypeCode()))
+                            .collect(Collectors.toList()));
+        }
+        return result;
     }
 }

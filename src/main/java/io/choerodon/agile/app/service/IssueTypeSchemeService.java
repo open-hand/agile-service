@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.infra.dto.IssueTypeDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.domain.PageInfo;
 import io.choerodon.agile.api.vo.IssueTypeSchemeSearchVO;
@@ -102,4 +103,6 @@ public interface IssueTypeSchemeService {
 //    void initByConsumeCreateProgram(Long projectId, String projectCode);
 
     Page<IssueTypeSchemeWithInfoVO> queryIssueTypeSchemeList(PageRequest pageRequest, Long organizationId, IssueTypeSchemeSearchVO issueTypeSchemeVO);
+
+    void initScheme(Long projectId, Long organizationId, String name, Long defaultIssueTypeId, String schemeApplyType, Map<String, IssueTypeDTO> issueTypeMap);
 }
