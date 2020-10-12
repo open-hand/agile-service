@@ -1,20 +1,19 @@
 import React, {
   ReactElement, useEffect, useMemo, useState,
 } from 'react';
-import { stores, Choerodon } from '@choerodon/boot';
+import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
 import { omit, find, unionBy } from 'lodash';
 import { Divider } from 'choerodon-ui';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
-import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import IssueFilterForm, { useIssueFilterForm } from '@/components/issue-filter-form';
 import ChooseField, { useChoseField } from '@/components/chose-field';
 import TableColumnCheckBoxes, { useTableColumnCheckBoxes } from '@/components/table-column-check-boxes';
 import WsProgress from '@/components/ws-progress';
 import { getProjectName } from '@/utils/common';
 import { useExportIssueStore } from './stores';
-import { getCustomFieldFilters, getExportFieldCodes } from './utils';
+import { getCustomFieldFilters } from './utils';
 import { IChosenFieldField } from '../chose-field/types';
 
 interface FormPartProps {
@@ -65,7 +64,7 @@ interface IDownLoadInfo {
 }
 const ExportIssue: React.FC<{}> = () => {
   const {
-    prefixCls, checkOptions: propsCheckOptions, tableDataSet, store,
+    prefixCls, checkOptions: propsCheckOptions, store,
     fields,
   } = useExportIssueStore();
   // 添加筛选配置 数据
@@ -145,6 +144,22 @@ const ExportIssue: React.FC<{}> = () => {
     store.setExportBtnHidden(false);
     store.setDownloadInfo(messageData);
   };
+  const renderExport = () => {
+    if (store.exportButtonConfig?.component) {
+      return typeof (store.exportButtonConfig?.component) === 'function' ? store.exportButtonConfig?.component(exportExcel) : store.exportButtonConfig?.component;
+    }
+    return (
+      <Button
+        icon="unarchive"
+        style={{ color: '#3f51b5' }}
+        onClick={exportExcel}
+        hidden={store.exportBtnHidden}
+        {...store.exportButtonConfig?.buttonProps}
+      >
+        {store.exportButtonConfig?.buttonChildren ?? '导出问题'}
+      </Button>
+    );
+  };
   return (
     <div>
       <FormPart title="筛选问题" className={`${prefixCls}-form-filter`}>
@@ -157,8 +172,7 @@ const ExportIssue: React.FC<{}> = () => {
       <Divider className={`${prefixCls}-horizontal`} />
       <FormPart title="选择字段" btnOnClick={handleChangeFieldStatus}>
         <TableColumnCheckBoxes {...checkBoxComponentProps} />
-        {/* <TableColumnCheckBoxes options={checkOptions} dataSet={tableColumnCheckBoxesDataSet} name="exportFieldCodes" /> */}
-        <Button icon="unarchive" style={{ color: '#3f51b5' }} onClick={exportExcel} hidden={store.exportBtnHidden}>导出问题</Button>
+        {renderExport()}
       </FormPart>
       <WsProgress
         messageKey="agile-export-issue"

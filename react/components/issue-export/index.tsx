@@ -1,14 +1,21 @@
 import React from 'react';
 import { DataSet, Modal, Table } from 'choerodon-ui/pro/lib';
-import Field from 'choerodon-ui/pro/lib/data-set/Field';
 import classnames from 'classnames';
 import ExportIssue from './ExportIssue';
 import ExportIssueContextProvider from './stores';
 import './ExportIssue.less';
-import { IExportIssueField } from './types';
 import IssueExportStore from './stores/store';
+import { IChosenFieldField } from '../chose-field/types';
 
-export default function Index(props: any) {
+interface IExportIssueProps {
+  fields: IChosenFieldField[],
+  chosenFields: IChosenFieldField[],
+  checkOptions: Array<{ value: string, label: string, order?: string }>,
+  tableRef: React.RefObject<Table>,
+  store: IssueExportStore,
+}
+export { IExportIssueProps };
+export default function Index(props: IExportIssueProps) {
   return (
     <ExportIssueContextProvider {...props}>
       <ExportIssue />
@@ -16,9 +23,9 @@ export default function Index(props: any) {
   );
 }
 
-function openExportIssueModal(fields: Array<IExportIssueField>, chosenFields: Array<any>,
-  tableDataSet: DataSet, tableRef: React.RefObject<Table>, store: IssueExportStore, otherModalProps: any) {
-  const checkOptions: Array<Field> = [...tableDataSet.fields.values()];
+function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Array<any>,
+  tableDataSet: DataSet, tableRef: React.RefObject<Table>, store: IssueExportStore, otherModalProps?: any) {
+  const checkOptions = [...tableDataSet.fields.values()].map((option) => ({ value: option.props.name!, label: option.props.label as string, order: option.order }));
   const { className, ...otherProps } = otherModalProps || {};
   Modal.open({
     key: Modal.key(),
@@ -31,7 +38,7 @@ function openExportIssueModal(fields: Array<IExportIssueField>, chosenFields: Ar
     children: <Index
       fields={fields}
       chosenFields={chosenFields}
-      checkOptions={checkOptions.map((option) => ({ value: option.props.name, label: option.props.label, order: option.order }))}
+      checkOptions={checkOptions}
       tableRef={tableRef}
       store={store}
     />,

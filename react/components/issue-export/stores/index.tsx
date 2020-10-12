@@ -2,25 +2,17 @@ import React, {
   createContext, useContext, useMemo, useEffect,
 } from 'react';
 import { injectIntl, InjectedIntl } from 'react-intl';
-import { DataSet, Table } from 'choerodon-ui/pro/lib';
 import { observer } from 'mobx-react-lite';
 import { findIndex } from 'lodash';
 import useIsInProgram from '@/hooks/useIsInProgram';
-import { IChosenFieldField } from '@/components/chose-field/types';
-import { useIssueFilterFormDataSet } from '@/components/issue-filter-form';
 import IssueExportStore from './store';
+import { IExportIssueProps } from '..';
 
-interface Context {
-  tableDataSet: DataSet,
-  tableRef: React.RefObject<Table>,
-  checkOptions: Array<{ value: string, label: string, order?: string, }>,
-  store: IssueExportStore,
+interface Context extends IExportIssueProps {
   intl: InjectedIntl,
   prefixCls: string,
-  chosenFields: Array<IChosenFieldField>,
-  fields: IChosenFieldField[],
 }
-type Props = Pick<Context, 'intl' | 'tableDataSet' | 'tableRef' | 'fields' | 'chosenFields' | 'checkOptions' | 'store'> & { children: React.Component };
+type Props = Pick<Context, 'intl' | 'tableRef' | 'fields' | 'chosenFields' | 'checkOptions' | 'store'> & { children: React.Component | React.ReactElement };
 const ExportIssueContext = createContext({} as Context);
 
 export function useExportIssueStore() {
@@ -33,7 +25,6 @@ const ExportIssueContextProvider = injectIntl(observer(
       tableRef, fields, chosenFields,
     } = props;
     console.log('fields...', fields);
-    const { isInProgram } = useIsInProgram();
     const columns = tableRef.current
       ? tableRef.current.tableStore.columns.filter((column) => column.name && !column.hidden)
       : [];
