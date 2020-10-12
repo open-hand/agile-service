@@ -273,6 +273,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private StatusLinkageService statusLinkageService;
     @Autowired
     private StateMachineNodeService stateMachineNodeService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -710,10 +712,13 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if ("task".equals(issueConvertDTO.getTypeCode()) || "story".equals(issueConvertDTO.getTypeCode())) {
             issueMapper.updateSubBugRelateIssueId(projectId, issueId);
         }
-        //删除日志信息
+        if (agilePluginService != null) {
+            agilePluginService.deleteIssueForBusiness(issueConvertDTO);
+        }
         if (backlogExpandService != null) {
             backlogExpandService.deleteIssueBacklogRel(issueId);
         }
+        //删除日志信息
         dataLogDeleteByIssueId(projectId, issueId);
         issueAccessDataService.delete(projectId, issueConvertDTO.getIssueId());
         //删除rank数据
