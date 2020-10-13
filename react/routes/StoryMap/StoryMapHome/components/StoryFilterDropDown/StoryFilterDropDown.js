@@ -13,6 +13,7 @@ import './index.less';
 
 function useClickOut(onClickOut) {
   const ref = useRef();
+  
   const handleClick = useCallback((e) => {
     const popupContainerEles = document.getElementsByClassName('c7n-pro-popup-container');
     const triggerBtn = document.getElementsByClassName('c7nagile-StoryMap-StoryFilterDropDown-triggerBtn')[0];

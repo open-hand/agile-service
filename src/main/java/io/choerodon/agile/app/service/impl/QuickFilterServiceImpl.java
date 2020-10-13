@@ -133,7 +133,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
             if (NOT_IN.equals(operation)) {
                 sqlQuery.append(" issue_id not in ( select issue_id from agile_version_issue_rel where version_id in " + inSql(operation,value) + " and relation_type = 'influence' ) ");
             } else {
-                sqlQuery.append(" issue_id in ( select issue_id from agile_version_issue_rel where " + field + " " + inSql(operation,value) + " " + EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY) + " and relation_type = 'influence' ) ");
+                sqlQuery.append(" issue_id in ( select issue_id from agile_version_issue_rel where " + field + " " + quickFilterValueVO.getOperation() + " " + inSql(operation,value) + " and relation_type = 'influence' ) ");
             }
         }
     }

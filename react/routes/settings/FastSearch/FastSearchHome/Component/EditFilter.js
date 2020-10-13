@@ -657,7 +657,7 @@ class AddComponent extends Component {
       return arr.map((v) => ({
         key: v,
         label: _.find(state[OPTION_FILTER[filter].state],
-          { [OPTION_FILTER[filter].id]: value })
+          { [OPTION_FILTER[filter].id]: v })
           ? _.find(state[OPTION_FILTER[filter].state],
             { [OPTION_FILTER[filter].id]: v })[OPTION_FILTER[filter].name]
           : undefined,

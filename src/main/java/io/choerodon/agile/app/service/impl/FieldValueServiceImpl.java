@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -232,7 +234,7 @@ public class FieldValueServiceImpl implements FieldValueService {
             issueUpdateVO.setIssueId(v.getIssueId());
             issueUpdateVO.setObjectVersionNumber(v.getObjectVersionNumber());
             IssueVO issueVO = issueService.updateIssue(projectId, issueUpdateVO, fieldList);
-            if ("bug".equals(v.getTypeCode()) && !ObjectUtils.isEmpty(v.getRelateIssueId())) {
+            if ("bug".equals(v.getTypeCode())) {
                 IssueUpdateVO issueUpdateVO1 = new IssueUpdateVO();
                 if (!CollectionUtils.isEmpty(influenceVersion)) {
                     issueUpdateVO1.setVersionType("influence");

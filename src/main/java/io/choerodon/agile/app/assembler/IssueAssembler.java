@@ -622,5 +622,4 @@ public class IssueAssembler extends AbstractAssembler {
                                 .map(v -> v.getNewValue().subtract(v.getOldValue()).intValue()).reduce(Integer::sum).orElse(0)))
                 .collect(Collectors.toList());
     }
-
 }
