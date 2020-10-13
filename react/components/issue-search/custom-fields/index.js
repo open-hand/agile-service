@@ -192,6 +192,7 @@ function CustomField({ field }) {
     default: return null;
   }
 }
+const ObserverCustomField = observer(CustomField);
 function CustomFields({
   children,
 }) {
@@ -217,7 +218,7 @@ function CustomFields({
       key={field.code}
       style={{ margin: '4px 5px', display: 'flex', alignItems: 'center' }}
     >
-      <CustomField
+      <ObserverCustomField
         field={field}
       />
       {!field.defaultShow && (

@@ -236,6 +236,11 @@ class BurndownChartHome extends Component {
     });
   };
 
+  refresh=() => {
+    this.getTableData();
+    this.axiosGetRestDays();
+  }
+
   render() {
     const {
       select, chartLoading, chartData, endDate, restDayShow, restDays, tableLoading,
@@ -334,14 +339,8 @@ class BurndownChartHome extends Component {
                   </Select>
                   <IssueSearch
                     store={this.issueSearchStore}
-                    onClear={() => {
-                      this.getTableData();
-                      this.axiosGetRestDays();
-                    }}
-                    onChange={() => {
-                      this.getTableData();
-                      this.axiosGetRestDays();
-                    }}
+                    onClear={this.refresh}
+                    onChange={this.refresh}
                   />
                 </div>
                 <BurnDownChart
