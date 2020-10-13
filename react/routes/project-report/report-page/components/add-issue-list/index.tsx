@@ -4,7 +4,6 @@ import React, {
 import {
   Form, DataSet, TextField, Select,
 } from 'choerodon-ui/pro';
-import { pull } from 'lodash';
 import { observer } from 'mobx-react-lite';
 import { Choerodon } from '@choerodon/boot';
 import IssueTable from '@/components/issue-table';

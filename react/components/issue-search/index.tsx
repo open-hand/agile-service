@@ -18,7 +18,7 @@ export function useIssueSearchStore(props: IssueSearchStoreProps) {
   const store = useMemo(() => new IssueSearchStore(props), []);
   return store;
 }
-
+export { IssueSearchStore };
 const IssueSearch: React.FC<IssueSearchProps> = ({
   urlFilter, onClear, onClickSaveFilter, store, onChange,
 }) => {

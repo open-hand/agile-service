@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useMemo } from 'react';
 import {
   Select, Icon,
 } from 'choerodon-ui';
@@ -16,6 +16,7 @@ import { getSelectStyle } from './custom-fields/utils';
 import useQuickFilters from './useQuickFilters';
 
 const { Option, OptGroup } = Select;
+
 const SearchArea: React.FC = () => {
   const prefixCls = 'c7n-issue';
   const {
@@ -102,51 +103,56 @@ const SearchArea: React.FC = () => {
     store.handleFilterChange('issueIds', []);
   };
   const myFilterSelectValue = getMyFilterSelectValue();
+  const hasSummaryField = useMemo(() => store.getAllFields.some((f) => f.code === 'contents'), [store.getAllFields]);
+  const hasQuickFilterField = useMemo(() => store.getAllFields.some((f) => f.code === 'quickFilterIds'), [store.getAllFields]);
   const renderSearch = () => (
     <>
+      {hasSummaryField && (
       <div style={{ marginTop: 4 }}>
         <SummaryField
           onChange={handleInputChange}
           value={store.getFilterValueByCode('contents') ? store.getFilterValueByCode('contents')[0] : undefined}
         />
       </div>
+      )}
       <div className={`${prefixCls}-search-left`}>
         <CustomFields>
-          <div style={{ margin: '4px 5px' }}>
-            <Select
-              mode={'multiple' as SelectMode}
-              showCheckAll={false}
-              allowClear
-              className="SelectTheme"
-              dropdownMatchSelectWidth={false}
-              placeholder="快速筛选"
-              maxTagCount={0}
-              labelInValue
-              maxTagPlaceholder={(ommittedValues : LabeledValue[]) => `${ommittedValues.map((item) => item.label).join(', ')}`}
-              style={{ ...getSelectStyle({ name: '快速筛选' }, myFilterSelectValue), height: 34 }}
-              onSelect={handleSelect}
-              onDeselect={handleDeselect}
-              onClear={() => {
-                setSelectedQuickFilters([]);
-                reset();
-              }}
-              value={myFilterSelectValue}
-            // getPopupContainer={(triggerNode) => triggerNode.parentNode}
-            >
-              <OptGroup key="quick" label="快速筛选">
-                {quickFilters.map((filter) => (
-                  <Option value={`quick|${filter.filterId}`}>{filter.name}</Option>
-                ))}
-              </OptGroup>
-              <OptGroup key="my" label="我的筛选">
-                {
+          {hasQuickFilterField ? (
+            <div style={{ margin: '4px 5px' }}>
+              <Select
+                mode={'multiple' as SelectMode}
+                showCheckAll={false}
+                allowClear
+                className="SelectTheme"
+                dropdownMatchSelectWidth={false}
+                placeholder="快速筛选"
+                maxTagCount={0}
+                labelInValue
+                maxTagPlaceholder={(ommittedValues : LabeledValue[]) => `${ommittedValues.map((item) => item.label).join(', ')}`}
+                style={{ ...getSelectStyle({ name: '快速筛选' }, myFilterSelectValue), height: 34 }}
+                onSelect={handleSelect}
+                onDeselect={handleDeselect}
+                onClear={() => {
+                  setSelectedQuickFilters([]);
+                  reset();
+                }}
+                value={myFilterSelectValue}
+              >
+                <OptGroup key="quick" label="快速筛选">
+                  {quickFilters.map((filter) => (
+                    <Option value={`quick|${filter.filterId}`}>{filter.name}</Option>
+                  ))}
+                </OptGroup>
+                <OptGroup key="my" label="我的筛选">
+                  {
                   myFilters.map((filter) => (
                     <Option value={`my|${filter.filterId}`}>{filter.name}</Option>
                   ))
                 }
-              </OptGroup>
-            </Select>
-          </div>
+                </OptGroup>
+              </Select>
+            </div>
+          ) : null}
         </CustomFields>
       </div>
       <div className={`${prefixCls}-search-right`}>
@@ -159,7 +165,7 @@ const SearchArea: React.FC = () => {
             重置
           </Button>
         )}
-        {!findSameFilter() && isHasFilter && (
+        {onClickSaveFilter && !findSameFilter() && isHasFilter && (
           <Button
             onClick={onClickSaveFilter}
             funcType={'raised' as FuncType}
