@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import org.hzero.starter.keyencrypt.core.EncryptContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -157,7 +158,7 @@ public class FieldValueController {
                                                    @RequestParam String schemeCode,
                                                    @RequestParam String applyType,
                                                    @RequestBody @Encrypt BatchUpdateFieldsValueVo batchUpdateFieldsValueVo) {
-        issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo,applyType, (ServletRequestAttributes)RequestContextHolder.currentRequestAttributes());
+        issueFieldValueService.asyncUpdateFields(projectId,schemeCode,batchUpdateFieldsValueVo,applyType, (ServletRequestAttributes)RequestContextHolder.currentRequestAttributes(), EncryptContext.encryptType());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

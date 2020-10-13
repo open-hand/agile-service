@@ -12,6 +12,7 @@ import io.choerodon.agile.infra.enums.PageCode;
 import io.choerodon.agile.infra.mapper.FieldDataLogMapper;
 import io.choerodon.agile.infra.mapper.FieldValueMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.mapper.ObjectSchemeFieldExtendMapper;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -66,6 +67,8 @@ public class FieldValueServiceImpl implements FieldValueService {
     private ProjectConfigService projectConfigService;
     @Autowired
     private MessageClient messageClient;
+    @Autowired
+    private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
 
     @Override
     public void fillValues(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewVO> pageFieldViews) {
@@ -263,20 +266,11 @@ public class FieldValueServiceImpl implements FieldValueService {
         }
         // 判断这个字段哪些问题类型可以添加
         customFields.forEach(v -> {
-            ObjectSchemeFieldDTO objectSchemeFieldDTO = objectSchemeFieldService.selectById(v.getFieldId());
-            String context = objectSchemeFieldDTO.getContext();
-            if ("global".equals(context)) {
-                batchHandlerCustomFields(projectId, v, schemeCode, issueIds);
-            } else {
-                String[] split = context.split(",");
-                if (ObjectUtils.isEmpty(split)) {
-                    throw new CommonException("error.context.null");
-                }
-                List<String> contexts = Arrays.asList(split);
-                List<Long> needAddIssueIds = issueDTOS.stream().filter(issueDTO -> contexts.contains(issueDTO.getTypeCode())).map(IssueDTO::getIssueId).collect(Collectors.toList());
-                if (!CollectionUtils.isEmpty(needAddIssueIds)) {
-                    batchHandlerCustomFields(projectId, v, schemeCode, needAddIssueIds);
-                }
+            List<ObjectSchemeFieldExtendDTO> objectSchemeFieldExtendDTOS = objectSchemeFieldExtendMapper.selectExtendField(null, ConvertUtil.getOrganizationId(projectId), v.getFieldId(), projectId);
+            List<String> contexts = objectSchemeFieldExtendDTOS.stream().map(ObjectSchemeFieldExtendDTO::getIssueType).collect(Collectors.toList());
+            List<Long> needAddIssueIds = issueDTOS.stream().filter(issueDTO -> contexts.contains(issueDTO.getTypeCode())).map(IssueDTO::getIssueId).collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(needAddIssueIds)) {
+                batchHandlerCustomFields(projectId, v, schemeCode, needAddIssueIds);
             }
             batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
             messageClient.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));

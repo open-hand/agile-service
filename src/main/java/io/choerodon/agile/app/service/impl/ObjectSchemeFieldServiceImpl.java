@@ -473,6 +473,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         ObjectSchemeFieldDTO update = modelMapper.map(updateDTO, ObjectSchemeFieldDTO.class);
         //处理context
         String[] contexts = updateDTO.getContext();
+        String context = Arrays.asList(contexts).stream().filter(string -> !string.isEmpty()).collect(Collectors.joining(","));
+        update.setContext(context);
         updateFieldIssueType(organizationId, projectId, fieldId, contexts);
         String defaultValue = tryDecryptDefaultValue(update.getDefaultValue());
         if (defaultValue != null) {
