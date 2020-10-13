@@ -59,6 +59,8 @@ export function useTableColumnCheckBoxes(config?: IConfig): [ITableColumnCheckBo
   const handleChange = (value: string[] | string, oldValue: string) => {
     if (value) {
       Array.isArray(value) ? setCheckedOptions(value) : setCheckedOptions([value]);
+    } else {
+      setCheckedOptions([]);
     }
     onChange(value);
   };
