@@ -84,7 +84,7 @@ public class FixDataServiceImpl implements FixDataService {
     protected PageFieldMapper pageFieldMapper;
     @Autowired
     protected ObjectSchemeFieldService objectSchemeFieldService;
-    @Autowired
+    @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
 
     @Override
