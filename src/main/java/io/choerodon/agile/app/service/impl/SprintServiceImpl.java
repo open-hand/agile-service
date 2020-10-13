@@ -349,7 +349,7 @@ public class SprintServiceImpl implements SprintService {
 
     @Override
     public List<SprintNameVO> queryNameByOptions(Long projectId, List<String> sprintStatusCodes) {
-        return sprintNameAssembler.toTargetList(sprintMapper.queryNameByOptions(projectId, sprintStatusCodes), SprintNameVO.class);
+        return sprintNameAssembler.toTargetList(sprintMapper.queryNameByOptions(Arrays.asList(projectId), sprintStatusCodes), SprintNameVO.class);
     }
 
     @Override

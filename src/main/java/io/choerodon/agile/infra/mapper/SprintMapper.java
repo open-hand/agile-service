@@ -13,7 +13,8 @@ import java.util.Set;
  * Created by jian_zhang02@163.com on 2018/5/15.
  */
 public interface SprintMapper extends BaseMapper<SprintDTO> {
-    List<SprintNameDTO> queryNameByOptions(@Param("projectId") Long projectId, @Param("sprintStatusCodes") List<String> sprintStatusCodes);
+    List<SprintNameDTO> queryNameByOptions(@Param("projectIds") List<Long> projectIds,
+                                           @Param("sprintStatusCodes") List<String> sprintStatusCodes);
 
     /**
      * 根据项目id和冲刺id查询冲刺
