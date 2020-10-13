@@ -15,6 +15,7 @@ import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -247,10 +248,18 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private void setSearchList(BurnDownSearchVO burnDownSearchVO) {
-        List<Long> personalFilterIds = burnDownSearchVO.getPersonalFilterIds() ;
-        if (!ObjectUtils.isEmpty(personalFilterIds)) {
-            burnDownSearchVO.setSearchList(boardService.getSearchVO(personalFilterIds));
-        } else {
+        List<Long> personalFilterIds = burnDownSearchVO.getPersonalFilterIds();
+        SearchVO currentSearchVO = burnDownSearchVO.getCurrentSearchVO();
+        List<SearchVO> list = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(personalFilterIds)) {
+            list.addAll(boardService.getSearchVO(personalFilterIds));
+        }
+        if (Objects.nonNull(currentSearchVO)){
+            list.add(currentSearchVO);
+        }
+        if (CollectionUtils.isNotEmpty(list)){
+            burnDownSearchVO.setSearchList(list);
+        }else {
             burnDownSearchVO.setSearchList(null);
         }
     }
