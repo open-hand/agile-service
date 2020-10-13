@@ -1,13 +1,14 @@
 import React, {
-  createContext, useMemo, useEffect, useState, 
+  createContext, useMemo, useEffect, useState,
 } from 'react';
-import { set } from 'mobx';
 import { DataSet } from 'choerodon-ui/pro';
 import { inject } from 'mobx-react';
 import { injectIntl } from 'react-intl';
 import { fieldApi } from '@/api';
-import IssueStore from '@/stores/project/issue/IssueStore';
-import IssueDataSet from './IssueDataSet';
+import IssueStore, { getSystemFields } from '@/stores/project/issue/IssueStore';
+import { useIssueSearchStore } from '@/components/issue-search';
+import IssueDataSet from '@/components/issue-table/dataSet';
+import { transformFilter, handleSelect, handleUnSelect } from './utils';
 
 const Store = createContext();
 
@@ -15,8 +16,7 @@ export default Store;
 
 export const StoreProvider = inject('AppState')(injectIntl(
   (props) => {
-    const { intl, children, AppState: { currentMenuType: { id: projectId, organizationId }, userInfo: { id: userId } } } = props;   
-    // const intlPrefix = 'global.saga';
+    const { intl, children, AppState: { currentMenuType: { id: projectId, organizationId }, userInfo: { id: userId } } } = props;
     const [fields, setFields] = useState([]);
     useEffect(() => {
       const loadData = async () => {
@@ -25,9 +25,28 @@ export const StoreProvider = inject('AppState')(injectIntl(
       };
       loadData();
     }, []);
-    
+    const issueSearchStore = useIssueSearchStore({
+      getSystemFields,
+      transformFilter,
+    });
     const dataSet = useMemo(() => new DataSet(IssueDataSet({
-      intl, projectId, organizationId,
+      intl,
+      projectId,
+      organizationId,
+      issueSearchStore,
+      IssueStore,
+      events: {
+        select: () => handleSelect({ dataSet }, issueSearchStore),
+        selectAll: () => handleSelect({ dataSet }, issueSearchStore),
+        unSelect: handleUnSelect,
+        unSelectAll: handleUnSelect,
+        load: () => {
+          // 有筛选，自动展开
+          if (issueSearchStore.isHasFilter) {
+            IssueStore.tableRef.current.tableStore.expandAll();
+          }
+        },
+      },
     })), []);
     IssueStore.dataSet = dataSet;
     /**
@@ -35,16 +54,16 @@ export const StoreProvider = inject('AppState')(injectIntl(
     * 详情页数据
     * @param id
     */
-    
+
     const value = {
       ...props,
+      issueSearchStore,
       fields,
       dataSet,
-      projectId, 
+      projectId,
       organizationId,
       userId,
       prefixCls: 'c7n-issue',
-      // intlPrefix,
     };
     return (
       <Store.Provider value={value}>

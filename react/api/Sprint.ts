@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
+import Api from './Api';
 
 interface ISprint {
   sprintName: string
@@ -40,14 +41,14 @@ interface MoveIssueCardsInfo {
   outsetIssueId: number, // 移动参照问题id 0代表无问题
   rankIndex: number, // 是否生成移动日志
 }
-class SprintApi {
+class SprintApi extends Api<SprintApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
    * 创建冲刺
-   * @param sprint 
+   * @param sprint
    */
   create(sprint: ISprint) {
     return axios.post(`${this.prefix}/sprint`, sprint);
@@ -55,7 +56,7 @@ class SprintApi {
 
   /**
    * 在当前PI下创建冲刺
-   * @param sprint 
+   * @param sprint
    */
   createOnCurrentPi(sprint: ISprint) {
     return axios.post(`${this.prefix}/sprint/sub_project`, sprint);
@@ -63,7 +64,7 @@ class SprintApi {
 
   /**
    * 校验冲刺名称
-   * @param name 
+   * @param name
    */
   validate(name: string) {
     return axios.post(`${this.prefix}/sprint/check_name`, {
@@ -73,7 +74,7 @@ class SprintApi {
 
   /**
    * 根据piId查询冲刺
-   * @param piId 
+   * @param piId
    */
   getAllByPiId(piId: number) {
     return axios.get(`${this.prefix}/sprint/sub_project/list?pi_id=${piId}`);
@@ -84,12 +85,35 @@ class SprintApi {
  * @param {*} arr
  */
   loadSprints(arr: Array<string> = [], projectId?:number) {
-    return axios.post(`/agile/v1/projects/${projectId || getProjectId()}/sprint/names`, arr);
+    return this.request({
+      method: 'post',
+      url: `/agile/v1/projects/${projectId || this.projectId}/sprint/names`,
+      data: arr,
+    });
+  }
+
+  /**
+   * 加载全部子项目下的冲刺
+   * @param param
+   * @param page
+   * @param selectedIds
+   */
+  loadSubProjectSprints(param: string, page: number, selectedIds?: number[]) {
+    return axios({
+      method: 'post',
+      url: `${this.prefix}/sprint/sub_project/page_sprints`,
+      params: {
+        page,
+        size: 10,
+        param,
+      },
+      data: selectedIds,
+    });
   }
 
   /**
    * 根据冲刺id加载冲刺
-   * @param sprintId 
+   * @param sprintId
    */
   loadSprint(sprintId: number) {
     return axios.get(`${this.prefix}/sprint/${sprintId}`);
@@ -97,7 +121,7 @@ class SprintApi {
 
   /**
    * 根据冲刺id查询sprint名及此冲刺下issue统计信息
-   * @param sprintId 
+   * @param sprintId
    */
   loadSprintAndCountIssue(sprintId: number) {
     return axios.get(`${this.prefix}/sprint/${sprintId}/names`);
@@ -112,10 +136,10 @@ class SprintApi {
 
   /**
    * 根据冲刺id及状态加载问题
-   * @param sprintId 
-   * @param status 
-   * @param page 
-   * @param size 
+   * @param sprintId
+   * @param status
+   * @param page
+   * @param size
    */
   loadSprintIssues(sprintId: number, status: string, page: number = 1, size: number = 99999) {
     const organizationId = getOrganizationId();
@@ -133,8 +157,8 @@ class SprintApi {
 
   /**
    * 根据团队id及PI id 加载冲刺列表
-   * @param teamId 
-   * @param piId 
+   * @param teamId
+   * @param piId
    */
   loadSprintsByTeam(teamId: number, piId: number) {
     return axios(
@@ -150,8 +174,8 @@ class SprintApi {
 
   /**
    * 按团队Ids和piId查询冲刺
-   * @param {*} piId 
-   * @param {*} teamIds 
+   * @param {*} piId
+   * @param {*} teamIds
    */
   getTeamSprints(piId: number, teamIds: Array<number>) {
     return axios({
@@ -166,8 +190,8 @@ class SprintApi {
 
   /**
    * 更新冲刺部分字段
-   * @param data 
-   * @param isCurrentPi  更新的冲刺是否为项目群下的子项目 
+   * @param data
+   * @param isCurrentPi  更新的冲刺是否为项目群下的子项目
    */
   updateSprint(data: USprint, isCurrentPi: boolean = false) {
     return axios({
@@ -179,7 +203,7 @@ class SprintApi {
 
   /**
    * 完成冲刺
-   * @param data 
+   * @param data
    */
   complete(data: CloseSprint) {
     return axios.post(`${this.prefix}/sprint/complete`, data);
@@ -187,8 +211,8 @@ class SprintApi {
 
   /**
    * 开启冲刺
-   * @param data 
-   * @param isCurrentPi 开启的冲刺是否为项目群下的子项目 
+   * @param data
+   * @param isCurrentPi 开启的冲刺是否为项目群下的子项目
    */
   start(data: StartSprint, isCurrentPi = false) {
     return axios.post(`${this.prefix}/sprint/${isCurrentPi ? 'sub_project/' : ''}start`, data);
@@ -196,15 +220,15 @@ class SprintApi {
 
   /**
    * 删除冲刺
-   * @param sprintId 
-   * @param isCurrentPi 删除的冲刺是否为项目群下的子项目 
+   * @param sprintId
+   * @param isCurrentPi 删除的冲刺是否为项目群下的子项目
    */
   delete(sprintId: number, isCurrentPi = false) {
     return axios.delete(`${this.prefix}/sprint/${isCurrentPi ? 'sub_project/' : ''}${sprintId}`);
   }
 
   /**
-   * 联合查询sprint及其issue 
+   * 联合查询sprint及其issue
    * @param quickFilterIds 快速查询ids
    * @param assigneeFilterIds 经办人搜索ids
    * @param filter  过滤条件
@@ -225,15 +249,15 @@ class SprintApi {
 
   /**
    * 根据冲刺id查询冲刺的时间范围内非工作日(包含周六周天)
-   * @param sprintId 
+   * @param sprintId
    */
-  getRestDays(sprintId: number) {
+  getRestDays(sprintId: string):Promise<string[]> {
     return axios.get(`${this.prefix}/sprint/query_non_workdays/${sprintId}/${getOrganizationId()}`);
   }
 
   /**
    * 根据冲刺id查询经办人分布状况
-   * @param sprintId 
+   * @param sprintId
    */
   getAssigneeDistribute(sprintId: number) {
     return axios({
@@ -247,7 +271,7 @@ class SprintApi {
 
   /**
    * 根据冲刺id查询问题类型分布状况
-   * @param sprintId 
+   * @param sprintId
    */
   getIssueTypeDistribute(sprintId: number) {
     const organizationId = getOrganizationId();
@@ -262,8 +286,8 @@ class SprintApi {
   }
 
   /**
-   * 冲刺id联合组织id查询冲刺基本信息  
-   * @param sprintId 
+   * 冲刺id联合组织id查询冲刺基本信息
+   * @param sprintId
    */
   getSprintCombineOrgId(sprintId: number) {
     const organizationId = getOrganizationId();
@@ -278,7 +302,7 @@ class SprintApi {
 
   /**
    * 根据冲刺id查询状态分布状况
-   * @param sprintId 
+   * @param sprintId
    */
   getStatusDistribute(sprintId: number) {
     const organizationId = getOrganizationId();
@@ -294,8 +318,8 @@ class SprintApi {
 
   /**
    * 将批量的issue加入到冲刺中
-   * @param sprintId 
-   * @param issueIds 
+   * @param sprintId
+   * @param issueIds
    */
   addIssues(sprintId: number, moveCardsInfo: MoveIssueCardsInfo) {
     return axios.post(`${this.prefix}/issues/to_sprint/${sprintId}`, moveCardsInfo);

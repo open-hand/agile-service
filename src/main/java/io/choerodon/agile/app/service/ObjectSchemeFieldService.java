@@ -100,9 +100,9 @@ public interface ObjectSchemeFieldService {
      */
     Boolean checkCode(Long organizationId, Long projectId, String code, String schemeCode);
 
-    List<AgileIssueHeadVO> getIssueHeadForAgile(Long organizationId, Long projectId, String schemeCode);
+    List<AgileIssueHeadVO> getIssueHeadForAgile(Long organizationId, Long projectId, String schemeCode, String issueTypeList);
 
-    List<ObjectSchemeFieldDetailVO> queryCustomFieldList(Long projectId);
+    List<ObjectSchemeFieldDetailVO> queryCustomFieldList(Long projectId, String issueTypeList);
 
     ObjectSchemeFieldDTO selectById(Long fieldId);
 

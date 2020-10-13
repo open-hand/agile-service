@@ -365,7 +365,7 @@ public class EncryptionUtils {
         temp = adMapOptional.map(ad -> (List<String>) (ad.get("sprint"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("sprint",
-                    temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+                    temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // issueIds
@@ -493,24 +493,27 @@ public class EncryptionUtils {
 
 
     public static String handlerPersonFilterJson(String filterJson, boolean encrypt) {
+        if (!EncryptContext.isEncrypt()){
+            return filterJson;
+        }
         try {
             JsonNode jsonNode = objectMapper.readTree(filterJson);
             ObjectNode objectNode = objectMapper.createObjectNode();
-            if (!ObjectUtils.isEmpty(jsonNode.get("advancedSearchArgs"))) {
+            if (!ObjectUtils.isEmpty(jsonNode.get("advancedSearchArgs")) && !jsonNode.get("advancedSearchArgs").isNull()) {
                 Map<String, Object> adMapOptional = objectMapper.readValue(objectMapper.writeValueAsString(jsonNode.get("advancedSearchArgs")), new TypeReference<Map<String, Object>>() {
                 });
                 objectNode.set("advancedSearchArgs",objectMapper.readTree(objectMapper.writeValueAsString(handlerOtherArgs(adMapOptional, encrypt))));
             } else {
                 objectNode.set("advancedSearchArgs",objectMapper.readTree(objectMapper.writeValueAsString(new HashMap())));
             }
-            if (!ObjectUtils.isEmpty(jsonNode.get("otherArgs"))) {
+            if (!ObjectUtils.isEmpty(jsonNode.get("otherArgs")) && !jsonNode.get("otherArgs").isNull()) {
                 Map<String, Object> oAMap = objectMapper.readValue(objectMapper.writeValueAsString(jsonNode.get("otherArgs")),new TypeReference<Map<String,Object>>(){});
                 objectNode.set("otherArgs",objectMapper.readTree(objectMapper.writeValueAsString(handlerOtherArgs(oAMap, encrypt))));
             }
             else {
                 objectNode.set("otherArgs", objectMapper.readTree(objectMapper.writeValueAsString(new HashMap())));
             }
-            if(!ObjectUtils.isEmpty(jsonNode.get("quickFilterIds"))){
+            if(!ObjectUtils.isEmpty(jsonNode.get("quickFilterIds")) && !jsonNode.get("quickFilterIds").isNull()){
                List<String> list =  objectMapper.readValue(objectMapper.writeValueAsString(jsonNode.get("quickFilterIds")),new TypeReference<List<String>>() {});
                if(encrypt){
                    objectNode.set("quickFilterIds",objectMapper.readTree(objectMapper.writeValueAsString(encryptListToStr(list))));
@@ -543,7 +546,12 @@ public class EncryptionUtils {
                     LOGGER.error("string to object error: {}", e);
                 }
                 if (!CollectionUtils.isEmpty(value)) {
-                    object = value.stream().map(v -> handlerEncrypt(encrypt,v)).collect(Collectors.toList());
+                    object = value.stream().map(v -> encrypt ?
+                            (StringUtils.isNumeric(v) ?
+                                    (Arrays.asList(ENCRYPT_INGORE_FIELD).contains(next.getKey()) && Arrays.asList(IGNORE_VALUES).contains(v) ?
+                                            v : encrypt(Long.parseLong(v))) : v) : (StringUtils.isNumeric(v) ?
+                                                (Arrays.asList(ENCRYPT_INGORE_FIELD).contains(next.getKey()) && Arrays.asList(IGNORE_VALUES).contains(v) ?
+                                                        v : decrypt(v)) : v)).collect(Collectors.toList());
                 }
                 else {
                     object = new ArrayList<>();
@@ -558,17 +566,7 @@ public class EncryptionUtils {
         return map1;
     }
 
-    private static String handlerEncrypt(Boolean encrypt,String v){
-        List<String> ignore = Arrays.asList(IGNORE_VALUES);
-        if(Boolean.TRUE.equals(encrypt)){
-            return (StringUtils.isNumeric(v) ? (!ignore.contains(v) ? encrypt(Long.parseLong(v)) : v) : v);
-        }
-        else {
-           return  (ignore.contains(v) ? v : decrypt(v));
-        }
-    }
-
-    private static Object handlerCustomField(Object value, Boolean encrypt) {
+    protected static Object handlerCustomField(Object value, Boolean encrypt) {
         try {
             JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(value));
             ObjectNode objectNode = (ObjectNode) jsonNode;

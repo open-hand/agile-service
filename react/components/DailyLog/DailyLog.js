@@ -1,11 +1,13 @@
+/* eslint-disable react/jsx-no-bind */
 import React, { Component } from 'react';
 import { stores } from '@choerodon/boot';
 import moment from 'moment';
 import {
-  Select, DatePicker, Modal, Radio,
+  Select, DatePicker, Modal, Radio, Button,
 } from 'choerodon-ui';
 import { beforeTextUpload } from '@/utils/richText';
 import { workLogApi } from '@/api';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import WYSIWYGEditor from '../WYSIWYGEditor';
 import './DailyLog.less';
 
@@ -215,9 +217,8 @@ class DailyLog extends Component {
     ]);
     if (!state[pro]) {
       return 0;
-    } else {
-      return state[pro] * TIME.get(state[unit]);
     }
+    return state[pro] * TIME.get(state[unit]);
   }
 
   formDate(data) {
@@ -228,11 +229,10 @@ class DailyLog extends Component {
   transTime(data) {
     if (this.isEmpty(data)) {
       return undefined;
-    } else if (typeof data === 'string') {
+    } if (typeof data === 'string') {
       return moment(this.formDate(data), DATA_FORMAT);
-    } else {
-      return data.format('YYYY-MM-DD HH:mm:ss');
     }
+    return data.format('YYYY-MM-DD HH:mm:ss');
   }
 
   render() {
@@ -257,19 +257,23 @@ class DailyLog extends Component {
         className="c7n-dailyLog"
         title="登记工作日志"
         visible={visible || false}
-        onOk={this.handleCreateDailyLog}
-        onCancel={onCancel}
         okText="创建"
         cancelText="取消"
         confirmLoading={createLoading}
-        width={740}
+        footer={[
+          <Button key="submit" type="primary" funcType="raised" onClick={this.handleCreateDailyLog}>
+            确定
+          </Button>,
+          <Button key="back" onClick={onCancel} funcType="raised">取消</Button>,
+        ]}
+        width={MODAL_WIDTH.middle}
       >
         <div>
           <section className="info">
             <div className="line-info">
               <Select
                 defaultOpen
-                getPopupContainer={trigger => trigger.parentNode}
+                getPopupContainer={(trigger) => trigger.parentNode}
                 label="耗费时间*"
                 value={dissipate && dissipate.toString()}
                 mode="combobox"
@@ -282,9 +286,9 @@ class DailyLog extends Component {
                 }}
                 tokenSeparators={[',']}
                 style={{ flex: 1, marginTop: 0, paddingTop: 0 }}
-                onChange={value => this.handleChangeDissipate(value)}
+                onChange={(value) => this.handleChangeDissipate(value)}
               >
-                {storyPointList.map(sp => (
+                {storyPointList.map((sp) => (
                   <Option key={sp.toString()} value={sp}>
                     {sp}
                   </Option>
@@ -295,14 +299,13 @@ class DailyLog extends Component {
                 style={{ width: 160, marginLeft: 18 }}
                 onChange={this.handleDissipateUnitChange.bind(this)}
               >
-                {['小时', '天', '周'].map(type => (
+                {['小时', '天', '周'].map((type) => (
                   <Option key={type} value={type}>{type}</Option>))}
               </Select>
             </div>
             {dissipateNull
               ? <div className="error-text">耗费时间必填</div>
-              : ''
-            }
+              : ''}
             <div
               className="dataPicker"
               style={{
@@ -318,8 +321,7 @@ class DailyLog extends Component {
               />
               {startTimeNull
                 ? <div className="error-text">工作日期必填</div>
-                : ''
-              }
+                : ''}
             </div>
             <div className="line-info">
               <RadioGroup label="剩余的估计" onChange={this.onRadioChange} value={radio}>
@@ -345,9 +347,9 @@ class DailyLog extends Component {
                     }}
                     tokenSeparators={[',']}
                     style={{ width: 265, marginTop: 0, paddingTop: 0 }}
-                    onChange={value => this.handleChangeTime(value)}
+                    onChange={(value) => this.handleChangeTime(value)}
                   >
-                    {storyPointList.map(sp => (
+                    {storyPointList.map((sp) => (
                       <Option key={sp.toString()} value={sp}>
                         {sp}
                       </Option>
@@ -359,7 +361,7 @@ class DailyLog extends Component {
                     value={timeUnit}
                     onChange={this.handleTimeUnitChange.bind(this)}
                   >
-                    {['小时', '天', '周'].map(type => (
+                    {['小时', '天', '周'].map((type) => (
                       <Option key={`${type}`} value={`${type}`}>{type}</Option>))}
                   </Select>
                 </Radio>
@@ -383,9 +385,9 @@ class DailyLog extends Component {
                     }}
                     tokenSeparators={[',']}
                     style={{ width: 265, marginTop: 0, paddingTop: 0 }}
-                    onChange={value => this.handleChangeReduce(value)}
+                    onChange={(value) => this.handleChangeReduce(value)}
                   >
-                    {storyPointList.map(sp => (
+                    {storyPointList.map((sp) => (
                       <Option key={sp.toString()} value={sp}>
                         {sp}
                       </Option>
@@ -397,7 +399,7 @@ class DailyLog extends Component {
                     value={reduceUnit}
                     onChange={this.handleReduceUnitChange.bind(this)}
                   >
-                    {['小时', '天', '周'].map(type => (
+                    {['小时', '天', '周'].map((type) => (
                       <Option key={`${type}`} value={`${type}`}>{type}</Option>))}
                   </Select>
                 </Radio>

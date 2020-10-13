@@ -2,6 +2,7 @@ import React from 'react';
 import { stores } from '@choerodon/boot';
 import { find } from 'lodash';
 import { Tooltip } from 'choerodon-ui';
+import humanize from './humanizeDuration';
 
 const { AppState } = stores;
 
@@ -49,4 +50,18 @@ export function configTheme({
 // 获取文件名后缀
 export function getFileSuffix(fileName) {
   return fileName.replace(/.+\./, '').toLowerCase();
+}
+/**
+ * 时间（毫秒）转文字显示
+ * @param {*} ms
+ */
+export function humanizeDuration(ms, config = {}) {
+  return humanize(ms, {
+    language: 'zh_CN',
+    delimiter: '',
+    spacer: '',
+    largest: 2,
+    round: true,
+    ...config,
+  });
 }

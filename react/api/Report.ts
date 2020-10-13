@@ -1,16 +1,17 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { getOrganizationId } from '@/utils/common';
+import Api from './Api';
 
 interface ICumulativeData {
-  columnIds: Array<number>, // 看板列id
+  columnIds: Array<string>, // 看板列id
   endDate: string,
-  quickFilterIds: Array<number> | [], // 快速搜索的id列表
+  quickFilterIds: Array<string> | [], // 快速搜索的id列表
   startDate: string,
-  boardId: number,
+  boardId: string,
 }
-class ReportApi {
+class ReportApi extends Api<ReportApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
@@ -43,7 +44,7 @@ class ReportApi {
    * @param sprintId
    * @param type
    */
-  loadBurnDownCoordinate(sprintId: number, type: string, filter: {
+  loadBurnDownCoordinate(sprintId: string, type: string, filter: {
     assigneeId?: string
     onlyStory?: boolean
     quickFilterIds?: string[]
@@ -52,7 +53,7 @@ class ReportApi {
     const {
       assigneeId, onlyStory, quickFilterIds, personalFilterIds,
     } = filter;
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/reports/${sprintId}/burn_down_report/coordinate`,
       data: {
@@ -79,7 +80,7 @@ class ReportApi {
    * @param versionId
    * @param type
    */
-  loadVersionChart(versionId: number, type: string) {
+  loadVersionChart(versionId: string, type: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/reports/version_chart`,
@@ -94,7 +95,7 @@ class ReportApi {
    * 加载版本报告问题列表
    * @param versionId
    */
-  loadVersionTable(versionId: number) {
+  loadVersionTable(versionId: string) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'get',
@@ -128,7 +129,7 @@ class ReportApi {
    * @param id
    * @param type  Epic Version
    */
-  loadEpicOrVersionBurnDownCoordinate(id: number, type: string) {
+  loadEpicOrVersionBurnDownCoordinate(id: string, type: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/reports/burn_down_coordinate_type/${id}`,
@@ -143,7 +144,7 @@ class ReportApi {
    * @param epicId
    * @param type
    */
-  loadEpicChart(epicId: number, type: string) {
+  loadEpicChart(epicId: string, type: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/reports/epic_chart`,
@@ -158,7 +159,7 @@ class ReportApi {
    * 加载史诗图问题列表
    * @param epicId
    */
-  loadIssuesForEpic(epicId: number) {
+  loadIssuesForEpic(epicId: string) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'get',
@@ -189,7 +190,7 @@ class ReportApi {
    * @param versionId
    * @param type
    */
-  loadPie(fieldName: string, sprintId: number, versionId: number, startDate: string, endDate: string) {
+  loadPie(fieldName: string, sprintId?: string, versionId?: string, startDate?: string, endDate?: string) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'get',

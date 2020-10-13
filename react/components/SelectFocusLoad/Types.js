@@ -104,6 +104,9 @@ export default {
     }),
   },
   issue_status: {
+    props: {
+      filterOption,
+    },
     request: () => statusApi.loadByProject('agile'),
     render: (status) => (
       <Option
@@ -180,6 +183,9 @@ export default {
     ),
   },
   issue_type: {
+    props: {
+      filterOption,
+    },
     request: () => issueTypeApi.loadAllWithStateMachineId('agile'),
     render: (issueType) => (
       <Option
@@ -440,21 +446,6 @@ export default {
     render: (pi) => (
       <Option disabled={!IsInProgramStore.isOwner && pi.statusCode === 'doing'} key={pi.id} value={pi.id}>
         {`${pi.code}-${pi.name}`}
-      </Option>
-    ),
-  },
-  all_pi: {
-    props: {
-      getPopupContainer: (triggerNode) => triggerNode.parentNode,
-      filterOption,
-      onFilterChange: false,
-      loadWhenMount: true,
-      label: 'PI',
-    },
-    request: () => piApi.getPiListByStatus(),
-    render: (pi) => (
-      <Option disabled={!IsInProgramStore.isOwner && pi.statusCode === 'doing'} key={pi.id} value={pi.id}>
-        {pi.code ? `${pi.code}-${pi.name}` : pi.name}
       </Option>
     ),
   },

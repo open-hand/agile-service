@@ -37,6 +37,7 @@ function IssueBody(props) {
   const { reloadIssue } = props;
   const createBranchShow = store.getCreateBranchShow;
   const workLogShow = store.getWorkLogShow;
+
   return (
     <section className={`${prefixCls}-body`} id="scroll-area" style={{ position: 'relative' }}>
       <div style={{ paddingRight: 20 }}>

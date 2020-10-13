@@ -71,7 +71,7 @@ export interface ILinkage {
   parentIssueTypeCode: 'story' | 'task' | 'bug',
   parentIssueStatusSetting: string,
 }
-class StatusTransformApi extends Api {
+class StatusTransformApi extends Api<StatusTransformApi> {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }

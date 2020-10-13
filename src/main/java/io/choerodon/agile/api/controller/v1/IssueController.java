@@ -383,25 +383,25 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.issue.transformedTask"));
     }
 
-    @ResponseBody
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("导出issue列表")
-    @PostMapping(value = "/export")
-    public void exportIssues(@ApiIgnore
-                             @ApiParam(value = "分页信息", required = true)
-                             @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
-                             PageRequest pageRequest,
-                             @ApiParam(value = "项目id", required = true)
-                             @PathVariable(name = "project_id") Long projectId,
-                             @ApiParam(value = "组织id", required = true)
-                             @RequestParam Long organizationId,
-                             @ApiParam(value = "查询参数", required = true)
-                             @RequestBody(required = false) SearchVO searchVO,
-                             HttpServletRequest request,
-                             HttpServletResponse response) {
-        EncryptionUtils.decryptSearchVO(searchVO);
-        issueService.exportIssues(projectId, searchVO, request, response, organizationId, pageRequest.getSort());
-    }
+//    @ResponseBody
+//    @Permission(level = ResourceLevel.ORGANIZATION)
+//    @ApiOperation("导出issue列表")
+//    @PostMapping(value = "/export")
+//    public void exportIssues(@ApiIgnore
+//                             @ApiParam(value = "分页信息", required = true)
+//                             @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
+//                             PageRequest pageRequest,
+//                             @ApiParam(value = "项目id", required = true)
+//                             @PathVariable(name = "project_id") Long projectId,
+//                             @ApiParam(value = "组织id", required = true)
+//                             @RequestParam Long organizationId,
+//                             @ApiParam(value = "查询参数", required = true)
+//                             @RequestBody(required = false) SearchVO searchVO,
+//                             HttpServletRequest request,
+//                             HttpServletResponse response) {
+//        EncryptionUtils.decryptSearchVO(searchVO);
+//        issueService.exportIssues(projectId, searchVO, request, response, organizationId, pageRequest.getSort());
+//    }
 
 
     @Permission(level = ResourceLevel.ORGANIZATION)

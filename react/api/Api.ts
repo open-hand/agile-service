@@ -15,7 +15,7 @@ function getCacheKey(config: any) {
     method, url, data, params,
   });
 }
-class Api {
+class Api<T> {
   isConfig: boolean;
 
   constructor(isConfig: boolean = false) {
@@ -52,7 +52,7 @@ class Api {
    * @param Property 要覆盖的key
    * @param value 要覆盖的值
    */
-  overwrite(Property: string, value: any) {
+  overwrite(Property: string, value: any): T {
     // 以当前this为模板，创建一个新对象
     const temp = Object.create(this);
     // 不直接temp[Property] = value;的原因是，如果这个属性只有getter，会报错
@@ -65,12 +65,18 @@ class Api {
     return temp;
   }
 
-  project(projectId: number) {
-    return this.overwrite('projectId', projectId);
+  project(projectId: string | number | undefined) {
+    if (projectId) {
+      return this.overwrite('projectId', projectId);
+    }
+    return this;
   }
 
-  org(orgId: number) {
-    return this.overwrite('orgId', orgId);
+  org(orgId: number | undefined) {
+    if (orgId) {
+      return this.overwrite('orgId', orgId);
+    }
+    return this;
   }
 }
 

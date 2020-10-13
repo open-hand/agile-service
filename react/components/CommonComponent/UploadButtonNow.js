@@ -14,12 +14,12 @@ const propTypes = {
   beforeUpload: PropTypes.func,
 };
 /**
- * 
+ *
  * hasPermission 进行删除权限控制，无传入，则默认为true
  */
 function UploadButtonNow(props) {
   const {
-    fileList, updateNow, onRemove, onBeforeUpload, hasPermission = true,
+    fileList, updateNow, onRemove, onBeforeUpload, hasPermission = true, disabled = false,
   } = props;
   const handleRemove = (file) => {
     const index = fileList.indexOf(file);
@@ -39,68 +39,70 @@ function UploadButtonNow(props) {
     }
   };
 
-  const render = () => {
-    const config = {
-      multiple: true,
-      beforeUpload: (file) => {
-        if (file.size > 1024 * 1024 * 30) {
-          Choerodon.prompt('文件不能超过30M');
-          return false;
-        } else if (file.name && encodeURI(file.name).length > 210) {
-          // check name length, the name in the database will
-          // like `file_uuid_encodeURI(file.name)`,
-          // uuid's length is 32
-          // the total could save is 255
-          // so select length of encodeURI(file.name)
-          // 255 - 32 - 6 = 217 -> 210
-
-          Choerodon.prompt('文件名过长，建议不超过20个字');
-          return false;
-        } else {
-          const tmp = file;
-          tmp.status = 'done';
-          if (onBeforeUpload) {
-            if (fileList.length > 0) {
-              updateNow(fileList.slice().concat(file));
-            } else {
-              updateNow([file]);
-            }
-          }
-        }
+  const config = {
+    multiple: true,
+    beforeUpload: (file) => {
+      if (file.size > 1024 * 1024 * 30) {
+        Choerodon.prompt('文件不能超过30M');
         return false;
-      },
+      } if (file.name && encodeURI(file.name).length > 210) {
+        // check name length, the name in the database will
+        // like `file_uuid_encodeURI(file.name)`,
+        // uuid's length is 32
+        // the total could save is 255
+        // so select length of encodeURI(file.name)
+        // 255 - 32 - 6 = 217 -> 210
 
-    };
-    return (
-      <div className="c7n-agile-uploadButtonNow">
-        <Upload
-          {...config}
-          className="upload-button"
-        >
-          <Tooltip title="上传附件" placement="topRight" autoAdjustOverflow={false} getPopupContainer={triggerNode => triggerNode.parentNode}>
-            <Button style={{ padding: '0 6px' }}>
-              <Icon type="file_upload" />
-            </Button>
-          </Tooltip>
-        </Upload>
-        <div className="c7n-agile-uploadButtonNow-fileList">
-          {
-            fileList && fileList.length > 0 && fileList.map(item => (
-              <SingleFileUpload
-                key={item.uid}
-                url={item.url}
-                fileName={item.name}
-                onDeleteFile={() => { handleRemove(item); }}
-                hasDeletePermission={hasPermission || AppState.userInfo.id === item.userId}
-              />
-            ))
-          }
-        </div>
-      </div>
-    );
+        Choerodon.prompt('文件名过长，建议不超过20个字');
+        return false;
+      }
+      const tmp = file;
+      tmp.status = 'done';
+      if (onBeforeUpload) {
+        if (fileList.length > 0) {
+          updateNow(fileList.slice().concat(file));
+        } else {
+          updateNow([file]);
+        }
+      }
+
+      return false;
+    },
+
   };
-
-  return render();
+  return (
+    <div className="c7n-agile-uploadButtonNow">
+      {
+        (hasPermission && !disabled) ? (
+          <Upload
+            {...config}
+            className="upload-button"
+          >
+            <Tooltip title="上传附件" placement="topRight" autoAdjustOverflow={false} getPopupContainer={(triggerNode) => triggerNode.parentNode}>
+              <Button style={{ padding: '0 6px' }}>
+                <Icon type="file_upload" />
+              </Button>
+            </Tooltip>
+          </Upload>
+        ) : (
+          <div style={{ height: 32 }} />
+        )
+      }
+      <div className="c7n-agile-uploadButtonNow-fileList">
+        {
+          fileList && fileList.length > 0 && fileList.map((item) => (
+            <SingleFileUpload
+              key={item.uid}
+              url={item.url}
+              fileName={item.name}
+              onDeleteFile={() => { handleRemove(item); }}
+              hasDeletePermission={(hasPermission || AppState.userInfo.id === item.userId) && !disabled}
+            />
+          ))
+        }
+      </div>
+    </div>
+  );
 }
 
 UploadButtonNow.propTypes = propTypes;

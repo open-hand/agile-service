@@ -2,23 +2,34 @@ import React, { useMemo, forwardRef } from 'react';
 import { Select } from 'choerodon-ui/pro';
 import { componentApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
+import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { IComponent } from '@/common/types';
 
-interface Props {
-  dataRef: React.MutableRefObject<any>
+interface Props extends Partial<SelectProps> {
+  dataRef?: React.MutableRefObject<any>
+  valueField?: string
+  afterLoad?: (components: IComponent[]) => void
 }
 
-const SelectComponent: React.FC<Props> = forwardRef(({ dataRef, ...otherProps }, ref: React.Ref<Select>) => {
+const SelectComponent: React.FC<Props> = forwardRef(({
+  dataRef, afterLoad, valueField, ...otherProps
+}, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'component',
     textField: 'name',
-    valueField: 'name',
+    valueField: valueField || 'name',
     request: () => componentApi.loadAllComponents(),
     middleWare: (components) => {
       // @ts-ignore
       const data = components.content || [];
-      Object.assign(dataRef, {
-        current: data,
-      });
+      if (dataRef) {
+        Object.assign(dataRef, {
+          current: data,
+        });
+      }
+      if (afterLoad) {
+        afterLoad(data);
+      }
       return data;
     },
     paging: false,

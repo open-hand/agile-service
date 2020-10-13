@@ -11,7 +11,7 @@ interface IStatus {
 interface UpdateData extends IStatus {
   objectVersionNumber: number
 }
-class StatusApi extends Api {
+class StatusApi extends Api<StatusApi> {
   get orgPrefix() {
     return `/agile/v1/organizations/${getOrganizationId()}`;
   }

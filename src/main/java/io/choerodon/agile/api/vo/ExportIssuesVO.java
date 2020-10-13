@@ -113,6 +113,12 @@ public class ExportIssuesVO {
     @ApiModelProperty(value = "自定义字段kv")
     private Map<String, Object> foundationFieldValue;
 
+    @ApiModelProperty("预计开始时间")
+    private Date estimatedStartTime;
+
+    @ApiModelProperty("预计结束时间")
+    private Date estimatedEndTime;
+
     public String getAssigneeRealName() {
         return assigneeRealName;
     }
@@ -383,5 +389,21 @@ public class ExportIssuesVO {
 
     public void setFoundationFieldValue(Map<String, Object> foundationFieldValue) {
         this.foundationFieldValue = foundationFieldValue;
+    }
+
+    public Date getEstimatedStartTime() {
+        return estimatedStartTime;
+    }
+
+    public void setEstimatedStartTime(Date estimatedStartTime) {
+        this.estimatedStartTime = estimatedStartTime;
+    }
+
+    public Date getEstimatedEndTime() {
+        return estimatedEndTime;
+    }
+
+    public void setEstimatedEndTime(Date estimatedEndTime) {
+        this.estimatedEndTime = estimatedEndTime;
     }
 }

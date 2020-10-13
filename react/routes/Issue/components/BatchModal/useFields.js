@@ -10,16 +10,11 @@ const requestKey = (() => {
 function reducer(state, action) {
   switch (action.type) {
     case 'INIT': {
-      return action.payload.map((item) => ({
-        key: requestKey(),
-        ...item,
-      }));
+      return action.payload;
     }
     case 'ADD': {
       return produce(state, (draft) => {
-        draft.push({
-          key: requestKey(),
-        });
+        draft.push(action.payload);
       });
     }
     case 'REMOVE': {
@@ -45,15 +40,23 @@ const initialState = [];
 function useFields() {
   const [fields, dispatch] = useReducer(reducer, initialState);
   const init = (data) => {
+    const initFields = data.map((item) => ({
+      key: requestKey(),
+      ...item,
+    }));
     dispatch({
       type: 'INIT',
-      payload: data,
+      payload: initFields,
     });
+    return initFields;
   };
   const add = () => {
+    const key = requestKey();
     dispatch({
       type: 'ADD',
+      payload: { key },
     });
+    return key;
   };
   const removeField = (key) => {
     dispatch({

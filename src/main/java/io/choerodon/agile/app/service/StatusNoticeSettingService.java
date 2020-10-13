@@ -18,4 +18,12 @@ public interface StatusNoticeSettingService {
     void noticeByChangeStatus(Long projectId, Long issueId);
 
     List<StatusNoticeSettingVO> list(Long projectId, Long issueTypeId, List<Long> statusIdList, String schemeCode);
+
+    /**
+     * 获取通知方式和通知对象
+     * @param projectId projectId
+     * @param issueId issueId
+     * @return 请注意: StatusNoticeSettingVO里仅userIdList和userTypeList有值
+     */
+    StatusNoticeSettingVO selectNoticeUserAndType(Long projectId, Long issueId);
 }

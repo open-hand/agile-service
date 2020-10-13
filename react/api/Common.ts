@@ -3,7 +3,7 @@ import { getProjectId, getOrganizationId } from '@/utils/common';
 import Api from './Api';
 
 const { AppState } = stores;
-class CommonApi extends Api {
+class CommonApi extends Api<CommonApi> {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }

@@ -12,7 +12,7 @@ import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import './index.less';
 
 const { Option, OptGroup } = Select;
-interface IQuickFilter {
+export interface IQuickFilter {
   description: string
   expressQuery: string
   filterId: string
@@ -21,7 +21,7 @@ interface IQuickFilter {
   projectId: number
   sequence: number
 }
-interface IPersonalFilter {
+export interface IPersonalFilter {
   filterId: string
   filterJson: string
   name: string
@@ -30,10 +30,11 @@ interface IPersonalFilter {
   userId: string
 }
 interface Props extends Partial<SelectProps> {
-  value?: string[] | null
+  projectId?: string
+  value?: IQuickSearchValue
   onChange?: (value: IQuickSearchValue) => void
 }
-interface IQuickSearchValue {
+export interface IQuickSearchValue {
   onlyStory: boolean
   onlyMe: boolean
   quickFilters: string[]
@@ -125,9 +126,10 @@ class QuickSearch extends Component<Props, State> {
   }
 
   componentDidMount() {
+    const { projectId } = this.props;
     Promise.all([
-      quickFilterApi.loadAll(),
-      personalFilterApi.loadAll(),
+      quickFilterApi.project(projectId).loadAll(),
+      personalFilterApi.project(projectId).loadAll(),
     ]).then(([quickFilters, personalFilters]) => {
       this.setState({
         quickFilters,

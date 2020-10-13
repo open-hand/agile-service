@@ -3,24 +3,38 @@ import { Select } from 'choerodon-ui/pro';
 import { IStatusCirculation, statusTransformApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { IStatus } from '@/common/types';
 
 interface Props extends Partial<SelectProps> {
   issueTypeId?: string
   expectStatusId?: string
+  dataRef?: React.MutableRefObject<any>
+  afterLoad?: (statuss: IStatusCirculation[]) => void
 }
 
 const SelectStatus: React.FC<Props> = forwardRef(
-  ({ issueTypeId, expectStatusId, ...otherProps }, ref: React.Ref<Select>) => {
+  ({
+    issueTypeId, expectStatusId, dataRef, afterLoad, ...otherProps
+  }, ref: React.Ref<Select>) => {
     const config = useMemo((): SelectConfig<IStatusCirculation> => ({
       name: 'status',
       textField: 'name',
       valueField: 'id',
       request: () => (issueTypeId ? statusTransformApi.loadList(issueTypeId) : Promise.resolve([])),
-      middleWare: (statusList) => (
-        expectStatusId
+      middleWare: (statusList) => {
+        const data = expectStatusId
           ? statusList.filter(({ id }) => id !== expectStatusId)
-          : statusList
-      ),
+          : statusList;
+        if (dataRef) {
+          Object.assign(dataRef, {
+            current: data,
+          });
+        }
+        if (afterLoad) {
+          afterLoad(data);
+        }
+        return data;
+      },
       paging: false,
     }), [issueTypeId]);
     const props = useSelect(config);

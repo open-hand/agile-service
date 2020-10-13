@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
+import Api from './Api';
 
 interface ISearchQuickFilter {
     contents: Array<string>,
@@ -9,7 +10,7 @@ interface IQuickFilter {
     name: string,
     childIncluded: boolean, // 是否包含子任务
     expressQuery: string, // 快速搜索表达式
-    description:string, // 描述  中间+++ 
+    description:string, // 描述  中间+++
     projectId:number,
     quickFilterValueVOList?: Array<any>, // 快速搜索值
     relationOperations?: Array<string>, // 多个搜索表达式之间的关系
@@ -20,14 +21,14 @@ interface UQuickFilter extends IQuickFilter{
 interface DragQuickFilter{
 
 }
-class QuickFilterApi {
+class QuickFilterApi extends Api<QuickFilterApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
    * 根据快速过滤id加载
-   * @param filterId 
+   * @param filterId
    */
   load(filterId:number) {
     return axios.get(`${this.prefix}/quick_filter/${filterId}`);
@@ -38,7 +39,7 @@ class QuickFilterApi {
     * @param searchData 理论上可以不传值，但不传值后端抛出错误
     */
   loadAll(searchData: ISearchQuickFilter = { contents: [], filterName: '' }) {
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/quick_filter/query_all`,
       data: searchData,
@@ -54,7 +55,7 @@ class QuickFilterApi {
 
   /**
    * 创建快速筛选
-   * @param data 
+   * @param data
    */
   create(data:IQuickFilter) {
     return axios.post(`${this.prefix}/quick_filter`, data);
@@ -62,7 +63,7 @@ class QuickFilterApi {
 
   /**
    * 更新快速筛选
-   * @param data 
+   * @param data
    */
   update(filterId:number, data:UQuickFilter) {
     return axios.put(`${this.prefix}/quick_filter/${filterId}`, data);
@@ -70,7 +71,7 @@ class QuickFilterApi {
 
   /**
    * 删除快速筛选
-   * @param filterId 
+   * @param filterId
    */
   delete(filterId:number) {
     return axios.delete(`${this.prefix}/quick_filter/${filterId}`);
@@ -78,7 +79,7 @@ class QuickFilterApi {
 
   /**
    * 拖拽对筛选排序
-   * @param data 
+   * @param data
    */
   drag(data:DragQuickFilter) {
     return axios.put(`${this.prefix}/quick_filter/drag`, data);
@@ -86,7 +87,7 @@ class QuickFilterApi {
 
   /**
    * 检查快速筛选名称是否重复
-   * @param quickFilterName 
+   * @param quickFilterName
    */
   checkName(quickFilterName:string) {
     return axios({

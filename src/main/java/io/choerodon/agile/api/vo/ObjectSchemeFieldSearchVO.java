@@ -15,6 +15,8 @@ public class ObjectSchemeFieldSearchVO {
     private String code;
     @ApiModelProperty(value = "名称")
     private String name;
+    @ApiModelProperty(value = "自定义字段类型")
+    private String issueTypeList;
 
     public String getContext() {
         return context;
@@ -46,5 +48,13 @@ public class ObjectSchemeFieldSearchVO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getIssueTypeList() {
+        return issueTypeList;
+    }
+
+    public void setIssueTypeList(String issueTypeList) {
+        this.issueTypeList = issueTypeList;
     }
 }

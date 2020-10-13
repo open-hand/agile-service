@@ -27,6 +27,7 @@ const PageConfig = React.lazy(() => import('./routes/page-config'));
 const StateMachine = React.lazy(() => import('./routes/StateMachine'));
 // 敏捷设置
 const Settings = React.lazy(() => import('./routes/settings'));
+const ProjectReport = React.lazy(() => import('./routes/project-report'));
 
 const { AppState } = stores;
 
@@ -35,6 +36,7 @@ class Agile extends React.Component {
     super(props);
     setHistory(props.history);
   }
+
   // componentDidCatch(error, info) {
   //   Choerodon.prompt(error.message);
   // }
@@ -77,6 +79,7 @@ class Agile extends React.Component {
               <Route path={`${match.url}/states`} component={State} />
               <Route path={`${match.url}/priorities`} component={Priority} />
               <Route path={`${match.url}/state-machine`} component={StateMachine} />
+              <Route path={`${match.url}/project-report`} component={ProjectReport} />
               <Route path="*" component={nomatch} />
             </Switch>
           </IntlProviderAsync>

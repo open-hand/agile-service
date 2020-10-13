@@ -7,6 +7,7 @@ import {
 } from '@choerodon/boot';
 import TimeAgo from 'timeago-react';
 import { devOpsApi } from '@/api';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import UserHead from '../UserHead';
 
 const { AppState } = stores;
@@ -164,6 +165,7 @@ class MergeRequest extends Component {
         okText="关闭"
         okCancel={false}
         onOk={onCancel}
+        width={MODAL_WIDTH.middle}
       >
         <Content
           style={{

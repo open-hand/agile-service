@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.choerodon.agile.infra.mapper.ProjectReportMapper">
+
+    <select id="list" resultType="io.choerodon.agile.api.vo.ProjectReportVO">
+        SELECT
+           apr.id,
+           apr.project_id,
+           apr.title,
+           apr.recent_send_date,
+           apr.created_by,
+           apr.object_version_number
+        FROM 
+           agile_project_report apr
+        WHERE 
+           apr.project_id = #{projectId}
+        <if test="title != null and title != ''">
+          <bind name="titleLike" value="'%' + title + '%'"/>
+            AND apr.title LIKE #{titleLike}
+        </if>
+        <if test="createdBy != null">
+            AND apr.created_by = #{createdBy}
+        </if>
+    </select>
+</mapper>

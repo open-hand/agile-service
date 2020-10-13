@@ -7,7 +7,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { CompactPicker } from 'react-color';
-
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import './priorityEdit.less';
 import { priorityApi } from '@/api';
 
@@ -132,7 +132,7 @@ class PriorityEdit extends Component {
         onOk={this.handleEditingOk}
         onCancel={this.handleEditingCancel}
         confirmLoading={loading}
-        width={380}
+        width={MODAL_WIDTH.small}
       >
         <Form>
           <FormItem
@@ -210,7 +210,7 @@ class PriorityEdit extends Component {
                   disabled={!!editingPriority.default || !editingPriority.enable}
                 >
                   设置为默认优先级
-                  
+
                 </Checkbox>,
               )
             }

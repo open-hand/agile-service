@@ -29,4 +29,6 @@ public interface FieldValueMapper extends BaseMapper<FieldValueDTO> {
     void batchInsertField(@Param("projectId") Long projectId,  @Param("schemeCode") String schemeCode, @Param("fieldValues") List<FieldValueDTO> fieldValues);
 
     Long selectUserIdByField(@Param("projectId") Long projectId, @Param("userType") String userType, @Param("issueId") Long issueId);
+
+    List<FieldValueDTO> queryListByInstanceIds(@Param("projectIds") List<Long> projectIds, @Param("instanceIds") List<Long> instanceIds, @Param("schemeCode") String schemeCode, @Param("fieldId") Long fieldId);
 }
