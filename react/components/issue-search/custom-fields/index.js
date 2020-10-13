@@ -234,7 +234,7 @@ function CustomFields({
             marginLeft: 5,
           }}
           onClick={() => {
-            store.onChosenFieldChange(false, field);
+            store.handleChosenFieldChange(false, field);
           }}
         >
           <Icon

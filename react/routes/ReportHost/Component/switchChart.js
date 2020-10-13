@@ -38,7 +38,7 @@ function SwitchChart({ location: { search }, current }) {
   );
   return (
     <Dropdown placement="bottomCenter" trigger={['click']} overlay={menu}>
-      <Button funcType="flat">
+      <Button funcType="flat" style={{ color: '#000' }}>
         <span>切换报表</span>
         <Icon type="arrow_drop_down" />
       </Button>

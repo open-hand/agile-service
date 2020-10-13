@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { getOrganizationId } from '@/utils/common';
+import { ISearchVO } from '@/components/filter/utils';
 import Api from './Api';
 
 interface ICumulativeData {
@@ -24,7 +25,7 @@ class ReportApi extends Api<ReportApi> {
     assigneeId?: string
     onlyStory?: boolean
     quickFilterIds?: string[]
-  } = {}) {
+  } = {}, searchVO: ISearchVO) {
     const { assigneeId, onlyStory, quickFilterIds } = filter;
     return axios({
       method: 'post',
@@ -35,6 +36,7 @@ class ReportApi extends Api<ReportApi> {
         assigneeId,
         onlyStory: onlyStory ? true : undefined,
         quickFilterIds,
+        currentSearchVO: searchVO,
       },
     });
   }
@@ -49,7 +51,7 @@ class ReportApi extends Api<ReportApi> {
     onlyStory?: boolean
     quickFilterIds?: string[]
     personalFilterIds?: string[]
-  } = {}) {
+  } = {}, searchVO?: ISearchVO) {
     const {
       assigneeId, onlyStory, quickFilterIds, personalFilterIds,
     } = filter;
@@ -62,6 +64,7 @@ class ReportApi extends Api<ReportApi> {
         onlyStory: onlyStory ? true : undefined,
         quickFilterIds,
         personalFilterIds,
+        currentSearchVO: searchVO,
       },
     });
   }
