@@ -126,7 +126,7 @@ const ExportIssue: React.FC<{}> = () => {
     search = store.exportBefore(search);
     const field = find(checkOptions, (f) => f.order) as { value: string, label: string, order?: string, };
     // @ts-ignore
-    return store.exportAxios(search, field ? `${field.name},${field.order}` : undefined)
+    return store.exportAxios(search, field ? `${field.value},${field.order}` : undefined)
       .then((blobData: any) => {
       }).finally(() => {
 
