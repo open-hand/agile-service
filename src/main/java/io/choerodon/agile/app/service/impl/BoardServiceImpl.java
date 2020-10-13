@@ -14,10 +14,7 @@ import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.DateUtil;
-import io.choerodon.agile.infra.utils.EncryptionUtils;
-import io.choerodon.agile.infra.utils.RankUtil;
-import io.choerodon.agile.infra.utils.SendMsgUtil;
+import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -97,6 +94,8 @@ public class BoardServiceImpl implements BoardService {
     private StatusFieldSettingService statusFieldSettingService;
     @Autowired
     private StatusLinkageService statusLinkageService;
+    @Autowired(required = false)
+    private BacklogExpandService backlogExpandService;
 
     @Override
     public void create(Long projectId, String boardName) {
@@ -515,6 +514,9 @@ public class BoardServiceImpl implements BoardService {
             throw new CommonException("error.update.status.transform.setting",e);
         }
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
+        if (backlogExpandService != null) {
+            backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
+        }
         IssueMoveVO result = modelMapper.map(issueDTO, IssueMoveVO.class);
 //        sendMsgUtil.sendMsgByIssueMoveComplete(projectId, issueMoveVO, issueDTO);
         return result;

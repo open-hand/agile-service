@@ -88,6 +88,8 @@ public class IssueCreateVO {
 
     private Date estimatedEndTime;
 
+    private Long programId;
+
     public Date getEstimatedStartTime() {
         return estimatedStartTime;
     }
@@ -285,4 +287,11 @@ public class IssueCreateVO {
         return StringUtil.getToString(this);
     }
 
+    public Long getProgramId() {
+        return programId;
+    }
+
+    public void setProgramId(Long programId) {
+        this.programId = programId;
+    }
 }

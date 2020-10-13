@@ -164,7 +164,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private ProjectUtil projectUtil;
     @Autowired
     private BoardAssembler boardAssembler;
-
+    @Autowired(required = false)
+    private BacklogExpandService backlogExpandService;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -272,6 +273,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private StatusLinkageService statusLinkageService;
     @Autowired
     private StateMachineNodeService stateMachineNodeService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Override
     public void afterCreateIssue(Long issueId, IssueConvertDTO issueConvertDTO, IssueCreateVO issueCreateVO, ProjectInfoDTO projectInfoDTO) {
@@ -591,6 +594,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             stateMachineClientService.cleanInstanceCache(projectId,issueId,applyType);
             throw new CommonException("error.update.status.transform.setting",e);
         }
+        if (backlogExpandService != null) {
+            backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
+        }
         return queryIssueByUpdate(projectId, issueId, Collections.singletonList("statusId"));
     }
 
@@ -706,6 +712,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if ("task".equals(issueConvertDTO.getTypeCode()) || "story".equals(issueConvertDTO.getTypeCode())) {
             issueMapper.updateSubBugRelateIssueId(projectId, issueId);
         }
+        if (agilePluginService != null) {
+            agilePluginService.deleteIssueForBusiness(issueConvertDTO);
+        }
+        if (backlogExpandService != null) {
+            backlogExpandService.deleteIssueBacklogRel(issueId);
+        }
         //删除日志信息
         dataLogDeleteByIssueId(projectId, issueId);
         issueAccessDataService.delete(projectId, issueConvertDTO.getIssueId());
@@ -719,6 +731,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         //delete cache
         dataLogRedisUtil.handleDeleteRedisByDeleteIssue(projectId);
         testFeignClient.deleteTestRel(projectId, issueId);
+        if (backlogExpandService != null) {
+            backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
+        }
     }
 
     @Override

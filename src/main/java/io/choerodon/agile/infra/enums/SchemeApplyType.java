@@ -25,4 +25,9 @@ public class SchemeApplyType {
      * 自定义
      */
     public static final String COMMON = "common";
+
+    /**
+     * 需求池
+     */
+    public static final String BACKLOG = "backlog";
 }

@@ -109,4 +109,6 @@ public interface StateMachineSchemeService {
      * @return Boolean
      */
     Boolean updateDeployProgress(Long organizationId, Long schemeId, Integer deployProgress);
+
+    void initScheme(String name, String schemeApplyType, ProjectEvent projectEvent);
 }

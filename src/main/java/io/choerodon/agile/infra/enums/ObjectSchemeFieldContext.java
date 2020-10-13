@@ -25,11 +25,15 @@ public class ObjectSchemeFieldContext {
 
     public static final String SUB_TASK = "sub_task";
 
-    public static final String[] ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK};
+    public static final String BACKLOG = "backlog";
+
+    public static final String[] ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK,BACKLOG};
 
     public static final String[] FIX_DATA_ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK};
 
     public static final List<String> ISSUE_TYPES_LIST = Arrays.asList(ISSUE_TYPES);
+
+    public static final List<String> NORMAL_PROJECT = Arrays.asList(STORY, EPIC, BUG, TASK, SUB_TASK);
 
     public static void isIllegalContexts(String[] context) {
         for (String str : context) {

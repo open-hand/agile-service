@@ -33,6 +33,8 @@ public class ProjectVO {
     @Encrypt
     private Long createdBy;
 
+    private String imageUrl;
+
     public Long getId() {
         return id;
     }
@@ -110,4 +112,11 @@ public class ProjectVO {
         return StringUtil.getToString(this);
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }

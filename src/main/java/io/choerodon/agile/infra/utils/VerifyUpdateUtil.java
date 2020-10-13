@@ -78,7 +78,15 @@ public class VerifyUpdateUtil {
             //对象包含子对象是list的值设置
             handlerListObject(field, objectUpdate, v);
             flag = false;
-        } else if (type == Boolean.class) {
+        }
+        else if (!ObjectUtils.isEmpty(type.getClassLoader())) {
+            // 是一个自定义的类
+            Object obj = type.newInstance();
+            EncryptionUtils.handlerObject(JSON.toJSONString(v),obj, type);
+            field.set(objectUpdate, obj);
+            flag = false;
+        }
+        else if (type == Boolean.class) {
             field.set(objectUpdate,v);
         }
 //        else if (type instanceof Object) {

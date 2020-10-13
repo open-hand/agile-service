@@ -200,4 +200,6 @@ public interface ObjectSchemeFieldService {
      * @return
      */
     IssueTypeFieldVO queryDescriptionTemplate(Long projectId, String issueType, Long organizationId);
+
+    String getFieldContext(String code);
 }

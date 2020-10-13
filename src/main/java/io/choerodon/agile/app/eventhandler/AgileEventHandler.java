@@ -4,7 +4,9 @@ import com.alibaba.fastjson.JSON;
 import io.choerodon.agile.api.vo.event.OrganizationCreateEventPayload;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.enums.InitStatus;
 import io.choerodon.agile.infra.enums.ProjectCategory;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.asgard.saga.annotation.SagaTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +59,7 @@ public class AgileEventHandler {
         //注册组织初始化优先级
         priorityService.initProrityByOrganization(Arrays.asList(organizationId));
         //初始化状态
-        initService.initStatus(organizationId);
+        initService.initStatus(organizationId, InitStatus.listByApplyType(SchemeApplyType.AGILE));
         //初始化默认状态机
         initService.initDefaultStateMachine(organizationId);
         //初始化页面配置数据

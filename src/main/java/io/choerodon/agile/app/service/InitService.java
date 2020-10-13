@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.infra.dto.StatusDTO;
+import io.choerodon.agile.infra.enums.InitStatus;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public interface InitService {
      *
      * @param organizationId
      */
-    List<StatusDTO> initStatus(Long organizationId);
+    List<StatusDTO> initStatus(Long organizationId,List<InitStatus> initStatusList);
 
     /**
      * 创建项目时初始化状态机

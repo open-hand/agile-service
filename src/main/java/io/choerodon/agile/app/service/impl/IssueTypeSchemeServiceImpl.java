@@ -266,7 +266,8 @@ public class IssueTypeSchemeServiceImpl implements IssueTypeSchemeService {
      * @param schemeApplyType
      * @param issueTypeMap
      */
-    protected void initScheme(Long projectId, Long organizationId, String name, Long defaultIssueTypeId, String schemeApplyType, Map<String, IssueTypeDTO> issueTypeMap) {
+    @Override
+    public void initScheme(Long projectId, Long organizationId, String name, Long defaultIssueTypeId, String schemeApplyType, Map<String, IssueTypeDTO> issueTypeMap) {
         //初始化敏捷问题类型方案
         IssueTypeSchemeDTO issueTypeScheme = new IssueTypeSchemeDTO();
         issueTypeScheme.setName(name);
