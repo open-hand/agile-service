@@ -1,7 +1,10 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.PageConfigFieldEditedVO;
+import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
+import org.apache.commons.collections.map.MultiKeyMap;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,4 +22,6 @@ public interface BacklogExpandService {
    Map<String, PageConfigFieldEditedVO> fieldEdited(String issueType);
 
    String getSystemFieldContext(String code);
+
+    void processBacklogFields(Long editPageId, MultiKeyMap dataMap, MultiKeyMap rankMap, List<ObjectSchemeFieldDTO> fields);
 }

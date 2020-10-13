@@ -84,6 +84,8 @@ public class FixDataServiceImpl implements FixDataService {
     protected PageFieldMapper pageFieldMapper;
     @Autowired
     protected ObjectSchemeFieldService objectSchemeFieldService;
+    @Autowired
+    private BacklogExpandService backlogExpandService;
 
     @Override
     public void fixCreateProject() {
@@ -481,6 +483,9 @@ public class FixDataServiceImpl implements FixDataService {
         Map<Long, List<IssueTypeDTO>> issueTypeMap = issueTypeList.stream().collect(Collectors.groupingBy(IssueTypeDTO::getOrganizationId));
 
         processFields(createPageId, editPageId, dataMap, rankMap, fields, issueTypeMap);
+        if (Boolean.TRUE.equals(objectSchemeField.getSystem()) && backlogExpandService != null) {
+            backlogExpandService.processBacklogFields(editPageId, dataMap, rankMap, fields);
+        }
     }
 
     protected void processFields(Long createPageId,
