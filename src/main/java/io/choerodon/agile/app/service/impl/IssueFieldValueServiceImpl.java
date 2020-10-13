@@ -48,7 +48,6 @@ public class IssueFieldValueServiceImpl implements IssueFieldValueService {
                                   String applyType, ServletRequestAttributes requestAttributes, String encryptType) {
         EncryptContext.setEncryptType(encryptType);
         RequestContextHolder.setRequestAttributes(requestAttributes);
-        EncryptContext.setEncryptType(encryptType.name());
         Long userId = DetailsHelper.getUserDetails().getUserId();
         String messageCode = WEBSOCKET_BATCH_UPDATE_FIELD+"-"+projectId;
         BatchUpdateFieldStatusVO batchUpdateFieldStatusVO = new BatchUpdateFieldStatusVO();
