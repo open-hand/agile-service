@@ -4,7 +4,6 @@ import React, {
 import { injectIntl, InjectedIntl } from 'react-intl';
 import { observer } from 'mobx-react-lite';
 import { findIndex } from 'lodash';
-import useIsInProgram from '@/hooks/useIsInProgram';
 import IssueExportStore from './store';
 import { IExportIssueProps } from '..';
 
