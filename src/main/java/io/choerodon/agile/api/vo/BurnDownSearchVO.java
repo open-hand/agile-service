@@ -31,6 +31,16 @@ public class BurnDownSearchVO {
     private String filterSql;
     @JsonIgnore
     private List<SearchVO> searchList;
+    
+    private SearchVO currentSearchVO;
+
+    public SearchVO getCurrentSearchVO() {
+        return currentSearchVO;
+    }
+
+    public void setCurrentSearchVO(SearchVO currentSearchVO) {
+        this.currentSearchVO = currentSearchVO;
+    }
 
     public List<SearchVO> getSearchList() {
         return searchList;
