@@ -627,9 +627,13 @@
         start_date,
         end_date,
         actual_end_date,
-        status_code
+        status_code,
+        project_id
         FROM agile_sprint
-        WHERE project_id = #{projectId}
+        WHERE project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+            #{projectId}
+        </foreach>
         <if test="sprintStatusCodes != null and sprintStatusCodes.size > 0">
             AND status_code IN
             <foreach collection="sprintStatusCodes" item="sprintStatusCode"

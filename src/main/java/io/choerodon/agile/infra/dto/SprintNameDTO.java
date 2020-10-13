@@ -13,6 +13,15 @@ public class SprintNameDTO {
     private Date actualEndDate;
     private Date endDate;
     private String statusCode;
+    private Long projectId;
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
 
     public Long getSprintId() {
         return sprintId;
