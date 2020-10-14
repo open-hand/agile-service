@@ -24,4 +24,6 @@ public interface BacklogExpandService {
    String getSystemFieldContext(String code);
 
     void processBacklogFields(Long editPageId, MultiKeyMap dataMap, MultiKeyMap rankMap, List<ObjectSchemeFieldDTO> fields);
+
+    void initBacklogMaxNum(Long projectId, Long maxNum);
 }

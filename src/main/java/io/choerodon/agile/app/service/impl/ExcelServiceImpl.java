@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -1367,7 +1368,7 @@ public class ExcelServiceImpl implements ExcelService {
                 //查询所有父节点问题
                 Page<IssueDTO> page =
                         PageHelper.doPage(cursor.getPage(), cursor.getSize(), () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr));
-                if (page.getTotalElements() < 1) {
+                if (CollectionUtils.isEmpty(page.getContent())) {
                     break;
                 }
                 List<Long> parentIds = page.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
@@ -1448,7 +1449,7 @@ public class ExcelServiceImpl implements ExcelService {
                     });
                 }
                 ExcelUtil.writeIssue(issueMap, parentSonMap, ExportIssuesVO.class, fieldNames, fieldCodes, sheetName, Arrays.asList(AUTO_SIZE_WIDTH), workbook, cursor);
-                boolean hasNextPage = cursor.getPage() < page.getTotalPages();
+                boolean hasNextPage = (cursor.getPage() + 1) < page.getTotalPages();
                 cursor.clean();
                 sendProcess(fileOperationHistoryDTO, userId, getProcess(cursor.getPage(), page.getTotalPages()));
                 if (!hasNextPage) {
