@@ -55,6 +55,7 @@ function EditIssue() {
     HeaderStore,
     isFullScreen,
     onChangeWidth,
+    transformIssue,
   } = useContext(EditIssueContext);
   const [issueTypes] = useIssueTypes();
   const container = useRef();
@@ -66,7 +67,7 @@ function EditIssue() {
     setIssueLoading(true);
     try {
       // 1. 加载详情
-      const issue = await (programId
+      let issue = await (programId
         ? issueApi.project(projectId).loadUnderProgram(id, programId) : issueApi.project(projectId).load(id));
       if (idRef.current !== id) {
         return;
@@ -89,6 +90,9 @@ function EditIssue() {
         issue.descriptionTemplate = template;
       }
       setIssueLoading(false);
+      if (transformIssue) {
+        issue = transformIssue(issue);
+      }
       store.setIssueFields(issue, fields);
       if (issueStore) {
         issueStore.setSelectedIssue(issue);
