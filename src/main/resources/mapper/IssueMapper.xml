@@ -1040,10 +1040,13 @@
         </if>
     </sql>
 
-    <select id="selectUserIdsByProjectId" resultType="java.lang.Long">
+    <select id="selectUserIdsByProjectIds" resultType="java.lang.Long">
         select distinct assignee_id
         from agile_issue
-        where project_id = #{projectId}
+        where project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+            #{projectId}
+        </foreach>
         and apply_type = 'agile'
         and assignee_id is not null
     </select>

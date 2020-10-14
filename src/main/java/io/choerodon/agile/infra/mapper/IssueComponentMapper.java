@@ -38,14 +38,14 @@ public interface IssueComponentMapper extends BaseMapper<IssueComponentDTO> {
     /**
      * 根据参数查询模块id列表
      *
-     * @param projectId          projectId
+     * @param projectIds          projectIds
      * @param noIssueTest        noIssueTest
      * @param componentId        componentId
      * @param searchArgs         searchArgs
      * @param advancedSearchArgs advancedSearchArgs
      * @return Long
      */
-    List<ComponentForListDTO> queryComponentByOption(@Param("projectId") Long projectId, @Param("noIssueTest") Boolean noIssueTest,
+    List<ComponentForListDTO> queryComponentByOption(@Param("projectIds") List<Long> projectIds, @Param("noIssueTest") Boolean noIssueTest,
                                                      @Param("componentId") Long componentId, @Param("searchArgs") Map<String, Object> searchArgs,
                                                      @Param("advancedSearchArgs") Map<String, Object> advancedSearchArgs, @Param("contents") List<String> contents);
 

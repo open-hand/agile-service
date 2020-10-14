@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import java.util.List;
+
 import io.choerodon.mybatis.common.BaseMapper;
 import io.choerodon.agile.infra.dto.*;
 import org.apache.ibatis.annotations.Param;
@@ -40,5 +41,11 @@ public interface IssueLabelMapper extends BaseMapper<IssueLabelDTO> {
      */
     Long queryLabelIdByLabelNameAndProjectId(@Param("labelName") String labelName, @Param("projectId") Long projectId);
 
-
+    /**
+     * 根据项目id集合查询标签
+     *
+     * @param projectIds
+     * @return
+     */
+    List<IssueLabelDTO> selectByProjectIds(@Param("projectIds") List<Long> projectIds);
 }

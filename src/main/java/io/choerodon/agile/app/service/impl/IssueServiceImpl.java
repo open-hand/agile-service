@@ -2423,7 +2423,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public Page<UserDTO> pagingQueryUsers(PageRequest pageRequest, Long projectId, String param) {
-        Set<Long> userIds = issueMapper.selectUserIdsByProjectId(projectId);
+        Set<Long> userIds = issueMapper.selectUserIdsByProjectIds(Arrays.asList(projectId));
         return baseFeignClient.agileUsers(projectId, pageRequest.getPage(), pageRequest.getSize(), param, userIds).getBody();
     }
 

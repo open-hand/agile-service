@@ -148,7 +148,7 @@ public class IssueComponentServiceImpl implements IssueComponentService {
         Boolean condition = handleSearchUser(searchVO);
         if (condition) {
             Page<ComponentForListDTO> componentForListDTOPage = PageHelper.doPageAndSort(pageRequest, () ->
-                    issueComponentMapper.queryComponentByOption(projectId, noIssueTest, componentId, searchVO.getSearchArgs(),
+                    issueComponentMapper.queryComponentByOption(Arrays.asList(projectId), noIssueTest, componentId, searchVO.getSearchArgs(),
                             searchVO.getAdvancedSearchArgs(), searchVO.getContents()));
             Page<ComponentForListVO> componentForListVOPageInfo = new Page<>();
             componentForListVOPageInfo.setSize(componentForListDTOPage.getSize());

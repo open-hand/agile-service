@@ -470,10 +470,10 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     /**
      * 查项目下issue的assignee_id
      *
-     * @param projectId
+     * @param projectIds
      * @return
      */
-    Set<Long> selectUserIdsByProjectId(@Param("projectId") Long projectId);
+    Set<Long> selectUserIdsByProjectIds(@Param("projectIds") List<Long> projectIds);
 
     /**
      * 查项目下issue的reporter_id

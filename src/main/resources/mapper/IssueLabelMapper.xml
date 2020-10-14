@@ -33,4 +33,12 @@
         WHERE project_id = #{projectId} AND label_name = #{labelName}
     </select>
 
+    <select id="selectByProjectIds" resultType="io.choerodon.agile.infra.dto.IssueLabelDTO">
+        select * from agile_issue_label
+        where project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+    </select>
+
 </mapper>
