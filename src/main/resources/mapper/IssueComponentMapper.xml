@@ -33,14 +33,20 @@
         from agile_issue_component aic left join (
         select acir.component_id,count(*) as issue_count from agile_component_issue_rel acir
         LEFT JOIN agile_issue ai ON ai.issue_id = acir.issue_id
-        where acir.project_id = #{projectId}
+        where acir.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
         <if test="noIssueTest">
             AND ai.apply_type = 'agile'
         </if>
         GROUP BY
         acir.component_id
         )aa on aic.component_id = aa.component_id
-        where aic.project_id = #{projectId}
+        where aic.project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
         <if test="componentId != null">
             AND aic.component_id != #{componentId}
         </if>
