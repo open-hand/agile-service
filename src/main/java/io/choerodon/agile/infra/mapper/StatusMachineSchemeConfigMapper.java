@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author peng.jiang@hand-china.com
@@ -19,4 +20,7 @@ public interface StatusMachineSchemeConfigMapper extends BaseMapper<StatusMachin
     List<StatusMachineSchemeConfigDTO> queryByOrgId(@Param("organizationId") Long organizationId);
 
     void migrateStatusMachineSchemeConfig();
+
+    List<StatusMachineSchemeConfigDTO> selectBySchemeIds(@Param("organizationId") Long organizationId,
+                                                         @Param("schemeIds") Set<Long> schemeIds);
 }

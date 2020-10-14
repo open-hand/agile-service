@@ -13,6 +13,7 @@ import io.choerodon.agile.infra.exception.RemoveStatusException;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.PageUtil;
+import io.choerodon.core.domain.PageInfo;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
@@ -273,6 +274,22 @@ public class StatusServiceImpl implements StatusService {
             }.getType());
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public Page<StatusVO> pagedQueryByStateMachineIds(PageRequest pageRequest,
+                                                      Long organizationId,
+                                                      List<Long> stateMachineIds) {
+        if (ObjectUtils.isEmpty(stateMachineIds)) {
+            return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+        }
+        Page<StatusDTO> status =
+                PageHelper.doPageAndSort(pageRequest, () -> statusMapper.queryByStateMachineIds(organizationId, stateMachineIds));
+        List<StatusVO> statusList =
+                modelMapper.map(status.getContent(), new TypeToken<List<StatusVO>>() {
+        }.getType());
+        PageInfo pageInfo = new PageInfo(pageRequest.getPage(), pageRequest.getSize());
+        return new Page(statusList, pageInfo, status.getTotalElements());
     }
 
     @Override

@@ -14,4 +14,13 @@
         AND smscd.is_default = 1
     </select>
 
+    <select id="selectBySchemeIds" resultType="io.choerodon.agile.infra.dto.StateMachineSchemeConfigDraftDTO">
+        select * from fd_state_machine_scheme_config_draft
+        where organization_id = #{organizationId}
+        and scheme_id in
+        <foreach item="item" index="index" collection="schemeIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
 </mapper>
