@@ -1,21 +1,19 @@
 import React, {
-  createContext, useContext, useMemo, useState,
+  createContext, useContext, useState,
 } from 'react';
 import { injectIntl, InjectedIntl } from 'react-intl';
-import { DataSet, Table } from 'choerodon-ui/pro/lib';
 import { observer } from 'mobx-react-lite';
-import { findIndex } from 'lodash';
-import useIsInProgram from '@/hooks/useIsInProgram';
-import { IChosenFieldField } from '@/components/chose-field/types';
+import { IIssueFilterFormProps } from '..';
 
-interface Context {
-    intl: InjectedIntl,
-    noMemberLoadFinish: boolean,
-    setNoMemberLoadFinish: (v: boolean) => void,
-    prefixCls: string,
+interface Context extends IIssueFilterFormProps {
+  intl: InjectedIntl,
+  footer?: React.ReactNode,
+  noMemberLoadFinish: boolean,
+  setNoMemberLoadFinish: (v: boolean) => void,
+  prefixCls: string,
 }
-type Props = Pick<Context, 'intl' | 'noMemberLoadFinish'|'setNoMemberLoadFinish'> & { children: React.Component };
-const IssueFilterFormStoreContext = createContext({} as Context);
+type Props = Pick<Context, 'intl' | 'footer'> & { children: React.ReactElement };
+const IssueFilterFormStoreContext = createContext({} as Context & { children: React.ReactElement });
 
 export function useIssueFilterFormStore() {
   return useContext(IssueFilterFormStoreContext);

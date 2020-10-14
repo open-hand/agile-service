@@ -13,20 +13,14 @@ import { IChosenFieldField } from '@/components/chose-field/types';
 import renderField from './components/renderField';
 import IssueFilterFormDataSet from './IssueFilterFormDataSet';
 import './index.less';
+import { useIssueFilterFormStore } from './stores';
+import { IIssueFilterFormProps } from '.';
 
-interface Props {
-  dataSet?: DataSet, // 传入外部dataSet 将放弃组件内创建
-  fields?: IChosenFieldField[], // 全部字段 用以保证dataSet内值能正常接收
-  chosenFields?: IChosenFieldField[], // 可控已选字段
-  onDelete?: (field: IChosenFieldField) => boolean | void,
-  // defaultValue?: any,
-  extraRenderFields?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet }) => React.ReactElement,
-  extraFormItems?: IChosenFieldField[],
-}
 interface IConfig {
   fields?: IChosenFieldField[],
   value?: IChosenFieldField[], /** 可控值value */
   systemDataSetField?: FieldProps[],
+  defaultVisibleFooterAddBtn?: boolean, // 是否使用默认添加筛选按钮
   actions?: {
     onAdd?: (value: IChosenFieldField) => void | undefined,
   },
@@ -34,7 +28,7 @@ interface IConfig {
     afterDelete?: (value: IChosenFieldField) => void | undefined | boolean,
   },
   extraFormItems?: IChosenFieldField[],
-  extraRenderFields?: (field: IChosenFieldField, otherComponentProps: Partial<SelectProps> | Partial<DatePickerProps>, { dataSet }: { dataSet: DataSet }) => React.ReactElement | false | null,
+  extraRenderFields?: IIssueFilterFormProps['extraRenderFields'],
 
 }
 interface IIssueFilterFormDataProps {
@@ -108,6 +102,7 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
     chosenFields: config?.value ?? [...currentFormItems.values()],
     extraRenderFields: config?.extraRenderFields,
     onDelete: handleDelete,
+    defaultVisibleFooterAddBtn: config?.defaultVisibleFooterAddBtn,
   };
   return [dataProps, componentProps];
 }
@@ -115,7 +110,8 @@ export function useIssueFilterForm(config?: IConfig): [IIssueFilterFormDataProps
 export function useIssueFilterFormDataSet(props: { fields: IChosenFieldField[], systemFields?: FieldProps[] }) {
   return useMemo(() => new DataSet(IssueFilterFormDataSet({ fields: props.fields, systemFields: props.systemFields })), []);
 }
-const IssueFilterForm: React.FC<Props> = (props) => {
+const IssueFilterForm: React.FC = () => {
+  const props = useIssueFilterFormStore();
   const prefixCls = 'c7n-agile-issue-filter-form';
   const dateFormatArr = useMemo(() => ['HH:mm:ss', 'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD'], []);
   const dataSet = useMemo(() => {
@@ -177,7 +173,7 @@ const IssueFilterForm: React.FC<Props> = (props) => {
             </Row>
           )))}
       </Form>
-      {props.children}
+      {props.footer}
     </>
   );
 };
