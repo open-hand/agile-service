@@ -250,6 +250,14 @@ function useFilter(config?: FilterConfig) {
       loadFields();
     }
   }, [loadFields]);
+  useDeepCompareEffect(() => {
+    if (config?.customFields) {
+      dispatch({
+        type: 'SET_CUSTOM_FIELDS',
+        payload: config.customFields,
+      });
+    }
+  }, [config?.customFields]);
   return {
     state,
     handleSelectChange,
