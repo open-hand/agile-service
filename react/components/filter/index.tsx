@@ -53,6 +53,22 @@ const Filter: React.FC<FilterProps> = ({
     }
     return result;
   }, []), [selected, totalFields]);
+  const groups = useMemo(() => [
+    {
+      title: '系统字段',
+      options: systemFields.map((f) => ({
+        title: f.title,
+        code: f.code,
+      })),
+    },
+    {
+      title: '自定义字段',
+      options: customFields.map((f) => ({
+        title: f.title,
+        code: f.code,
+      })),
+    },
+  ], [customFields, systemFields]);
   return (
     <>
       <Form ref={formRef}>
@@ -80,8 +96,7 @@ const Filter: React.FC<FilterProps> = ({
         ))}
       </Form>
       <SelectField
-        systemFields={systemFields}
-        customFields={customFields}
+        groups={groups}
         value={selected}
         onChange={onSelectChange}
       />
