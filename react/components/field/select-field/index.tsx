@@ -3,7 +3,6 @@ import React, {
 } from 'react';
 import { Button } from 'choerodon-ui/pro';
 import { Dropdown } from 'choerodon-ui';
-import { ISystemFieldCode } from '@/common/types';
 import { pull } from 'lodash';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import FieldList from './FieldList';
@@ -28,15 +27,21 @@ export interface ISelectableField<T> {
   title: string
   disabled?: boolean
 }
+interface Group {
+  title: string
+  options: {
+    title: string
+    code: string,
+    disabled?: boolean
+  }[]
+}
 export interface SelectFieldProps {
   value?: string[]
   onChange?: (codes: string[], select: boolean, value: string[]) => void
-  systemFields: ISelectableField<ISystemFieldCode>[]
-  customFields: ISelectableField<string>[]
+  groups: Group[]
 }
 const SelectField: React.FC<SelectFieldProps> = ({
-  systemFields,
-  customFields,
+  groups,
   onChange,
   ...otherProps
 }) => {
@@ -86,8 +91,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
             }}
           >
             <FieldList
-              systemFields={systemFields}
-              customFields={customFields}
+              groups={groups}
               closeMenu={() => setHidden(true)}
               value={realValue}
               onSelect={handleSelect}

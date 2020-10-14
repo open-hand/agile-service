@@ -3,32 +3,62 @@ import {
   CheckBox, Button, TextField, Icon,
 } from 'choerodon-ui/pro';
 import './FieldList.less';
-import { SelectFieldProps } from '.';
 
 const prefix = 'c7nagile-choose-field-list';
 
+interface Group {
+  title: string
+  options: {
+    title: string
+    code: string,
+    disabled?: boolean
+  }[]
+}
 type Props = {
   closeMenu: () => void,
   value: string[]
   onSelect: (code: string | string[]) => void
   onUnSelect: (code: string | string[]) => void
-} & Pick<SelectFieldProps, 'systemFields' | 'customFields'>
+  groups: Group[]
+}
 
 const FieldList: React.FC<Props> = ({
-  closeMenu, value, onSelect, onUnSelect, systemFields, customFields,
+  closeMenu, value, onSelect, onUnSelect, groups,
 }) => {
   const [searchText, setSearchText] = useState('');
-  const codes = useMemo(() => [...systemFields, ...customFields].map(({ code }) => code), [customFields, systemFields]);
+  const codes = useMemo(() => groups.reduce((res, current) => [...res, ...current.options.map((o) => o.code)], []), [groups]);
   const hasSelect = useMemo(() => value.length > 0, [value.length]);
   const hasSelectAll = useMemo(() => value.length === codes.length, [codes.length, value.length]);
   const isChecked = useCallback((code: string) => value.includes(code), [value]);
-  function handleChange(code: string | string[], select: boolean) {
+  const handleChange = useCallback((code: string | string[], select: boolean) => {
     if (select) {
       onSelect(code);
     } else {
       onUnSelect(code);
     }
-  }
+  }, [onSelect, onUnSelect]);
+  const renderGroup = useCallback((group: Group) => group.options.length > 0 && (
+    <div className={`${prefix}-section`} key={group.title}>
+      <div className={`${prefix}-title`}>{group.title}</div>
+      <div className={`${prefix}-list`}>
+        {group.options.map(({ code, disabled, title }) => {
+          const checked = isChecked(code);
+          return (
+            <div className={`${prefix}-item`} key={code}>
+              <CheckBox
+                value={code}
+                disabled={disabled}
+                checked={checked}
+                onChange={() => handleChange(code, !checked)}
+              >
+                {title}
+              </CheckBox>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  ), [handleChange, isChecked]);
   return (
     <div
       className={prefix}
@@ -71,52 +101,7 @@ const FieldList: React.FC<Props> = ({
         </Button>
       </div>
       <div className={`${prefix}-content`}>
-        {systemFields.length > 0 && (
-          <div className={`${prefix}-section`}>
-            <div className={`${prefix}-title`}>预定义字段</div>
-            <div className={`${prefix}-list`}>
-              {systemFields.map((field) => {
-                const { title, code, disabled } = field;
-                const checked = isChecked(code);
-                return (
-                  <div className={`${prefix}-item`} key={code}>
-                    <CheckBox
-                      value={code}
-                      disabled={disabled}
-                      checked={checked}
-                      onChange={() => handleChange(code, !checked)}
-                    >
-                      {title}
-                    </CheckBox>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-        {customFields.length > 0 && (
-          <div className={`${prefix}-section`}>
-            <div className={`${prefix}-title`}>自定义字段</div>
-            <div className={`${prefix}-list`}>
-              {customFields.map((field) => {
-                const { title, code, disabled } = field;
-                const checked = isChecked(code);
-                return (
-                  <div className={`${prefix}-item`} key={code}>
-                    <CheckBox
-                      value={code}
-                      disabled={disabled}
-                      checked={checked}
-                      onChange={() => handleChange(code, !checked)}
-                    >
-                      {title}
-                    </CheckBox>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        {groups.map((group) => renderGroup(group))}
       </div>
     </div>
   );
