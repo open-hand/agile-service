@@ -970,7 +970,11 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     private void processFieldEdited(String issueType, List<PageConfigFieldVO> pageConfigFields) {
-        Map<String, PageConfigFieldEditedVO> map = SystemFieldCanNotEdit.fieldEdited(issueType);
+        Map<String, PageConfigFieldEditedVO> map = new HashMap<>();
+        Map<String, PageConfigFieldEditedVO> fieldEditedVOMap = SystemFieldCanNotEdit.fieldEdited(issueType);
+        if (!ObjectUtils.isEmpty(fieldEditedVOMap)) {
+            map.putAll(fieldEditedVOMap);
+        }
         if (backlogExpandService != null) {
             map.putAll(backlogExpandService.fieldEdited(issueType));
         }
