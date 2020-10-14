@@ -43,6 +43,7 @@ export interface ISearchVO {
     createEndDate?: string,
     updateStartDate?: string,
     updateEndDate?: string,
+    teamProjectIds?: string[]
   },
   quickFilterIds?: string[],
   contents?: string[],
@@ -66,6 +67,7 @@ function transformSystemFilter(data: IFilter): ISearchVO {
     sprint,
     summary,
     version,
+    teamProjectIds,
   } = data;
   return {
     advancedSearchArgs: {
@@ -90,6 +92,7 @@ function transformSystemFilter(data: IFilter): ISearchVO {
       createEndDate: createDate[1],
       updateStartDate: updateDate[0],
       updateEndDate: updateDate[1],
+      teamProjectIds,
     },
     quickFilterIds,
     contents,
