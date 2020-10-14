@@ -5,6 +5,7 @@ import io.choerodon.agile.api.vo.StateMachineSchemeVO;
 import io.choerodon.agile.api.vo.event.StateMachineSchemeChangeItem;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author shinan.chen
@@ -92,6 +93,9 @@ public interface StateMachineSchemeConfigService {
      * @return
      */
     List<StatusMachineSchemeConfigVO> queryBySchemeId(Boolean isDraft, Long organizationId, Long schemeId);
+
+    List<StatusMachineSchemeConfigVO> queryBySchemeIds(Boolean isDraft, Long organizationId, Set<Long> schemeIds);
+
 
     /**
      * 查询状态机关联的方案

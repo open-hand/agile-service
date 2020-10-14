@@ -99,6 +99,8 @@ public interface StatusService {
      */
     List<StatusVO> queryByStateMachineIds(Long organizationId, List<Long> stateMachineIds);
 
+    Page<StatusVO> pagedQueryByStateMachineIds(PageRequest pageRequest, Long organizationId, List<Long> stateMachineIds);
+
     List<StatusAndTransformVO> queryStatusByStateMachineId(Long organizationId, Long stateMachineId);
 
     Page<ProjectStatusVO> listStatusByProjectId(Long projectId, PageRequest pageRequest, StatusSearchVO statusSearchVO);
