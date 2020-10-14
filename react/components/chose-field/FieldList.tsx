@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   CheckBox, Button, TextField, Icon,
@@ -10,7 +10,7 @@ import ChoseFieldStore from './store';
 const prefix = 'c7nagile-choose-field-list';
 
 export function useChoseFieldStore(props: IUseChoseFieldProps) {
-  return useMemo(() => new ChoseFieldStore(props), []);
+  return useMemo(() => new ChoseFieldStore(props), [props]);
 }
 interface Props {
   store: ChoseFieldStore,

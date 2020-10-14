@@ -1,7 +1,6 @@
 import { IChosenFieldField, IChosenFieldFieldEvents } from '@/components/chose-field/types';
 import { FieldProps } from 'choerodon-ui/pro/lib/data-set/Field';
 import { findIndex } from 'lodash';
-import { useLocalStore } from 'mobx-react-lite';
 import { observable, action, computed } from 'mobx';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { DatePickerProps } from 'choerodon-ui/pro/lib/date-picker/DatePicker';
@@ -11,7 +10,7 @@ import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 interface EventsProps extends IChosenFieldFieldEvents {
   loadRecordAxios?: (store: IssueExportStore) => Promise<any> /** 查询导出记录 */
   exportBefore?: (data: any) => any, /** 导出前对数据转换 */
-  exportAxios?: (searchData: any, fieldSort: string) => Promise<any>, /** 导出 */
+  exportAxios?: (searchData: any, fieldSort: string | undefined) => Promise<any>, /** 导出 */
 }
 interface IDownLoadInfo {
   id: string | null,
@@ -137,7 +136,7 @@ class IssueExportStore {
   }
 
   @action
-  exportAxios(searchData: any, fieldSort: string): Promise<any> {
+  exportAxios(searchData: any, fieldSort: string | undefined): Promise<any> {
     const { exportAxios = (v1: any, v2: any) => new Promise(() => null) } = this.events;
     return exportAxios(searchData, fieldSort);
   }

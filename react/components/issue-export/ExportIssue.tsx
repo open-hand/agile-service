@@ -121,7 +121,7 @@ const ExportIssue: React.FC = () => {
     search.exportFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions);
     search = store.exportBefore(search);
     const field = find(checkOptions, (f) => f.order) as { value: string, label: string, order?: string, };
-    return store.exportAxios(search, field ? `${field.value},${field.order}` : '');
+    return store.exportAxios(search, field ? `${field.value},${field.order}` : undefined);
   };
   const handleChangeFieldStatus = (status: 'ALL' | 'NONE') => {
     if (status !== 'ALL') {

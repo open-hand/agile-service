@@ -8,7 +8,7 @@ import { DropDownProps } from 'choerodon-ui/lib/dropdown';
 import { ButtonProps } from 'choerodon-ui/pro/lib/button/Button';
 import { observer } from 'mobx-react-lite';
 import { IFiledListItemProps, pageConfigApi } from '@/api';
-import FieldList, { useChoseFieldStore } from './FieldList';
+import FieldList from './FieldList';
 import ChoseFieldStore from './store';
 import { IChosenFieldField, IChosenFieldFieldEvents } from './types';
 
