@@ -38,6 +38,9 @@ const IssueSwitch: React.FC<Props> = ({ issue, reloadIssue }) => {
   const sameParentList = ((typeCode === 'sub_task' ? sameParentIssueVOList : sameParentBugVOList) || []).filter((item) => item.issueId !== issueId);
   const renderIssueList = (item:Issue, i: number) => (
     <IssueList
+      style={{
+        borderBottom: sameParentList.length > 1 ? '1px solid rgba(0, 0, 0, 0.12)' : '',
+      }}
       showAssignee={false}
       key={item.issueId}
       issue={{
@@ -74,7 +77,6 @@ const IssueSwitch: React.FC<Props> = ({ issue, reloadIssue }) => {
     setVisible(false);
   }, []);
   const ref = useClickOut(handleClickOut);
-
   return (
     <>
       {
@@ -82,14 +84,12 @@ const IssueSwitch: React.FC<Props> = ({ issue, reloadIssue }) => {
         ['sub_task', 'bug'].includes(typeCode) && Boolean(parentId) && sameParentList.length > 0 && (
           // @ts-ignore
           <span className={styles.issue_switch} ref={ref}>
-            <Icon
-              type="arrow_drop_down"
-              style={{
-                cursor: 'pointer',
-                marginTop: -5,
-              }}
-              onClick={handleClickIcon}
-            />
+            <span className={styles.issue_switch_clickTarget}>
+              <Icon
+                type={!visible ? 'expand_more' : 'expand_less'}
+                onClick={handleClickIcon}
+              />
+            </span>
             {visible && renderOverlay()}
           </span>
         )
