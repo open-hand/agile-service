@@ -130,6 +130,11 @@ public class BurnDownSearchVO {
         } else {
             builder.append(delimiter).append("null");
         }
+        if (!ObjectUtils.isEmpty(currentSearchVO)){
+            builder.append(delimiter).append(currentSearchVO.toString().hashCode());
+        }else {
+            builder.append(delimiter).append("null");
+        }
         return builder.toString();
     }
 }
