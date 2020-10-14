@@ -1,9 +1,9 @@
 import React, {
-  ReactElement, useEffect, useMemo, useState,
+  memo, ReactElement, useEffect, useMemo, useState,
 } from 'react';
 import { Choerodon } from '@choerodon/boot';
 import { observer } from 'mobx-react-lite';
-import { omit, find, unionBy } from 'lodash';
+import { find } from 'lodash';
 import { Divider } from 'choerodon-ui';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
@@ -22,7 +22,7 @@ interface FormPartProps {
   children: ReactElement | ReactElement[] | null,
   btnOnClick?: (nextBtnStatusCode: 'ALL' | 'NONE') => boolean,
 }
-const FormPart: React.FC<FormPartProps> = (props) => {
+const FormPart: React.FC<FormPartProps> = memo((props) => {
   const {
     title, children, btnOnClick,
   } = props;
@@ -55,17 +55,16 @@ const FormPart: React.FC<FormPartProps> = (props) => {
       </div>
     </div>
   );
-};
+});
 interface IDownLoadInfo {
   id: string | null,
   fileUrl: string | null,
   creationDate: string | null,
   lastUpdateDate: string | null,
 }
-const ExportIssue: React.FC<{}> = () => {
+const ExportIssue: React.FC = () => {
   const {
-    prefixCls, checkOptions: propsCheckOptions, store,
-    fields,
+    prefixCls, checkOptions: propsCheckOptions, store, fields,
   } = useExportIssueStore();
   // 添加筛选配置 数据
   const [choseDataProps, choseComponentProps] = useChoseField({
@@ -74,9 +73,7 @@ const ExportIssue: React.FC<{}> = () => {
     events: {
       initField: (data) => store.initField(data),
       initChosenField: (data) => store.initChosenField(data),
-      // choseField: (data) => store.currentChosenFields,
       choseField: (data) => handleChange(data),
-
     },
   });
   const { store: choseFieldStore } = choseDataProps;
@@ -106,7 +103,7 @@ const ExportIssue: React.FC<{}> = () => {
     store.loadRecordAxios(store).then((res: IDownLoadInfo) => {
       store.setDownloadInfo(res);
     });
-  }, []);
+  }, [store]);
   /**
  * 输出 excel
  */
@@ -122,15 +119,9 @@ const ExportIssue: React.FC<{}> = () => {
       return false;
     }
     search.exportFieldCodes = store.transformExportFieldCodes(checkBoxDataProps.checkedOptions);
-    console.log('search...', search);
     search = store.exportBefore(search);
     const field = find(checkOptions, (f) => f.order) as { value: string, label: string, order?: string, };
-    // @ts-ignore
-    return store.exportAxios(search, field ? `${field.value},${field.order}` : undefined)
-      .then((blobData: any) => {
-      }).finally(() => {
-
-      });
+    return store.exportAxios(search, field ? `${field.value},${field.order}` : '');
   };
   const handleChangeFieldStatus = (status: 'ALL' | 'NONE') => {
     if (status !== 'ALL') {
@@ -179,7 +170,6 @@ const ExportIssue: React.FC<{}> = () => {
         onFinish={handleFinish}
         onStart={() => store.setExportBtnHidden(true)}
         autoDownload={{ fileName: `${getProjectName()}.xlsx` }}
-        // visible
         downloadInfo={store.downloadInfo.id ? {
           url: store.downloadInfo.fileUrl!,
           lastUpdateDate: store.downloadInfo.lastUpdateDate!,
