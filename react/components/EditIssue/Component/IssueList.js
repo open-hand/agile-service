@@ -51,7 +51,7 @@ class IssueList extends Component {
 
   render() {
     const {
-      issue, i, showAssignee, showDelete, showPriority, onOpen,
+      issue, i, showAssignee, showDelete, showPriority, onOpen, style,
     } = this.props;
     const { typeCode } = issue;
     const menu = AppState.currentMenuType;
@@ -66,6 +66,7 @@ class IssueList extends Component {
           cursor: 'pointer',
           borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
           borderTop: !i ? '1px solid rgba(0, 0, 0, 0.12)' : '',
+          ...style,
         }}
       >
         <Tooltip mouseEnterDelay={0.5} title={`任务类型: ${issueTypeName}`}>
