@@ -1,5 +1,6 @@
 import React from 'react';
 import { DataSet, Modal, Table } from 'choerodon-ui/pro/lib';
+import { ModalProps } from 'choerodon-ui/pro/lib/modal/Modal';
 import classnames from 'classnames';
 import ExportIssue from './ExportIssue';
 import ExportIssueContextProvider from './stores';
@@ -24,7 +25,7 @@ export default function Index(props: IExportIssueProps) {
 }
 
 function openExportIssueModal(fields: Array<IChosenFieldField>, chosenFields: Array<any>,
-  tableDataSet: DataSet, tableRef: React.RefObject<Table>, store: IssueExportStore, otherModalProps?: any) {
+  tableDataSet: DataSet, tableRef: React.RefObject<Table>, store: IssueExportStore, otherModalProps?: ModalProps) {
   const checkOptions = [...tableDataSet.fields.values()].map((option) => ({ value: option.props.name!, label: option.props.label as string, order: option.order }));
   const { className, ...otherProps } = otherModalProps || {};
   Modal.open({
