@@ -10,6 +10,8 @@ public class IssueCountDTO {
     private String name;
     private Integer issueCount;
     private BigDecimal storyPointCount;
+    private BigDecimal successStoryPoint;
+    private BigDecimal totalStoryPoint;
 
     public Long getId() {
         return id;
@@ -41,5 +43,21 @@ public class IssueCountDTO {
 
     public BigDecimal getStoryPointCount() {
         return storyPointCount;
+    }
+
+    public BigDecimal getSuccessStoryPoint() {
+        return successStoryPoint;
+    }
+
+    public void setSuccessStoryPoint(BigDecimal successStoryPoint) {
+        this.successStoryPoint = successStoryPoint;
+    }
+
+    public BigDecimal getTotalStoryPoint() {
+        return totalStoryPoint;
+    }
+
+    public void setTotalStoryPoint(BigDecimal totalStoryPoint) {
+        this.totalStoryPoint = totalStoryPoint;
     }
 }

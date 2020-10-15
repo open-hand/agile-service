@@ -1,15 +1,13 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.infra.utils.StringUtil;
+import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-
-import io.swagger.annotations.ApiModelProperty;
-
-import io.choerodon.agile.infra.utils.StringUtil;
-import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * Created by WangZhe@choerodon.io on 2019-06-28.
@@ -31,11 +29,9 @@ public class IssueListFieldKVVO {
     private String summary;
 
     @ApiModelProperty(value = "经办人id")
-    @Encrypt
     private Long assigneeId;
 
     @ApiModelProperty(value = "报告人id")
-    @Encrypt
     private Long reporterId;
 
     @ApiModelProperty(value = "项目id")
@@ -82,8 +78,15 @@ public class IssueListFieldKVVO {
     @ApiModelProperty(value = "故事点")
     private BigDecimal storyPoints;
 
+    @ApiModelProperty(value = "特性名称")
+    private String featureName;
+
+    @ApiModelProperty(value = "特性id")
     @Encrypt(ignoreValue = {"0"})
-    private Long parentId;
+    private Long featureId;
+
+    @ApiModelProperty(value = "特性颜色")
+    private String featureColor;
 
     @ApiModelProperty(value = "如果问题类型是特性，返回特性类别:business、enabler")
     private String featureType;
@@ -109,6 +112,9 @@ public class IssueListFieldKVVO {
     @ApiModelProperty(value = "最后更新时间")
     private Date lastUpdateDate;
 
+    @Encrypt(ignoreValue = {"0"})
+    private Long parentId;
+
     @ApiModelProperty(value = "关联的版本")
     private List<VersionIssueRelVO> versionIssueRelVOS;
 
@@ -124,12 +130,22 @@ public class IssueListFieldKVVO {
     @ApiModelProperty(value = "自定义字段kv")
     private Map<String, Object> foundationFieldValue;
 
-    @ApiModelProperty(value = "项目信息")
+    @ApiModelProperty("项目信息")
     private ProjectVO projectVO;
 
     private Date estimatedStartTime;
 
     private Date estimatedEndTime;
+
+    private String projectName;
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
 
     public Date getEstimatedStartTime() {
         return estimatedStartTime;
@@ -145,6 +161,14 @@ public class IssueListFieldKVVO {
 
     public void setEstimatedEndTime(Date estimatedEndTime) {
         this.estimatedEndTime = estimatedEndTime;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
     }
 
     public List<IssueSprintVO> getIssueSprintVOS() {
@@ -412,12 +436,28 @@ public class IssueListFieldKVVO {
         this.foundationFieldValue = foundationFieldValue;
     }
 
-    public Long getParentId() {
-        return parentId;
+    public String getFeatureName() {
+        return featureName;
     }
 
-    public void setParentId(Long parentId) {
-        this.parentId = parentId;
+    public void setFeatureName(String featureName) {
+        this.featureName = featureName;
+    }
+
+    public Long getFeatureId() {
+        return featureId;
+    }
+
+    public void setFeatureId(Long featureId) {
+        this.featureId = featureId;
+    }
+
+    public String getFeatureColor() {
+        return featureColor;
+    }
+
+    public void setFeatureColor(String featureColor) {
+        this.featureColor = featureColor;
     }
 
     @Override

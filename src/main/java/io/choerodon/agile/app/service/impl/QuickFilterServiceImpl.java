@@ -10,6 +10,7 @@ import io.choerodon.agile.api.vo.QuickFilterSearchVO;
 import io.choerodon.agile.api.vo.QuickFilterSequenceVO;
 import io.choerodon.agile.api.vo.QuickFilterVO;
 import io.choerodon.agile.api.vo.QuickFilterValueVO;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
 import io.choerodon.agile.app.service.QuickFilterFieldService;
 import io.choerodon.agile.app.service.QuickFilterService;
@@ -69,6 +70,8 @@ public class QuickFilterServiceImpl implements QuickFilterService {
     private ObjectMapper objectMapper;
     @Autowired
     private QuickFilterFieldService quickFilterFieldService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     private EncryptionService encryptionService = new EncryptionService(new EncryptProperties());
 
@@ -358,6 +361,9 @@ public class QuickFilterServiceImpl implements QuickFilterService {
         String value = "'null'".equals(quickFilterValueVO.getValue()) ? NULL_STR : quickFilterValueVO.getValue();
         String operation = quickFilterValueVO.getOperation();
         processPredefinedField(sqlQuery, quickFilterValueVO, value, operation);
+        if (agilePluginService != null) {
+            agilePluginService.appendProgramFieldSql(sqlQuery, quickFilterValueVO, value, operation, projectId);
+        }
     }
 
     protected void processPredefinedField(StringBuilder sqlQuery, QuickFilterValueVO quickFilterValueVO, String value, String operation) {

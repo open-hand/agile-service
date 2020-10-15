@@ -6,121 +6,95 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
 
-/**
- * Created by jian_zhang02@163.com on 2018/6/12.
- */
 public class ExportIssuesVO {
-
-    @ApiModelProperty(value = "问题id")
+    @ApiModelProperty("问题id")
     private Long issueId;
-
-    @ApiModelProperty(value = "问题编号")
+    @ApiModelProperty("问题编号")
     private String issueNum;
-
-    @ApiModelProperty(value = "未完成的问题列表")
+    @ApiModelProperty("未完成的问题列表")
     private String summary;
-
-    @ApiModelProperty(value = "问题类型名称")
+    @ApiModelProperty("问题类型名称")
     private String typeName;
-
-    @ApiModelProperty(value = "项目编码")
+    @ApiModelProperty("项目编码")
     private String projectCode;
-
-    @ApiModelProperty(value = "经办人id")
+    @ApiModelProperty("经办人id")
     private Long assigneeId;
-
-    @ApiModelProperty(value = "经办人名称")
+    @ApiModelProperty("经办人名称")
     private String assigneeName;
-
-    @ApiModelProperty(value = "经办人真实名称")
+    @ApiModelProperty("经办人真实名称")
     private String assigneeRealName;
-
-    @ApiModelProperty(value = "报告人id")
+    @ApiModelProperty("报告人id")
     private Long reporterId;
-
-    @ApiModelProperty(value = "报告人名称")
+    @ApiModelProperty("报告人名称")
     private String reporterName;
-
-    @ApiModelProperty(value = "报告人真实名称")
+    @ApiModelProperty("报告人真实名称")
     private String reporterRealName;
-
-    @ApiModelProperty(value = "状态名称")
+    @ApiModelProperty("状态名称")
     private String statusName;
-
-    @ApiModelProperty(value = "描述")
+    @ApiModelProperty("描述")
     private String description;
-
-    @ApiModelProperty(value = "冲刺名称")
+    @ApiModelProperty("冲刺名称")
     private String sprintName;
-
-    @ApiModelProperty(value = "关闭冲刺的名称")
+    @ApiModelProperty("关闭冲刺的名称")
     private String closeSprintName;
-
-    @ApiModelProperty(value = "创建时间")
+    @ApiModelProperty("创建时间")
     private Date creationDate;
-
-    @ApiModelProperty(value = "最后更新时间")
+    @ApiModelProperty("最后更新时间")
     private Date lastUpdateDate;
-
-    @ApiModelProperty(value = "优先级名称")
+    @ApiModelProperty("优先级名称")
     private String priorityName;
-
-    @ApiModelProperty(value = "子任务")
+    @ApiModelProperty("子任务")
     private String subTask;
-
-    @ApiModelProperty(value = "预估时间")
+    @ApiModelProperty("预估时间")
     private BigDecimal estimateTime;
-
-    @ApiModelProperty(value = "剩余时间")
+    @ApiModelProperty("剩余时间")
     private BigDecimal remainingTime;
-
-    @ApiModelProperty(value = "修复版本名称")
+    @ApiModelProperty("修复版本名称")
     private String fixVersionName;
-
-    @ApiModelProperty(value = "影响版本名称")
+    @ApiModelProperty("影响版本名称")
     private String influenceVersionName;
-
-    @ApiModelProperty(value = "项目名称")
+    @ApiModelProperty("项目名称")
     private String projectName;
-
-    @ApiModelProperty(value = "修复版本和影响版本的名称")
+    @ApiModelProperty("修复版本和影响版本的名称")
     private String versionName;
-
-    @ApiModelProperty(value = "solution")
+    @ApiModelProperty("solution")
     private String solution;
-
-    @ApiModelProperty(value = "预估时间总和")
+    @ApiModelProperty("预估时间总和")
     private BigDecimal sumEstimateTime;
-
-    @ApiModelProperty(value = "剩余时间总和")
+    @ApiModelProperty("剩余时间总和")
     private BigDecimal sumRemainingTime;
-
-    @ApiModelProperty(value = "史诗名称")
+    @ApiModelProperty("史诗名称")
     private String epicName;
-
-    @ApiModelProperty(value = "故事点")
+    @ApiModelProperty("特性")
+    private String feature;
+    @ApiModelProperty("故事点")
     private BigDecimal storyPoints;
-
-    @ApiModelProperty(value = "模块名称")
+    @ApiModelProperty("模块名称")
     private String componentName;
-
-    @ApiModelProperty(value = "标签名称")
+    @ApiModelProperty("标签名称")
     private String labelName;
-
-    @ApiModelProperty(value = "resolution")
+    @ApiModelProperty("resolution")
     private String resolution;
-
-    @ApiModelProperty(value = "自定义字段kv")
+    @ApiModelProperty("自定义字段kv")
     private Map<String, Object> foundationFieldValue;
-
     @ApiModelProperty("预计开始时间")
     private Date estimatedStartTime;
-
     @ApiModelProperty("预计结束时间")
     private Date estimatedEndTime;
 
+    public ExportIssuesVO() {
+    }
+
+    public String getFeature() {
+        return feature;
+    }
+
+    public void setFeature(String feature) {
+        this.feature = feature;
+    }
+
     public String getAssigneeRealName() {
-        return assigneeRealName;
+        return this.assigneeRealName;
     }
 
     public void setAssigneeRealName(String assigneeRealName) {
@@ -128,7 +102,7 @@ public class ExportIssuesVO {
     }
 
     public String getReporterRealName() {
-        return reporterRealName;
+        return this.reporterRealName;
     }
 
     public void setReporterRealName(String reporterRealName) {
@@ -136,7 +110,7 @@ public class ExportIssuesVO {
     }
 
     public String getResolution() {
-        return resolution;
+        return this.resolution;
     }
 
     public void setResolution(String resolution) {
@@ -144,7 +118,7 @@ public class ExportIssuesVO {
     }
 
     public String getProjectName() {
-        return projectName;
+        return this.projectName;
     }
 
     public void setProjectName(String projectName) {
@@ -152,7 +126,7 @@ public class ExportIssuesVO {
     }
 
     public String getVersionName() {
-        return versionName;
+        return this.versionName;
     }
 
     public void setVersionName(String versionName) {
@@ -160,7 +134,7 @@ public class ExportIssuesVO {
     }
 
     public Long getIssueId() {
-        return issueId;
+        return this.issueId;
     }
 
     public void setIssueId(Long issueId) {
@@ -168,7 +142,7 @@ public class ExportIssuesVO {
     }
 
     public String getIssueNum() {
-        return issueNum;
+        return this.issueNum;
     }
 
     public void setIssueNum(String issueNum) {
@@ -176,7 +150,7 @@ public class ExportIssuesVO {
     }
 
     public String getSummary() {
-        return summary;
+        return this.summary;
     }
 
     public void setSummary(String summary) {
@@ -184,7 +158,7 @@ public class ExportIssuesVO {
     }
 
     public String getTypeName() {
-        return typeName;
+        return this.typeName;
     }
 
     public void setTypeName(String typeName) {
@@ -192,7 +166,7 @@ public class ExportIssuesVO {
     }
 
     public String getProjectCode() {
-        return projectCode;
+        return this.projectCode;
     }
 
     public void setProjectCode(String projectCode) {
@@ -200,7 +174,7 @@ public class ExportIssuesVO {
     }
 
     public Long getAssigneeId() {
-        return assigneeId;
+        return this.assigneeId;
     }
 
     public void setAssigneeId(Long assigneeId) {
@@ -208,7 +182,7 @@ public class ExportIssuesVO {
     }
 
     public Long getReporterId() {
-        return reporterId;
+        return this.reporterId;
     }
 
     public void setReporterId(Long reporterId) {
@@ -216,7 +190,7 @@ public class ExportIssuesVO {
     }
 
     public String getStatusName() {
-        return statusName;
+        return this.statusName;
     }
 
     public void setStatusName(String statusName) {
@@ -224,7 +198,7 @@ public class ExportIssuesVO {
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public void setDescription(String description) {
@@ -232,7 +206,7 @@ public class ExportIssuesVO {
     }
 
     public String getSprintName() {
-        return sprintName;
+        return this.sprintName;
     }
 
     public void setSprintName(String sprintName) {
@@ -240,7 +214,7 @@ public class ExportIssuesVO {
     }
 
     public Date getCreationDate() {
-        return creationDate;
+        return this.creationDate;
     }
 
     public void setCreationDate(Date creationDate) {
@@ -248,7 +222,7 @@ public class ExportIssuesVO {
     }
 
     public Date getLastUpdateDate() {
-        return lastUpdateDate;
+        return this.lastUpdateDate;
     }
 
     public void setLastUpdateDate(Date lastUpdateDate) {
@@ -256,7 +230,7 @@ public class ExportIssuesVO {
     }
 
     public String getPriorityName() {
-        return priorityName;
+        return this.priorityName;
     }
 
     public void setPriorityName(String priorityName) {
@@ -264,7 +238,7 @@ public class ExportIssuesVO {
     }
 
     public String getSubTask() {
-        return subTask;
+        return this.subTask;
     }
 
     public void setSubTask(String subTask) {
@@ -272,7 +246,7 @@ public class ExportIssuesVO {
     }
 
     public BigDecimal getEstimateTime() {
-        return estimateTime;
+        return this.estimateTime;
     }
 
     public void setEstimateTime(BigDecimal estimateTime) {
@@ -280,7 +254,7 @@ public class ExportIssuesVO {
     }
 
     public BigDecimal getRemainingTime() {
-        return remainingTime;
+        return this.remainingTime;
     }
 
     public void setRemainingTime(BigDecimal remainingTime) {
@@ -288,7 +262,7 @@ public class ExportIssuesVO {
     }
 
     public String getCloseSprintName() {
-        return closeSprintName;
+        return this.closeSprintName;
     }
 
     public void setCloseSprintName(String closeSprintName) {
@@ -296,7 +270,7 @@ public class ExportIssuesVO {
     }
 
     public String getFixVersionName() {
-        return fixVersionName;
+        return this.fixVersionName;
     }
 
     public void setFixVersionName(String fixVersionName) {
@@ -304,7 +278,7 @@ public class ExportIssuesVO {
     }
 
     public String getInfluenceVersionName() {
-        return influenceVersionName;
+        return this.influenceVersionName;
     }
 
     public void setInfluenceVersionName(String influenceVersionName) {
@@ -312,7 +286,7 @@ public class ExportIssuesVO {
     }
 
     public String getAssigneeName() {
-        return assigneeName;
+        return this.assigneeName;
     }
 
     public void setAssigneeName(String assigneeName) {
@@ -320,7 +294,7 @@ public class ExportIssuesVO {
     }
 
     public String getReporterName() {
-        return reporterName;
+        return this.reporterName;
     }
 
     public void setReporterName(String reporterName) {
@@ -328,7 +302,7 @@ public class ExportIssuesVO {
     }
 
     public String getSolution() {
-        return solution;
+        return this.solution;
     }
 
     public void setSolution(String solution) {
@@ -336,7 +310,7 @@ public class ExportIssuesVO {
     }
 
     public BigDecimal getSumEstimateTime() {
-        return sumEstimateTime;
+        return this.sumEstimateTime;
     }
 
     public void setSumEstimateTime(BigDecimal sumEstimateTime) {
@@ -344,7 +318,7 @@ public class ExportIssuesVO {
     }
 
     public BigDecimal getSumRemainingTime() {
-        return sumRemainingTime;
+        return this.sumRemainingTime;
     }
 
     public void setSumRemainingTime(BigDecimal sumRemainingTime) {
@@ -352,7 +326,7 @@ public class ExportIssuesVO {
     }
 
     public String getEpicName() {
-        return epicName;
+        return this.epicName;
     }
 
     public void setEpicName(String epicName) {
@@ -360,7 +334,7 @@ public class ExportIssuesVO {
     }
 
     public BigDecimal getStoryPoints() {
-        return storyPoints;
+        return this.storyPoints;
     }
 
     public void setStoryPoints(BigDecimal storyPoints) {
@@ -368,7 +342,7 @@ public class ExportIssuesVO {
     }
 
     public String getComponentName() {
-        return componentName;
+        return this.componentName;
     }
 
     public void setComponentName(String componentName) {
@@ -376,7 +350,7 @@ public class ExportIssuesVO {
     }
 
     public String getLabelName() {
-        return labelName;
+        return this.labelName;
     }
 
     public void setLabelName(String labelName) {
@@ -384,7 +358,7 @@ public class ExportIssuesVO {
     }
 
     public Map<String, Object> getFoundationFieldValue() {
-        return foundationFieldValue;
+        return this.foundationFieldValue;
     }
 
     public void setFoundationFieldValue(Map<String, Object> foundationFieldValue) {
