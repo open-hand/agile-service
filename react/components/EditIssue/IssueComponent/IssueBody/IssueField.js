@@ -16,7 +16,7 @@ const hideFields = ['priority', 'component', 'label', 'fixVersion', 'sprint', 't
 
 const IssueField = observer((props) => {
   const {
-    store, applyType, saveFieldVersionRef, saveFieldFixVersionRef,
+    store, applyType, saveFieldVersionRef, saveFieldFixVersionRef, disabled,
   } = useContext(EditIssueContext);
   const renderNormalField = (field) => (<FieldPro {...props} field={field} />);
   const getFieldComponent = (field) => {
