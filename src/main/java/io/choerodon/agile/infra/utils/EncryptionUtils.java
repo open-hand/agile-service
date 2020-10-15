@@ -40,7 +40,7 @@ public class EncryptionUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EncryptionUtils.class);
 
-    static EncryptionService encryptionService = new EncryptionService(new EncryptProperties());
+    protected static EncryptionService encryptionService = new EncryptionService(new EncryptProperties());
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
