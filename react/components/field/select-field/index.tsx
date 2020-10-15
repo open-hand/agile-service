@@ -3,7 +3,7 @@ import React, {
 } from 'react';
 import { Button } from 'choerodon-ui/pro';
 import { Dropdown } from 'choerodon-ui';
-import { pull } from 'lodash';
+import { pull, uniq } from 'lodash';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import FieldList from './FieldList';
 
@@ -56,7 +56,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
   const handleSelect = useCallback((code: string | string[]) => {
     const codes = Array.isArray(code) ? code : [code];
     setValue((v) => {
-      const result = [...v, ...codes];
+      const result = uniq([...v, ...codes]);
       onChange && onChange(codes, true, result);
       if (controlled) {
         return v;
