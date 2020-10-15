@@ -9,6 +9,7 @@ import {
 import { Choerodon } from '@choerodon/boot';
 import { debounce } from 'lodash';
 import moment from 'moment';
+import { toJS } from 'mobx';
 import UserInfo from '@/components/UserInfo';
 import { randomString } from '@/utils/random';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
@@ -127,10 +128,9 @@ function CreateField() {
         Choerodon.prompt('字段列表不能为空');
         return false;
       }
+      const defaultValueArr = toJS(current?.get('defaultValue'));
       obj.fieldOptions = fieldOptions.map((o) => {
-        if (obj.defaultValue.indexOf(String(o.id)) !== -1 || obj.defaultValue
-          && (obj.defaultValue.indexOf(String(o.code)) !== -1
-            || obj.defaultValue.indexOf(String(o.tempKey)) !== -1)) {
+        if (Array.isArray(defaultValueArr) && defaultValueArr.some((v) => v === o.id || v === o.tempKey || v === o.code)) {
           return { ...o, isDefault: true };
         }
         return { ...o, isDefault: false };
