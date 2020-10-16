@@ -169,6 +169,9 @@ type FilterAction =
       code: string
       value: any
     }
+  }
+  | {
+    type: 'RESET_FILTER'
   };
 
 function filterReducer(draft: FilterState, action: FilterAction): FilterState {
@@ -202,7 +205,10 @@ function filterReducer(draft: FilterState, action: FilterAction): FilterState {
       draft.filter[code] = value;
       return draft;
     }
-
+    case 'RESET_FILTER': {
+      draft.filter = {};
+      return draft;
+    }
     default: return draft;
   }
 }
@@ -236,6 +242,11 @@ function useFilter(config?: FilterConfig) {
       },
     });
   }, [dispatch]);
+  const reset = useCallback(() => {
+    dispatch({
+      type: 'RESET_FILTER',
+    });
+  }, [dispatch]);
   const loadFields = useCallback(async () => {
     const Fields = (await fieldApi.getCustomFields()).map((f: any) => ({
       ...f,
@@ -264,6 +275,7 @@ function useFilter(config?: FilterConfig) {
     state,
     handleSelectChange,
     handleFilterChange,
+    reset,
   };
 }
 

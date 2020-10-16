@@ -168,18 +168,20 @@ export function filterToSearchVO(filter: IFilter, fields: IFilterField[]): ISear
         case 'datetime':
         case 'date': {
           if (value && value.length > 0) {
-            if (fieldType === 'time') {
-              customField.date_hms.push({
-                fieldId: id,
-                startDate: value[0],
-                endDate: value[1],
-              });
-            } else {
-              customField.date.push({
-                fieldId: id,
-                startDate: value[0],
-                endDate: value[1],
-              });
+            if (value[0] && value[1]) {
+              if (fieldType === 'time') {
+                customField.date_hms.push({
+                  fieldId: id,
+                  startDate: value[0],
+                  endDate: value[1],
+                });
+              } else {
+                customField.date.push({
+                  fieldId: id,
+                  startDate: value[0],
+                  endDate: value[1],
+                });
+              }
             }
           }
           break;

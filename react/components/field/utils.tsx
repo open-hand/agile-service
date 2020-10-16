@@ -110,7 +110,6 @@ export function getFieldElement(field: IFilterField): React.ReactNode {
         <TextArea
           rows={3}
           maxLength={255}
-
         />
       );
     case 'radio': case 'single': case 'checkbox': case 'multiple':
