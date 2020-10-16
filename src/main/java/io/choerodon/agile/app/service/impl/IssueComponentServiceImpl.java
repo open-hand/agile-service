@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.validator.IssueComponentValidator;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.dto.ComponentForListDTO;
 import io.choerodon.agile.infra.dto.ComponentIssueRelDTO;

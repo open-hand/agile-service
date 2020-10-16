@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StateMachineTransformService;

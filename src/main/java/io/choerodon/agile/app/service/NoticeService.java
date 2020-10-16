@@ -1,6 +1,6 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.IssueVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.MessageVO;
 import io.choerodon.agile.infra.dto.MessageDetailDTO;
 

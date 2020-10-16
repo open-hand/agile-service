@@ -1,7 +1,7 @@
-package io.choerodon.agile.api.vo;
+package io.choerodon.agile.api.vo.business;
 
 
-
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.annotation.Update;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
@@ -31,6 +31,7 @@ public class IssueUpdateVO {
     private String summary;
 
     @ApiModelProperty(value = "优先级code")
+    @Encrypt
     private String priorityCode;
 
     @ApiModelProperty(value = "报告人id")
@@ -97,11 +98,18 @@ public class IssueUpdateVO {
     private String epicName;
 
     @ApiModelProperty(value = "优先级id")
-    @Encrypt
+    @Encrypt(ignoreValue = {"0"})
     private Long priorityId;
 
     @ApiModelProperty(value = "停留时间")
     private Date stayDate;
+
+    @ApiModelProperty(value = "关联的featureDTO")
+    private FeatureVO featureVO;
+
+    @ApiModelProperty(value = "关联的featureId")
+    @Encrypt(ignoreValue = {"0"})
+    private Long featureId;
 
     @ApiModelProperty(value = "bug关联的故事id")
     @Encrypt(ignoreValue = {"0"})
@@ -120,6 +128,14 @@ public class IssueUpdateVO {
     @ApiModelProperty(value = "自动触发issueNum")
     private String autoTriggerNum;
 
+    public Boolean getAutoTranferFlag() {
+        return autoTranferFlag;
+    }
+
+    public void setAutoTranferFlag(Boolean autoTranferFlag) {
+        this.autoTranferFlag = autoTranferFlag;
+    }
+
     public Long getAutoTriggerId() {
         return autoTriggerId;
     }
@@ -134,14 +150,6 @@ public class IssueUpdateVO {
 
     public void setAutoTriggerNum(String autoTriggerNum) {
         this.autoTriggerNum = autoTriggerNum;
-    }
-
-    public Boolean getAutoTranferFlag() {
-        return autoTranferFlag;
-    }
-
-    public void setAutoTranferFlag(Boolean autoTranferFlag) {
-        this.autoTranferFlag = autoTranferFlag;
     }
 
     public Date getEstimatedStartTime() {
@@ -366,6 +374,22 @@ public class IssueUpdateVO {
 
     public Date getStayDate() {
         return stayDate;
+    }
+
+    public FeatureVO getFeatureVO() {
+        return featureVO;
+    }
+
+    public void setFeatureVO(FeatureVO featureVO) {
+        this.featureVO = featureVO;
+    }
+
+    public Long getFeatureId() {
+        return featureId;
+    }
+
+    public void setFeatureId(Long featureId) {
+        this.featureId = featureId;
     }
 
     public void setRelateIssueId(Long relateIssueId) {
