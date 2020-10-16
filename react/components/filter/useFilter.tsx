@@ -182,7 +182,9 @@ function filterReducer(draft: FilterState, action: FilterAction): FilterState {
       const { select, codes } = action.payload;
       if (select) {
         codes.forEach((code) => {
-          draft.selected.push(code);
+          if (!draft.selected.includes(code)) {
+            draft.selected.push(code);
+          }
         });
       } else {
         codes.forEach((code) => {
