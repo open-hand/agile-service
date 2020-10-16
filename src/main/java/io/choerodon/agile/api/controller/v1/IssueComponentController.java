@@ -1,7 +1,7 @@
 package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.ComponentForListVO;
-import io.choerodon.agile.api.vo.IssueVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.SearchVO;
 
 import io.choerodon.core.domain.Page;

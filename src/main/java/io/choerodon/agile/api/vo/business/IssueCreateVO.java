@@ -1,6 +1,7 @@
-package io.choerodon.agile.api.vo;
+package io.choerodon.agile.api.vo.business;
 
 
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -79,16 +80,43 @@ public class IssueCreateVO {
 
     @Encrypt(ignoreValue = {"0"})
     private Long relateIssueId;
+
     @Encrypt(ignoreValue = {"0"})
     private Long parentIssueId;
 
     private RankVO rankVO;
 
+    @ApiModelProperty(value = "featureId")
+    @Encrypt(ignoreValue = {"0"})
+    private Long featureId;
+
+    @ApiModelProperty(value = "feature开始时间")
+    private Date startDate;
+
+    @ApiModelProperty(value = "feature结束时间")
+    private Date endDate;
+
+    @ApiModelProperty(value = "feature所属项目群id")
+    private Long programId;
+
+    @ApiModelProperty(value = "问题所属pi")
+    @Encrypt(ignoreValue = {"0"})
+    private Long piId;
+
+    @ApiModelProperty(value = "featureVO")
+    private FeatureVO featureVO;
+
+    private WsjfVO wsjfVO;
+
+    private Long teamProjectId;
+
+    private Boolean isEpic;
+
+    private List<Long> teamProjectIds;
+
     private Date estimatedStartTime;
 
     private Date estimatedEndTime;
-
-    private Long programId;
 
     public Date getEstimatedStartTime() {
         return estimatedStartTime;
@@ -104,6 +132,22 @@ public class IssueCreateVO {
 
     public void setEstimatedEndTime(Date estimatedEndTime) {
         this.estimatedEndTime = estimatedEndTime;
+    }
+
+    public Boolean getEpic() {
+        return isEpic;
+    }
+
+    public void setEpic(Boolean epic) {
+        isEpic = epic;
+    }
+
+    public Long getTeamProjectId() {
+        return teamProjectId;
+    }
+
+    public void setTeamProjectId(Long teamProjectId) {
+        this.teamProjectId = teamProjectId;
     }
 
     public List<IssueLinkCreateVO> getIssueLinkCreateVOList() {
@@ -274,6 +318,55 @@ public class IssueCreateVO {
         return rankVO;
     }
 
+    public Long getFeatureId() {
+        return featureId;
+    }
+
+    public void setFeatureId(Long featureId) {
+        this.featureId = featureId;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public Long getProgramId() {
+        return programId;
+    }
+
+    public void setProgramId(Long programId) {
+        this.programId = programId;
+    }
+
+    public Long getPiId() {
+        return piId;
+    }
+
+    public void setPiId(Long piId) {
+        this.piId = piId;
+    }
+
+    public FeatureVO getFeatureVO() {
+        return featureVO;
+    }
+
+    public void setFeatureVO(FeatureVO featureVO) {
+        this.featureVO = featureVO;
+    }
+
+
     public Long getParentIssueId() {
         return parentIssueId;
     }
@@ -287,11 +380,19 @@ public class IssueCreateVO {
         return StringUtil.getToString(this);
     }
 
-    public Long getProgramId() {
-        return programId;
+    public WsjfVO getWsjfVO() {
+        return wsjfVO;
     }
 
-    public void setProgramId(Long programId) {
-        this.programId = programId;
+    public void setWsjfVO(WsjfVO wsjfVO) {
+        this.wsjfVO = wsjfVO;
+    }
+
+    public List<Long> getTeamProjectIds() {
+        return teamProjectIds;
+    }
+
+    public void setTeamProjectIds(List<Long> teamProjectIds) {
+        this.teamProjectIds = teamProjectIds;
     }
 }

@@ -1,14 +1,14 @@
-package io.choerodon.agile.api.vo;
+package io.choerodon.agile.api.vo.business;
 
+
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.infra.utils.StringUtil;
+import io.swagger.annotations.ApiModelProperty;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-
-
-import io.choerodon.agile.infra.utils.StringUtil;
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
 
 /**
  * 敏捷开发Issue
@@ -154,7 +154,7 @@ public class IssueVO {
     private String createrRealName;
 
     @ApiModelProperty(value = "优先级id")
-    @Encrypt
+    @Encrypt(ignoreValue = {"0"})
     private Long priorityId;
 
     @ApiModelProperty(value = "问题类型id")
@@ -171,6 +171,7 @@ public class IssueVO {
     private StatusVO statusMapVO;
 
     @ApiModelProperty(value = "创建人id")
+    @Encrypt
     private Long createdBy;
 
     @ApiModelProperty(value = "业务类型：agile、test等")
@@ -200,6 +201,30 @@ public class IssueVO {
 
     @ApiModelProperty(value = "子缺陷的父任务概要")
     private String parentRelateSummary;
+
+    @ApiModelProperty(value = "featureVO")
+    private FeatureVO featureVO;
+
+    @ApiModelProperty(value = "featureId")
+    @Encrypt(ignoreValue = {"0"})
+    private Long featureId;
+
+    @ApiModelProperty(value = "feature名称")
+    private String featureName;
+
+    @ApiModelProperty(value = "活跃pi")
+    private PiNameVO activePi;
+
+    @ApiModelProperty(value = "已关闭的pi列表")
+    private List<PiNameVO> closePi;
+
+    private List<ProjectVO> activePiTeams;
+
+    private List<SprintDetailVO>  activePiSprints;
+
+    private List<SprintDetailVO>  closedPiSprints;
+
+    private WsjfVO wsjf;
 
     private Date estimatedStartTime;
 
@@ -645,6 +670,14 @@ public class IssueVO {
         return relateIssueNum;
     }
 
+    public String getParentRelateSummary() {
+        return parentRelateSummary;
+    }
+
+    public void setParentRelateSummary(String parentRelateSummary) {
+        this.parentRelateSummary = parentRelateSummary;
+    }
+
     public void setSubIssueVOList(List<IssueSubListVO> subIssueVOList) {
         this.subIssueVOList = subIssueVOList;
     }
@@ -677,12 +710,44 @@ public class IssueVO {
         this.createrRealName = createrRealName;
     }
 
-    public void setParentRelateSummary(String parentRelateSummary) {
-        this.parentRelateSummary = parentRelateSummary;
+    public FeatureVO getFeatureVO() {
+        return featureVO;
     }
 
-    public String getParentRelateSummary() {
-        return parentRelateSummary;
+    public void setFeatureVO(FeatureVO featureVO) {
+        this.featureVO = featureVO;
+    }
+
+    public Long getFeatureId() {
+        return featureId;
+    }
+
+    public void setFeatureId(Long featureId) {
+        this.featureId = featureId;
+    }
+
+    public String getFeatureName() {
+        return featureName;
+    }
+
+    public void setFeatureName(String featureName) {
+        this.featureName = featureName;
+    }
+
+    public PiNameVO getActivePi() {
+        return activePi;
+    }
+
+    public void setActivePi(PiNameVO activePi) {
+        this.activePi = activePi;
+    }
+
+    public List<PiNameVO> getClosePi() {
+        return closePi;
+    }
+
+    public void setClosePi(List<PiNameVO> closePi) {
+        this.closePi = closePi;
     }
 
     @Override
@@ -690,4 +755,35 @@ public class IssueVO {
         return StringUtil.getToString(this);
     }
 
+    public List<ProjectVO> getActivePiTeams() {
+        return activePiTeams;
+    }
+
+    public void setActivePiTeams(List<ProjectVO> activePiTeams) {
+        this.activePiTeams = activePiTeams;
+    }
+
+    public List<SprintDetailVO> getActivePiSprints() {
+        return activePiSprints;
+    }
+
+    public void setActivePiSprints(List<SprintDetailVO> activePiSprints) {
+        this.activePiSprints = activePiSprints;
+    }
+
+    public List<SprintDetailVO> getClosedPiSprints() {
+        return closedPiSprints;
+    }
+
+    public void setClosedPiSprints(List<SprintDetailVO> closedPiSprints) {
+        this.closedPiSprints = closedPiSprints;
+    }
+
+    public WsjfVO getWsjf() {
+        return wsjf;
+    }
+
+    public void setWsjf(WsjfVO wsjf) {
+        this.wsjf = wsjf;
+    }
 }

@@ -3,19 +3,18 @@ package io.choerodon.agile.app.assembler;
 import com.google.common.collect.Lists;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.IssueCreateVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.enums.StatusType;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.dto.*;
 
-import io.choerodon.core.exception.CommonException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.hzero.core.base.BaseConstants;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
@@ -24,11 +23,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import rx.Observable;
 
-import java.math.BigDecimal;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 

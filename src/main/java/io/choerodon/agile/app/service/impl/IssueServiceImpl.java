@@ -2,6 +2,9 @@ package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import io.choerodon.agile.api.vo.business.IssueCreateVO;
+import io.choerodon.agile.api.vo.business.IssueUpdateVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.core.domain.Page;
@@ -297,9 +300,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     @Override
     public void handleInitIssue(IssueConvertDTO issueConvertDTO, Long statusId, ProjectInfoDTO projectInfoDTO) {
+        List<LookupValueDTO> colorList = new ArrayList<>();
         //如果是epic，初始化颜色
         if (ISSUE_EPIC.equals(issueConvertDTO.getTypeCode())) {
-            List<LookupValueDTO> colorList = lookupValueMapper.queryLookupValueByCode(EPIC_COLOR_TYPE).getLookupValues();
+            colorList = lookupValueMapper.queryLookupValueByCode(EPIC_COLOR_TYPE).getLookupValues();
+        }
+        if (agilePluginService != null) {
+            agilePluginService.handleInitIssue(colorList, issueConvertDTO);
+        }
+        if (!CollectionUtils.isEmpty(colorList)) {
             issueConvertDTO.initializationColor(colorList);
             //排序编号
             Integer sequence = issueMapper.queryMaxEpicSequenceByProject(issueConvertDTO.getProjectId());
@@ -360,10 +369,17 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + "/" + BACKETNAME + "/" + issueAttachmentDO.getUrl()));
         }
+        if (agilePluginService != null) {
+            agilePluginService.setBusinessAttributes(issue);
+        }
         Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, issue.getApplyType());
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
         Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
-        return issueAssembler.issueDetailDTOToVO(issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
+        IssueVO issueVO = issueAssembler.issueDetailDTOToVO(issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
+        if (agilePluginService != null) {
+            agilePluginService.programIssueDetailDTOToVO(issueVO,issue);
+        }
+        return issueVO;
     }
 
     protected IssueVO queryIssueByUpdate(Long projectId, Long issueId, List<String> fieldList) {
@@ -549,6 +565,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     @Override
     @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldListName = "fieldList")
     public IssueVO updateIssue(Long projectId, IssueUpdateVO issueUpdateVO, List<String> fieldList) {
+        if (agilePluginService != null) {
+            agilePluginService.checkFeatureBeforeUpdateIssue(issueUpdateVO,projectId);
+        }
         if (fieldList.contains("epicName")
                 && issueUpdateVO.getEpicName() != null
                 && checkEpicName(projectId, issueUpdateVO.getEpicName(), issueUpdateVO.getIssueId())) {
@@ -614,10 +633,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
         IssueDTO originIssue = issueMapper.queryIssueWithNoCloseSprint(issueUpdateVO.getIssueId());
         IssueConvertDTO issueConvertDTO = issueAssembler.toTarget(issueUpdateVO, IssueConvertDTO.class);
+        String issueType = originIssue.getTypeCode();
         //处理用户，前端可能会传0，处理为null
         issueConvertDTO.initializationIssueUser();
         if (fieldList.contains(SPRINT_ID_FIELD)) {
             IssueConvertDTO oldIssue = modelMapper.map(originIssue, IssueConvertDTO.class);
+            Long sprintId = issueConvertDTO.getSprintId();
             //处理子任务的冲刺
             List<Long> issueIds = issueMapper.querySubIssueIdsByIssueId(projectId, issueConvertDTO.getIssueId());
             List<Long> subBugIds = issueMapper.querySubBugIdsByIssueId(projectId, issueConvertDTO.getIssueId());
@@ -630,6 +651,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             if (condition) {
                 BatchRemoveSprintDTO batchRemoveSprintDTO = new BatchRemoveSprintDTO(projectId, issueConvertDTO.getSprintId(), issueIds);
                 issueAccessDataService.removeIssueFromSprintByIssueIds(batchRemoveSprintDTO);
+                if (agilePluginService != null) {
+                    agilePluginService.updateIssueSprintChanged(oldIssue, projectId, sprintId, issueType);
+                }
             }
             if (exitSprint) {
                 issueAccessDataService.issueToDestinationByIds(projectId, issueConvertDTO.getSprintId(), issueIds, new Date(), customUserDetails.getUserId());
@@ -639,6 +663,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 fieldList.add(RANK_FIELD);
                 issueConvertDTO.setOriginSprintId(originIssue.getSprintId());
             }
+        }
+        if (agilePluginService != null) {
+            agilePluginService.updateIssueSprintChanged(issueType,fieldList,projectId,issueUpdateVO,originIssue);
         }
         issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
     }
@@ -853,6 +880,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         issueAccessDataService.batchUpdateIssueRank(projectId, moveIssueDTOS);
         List<Long> moveIssueIds = moveIssueVO.getIssueIds();
+        List<Long> frontIncomingIssues = deepCopy(moveIssueIds);
         //处理子任务与子缺陷
         List<Long> subTaskIds = issueMapper.querySubIssueIds(projectId, moveIssueIds);
         List<Long> subBugIds = issueMapper.querySubBugIds(projectId, moveIssueIds);
@@ -871,6 +899,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issueAccessDataService.removeIssueFromSprintByIssueIds(batchRemoveSprintDTO);
             if (sprintId != null && !Objects.equals(sprintId, 0L)) {
                 issueAccessDataService.issueToDestinationByIds(projectId, sprintId, moveIssueIdsFilter, new Date(), customUserDetails.getUserId());
+                if (agilePluginService != null) {
+                    agilePluginService.handlerAssociateSprintsWithFeature(projectId, sprintId, frontIncomingIssues, issueSearchDTOList);
+                }
             }
 //            //如果移动冲刺不是活跃冲刺，则状态回到默认状态
 //            batchHandleIssueStatus(projectId, moveIssueIdsFilter, sprintId);
@@ -881,6 +912,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             return new ArrayList<>();
         }
 
+    }
+
+    private List<Long> deepCopy(List<Long> src) {
+        List<Long> dest = new ArrayList<>(src.size());
+        src.forEach(i -> dest.add(i));
+        return dest;
     }
 
     @Override
@@ -1721,14 +1758,20 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 if (ISSUE_EPIC.equals(issueCreateVO.getTypeCode())) {
                     setEpicName(projectId, copyConditionVO, issueCreateVO);
                 }
+                if (agilePluginService != null) {
+                    agilePluginService.handlerCloneFeature(issueId,issueCreateVO, applyType, projectId);
+                }
                 IssueVO newIssue = stateMachineClientService.createIssue(issueCreateVO, applyType);
                 newIssueId = newIssue.getIssueId();
                 objectVersionNumber = newIssue.getObjectVersionNumber();
             }
             //复制链接
             batchCreateCopyIssueLink(copyConditionVO.getIssueLink(), issueId, newIssueId, projectId);
-            //生成一条复制的关联
-            createCopyIssueLink(issueDetailDTO.getIssueId(), newIssueId, projectId);
+            // 复制项目群的特性和史诗都不会去创建关联关系
+            if (!(applyType.equals("program") && (issueDetailDTO.getTypeCode().equals("issue_epic") || issueDetailDTO.getTypeCode().equals("feature")))) {
+                //生成一条复制的关联
+                createCopyIssueLink(issueDetailDTO.getIssueId(), newIssueId, projectId);
+            }
             //复制故事点和剩余工作量并记录日志
             copyStoryPointAndRemainingTimeData(issueDetailDTO, projectId, newIssueId, objectVersionNumber);
             //复制冲刺

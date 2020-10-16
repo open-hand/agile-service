@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.utils;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.app.service.NoticeService;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.app.service.UserService;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/4/29.

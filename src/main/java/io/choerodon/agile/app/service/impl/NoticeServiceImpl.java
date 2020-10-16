@@ -1,16 +1,13 @@
 package io.choerodon.agile.app.service.impl;
 
-import io.choerodon.agile.infra.dto.UserDTO;
-import io.choerodon.agile.infra.feign.BaseFeignClient;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.feign.NotifyFeignClient;
-import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.assembler.NoticeMessageAssembler;
 import io.choerodon.agile.app.service.NoticeService;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.MessageDTO;
 import io.choerodon.agile.infra.dto.MessageDetailDTO;
-import io.choerodon.agile.infra.feign.NotifyFeignClient;
 import io.choerodon.agile.infra.feign.vo.MessageSettingVO;
 import io.choerodon.agile.infra.mapper.NoticeDetailMapper;
 import io.choerodon.agile.infra.mapper.NoticeMapper;

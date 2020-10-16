@@ -1,5 +1,4 @@
-package io.choerodon.agile.api.vo;
-
+package io.choerodon.agile.api.vo.business;
 
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -20,6 +19,48 @@ public class SprintDetailVO {
     private String statusCode;
     private Long projectId;
     private Long objectVersionNumber;
+
+    private Long boardFeatureId;
+
+    private String type;
+
+    private Long featureId;
+
+    private Long piId;
+
+    private PiNameVO piName;
+
+    public PiNameVO getPiName() {
+        return piName;
+    }
+
+    public void setPiName(PiNameVO piName) {
+        this.piName = piName;
+    }
+
+    public Long getPiId() {
+        return piId;
+    }
+
+    public void setPiId(Long piId) {
+        this.piId = piId;
+    }
+
+    public Long getFeatureId() {
+        return featureId;
+    }
+
+    public void setFeatureId(Long featureId) {
+        this.featureId = featureId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public Long getSprintId() {
         return sprintId;
@@ -101,4 +142,12 @@ public class SprintDetailVO {
         this.objectVersionNumber = objectVersionNumber;
     }
 
+
+    public Long getBoardFeatureId() {
+        return boardFeatureId;
+    }
+
+    public void setBoardFeatureId(Long boardFeatureId) {
+        this.boardFeatureId = boardFeatureId;
+    }
 }

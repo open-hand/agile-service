@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.IssueUpdateVO;
 import io.choerodon.agile.app.service.FieldValueService;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.ProjectConfigService;

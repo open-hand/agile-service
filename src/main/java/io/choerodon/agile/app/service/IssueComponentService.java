@@ -2,7 +2,7 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.ComponentForListVO;
 import io.choerodon.agile.api.vo.IssueComponentVO;
-import io.choerodon.agile.api.vo.IssueVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.infra.dto.IssueComponentDTO;

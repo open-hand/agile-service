@@ -4,6 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.IssueCreateVO;
+import io.choerodon.agile.api.vo.business.IssueUpdateVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.event.CreateIssuePayload;
 import io.choerodon.agile.api.vo.event.CreateSubIssuePayload;
 import io.choerodon.agile.app.assembler.IssueAssembler;
@@ -98,6 +101,8 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     private InstanceCache instanceCache;
     @Autowired
     private StatusNoticeSettingService statusNoticeSettingService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     private void insertRank(Long projectId, Long issueId, String type, RankVO rankVO) {
         List<RankDTO> rankDTOList = new ArrayList<>();
@@ -139,6 +144,9 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
     @Override
     public IssueVO createIssue(IssueCreateVO issueCreateVO, String applyType) {
         issueValidator.checkIssueCreate(issueCreateVO, applyType);
+        if (agilePluginService != null) {
+            agilePluginService.checkBeforeCreateIssue(issueCreateVO,applyType);
+        }
         IssueConvertDTO issueConvertDTO = issueAssembler.toTarget(issueCreateVO, IssueConvertDTO.class);
         Long projectId = issueConvertDTO.getProjectId();
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
@@ -168,7 +176,9 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if ("issue_epic".equals(issueCreateVO.getTypeCode())) {
             initRank(issueCreateVO, issueId, "epic");
         }
-
+        if (agilePluginService != null) {
+            agilePluginService.handlerBusinessAfterCreateIssue(issueConvertDTO,projectId,issueId,issueCreateVO);
+        }
         CreateIssuePayload createIssuePayload = new CreateIssuePayload(issueCreateVO, issueConvertDTO, projectInfo);
         InputDTO inputDTO = new InputDTO(issueId, JSON.toJSONString(createIssuePayload));
         //通过状态机客户端创建实例, 反射验证/条件/后置动作

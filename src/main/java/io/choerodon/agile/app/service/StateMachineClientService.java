@@ -1,16 +1,11 @@
 package io.choerodon.agile.app.service;
 
-import io.choerodon.agile.api.vo.IssueCreateVO;
+import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.IssueSubVO;
-import io.choerodon.agile.api.vo.IssueVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.api.vo.IssueSubCreateVO;
-import io.choerodon.agile.api.vo.event.ProjectConfig;
-import io.choerodon.agile.api.vo.event.StateMachineSchemeDeployCheckIssue;
 import io.choerodon.agile.infra.statemachineclient.dto.ExecuteResult;
 import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author shinan.chen

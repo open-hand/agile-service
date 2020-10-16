@@ -1,18 +1,17 @@
 package io.choerodon.agile.app.service;
 
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson.JSONObject;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.IssueCreateVO;
+import io.choerodon.agile.api.vo.business.IssueUpdateVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.domain.PageInfo;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
 
 
 /**
