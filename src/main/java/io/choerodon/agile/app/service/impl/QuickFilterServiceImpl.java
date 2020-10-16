@@ -24,7 +24,7 @@ import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.exception.CommonException;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.starter.keyencrypt.core.EncryptProperties;
 import org.hzero.starter.keyencrypt.core.EncryptionService;
 import org.modelmapper.ModelMapper;
@@ -228,7 +228,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
                 " select ffv.instance_id from fd_field_value ffv where ffv.project_id = " + projectId
                         + " and ffv.field_id = " + fieldId;
         if (CustomFieldType.isOption(customFieldType)) {
-            return getOptionOrNumberSql(EncryptionUtils.handlerFilterEncryptList(value,false), operation, selectSql, "ffv.option_id");
+            return getOptionOrNumberSql(NULL_STR.equals(value)? value : EncryptionUtils.handlerFilterEncryptList(value,false), operation, selectSql, "ffv.option_id");
         } else if (CustomFieldType.isDate(customFieldType)) {
             return getDateSql(value, operation, selectSql);
         } else if (CustomFieldType.isDateHms(customFieldType)) {
@@ -426,10 +426,8 @@ public class QuickFilterServiceImpl implements QuickFilterService {
 
     private void decryptValueList(QuickFilterValueVO filter) {
         if (Boolean.FALSE.equals(filter.getPredefined())) {
-            if (!"'null'".equals(filter.getValue())) {
-                if (CustomFieldType.isOption(filter.getCustomFieldType())) {
-                    filter.setValue(handlerFilterEncryptList(filter.getValue(), false));
-                }
+            if (CustomFieldType.isOption(filter.getCustomFieldType())) {
+                filter.setValue(handlerFilterEncryptList(filter.getValue(), false));
             }
         } else {
             if (!"'null'".equals(filter.getValue())) {
@@ -644,7 +642,11 @@ public class QuickFilterServiceImpl implements QuickFilterService {
             build.append(")");
         }
         else {
-            build.append(encrypt ? encryptionService.encrypt(value, EncryptionUtils.BLANK_KEY) : EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY));
+            if (StringUtils.equalsAny(value,"null","'null'" )){
+                build.append(value);
+            }else {
+                build.append(encrypt ? encryptionService.encrypt(value, EncryptionUtils.BLANK_KEY) : EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY));
+            }
         }
         return build.toString();
     }
