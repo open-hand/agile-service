@@ -418,8 +418,10 @@ public class QuickFilterServiceImpl implements QuickFilterService {
 
     private void decryptValueList(QuickFilterValueVO filter) {
         if (Boolean.FALSE.equals(filter.getPredefined())) {
-            if (CustomFieldType.isOption(filter.getCustomFieldType())) {
-                filter.setValue(handlerFilterEncryptList(filter.getValue(), false));
+            if (!"'null'".equals(filter.getValue())) {
+                if (CustomFieldType.isOption(filter.getCustomFieldType())) {
+                    filter.setValue(handlerFilterEncryptList(filter.getValue(), false));
+                }
             }
         } else {
             if (!"'null'".equals(filter.getValue())) {
