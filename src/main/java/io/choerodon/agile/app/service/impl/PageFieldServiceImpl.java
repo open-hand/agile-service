@@ -63,7 +63,7 @@ public class PageFieldServiceImpl implements PageFieldService {
     private ModelMapper modelMapper;
     @Autowired
     protected ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
-    @Autowired
+    @Autowired(required = false)
     private AgilePluginService agilePluginService;
 
     @Override
