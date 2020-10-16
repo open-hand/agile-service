@@ -138,15 +138,15 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                                  @Param("content") String content);
 
 
-    List<SprintNameDTO> querySprintNameByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+    List<SprintNameDTO> querySprintNameByIssueIds(@Param("projectIds") List<Long> projectIds, @Param("issueIds") List<Long> issueIds);
 
     List<VersionIssueRelDTO> queryVersionIssueRelByIssueId(@Param("issueId") Long issueId);
 
-    List<VersionIssueRelDTO> queryVersionNameByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds, @Param("relationType") String relationType);
+    List<VersionIssueRelDTO> queryVersionNameByIssueIds(@Param("projectIds") List<Long> projectIds, @Param("issueIds") List<Long> issueIds, @Param("relationType") String relationType);
 
-    List<LabelIssueRelDTO> queryLabelIssueByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+    List<LabelIssueRelDTO> queryLabelIssueByIssueIds(@Param("projectIds") List<Long> projectIds, @Param("issueIds") List<Long> issueIds);
 
-    List<ComponentIssueRelDTO> queryComponentIssueByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+    List<ComponentIssueRelDTO> queryComponentIssueByIssueIds(@Param("projectIds") List<Long> projectIds, @Param("issueIds") List<Long> issueIds);
 
     /**
      * 根据issueIds查询issueEpic信息

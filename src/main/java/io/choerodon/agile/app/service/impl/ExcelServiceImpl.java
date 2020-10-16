@@ -87,6 +87,7 @@ public class ExcelServiceImpl implements ExcelService {
     private static final String FILESUFFIX = ".xlsx";
     protected static final String DOWNLOAD_FILE = "download_file";
     protected static final String DOWNLOAD_FILE_PI = "download_file_pi";
+    protected static final String DOWNLOAD_FILE_ISSUE_ANALYSIS = "download_file_issue_analysis";
     private static final String EXPORT_ERROR_WORKBOOK_CLOSE = "error.issue.close.workbook";
     private static final String PROJECT_ERROR = "error.project.notFound";
     private static final String FIX_RELATION_TYPE = "fix";
@@ -612,7 +613,8 @@ public class ExcelServiceImpl implements ExcelService {
         return subTask;
     }
 
-    protected void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process) {
+    @Override
+    public void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process) {
         fileOperationHistoryDTO.setProcess(process);
         String message = null;
         try {
@@ -625,6 +627,7 @@ public class ExcelServiceImpl implements ExcelService {
                 messageClient.sendByUserId(userId, WEBSOCKET_IMPORT_CODE, message);
                 break;
             case DOWNLOAD_FILE:
+            case DOWNLOAD_FILE_ISSUE_ANALYSIS:
             case DOWNLOAD_FILE_PI:
                 messageClient.sendByUserId(userId, WEBSOCKET_EXPORT_CODE, message);
                 break;
@@ -1302,7 +1305,8 @@ public class ExcelServiceImpl implements ExcelService {
         return false;
     }
 
-    protected FileOperationHistoryDTO initFileOperationHistory(Long projectId, Long userId, String status, String action) {
+    @Override
+    public FileOperationHistoryDTO initFileOperationHistory(Long projectId, Long userId, String status, String action) {
         FileOperationHistoryDTO fileOperationHistoryDTO = new FileOperationHistoryDTO(projectId, userId, action, 0L, 0L, status);
         if (fileOperationHistoryMapper.insert(fileOperationHistoryDTO) != 1) {
             throw new CommonException("error.FileOperationHistoryDTO.insert");
@@ -1405,11 +1409,11 @@ public class ExcelServiceImpl implements ExcelService {
                     Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
                     Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
                     Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
-                    Map<Long, List<SprintNameDTO>> closeSprintNames = issueMapper.querySprintNameByIssueIds(projectId, issueIds).stream().collect(Collectors.groupingBy(SprintNameDTO::getIssueId));
-                    Map<Long, List<VersionIssueRelDTO>> fixVersionNames = issueMapper.queryVersionNameByIssueIds(projectId, issueIds, FIX_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
-                    Map<Long, List<VersionIssueRelDTO>> influenceVersionNames = issueMapper.queryVersionNameByIssueIds(projectId, issueIds, INFLUENCE_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
-                    Map<Long, List<LabelIssueRelDTO>> labelNames = issueMapper.queryLabelIssueByIssueIds(projectId, issueIds).stream().collect(Collectors.groupingBy(LabelIssueRelDTO::getIssueId));
-                    Map<Long, List<ComponentIssueRelDTO>> componentMap = issueMapper.queryComponentIssueByIssueIds(projectId, issueIds).stream().collect(Collectors.groupingBy(ComponentIssueRelDTO::getIssueId));
+                    Map<Long, List<SprintNameDTO>> closeSprintNames = issueMapper.querySprintNameByIssueIds(Arrays.asList(projectId), issueIds).stream().collect(Collectors.groupingBy(SprintNameDTO::getIssueId));
+                    Map<Long, List<VersionIssueRelDTO>> fixVersionNames = issueMapper.queryVersionNameByIssueIds(Arrays.asList(projectId), issueIds, FIX_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
+                    Map<Long, List<VersionIssueRelDTO>> influenceVersionNames = issueMapper.queryVersionNameByIssueIds(Arrays.asList(projectId), issueIds, INFLUENCE_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
+                    Map<Long, List<LabelIssueRelDTO>> labelNames = issueMapper.queryLabelIssueByIssueIds(Arrays.asList(projectId), issueIds).stream().collect(Collectors.groupingBy(LabelIssueRelDTO::getIssueId));
+                    Map<Long, List<ComponentIssueRelDTO>> componentMap = issueMapper.queryComponentIssueByIssueIds(Arrays.asList(projectId), issueIds).stream().collect(Collectors.groupingBy(ComponentIssueRelDTO::getIssueId));
                     Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, issueIds, true);
                     cursor
                             .addCollections(userIds)
@@ -1481,7 +1485,8 @@ public class ExcelServiceImpl implements ExcelService {
      * @param fileOperationHistoryDTO
      * @param userId
      */
-    protected void downloadWorkBook(Long organizationId,Workbook workbook, String fileName, FileOperationHistoryDTO fileOperationHistoryDTO, Long userId) {
+    @Override
+    public void downloadWorkBook(Long organizationId,Workbook workbook, String fileName, FileOperationHistoryDTO fileOperationHistoryDTO, Long userId) {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream();) {
             workbook.write(os);
             byte[] content = os.toByteArray();
@@ -1716,6 +1721,17 @@ public class ExcelServiceImpl implements ExcelService {
                 .orElseThrow(() -> new CommonException("error.foundation.listQuery"))
                 .get("content");
 
+        processExportField(exportFieldCodes, fieldsName, fields, fieldMap, m, content);
+        return fieldMap;
+    }
+
+    @Override
+    public void processExportField(List<String> exportFieldCodes,
+                                    String[] fieldsName,
+                                    String[] fields,
+                                    Map<String, String[]> fieldMap,
+                                    ObjectMapper m,
+                                    Object content) {
         List<Object> contentList = m.convertValue(content, List.class);
         List<ObjectSchemeFieldDTO> fieldDTOS = new ArrayList<>();
 
@@ -1765,7 +1781,6 @@ public class ExcelServiceImpl implements ExcelService {
                 fieldMap.put(FIELD_NAMES, fieldsName);
             }
         }
-        return fieldMap;
     }
 
     public String getDes(String str) {

@@ -155,7 +155,10 @@
         avir.*,
         apr.name
         FROM agile_version_issue_rel avir LEFT JOIN agile_product_version apr ON avir.version_id = apr.version_id
-        WHERE avir.project_id = #{projectId}
+        WHERE avir.project_id in
+        <foreach item="item" index="index" collection="projectIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
         <if test='relationType != null and relationType != ""'>
             AND avir.relation_type = #{relationType}
         </if>
@@ -186,7 +189,12 @@
         SELECT
         aisr.issue_id, asp.sprint_name
         FROM agile_issue_sprint_rel aisr, agile_sprint asp
-        WHERE aisr.project_id = #{projectId} AND aisr.sprint_id = asp.sprint_id AND asp.status_code = 'closed'
+        WHERE aisr.project_id in
+        <foreach item="item" index="index" collection="projectIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND aisr.sprint_id = asp.sprint_id
+        AND asp.status_code = 'closed'
         AND aisr.issue_id IN
         <foreach collection="issueIds" item="issueId" open="("
                  separator="," close=")">
@@ -220,7 +228,10 @@
                  separator="," close=")">
             #{issueId}
         </foreach>
-        and ail.project_id = #{projectId}
+        and ail.project_id in
+        <foreach item="item" index="index" collection="projectIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
     </select>
 
     <select id="queryComponentIssueByIssueIds" resultType="io.choerodon.agile.infra.dto.ComponentIssueRelDTO">
@@ -233,7 +244,11 @@
                  separator="," close=")">
             #{issueId}
         </foreach>
-        and acir.project_id = #{projectId}
+        and acir.project_id in
+        <foreach item="item" index="index" collection="projectIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
     </select>
 
     <select id="queryComponentIssueRelByIssueId" resultType="io.choerodon.agile.infra.dto.ComponentIssueRelDTO">
