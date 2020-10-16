@@ -138,11 +138,11 @@ const DraggableItem: React.FC<Props> = ({
       <div className={`${prefixCls}-item`}>
         {renderFieldName({ value: data.get('fieldName'), record: data, dataSet: data.dataSet })}
       </div>
-      <Tooltip title={data.get('localDefaultValue') || data.get('defaultValue')} placement="top">
-        <div className={`${prefixCls}-item ${prefixCls}-item-text`}>
+      <div className={`${prefixCls}-item ${prefixCls}-item-text`}>
+        <Tooltip title={data.get('localDefaultValue') || data.get('defaultValue')} placement="top">
           {data.get('localDefaultValue') || data.get('defaultValue')}
-        </div>
-      </Tooltip>
+        </Tooltip>
+      </div>
       <div className={`${prefixCls}-item`}>
         {renderCheckBox({ record: data, name: 'required', dataSet: data.dataSet }, requiredFieldCanNotEdit)}
       </div>
