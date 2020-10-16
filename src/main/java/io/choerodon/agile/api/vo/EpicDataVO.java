@@ -58,6 +58,10 @@ public class EpicDataVO {
     @ApiModelProperty(value = "项目群id")
     private Long programId;
 
+    private BigDecimal successStoryPoint;
+
+    private BigDecimal totalStoryPoint;
+
     public Integer getEpicSequence() {
         return epicSequence;
     }
@@ -186,4 +190,19 @@ public class EpicDataVO {
         return programId;
     }
 
+    public BigDecimal getSuccessStoryPoint() {
+        return successStoryPoint;
+    }
+
+    public void setSuccessStoryPoint(BigDecimal successStoryPoint) {
+        this.successStoryPoint = successStoryPoint;
+    }
+
+    public BigDecimal getTotalStoryPoint() {
+        return totalStoryPoint;
+    }
+
+    public void setTotalStoryPoint(BigDecimal totalStoryPoint) {
+        this.totalStoryPoint = totalStoryPoint;
+    }
 }

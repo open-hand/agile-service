@@ -1,6 +1,5 @@
 package io.choerodon.agile.api.vo;
 
-
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
@@ -29,9 +28,11 @@ public class IssueListVO implements Serializable {
     private String summary;
 
     @ApiModelProperty(value = "经办人id")
+    @Encrypt
     private Long assigneeId;
 
     @ApiModelProperty(value = "报告人id")
+    @Encrypt
     private Long reporterId;
 
     @ApiModelProperty(value = "项目id")
@@ -69,7 +70,7 @@ public class IssueListVO implements Serializable {
     private String epicName;
 
     @ApiModelProperty(value = "史诗id")
-    @Encrypt
+    @Encrypt(ignoreValue = {"0"})
     private Long epicId;
 
     @ApiModelProperty(value = "史诗颜色")
@@ -110,6 +111,12 @@ public class IssueListVO implements Serializable {
 
     @ApiModelProperty(value = "评论列表")
     private List<IssueComponentBriefVO> issueComponentBriefVOS;
+
+    private ProjectVO projectVO;
+
+    private BigDecimal completedCount;
+
+    private BigDecimal totalCount;
 
     public List<IssueSprintVO> getIssueSprintVOS() {
         return issueSprintVOS;
@@ -363,5 +370,29 @@ public class IssueListVO implements Serializable {
     @Override
     public String toString() {
         return StringUtil.getToString(this);
+    }
+
+    public ProjectVO getProjectVO() {
+        return projectVO;
+    }
+
+    public void setProjectVO(ProjectVO projectVO) {
+        this.projectVO = projectVO;
+    }
+
+    public BigDecimal getCompletedCount() {
+        return completedCount;
+    }
+
+    public void setCompletedCount(BigDecimal completedCount) {
+        this.completedCount = completedCount;
+    }
+
+    public BigDecimal getTotalCount() {
+        return totalCount;
+    }
+
+    public void setTotalCount(BigDecimal totalCount) {
+        this.totalCount = totalCount;
     }
 }

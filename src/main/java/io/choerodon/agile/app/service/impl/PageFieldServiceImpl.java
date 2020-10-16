@@ -1,10 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.service.FieldOptionService;
-import io.choerodon.agile.app.service.FieldValueService;
-import io.choerodon.agile.app.service.ObjectSchemeFieldService;
-import io.choerodon.agile.app.service.PageFieldService;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.annotation.CopyPageField;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
@@ -66,6 +63,8 @@ public class PageFieldServiceImpl implements PageFieldService {
     private ModelMapper modelMapper;
     @Autowired
     protected ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Override
     public PageFieldDTO baseCreate(PageFieldDTO field) {
@@ -164,6 +163,9 @@ public class PageFieldServiceImpl implements PageFieldService {
             objectSchemeFieldService.createSystemFieldIfNotExisted(organizationId);
             pageFields =
                     objectSchemeFieldExtendMapper.selectFields(organizationId, projectId, issueType, created, edited);
+        }
+        if (agilePluginService != null) {
+            pageFields = agilePluginService.handlerProgramPageField(projectId,issueType,pageFields);
         }
         return pageFields;
     }

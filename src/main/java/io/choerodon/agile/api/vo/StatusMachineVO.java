@@ -1,10 +1,10 @@
 package io.choerodon.agile.api.vo;
 
-
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author peng.jiang, dinghuang123@gmail.com
@@ -29,6 +29,16 @@ public class StatusMachineVO {
     private List<StatusMachineNodeVO> nodeVOS;
     @ApiModelProperty(value = "状态机转换列表")
     private List<StatusMachineTransformVO> transformVOS;
+
+    private Set<String> applyTypes;
+
+    public Set<String> getApplyTypes() {
+        return applyTypes;
+    }
+
+    public void setApplyTypes(Set<String> applyTypes) {
+        this.applyTypes = applyTypes;
+    }
 
     public Long getId() {
         return id;

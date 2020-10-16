@@ -1,6 +1,5 @@
 package io.choerodon.agile.api.vo;
 
-
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
@@ -27,14 +26,12 @@ public class IssueSearchVO {
     private String summary;
 
     @ApiModelProperty(value = "报告人id")
-    @Encrypt
     private Long reporterId;
 
     @ApiModelProperty(value = "描述")
     private String description;
 
     @ApiModelProperty(value = "经办人id")
-    @Encrypt(ignoreValue = {"0"})
     private Long assigneeId;
 
     @ApiModelProperty(value = "经办人名称")
@@ -57,7 +54,7 @@ public class IssueSearchVO {
     private String statusName;
 
     @ApiModelProperty(value = "史诗id")
-    @Encrypt(ignoreValue = {"0"})
+    @Encrypt
     private Long epicId;
 
     @ApiModelProperty(value = "史诗名称")
@@ -65,6 +62,9 @@ public class IssueSearchVO {
 
     @ApiModelProperty(value = "特性名称")
     private String featureName;
+
+    @ApiModelProperty(value = "特性颜色")
+    private String featureColor;
 
     @ApiModelProperty(value = "优先级code")
     private String priorityCode;
@@ -105,7 +105,7 @@ public class IssueSearchVO {
     private IssueTypeVO issueTypeVO;
 
     @ApiModelProperty(value = "优先级id")
-    @Encrypt
+    @Encrypt(ignoreValue = {"0"})
     private Long priorityId;
 
     @ApiModelProperty(value = "经办人登录名称")
@@ -365,6 +365,14 @@ public class IssueSearchVO {
 
     public String getFeatureName() {
         return featureName;
+    }
+
+    public String getFeatureColor() {
+        return featureColor;
+    }
+
+    public void setFeatureColor(String featureColor) {
+        this.featureColor = featureColor;
     }
 
     public Date getEstimatedStartTime() {
