@@ -360,9 +360,11 @@ public class QuickFilterServiceImpl implements QuickFilterService {
     protected void appendPredefinedFieldSql(StringBuilder sqlQuery, QuickFilterValueVO quickFilterValueVO, Long projectId) {
         String value = "'null'".equals(quickFilterValueVO.getValue()) ? NULL_STR : quickFilterValueVO.getValue();
         String operation = quickFilterValueVO.getOperation();
-        processPredefinedField(sqlQuery, quickFilterValueVO, value, operation);
-        if (agilePluginService != null) {
+        if (agilePluginService != null && "feature".equals(quickFilterValueVO.getFieldCode())) {
             agilePluginService.appendProgramFieldSql(sqlQuery, quickFilterValueVO, value, operation, projectId);
+        }
+        else {
+            processPredefinedField(sqlQuery, quickFilterValueVO, value, operation);
         }
     }
 
