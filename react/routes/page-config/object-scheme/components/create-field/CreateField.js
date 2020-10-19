@@ -7,7 +7,7 @@ import {
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
 import { debounce } from 'lodash';
-
+import { toJS } from 'mobx';
 
 import UserInfo from '@/components/UserInfo';
 import { randomString } from '@/utils/random';
@@ -20,7 +20,6 @@ import * as images from '../../images';
 const { Option } = Select;
 const singleList = ['radio', 'single'];
 const multipleList = ['checkbox', 'multiple'];
-
 
 function CreateField() {
   const ctx = useContext(Store);
@@ -36,12 +35,12 @@ function CreateField() {
   }, [formDataSet && formDataSet.status]);
 
   const fieldTypeOptionRender = ({ text, value }) => (
-    <Fragment>
+    <>
       <img src={images[value]} alt="" className="issue-field-img" />
       <span>
         {text}
       </span>
-    </Fragment>
+    </>
   );
 
   const contextOptionSetter = ({ record }) => {
@@ -76,8 +75,9 @@ function CreateField() {
         Choerodon.prompt('字段列表不能为空');
         return false;
       }
+      const defaultValueArr = toJS(current?.get('defaultValue'));
       obj.fieldOptions = fieldOptions.map((o) => {
-        if (obj.defaultValue.indexOf(String(o.id)) !== -1 || obj.defaultValue && (obj.defaultValue.indexOf(String(o.code)) !== -1 || obj.defaultValue.indexOf(String(o.tempKey)) !== -1)) {
+        if (Array.isArray(defaultValueArr) && defaultValueArr.some(v => v === o.id || v === o.tempKey || v === o.code)) {
           return { ...o, isDefault: true };
         } else {
           return { ...o, isDefault: false };
@@ -177,7 +177,6 @@ function CreateField() {
     loadUserData(value);
   }, 500), []);
 
-
   function getAttachFields() {
     const { current } = formDataSet;
     const isCheck = current.get('check');
@@ -185,7 +184,7 @@ function CreateField() {
     switch (fieldType) {
       case 'time':
         return (
-          <Fragment>
+          <>
             <TimePicker
               name="defaultValue"
               disabled={isCheck}
@@ -196,11 +195,11 @@ function CreateField() {
             >
               {formatMessage({ id: 'field.useCurrentTime' })}
             </CheckBox>
-          </Fragment>
+          </>
         );
       case 'datetime':
         return (
-          <Fragment>
+          <>
             <DateTimePicker
               name="defaultValue"
               disabled={isCheck}
@@ -211,11 +210,11 @@ function CreateField() {
             >
               {formatMessage({ id: 'field.useCurrentDate' })}
             </CheckBox>
-          </Fragment>
+          </>
         );
       case 'date':
         return (
-          <Fragment>
+          <>
             <DatePicker
               name="defaultValue"
               disabled={isCheck}
@@ -226,7 +225,7 @@ function CreateField() {
             >
               {formatMessage({ id: 'field.useCurrentDate' })}
             </CheckBox>
-          </Fragment>
+          </>
         );
       case 'number':
         return (
@@ -266,7 +265,7 @@ function CreateField() {
         );
       case 'radio': case 'single': case 'checkbox': case 'multiple':
         return (
-          <Fragment>
+          <>
             <Select
               name="defaultValue"
               style={{ width: '100%', marginBottom: '20px' }}
@@ -298,7 +297,7 @@ function CreateField() {
               onDelete={onTreeDelete}
               onInvalid={onTreeDelete}
             />
-          </Fragment>
+          </>
         );
       case 'member':
         return (
@@ -325,8 +324,7 @@ function CreateField() {
             <TextField
               name="code"
             />
-          )
-        }
+          )}
         <TextField
           name="name"
         />
