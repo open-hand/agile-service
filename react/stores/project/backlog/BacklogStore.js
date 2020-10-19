@@ -1003,11 +1003,9 @@ class BacklogStore {
           <p style={{ marginBottom: 10 }}>请确认您要删除这个冲刺。</p>
         </div>
       ),
-      onOk() {
-        return sprintApi.delete(data.sprintId, isCurrentPi).then((res) => {
-          this.refresh();
-        }).catch((error) => {
-        });
+      onOk: async () => {
+        await sprintApi.delete(data.sprintId, isCurrentPi);
+        this.refresh();
       },
       onCancel() { },
       okText: '删除',
