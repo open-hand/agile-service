@@ -171,7 +171,7 @@ type FilterAction =
     }
   }
   | {
-    type: 'RESET_FILTER'
+    type: 'SET_FILTER', payload: { [key: string]: any }
   };
 
 function filterReducer(draft: FilterState, action: FilterAction): FilterState {
@@ -205,8 +205,8 @@ function filterReducer(draft: FilterState, action: FilterAction): FilterState {
       draft.filter[code] = value;
       return draft;
     }
-    case 'RESET_FILTER': {
-      draft.filter = {};
+    case 'SET_FILTER': {
+      draft.filter = action.payload;
       return draft;
     }
     default: return draft;
@@ -244,7 +244,8 @@ function useFilter(config?: FilterConfig) {
   }, [dispatch]);
   const reset = useCallback(() => {
     dispatch({
-      type: 'RESET_FILTER',
+      type: 'SET_FILTER',
+      payload: {},
     });
   }, [dispatch]);
   const loadFields = useCallback(async () => {
@@ -271,6 +272,15 @@ function useFilter(config?: FilterConfig) {
       });
     }
   }, [config?.customFields]);
+  useDeepCompareEffect(() => {
+    if (config?.filter) {
+      dispatch({
+        type: 'SET_FILTER',
+        // @ts-ignore
+        payload: config.filter,
+      });
+    }
+  }, [config?.filter]);
   return {
     state,
     handleSelectChange,
