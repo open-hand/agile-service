@@ -550,6 +550,7 @@ class CreateIssue extends Component {
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {getFieldDecorator('assigneedId', {
                 rules: [{ required: field.required, message: '请选择经办人' }],
+                initialValue: this.props.chosenAssignee,
               })(
                 <SelectFocusLoad
                   type="user"
@@ -591,7 +592,6 @@ class CreateIssue extends Component {
                   this.props.chosenSprint && form.setFieldsValue({
                     sprintId: this.props.chosenSprint,
                   });
-                  console.log('sprints.;', sprints, this.props.chosenSprint);
                 }}
               />,
             )}
