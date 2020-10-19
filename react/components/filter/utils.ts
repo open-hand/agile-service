@@ -44,6 +44,7 @@ export interface ISearchVO {
     updateStartDate?: string,
     updateEndDate?: string,
     teamProjectIds?: string[]
+    issueType?: string
   },
   quickFilterIds?: string[],
   contents?: string[],
