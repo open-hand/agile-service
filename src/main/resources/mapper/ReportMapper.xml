@@ -164,7 +164,7 @@
         WHERE
         adl3.issue_id = bbb.issue_id
         AND adl3.creation_date &lt; bbb.date
-        AND adl3.field = 'resolution'
+        AND adl3.field IN ('resolution', 'Auto Resolution')
         AND adl3.project_id = #{sprintDTO.projectId}
         ORDER BY adl3.creation_date DESC
         LIMIT 1
@@ -179,7 +179,7 @@
         WHERE
         adl3.issue_id = bbb.issue_id
         AND adl3.creation_date &lt; bbb.date
-        AND adl3.field = 'resolution'
+        AND adl3.field IN ('resolution', 'Auto Resolution')
         AND adl3.project_id = #{sprintDTO.projectId}
         ORDER BY adl3.creation_date DESC
         LIMIT 1
@@ -249,7 +249,7 @@
         WHERE
         adl3.issue_id = a.issue_id
         AND adl3.creation_date &lt; a.date
-        AND adl3.field = 'resolution'
+        AND adl3.field IN ('resolution', 'Auto Resolution')
         AND adl3.project_id = #{sprintDTO.projectId}
         ORDER BY adl3.creation_date DESC
         LIMIT 1
@@ -264,7 +264,7 @@
         WHERE
         adl3.issue_id = a.issue_id
         AND adl3.creation_date &lt; a.date
-        AND adl3.field = 'resolution'
+        AND adl3.field IN ('resolution', 'Auto Resolution')
         AND adl3.project_id = #{sprintDTO.projectId}
         ORDER BY adl3.creation_date DESC
         LIMIT 1
@@ -324,7 +324,7 @@
         WHERE
         adl2.issue_id = ai.issue_id
         AND adl2.creation_date &lt; abd.date
-        AND adl2.field = 'resolution'
+        AND adl2.field IN ('resolution', 'Auto Resolution')
         AND adl2.project_id = #{sprintDTO.projectId}
         ORDER BY
         adl2.creation_date DESC
@@ -344,7 +344,7 @@
         WHERE
         adl2.issue_id = ai.issue_id
         AND adl2.creation_date &lt; abd.date
-        AND adl2.field = 'resolution'
+        AND adl2.field IN ('resolution', 'Auto Resolution')
         AND adl2.project_id = #{sprintDTO.projectId}
         ORDER BY
         adl2.creation_date DESC
@@ -397,7 +397,7 @@
         WHERE
         adl2.issue_id = adl.issue_id
         AND adl2.creation_date &lt; adl.creation_date
-        AND adl2.field = 'resolution'
+        AND adl2.field IN ('resolution', 'Auto Resolution')
         AND adl2.project_id = #{sprintDTO.projectId}
         ORDER BY
         adl2.creation_date DESC
@@ -417,7 +417,7 @@
         WHERE
         adl2.issue_id = adl.issue_id
         AND adl2.creation_date &lt; adl.creation_date
-        AND adl2.field = 'resolution'
+        AND adl2.field IN ('resolution', 'Auto Resolution')
         AND adl2.project_id = #{sprintDTO.projectId}
         ORDER BY
         adl2.creation_date DESC
@@ -449,7 +449,7 @@
         agile_data_log adl
         WHERE
         adl.project_id = #{sprintDTO.projectId}
-        AND adl.field = 'resolution'
+        AND adl.field IN ('resolution', 'Auto Resolution')
         AND adl.creation_date &gt; #{sprintDTO.startDate}
         AND adl.creation_date &lt; #{sprintDTO.actualEndDate}
         AND adl.new_value != ''
@@ -467,7 +467,7 @@
         agile_data_log adl
         WHERE
         adl.project_id = #{sprintDTO.projectId}
-        and adl.field = 'resolution'
+        and adl.field IN ('resolution', 'Auto Resolution')
         AND adl.creation_date &gt; #{sprintDTO.startDate}
         AND adl.creation_date &lt; #{sprintDTO.actualEndDate}
         AND adl.new_value is NULL
@@ -502,7 +502,7 @@
         agile_data_log adl
         WHERE
         adl.project_id = #{sprintDTO.projectId} and
-        adl.field = 'resolution' AND adl.creation_date &gt; #{sprintDTO.startDate}
+        adl.field IN ('resolution', 'Auto Resolution') AND adl.creation_date &gt; #{sprintDTO.startDate}
         AND adl.creation_date &lt; #{sprintDTO.actualEndDate}
         AND adl.new_value IS not null
         AND adl.issue_id = #{issueId}
@@ -538,7 +538,7 @@
         WHERE
         adl.project_id = #{sprintDTO.projectId}
         AND adl.issue_id =#{issueId}
-        and adl.field = 'resolution'
+        and adl.field IN ('resolution', 'Auto Resolution')
         AND adl.creation_date &gt; #{sprintDTO.startDate}
          AND adl.new_value IS null
         AND adl.creation_date &lt; #{sprintDTO.actualEndDate}
@@ -566,7 +566,7 @@
         agile_data_log adl
         WHERE
         adl.project_id = #{sprintDTO.projectId}
-        AND adl.field = 'resolution'
+        AND adl.field IN ('resolution', 'Auto Resolution')
         AND adl.creation_date &lt; #{sprintDTO.startDate}
         AND adl.issue_id IN
         <foreach collection="issueIdList" item="issueId"
@@ -600,7 +600,7 @@
         agile_project_info api2 ON
         api2.project_id = ai2.project_id
         WHERE
-        adl.field = 'resolution'
+        adl.field IN ('resolution', 'Auto Resolution')
         AND adl.project_id = #{sprintDTO.projectId}
         AND adl.creation_date &gt; #{sprintDTO.startDate}
         AND adl.creation_date &lt;= #{sprintDTO.actualEndDate}
@@ -636,7 +636,7 @@
         LEFT JOIN agile_issue ai2 on ai.parent_issue_id = ai2.issue_id
         LEFT JOIN agile_project_info api2 ON api2.project_id = ai2.project_id
         WHERE
-        adl.field = 'resolution'
+        adl.field IN ('resolution', 'Auto Resolution')
         AND adl.project_id = #{sprintDTO.projectId}
         AND adl.creation_date &gt;= #{sprintDTO.startDate}
         AND adl.creation_date &lt;= #{sprintDTO.actualEndDate}
@@ -727,7 +727,7 @@
                                   WHERE adl4.log_id IN
                                         (SELECT MAX(adl.log_id) AS log_id
                                          FROM agile_data_log adl
-                                         WHERE adl.field = 'resolution'
+                                         WHERE adl.field IN ('resolution', 'Auto Resolution')
                                          AND adl.project_id = #{sprintDTO.projectId}
                                          AND adl.creation_date &lt; #{sprintDTO.actualEndDate}
                                          GROUP BY issue_id)
@@ -785,11 +785,11 @@
                                              adl7.issue_id
                                          FROM agile_data_log adl7
                                          WHERE adl7.project_id = #{sprintDTO.projectId}
-	                                            AND adl7.field = 'resolution'
+	                                            AND adl7.field IN ('resolution', 'Auto Resolution')
 	                                             and adl7.log_id IN (SELECT MAX(adl1.log_id) AS log_id
                                                                FROM agile_data_log adl1
                                                                WHERE adl1.project_id = #{sprintDTO.projectId}
-                                                                     and adl1.field = 'resolution'
+                                                                     and adl1.field IN ('resolution', 'Auto Resolution')
                                                                      AND adl1.creation_date &lt; #{sprintDTO.actualEndDate}
                                                                      and adl1.issue_id in(SELECT issue_id FROM agile_issue_sprint_rel WHERE project_id = #{sprintDTO.projectId} AND sprint_id = #{sprintDTO.sprintId} )
                                                                GROUP BY
@@ -948,7 +948,7 @@
                     WHERE
                         adl.issue_id = #{issueId}
                         AND adl.creation_date &lt; #{date}
-                        AND adl.field = 'resolution'
+                        AND adl.field IN ('resolution', 'Auto Resolution')
                     ORDER BY adl.creation_date DESC
                     LIMIT 1) bbb) c
     </select>
@@ -3365,7 +3365,7 @@
     SELECT
     a.*
     FROM agile_data_log a
-    where a.field = 'resolution'
+    where a.field IN ('resolution', 'Auto Resolution')
     and a.project_id = #{projectId}
     and a.issue_id = #{issueId}
     and a.creation_date &lt;= #{outDate}
