@@ -28,6 +28,7 @@ import ScrumBoardFullScreen from '../ScrumBoardComponent/ScrumBoardFullScreen';
 import CreateBoard from '../ScrumBoardComponent/CreateBoard';
 import { service } from '../setting/Setting';
 import SelectPriority from './SelectPriority';
+import CreateIssue from '../ScrumBoardComponent/create-issue';
 
 const { Option } = Select;
 const { AppState } = stores;
@@ -338,6 +339,10 @@ class ScrumBoardHome extends Component {
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   }
 
+  handleCreateIssue = () => {
+    ScrumBoardStore.setCreateIssueVisible(true);
+  };
+
   render() {
     const { HeaderStore } = this.props;
     const {
@@ -388,14 +393,11 @@ class ScrumBoardHome extends Component {
             }
           </Select>
           <HeaderLine />
-          <ScrumBoardFullScreen />
+          <Button onClick={this.handleCreateIssue} icon="playlist_add">创建问题</Button>
           <Button
             className="c7n-scrumboard-settingButton"
             funcType="flat"
             icon="settings"
-            style={{
-              marginRight: 15,
-            }}
             onClick={() => {
               to(LINK_URL.scrumboardSetting, {
                 params: {
@@ -406,6 +408,7 @@ class ScrumBoardHome extends Component {
           >
             配置看板
           </Button>
+          <ScrumBoardFullScreen />
           {
             currentSprintIsDoing && (
               <>
@@ -477,10 +480,12 @@ class ScrumBoardHome extends Component {
                   )}
               </div>
             </div>
+
             <IssueDetail
               refresh={this.refresh}
             />
           </Spin>
+          <CreateIssue refresh={this.refresh} />
         </Content>
         {
           ScrumBoardStore.getUpdateParent ? (
