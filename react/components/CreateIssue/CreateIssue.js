@@ -159,7 +159,7 @@ class CreateIssue extends Component {
       this.setState({
         createLoading: false,
       });
-      onOk(res);
+      onOk(res, data);
     }).catch((e) => {
       form.resetFields();
       this.setState({
@@ -587,6 +587,12 @@ class CreateIssue extends Component {
                 allowClear
                 type="sprint"
                 disabled={['sub_task', 'sub_bug'].includes(mode)}
+                afterLoad={(sprints) => {
+                  this.props.chosenSprint && form.setFieldsValue({
+                    sprintId: this.props.chosenSprint,
+                  });
+                  console.log('sprints.;', sprints, this.props.chosenSprint);
+                }}
               />,
             )}
           </FormItem>
@@ -883,7 +889,7 @@ class CreateIssue extends Component {
         );
       case 'subProject':
         return newIssueTypeCode === 'feature'
-        && <FieldTeam form={form} teamProjectIds={teamProjectIds} field={field || {}} />;
+          && <FieldTeam form={form} teamProjectIds={teamProjectIds} field={field || {}} />;
       default:
         return (
           <FormItem label={fieldName} style={{ width: 330 }}>

@@ -26,6 +26,8 @@ class ScrumBoardStore {
 
   @observable calanderCouldUse = false;
 
+  @observable createIssueVisible = false;
+
   @observable currentSprintExist = true;
 
   @observable currentDrag = null;
@@ -919,6 +921,14 @@ class ScrumBoardStore {
 
   @action setPriority(priorityIds) {
     this.priorityIds = priorityIds;
+  }
+
+  @action setCreateIssueVisible(data) {
+    this.createIssueVisible = data;
+  }
+
+  @computed get getCreateIssueVisible() {
+    return this.createIssueVisible;
   }
 }
 

@@ -8,7 +8,8 @@ const BoardFullScreen = () => {
   return (
     <Button
       className="c7nagile-board-fullScreenBtn"
-      onClick={() => { toggleFullScreen(); }} 
+      onClick={() => { toggleFullScreen(); }}
+      style={{ marginRight: 15 }}
       icon={isFullScreen ? 'fullscreen_exit' : 'zoom_out_map'}
     >
       {isFullScreen ? '退出全屏' : '全屏'}
