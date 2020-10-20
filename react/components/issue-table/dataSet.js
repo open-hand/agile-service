@@ -42,6 +42,7 @@ export default ({
     { name: 'creationDate', type: 'string', label: '创建时间' },
     { name: 'estimatedStartTime', type: 'string', label: '预计开始时间' },
     { name: 'estimatedEndTime', type: 'string', label: '预计结束时间' },
+    { name: 'remainingTime', type: 'string', label: '剩余预估时间' },
     { name: 'issueSprintVOS', type: 'array', label: '冲刺' },
   ],
   queryFields: [

@@ -271,6 +271,13 @@ const IssueTable: React.FC<Props> = ({
           name="estimatedEndTime"
           className="c7n-agile-table-cell"
         />
+        <Column
+          width={170}
+          hidden={columnHidden('remainingTime')}
+          name="remainingTime"
+          className="c7n-agile-table-cell"
+          renderer={({ text }) => (text ? `${text}小时` : '-')}
+        />
         <Column hidden={columnHidden('label')} name="label" className="c7n-agile-table-cell" renderer={renderTag('labelIssueRelVOS', 'labelName')} />
         <Column hidden={columnHidden('component')} name="component" className="c7n-agile-table-cell" renderer={renderTag('issueComponentBriefVOS', 'name')} />
         <Column hidden={columnHidden('storyPoints')} name="storyPoints" className="c7n-agile-table-cell" renderer={({ text }) => text || '-'} />
