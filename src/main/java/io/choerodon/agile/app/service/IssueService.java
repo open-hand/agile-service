@@ -348,4 +348,15 @@ public interface IssueService {
      * @return
      */
     Page<IssueListFieldKVVO> queryBackLogIssuesByPersonal(Long organizationId, Long projectId,PageRequest pageRequest);
+
+    /**
+     * 根据项目id和问题类型分页查询可以选择的父问题
+     *
+     * @param pageRequest
+     * @param projectId
+     * @param issueType
+     * @param param
+     * @return
+     */
+    Page<IssueVO> pagingQueryAvailableParents(PageRequest pageRequest, Long projectId, String issueType, String param);
 }

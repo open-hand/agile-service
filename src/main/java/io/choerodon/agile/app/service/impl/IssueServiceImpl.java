@@ -2556,4 +2556,20 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         page.setNumberOfElements(parentPage.getNumberOfElements());
         return page;
     }
+
+    @Override
+    public Page<IssueVO> pagingQueryAvailableParents(PageRequest pageRequest,
+                                                     Long projectId,
+                                                     String issueType,
+                                                     String param) {
+        if (IssueTypeCode.isBug(issueType) || IssueTypeCode.isSubTask(issueType)) {
+            /**
+             * 选择子任务：可关联问题：故事、缺陷（不是其他的子缺陷）、任务
+             * 选择缺陷：故事、任务
+             */
+            return PageHelper.doPageAndSort(pageRequest, () -> issueMapper.listAvailableParents(projectId, issueType, param));
+        } else {
+            return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+        }
+    }
 }

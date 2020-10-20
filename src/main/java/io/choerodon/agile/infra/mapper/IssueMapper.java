@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.mapper;
 import io.choerodon.agile.api.vo.IssueIdSprintIdVO;
 import io.choerodon.agile.api.vo.IssueOverviewVO;
 import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -517,4 +518,15 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<IssueDTO> querySubIssueByIssueId(@Param("issueId") Long issueId);
 
     List<IssueDTO> querySubBugByIssueId(@Param("issueId") Long issueId);
+
+    /**
+     * 根据projectId和
+     * @param projectId
+     * @param issueType
+     * @param param
+     * @return
+     */
+    List<IssueVO> listAvailableParents(@Param("projectId") Long projectId,
+                                       @Param("issueType") String issueType,
+                                       @Param("param") String param);
 }

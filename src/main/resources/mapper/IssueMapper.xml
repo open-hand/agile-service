@@ -31,6 +31,7 @@
         <id column="relate_issue_id" property="relateIssueId"/>
         <id column="relate_issue_num" property="relateIssueNum"/>
         <id column="parent_relate_num" property="parentRelateNum"/>
+        <id column="parent_relate_description" property="parentRelateDescription"/>
         <result property="estimatedStartTime" column="estimated_start_time"/>
         <result property="estimatedEndTime" column="estimated_end_time"/>
         <association property="activeSprint" column="issue_id" select="queryActiveSprintNameByIssueId"/>
@@ -132,7 +133,8 @@
             CONCAT_WS('-', api.project_code, ai.issue_num)                                   AS issue_num_splicing,
             ai.estimated_start_time,
             ai.estimated_end_time,
-            ai3.description as parent_issue_description
+            ai3.description as parent_issue_description,
+            ai4.description as parent_relate_description
         FROM agile_issue ai
             LEFT JOIN agile_issue ai2 ON ai2.issue_id = ai.epic_id
             LEFT JOIN lookup_value alv2 ON ai2.color_code = alv2.value_code
@@ -3042,6 +3044,37 @@
         select * from agile_issue ai
         where ai.project_id = #{projectId}
         AND (ai.parent_issue_id = #{parentIssueId} OR ai.relate_issue_id = #{parentIssueId})
+    </select>
+
+    <select id="listAvailableParents" resultType="io.choerodon.agile.api.vo.business.IssueVO">
+        select
+        t1.issue_id,
+        t1.summary,
+        CONCAT_WS('-', t2.project_code, t1.issue_num) AS issue_num,
+        t1.type_code
+        from agile_issue t1
+        LEFT JOIN agile_project_info t2 ON t1.project_id = t2.project_id
+        where t1.project_id = #{projectId}
+        <if test="issueType == 'bug'">
+            and (
+                t1.type_code = 'story'
+                or t1.type_code = 'task'
+            )
+        </if>
+        <if test="issueType == 'sub_task'">
+            and (
+                t1.type_code = 'story'
+                or t1.type_code = 'task'
+                or (t1.type_code = 'bug' and (t1.relate_issue_id is null or t1.relate_issue_id = 0))
+            )
+        </if>
+        <if test="param != null">
+            and (
+                t1.summary like CONCAT(CONCAT('%', #{param}), '%')
+                or CONCAT_WS('-', t2.project_code, t1.issue_num) like CONCAT(CONCAT('%', #{param}), '%')
+            )
+        </if>
+        order by t1.issue_id desc
     </select>
 
 </mapper>
