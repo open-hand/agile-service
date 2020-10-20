@@ -663,7 +663,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
         }
         if (agilePluginService != null) {
-            agilePluginService.updateIssueSprintChanged(issueType,fieldList,projectId,issueUpdateVO,originIssue);
+            agilePluginService.handlerProgramUpdateIssue(issueType,fieldList,projectId,issueUpdateVO,originIssue);
         }
         issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
     }
