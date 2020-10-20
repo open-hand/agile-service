@@ -1,11 +1,11 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
-import { Tooltip } from 'choerodon-ui';
 import { LINK_URL_TO } from '@/constants/LINK_URL';
+import IssueParentTip from './IssueParentTip';
 import IssueSwitch from './IssueSwitch';
 
 const IssueNumber = ({
-  parentIssueId, resetIssue, reloadIssue, typeCode, parentSummary, issue, type, disabled,
+  parentIssueId, resetIssue, reloadIssue, typeCode, parentSummary, parentDescription, issue, type, disabled,
 }) => {
   const handleClickParent = () => {
     if (disabled) {
@@ -37,18 +37,21 @@ const IssueNumber = ({
     >
       {
         parentSummary ? (
-          <span style={{ display: 'inline-block', width: '90%', maxWidth: 'max-content' }}>
-            <Tooltip title={parentSummary}>
-              <span
-                role="none"
-                className="primary parent-summary-hidden"
-                style={{ cursor: disabled ? 'auto' : 'pointer' }}
-                onClick={handleClickParent}
-              >
-                {parentSummary}
-              </span>
-            </Tooltip>
-
+          <span className="parent-summary" style={{ display: 'inline-block', width: '90%', maxWidth: 'max-content' }}>
+            <div className="parent-summary-tip">
+              <IssueParentTip
+                parentSummary={parentSummary}
+                parentDescription={parentDescription}
+              />
+            </div>
+            <span
+              role="none"
+              className="primary parent-summary-hidden"
+              style={{ cursor: disabled ? 'auto' : 'pointer' }}
+              onClick={handleClickParent}
+            >
+              {parentSummary}
+            </span>
             <span style={{ paddingLeft: 10, paddingRight: 10 }}>/</span>
           </span>
         ) : null
