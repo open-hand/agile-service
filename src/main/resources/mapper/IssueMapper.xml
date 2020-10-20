@@ -23,6 +23,7 @@
         <id column="epic_color" property="epicColor"/>
         <id column="parent_issue_num" property="parentIssueNum"/>
         <id column="parent_issue_summary" property="parentIssueSummary"/>
+        <id column="parent_issue_description" property="parentIssueDescription"/>
         <id column="object_version_number" property="objectVersionNumber"/>
         <id column="priority_id" property="priorityId"/>
         <id column="issue_type_id" property="issueTypeId"/>
@@ -130,7 +131,8 @@
             ai4.summary                                                                      AS parent_relate_summary,
             CONCAT_WS('-', api.project_code, ai.issue_num)                                   AS issue_num_splicing,
             ai.estimated_start_time,
-            ai.estimated_end_time
+            ai.estimated_end_time,
+            ai3.description as parent_issue_description
         FROM agile_issue ai
             LEFT JOIN agile_issue ai2 ON ai2.issue_id = ai.epic_id
             LEFT JOIN lookup_value alv2 ON ai2.color_code = alv2.value_code
