@@ -151,12 +151,12 @@ function Header({ dataSet, close }) {
       <div style={{ fontSize: '18px', fontWeight: 500, marginRight: 12 }}>
         {`批量编辑 (已选中${dataSet.selected.length}项)`}
       </div>
-      <Button
+      {/* <Button
         icon="close"
         shape="circle"
         style={{ color: 'white', marginRight: -5, marginLeft: 'auto' }}
         onClick={close}
-      />
+      /> */}
     </>
   );
 }
