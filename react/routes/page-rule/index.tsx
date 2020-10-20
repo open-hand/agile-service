@@ -5,7 +5,7 @@ import {
 import { observer } from 'mobx-react-lite';
 import { Button, DataSet, Modal } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { getProjectId } from '@/utils/common';
+import { pageRuleApiConfig } from '@/api';
 import RuleTable from './components/rule-table';
 import styles from './index.less';
 import RuleModal from './components/rule-modal';
@@ -15,30 +15,45 @@ const PageRule = () => {
     autoQuery: true,
     selection: false,
     transport: {
-      read: ({ params }) => ({
-        url: `/agile/v1/projects/${getProjectId()}/configuration_rule`,
-        method: 'get',
-        params,
-      }),
+      read: ({ params }) => pageRuleApiConfig.load(params),
     },
     fields: [
       {
-        label: '通知对象',
-        name: 'receiverList',
-        type: 'array' as FieldType,
+        label: '名称',
+        name: 'name',
+        type: 'string' as FieldType,
       },
       {
         name: 'action',
       },
       {
-        label: '抄送人',
-        name: 'ccList',
-        type: 'string' as FieldType,
-      },
-      {
         label: '通知规则',
         name: 'expressQuery',
         type: 'string' as FieldType,
+      },
+      {
+        label: '变更值',
+        name: 'newAssignee',
+      },
+      {
+        label: '通知对象',
+        name: 'receiverList',
+        type: 'array' as FieldType,
+      },
+      // {
+      //   label: '抄送人',
+      //   name: 'ccList',
+      //   type: 'string' as FieldType,
+      // },
+      {
+        label: '状态',
+        name: 'enabled',
+        type: 'boolean' as FieldType,
+      },
+      {
+        label: '来源',
+        name: 'source',
+        type: 'boolean' as FieldType,
       },
     ],
   }), []);

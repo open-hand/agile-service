@@ -15,7 +15,7 @@ import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
 import { getProjectId } from '@/utils/common';
 import { User } from '@/common/types';
-import { fieldApi } from '@/api';
+import { fieldApi, pageRuleApi } from '@/api';
 import Loading from '@/components/Loading';
 import { find, map } from 'lodash';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
@@ -286,8 +286,6 @@ const RuleModal: React.FC<Props> = ({ modal, ruleTableDataSet, ruleId }) => {
     );
   }, [fieldData, modalDataSet]);
 
-  const getSystemFields = useCallback(() => axios.get(`/agile/v1/projects/${getProjectId()}/configuration_rule/fields`), []);
-
   const addField = useCallback((name, props) => {
     const field = new DataSetField({ ...props, name }, modalDataSet, modalDataSet.current);
     modalDataSet?.current?.fields.set(name, field);
@@ -321,7 +319,7 @@ const RuleModal: React.FC<Props> = ({ modal, ruleTableDataSet, ruleId }) => {
       addFieldRule(newKey, 0);
     }
     setLoading(true);
-    Promise.all([getSystemFields(), fieldApi.getCustomFields()]).then(([systemFields, customFields]) => {
+    Promise.all([pageRuleApi.getPageRuleSystemFields(), fieldApi.getCustomFields()]).then(([systemFields, customFields]) => {
       const transformedSystemFields = systemFields.map((item: { fieldCode: string; }) => ({
         ...item,
         code: item.fieldCode,
@@ -340,7 +338,7 @@ const RuleModal: React.FC<Props> = ({ modal, ruleTableDataSet, ruleId }) => {
         setLoading(false);
       });
     });
-  }, [addFieldRule, getSystemFields, ruleId]);
+  }, [addFieldRule, ruleId]);
 
   const getFieldValue = useCallback((name) => {
     const { current } = modalDataSet;
@@ -519,7 +517,7 @@ const RuleModal: React.FC<Props> = ({ modal, ruleTableDataSet, ruleId }) => {
         ...expressObj,
       };
       if (!ruleId) {
-        return axios.post(`/agile/v1/projects/${getProjectId()}/configuration_rule`, data).then(() => {
+        return pageRuleApi.create(data).then(() => {
           Choerodon.prompt('创建成功');
           ruleTableDataSet.query();
           return true;
@@ -528,7 +526,7 @@ const RuleModal: React.FC<Props> = ({ modal, ruleTableDataSet, ruleId }) => {
           return false;
         });
       }
-      return axios.put(`/agile/v1/projects/${getProjectId()}/configuration_rule/${ruleId}`, data).then(() => {
+      return pageRuleApi.update(ruleId, data).then(() => {
         Choerodon.prompt('编辑成功');
         ruleTableDataSet.query(ruleTableDataSet.currentPage);
         return true;
@@ -555,7 +553,7 @@ const RuleModal: React.FC<Props> = ({ modal, ruleTableDataSet, ruleId }) => {
     if (ruleId && fieldData.length) {
       setLoading(true);
       // @ts-ignore
-      axios.get(`/agile/v1/projects/${getProjectId()}/configuration_rule/${ruleId}`).then((res) => {
+      pageRuleApi.getRule(ruleId).then((res) => {
         batchedUpdates(() => {
           const { ccList = [], receiverList = [], expressList = [] } = res;
           setFieldValue('ccList', ccList.map((item: User) => item.id));
