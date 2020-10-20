@@ -615,6 +615,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
             // 报错
             throw new CommonException("error.status.status_issue_used");
         }
+        if (Objects.equals(issueTypeId,0L)) {
+            return machineNodeDTO;
+        }
         // 校验当前node的状态是否与其他状态有联动
         IssueTypeDTO issueTypeDTO = issueTypeMapper.selectByPrimaryKey(issueTypeId);
         List<StatusLinkageDTO> linkExistList = statusLinkageMapper.selectByCondition(Condition.builder(StatusLinkageDTO.class)
