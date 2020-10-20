@@ -1,5 +1,8 @@
-package io.choerodon.agile.api.vo;
+package io.choerodon.agile.api.vo.business;
 
+import io.choerodon.agile.api.vo.IssueTypeVO;
+import io.choerodon.agile.api.vo.PriorityVO;
+import io.choerodon.agile.api.vo.StatusVO;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 

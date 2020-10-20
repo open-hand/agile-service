@@ -3,7 +3,7 @@
 // (powered by Fernflower decompiler)
 //
 
-package io.choerodon.agile.api.vo;
+package io.choerodon.agile.api.vo.business;
 
 
 

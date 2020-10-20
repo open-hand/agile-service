@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.agile.api.vo.business.ExportIssuesVO;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.enums.ExcelImportTemplateColumn;

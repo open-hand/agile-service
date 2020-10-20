@@ -1,18 +1,20 @@
-package io.choerodon.agile.api.vo;
+package io.choerodon.agile.api.vo.business;
 
+import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
- * @author dinghuang123@gmail.com
+ * Created by WangZhe@choerodon.io on 2019-06-28.
+ * Email: ettwz@hotmail.com
  */
-public class IssueListVO implements Serializable {
+public class IssueListFieldKVVO {
 
     @ApiModelProperty(value = "问题主键id")
     @Encrypt
@@ -28,11 +30,9 @@ public class IssueListVO implements Serializable {
     private String summary;
 
     @ApiModelProperty(value = "经办人id")
-    @Encrypt
     private Long assigneeId;
 
     @ApiModelProperty(value = "报告人id")
-    @Encrypt
     private Long reporterId;
 
     @ApiModelProperty(value = "项目id")
@@ -79,6 +79,16 @@ public class IssueListVO implements Serializable {
     @ApiModelProperty(value = "故事点")
     private BigDecimal storyPoints;
 
+    @ApiModelProperty(value = "特性名称")
+    private String featureName;
+
+    @ApiModelProperty(value = "特性id")
+    @Encrypt(ignoreValue = {"0"})
+    private Long featureId;
+
+    @ApiModelProperty(value = "特性颜色")
+    private String featureColor;
+
     @ApiModelProperty(value = "如果问题类型是特性，返回特性类别:business、enabler")
     private String featureType;
 
@@ -97,8 +107,14 @@ public class IssueListVO implements Serializable {
     @ApiModelProperty(value = "问题类型DTO")
     private IssueTypeVO issueTypeVO;
 
+    @ApiModelProperty(value = "创建时间")
+    private Date creationDate;
+
     @ApiModelProperty(value = "最后更新时间")
     private Date lastUpdateDate;
+
+    @Encrypt(ignoreValue = {"0"})
+    private Long parentId;
 
     @ApiModelProperty(value = "关联的版本")
     private List<VersionIssueRelVO> versionIssueRelVOS;
@@ -112,11 +128,49 @@ public class IssueListVO implements Serializable {
     @ApiModelProperty(value = "评论列表")
     private List<IssueComponentBriefVO> issueComponentBriefVOS;
 
+    @ApiModelProperty(value = "自定义字段kv")
+    private Map<String, Object> foundationFieldValue;
+
+    @ApiModelProperty("项目信息")
     private ProjectVO projectVO;
 
-    private BigDecimal completedCount;
+    private Date estimatedStartTime;
 
-    private BigDecimal totalCount;
+    private Date estimatedEndTime;
+
+    private String projectName;
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
+    public Date getEstimatedStartTime() {
+        return estimatedStartTime;
+    }
+
+    public void setEstimatedStartTime(Date estimatedStartTime) {
+        this.estimatedStartTime = estimatedStartTime;
+    }
+
+    public Date getEstimatedEndTime() {
+        return estimatedEndTime;
+    }
+
+    public void setEstimatedEndTime(Date estimatedEndTime) {
+        this.estimatedEndTime = estimatedEndTime;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
 
     public List<IssueSprintVO> getIssueSprintVOS() {
         return issueSprintVOS;
@@ -165,6 +219,14 @@ public class IssueListVO implements Serializable {
 
     public void setEpicColor(String epicColor) {
         this.epicColor = epicColor;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 
     public Date getLastUpdateDate() {
@@ -367,6 +429,38 @@ public class IssueListVO implements Serializable {
         return featureType;
     }
 
+    public Map<String, Object> getFoundationFieldValue() {
+        return foundationFieldValue;
+    }
+
+    public void setFoundationFieldValue(Map<String, Object> foundationFieldValue) {
+        this.foundationFieldValue = foundationFieldValue;
+    }
+
+    public String getFeatureName() {
+        return featureName;
+    }
+
+    public void setFeatureName(String featureName) {
+        this.featureName = featureName;
+    }
+
+    public Long getFeatureId() {
+        return featureId;
+    }
+
+    public void setFeatureId(Long featureId) {
+        this.featureId = featureId;
+    }
+
+    public String getFeatureColor() {
+        return featureColor;
+    }
+
+    public void setFeatureColor(String featureColor) {
+        this.featureColor = featureColor;
+    }
+
     @Override
     public String toString() {
         return StringUtil.getToString(this);
@@ -378,21 +472,5 @@ public class IssueListVO implements Serializable {
 
     public void setProjectVO(ProjectVO projectVO) {
         this.projectVO = projectVO;
-    }
-
-    public BigDecimal getCompletedCount() {
-        return completedCount;
-    }
-
-    public void setCompletedCount(BigDecimal completedCount) {
-        this.completedCount = completedCount;
-    }
-
-    public BigDecimal getTotalCount() {
-        return totalCount;
-    }
-
-    public void setTotalCount(BigDecimal totalCount) {
-        this.totalCount = totalCount;
     }
 }
