@@ -71,6 +71,8 @@ public class FieldValueServiceImpl implements FieldValueService {
     private MessageClient messageClient;
     @Autowired
     private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
+    @Autowired
+    private AgilePluginService agilePluginService;
 
     @Override
     public void fillValues(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewVO> pageFieldViews) {
@@ -208,12 +210,20 @@ public class FieldValueServiceImpl implements FieldValueService {
         List<VersionIssueRelVO> influenceVersion = ObjectUtils.isEmpty(predefinedFields.get("influenceVersion")) ? null : EncryptionUtils.jsonToList(predefinedFields.get("influenceVersion"),VersionIssueRelVO.class);
         predefinedFields.remove("fixVersion");
         predefinedFields.remove("influenceVersion");
+        Map<String,Object> programMap = new HashMap<>();
+        if (agilePluginService != null) {
+            agilePluginService.handlerProgramPredefinedFields(projectId,predefinedFields,programMap,appleType);
+        }
         issueDTOS.forEach(v -> {
             IssueUpdateVO issueUpdateVO = new IssueUpdateVO();
             List<String> fieldList = verifyUpdateUtil.verifyUpdateData(predefinedFields, issueUpdateVO);
             if (!"story".equals(v.getTypeCode())) {
                 fieldList.remove(String.valueOf("storyPoints"));
                 issueUpdateVO.setStoryPoints(null);
+            }
+
+            if ("story".equals(v.getTypeCode()) && agilePluginService != null) {
+                agilePluginService.setFeatureId(issueUpdateVO,programMap,fieldList);
             }
 
             if ("issue_epic".equals(v.getTypeCode())) {
@@ -254,6 +264,9 @@ public class FieldValueServiceImpl implements FieldValueService {
                         issueService.updateIssueStatus(projectId, v.getIssueId(), transformVO.getId(), transformVO.getStatusVO().getObjectVersionNumber(), appleType);
                     }
                 }
+            }
+            if (agilePluginService != null) {
+                agilePluginService.handlerFeatureField(projectId,v,programMap);
             }
             batchUpdateFieldStatusVO.setProcess( batchUpdateFieldStatusVO.getProcess() + batchUpdateFieldStatusVO.getIncrementalValue());
             messageClient.sendByUserId(batchUpdateFieldStatusVO.getUserId(), batchUpdateFieldStatusVO.getKey(), JSON.toJSONString(batchUpdateFieldStatusVO));
