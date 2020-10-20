@@ -208,7 +208,7 @@ function EditIssue() {
       bottom: 0,
       // height: 'calc(100vh - 50px)',
       zIndex: 101,
-      overflow: 'hidden',
+      // overflow: 'hidden',
     }}
     >
       <ResizeAble

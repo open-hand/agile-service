@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import { Icon } from 'choerodon-ui';
 import IssueNumber from './IssueNumber';
 import IssueType from './IssueType';
-
 import './IssueComponent.less';
 import EditIssueContext from '../stores';
 import './IssueHeader.less';
@@ -15,7 +14,7 @@ const IssueHeader = (props) => {
   const urlParams = AppState.currentMenuType;
   const issue = store.getIssue;
   const {
-    parentIssueId, relateIssueId, typeCode, parentIssueSummary, parentRelateSummary,
+    parentIssueId, relateIssueId, typeCode, parentIssueSummary, parentRelateSummary, description,
   } = issue;
   return (
     <div className={`${prefixCls}-IssueHeader`}>
@@ -32,6 +31,7 @@ const IssueHeader = (props) => {
             typeCode={typeCode}
             // parentIssueNum={parentIssueNum || relateIssueNum}
             parentSummary={parentIssueSummary || parentRelateSummary}
+            parentDescription={description}
             issue={issue}
             disabled={disabled}
           />
