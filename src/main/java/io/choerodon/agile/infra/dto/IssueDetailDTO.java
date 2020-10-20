@@ -110,6 +110,8 @@ public class IssueDetailDTO {
 
     private String parentIssueSummary;
 
+    private String parentIssueDescription;
+
     private PriorityVO priorityVO;
 
     private IssueTypeVO issueTypeVO;
@@ -127,6 +129,14 @@ public class IssueDetailDTO {
     private String relateIssueNum;
 
     private String parentRelateSummary;
+
+    public String getParentIssueDescription() {
+        return parentIssueDescription;
+    }
+
+    public void setParentIssueDescription(String parentIssueDescription) {
+        this.parentIssueDescription = parentIssueDescription;
+    }
 
     public List<IssueDTO> getSameParentIssueDTOList() {
         return sameParentIssueDTOList;
