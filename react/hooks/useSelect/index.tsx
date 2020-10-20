@@ -138,7 +138,7 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     }
     return name.toLowerCase().indexOf(text.toLowerCase()) >= 0;
   }, [defaultRender, optionRenderer, textField]);
-  const optionData: Array<T> = useMemo(() => applyMiddleWares<T>(data, [middleWare]).map((item) => ({
+  const optionData: Array<T> = useMemo(() => (applyMiddleWares<T>(data, [middleWare]) || []).map((item) => ({
     ...item,
     meaning: item[textField],
     value: item[valueField],
