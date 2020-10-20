@@ -48,22 +48,6 @@ public class IssueDetailDTO {
 
     private Date estimatedEndTime;
 
-    public Date getEstimatedStartTime() {
-        return estimatedStartTime;
-    }
-
-    public void setEstimatedStartTime(Date estimatedStartTime) {
-        this.estimatedStartTime = estimatedStartTime;
-    }
-
-    public Date getEstimatedEndTime() {
-        return estimatedEndTime;
-    }
-
-    public void setEstimatedEndTime(Date estimatedEndTime) {
-        this.estimatedEndTime = estimatedEndTime;
-    }
-
     private List<VersionIssueRelDTO> versionIssueRelDTOList;
 
     private List<LabelIssueRelDTO> labelIssueRelDTOList;
@@ -129,6 +113,32 @@ public class IssueDetailDTO {
     private String relateIssueNum;
 
     private String parentRelateSummary;
+
+    private String parentRelateDescription;
+
+    public Date getEstimatedStartTime() {
+        return estimatedStartTime;
+    }
+
+    public void setEstimatedStartTime(Date estimatedStartTime) {
+        this.estimatedStartTime = estimatedStartTime;
+    }
+
+    public Date getEstimatedEndTime() {
+        return estimatedEndTime;
+    }
+
+    public void setEstimatedEndTime(Date estimatedEndTime) {
+        this.estimatedEndTime = estimatedEndTime;
+    }
+
+    public String getParentRelateDescription() {
+        return parentRelateDescription;
+    }
+
+    public void setParentRelateDescription(String parentRelateDescription) {
+        this.parentRelateDescription = parentRelateDescription;
+    }
 
     public String getParentIssueDescription() {
         return parentIssueDescription;

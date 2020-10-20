@@ -690,4 +690,19 @@ public class IssueController {
                                                                   @RequestParam(value = "param", required = false) String param) {
         return ResponseEntity.ok(issueService.pagingQueryReporters(pageRequest, projectId, param));
     }
+
+    @CustomPageRequest
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("根据项目id和问题类型分页查询可以选择的父问题")
+    @PostMapping(value = "/available_parents")
+    public ResponseEntity<Page<IssueVO>> pagingQueryAvailableParents(@ApiIgnore
+                                                                     @ApiParam(value = "分页信息", required = true)
+                                                                             PageRequest pageRequest,
+                                                                     @ApiParam(value = "项目id", required = true)
+                                                                     @PathVariable(name = "project_id") Long projectId,
+                                                                     @RequestParam String issueType,
+                                                                     @RequestParam(value = "param", required = false) String param) {
+        return ResponseEntity.ok(issueService.pagingQueryAvailableParents(pageRequest, projectId, issueType, param));
+    }
+
 }
