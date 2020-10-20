@@ -16,7 +16,7 @@ import IssueSearch from '@/components/issue-search';
 import { linkUrl } from '@/utils/to';
 import LINK_URL, { getParams } from '@/constants/LINK_URL';
 import IssueTable from '@/components/issue-table';
-import IssueExportStore from '@/components/issue-export/stores/store';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { openExportIssueModal } from './components/ExportIssue';
 import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
@@ -198,7 +198,10 @@ const Issue = observer(() => {
           store={issueSearchStore}
           urlFilter={urlFilter}
           onClear={handleClear}
-          onChange={IssueStore.query}
+          onChange={() => {
+            localPageCacheStore.setItem('issues', issueSearchStore.currentFilter);
+            IssueStore.query();
+          }}
           onClickSaveFilter={handleClickSaveFilter}
         />
         <IssueTable

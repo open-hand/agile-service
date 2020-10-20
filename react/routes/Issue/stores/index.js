@@ -8,6 +8,7 @@ import { fieldApi } from '@/api';
 import IssueStore, { getSystemFields } from '@/stores/project/issue/IssueStore';
 import { useIssueSearchStore } from '@/components/issue-search';
 import IssueDataSet from '@/components/issue-table/dataSet';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import { transformFilter, handleSelect, handleUnSelect } from './utils';
 
 const Store = createContext();
@@ -28,6 +29,7 @@ export const StoreProvider = inject('AppState')(injectIntl(
     const issueSearchStore = useIssueSearchStore({
       getSystemFields,
       transformFilter,
+      defaultChosenFields: Array.isArray(localPageCacheStore.getItem('issues')) ? new Map(localPageCacheStore.getItem('issues').map((item) => [item.code, item])) : undefined,
     });
     const dataSet = useMemo(() => new DataSet(IssueDataSet({
       intl,
