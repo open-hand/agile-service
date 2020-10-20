@@ -24,7 +24,7 @@ const IssueType = React.lazy(() => import('./routes/issueType'));
 const Priority = React.lazy(() => import('./routes/priority'));
 const State = React.lazy(() => import('./routes/state'));
 const PageConfig = React.lazy(() => import('./routes/page-config'));
-
+const PageRule = React.lazy(() => import('./routes/page-rule'));
 const StateMachine = React.lazy(() => import('./routes/StateMachine'));
 // 敏捷设置
 const Settings = React.lazy(() => import('./routes/settings'));
@@ -75,6 +75,7 @@ class Agile extends React.Component {
               <Route path={`${match.url}/reporthost`} component={ReportHost} />
               {/* 设置页面 */}
               <Route path={`${match.url}/page`} component={PageConfig} />
+              <Route path={`${match.url}/page-rule`} component={PageRule} />
               {/* 页面类型 */}
               <Route path={`${match.url}/issue-type`} component={IssueType} />
               <Route path={`${match.url}/settings`} component={Settings} />
