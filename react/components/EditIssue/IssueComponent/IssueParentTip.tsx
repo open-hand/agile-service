@@ -20,9 +20,9 @@ const IssueParentTip: React.FC<Props> = ({ parentSummary, parentDescription }) =
           <div className={styles.issueParentTip_content}>
             <div className={styles.issueParentTip_content_item}>
               <span className={styles.issueParentTip_content_item_title}>概要</span>
-              <span className={styles.issueParentTip_content_item_content}>
+              <div className={styles.issueParentTip_content_item_content}>
                 {parentSummary}
-              </span>
+              </div>
             </div>
             <div className={styles.issueParentTip_content_item}>
               <span className={styles.issueParentTip_content_item_title}>描述</span>
