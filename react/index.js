@@ -13,6 +13,7 @@ import RunWhenProjectChange from '@/common/RunWhenProjectChange';
 import { setHistory } from '@/utils/to';
 import IsInProgramStore from './stores/common/program/IsInProgramStore';
 import './style/index.less';
+import { localPageCacheStore } from './stores/common/LocalPageCacheStore';
 
 const ScrumBoard = React.lazy(() => import('./routes/ScrumBoard'));
 const ReportHost = React.lazy(() => import('./routes/ReportHost'));
@@ -46,6 +47,7 @@ class Agile extends React.Component {
       if (AppState.currentMenuType.category !== 'PROGRAM') {
         // 切换项目查是否在项目群中
         RunWhenProjectChange(IsInProgramStore.refresh);
+        RunWhenProjectChange(localPageCacheStore.clear);
         IsInProgramStore.refresh();
       }
     }
