@@ -1,7 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.SearchVO;
-import io.choerodon.agile.api.vo.StoryMapDragVO;
+import io.choerodon.agile.api.vo.business.StoryMapDragVO;
 import io.choerodon.agile.api.vo.StoryMapVO;
 
 /**

@@ -3,9 +3,7 @@ package io.choerodon.agile.api.controller.v1;
 import com.alibaba.fastjson.JSONObject;
 
 
-import io.choerodon.agile.api.vo.business.IssueCreateVO;
-import io.choerodon.agile.api.vo.business.IssueUpdateVO;
-import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
@@ -170,11 +168,11 @@ public class IssueController {
                                                                @ApiParam(value = "分页信息", required = true)
                                                                @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
                                                                        PageRequest pageRequest,
-                                                                         @ApiParam(value = "项目id", required = true)
+                                                                     @ApiParam(value = "项目id", required = true)
                                                                @PathVariable(name = "project_id") Long projectId,
-                                                                         @ApiParam(value = "查询参数", required = true)
+                                                                     @ApiParam(value = "查询参数", required = true)
                                                                @RequestBody(required = false) SearchVO searchVO,
-                                                                         @ApiParam(value = "查询参数", required = true)
+                                                                     @ApiParam(value = "查询参数", required = true)
                                                                @RequestParam(required = false) Long organizationId) {
         EncryptionUtils.decryptSearchVO(searchVO);
         return Optional.ofNullable(issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId))

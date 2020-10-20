@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
-import io.choerodon.agile.api.vo.IssueListFieldKVVO;
+import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
