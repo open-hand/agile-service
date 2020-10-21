@@ -6,6 +6,8 @@ import { observer } from 'mobx-react-lite';
 import { Button, DataSet, Modal } from 'choerodon-ui/pro';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { pageRuleApiConfig } from '@/api';
+import { getApplyType } from '@/utils/common';
+import IsProgramContext from '@/hooks/useIsProgrom';
 import RuleTable from './components/rule-table';
 import styles from './index.less';
 import RuleModal from './components/rule-modal';
@@ -40,11 +42,6 @@ const PageRule = () => {
         name: 'receiverList',
         type: 'array' as FieldType,
       },
-      // {
-      //   label: '抄送人',
-      //   name: 'ccList',
-      //   type: 'string' as FieldType,
-      // },
       {
         label: '状态',
         name: 'enabled',
@@ -67,20 +64,23 @@ const PageRule = () => {
       },
       key: Modal.key(),
       title: '添加规则',
-      children: <RuleModal ruleTableDataSet={ruleTableDataSet} />,
+      children: <RuleModal ruleTableDataSet={ruleTableDataSet} isProgram={getApplyType() === 'program'} />,
     });
   };
 
   return (
-    <Page service={[]}>
-      <Header>
-        <Button icon="playlist_add" onClick={handleAddRule}>添加规则</Button>
-      </Header>
-      <Breadcrumb />
-      <Content>
-        <RuleTable tableDataSet={ruleTableDataSet} />
-      </Content>
-    </Page>
+    <IsProgramContext.Provider value={{ isProgram: getApplyType() === 'program' }}>
+      <Page service={[]}>
+        <Header>
+          <Button icon="playlist_add" onClick={handleAddRule}>添加规则</Button>
+        </Header>
+        <Breadcrumb />
+        <Content>
+          <RuleTable tableDataSet={ruleTableDataSet} />
+        </Content>
+      </Page>
+    </IsProgramContext.Provider>
+
   );
 };
 
