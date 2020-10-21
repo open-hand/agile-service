@@ -8,8 +8,10 @@ import {
   Button, Spin, Tooltip,
 } from 'choerodon-ui';
 import { Modal } from 'choerodon-ui/pro';
+import { findIndex } from 'lodash';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
 import SideNav from '@/components/side-nav';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import Version from '../components/VersionComponent/Version';
 import Epic from '../components/EpicComponent/Epic';
 import Feature from '../components/FeatureComponent/Feature';

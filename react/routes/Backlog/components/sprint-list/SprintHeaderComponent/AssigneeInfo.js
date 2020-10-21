@@ -3,30 +3,45 @@ import { observer } from 'mobx-react';
 import {
   Tooltip, Icon,
 } from 'choerodon-ui';
+import { findIndex } from 'lodash';
 import classnames from 'classnames';
 import { Button } from 'choerodon-ui/pro';
 import UserHead from '@/components/UserHead';
 import BacklogStore from '@/stores/project/backlog/BacklogStore';
-
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import AssigneeModal from './AssigneeModal';
 import './AssigneeInfo.less';
 
 @observer class AssigneeInfo extends Component {
+  constructor(props) {
+    super(props);
+    const { data: { sprintId, assigneeIssues } } = this.props;
+    const assigneeId = localPageCacheStore.getItem(`backlog.sprint-${sprintId}`);
+    if (assigneeId && findIndex(assigneeIssues, (item) => String(item.assigneeId) === String(assigneeId)) !== -1) {
+      BacklogStore.setFilterSprintAssign(sprintId, assigneeId);
+    } else {
+      localPageCacheStore.remove(`backlog.sprint-${sprintId}`);
+    }
+  }
+
   handleSearchAssignee = (assigneeId) => {
     const { data: { sprintId } } = this.props;
     const filterSprintAssignId = BacklogStore.filterSprintAssign.get(sprintId);
     if (filterSprintAssignId === assigneeId) {
+      localPageCacheStore.remove(`backlog.sprint-${sprintId}`);
       BacklogStore.clearFilterSprintAssign(sprintId);
     } else {
+      localPageCacheStore.setItem(`backlog.sprint-${sprintId}`, assigneeId);
       BacklogStore.setFilterSprintAssign(sprintId, assigneeId);
     }
   };
 
   /**
- * 清除经办人筛选 
+ * 清除经办人筛选
  */
   handleClearAssignee = () => {
     const { data: { sprintId } } = this.props;
+    localPageCacheStore.remove(`backlog.sprint-${sprintId}`);
     BacklogStore.clearFilterSprintAssign(sprintId);
   };
 
@@ -35,11 +50,11 @@ import './AssigneeInfo.less';
     const { assigneeIssues } = data;
     const filterSprintAssignId = BacklogStore.filterSprintAssign.get(data.sprintId);
     return (
-      <Fragment>
+      <>
         <div className="c7n-backlog-assignInfo">
           <div className="c7n-backlog-assignInfo-left">
             {assigneeIssues ? assigneeIssues
-              .filter(assignee => assignee.assigneeId)
+              .filter((assignee) => assignee.assigneeId)
               .map(({
                 assigneeId,
                 assigneeName,
@@ -90,8 +105,8 @@ import './AssigneeInfo.less';
             {filterSprintAssignId && <Button color="blue" onClick={this.handleClearAssignee}>清除筛选</Button>}
           </div>
         </div>
-       
-      </Fragment>
+
+      </>
     );
   }
 }

@@ -1,3 +1,5 @@
+import { merge } from 'lodash';
+
 interface LocalPageCacheStoreInterface {
   getItem: (code: string) => any,
   setItem: (code: string, data: any) => void,
@@ -12,6 +14,10 @@ class LocalPageCacheStore implements LocalPageCacheStoreInterface {
 
   setItem(pageKey: string, data: any) {
     this.pages.set(pageKey, data);
+  }
+
+  mergeSetItem<T extends object>(pageKey: string, data: T) {
+    this.pages.set(pageKey, merge(this.pages.get(pageKey), data));
   }
 
   getItem(pageKey: string) {

@@ -14,6 +14,7 @@ import {
 import { getProjectId } from '@/utils/common';
 import { extendMoment } from 'moment-range';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 
 const moment = extendMoment(Moment);
 const { AppState } = stores;
@@ -534,6 +535,7 @@ class BacklogStore {
     return {
       get(sprintId) {
         const filterAssignId = that.filterSprintAssign.get(sprintId);
+        console.log('filterAssignId====', filterAssignId);
         if (filterAssignId) {
           return that.issueMap.get(sprintId) ? that.issueMap.get(sprintId).filter((issue) => issue.assigneeId === filterAssignId) : [];
         }
@@ -821,6 +823,7 @@ class BacklogStore {
     this.epicFilter = 'all';
     this.quickFilters = [];
     this.assigneeFilterIds = [];
+    this.filterSprintAssign = observable.map();
     this.chosenEpic = 'all';
     this.chosenVersion = 'all';
     this.filterSelected = false;
@@ -1096,7 +1099,7 @@ class BacklogStore {
   getIssueListBySprintId(sprintId) {
     const issueList = this.issueMap.get(String(sprintId));
     const filterAssignId = this.filterSprintAssign.get(sprintId);
-    return filterAssignId ? issueList.filter((issue) => issue.assigneeId === filterAssignId) : issueList;
+    return filterAssignId ? issueList.filter((issue) => String(issue.assigneeId) === String(filterAssignId)) : issueList;
   }
 
   @observable showPlanSprint = true;
@@ -1133,6 +1136,7 @@ class BacklogStore {
         endDate: sprint.actualEndDate || sprint.endDate,
       })));
     }
+    return [];
   }
 
   @action setPiInfo(data) {
