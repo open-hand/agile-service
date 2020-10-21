@@ -167,7 +167,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         configurationRuleVO.setReceiverList(map.get(ruleId).getReceiverList());
         configurationRuleVO.setCcList(map.get(ruleId).getCcList());
         configurationRuleVO.setUserTypes(map.get(ruleId).getUserTypes());
-        configurationRuleVO.setIssueTypes(CommonMapperUtil.readValue(map.get(ruleId).getTypeCode(),javaType));
+        configurationRuleVO.setIssueTypes(CommonMapperUtil.readValue(configurationRuleDTO.getTypeCode(),javaType));
         return configurationRuleVO;
     }
 
