@@ -7,7 +7,7 @@ import java.util.Map;
 
 import io.choerodon.agile.app.service.NoticeDetectionService;
 import io.choerodon.agile.infra.annotation.RuleNotice;
-import io.choerodon.agile.infra.dto.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;

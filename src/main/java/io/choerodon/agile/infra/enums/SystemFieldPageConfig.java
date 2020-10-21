@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.enums;
 
+
 /**
  * @author superlee
  * @since 2020-08-27
@@ -26,8 +27,12 @@ public class SystemFieldPageConfig {
         TIME_TRACE(FieldCode.TIME_TRACE, false, true),
         CREATION_DATE(FieldCode.CREATION_DATE, false, true),
         LAST_UPDATE_DATE(FieldCode.LAST_UPDATE_DATE, false, true),
+        PI(FieldCode.PI, true, true),
+        BENFIT_HYPOTHESIS(FieldCode.BENFIT_HYPOTHESIS, true, true),
+        ACCEPTANCE_CRITERA(FieldCode.ACCEPTANCE_CRITERA, true, true),
         ESTIMATED_START_TIME(FieldCode.ESTIMATED_START_TIME, true, true),
         ESTIMATED_END_TIME(FieldCode.ESTIMATED_END_TIME, true, true),
+        SUB_PROJECT(FieldCode.SUB_PROJECT, true, true),
         ;
 
 

@@ -6,7 +6,7 @@ import io.choerodon.agile.api.vo.business.IssueListVO;
 import io.choerodon.agile.app.service.ReportService;
 
 import io.choerodon.agile.infra.dto.GroupDataChartDTO;
-import io.choerodon.agile.infra.dto.GroupDataChartListDTO;
+import io.choerodon.agile.infra.dto.business.GroupDataChartListDTO;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;

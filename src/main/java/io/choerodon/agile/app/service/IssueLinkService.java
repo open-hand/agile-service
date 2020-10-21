@@ -3,7 +3,7 @@ package io.choerodon.agile.app.service;
 import io.choerodon.agile.api.vo.IssueLinkCreateVO;
 import io.choerodon.agile.api.vo.IssueLinkFixVO;
 import io.choerodon.agile.api.vo.IssueLinkVO;
-import io.choerodon.agile.infra.dto.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.IssueLinkDTO;
 
 import java.util.List;

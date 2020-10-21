@@ -7,6 +7,7 @@ import io.choerodon.agile.app.assembler.StoryMapAssembler;
 import io.choerodon.agile.app.service.IssueAccessDataService;
 import io.choerodon.agile.app.service.StoryMapService;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.StoryMapStoryDTO;
 import io.choerodon.agile.infra.mapper.IssueStatusMapper;
 import io.choerodon.agile.infra.mapper.StoryMapMapper;
 import io.choerodon.agile.infra.mapper.StoryMapWidthMapper;

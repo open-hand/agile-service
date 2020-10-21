@@ -6,7 +6,7 @@ import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusLinkageService;
-import io.choerodon.agile.infra.dto.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.StatusLinkageDTO;
 import io.choerodon.agile.infra.dto.StatusMachineTransformDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;

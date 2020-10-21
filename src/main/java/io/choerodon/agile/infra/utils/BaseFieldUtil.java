@@ -9,8 +9,8 @@ import java.util.Set;
 import javax.persistence.Id;
 
 import io.choerodon.agile.infra.dto.IssueCommentDTO;
-import io.choerodon.agile.infra.dto.IssueConvertDTO;
-import io.choerodon.agile.infra.dto.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.IssueLinkDTO;
 import io.choerodon.agile.infra.mapper.IssueCommentMapper;
 import io.choerodon.agile.infra.mapper.IssueLinkMapper;

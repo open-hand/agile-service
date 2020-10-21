@@ -5,7 +5,7 @@ import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.api.vo.StoryMapStoryVO;
 import io.choerodon.agile.api.vo.StoryMapVersionVO;
 import io.choerodon.agile.infra.utils.ConvertUtil;
-import io.choerodon.agile.infra.dto.StoryMapStoryDTO;
+import io.choerodon.agile.infra.dto.business.StoryMapStoryDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

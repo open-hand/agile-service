@@ -24,7 +24,7 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.StateMachineClientService;
-import io.choerodon.agile.infra.dto.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.utils.VerifyUpdateUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;

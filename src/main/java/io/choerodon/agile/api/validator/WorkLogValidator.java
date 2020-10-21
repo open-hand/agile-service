@@ -2,7 +2,7 @@ package io.choerodon.agile.api.validator;
 
 
 import io.choerodon.agile.api.vo.WorkLogVO;
-import io.choerodon.agile.infra.dto.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.core.exception.CommonException;
 
 /**

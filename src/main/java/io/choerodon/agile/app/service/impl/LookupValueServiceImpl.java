@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.LookupTypeWithValuesVO;
 import io.choerodon.agile.api.vo.LookupValueVO;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.BacklogExpandService;
 import io.choerodon.agile.app.service.LookupValueService;
 import io.choerodon.agile.infra.dto.LookupTypeWithValuesDTO;
@@ -38,6 +39,9 @@ public class LookupValueServiceImpl implements LookupValueService {
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
 
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
+
     @Override
     public LookupTypeWithValuesVO queryLookupValueByCode(String typeCode, Long projectId) {
         LookupTypeWithValuesDTO typeWithValues = lookupValueMapper.queryLookupValueByCode(typeCode);
@@ -72,11 +76,15 @@ public class LookupValueServiceImpl implements LookupValueService {
     }
 
     protected List<LookupValueDTO> filterProjectType(Long projectId, LookupTypeWithValuesDTO typeWithValues) {
-        return typeWithValues
-                .getLookupValues()
-                .stream()
-                .filter(i -> ObjectSchemeFieldContext.NORMAL_PROJECT.contains(i.getValueCode()))
-                .collect(Collectors.toList());
+        if (agilePluginService != null) {
+            return agilePluginService.filterProgramType(projectId, typeWithValues);
+        } else {
+            return typeWithValues
+                    .getLookupValues()
+                    .stream()
+                    .filter(i -> ObjectSchemeFieldContext.NORMAL_PROJECT.contains(i.getValueCode()))
+                    .collect(Collectors.toList());
+        }
     }
 
     private List<LookupValueDTO> filterBacklog(Long projectId, LookupTypeWithValuesDTO typeWithValues) {

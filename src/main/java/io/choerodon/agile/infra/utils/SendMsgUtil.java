@@ -5,6 +5,7 @@ import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.app.service.NoticeService;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.app.service.UserService;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueStatusMapper;

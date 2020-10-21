@@ -1,5 +1,7 @@
 package io.choerodon.agile.infra.dto;
 
+import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
+
 import java.util.Date;
 import java.util.List;
 

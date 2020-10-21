@@ -3,6 +3,8 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.app.service.IssueAccessDataService;
 import io.choerodon.agile.infra.dto.BatchRemoveSprintDTO;
 import io.choerodon.agile.infra.annotation.DataLog;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.utils.BaseFieldUtil;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.dto.*;
@@ -15,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @Transactional(rollbackFor = Exception.class)

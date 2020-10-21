@@ -2,7 +2,7 @@ package io.choerodon.agile.app.service;
 
 import java.util.List;
 
-import io.choerodon.agile.infra.dto.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 
 /**

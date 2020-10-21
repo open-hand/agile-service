@@ -1,12 +1,17 @@
 package io.choerodon.agile.app.service;
 
 import com.alibaba.fastjson.JSONObject;
+import io.choerodon.agile.api.vo.IssueTypeVO;
+import io.choerodon.agile.api.vo.PageConfigFieldVO;
 import io.choerodon.agile.api.vo.QuickFilterValueVO;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -166,4 +171,43 @@ public interface AgilePluginService {
      * @param programMap
      */
     void handlerFeatureField(Long projectId, IssueDTO issueDTO, Map<String, Object> programMap);
+
+    /**
+     * 过滤项目群类型
+     * @param projectId
+     * @param typeWithValues
+     * @return
+     */
+    List<LookupValueDTO> filterProgramType(Long projectId, LookupTypeWithValuesDTO typeWithValues);
+
+    /**
+     * 查询项目群的问题类型
+     * @param projectId
+     * @param issueTypes
+     * @param contextArray
+     * @return
+     */
+    List<IssueTypeVO> queryProgramIssueType(Long projectId, List<IssueTypeVO> issueTypes, List<String> contextArray);
+
+    /**
+     * 项目群史诗查询pageConfig
+     * @param projectId
+     * @param issueType
+     * @param pageConfigFieldVOS
+     * @return
+     */
+    List<PageConfigFieldVO> queryProgramPageConfigFields(Long projectId, String issueType, List<PageConfigFieldVO> pageConfigFieldVOS);
+
+    /**
+     * 添加项目群问题类型
+     * @return
+     */
+    List<String> addProgramIssueType();
+
+    /**
+     * 对项目群史诗进行处理
+     * @param objectSchemeFieldDTOS
+     * @return
+     */
+    List<ObjectSchemeFieldDTO> filterProgramEpic(List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS);
 }

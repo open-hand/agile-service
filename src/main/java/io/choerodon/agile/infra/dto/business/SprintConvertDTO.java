@@ -1,5 +1,6 @@
-package io.choerodon.agile.infra.dto;
+package io.choerodon.agile.infra.dto.business;
 
+import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.core.exception.CommonException;
 
 import java.util.Date;
@@ -11,6 +12,8 @@ import java.util.Date;
 public class SprintConvertDTO {
 
     public SprintConvertDTO() {}
+
+    private static final String TYPE_PI = "pi";
 
     public SprintConvertDTO(Long projectId, String sprintName, String sprintGoal, Date startDate, Date endDate, String statusCode) {
         this.projectId = projectId;
@@ -30,13 +33,33 @@ public class SprintConvertDTO {
     private String statusCode;
     private Long projectId;
     private Long objectVersionNumber;
-
+    private static final String TYPE_IP = "ip";
+    private Long piId;
+    private String type;
+    public SprintConvertDTO(Long projectId, String sprintName, Date startDate, Date endDate, String statusCode, Long piId) {
+        this.projectId = projectId;
+        this.sprintName = sprintName;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.statusCode = statusCode;
+        this.piId = piId;
+        if(piId != null) {
+            this.type = TYPE_PI;
+        }
+    }
     private static final String STATUS_SPRINT_PLANNING_CODE = "sprint_planning";
     private static final String STATUS_STARTED_CODE = "started";
     private static final String STATUS_CLOSE_CODE = "closed";
     private static final String SPRINT_DATE_ERROR = "error.sprintDate.nullOrStartAfterEndDate";
     private static final String DELETE_ERROR = "error.sprint.isDoing";
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
     public Long getSprintId() {
         return sprintId;
     }
@@ -107,6 +130,14 @@ public class SprintConvertDTO {
 
     public void setObjectVersionNumber(Long objectVersionNumber) {
         this.objectVersionNumber = objectVersionNumber;
+    }
+
+    public Long getPiId() {
+        return piId;
+    }
+
+    public void setPiId(Long piId) {
+        this.piId = piId;
     }
 
     public void createSprint(ProjectInfoDTO project) {
