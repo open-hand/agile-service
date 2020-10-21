@@ -415,6 +415,19 @@ class IssueApi extends Api<IssueApi> {
       },
     });
   }
+
+  loadParentIssues(page: number, size: number = 20, issueType: 'bug' | 'sub_task', param?: string) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issues/available_parents`,
+      params: {
+        issueType,
+        param,
+        page,
+        size,
+      },
+    });
+  }
 }
 const issueApi = new IssueApi();
 

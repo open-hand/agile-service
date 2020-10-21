@@ -387,8 +387,7 @@ class CreateIssue extends Component {
           teamProjectIds,
           estimatedEndTime: estimatedEndTime && estimatedEndTime.format('YYYY-MM-DD HH:mm:ss'),
           estimatedStartTime: estimatedStartTime && estimatedStartTime.format('YYYY-MM-DD HH:mm:ss'),
-          subBugParent,
-          subTaskParent,
+          parentId: subBugParent || subTaskParent,
         };
         this.setState({ createLoading: true });
         const deltaOps = description;

@@ -240,7 +240,7 @@ export default {
       optionLabelProp: 'showName',
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
     },
-    request: ({ filter, page }, issueId) => issueApi.loadIssuesInLink(page, 20, issueId, filter),
+    request: ({ filter, page }, issueId) => issueApi.loadIssuesInLink(page - 1, 20, issueId, filter),
     render: (issue) => (
       <Option
         key={issue.issueId}
@@ -285,7 +285,7 @@ export default {
       loadWhenMount: true,
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
     },
-    request: ({ filter, page }, issueId) => issueApi.loadIssuesInLink(page, 20, issueId, filter), // 故事、任务、缺陷（不能是子缺陷）
+    request: ({ filter, page }) => issueApi.loadParentIssues(page, 20, 'sub_task', filter), // 故事、任务、缺陷（不能是子缺陷）
     render: (issue) => (
       <Option
         key={issue.issueId}
@@ -329,7 +329,7 @@ export default {
       loadWhenMount: true,
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
     },
-    request: ({ filter, page }, issueId) => issueApi.loadIssuesInLink(page, 20, issueId, filter), // 故事、任务
+    request: ({ filter, page }) => issueApi.loadParentIssues(page, 20, 'bug', filter), // 故事、任务
     render: (issue) => (
       <Option
         key={issue.issueId}
