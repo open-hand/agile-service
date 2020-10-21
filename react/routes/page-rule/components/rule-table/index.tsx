@@ -10,7 +10,7 @@ import { User } from '@/common/types';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
 import { getProjectId } from '@/utils/common';
-import { UserHead } from '@/components';
+import UserHead from '@/components/UserHead';
 import { pageRuleApi } from '@/api';
 import styles from '../../index.less';
 import RuleModal from '../rule-modal';
