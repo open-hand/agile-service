@@ -5,6 +5,7 @@ import io.choerodon.agile.api.vo.IssueOverviewVO;
 import io.choerodon.agile.api.vo.SearchVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
