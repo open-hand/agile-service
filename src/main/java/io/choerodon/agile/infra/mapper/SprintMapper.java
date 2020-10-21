@@ -1,6 +1,7 @@
 package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 

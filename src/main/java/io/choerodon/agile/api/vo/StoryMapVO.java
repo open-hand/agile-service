@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.agile.infra.dto.EpicWithInfoDTO;
-import io.choerodon.agile.infra.dto.StoryMapStoryDTO;
+import io.choerodon.agile.infra.dto.business.StoryMapStoryDTO;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/6/22 下午3:13

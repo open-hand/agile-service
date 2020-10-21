@@ -4,7 +4,7 @@ import io.choerodon.agile.api.vo.DataLogFixVO;
 import io.choerodon.agile.api.vo.StatusVO;
 import io.choerodon.agile.infra.dto.DataLogDTO;
 import io.choerodon.agile.infra.dto.DataLogStatusChangeDTO;
-import io.choerodon.agile.infra.dto.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.ProductVersionDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;

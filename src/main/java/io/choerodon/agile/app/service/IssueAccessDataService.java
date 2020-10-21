@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.infra.dto.BatchRemoveSprintDTO;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 
 import java.util.Date;
 import java.util.List;

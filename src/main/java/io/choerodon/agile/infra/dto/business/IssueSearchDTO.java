@@ -1,4 +1,4 @@
-package io.choerodon.agile.infra.dto;
+package io.choerodon.agile.infra.dto.business;
 
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.PriorityVO;
@@ -25,6 +25,9 @@ public class IssueSearchDTO {
     private Long projectId;
     private Long epicId;
     private String epicName;
+    private String featureName;
+    private String featureColor;
+    private Long featureId;
     private List<Long> versionIds;
     private List<String> versionNames;
     private Long sprintId;
@@ -43,6 +46,14 @@ public class IssueSearchDTO {
     private IssueTypeVO issueTypeVO;
     private String assigneeLoginName;
     private String assigneeRealName;
+
+    public Long getFeatureId() {
+        return featureId;
+    }
+
+    public void setFeatureId(Long featureId) {
+        this.featureId = featureId;
+    }
 
     public Long getIssueId() {
         return issueId;
@@ -250,6 +261,22 @@ public class IssueSearchDTO {
 
     public void setAssigneeRealName(String assigneeRealName) {
         this.assigneeRealName = assigneeRealName;
+    }
+
+    public String getFeatureName() {
+        return featureName;
+    }
+
+    public void setFeatureName(String featureName) {
+        this.featureName = featureName;
+    }
+
+    public String getFeatureColor() {
+        return featureColor;
+    }
+
+    public void setFeatureColor(String featureColor) {
+        this.featureColor = featureColor;
     }
 
     public Date getEstimatedStartTime() {

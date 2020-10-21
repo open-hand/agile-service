@@ -44,7 +44,7 @@
         order by ai.issue_id desc
     </select>
 
-    <resultMap id="storyListMap" type="io.choerodon.agile.infra.dto.StoryMapStoryDTO">
+    <resultMap id="storyListMap" type="io.choerodon.agile.infra.dto.business.StoryMapStoryDTO">
         <id column="ai_issue_id" property="issueId"/>
         <id column="ai_issue_num" property="issueNum"/>
         <id column="ai_summary" property="summary"/>

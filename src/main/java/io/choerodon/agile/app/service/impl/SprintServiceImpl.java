@@ -2,6 +2,9 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.business.IssueListVO;
 import io.choerodon.agile.api.vo.business.SprintDetailVO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
+import io.choerodon.agile.infra.dto.business.SprintConvertDTO;
 import io.choerodon.core.domain.Page;
 import com.google.common.collect.Ordering;
 import io.choerodon.agile.api.validator.SprintValidator;

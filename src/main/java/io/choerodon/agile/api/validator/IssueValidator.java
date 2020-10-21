@@ -11,6 +11,8 @@ import io.choerodon.agile.app.service.StateMachineTransformService;
 import io.choerodon.agile.app.service.StatusTransferSettingService;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;

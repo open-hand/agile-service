@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.event.TransformInfo;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.cache.InstanceCache;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
 import io.choerodon.agile.infra.mapper.*;

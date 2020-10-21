@@ -1,18 +1,15 @@
 package io.choerodon.agile.app.service.impl;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
-import io.choerodon.agile.api.vo.MessageSenderUniqueVO;
 import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
 import io.choerodon.agile.app.service.NoticeDetectionService;
 import io.choerodon.agile.app.service.StatusNoticeSettingService;
-import io.choerodon.agile.infra.dto.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 import io.choerodon.agile.infra.mapper.ConfigurationRuleMapper;

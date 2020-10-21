@@ -7,6 +7,7 @@ import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusFieldSettingService;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.FieldCode;
 import io.choerodon.agile.infra.enums.FieldType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;

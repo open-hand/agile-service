@@ -61,7 +61,7 @@
                     select="querySubBugByIssueId"/>
     </resultMap>
 
-    <resultMap id="issueSearch" type="io.choerodon.agile.infra.dto.IssueSearchDTO">
+    <resultMap id="issueSearch" type="io.choerodon.agile.infra.dto.business.IssueSearchDTO">
         <id property="issueId" column="issue_id"/>
         <id property="issueNum" column="issue_num"/>
         <id property="typeCode" column="type_code"/>
@@ -275,7 +275,7 @@
         WHERE issue_id = #{issueId}
     </select>
 
-    <select id="querySubIssueByIssueId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="querySubIssueByIssueId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
             ai.issue_id,
             ai.summary,
@@ -294,7 +294,7 @@
         WHERE ai.parent_issue_id = #{issueId}
     </select>
 
-    <select id="querySubBugByIssueId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="querySubBugByIssueId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
             ai.issue_id,
             ai.summary,
@@ -312,7 +312,7 @@
         WHERE ai.relate_issue_id = #{issueId}
     </select>
 
-    <resultMap id="IssueWithSub" type="io.choerodon.agile.infra.dto.IssueDTO">
+    <resultMap id="IssueWithSub" type="io.choerodon.agile.infra.dto.business.IssueDTO">
         <id property="issueId" column="issue_issue_id"/>
         <result property="typeCode" column="type_code"/>
         <result property="summary" column="summary"/>
@@ -364,7 +364,7 @@
         </collection>
     </resultMap>
 
-    <select id="queryIssueByIssueIdsAndSubIssueIds" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryIssueByIssueIdsAndSubIssueIds" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         select
         *
         from agile_issue
@@ -487,7 +487,7 @@
         END
     </select>
 
-    <select id="queryIssueIdsListWithSub" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryIssueIdsListWithSub" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         select
             ai1.issue_id ,
             ai1.priority_id,
@@ -597,7 +597,7 @@
         </if>
     </select>
 
-    <select id="queryStoryAndTaskByProjectId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryStoryAndTaskByProjectId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         select
         ai.issue_id as issue_id,
         ai.summary,
@@ -1078,7 +1078,7 @@
         and reporter_id is not null
     </select>
 
-    <select id="queryParentIssueByProjectIdsAndUserId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryParentIssueByProjectIdsAndUserId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         select DISTINCT ai.* from (
             (
               select ai.issue_id,ai.project_id,ai.last_update_date from agile_issue_sprint_rel aisr,agile_issue ai,agile_issue_status ais
@@ -1140,7 +1140,7 @@
              order by ai.project_id ASC,ai.last_update_date DESC
     </select>
 
-    <select id="listIssuesByParentIssueIdsAndUserId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="listIssuesByParentIssueIdsAndUserId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
           SELECT
             ai.issue_id, ai.summary,
             ai.project_id, ai.type_code,
@@ -1554,7 +1554,7 @@
         </foreach>
     </select>
 
-    <select id="queryIssueSprintNotClosed" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryIssueSprintNotClosed" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
             ai.issue_id,
             asp1.sprint_id,
@@ -1570,7 +1570,7 @@
         WHERE ai.project_id = #{projectId} AND ai.issue_id = #{issueId}
     </select>
 
-    <select id="queryIssueSubList" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryIssueSubList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT *
         FROM
             agile_issue
@@ -1613,7 +1613,7 @@
         WHERE epic_id = #{issueId}
     </update>
 
-    <select id="queryIssueEpicSelectList" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryIssueEpicSelectList" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
             issue_id,
             epic_name
@@ -1797,7 +1797,7 @@
         WHERE project_id = #{projectId} AND relate_issue_id = #{issueId}
     </select>
 
-    <select id="queryIssueEpicInfoByIssueIds" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryIssueEpicInfoByIssueIds" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         select ai.* from agile_issue ai where ai.issue_id in
         <foreach collection="issueIds" item="issueId" open="(" separator=","
                  close=")">
@@ -1841,7 +1841,7 @@
         ORDER BY ai.issue_id
     </select>
 
-    <select id="listIssueWithLinkedIssues" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="listIssueWithLinkedIssues" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT search.* from (
         SELECT
         ai.issue_id,
@@ -1961,7 +1961,7 @@
         </if>
     </select>
 
-    <select id="listIssueWithoutSubToTestComponent" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="listIssueWithoutSubToTestComponent" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT search.* from (
         SELECT
         ai.issue_id,
@@ -2224,7 +2224,7 @@
             creation_day
     </select>
 
-    <select id="queryIssueWithNoCloseSprint" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryIssueWithNoCloseSprint" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
             ai.issue_id,
             ai.type_code,
@@ -2745,7 +2745,7 @@
         </foreach>
     </delete>
 
-    <select id="queryEpicDetailByIssueId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryEpicDetailByIssueId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
                 ai.issue_id,
                 CONCAT_WS( '-', api.project_code, ai.issue_num ) AS issue_num,
@@ -2760,7 +2760,7 @@
                 AND ai.type_code = 'issue_epic'
     </select>
 
-    <select id="queryEpicWithStatusByIssueId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryEpicWithStatusByIssueId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
             ai.issue_id,
             ais.is_completed as completed,
@@ -2806,7 +2806,7 @@
     </resultMap>
 
 
-    <select id="queryIssueSprintNotClosedByIssueIds" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryIssueSprintNotClosedByIssueIds" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
         ai.issue_id,
         IFNULL(asp1.sprint_id, 0) AS sprint_id,
@@ -2835,7 +2835,7 @@
         AND ai.apply_type = #{applyType}
     </select>
 
-    <select id="queryByIssueTypeIdsAndApplyType" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryByIssueTypeIdsAndApplyType" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
         ai.*
         FROM agile_issue ai
@@ -2855,7 +2855,7 @@
         AND apply_type = #{applyType}
     </update>
 
-    <select id="queryIssueWithCompleteInfoByStatusId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryIssueWithCompleteInfoByStatusId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
         ai.*,ais.is_completed as completed
         FROM agile_issue ai left join agile_issue_status ais on ais.status_id = ai.status_id and ai.project_id = ais.project_id
@@ -2903,7 +2903,7 @@
         </foreach>
     </update>
 
-    <select id="queryIssuesByPriorityId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryIssuesByPriorityId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
         ai.*
         FROM agile_issue ai
@@ -2958,7 +2958,7 @@
         AND apply_type = 'test'
     </select>
 
-    <select id="listIssueInfoByIssueIds" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="listIssueInfoByIssueIds" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
         ai.issue_id as issue_id,
         ai.summary,
@@ -3040,7 +3040,7 @@
         group by ai.issue_type_id
     </select>
 
-    <select id="querySubIssueByParentIssueId" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="querySubIssueByParentIssueId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         select * from agile_issue ai
         where ai.project_id = #{projectId}
         AND (ai.parent_issue_id = #{parentIssueId} OR ai.relate_issue_id = #{parentIssueId})

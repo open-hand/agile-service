@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.choerodon.agile.api.vo.business.ExportIssuesVO;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.ExcelImportTemplateColumn;
 import io.choerodon.agile.infra.enums.IssueTypeCode;
 import io.choerodon.agile.infra.enums.ObjectSchemeCode;
