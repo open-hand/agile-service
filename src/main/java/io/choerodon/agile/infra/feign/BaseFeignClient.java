@@ -21,7 +21,7 @@ import java.util.Set;
  * @since 2018/5/24
  */
 @Component
-@FeignClient(value = HZeroService.Iam.NAME, fallback = BaseFeignClientFallback.class)
+@FeignClient(value = "choerodon-iam", fallback = BaseFeignClientFallback.class)
 public interface BaseFeignClient {
 
     /**

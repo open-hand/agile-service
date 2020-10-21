@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.app.service.BacklogExpandService;
 import io.choerodon.agile.app.service.ProjectInfoService;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
@@ -31,6 +32,8 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
     private BaseFeignClient baseFeignClient;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired(required = false)
+    private BacklogExpandService backlogExpandService;
 
     @Override
     public void initializationProjectInfo(ProjectEvent projectEvent) {
@@ -42,6 +45,9 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
         int result = projectInfoMapper.insert(projectInfoDTO);
         if (result != 1) {
             throw new CommonException("error.projectInfo.initializationProjectInfo");
+        }
+        if (backlogExpandService != null) {
+            backlogExpandService.initBacklogMaxNum(projectEvent.getProjectId(),0L);
         }
     }
 

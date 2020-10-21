@@ -32,5 +32,4 @@ public interface ProjectOverviewService {
      * @return sprint情况统计
      */
     SprintStatisticsVO selectSprintStatistics(Long projectId, Long sprintId);
-
 }

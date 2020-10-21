@@ -10,6 +10,7 @@ import io.choerodon.agile.api.vo.QuickFilterSearchVO;
 import io.choerodon.agile.api.vo.QuickFilterSequenceVO;
 import io.choerodon.agile.api.vo.QuickFilterVO;
 import io.choerodon.agile.api.vo.QuickFilterValueVO;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
 import io.choerodon.agile.app.service.QuickFilterFieldService;
 import io.choerodon.agile.app.service.QuickFilterService;
@@ -21,9 +22,12 @@ import io.choerodon.agile.infra.mapper.QuickFilterFieldMapper;
 import io.choerodon.agile.infra.mapper.QuickFilterMapper;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.ProjectUtil;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.starter.keyencrypt.core.EncryptProperties;
 import org.hzero.starter.keyencrypt.core.EncryptionService;
 import org.modelmapper.ModelMapper;
@@ -69,6 +73,8 @@ public class QuickFilterServiceImpl implements QuickFilterService {
     private ObjectMapper objectMapper;
     @Autowired
     private QuickFilterFieldService quickFilterFieldService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     private EncryptionService encryptionService = new EncryptionService(new EncryptProperties());
 
@@ -133,7 +139,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
             if (NOT_IN.equals(operation)) {
                 sqlQuery.append(" issue_id not in ( select issue_id from agile_version_issue_rel where version_id in " + inSql(operation,value) + " and relation_type = 'influence' ) ");
             } else {
-                sqlQuery.append(" issue_id in ( select issue_id from agile_version_issue_rel where " + field + " " + inSql(operation,value) + " " + EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY) + " and relation_type = 'influence' ) ");
+                sqlQuery.append(" issue_id in ( select issue_id from agile_version_issue_rel where " + field + " " + quickFilterValueVO.getOperation() + " " + inSql(operation,value) + " and relation_type = 'influence' ) ");
             }
         }
     }
@@ -225,7 +231,7 @@ public class QuickFilterServiceImpl implements QuickFilterService {
                 " select ffv.instance_id from fd_field_value ffv where ffv.project_id = " + projectId
                         + " and ffv.field_id = " + fieldId;
         if (CustomFieldType.isOption(customFieldType)) {
-            return getOptionOrNumberSql(EncryptionUtils.handlerFilterEncryptList(value,false), operation, selectSql, "ffv.option_id");
+            return getOptionOrNumberSql(NULL_STR.equals(value)? value : EncryptionUtils.handlerFilterEncryptList(value,false), operation, selectSql, "ffv.option_id");
         } else if (CustomFieldType.isDate(customFieldType)) {
             return getDateSql(value, operation, selectSql);
         } else if (CustomFieldType.isDateHms(customFieldType)) {
@@ -357,7 +363,12 @@ public class QuickFilterServiceImpl implements QuickFilterService {
     protected void appendPredefinedFieldSql(StringBuilder sqlQuery, QuickFilterValueVO quickFilterValueVO, Long projectId) {
         String value = "'null'".equals(quickFilterValueVO.getValue()) ? NULL_STR : quickFilterValueVO.getValue();
         String operation = quickFilterValueVO.getOperation();
-        processPredefinedField(sqlQuery, quickFilterValueVO, value, operation);
+        if (agilePluginService != null && "feature".equals(quickFilterValueVO.getFieldCode())) {
+            agilePluginService.appendProgramFieldSql(sqlQuery, quickFilterValueVO, value, operation, projectId);
+        }
+        else {
+            processPredefinedField(sqlQuery, quickFilterValueVO, value, operation);
+        }
     }
 
     protected void processPredefinedField(StringBuilder sqlQuery, QuickFilterValueVO quickFilterValueVO, String value, String operation) {
@@ -481,8 +492,8 @@ public class QuickFilterServiceImpl implements QuickFilterService {
     }
 
     @Override
-    public List<QuickFilterVO> listByProjectId(Long projectId, QuickFilterSearchVO quickFilterSearchVO) {
-        List<QuickFilterDTO> quickFilterDTOList = quickFilterMapper.queryFiltersByProjectId(projectId, quickFilterSearchVO.getFilterName(), quickFilterSearchVO.getContents());
+    public List<QuickFilterVO> listByProjectId(Long projectId, QuickFilterSearchVO quickFilterSearchVO, PageRequest pageRequest) {
+        Page<QuickFilterDTO> quickFilterDTOList = PageHelper.doPageAndSort(pageRequest, ()-> quickFilterMapper.queryFiltersByProjectId(projectId, quickFilterSearchVO.getFilterName(), quickFilterSearchVO.getContents()));
         quickFilterDTOList.forEach(v -> v.setDescription(handlerFilterDescription(v.getDescription(),true)));
         if (quickFilterDTOList != null && !quickFilterDTOList.isEmpty()) {
             return modelMapper.map(quickFilterDTOList, new TypeToken<List<QuickFilterVO>>(){}.getType());
@@ -634,7 +645,11 @@ public class QuickFilterServiceImpl implements QuickFilterService {
             build.append(")");
         }
         else {
-            build.append(encrypt ? encryptionService.encrypt(value, EncryptionUtils.BLANK_KEY) : EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY));
+            if (StringUtils.equalsAny(value,"null","'null'" )){
+                build.append(value);
+            }else {
+                build.append(encrypt ? encryptionService.encrypt(value, EncryptionUtils.BLANK_KEY) : EncryptionUtils.decrypt(value, EncryptionUtils.BLANK_KEY));
+            }
         }
         return build.toString();
     }

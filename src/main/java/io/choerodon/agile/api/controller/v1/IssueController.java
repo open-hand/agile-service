@@ -3,6 +3,7 @@ package io.choerodon.agile.api.controller.v1;
 import com.alibaba.fastjson.JSONObject;
 
 
+import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
@@ -29,8 +30,7 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.swagger.annotation.CustomPageRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -168,11 +168,11 @@ public class IssueController {
                                                                @ApiParam(value = "分页信息", required = true)
                                                                @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
                                                                        PageRequest pageRequest,
-                                                                         @ApiParam(value = "项目id", required = true)
+                                                                     @ApiParam(value = "项目id", required = true)
                                                                @PathVariable(name = "project_id") Long projectId,
-                                                                         @ApiParam(value = "查询参数", required = true)
+                                                                     @ApiParam(value = "查询参数", required = true)
                                                                @RequestBody(required = false) SearchVO searchVO,
-                                                                         @ApiParam(value = "查询参数", required = true)
+                                                                     @ApiParam(value = "查询参数", required = true)
                                                                @RequestParam(required = false) Long organizationId) {
         EncryptionUtils.decryptSearchVO(searchVO);
         return Optional.ofNullable(issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId))
@@ -383,25 +383,25 @@ public class IssueController {
                 .orElseThrow(() -> new CommonException("error.issue.transformedTask"));
     }
 
-    @ResponseBody
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("导出issue列表")
-    @PostMapping(value = "/export")
-    public void exportIssues(@ApiIgnore
-                             @ApiParam(value = "分页信息", required = true)
-                             @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
-                             PageRequest pageRequest,
-                             @ApiParam(value = "项目id", required = true)
-                             @PathVariable(name = "project_id") Long projectId,
-                             @ApiParam(value = "组织id", required = true)
-                             @RequestParam Long organizationId,
-                             @ApiParam(value = "查询参数", required = true)
-                             @RequestBody(required = false) SearchVO searchVO,
-                             HttpServletRequest request,
-                             HttpServletResponse response) {
-        EncryptionUtils.decryptSearchVO(searchVO);
-        issueService.exportIssues(projectId, searchVO, request, response, organizationId, pageRequest.getSort());
-    }
+//    @ResponseBody
+//    @Permission(level = ResourceLevel.ORGANIZATION)
+//    @ApiOperation("导出issue列表")
+//    @PostMapping(value = "/export")
+//    public void exportIssues(@ApiIgnore
+//                             @ApiParam(value = "分页信息", required = true)
+//                             @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
+//                             PageRequest pageRequest,
+//                             @ApiParam(value = "项目id", required = true)
+//                             @PathVariable(name = "project_id") Long projectId,
+//                             @ApiParam(value = "组织id", required = true)
+//                             @RequestParam Long organizationId,
+//                             @ApiParam(value = "查询参数", required = true)
+//                             @RequestBody(required = false) SearchVO searchVO,
+//                             HttpServletRequest request,
+//                             HttpServletResponse response) {
+//        EncryptionUtils.decryptSearchVO(searchVO);
+//        issueService.exportIssues(projectId, searchVO, request, response, organizationId, pageRequest.getSort());
+//    }
 
 
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -690,4 +690,19 @@ public class IssueController {
                                                                   @RequestParam(value = "param", required = false) String param) {
         return ResponseEntity.ok(issueService.pagingQueryReporters(pageRequest, projectId, param));
     }
+
+    @CustomPageRequest
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("根据项目id和问题类型分页查询可以选择的父问题")
+    @PostMapping(value = "/available_parents")
+    public ResponseEntity<Page<IssueVO>> pagingQueryAvailableParents(@ApiIgnore
+                                                                     @ApiParam(value = "分页信息", required = true)
+                                                                             PageRequest pageRequest,
+                                                                     @ApiParam(value = "项目id", required = true)
+                                                                     @PathVariable(name = "project_id") Long projectId,
+                                                                     @RequestParam String issueType,
+                                                                     @RequestParam(value = "param", required = false) String param) {
+        return ResponseEntity.ok(issueService.pagingQueryAvailableParents(pageRequest, projectId, issueType, param));
+    }
+
 }

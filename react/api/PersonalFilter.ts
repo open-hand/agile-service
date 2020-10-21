@@ -1,5 +1,6 @@
 import { axios, stores } from '@choerodon/boot';
 import { getProjectId } from '@/utils/common';
+import Api from './Api';
 
 interface IPersonalFilter {
     filterJson: string, // 搜索条件json字符串
@@ -10,9 +11,9 @@ interface UPersonalFilter{
     objectVersionNumber: number,
 }
 const { AppState } = stores;
-class PersonalFilterApi {
+class PersonalFilterApi extends Api<PersonalFilterApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
@@ -21,7 +22,7 @@ class PersonalFilterApi {
   */
   loadAll(userId: number = AppState.userInfo.id) {
     // const { userInfo: { id: userId } } = AppState;
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/personal_filter/query_all/${userId}`,
     });
@@ -29,7 +30,7 @@ class PersonalFilterApi {
 
   /**
             * 创建我的筛选
-            * @param data 
+            * @param data
             */
   create(data: IPersonalFilter) {
     return axios.post(`${this.prefix}/personal_filter`, data);
@@ -37,24 +38,24 @@ class PersonalFilterApi {
 
   /**
            * 更新我的筛选
-           * @param filterId 
-           * @param updateData 
+           * @param filterId
+           * @param updateData
            */
-  update(filterId: number, updateData: UPersonalFilter) {
+  update(filterId: string, updateData: UPersonalFilter) {
     return axios.put(`${this.prefix}/personal_filter/${filterId}`, updateData);
   }
 
   /**
     * 删除我的筛选
-    * @param filterId 
+    * @param filterId
     */
-  delete(filterId: number) {
+  delete(filterId: string) {
     return axios.delete(`${this.prefix}/personal_filter/${filterId}`);
   }
 
-  /** 
+  /**
     * 检查名字是否重复
-    * @param name 
+    * @param name
     */
   checkName(name: string) {
     const userId = AppState.userInfo.id;

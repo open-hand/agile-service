@@ -1,8 +1,8 @@
 package io.choerodon.agile.app.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.validator.StoryMapValidator;
+import io.choerodon.agile.api.vo.business.StoryMapDragVO;
 import io.choerodon.agile.app.assembler.StoryMapAssembler;
 import io.choerodon.agile.app.service.IssueAccessDataService;
 import io.choerodon.agile.app.service.StoryMapService;

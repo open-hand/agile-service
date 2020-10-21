@@ -36,6 +36,15 @@
         smsc.organization_id = #{organizationId}
     </select>
 
+    <select id="selectBySchemeIds" resultType="io.choerodon.agile.infra.dto.StatusMachineSchemeConfigDTO">
+        select * from fd_status_machine_scheme_config
+        where organization_id = #{organizationId}
+        and scheme_id in
+        <foreach item="item" index="index" collection="schemeIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
     <insert id="migrateStatusMachineSchemeConfig">
        insert into fd_status_machine_scheme_config
        select * from fd_state_machine_scheme_config

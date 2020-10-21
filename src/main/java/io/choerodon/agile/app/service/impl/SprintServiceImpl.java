@@ -1,5 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.api.vo.business.IssueListVO;
+import io.choerodon.agile.api.vo.business.SprintDetailVO;
 import io.choerodon.core.domain.Page;
 import com.google.common.collect.Ordering;
 import io.choerodon.agile.api.validator.SprintValidator;
@@ -349,7 +351,7 @@ public class SprintServiceImpl implements SprintService {
 
     @Override
     public List<SprintNameVO> queryNameByOptions(Long projectId, List<String> sprintStatusCodes) {
-        return sprintNameAssembler.toTargetList(sprintMapper.queryNameByOptions(projectId, sprintStatusCodes), SprintNameVO.class);
+        return sprintNameAssembler.toTargetList(sprintMapper.queryNameByOptions(Arrays.asList(projectId), sprintStatusCodes), SprintNameVO.class);
     }
 
     @Override

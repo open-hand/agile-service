@@ -16,6 +16,7 @@ public class AssigneeIssueVO {
     private Long sprintId;
 
     @ApiModelProperty(value = "经办人id")
+    @Encrypt(ignoreValue = {"0"})
     private Long assigneeId;
 
     @ApiModelProperty(value = "经办人名称")

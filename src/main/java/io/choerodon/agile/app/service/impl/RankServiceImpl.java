@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.RankVO;
 import io.choerodon.agile.api.validator.RankValidator;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.RankService;
 import io.choerodon.agile.infra.utils.RankUtil;
 import io.choerodon.agile.infra.dto.RankDTO;
@@ -40,18 +41,15 @@ public class RankServiceImpl implements RankService {
     @Autowired
     private UserService userService;
 
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
+
 
     private List<Long> getEpicIds(Long projectId) {
         List<Long> epicIds = new ArrayList<>();
-//        // get program epic
-//        ProjectVO program = userService.getGroupInfoByEnableProject(ConvertUtil.getOrganizationId(projectId), projectId);
-//        if (program != null) {
-//            List<Long> programEpicIds = rankMapper.selectEpicIdsByProgram(program.getId());
-//            if (programEpicIds != null && !programEpicIds.isEmpty()) {
-//                epicIds.addAll(programEpicIds);
-//            }
-//        }
-        // get project epic
+        if (agilePluginService != null) {
+            agilePluginService.getProgramEpicIds(epicIds, projectId);
+        }
         List<Long> projectEpicIds = rankMapper.selectEpicIdsByProject(projectId);
         if (projectEpicIds != null && !projectEpicIds.isEmpty()) {
             epicIds.addAll(projectEpicIds);
@@ -95,25 +93,18 @@ public class RankServiceImpl implements RankService {
     public RankDTO getReferenceRank(Long projectId, String type, Long referenceIssueId) {
         RankDTO rankDTO = rankMapper.selectRankByIssueId(projectId, type, referenceIssueId);
         if (rankDTO == null) {
-            switch (type) {
-                case RANK_TYPE_EPIC:
-                    List<Long> epicIds = getEpicIds(projectId);
-                    List<Long> epicRankDOList = rankMapper.checkRankEmpty(projectId, RANK_TYPE_EPIC);
-                    List<Long> emptyEpicIds = epicIds.stream().filter(epicId -> !epicRankDOList.contains(epicId)).collect(Collectors.toList());
-                    if (emptyEpicIds != null && !emptyEpicIds.isEmpty()) {
-                        insertRankByBatch(projectId, emptyEpicIds, RANK_TYPE_EPIC);
-                    }
-                    break;
-//                case RANK_TYPE_FEATURE:
-//                    List<Long> featureIds = getFeatureIds(projectId);
-//                    List<Long> featureRankDOList = rankMapper.checkRankEmpty(projectId, RANK_TYPE_FEATURE);
-//                    List<Long> emptyFeatureIds = featureIds.stream().filter(featureId -> !featureRankDOList.contains(featureId)).collect(Collectors.toList());
-//                    if (emptyFeatureIds != null && !emptyFeatureIds.isEmpty()) {
-//                        insertRankByBatch(projectId, emptyFeatureIds, RANK_TYPE_FEATURE);
-//                    }
-//                    break;
-                default:
-                    break;
+            if (RANK_TYPE_EPIC.equals(type)) {
+                List<Long> epicIds = getEpicIds(projectId);
+                List<Long> epicRankDOList = rankMapper.checkRankEmpty(projectId, RANK_TYPE_EPIC);
+                List<Long> emptyEpicIds = epicIds.stream().filter(epicId -> !epicRankDOList.contains(epicId)).collect(Collectors.toList());
+                if (emptyEpicIds != null && !emptyEpicIds.isEmpty()) {
+                    insertRankByBatch(projectId, emptyEpicIds, RANK_TYPE_EPIC);
+                }
+            }
+            else {
+                if (agilePluginService != null) {
+                    agilePluginService.handlerFeatureRank(projectId,type);
+                }
             }
             RankDTO newRank = rankMapper.selectRankByIssueId(projectId, type, referenceIssueId);
             if (newRank == null) {
@@ -129,25 +120,18 @@ public class RankServiceImpl implements RankService {
         RankDTO rankReference = rankMapper.selectRankByIssueId(projectId, type, referenceIssueId);
         RankDTO rankCurrent = rankMapper.selectRankByIssueId(projectId, type, issueId);
         if (rankReference == null || rankCurrent == null) {
-            switch (type) {
-//                case RANK_TYPE_FEATURE:
-//                    List<Long> featureIds = getFeatureIds(projectId);
-//                    List<Long> featureRankDOList = rankMapper.checkRankEmpty(projectId, RANK_TYPE_FEATURE);
-//                    List<Long> emptyFeatureIds = featureIds.stream().filter(featureId -> !featureRankDOList.contains(featureId)).collect(Collectors.toList());
-//                    if (emptyFeatureIds != null && !emptyFeatureIds.isEmpty()) {
-//                        insertRankByBatch(projectId, emptyFeatureIds, RANK_TYPE_FEATURE);
-//                    }
-//                    break;
-                case RANK_TYPE_EPIC:
-                    List<Long> epicIds = getEpicIds(projectId);
-                    List<Long> epicRankDOList = rankMapper.checkRankEmpty(projectId, RANK_TYPE_EPIC);
-                    List<Long> emptyEpicIds = epicIds.stream().filter(epicId -> !epicRankDOList.contains(epicId)).collect(Collectors.toList());
-                    if (emptyEpicIds != null && !emptyEpicIds.isEmpty()) {
-                        insertRankByBatch(projectId, emptyEpicIds, RANK_TYPE_EPIC);
-                    }
-                    break;
-                default:
-                    break;
+            if (RANK_TYPE_EPIC.equals(type)) {
+                List<Long> epicIds = getEpicIds(projectId);
+                List<Long> epicRankDOList = rankMapper.checkRankEmpty(projectId, RANK_TYPE_EPIC);
+                List<Long> emptyEpicIds = epicIds.stream().filter(epicId -> !epicRankDOList.contains(epicId)).collect(Collectors.toList());
+                if (emptyEpicIds != null && !emptyEpicIds.isEmpty()) {
+                    insertRankByBatch(projectId, emptyEpicIds, RANK_TYPE_EPIC);
+                }
+            }
+            else {
+                if (agilePluginService != null) {
+                    agilePluginService.handlerFeatureRank(projectId,type);
+                }
             }
             RankDTO newRank = rankMapper.selectRankByIssueId(projectId, type, referenceIssueId);
             if (newRank == null) {

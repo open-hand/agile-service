@@ -1,5 +1,6 @@
 import { axios } from '@choerodon/boot';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
+import Api from './Api';
 
 interface IFiled {
   context: string, // "task"
@@ -18,9 +19,9 @@ interface BathUpdateField {
   issueIds: Array<number>,
   predefinedFields: Array<any>,
 }
-class FieldApi {
+class FieldApi extends Api<FieldApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
@@ -45,7 +46,7 @@ class FieldApi {
  * 加载字段配置
  * @returns {V|*}
  */
-  getFields(dto: IFiled, projectId?:number) {
+  getFields(dto: IFiled, projectId?: number) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'post',
@@ -63,7 +64,7 @@ class FieldApi {
  */
   getFieldAndValue(issueId: number, dto: IFiled) {
     const organizationId = getOrganizationId();
-    return axios({
+    return this.request({
       method: 'post',
       url: `${this.prefix}/field_value/list/${issueId}`,
       params: {
@@ -76,8 +77,14 @@ class FieldApi {
   /**
    * 获取项目下自定义的字段
    */
-  getCustomFields() {
-    return axios.get(`${this.prefix}/field_value/list/custom_field`);
+  getCustomFields(issueTypeList?: 'agileIssueType' | 'programIssueType') {
+    return axios({
+      method: 'get',
+      url: `${this.prefix}/field_value/list/custom_field`,
+      params: {
+        issueTypeList: issueTypeList ?? getApplyType() === 'program' ? 'programIssueType' : 'agileIssueType',
+      },
+    });
   }
 
   /**
@@ -85,7 +92,7 @@ class FieldApi {
    * @param dto 自定义字段列表
    * @returns {V|*}
    */
-  createFieldValue(issueId: number, schemeCode: string, dto?: Array<any>, projectId?:number) {
+  createFieldValue(issueId: number, schemeCode: string, dto?: Array<any>, projectId?: number) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'post',
@@ -140,12 +147,13 @@ class FieldApi {
   /**
    * 项目层，获取自定义字段表头
    */
-  getFoundationHeader() {
+  getFoundationHeader(issueTypeList?: 'agileIssueType' | 'programIssueType') {
     return axios.get(`${this.prefix}/field_value/list/getFields`, {
       params: {
         project_id: getProjectId(),
         organizationId: getOrganizationId(),
         schemeCode: 'agile_issue',
+        issueTypeList: issueTypeList ?? getApplyType() === 'program' ? 'programIssueType' : 'agileIssueType',
       },
     });
   }

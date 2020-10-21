@@ -2,7 +2,13 @@ package io.choerodon.agile.app.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.choerodon.agile.api.vo.business.ExportIssuesVO;
+import io.choerodon.agile.api.vo.business.IssueCreateVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.enums.ExcelImportTemplateColumn;
+import io.choerodon.agile.infra.enums.IssueTypeCode;
+import io.choerodon.agile.infra.enums.ObjectSchemeCode;
+import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.IssueTypeLinkDTO;
@@ -14,6 +20,12 @@ import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.core.utils.PageableHelper;
+import io.choerodon.mybatis.pagehelper.PageHelper;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -22,18 +34,27 @@ import org.hzero.boot.message.MessageClient;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/25.
@@ -61,6 +82,20 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String FILE_NAME = "error.xlsx";
     protected static final String MULTIPART_NAME = "file";
     protected static final String ORIGINAL_FILE_NAME = ".xlsx";
+
+    private static final String FIELD_CODES = "fieldCodes";
+    private static final String FIELD_NAMES = "fieldNames";
+    private static final String WEBSOCKET_EXPORT_CODE = "agile-export-issue";
+    private static final String EXCELCONTENTTYPE = "application/vnd.ms-excel";
+    private static final String FILESUFFIX = ".xlsx";
+    protected static final String DOWNLOAD_FILE = "download_file";
+    protected static final String DOWNLOAD_FILE_PI = "download_file_pi";
+    protected static final String DOWNLOAD_FILE_ISSUE_ANALYSIS = "download_file_issue_analysis";
+    private static final String EXPORT_ERROR_WORKBOOK_CLOSE = "error.issue.close.workbook";
+    private static final String PROJECT_ERROR = "error.project.notFound";
+    private static final String FIX_RELATION_TYPE = "fix";
+    private static final String INFLUENCE_RELATION_TYPE = "influence";
+    private Log log = LogFactory.getLog(this.getClass());
 
     protected static final String VERSION_PLANNING = "version_planning";
 
@@ -116,6 +151,51 @@ public class ExcelServiceImpl implements ExcelService {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    protected ObjectSchemeFieldService objectSchemeFieldService;
+    @Autowired
+    private QuickFilterMapper quickFilterMapper;
+    @Autowired
+    protected ProjectInfoMapper projectInfoMapper;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    protected PageFieldService pageFieldService;
+
+    private static final String[] FIELDS_NAMES;
+
+    private static final String[] FIELDS;
+
+    protected static Map<String, String> FIELD_MAP = new LinkedHashMap<>();
+
+    protected static String[] AUTO_SIZE_WIDTH = {"summary", "epicName", "feature",
+            "creationDate", "lastUpdateDate", "sprintName"};
+
+    static {
+        FIELD_MAP.put("typeName", "问题类型");
+        FIELD_MAP.put("issueNum", "问题编号");
+        FIELD_MAP.put("summary", "概要");
+        FIELD_MAP.put("description", "描述");
+        FIELD_MAP.put("priorityName", "优先级");
+        FIELD_MAP.put("statusName", "状态");
+        FIELD_MAP.put("resolution", "解决状态");
+        FIELD_MAP.put("sprintName", "冲刺");
+        FIELD_MAP.put("assigneeName", "经办人");
+        FIELD_MAP.put("reporterName", "报告人");
+        FIELD_MAP.put("storyPoints", "故事点");
+        FIELD_MAP.put("remainingTime", "剩余预估时间");
+        FIELD_MAP.put("versionName", "版本");
+        FIELD_MAP.put("epicName", "所属史诗");
+        FIELD_MAP.put("labelName", "标签");
+        FIELD_MAP.put("componentName", "模块");
+        FIELD_MAP.put("creationDate", "创建时间");
+        FIELD_MAP.put("lastUpdateDate", "最后更新时间");
+        FIELD_MAP.put("estimatedStartTime", "预计开始时间");
+        FIELD_MAP.put("estimatedEndTime", "预计结束时间");
+        FIELDS = new ArrayList<>(FIELD_MAP.keySet()).toArray(new String[FIELD_MAP.keySet().size()]);
+        FIELDS_NAMES = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
+    }
 
     @Override
     public void download(Long projectId, Long organizationId, HttpServletRequest request, HttpServletResponse response) {
@@ -536,7 +616,8 @@ public class ExcelServiceImpl implements ExcelService {
         return subTask;
     }
 
-    protected void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process) {
+    @Override
+    public void sendProcess(FileOperationHistoryDTO fileOperationHistoryDTO, Long userId, Double process) {
         fileOperationHistoryDTO.setProcess(process);
         String message = null;
         try {
@@ -544,7 +625,16 @@ public class ExcelServiceImpl implements ExcelService {
         } catch (JsonProcessingException e) {
             LOGGER.error("object to json error: {}", e);
         }
-        messageClient.sendByUserId(userId, WEBSOCKET_IMPORT_CODE, message);
+        switch (fileOperationHistoryDTO.getAction()) {
+            case UPLOAD_FILE:
+                messageClient.sendByUserId(userId, WEBSOCKET_IMPORT_CODE, message);
+                break;
+            case DOWNLOAD_FILE:
+            case DOWNLOAD_FILE_ISSUE_ANALYSIS:
+            case DOWNLOAD_FILE_PI:
+                messageClient.sendByUserId(userId, WEBSOCKET_EXPORT_CODE, message);
+                break;
+        }
     }
 
     protected String uploadErrorExcel(Workbook errorWorkbook, Long organizationId) {
@@ -780,7 +870,7 @@ public class ExcelServiceImpl implements ExcelService {
     @Override
     public void batchImport(Long projectId, Long organizationId, Long userId, Workbook workbook) {
         String status = DOING;
-        FileOperationHistoryDTO res = initFileOperationHistory(projectId, userId, status);
+        FileOperationHistoryDTO res = initFileOperationHistory(projectId, userId, status, UPLOAD_FILE);
         validateWorkbook(projectId, userId, workbook, res, FIELDS_NAME);
 
         Sheet sheet = workbook.getSheetAt(1);
@@ -1218,8 +1308,9 @@ public class ExcelServiceImpl implements ExcelService {
         return false;
     }
 
-    protected FileOperationHistoryDTO initFileOperationHistory(Long projectId, Long userId, String status) {
-        FileOperationHistoryDTO fileOperationHistoryDTO = new FileOperationHistoryDTO(projectId, userId, UPLOAD_FILE, 0L, 0L, status);
+    @Override
+    public FileOperationHistoryDTO initFileOperationHistory(Long projectId, Long userId, String status, String action) {
+        FileOperationHistoryDTO fileOperationHistoryDTO = new FileOperationHistoryDTO(projectId, userId, action, 0L, 0L, status);
         if (fileOperationHistoryMapper.insert(fileOperationHistoryDTO) != 1) {
             throw new CommonException("error.FileOperationHistoryDTO.insert");
         }
@@ -1242,9 +1333,494 @@ public class ExcelServiceImpl implements ExcelService {
 
 
     @Override
-    public FileOperationHistoryVO queryLatestRecode(Long projectId) {
+    public FileOperationHistoryVO queryLatestRecode(Long projectId, String action) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        FileOperationHistoryDTO result = fileOperationHistoryMapper.queryLatestRecode(projectId, userId);
+        FileOperationHistoryDTO result = fileOperationHistoryMapper.queryLatestRecode(projectId, userId, action);
         return result == null ? new FileOperationHistoryVO() : modelMapper.map(result, FileOperationHistoryVO.class);
+    }
+
+    @Override
+    @Async
+    public void asyncExportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request,
+                                  HttpServletResponse response, Long organizationId, Sort sort, ServletRequestAttributes requestAttributes) {
+        RequestContextHolder.setRequestAttributes(requestAttributes);
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        FileOperationHistoryDTO fileOperationHistoryDTO = initFileOperationHistory(projectId, userId, DOING, DOWNLOAD_FILE);
+        //处理根据界面筛选结果导出的字段
+        Map<String, String[]> fieldMap =
+                handleExportFields(searchVO.getExportFieldCodes(), projectId, organizationId, FIELDS_NAMES, FIELDS);
+        String[] fieldCodes = sortFieldCodes(fieldMap.get(FIELD_CODES));
+        String[] fieldNames = sortFieldNames(fieldMap.get(FIELD_NAMES));
+        ProjectInfoDTO projectInfoDTO = new ProjectInfoDTO();
+        projectInfoDTO.setProjectId(projectId);
+        projectInfoDTO = projectInfoMapper.selectOne(projectInfoDTO);
+        ProjectVO project = userService.queryProject(projectId);
+        if (project == null) {
+            throw new CommonException(PROJECT_ERROR);
+        }
+        project.setCode(projectInfoDTO.getProjectCode());
+        Boolean condition = issueService.handleSearchUser(searchVO, projectId);
+
+        String sheetName = project.getName();
+        Workbook workbook = ExcelUtil.initIssueExportWorkbook(sheetName, fieldNames);
+        ExcelCursorDTO cursor = new ExcelCursorDTO(1, 0, 1000);
+        if (condition) {
+            String filterSql = null;
+            if (searchVO.getQuickFilterIds() != null && !searchVO.getQuickFilterIds().isEmpty()) {
+                filterSql = getQuickFilter(searchVO.getQuickFilterIds());
+            }
+            final String searchSql = filterSql;
+            String orderStr = getOrderStrOfQueryingIssuesWithSub(sort);
+            while (true) {
+                //查询所有父节点问题
+                Page<IssueDTO> page =
+                        PageHelper.doPage(cursor.getPage(), cursor.getSize(), () -> issueMapper.queryIssueIdsListWithSub(projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds(), orderStr));
+                if (CollectionUtils.isEmpty(page.getContent())) {
+                    break;
+                }
+                List<Long> parentIds = page.getContent().stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
+                List<Long> issueIds = new ArrayList<>();
+                Map<Long, Set<Long>> parentSonMap = new HashMap<>();
+                List<IssueDTO> issues = new ArrayList<>();
+                if (!parentIds.isEmpty()) {
+                    Set<Long> childrenIds = issueMapper.queryChildrenIdByParentId(parentIds, projectId, searchVO, searchSql, searchVO.getAssigneeFilterIds());
+                    cursor.addCollections(childrenIds);
+                    issues = issueMapper.queryIssueListWithSubByIssueIds(parentIds, childrenIds, true);
+                }
+                Map<Long, ExportIssuesVO> issueMap = new LinkedHashMap<>();
+                cursor
+                        .addCollections(page.getContent())
+                        .addCollections(parentIds)
+                        .addCollections(issueIds)
+                        .addCollections(parentSonMap)
+                        .addCollections(issueMap)
+                        .addCollections(issues);
+                if (!ObjectUtils.isEmpty(issues)) {
+                    Set<Long> userIds = new HashSet<>();
+                    issues.forEach(i -> {
+                        issueIds.add(i.getIssueId());
+                        Long assigneeId = i.getAssigneeId();
+                        Long reporterId = i.getReporterId();
+                        if (!ObjectUtils.isEmpty(assigneeId) && !Objects.equals(assigneeId, 0L)) {
+                            userIds.add(assigneeId);
+                        }
+                        if (!ObjectUtils.isEmpty(reporterId) && !Objects.equals(reporterId, 0L)) {
+                            userIds.add(reporterId);
+                        }
+                    });
+                    Map<Long, UserMessageDTO> usersMap = userService.queryUsersMap(new ArrayList<>(userIds), true);
+                    Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId, SchemeApplyType.AGILE);
+                    Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
+                    Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
+                    Map<Long, List<SprintNameDTO>> closeSprintNames = issueMapper.querySprintNameByIssueIds(Arrays.asList(projectId), issueIds).stream().collect(Collectors.groupingBy(SprintNameDTO::getIssueId));
+                    Map<Long, List<VersionIssueRelDTO>> fixVersionNames = issueMapper.queryVersionNameByIssueIds(Arrays.asList(projectId), issueIds, FIX_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
+                    Map<Long, List<VersionIssueRelDTO>> influenceVersionNames = issueMapper.queryVersionNameByIssueIds(Arrays.asList(projectId), issueIds, INFLUENCE_RELATION_TYPE).stream().collect(Collectors.groupingBy(VersionIssueRelDTO::getIssueId));
+                    Map<Long, List<LabelIssueRelDTO>> labelNames = issueMapper.queryLabelIssueByIssueIds(Arrays.asList(projectId), issueIds).stream().collect(Collectors.groupingBy(LabelIssueRelDTO::getIssueId));
+                    Map<Long, List<ComponentIssueRelDTO>> componentMap = issueMapper.queryComponentIssueByIssueIds(Arrays.asList(projectId), issueIds).stream().collect(Collectors.groupingBy(ComponentIssueRelDTO::getIssueId));
+                    Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, issueIds, true);
+                    cursor
+                            .addCollections(userIds)
+                            .addCollections(usersMap)
+                            .addCollections(issueTypeDTOMap)
+                            .addCollections(statusMapDTOMap)
+                            .addCollections(priorityDTOMap)
+                            .addCollections(closeSprintNames)
+                            .addCollections(fixVersionNames)
+                            .addCollections(influenceVersionNames)
+                            .addCollections(labelNames)
+                            .addCollections(componentMap)
+                            .addCollections(foundationCodeValue);
+                    issues.forEach(issue -> {
+                        Long issueId = issue.getIssueId();
+                        ExportIssuesVO exportIssuesVO = new ExportIssuesVO();
+                        BeanUtils.copyProperties(issue, exportIssuesVO);
+
+                        exportIssuesVO.setProjectName(project.getName());
+                        exportIssuesVO.setSprintName(getActiveSprintName(issue));
+                        setAssignee(usersMap, issue, exportIssuesVO);
+                        serReporter(usersMap, issue, exportIssuesVO);
+                        setPriorityName(priorityDTOMap, issue, exportIssuesVO);
+                        setStatusName(statusMapDTOMap, issue, exportIssuesVO);
+                        setTypeName(issueTypeDTOMap, issue, exportIssuesVO);
+                        setCloseSprintName(closeSprintNames, issueId, exportIssuesVO);
+                        setFixVersionName(fixVersionNames, issueId, exportIssuesVO);
+                        exportIssuesVO.setSprintName(exportIssuesSprintName(exportIssuesVO));
+                        setInfluenceVersionName(influenceVersionNames, issueId, exportIssuesVO);
+                        setLabelName(labelNames, issueId, exportIssuesVO);
+                        setComponentName(componentMap, issueId, exportIssuesVO);
+                        exportIssuesVO.setVersionName(exportIssuesVersionName(exportIssuesVO));
+                        exportIssuesVO.setDescription(getDes(exportIssuesVO.getDescription()));
+                        setFoundationFieldValue(foundationCodeValue, issueId, exportIssuesVO);
+                        issueMap.put(issueId, exportIssuesVO);
+                        processParentSonRelation(parentSonMap, issue);
+                    });
+                }
+                ExcelUtil.writeIssue(issueMap, parentSonMap, ExportIssuesVO.class, fieldNames, fieldCodes, sheetName, Arrays.asList(AUTO_SIZE_WIDTH), workbook, cursor);
+                boolean hasNextPage = (cursor.getPage() + 1) < page.getTotalPages();
+                cursor.clean();
+                sendProcess(fileOperationHistoryDTO, userId, getProcess(cursor.getPage(), page.getTotalPages()));
+                if (!hasNextPage) {
+                    break;
+                }
+                //查询后页数增1
+                cursor.increasePage();
+            }
+        }
+//        ExcelUtil.writeToResponse(response, workbook);
+        String fileName = project.getName() + FILESUFFIX;
+        //把workbook上传到对象存储服务中
+        downloadWorkBook(organizationId, workbook, fileName, fileOperationHistoryDTO, userId);
+    }
+
+    protected Double getProcess(Integer currentNum, Integer totalNum) {
+        double process = (currentNum + 1.0) / (totalNum + 1.0) * 0.95 * 100;
+        BigDecimal b = new BigDecimal(process);
+        process = b.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return process;
+    }
+
+    /**
+     * 上传文件到minio中
+     *
+     * @param organizationId
+     * @param workbook
+     * @param fileName
+     * @param fileOperationHistoryDTO
+     * @param userId
+     */
+    @Override
+    public void downloadWorkBook(Long organizationId,Workbook workbook, String fileName, FileOperationHistoryDTO fileOperationHistoryDTO, Long userId) {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream();) {
+            workbook.write(os);
+            byte[] content = os.toByteArray();
+            MultipartFile file = new MultipartExcel("file", fileName, EXCELCONTENTTYPE, content);
+
+            //返回上载结果
+            String path = fileClient.uploadFile(organizationId,APPLY_TYPE_AGILE,null, fileName, file);
+            fileOperationHistoryDTO.setStatus(SUCCESS);
+            fileOperationHistoryDTO.setFileUrl(path);
+        } catch (Exception e) {
+            fileOperationHistoryDTO.setStatus(FAILED);
+        } finally {
+            try {
+                fileOperationHistoryDTO.setLastUpdateDate(new Date());
+                fileOperationHistoryMapper.updateByPrimaryKey(fileOperationHistoryDTO);
+                sendProcess(fileOperationHistoryDTO, userId, 100.0);
+
+                //notifyService.postWebSocket(code, String.valueOf(userId), JSON.toJSONString(testFileLoadHistoryWithRateVO));
+                workbook.close();
+            } catch (IOException e) {
+                log.warn(EXPORT_ERROR_WORKBOOK_CLOSE, e);
+            }
+        }
+    }
+
+
+    protected void setLabelName(Map<Long, List<LabelIssueRelDTO>> labelNames, Long issueId, ExportIssuesVO exportIssuesVO) {
+        String labelName = "";
+        List<LabelIssueRelDTO> labelIssueRel = labelNames.get(issueId);
+        if (!ObjectUtils.isEmpty(labelIssueRel)) {
+            labelName = labelIssueRel.stream().map(LabelIssueRelDTO::getLabelName).collect(Collectors.joining(","));
+        }
+        exportIssuesVO.setLabelName(labelName);
+    }
+
+    protected void setComponentName(Map<Long, List<ComponentIssueRelDTO>> componentMap, Long issueId, ExportIssuesVO exportIssuesVO) {
+        String componentName = "";
+        List<ComponentIssueRelDTO> componentIssueRel = componentMap.get(issueId);
+        if (!ObjectUtils.isEmpty(componentIssueRel)) {
+            componentName = componentIssueRel.stream().map(ComponentIssueRelDTO::getName).collect(Collectors.joining(","));
+        }
+        exportIssuesVO.setComponentName(componentName);
+    }
+
+    protected void setFoundationFieldValue(Map<Long, Map<String, Object>> foundationCodeValue, Long issueId, ExportIssuesVO exportIssuesVO) {
+        Map<String, Object> fieldValue = foundationCodeValue.get(issueId);
+        if (fieldValue == null) {
+            fieldValue = new HashMap<>();
+        }
+        exportIssuesVO.setFoundationFieldValue(fieldValue);
+    }
+
+    protected void setInfluenceVersionName(Map<Long, List<VersionIssueRelDTO>> influenceVersionNames, Long issueId, ExportIssuesVO exportIssuesVO) {
+        String influenceVersionName = "";
+        List<VersionIssueRelDTO> versionIssueRel = influenceVersionNames.get(issueId);
+        if (!ObjectUtils.isEmpty(versionIssueRel)) {
+            influenceVersionName = versionIssueRel.stream().map(VersionIssueRelDTO::getName).collect(Collectors.joining(","));
+        }
+        exportIssuesVO.setInfluenceVersionName(influenceVersionName);
+    }
+
+    protected void setCloseSprintName(Map<Long, List<SprintNameDTO>> closeSprintNames, Long issueId, ExportIssuesVO exportIssuesVO) {
+        String closeSprintName = "";
+        List<SprintNameDTO> sprintNames = closeSprintNames.get(issueId);
+        if (!ObjectUtils.isEmpty(sprintNames)) {
+            closeSprintName =
+                    sprintNames
+                            .stream()
+                            .map(SprintNameDTO::getSprintName)
+                            .collect(Collectors.joining(","));
+        }
+        exportIssuesVO.setCloseSprintName(closeSprintName);
+    }
+
+    protected void setFixVersionName(Map<Long, List<VersionIssueRelDTO>> fixVersionNames, Long issueId, ExportIssuesVO exportIssuesVO) {
+        String fixVersionName = "";
+        List<VersionIssueRelDTO> versionIssueRel = fixVersionNames.get(issueId);
+        if (!ObjectUtils.isEmpty(versionIssueRel)) {
+            fixVersionName =
+                    versionIssueRel
+                            .stream()
+                            .map(VersionIssueRelDTO::getName)
+                            .collect(Collectors.joining(","));
+        }
+        exportIssuesVO.setFixVersionName(fixVersionName);
+    }
+
+    protected void setTypeName(Map<Long, IssueTypeVO> issueTypeDTOMap, IssueDTO issue, ExportIssuesVO exportIssuesVO) {
+        IssueTypeVO issueTypeVO = issueTypeDTOMap.get(issue.getIssueTypeId());
+        if (!ObjectUtils.isEmpty(issueTypeVO)) {
+            exportIssuesVO.setTypeName(issueTypeVO.getName());
+        }
+    }
+
+    protected void setStatusName(Map<Long, StatusVO> statusMapDTOMap, IssueDTO issue, ExportIssuesVO exportIssuesVO) {
+        StatusVO statusVO = statusMapDTOMap.get(issue.getStatusId());
+        if (!ObjectUtils.isEmpty(statusVO)) {
+            exportIssuesVO.setStatusName(statusVO.getName());
+        }
+    }
+
+    protected void setPriorityName(Map<Long, PriorityVO> priorityDTOMap, IssueDTO issue, ExportIssuesVO exportIssuesVO) {
+        Long priorityId = issue.getPriorityId();
+        PriorityVO priorityVO = priorityDTOMap.get(priorityId);
+        if (!ObjectUtils.isEmpty(priorityVO)) {
+            exportIssuesVO.setPriorityName(priorityVO.getName());
+        }
+    }
+
+    protected void serReporter(Map<Long, UserMessageDTO> usersMap, IssueDTO issue, ExportIssuesVO exportIssuesVO) {
+        Long reporterId = issue.getReporterId();
+        UserMessageDTO userMessage = usersMap.get(reporterId);
+        if (!ObjectUtils.isEmpty(userMessage)) {
+            exportIssuesVO.setReporterName(userMessage.getName());
+            exportIssuesVO.setReporterRealName(userMessage.getRealName());
+        }
+    }
+
+    protected void setAssignee(Map<Long, UserMessageDTO> usersMap, IssueDTO issue, ExportIssuesVO exportIssuesVO) {
+        Long assigneeId = issue.getAssigneeId();
+        UserMessageDTO userMessage = usersMap.get(assigneeId);
+        if (!ObjectUtils.isEmpty(userMessage)) {
+            exportIssuesVO.setAssigneeName(userMessage.getName());
+            exportIssuesVO.setAssigneeRealName(userMessage.getRealName());
+        }
+    }
+
+    protected String getActiveSprintName(IssueDTO issue) {
+        List<IssueSprintDTO>  issueSprintList = issue.getIssueSprintDTOS();
+        if (!ObjectUtils.isEmpty(issueSprintList)) {
+            for(IssueSprintDTO sprint : issueSprintList) {
+                if (!"closed".equals(sprint.getStatusCode())) {
+                    return sprint.getSprintName();
+                }
+            }
+        }
+        return null;
+    }
+
+    protected String[] sortFieldNames(String[] fieldNames) {
+        List<String> result = new ArrayList<>();
+        result.add("问题类型");
+        result.add("问题编号");
+        result.add("概要");
+        for (String str : fieldNames) {
+            if (result.get(0).equals(str)
+                    || result.get(1).equals(str)
+                    || result.get(2).equals(str)) {
+                continue;
+            }
+            result.add(str);
+        }
+        return result.toArray(new String[result.size()]);
+    }
+
+    protected String[] sortFieldCodes(String[] fieldCodes) {
+        List<String> result = new ArrayList<>();
+        result.add("typeName");
+        result.add("issueNum");
+        result.add("summary");
+        for (String str : fieldCodes) {
+            if (result.get(0).equals(str)
+                    || result.get(1).equals(str)
+                    || result.get(2).equals(str)) {
+                continue;
+            }
+            result.add(str);
+        }
+        return result.toArray(new String[result.size()]);
+    }
+
+    protected void processParentSonRelation(Map<Long, Set<Long>> parentSonMap, IssueDTO issue) {
+        String typeCode = issue.getTypeCode();
+        Long issueId = issue.getIssueId();
+        if (IssueTypeCode.isBug(typeCode)) {
+            Long relateIssueId = issue.getRelateIssueId();
+            if (!ObjectUtils.isEmpty(relateIssueId) && !Objects.equals(relateIssueId, 0L)) {
+                appendToParentSonMap(relateIssueId, issueId, parentSonMap);
+            }
+        }
+        if (IssueTypeCode.isSubTask(typeCode)) {
+            Long parentIssueId = issue.getParentIssueId();
+            if (!ObjectUtils.isEmpty(parentIssueId) && !Objects.equals(parentIssueId, 0L)) {
+                appendToParentSonMap(parentIssueId, issueId, parentSonMap);
+            }
+        }
+    }
+
+    private void appendToParentSonMap(Long parentId, Long issueId, Map<Long, Set<Long>> parentSonMap) {
+        Set<Long> childrenSet =  parentSonMap.get(parentId);
+        if (childrenSet == null) {
+            childrenSet = new HashSet<>();
+            parentSonMap.put(parentId, childrenSet);
+        }
+        childrenSet.add(issueId);
+    }
+
+    protected String getQuickFilter(List<Long> quickFilterIds) {
+        List<String> sqlQuerys = quickFilterMapper.selectSqlQueryByIds(quickFilterIds);
+        if (sqlQuerys.isEmpty()) {
+            return null;
+        }
+        int idx = 0;
+        StringBuilder sql = new StringBuilder("select issue_id from agile_issue where ");
+        for (String filter : sqlQuerys) {
+            if (idx == 0) {
+                sql.append(" ( " + filter + " ) ");
+                idx += 1;
+            } else {
+                sql.append(" and " + " ( " + filter + " ) ");
+            }
+        }
+        return sql.toString();
+    }
+
+    /**
+     * 处理根据界面筛选结果导出的字段
+     *
+     * @param exportFieldCodes
+     * @return
+     */
+    protected Map<String, String[]> handleExportFields(List<String> exportFieldCodes,
+                                                       Long projectId,
+                                                       Long organizationId,
+                                                       String[] fieldsName,
+                                                       String[] fields) {
+        Map<String, String[]> fieldMap = new HashMap<>(2);
+        ObjectMapper m = new ObjectMapper();
+
+        Object content = Optional.ofNullable(objectSchemeFieldService
+                .listQuery(organizationId, projectId, ObjectSchemeCode.AGILE_ISSUE))
+                .orElseThrow(() -> new CommonException("error.foundation.listQuery"))
+                .get("content");
+
+        processExportField(exportFieldCodes, fieldsName, fields, fieldMap, m, content);
+        return fieldMap;
+    }
+
+    @Override
+    public void processExportField(List<String> exportFieldCodes,
+                                    String[] fieldsName,
+                                    String[] fields,
+                                    Map<String, String[]> fieldMap,
+                                    ObjectMapper m,
+                                    Object content) {
+        List<Object> contentList = m.convertValue(content, List.class);
+        List<ObjectSchemeFieldDTO> fieldDTOS = new ArrayList<>();
+
+        if (content != null) {
+            contentList.forEach(k ->
+                    fieldDTOS.add(m.convertValue(k, ObjectSchemeFieldDTO.class)));
+        }
+
+        List<ObjectSchemeFieldDTO> userDefinedFieldDTOS = fieldDTOS.stream().
+                filter(v -> !v.getSystem()).collect(Collectors.toList());
+
+        if (exportFieldCodes != null && exportFieldCodes.size() != 0) {
+            Map<String, String> data = new HashMap<>(fields.length + userDefinedFieldDTOS.size());
+            for (int i = 0; i < fields.length; i++) {
+                data.put(fields[i], fieldsName[i]);
+            }
+            for (ObjectSchemeFieldDTO userDefinedFieldDTO : userDefinedFieldDTOS) {
+                data.put(userDefinedFieldDTO.getCode(), userDefinedFieldDTO.getName());
+            }
+
+            List<String> fieldCodes = new ArrayList<>(exportFieldCodes.size());
+            List<String> fieldNames = new ArrayList<>(exportFieldCodes.size());
+            exportFieldCodes.forEach(code -> {
+                String name = data.get(code);
+                if (name != null) {
+                    fieldCodes.add(code);
+                    fieldNames.add(name);
+                } else {
+                    throw new CommonException("error.issue.illegal.exportField", code);
+                }
+            });
+            fieldMap.put(FIELD_CODES, fieldCodes.stream().toArray(String[]::new));
+            fieldMap.put(FIELD_NAMES, fieldNames.stream().toArray(String[]::new));
+        } else {
+            if (!userDefinedFieldDTOS.isEmpty()) {
+                List<String> fieldCodes = new ArrayList(Arrays.asList(fields));
+                List<String> fieldNames = new ArrayList(Arrays.asList(fieldsName));
+                userDefinedFieldDTOS.forEach(fieldDTO -> {
+                    fieldCodes.add(fieldDTO.getCode());
+                    fieldNames.add(fieldDTO.getName());
+                });
+
+                fieldMap.put(FIELD_CODES, fieldCodes.stream().toArray(String[]::new));
+                fieldMap.put(FIELD_NAMES, fieldNames.stream().toArray(String[]::new));
+            } else {
+                fieldMap.put(FIELD_CODES, fields);
+                fieldMap.put(FIELD_NAMES, fieldsName);
+            }
+        }
+    }
+
+    public String getDes(String str) {
+        StringBuilder result = new StringBuilder();
+        if (!"".equals(str) && str != null) {
+            String[] arrayLine = str.split(("\\},\\{"));
+            String regEx = "\"insert\":\"(.*)\"";
+            Pattern pattern = Pattern.compile(regEx);
+            for (String s : arrayLine) {
+                Matcher matcher = pattern.matcher(s);
+                if (matcher.find()) {
+                    result.append(StringEscapeUtils.unescapeJava(matcher.group(1)));
+                }
+            }
+        }
+        return result.toString();
+    }
+
+    protected String exportIssuesSprintName(ExportIssuesVO exportIssuesVO) {
+        StringBuilder sprintName = new StringBuilder(exportIssuesVO.getSprintName() != null ? "正在使用冲刺:" + exportIssuesVO.getSprintName() + "\r\n" : "");
+        sprintName.append(!Objects.equals(exportIssuesVO.getCloseSprintName(), "") ? "已关闭冲刺:" + exportIssuesVO.getCloseSprintName() : "");
+        return sprintName.toString();
+    }
+
+    protected String exportIssuesVersionName(ExportIssuesVO exportIssuesVO) {
+        StringBuilder versionName = new StringBuilder();
+        if (exportIssuesVO.getFixVersionName() != null && !"".equals(exportIssuesVO.getFixVersionName())) {
+            versionName.append("修复的版本:").append(exportIssuesVO.getFixVersionName()).append("\r\n");
+        } else if (exportIssuesVO.getInfluenceVersionName() != null && !"".equals(exportIssuesVO.getInfluenceVersionName())) {
+            versionName.append("影响的版本:").append(exportIssuesVO.getInfluenceVersionName());
+        }
+        return versionName.toString();
+    }
+
+    protected String getOrderStrOfQueryingIssuesWithSub(Sort sort) {
+        Map<String, String> order = new HashMap<>(1);
+        order.put("issueId", "issue_issue_id");
+        return PageableHelper.getSortSql(PageUtil.sortResetOrder(sort, null, order));
     }
 }

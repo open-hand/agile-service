@@ -9,8 +9,10 @@ import io.choerodon.agile.api.vo.UserVO;
 import io.choerodon.agile.app.assembler.StatusNoticeSettingAssembler;
 import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StatusNoticeSettingService;
+import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.dto.IssueDTO;
 import io.choerodon.agile.infra.dto.StatusNoticeSettingDTO;
+import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 import io.choerodon.agile.infra.enums.StatusNoticeUserType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.*;
@@ -115,6 +117,24 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
         sendMsgUtil.noticeIssueStatus(projectId, userSet, new ArrayList<>(Arrays.asList(StringUtils.split(noticeList.stream()
                         .map(StatusNoticeSettingDTO::getNoticeType).findFirst().orElse(""), BaseConstants.Symbol.COMMA))),
                 issue, DetailsHelper.getUserDetails());
+    }
+
+    @Override
+    public StatusNoticeSettingVO selectNoticeUserAndType(Long projectId, Long issueId) {
+        // 根据issueId找到对应的issueType和status
+        IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
+        Assert.notNull(issue, BaseConstants.ErrorCode.DATA_NOT_EXISTS);
+        // 找到通知内容
+        List<StatusNoticeSettingDTO> noticeList = statusNoticeSettingMapper.select(new StatusNoticeSettingDTO(projectId,
+                issue.getIssueTypeId(), issue.getStatusId()));
+        // 根据类型找到接收人
+        Set<Long> userSet = new HashSet<>();
+        noticeList.forEach(noticeDTO -> this.receiverType2User(projectId, noticeDTO, issue, userSet));
+        StatusNoticeSettingVO result = new StatusNoticeSettingVO();
+        result.setUserIdList(userSet);
+        result.setUserTypeList(new HashSet<>(Arrays.asList(StringUtils.split(noticeList.stream()
+                .map(StatusNoticeSettingDTO::getNoticeType).findFirst().orElse(""), BaseConstants.Symbol.COMMA))));
+        return result;
     }
 
     @Override

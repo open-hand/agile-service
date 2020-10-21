@@ -22,8 +22,29 @@ spring:
       enabled: false
   cache:
     type: redis
+hzero:
+  service:
+    platform:
+      name: choerodon-platform
+    oauth:
+      name: choerodon-oauth
+    iam:
+      name: choerodon-iam
+    file:
+      name: choerodon-file
+    message:
+      name: choerodon-message
+    admin:
+      name: choerodon-admin
+    swagger:
+      name: choerodon-swagger
+    gateway:
+      name: choerodon-gateway
+    monitor:
+      name: choerodon-monitor
 choerodon:
   saga:
+    service: choerodon-asgard
     consumer:
       enabled: true # 是否启用消费端
       thread-num: 5  # 消费线程数
@@ -52,7 +73,7 @@ mybatis:
     mapUnderscoreToCamelCase: true
     key-generator: snowflake
     snowflake:
-      meta-provider-redis-db: ${SPRING_RESIDS_DATABASE:12}
+      meta-provider-redis-db: ${SPRING_REDIS_DATABASE:1}
 
 feign:
   hystrix:

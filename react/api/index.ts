@@ -33,3 +33,5 @@ export * from './Board';
 export * from './BoardColumn';
 export * from './StatusTransform';
 export * from './PageConfig';
+export * from './ProjectReport';
+export * from './PageRule';

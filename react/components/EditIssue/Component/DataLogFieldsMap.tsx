@@ -569,6 +569,72 @@ const fieldsMap = new Map([
       },
     },
   ],
+  ['estimatedStartTime', {
+    name: '预计开始时间',
+    create: {
+      render: (log: ILog) => {
+        const { newString } = log;
+        return (
+          <span>
+            将
+            <span className="c7n-Log-field">【预计开始时间】</span>
+            <span>由</span>
+            <span className="c7n-Log-value">【无】</span>
+            改变为
+            <span className="c7n-Log-value">{`【${newString}】`}</span>
+          </span>
+        );
+      },
+    },
+    delete: {
+      render: (log: ILog) => {
+        const { oldString } = log;
+        return (
+          <span>
+            将
+            <span className="c7n-Log-field">【预计开始时间】</span>
+            <span>由</span>
+            <span className="c7n-Log-value">{`【${oldString}】`}</span>
+            改变为
+            <span className="c7n-Log-value">【无】</span>
+          </span>
+        );
+      },
+    },
+  }],
+  ['estimatedEndTime', {
+    name: '预计结束时间',
+    create: {
+      render: (log: ILog) => {
+        const { newString } = log;
+        return (
+          <span>
+            将
+            <span className="c7n-Log-field">【预计结束时间】</span>
+            <span>由</span>
+            <span className="c7n-Log-value">【无】</span>
+            改变为
+            <span className="c7n-Log-value">{`【${newString}】`}</span>
+          </span>
+        );
+      },
+    },
+    delete: {
+      render: (log: ILog) => {
+        const { oldString } = log;
+        return (
+          <span>
+            将
+            <span className="c7n-Log-field">【预计结束时间】</span>
+            <span>由</span>
+            <span className="c7n-Log-value">{`【${oldString}】`}</span>
+            改变为
+            <span className="c7n-Log-value">【无】</span>
+          </span>
+        );
+      },
+    },
+  }],
 ]);
 
 export default fieldsMap;

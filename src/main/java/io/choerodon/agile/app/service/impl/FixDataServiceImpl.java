@@ -82,6 +82,10 @@ public class FixDataServiceImpl implements FixDataService {
     private StatusMachineNodeMapper statusMachineNodeMapper;
     @Autowired
     protected PageFieldMapper pageFieldMapper;
+    @Autowired
+    protected ObjectSchemeFieldService objectSchemeFieldService;
+    @Autowired(required = false)
+    private BacklogExpandService backlogExpandService;
 
     @Override
     public void fixCreateProject() {
@@ -344,10 +348,10 @@ public class FixDataServiceImpl implements FixDataService {
             //获取某个组织下的某个类型的最小rank值
             Map<Long, String> minRankMap = getMinRankMap(rankMap);
 
-            String estimatedStartTimeFieldContext = estimatedStartTimeField.getContext();
+            String estimatedStartTimeFieldContext = objectSchemeFieldService.getFieldContext(estimatedStartTime);
             String[] estimatedStartTimeFieldContextArray = estimatedStartTimeFieldContext.split(",");
 
-            String estimatedEndTimeFieldContext = estimatedEndTimeField.getContext();
+            String estimatedEndTimeFieldContext = objectSchemeFieldService.getFieldContext(estimatedEndTime);
             String[] estimatedEndTimeFieldContextArray = estimatedEndTimeFieldContext.split(",");
 
             organizationIds.forEach(o -> {
@@ -479,6 +483,9 @@ public class FixDataServiceImpl implements FixDataService {
         Map<Long, List<IssueTypeDTO>> issueTypeMap = issueTypeList.stream().collect(Collectors.groupingBy(IssueTypeDTO::getOrganizationId));
 
         processFields(createPageId, editPageId, dataMap, rankMap, fields, issueTypeMap);
+        if (Boolean.TRUE.equals(objectSchemeField.getSystem()) && backlogExpandService != null) {
+            backlogExpandService.processBacklogFields(editPageId, dataMap, rankMap, fields);
+        }
     }
 
     protected void processFields(Long createPageId,

@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import {
-  Modal, Form, Input, Select, Icon,
+  Modal, Form, Input, Select, Icon, Tooltip,
 } from 'choerodon-ui';
 import {
   stores, Content, Choerodon,
 } from '@choerodon/boot';
 import { devOpsApi } from '@/api';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import './CreateBranch.less';
 import './commom.less';
 
@@ -124,7 +125,7 @@ class CreateBranch extends Component {
         okText="创建"
         cancelText="取消"
         confirmLoading={confirmLoading}
-        width={740}
+        width={MODAL_WIDTH.middle}
       >
         <Content
           style={{
@@ -151,8 +152,12 @@ class CreateBranch extends Component {
                   }
                   loading={selectLoading}
                 >
-                  {originApps.map(app => (
-                    <Option value={app.id} key={app.id}>{app.name}</Option>
+                  {originApps.map((app) => (
+                    <Option value={app.id} key={app.id}>
+                      <Tooltip title={app.code}>
+                        {`${app.name}(${app.code})`}
+                      </Tooltip>
+                    </Option>
                   ))}
                 </Select>,
               )}
@@ -211,7 +216,7 @@ class CreateBranch extends Component {
                   }}
                 >
                   <OptGroup label="分支" key="branchGroup">
-                    {branchs.map(s => (
+                    {branchs.map((s) => (
                       <Option value={s.branchName} key={s.branchName}>
                         <Icon type="branch" className="c7nagile-name-icon" />
                         {s.branchName}
@@ -254,7 +259,7 @@ class CreateBranch extends Component {
                     }
                   </OptGroup>
                   <OptGroup label="tag" key="tagGroup">
-                    {tags.map(s => (
+                    {tags.map((s) => (
                       <Option value={s.name} key={s.name}>
                         <Icon type="local_offer" className="c7nagile-name-icon" />
                         {s.name}
@@ -272,11 +277,11 @@ class CreateBranch extends Component {
                             }}
                             onClick={(e) => {
                               e.stopPropagation();
-                              devOpsApi.loadTagsByService(form.getFieldValue('app'), 1, tagsSize + 5, { 
+                              devOpsApi.loadTagsByService(form.getFieldValue('app'), 1, tagsSize + 5, {
                                 searchParam: {
                                   tagName: branchsInput,
                                 },
-                                param: null, 
+                                param: null,
                               }).then((res) => {
                                 if (res && !res.failed) {
                                   this.setState({
@@ -309,7 +314,7 @@ class CreateBranch extends Component {
                   allowClear
                   label="分支类型"
                 >
-                  {['feature', 'bugfix', 'release', 'hotfix', 'custom'].map(s => (
+                  {['feature', 'bugfix', 'release', 'hotfix', 'custom'].map((s) => (
                     <Option value={s} key={s}>
                       <span className={`c7nagile-branch-icon icon-${s === 'bugfix' ? 'develop' : s}`}>
                         {s.slice(0, 1).toUpperCase()}

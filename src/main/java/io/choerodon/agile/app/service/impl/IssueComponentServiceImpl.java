@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service.impl;
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.validator.IssueComponentValidator;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.utils.RedisUtil;
 import io.choerodon.agile.infra.dto.ComponentForListDTO;
 import io.choerodon.agile.infra.dto.ComponentIssueRelDTO;
@@ -148,7 +149,7 @@ public class IssueComponentServiceImpl implements IssueComponentService {
         Boolean condition = handleSearchUser(searchVO);
         if (condition) {
             Page<ComponentForListDTO> componentForListDTOPage = PageHelper.doPageAndSort(pageRequest, () ->
-                    issueComponentMapper.queryComponentByOption(projectId, noIssueTest, componentId, searchVO.getSearchArgs(),
+                    issueComponentMapper.queryComponentByOption(Arrays.asList(projectId), noIssueTest, componentId, searchVO.getSearchArgs(),
                             searchVO.getAdvancedSearchArgs(), searchVO.getContents()));
             Page<ComponentForListVO> componentForListVOPageInfo = new Page<>();
             componentForListVOPageInfo.setSize(componentForListDTOPage.getSize());

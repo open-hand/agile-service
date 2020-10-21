@@ -8,7 +8,6 @@ import { stores, Choerodon } from '@choerodon/boot';
 import { Spin } from 'choerodon-ui';
 import { throttle } from 'lodash';
 import './EditIssue.less';
-import useIsOwner from '@/hooks/useIsOwner';
 import { useIssueTypes } from '@/hooks';
 import {
   issueApi, fieldApi, issueLinkApi, workLogApi, knowledgeApi, dataLogApi, devOpsApi, pageConfigApi,
@@ -33,6 +32,7 @@ const defaultProps = {
 function EditIssue() {
   const [issueLoading, setIssueLoading] = useState(false);
   const {
+    projectId,
     afterIssueUpdate,
     store,
     forwardedRef,
@@ -55,8 +55,8 @@ function EditIssue() {
     HeaderStore,
     isFullScreen,
     onChangeWidth,
+    transformIssue,
   } = useContext(EditIssueContext);
-  const [isOwner] = useIsOwner();
   const [issueTypes] = useIssueTypes();
   const container = useRef();
   const idRef = useRef();
@@ -67,8 +67,8 @@ function EditIssue() {
     setIssueLoading(true);
     try {
       // 1. 加载详情
-      const issue = await (programId
-        ? issueApi.loadUnderProgram(id, programId) : issueApi.load(id));
+      let issue = await (programId
+        ? issueApi.project(projectId).loadUnderProgram(id, programId) : issueApi.project(projectId).load(id));
       if (idRef.current !== id) {
         return;
       }
@@ -82,14 +82,17 @@ function EditIssue() {
         context: issue.typeCode,
         pageCode: 'agile_issue_edit',
       };
-      const fields = await fieldApi.getFieldAndValue(id, param);
+      const fields = await fieldApi.project(projectId).getFieldAndValue(id, param);
       const { description, issueTypeVO: { typeCode } } = issue;
       if (!description || description === JSON.stringify([{ insert: '\n' }])) { // 加载默认模版
-        const issueTemplateInfo = await pageConfigApi.loadTemplateByType(typeCode) || {};
+        const issueTemplateInfo = await pageConfigApi.project(projectId).loadTemplateByType(typeCode) || {};
         const { template } = issueTemplateInfo;
         issue.descriptionTemplate = template;
       }
       setIssueLoading(false);
+      if (transformIssue) {
+        issue = transformIssue(issue);
+      }
       store.setIssueFields(issue, fields);
       if (issueStore) {
         issueStore.setSelectedIssue(issue);
@@ -102,11 +105,11 @@ function EditIssue() {
         linkIssues,
         branches,
       ] = await Promise.all([
-        knowledgeApi.loadByIssue(id),
-        programId || applyType === 'program' ? null : workLogApi.loadByIssue(id),
-        programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.loadByIssue(id),
-        programId || applyType === 'program' ? null : issueLinkApi.loadByIssueAndApplyType(id),
-        programId || applyType === 'program' ? null : devOpsApi.countBranches(id),
+        knowledgeApi.project(projectId).loadByIssue(id),
+        programId || applyType === 'program' ? null : workLogApi.project(projectId).loadByIssue(id),
+        programId ? dataLogApi.loadUnderProgram(id, programId) : dataLogApi.project(projectId).loadByIssue(id),
+        programId || applyType === 'program' ? null : issueLinkApi.project(projectId).loadByIssueAndApplyType(id),
+        programId || applyType === 'program' ? null : devOpsApi.project(projectId).countBranches(id),
       ]);
       if (idRef.current !== id) {
         return;
@@ -196,7 +199,6 @@ function EditIssue() {
   } = store;
   const { isInProgram } = useIsInProgram();
   const rightDisabled = disabled || (isInProgram && typeCode === 'issue_epic');
-  const HasPermission = (isOwner || createdBy === AppState.userInfo.id);
   return (
     <div style={{
       position: 'fixed',
@@ -206,7 +208,7 @@ function EditIssue() {
       bottom: 0,
       // height: 'calc(100vh - 50px)',
       zIndex: 101,
-      overflow: 'hidden',
+      // overflow: 'hidden',
     }}
     >
       <ResizeAble
@@ -252,12 +254,12 @@ function EditIssue() {
               backUrl={backUrl}
               onCancel={onCancel}
               loginUserId={AppState.userInfo.id}
-              hasPermission={HasPermission}
               onDeleteIssue={onDeleteIssue}
               onUpdate={onUpdate}
             />
             <IssueBody
               key={issueId}
+              projectId={projectId}
               disabled={rightDisabled}
               store={store}
               issueId={currentIssueId}
@@ -265,7 +267,6 @@ function EditIssue() {
               onUpdate={onUpdate}
               onDeleteSubIssue={onDeleteSubIssue}
               loginUserId={AppState.userInfo.id}
-              hasPermission={isOwner}
               applyType={applyType}
               onDeleteIssue={onDeleteIssue}
               parentSummary={summary}

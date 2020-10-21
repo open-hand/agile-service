@@ -15,6 +15,8 @@ const SubBug = observer(({
   const renderIssueList = (issue, i) => (
     <IssueList
       showAssignee
+      showDelete={!disabled}
+      showPriority
       key={issue.issueId}
       issue={{
         ...issue,
@@ -55,7 +57,6 @@ const SubBug = observer(({
     }
   };
 
-
   return (
     <div id="bug">
       <Divider />
@@ -65,7 +66,7 @@ const SubBug = observer(({
         </div>
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
-            <Tooltip placement="topRight" title="创建缺陷" getPopupContainer={triggerNode => triggerNode.parentNode}>
+            <Tooltip placement="topRight" title="创建缺陷" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
               <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => store.setCreateSubBugShow(true)}>
                 <Icon type="playlist_add icon" />
               </Button>

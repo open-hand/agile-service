@@ -32,7 +32,7 @@ const SelectFocusLoad = (props) => {
   } = Type;
   const totalProps = { ...props, ...TypeProps };
   const {
-    loadWhenMount, afterLoad, value, saveList, children, defaultOpen, defaultOption, optionFilter, requestArgs,
+    loadWhenMount, afterLoad, value, saveList, children, defaultOpen, defaultOption, optionFilter, requestArgs, customList,
   } = totalProps;
   const [loading, setLoading] = useState(false);
   const [List, setList] = useState(defaultOption ? [defaultOption] : []);
@@ -56,13 +56,14 @@ const SelectFocusLoad = (props) => {
     request({ filter, page }, requestArgs).then((data) => {
       const { list, hasNextPage } = dataConverter(data);
       const TotalList = isLoadMore ? [...List, ...list] : list;
+      const resultList = customList ? customList(TotalList) : TotalList;
       setPage(page);
       setFilter(filter);
       setCanLoadMore(hasNextPage);
-      avoidShowError(TotalList);
-      setList(TotalList);
+      avoidShowError(resultList);
+      setList(resultList);
       setLoading(false);
-      resolve(TotalList);
+      resolve(resultList);
     });
   });
   const LoadWhenMount = () => {
@@ -108,7 +109,7 @@ const SelectFocusLoad = (props) => {
     totalList = totalList.filter(optionFilter);
   }
   // 渲染去掉重复项
-  const Options = uniqBy(totalList.map(render).concat(React.Children.toArray(children)), option => option.props.value);
+  const Options = uniqBy(totalList.map(render).concat(React.Children.toArray(children)), (option) => option.props.value);
 
   return (
     <Select
@@ -116,8 +117,8 @@ const SelectFocusLoad = (props) => {
       filterOption={false}
       loading={loading}
       ref={SelectRef}
-      // style={{ width: 200 }}   
-      getPopupContainer={triggerNode => triggerNode.parentNode} 
+      // style={{ width: 200 }}
+      getPopupContainer={(triggerNode) => triggerNode.parentNode}
       onFilterChange={handleFilterChange}
       {...TypeProps}
       {...props}
@@ -125,7 +126,7 @@ const SelectFocusLoad = (props) => {
     >
       {Options}
       <Option style={{ display: canLoadMore || Options.length === 0 ? 'block' : 'none', cursor: 'pointer' }} key="SelectFocusLoad-loadMore" className="SelectFocusLoad-loadMore" disabled>
-        {Options.length > 0 
+        {Options.length > 0
           ? <Button type="primary" style={{ textAlign: 'left', width: '100%', background: 'transparent' }} onClick={loadMore}>更多</Button>
           : '无匹配结果'}
       </Option>
@@ -136,6 +137,7 @@ const SelectFocusLoad = (props) => {
 SelectFocusLoad.propTypes = propTypes;
 // export default SelectFocusLoad;
 
+// eslint-disable-next-line react/prefer-stateless-function
 class SelectFocusLoadClass extends Component {
   render() {
     return (

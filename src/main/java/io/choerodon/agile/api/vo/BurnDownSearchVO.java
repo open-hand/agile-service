@@ -31,6 +31,16 @@ public class BurnDownSearchVO {
     private String filterSql;
     @JsonIgnore
     private List<SearchVO> searchList;
+    
+    private SearchVO currentSearchVO;
+
+    public SearchVO getCurrentSearchVO() {
+        return currentSearchVO;
+    }
+
+    public void setCurrentSearchVO(SearchVO currentSearchVO) {
+        this.currentSearchVO = currentSearchVO;
+    }
 
     public List<SearchVO> getSearchList() {
         return searchList;
@@ -118,6 +128,11 @@ public class BurnDownSearchVO {
             Collections.sort(personalFilterIds);
             builder.append(delimiter).append(StringUtils.join(personalFilterIds, ","));
         } else {
+            builder.append(delimiter).append("null");
+        }
+        if (!ObjectUtils.isEmpty(currentSearchVO)){
+            builder.append(delimiter).append(currentSearchVO.toString().hashCode());
+        }else {
             builder.append(delimiter).append("null");
         }
         return builder.toString();

@@ -296,7 +296,8 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
      * @param schemeApplyType
      * @param projectEvent
      */
-    protected void initScheme(String name, String schemeApplyType, ProjectEvent projectEvent) {
+    @Override
+    public void initScheme(String name, String schemeApplyType, ProjectEvent projectEvent) {
         Long projectId = projectEvent.getProjectId();
         Long organizationId = projectUtil.getOrganizationId(projectId);
         Long stateMachineId = initService.createStateMachineWithCreateProject(organizationId, schemeApplyType, projectEvent);

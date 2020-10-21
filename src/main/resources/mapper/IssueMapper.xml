@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="io.choerodon.agile.infra.mapper.IssueMapper">
 
-    <resultMap type="io.choerodon.agile.infra.dto.IssueDetailDTO" id="issueDetail">
+    <resultMap type="io.choerodon.agile.infra.dto.business.IssueDetailDTO" id="issueDetail">
         <id column="issue_id" property="issueId"/>
         <id column="issue_num_splicing" property="issueNum"/>
         <id column="status_id" property="statusId"/>
@@ -23,6 +23,7 @@
         <id column="epic_color" property="epicColor"/>
         <id column="parent_issue_num" property="parentIssueNum"/>
         <id column="parent_issue_summary" property="parentIssueSummary"/>
+        <id column="parent_issue_description" property="parentIssueDescription"/>
         <id column="object_version_number" property="objectVersionNumber"/>
         <id column="priority_id" property="priorityId"/>
         <id column="issue_type_id" property="issueTypeId"/>
@@ -30,32 +31,33 @@
         <id column="relate_issue_id" property="relateIssueId"/>
         <id column="relate_issue_num" property="relateIssueNum"/>
         <id column="parent_relate_num" property="parentRelateNum"/>
+        <id column="parent_relate_description" property="parentRelateDescription"/>
         <result property="estimatedStartTime" column="estimated_start_time"/>
         <result property="estimatedEndTime" column="estimated_end_time"/>
         <association property="activeSprint" column="issue_id" select="queryActiveSprintNameByIssueId"/>
         <collection property="versionIssueRelDTOList" column="issue_id"
-                    ofType="io.choerodon.agile.infra.dto.IssueDetailDTO"
+                    ofType="io.choerodon.agile.infra.dto.business.IssueDetailDTO"
                     select="queryVersionIssueRelByIssueId"/>
         <collection property="closeSprint" column="issue_id"
-                    ofType="io.choerodon.agile.infra.dto.IssueDetailDTO"
+                    ofType="io.choerodon.agile.infra.dto.business.IssueDetailDTO"
                     select="queryCloseSprintNameByIssueId"/>
         <collection property="labelIssueRelDTOList" column="issue_id"
-                    ofType="io.choerodon.agile.infra.dto.IssueDetailDTO"
+                    ofType="io.choerodon.agile.infra.dto.business.IssueDetailDTO"
                     select="queryLabelIssueByIssueId"/>
         <collection property="componentIssueRelDTOList" column="issue_id"
-                    ofType="io.choerodon.agile.infra.dto.IssueDetailDTO"
+                    ofType="io.choerodon.agile.infra.dto.business.IssueDetailDTO"
                     select="queryComponentIssueRelByIssueId"/>
         <collection property="issueCommentDTOList" column="issue_id"
-                    ofType="io.choerodon.agile.infra.dto.IssueDetailDTO"
+                    ofType="io.choerodon.agile.infra.dto.business.IssueDetailDTO"
                     select="queryIssueCommentByIssueId"/>
         <collection property="issueAttachmentDTOList" column="issue_id"
-                    ofType="io.choerodon.agile.infra.dto.IssueDetailDTO"
+                    ofType="io.choerodon.agile.infra.dto.business.IssueDetailDTO"
                     select="queryIssueAttachmentByIssueId"/>
         <collection property="subIssueDTOList" column="issue_id"
-                    ofType="io.choerodon.agile.infra.dto.IssueDetailDTO"
+                    ofType="io.choerodon.agile.infra.dto.business.IssueDetailDTO"
                     select="querySubIssueByIssueId"/>
         <collection property="subBugDOList" column="issue_id"
-                    ofType="io.choerodon.agile.infra.dto.IssueDetailDTO"
+                    ofType="io.choerodon.agile.infra.dto.business.IssueDetailDTO"
                     select="querySubBugByIssueId"/>
     </resultMap>
 
@@ -130,7 +132,9 @@
             ai4.summary                                                                      AS parent_relate_summary,
             CONCAT_WS('-', api.project_code, ai.issue_num)                                   AS issue_num_splicing,
             ai.estimated_start_time,
-            ai.estimated_end_time
+            ai.estimated_end_time,
+            ai3.description as parent_issue_description,
+            ai4.description as parent_relate_description
         FROM agile_issue ai
             LEFT JOIN agile_issue ai2 ON ai2.issue_id = ai.epic_id
             LEFT JOIN lookup_value alv2 ON ai2.color_code = alv2.value_code
@@ -155,7 +159,10 @@
         avir.*,
         apr.name
         FROM agile_version_issue_rel avir LEFT JOIN agile_product_version apr ON avir.version_id = apr.version_id
-        WHERE avir.project_id = #{projectId}
+        WHERE avir.project_id in
+        <foreach item="item" index="index" collection="projectIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
         <if test='relationType != null and relationType != ""'>
             AND avir.relation_type = #{relationType}
         </if>
@@ -186,7 +193,12 @@
         SELECT
         aisr.issue_id, asp.sprint_name
         FROM agile_issue_sprint_rel aisr, agile_sprint asp
-        WHERE aisr.project_id = #{projectId} AND aisr.sprint_id = asp.sprint_id AND asp.status_code = 'closed'
+        WHERE aisr.project_id in
+        <foreach item="item" index="index" collection="projectIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND aisr.sprint_id = asp.sprint_id
+        AND asp.status_code = 'closed'
         AND aisr.issue_id IN
         <foreach collection="issueIds" item="issueId" open="("
                  separator="," close=")">
@@ -220,7 +232,10 @@
                  separator="," close=")">
             #{issueId}
         </foreach>
-        and ail.project_id = #{projectId}
+        and ail.project_id in
+        <foreach item="item" index="index" collection="projectIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
     </select>
 
     <select id="queryComponentIssueByIssueIds" resultType="io.choerodon.agile.infra.dto.ComponentIssueRelDTO">
@@ -233,7 +248,11 @@
                  separator="," close=")">
             #{issueId}
         </foreach>
-        and acir.project_id = #{projectId}
+        and acir.project_id in
+        <foreach item="item" index="index" collection="projectIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+
     </select>
 
     <select id="queryComponentIssueRelByIssueId" resultType="io.choerodon.agile.infra.dto.ComponentIssueRelDTO">
@@ -657,6 +676,14 @@
     </sql>
 
     <sql id="explainSearchVO">
+        <include refid="io.choerodon.agile.infra.mapper.IssueMapper.explainSearchVOSql"/>
+        <if test='searchVO.otherArgs != null'>
+            <include refid="io.choerodon.agile.infra.mapper.IssueMapper.otherArgsSql1"/>
+            <include refid="io.choerodon.agile.infra.mapper.IssueMapper.otherArgsSql2"/>
+        </if>
+    </sql>
+
+    <sql id="explainSearchVOSql">
         <if test='searchVO.searchArgs != null'>
             <if test='searchVO.searchArgs.summary != null and searchVO.searchArgs.summary != "" '>
                 AND ai.summary LIKE concat(concat('%',#{searchVO.searchArgs.summary}),'%')
@@ -748,257 +775,273 @@
                 AND ail.label_name LIKE CONCAT(CONCAT('%' ,#{searchVO.searchArgs.label}) ,'%') )
             </if>
         </if>
-        <if test='searchVO.otherArgs != null'>
-            <if test='searchVO.otherArgs.assigneeId != null and searchVO.otherArgs.assigneeId.size > 0'>
-                AND (
-                <if test='searchVO.otherArgs.assigneeIdNull != null and searchVO.otherArgs.assigneeIdNull == true'>
-                    (ai.assignee_id = 0 or ai.assignee_id is null) OR
-                </if>
-                ai.assignee_id in
-                <foreach collection="searchVO.otherArgs.assigneeId" item="aId" open="(" separator=","
-                         close=")">
-                    #{aId}
-                </foreach>
-                )
+    </sql>
+
+    <sql id="otherArgsSql1">
+        <if test='searchVO.otherArgs.assigneeId != null and searchVO.otherArgs.assigneeId.size > 0'>
+            AND (
+            <if test='searchVO.otherArgs.assigneeIdNull != null and searchVO.otherArgs.assigneeIdNull == true'>
+                (ai.assignee_id = 0 or ai.assignee_id is null) OR
             </if>
-            <if test='searchVO.otherArgs.statusId != null and searchVO.otherArgs.statusId.size > 0'>
-                AND ai.status_id in
-                <foreach collection="searchVO.otherArgs.statusId" item="id" open="(" separator=","
-                         close=")">
-                    #{id}
-                </foreach>
+            ai.assignee_id in
+            <foreach collection="searchVO.otherArgs.assigneeId" item="aId" open="(" separator=","
+                     close=")">
+                #{aId}
+            </foreach>
+            )
+        </if>
+        <if test='searchVO.otherArgs.statusId != null and searchVO.otherArgs.statusId.size > 0'>
+            AND ai.status_id in
+            <foreach collection="searchVO.otherArgs.statusId" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+        </if>
+        <if test='searchVO.otherArgs.resolution !=null'>
+            AND ai.status_id in (
+            select ais.status_id from agile_issue_status ais where ais.status_id = ai.status_id and ais.project_id =
+            ai.project_id
+            <choose>
+                <when test="searchVO.otherArgs.resolution == 'true'">
+                    and ais.is_completed = 1
+                </when>
+                <otherwise>
+                    and ais.is_completed = 0
+                </otherwise>
+            </choose>
+            )
+        </if>
+        <if test='searchVO.otherArgs.component != null and searchVO.otherArgs.component.size > 0'>
+            AND (
+            <if test='searchVO.otherArgs.componentNull != null and searchVO.otherArgs.componentNull == true'>
+                ai.issue_id in (SELECT ai12.issue_id from agile_issue ai12 left join
+                agile_component_issue_rel acir2
+                on ai12.issue_id = acir2.issue_id WHERE
+                acir2.component_id is null ) OR
             </if>
-            <if test='searchVO.otherArgs.resolution !=null'>
-                AND ai.status_id in (
-                select ais.status_id from agile_issue_status ais where ais.status_id = ai.status_id and ais.project_id =
-                ai.project_id
-                <choose>
-                    <when test="searchVO.otherArgs.resolution == 'true'">
-                        and ais.is_completed = 1
-                    </when>
-                    <otherwise>
-                        and ais.is_completed = 0
-                    </otherwise>
-                </choose>
-                )
-            </if>
-            <if test='searchVO.otherArgs.component != null and searchVO.otherArgs.component.size > 0'>
-                AND (
-                <if test='searchVO.otherArgs.componentNull != null and searchVO.otherArgs.componentNull == true'>
-                    ai.issue_id in (SELECT ai12.issue_id from agile_issue ai12 left join
-                    agile_component_issue_rel acir2
-                    on ai12.issue_id = acir2.issue_id WHERE
-                    acir2.component_id is null ) OR
-                </if>
-                ai.issue_id in
-                (SELECT acir2.issue_id FROM agile_component_issue_rel acir2 WHERE
-                acir2.component_id in
-                <foreach collection="searchVO.otherArgs.component" item="id" open="(" separator=","
-                         close=")">
-                    #{id}
-                </foreach>
-                ))
-            </if>
-            <if test='searchVO.otherArgs.sprint != null and searchVO.otherArgs.sprint.size > 0'>
-                AND (
-                <if test='searchVO.otherArgs.sprintNull != null and searchVO.otherArgs.sprintNull == true'>
-                    ai.issue_id in (SELECT ai10.issue_id from agile_issue ai10 left join
-                    agile_issue_sprint_rel aisr2
-                    on ai10.issue_id = aisr2.issue_id WHERE
-                    aisr2.sprint_id is null ) OR
-                </if>
-                ai.issue_id in
-                (SELECT aisr2.issue_id FROM agile_issue_sprint_rel aisr2 WHERE
-                aisr2.sprint_id in
-                <foreach collection="searchVO.otherArgs.sprint" item="id" open="(" separator=","
-                         close=")">
-                    #{id}
-                </foreach>
-                ))
-            </if>
-            <if test='searchVO.otherArgs.epic != null and searchVO.otherArgs.epic.size > 0'>
-                AND (
-                <if test='searchVO.otherArgs.epicNull != null and searchVO.otherArgs.epicNull == true'>
-                    (((ai.epic_id is null or ai.epic_id = 0) and ai.type_code in ('story', 'task', 'bug', 'feature'))
-                    or (ai.parent_issue_id in (select ai7.issue_id from agile_issue ai7 where ai7.issue_id =
-                    ai.parent_issue_id and
-                    (ai7.epic_id is null or ai7.epic_id = 0) and ai.type_code = 'sub_task' ))) OR
-                </if>
-                ((ai.epic_id in
-                <foreach collection="searchVO.otherArgs.epic" item="id" open="(" separator=","
-                         close=")">
-                    #{id}
-                </foreach>
-                and ai.type_code in ('story', 'task', 'bug', 'feature'))
+            ai.issue_id in
+            (SELECT acir2.issue_id FROM agile_component_issue_rel acir2 WHERE
+            acir2.component_id in
+            <foreach collection="searchVO.otherArgs.component" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            ))
+        </if>
+
+        <if test='searchVO.otherArgs.epic != null and searchVO.otherArgs.epic.size > 0'>
+            AND (
+            <if test='searchVO.otherArgs.epicNull != null and searchVO.otherArgs.epicNull == true'>
+                (((ai.epic_id is null or ai.epic_id = 0) and ai.type_code in ('story', 'task', 'bug', 'feature'))
                 or (ai.parent_issue_id in (select ai7.issue_id from agile_issue ai7 where ai7.issue_id =
                 ai.parent_issue_id and
-                ai7.epic_id in
-                <foreach collection="searchVO.otherArgs.epic" item="id" open="(" separator=","
+                (ai7.epic_id is null or ai7.epic_id = 0) and ai.type_code = 'sub_task' ))) OR
+            </if>
+            ((ai.epic_id in
+            <foreach collection="searchVO.otherArgs.epic" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            and ai.type_code in ('story', 'task', 'bug', 'feature'))
+            or (ai.parent_issue_id in (select ai7.issue_id from agile_issue ai7 where ai7.issue_id =
+            ai.parent_issue_id and
+            ai7.epic_id in
+            <foreach collection="searchVO.otherArgs.epic" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            ) and ai.type_code = 'sub_task'))
+            )
+        </if>
+        <if test='searchVO.otherArgs.feature != null and searchVO.otherArgs.feature.size > 0'>
+            AND (
+            <if test='searchVO.otherArgs.featureNull != null and searchVO.otherArgs.featureNull == true'>
+                ((ai.feature_id is null or ai.feature_id = 0) and ai.type_code in ('story'))
+                OR
+            </if>
+            (ai.feature_id in
+            <foreach collection="searchVO.otherArgs.feature" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>
+            and ai.type_code in ('story'))
+            )
+        </if>
+        <if test='searchVO.otherArgs.version != null and searchVO.otherArgs.version.size > 0'>
+            AND (
+            <if test='searchVO.otherArgs.versionNull != null and searchVO.otherArgs.versionNull == true'>
+                ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
+                left join agile_version_issue_rel avir44
+                on ai31.issue_id = avir44.issue_id
+                WHERE avir44.version_id is null ) OR
+            </if>
+            ai.issue_id in ( SELECT avir3.issue_id FROM
+            agile_version_issue_rel avir3 WHERE avir3.version_id in
+            <foreach collection="searchVO.otherArgs.version" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>)
+            )
+        </if>
+        <if test='searchVO.otherArgs.label != null and searchVO.otherArgs.label.size > 0'>
+            AND (
+            <if test='searchVO.otherArgs.labelNull != null and searchVO.otherArgs.labelNull == true'>
+                ai.issue_id in (SELECT ai13.issue_id from agile_issue ai13 left join
+                agile_label_issue_rel alir2 on ai13.issue_id = alir2.issue_id WHERE
+                alir2.label_id is null ) OR
+            </if>
+            ai.issue_id in ( SELECT alir2.issue_id FROM
+            agile_label_issue_rel alir2 WHERE alir2.label_id in
+            <foreach collection="searchVO.otherArgs.label" item="id" open="(" separator=","
+                     close=")">
+                #{id}
+            </foreach>)
+            )
+        </if>
+        <if test='searchVO.otherArgs.issueIds != null and searchVO.otherArgs.issueIds.size > 0'>
+            AND ai.issue_id in
+            <foreach collection="searchVO.otherArgs.issueIds" item="issueId" open="(" separator=","
+                     close=")">
+                #{issueId}
+            </foreach>
+        </if>
+    </sql>
+
+    <sql id="otherArgsSql2">
+        <if test='searchVO.otherArgs.sprint != null and searchVO.otherArgs.sprint.size > 0'>
+            AND (
+            <if test='searchVO.otherArgs.sprintNull != null and searchVO.otherArgs.sprintNull == true'>
+                ai.issue_id in (SELECT ai10.issue_id from agile_issue ai10 left join
+                agile_issue_sprint_rel aisr2
+                on ai10.issue_id = aisr2.issue_id WHERE
+                aisr2.sprint_id is null ) OR
+            </if>
+            <foreach collection="searchVO.otherArgs.sprint" item="id"  separator="or">
+                <if test="id==0">
+                    ai.issue_id not in
+                    (
+                    SELECT issue_id
+                    FROM agile_issue_sprint_rel aisr
+                    WHERE project_id = #{projectId}
+                    )
+                </if>
+                <if test="id != 0 ">
+                    ai.issue_id in
+                    (
+                    SELECT aisr2.issue_id
+                    FROM agile_issue_sprint_rel aisr2
+                    WHERE aisr2.sprint_id = #{id}
+                    )
+                </if>
+            </foreach>
+            )
+        </if>
+        <if test="searchVO.otherArgs.customField != null and searchVO.otherArgs.customField.size > 0">
+            <if test="searchVO.otherArgs.customField.option != null and searchVO.otherArgs.customField.option.size > 0">
+                and
+                <foreach collection="searchVO.otherArgs.customField.option" item="item" open="(" separator="and"
                          close=")">
-                    #{id}
+                    ai.issue_id in
+                    (
+                    SELECT
+                    ffv.instance_id
+                    FROM
+                    fd_field_value ffv
+                    WHERE
+                    ffv.project_id = #{projectId}
+                    AND ffv.field_id = #{item.fieldId}
+                    AND ffv.option_id IN
+                    <foreach collection="item.value" item="value" open="(" separator=","
+                             close=")">
+                        #{value}
+                    </foreach>
+                    )
                 </foreach>
-                ) and ai.type_code = 'sub_task'))
-                )
             </if>
-            <if test='searchVO.otherArgs.feature != null and searchVO.otherArgs.feature.size > 0'>
-                AND (
-                    <if test='searchVO.otherArgs.featureNull != null and searchVO.otherArgs.featureNull == true'>
-                        ((ai.feature_id is null or ai.feature_id = 0) and ai.type_code in ('story'))
-                        OR
-                    </if>
-                    (ai.feature_id in
-                    <foreach collection="searchVO.otherArgs.feature" item="id" open="(" separator=","
-                             close=")">
-                        #{id}
-                    </foreach>
-                    and ai.type_code in ('story'))
-                )
-            </if>
-            <if test='searchVO.otherArgs.version != null and searchVO.otherArgs.version.size > 0'>
-                AND (
-                <if test='searchVO.otherArgs.versionNull != null and searchVO.otherArgs.versionNull == true'>
-                    ai.issue_id in (SELECT ai31.issue_id from agile_issue ai31
-                    left join agile_version_issue_rel avir44
-                    on ai31.issue_id = avir44.issue_id
-                    WHERE avir44.version_id is null ) OR
-                </if>
-                ai.issue_id in ( SELECT avir3.issue_id FROM
-                agile_version_issue_rel avir3 WHERE avir3.version_id in
-                <foreach collection="searchVO.otherArgs.version" item="id" open="(" separator=","
+            <if test="searchVO.otherArgs.customField.date != null and searchVO.otherArgs.customField.date.size > 0">
+                and
+                <foreach collection="searchVO.otherArgs.customField.date" item="item" open="(" separator="and"
                          close=")">
-                    #{id}
-                </foreach>)
-                )
-            </if>
-            <if test='searchVO.otherArgs.label != null and searchVO.otherArgs.label.size > 0'>
-                AND (
-                <if test='searchVO.otherArgs.labelNull != null and searchVO.otherArgs.labelNull == true'>
-                    ai.issue_id in (SELECT ai13.issue_id from agile_issue ai13 left join
-                    agile_label_issue_rel alir2 on ai13.issue_id = alir2.issue_id WHERE
-                    alir2.label_id is null ) OR
-                </if>
-                ai.issue_id in ( SELECT alir2.issue_id FROM
-                agile_label_issue_rel alir2 WHERE alir2.label_id in
-                <foreach collection="searchVO.otherArgs.label" item="id" open="(" separator=","
-                         close=")">
-                    #{id}
-                </foreach>)
-                )
-            </if>
-            <if test='searchVO.otherArgs.issueIds != null and searchVO.otherArgs.issueIds.size > 0'>
-                AND ai.issue_id in
-                <foreach collection="searchVO.otherArgs.issueIds" item="issueId" open="(" separator=","
-                         close=")">
-                    #{issueId}
+                    ai.issue_id in
+                    (
+                    SELECT
+                    ffv.instance_id
+                    FROM
+                    fd_field_value ffv
+                    WHERE
+                    ffv.project_id = #{projectId}
+                    AND ffv.field_id = #{item.fieldId}
+                    AND ffv.date_value &gt;= #{item.startDate} AND ffv.date_value &lt;= #{item.endDate}
+                    )
                 </foreach>
             </if>
-            <if test="searchVO.otherArgs.customField != null and searchVO.otherArgs.customField.size > 0">
-                <if test="searchVO.otherArgs.customField.option != null and searchVO.otherArgs.customField.option.size > 0">
-                    and
-                    <foreach collection="searchVO.otherArgs.customField.option" item="item" open="(" separator="and"
-                             close=")">
-                         ai.issue_id in
-                        (
-                            SELECT
-                              ffv.instance_id
-                            FROM
-                              fd_field_value ffv
-                            WHERE
-                            ffv.project_id = #{projectId}
-                            AND ffv.field_id = #{item.fieldId}
-                            AND ffv.option_id IN
-                            <foreach collection="item.value" item="value" open="(" separator=","
-                                     close=")">
-                                #{value}
-                            </foreach>
-                        )
-                    </foreach>
-                </if>
-                <if test="searchVO.otherArgs.customField.date != null and searchVO.otherArgs.customField.date.size > 0">
-                    and
-                    <foreach collection="searchVO.otherArgs.customField.date" item="item" open="(" separator="and"
-                             close=")">
-                        ai.issue_id in
-                        (
-                            SELECT
-                              ffv.instance_id
-                            FROM
-                              fd_field_value ffv
-                            WHERE
-                            ffv.project_id = #{projectId}
-                            AND ffv.field_id = #{item.fieldId}
-                            AND ffv.date_value &gt;= #{item.startDate} AND ffv.date_value &lt;= #{item.endDate}
-                        )
-                    </foreach>
-                </if>
-                <if test="searchVO.otherArgs.customField.date_hms != null and searchVO.otherArgs.customField.date_hms.size > 0">
-                    and
-                    <foreach collection="searchVO.otherArgs.customField.date_hms" item="item" open="(" separator="and"
-                             close=")">
-                        ai.issue_id in
-                        (
-                            SELECT
-                            ffv.instance_id
-                            FROM
-                            fd_field_value ffv
-                            WHERE
-                            ffv.project_id = #{projectId}
-                            AND ffv.field_id = #{item.fieldId}
-                            AND DATE_FORMAT(ffv.date_value, '%H:%i:%s') &gt;= #{item.startDate} AND DATE_FORMAT(ffv.date_value, '%H:%i:%s') &lt;= #{item.endDate}
-                        )
-                    </foreach>
-                </if>
-                <if test="searchVO.otherArgs.customField.number != null and searchVO.otherArgs.customField.number.size > 0">
-                    and
-                    <foreach collection="searchVO.otherArgs.customField.number" item="item" open="(" separator="and"
-                             close=")">
-                        ai.issue_id in
-                        (
-                            SELECT
-                            ffv.instance_id
-                            FROM
-                            fd_field_value ffv
-                            WHERE
-                            ffv.project_id = #{projectId}
-                            AND ffv.field_id = #{item.fieldId}
-                            AND ffv.number_value = #{item.value}
-                        )
-                    </foreach>
-                </if>
-                <if test="searchVO.otherArgs.customField.string != null and searchVO.otherArgs.customField.string.size > 0">
-                    and
-                    <foreach collection="searchVO.otherArgs.customField.string" item="item" open="(" separator="and"
-                             close=")">
-                        ai.issue_id in
-                        (
-                            SELECT
-                            ffv.instance_id
-                            FROM
-                            fd_field_value ffv
-                            WHERE
-                            ffv.project_id = #{projectId}
-                            AND ffv.field_id = #{item.fieldId}
-                            AND ffv.string_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
-                        )
-                    </foreach>
-                </if>
-                <if test="searchVO.otherArgs.customField.text != null and searchVO.otherArgs.customField.text.size > 0">
-                    and
-                    <foreach collection="searchVO.otherArgs.customField.text" item="item" open="(" separator="and"
-                             close=")">
-                        ai.issue_id in
-                        (
-                            SELECT
-                            ffv.instance_id
-                            FROM
-                            fd_field_value ffv
-                            WHERE
-                            ffv.project_id = #{projectId}
-                            AND ffv.field_id = #{item.fieldId}
-                            AND ffv.text_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
-                        )
-                    </foreach>
-                </if>
+            <if test="searchVO.otherArgs.customField.date_hms != null and searchVO.otherArgs.customField.date_hms.size > 0">
+                and
+                <foreach collection="searchVO.otherArgs.customField.date_hms" item="item" open="(" separator="and"
+                         close=")">
+                    ai.issue_id in
+                    (
+                    SELECT
+                    ffv.instance_id
+                    FROM
+                    fd_field_value ffv
+                    WHERE
+                    ffv.project_id = #{projectId}
+                    AND ffv.field_id = #{item.fieldId}
+                    AND DATE_FORMAT(ffv.date_value, '%H:%i:%s') &gt;= #{item.startDate} AND DATE_FORMAT(ffv.date_value, '%H:%i:%s') &lt;= #{item.endDate}
+                    )
+                </foreach>
+            </if>
+            <if test="searchVO.otherArgs.customField.number != null and searchVO.otherArgs.customField.number.size > 0">
+                and
+                <foreach collection="searchVO.otherArgs.customField.number" item="item" open="(" separator="and"
+                         close=")">
+                    ai.issue_id in
+                    (
+                    SELECT
+                    ffv.instance_id
+                    FROM
+                    fd_field_value ffv
+                    WHERE
+                    ffv.project_id = #{projectId}
+                    AND ffv.field_id = #{item.fieldId}
+                    AND ffv.number_value = #{item.value}
+                    )
+                </foreach>
+            </if>
+            <if test="searchVO.otherArgs.customField.string != null and searchVO.otherArgs.customField.string.size > 0">
+                and
+                <foreach collection="searchVO.otherArgs.customField.string" item="item" open="(" separator="and"
+                         close=")">
+                    ai.issue_id in
+                    (
+                    SELECT
+                    ffv.instance_id
+                    FROM
+                    fd_field_value ffv
+                    WHERE
+                    ffv.project_id = #{projectId}
+                    AND ffv.field_id = #{item.fieldId}
+                    AND ffv.string_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
+                    )
+                </foreach>
+            </if>
+            <if test="searchVO.otherArgs.customField.text != null and searchVO.otherArgs.customField.text.size > 0">
+                and
+                <foreach collection="searchVO.otherArgs.customField.text" item="item" open="(" separator="and"
+                         close=")">
+                    ai.issue_id in
+                    (
+                    SELECT
+                    ffv.instance_id
+                    FROM
+                    fd_field_value ffv
+                    WHERE
+                    ffv.project_id = #{projectId}
+                    AND ffv.field_id = #{item.fieldId}
+                    AND ffv.text_value LIKE CONCAT(CONCAT('%' ,#{item.value}) ,'%')
+                    )
+                </foreach>
             </if>
         </if>
     </sql>
@@ -1016,10 +1059,13 @@
         </if>
     </sql>
 
-    <select id="selectUserIdsByProjectId" resultType="java.lang.Long">
+    <select id="selectUserIdsByProjectIds" resultType="java.lang.Long">
         select distinct assignee_id
         from agile_issue
-        where project_id = #{projectId}
+        where project_id in
+        <foreach collection="projectIds" item="projectId" open="(" close=")" separator=",">
+            #{projectId}
+        </foreach>
         and apply_type = 'agile'
         and assignee_id is not null
     </select>
@@ -2502,7 +2548,7 @@
                 WHERE
                     adl.issue_id = ai.issue_id
                     AND adl.project_id = #{projectId}
-                    AND adl.field = 'resolution'
+                    AND adl.field IN ('resolution', 'Auto Resolution')
                     AND adl.new_value is not null
                 ORDER BY
                     adl.log_id DESC
@@ -2998,6 +3044,38 @@
         select * from agile_issue ai
         where ai.project_id = #{projectId}
         AND (ai.parent_issue_id = #{parentIssueId} OR ai.relate_issue_id = #{parentIssueId})
+    </select>
+
+    <select id="listAvailableParents" resultType="io.choerodon.agile.api.vo.business.IssueVO">
+        select
+        t1.issue_id,
+        t1.summary,
+        CONCAT_WS('-', t2.project_code, t1.issue_num) AS issue_num,
+        t1.type_code,
+        t1.issue_type_id
+        from agile_issue t1
+        LEFT JOIN agile_project_info t2 ON t1.project_id = t2.project_id
+        where t1.project_id = #{projectId}
+        <if test="issueType == 'bug'">
+            and (
+                t1.type_code = 'story'
+                or t1.type_code = 'task'
+            )
+        </if>
+        <if test="issueType == 'sub_task'">
+            and (
+                t1.type_code = 'story'
+                or t1.type_code = 'task'
+                or (t1.type_code = 'bug' and (t1.relate_issue_id is null or t1.relate_issue_id = 0))
+            )
+        </if>
+        <if test="param != null">
+            and (
+                t1.summary like CONCAT(CONCAT('%', #{param}), '%')
+                or CONCAT_WS('-', t2.project_code, t1.issue_num) like CONCAT(CONCAT('%', #{param}), '%')
+            )
+        </if>
+        order by t1.issue_id desc
     </select>
 
 </mapper>

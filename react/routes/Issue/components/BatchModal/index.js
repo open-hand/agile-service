@@ -266,7 +266,7 @@ function BatchModal({
       }),
       valueField: 'versionId',
       textField: 'name',
-    }, ...userFields],
+    }],
   }), []);
   const getData = () => {
     const temp = dataSet.current ? dataSet.current.toData() : {};
@@ -372,11 +372,22 @@ function BatchModal({
       </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button onClick={onCancel} disabled={loading}>取消</Button>
+        <Button
+          onClick={onCancel}
+          disabled={loading}
+          style={{
+            fontWeight: 500,
+          }}
+        >
+          取消
+        </Button>
         <Button
           disabled={Object.keys(getData()).length === 0}
           color="blue"
           loading={loading}
+          style={{
+            fontWeight: 500,
+          }}
           onClick={() => {
             submit();
           }}

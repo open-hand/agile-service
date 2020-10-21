@@ -7,6 +7,7 @@ import {
 import moment from 'moment';
 import { stores } from '@choerodon/boot';
 import { versionApi, permissionApi } from '@/api';
+import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import ReleaseStore from '../../../stores/project/release/ReleaseStore';
 
 const { Sidebar } = Modal;
@@ -110,7 +111,7 @@ class EditRelease extends Component {
         visible={visible}
         destroyOnClose
         confirmLoading={loading}
-        width={380}
+        width={MODAL_WIDTH.small}
         footer={[
           <Button key="submit" type="primary" funcType="raised" loading={loading} onClick={this.handleOk} disabled={!editPermission}>
             确定

@@ -278,6 +278,7 @@ const NotifySetting = ({
     <div className={styles.notify_setting}>
       <Loading loading={loading} />
       <Form dataSet={notifySettingDataSet}>
+        <Select name="noticeTypeList" />
         <Dropdown
           // @ts-ignore
           getPopupContainer={(trigger) => trigger.parentNode}
@@ -326,14 +327,10 @@ const NotifySetting = ({
             <Icon type="arrow_drop_down" />
           </div>
         </Dropdown>
-        <Select name="noticeTypeList" />
         {
           AppState.currentMenuType.category !== 'PROGRAM' && (
           <CheckBox
             name="webhook"
-            style={{
-              marginTop: -30,
-            }}
           />
           )
         }

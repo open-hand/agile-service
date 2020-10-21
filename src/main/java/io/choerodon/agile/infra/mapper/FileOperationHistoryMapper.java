@@ -10,5 +10,5 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface FileOperationHistoryMapper extends BaseMapper<FileOperationHistoryDTO> {
 
-    FileOperationHistoryDTO queryLatestRecode(@Param("projectId") Long projectId, @Param("userId") Long userId);
+    FileOperationHistoryDTO queryLatestRecode(@Param("projectId") Long projectId, @Param("userId") Long userId, @Param("action")String action);
 }

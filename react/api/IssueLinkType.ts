@@ -11,7 +11,7 @@ interface ILinkTypeQuery {
   },
 }
 
-class IssueLinkTypeApi extends Api {
+class IssueLinkTypeApi extends Api<IssueLinkTypeApi> {
   get prefix() {
     return `/agile/v1/projects/${getProjectId()}`;
   }
@@ -39,8 +39,8 @@ class IssueLinkTypeApi extends Api {
 
   /**
    * 检查issueLinkType 是否重名
-   * @param issueLinkTypeName 
-   * @param issueLinkTypeId 
+   * @param issueLinkTypeName
+   * @param issueLinkTypeId
    */
   checkName(issueLinkTypeName:string, issueLinkTypeId?:number) {
     return this.request({

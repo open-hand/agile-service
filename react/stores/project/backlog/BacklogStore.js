@@ -9,7 +9,7 @@ import { store, stores } from '@choerodon/boot';
 import { Modal } from 'choerodon-ui';
 import Moment from 'moment';
 import {
-  featureApi, sprintApi, piApi, storyMapApi, issueApi, epicApi, priorityApi, issueTypeApi, commonApi, versionApi, quickFilterApi, 
+  featureApi, sprintApi, piApi, storyMapApi, issueApi, epicApi, priorityApi, issueTypeApi, commonApi, versionApi, quickFilterApi,
 } from '@/api';
 import { getProjectId } from '@/utils/common';
 import { extendMoment } from 'moment-range';
@@ -109,7 +109,6 @@ class BacklogStore {
 
   @observable newIssueVisible = false;
 
-
   @computed get getNewIssueVisible() {
     return this.newIssueVisible;
   }
@@ -183,7 +182,6 @@ class BacklogStore {
     return data;
   }
 
-
   axiosGetColorLookupValue() {
     return commonApi.loadLookupValue('epic_color');
   }
@@ -201,7 +199,7 @@ class BacklogStore {
   @action setRandomFeatureColor(featureList, colorLookupValue) {
     featureList.forEach((feature) => {
       if (!feature.color) {
-        this.randomFeatureColor[feature.summary] = randomItem(colorLookupValue.map(c => c.name));
+        this.randomFeatureColor[feature.summary] = randomItem(colorLookupValue.map((c) => c.name));
       }
     });
   }
@@ -213,7 +211,6 @@ class BacklogStore {
   @action setSprintWidth() {
     this.sprintWidth = document.getElementsByClassName('c7n-backlog-sprint')[0].offsetWidth;
   }
-
 
   @computed get getOnlyMe() {
     return this.onlyMe;
@@ -328,7 +325,7 @@ class BacklogStore {
       // 这里只保留几个字段，省内存
       return {
         ...sprint,
-        issueSearchVOList: null,
+        // issueSearchVOList: null,
         type: 'sprint',
         sprintType: sprint.type, // 冲刺类型 用于辨别ip冲刺
         expand: true,
@@ -414,7 +411,7 @@ class BacklogStore {
     }
     this.setSprintData({ backlogData, sprintData });
 
-    this.hasActiveSprint = Boolean(sprintData.find(element => element.statusCode === 'started'));
+    this.hasActiveSprint = Boolean(sprintData.find((element) => element.statusCode === 'started'));
     this.spinIf = false;
   }
 
@@ -438,7 +435,7 @@ class BacklogStore {
 
   @action dealWithMultiSelect(sprintId, currentClick, type) {
     const data = this.issueMap.get(sprintId);
-    const currentIndex = data.findIndex(issue => currentClick.issueId === issue.issueId);
+    const currentIndex = data.findIndex((issue) => currentClick.issueId === issue.issueId);
     if (this.prevClickedIssue && this.prevClickedIssue.sprintId === currentClick.sprintId) {
       // 如果以后想利用 ctrl 从多个冲刺中选取 issue，可以把判断条件2直接挪到 shift 上
       // 但是请考虑清楚操作多个数组可能带来的性能开销问题
@@ -485,7 +482,7 @@ class BacklogStore {
   }
 
   @action clickedOnce(sprintId, currentClick, hasExtraKey) {
-    const index = this.issueMap.get(sprintId.toString()).findIndex(issue => issue.issueId === currentClick.issueId);
+    const index = this.issueMap.get(sprintId.toString()).findIndex((issue) => issue.issueId === currentClick.issueId);
     this.multiSelected = observable.map();
     this.multiSelected.set(currentClick.issueId, currentClick);
     this.prevClickedIssue = {
@@ -538,10 +535,9 @@ class BacklogStore {
       get(sprintId) {
         const filterAssignId = that.filterSprintAssign.get(sprintId);
         if (filterAssignId) {
-          return that.issueMap.get(sprintId) ? that.issueMap.get(sprintId).filter(issue => issue.assigneeId === filterAssignId) : [];
-        } else {
-          return that.issueMap.get(sprintId);
+          return that.issueMap.get(sprintId) ? that.issueMap.get(sprintId).filter((issue) => issue.assigneeId === filterAssignId) : [];
         }
+        return that.issueMap.get(sprintId);
       },
     };
   }
@@ -562,16 +558,14 @@ class BacklogStore {
     if (sourceId === destinationId) {
       if (sourceIndex < destinationIndex) {
         return destinationArr[destinationIndex];
-      } else if (destinationIndex === 0) {
+      } if (destinationIndex === 0) {
         return destinationArr[destinationIndex];
-      } else {
-        return destinationArr[destinationIndex - 1];
       }
-    } else if (destinationIndex === 0 && destinationArr.length) {
-      return destinationArr[destinationIndex];
-    } else {
       return destinationArr[destinationIndex - 1];
+    } if (destinationIndex === 0 && destinationArr.length) {
+      return destinationArr[destinationIndex];
     }
+    return destinationArr[destinationIndex - 1];
   };
 
   @action moveSingleIssue(destinationId, destinationIndex, sourceId, sourceIndex, draggableId, issueItem, type) {
@@ -588,14 +582,14 @@ class BacklogStore {
       this.issueMap.set(sourceId, sourceArr);
       this.issueMap.set(destinationId, destinationArr);
     } else if (type === 'multi') {
-      const modifiedSourceArr = sourceArr.filter(issue => !this.multiSelected.has(issue.issueId));
+      const modifiedSourceArr = sourceArr.filter((issue) => !this.multiSelected.has(issue.issueId));
       destinationArr.splice(destinationIndex, 0, ...[...this.multiSelected.values()]);
       if (!this.multiSelected.has(issueItem.issueId)) {
         modifiedSourceArr.splice(sourceIndex, 1);
         destinationArr.unshift(issueItem);
       }
       if (sourceId === destinationId) {
-        const dragInSingleSprint = sourceArr.filter(issue => !this.multiSelected.has(issue.issueId));
+        const dragInSingleSprint = sourceArr.filter((issue) => !this.multiSelected.has(issue.issueId));
         dragInSingleSprint.splice(destinationIndex, 0, ...[...this.multiSelected.values()]);
         this.issueMap.set(destinationId, dragInSingleSprint);
       } else {
@@ -651,13 +645,13 @@ class BacklogStore {
   }
 
   @action updateEpic(epic) {
-    const updateIndex = this.epicList.findIndex(item => epic.issueId === item.issueId);
+    const updateIndex = this.epicList.findIndex((item) => epic.issueId === item.issueId);
     this.epicList[updateIndex].name = epic.name;
     this.epicList[updateIndex].objectVersionNumber = epic.objectVersionNumber;
   }
 
   @action updateFeature(feature) {
-    const updateIndex = this.featureList.findIndex(item => feature.issueId === item.issueId);
+    const updateIndex = this.featureList.findIndex((item) => feature.issueId === item.issueId);
     this.featureList[updateIndex].name = feature.name;
     this.featureList[updateIndex].objectVersionNumber = feature.objectVersionNumber;
   }
@@ -671,7 +665,7 @@ class BacklogStore {
     const referenceIssueId = before ? this.epicList[destinationIndex + 1].issueId : this.epicList[destinationIndex - 1].issueId;
     const sortVO = {
       projectId: getProjectId(),
-      objectVersionNumber: epicRankObjectVersionNumber, // 乐观锁     
+      objectVersionNumber: epicRankObjectVersionNumber, // 乐观锁
       issueId,
       type: 'epic',
       before,
@@ -703,7 +697,7 @@ class BacklogStore {
     const referenceIssueId = before ? this.featureList[destinationIndex + 1].issueId : this.featureList[destinationIndex - 1].issueId;
     const sortVO = {
       projectId: getProjectId(),
-      objectVersionNumber: featureRankObjectVersionNumber, // 乐观锁     
+      objectVersionNumber: featureRankObjectVersionNumber, // 乐观锁
       issueId,
       type: 'feature',
       before,
@@ -736,7 +730,7 @@ class BacklogStore {
   }
 
   @action updateVersion(version, type) {
-    const updateIndex = this.versionData.findIndex(item => item.versionId === version.versionId);
+    const updateIndex = this.versionData.findIndex((item) => item.versionId === version.versionId);
     if (type === 'name') {
       this.versionData[updateIndex].name = version.name;
     } else if (type === 'description') {
@@ -925,13 +919,13 @@ class BacklogStore {
     if (IsInProgramStore.isInProgram) {
       const notDonePiList = await piApi.getPiByPiStatus(['todo', 'doing'], IsInProgramStore.program.id);
       // 为了可以对规划中的冲刺进行时间修改的限制，这里获取对应pi和冲刺
-      const piIds = intersection(notDonePiList.map(pi => pi.id), uniq(sprintData.filter(sprint => sprint.planning).map(sprint => sprint.piId)));
+      const piIds = intersection(notDonePiList.map((pi) => pi.id), uniq(sprintData.filter((sprint) => sprint.planning).map((sprint) => sprint.piId)));
       if (piIds.length > 0) {
-        const sprints = await Promise.all(piIds.map(piId => sprintApi.getAllByPiId(piId)));
+        const sprints = await Promise.all(piIds.map((piId) => sprintApi.getAllByPiId(piId)));
         this.setPlanPiAndSprints(piIds, notDonePiList, sprints);
       }
       this.notDonePiList = notDonePiList;
-      const doingPi = notDonePiList.find(pi => pi.statusCode === 'doing');
+      const doingPi = notDonePiList.find((pi) => pi.statusCode === 'doing');
       if (doingPi && setPiIdIf) {
         this.setSelectedPiId(doingPi.id);
       }
@@ -994,33 +988,29 @@ class BacklogStore {
   };
 
   handleDeleteSprint = (data, isCurrentPi) => {
-    if (data.issueSearchVOList && data.issueSearchVOList.length > 0) {
-      Modal.confirm({
-        width: 560,
-        wrapClassName: 'deleteConfirm',
-        title: `删除冲刺${data.sprintName}`,
-        content: (
-          <div>
-            <p style={{ marginBottom: 10 }}>请确认您要删除这个冲刺。</p>
-            <p style={{ marginBottom: 10 }}>这个冲刺将会被彻底删除，冲刺中的任务将会被移动到待办事项中。</p>
-          </div>
-        ),
-        onOk() {
-          return sprintApi.delete(data.sprintId, isCurrentPi).then((res) => {
-            this.refresh();
-          }).catch((error) => {
-          });
-        },
-        onCancel() { },
-        okText: '删除',
-        okType: 'danger',
-      });
-    } else {
-      sprintApi.delete(data.sprintId, isCurrentPi).then((res) => {
+    const hasIssue = data.issueSearchVOList && data.issueSearchVOList.length > 0;
+    Modal.confirm({
+      width: 560,
+      wrapClassName: 'deleteConfirm',
+      title: `删除冲刺${data.sprintName}`,
+      content: hasIssue ? (
+        <div>
+          <p style={{ marginBottom: 10 }}>请确认您要删除这个冲刺。</p>
+          <p style={{ marginBottom: 10 }}>这个冲刺将会被彻底删除，冲刺中的任务将会被移动到待办事项中。</p>
+        </div>
+      ) : (
+        <div>
+          <p style={{ marginBottom: 10 }}>请确认您要删除这个冲刺。</p>
+        </div>
+      ),
+      onOk: async () => {
+        await sprintApi.delete(data.sprintId, isCurrentPi);
         this.refresh();
-      }).catch((error) => {
-      });
-    }
+      },
+      onCancel() { },
+      okText: '删除',
+      okType: 'danger',
+    });
   };
 
   handleCreateIssue(res, sprintId) {
@@ -1106,7 +1096,7 @@ class BacklogStore {
   getIssueListBySprintId(sprintId) {
     const issueList = this.issueMap.get(String(sprintId));
     const filterAssignId = this.filterSprintAssign.get(sprintId);
-    return filterAssignId ? issueList.filter(issue => issue.assigneeId === filterAssignId) : issueList;
+    return filterAssignId ? issueList.filter((issue) => issue.assigneeId === filterAssignId) : issueList;
   }
 
   @observable showPlanSprint = true;
@@ -1133,19 +1123,17 @@ class BacklogStore {
 
   @observable sprints = []; // 用于时间判断
 
-
   loadPiInfoAndSprint = async (programId = IsInProgramStore.artInfo.programId, artId = IsInProgramStore.artInfo.id) => {
     const currentPiInfo = await piApi.getCurrent(programId, artId);
     if (currentPiInfo.id) {
       const sprints = await sprintApi.getAllByPiId(currentPiInfo.id);
       this.setPiInfo(currentPiInfo);
-      this.setSprints(sprints.map(sprint => ({
+      this.setSprints(sprints.map((sprint) => ({
         ...sprint,
         endDate: sprint.actualEndDate || sprint.endDate,
       })));
     }
   }
-
 
   @action setPiInfo(data) {
     this.piInfo = data;
@@ -1172,7 +1160,7 @@ class BacklogStore {
 
   // 时间点是否在其他冲刺中
   isDateBetweenOtherSprints({ date, sprintId, sprints = this.sprints } = {}) {
-    return sprints.filter(sprint => sprint.sprintId !== sprintId).some((sprint) => {
+    return sprints.filter((sprint) => sprint.sprintId !== sprintId).some((sprint) => {
       const { startDate } = sprint;
       const endDate = sprint.actualEndDate || sprint.endDate;
       return date.isBetween(startDate, endDate);
@@ -1192,7 +1180,7 @@ class BacklogStore {
   isRangeOverlapWithOtherSprints({
     startDate, endDate, sprintId, sprints = this.sprints,
   } = {}) {
-    return sprints.filter(sprint => sprint.sprintId !== sprintId).some((sprint) => {
+    return sprints.filter((sprint) => sprint.sprintId !== sprintId).some((sprint) => {
       const { startDate: sprintStartDate } = sprint;
       const sprintEndDate = sprint.actualEndDate || sprint.endDate;
       const sprintRange = moment.range(sprintStartDate, sprintEndDate);
@@ -1200,7 +1188,6 @@ class BacklogStore {
       return range.overlaps(sprintRange);
     });
   }
-
 
   // 开始时间应小于结束时间
   isRange(startDate, endDate) {

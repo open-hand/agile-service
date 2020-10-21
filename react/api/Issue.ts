@@ -1,5 +1,6 @@
 import { axios, stores } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
+import Api from './Api';
 
 const { AppState } = stores;
 interface IIssue {
@@ -23,7 +24,7 @@ interface IIssue {
   relateIssueId?: number, // 关联的问题id
   sprintId?: number, // 冲刺id
   storyPoints?: number | string, // 故事点
-  versionIssueRelVOList?: Array<object>, // 关联的版本信息 [{versionId: 1814, relationType: "fix"}] 
+  versionIssueRelVOList?: Array<object>, // 关联的版本信息 [{versionId: 1814, relationType: "fix"}]
   wsjfVO?: object, // wsjf信息 {}
   // [ propName : string ] : any,//
 }
@@ -39,7 +40,7 @@ interface UTypeAndStatus {
   projectId: number | string,
   typeCode: string,
   statusId?: number, // 状态id
-  parentIssueId?: number// 父id 
+  parentIssueId?: number// 父id
 }
 interface UIssueParent {
   issueId: number,
@@ -56,7 +57,17 @@ interface CopyCondition {
   summary: string,
   epicName?: string,
 }
-interface ExportSearch {
+
+interface ICustomFieldData {
+  option: Array<{ fieldId: string, value: any }>,
+  date: Array<any>,
+  // eslint-disable-next-line camelcase
+  date_hms: Array<any>,
+  number: Array<any>,
+  string: Array<any>,
+  text: Array<any>,
+}
+interface IExportSearch {
   advancedSearchArgs?: {
     issueTypeId?: number, // 问题类型id
     reporterIds?: Array<number>, // 报告人id列表
@@ -64,7 +75,7 @@ interface ExportSearch {
     priorityId?: number, // 优先级id
   },
   otherArgs: {
-    customField: object, // 通用组件 （自定义）
+    customField?: ICustomFieldData, // 通用组件 （自定义）
     assigneeId?: number, // 经办人id
     issueIds?: Array<number>,
     component?: any,
@@ -85,15 +96,16 @@ interface ExportSearch {
   quickFilterIds?: Array<number>,
   contents?: string,
 }
-class IssueApi {
+export { IExportSearch, ICustomFieldData };
+class IssueApi extends Api<IssueApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   /**
     * 创建问题 敏捷/测试
-    * @param issueObj 
-    * @param applyType 
+    * @param issueObj
+    * @param applyType
     */
   create = (issueObj: IIssue, applyType: string = 'agile') => axios({
     method: 'post',
@@ -106,8 +118,8 @@ class IssueApi {
 
   /**
     * 更新问题
-    * @param issueObj 
-    * @param projectId 
+    * @param issueObj
+    * @param projectId
     */
   update = (issueObj: UIssue) => axios.put(`${this.prefix}/issues`, issueObj)
 
@@ -133,7 +145,7 @@ class IssueApi {
 
   /**
     * 更新问题类型
-    * @param data 
+    * @param data
     */
   updateType(data: UTypeAndStatus) {
     const organizationId = getOrganizationId();
@@ -150,9 +162,9 @@ class IssueApi {
 
   /**
     * 克隆问题
-    * @param issueId 
-    * @param applyType 
-    * @param copyCondition 
+    * @param issueId
+    * @param applyType
+    * @param copyCondition
     */
   clone(issueId: number, applyType: string = 'agile', copyCondition: CopyCondition) {
     const organizationId = getOrganizationId();
@@ -169,11 +181,11 @@ class IssueApi {
 
   /**
     * 根据问题id加载问题
-    * @param issueId 
+    * @param issueId
     */
   load(issueId: number) {
     const organizationId = getOrganizationId();
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/issues/${issueId}`,
       params: {
@@ -189,7 +201,7 @@ class IssueApi {
    */
   loadUnderProgram(issueId: number, programId: number) {
     const organizationId = getOrganizationId();
-    return axios({
+    return this.request({
       method: 'get',
       url: `${this.prefix}/project_invoke_program/issue/${issueId}`,
       params: {
@@ -213,20 +225,20 @@ class IssueApi {
 
   /**
     * 导出问题列表
-    * @param searchVO 
-    * @param sort 
+    * @param searchVO
+    * @param sort
     */
-  export(searchVO: ExportSearch, sort?: string) {
+  export(searchVO: IExportSearch, sort?: string) {
     const organizationId = getOrganizationId();
     return axios({
-      url: `${this.prefix}/issues/export`,
+      url: `${this.prefix}/excel/export`,
       method: 'post',
       data: searchVO,
       params: {
         organizationId,
         sort,
       },
-      responseType: 'arraybuffer',
+      // responseType: 'arraybuffer',
     });
   }
 
@@ -269,18 +281,24 @@ class IssueApi {
   }
 
   /**
- * 查询最新的导入记录
+ * 查询最新的导入导出记录
  * @returns {V|*}
  */
-  loadLastImport() {
-    return axios.get(`${this.prefix}/excel/latest`);
+  loadLastImportOrExport(action: 'upload_file' | 'download_file') {
+    return axios({
+      url: `${this.prefix}/excel/latest`,
+      method: 'get',
+      params: {
+        action,
+      },
+    });
   }
 
   /**
  *下载导入模板
  *
  * @export
- * @returns 
+ * @returns
  */
   downloadTemplateForImport() {
     const organizationId = getOrganizationId();
@@ -296,14 +314,14 @@ class IssueApi {
 
   /**
     * 创建子任务
-    * @param obj 
-    * @param applyType 
+    * @param obj
+    * @param applyType
     */
   createSubtask = (issueObj: object) => axios.post(`${this.prefix}/issues/sub_issue`, issueObj)
 
   /**
     * 根据子任务问题id 进行加载这个子任务（废弃，不再使用）
-    * @param issueId 
+    * @param issueId
     */
   loadSubtask(issueId: number) {
     return axios.get(`${this.prefix}/issues/sub_issue/${issueId}`);
@@ -311,7 +329,7 @@ class IssueApi {
 
   /**
     * 子任务转换为任务
-    * @param data 
+    * @param data
     */
   subtaskTransformTask(data: UTypeAndStatus) {
     const organizationId = getOrganizationId();
@@ -327,7 +345,7 @@ class IssueApi {
 
   /**
     * 任务转换为子任务
-    * @param data 
+    * @param data
     */
   taskTransformSubTask(data: UTypeAndStatus) {
     const organizationId = getOrganizationId();
@@ -343,7 +361,7 @@ class IssueApi {
 
   /**
     * 更改子任务所属的父任务
-    * @param issueUpdateParentIdVO 
+    * @param issueUpdateParentIdVO
     */
   subTaskChangeParent(issueUpdateParentIdVO: UIssueParent) {
     return axios.post(`${this.prefix}/issues/update_parent`, issueUpdateParentIdVO);
@@ -351,9 +369,9 @@ class IssueApi {
 
   /**
   * 查询故事和任务   关联问题时 (对于BUG管理问题)
-  * @param {*} page 
-  * @param {*} size 
-  * @param {*} searchVO  
+  * @param {*} page
+  * @param {*} size
+  * @param {*} searchVO
   */
   loadStroyAndTask(page: number = 1, size: number = 10, searchVO?: SearchVO) {
     return axios({
@@ -369,10 +387,10 @@ class IssueApi {
 
   /**
     * 分页搜索查询issue列表
-    * @param page 
-    * @param size 
-    * @param issueId 
-    * @param content 
+    * @param page
+    * @param size
+    * @param issueId
+    * @param content
     */
   loadIssuesInLink(page: number = 1, size: number = 10, issueId?: number, content?: string, projectId?: number) {
     return axios({
@@ -394,6 +412,19 @@ class IssueApi {
       url: `/agile/v1/projects/${getProjectId()}/encrypt`,
       params: {
         issueId,
+      },
+    });
+  }
+
+  loadParentIssues(page: number, size: number = 20, issueType: 'bug' | 'sub_task', param?: string) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/issues/available_parents`,
+      params: {
+        issueType,
+        param,
+        page,
+        size,
       },
     });
   }

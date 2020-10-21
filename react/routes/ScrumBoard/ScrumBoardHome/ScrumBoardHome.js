@@ -6,6 +6,7 @@ import {
 import {
   Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
 } from 'choerodon-ui';
+import { merge } from 'lodash';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
 import {
@@ -13,6 +14,7 @@ import {
 } from '@/api';
 import LINK_URL from '@/constants/LINK_URL';
 import to from '@/utils/to';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
@@ -28,6 +30,7 @@ import ScrumBoardFullScreen from '../ScrumBoardComponent/ScrumBoardFullScreen';
 import CreateBoard from '../ScrumBoardComponent/CreateBoard';
 import { service } from '../setting/Setting';
 import SelectPriority from './SelectPriority';
+import CreateIssue from '../ScrumBoardComponent/create-issue';
 
 const { Option } = Select;
 const { AppState } = stores;
@@ -65,6 +68,24 @@ class ScrumBoardHome extends Component {
 
   componentDidMount() {
     ScrumBoardStore.setSelectedBoardId('');
+    const scrumboardInitValue = localPageCacheStore.getItem('scrumboard');
+    if (scrumboardInitValue) {
+      const {
+        onlyMeChecked, onlyStoryChecked, moreChecked, personalFilters, assigneeFilter, sprintFilter, priorityIds,
+      } = scrumboardInitValue;
+      ScrumBoardStore.addQuickSearchFilter(
+        onlyMeChecked,
+        onlyStoryChecked,
+        moreChecked,
+        personalFilters,
+      );
+      assigneeFilter && ScrumBoardStore.addAssigneeFilter(assigneeFilter.map((item) => item.key));
+      if (sprintFilter) {
+        ScrumBoardStore.addSprintFilter(sprintFilter);
+        ScrumBoardStore.setSprintData(sprintFilter);
+      }
+      priorityIds && ScrumBoardStore.setPriority(priorityIds);
+    }
     this.getBoard();
     // eslint-disable-next-line react/destructuring-assignment
     const { state } = this.props.location;
@@ -115,6 +136,12 @@ class ScrumBoardHome extends Component {
       moreChecked,
       personalFilters,
     );
+    localPageCacheStore.setItem('scrumboard', merge(localPageCacheStore.getItem('scrumboard'), {
+      onlyMeChecked,
+      onlyStoryChecked,
+      moreChecked,
+      personalFilters,
+    }));
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   };
 
@@ -125,11 +152,15 @@ class ScrumBoardHome extends Component {
 
   onSprintChange = (value) => {
     ScrumBoardStore.addSprintFilter(value);
+    localPageCacheStore.setItem('scrumboard', merge(localPageCacheStore.getItem('scrumboard'), {
+      sprintFilter: value,
+    }));
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   }
 
   handleClearFilter = () => {
     ScrumBoardStore.clearFilter();
+    localPageCacheStore.remove('scrumboard');
     QuickSearchEvent.emit('clearQuickSearchSelect');
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   }
@@ -335,8 +366,15 @@ class ScrumBoardHome extends Component {
 
   handlePriorityChange = (value) => {
     ScrumBoardStore.setPriority(value);
+    localPageCacheStore.setItem('scrumboard', merge(localPageCacheStore.getItem('scrumboard'), {
+      priorityIds: value,
+    }));
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   }
+
+  handleCreateIssue = () => {
+    ScrumBoardStore.setCreateIssueVisible(true);
+  };
 
   render() {
     const { HeaderStore } = this.props;
@@ -353,7 +391,7 @@ class ScrumBoardHome extends Component {
         <Header title="活跃冲刺">
           <Select
             ref={(SelectBoard) => { this.SelectBoard = SelectBoard; }}
-            className="SelectTheme primary autoWidth"
+            className="SelectTheme  autoWidth"
             value={ScrumBoardStore.getSelectedBoard}
             style={{
               marginRight: 15, fontWeight: 500, lineHeight: '28px',
@@ -387,15 +425,12 @@ class ScrumBoardHome extends Component {
               ))
             }
           </Select>
-          <ScrumBoardFullScreen />
           <HeaderLine />
+          <Button onClick={this.handleCreateIssue} icon="playlist_add">创建问题</Button>
           <Button
             className="c7n-scrumboard-settingButton"
             funcType="flat"
             icon="settings"
-            style={{
-              marginRight: 15,
-            }}
             onClick={() => {
               to(LINK_URL.scrumboardSetting, {
                 params: {
@@ -406,6 +441,7 @@ class ScrumBoardHome extends Component {
           >
             配置看板
           </Button>
+          <ScrumBoardFullScreen />
           {
             currentSprintIsDoing && (
               <>
@@ -477,10 +513,12 @@ class ScrumBoardHome extends Component {
                   )}
               </div>
             </div>
+
             <IssueDetail
               refresh={this.refresh}
             />
           </Spin>
+          <CreateIssue refresh={this.refresh} />
         </Content>
         {
           ScrumBoardStore.getUpdateParent ? (

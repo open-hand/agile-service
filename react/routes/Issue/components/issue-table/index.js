@@ -1,16 +1,19 @@
-/* eslint-disable max-len */
-import React, { useContext } from 'react';
+import React, {
+  useContext, Fragment,
+} from 'react';
 import { observer } from 'mobx-react-lite';
-import _, { map } from 'lodash';
+import _ from 'lodash';
 import { Tooltip, Tag } from 'choerodon-ui';
 import { Table } from 'choerodon-ui/pro';
+import { map } from 'lodash';
 import QuickCreateIssue from '@/components/QuickCreateIssue';
 import PriorityTag from '@/components/PriorityTag';
 import TypeTag from '@/components/TypeTag';
 import StatusTag from '@/components/StatusTag';
 import UserHead from '@/components/UserHead';
 import IssueStore from '@/stores/project/issue/IssueStore';
-import useIsInProgram from '@/hooks/useIsInProgram';
+import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import CollapseAll from './CollapseAll';
 import Store from '../../stores';
 import './index.less';
 
@@ -19,7 +22,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
   const {
     dataSet, fields,
   } = useContext(Store);
-  const { isInProgram } = useIsInProgram();
+  const { isInProgram } = IsInProgramStore;
   const handleRowClick = (record) => {
     // dataSet.select(record);
     const editFilterInfo = IssueStore.getEditFilterInfo;
@@ -30,14 +33,14 @@ function IssueTable({ tableRef, onCreateIssue }) {
       expand: true,
     });
     IssueStore.setFilterListVisible(false);
-    IssueStore.setEditFilterInfo(map(editFilterInfo, (item) => Object.assign(item, { isEditing: false })));
+    IssueStore.setEditFilterInfo(map(editFilterInfo, item => Object.assign(item, { isEditing: false })));
   };
   const renderTag = (listField, nameField) => ({ record }) => {
     const list = record.get(listField);
     if (list) {
       if (list.length > 0) {
         return (
-          <Tooltip title={<div>{_.map(list, (item) => item[nameField]).map((name) => <div>{name}</div>)}</div>}>
+          <Tooltip title={<div>{_.map(list, item => item[nameField]).map(name => <div>{name}</div>)}</div>}>
             <div style={{ display: 'inline-flex', maxWidth: '100%' }}>
               <Tag
                 color="blue"
@@ -97,7 +100,8 @@ function IssueTable({ tableRef, onCreateIssue }) {
           name="issueId"
           width={320}
           header={() => (
-            <div className="c7nagile-issue-table-summary">
+            <div style={{ display: "inline-block" }}>
+              <CollapseAll tableRef={tableRef} />
               概要
             </div>
           )}
@@ -107,14 +111,14 @@ function IssueTable({ tableRef, onCreateIssue }) {
             },
           })}
           renderer={({ record }) => (
-            <>
+            <Fragment>
               <TypeTag data={record.get('issueTypeVO')} style={{ marginRight: 5, marginTop: -2 }} />
               <Tooltip mouseEnterDelay={0.5} placement="topLeft" title={`问题概要： ${record.get('summary')}`}>
                 <span className="c7n-agile-table-cell-click">
                   {record.get('summary')}
                 </span>
               </Tooltip>
-            </>
+            </Fragment>
           )}
         />
         <Column
@@ -161,7 +165,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
           sortable
           name="statusId"
           renderer={({ record }) => (
-            <Tooltip title={record.get('statusVO')?.name}>
+            <Tooltip title={record.get('statusVO').name}>
               <div style={{
                 display: 'inline-flex',
                 overflow: 'hidden',
@@ -207,18 +211,6 @@ function IssueTable({ tableRef, onCreateIssue }) {
           name="creationDate"
           className="c7n-agile-table-cell"
         />
-        <Column
-          width={170}
-          hidden
-          name="estimatedStartTime"
-          className="c7n-agile-table-cell"
-        />
-        <Column
-          width={170}
-          hidden
-          name="estimatedEndTime"
-          className="c7n-agile-table-cell"
-        />
         <Column hidden name="label" className="c7n-agile-table-cell" renderer={renderTag('labelIssueRelVOS', 'labelName')} />
         <Column hidden name="component" className="c7n-agile-table-cell" renderer={renderTag('issueComponentBriefVOS', 'name')} />
         <Column hidden name="storyPoints" className="c7n-agile-table-cell" renderer={({ text }) => text || '-'} />
@@ -226,7 +218,7 @@ function IssueTable({ tableRef, onCreateIssue }) {
         <Column hidden name="epic" className="c7n-agile-table-cell" renderer={renderEpicOrFeature} />
         {isInProgram && <Column hidden name="feature" className="c7n-agile-table-cell" renderer={renderEpicOrFeature} />}
         <Column name="issueSprintVOS" renderer={renderTag('issueSprintVOS', 'sprintName')} />
-        {fields.map((field) => (
+        {fields.map(field => (
           <Column
             hidden
             name={field.code}

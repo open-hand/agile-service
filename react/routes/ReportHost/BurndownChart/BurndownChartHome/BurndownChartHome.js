@@ -1,19 +1,23 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import {
-  Button, Icon, Select, Checkbox,
+  Button, Icon, Select, Checkbox, Dropdown, Menu,
 } from 'choerodon-ui';
 import {
   Page, Header, Content, Breadcrumb, stores,
 } from '@choerodon/boot';
-import { some, groupBy } from 'lodash';
+import { some } from 'lodash';
 import Moment from 'moment';
 import { extendMoment } from 'moment-range';
 import { sprintApi, reportApi } from '@/api';
 import { linkUrl } from '@/utils/to';
+import { configTheme } from '@/utils/common';
 import LINK_URL from '@/constants/LINK_URL';
-import QuickSearch from '@/components/quick-search';
+import HeaderLine from '@/components/HeaderLine';
 import BurnDownChart from '@/components/charts/burn-down';
+import IssueSearch, { IssueSearchStore } from '@/components/issue-search';
+import { transformFilter } from '@/routes/Issue/stores/utils';
+import { getSystemFields } from '@/stores/project/issue/IssueStore';
 import BurndownChartStore from '@/stores/project/burndownChart/BurndownChartStore';
 import epicSvg from '@/assets/image/emptyChart.svg';
 import NoDataComponent from '../../Component/noData';
@@ -45,6 +49,10 @@ class BurndownChartHome extends Component {
         quickFilters: [],
       },
     };
+    this.issueSearchStore = new IssueSearchStore({
+      transformFilter,
+      getSystemFields: () => getSystemFields().filter((f) => !['contents', 'sprint', 'quickFilterIds'].includes(f.code)),
+    });
   }
 
   componentDidMount() {
@@ -69,14 +77,17 @@ class BurndownChartHome extends Component {
   }
 
   getChartCoordinate() {
-    const { defaultSprintId, select, quickFilter } = this.state;
+    const {
+      defaultSprintId, select, quickFilter,
+    } = this.state;
+    const searchVO = this.issueSearchStore.getCustomFieldFilters();
     this.setState({ chartLoading: true });
     reportApi.loadBurnDownCoordinate(defaultSprintId, select, {
       assigneeId: quickFilter.onlyMe ? AppState.getUserId : undefined,
       onlyStory: quickFilter.onlyStory,
       quickFilterIds: quickFilter.quickFilters,
       personalFilterIds: quickFilter.personalFilters,
-    }).then((res) => {
+    }, searchVO).then((res) => {
       this.setState({
         chartLoading: false,
         chartData: res,
@@ -85,7 +96,10 @@ class BurndownChartHome extends Component {
   }
 
   getTableData() {
-    const { defaultSprintId, select, quickFilter } = this.state;
+    const {
+      defaultSprintId, select, quickFilter,
+    } = this.state;
+    const searchVO = this.issueSearchStore.getCustomFieldFilters();
     this.setState({
       tableLoading: true,
     });
@@ -94,7 +108,7 @@ class BurndownChartHome extends Component {
       onlyStory: quickFilter.onlyStory,
       quickFilterIds: quickFilter.quickFilters,
       personalFilterIds: quickFilter.personalFilters,
-    }).then((res) => {
+    }, searchVO).then((res) => {
       const data = res;
       const newData = [];
       // 将操作日期相同的合并
@@ -222,9 +236,14 @@ class BurndownChartHome extends Component {
     });
   };
 
+  refresh=() => {
+    this.getTableData();
+    this.axiosGetRestDays();
+  }
+
   render() {
     const {
-      quickFilter, select, chartLoading, chartData, endDate, restDayShow, restDays, tableLoading,
+      select, chartLoading, chartData, endDate, restDayShow, restDays, tableLoading,
     } = this.state;
     const sprints = BurndownChartStore.getSprintList;
     return (
@@ -236,6 +255,7 @@ class BurndownChartHome extends Component {
           <SwithChart
             current="burndownchart"
           />
+          <HeaderLine />
           <Button
             funcType="flat"
             onClick={() => {
@@ -246,17 +266,42 @@ class BurndownChartHome extends Component {
             <Icon type="refresh icon" />
             <span>刷新</span>
           </Button>
+          <Checkbox
+            style={{ marginLeft: 24 }}
+            checked={restDayShow}
+            onChange={this.onCheckChange}
+          >
+            显示非工作日
+          </Checkbox>
         </Header>
         <Breadcrumb title="燃尽图" />
-        <Content>
+        <Content style={{
+          borderTop: '1px solid rgb(216, 216, 216)',
+        }}
+        >
           {
             sprints.length > 0 ? (
               <div>
-                <div>
+                <div style={{
+                  display: 'flex', alignItems: 'flex-start',
+                }}
+                >
                   <Select
+                    // {...configTheme({
+                    //   list: sprints,
+                    //   textField: 'sprintName',
+                    //   valueFiled: 'sprintId',
+                    // })}
                     getPopupContainer={(triggerNode) => triggerNode.parentNode}
-                    style={{ width: 244 }}
+                    style={{
+                      width: 150,
+                      flexShrink: 0,
+                      marginTop: 10,
+                      marginRight: 5,
+                    }}
                     label="迭代冲刺"
+                    placeholder="迭代冲刺"
+                    dropdownMatchSelectWidth={false}
                     value={this.state.defaultSprintId}
                     onChange={(value) => {
                       let newEndDate;
@@ -282,30 +327,24 @@ class BurndownChartHome extends Component {
                   </Select>
                   <Select
                     getPopupContainer={(triggerNode) => triggerNode.parentNode}
-                    style={{ width: 244, marginLeft: 24 }}
+                    style={{ marginLeft: 10, marginTop: 10, marginRight: 15 }}
                     label="单位"
-                    defaultValue={this.state.select}
+                    value={this.state.select}
                     onChange={this.handleChangeSelect}
+                    dropdownMatchSelectWidth={false}
                   >
                     <Option value="remainingEstimatedTime">剩余时间</Option>
                     <Option value="storyPoints">故事点</Option>
                     <Option value="issueCount">问题计数</Option>
                   </Select>
-                  <QuickSearch
-                    style={{ marginLeft: 24, width: 244 }}
-                    onChange={this.handleQuickSearchChange}
-                    value={quickFilter}
+                  <IssueSearch
+                    store={this.issueSearchStore}
+                    onClear={this.refresh}
+                    onChange={this.refresh}
                   />
-                  <Checkbox
-                    style={{ marginLeft: 24 }}
-                    checked={restDayShow}
-                    onChange={this.onCheckChange}
-                  >
-                    显示非工作日
-                  </Checkbox>
                 </div>
                 <BurnDownChart
-                  select={select}
+                  type={select}
                   loading={chartLoading}
                   data={chartData}
                   endDate={endDate}

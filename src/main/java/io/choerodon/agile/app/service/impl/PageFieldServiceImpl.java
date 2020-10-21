@@ -1,10 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.app.service.FieldOptionService;
-import io.choerodon.agile.app.service.FieldValueService;
-import io.choerodon.agile.app.service.ObjectSchemeFieldService;
-import io.choerodon.agile.app.service.PageFieldService;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.annotation.CopyPageField;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
@@ -59,13 +56,15 @@ public class PageFieldServiceImpl implements PageFieldService {
     @Autowired
     private LookupValueMapper lookupValueMapper;
     @Autowired
-    private FieldValueMapper fieldValueMapper;
+    protected FieldValueMapper fieldValueMapper;
     @Autowired
     protected ObjectSchemeFieldService objectSchemeFieldService;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
     protected ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Override
     public PageFieldDTO baseCreate(PageFieldDTO field) {
@@ -164,6 +163,9 @@ public class PageFieldServiceImpl implements PageFieldService {
             objectSchemeFieldService.createSystemFieldIfNotExisted(organizationId);
             pageFields =
                     objectSchemeFieldExtendMapper.selectFields(organizationId, projectId, issueType, created, edited);
+        }
+        if (agilePluginService != null) {
+            pageFields = agilePluginService.handlerProgramPageField(projectId,issueType,pageFields);
         }
         return pageFields;
     }
@@ -345,11 +347,18 @@ public class PageFieldServiceImpl implements PageFieldService {
 
     @Override
     public Map<Long, Map<String, Object>> queryFieldValueWithIssueIdsForAgileExport(Long organizationId, Long projectId, List<Long> instanceIds, Boolean isJustStr) {
-        Map<Long, Map<String, Object>> result = new HashMap<>();
-        List<FieldValueDTO> values = fieldValueMapper.queryList(projectId, null, null, null);
+        List<FieldValueDTO> values = fieldValueMapper.queryListByInstanceIds(Arrays.asList(projectId), instanceIds, null, null);
         ObjectSchemeFieldSearchVO searchDTO = new ObjectSchemeFieldSearchVO();
         searchDTO.setSchemeCode(ObjectSchemeCode.AGILE_ISSUE);
         List<ObjectSchemeFieldDTO> fieldDTOS = objectSchemeFieldService.listQuery(organizationId, projectId, searchDTO);
+        return getFieldValueMap(fieldDTOS, values, instanceIds, isJustStr);
+    }
+
+    protected Map<Long, Map<String, Object>> getFieldValueMap(List<ObjectSchemeFieldDTO> fieldDTOS,
+                                                              List<FieldValueDTO> values,
+                                                              List<Long> instanceIds,
+                                                              Boolean isJustStr) {
+        Map<Long, Map<String, Object>> result = new HashMap<>();
         Map<Long, ObjectSchemeFieldDTO> fieldMap = fieldDTOS.stream().collect(Collectors.toMap(ObjectSchemeFieldDTO::getId, Function.identity()));
         Map<Long, List<FieldValueDTO>> valuesMap = values.stream().collect(Collectors.groupingBy(FieldValueDTO::getInstanceId));
         Map<Long, UserDTO> userMap = FieldValueUtil.handleUserMap(values.stream().filter(x -> x.getFieldType().equals(FieldType.MEMBER)).map(FieldValueDTO::getOptionId).collect(Collectors.toList()));

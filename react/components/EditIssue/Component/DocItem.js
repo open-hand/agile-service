@@ -3,6 +3,7 @@ import { withRouter } from 'react-router-dom';
 import { Icon, Popconfirm, Tooltip } from 'choerodon-ui';
 import './DocItem.less';
 import to from '@/utils/to';
+
 import LINK_URL from '@/constants/LINK_URL';
 
 class DocItem extends Component {
@@ -29,7 +30,7 @@ class DocItem extends Component {
 
   render() {
     const {
-      doc, type, onDeleteDoc,
+      doc, type, onDeleteDoc, disabled,
     } = this.props;
     return (
       <div
@@ -54,17 +55,21 @@ class DocItem extends Component {
               </span>
             </Tooltip>
           )}
+        {
+            !disabled && (
+            <Popconfirm
+              title="确认删除知识关联吗？"
+              onConfirm={() => onDeleteDoc(doc.id)}
+              okText="确认"
+              cancelText="取消"
+              placement="topRight"
+              arrowPointAtCenter
+            >
+              <Icon type="delete" className="c7n-docItem-delete" />
+            </Popconfirm>
+            )
+          }
 
-        <Popconfirm
-          title="确认删除知识关联吗？"
-          onConfirm={() => onDeleteDoc(doc.id)}
-          okText="确认"
-          cancelText="取消"
-          placement="topRight"
-          arrowPointAtCenter
-        >
-          <Icon type="delete" className="c7n-docItem-delete" />
-        </Popconfirm>
       </div>
     );
   }

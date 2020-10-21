@@ -3,7 +3,9 @@ package io.choerodon.agile.infra.mapper;
 import io.choerodon.agile.api.vo.IssueIdSprintIdVO;
 import io.choerodon.agile.api.vo.IssueOverviewVO;
 import io.choerodon.agile.api.vo.SearchVO;
+import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -138,15 +140,15 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
                                                  @Param("content") String content);
 
 
-    List<SprintNameDTO> querySprintNameByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+    List<SprintNameDTO> querySprintNameByIssueIds(@Param("projectIds") List<Long> projectIds, @Param("issueIds") List<Long> issueIds);
 
     List<VersionIssueRelDTO> queryVersionIssueRelByIssueId(@Param("issueId") Long issueId);
 
-    List<VersionIssueRelDTO> queryVersionNameByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds, @Param("relationType") String relationType);
+    List<VersionIssueRelDTO> queryVersionNameByIssueIds(@Param("projectIds") List<Long> projectIds, @Param("issueIds") List<Long> issueIds, @Param("relationType") String relationType);
 
-    List<LabelIssueRelDTO> queryLabelIssueByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+    List<LabelIssueRelDTO> queryLabelIssueByIssueIds(@Param("projectIds") List<Long> projectIds, @Param("issueIds") List<Long> issueIds);
 
-    List<ComponentIssueRelDTO> queryComponentIssueByIssueIds(@Param("projectId") Long projectId, @Param("issueIds") List<Long> issueIds);
+    List<ComponentIssueRelDTO> queryComponentIssueByIssueIds(@Param("projectIds") List<Long> projectIds, @Param("issueIds") List<Long> issueIds);
 
     /**
      * 根据issueIds查询issueEpic信息
@@ -470,10 +472,10 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     /**
      * 查项目下issue的assignee_id
      *
-     * @param projectId
+     * @param projectIds
      * @return
      */
-    Set<Long> selectUserIdsByProjectId(@Param("projectId") Long projectId);
+    Set<Long> selectUserIdsByProjectIds(@Param("projectIds") List<Long> projectIds);
 
     /**
      * 查项目下issue的reporter_id
@@ -513,4 +515,19 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
     List<Long> selectIssueTypeIdsByStatusId(@Param("projectId") Long projectId, @Param("statusId") Long statusId);
 
     List<IssueDTO> querySubIssueByParentIssueId(@Param("projectId") Long projectId, @Param("parentIssueId") Long parentIssueId);
+
+    List<IssueDTO> querySubIssueByIssueId(@Param("issueId") Long issueId);
+
+    List<IssueDTO> querySubBugByIssueId(@Param("issueId") Long issueId);
+
+    /**
+     * 根据projectId和
+     * @param projectId
+     * @param issueType
+     * @param param
+     * @return
+     */
+    List<IssueVO> listAvailableParents(@Param("projectId") Long projectId,
+                                       @Param("issueType") String issueType,
+                                       @Param("param") String param);
 }

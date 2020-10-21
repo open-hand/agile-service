@@ -584,6 +584,7 @@ class EpicBurndown extends Component {
     if (JSON.stringify(item) !== '{}') {
       if (linkType === 'epic') {
         LINK_URL_TO.issueLinkTo(item.issueId, item.issueNum);
+        return;
       }
       to(LINK_URL.workListIssue);
     }
@@ -612,7 +613,6 @@ class EpicBurndown extends Component {
               中创建故事并预估故事点。
             </p>
           </div>
-          {/* {'当前史诗下没有故事点'} */}
         </div>
       );
     }
@@ -818,12 +818,6 @@ class EpicBurndown extends Component {
       <Page className="c7n-epicBurndown" service={['choerodon.code.project.operation.chart.ps.choerodon.code.project.operation.chart.ps.epicburndown']}>
         <Header
           title="史诗燃耗图"
-          /**
-          backPath={`/agile/${linkFromParamUrl || 'reporthost'}?ty
-          pe=${urlParams.type}&id=${urlParams.id}&name=${encodeURICo
-            mponent(urlParams.name)}&organizationId=${urlParams.organizationId}`}
-
-           */
           backPath={linkUrl(LINK_URL.report)}
         >
           <SwithChart
@@ -888,7 +882,6 @@ class EpicBurndown extends Component {
                       </figure>
                     </div>
                   </div>
-
                 </div>
                 <div>
                   {this.renderEpicInfo()}

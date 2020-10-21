@@ -1,18 +1,15 @@
 package io.choerodon.agile.app.service;
 
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson.JSONObject;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.core.domain.Page;
-import io.choerodon.core.domain.PageInfo;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
-import io.choerodon.mybatis.pagehelper.domain.Sort;
 
 
 /**
@@ -156,8 +153,8 @@ public interface IssueService {
 
     Page<IssueNumVO> queryIssueByOption(Long projectId, Long issueId, String issueNum, Boolean onlyActiveSprint, Boolean self, String content, PageRequest pageRequest);
 
-    void exportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request,
-                      HttpServletResponse response, Long organizationId, Sort sort);
+//    void exportIssues(Long projectId, SearchVO searchVO, HttpServletRequest request,
+//                      HttpServletResponse response, Long organizationId, Sort sort);
 
     /**
      * 根据issueId复制一个issue
@@ -351,4 +348,15 @@ public interface IssueService {
      * @return
      */
     Page<IssueListFieldKVVO> queryBackLogIssuesByPersonal(Long organizationId, Long projectId,PageRequest pageRequest);
+
+    /**
+     * 根据项目id和问题类型分页查询可以选择的父问题
+     *
+     * @param pageRequest
+     * @param projectId
+     * @param issueType
+     * @param param
+     * @return
+     */
+    Page<IssueVO> pagingQueryAvailableParents(PageRequest pageRequest, Long projectId, String issueType, String param);
 }

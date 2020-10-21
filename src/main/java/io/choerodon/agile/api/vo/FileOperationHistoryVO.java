@@ -4,6 +4,8 @@ package io.choerodon.agile.api.vo;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import java.util.Date;
+
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/2/25.
  * Email: fuqianghuang01@gmail.com
@@ -38,6 +40,12 @@ public class FileOperationHistoryVO {
 
     @ApiModelProperty(value = "版本号")
     private Long objectVersionNumber;
+
+    @ApiModelProperty(value = "创建时间")
+    private Date creationDate;
+
+    @ApiModelProperty(value = "最后更新日期")
+    private Date lastUpdateDate;
 
     public Long getId() {
         return id;
@@ -109,5 +117,21 @@ public class FileOperationHistoryVO {
 
     public Long getObjectVersionNumber() {
         return objectVersionNumber;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public Date getLastUpdateDate() {
+        return lastUpdateDate;
+    }
+
+    public void setLastUpdateDate(Date lastUpdateDate) {
+        this.lastUpdateDate = lastUpdateDate;
     }
 }

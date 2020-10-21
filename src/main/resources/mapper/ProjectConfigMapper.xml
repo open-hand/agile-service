@@ -45,6 +45,18 @@
         AND apply_type = #{applyType}
     </select>
 
+    <select id="queryByProjectIdsAndOptions" resultType="io.choerodon.agile.infra.dto.ProjectConfigDTO">
+        SELECT *
+        FROM fd_project_config
+        WHERE project_id in
+        <foreach item="projectId" index="index" collection="projectIds" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+        AND scheme_type = #{schemeType}
+        AND apply_type = #{applyType}
+    </select>
+
+
     <select id="queryByProjectIds" resultType="io.choerodon.agile.infra.dto.ProjectConfigDTO">
         SELECT *
         FROM fd_project_config

@@ -28,7 +28,7 @@ const { Text, Edit } = TextEditToggle;
   };
 
   render() {
-    const { store } = this.props;
+    const { store, disabled } = this.props;
     const issue = store.getIssue;
     const { remainingTime } = issue;
     const workloads = this.getWorkloads();
@@ -36,7 +36,7 @@ const { Text, Edit } = TextEditToggle;
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
           <span className="c7n-property">
-            {'时间跟踪'}
+            时间跟踪
           </span>
         </div>
         <div className="c7n-value-wrapper">
@@ -64,21 +64,25 @@ const { Text, Edit } = TextEditToggle;
                   {workloads + (remainingTime || 0)}
                   {'小时'}
                 </span>
-                
+
               </div>
-              <div
-                role="none"
-                className="primary"
-                style={{
-                  marginLeft: '8px',                 
-                  cursor: 'pointer',
-                }}
-                onClick={() => {
-                  store.setWorkLogShow(true);
-                }}
-              >
-                {'登记工作'}
-              </div>
+              {
+                !disabled && (
+                <div
+                  role="none"
+                  className="primary"
+                  style={{
+                    marginLeft: '8px',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => {
+                    store.setWorkLogShow(true);
+                  }}
+                >
+                  登记工作
+                </div>
+                )
+              }
             </Text>
             <Edit>
               <div>{remainingTime}</div>

@@ -1,5 +1,8 @@
 package io.choerodon.agile.infra.enums;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author shinan.chen
  * @date 2018/10/23
@@ -28,5 +31,19 @@ public enum InitStatus {
 
     public String getCode() {
         return code;
+    }
+
+    public static List<InitStatus> listByApplyType(String applyType) {
+        List<InitStatus> result = new ArrayList<>();
+        switch (applyType) {
+            case SchemeApplyType.AGILE:
+                result.add(InitStatus.CREATE);
+                result.add(InitStatus.PROCESSING);
+                result.add(InitStatus.COMPLETE);
+                break;
+            default:
+                break;
+        }
+        return result;
     }
 }

@@ -160,4 +160,32 @@
             #{fieldValue.dateValue})
         </foreach>
     </insert>
+
+    <select id="queryListByInstanceIds" resultMap="fieldValueMap">
+        SELECT fv.*,
+        fo.value as option_value,
+        f.field_type
+        FROM fd_field_value fv
+        LEFT JOIN fd_field_option fo ON fo.id = fv.option_id
+        LEFT JOIN fd_object_scheme_field f ON f.id = fv.field_id
+        WHERE 1 = 1
+        <if test="projectIds != null and projectIds.size > 0">
+            AND fv.project_id in
+            <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                #{projectId}
+            </foreach>
+        </if>
+        <if test="instanceIds != null">
+            AND fv.instance_id in
+            <foreach collection="instanceIds" item="instanceId" open="(" separator="," close=")">
+                #{instanceId}
+            </foreach>
+        </if>
+        <if test="schemeCode != null">
+            AND fv.scheme_code = #{schemeCode}
+        </if>
+        <if test="fieldId != null">
+            AND fv.field_id = #{fieldId}
+        </if>
+    </select>
 </mapper>

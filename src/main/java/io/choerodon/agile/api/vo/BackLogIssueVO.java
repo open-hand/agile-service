@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.vo;
 
+import io.choerodon.agile.api.vo.business.IssueSearchVO;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;

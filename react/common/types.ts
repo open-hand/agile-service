@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { ModalProps } from 'choerodon-ui/lib/modal';
 
 export interface User {
@@ -11,19 +12,56 @@ export interface User {
   name?: string
 }
 
-export interface Issue {
-  issueId: string
-  summary: string
+export interface ISprint {
+  sprintId: string
+  sprintName: string
+  startDate: string
+  endDate: string
+  actualEndDate: string
+  statusCode: string
+}
+
+export interface IPriority {
+  colour: string
+  default: boolean
+  description: string
+  enable: boolean
+  id: string
+  name: string
+  objectVersionNumber: number
+  organizationId: string
+  sequence: number
+}
+export interface IVersion {
+  versionId: string,
+  name: string,
+}
+
+export interface IComponent {
+  name: string,
+  componentId: string
+}
+
+export interface ILabel {
+  labelId: string
+  labelName: string
 }
 
 export interface PI {
+  id: string
   code: string
   name: string
+  startDate: string
+  endDate: string
+  actualStartDate: string | null
+  actualEndDate: string | null
+  statusCode: 'todo' | 'doing' | 'done' | string,
 }
 
 export interface IStatus {
   id: string
   valueCode: 'todo' | 'doing' | 'done' | 'prepare'
+  type: 'todo' | 'doing' | 'done' | 'prepare'
   name: string
 }
 export interface Priority {
@@ -116,6 +154,7 @@ export interface IIssueType {
   stateMachineId: string,
   typeCode: string,
 }
+export type IFeatureType = 'business' | 'enabler'
 
 interface FieldOption {
   id: string,
@@ -132,6 +171,32 @@ export interface IField {
   name: string,
   system: boolean,
   extraConfig?: boolean,
+}
+
+export interface Issue {
+  issueId: string
+  issueNum: string
+  summary: string
+  typeCode?: string,
+  issueTypeVO: IIssueType,
+  parentIssueId?: string
+  parentIssueNum?: string
+  parentIssueSummary?: string
+  relateIssueId?: string
+  parentRelateSummary?: string
+  sameParentIssueVOList?: Issue[],
+  sameParentBugVOList?: Issue[]
+  assigneeRealName: string
+  reporterRealName: string
+  statusVO: IStatus
+  priorityVO: IPriority
+  featureColor: string
+  featureName: string
+  epicColor: string
+  epicName: string
+  foundationFieldValue: {
+    [key: string]: any
+  }
 }
 
 export interface ILog {
@@ -154,4 +219,111 @@ export interface ILog {
   trigger?: string,
   removeResolution?: boolean,
   resolutionChanged?: boolean,
+}
+export type IReportContentType = 'chart' | 'text' | 'static_list' | 'dynamic_list'
+
+export interface IBoard {
+  boardId: string
+  columnConstraint: string
+  estimationStatistic: string
+  name: string
+  objectVersionNumber: number
+  projectId: string
+  swimlaneBasedCode: string
+  userDefault: boolean
+  userDefaultBoard: string
+}
+export type IIssueColumnName =
+  'summary' |
+  'issueNum' |
+  'priority' |
+  'sprint' |
+  'reporter' |
+  'creationDate' |
+  'assign' |
+  'status' |
+  'lastUpdateDate' |
+  'estimatedStartTime' |
+  'estimatedEndTime' |
+  'label' |
+  'component' |
+  'storyPoints' |
+  'version' |
+  'epic' |
+  'feature';
+
+export type IFieldType =
+  'text' | 'input' | 'member' | 'single' | 'multiple' | 'radio' | 'checkbox' |
+  'number' | 'time' | 'date' | 'datetime'
+
+export type ISystemFieldCode =
+  'summary' |
+  'issueTypeId' |
+  'issueNum' |
+  'priorityId' |
+  'sprint' |
+  'reporterIds' |
+  'createDate' |
+  'assigneeId' |
+  'statusId' |
+  'updateDate' |
+  'estimatedStartTime' |
+  'estimatedEndTime' |
+  'label' |
+  'component' |
+  'storyPoints' |
+  'version' |
+  'epic' |
+  'feature';
+
+export interface IFoundationHeader {
+  title: string
+  fieldType: string
+  code: string
+}
+interface ICustomFieldSearch {
+  fieldId: string
+  value: any
+}
+interface IDateFieldSearch {
+  fieldId: string,
+  startDate: string,
+  endDate: string,
+}
+export interface ISearchVO {
+  advancedSearchArgs: {
+    issueTypeId?: string[],
+    reporterIds?: string[],
+    statusId?: string[],
+    priorityId?: string[],
+  },
+  otherArgs: {
+    assigneeId?: string[],
+    issueIds?: string[],
+    component?: string[],
+    epic?: string[],
+    feature?: string[],
+    label?: string[],
+    sprint?: string[],
+    summary?: string[],
+    version?: string[],
+    customField?: {
+      option: ICustomFieldSearch[],
+      date: IDateFieldSearch[],
+      date_hms: IDateFieldSearch[],
+      number: ICustomFieldSearch[],
+      string: ICustomFieldSearch[],
+      text: ICustomFieldSearch[],
+    },
+  },
+  searchArgs: {
+    createStartDate?: string,
+    createEndDate?: string,
+    updateStartDate?: string,
+    updateEndDate?: string,
+    teamProjectIds?: string[]
+    issueType?: string
+  },
+  quickFilterIds?: string[],
+  contents?: string[],
 }

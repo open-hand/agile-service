@@ -2,12 +2,7 @@
 import {
   observable, action, computed, toJS,
 } from 'mobx';
-import {
-  stores, Choerodon,
-} from '@choerodon/boot';
-import {
-  debounce, reverse, map, find, isEmpty, isEqual, pick,
-} from 'lodash';
+import { debounce } from 'lodash';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import { fieldApi, personalFilterApi } from '@/api';
 
@@ -139,59 +134,9 @@ export function getSystemFields() {
   return IsInProgramStore.isInProgram ? systemFields : systemFields.filter((f) => f.code !== 'feature');
 }
 
-const { AppState } = stores;
-function transformSystemFilter(data) {
-  const {
-    issueTypeId,
-    assigneeId,
-    statusId,
-    priorityId,
-    issueIds,
-    quickFilterIds,
-    createDate = [],
-    updateDate = [],
-    contents,
-    component,
-    epic,
-    feature,
-    label,
-    reporterIds,
-    sprint,
-    summary,
-    version,
-  } = data;
-  return {
-    advancedSearchArgs: {
-      issueTypeId,
-      reporterIds,
-      statusId,
-      priorityId,
-    },
-    otherArgs: {
-      assigneeId,
-      issueIds,
-      component,
-      epic,
-      feature,
-      label,
-      sprint,
-      summary,
-      version,
-    },
-    searchArgs: {
-      createStartDate: createDate[0],
-      createEndDate: createDate[1],
-      updateStartDate: updateDate[0],
-      updateEndDate: updateDate[1],
-    },
-    quickFilterIds,
-    contents,
-  };
-}
-
 class IssueStore {
   // 当前加载状态
-  @observable loading = true;
+  @observable loading = false;
 
   // 创建问题窗口是否展开
   @observable createFlag = false;
@@ -315,62 +260,6 @@ class IssueStore {
     return toJS(this.expand);
   }
 
-  axiosGetMyFilterList = () => {
-    // const { userInfo: { id } } = AppState;
-    this.setLoading(true);
-    return personalFilterApi.loadAll().then((myFilters) => {
-      this.setLoading(false);
-      const reverseMyFilters = reverse(myFilters);
-      this.setMyFilters(reverseMyFilters);
-      this.setEditFilterInfo(map(map(reverseMyFilters, (item) => ({
-        filterId: item.filterId,
-      })), (item, index) => ({
-        ...item,
-        isEditing: false,
-        isEditingIndex: index,
-      })));
-    }).catch(() => {
-      this.setLoading(false);
-      Choerodon.prompt('获取我的筛选列表失败');
-    });
-  };
-
-  @observable fields = []
-
-  async loadCustomFields() {
-    const fields = await fieldApi.getCustomFields();
-    this.setFields(fields);
-  }
-
-  @action setFields(fields) {
-    this.fields = fields;
-  }
-
-  @observable chosenFields = new Map();
-
-  @action initChosenFields() {
-    this.chosenFields = new Map(getSystemFields()
-      .filter((f) => f.defaultShow)
-      .map((f) => ([f.code, observable({ ...f, value: undefined })])));
-  }
-
-  @action handleChosenFieldChange = (select, field) => {
-    const { code } = field;
-    if (select) {
-      this.chosenFields.set(code, observable({ ...field, value: undefined }));
-    } else {
-      const { value } = this.chosenFields.get(code);
-      this.chosenFields.delete(code);
-      if (!isEmpty(value)) {
-        this.query();
-      }
-    }
-  }
-
-  getFilterValueByCode(code) {
-    return this.chosenFields.get(code) ? toJS(this.chosenFields.get(code).value) : undefined;
-  }
-
   setTableRef(tableRef) {
     this.tableRef = tableRef;
   }
@@ -378,162 +267,6 @@ class IssueStore {
   query = debounce(() => {
     this.dataSet.query();
   }, 300);
-
-  handleFilterChange = (code, value) => {
-    this.setFieldFilter(code, value);
-    this.query();
-  }
-
-  @action setFieldFilter = (code, value) => {
-    const field = this.chosenFields.get(code);
-    // 说明这时候没有被选择，那么要自动选上
-    if (!field) {
-      const unSelectField = find([...this.fields, ...getSystemFields()], { code });
-      if (unSelectField) {
-        this.chosenFields.set(code, observable({ ...unSelectField, value }));
-      }
-    } else {
-      field.value = value;
-    }
-  }
-
-  @action setChosenFields(chosenFields) {
-    this.chosenFields = chosenFields;
-  }
-
-  @action chooseAll(filteredFields) {
-    filteredFields.forEach((field) => {
-      this.chosenFields.set(field.code, observable({ ...field, value: undefined }));
-    });
-  }
-
-  @action unChooseAll() {
-    let hasValue = false;
-    for (const [, field] of this.chosenFields) {
-      if (!isEmpty(field.value)) {
-        hasValue = true;
-        break;
-      }
-    }
-    this.chosenFields = new Map(getSystemFields().filter((f) => f.defaultShow)
-      .map((f) => ([f.code, this.chosenFields.get(f.code)])));
-    // 取消全选之前如果有筛选就查一次
-    if (hasValue) {
-      this.query();
-    }
-  }
-
-  @action
-  clearAllFilter() {
-    for (const [, field] of this.chosenFields) {
-      if (field.value) {
-        field.value = undefined;
-      }
-    }
-  }
-
-  getCustomFieldFilters = () => {
-    const customField = {
-      option: [],
-      date: [],
-      date_hms: [],
-      number: [],
-      string: [],
-      text: [],
-    };
-    const systemFilter = {};
-    for (const [code, field] of this.chosenFields) {
-      const { fieldType, id } = field;
-      const value = toJS(field.value);
-      if (value === undefined || value === null || value === '') {
-        // eslint-disable-next-line no-continue
-        continue;
-      }
-      // 系统字段
-      if (!id) {
-        systemFilter[code] = value;
-        // eslint-disable-next-line no-continue
-        continue;
-      }
-      switch (fieldType) {
-        case 'single':
-        case 'multiple':
-        case 'radio':
-        case 'checkbox':
-        case 'member': {
-          const v = Array.isArray(value) ? value : [value];
-          if (v.length > 0) {
-            customField.option.push({
-              fieldId: id,
-              value: v,
-            });
-          }
-          break;
-        }
-        case 'input': {
-          if (value && value.length > 0) {
-            customField.string.push({
-              fieldId: id,
-              value,
-            });
-          }
-          break;
-        }
-        case 'text': {
-          if (value && value.length > 0) {
-            customField.text.push({
-              fieldId: id,
-              value,
-            });
-          }
-          break;
-        }
-        case 'number': {
-          customField.number.push({
-            fieldId: id,
-            value,
-          });
-          break;
-        }
-        case 'time':
-        case 'datetime':
-        case 'date': {
-          if (value && value.length > 0) {
-            if (fieldType === 'time') {
-              customField.date_hms.push({
-                fieldId: id,
-                startDate: value[0],
-                endDate: value[1],
-              });
-            } else {
-              customField.date.push({
-                fieldId: id,
-                startDate: value[0],
-                endDate: value[1],
-              });
-            }
-          }
-          break;
-        }
-        default: break;
-      }
-    }
-    const filter = transformSystemFilter(systemFilter);
-    filter.otherArgs.customField = customField;
-    return filter;
-  }
-
-  getFieldCodeById(id) {
-    const field = find(this.fields, { id });
-    return field ? field.code : undefined;
-  }
-
-  @computed
-  get isHasFilter() {
-    const currentFilterDTO = this.getCustomFieldFilters()
-      ? flattenObject(this.getCustomFieldFilters()) : {};
-    return !isFilterSame({}, currentFilterDTO);
-  }
 }
 
 export default new IssueStore();

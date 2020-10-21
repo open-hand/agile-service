@@ -225,6 +225,21 @@ public class StateMachineSchemeConfigServiceImpl implements StateMachineSchemeCo
     }
 
     @Override
+    public List<StatusMachineSchemeConfigVO> queryBySchemeIds(Boolean isDraft,
+                                                              Long organizationId,
+                                                              Set<Long> schemeIds) {
+        List<StatusMachineSchemeConfigVO> configs;
+        if (isDraft) {
+            configs = modelMapper.map(configDraftMapper.selectBySchemeIds(organizationId, schemeIds), new TypeToken<List<StatusMachineSchemeConfigVO>>() {
+            }.getType());
+        } else {
+            configs = modelMapper.map(configMapper.selectBySchemeIds(organizationId, schemeIds), new TypeToken<List<StatusMachineSchemeConfigVO>>() {
+            }.getType());
+        }
+        return configs;
+    }
+
+    @Override
     public List<Long> querySchemeIdsByStateMachineId(Boolean isDraft, Long organizationId, Long stateMachineId) {
         List<Long> schemeIds;
         if (isDraft) {
