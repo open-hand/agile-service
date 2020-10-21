@@ -6,6 +6,7 @@ import {
 import {
   Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
 } from 'choerodon-ui';
+import { merge } from 'lodash';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
 import {
@@ -13,6 +14,7 @@ import {
 } from '@/api';
 import LINK_URL from '@/constants/LINK_URL';
 import to from '@/utils/to';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import ScrumBoardDataController from './ScrumBoardDataController';
 import ScrumBoardStore from '../../../stores/project/scrumBoard/ScrumBoardStore';
 import StatusColumn from '../ScrumBoardComponent/StatusColumn/StatusColumn';
@@ -66,6 +68,24 @@ class ScrumBoardHome extends Component {
 
   componentDidMount() {
     ScrumBoardStore.setSelectedBoardId('');
+    const scrumboardInitValue = localPageCacheStore.getItem('scrumboard');
+    if (scrumboardInitValue) {
+      const {
+        onlyMeChecked, onlyStoryChecked, moreChecked, personalFilters, assigneeFilter, sprintFilter, priorityIds,
+      } = scrumboardInitValue;
+      ScrumBoardStore.addQuickSearchFilter(
+        onlyMeChecked,
+        onlyStoryChecked,
+        moreChecked,
+        personalFilters,
+      );
+      assigneeFilter && ScrumBoardStore.addAssigneeFilter(assigneeFilter.map((item) => item.key));
+      if (sprintFilter) {
+        ScrumBoardStore.addSprintFilter(sprintFilter);
+        ScrumBoardStore.setSprintData(sprintFilter);
+      }
+      priorityIds && ScrumBoardStore.setPriority(priorityIds);
+    }
     this.getBoard();
     // eslint-disable-next-line react/destructuring-assignment
     const { state } = this.props.location;
@@ -116,6 +136,12 @@ class ScrumBoardHome extends Component {
       moreChecked,
       personalFilters,
     );
+    localPageCacheStore.setItem('scrumboard', merge(localPageCacheStore.getItem('scrumboard'), {
+      onlyMeChecked,
+      onlyStoryChecked,
+      moreChecked,
+      personalFilters,
+    }));
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   };
 
@@ -126,11 +152,15 @@ class ScrumBoardHome extends Component {
 
   onSprintChange = (value) => {
     ScrumBoardStore.addSprintFilter(value);
+    localPageCacheStore.setItem('scrumboard', merge(localPageCacheStore.getItem('scrumboard'), {
+      sprintFilter: value,
+    }));
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   }
 
   handleClearFilter = () => {
     ScrumBoardStore.clearFilter();
+    localPageCacheStore.remove('scrumboard');
     QuickSearchEvent.emit('clearQuickSearchSelect');
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   }
@@ -336,6 +366,9 @@ class ScrumBoardHome extends Component {
 
   handlePriorityChange = (value) => {
     ScrumBoardStore.setPriority(value);
+    localPageCacheStore.setItem('scrumboard', merge(localPageCacheStore.getItem('scrumboard'), {
+      priorityIds: value,
+    }));
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   }
 

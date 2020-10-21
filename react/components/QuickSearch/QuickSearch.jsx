@@ -2,11 +2,13 @@ import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { Choerodon } from '@choerodon/boot';
 import { Select } from 'choerodon-ui';
+import { merge, uniqBy } from 'lodash';
 import EventEmitter from 'wolfy87-eventemitter';
 import {
   sprintApi, quickFilterApi, userApi, personalFilterApi,
 } from '@/api';
 import './QuickSearch.less';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import BacklogStore from '../../stores/project/backlog/BacklogStore';
 import ScrumBoardStore from '../../stores/project/scrumBoard/ScrumBoardStore';
 
@@ -17,20 +19,36 @@ const QuickSearchEvent = new EventEmitter();
 class QuickSearch extends Component {
   constructor(props) {
     super(props);
+    const scrumboardInitValue = localPageCacheStore.getItem('scrumboard');
+    this.defaultQuickFilterValue = [];
+    this.defaultSelectUsersValue = [];
+    if (scrumboardInitValue) {
+      const {
+        onlyMeChecked, onlyStoryChecked, moreChecked, personalFilters, assigneeFilter, sprintFilter,
+      } = scrumboardInitValue;
+      onlyMeChecked && this.defaultQuickFilterValue.push({
+        key: -1,
+      });
+      onlyStoryChecked && this.defaultQuickFilterValue.push({ key: -2 });
+      moreChecked && this.defaultQuickFilterValue.push(...moreChecked.map((item) => ({ key: item })));
+      personalFilters && this.defaultQuickFilterValue.push(...personalFilters.map((item) => ({ key: `personal%${item}` })));
+      assigneeFilter && this.defaultSelectUsersValue.push(...assigneeFilter.map((item) => ({ ...item, id: item.key, realName: item.label })));
+    }
+
     this.state = {
       userDataArray: [],
       quickSearchArray: [],
-      selectQuickSearch: [],
-      selectUsers: [],
+      selectQuickSearch: this.defaultQuickFilterValue,
+      selectUsers: this.defaultSelectUsersValue,
       personalFilter: [],
     };
   }
 
   /**
-   * DidMount =>
-   * 1. 请求快速搜索数据
-   * 2. 请求项目经办人信息
-   */
+ * DidMount =>
+ * 1. 请求快速搜索数据
+ * 2. 请求项目经办人信息
+ */
   componentDidMount() {
     QuickSearchEvent.addListener('clearQuickSearchSelect', this.clearQuickSearch);
     QuickSearchEvent.addListener('setSelectQuickSearch', this.setSelectQuickSearch);
@@ -47,12 +65,13 @@ class QuickSearch extends Component {
         label: item.name,
         value: item.filterId,
       }));
-      // 非停用角色
-      const resUserData = res[1].list.filter((item) => item.enabled).map((item) => ({
+        // 非停用角色
+      let resUserData = res[1].list.filter((item) => item.enabled).map((item) => ({
         id: item.id,
         realName: item.realName,
       }));
-
+      resUserData.push(...this.defaultSelectUsersValue);
+      resUserData = uniqBy(resUserData, 'id');
       const resSprintData = res[2];
       const personalFilter = res[3];
 
@@ -112,6 +131,9 @@ class QuickSearch extends Component {
     this.setState({
       selectUsers: value,
     });
+    localPageCacheStore.setItem('scrumboard', merge(localPageCacheStore.getItem('scrumboard'), {
+      assigneeFilter: value,
+    }));
     onAssigneeChange(flattenValue);
   };
 

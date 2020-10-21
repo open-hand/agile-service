@@ -6,6 +6,8 @@ interface LocalPageCacheStoreInterface {
 }
 
 class LocalPageCacheStore implements LocalPageCacheStoreInterface {
+  pageKeyList = ['scrumboard', 'issues']
+
   pages = new Map<string, any>();
 
   setItem(pageKey: string, data: any) {
