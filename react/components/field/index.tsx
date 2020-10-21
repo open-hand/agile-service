@@ -22,8 +22,7 @@ const Field: React.FC<IFieldProps> = ({
   field, mode, value, onChange, render, ...otherProps
 }) => {
   const { fieldType, title } = field;
-  const isFilter = mode === 'filter';
-  const element = render ? render(field, getFieldElement(field, isFilter)) : getFieldElement(field, isFilter);
+  const element = render ? render(field, getFieldElement(field)) : getFieldElement(field);
   const shouldMultipleOnFilter = useMemo(() => mode === 'filter'
     && ['member', 'radio', 'single', 'checkbox', 'multiple'].includes(fieldType),
   [fieldType, mode]);
