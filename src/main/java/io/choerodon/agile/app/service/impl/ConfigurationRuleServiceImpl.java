@@ -69,10 +69,12 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     public ConfigurationRuleVO create(Long projectId, ConfigurationRuleVO configurationRuleVO) {
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getExpressList()), BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getIssueTypes()), BaseConstants.ErrorCode.DATA_INVALID);
         checkUniqueName(projectId, configurationRuleVO.getName());
         String sqlQuery = getSqlQuery(configurationRuleVO, projectId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
+        configurationRuleDTO.setTypeCode(CommonMapperUtil.writeValueAsString(configurationRuleVO.getIssueTypes()));
         configurationRuleDTO.setSqlQuery(sqlQuery);
         configurationRuleDTO.setSource(ConfigurationRuleDTO.SOURCE_CUSTOM);
         if (configurationRuleMapper.insert(configurationRuleDTO) != 1) {
@@ -100,12 +102,15 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         // 检查是否名称唯一
         checkUniqueName(projectId, configurationRuleVO.getName());
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getIssueTypes()), BaseConstants.ErrorCode.DATA_INVALID);
         configurationRuleVO.setId(ruleId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setSqlQuery(getSqlQuery(configurationRuleVO, projectId));
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
+        configurationRuleDTO.setTypeCode(CommonMapperUtil.writeValueAsString(configurationRuleVO.getIssueTypes()));
         if (configurationRuleMapper.updateOptional(configurationRuleDTO, ConfigurationRuleDTO.FIELD_SQL_QUERY,
-                ConfigurationRuleDTO.FIELD_EXPRESS_QUERY, ConfigurationRuleDTO.FIELD_EXPRESS_FORMAT) != 1) {
+                ConfigurationRuleDTO.FIELD_EXPRESS_QUERY, ConfigurationRuleDTO.FIELD_EXPRESS_FORMAT,
+                ConfigurationRuleDTO.FIELD_TYPE_CODE) != 1) {
             throw new CommonException("error.rule.update");
         }
         // 更新通知对象

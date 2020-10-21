@@ -23,7 +23,7 @@ databaseChangeLog(logicalFilePath:'agile_configuration_rule.groovy') {
     changeSet(id: '2020-10-21-add-column', author: 'jiaxu.cui@hand-china.com') {
         addColumn(tableName: 'agile_configuration_rule') {
             column(name: 'name', type: 'varchar(50)', remarks: '名称')
-            column(name: 'type_code', type: 'VARCHAR(50)', remarks: '类型code')
+            column(name: 'type_code', type: 'VARCHAR(255)', remarks: '类型code')
             column(name: 'source', type: 'VARCHAR(50)', remarks: '来源')
             column(name: 'is_enabled', type: 'TINYINT UNSIGNED', remarks: 'enabled flag', defaultValue: "1") {
                 constraints(nullable: false)

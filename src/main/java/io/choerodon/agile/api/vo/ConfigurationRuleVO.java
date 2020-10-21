@@ -21,8 +21,10 @@ public class ConfigurationRuleVO extends AuditDomain {
     private String expressQuery;
     private String expressFormat;
     private String name;
-    private String typeCode;
     private Boolean enabled;
+    @ApiModelProperty("问题类型")
+    private List<String> issueTypes;
+    @ApiModelProperty("用户类型")
     private List<String> userTypes;
     @ApiModelProperty("快速搜索创建传值")
     private List<RuleExpressVO> expressList;
@@ -32,6 +34,14 @@ public class ConfigurationRuleVO extends AuditDomain {
     private List<UserDTO> ccList;
     @ApiModelProperty("经办人")
     private List<UserDTO> processerList;
+
+    public List<String> getIssueTypes() {
+        return issueTypes;
+    }
+
+    public void setIssueTypes(List<String> issueTypes) {
+        this.issueTypes = issueTypes;
+    }
 
     public List<String> getUserTypes() {
         return userTypes;
@@ -55,14 +65,6 @@ public class ConfigurationRuleVO extends AuditDomain {
 
     public void setProcesserList(List<UserDTO> processerList) {
         this.processerList = processerList;
-    }
-
-    public String getTypeCode() {
-        return typeCode;
-    }
-
-    public void setTypeCode(String typeCode) {
-        this.typeCode = typeCode;
     }
 
     public Boolean getEnabled() {

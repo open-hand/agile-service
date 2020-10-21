@@ -29,6 +29,7 @@ public class ConfigurationRuleDTO extends AuditDomain {
     public static final String FIELD_EXPRESS_QUERY = "expressQuery";
     public static final String FIELD_EXPRESS_FORMAT = "expressFormat";
     public static final String FIELD_ENABLED = "enabled";
+    public static final String FIELD_TYPE_CODE = "typeCode";
     
     public static final String SOURCE_PREDEFINED = "predefined";
     public static final String SOURCE_CUSTOM = "custom";
