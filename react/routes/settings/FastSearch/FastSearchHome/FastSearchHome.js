@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-bind */
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
@@ -30,6 +31,10 @@ class Search extends Component {
       loading: false,
       barFilters: [],
       filterName: '',
+      pageInfo: {
+        current: 2,
+        pageSize: 10,
+      },
     };
     const createKey = Modal.key();
     const editKey = Modal.key();
@@ -118,16 +123,17 @@ class Search extends Component {
     this.setState({
       filters: data,
     });
+    const { pageInfo } = this.state;
     quickFilterApi.drag(postData)
       .then(() => {
-        quickFilterApi.loadAll({ contents: [], filterName: '' }).then((res) => {
+        quickFilterApi.loadAll({ contents: [], filterName: '' }, pageInfo.page, pageInfo.size).then((res) => {
           this.setState({
             filters: res,
           });
         });
       })
       .catch(() => {
-        quickFilterApi.loadAll({ contents: [], filterName: '' }).then((ress) => {
+        quickFilterApi.loadAll({ contents: [], filterName: '' }, pageInfo.page, pageInfo.size).then((ress) => {
           this.setState({
             filters: ress,
           });
@@ -136,11 +142,12 @@ class Search extends Component {
   };
 
   handleTableChange = (pagination, filters, sorter, barFilters) => {
+    console.log('pagination', pagination);
     this.setState({
       filterName: filters.name && filters.name[0],
       barFilters,
     }, () => {
-      this.loadFilters();
+      this.loadFilters(pagination.current, pagination.pageSize);
     });
   }
 
@@ -150,24 +157,28 @@ class Search extends Component {
       deleteFilterShow: true,
     });
   }
-  
-  loadFilters() {
-    const { filterName, barFilters } = this.state;
+
+  loadFilters(newPage = 1, pageSize = 10) {
+    const { filterName, barFilters, pageInfo } = this.state;
     this.setState({
       loading: true,
     });
     quickFilterApi.loadAll({
       contents: barFilters,
       filterName,
-    }).then((res) => {
+    }, newPage, pageSize).then((res) => {
       this.setState({
         filters: res,
         loading: false,
+        pageInfo: {
+          current: newPage,
+          pageSize,
+          total: res.total,
+        },
       });
     })
       .catch((error) => { });
   }
-
 
   handleClickMenu = (record, { key }) => {
     switch (key) {
@@ -193,7 +204,7 @@ class Search extends Component {
     });
   }
 
-  renderMenu = record => (
+  renderMenu = (record) => (
     <Menu onClick={this.handleClickMenu.bind(this, record)}>
       <Menu.Item key="deleteFilter">
         <span>删除</span>
@@ -203,13 +214,13 @@ class Search extends Component {
 
   render() {
     const {
-      loading, filters, editFilterShow,
+      loading, filters, editFilterShow, pageInfo,
       deleteFilterShow, filter, currentFilterId,
     } = this.state;
 
     const menu = AppState.currentMenuType;
     const {
-      type, id, organizationId: orgId, name, 
+      type, id, organizationId: orgId, name,
     } = menu;
 
     const column = [
@@ -220,6 +231,7 @@ class Search extends Component {
         render: (text, record) => (
           <TableDropMenu
             menu={this.renderMenu(record)}
+            // eslint-disable-next-line react/jsx-no-bind
             onClickEdit={this.handleClickEdit.bind(this, record)}
             text={(
               <Tooltip placement="topLeft" mouseEnterDelay={0.5} title={text}>
@@ -244,7 +256,7 @@ class Search extends Component {
         title: '筛选器',
         dataIndex: 'expressQuery',
         // width: '50%',
-        render: expressQuery => (
+        render: (expressQuery) => (
           <div style={{
             maxWidth: '422px',
             overflow: 'hidden',
@@ -273,7 +285,7 @@ class Search extends Component {
         title: '描述',
         dataIndex: 'description',
         // width: '25%',
-        render: description => (
+        render: (description) => (
           <div style={{
             maxWidth: '288px',
             overflow: 'hidden',
@@ -319,7 +331,8 @@ class Search extends Component {
               <SortTable
                 onChange={this.handleTableChange}
                 handleDrag={this.handleDrag}
-                rowKey={record => record.filterId}
+                pagination={pageInfo}
+                rowKey={(record) => record.filterId}
                 columns={column}
                 dataSource={filters}
                 scroll={{ x: true }}
