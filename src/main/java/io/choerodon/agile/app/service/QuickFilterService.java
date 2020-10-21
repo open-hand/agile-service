@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service;
 import io.choerodon.agile.api.vo.QuickFilterSearchVO;
 import io.choerodon.agile.api.vo.QuickFilterVO;
 import io.choerodon.agile.api.vo.QuickFilterSequenceVO;
+import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public interface QuickFilterService {
      * @param quickFilterSearchVO quickFilterSearchVO
      * @return QuickFilterVO
      */
-    List<QuickFilterVO> listByProjectId(Long projectId, QuickFilterSearchVO quickFilterSearchVO, PageRequest pageRequest);
+    Page<QuickFilterVO> listByProjectId(Long projectId, QuickFilterSearchVO quickFilterSearchVO, PageRequest pageRequest);
 
     /**
      * 拖动排序
