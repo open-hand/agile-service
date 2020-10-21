@@ -25,7 +25,7 @@ export function getFlatElement(field: IFilterField, element: React.ReactNode) {
     }
   }
 }
-function renderFlatField(field: IFilterField, { element, removeButton }: { element: React.ReactElement, removeButton: React.ReactElement | null }) {
+export function renderFlatField(field: IFilterField, { element, removeButton }: { element: React.ReactElement, removeButton: React.ReactElement | null }) {
   const isSelect = ['single', 'multiple', 'radio', 'checkbox', 'member'].includes(field.fieldType);
   const className = classNames({
     'c7n-pro-select-flat': isSelect,

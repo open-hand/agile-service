@@ -28,6 +28,7 @@ export interface FilterProps {
   customFields: ICustomField[]
   alwaysRenderFields?: string[]
   render?: (field: IFilterField, element: React.ReactNode) => React.ReactNode
+  renderer?: IRenderFields
   removeButton?: boolean | React.ReactNode
   grouped?: boolean
   flat?: boolean
@@ -38,6 +39,7 @@ const Filter: React.FC<FilterProps> = ({
   customFields,
   alwaysRenderFields = [],
   render,
+  renderer,
   onSelectChange,
   onFilterChange,
   selected,
@@ -242,6 +244,11 @@ const Filter: React.FC<FilterProps> = ({
   }, [filter, resetFilter]);
   const selectField = renderSelectField();
   const resetButton = renderResetButton();
+  if (renderer) {
+    return renderer({
+      fields: selectedFields, getFieldElement: renderField, selectField, resetButton,
+    });
+  }
   return grouped
     ? renderGroupedFields({
       fields: selectedFields, getFieldElement: renderField, selectField, resetButton,
