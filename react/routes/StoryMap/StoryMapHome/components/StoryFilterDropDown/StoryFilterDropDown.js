@@ -7,13 +7,14 @@ import {
 import { Dropdown } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import StoryFilter from '../StoryFilter';
 import SelectDataSet from '../../store/selectDataSet';
 import './index.less';
 
 function useClickOut(onClickOut) {
   const ref = useRef();
-  
+
   const handleClick = useCallback((e) => {
     const popupContainerEles = document.getElementsByClassName('c7n-pro-popup-container');
     const triggerBtn = document.getElementsByClassName('c7nagile-StoryMap-StoryFilterDropDown-triggerBtn')[0];
@@ -44,10 +45,17 @@ function StoryFilterDropDown() {
   }, []);
   const ref = useClickOut(handleClickOut);
   const selectDataSet = useMemo(() => new DataSet(SelectDataSet(StoryMapStore)), []);
-  const {
-    isCompleted, components, sprints, prioritys,
-  } = (selectDataSet.current && selectDataSet.current.data) || {};
-  const hasFilter = (isCompleted || isCompleted === false) || components || sprints || prioritys;
+  useEffect(() => {
+    const defaultValues = localPageCacheStore.getItem('stroyMap.filter') || {};
+    for (const key in defaultValues) {
+      if (Object.prototype.hasOwnProperty.call(defaultValues, key) && typeof (defaultValues[key]) !== 'undefined' && defaultValues[key] !== null) {
+        console.log('key', key, defaultValues[key]);
+        selectDataSet.current.set(key, defaultValues[key]);
+      }
+    }
+  }, [selectDataSet]);
+
+  const hasFilter = selectDataSet.current.dirty;
   return (
     <div
       style={{ marginLeft: 5, display: 'flex', alignItems: 'center' }}
@@ -58,6 +66,7 @@ function StoryFilterDropDown() {
         visible={!hidden}
         overlay={(
           <div
+            role="none"
             ref={ref}
             onClick={(e) => {
               e.stopPropagation();
@@ -65,7 +74,7 @@ function StoryFilterDropDown() {
           >
             <StoryFilter selectDataSet={selectDataSet} hasFilter={hasFilter} />
           </div>
-            )}
+        )}
         trigger={['click']}
       >
         <Button
@@ -79,10 +88,10 @@ function StoryFilterDropDown() {
           <span className="c7nagile-StoryMap-StoryFilterDropDown-triggerBtn-tip">
             <Icon type="filter2" />
             {
-                  hasFilter && (
-                  <span className="c7nagile-StoryMap-StoryFilterDropDown-triggerBtn-tip-circle" />
-                  )
-              }
+              hasFilter && (
+                <span className="c7nagile-StoryMap-StoryFilterDropDown-triggerBtn-tip-circle" />
+              )
+            }
           </span>
         </Button>
       </Dropdown>
