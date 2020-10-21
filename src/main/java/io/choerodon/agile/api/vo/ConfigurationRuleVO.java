@@ -2,8 +2,6 @@ package io.choerodon.agile.api.vo;
 
 import java.util.List;
 
-import javax.persistence.Column;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -25,6 +23,7 @@ public class ConfigurationRuleVO extends AuditDomain {
     private String name;
     private String typeCode;
     private Boolean enabled;
+    private List<String> userTypes;
     @ApiModelProperty("快速搜索创建传值")
     private List<RuleExpressVO> expressList;
     @ApiModelProperty("通知对象")
@@ -32,8 +31,16 @@ public class ConfigurationRuleVO extends AuditDomain {
     @ApiModelProperty("抄送人")
     private List<UserDTO> ccList;
     @ApiModelProperty("经办人")
-    private List<UserDTO> assigneeList;
-    
+    private List<UserDTO> processerList;
+
+    public List<String> getUserTypes() {
+        return userTypes;
+    }
+
+    public void setUserTypes(List<String> userTypes) {
+        this.userTypes = userTypes;
+    }
+
     public String getName() {
         return name;
     }
@@ -42,12 +49,12 @@ public class ConfigurationRuleVO extends AuditDomain {
         this.name = name;
     }
 
-    public List<UserDTO> getAssigneeList() {
-        return assigneeList;
+    public List<UserDTO> getProcesserList() {
+        return processerList;
     }
 
-    public void setAssigneeList(List<UserDTO> assigneeList) {
-        this.assigneeList = assigneeList;
+    public void setProcesserList(List<UserDTO> processerList) {
+        this.processerList = processerList;
     }
 
     public String getTypeCode() {

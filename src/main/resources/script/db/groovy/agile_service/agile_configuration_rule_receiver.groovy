@@ -25,4 +25,8 @@ databaseChangeLog(logicalFilePath:'agile_configuration_rule_receiver.groovy') {
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
     }
+    
+    changeSet(id: '2020-10-21-drop-notnull', author: 'jiaxu.cui@hand-china.com') {
+        dropNotNullConstraint(tableName: 'agile_configuration_rule_receiver', columnName: 'user_id', columnDataType: 'BIGINT UNSIGNED')
+    }
 }

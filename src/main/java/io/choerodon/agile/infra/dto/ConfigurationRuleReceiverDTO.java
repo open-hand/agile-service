@@ -20,7 +20,10 @@ public class ConfigurationRuleReceiverDTO extends AuditDomain {
 
     public static final String TYPE_RECEIVER = "RECEIVER";
     public static final String TYPE_CC = "CC";
-    public static final String TYPE_ASSIGNEE = "ASSIGNEE";
+    public static final String TYPE_PROCESSER = "PROCESSER";
+    public static final String TYPE_ASSINGEE = "ASSINGEE";
+    public static final String TYPE_REPORTER = "REPORTER";
+    public static final String TYPE_PROJECT_OWNER = "PROJECT_OWNER";
 
     public ConfigurationRuleReceiverDTO(Long ruleId, Long projectId) {
         this.ruleId = ruleId;
