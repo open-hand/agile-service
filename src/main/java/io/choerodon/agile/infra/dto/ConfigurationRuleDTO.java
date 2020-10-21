@@ -23,10 +23,15 @@ import io.swagger.annotations.ApiModelProperty;
 @ModifyAudit
 @Table(name = "agile_configuration_rule")
 public class ConfigurationRuleDTO extends AuditDomain {
-    
+
+    public static final String FIELD_ID = "id";
     public static final String FIELD_SQL_QUERY = "sqlQuery";
     public static final String FIELD_EXPRESS_QUERY = "expressQuery";
     public static final String FIELD_EXPRESS_FORMAT = "expressFormat";
+    public static final String FIELD_ENABLED = "enabled";
+    
+    public static final String SOURCE_PREDEFINED = "predefined";
+    public static final String SOURCE_CUSTOM = "custom";
 
     public ConfigurationRuleDTO(Long id, Long projectId) {
         this.id = id;
@@ -45,9 +50,17 @@ public class ConfigurationRuleDTO extends AuditDomain {
     private String expressFormat;
     private String typeCode;
     private String source;
-    private String description;
+    private String name;
     @Column(name = "is_enabled")
     private Boolean enabled;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getTypeCode() {
         return typeCode;
@@ -63,14 +76,6 @@ public class ConfigurationRuleDTO extends AuditDomain {
 
     public void setSource(String source) {
         this.source = source;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public Boolean getEnabled() {

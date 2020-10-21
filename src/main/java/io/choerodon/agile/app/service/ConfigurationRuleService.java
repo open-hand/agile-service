@@ -36,5 +36,9 @@ public interface ConfigurationRuleService {
      * @return map
      */
     Map<Long, ConfigurationRuleVO> selectRuleReceiverWithCc(List<Long> ruleIdList);
+    
+    void changeRuleEnabled(Long projectId, Long ruleId, boolean enabled);
+
+    void checkUniqueName(Long projectId, String name);
 }
 

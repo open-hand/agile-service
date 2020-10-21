@@ -2,6 +2,8 @@ package io.choerodon.agile.api.vo;
 
 import java.util.List;
 
+import javax.persistence.Column;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -20,12 +22,49 @@ public class ConfigurationRuleVO extends AuditDomain {
     private String sqlQuery;
     private String expressQuery;
     private String expressFormat;
+    private String name;
+    private String typeCode;
+    private Boolean enabled;
     @ApiModelProperty("快速搜索创建传值")
     private List<RuleExpressVO> expressList;
     @ApiModelProperty("通知对象")
     private List<UserDTO> receiverList;
     @ApiModelProperty("抄送人")
     private List<UserDTO> ccList;
+    @ApiModelProperty("经办人")
+    private List<UserDTO> assigneeList;
+    
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<UserDTO> getAssigneeList() {
+        return assigneeList;
+    }
+
+    public void setAssigneeList(List<UserDTO> assigneeList) {
+        this.assigneeList = assigneeList;
+    }
+
+    public String getTypeCode() {
+        return typeCode;
+    }
+
+    public void setTypeCode(String typeCode) {
+        this.typeCode = typeCode;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
 
     public List<UserDTO> getReceiverList() {
         return receiverList;

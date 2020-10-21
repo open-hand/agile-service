@@ -50,9 +50,6 @@ import org.springframework.util.ObjectUtils;
 @Transactional(rollbackFor = Exception.class)
 public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
 
-    protected static final String TYPE_RECEIVER = "RECEIVER";
-    protected static final String TYPE_CC = "CC";
-
     @Autowired
     private ConfigurationRuleMapper configurationRuleMapper;
     @Autowired
@@ -72,10 +69,12 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     public ConfigurationRuleVO create(Long projectId, ConfigurationRuleVO configurationRuleVO) {
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getExpressList()), BaseConstants.ErrorCode.DATA_INVALID);
+        checkUniqueName(projectId, configurationRuleVO.getName());
         String sqlQuery = getSqlQuery(configurationRuleVO, projectId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
         configurationRuleDTO.setSqlQuery(sqlQuery);
+        configurationRuleDTO.setSource(ConfigurationRuleDTO.SOURCE_CUSTOM);
         if (configurationRuleMapper.insert(configurationRuleDTO) != 1) {
             throw new CommonException("error.rule.insert");
         }
@@ -84,7 +83,22 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     }
 
     @Override
+    public void checkUniqueName(Long projectId, String name) {
+        ConfigurationRuleDTO configurationRuleDTO = new ConfigurationRuleDTO();
+        configurationRuleDTO.setProjectId(projectId);
+        configurationRuleDTO.setName(name);
+        List<ConfigurationRuleDTO> exist = configurationRuleMapper.select(configurationRuleDTO);
+        if (CollectionUtils.isNotEmpty(exist)){
+            throw new CommonException(BaseConstants.ErrorCode.DATA_INVALID);
+        }
+    }
+
+    @Override
     public ConfigurationRuleVO update(Long projectId, Long ruleId, ConfigurationRuleVO configurationRuleVO) {
+        // 检查是否是预定义规则
+        checkPredefinedRule(projectId, ruleId);
+        // 检查是否名称唯一
+        checkUniqueName(projectId, configurationRuleVO.getName());
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
         configurationRuleVO.setId(ruleId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
@@ -100,10 +114,21 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         return configurationRuleVO;
     }
 
+    private void checkPredefinedRule(Long projectId, Long ruleId) {
+        ConfigurationRuleDTO configurationRuleDTO = configurationRuleMapper.selectOne(new ConfigurationRuleDTO(ruleId
+                , projectId));
+        Assert.notNull(configurationRuleDTO, BaseConstants.ErrorCode.DATA_NOT_EXISTS);
+        if (StringUtils.equals(ConfigurationRuleDTO.SOURCE_PREDEFINED, configurationRuleDTO.getSource())){
+            throw new CommonException(BaseConstants.ErrorCode.DATA_INVALID);
+        }
+    }
+
     @Override
     public void deleteById(Long projectId, Long ruleId) {
         Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(ruleId, BaseConstants.ErrorCode.DATA_INVALID);
+        // 检查是否是预定义规则
+        checkPredefinedRule(projectId, ruleId);
         List<ConfigurationRuleReceiverDTO> receiverDTOList =
                 configurationRuleReceiverMapper.select(new ConfigurationRuleReceiverDTO(ruleId, projectId));
         if (CollectionUtils.isNotEmpty(receiverDTOList)){
@@ -135,14 +160,14 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         // 设置收件人列表
         Map<String, List<ConfigurationRuleReceiverDTO>> group =
                 receiverList.stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getUserType));
-        Long[] receiverIds = group.getOrDefault(TYPE_RECEIVER, Collections.emptyList())
+        Long[] receiverIds = group.getOrDefault(ConfigurationRuleReceiverDTO.TYPE_RECEIVER, Collections.emptyList())
                 .stream().map(ConfigurationRuleReceiverDTO::getUserId).toArray(Long[]::new);
         if (ArrayUtils.isNotEmpty(receiverIds)){
             List<UserDTO> userList = baseFeignClient.listUsersByIds(receiverIds, false).getBody();
             configurationRuleVO.setReceiverList(userList);
         }
         // 设置抄送人列表
-        Long[] ccIds = group.getOrDefault(TYPE_CC, Collections.emptyList())
+        Long[] ccIds = group.getOrDefault(ConfigurationRuleReceiverDTO.TYPE_CC, Collections.emptyList())
                 .stream().map(ConfigurationRuleReceiverDTO::getUserId).toArray(Long[]::new);
         if (ArrayUtils.isNotEmpty(ccIds)){
             List<UserDTO> userList = baseFeignClient.listUsersByIds(ccIds, false).getBody();
@@ -182,11 +207,12 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                 .map(ConfigurationRuleReceiverDTO::getUserId).toArray(Long[]::new), false).getBody();
         Map<Long, UserDTO> userDTOMap = userList.stream().collect(Collectors.toMap(UserDTO::getId,
                 Function.identity()));
-        if (CollectionUtils.isNotEmpty(group.get(TYPE_RECEIVER))){
-            receiverGroup.putAll(group.get(TYPE_RECEIVER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
+        if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_RECEIVER))){
+            receiverGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_RECEIVER).stream()
+                    .collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
         }
-        if (CollectionUtils.isNotEmpty(group.get(TYPE_CC))){
-            ccGroup.putAll(group.get(TYPE_CC).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
+        if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_CC))){
+            ccGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_CC).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
         }
         return ruleIdList.stream().map(ruleId -> {
             ConfigurationRuleVO ruleVO = new ConfigurationRuleVO();
@@ -201,6 +227,17 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                     .collect(Collectors.toList()));
             return ruleVO;
         }).collect(Collectors.toMap(ConfigurationRuleVO::getId, Function.identity()));
+    }
+
+    @Override
+    public void changeRuleEnabled(Long projectId, Long ruleId, boolean enabled) {
+        Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.notNull(ruleId, BaseConstants.ErrorCode.DATA_INVALID);
+        ConfigurationRuleDTO configurationRuleDTO = new ConfigurationRuleDTO(ruleId, projectId);
+        configurationRuleDTO.setEnabled(enabled);
+        if (configurationRuleMapper.updateOptional(configurationRuleDTO, ConfigurationRuleDTO.FIELD_ENABLED) != 1) {
+            throw new CommonException("error.rule.update");
+        }
     }
 
     private String renderLinkTableSql(String sourceOp, String field, List<Supplier<String>> conditionList) {
@@ -420,11 +457,20 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     private void createProjectReportReceiver(Long projectId, ConfigurationRuleVO configurationRuleVO,
                                              ConfigurationRuleDTO configurationRuleDTO) {
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getAssigneeList()), BaseConstants.ErrorCode.DATA_INVALID);
         for (UserDTO userDTO : configurationRuleVO.getReceiverList()) {
             ConfigurationRuleReceiverDTO configurationRuleReceiverDTO = new ConfigurationRuleReceiverDTO();
             configurationRuleReceiverDTO.setProjectId(projectId);
             configurationRuleReceiverDTO.setRuleId(configurationRuleDTO.getId());
-            configurationRuleReceiverDTO.setUserType(TYPE_RECEIVER);
+            configurationRuleReceiverDTO.setUserType(ConfigurationRuleReceiverDTO.TYPE_RECEIVER);
+            configurationRuleReceiverDTO.setUserId(userDTO.getId());
+            configurationRuleReceiverMapper.insertSelective(configurationRuleReceiverDTO);
+        }
+        for (UserDTO userDTO : configurationRuleVO.getAssigneeList()) {
+            ConfigurationRuleReceiverDTO configurationRuleReceiverDTO = new ConfigurationRuleReceiverDTO();
+            configurationRuleReceiverDTO.setProjectId(projectId);
+            configurationRuleReceiverDTO.setRuleId(configurationRuleDTO.getId());
+            configurationRuleReceiverDTO.setUserType(ConfigurationRuleReceiverDTO.TYPE_ASSIGNEE);
             configurationRuleReceiverDTO.setUserId(userDTO.getId());
             configurationRuleReceiverMapper.insertSelective(configurationRuleReceiverDTO);
         }
@@ -433,7 +479,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                 ConfigurationRuleReceiverDTO configurationRuleReceiverDTO = new ConfigurationRuleReceiverDTO();
                 configurationRuleReceiverDTO.setProjectId(projectId);
                 configurationRuleReceiverDTO.setRuleId(configurationRuleDTO.getId());
-                configurationRuleReceiverDTO.setUserType(TYPE_CC);
+                configurationRuleReceiverDTO.setUserType(ConfigurationRuleReceiverDTO.TYPE_CC);
                 configurationRuleReceiverDTO.setUserId(userDTO.getId());
                 configurationRuleReceiverMapper.insertSelective(configurationRuleReceiverDTO);
             }

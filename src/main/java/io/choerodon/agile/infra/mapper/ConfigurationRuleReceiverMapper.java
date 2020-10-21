@@ -14,6 +14,6 @@ import org.apache.ibatis.annotations.Param;
 public interface ConfigurationRuleReceiverMapper extends BaseMapper<ConfigurationRuleReceiverDTO> {
 
     List<ConfigurationRuleReceiverDTO> selectReceiver(@Param("ruleIdList") List<Long> ruleIdList,
-                                                  @Param("type") String type);
+                                                  @Param("types") List<String> types);
 }
 
