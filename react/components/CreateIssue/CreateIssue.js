@@ -363,8 +363,8 @@ class CreateIssue extends Component {
           epicId: epicId || 0,
           piId: pi || 0,
           epicName,
-          parentIssueId: parentIssueId || 0, // 子任务
-          relateIssueId: relateIssueId || 0, // 子bug
+          parentIssueId: subTaskParent || parentIssueId || 0, // 子任务
+          relateIssueId: subBugParent || relateIssueId || 0, // 子bug
           assigneeId: assigneedId,
           labelIssueRelVOList,
           versionIssueRelVOList: fixVersionIssueRelVOList,
@@ -387,7 +387,6 @@ class CreateIssue extends Component {
           teamProjectIds,
           estimatedEndTime: estimatedEndTime && estimatedEndTime.format('YYYY-MM-DD HH:mm:ss'),
           estimatedStartTime: estimatedStartTime && estimatedStartTime.format('YYYY-MM-DD HH:mm:ss'),
-          parentId: subBugParent || subTaskParent,
         };
         this.setState({ createLoading: true });
         const deltaOps = description;
