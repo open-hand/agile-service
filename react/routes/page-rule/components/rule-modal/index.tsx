@@ -3,24 +3,23 @@ import React, {
 } from 'react';
 
 import {
-  Form, DataSet, Select, Button, Row, Col,
+  Form, DataSet, Select, Button, Row, Col, TextField,
 } from 'choerodon-ui/pro';
 import { unstable_batchedUpdates as batchedUpdates } from 'react-dom';
 import { ModalProps } from 'choerodon-ui/pro/lib/modal/Modal';
-import { Divider } from 'choerodon-ui';
-import { axios, Choerodon } from '@choerodon/boot';
+import { Choerodon } from '@choerodon/boot';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
-import { getProjectId } from '@/utils/common';
 import { User } from '@/common/types';
-import { fieldApi, pageRuleApi } from '@/api';
+import { fieldApi, pageRuleApi, pageConfigApi } from '@/api';
 import Loading from '@/components/Loading';
-import { find, map } from 'lodash';
+import { find, map, includes } from 'lodash';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
 import SelectUser from '@/components/select/select-user';
 import moment from 'moment';
+import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import renderRule, {
   IField, Operation, IFieldWithType, IMiddleFieldType,
 } from './renderRule';
@@ -39,6 +38,7 @@ interface Props {
     modal?: IModalProps,
     ruleTableDataSet: DataSet
     ruleId?: string
+    isProgram: boolean,
 }
 
 interface Express {
@@ -135,7 +135,26 @@ const formatMoment = (type: 'date' | 'datetime' | 'time', d: string) => {
   }
 };
 
-const RuleModal: React.FC<Props> = ({ modal, ruleTableDataSet, ruleId }) => {
+interface IssueOption {
+  typeCode: string,
+  name: string,
+}
+const projectIssueTypeOptions: Array<IssueOption> = [
+  { typeCode: 'story', name: '故事' },
+  { typeCode: 'task', name: '任务' },
+  { typeCode: 'sub_task', name: '子任务' },
+  { typeCode: 'bug', name: '缺陷' },
+  { typeCode: 'issue_epic', name: '史诗' },
+];
+
+const programIssueTypeOptions: Array<IssueOption> = [
+  { typeCode: 'feature', name: '特性' },
+  { typeCode: 'issue_epic', name: '史诗' },
+];
+
+const RuleModal: React.FC<Props> = ({
+  isProgram, modal, ruleTableDataSet, ruleId,
+}) => {
   const formRef: React.MutableRefObject<Form | undefined> = useRef();
   const [fieldData, setFieldData] = useState<IFieldWithType[]>([]);
   const fieldDataRef = useRef<IFieldWithType[]>([]);
@@ -144,13 +163,66 @@ const RuleModal: React.FC<Props> = ({ modal, ruleTableDataSet, ruleId }) => {
   const systemDataRefMap = useRef<Map<string, any>>(new Map());
   const [initRule, setInitRule] = useState({});
   const [loading, setLoading] = useState<boolean>(false);
+  const [backlogStarted, setBacklogStarted] = useState<boolean>(false);
+
+  const issueTypeDataSet = useMemo(() => {
+    if (isProgram) {
+      if (backlogStarted && !find(programIssueTypeOptions, (item) => item.typeCode === 'backlog')) {
+        programIssueTypeOptions.unshift({
+          name: '需求',
+          typeCode: 'backlog',
+        });
+      }
+    } else if (backlogStarted && !find(projectIssueTypeOptions, (item) => item.typeCode === 'backlog')) {
+      projectIssueTypeOptions.unshift({
+        name: '需求',
+        typeCode: 'backlog',
+      });
+    }
+    return new DataSet({
+      data: isProgram ? programIssueTypeOptions : projectIssueTypeOptions,
+    });
+  }, [backlogStarted, isProgram]);
+
+  useEffect(() => {
+    pageConfigApi.loadAvailableIssueType().then((res) => {
+      if (res.some((item) => item.typeCode === 'backlog')) {
+        setBacklogStarted(true);
+      }
+    });
+  }, []);
 
   const modalDataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [{
+      name: 'name',
+      type: 'string' as FieldType,
+      required: true,
+      label: '名称',
+      maxLength: 50,
+      validator: (value, name, record) => pageRuleApi.checkName(value).then((res: boolean) => {
+        if (res) {
+          return '规则名称重复';
+        }
+        return true;
+      }),
+    }, {
+      name: 'issueType',
+      required: true,
+      type: 'string' as FieldType,
+      label: '问题类型',
+      textField: 'name',
+      valueField: 'typeCode',
+      options: issueTypeDataSet,
+    }, {
       name: 'receiverList',
       required: true,
-    }],
+    },
+    {
+      name: 'assignee',
+      type: 'string' as FieldType,
+    },
+    ],
     events: {
       update: ({
         // @ts-ignore
@@ -197,7 +269,7 @@ const RuleModal: React.FC<Props> = ({ modal, ruleTableDataSet, ruleId }) => {
         setUpdateCount((count) => count + 1);
       },
     },
-  }), [fieldDataRef]);
+  }), [issueTypeDataSet]);
 
   const renderOperations = useCallback((fieldK: { key: number }) => {
     const { key } = fieldK;
@@ -509,6 +581,9 @@ const RuleModal: React.FC<Props> = ({ modal, ruleTableDataSet, ruleId }) => {
 
   const handleClickSubmit = useCallback(async () => {
     if (await modalDataSet.validate()) {
+      console.log('name, issueType, assignee');
+      console.log(toJS(getFieldValue('name')), toJS(getFieldValue('issueType')), toJS(getFieldValue('assignee')));
+      // debugger;
       const expressObj = transformSumitData();
       const data = {
         ...initRule,
@@ -604,45 +679,24 @@ const RuleModal: React.FC<Props> = ({ modal, ruleTableDataSet, ruleId }) => {
   });
 
   return (
+
     <div className={styles.rule_form}>
       <Loading loading={loading} />
       <Form dataSet={modalDataSet} ref={formRef as React.RefObject<Form>}>
-        <div className={`${styles.rule_form_setting} ${styles.rule_form_objectSetting}`}>
-          <p className={styles.rule_form_setting_title}>通知对象设置</p>
-          <SelectUser
-            required
-            style={{
-              width: 600,
-            }}
-            // @ts-ignore
-            autoQueryConfig={{
-              selectedUserIds: getFieldValue('receiverList'),
-            }}
-            name="receiverList"
-            label="通知对象"
+        <div className={`${styles.rule_form_setting}`}>
+          <TextField name="name" style={{ width: 520 }} />
+          <Select
+            name="issueType"
+            clearButton={false}
             multiple
-            maxTagCount={6}
-            maxTagTextLength={4}
-          />
-          <SelectUser
-            style={{
-              width: 600,
-              marginTop: 27,
-            }}
-            // @ts-ignore
-            autoQueryConfig={{
-              selectedUserIds: getFieldValue('ccList'),
-            }}
-            name="ccList"
-            label="抄送人"
-            multiple
-            maxTagCount={6}
-            maxTagTextLength={4}
+            style={{ width: 520, marginTop: 27 }}
+            onOption={({ record }) => ({
+              disabled: (getFieldValue('issueType') && getFieldValue('issueType').indexOf('backlog') > -1 && record.get('typeCode') !== 'backlog') || (getFieldValue('issueType') && getFieldValue('issueType').indexOf('backlog') === -1 && record.get('typeCode') === 'backlog'),
+            })}
           />
         </div>
-        <Divider />
-        <div className={`${styles.rule_form_setting} ${styles.rule_form_ruleSetting}`}>
-          <p className={styles.rule_form_setting_title}>通知规则设置</p>
+        <div className={`${styles.rule_form_setting}`}>
+          <p className={styles.rule_form_setting_title}>规则设置</p>
           {
                 fields.map((f: { key: number }, i: number, arr: { key: number }[]) => {
                   const { key } = f;
@@ -734,10 +788,49 @@ const RuleModal: React.FC<Props> = ({ modal, ruleTableDataSet, ruleId }) => {
               }}
               icon="add"
               color={'blue' as ButtonColor}
+              style={{
+                marginTop: -5,
+              }}
             >
               添加字段
             </Button>
           </div>
+        </div>
+        <div className={`${styles.rule_form_setting}`}>
+          <p className={styles.rule_form_setting_title}>自动变更设置</p>
+          <SelectUser name="assignee" label={getFieldValue('issueType') && includes(getFieldValue('issueType'), 'backlog')} style={{ width: 520 }} />
+        </div>
+        <div className={`${styles.rule_form_setting}`}>
+          <p className={styles.rule_form_setting_title}>通知对象设置</p>
+          <SelectUser
+            style={{
+              width: 520,
+            }}
+            // @ts-ignore
+            autoQueryConfig={{
+              selectedUserIds: getFieldValue('receiverList'),
+            }}
+            name="receiverList"
+            label="通知对象"
+            multiple
+            maxTagCount={6}
+            maxTagTextLength={4}
+          />
+          <SelectUser
+            style={{
+              width: 520,
+              marginTop: 27,
+            }}
+            // @ts-ignore
+            autoQueryConfig={{
+              selectedUserIds: getFieldValue('ccList'),
+            }}
+            name="ccList"
+            label="抄送人"
+            multiple
+            maxTagCount={6}
+            maxTagTextLength={4}
+          />
         </div>
       </Form>
     </div>

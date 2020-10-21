@@ -93,7 +93,6 @@ function useMemberLocalStoreMap(config?: MemberLocalMapConfig): [MemberLocalStor
             }
             return { list: res ? [res] : [] };
           }) as Promise<{ list: User[] }>;
-          console.log('quest....');
         }
         (queryUserRequest ?? userApi.getById(id)).then((res: any) => {
           const { list } = res;

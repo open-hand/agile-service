@@ -1,6 +1,5 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useMemo, useCallback } from 'react';
-import { axios, Choerodon } from '@choerodon/boot';
+import React, { useCallback } from 'react';
+import { Choerodon } from '@choerodon/boot';
 import {
   Table, DataSet, Menu, Dropdown, Modal,
 } from 'choerodon-ui/pro';
@@ -9,9 +8,9 @@ import { TableColumnTooltip, TableQueryBarType } from 'choerodon-ui/pro/lib/tabl
 import { User } from '@/common/types';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
-import { getProjectId } from '@/utils/common';
 import UserHead from '@/components/UserHead';
 import { pageRuleApi } from '@/api';
+import { useIsProgramContext } from '@/hooks/useIsProgrom';
 import styles from '../../index.less';
 import RuleModal from '../rule-modal';
 
@@ -22,6 +21,8 @@ interface Props{
 }
 
 const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
+  const { isProgram } = useIsProgramContext();
+
   const handleClickName = useCallback((ruleId: string) => {
     Modal.open({
       className: styles.rule_modal,
@@ -31,9 +32,9 @@ const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
       },
       key: Modal.key(),
       title: '编辑规则',
-      children: <RuleModal ruleTableDataSet={tableDataSet} ruleId={ruleId} />,
+      children: <RuleModal ruleTableDataSet={tableDataSet} ruleId={ruleId} isProgram={isProgram} />,
     });
-  }, [tableDataSet]);
+  }, [isProgram, tableDataSet]);
 
   const renderName = useCallback(({ value, record }) => (
     <span
