@@ -20,12 +20,60 @@ public class ConfigurationRuleVO extends AuditDomain {
     private String sqlQuery;
     private String expressQuery;
     private String expressFormat;
+    private String name;
+    private Boolean enabled;
+    @ApiModelProperty("问题类型")
+    private List<String> issueTypes;
+    @ApiModelProperty("用户类型")
+    private List<String> userTypes;
     @ApiModelProperty("快速搜索创建传值")
     private List<RuleExpressVO> expressList;
     @ApiModelProperty("通知对象")
     private List<UserDTO> receiverList;
     @ApiModelProperty("抄送人")
     private List<UserDTO> ccList;
+    @ApiModelProperty("经办人")
+    private List<UserDTO> processerList;
+
+    public List<String> getIssueTypes() {
+        return issueTypes;
+    }
+
+    public void setIssueTypes(List<String> issueTypes) {
+        this.issueTypes = issueTypes;
+    }
+
+    public List<String> getUserTypes() {
+        return userTypes;
+    }
+
+    public void setUserTypes(List<String> userTypes) {
+        this.userTypes = userTypes;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<UserDTO> getProcesserList() {
+        return processerList;
+    }
+
+    public void setProcesserList(List<UserDTO> processerList) {
+        this.processerList = processerList;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
 
     public List<UserDTO> getReceiverList() {
         return receiverList;

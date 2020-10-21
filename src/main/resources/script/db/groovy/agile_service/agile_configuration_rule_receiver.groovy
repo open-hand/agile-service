@@ -8,9 +8,7 @@ databaseChangeLog(logicalFilePath:'agile_configuration_rule_receiver.groovy') {
             column(name: 'rule_id', type: 'BIGINT UNSIGNED', remarks: 'rule id') {
                 constraints(nullable: false)
             }
-            column(name: 'user_id', type: 'BIGINT UNSIGNED', remarks: 'rule id') {
-                constraints(nullable: false)
-            }
+            column(name: 'user_id', type: 'BIGINT UNSIGNED', remarks: 'rule id')
             column(name: 'user_type', type: 'VARCHAR(50)', remarks: 'user type') {
                 constraints(nullable: false)
             }

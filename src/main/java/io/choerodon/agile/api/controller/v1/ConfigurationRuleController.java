@@ -5,6 +5,7 @@ import java.util.List;
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
 import io.choerodon.agile.app.service.ConfigurationRuleFiledService;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
+import io.choerodon.agile.infra.dto.ConfigurationRuleDTO;
 import io.choerodon.agile.infra.dto.ConfigurationRuleFiledDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
@@ -32,40 +33,28 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/v1/projects/{project_id}/configuration_rule")
 public class ConfigurationRuleController extends BaseController {
 
-    public static final String FIELD_ID = "id";
-
     @Autowired
     private ConfigurationRuleService configurationRuleService;
     @Autowired
     private ConfigurationRuleFiledService configurationRuleFiledService;
 
-    /**
-     * 列表
-     */
     @ApiOperation(value = "列表")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<Page<ConfigurationRuleVO>> list(@PathVariable("project_id") Long projectId,
-                                                          @ApiIgnore @SortDefault(value = FIELD_ID,
+                                                          @ApiIgnore @SortDefault(value = ConfigurationRuleDTO.FIELD_ID,
             direction = Sort.Direction.DESC) PageRequest pageRequest){
         return Results.success(configurationRuleService.listByProjectId(projectId, pageRequest));
     }
 
-
-    /**
-     * 详细
-     */
     @ApiOperation(value = "明细")
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/{ruldId}")
+    @GetMapping("/{ruleId}")
     public ResponseEntity<ConfigurationRuleVO> detail(@PathVariable("project_id") Long projectId,
-                                               @PathVariable @Encrypt Long ruldId) {
-        return Results.success(configurationRuleService.queryById(projectId, ruldId));
+                                               @PathVariable @Encrypt Long ruleId) {
+        return Results.success(configurationRuleService.queryById(projectId, ruleId));
     }
 
-    /**
-     * 创建
-     */
     @ApiOperation(value = "创建")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping
@@ -75,25 +64,19 @@ public class ConfigurationRuleController extends BaseController {
         configurationRuleService.create(projectId, configurationRuleVO);
         return Results.success();
     }
-
-    /**
-     * 修改
-     */
+    
     @ApiOperation(value = "修改")
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @PutMapping("/{ruldId}")
+    @PutMapping("/{ruleId}")
     public ResponseEntity<Void> update(@PathVariable("project_id") Long projectId,
-                                       @PathVariable @Encrypt Long ruldId,
+                                       @PathVariable @Encrypt Long ruleId,
                                        @RequestBody ConfigurationRuleVO configurationRuleVO) {
         configurationRuleVO.setProjectId(projectId);
-        configurationRuleVO.setId(ruldId);
-        configurationRuleService.update(projectId, ruldId, configurationRuleVO);
+        configurationRuleVO.setId(ruleId);
+        configurationRuleService.update(projectId, ruleId, configurationRuleVO);
         return Results.success();
     }
 
-    /**
-     * 删除
-     */
     @ApiOperation(value = "删除")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @DeleteMapping("/{ruleId}")
@@ -109,6 +92,33 @@ public class ConfigurationRuleController extends BaseController {
     public ResponseEntity<List<ConfigurationRuleFiledDTO>> fieldList(@ApiParam(value = "项目id", required = true)
                                                                      @PathVariable(name = "project_id") Long projectId) {
         return Results.success(configurationRuleFiledService.list(projectId));
+    }
+
+    @ApiOperation(value = "启用")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/{ruleId}/enabled")
+    public ResponseEntity<Void> enableRule(@PathVariable("project_id") Long projectId,
+                                           @PathVariable @Encrypt Long ruleId) {
+        configurationRuleService.changeRuleEnabled(projectId, ruleId, true);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "禁用")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @PostMapping("/{ruleId}/disabled")
+    public ResponseEntity<Void> disableRule(@PathVariable("project_id") Long projectId,
+                                            @PathVariable @Encrypt Long ruleId) {
+        configurationRuleService.changeRuleEnabled(projectId, ruleId, false);
+        return Results.success();
+    }
+
+    @ApiOperation(value = "校验名称唯一")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/check_unique_name")
+    public ResponseEntity<Void> checkUniqueName(@PathVariable("project_id") Long projectId,
+                                            @RequestParam("name") String name) {
+        configurationRuleService.checkUniqueName(projectId, name);
+        return Results.success();
     }
 
 }

@@ -2548,7 +2548,7 @@
                 WHERE
                     adl.issue_id = ai.issue_id
                     AND adl.project_id = #{projectId}
-                    AND adl.field = 'resolution'
+                    AND adl.field IN ('resolution', 'Auto Resolution')
                     AND adl.new_value is not null
                 ORDER BY
                     adl.log_id DESC

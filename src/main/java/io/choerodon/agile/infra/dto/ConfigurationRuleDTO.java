@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.dto;
 
+import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -22,10 +23,16 @@ import io.swagger.annotations.ApiModelProperty;
 @ModifyAudit
 @Table(name = "agile_configuration_rule")
 public class ConfigurationRuleDTO extends AuditDomain {
-    
+
+    public static final String FIELD_ID = "id";
     public static final String FIELD_SQL_QUERY = "sqlQuery";
     public static final String FIELD_EXPRESS_QUERY = "expressQuery";
     public static final String FIELD_EXPRESS_FORMAT = "expressFormat";
+    public static final String FIELD_ENABLED = "enabled";
+    public static final String FIELD_TYPE_CODE = "typeCode";
+    
+    public static final String SOURCE_PREDEFINED = "predefined";
+    public static final String SOURCE_CUSTOM = "custom";
 
     public ConfigurationRuleDTO(Long id, Long projectId) {
         this.id = id;
@@ -42,6 +49,43 @@ public class ConfigurationRuleDTO extends AuditDomain {
     private String sqlQuery;
     private String expressQuery;
     private String expressFormat;
+    private String typeCode;
+    private String source;
+    private String name;
+    @Column(name = "is_enabled")
+    private Boolean enabled;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getTypeCode() {
+        return typeCode;
+    }
+
+    public void setTypeCode(String typeCode) {
+        this.typeCode = typeCode;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
 
     public Long getId() {
         return id;

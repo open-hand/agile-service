@@ -1995,7 +1995,7 @@
                 FROM
                    agile_data_log adl1
                 WHERE
-                    adl1.field = 'resolution'
+                    adl1.field IN ('resolution', 'Auto Resolution')
                     AND adl1.project_id = #{projectId}
                 GROUP BY adl1.issue_id
             )
@@ -2678,7 +2678,7 @@
                     and avirh.issue_id = aih.issue_id and aih.apply_type = 'agile'
                 </if>
                 )
-                AND adl.field = 'resolution'
+                AND adl.field IN ('resolution', 'Auto Resolution')
                 GROUP BY
                 t1.group_day,
                 adl.issue_id
