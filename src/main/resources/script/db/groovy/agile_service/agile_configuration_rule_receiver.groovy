@@ -8,9 +8,7 @@ databaseChangeLog(logicalFilePath:'agile_configuration_rule_receiver.groovy') {
             column(name: 'rule_id', type: 'BIGINT UNSIGNED', remarks: 'rule id') {
                 constraints(nullable: false)
             }
-            column(name: 'user_id', type: 'BIGINT UNSIGNED', remarks: 'rule id') {
-                constraints(nullable: false)
-            }
+            column(name: 'user_id', type: 'BIGINT UNSIGNED', remarks: 'rule id')
             column(name: 'user_type', type: 'VARCHAR(50)', remarks: 'user type') {
                 constraints(nullable: false)
             }
@@ -24,9 +22,5 @@ databaseChangeLog(logicalFilePath:'agile_configuration_rule_receiver.groovy') {
             column(name: "last_updated_by", type: "BIGINT UNSIGNED", defaultValue: "0")
             column(name: "last_update_date", type: "DATETIME", defaultValueComputed: "CURRENT_TIMESTAMP")
         }
-    }
-    
-    changeSet(id: '2020-10-21-drop-notnull', author: 'jiaxu.cui@hand-china.com') {
-        dropNotNullConstraint(tableName: 'agile_configuration_rule_receiver', columnName: 'user_id', columnDataType: 'BIGINT UNSIGNED')
     }
 }
