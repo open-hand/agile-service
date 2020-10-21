@@ -3,6 +3,7 @@ package io.choerodon.agile.api.controller.v1;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.QuickFilterFieldService;
 import io.choerodon.agile.app.service.QuickFilterService;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -89,7 +90,7 @@ public class QuickFilterController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询quick filter列表")
     @PostMapping(value = "/query_all")
-    public ResponseEntity<List<QuickFilterVO>> listByProjectId(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Page<QuickFilterVO>> listByProjectId(@ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
                                                                @ApiParam(value = "分页信息", required = true)
                                                                @SortDefault(value = "sequence", direction = Sort.Direction.DESC)

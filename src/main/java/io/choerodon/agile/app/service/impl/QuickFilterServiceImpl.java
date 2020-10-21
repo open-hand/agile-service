@@ -23,6 +23,7 @@ import io.choerodon.agile.infra.mapper.QuickFilterMapper;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.agile.infra.utils.ProjectUtil;
 import io.choerodon.core.domain.Page;
+import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -492,13 +493,16 @@ public class QuickFilterServiceImpl implements QuickFilterService {
     }
 
     @Override
-    public List<QuickFilterVO> listByProjectId(Long projectId, QuickFilterSearchVO quickFilterSearchVO, PageRequest pageRequest) {
+    public Page<QuickFilterVO> listByProjectId(Long projectId, QuickFilterSearchVO quickFilterSearchVO, PageRequest pageRequest) {
         Page<QuickFilterDTO> quickFilterDTOList = PageHelper.doPageAndSort(pageRequest, ()-> quickFilterMapper.queryFiltersByProjectId(projectId, quickFilterSearchVO.getFilterName(), quickFilterSearchVO.getContents()));
         quickFilterDTOList.forEach(v -> v.setDescription(handlerFilterDescription(v.getDescription(),true)));
         if (quickFilterDTOList != null && !quickFilterDTOList.isEmpty()) {
-            return modelMapper.map(quickFilterDTOList, new TypeToken<List<QuickFilterVO>>(){}.getType());
+            PageInfo pageInfo = new PageInfo(quickFilterDTOList.getNumber(), quickFilterDTOList.getSize());
+            List<QuickFilterVO> quickFilterVOList = modelMapper.map(quickFilterDTOList, new TypeToken<List<QuickFilterVO>>(){}.getType());
+            Page<QuickFilterVO> quickFilterVOPage = new Page<>(quickFilterVOList, pageInfo, quickFilterDTOList.getTotalElements());
+            return quickFilterVOPage;
         } else {
-            return new ArrayList<>();
+            return new Page<>();
         }
     }
 
