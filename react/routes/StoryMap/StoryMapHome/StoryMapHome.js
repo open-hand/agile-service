@@ -14,6 +14,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import { observer } from 'mobx-react-lite';
 import useIsInProgram from '@/hooks/useIsInProgram';
 import HeaderLine from '@/components/HeaderLine';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import Minimap from '../../../components/MiniMap';
 import Empty from '../../../components/Empty';
 import epicPic from './emptyStory.svg';
@@ -47,6 +48,9 @@ const StoryMapHome = observer(() => {
 
   useEffect(() => {
     handleRefresh();
+    const defaultHiddenNoStoryValue = localPageCacheStore.getItem('stroyMap.hidden.no.stroy');
+    defaultHiddenNoStoryValue && StoryMapStore.setHiddenColumnNoStory(defaultHiddenNoStoryValue);
+
     return () => { StoryMapStore.clear(); };
   }, []);
   const handleOpenIssueList = () => {
@@ -113,6 +117,7 @@ const StoryMapHome = observer(() => {
   };
 
   const handleCheckBoxChange = (value, oldValue) => {
+    localPageCacheStore.setItem('stroyMap.hidden.no.stroy', value);
     StoryMapStore.setHiddenColumnNoStory(value);
   };
 
@@ -132,7 +137,7 @@ const StoryMapHome = observer(() => {
   }, [selectedIssueMap.size]);
 
   const { isInProgram } = useIsInProgram(); // 判断是否为项目群下的子项目 是则不显示史诗
-  const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => {}, 'c7nagile-StoryMap-fullScreen');
+  const [isFullScreen, toggleFullScreen] = useFullScreen(() => document.body, () => { }, 'c7nagile-StoryMap-fullScreen');
   return (
     <Page
       className="c7nagile-StoryMap"
@@ -156,7 +161,7 @@ const StoryMapHome = observer(() => {
         <HeaderLine />
         <SwitchSwimLine />
         <StoryFilterDropDown />
-        <CheckBox name="hiddenColumn" onChange={handleCheckBoxChange}>隐藏无故事的列</CheckBox>
+        <CheckBox name="hiddenColumn" checked={StoryMapStore.hiddenColumnNoStory} onChange={handleCheckBoxChange}>隐藏无故事的列</CheckBox>
       </Header>
       <Breadcrumb />
       <Content style={{

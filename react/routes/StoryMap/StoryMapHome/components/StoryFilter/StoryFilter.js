@@ -1,19 +1,21 @@
 import React from 'react';
 import {
-  Select, Form, Button, 
+  Select, Form, Button,
 } from 'choerodon-ui/pro';
 import { Divider } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
 import StoryMapStore from '@/stores/project/StoryMap/StoryMapStore';
 import './index.less';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 
 const StoryFilter = ({ selectDataSet, hasFilter }) => {
   const handleResetFilter = () => {
+    localPageCacheStore.remove('stroyMap.filter');
     selectDataSet.reset();
     StoryMapStore.resetSearchVO();
     StoryMapStore.getStoryMap();
   };
-  
+
   return (
     <div className="c7nagile-StoryMap-storyFilter">
       <Form>
@@ -32,8 +34,8 @@ const StoryFilter = ({ selectDataSet, hasFilter }) => {
           searchable
           dropdownMatchSelectWidth={false}
           maxTagCount={2}
-          maxTagTextLength={8} 
-          maxTagPlaceholder={restValues => `+${restValues.length}...`}
+          maxTagTextLength={8}
+          maxTagPlaceholder={(restValues) => `+${restValues.length}...`}
           optionRenderer={({ record, text }) => (
             <div style={{ display: 'inline-block' }}>
               {text}
@@ -54,8 +56,8 @@ const StoryFilter = ({ selectDataSet, hasFilter }) => {
           searchable
           multiple
           maxTagCount={3}
-          maxTagTextLength={8} 
-          maxTagPlaceholder={restValues => `+${restValues.length}...`}
+          maxTagTextLength={8}
+          maxTagPlaceholder={(restValues) => `+${restValues.length}...`}
         />
         <Select
           className="c7nagile-StoryMap-storyFilter-select c7nagile-StoryMap-storyFilter-componentSelect"
@@ -66,13 +68,13 @@ const StoryFilter = ({ selectDataSet, hasFilter }) => {
           searchable
           multiple
           maxTagCount={2}
-          maxTagTextLength={8} 
-          maxTagPlaceholder={restValues => `+${restValues.length}...`}
+          maxTagTextLength={8}
+          maxTagPlaceholder={(restValues) => `+${restValues.length}...`}
         />
       </Form>
       {
           hasFilter && (
-          <React.Fragment>
+          <>
             <Divider />
             <div className="c7nagile-StoryMap-storyFilter-resetDiv">
               <Button
@@ -83,7 +85,7 @@ const StoryFilter = ({ selectDataSet, hasFilter }) => {
                 重置
               </Button>
             </div>
-          </React.Fragment>
+          </>
           )
       }
     </div>
