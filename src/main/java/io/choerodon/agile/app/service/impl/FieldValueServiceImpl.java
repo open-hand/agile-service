@@ -71,7 +71,7 @@ public class FieldValueServiceImpl implements FieldValueService {
     private MessageClient messageClient;
     @Autowired
     private ObjectSchemeFieldExtendMapper objectSchemeFieldExtendMapper;
-    @Autowired
+    @Autowired(required = false)
     private AgilePluginService agilePluginService;
 
     @Override
