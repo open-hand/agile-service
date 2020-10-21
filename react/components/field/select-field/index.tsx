@@ -27,7 +27,7 @@ export interface ISelectableField<T> {
   title: string
   disabled?: boolean
 }
-interface Group {
+export interface Group {
   title: string
   options: {
     title: string

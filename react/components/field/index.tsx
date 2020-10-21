@@ -2,7 +2,7 @@ import React, { useMemo, useCallback } from 'react';
 import type { Moment } from 'moment';
 import { FormFieldProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { IFieldType } from '@/common/types';
-import { IFilterField } from '../filter/useFilter';
+import { IFilterField } from '../filter';
 import { getFieldElement, encodeDate, decodeDate } from './utils';
 
 const transformValue = (fieldType: IFieldType, value: string | [] | undefined) => {
@@ -22,8 +22,7 @@ const Field: React.FC<IFieldProps> = ({
   field, mode, value, onChange, render, ...otherProps
 }) => {
   const { fieldType, title } = field;
-  const isFilter = mode === 'filter';
-  const element = render ? render(field, getFieldElement(field, isFilter)) : getFieldElement(field, isFilter);
+  const element = render ? render(field, getFieldElement(field)) : getFieldElement(field);
   const shouldMultipleOnFilter = useMemo(() => mode === 'filter'
     && ['member', 'radio', 'single', 'checkbox', 'multiple'].includes(fieldType),
   [fieldType, mode]);

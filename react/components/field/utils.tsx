@@ -17,12 +17,10 @@ import SelectStatus from './components/StatusField';
 import FeatureProjectField from './components/FeatureProjectField';
 import PIField from './components/pi-field';
 import QuickFilterField from './components/quick-filter-field';
-import InputField from './components/InputField';
-import OldNumberField from './components/NumberField';
-import { IFilterField, ICustomField } from '../filter/useFilter';
+import { IFilterField, ICustomField } from '../filter';
 
 const { Option } = Select;
-export function getFieldElement(field: IFilterField, isFilter?: boolean): React.ReactNode {
+export function getFieldElement(field: IFilterField): React.ReactNode {
   const { code, fieldType, system } = field;
   if (system) {
     switch (code) {
@@ -97,22 +95,15 @@ export function getFieldElement(field: IFilterField, isFilter?: boolean): React.
         <DatePicker />
       );
     case 'number':
-      // @ts-ignore
-      return isFilter ? <OldNumberField /> : (
-        <NumberField />
-      );
+      return <NumberField />;
     case 'input':
-      // @ts-ignore
-      return isFilter ? <InputField /> : (
+      return (
         <TextField
           maxLength={100}
         />
       );
     case 'text':
-      return isFilter ? (
-        // @ts-ignore
-        <InputField />
-      ) : (
+      return (
         <TextArea
           rows={3}
           maxLength={255}

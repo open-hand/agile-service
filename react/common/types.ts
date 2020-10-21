@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { ModalProps } from 'choerodon-ui/lib/modal';
 
 export interface User {
@@ -279,4 +280,50 @@ export interface IFoundationHeader {
   title: string
   fieldType: string
   code: string
+}
+interface ICustomFieldSearch {
+  fieldId: string
+  value: any
+}
+interface IDateFieldSearch {
+  fieldId: string,
+  startDate: string,
+  endDate: string,
+}
+export interface ISearchVO {
+  advancedSearchArgs: {
+    issueTypeId?: string[],
+    reporterIds?: string[],
+    statusId?: string[],
+    priorityId?: string[],
+  },
+  otherArgs: {
+    assigneeId?: string[],
+    issueIds?: string[],
+    component?: string[],
+    epic?: string[],
+    feature?: string[],
+    label?: string[],
+    sprint?: string[],
+    summary?: string[],
+    version?: string[],
+    customField?: {
+      option: ICustomFieldSearch[],
+      date: IDateFieldSearch[],
+      date_hms: IDateFieldSearch[],
+      number: ICustomFieldSearch[],
+      string: ICustomFieldSearch[],
+      text: ICustomFieldSearch[],
+    },
+  },
+  searchArgs: {
+    createStartDate?: string,
+    createEndDate?: string,
+    updateStartDate?: string,
+    updateEndDate?: string,
+    teamProjectIds?: string[]
+    issueType?: string
+  },
+  quickFilterIds?: string[],
+  contents?: string[],
 }
