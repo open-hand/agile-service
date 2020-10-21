@@ -318,7 +318,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
             return renderCustomSql(preOp, projectId, fieldId, 
                     Collections.singletonList(() ->  conditionSql("ffv.option_id", operation, value)));
         } else if (CustomFieldType.isDate(customFieldType)) {
-            value = ruleExpressVO.getValueDate();
+            value = BooleanUtils.isTrue(ruleExpressVO.getNowFlag())? ruleExpressVO.getValueStr() : ruleExpressVO.getValueDate();
             return renderCustomSql(preOp, projectId, fieldId, Collections.singletonList(() -> 
                     conditionSql(getUnixTimeExpress("ffv.date_value"), operation, getUnixTimeExpress(valueToString(value)))));
         } else if (CustomFieldType.isDateHms(customFieldType)) {
@@ -376,7 +376,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                 value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueIdList() : ruleExpressVO.getValueId();
                 break;
             case FieldType.RulePredefind.DATE_TYPE:
-                value = ruleExpressVO.getValueDate();
+                value = BooleanUtils.isTrue(ruleExpressVO.getNowFlag()) ? ruleExpressVO.getValueStr() : ruleExpressVO.getValueDate();
                 break;
             case FieldType.RulePredefind.TEXT_TYPE:
                 value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueStrList() : ruleExpressVO.getValueStr();
@@ -418,7 +418,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
 
     private String valueToString(Object value) {
         if (value instanceof String){
-            return "'" + value + "'";
+            return ConfigurationRule.isSqlVar((String)value) ? (String)value : "'" + value + "'";
         }else if(value instanceof Date){
             return "'" + df.format(value) + "'";
         }else {

@@ -24,6 +24,8 @@ public class RuleExpressVO {
     private Boolean predefined;
     @ApiModelProperty("字段类型")
     private String fieldType;
+    @ApiModelProperty("是否是当前时间")
+    private Boolean nowFlag;
     @ApiModelProperty("是否允许小数")
     private Boolean allowDecimals;
     @ApiModelProperty("快速搜索值")
@@ -52,6 +54,14 @@ public class RuleExpressVO {
     private Date valueDate;
     @ApiModelProperty("时分秒快速搜索值")
     private String valueDateHms;
+
+    public Boolean getNowFlag() {
+        return nowFlag;
+    }
+
+    public void setNowFlag(Boolean nowFlag) {
+        this.nowFlag = nowFlag;
+    }
 
     public Boolean getAllowDecimals() {
         return allowDecimals;
