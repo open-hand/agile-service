@@ -1,5 +1,6 @@
 package io.choerodon.agile.infra.dto;
 
+import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -42,6 +43,43 @@ public class ConfigurationRuleDTO extends AuditDomain {
     private String sqlQuery;
     private String expressQuery;
     private String expressFormat;
+    private String typeCode;
+    private String source;
+    private String description;
+    @Column(name = "is_enabled")
+    private Boolean enabled;
+
+    public String getTypeCode() {
+        return typeCode;
+    }
+
+    public void setTypeCode(String typeCode) {
+        this.typeCode = typeCode;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
 
     public Long getId() {
         return id;
