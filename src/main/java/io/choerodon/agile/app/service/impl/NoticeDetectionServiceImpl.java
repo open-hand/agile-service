@@ -1,13 +1,10 @@
 package io.choerodon.agile.app.service.impl;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
-import io.choerodon.agile.api.vo.MessageSenderUniqueVO;
 import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
 import io.choerodon.agile.app.service.NoticeDetectionService;
@@ -73,7 +70,7 @@ public class NoticeDetectionServiceImpl implements NoticeDetectionService {
 
     private List<MessageSender> generateRuleSender(RuleNoticeEvent event,Long projectId,List<Long> ruleIdList,
                                                    IssueDTO issue, List<String> fieldList) {
-        Map<Long, ConfigurationRuleVO> map = configurationRuleService.selectRuleReceiverWithCc(ruleIdList);
+        Map<Long, ConfigurationRuleVO> map = configurationRuleService.selectRuleALLReceiver(ruleIdList);
         // 生成需要合并的messageSenderList
         return Arrays.stream(event.getMessageCodeList())
                 .map(code ->getSenderList(generatedSenderByCode(code, projectId, issue, fieldList), map))

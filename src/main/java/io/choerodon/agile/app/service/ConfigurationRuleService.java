@@ -35,7 +35,7 @@ public interface ConfigurationRuleService {
      * @param ruleIdList ruleIdList
      * @return map
      */
-    Map<Long, ConfigurationRuleVO> selectRuleReceiverWithCc(List<Long> ruleIdList);
+    Map<Long, ConfigurationRuleVO> selectRuleALLReceiver(List<Long> ruleIdList);
     
     void changeRuleEnabled(Long projectId, Long ruleId, boolean enabled);
 
