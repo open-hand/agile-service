@@ -2568,7 +2568,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
              * 选择子任务：可关联问题：故事、缺陷（不是其他的子缺陷）、任务
              * 选择缺陷：故事、任务
              */
-            return PageHelper.doPageAndSort(pageRequest, () -> issueMapper.listAvailableParents(projectId, issueType, param));
+            Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId,"agile");
+            Page<IssueVO> result = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.listAvailableParents(projectId, issueType, param));
+            result.getContent().forEach(r -> r.setIssueTypeVO(issueTypeDTOMap.get(r.getIssueTypeId())));
+            return result;
         } else {
             return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
         }
