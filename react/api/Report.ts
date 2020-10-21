@@ -1,6 +1,6 @@
 import { axios } from '@choerodon/boot';
 import { getOrganizationId } from '@/utils/common';
-import { ISearchVO } from '@/components/filter/utils';
+import { ISearchVO } from '@/common/types';
 import Api from './Api';
 
 interface ICumulativeData {

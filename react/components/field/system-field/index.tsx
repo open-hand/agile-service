@@ -10,7 +10,7 @@ import TextEditToggle from '@/components/TextEditTogglePro';
 import UserHead from '@/components/UserHead';
 import { Action } from '@/components/TextEditTogglePro/TextEditToggle';
 import { IFieldType } from '@/common/types';
-import { ICustomField } from '@/components/filter/useFilter';
+import { ICustomField } from '@/components/filter';
 
 const getEditorByFieldType = (fieldType: IFieldType, outside: boolean) => {
   switch (fieldType) {

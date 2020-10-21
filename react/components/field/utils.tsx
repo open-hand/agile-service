@@ -17,7 +17,7 @@ import SelectStatus from './components/StatusField';
 import FeatureProjectField from './components/FeatureProjectField';
 import PIField from './components/pi-field';
 import QuickFilterField from './components/quick-filter-field';
-import { IFilterField, ICustomField } from '../filter/useFilter';
+import { IFilterField, ICustomField } from '../filter';
 
 const { Option } = Select;
 export function getFieldElement(field: IFilterField): React.ReactNode {
