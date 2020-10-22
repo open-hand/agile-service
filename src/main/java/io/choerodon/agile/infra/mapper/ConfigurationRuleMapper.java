@@ -15,7 +15,7 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface ConfigurationRuleMapper extends BaseMapper<ConfigurationRuleDTO> {
 
-    List<ConfigurationRuleVO> selectByProjectId(@Param("projectId") Long projectId);
+    List<ConfigurationRuleVO> selectByProjectId(ConfigurationRuleVO configurationRuleVO);
 
     Map<String, Long> selectByRuleList(@Param("issueId") Long issueId,
                                        @Param("projectId") Long projectId,

@@ -175,9 +175,9 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     }
 
     @Override
-    public Page<ConfigurationRuleVO> listByProjectId(Long projectId, PageRequest pageRequest) {
+    public Page<ConfigurationRuleVO> listByProjectId(ConfigurationRuleVO configurationRuleVO, PageRequest pageRequest) {
         return PageHelper.doPageAndSort(pageRequest, () -> {
-            List<ConfigurationRuleVO> page = configurationRuleMapper.selectByProjectId(projectId);
+            List<ConfigurationRuleVO> page = configurationRuleMapper.selectByProjectId(configurationRuleVO);
             if (CollectionUtils.isEmpty(page)){
                 return page;
             }

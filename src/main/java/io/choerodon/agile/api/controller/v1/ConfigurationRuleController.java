@@ -42,9 +42,11 @@ public class ConfigurationRuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     public ResponseEntity<Page<ConfigurationRuleVO>> list(@PathVariable("project_id") Long projectId,
+                                                          ConfigurationRuleVO configurationRuleVO,
                                                           @ApiIgnore @SortDefault(value = ConfigurationRuleDTO.FIELD_ID,
-            direction = Sort.Direction.DESC) PageRequest pageRequest){
-        return Results.success(configurationRuleService.listByProjectId(projectId, pageRequest));
+                                                          direction = Sort.Direction.DESC) PageRequest pageRequest){
+        configurationRuleVO.setProjectId(projectId);
+        return Results.success(configurationRuleService.listByProjectId(configurationRuleVO, pageRequest));
     }
 
     @ApiOperation(value = "明细")

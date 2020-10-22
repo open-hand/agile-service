@@ -15,10 +15,23 @@
     </sql>
 
     <select id="selectByProjectId" resultType="io.choerodon.agile.api.vo.ConfigurationRuleVO">
-        SELECT *
+        SELECT 
+           acr.*, 
+           acr.is_enabled AS enabled
         FROM
-            agile_configuration_rule
-        WHERE project_id = #{projectId}
+            agile_configuration_rule acr
+        WHERE project_id = #{projectId} 
+        <if test="name != null and name != ''">
+          <bind name="nameLike" value="'%' + name + '%'"/>
+            AND acr.name = #{nameLike}
+        </if>
+        <if test="enabled != null">
+            <bind name="nameLike" value="'%' + name + '%'"/>
+            AND acr.is_enabled = #{enabled}
+        </if>
+        <if test="source != null and source != ''">
+            AND acr.source = #{source}
+        </if>
     </select>
 
     <select id="selectByRuleList" resultType="java.util.Map">
