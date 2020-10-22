@@ -9,8 +9,8 @@ import { pageRuleApiConfig } from '@/api';
 import { getApplyType } from '@/utils/common';
 import IsProgramContext from '@/hooks/useIsProgrom';
 import RuleTable from './components/rule-table';
-import styles from './index.less';
 import RuleModal from './components/rule-modal';
+import styles from './index.less';
 
 const PageRule = () => {
   const ruleTableDataSet = useMemo(() => new DataSet({
@@ -34,6 +34,11 @@ const PageRule = () => {
         type: 'string' as FieldType,
       },
       {
+        label: '问题类型',
+        name: 'issueTypes',
+        type: 'array' as FieldType,
+      },
+      {
         label: '变更值',
         name: 'newAssignee',
       },
@@ -53,6 +58,20 @@ const PageRule = () => {
         type: 'boolean' as FieldType,
       },
     ],
+    queryFields: [
+      {
+        name: 'name',
+        label: '名称',
+      },
+      {
+        name: 'enabled',
+        label: '状态',
+      },
+      {
+        name: 'source',
+        label: '来源',
+      },
+    ],
   }), []);
 
   const handleAddRule = () => {
@@ -70,7 +89,7 @@ const PageRule = () => {
 
   return (
     <IsProgramContext.Provider value={{ isProgram: getApplyType() === 'program' }}>
-      <Page service={[]}>
+      <Page service={[]} className={styles.pageRule}>
         <Header>
           <Button icon="playlist_add" onClick={handleAddRule}>添加规则</Button>
         </Header>

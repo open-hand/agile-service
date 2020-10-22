@@ -29,7 +29,6 @@ const useIsInProgram = (): ChildrenProps => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const type = AppState.currentMenuType.category === 'PROGRAM' ? 'program' : 'agile';
-  const { id } = AppState.currentMenuType;
   const isProgram = type === 'program';
   const refresh = useCallback(async () => {
     if (!isProgram) {
@@ -50,7 +49,7 @@ const useIsInProgram = (): ChildrenProps => {
         setLoading(false);
       });
     }
-  }, [isProgram, id]);
+  }, [isProgram]);
 
   useEffect(() => {
     refresh();

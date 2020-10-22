@@ -20,6 +20,16 @@ interface Props{
     tableDataSet: DataSet,
 }
 
+const issueTypeMap = new Map([
+  ['backlog', '需求'],
+  ['story', '故事'],
+  ['task', '任务'],
+  ['bug', '缺陷'],
+  ['sub_task', '子任务'],
+  ['issue_epic', '史诗'],
+  ['feature', '特性'],
+]);
+
 const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
   const { isProgram } = useIsProgramContext();
 
@@ -51,6 +61,17 @@ const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
     return (
       <span>
         {receiverList.map((user: User) => user.realName).join('、')}
+      </span>
+    );
+  }, []);
+
+  const renderIssueType = useCallback(({ record }: RenderProps) => {
+    const typeCodes = record?.get('issueTypes');
+    return (
+      <span>
+        {
+          (typeCodes || []).map((code: string) => issueTypeMap.get(code)).join('、')
+      }
       </span>
     );
   }, []);
@@ -170,12 +191,13 @@ const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
   }, []);
 
   return (
-    <Table dataSet={tableDataSet} queryBar={'none' as TableQueryBarType}>
+    <Table dataSet={tableDataSet}>
       <Column name="name" renderer={renderName} width={200} tooltip={'overflow' as TableColumnTooltip} />
       <Column name="action" width={50} renderer={renderAction} tooltip={'overflow' as TableColumnTooltip} />
       <Column name="expressQuery" width={250} tooltip={'overflow' as TableColumnTooltip} />
       <Column name="newAssignee" renderer={renderAssignee} tooltip={'overflow' as TableColumnTooltip} />
       <Column name="receiverList" renderer={renderReceiver} tooltip={'overflow' as TableColumnTooltip} />
+      <Column name="issueTypes" renderer={renderIssueType} tooltip={'overflow' as TableColumnTooltip} />
       <Column name="enabled" renderer={renderStatus} tooltip={'overflow' as TableColumnTooltip} />
       <Column name="source" renderer={({ value }) => (value === 'system' ? '预置' : '自定义')} tooltip={'overflow' as TableColumnTooltip} />
     </Table>
