@@ -13,6 +13,7 @@ import RunWhenProjectChange from '@/common/RunWhenProjectChange';
 import { setHistory } from '@/utils/to';
 import IsInProgramStore from './stores/common/program/IsInProgramStore';
 import './style/index.less';
+import { localPageCacheStore } from './stores/common/LocalPageCacheStore';
 
 const ScrumBoard = React.lazy(() => import('./routes/ScrumBoard'));
 const ReportHost = React.lazy(() => import('./routes/ReportHost'));
@@ -23,7 +24,7 @@ const IssueType = React.lazy(() => import('./routes/issueType'));
 const Priority = React.lazy(() => import('./routes/priority'));
 const State = React.lazy(() => import('./routes/state'));
 const PageConfig = React.lazy(() => import('./routes/page-config'));
-
+const PageRule = React.lazy(() => import('./routes/page-rule'));
 const StateMachine = React.lazy(() => import('./routes/StateMachine'));
 // 敏捷设置
 const Settings = React.lazy(() => import('./routes/settings'));
@@ -46,6 +47,7 @@ class Agile extends React.Component {
       if (AppState.currentMenuType.category !== 'PROGRAM') {
         // 切换项目查是否在项目群中
         RunWhenProjectChange(IsInProgramStore.refresh);
+        RunWhenProjectChange(localPageCacheStore.clear);
         IsInProgramStore.refresh();
       }
     }
@@ -73,6 +75,7 @@ class Agile extends React.Component {
               <Route path={`${match.url}/reporthost`} component={ReportHost} />
               {/* 设置页面 */}
               <Route path={`${match.url}/page`} component={PageConfig} />
+              <Route path={`${match.url}/page-rule`} component={PageRule} />
               {/* 页面类型 */}
               <Route path={`${match.url}/issue-type`} component={IssueType} />
               <Route path={`${match.url}/settings`} component={Settings} />

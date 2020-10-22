@@ -216,7 +216,7 @@ export default function renderField<T extends Partial<SelectProps>>(field: IChos
             //   }
             // }))} value.map((item: string) => (String(item)))
           autoQueryConfig={defaultValue ? {
-            selectedUserIds: defaultValue.map((item: any) => String(item)),
+            selectedUserIds: defaultValue.map((item: any) => String(item))[0],
             userMaps,
             finishStack,
             taskStacks: stacks,

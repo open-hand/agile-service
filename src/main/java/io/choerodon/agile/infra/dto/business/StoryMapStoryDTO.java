@@ -1,6 +1,6 @@
-package io.choerodon.agile.infra.dto;
+package io.choerodon.agile.infra.dto.business;
 
-
+import io.choerodon.agile.infra.dto.StoryMapVersionDTO;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.util.List;
@@ -10,22 +10,20 @@ import java.util.List;
  * Email: fuqianghuang01@gmail.com
  */
 public class StoryMapStoryDTO {
-
     @Encrypt
     private Long issueId;
 
     private String issueNum;
 
     private String summary;
-
     @Encrypt(ignoreValue = {"0"})
     private Long epicId;
+    @Encrypt(ignoreValue = {"0"})
+    private Long featureId;
 
     private Boolean completed;
-
     @Encrypt
     private Long issueTypeId;
-
     @Encrypt
     private Long statusId;
 
@@ -61,6 +59,14 @@ public class StoryMapStoryDTO {
 
     public void setEpicId(Long epicId) {
         this.epicId = epicId;
+    }
+
+    public Long getFeatureId() {
+        return featureId;
+    }
+
+    public void setFeatureId(Long featureId) {
+        this.featureId = featureId;
     }
 
     public void setStoryMapVersionDTOList(List<StoryMapVersionDTO> storyMapVersionDTOList) {

@@ -27,7 +27,7 @@ export interface ISelectableField<T> {
   title: string
   disabled?: boolean
 }
-interface Group {
+export interface Group {
   title: string
   options: {
     title: string
@@ -39,10 +39,12 @@ export interface SelectFieldProps {
   value?: string[]
   onChange?: (codes: string[], select: boolean, value: string[]) => void
   groups: Group[]
+  triggerElement?: React.ReactElement
 }
 const SelectField: React.FC<SelectFieldProps> = ({
   groups,
   onChange,
+  triggerElement,
   ...otherProps
 }) => {
   const [hidden, setHidden] = useState(true);
@@ -101,16 +103,23 @@ const SelectField: React.FC<SelectFieldProps> = ({
         )}
         trigger={['click']}
       >
-        <Button
-          color={'blue' as ButtonColor}
-          icon="add"
-          onClick={(e) => {
+        {triggerElement ? React.cloneElement(triggerElement, {
+          onClick: (e: any) => {
             e.nativeEvent.stopImmediatePropagation();
             setHidden(false);
-          }}
-        >
-          添加筛选
-        </Button>
+          },
+        }) : (
+          <Button
+            color={'blue' as ButtonColor}
+            icon="add"
+            onClick={(e) => {
+              e.nativeEvent.stopImmediatePropagation();
+              setHidden(false);
+            }}
+          >
+            添加筛选
+          </Button>
+        )}
       </Dropdown>
     </div>
   );

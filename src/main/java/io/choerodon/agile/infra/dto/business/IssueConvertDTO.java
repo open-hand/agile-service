@@ -1,5 +1,7 @@
-package io.choerodon.agile.infra.dto;
+package io.choerodon.agile.infra.dto.business;
 
+import io.choerodon.agile.infra.dto.LookupValueDTO;
+import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.utils.IssueNumUtil;
 import io.choerodon.agile.infra.utils.StringUtil;
@@ -23,6 +25,7 @@ public class IssueConvertDTO {
     private static final String ISSUE_EPIC = "issue_epic";
     private static final String DEFAULT_ASSIGNEE = "default_assignee";
     private static final String CURRENT_USER = "current_user";
+    private static final String ISSUE_FEATURE = "feature";
 
     private Long issueId;
 
@@ -78,6 +81,20 @@ public class IssueConvertDTO {
 
     private Boolean assigneerCondtiion;
 
+    private Date stayDate;
+
+    private Long relateIssueId;
+
+    private Long featureId;
+
+    private Date startDate;
+
+    private Date endDate;
+
+    private Long programId;
+
+    private Long piId;
+
     private Date estimatedStartTime;
 
     private Date estimatedEndTime;
@@ -95,6 +112,14 @@ public class IssueConvertDTO {
      */
     private String autoTriggerNum;
 
+    public Boolean getAutoTranferFlag() {
+        return autoTranferFlag;
+    }
+
+    public void setAutoTranferFlag(Boolean autoTranferFlag) {
+        this.autoTranferFlag = autoTranferFlag;
+    }
+
     public Long getAutoTriggerId() {
         return autoTriggerId;
     }
@@ -109,14 +134,6 @@ public class IssueConvertDTO {
 
     public void setAutoTriggerNum(String autoTriggerNum) {
         this.autoTriggerNum = autoTriggerNum;
-    }
-
-    public Boolean getAutoTranferFlag() {
-        return autoTranferFlag;
-    }
-
-    public void setAutoTranferFlag(Boolean autoTranferFlag) {
-        this.autoTranferFlag = autoTranferFlag;
     }
 
     public Date getEstimatedStartTime() {
@@ -142,10 +159,6 @@ public class IssueConvertDTO {
     public void setAssigneerCondtiion(Boolean assigneerCondtiion) {
         this.assigneerCondtiion = assigneerCondtiion;
     }
-
-    private Date stayDate;
-
-    private Long relateIssueId;
 
     public Integer getEpicSequence() {
         return epicSequence;
@@ -430,6 +443,10 @@ public class IssueConvertDTO {
         return Objects.equals(this.applyType, SchemeApplyType.AGILE) && !Objects.equals(this.typeCode, ISSUE_EPIC);
     }
 
+    public Boolean isProgramRank() {
+        return Objects.equals(this.applyType, SchemeApplyType.PROGRAM) && Objects.equals(this.typeCode, ISSUE_FEATURE);
+    }
+
     public Boolean isIssueMapRank() {
         return Objects.equals(this.applyType, SchemeApplyType.AGILE) && !Objects.equals(this.typeCode, ISSUE_EPIC) && !Objects.equals(this.typeCode, SUB_TASK);
     }
@@ -474,5 +491,45 @@ public class IssueConvertDTO {
 
     public Long getRelateIssueId() {
         return relateIssueId;
+    }
+
+    public Long getFeatureId() {
+        return featureId;
+    }
+
+    public void setFeatureId(Long featureId) {
+        this.featureId = featureId;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public Long getProgramId() {
+        return programId;
+    }
+
+    public void setProgramId(Long programId) {
+        this.programId = programId;
+    }
+
+    public Long getPiId() {
+        return piId;
+    }
+
+    public void setPiId(Long piId) {
+        this.piId = piId;
     }
 }

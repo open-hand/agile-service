@@ -2,6 +2,9 @@ package io.choerodon.agile.infra.mapper;
 
 import io.choerodon.agile.api.vo.BurnDownSearchVO;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.GroupDataChartDTO;
+import io.choerodon.agile.infra.dto.business.GroupDataChartListDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;

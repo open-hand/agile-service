@@ -22,7 +22,6 @@ const ExportIssueContextProvider = injectIntl(observer(
     const {
       tableRef, fields, chosenFields,
     } = props;
-    console.log('fields...', fields);
     const columns = useMemo(() => (tableRef.current
       ? tableRef.current.tableStore.columns.filter((column) => column.name && !column.hidden)
       : []), [tableRef]);

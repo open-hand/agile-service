@@ -5,10 +5,10 @@ import java.util.List;
 import com.alibaba.fastjson.JSONObject;
 
 import io.choerodon.agile.api.vo.*;
-import io.choerodon.agile.api.vo.business.IssueCreateVO;
-import io.choerodon.agile.api.vo.business.IssueUpdateVO;
-import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -350,4 +350,15 @@ public interface IssueService {
      * @return
      */
     Page<IssueListFieldKVVO> queryBackLogIssuesByPersonal(Long organizationId, Long projectId,PageRequest pageRequest);
+
+    /**
+     * 根据项目id和问题类型分页查询可以选择的父问题
+     *
+     * @param pageRequest
+     * @param projectId
+     * @param issueType
+     * @param param
+     * @return
+     */
+    Page<IssueVO> pagingQueryAvailableParents(PageRequest pageRequest, Long projectId, String issueType, String param);
 }

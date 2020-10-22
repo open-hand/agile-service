@@ -10,6 +10,9 @@ import io.choerodon.agile.app.service.ProjectConfigService;
 import io.choerodon.agile.app.service.StateMachineTransformService;
 import io.choerodon.agile.app.service.StatusTransferSettingService;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.enums.IssueTypeCode;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
@@ -100,6 +103,11 @@ public class IssueValidator {
         }
         if (!EnumUtil.contain(SchemeApplyType.class, applyType)) {
             throw new CommonException("error.applyType.illegal");
+        }
+        if (IssueTypeCode.isSubTask(issueCreateVO.getTypeCode())
+                && (ObjectUtils.isEmpty(issueCreateVO.getParentIssueId())
+                || Objects.equals(0L, issueCreateVO.getParentIssueId()))) {
+            throw new CommonException("error.parentIssueId.null");
         }
     }
 

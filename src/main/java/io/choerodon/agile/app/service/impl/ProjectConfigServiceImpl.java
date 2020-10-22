@@ -6,6 +6,7 @@ import io.choerodon.agile.api.vo.event.TransformInfo;
 import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.cache.InstanceCache;
 import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.exception.RemoveStatusException;
 import io.choerodon.agile.infra.mapper.*;
@@ -614,6 +615,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (Boolean.TRUE.equals(checkIssueUse)) {
             // 报错
             throw new CommonException("error.status.status_issue_used");
+        }
+        if (Objects.equals(issueTypeId,0L)) {
+            return machineNodeDTO;
         }
         // 校验当前node的状态是否与其他状态有联动
         IssueTypeDTO issueTypeDTO = issueTypeMapper.selectByPrimaryKey(issueTypeId);

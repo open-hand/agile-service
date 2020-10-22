@@ -135,6 +135,10 @@ public class IssueVO {
     @ApiModelProperty(value = "父任务问题概要")
     private String parentIssueSummary;
 
+    private String parentIssueDescription;
+
+    private String parentRelateDescription;
+
     @ApiModelProperty(value = "经办人图标")
     private String assigneeImageUrl;
 
@@ -229,6 +233,22 @@ public class IssueVO {
     private Date estimatedStartTime;
 
     private Date estimatedEndTime;
+
+    public String getParentRelateDescription() {
+        return parentRelateDescription;
+    }
+
+    public void setParentRelateDescription(String parentRelateDescription) {
+        this.parentRelateDescription = parentRelateDescription;
+    }
+
+    public String getParentIssueDescription() {
+        return parentIssueDescription;
+    }
+
+    public void setParentIssueDescription(String parentIssueDescription) {
+        this.parentIssueDescription = parentIssueDescription;
+    }
 
     public List<IssueSubListVO> getSameParentIssueVOList() {
         return sameParentIssueVOList;

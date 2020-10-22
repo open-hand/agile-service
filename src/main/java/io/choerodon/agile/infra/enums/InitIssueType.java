@@ -3,10 +3,7 @@ package io.choerodon.agile.infra.enums;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author dinghuang123@gmail.com
- * @since 2018/10/24
- */
+
 public enum InitIssueType {
     /**
      * 史诗
@@ -35,7 +32,13 @@ public enum InitIssueType {
     /**
      * 自动化测试
      */
-    AUTO_TEST("test-automation", "自动化测试", "自动化测试", "#FA8C16", "issue_auto_test");
+    AUTO_TEST("test-automation", "自动化测试", "自动化测试", "#FA8C16", "issue_auto_test"),
+    /**
+     * 特性
+     */
+    FEATURE("agile-feature", "特性", "特性", "#3D5AFE", "feature"),
+
+    ;
 
     private String icon;
     private String name;
@@ -75,6 +78,7 @@ public enum InitIssueType {
         List<InitIssueType> result = new ArrayList<>();
         switch (applyType) {
             case SchemeApplyType.AGILE:
+                result.add(InitIssueType.FEATURE);
                 result.add(InitIssueType.EPIC);
                 result.add(InitIssueType.STORY);
                 result.add(InitIssueType.BUG);
@@ -84,6 +88,10 @@ public enum InitIssueType {
             case SchemeApplyType.TEST:
                 result.add(InitIssueType.TEST);
                 result.add(InitIssueType.AUTO_TEST);
+                break;
+            case SchemeApplyType.PROGRAM:
+                result.add(InitIssueType.EPIC);
+                result.add(InitIssueType.FEATURE);
                 break;
             default:
                 break;

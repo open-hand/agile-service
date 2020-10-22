@@ -240,7 +240,7 @@ export default {
       optionLabelProp: 'showName',
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
     },
-    request: ({ filter, page }, issueId) => issueApi.loadIssuesInLink(page, 20, issueId, filter),
+    request: ({ filter, page }, issueId) => issueApi.loadIssuesInLink(page - 1, 20, issueId, filter),
     render: (issue) => (
       <Option
         key={issue.issueId}
@@ -274,6 +274,94 @@ export default {
               </p>
             </Tooltip>
 
+          </div>
+        </div>
+      </Option>
+    ),
+  },
+  subTask_parent_issue: {
+    props: {
+      optionLabelProp: 'showName',
+      loadWhenMount: true,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+    },
+    request: ({ filter, page }) => issueApi.loadParentIssues(page, 20, 'sub_task', filter), // 故事、任务、缺陷（不能是子缺陷）
+    render: (issue) => (
+      <Option
+        key={issue.issueId}
+        value={issue.issueId}
+        showName={issue.issueNum}
+      >
+        <div style={{
+          display: 'inline-flex',
+          flex: 1,
+          width: 'calc(100% - 30px)',
+          alignItems: 'center',
+          verticalAlign: 'middle',
+        }}
+        >
+          <TypeTag
+            data={issue.issueTypeVO}
+          />
+          <span style={{
+            paddingLeft: 12, paddingRight: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}
+          >
+            {issue.issueNum}
+          </span>
+          <div style={{ overflow: 'hidden', flex: 1 }}>
+            <Tooltip title={issue.summary}>
+              <p style={{
+                paddingRight: '25px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, maxWidth: 'unset',
+              }}
+              >
+                {issue.summary}
+              </p>
+            </Tooltip>
+          </div>
+        </div>
+      </Option>
+    ),
+  },
+  subBug_parent_issue: {
+    props: {
+      optionLabelProp: 'showName',
+      loadWhenMount: true,
+      getPopupContainer: (triggerNode) => triggerNode.parentNode,
+    },
+    request: ({ filter, page }) => issueApi.loadParentIssues(page, 20, 'bug', filter), // 故事、任务
+    render: (issue) => (
+      <Option
+        key={issue.issueId}
+        value={issue.issueId}
+        showName={issue.issueNum}
+      >
+        <div style={{
+          display: 'inline-flex',
+          flex: 1,
+          width: 'calc(100% - 30px)',
+          alignItems: 'center',
+          verticalAlign: 'middle',
+        }}
+        >
+          <TypeTag
+            data={issue.issueTypeVO}
+          />
+          <span style={{
+            paddingLeft: 12, paddingRight: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}
+          >
+            {issue.issueNum}
+          </span>
+          <div style={{ overflow: 'hidden', flex: 1 }}>
+            <Tooltip title={issue.summary}>
+              <p style={{
+                paddingRight: '25px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 0, maxWidth: 'unset',
+              }}
+              >
+                {issue.summary}
+              </p>
+            </Tooltip>
           </div>
         </div>
       </Option>

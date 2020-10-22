@@ -3,7 +3,11 @@ package io.choerodon.agile.api.controller.v1;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.QuickFilterFieldService;
 import io.choerodon.agile.app.service.QuickFilterService;
+import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
+import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
+import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import io.choerodon.mybatis.pagehelper.domain.Sort;
 import io.choerodon.swagger.annotation.Permission;
 import io.choerodon.core.exception.CommonException;
 import io.swagger.annotations.ApiOperation;
@@ -86,10 +90,13 @@ public class QuickFilterController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询quick filter列表")
     @PostMapping(value = "/query_all")
-    public ResponseEntity<List<QuickFilterVO>> listByProjectId(@ApiParam(value = "项目id", required = true)
+    public ResponseEntity<Page<QuickFilterVO>> listByProjectId(@ApiParam(value = "项目id", required = true)
                                                                 @PathVariable(name = "project_id") Long projectId,
+                                                               @ApiParam(value = "分页信息", required = true)
+                                                               @SortDefault(value = "sequence", direction = Sort.Direction.DESC)
+                                                                       PageRequest pageRequest,
                                                                @RequestBody(required = false) QuickFilterSearchVO quickFilterSearchVO) {
-        return Optional.ofNullable(quickFilterService.listByProjectId(projectId, quickFilterSearchVO))
+        return Optional.ofNullable(quickFilterService.listByProjectId(projectId, quickFilterSearchVO, pageRequest))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.quickFilter.list"));
     }

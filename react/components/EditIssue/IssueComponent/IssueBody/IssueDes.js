@@ -59,7 +59,7 @@ const IssueDes = ({ reloadIssue }) => {
               <WYSIWYGEditor
                 autoFocus
                 bottomBar
-                value={text2Delta(descriptionTemplate) || text2Delta(editDes)}
+                value={text2Delta(editDes) || text2Delta(descriptionTemplate)}
                 style={{
                   height: '100%', width: '100%',
                 }}

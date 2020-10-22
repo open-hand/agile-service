@@ -1,7 +1,8 @@
-package io.choerodon.agile.api.vo;
+package io.choerodon.agile.infra.dto.business;
 
-import io.swagger.annotations.ApiModelProperty;
-import org.hzero.starter.keyencrypt.core.Encrypt;
+import io.choerodon.agile.api.vo.IssueTypeVO;
+import io.choerodon.agile.api.vo.PriorityVO;
+import io.choerodon.agile.api.vo.StatusVO;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -10,113 +11,49 @@ import java.util.List;
 /**
  * Created by jian_zhang02@163.com on 2018/5/16.
  */
-public class IssueSearchVO {
-
-    @ApiModelProperty(value = "问题主键id")
-    @Encrypt
+public class IssueSearchDTO {
     private Long issueId;
-
-    @ApiModelProperty(value = "问题编号")
     private String issueNum;
-
-    @ApiModelProperty(value = "问题类型code")
     private String typeCode;
-
-    @ApiModelProperty(value = "问题概要")
-    private String summary;
-
-    @ApiModelProperty(value = "报告人id")
-    private Long reporterId;
-
-    @ApiModelProperty(value = "描述")
-    private String description;
-
-    @ApiModelProperty(value = "经办人id")
-    private Long assigneeId;
-
-    @ApiModelProperty(value = "经办人名称")
-    private String assigneeName;
-
-    @ApiModelProperty(value = "图标")
-    private String imageUrl;
-
-    @ApiModelProperty(value = "项目id")
-    private Long projectId;
-
-    @ApiModelProperty(value = "状态id")
-    @Encrypt
     private Long statusId;
-
-    @ApiModelProperty(value = "状态类别")
-    private String categoryCode;
-
-    @ApiModelProperty(value = "状态名称")
-    private String statusName;
-
-    @ApiModelProperty(value = "史诗id")
-    @Encrypt
+    private String summary;
+    private Long reporterId;
+    private String description;
+    private Long assigneeId;
+    private String assigneeName;
+    private String imageUrl;
+    private Long projectId;
     private Long epicId;
-
-    @ApiModelProperty(value = "史诗名称")
     private String epicName;
-
-    @ApiModelProperty(value = "特性名称")
     private String featureName;
-
-    @ApiModelProperty(value = "特性颜色")
     private String featureColor;
-
-    @ApiModelProperty(value = "优先级code")
-    private String priorityCode;
-
-    @ApiModelProperty(value = "优先级名称")
-    private String priorityName;
-
-    @ApiModelProperty(value = "版本id集合")
-    @Encrypt
+    private Long featureId;
     private List<Long> versionIds;
-
-    @ApiModelProperty(value = "版本名称集合")
     private List<String> versionNames;
-
-    @ApiModelProperty(value = "冲刺id")
-    @Encrypt(ignoreValue = {"0"})
     private Long sprintId;
-
-    @ApiModelProperty(value = "故事点")
     private BigDecimal storyPoints;
-
-    @ApiModelProperty(value = "史诗颜色")
     private String color;
-
-    @ApiModelProperty(value = "状态颜色")
-    private String statusColor;
-
-    @ApiModelProperty(value = "版本号")
     private Long objectVersionNumber;
+    private Date estimatedStartTime;
+    private Date estimatedEndTime;
 
-    @ApiModelProperty(value = "优先级DTO")
     private PriorityVO priorityVO;
-
-    @ApiModelProperty(value = "状态DTO")
-    private StatusVO statusMapVO;
-
-    @ApiModelProperty(value = "问题类型DTO")
-    private IssueTypeVO issueTypeVO;
-
-    @ApiModelProperty(value = "优先级id")
-    @Encrypt(ignoreValue = {"0"})
     private Long priorityId;
 
-    @ApiModelProperty(value = "经办人登录名称")
-    private String assigneeLoginName;
+    private StatusVO statusMapVO;
 
-    @ApiModelProperty(value = "经办人真实名称")
+    private Long issueTypeId;
+    private IssueTypeVO issueTypeVO;
+    private String assigneeLoginName;
     private String assigneeRealName;
 
-    private Date estimatedStartTime;
+    public Long getFeatureId() {
+        return featureId;
+    }
 
-    private Date estimatedEndTime;
+    public void setFeatureId(Long featureId) {
+        this.featureId = featureId;
+    }
 
     public Long getIssueId() {
         return issueId;
@@ -222,36 +159,12 @@ public class IssueSearchVO {
         this.sprintId = sprintId;
     }
 
-    public String getPriorityCode() {
-        return priorityCode;
+    public Long getStatusId() {
+        return statusId;
     }
 
-    public void setPriorityCode(String priorityCode) {
-        this.priorityCode = priorityCode;
-    }
-
-    public String getStatusName() {
-        return statusName;
-    }
-
-    public void setStatusName(String statusName) {
-        this.statusName = statusName;
-    }
-
-    public String getPriorityName() {
-        return priorityName;
-    }
-
-    public void setPriorityName(String priorityName) {
-        this.priorityName = priorityName;
-    }
-
-    public String getCategoryCode() {
-        return categoryCode;
-    }
-
-    public void setCategoryCode(String categoryCode) {
-        this.categoryCode = categoryCode;
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
     }
 
     public void setStoryPoints(BigDecimal storyPoints) {
@@ -260,14 +173,6 @@ public class IssueSearchVO {
 
     public BigDecimal getStoryPoints() {
         return storyPoints;
-    }
-
-    public Long getStatusId() {
-        return statusId;
-    }
-
-    public void setStatusId(Long statusId) {
-        this.statusId = statusId;
     }
 
     public String getAssigneeName() {
@@ -292,14 +197,6 @@ public class IssueSearchVO {
 
     public void setColor(String color) {
         this.color = color;
-    }
-
-    public String getStatusColor() {
-        return statusColor;
-    }
-
-    public void setStatusColor(String statusColor) {
-        this.statusColor = statusColor;
     }
 
     public Long getObjectVersionNumber() {
@@ -334,6 +231,14 @@ public class IssueSearchVO {
         return statusMapVO;
     }
 
+    public void setIssueTypeId(Long issueTypeId) {
+        this.issueTypeId = issueTypeId;
+    }
+
+    public Long getIssueTypeId() {
+        return issueTypeId;
+    }
+
     public void setIssueTypeVO(IssueTypeVO issueTypeVO) {
         this.issueTypeVO = issueTypeVO;
     }
@@ -358,13 +263,12 @@ public class IssueSearchVO {
         this.assigneeRealName = assigneeRealName;
     }
 
+    public String getFeatureName() {
+        return featureName;
+    }
 
     public void setFeatureName(String featureName) {
         this.featureName = featureName;
-    }
-
-    public String getFeatureName() {
-        return featureName;
     }
 
     public String getFeatureColor() {

@@ -4,7 +4,6 @@ import { DragDropContext, DragSource, DropTarget } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import './DrapSortingTable.less';
 
-
 const dragDirection = (
   dragIndex,
   hoverIndex,
@@ -23,7 +22,6 @@ const dragDirection = (
   }
   return type;
 };
-
 
 let BodyRow = (props) => {
   const {
@@ -105,7 +103,6 @@ BodyRow = DropTarget('row', rowTarget, (connect, monitor) => ({
   }))(BodyRow),
 );
 
-
 @DragDropContext(HTML5Backend)
 class SortTable extends Component {
   components = {
@@ -121,6 +118,7 @@ class SortTable extends Component {
     };
   }
 
+  // eslint-disable-next-line react/no-deprecated
   componentWillReceiveProps(nextProps) {
     const { dataSource } = this.props;
     const { data } = this.state;
@@ -128,7 +126,6 @@ class SortTable extends Component {
       this.setState({ data: dataSource });
     }
   }
-
 
   moveRow = (dragIndex, hoverIndex, e) => {
     const { dataSource, handleDrag } = this.props;
@@ -169,7 +166,7 @@ class SortTable extends Component {
         rowClassName="table-row"
         columns={columns}
         dataSource={dataSource}
-        pagination={dataSource && dataSource.length <= 10 ? false : pagination}
+        pagination={pagination}
         onChange={onChange}
         components={this.components}
         filterBarPlaceholder="过滤表"
@@ -180,7 +177,7 @@ class SortTable extends Component {
             e.target.parentElement.classList.add('hover-row');
           },
         })}
-        rowKey={record => record.filterId}
+        rowKey={(record) => record.filterId}
       />
     );
   }

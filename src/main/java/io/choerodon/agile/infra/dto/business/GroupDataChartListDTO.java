@@ -1,9 +1,8 @@
-package io.choerodon.agile.infra.dto;
+package io.choerodon.agile.infra.dto.business;
 
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.PriorityVO;
 import io.choerodon.agile.api.vo.StatusVO;
-
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import java.math.BigDecimal;
@@ -13,7 +12,6 @@ import java.math.BigDecimal;
  * Email: fuqianghuang01@gmail.com
  */
 public class GroupDataChartListDTO {
-
     @Encrypt
     private Long issueId;
 
@@ -35,6 +33,7 @@ public class GroupDataChartListDTO {
 
     private String statusColor;
 
+    @Encrypt
     private Long priorityId;
 
     @Encrypt
@@ -48,6 +47,20 @@ public class GroupDataChartListDTO {
 
     @Encrypt
     private Long statusId;
+
+    private String featureType;
+
+    private Long projectId;
+
+    private BigDecimal workTime;
+
+    public BigDecimal getWorkTime() {
+        return workTime;
+    }
+
+    public void setWorkTime(BigDecimal workTime) {
+        this.workTime = workTime;
+    }
 
     public Long getIssueId() {
         return issueId;
@@ -175,5 +188,21 @@ public class GroupDataChartListDTO {
 
     public IssueTypeVO getIssueTypeVO() {
         return issueTypeVO;
+    }
+
+    public String getFeatureType() {
+        return featureType;
+    }
+
+    public void setFeatureType(String featureType) {
+        this.featureType = featureType;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 }

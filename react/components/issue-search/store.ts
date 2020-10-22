@@ -22,6 +22,7 @@ export type IChosenFields = Map<string, IChosenField>
 export interface IssueSearchStoreProps {
   getSystemFields: () => ILocalField[]
   transformFilter: (chosenFields: IChosenFields) => any
+  defaultChosenFields: IChosenFields,
 }
 class IssueSearchStore {
   query: () => void = () => { }
@@ -30,12 +31,16 @@ class IssueSearchStore {
 
   transformFilter: (chosenFields: IChosenFields) => any = () => { }
 
+  defaultChosenFields?: IChosenFields;
+
   constructor({
     getSystemFields,
     transformFilter,
+    defaultChosenFields,
   }: IssueSearchStoreProps) {
     this.getSystemFields = getSystemFields;
     this.transformFilter = transformFilter;
+    this.defaultChosenFields = defaultChosenFields;
   }
 
   setQuery(query: () => void) {
@@ -76,6 +81,11 @@ class IssueSearchStore {
     this.chosenFields = new Map(this.getSystemFields()
       .filter((f) => f.defaultShow)
       .map((f) => ([f.code, observable({ ...f, value: undefined })])));
+    if (this.defaultChosenFields) {
+      this.defaultChosenFields.forEach((value, key) => {
+        this.chosenFields.set(key, value);
+      });
+    }
   }
 
   @action handleChosenFieldChange = (select: boolean, field: IField) => {

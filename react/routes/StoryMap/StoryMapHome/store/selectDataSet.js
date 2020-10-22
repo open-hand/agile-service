@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { DataSet } from 'choerodon-ui/pro';
 import { getProjectId } from '@/utils/common';
 import _ from 'lodash';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 
 const fieldIds = {
   components: 'componentId',
@@ -27,6 +28,9 @@ const isCompletedDataSet = new DataSet(IsCompletedDataSet);
 export default function SelectDataSet(StoryMapStore) {
   return {
     autoCreate: true,
+    data: [{
+      isCompleted: null, components: null, prioritys: null, sprints: null,
+    }],
     fields: [
       {
         name: 'isCompleted',
@@ -35,7 +39,6 @@ export default function SelectDataSet(StoryMapStore) {
         textField: 'name',
         valueField: 'isCompleted',
         options: isCompletedDataSet,
-        defaultValue: null,
       },
       {
         name: 'components',
@@ -49,7 +52,7 @@ export default function SelectDataSet(StoryMapStore) {
           },
           data: { advancedSearchArgs: {}, searchArgs: {}, content: '' },
           method: 'post',
-          transformResponse: data => (Array.isArray(data) ? data : (JSON.parse(data).content || [])),
+          transformResponse: (data) => (Array.isArray(data) ? data : (JSON.parse(data).content || [])),
         }),
         textField: 'name',
         valueField: 'componentId',
@@ -61,7 +64,7 @@ export default function SelectDataSet(StoryMapStore) {
         lookupAxiosConfig: () => ({
           url: `/agile/v1/projects/${getProjectId()}/priority/list_by_org`,
           method: 'get',
-          transformResponse: data => (Array.isArray(data) ? data : (JSON.parse(data) || [])),
+          transformResponse: (data) => (Array.isArray(data) ? data : (JSON.parse(data) || [])),
         }),
         textField: 'name',
         valueField: 'id',
@@ -76,11 +79,10 @@ export default function SelectDataSet(StoryMapStore) {
           transformResponse: (data) => {
             if (Array.isArray(data)) {
               return data;
-            } else {
-              const newData = JSON.parse(data) || [];
-              const newDataGroupByStatus = _.groupBy(newData, 'statusCode');
-              return [...(newDataGroupByStatus.started || []), ...(newDataGroupByStatus.sprint_planning || []), ...(newDataGroupByStatus.closed || [])];
             }
+            const newData = JSON.parse(data) || [];
+            const newDataGroupByStatus = _.groupBy(newData, 'statusCode');
+            return [...(newDataGroupByStatus.started || []), ...(newDataGroupByStatus.sprint_planning || []), ...(newDataGroupByStatus.closed || [])];
           },
         }),
         textField: 'sprintName',
@@ -89,11 +91,11 @@ export default function SelectDataSet(StoryMapStore) {
     ],
     events: {
       update: ({ name, value }) => {
-        console.log(name, value);
+        localPageCacheStore.mergeSetItem('stroyMap.filter', { [`${name}`]: value });
         if (name === 'isCompleted') {
           StoryMapStore.handleFilterChange(name, value);
         } else {
-          StoryMapStore.handleFilterChange(name, value ? value.map(item => item[fieldIds[name]]) : []);
+          StoryMapStore.handleFilterChange(name, value ? value.map((item) => item[fieldIds[name]]) : []);
         }
       },
     },

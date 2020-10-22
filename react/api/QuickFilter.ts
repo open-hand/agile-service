@@ -3,22 +3,22 @@ import { getProjectId } from '@/utils/common';
 import Api from './Api';
 
 interface ISearchQuickFilter {
-    contents: Array<string>,
-    filterName: string
+  contents: Array<string>,
+  filterName: string
 }
 interface IQuickFilter {
-    name: string,
-    childIncluded: boolean, // 是否包含子任务
-    expressQuery: string, // 快速搜索表达式
-    description:string, // 描述  中间+++
-    projectId:number,
-    quickFilterValueVOList?: Array<any>, // 快速搜索值
-    relationOperations?: Array<string>, // 多个搜索表达式之间的关系
+  name: string,
+  childIncluded: boolean, // 是否包含子任务
+  expressQuery: string, // 快速搜索表达式
+  description: string, // 描述  中间+++
+  projectId: number,
+  quickFilterValueVOList?: Array<any>, // 快速搜索值
+  relationOperations?: Array<string>, // 多个搜索表达式之间的关系
 }
-interface UQuickFilter extends IQuickFilter{
-  objectVersionNumber:number,
+interface UQuickFilter extends IQuickFilter {
+  objectVersionNumber: number,
 }
-interface DragQuickFilter{
+interface DragQuickFilter {
 
 }
 class QuickFilterApi extends Api<QuickFilterApi> {
@@ -30,7 +30,7 @@ class QuickFilterApi extends Api<QuickFilterApi> {
    * 根据快速过滤id加载
    * @param filterId
    */
-  load(filterId:number) {
+  load(filterId: number) {
     return axios.get(`${this.prefix}/quick_filter/${filterId}`);
   }
 
@@ -42,6 +42,26 @@ class QuickFilterApi extends Api<QuickFilterApi> {
     return this.request({
       method: 'post',
       url: `${this.prefix}/quick_filter/query_all`,
+      params: {
+        page: 1,
+        size: 0,
+      },
+      data: searchData,
+    }).then((res: any = {}) => res.content || []);
+  }
+
+  /**
+    * 加载快速筛选列表
+    * @param searchData 理论上可以不传值，但不传值后端抛出错误
+    */
+  loadList(searchData: ISearchQuickFilter = { contents: [], filterName: '' }, page: number, size = 10) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/quick_filter/query_all`,
+      params: {
+        page,
+        size,
+      },
       data: searchData,
     });
   }
@@ -57,7 +77,7 @@ class QuickFilterApi extends Api<QuickFilterApi> {
    * 创建快速筛选
    * @param data
    */
-  create(data:IQuickFilter) {
+  create(data: IQuickFilter) {
     return axios.post(`${this.prefix}/quick_filter`, data);
   }
 
@@ -65,7 +85,7 @@ class QuickFilterApi extends Api<QuickFilterApi> {
    * 更新快速筛选
    * @param data
    */
-  update(filterId:number, data:UQuickFilter) {
+  update(filterId: number, data: UQuickFilter) {
     return axios.put(`${this.prefix}/quick_filter/${filterId}`, data);
   }
 
@@ -73,7 +93,7 @@ class QuickFilterApi extends Api<QuickFilterApi> {
    * 删除快速筛选
    * @param filterId
    */
-  delete(filterId:number) {
+  delete(filterId: number) {
     return axios.delete(`${this.prefix}/quick_filter/${filterId}`);
   }
 
@@ -81,7 +101,7 @@ class QuickFilterApi extends Api<QuickFilterApi> {
    * 拖拽对筛选排序
    * @param data
    */
-  drag(data:DragQuickFilter) {
+  drag(data: DragQuickFilter) {
     return axios.put(`${this.prefix}/quick_filter/drag`, data);
   }
 
@@ -89,7 +109,7 @@ class QuickFilterApi extends Api<QuickFilterApi> {
    * 检查快速筛选名称是否重复
    * @param quickFilterName
    */
-  checkName(quickFilterName:string) {
+  checkName(quickFilterName: string) {
     return axios({
       method: 'get',
       url: `${this.prefix}/quick_filter/check_name`,

@@ -2,7 +2,9 @@
 import {
   observable, action, computed, toJS,
 } from 'mobx';
-import { debounce } from 'lodash';
+import {
+  debounce, isEmpty, isEqual, pick,
+} from 'lodash';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
 import { fieldApi, personalFilterApi } from '@/api';
 
@@ -264,8 +266,8 @@ class IssueStore {
     this.tableRef = tableRef;
   }
 
-  query = debounce(() => {
-    this.dataSet.query();
+  query = debounce((page) => {
+    this.dataSet.query(page);
   }, 300);
 }
 

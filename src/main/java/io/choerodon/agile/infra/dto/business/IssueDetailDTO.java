@@ -1,13 +1,16 @@
-package io.choerodon.agile.infra.dto;
+package io.choerodon.agile.infra.dto.business;
 
 import io.choerodon.agile.api.vo.IssueTypeVO;
 import io.choerodon.agile.api.vo.PriorityVO;
 import io.choerodon.agile.api.vo.StatusVO;
+import io.choerodon.agile.infra.dto.*;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.utils.StringUtil;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author dinghuang123@gmail.com
@@ -44,26 +47,6 @@ public class IssueDetailDTO {
 
     private Long issueTypeId;
 
-    private Date estimatedStartTime;
-
-    private Date estimatedEndTime;
-
-    public Date getEstimatedStartTime() {
-        return estimatedStartTime;
-    }
-
-    public void setEstimatedStartTime(Date estimatedStartTime) {
-        this.estimatedStartTime = estimatedStartTime;
-    }
-
-    public Date getEstimatedEndTime() {
-        return estimatedEndTime;
-    }
-
-    public void setEstimatedEndTime(Date estimatedEndTime) {
-        this.estimatedEndTime = estimatedEndTime;
-    }
-
     private List<VersionIssueRelDTO> versionIssueRelDTOList;
 
     private List<LabelIssueRelDTO> labelIssueRelDTOList;
@@ -75,6 +58,10 @@ public class IssueDetailDTO {
     private SprintNameDTO activeSprint;
 
     private List<SprintNameDTO> closeSprint;
+
+    private PiNameDTO activePi;
+
+    private List<PiNameDTO> closePi;
 
     private List<IssueCommentDTO> issueCommentDTOList;
 
@@ -110,6 +97,8 @@ public class IssueDetailDTO {
 
     private String parentIssueSummary;
 
+    private String parentIssueDescription;
+
     private PriorityVO priorityVO;
 
     private IssueTypeVO issueTypeVO;
@@ -122,11 +111,43 @@ public class IssueDetailDTO {
 
     private String issueTypeCode;
 
+    private FeatureDTO featureDTO;
+
+    private Long featureId;
+
+    private String featureName;
+
     private Long relateIssueId;
 
     private String relateIssueNum;
 
     private String parentRelateSummary;
+
+    private WsjfDTO wsjf;
+
+    private Set<Long> projectIds;
+
+    private Date estimatedStartTime;
+
+    private Date estimatedEndTime;
+
+    private String parentRelateDescription;
+
+    public String getParentRelateDescription() {
+        return parentRelateDescription;
+    }
+
+    public void setParentRelateDescription(String parentRelateDescription) {
+        this.parentRelateDescription = parentRelateDescription;
+    }
+
+    public String getParentIssueDescription() {
+        return parentIssueDescription;
+    }
+
+    public void setParentIssueDescription(String parentIssueDescription) {
+        this.parentIssueDescription = parentIssueDescription;
+    }
 
     public List<IssueDTO> getSameParentIssueDTOList() {
         return sameParentIssueDTOList;
@@ -142,6 +163,22 @@ public class IssueDetailDTO {
 
     public void setSameParentBugDOList(List<IssueDTO> sameParentBugDOList) {
         this.sameParentBugDOList = sameParentBugDOList;
+    }
+
+    public Date getEstimatedStartTime() {
+        return estimatedStartTime;
+    }
+
+    public void setEstimatedStartTime(Date estimatedStartTime) {
+        this.estimatedStartTime = estimatedStartTime;
+    }
+
+    public Date getEstimatedEndTime() {
+        return estimatedEndTime;
+    }
+
+    public void setEstimatedEndTime(Date estimatedEndTime) {
+        this.estimatedEndTime = estimatedEndTime;
     }
 
     public String getIssueTypeCode() {
@@ -472,6 +509,46 @@ public class IssueDetailDTO {
         this.applyType = applyType;
     }
 
+    public void setFeatureDTO(FeatureDTO featureDTO) {
+        this.featureDTO = featureDTO;
+    }
+
+    public FeatureDTO getFeatureDTO() {
+        return featureDTO;
+    }
+
+    public Long getFeatureId() {
+        return featureId;
+    }
+
+    public void setFeatureId(Long featureId) {
+        this.featureId = featureId;
+    }
+
+    public String getFeatureName() {
+        return featureName;
+    }
+
+    public void setFeatureName(String featureName) {
+        this.featureName = featureName;
+    }
+
+    public void setActivePi(PiNameDTO activePi) {
+        this.activePi = activePi;
+    }
+
+    public PiNameDTO getActivePi() {
+        return activePi;
+    }
+
+    public void setClosePi(List<PiNameDTO> closePi) {
+        this.closePi = closePi;
+    }
+
+    public List<PiNameDTO> getClosePi() {
+        return closePi;
+    }
+
     public void setRelateIssueId(Long relateIssueId) {
         this.relateIssueId = relateIssueId;
     }
@@ -507,5 +584,21 @@ public class IssueDetailDTO {
     @Override
     public String toString() {
         return StringUtil.getToString(this);
+    }
+
+    public WsjfDTO getWsjf() {
+        return wsjf;
+    }
+
+    public void setWsjf(WsjfDTO wsjf) {
+        this.wsjf = wsjf;
+    }
+
+    public Set<Long> getProjectIds() {
+        return projectIds;
+    }
+
+    public void setProjectIds(Set<Long> projectIds) {
+        this.projectIds = projectIds;
     }
 }

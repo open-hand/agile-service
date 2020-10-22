@@ -1,5 +1,8 @@
 package io.choerodon.agile.infra.enums;
 
+import io.choerodon.agile.app.service.AgilePluginService;
+import io.choerodon.agile.app.service.BacklogExpandService;
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.exception.CommonException;
 
 import java.util.Arrays;
@@ -27,7 +30,7 @@ public class ObjectSchemeFieldContext {
 
     public static final String BACKLOG = "backlog";
 
-    public static final String[] ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK,BACKLOG};
+    public static final String[] ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK};
 
     public static final String[] FIX_DATA_ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK};
 
@@ -37,22 +40,44 @@ public class ObjectSchemeFieldContext {
 
     public static void isIllegalContexts(String[] context) {
         for (String str : context) {
-            if (!ISSUE_TYPES_LIST.contains(str)) {
+            if (!getIssueTye().contains(str)) {
                 throw new CommonException("error.context.illegal");
             }
         }
     }
 
+    public static List<String> getIssueTye(){
+        List<String> list = Arrays.asList(ISSUE_TYPES);
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        if (agilePluginService != null) {
+            list.add("feature");
+        }
+        BacklogExpandService backlogExpandService = SpringBeanUtil.getExpandBean(BacklogExpandService.class);
+        if (backlogExpandService != null) {
+            list.add("backlog");
+        }
+        return list;
+    }
+
+    public static List<String> fixDataIssueType(){
+        List<String> list = Arrays.asList(FIX_DATA_ISSUE_TYPES);
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        if (agilePluginService != null) {
+            list.add("feature");
+        }
+        return list;
+    }
+
     public static void isIllegalIssueTypes(String[] context) {
         for (String str : context) {
-            if (!Arrays.asList(ISSUE_TYPES).contains(str)) {
+            if (!getIssueTye().contains(str)) {
                 throw new CommonException("error.context.illegal");
             }
         }
     }
 
     public static void isIllegalIssueType(String issueType) {
-        if (!Arrays.asList(ISSUE_TYPES).contains(issueType)) {
+        if (!getIssueTye().contains(issueType)) {
             throw new CommonException("error.issue.type.illegal");
         }
     }

@@ -117,6 +117,28 @@ class CreateIssue extends Component {
     }
   }
 
+  autoSetSprint = (issueId) => {
+    const { form: { setFieldsValue } } = this.props;
+    if (issueId) {
+      issueApi.load(issueId).then((res) => {
+        const { activeSprint } = res;
+        if (activeSprint) {
+          setFieldsValue({
+            sprintId: activeSprint.sprintId,
+          });
+        } else {
+          setFieldsValue({
+            sprintId: undefined,
+          });
+        }
+      });
+    } else {
+      setFieldsValue({
+        sprintId: undefined,
+      });
+    }
+  }
+
   // eslint-disable-next-line react/destructuring-assignment
   getDefaultType = (issueTypes = this.state.originIssueTypes) => {
     const { defaultTypeCode } = this.props;
@@ -159,7 +181,7 @@ class CreateIssue extends Component {
       this.setState({
         createLoading: false,
       });
-      onOk(res);
+      onOk(res, data);
     }).catch((e) => {
       form.resetFields();
       this.setState({
@@ -283,6 +305,8 @@ class CreateIssue extends Component {
           teamProjectIds,
           estimatedEndTime,
           estimatedStartTime,
+          subBugParent,
+          subTaskParent,
         } = values;
         const { typeCode } = originIssueTypes.find((t) => t.id === typeId);
         // 手动检验描述是否必输校验
@@ -339,8 +363,8 @@ class CreateIssue extends Component {
           epicId: epicId || 0,
           piId: pi || 0,
           epicName,
-          parentIssueId: parentIssueId || 0, // 子任务
-          relateIssueId: relateIssueId || 0, // 子bug
+          parentIssueId: subTaskParent || parentIssueId || 0, // 子任务
+          relateIssueId: subBugParent || relateIssueId || 0, // 子bug
           assigneeId: assigneedId,
           labelIssueRelVOList,
           versionIssueRelVOList: fixVersionIssueRelVOList,
@@ -401,11 +425,12 @@ class CreateIssue extends Component {
   getIssueTypes = (isInProgram) => {
     const { mode } = this.props;
     const { originIssueTypes } = this.state;
-    const filterSubType = (type) => (!['sub_task'].includes(type.typeCode));
+    // const filterSubType = (type) => (!['sub_task'].includes(type.typeCode));
     const filterEpic = (type) => (!['issue_epic'].includes(type.typeCode));
     const filterFeature = (type) => (!['feature'].includes(type.typeCode));
     const issueTypes = applyFilter(originIssueTypes, [
-      filterSubType, {
+      // filterSubType,
+      {
         filter: filterEpic,
         apply: isInProgram || mode === 'feature', // 在项目群下的子项目和创建feature时，把epic过滤掉
       }, {
@@ -508,6 +533,37 @@ class CreateIssue extends Component {
                   }
                 </IsInProgram>
               ),
+            newIssueTypeCode === 'sub_task' ? (
+              <FormItem>
+                {getFieldDecorator('subTaskParent', {
+                  rules: [{ required: true, message: '父级任务为必选项' }],
+                })(
+                  <SelectFocusLoad
+                    label="关联父级任务"
+                    type="subTask_parent_issue"
+                    allowClear
+                    onChange={((value) => {
+                      this.autoSetSprint(value);
+                    })}
+                  />,
+                )}
+              </FormItem>
+            ) : null,
+            newIssueTypeCode === 'bug' ? (
+              <FormItem>
+                {getFieldDecorator('subBugParent', {
+                })(
+                  <SelectFocusLoad
+                    label="关联父级任务"
+                    type="subBug_parent_issue"
+                    allowClear
+                    onChange={((value) => {
+                      this.autoSetSprint(value);
+                    })}
+                  />,
+                )}
+              </FormItem>
+            ) : null,
             newIssueTypeCode === 'feature' ? (
               <FormItem>
                 {getFieldDecorator('featureType', {
@@ -550,6 +606,7 @@ class CreateIssue extends Component {
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {getFieldDecorator('assigneedId', {
                 rules: [{ required: field.required, message: '请选择经办人' }],
+                initialValue: this.props.chosenAssignee,
               })(
                 <SelectFocusLoad
                   type="user"
@@ -586,7 +643,12 @@ class CreateIssue extends Component {
                 label="冲刺"
                 allowClear
                 type="sprint"
-                disabled={['sub_task', 'sub_bug'].includes(mode)}
+                disabled={['sub_task', 'sub_bug'].includes(mode) || newIssueTypeCode === 'sub_task' || (newIssueTypeCode === 'bug' && form.getFieldValue('subBugParent'))}
+                afterLoad={(sprints) => {
+                  this.props.chosenSprint && form.setFieldsValue({
+                    sprintId: this.props.chosenSprint,
+                  });
+                }}
               />,
             )}
           </FormItem>
@@ -883,7 +945,7 @@ class CreateIssue extends Component {
         );
       case 'subProject':
         return newIssueTypeCode === 'feature'
-        && <FieldTeam form={form} teamProjectIds={teamProjectIds} field={field || {}} />;
+          && <FieldTeam form={form} teamProjectIds={teamProjectIds} field={field || {}} />;
       default:
         return (
           <FormItem label={fieldName} style={{ width: 330 }}>

@@ -1,8 +1,9 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.IssueListVO;
 import io.choerodon.agile.api.vo.business.SprintDetailVO;
-import io.choerodon.agile.infra.dto.SprintConvertDTO;
+import io.choerodon.agile.infra.dto.business.SprintConvertDTO;
 import io.choerodon.agile.infra.dto.SprintDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;

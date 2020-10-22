@@ -1,7 +1,7 @@
 package io.choerodon.agile.api.vo.event;
 
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
-import io.choerodon.agile.infra.dto.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.ProjectInfoDTO;
 
 /**

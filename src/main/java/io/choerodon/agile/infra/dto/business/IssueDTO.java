@@ -1,33 +1,30 @@
-package io.choerodon.agile.infra.dto;
+package io.choerodon.agile.infra.dto.business;
 
-
+import io.choerodon.agile.infra.dto.IssueComponentBriefDTO;
+import io.choerodon.agile.infra.dto.IssueSprintDTO;
+import io.choerodon.agile.infra.dto.LabelIssueRelDTO;
+import io.choerodon.agile.infra.dto.VersionIssueRelDTO;
+import io.choerodon.agile.infra.utils.StringUtil;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
-import io.choerodon.agile.infra.utils.StringUtil;
-import org.hzero.starter.keyencrypt.core.Encrypt;
 
-import javax.persistence.*;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-/**
- * 敏捷开发Issue
- *
- * @author dinghuang123@gmail.com
- * @since 2018-05-14 20:30:48
- */
-@Table(name = "agile_issue")
-@ModifyAudit
 @VersionAudit
+@ModifyAudit
+@Table(name = "agile_issue")
 public class IssueDTO extends AuditDomain {
-
     /***/
     @Id
     @GeneratedValue
-    @Encrypt
     private Long issueId;
 
     /**
@@ -149,6 +146,9 @@ public class IssueDTO extends AuditDomain {
     @Transient
     private List<LabelIssueRelDTO> labelIssueRelDTOS;
 
+    @Transient
+    private BigDecimal spentWorkTime;
+
     private BigDecimal estimateTime;
 
     private BigDecimal remainingTime;
@@ -173,7 +173,35 @@ public class IssueDTO extends AuditDomain {
     private Long epicRankObjectVersionNumber;
 
     @Transient
+    private String featureName;
+
+    @Transient
+    private String featureColor;
+    /**
+     *  项目群新增
+     */
+    private Long featureId;
+
+    private Date startDate;
+
+    private Date endDate;
+
+    private Long programId;
+
+    @Transient
+    private String featureType;
+
+    @Transient
+    private String featureRank;
+
+    @Transient
+    private Long featureRankObjectVersionNumber;
+
+    @Transient
     private String resolution;
+
+    @Transient
+    private Long piId;
 
     private Date estimatedStartTime;
 
@@ -193,6 +221,22 @@ public class IssueDTO extends AuditDomain {
 
     public void setEstimatedEndTime(Date estimatedEndTime) {
         this.estimatedEndTime = estimatedEndTime;
+    }
+
+    public BigDecimal getSpentWorkTime() {
+        return spentWorkTime;
+    }
+
+    public void setSpentWorkTime(BigDecimal spentWorkTime) {
+        this.spentWorkTime = spentWorkTime;
+    }
+
+    public Long getPiId() {
+        return piId;
+    }
+
+    public void setPiId(Long piId) {
+        this.piId = piId;
     }
 
     public String getResolution() {
@@ -537,6 +581,78 @@ public class IssueDTO extends AuditDomain {
 
     public void setEpicRankObjectVersionNumber(Long epicRankObjectVersionNumber) {
         this.epicRankObjectVersionNumber = epicRankObjectVersionNumber;
+    }
+
+    public Long getFeatureId() {
+        return featureId;
+    }
+
+    public void setFeatureId(Long featureId) {
+        this.featureId = featureId;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public Long getProgramId() {
+        return programId;
+    }
+
+    public void setProgramId(Long programId) {
+        this.programId = programId;
+    }
+
+    public String getFeatureType() {
+        return featureType;
+    }
+
+    public void setFeatureType(String featureType) {
+        this.featureType = featureType;
+    }
+
+    public String getFeatureRank() {
+        return featureRank;
+    }
+
+    public void setFeatureRank(String featureRank) {
+        this.featureRank = featureRank;
+    }
+
+    public Long getFeatureRankObjectVersionNumber() {
+        return featureRankObjectVersionNumber;
+    }
+
+    public void setFeatureRankObjectVersionNumber(Long featureRankObjectVersionNumber) {
+        this.featureRankObjectVersionNumber = featureRankObjectVersionNumber;
+    }
+
+    public String getFeatureName() {
+        return featureName;
+    }
+
+    public void setFeatureName(String featureName) {
+        this.featureName = featureName;
+    }
+
+    public String getFeatureColor() {
+        return featureColor;
+    }
+
+    public void setFeatureColor(String featureColor) {
+        this.featureColor = featureColor;
     }
 
     @Override

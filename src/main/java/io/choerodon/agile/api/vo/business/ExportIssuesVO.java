@@ -1,4 +1,4 @@
-package io.choerodon.agile.api.vo;
+package io.choerodon.agile.api.vo.business;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -81,8 +81,17 @@ public class ExportIssuesVO {
     private Date estimatedStartTime;
     @ApiModelProperty("预计结束时间")
     private Date estimatedEndTime;
+    private String teamProjects;
 
     public ExportIssuesVO() {
+    }
+
+    public String getTeamProjects() {
+        return teamProjects;
+    }
+
+    public void setTeamProjects(String teamProjects) {
+        this.teamProjects = teamProjects;
     }
 
     public String getFeature() {

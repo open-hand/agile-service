@@ -3,9 +3,7 @@ package io.choerodon.agile.api.controller.v1;
 import com.alibaba.fastjson.JSONObject;
 
 
-import io.choerodon.agile.api.vo.business.IssueCreateVO;
-import io.choerodon.agile.api.vo.business.IssueUpdateVO;
-import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.utils.EncryptionUtils;
 import io.choerodon.core.domain.Page;
@@ -26,7 +24,7 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.validator.IssueValidator;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.agile.app.service.StateMachineClientService;
-import io.choerodon.agile.infra.dto.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.utils.VerifyUpdateUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -170,11 +168,11 @@ public class IssueController {
                                                                @ApiParam(value = "分页信息", required = true)
                                                                @SortDefault(value = "issueId", direction = Sort.Direction.DESC)
                                                                        PageRequest pageRequest,
-                                                                         @ApiParam(value = "项目id", required = true)
+                                                                     @ApiParam(value = "项目id", required = true)
                                                                @PathVariable(name = "project_id") Long projectId,
-                                                                         @ApiParam(value = "查询参数", required = true)
+                                                                     @ApiParam(value = "查询参数", required = true)
                                                                @RequestBody(required = false) SearchVO searchVO,
-                                                                         @ApiParam(value = "查询参数", required = true)
+                                                                     @ApiParam(value = "查询参数", required = true)
                                                                @RequestParam(required = false) Long organizationId) {
         EncryptionUtils.decryptSearchVO(searchVO);
         return Optional.ofNullable(issueService.listIssueWithSub(projectId, searchVO, pageRequest, organizationId))
@@ -692,4 +690,19 @@ public class IssueController {
                                                                   @RequestParam(value = "param", required = false) String param) {
         return ResponseEntity.ok(issueService.pagingQueryReporters(pageRequest, projectId, param));
     }
+
+    @CustomPageRequest
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("根据项目id和问题类型分页查询可以选择的父问题")
+    @PostMapping(value = "/available_parents")
+    public ResponseEntity<Page<IssueVO>> pagingQueryAvailableParents(@ApiIgnore
+                                                                     @ApiParam(value = "分页信息", required = true)
+                                                                             PageRequest pageRequest,
+                                                                     @ApiParam(value = "项目id", required = true)
+                                                                     @PathVariable(name = "project_id") Long projectId,
+                                                                     @RequestParam String issueType,
+                                                                     @RequestParam(value = "param", required = false) String param) {
+        return ResponseEntity.ok(issueService.pagingQueryAvailableParents(pageRequest, projectId, issueType, param));
+    }
+
 }

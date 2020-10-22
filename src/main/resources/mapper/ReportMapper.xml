@@ -848,7 +848,7 @@
         </if>
     </select>
 
-    <select id="queryIssueByIssueIds" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryIssueByIssueIds" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
         ai.issue_id, CONCAT_WS('-', api.project_code, ai.issue_num) AS issue_num,
         ai.type_code,
@@ -1093,7 +1093,7 @@
         AND adl.creation_date &lt;= #{endDate}
     </select>
 
-    <select id="queryReportIssues" resultType="io.choerodon.agile.infra.dto.IssueDTO">
+    <select id="queryReportIssues" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
         SELECT
         ai.issue_id, CONCAT_WS('-', api.project_code, ai.issue_num) AS issue_num,
         ai.issue_type_id,
@@ -1902,7 +1902,7 @@
         </if>
     </select>
 
-    <select id="selectEpicIssueList" resultType="io.choerodon.agile.infra.dto.GroupDataChartListDTO">
+    <select id="selectEpicIssueList" resultType="io.choerodon.agile.infra.dto.business.GroupDataChartListDTO">
         SELECT
             ai.issue_id,
             CONCAT_WS(
@@ -1954,7 +1954,7 @@
         AND ai.apply_type = 'agile'
     </select>
 
-    <select id="selectVersionIssueList" resultType="io.choerodon.agile.infra.dto.GroupDataChartListDTO">
+    <select id="selectVersionIssueList" resultType="io.choerodon.agile.infra.dto.business.GroupDataChartListDTO">
         SELECT
             ai.issue_id,
             CONCAT_WS(

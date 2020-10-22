@@ -2,10 +2,12 @@ package io.choerodon.agile.app.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import io.choerodon.agile.api.vo.business.IssueCreateVO;
-import io.choerodon.agile.api.vo.business.IssueUpdateVO;
-import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.api.vo.business.*;
 import io.choerodon.agile.infra.annotation.RuleNotice;
+import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.core.domain.Page;
 import com.google.common.collect.Lists;
@@ -665,7 +667,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
         }
         if (agilePluginService != null) {
-            agilePluginService.updateIssueSprintChanged(issueType,fieldList,projectId,issueUpdateVO,originIssue);
+            agilePluginService.handlerProgramUpdateIssue(issueType,fieldList,projectId,issueUpdateVO,originIssue);
         }
         issueAccessDataService.update(issueConvertDTO, fieldList.toArray(new String[fieldList.size()]));
     }
@@ -2557,5 +2559,24 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         page.setTotalPages(parentPage.getTotalPages());
         page.setNumberOfElements(parentPage.getNumberOfElements());
         return page;
+    }
+
+    @Override
+    public Page<IssueVO> pagingQueryAvailableParents(PageRequest pageRequest,
+                                                     Long projectId,
+                                                     String issueType,
+                                                     String param) {
+        if (IssueTypeCode.isBug(issueType) || IssueTypeCode.isSubTask(issueType)) {
+            /**
+             * 选择子任务：可关联问题：故事、缺陷（不是其他的子缺陷）、任务
+             * 选择缺陷：故事、任务
+             */
+            Map<Long, IssueTypeVO> issueTypeDTOMap = ConvertUtil.getIssueTypeMap(projectId,"agile");
+            Page<IssueVO> result = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.listAvailableParents(projectId, issueType, param));
+            result.getContent().forEach(r -> r.setIssueTypeVO(issueTypeDTOMap.get(r.getIssueTypeId())));
+            return result;
+        } else {
+            return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
+        }
     }
 }

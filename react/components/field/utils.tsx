@@ -17,7 +17,7 @@ import SelectStatus from './components/StatusField';
 import FeatureProjectField from './components/FeatureProjectField';
 import PIField from './components/pi-field';
 import QuickFilterField from './components/quick-filter-field';
-import { IFilterField, ICustomField } from '../filter/useFilter';
+import { IFilterField, ICustomField } from '../filter';
 
 const { Option } = Select;
 export function getFieldElement(field: IFilterField): React.ReactNode {
@@ -95,14 +95,11 @@ export function getFieldElement(field: IFilterField): React.ReactNode {
         <DatePicker />
       );
     case 'number':
-      return (
-        <NumberField />
-      );
+      return <NumberField />;
     case 'input':
       return (
         <TextField
           maxLength={100}
-
         />
       );
     case 'text':
@@ -140,23 +137,25 @@ export function getFieldElement(field: IFilterField): React.ReactNode {
     default: return null;
   }
 }
-function encodeDate(date: string): Moment
-function encodeDate(date: string[]): Moment[]
-function encodeDate(date: string | string[]) {
+function encodeDate(date: string, isTime: boolean): Moment
+function encodeDate(date: string[], isTime: boolean): Moment[]
+function encodeDate(date: string | string[], isTime: boolean) {
   if (Array.isArray(date)) {
-    return date.map((d) => (d ? moment(d) : d));
-  } if (date) {
-    return moment(date);
+    return date.map((d) => (d ? moment(isTime ? `2000-01-01 ${d}` : d) : d));
+  }
+  if (date) {
+    return moment(isTime ? `2000-01-01 ${date}` : date);
   }
   return date;
 }
-function decodeDate(date: Moment): string
-function decodeDate(date: Moment[]): string[]
-function decodeDate(date: Moment | Moment[]) {
+function decodeDate(date: Moment, isTime: boolean): string
+function decodeDate(date: Moment[], isTime: boolean): string[]
+function decodeDate(date: Moment | Moment[], isTime: boolean) {
   if (Array.isArray(date)) {
-    return date.map((d) => (d ? moment(d).format('YYYY-MM-DD HH:mm:ss') : d));
-  } if (date) {
-    return moment(date).format('YYYY-MM-DD HH:mm:ss');
+    return date.map((d) => (d ? moment(d).format(isTime ? 'HH:mm:ss' : 'YYYY-MM-DD HH:mm:ss') : d));
+  }
+  if (date) {
+    return moment(date).format(isTime ? 'HH:mm:ss' : 'YYYY-MM-DD HH:mm:ss');
   }
   return date;
 }

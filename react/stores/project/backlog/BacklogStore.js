@@ -14,6 +14,7 @@ import {
 import { getProjectId } from '@/utils/common';
 import { extendMoment } from 'moment-range';
 import IsInProgramStore from '@/stores/common/program/IsInProgramStore';
+import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 
 const moment = extendMoment(Moment);
 const { AppState } = stores;
@@ -534,6 +535,7 @@ class BacklogStore {
     return {
       get(sprintId) {
         const filterAssignId = that.filterSprintAssign.get(sprintId);
+        console.log('filterAssignId====', filterAssignId);
         if (filterAssignId) {
           return that.issueMap.get(sprintId) ? that.issueMap.get(sprintId).filter((issue) => issue.assigneeId === filterAssignId) : [];
         }
@@ -821,6 +823,7 @@ class BacklogStore {
     this.epicFilter = 'all';
     this.quickFilters = [];
     this.assigneeFilterIds = [];
+    this.filterSprintAssign = observable.map();
     this.chosenEpic = 'all';
     this.chosenVersion = 'all';
     this.filterSelected = false;
@@ -995,19 +998,16 @@ class BacklogStore {
       title: `删除冲刺${data.sprintName}`,
       content: hasIssue ? (
         <div>
-          <p style={{ marginBottom: 10 }}>请确认您要删除这个冲刺。</p>
-          <p style={{ marginBottom: 10 }}>这个冲刺将会被彻底删除，冲刺中的任务将会被移动到待办事项中。</p>
+          <p style={{ marginBottom: 10 }}>{`确认要删除冲刺${data.sprintName}吗？删除冲刺后当前规划的问题将移动到待办事项`}</p>
         </div>
       ) : (
         <div>
-          <p style={{ marginBottom: 10 }}>请确认您要删除这个冲刺。</p>
+          <p style={{ marginBottom: 10 }}>{`确认要删除冲刺${data.sprintName}吗？`}</p>
         </div>
       ),
-      onOk() {
-        return sprintApi.delete(data.sprintId, isCurrentPi).then((res) => {
-          this.refresh();
-        }).catch((error) => {
-        });
+      onOk: async () => {
+        await sprintApi.delete(data.sprintId, isCurrentPi);
+        this.refresh();
       },
       onCancel() { },
       okText: '删除',
@@ -1098,7 +1098,7 @@ class BacklogStore {
   getIssueListBySprintId(sprintId) {
     const issueList = this.issueMap.get(String(sprintId));
     const filterAssignId = this.filterSprintAssign.get(sprintId);
-    return filterAssignId ? issueList.filter((issue) => issue.assigneeId === filterAssignId) : issueList;
+    return filterAssignId ? issueList.filter((issue) => String(issue.assigneeId) === String(filterAssignId)) : issueList;
   }
 
   @observable showPlanSprint = true;
@@ -1135,6 +1135,7 @@ class BacklogStore {
         endDate: sprint.actualEndDate || sprint.endDate,
       })));
     }
+    return [];
   }
 
   @action setPiInfo(data) {

@@ -2,6 +2,7 @@ import React, { useState, useContext, useMemo } from 'react';
 import {
   Select, Icon,
 } from 'choerodon-ui';
+import { stores } from '@choerodon/boot';
 import { find, remove } from 'lodash';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'choerodon-ui/pro';
@@ -15,6 +16,7 @@ import CustomFields from './custom-fields';
 import { getSelectStyle } from './custom-fields/utils';
 import useQuickFilters from './useQuickFilters';
 
+const { AppState } = stores;
 const { Option, OptGroup } = Select;
 
 const SearchArea: React.FC = () => {
@@ -26,7 +28,7 @@ const SearchArea: React.FC = () => {
   const { isHasFilter } = store;
   const myFilters = store.getMyFilters;
   const [selectedQuickFilters, setSelectedQuickFilters] = useState<LabeledValue[]>([]);
-
+  const userId = String(AppState.userInfo.id);
   const reset = () => {
     onClear();
     store.clearAllFilter();
@@ -60,6 +62,10 @@ const SearchArea: React.FC = () => {
           store.handleFilterChange(key, value);
         }
       }
+    } else if (type === 'commonly') {
+      if (id === 'onlyMe') {
+        store.handleFilterChange('assigneeId', [userId]);
+      }
     }
   };
   const handleDeselect = (v: LabeledValue) => {
@@ -92,7 +98,21 @@ const SearchArea: React.FC = () => {
   };
   const getMyFilterSelectValue = () => {
     const targetMyFilter = findSameFilter();
-    return targetMyFilter ? selectedQuickFilters.concat({ key: `my|${targetMyFilter.filterId}`, label: targetMyFilter.name }) : selectedQuickFilters;
+
+    const currentFilterDTO = store.getCustomFieldFilters();
+    const onlyMe = currentFilterDTO.otherArgs.assigneeId && currentFilterDTO.otherArgs.assigneeId.length === 1 && currentFilterDTO.otherArgs.assigneeId[0] === userId;
+    const result = [...selectedQuickFilters];
+    if (targetMyFilter) {
+      result.push(
+        { key: `my|${targetMyFilter.filterId}`, label: targetMyFilter.name },
+      );
+    }
+    if (onlyMe) {
+      result.push(
+        { key: 'commonly|onlyMe', label: '仅我的问题' },
+      );
+    }
+    return result;
   };
   const handleInputChange = (value: string) => {
     if (value) {
@@ -138,6 +158,10 @@ const SearchArea: React.FC = () => {
                 }}
                 value={myFilterSelectValue}
               >
+                <OptGroup key="commonly" label="常用选项">
+                  <Option value="commonly|onlyMe">仅我的问题</Option>
+                  {/* <Option value={-2}>仅故事</Option> */}
+                </OptGroup>
                 <OptGroup key="quick" label="快速筛选">
                   {quickFilters.map((filter) => (
                     <Option value={`quick|${filter.filterId}`}>{filter.name}</Option>

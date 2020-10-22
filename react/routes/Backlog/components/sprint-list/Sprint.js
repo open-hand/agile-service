@@ -11,9 +11,9 @@ function Sprint({ data }) {
     <div style={{ width: '100%' }}>
       <SprintHeader data={data} />
       {expand && (
-        <Fragment>
-          <IssueList data={issueList} sprintId={sprintId} />                  
-        </Fragment>
+        <>
+          <IssueList data={issueList} sprintId={sprintId} />
+        </>
       )}
     </div>
   );

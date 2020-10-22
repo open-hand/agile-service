@@ -25,7 +25,7 @@ const SelectTeam: React.FC<Props> = forwardRef(({ projectDataRef = { current: nu
       if (afterLoadRef.current) {
         afterLoadRef.current(projects);
       }
-      return projects;
+      return projects || [];
     },
   }), []);
   const props = useSelect(config);

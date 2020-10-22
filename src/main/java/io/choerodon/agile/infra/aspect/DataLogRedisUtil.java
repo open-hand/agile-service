@@ -1,9 +1,9 @@
 package io.choerodon.agile.infra.aspect;
 
-import io.choerodon.agile.infra.dto.IssueConvertDTO;
-import io.choerodon.agile.infra.dto.SprintConvertDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
+import io.choerodon.agile.infra.dto.business.SprintConvertDTO;
 import io.choerodon.agile.infra.utils.RedisUtil;
-import io.choerodon.agile.infra.dto.IssueDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.IssueStatusDTO;
 import io.choerodon.agile.infra.dto.ProductVersionDTO;
 import io.choerodon.agile.infra.dto.SprintDTO;

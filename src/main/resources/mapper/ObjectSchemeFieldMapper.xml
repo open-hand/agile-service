@@ -186,6 +186,9 @@
             <if test='issueTypeList == "programIssueType" '>
                 AND osfe.issue_type IN ('issue_epic', 'feature')
             </if>
+            <if test='issueTypeList == "backlogIssueType" '>
+                AND osfe.issue_type IN ('backlog')
+            </if>
             )
         </if>
         order by osf.id DESC

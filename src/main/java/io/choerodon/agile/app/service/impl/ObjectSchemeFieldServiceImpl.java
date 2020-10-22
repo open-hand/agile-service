@@ -61,6 +61,8 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private BacklogExpandService backlogExpandService;
     @Autowired(required = false)
     private AgilePluginService agilePluginService;
+    @Autowired
+    private BaseFeignClient baseFeignClient;
 
     @Override
     public ObjectSchemeFieldDTO baseCreate(ObjectSchemeFieldDTO field,
@@ -221,15 +223,28 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                                                                Long fieldId,
                                                                Long issueTypeId) {
         List<String> issueTypes = null;
+        Boolean isProgram = false;
         if (!ObjectUtils.isEmpty(projectId)) {
-            issueTypes = new ArrayList<>(ObjectSchemeFieldContext.NORMAL_PROJECT);
+            ProjectVO body = baseFeignClient.queryProject(projectId).getBody();
+            if (!ObjectUtils.isEmpty(body) && Objects.equals(body.getCategory(),"PROGRAM")) {
+                isProgram = true;
+                if(agilePluginService != null){
+                    issueTypes = agilePluginService.addProgramIssueType();
+                }
+            } else {
+                issueTypes = new ArrayList<>(ObjectSchemeFieldContext.NORMAL_PROJECT);
+            }
             if (backlogExpandService != null) {
                 if (Boolean.TRUE.equals(backlogExpandService.enabled(projectId))) {
                     issueTypes.add(ObjectSchemeFieldContext.BACKLOG);
                 }
             }
         }
-        return objectSchemeFieldMapper.selectByOptions(organizationId, projectId, schemeCode, fieldId, issueTypeId, issueTypes);
+        List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS = objectSchemeFieldMapper.selectByOptions(organizationId, projectId, schemeCode, fieldId, issueTypeId, issueTypes);
+        if(isProgram && agilePluginService != null){
+           return agilePluginService.filterProgramEpic(objectSchemeFieldDTOS);
+        }
+        return objectSchemeFieldDTOS;
     }
 
     @Override
@@ -237,7 +252,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         List<ObjectSchemeFieldExtendDTO> result =
                 objectSchemeFieldExtendMapper
                         .selectExtendField(
-                                Arrays.asList(ObjectSchemeFieldContext.FIX_DATA_ISSUE_TYPES),
+                                ObjectSchemeFieldContext.fixDataIssueType(),
                                 organizationId,
                                 null,
                                 null);
@@ -304,7 +319,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     private List<IssueTypeDTO> convertContextToIssueTypes(String context, Long organizationId) {
         List<IssueTypeDTO> result = new ArrayList<>();
         Map<String, Long> issueTypeMap = issueTypeService.queryIssueTypeMap(organizationId);
-        List<String> fixDataIssueTypes = Arrays.asList(ObjectSchemeFieldContext.FIX_DATA_ISSUE_TYPES);
+        List<String> fixDataIssueTypes = ObjectSchemeFieldContext.fixDataIssueType();
         String[] contextArray = context.split(",");
         if (ObjectSchemeFieldContext.isGlobal(contextArray)) {
             for (Map.Entry<String, Long> entry : issueTypeMap.entrySet()) {
@@ -506,11 +521,16 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     protected List<IssueTypeVO> queryProjectIssueType(Long projectId,
                                                     List<IssueTypeVO> issueTypes,
                                                     List<String> contextArray) {
-            return issueTypes
-                    .stream()
-                    .filter(i -> ObjectSchemeFieldContext.NORMAL_PROJECT.contains(i.getTypeCode())
-                            && contextArray.contains(i.getTypeCode()))
-                    .collect(Collectors.toList());
+            if(agilePluginService != null){
+                return agilePluginService.queryProgramIssueType(projectId,issueTypes,contextArray);
+            }
+            else {
+                return issueTypes
+                        .stream()
+                        .filter(i -> ObjectSchemeFieldContext.NORMAL_PROJECT.contains(i.getTypeCode())
+                                && contextArray.contains(i.getTypeCode()))
+                        .collect(Collectors.toList());
+            }
     }
 
     @Override
@@ -990,7 +1010,11 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
     }
 
     protected List<PageConfigFieldVO> queryPageConfigFields(Long organizationId, Long projectId, String issueType) {
-        return objectSchemeFieldExtendMapper.listConfigs(organizationId, projectId, issueType);
+        List<PageConfigFieldVO> pageConfigFieldVOS = objectSchemeFieldExtendMapper.listConfigs(organizationId, projectId, issueType);
+        if (agilePluginService != null) {
+           return agilePluginService.queryProgramPageConfigFields(projectId,issueType,pageConfigFieldVOS);
+        }
+        return pageConfigFieldVOS;
     }
 
     private void processFieldEdited(String issueType, List<PageConfigFieldVO> pageConfigFields) {

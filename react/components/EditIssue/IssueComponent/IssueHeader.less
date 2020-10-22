@@ -2,18 +2,30 @@
   padding: 0 20px;
   position: relative;
   &-top {
+    position: relative;
     display: flex;
     align-items: center;
     &-number {
       width: calc(~'90% - 1.5rem');
     }
-    .parent-summary-hidden {
-      display: inline-block;
-      width: calc(~'100% - .22rem');    
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      vertical-align: bottom;
+    .parent-summary {
+      &-tip {
+        display: none;
+      }
+      &:hover {
+        .parent-summary-tip {
+          display: block;
+        }
+      }
+      .parent-summary-hidden {
+        display: inline-block;
+        max-width: 220px;
+        width: calc(~'100% - .22rem');    
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        vertical-align: bottom;
+      }
     }
   }
 
