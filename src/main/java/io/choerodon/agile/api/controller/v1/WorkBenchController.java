@@ -1,5 +1,6 @@
 package io.choerodon.agile.api.controller.v1;
 
+import io.choerodon.agile.api.vo.WorkBenchIssueSearchVO;
 import io.choerodon.agile.api.vo.business.IssueListFieldKVVO;
 import io.choerodon.agile.app.service.IssueService;
 import io.choerodon.core.domain.Page;
@@ -30,10 +31,11 @@ public class WorkBenchController {
     @ApiOperation("查询工作台个人代办事项")
     @PostMapping("/personal/backlog_issues")
     public ResponseEntity<Page<IssueListFieldKVVO>> queryBackLogIssuesByPersonal(@ApiParam(value = "组织id", required = true)
-                                                                        @PathVariable(name = "organization_id") Long organizationId,
-                                                                        @RequestParam(required = false) Long projectId,
-                                                                        PageRequest pageRequest) {
-        return Optional.ofNullable(issueService.queryBackLogIssuesByPersonal(organizationId, projectId, pageRequest))
+                                                                                 @PathVariable(name = "organization_id") Long organizationId,
+                                                                                 @RequestParam(required = false) Long projectId,
+                                                                                 PageRequest pageRequest,
+                                                                                 @RequestBody WorkBenchIssueSearchVO workBenchIssueSearchVO) {
+        return Optional.ofNullable(issueService.queryBackLogIssuesByPersonal(organizationId, projectId, pageRequest, workBenchIssueSearchVO))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueLabel.queryIssueLabelList"));
     }

@@ -491,18 +491,25 @@ public interface IssueMapper extends BaseMapper<IssueDTO> {
      * 查询个人未完成故事，任务和bug
      * @param projectIds
      * @param userId
+     * @param searchType
      * @return
      */
-    List<IssueDTO> queryParentIssueByProjectIdsAndUserId(@Param("projectIds") List<Long> projectIds, @Param("userId") Long userId);
+    List<IssueDTO> queryParentIssueByProjectIdsAndUserId(@Param("projectIds") List<Long> projectIds,
+                                                         @Param("userId") Long userId,
+                                                         @Param("searchType") String searchType);
 
     /**
      * 查询个人在所有子项目中未完成的问题
      * @param projectIds
      * @param parentIssues
      * @param userId
+     * @param searchType
      * @return
      */
-    List<IssueDTO> listIssuesByParentIssueIdsAndUserId(@Param("projectIds") List<Long> projectIds,@Param("parentIssues") List<Long> parentIssues,@Param("userId") Long userId);
+    List<IssueDTO> listIssuesByParentIssueIdsAndUserId(@Param("projectIds") List<Long> projectIds,
+                                                       @Param("parentIssues") List<Long> parentIssues,
+                                                       @Param("userId") Long userId,
+                                                       @Param("searchType") String searchType);
 
     List<IssueOverviewVO> selectIssueBysprint(@Param("projectId") Long projectId,
                                               @Param("sprintId") Long sprintId,
