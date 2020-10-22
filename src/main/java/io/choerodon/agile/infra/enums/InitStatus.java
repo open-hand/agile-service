@@ -1,5 +1,8 @@
 package io.choerodon.agile.infra.enums;
 
+import io.choerodon.agile.app.service.AgilePluginService;
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +54,22 @@ public enum InitStatus {
                 break;
             default:
                 break;
+        }
+        return result;
+    }
+
+    public static List<InitStatus> listInitStatus() {
+        List<InitStatus> result = new ArrayList<>();
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        if (agilePluginService != null) {
+            result.add(InitStatus.PREPARE);
+            result.add(InitStatus.CREATE);
+            result.add(InitStatus.PROCESSING);
+            result.add(InitStatus.COMPLETE);
+        } else {
+            result.add(InitStatus.CREATE);
+            result.add(InitStatus.PROCESSING);
+            result.add(InitStatus.COMPLETE);
         }
         return result;
     }

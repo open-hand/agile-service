@@ -1,5 +1,7 @@
 package io.choerodon.agile.infra.enums;
 
+import io.choerodon.core.exception.CommonException;
+
 /**
  * 项目类别
  *
@@ -26,4 +28,14 @@ public class ProjectCategory {
      * 项目群子项目
      */
     public static final String PROGRAM_PROJECT = "PROGRAM_PROJECT";
+
+    public static String getApplyType(String category){
+        if (PROGRAM.equals(category)) {
+            return SchemeApplyType.PROGRAM;
+        } else if (AGILE.equals(category) || GENERAL.equals(category)) {
+            return SchemeApplyType.AGILE;
+        } else {
+            throw new CommonException("error.project.category.illegal");
+        }
+    }
 }
