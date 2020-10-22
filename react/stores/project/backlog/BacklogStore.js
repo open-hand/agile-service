@@ -998,12 +998,11 @@ class BacklogStore {
       title: `删除冲刺${data.sprintName}`,
       content: hasIssue ? (
         <div>
-          <p style={{ marginBottom: 10 }}>请确认您要删除这个冲刺。</p>
-          <p style={{ marginBottom: 10 }}>这个冲刺将会被彻底删除，冲刺中的任务将会被移动到待办事项中。</p>
+          <p style={{ marginBottom: 10 }}>{`确认要删除冲刺${data.sprintName}吗？删除冲刺后当前规划的问题将移动到待办事项`}</p>
         </div>
       ) : (
         <div>
-          <p style={{ marginBottom: 10 }}>请确认您要删除这个冲刺。</p>
+          <p style={{ marginBottom: 10 }}>{`确认要删除冲刺${data.sprintName}吗？`}</p>
         </div>
       ),
       onOk: async () => {
