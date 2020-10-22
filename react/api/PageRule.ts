@@ -14,7 +14,7 @@ class PageRuleApi extends Api<PageRuleApi> {
   }
 
   /**
-  * 查询页面贵则
+  * 查询页面规则
   */
   load(params: { page: number, size: number}) {
     return this.request({
@@ -76,29 +76,29 @@ class PageRuleApi extends Api<PageRuleApi> {
 
   startRule(ruleId: string) {
     return this.request({
-      method: 'put',
-      url: `${this.prefix}/configuration_rule/${ruleId}`,
+      method: 'post',
+      url: `${this.prefix}/configuration_rule/${ruleId}/enabled`,
+      data: {},
     });
   }
 
   stopRule(ruleId: string) {
     return this.request({
-      method: 'put',
-      url: `${this.prefix}/configuration_rule/${ruleId}`,
+      method: 'post',
+      url: `${this.prefix}/configuration_rule/${ruleId}/disabled`,
+      data: {},
     });
   }
 
   /**
-    * 检查名字是否重复
+    * 检查名字是否可以通过校验
     * @param name
     */
   checkName(name: string) {
-    const userId = AppState.userInfo.id;
     return axios({
       method: 'get',
-      url: `${this.prefix}/personal_filter/check_name`,
+      url: `${this.prefix}/configuration_rule/check_unique_name`,
       params: {
-        userId,
         name,
       },
     });

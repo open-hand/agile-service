@@ -201,7 +201,7 @@ const RuleModal: React.FC<Props> = ({
       label: '名称',
       maxLength: 50,
       validator: (value, name, record) => pageRuleApi.checkName(value).then((res: boolean) => {
-        if (res) {
+        if (!res) {
           return '规则名称重复';
         }
         return true;

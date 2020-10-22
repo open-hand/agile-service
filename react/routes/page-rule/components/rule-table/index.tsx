@@ -42,7 +42,7 @@ const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
       className={styles.name}
       onClick={() => handleClickName(record?.get('id'))}
     >
-      {value || '我是name'}
+      {value}
     </span>
   ), [handleClickName]);
 
@@ -167,7 +167,7 @@ const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
         />
       </Dropdown>
     );
-  }, [tableDataSet]);
+  }, []);
 
   return (
     <Table dataSet={tableDataSet} queryBar={'none' as TableQueryBarType}>
