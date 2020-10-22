@@ -23,7 +23,7 @@
         WHERE project_id = #{projectId} 
         <if test="name != null and name != ''">
           <bind name="nameLike" value="'%' + name + '%'"/>
-            AND acr.name = #{nameLike}
+            AND acr.name LIKE #{nameLike}
         </if>
         <if test="enabled != null">
             <bind name="nameLike" value="'%' + name + '%'"/>

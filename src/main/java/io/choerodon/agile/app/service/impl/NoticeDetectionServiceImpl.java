@@ -53,7 +53,9 @@ public class NoticeDetectionServiceImpl implements NoticeDetectionService {
     @Async
     @Override
     public void issueNoticeDetection(RuleNoticeEvent event, IssueDTO issueDTO, Long projectId, List<String> fieldList){
-        List<ConfigurationRuleVO> ruleVOList = configurationRuleMapper.selectByProjectId(projectId);
+        ConfigurationRuleVO rule = new ConfigurationRuleVO();
+        rule.setProjectId(projectId);
+        List<ConfigurationRuleVO> ruleVOList = configurationRuleMapper.selectByProjectId(rule);
         if (CollectionUtils.isEmpty(ruleVOList)){
             return;
         }
