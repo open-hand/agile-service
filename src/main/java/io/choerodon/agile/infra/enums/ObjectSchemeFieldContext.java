@@ -5,6 +5,7 @@ import io.choerodon.agile.app.service.BacklogExpandService;
 import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.exception.CommonException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,6 +29,8 @@ public class ObjectSchemeFieldContext {
 
     public static final String SUB_TASK = "sub_task";
 
+    public static final String FEATURE = "feature";
+
     public static final String BACKLOG = "backlog";
 
     public static final String[] ISSUE_TYPES = {STORY, EPIC, BUG, TASK, SUB_TASK};
@@ -47,23 +50,23 @@ public class ObjectSchemeFieldContext {
     }
 
     public static List<String> getIssueTye(){
-        List<String> list = Arrays.asList(ISSUE_TYPES);
+        List<String> list = new ArrayList<>(Arrays.asList(ISSUE_TYPES));
         AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
         if (agilePluginService != null) {
-            list.add("feature");
+            list.add(FEATURE);
         }
         BacklogExpandService backlogExpandService = SpringBeanUtil.getExpandBean(BacklogExpandService.class);
         if (backlogExpandService != null) {
-            list.add("backlog");
+            list.add(BACKLOG);
         }
         return list;
     }
 
     public static List<String> fixDataIssueType(){
-        List<String> list = Arrays.asList(FIX_DATA_ISSUE_TYPES);
+        List<String> list = new ArrayList<>(Arrays.asList(FIX_DATA_ISSUE_TYPES));
         AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
         if (agilePluginService != null) {
-            list.add("feature");
+            list.add(FEATURE);
         }
         return list;
     }

@@ -106,6 +106,26 @@
         </choose>
     </select>
 
+    <select id="selectExtendFields" resultType="io.choerodon.agile.infra.dto.ObjectSchemeFieldExtendDTO">
+        select
+        id,
+        issue_type_id,
+        issue_type,
+        project_id,
+        organization_id,
+        field_id,
+        is_required as required,
+        is_created as created,
+        is_edited as edited,
+        rank,
+        object_version_number
+        from fd_object_scheme_field_extend
+        where 1=1
+        AND organization_id = #{organizationId}
+        AND field_id = #{fieldId}
+        AND (project_id = #{projectId} OR project_id is null)
+    </select>
+
     <select id="selectExtendFieldCount" resultType="java.lang.Integer">
         select
         count(id)
