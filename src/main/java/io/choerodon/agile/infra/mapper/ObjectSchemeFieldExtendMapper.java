@@ -135,4 +135,6 @@ public interface ObjectSchemeFieldExtendMapper extends BaseMapper<ObjectSchemeFi
                                     @Param("issueType") String issueType,
                                     @Param("created") Boolean created,
                                     @Param("edited") Boolean edited);
+
+    List<ObjectSchemeFieldExtendDTO> selectExtendFields(@Param("organizationId") Long organizationId,@Param("organizationId") Long fieldId,@Param("organizationId") Long projectId);
 }

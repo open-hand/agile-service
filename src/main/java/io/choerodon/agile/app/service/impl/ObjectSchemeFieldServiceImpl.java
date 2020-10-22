@@ -303,7 +303,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         List<IssueTypeVO> result = new ArrayList<>();
         for (IssueTypeVO vo : issueTypes) {
             String typeCode = vo.getTypeCode();
-            if (ObjectSchemeFieldContext.ISSUE_TYPES_LIST.contains(typeCode)) {
+            if (ObjectSchemeFieldContext.getIssueTye().contains(typeCode)) {
                 if (ObjectSchemeFieldContext.BACKLOG.equals(typeCode)) {
                     if (containsBacklog) {
                         result.add(vo);
@@ -381,7 +381,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         issueTypeList =
                 issueTypeList
                         .stream()
-                        .filter(i -> ObjectSchemeFieldContext.ISSUE_TYPES_LIST.contains(i.getTypeCode()))
+                        .filter(i -> ObjectSchemeFieldContext.getIssueTye().contains(i.getTypeCode()))
                         .collect(Collectors.toList());
         issueTypeList = filterBacklog(projectId, issueTypeList);
         Boolean result = true;
@@ -507,7 +507,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         if (ObjectUtils.isEmpty(projectId)) {
             return issueTypes
                     .stream()
-                    .filter(i -> ObjectSchemeFieldContext.ISSUE_TYPES_LIST.contains(i.getTypeCode())
+                    .filter(i -> ObjectSchemeFieldContext.getIssueTye().contains(i.getTypeCode())
                             && contextArray.contains(i.getTypeCode()))
                     .collect(Collectors.toList());
         } else {
