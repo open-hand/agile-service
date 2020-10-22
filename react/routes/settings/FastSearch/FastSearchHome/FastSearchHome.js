@@ -126,14 +126,14 @@ class Search extends Component {
     const { pageInfo } = this.state;
     quickFilterApi.drag(postData)
       .then(() => {
-        quickFilterApi.loadAll({ contents: [], filterName: '' }, pageInfo.page, pageInfo.size).then((res) => {
+        quickFilterApi.loadList({ contents: [], filterName: '' }, pageInfo.page, pageInfo.size).then((res) => {
           this.setState({
             filters: res,
           });
         });
       })
       .catch(() => {
-        quickFilterApi.loadAll({ contents: [], filterName: '' }, pageInfo.page, pageInfo.size).then((ress) => {
+        quickFilterApi.loadList({ contents: [], filterName: '' }, pageInfo.page, pageInfo.size).then((ress) => {
           this.setState({
             filters: ress,
           });
@@ -163,7 +163,7 @@ class Search extends Component {
     this.setState({
       loading: true,
     });
-    quickFilterApi.loadAll({
+    quickFilterApi.loadList({
       contents: barFilters,
       filterName,
     }, newPage, pageSize).then((res) => {

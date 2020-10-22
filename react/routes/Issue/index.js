@@ -40,6 +40,17 @@ const Issue = observer(() => {
   const importRef = useRef();
   const tableRef = useRef();
   IssueStore.setTableRef(tableRef);
+  const visibleColumns = useMemo(() => {
+    if (localPageCacheStore.getItem('issues.table')) {
+      const { columProps } = localPageCacheStore.getItem('issues.table');
+      if (Array.isArray(columProps) && columProps.length > 0) {
+        console.log('visibleColumns...', columProps);
+        return columProps.map((item) => item.name);
+      }
+      return [];
+    }
+    return undefined;
+  }, []);
   /**
    * 默认此次操作不是删除操作
    * 防止删除此页一条数据时页时停留当前页时出现无数据清空
@@ -52,6 +63,11 @@ const Issue = observer(() => {
       ? dataSet.currentPage - 1
       : dataSet.currentPage,
   );
+  useEffect(() => () => {
+    const columProps = tableRef.current
+      ? tableRef.current.tableStore.columns.filter((column) => column.name && !column.hidden) : [];
+    localPageCacheStore.mergeSetItem('issues.table', { pageInfo: { currentPage: dataSet.currentPage }, columProps });
+  }, [dataSet]);
 
   const initFilter = async () => {
     const {
@@ -108,7 +124,8 @@ const Issue = observer(() => {
         expand: true,
       });
     } else {
-      await IssueStore.query();
+      const { pageInfo = {} } = localPageCacheStore.getItem('issues.table') || {};
+      await IssueStore.query(pageInfo.currentPage);
     }
   };
   const getProjectInfo = () => {
@@ -208,6 +225,7 @@ const Issue = observer(() => {
           dataSet={dataSet}
           fields={fields}
           tableRef={tableRef}
+          visibleColumns={visibleColumns}
           onCreateIssue={handleCreateIssue}
           onRowClick={(record) => {
             // dataSet.select(record);
