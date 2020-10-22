@@ -27,26 +27,43 @@ public class ConfigurationRule{
     
     public enum FieldTableMapping {
 
-        component_id("agile_component_issue_rel"),
-        version_id("agile_version_issue_rel"),
-        label_id("agile_label_issue_rel"),
-        sprint_id("agile_issue_sprint_rel"),
-        issue("agile_issue")
+        component("component_id","agile_component_issue_rel"),
+        fix_version("version_id","agile_version_issue_rel"),
+        influence_version("version_id","agile_version_issue_rel"),
+        label("label_id","agile_label_issue_rel"),
+        sprint("sprint_id","agile_issue_sprint_rel"),
+        issue("issue","agile_issue")
         ;
 
-        FieldTableMapping(String table) {
+        FieldTableMapping(String field, String table) {
+            this.field = field;
             this.table = table;
         }
 
         private String table;
+        
+        private String field;
 
         public String getTable() {
             return table;
         }
-        
+
+        public String getField() {
+            return field;
+        }
+
         public static FieldTableMapping matches(String name){
             for (FieldTableMapping value : FieldTableMapping.values()) {
                 if (StringUtils.equals(value.name(), name)){
+                    return value;
+                }
+            }
+            return issue;
+        }
+
+        public static FieldTableMapping matchesField(String field){
+            for (FieldTableMapping value : FieldTableMapping.values()) {
+                if (StringUtils.equals(value.getField(), field)){
                     return value;
                 }
             }
