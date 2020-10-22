@@ -17,36 +17,65 @@ public class ConfigurationRule{
     public static final String TEMPLATE_UNIX_TIMESTAMP_EXPRESS = " UNIX_TIMESTAMP(%s) ";
     public static final String TEMPLATE_TIME_FIELD_EXPRESS = " TIME(DATE_FORMAT(%s, '%%H:%%i:%%s')) ";
     public static final String TEMPLATE_TIME_VALUE_EXPRESS = " TIME(%s) ";
-    public static final String TEMPLATE_NOW_EXPRESS = "NOW()";
+    public static final String SQL_VAR_NOW_EXPRESS = "NOW()";
     public static final String TEMPLATE_CUSTOM_SQL = " issue_id %s ( select ffv.instance_id from fd_field_value ffv where ffv.project_id = %s and ffv.field_id = %s %s ) ";
+    public static final String SQL_VAR_NOT_EQUALS = " 1 = 2 ";
+    public static final String TEMPLATE_TYPE_LIMIT = "(" + TEMPLATE_CONDITION_SQL + ")";
     
     public static boolean isSqlVar(String express){
-        return StringUtils.equalsAnyIgnoreCase(express, TEMPLATE_NOW_EXPRESS);
+        return StringUtils.equalsAnyIgnoreCase(express, SQL_VAR_NOW_EXPRESS);
     }
-    
-    
+
     public enum FieldTableMapping {
+        
+        component("component_id","agile_component_issue_rel"),
+        fixVersion("version_id","agile_version_issue_rel"),
+        influenceVersion("version_id","agile_version_issue_rel"),
+        label("label_id","agile_label_issue_rel"),
+        sprint("sprint_id","agile_issue_sprint_rel"),
+        assignee("assignee_id","agile_issue"),
+        priority("priority_id","agile_issue"),
+        status("status_id","agile_issue"),
+        reporter("reporter_id","agile_issue"),
+        creationDate("creation_date","agile_issue"),
+        lastUpdateDate("last_update_date","agile_issue"),
+        storyPoint("story_point","agile_issue"),
+        remainTime("remain_time","agile_issue"),
+        epic("epic_id","agile_issue"),
+        issueType("type_code","agile_issue"),
+        estimatedStartTime("estimated_start_time","agile_issue"),
+        estimatedEndTime("estimated_end_time","agile_issue"),
+        issue("issue","agile_issue");
 
-        component_id("agile_component_issue_rel"),
-        version_id("agile_version_issue_rel"),
-        label_id("agile_label_issue_rel"),
-        sprint_id("agile_issue_sprint_rel"),
-        issue("agile_issue")
-        ;
-
-        FieldTableMapping(String table) {
+        FieldTableMapping(String field, String table) {
+            this.field = field;
             this.table = table;
         }
 
         private String table;
+        
+        private String field;
 
         public String getTable() {
             return table;
         }
-        
+
+        public String getField() {
+            return field;
+        }
+
         public static FieldTableMapping matches(String name){
             for (FieldTableMapping value : FieldTableMapping.values()) {
                 if (StringUtils.equals(value.name(), name)){
+                    return value;
+                }
+            }
+            return issue;
+        }
+
+        public static FieldTableMapping matchesField(String field){
+            for (FieldTableMapping value : FieldTableMapping.values()) {
+                if (StringUtils.equals(value.getField(), field)){
                     return value;
                 }
             }

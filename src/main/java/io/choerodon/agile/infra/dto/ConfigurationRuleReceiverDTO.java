@@ -4,6 +4,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import io.choerodon.agile.infra.enums.StatusNoticeUserType;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
@@ -21,9 +22,9 @@ public class ConfigurationRuleReceiverDTO extends AuditDomain {
     public static final String TYPE_RECEIVER = "RECEIVER";
     public static final String TYPE_CC = "CC";
     public static final String TYPE_PROCESSER = "PROCESSER";
-    public static final String TYPE_ASSINGEE = "ASSINGEE";
-    public static final String TYPE_REPORTER = "REPORTER";
-    public static final String TYPE_PROJECT_OWNER = "PROJECT_OWNER";
+    public static final String TYPE_ASSINGEE = StatusNoticeUserType.ASSIGNEE;
+    public static final String TYPE_REPORTER = StatusNoticeUserType.REPORTER;
+    public static final String TYPE_PROJECT_OWNER = StatusNoticeUserType.PROJECT_OWNER;
 
     public ConfigurationRuleReceiverDTO(Long ruleId, Long projectId) {
         this.ruleId = ruleId;

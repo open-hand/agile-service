@@ -3,11 +3,35 @@
 
 <mapper namespace="io.choerodon.agile.infra.mapper.ConfigurationRuleMapper">
 
+    <sql id="checkSqlQuery">
+        <choose>
+            <when test="rule.sqlQuery != null and rule.sqlQuery != ''">
+                AND (${rule.sqlQuery})
+            </when>
+            <otherwise>
+                AND 1 = 2
+            </otherwise>
+        </choose>
+    </sql>
+
     <select id="selectByProjectId" resultType="io.choerodon.agile.api.vo.ConfigurationRuleVO">
-        SELECT *
+        SELECT 
+           acr.*, 
+           acr.is_enabled AS enabled
         FROM
-            agile_configuration_rule
-        WHERE project_id = #{projectId}
+            agile_configuration_rule acr
+        WHERE project_id = #{projectId} 
+        <if test="name != null and name != ''">
+          <bind name="nameLike" value="'%' + name + '%'"/>
+            AND acr.name LIKE #{nameLike}
+        </if>
+        <if test="enabled != null">
+            <bind name="nameLike" value="'%' + name + '%'"/>
+            AND acr.is_enabled = #{enabled}
+        </if>
+        <if test="source != null and source != ''">
+            AND acr.source = #{source}
+        </if>
     </select>
 
     <select id="selectByRuleList" resultType="java.util.Map">
@@ -18,10 +42,11 @@
         FROM
         agile_issue ai
         <foreach collection="ruleList" item="rule" index="index">
-            LEFT JOIN (SELECT issue_id FROM agile_issue WHERE issue_id = #{issueId} AND (${rule.sqlQuery})) t${index} ON ai.issue_id = t${index}.issue_id
+            LEFT JOIN (SELECT issue_id FROM agile_issue WHERE issue_id = #{issueId} <include refid="checkSqlQuery"/>) t${index} ON ai.issue_id = t${index}.issue_id
         </foreach>
         WHERE
             project_id = #{projectId}
         AND ai.issue_id = #{issueId}
     </select>
+
 </mapper>

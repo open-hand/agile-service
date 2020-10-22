@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JavaType;
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
+import io.choerodon.agile.api.vo.ObjectSchemeFieldVO;
 import io.choerodon.agile.api.vo.RuleExpressVO;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
@@ -18,7 +19,6 @@ import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.enums.ConfigurationRule;
 import io.choerodon.agile.infra.enums.CustomFieldType;
-import io.choerodon.agile.infra.enums.FieldType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.ConfigurationRuleFiledMapper;
 import io.choerodon.agile.infra.mapper.ConfigurationRuleMapper;
@@ -30,7 +30,6 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.core.base.BaseConstants;
@@ -66,7 +65,8 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     
     private static final String[] RECEIVER_LIST = new String[]{ConfigurationRuleReceiverDTO.TYPE_RECEIVER, 
             ConfigurationRuleReceiverDTO.TYPE_CC, ConfigurationRuleReceiverDTO.TYPE_ASSINGEE, 
-            ConfigurationRuleReceiverDTO.TYPE_REPORTER, ConfigurationRuleReceiverDTO.TYPE_PROJECT_OWNER};
+            ConfigurationRuleReceiverDTO.TYPE_REPORTER, ConfigurationRuleReceiverDTO.TYPE_PROJECT_OWNER, 
+            ConfigurationRuleReceiverDTO.TYPE_PROCESSER};
     public static final DateFormat df = new SimpleDateFormat(BaseConstants.Pattern.DATETIME);
 
     @Override
@@ -75,13 +75,13 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getExpressList()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getIssueTypes()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(checkUniqueName(projectId, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
-        String sqlQuery = getSqlQuery(configurationRuleVO, projectId);
+        String sqlQuery = generateSqlQuery(configurationRuleVO, projectId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
         configurationRuleDTO.setTypeCode(CommonMapperUtil.writeValueAsString(configurationRuleVO.getIssueTypes()));
         configurationRuleDTO.setSqlQuery(sqlQuery);
         configurationRuleDTO.setSource(ConfigurationRuleDTO.SOURCE_CUSTOM);
-        if (configurationRuleMapper.insert(configurationRuleDTO) != 1) {
+        if (configurationRuleMapper.insertSelective(configurationRuleDTO) != 1) {
             throw new CommonException("error.rule.insert");
         }
         createProjectReportReceiver(projectId,configurationRuleVO, configurationRuleDTO);
@@ -111,7 +111,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.isTrue(checkUniqueName(projectId, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
         configurationRuleVO.setId(ruleId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
-        configurationRuleDTO.setSqlQuery(getSqlQuery(configurationRuleVO, projectId));
+        configurationRuleDTO.setSqlQuery(generateSqlQuery(configurationRuleVO, projectId));
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
         configurationRuleDTO.setTypeCode(CommonMapperUtil.writeValueAsString(configurationRuleVO.getIssueTypes()));
         if (configurationRuleMapper.updateOptional(configurationRuleDTO, ConfigurationRuleDTO.FIELD_SQL_QUERY,
@@ -170,13 +170,14 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         configurationRuleVO.setCcList(map.get(ruleId).getCcList());
         configurationRuleVO.setUserTypes(map.get(ruleId).getUserTypes());
         configurationRuleVO.setIssueTypes(CommonMapperUtil.readValue(configurationRuleDTO.getTypeCode(),javaType));
+        configurationRuleVO.setProcesserList(map.get(ruleId).getProcesserList());
         return configurationRuleVO;
     }
 
     @Override
-    public Page<ConfigurationRuleVO> listByProjectId(Long projectId, PageRequest pageRequest) {
+    public Page<ConfigurationRuleVO> listByProjectId(ConfigurationRuleVO configurationRuleVO, PageRequest pageRequest) {
         return PageHelper.doPageAndSort(pageRequest, () -> {
-            List<ConfigurationRuleVO> page = configurationRuleMapper.selectByProjectId(projectId);
+            List<ConfigurationRuleVO> page = configurationRuleMapper.selectByProjectId(configurationRuleVO);
             if (CollectionUtils.isEmpty(page)){
                 return page;
             }
@@ -198,13 +199,13 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         if (CollectionUtils.isEmpty(ruleIdList)){
             return new HashMap<>();
         }
-        List<String> types = new ArrayList<>();
         List<ConfigurationRuleReceiverDTO> receiverDTOList = configurationRuleReceiverMapper.selectReceiver(ruleIdList, Arrays.asList(RECEIVER_LIST));
         Map<String, List<ConfigurationRuleReceiverDTO>> group =
                 receiverDTOList.stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getUserType));
         Map<Long, List<ConfigurationRuleReceiverDTO>> receiverGroup = new HashMap<>();
         Map<Long, List<ConfigurationRuleReceiverDTO>> ccGroup = new HashMap<>();
         Map<Long, List<ConfigurationRuleReceiverDTO>> userTypeGroup = new HashMap<>();
+        Map<Long, List<ConfigurationRuleReceiverDTO>> processerGroup = new HashMap<>();
         List<UserDTO> userList = baseFeignClient.listUsersByIds(receiverDTOList.stream()
                 .map(ConfigurationRuleReceiverDTO::getUserId).toArray(Long[]::new), false).getBody();
         Map<Long, UserDTO> userDTOMap = userList.stream().collect(Collectors.toMap(UserDTO::getId,
@@ -220,13 +221,13 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
             userTypeGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_PROJECT_OWNER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
         }
         if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_ASSINGEE))){
-            userTypeGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_PROJECT_OWNER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
-        }
-        if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_ASSINGEE))){
             userTypeGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_ASSINGEE).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
         }
         if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_REPORTER))){
             userTypeGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_REPORTER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
+        }
+        if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_PROCESSER))){
+            processerGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_PROCESSER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
         }
         return ruleIdList.stream().map(ruleId -> {
             ConfigurationRuleVO ruleVO = new ConfigurationRuleVO();
@@ -242,6 +243,10 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
             ruleVO.setUserTypes(userTypeGroup
                     .getOrDefault(ruleId, Collections.emptyList())
                     .stream().map(ConfigurationRuleReceiverDTO::getUserType)
+                    .collect(Collectors.toList()));
+            ruleVO.setProcesserList(processerGroup
+                    .getOrDefault(ruleId, Collections.emptyList())
+                    .stream().map(receiver -> userDTOMap.get(receiver.getUserId()))
                     .collect(Collectors.toList()));
             return ruleVO;
         }).collect(Collectors.toMap(ConfigurationRuleVO::getId, Function.identity()));
@@ -266,7 +271,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         String operation = ConfigurationRule.OpSqlMapping.valueOf(sourceOp).withField(field).name();
         StringBuilder sb = new StringBuilder();
         String sqlOp = ConfigurationRule.OpSqlMapping.valueOf(operation).getSqlOp();
-        String table = ConfigurationRule.FieldTableMapping.matches(field).getTable();
+        String table = ConfigurationRule.FieldTableMapping.matchesField(field).getTable();
         if (ConfigurationRule.OpSqlMapping.is.name().equals(sourceOp) || ConfigurationRule.OpSqlMapping.is_not.name().equals(sourceOp)){
             return String.format(ConfigurationRule.TEMPLATE_LINK_TABLE_SQL, sqlOp, table, "");
         }
@@ -280,7 +285,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     private String inSql(String field, Collection<?> value){
         String sql;
         if (CollectionUtils.isEmpty(value)) {
-            return "";
+            return StringUtils.EMPTY;
         }
         String valueList = value.stream().map(this::valueToString)
                 .collect(Collectors.joining(BaseConstants.Symbol.COMMA));
@@ -288,20 +293,25 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         return sql;
     }
 
-    protected void dealCaseVersion(RuleExpressVO quickFilterValueVO, String field, Object value,String operation, StringBuilder sqlQuery) {
+    protected String dealCaseVersion(RuleExpressVO quickFilterValueVO, String field, Object value,String operation) {
         if ("fix_version".equals(quickFilterValueVO.getFieldCode())) {
-            sqlQuery.append(renderLinkTableSql(operation, field, 
-                    Arrays.asList(() -> this.conditionSql("relation_type", ConfigurationRule.OpSqlMapping.eq.name(), valueToString("fix")), () -> this.conditionSql(field, operation, value))));
+            return renderLinkTableSql(operation, field,
+                    Arrays.asList(() -> this.conditionSql("relation_type", ConfigurationRule.OpSqlMapping.eq.name(), valueToString("fix")), () -> this.conditionSql(field, operation, value)));
         } else if ("influence_version".equals(quickFilterValueVO.getFieldCode())) {
-            sqlQuery.append(renderLinkTableSql(operation, field,
-                    Arrays.asList(() -> this.conditionSql("relation_type", ConfigurationRule.OpSqlMapping.eq.name(),valueToString("influence")), () -> this.conditionSql(field, operation, value))));
+            return renderLinkTableSql(operation, field,
+                    Arrays.asList(() -> this.conditionSql("relation_type", ConfigurationRule.OpSqlMapping.eq.name(),valueToString("influence")), () -> this.conditionSql(field, operation, value)));
         }
+        return StringUtils.EMPTY;
     }
 
-    private String getSqlQuery(ConfigurationRuleVO configurationRuleVO, Long projectId) {
+    private String generateSqlQuery(ConfigurationRuleVO configurationRuleVO, Long projectId) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         List<RuleExpressVO> ruleExpressVOList = configurationRuleVO.getExpressList();
+        Map<String, ObjectSchemeFieldVO> fieldMap = objectSchemeFieldService
+                .listPageFieldWithOption(organizationId, projectId, "agile_issue", configurationRuleVO.getIssueTypes())
+                .stream().collect(Collectors.toMap(ObjectSchemeFieldVO::getCode, Function.identity()));
         StringBuilder sqlQuery = new StringBuilder();
+        String typeLimit;
         for (RuleExpressVO ruleExpressVO : ruleExpressVOList) {
             if (StringUtils.isNotBlank(ruleExpressVO.getRelationshipWithPervious())){
                 sqlQuery.append(ConfigurationRule.OpSqlMapping.valueOf(ruleExpressVO.getRelationshipWithPervious()).getSqlOp());
@@ -312,16 +322,25 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                 String errorMsg = "error." + fieldCode + ".predefined.null";
                 throw new CommonException(errorMsg);
             }
+            typeLimit = inSql("type_code", Optional.ofNullable(fieldMap.get(ruleExpressVO.getFieldCode()))
+                    .map(ObjectSchemeFieldVO::getContexts).orElse(null));
             if (predefined) {
-                appendPredefinedFieldSql(sqlQuery, ruleExpressVO);
+                sqlQuery.append(addTypeLimit(typeLimit, processPredefinedField(ruleExpressVO, getValue(ruleExpressVO))));
             } else {
-                sqlQuery.append(appendCustomFieldSql(ruleExpressVO, organizationId, projectId));
+                sqlQuery.append(addTypeLimit(typeLimit, processCustomField(ruleExpressVO, organizationId, projectId, getValue(ruleExpressVO))));
             }
         }
         return sqlQuery.toString();
     }
+    
+    private String addTypeLimit(String typeLimit, String sql){
+        if (StringUtils.isBlank(typeLimit)){
+            typeLimit = ConfigurationRule.SQL_VAR_NOT_EQUALS;
+        }
+        return String.format(ConfigurationRule.TEMPLATE_TYPE_LIMIT, typeLimit, ConfigurationRule.OpSqlMapping.and.getSqlOp(), sql);
+    }
 
-    private String appendCustomFieldSql(RuleExpressVO ruleExpressVO, Long organizationId, Long projectId) {
+    private String processCustomField(RuleExpressVO ruleExpressVO, Long organizationId, Long projectId, Object value) {
         String fieldCode = ruleExpressVO.getFieldCode();
         ObjectSchemeFieldDTO objectSchemeField = objectSchemeFieldService.queryByFieldCode(organizationId, projectId, fieldCode);
         if (ObjectUtils.isEmpty(objectSchemeField)) {
@@ -330,40 +349,58 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Long fieldId = objectSchemeField.getId();
         String operation = ruleExpressVO.getOperation();
         String preOp = ConfigurationRule.OpSqlMapping.getPreOp(operation).name();
-        Object value;
         
         String customFieldType = ruleExpressVO.getFieldType();
         CustomFieldType.contains(customFieldType, true);
 
         if (CustomFieldType.isOption(customFieldType)) {
-            value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueIdList() : ruleExpressVO.getValueId();
             return renderCustomSql(preOp, projectId, fieldId, 
                     Collections.singletonList(() ->  conditionSql("ffv.option_id", operation, value)));
         } else if (CustomFieldType.isDate(customFieldType)) {
-            value = BooleanUtils.isTrue(ruleExpressVO.getNowFlag())? ruleExpressVO.getValueStr() : ruleExpressVO.getValueDate();
             return renderCustomSql(preOp, projectId, fieldId, Collections.singletonList(() -> 
                     conditionSql(getUnixTimeExpress("ffv.date_value"), operation, getUnixTimeExpress(valueToString(value)))));
         } else if (CustomFieldType.isDateHms(customFieldType)) {
-            value = ruleExpressVO.getValueDateHms();
             return renderCustomSql(preOp, projectId, fieldId, Collections.singletonList(() ->
                     conditionSql(getTimeFieldExpress("ffv.date_value"), operation, getTimeValueExpress(valueToString(value)))));
         } else if (CustomFieldType.isNumber(customFieldType)) {
-            value = getNumber(operation, ruleExpressVO);
             return renderCustomSql(preOp, projectId, fieldId, 
                     Collections.singletonList(() -> conditionSql("ffv.number_value", operation, value)));
         } else if (CustomFieldType.isString(customFieldType)) {
-            value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueStrList() : ruleExpressVO.getValueStr();
             return renderCustomSql(preOp, projectId, fieldId,
                     Collections.singletonList(() ->  conditionSql("ffv.string_value", operation, value)));
         } else  {
             //text
-            value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueStrList() : ruleExpressVO.getValueStr();
             return renderCustomSql(preOp, projectId, fieldId,
                     Collections.singletonList(() ->  conditionSql("ffv.text_value", operation, value)));
         }
     }
+
+
+    private Object getValue(RuleExpressVO ruleExpressVO){
+        Object value;
+        String fieldType = ruleExpressVO.getFieldType();
+        String operation = ruleExpressVO.getOperation();
+        if (CustomFieldType.isOption(fieldType)) {
+            value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueIdList() : ruleExpressVO.getValueId();
+        } else if (CustomFieldType.isDate(fieldType)) {
+            value = BooleanUtils.isTrue(ruleExpressVO.getNowFlag()) ? ruleExpressVO.getValueStr() : ruleExpressVO.getValueDate();
+        } else if (CustomFieldType.isDateHms(fieldType)) {
+            value = ruleExpressVO.getValueDateHms();
+        } else if (CustomFieldType.isNumber(fieldType)) {
+            value = getNumber(operation, ruleExpressVO);
+        } else if (CustomFieldType.isString(fieldType)) {
+            value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueStrList() : ruleExpressVO.getValueStr();
+        } else  {
+            //text
+            value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueStrList() : ruleExpressVO.getValueStr();
+        }
+        return value;
+    }
     
     private Object getNumber(String operation, RuleExpressVO ruleExpressVO){
+        if (StringUtils.equalsAny(ruleExpressVO.getFieldCode(), "storyPoints", "remainingTime")){
+             return ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueDecimalList() : ruleExpressVO.getValueDecimal();
+        }
         if (ConfigurationRule.OpSqlMapping.isCollOp(operation)){
             if (BooleanUtils.isTrue(ruleExpressVO.getAllowDecimals())){
                 return ruleExpressVO.getValueDecimalList();
@@ -389,53 +426,33 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         return String.format(ConfigurationRule.TEMPLATE_CUSTOM_SQL, sqlOp, projectId, fieldId,sb.toString());
     }
 
-    protected void appendPredefinedFieldSql(StringBuilder sqlQuery, RuleExpressVO ruleExpressVO) {
-        String fieldType = ruleExpressVO.getFieldType();
-        String operation = ruleExpressVO.getOperation();
-        Object value;
-        switch (fieldType){
-            case FieldType.RulePredefind.LONG_TYPE:
-                value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueIdList() : ruleExpressVO.getValueId();
-                break;
-            case FieldType.RulePredefind.DATE_TYPE:
-                value = BooleanUtils.isTrue(ruleExpressVO.getNowFlag()) ? ruleExpressVO.getValueStr() : ruleExpressVO.getValueDate();
-                break;
-            case FieldType.RulePredefind.TEXT_TYPE:
-                value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueStrList() : ruleExpressVO.getValueStr();
-                break;
-            case FieldType.RulePredefind.DECIMAL_TYPE:
-                value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueDecimalList() : ruleExpressVO.getValueDecimal();
-                break;
-            default:
-                throw new CommonException("error.configuration.fieldType.error");
-        }
-        processPredefinedField(sqlQuery, ruleExpressVO, value, operation);
-    }
 
-    protected void processPredefinedField(StringBuilder sqlQuery, RuleExpressVO ruleExpressVO, Object value, String operation) {
-        String field = configurationRuleFiledMapper.selectByPrimaryKey(ruleExpressVO.getFieldCode()).getField();
+    protected String processPredefinedField(RuleExpressVO ruleExpressVO, Object value) {
+        String operation = ruleExpressVO.getOperation();
+        String field = ConfigurationRule.FieldTableMapping.matches(ruleExpressVO.getFieldCode()).getField();
+        String sql;
         switch (field) {
             case "version_id":
-                dealCaseVersion(ruleExpressVO, field, value, operation, sqlQuery);
+                sql = dealCaseVersion(ruleExpressVO, field, value, operation);
                 break;
             case "component_id":
             case "label_id":
             case "sprint_id":
-                sqlQuery.append(renderLinkTableSql(operation, field, 
-                        Collections.singletonList(() -> this.conditionSql(field, operation, value))));
+                sql = renderLinkTableSql(operation, field, Collections.singletonList(() -> this.conditionSql(field, operation, value)));
                 break;
             case "creation_date":
             case "last_update_date":
-                sqlQuery.append(this.conditionSql(getUnixTimeExpress(field), operation, getUnixTimeExpress(valueToString(value))));
+                sql = this.conditionSql(getUnixTimeExpress(field), operation, getUnixTimeExpress(valueToString(value)));
                 break;
             default:
                 if (ConfigurationRule.OpSqlMapping.isCollOp(operation)){
-                    sqlQuery.append(this.conditionSql(field, operation, value));
+                    sql = this.conditionSql(field, operation, value);
                 }else {
-                    sqlQuery.append(this.conditionSql(field, operation, valueToString(value)));
+                    sql = this.conditionSql(field, operation, valueToString(value));
                 }
                 break;
         }
+        return sql;
     }
 
     private String valueToString(Object value) {

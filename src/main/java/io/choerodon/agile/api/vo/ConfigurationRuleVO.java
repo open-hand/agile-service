@@ -22,6 +22,7 @@ public class ConfigurationRuleVO extends AuditDomain {
     private String expressFormat;
     private String name;
     private Boolean enabled;
+    private String source;
     @ApiModelProperty("问题类型")
     private List<String> issueTypes;
     @ApiModelProperty("用户类型")
@@ -35,6 +36,14 @@ public class ConfigurationRuleVO extends AuditDomain {
     @ApiModelProperty("经办人")
     private List<UserDTO> processerList;
     private String typeCode;
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
 
     public String getTypeCode() {
         return typeCode;

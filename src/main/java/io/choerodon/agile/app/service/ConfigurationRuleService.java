@@ -28,7 +28,7 @@ public interface ConfigurationRuleService {
      * @param projectId projectId
      * @return ConfigurationRuleVO
      */
-    Page<ConfigurationRuleVO> listByProjectId(Long projectId, PageRequest pageRequest);
+    Page<ConfigurationRuleVO> listByProjectId(ConfigurationRuleVO configurationRuleVO, PageRequest pageRequest);
 
     /**
      * 获取ruleList对应的接收人和抄送人
