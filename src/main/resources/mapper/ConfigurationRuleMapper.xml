@@ -32,6 +32,10 @@
         <if test="source != null and source != ''">
             AND acr.source = #{source}
         </if>
+        <if test="typeCode != null and typeCode != ''">
+            <bind name="typeCodeLike" value="'%' + typeCode + '%'"/>
+            AND acr.type_code LIKE #{typeCodeLike}
+        </if>
     </select>
 
     <select id="selectByRuleList" resultType="java.util.Map">

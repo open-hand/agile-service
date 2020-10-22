@@ -4,7 +4,9 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JavaType;
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
+import io.choerodon.agile.api.vo.RuleExpressVO;
 import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
 import io.choerodon.agile.app.service.NoticeDetectionService;
@@ -13,6 +15,7 @@ import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 import io.choerodon.agile.infra.mapper.ConfigurationRuleMapper;
+import io.choerodon.agile.infra.utils.CommonMapperUtil;
 import io.choerodon.agile.infra.utils.SendMsgUtil;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections.keyvalue.MultiKey;
@@ -55,7 +58,8 @@ public class NoticeDetectionServiceImpl implements NoticeDetectionService {
     public void issueNoticeDetection(RuleNoticeEvent event, IssueDTO issueDTO, Long projectId, List<String> fieldList){
         ConfigurationRuleVO rule = new ConfigurationRuleVO();
         rule.setProjectId(projectId);
-        List<ConfigurationRuleVO> ruleVOList = configurationRuleMapper.selectByProjectId(rule);
+        rule.setIssueTypes(Collections.singletonList(issueDTO.getTypeCode()));
+        List<ConfigurationRuleVO> ruleVOList = processRule(configurationRuleMapper.selectByProjectId(rule));
         if (CollectionUtils.isEmpty(ruleVOList)){
             return;
         }
@@ -68,6 +72,16 @@ public class NoticeDetectionServiceImpl implements NoticeDetectionService {
         List<MessageSender> ruleSenderList = generateRuleSender(event, projectId, ruleIdList, issueDTO, fieldList);
         // 合并消息通知
         mergeNotice(ruleSenderList);
+    }
+
+    private List<ConfigurationRuleVO> processRule(List<ConfigurationRuleVO> sourceList) {
+        List<ConfigurationRuleVO> ruleList = new ArrayList<>(sourceList);
+        JavaType javaType = CommonMapperUtil.getTypeFactory().constructParametricType(List.class, RuleExpressVO.class);
+        for (ConfigurationRuleVO ruleVO : ruleList) {
+            ruleVO.setExpressList(CommonMapperUtil.readValue(ruleVO.getExpressFormat(), javaType));
+            ruleVO.setSqlQuery(configurationRuleService.generateSqlQuery(ruleVO));
+        }
+        return ruleList;
     }
 
     private List<MessageSender> generateRuleSender(RuleNoticeEvent event,Long projectId,List<Long> ruleIdList,
