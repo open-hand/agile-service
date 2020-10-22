@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JavaType;
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
 import io.choerodon.agile.api.vo.RuleExpressVO;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
@@ -63,6 +64,9 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     @Autowired
     private ModelMapper modelMapper;
     
+    private static final String[] RECEIVER_LIST = new String[]{ConfigurationRuleReceiverDTO.TYPE_RECEIVER, 
+            ConfigurationRuleReceiverDTO.TYPE_CC, ConfigurationRuleReceiverDTO.TYPE_ASSINGEE, 
+            ConfigurationRuleReceiverDTO.TYPE_REPORTER, ConfigurationRuleReceiverDTO.TYPE_PROJECT_OWNER};
     public static final DateFormat df = new SimpleDateFormat(BaseConstants.Pattern.DATETIME);
 
     @Override
@@ -70,7 +74,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getExpressList()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getIssueTypes()), BaseConstants.ErrorCode.DATA_INVALID);
-        checkUniqueName(projectId, configurationRuleVO.getName());
+        Assert.isTrue(checkUniqueName(projectId, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
         String sqlQuery = getSqlQuery(configurationRuleVO, projectId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
@@ -85,24 +89,26 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     }
 
     @Override
-    public void checkUniqueName(Long projectId, String name) {
+    public boolean checkUniqueName(Long projectId, String name) {
+        boolean flag = true;
         ConfigurationRuleDTO configurationRuleDTO = new ConfigurationRuleDTO();
         configurationRuleDTO.setProjectId(projectId);
         configurationRuleDTO.setName(name);
         List<ConfigurationRuleDTO> exist = configurationRuleMapper.select(configurationRuleDTO);
         if (CollectionUtils.isNotEmpty(exist)){
-            throw new CommonException(BaseConstants.ErrorCode.DATA_INVALID);
+            flag = false;
         }
+        return flag;
     }
 
     @Override
     public ConfigurationRuleVO update(Long projectId, Long ruleId, ConfigurationRuleVO configurationRuleVO) {
         // 检查是否是预定义规则
         checkPredefinedRule(projectId, ruleId);
-        // 检查是否名称唯一
-        checkUniqueName(projectId, configurationRuleVO.getName());
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getIssueTypes()), BaseConstants.ErrorCode.DATA_INVALID);
+        // 检查是否名称唯一
+        Assert.isTrue(checkUniqueName(projectId, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
         configurationRuleVO.setId(ruleId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setSqlQuery(getSqlQuery(configurationRuleVO, projectId));
@@ -158,26 +164,12 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
             configurationRuleVO.setExpressList(CommonMapperUtil.readValue(configurationRuleDTO.getExpressFormat(),
                     CommonMapperUtil.getTypeFactory().constructParametricType(List.class, RuleExpressVO.class)));
         }
-        List<ConfigurationRuleReceiverDTO> receiverList = configurationRuleReceiverMapper.select(new ConfigurationRuleReceiverDTO(ruleId, projectId));
-        if (CollectionUtils.isEmpty(receiverList)){
-            return configurationRuleVO;
-        }
-        // 设置收件人列表
-        Map<String, List<ConfigurationRuleReceiverDTO>> group =
-                receiverList.stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getUserType));
-        Long[] receiverIds = group.getOrDefault(ConfigurationRuleReceiverDTO.TYPE_RECEIVER, Collections.emptyList())
-                .stream().map(ConfigurationRuleReceiverDTO::getUserId).toArray(Long[]::new);
-        if (ArrayUtils.isNotEmpty(receiverIds)){
-            List<UserDTO> userList = baseFeignClient.listUsersByIds(receiverIds, false).getBody();
-            configurationRuleVO.setReceiverList(userList);
-        }
-        // 设置抄送人列表
-        Long[] ccIds = group.getOrDefault(ConfigurationRuleReceiverDTO.TYPE_CC, Collections.emptyList())
-                .stream().map(ConfigurationRuleReceiverDTO::getUserId).toArray(Long[]::new);
-        if (ArrayUtils.isNotEmpty(ccIds)){
-            List<UserDTO> userList = baseFeignClient.listUsersByIds(ccIds, false).getBody();
-            configurationRuleVO.setCcList(userList);
-        }
+        Map<Long, ConfigurationRuleVO> map = selectRuleALLReceiver(Collections.singletonList(ruleId));
+        JavaType javaType = CommonMapperUtil.getTypeFactory().constructParametricType(List.class, String.class);
+        configurationRuleVO.setReceiverList(map.get(ruleId).getReceiverList());
+        configurationRuleVO.setCcList(map.get(ruleId).getCcList());
+        configurationRuleVO.setUserTypes(map.get(ruleId).getUserTypes());
+        configurationRuleVO.setIssueTypes(CommonMapperUtil.readValue(configurationRuleDTO.getTypeCode(),javaType));
         return configurationRuleVO;
     }
 
@@ -188,26 +180,31 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
             if (CollectionUtils.isEmpty(page)){
                 return page;
             }
+            JavaType javaType = CommonMapperUtil.getTypeFactory().constructParametricType(List.class, String.class);
             List<Long> ruleIdList = page.stream().map(ConfigurationRuleVO::getId).collect(Collectors.toList());
-            Map<Long, ConfigurationRuleVO> map = selectRuleReceiverWithCc(ruleIdList);
+            Map<Long, ConfigurationRuleVO> map = selectRuleALLReceiver(ruleIdList);
             for (ConfigurationRuleVO reportVO : page) {
                 reportVO.setReceiverList(map.get(reportVO.getId()).getReceiverList());
                 reportVO.setCcList(map.get(reportVO.getId()).getCcList());
+                reportVO.setIssueTypes(CommonMapperUtil.readValue(reportVO.getTypeCode(), javaType));
+                reportVO.setUserTypes(map.get(reportVO.getId()).getUserTypes());
             }
             return page;
         });
     }
     
     @Override
-    public Map<Long, ConfigurationRuleVO> selectRuleReceiverWithCc(List<Long> ruleIdList){
+    public Map<Long, ConfigurationRuleVO> selectRuleALLReceiver(List<Long> ruleIdList){
         if (CollectionUtils.isEmpty(ruleIdList)){
             return new HashMap<>();
         }
-        List<ConfigurationRuleReceiverDTO> receiverDTOList = configurationRuleReceiverMapper.selectReceiver(ruleIdList, null);
+        List<String> types = new ArrayList<>();
+        List<ConfigurationRuleReceiverDTO> receiverDTOList = configurationRuleReceiverMapper.selectReceiver(ruleIdList, Arrays.asList(RECEIVER_LIST));
         Map<String, List<ConfigurationRuleReceiverDTO>> group =
                 receiverDTOList.stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getUserType));
         Map<Long, List<ConfigurationRuleReceiverDTO>> receiverGroup = new HashMap<>();
         Map<Long, List<ConfigurationRuleReceiverDTO>> ccGroup = new HashMap<>();
+        Map<Long, List<ConfigurationRuleReceiverDTO>> userTypeGroup = new HashMap<>();
         List<UserDTO> userList = baseFeignClient.listUsersByIds(receiverDTOList.stream()
                 .map(ConfigurationRuleReceiverDTO::getUserId).toArray(Long[]::new), false).getBody();
         Map<Long, UserDTO> userDTOMap = userList.stream().collect(Collectors.toMap(UserDTO::getId,
@@ -218,6 +215,18 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         }
         if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_CC))){
             ccGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_CC).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
+        }
+        if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_PROJECT_OWNER))){
+            userTypeGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_PROJECT_OWNER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
+        }
+        if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_ASSINGEE))){
+            userTypeGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_PROJECT_OWNER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
+        }
+        if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_ASSINGEE))){
+            userTypeGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_ASSINGEE).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
+        }
+        if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_REPORTER))){
+            userTypeGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_REPORTER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
         }
         return ruleIdList.stream().map(ruleId -> {
             ConfigurationRuleVO ruleVO = new ConfigurationRuleVO();
@@ -230,6 +239,10 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                     .getOrDefault(ruleId, Collections.emptyList())
                     .stream().map(receiver -> userDTOMap.get(receiver.getUserId()))
                     .collect(Collectors.toList()));
+            ruleVO.setUserTypes(userTypeGroup
+                    .getOrDefault(ruleId, Collections.emptyList())
+                    .stream().map(ConfigurationRuleReceiverDTO::getUserType)
+                    .collect(Collectors.toList()));
             return ruleVO;
         }).collect(Collectors.toMap(ConfigurationRuleVO::getId, Function.identity()));
     }
@@ -239,6 +252,10 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(ruleId, BaseConstants.ErrorCode.DATA_INVALID);
         ConfigurationRuleDTO configurationRuleDTO = new ConfigurationRuleDTO(ruleId, projectId);
+        configurationRuleDTO = configurationRuleMapper.selectOne(configurationRuleDTO);
+        if (Objects.isNull(configurationRuleDTO)){
+            throw new CommonException("error.rule.update");
+        }
         configurationRuleDTO.setEnabled(enabled);
         if (configurationRuleMapper.updateOptional(configurationRuleDTO, ConfigurationRuleDTO.FIELD_ENABLED) != 1) {
             throw new CommonException("error.rule.update");

@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.choerodon.agile.infra.dto.*;
@@ -171,6 +172,15 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
         }
         createSystemFieldIfNotExisted(organizationId);
+        List<ObjectSchemeFieldVO> fieldViews = generateFieldViews(organizationId, projectId, schemeCode);
+        ObjectSchemeDTO select = new ObjectSchemeDTO();
+        select.setSchemeCode(schemeCode);
+        result.put("name", objectSchemeMapper.selectOne(select).getName());
+        result.put("content", fieldViews);
+        return result;
+    }
+
+    protected List<ObjectSchemeFieldVO> generateFieldViews(Long organizationId, Long projectId, String schemeCode) {
         List<ObjectSchemeFieldDTO> fields = selectFieldsByOptions(organizationId, projectId, schemeCode, null, null);
         List<ObjectSchemeFieldVO> fieldViews = new ArrayList<>();
         fields.forEach(f -> {
@@ -182,15 +192,29 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
             String requiredScope =
                     processIssueTyeAndRequiredScope(issueTypes, issueTypeNames, true, extendList, containsAllIssueTypes);
             vo.setContext(String.join(",", issueTypes));
+            vo.setContexts(issueTypes);
             vo.setContextName(String.join(",", issueTypeNames));
             vo.setRequiredScope(requiredScope);
             fieldViews.add(vo);
         });
-        ObjectSchemeDTO select = new ObjectSchemeDTO();
-        select.setSchemeCode(schemeCode);
-        result.put("name", objectSchemeMapper.selectOne(select).getName());
-        result.put("content", fieldViews);
-        return result;
+        return fieldViews;
+    }
+
+    @Override
+    public List<ObjectSchemeFieldVO> listPageFieldWithOption(Long organizationId, Long projectId, String schemeCode,
+                                                         List<String> issueTypeList) {
+        List<ObjectSchemeFieldVO> fieldVOS = generateFieldViews(organizationId, projectId, schemeCode);
+        List<ObjectSchemeFieldDetailVO> objectSchemeFieldDetailVOList = objectSchemeFieldMapper.selectCustomFieldList(ConvertUtil.getOrganizationId(projectId), projectId, null);
+        if (CollectionUtils.isEmpty(objectSchemeFieldDetailVOList)){
+            return fieldVOS;
+        }
+        Map<Long, ObjectSchemeFieldDetailVO> map =
+                objectSchemeFieldDetailVOList.stream().collect(Collectors.toMap(ObjectSchemeFieldDetailVO::getId,
+                        Function.identity()));
+        return fieldVOS.stream()
+                .filter(vo -> vo.getContexts().containsAll(issueTypeList))
+                .peek(vo ->vo.setFieldOptions(map.getOrDefault(vo.getId(), new ObjectSchemeFieldDetailVO()).getFieldOptions()))
+                .collect(Collectors.toList());
     }
 
     protected List<ObjectSchemeFieldDTO> selectFieldsByOptions(Long organizationId,
