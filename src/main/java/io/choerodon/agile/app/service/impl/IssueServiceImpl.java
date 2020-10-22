@@ -2490,41 +2490,29 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public Page<IssueListFieldKVVO> queryBackLogIssuesByPersonal(Long organizationId, Long projectId,PageRequest pageRequest) {
+    public Page<IssueListFieldKVVO> queryBackLogIssuesByPersonal(Long organizationId,
+                                                                 Long projectId,
+                                                                 PageRequest pageRequest,
+                                                                 WorkBenchIssueSearchVO workBenchIssueSearchVO) {
         if (ObjectUtils.isEmpty(organizationId)) {
             throw new CommonException("error.organizationId.iss.null");
         }
         List<Long> projectIds = new ArrayList<>();
         List<ProjectVO> projects = new ArrayList<>();
         Long userId = DetailsHelper.getUserDetails().getUserId();
-        if (ObjectUtils.isEmpty(projectId)) {
-            List<ProjectVO> projectVOS = baseFeignClient.queryOrgProjects(organizationId,userId).getBody();
-            if (!CollectionUtils.isEmpty(projectVOS)) {
-                projectVOS.stream().filter(v -> !Objects.equals(v.getCategory(),"PROGRAM") && Boolean.TRUE.equals(v.getEnabled()))
-                        .forEach(obj -> {
-                            projectIds.add(obj.getId());
-                            projects.add(obj);
-                        });
+        queryUserProjects(organizationId, projectId, projectIds, projects, userId);
 
-            }
-        } else {
-            ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
-            if (!organizationId.equals(projectVO.getOrganizationId())) {
-                throw new CommonException("error.organization.illegal");
-            }
-            projects.add(projectVO);
-            projectIds.add(projectId);
-        }
         if (CollectionUtils.isEmpty(projectIds)) {
             return new Page<>();
         }
-        Page<IssueDTO> parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryParentIssueByProjectIdsAndUserId(projectIds, userId));
+        String searchType = workBenchIssueSearchVO.getType();
+        Page<IssueDTO> parentPage = PageHelper.doPageAndSort(pageRequest, () -> issueMapper.queryParentIssueByProjectIdsAndUserId(projectIds, userId, searchType));
         List<IssueDTO> parentIssuesDTOS = parentPage.getContent();
         if (CollectionUtils.isEmpty(parentIssuesDTOS)) {
             return new Page<>();
         }
         List<Long> parentIssues = parentIssuesDTOS.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
-        List<IssueDTO> allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId);
+        List<IssueDTO> allIssue = issueMapper.listIssuesByParentIssueIdsAndUserId(projectIds,parentIssues, userId, searchType);
         Map<Long, PriorityVO> priorityMap = priorityService.queryByOrganizationId(organizationId);
         Map<Long, IssueTypeVO> issueTypeDTOMap = issueTypeService.listIssueTypeMap(organizationId);
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
@@ -2559,6 +2547,28 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         page.setTotalPages(parentPage.getTotalPages());
         page.setNumberOfElements(parentPage.getNumberOfElements());
         return page;
+    }
+
+    private void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId) {
+        if (ObjectUtils.isEmpty(projectId)) {
+            List<ProjectVO> projectVOS = baseFeignClient.queryOrgProjects(organizationId,userId).getBody();
+            if (!CollectionUtils.isEmpty(projectVOS)) {
+                projectVOS
+                        .stream()
+                        .filter(v -> !Objects.equals(v.getCategory(),"PROGRAM") && Boolean.TRUE.equals(v.getEnabled()))
+                        .forEach(obj -> {
+                            projectIds.add(obj.getId());
+                            projects.add(obj);
+                        });
+            }
+        } else {
+            ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
+            if (!organizationId.equals(projectVO.getOrganizationId())) {
+                throw new CommonException("error.organization.illegal");
+            }
+            projects.add(projectVO);
+            projectIds.add(projectId);
+        }
     }
 
     @Override

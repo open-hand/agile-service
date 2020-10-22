@@ -347,9 +347,14 @@ public interface IssueService {
      * 个人工作台查询代办事项
      * @param organizationId
      * @param projectId
+     * @param pageRequest
+     * @param workBenchIssueSearchVO
      * @return
      */
-    Page<IssueListFieldKVVO> queryBackLogIssuesByPersonal(Long organizationId, Long projectId,PageRequest pageRequest);
+    Page<IssueListFieldKVVO> queryBackLogIssuesByPersonal(Long organizationId,
+                                                          Long projectId,
+                                                          PageRequest pageRequest,
+                                                          WorkBenchIssueSearchVO workBenchIssueSearchVO);
 
     /**
      * 根据项目id和问题类型分页查询可以选择的父问题
