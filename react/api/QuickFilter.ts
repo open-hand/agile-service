@@ -42,6 +42,26 @@ class QuickFilterApi extends Api<QuickFilterApi> {
     return this.request({
       method: 'post',
       url: `${this.prefix}/quick_filter/query_all`,
+      params: {
+        page: 1,
+        size: 0,
+      },
+      data: searchData,
+    }).then((res: any = {}) => res.content || []);
+  }
+
+  /**
+    * 加载快速筛选列表
+    * @param searchData 理论上可以不传值，但不传值后端抛出错误
+    */
+  loadList(searchData: ISearchQuickFilter = { contents: [], filterName: '' }, page: number, size = 10) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/quick_filter/query_all`,
+      params: {
+        page,
+        size,
+      },
       data: searchData,
     });
   }
