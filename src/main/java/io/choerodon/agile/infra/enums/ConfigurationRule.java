@@ -23,17 +23,27 @@ public class ConfigurationRule{
     public static boolean isSqlVar(String express){
         return StringUtils.equalsAnyIgnoreCase(express, TEMPLATE_NOW_EXPRESS);
     }
-    
-    
-    public enum FieldTableMapping {
 
+    public enum FieldTableMapping {
+        
         component("component_id","agile_component_issue_rel"),
-        fix_version("version_id","agile_version_issue_rel"),
-        influence_version("version_id","agile_version_issue_rel"),
+        fixVersion("version_id","agile_version_issue_rel"),
+        influenceVersion("version_id","agile_version_issue_rel"),
         label("label_id","agile_label_issue_rel"),
         sprint("sprint_id","agile_issue_sprint_rel"),
-        issue("issue","agile_issue")
-        ;
+        assignee("assignee_id","agile_issue"),
+        priority("priority_id","agile_issue"),
+        status("status_id","agile_issue"),
+        reporter("reporter_id","agile_issue"),
+        creationDate("creation_date","agile_issue"),
+        lastUpdateDate("last_update_date","agile_issue"),
+        storyPoint("story_point","agile_issue"),
+        remainTime("remain_time","agile_issue"),
+        epic("epic_id","agile_issue"),
+        issueType("type_code","agile_issue"),
+        estimatedStartTime("estimated_start_time","agile_issue"),
+        estimatedEndTime("estimated_end_time","agile_issue"),
+        issue("issue","agile_issue");
 
         FieldTableMapping(String field, String table) {
             this.field = field;

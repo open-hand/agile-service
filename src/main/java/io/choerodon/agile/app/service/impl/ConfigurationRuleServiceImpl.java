@@ -79,7 +79,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         configurationRuleDTO.setTypeCode(CommonMapperUtil.writeValueAsString(configurationRuleVO.getIssueTypes()));
         configurationRuleDTO.setSqlQuery(sqlQuery);
         configurationRuleDTO.setSource(ConfigurationRuleDTO.SOURCE_CUSTOM);
-        if (configurationRuleMapper.insert(configurationRuleDTO) != 1) {
+        if (configurationRuleMapper.insertSelective(configurationRuleDTO) != 1) {
             throw new CommonException("error.rule.insert");
         }
         createProjectReportReceiver(projectId,configurationRuleVO, configurationRuleDTO);
