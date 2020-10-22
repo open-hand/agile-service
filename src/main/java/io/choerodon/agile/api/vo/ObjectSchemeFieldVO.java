@@ -47,6 +47,26 @@ public class ObjectSchemeFieldVO {
     private List<FieldOptionVO> fieldOptions;
     @ApiModelProperty(value = "默认值（用于显示，仅member类型）")
     private Object defaultValueObj;
+    @ApiModelProperty(value = "数组化的context")
+    private List<String> contexts;
+    @ApiModelProperty(value = "是否允许小数")
+    private Boolean extraConfig;
+
+    public Boolean getExtraConfig() {
+        return extraConfig;
+    }
+
+    public void setExtraConfig(Boolean extraConfig) {
+        this.extraConfig = extraConfig;
+    }
+
+    public List<String> getContexts() {
+        return contexts;
+    }
+
+    public void setContexts(List<String> contexts) {
+        this.contexts = contexts;
+    }
 
     public String getRequiredScope() {
         return requiredScope;

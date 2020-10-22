@@ -3,10 +3,10 @@ package io.choerodon.agile.api.controller.v1;
 import java.util.List;
 
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
-import io.choerodon.agile.app.service.ConfigurationRuleFiledService;
+import io.choerodon.agile.api.vo.ObjectSchemeFieldVO;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
+import io.choerodon.agile.app.service.ObjectSchemeFieldService;
 import io.choerodon.agile.infra.dto.ConfigurationRuleDTO;
-import io.choerodon.agile.infra.dto.ConfigurationRuleFiledDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -36,7 +36,7 @@ public class ConfigurationRuleController extends BaseController {
     @Autowired
     private ConfigurationRuleService configurationRuleService;
     @Autowired
-    private ConfigurationRuleFiledService configurationRuleFiledService;
+    private ObjectSchemeFieldService objectSchemeFieldService;
 
     @ApiOperation(value = "列表")
     @Permission(level = ResourceLevel.ORGANIZATION)
@@ -89,9 +89,12 @@ public class ConfigurationRuleController extends BaseController {
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("查询configuration rule field列表")
     @GetMapping("/fields")
-    public ResponseEntity<List<ConfigurationRuleFiledDTO>> fieldList(@ApiParam(value = "项目id", required = true)
-                                                                     @PathVariable(name = "project_id") Long projectId) {
-        return Results.success(configurationRuleFiledService.list(projectId));
+    public ResponseEntity<List<ObjectSchemeFieldVO>> fieldList(@ApiParam(value = "项目id", required = true)
+                                                               @PathVariable(name = "project_id") Long projectId,
+                                                               @RequestParam("organizationId") Long organizationId,
+                                                               @RequestParam("schemeCode") String schemeCode,
+                                                               @RequestParam("issueTypeList") List<String> issueTypeList) {
+        return Results.success(objectSchemeFieldService.listPageFieldWithOption(organizationId, projectId, schemeCode, issueTypeList));
     }
 
     @ApiOperation(value = "启用")

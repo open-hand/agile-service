@@ -202,4 +202,6 @@ public interface ObjectSchemeFieldService {
     IssueTypeFieldVO queryDescriptionTemplate(Long projectId, String issueType, Long organizationId);
 
     String getFieldContext(String code);
+
+    List<ObjectSchemeFieldVO> listPageFieldWithOption(Long organizationId, Long projectId, String schemeCode, List<String> issueTypeList);
 }
