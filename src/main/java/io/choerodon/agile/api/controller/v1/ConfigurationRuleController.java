@@ -118,10 +118,9 @@ public class ConfigurationRuleController extends BaseController {
     @ApiOperation(value = "校验名称唯一")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping("/check_unique_name")
-    public ResponseEntity<Void> checkUniqueName(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<Boolean> checkUniqueName(@PathVariable("project_id") Long projectId,
                                             @RequestParam("name") String name) {
-        configurationRuleService.checkUniqueName(projectId, name);
-        return Results.success();
+        return Results.success(configurationRuleService.checkUniqueName(projectId, name));
     }
 
 }

@@ -39,6 +39,6 @@ public interface ConfigurationRuleService {
     
     void changeRuleEnabled(Long projectId, Long ruleId, boolean enabled);
 
-    void checkUniqueName(Long projectId, String name);
+    boolean checkUniqueName(Long projectId, String name);
 }
 

@@ -74,7 +74,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getExpressList()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getIssueTypes()), BaseConstants.ErrorCode.DATA_INVALID);
-        checkUniqueName(projectId, configurationRuleVO.getName());
+        Assert.isTrue(checkUniqueName(projectId, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
         String sqlQuery = getSqlQuery(configurationRuleVO, projectId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
@@ -89,24 +89,26 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     }
 
     @Override
-    public void checkUniqueName(Long projectId, String name) {
+    public boolean checkUniqueName(Long projectId, String name) {
+        boolean flag = true;
         ConfigurationRuleDTO configurationRuleDTO = new ConfigurationRuleDTO();
         configurationRuleDTO.setProjectId(projectId);
         configurationRuleDTO.setName(name);
         List<ConfigurationRuleDTO> exist = configurationRuleMapper.select(configurationRuleDTO);
         if (CollectionUtils.isNotEmpty(exist)){
-            throw new CommonException(BaseConstants.ErrorCode.DATA_INVALID);
+            flag = false;
         }
+        return flag;
     }
 
     @Override
     public ConfigurationRuleVO update(Long projectId, Long ruleId, ConfigurationRuleVO configurationRuleVO) {
         // 检查是否是预定义规则
         checkPredefinedRule(projectId, ruleId);
-        // 检查是否名称唯一
-        checkUniqueName(projectId, configurationRuleVO.getName());
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getIssueTypes()), BaseConstants.ErrorCode.DATA_INVALID);
+        // 检查是否名称唯一
+        Assert.isTrue(checkUniqueName(projectId, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
         configurationRuleVO.setId(ruleId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setSqlQuery(getSqlQuery(configurationRuleVO, projectId));
@@ -250,6 +252,10 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.notNull(projectId, BaseConstants.ErrorCode.DATA_INVALID);
         Assert.notNull(ruleId, BaseConstants.ErrorCode.DATA_INVALID);
         ConfigurationRuleDTO configurationRuleDTO = new ConfigurationRuleDTO(ruleId, projectId);
+        configurationRuleDTO = configurationRuleMapper.selectOne(configurationRuleDTO);
+        if (Objects.isNull(configurationRuleDTO)){
+            throw new CommonException("error.rule.update");
+        }
         configurationRuleDTO.setEnabled(enabled);
         if (configurationRuleMapper.updateOptional(configurationRuleDTO, ConfigurationRuleDTO.FIELD_ENABLED) != 1) {
             throw new CommonException("error.rule.update");
