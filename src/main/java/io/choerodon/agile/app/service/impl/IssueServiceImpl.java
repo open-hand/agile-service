@@ -348,7 +348,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    @RuleNotice(event = RuleNoticeEvent.ISSUE_CREATED)
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_CREATED, instanceIdNameInReturn = "issueId")
     public IssueVO queryIssueCreate(Long projectId, Long issueId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
@@ -565,7 +565,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldListName = "fieldList")
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldListName = "fieldList", instanceIdNameInReturn = "issueId")
     public IssueVO updateIssue(Long projectId, IssueUpdateVO issueUpdateVO, List<String> fieldList) {
         if (agilePluginService != null) {
             agilePluginService.checkFeatureBeforeUpdateIssue(issueUpdateVO,projectId);
@@ -592,7 +592,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    @RuleNotice(event = RuleNoticeEvent.ISSUE_STATAUS_CHANGE)
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_STATAUS_CHANGE, instanceIdNameInReturn = "issueId")
     public IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber,
                                      String applyType, IssueDTO triggerIssue, boolean autoTranferFlag) {
         stateMachineClientService.executeTransform(projectId, issueId, transformId, objectVersionNumber, applyType, new InputDTO(issueId, "updateStatus", updateTrigger(autoTranferFlag, triggerIssue)));
@@ -1016,7 +1016,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    @RuleNotice(event = RuleNoticeEvent.ISSUE_CREATED)
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_CREATED, instanceIdNameInReturn = "issueId")
     public IssueSubVO queryIssueSubByCreate(Long projectId, Long issueId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
