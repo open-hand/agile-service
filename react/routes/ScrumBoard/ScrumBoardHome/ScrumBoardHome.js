@@ -7,6 +7,7 @@ import {
   Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
 } from 'choerodon-ui';
 import { merge } from 'lodash';
+import { toJS } from 'mobx';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
 import {
@@ -71,7 +72,7 @@ class ScrumBoardHome extends Component {
     const scrumboardInitValue = localPageCacheStore.getItem('scrumboard');
     if (scrumboardInitValue) {
       const {
-        onlyMeChecked, onlyStoryChecked, moreChecked, personalFilters, assigneeFilter, sprintFilter, priorityIds,
+        onlyMeChecked, onlyStoryChecked, moreChecked, personalFilters = [], assigneeFilter, sprintFilter, priorityIds,
       } = scrumboardInitValue;
       ScrumBoardStore.addQuickSearchFilter(
         onlyMeChecked,
