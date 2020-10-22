@@ -128,14 +128,14 @@ class Search extends Component {
       .then(() => {
         quickFilterApi.loadList({ contents: [], filterName: '' }, pageInfo.page, pageInfo.size).then((res) => {
           this.setState({
-            filters: res,
+            filters: res.content,
           });
         });
       })
       .catch(() => {
         quickFilterApi.loadList({ contents: [], filterName: '' }, pageInfo.page, pageInfo.size).then((ress) => {
           this.setState({
-            filters: ress,
+            filters: ress.content,
           });
         });
       });
@@ -168,10 +168,10 @@ class Search extends Component {
       filterName,
     }, newPage, pageSize).then((res) => {
       this.setState({
-        filters: res,
+        filters: res.content,
         loading: false,
         pageInfo: {
-          current: newPage,
+          current: res.pageNum,
           pageSize,
           total: res.total,
         },
