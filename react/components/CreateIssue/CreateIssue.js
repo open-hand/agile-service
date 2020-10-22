@@ -203,6 +203,9 @@ class CreateIssue extends Component {
 
   loadDefaultTemplate = (issueTypeId) => {
     const { form } = this.props;
+    if (this.props.defaultDescription) { // 如果有外部默认描述信息则 放弃加载默认模版
+      return;
+    }
     const currentDes = form.getFieldValue('description');
     pageConfigApi.loadTemplateByType(issueTypeId).then((res) => {
       const { template } = res || {};
@@ -877,6 +880,7 @@ class CreateIssue extends Component {
           <>
             <FormItem key={newIssueTypeCode} label={fieldName} className="c7nagile-line" required={field.required}>
               {getFieldDecorator(fieldCode, {
+                initialValue: this.props.defaultDescription,
               })(
                 <DebounceEditor
                   style={{ height: 200, width: '100%' }}
