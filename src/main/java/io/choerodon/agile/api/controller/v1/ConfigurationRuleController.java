@@ -93,7 +93,7 @@ public class ConfigurationRuleController extends BaseController {
                                                                @PathVariable(name = "project_id") Long projectId,
                                                                @RequestParam("organizationId") Long organizationId,
                                                                @RequestParam("schemeCode") String schemeCode,
-                                                               @RequestParam("issueTypeList") List<String> issueTypeList) {
+                                                               @RequestParam(value = "issueTypeList", required = false) List<String> issueTypeList) {
         return Results.success(objectSchemeFieldService.listPageFieldWithOption(organizationId, projectId, schemeCode, issueTypeList));
     }
 

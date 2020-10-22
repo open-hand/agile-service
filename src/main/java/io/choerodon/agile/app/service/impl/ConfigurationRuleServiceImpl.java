@@ -64,7 +64,8 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     
     private static final String[] RECEIVER_LIST = new String[]{ConfigurationRuleReceiverDTO.TYPE_RECEIVER, 
             ConfigurationRuleReceiverDTO.TYPE_CC, ConfigurationRuleReceiverDTO.TYPE_ASSINGEE, 
-            ConfigurationRuleReceiverDTO.TYPE_REPORTER, ConfigurationRuleReceiverDTO.TYPE_PROJECT_OWNER};
+            ConfigurationRuleReceiverDTO.TYPE_REPORTER, ConfigurationRuleReceiverDTO.TYPE_PROJECT_OWNER, 
+            ConfigurationRuleReceiverDTO.TYPE_PROCESSER};
     public static final DateFormat df = new SimpleDateFormat(BaseConstants.Pattern.DATETIME);
 
     @Override
@@ -168,6 +169,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         configurationRuleVO.setCcList(map.get(ruleId).getCcList());
         configurationRuleVO.setUserTypes(map.get(ruleId).getUserTypes());
         configurationRuleVO.setIssueTypes(CommonMapperUtil.readValue(configurationRuleDTO.getTypeCode(),javaType));
+        configurationRuleVO.setProcesserList(map.get(ruleId).getProcesserList());
         return configurationRuleVO;
     }
 
@@ -196,13 +198,13 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         if (CollectionUtils.isEmpty(ruleIdList)){
             return new HashMap<>();
         }
-        List<String> types = new ArrayList<>();
         List<ConfigurationRuleReceiverDTO> receiverDTOList = configurationRuleReceiverMapper.selectReceiver(ruleIdList, Arrays.asList(RECEIVER_LIST));
         Map<String, List<ConfigurationRuleReceiverDTO>> group =
                 receiverDTOList.stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getUserType));
         Map<Long, List<ConfigurationRuleReceiverDTO>> receiverGroup = new HashMap<>();
         Map<Long, List<ConfigurationRuleReceiverDTO>> ccGroup = new HashMap<>();
         Map<Long, List<ConfigurationRuleReceiverDTO>> userTypeGroup = new HashMap<>();
+        Map<Long, List<ConfigurationRuleReceiverDTO>> processerGroup = new HashMap<>();
         List<UserDTO> userList = baseFeignClient.listUsersByIds(receiverDTOList.stream()
                 .map(ConfigurationRuleReceiverDTO::getUserId).toArray(Long[]::new), false).getBody();
         Map<Long, UserDTO> userDTOMap = userList.stream().collect(Collectors.toMap(UserDTO::getId,
@@ -218,13 +220,13 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
             userTypeGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_PROJECT_OWNER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
         }
         if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_ASSINGEE))){
-            userTypeGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_PROJECT_OWNER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
-        }
-        if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_ASSINGEE))){
             userTypeGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_ASSINGEE).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
         }
         if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_REPORTER))){
             userTypeGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_REPORTER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
+        }
+        if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_PROCESSER))){
+            processerGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_PROCESSER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
         }
         return ruleIdList.stream().map(ruleId -> {
             ConfigurationRuleVO ruleVO = new ConfigurationRuleVO();
@@ -240,6 +242,10 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
             ruleVO.setUserTypes(userTypeGroup
                     .getOrDefault(ruleId, Collections.emptyList())
                     .stream().map(ConfigurationRuleReceiverDTO::getUserType)
+                    .collect(Collectors.toList()));
+            ruleVO.setProcesserList(processerGroup
+                    .getOrDefault(ruleId, Collections.emptyList())
+                    .stream().map(receiver -> userDTOMap.get(receiver.getUserId()))
                     .collect(Collectors.toList()));
             return ruleVO;
         }).collect(Collectors.toMap(ConfigurationRuleVO::getId, Function.identity()));
