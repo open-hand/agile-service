@@ -1079,7 +1079,8 @@
     </select>
 
     <select id="queryParentIssueByProjectIdsAndUserId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
-        select DISTINCT ai.* from (
+        select DISTINCT ai.*
+        from (
             (
                 select
                     ai.issue_id,
@@ -1089,90 +1090,88 @@
                     agile_issue_sprint_rel aisr,
                     agile_issue ai,
                     agile_issue_status ais
-                where
-                    aisr.project_id in
+                where aisr.project_id in
+                <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                    #{projectId}
+                </foreach>
+                AND aisr.sprint_id in (
+                    select sprint_id
+                    from agile_sprint asp
+                    where asp.project_id in
                     <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
                         #{projectId}
                     </foreach>
-                AND aisr.sprint_id in (
-                    select sprint_id from agile_sprint asp
-                        where
-                        asp.project_id in
-                        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                            #{projectId}
-                        </foreach>
-                        AND asp.status_code = 'started'
+                    AND asp.status_code = 'started'
                 )
                 AND ai.issue_id = aisr.issue_id
                 <choose>
-                    <when test="searchType != null">
-                        AND ai.type_code in ('bug')
-                        <if test="searchType == 'mineBug'">
+                    <when test="searchType == null">
+                        AND ai.type_code in ('story','bug','task')
+                        AND (ai.parent_issue_id IS NULL OR ai.parent_issue_id = 0)
+                        AND (ai.relate_issue_id IS NULL OR ai.relate_issue_id = 0)
+                        AND ai.assignee_id = #{userId}
+                    </when>
+                    <otherwise>
+                        AND ai.type_code = 'bug'
+                        <if test="searchType == 'myBug'">
                             AND ai.assignee_id = #{userId}
                         </if>
                         <if test="searchType == 'reportedBug'">
                             AND ai.reporter_id = #{userId}
                         </if>
-                    </when>
-                    <otherwise>
-                        AND ai.type_code in ('story','bug','task')
-                        AND ai.assignee_id = #{userId}
                     </otherwise>
                 </choose>
-                AND (ai.parent_issue_id IS NULL OR ai.parent_issue_id = 0)
-                AND (ai.relate_issue_id IS NULL OR ai.relate_issue_id = 0)
+
                 AND ais.project_id = ai.project_id
                 AND ais.status_id = ai.status_id
                 AND ais.is_completed != 1
             )
-            UNION ALL
+        <if test="searchType == null">
+        UNION ALL
             (
-                    select ai.issue_id,ai.project_id,ai.last_update_date from agile_issue ai
-                    where
-                    ai.project_id in
+                select
+                    ai.issue_id,
+                    ai.project_id,
+                    ai.last_update_date
+                from agile_issue ai
+                where
+                ai.project_id in
+                <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
+                    #{projectId}
+                </foreach>
+                AND ai.issue_id in (
+                    select
+                        IF(ai.type_code = 'bug',ai.relate_issue_id,ai.parent_issue_id) as issue_id
+                    from
+                        agile_issue_sprint_rel aisr,
+                        agile_issue ai,
+                        agile_issue_status ais
+                    where aisr.project_id in
                     <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
                         #{projectId}
                     </foreach>
-                    AND ai.issue_id in (
-                        select
-                            IF(ai.type_code = 'bug',ai.relate_issue_id,ai.parent_issue_id) as issue_id
-                        from agile_issue_sprint_rel aisr,agile_issue ai,agile_issue_status ais
-                        where
-                        aisr.project_id in
-                        <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
-                            #{projectId}
-                        </foreach>
-                        AND aisr.sprint_id in (
-                        select sprint_id from agile_sprint asp where
-                        asp.project_id in
+                    AND aisr.sprint_id in (
+                        select sprint_id
+                        from agile_sprint asp
+                        where asp.project_id in
                         <foreach collection="projectIds" item="projectId" separator="," open="(" close=")">
                             #{projectId}
                         </foreach>
                         AND asp.status_code = 'started'
-                        )
-                        AND ai.issue_id = aisr.issue_id
-                        <choose>
-                            <when test="searchType != null">
-                                AND ai.type_code in ('bug')
-                                <if test="searchType == 'mineBug'">
-                                    AND ai.assignee_id = #{userId}
-                                </if>
-                                <if test="searchType == 'reportedBug'">
-                                    AND ai.reporter_id = #{userId}
-                                </if>
-                            </when>
-                            <otherwise>
-                                AND ai.type_code in ('sub_task','bug')
-                                AND ai.assignee_id = #{userId}
-                            </otherwise>
-                        </choose>
-                        AND ais.project_id = ai.project_id
-                        AND ais.status_id = ai.status_id
-                        AND ais.is_completed != 1
-                       )
                     )
-                ) ai
-             order by ai.project_id ASC,ai.last_update_date DESC
+                    AND ai.issue_id = aisr.issue_id
+                    AND ai.type_code in ('sub_task','bug')
+                    AND ai.assignee_id = #{userId}
+                    AND ais.project_id = ai.project_id
+                    AND ais.status_id = ai.status_id
+                    AND ais.is_completed != 1
+                )
+            )
+        </if>
+        ) ai
+        order by
+        ai.project_id ASC,
+        ai.last_update_date DESC
     </select>
 
     <select id="listIssuesByParentIssueIdsAndUserId" resultType="io.choerodon.agile.infra.dto.business.IssueDTO">
@@ -1210,23 +1209,8 @@
                 )
                 OR
                 (
-                    <choose>
-                        <when test="searchType != null">
-                            ai.type_code in ('bug')
-                            <if test="searchType == 'mineBug'">
-                                AND ai.assignee_id = #{userId}
-                            </if>
-                            <if test="searchType == 'reportedBug'">
-                                AND ai.reporter_id = #{userId}
-                            </if>
-                        </when>
-                        <otherwise>
-                            ai.type_code in ('sub_task','bug')
-                            AND ai.assignee_id = #{userId}
-                        </otherwise>
-                    </choose>
-                    AND
-                    (
+                    ai.type_code IN ('sub_task','bug')
+                    AND (
                         ai.parent_issue_id in
                         <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
                             #{parentIssue}
@@ -1237,6 +1221,9 @@
                             #{parentIssue}
                         </foreach>
                     )
+                    <if test="searchType == null">
+                        AND ai.assignee_id = #{userId}
+                    </if>
                     AND ais.is_completed != 1
                 )
             )
