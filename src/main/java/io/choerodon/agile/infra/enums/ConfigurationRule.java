@@ -17,11 +17,13 @@ public class ConfigurationRule{
     public static final String TEMPLATE_UNIX_TIMESTAMP_EXPRESS = " UNIX_TIMESTAMP(%s) ";
     public static final String TEMPLATE_TIME_FIELD_EXPRESS = " TIME(DATE_FORMAT(%s, '%%H:%%i:%%s')) ";
     public static final String TEMPLATE_TIME_VALUE_EXPRESS = " TIME(%s) ";
-    public static final String TEMPLATE_NOW_EXPRESS = "NOW()";
+    public static final String SQL_VAR_NOW_EXPRESS = "NOW()";
     public static final String TEMPLATE_CUSTOM_SQL = " issue_id %s ( select ffv.instance_id from fd_field_value ffv where ffv.project_id = %s and ffv.field_id = %s %s ) ";
+    public static final String SQL_VAR_NOT_EQUALS = " 1 = 2 ";
+    public static final String TEMPLATE_TYPE_LIMIT = "(" + TEMPLATE_CONDITION_SQL + ")";
     
     public static boolean isSqlVar(String express){
-        return StringUtils.equalsAnyIgnoreCase(express, TEMPLATE_NOW_EXPRESS);
+        return StringUtils.equalsAnyIgnoreCase(express, SQL_VAR_NOW_EXPRESS);
     }
 
     public enum FieldTableMapping {

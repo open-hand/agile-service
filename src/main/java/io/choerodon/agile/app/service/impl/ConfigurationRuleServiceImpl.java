@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JavaType;
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
+import io.choerodon.agile.api.vo.ObjectSchemeFieldVO;
 import io.choerodon.agile.api.vo.RuleExpressVO;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
@@ -284,7 +285,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     private String inSql(String field, Collection<?> value){
         String sql;
         if (CollectionUtils.isEmpty(value)) {
-            return "";
+            return StringUtils.EMPTY;
         }
         String valueList = value.stream().map(this::valueToString)
                 .collect(Collectors.joining(BaseConstants.Symbol.COMMA));
@@ -306,7 +307,11 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     private String generateSqlQuery(ConfigurationRuleVO configurationRuleVO, Long projectId) {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         List<RuleExpressVO> ruleExpressVOList = configurationRuleVO.getExpressList();
+        Map<String, ObjectSchemeFieldVO> fieldMap = objectSchemeFieldService
+                .listPageFieldWithOption(organizationId, projectId, "agile_issue", configurationRuleVO.getIssueTypes())
+                .stream().collect(Collectors.toMap(ObjectSchemeFieldVO::getCode, Function.identity()));
         StringBuilder sqlQuery = new StringBuilder();
+        String typeLimit;
         for (RuleExpressVO ruleExpressVO : ruleExpressVOList) {
             if (StringUtils.isNotBlank(ruleExpressVO.getRelationshipWithPervious())){
                 sqlQuery.append(ConfigurationRule.OpSqlMapping.valueOf(ruleExpressVO.getRelationshipWithPervious()).getSqlOp());
@@ -317,13 +322,22 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                 String errorMsg = "error." + fieldCode + ".predefined.null";
                 throw new CommonException(errorMsg);
             }
+            typeLimit = inSql("type_code", Optional.ofNullable(fieldMap.get(ruleExpressVO.getFieldCode()))
+                    .map(ObjectSchemeFieldVO::getContexts).orElse(null));
             if (predefined) {
-                sqlQuery.append(processPredefinedField(ruleExpressVO, getValue(ruleExpressVO)));
+                sqlQuery.append(addTypeLimit(typeLimit, processPredefinedField(ruleExpressVO, getValue(ruleExpressVO))));
             } else {
-                sqlQuery.append(processCustomField(ruleExpressVO, organizationId, projectId, getValue(ruleExpressVO)));
+                sqlQuery.append(addTypeLimit(typeLimit, processCustomField(ruleExpressVO, organizationId, projectId, getValue(ruleExpressVO))));
             }
         }
         return sqlQuery.toString();
+    }
+    
+    private String addTypeLimit(String typeLimit, String sql){
+        if (StringUtils.isBlank(typeLimit)){
+            typeLimit = ConfigurationRule.SQL_VAR_NOT_EQUALS;
+        }
+        return String.format(ConfigurationRule.TEMPLATE_TYPE_LIMIT, typeLimit, ConfigurationRule.OpSqlMapping.and.getSqlOp(), sql);
     }
 
     private String processCustomField(RuleExpressVO ruleExpressVO, Long organizationId, Long projectId, Object value) {
