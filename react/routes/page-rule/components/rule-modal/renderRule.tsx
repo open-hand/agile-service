@@ -12,6 +12,7 @@ import SelectVersion from '@/components/select/select-version';
 import SelectEpic from '@/components/select/select-epic';
 import SelectSprint from '@/components/select/select-sprint';
 import SelectUser from '@/components/select/select-user';
+import { InjectedComponent } from './injectComponent';
 // import SelectDemandType from '@choerodon/agile-pro/lib/components/select/select-demand-type';
 // import SelectTreeDemandClassification from '@choerodon/agile-pro/lib/components/select/select-demand-classification';
 // import SelectUrgent from '@choerodon/agile-pro/lib/components/select/select-priority';
@@ -224,15 +225,42 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
             />
           );
         }
-              // case 'backlogType': {
-              //   return <SelectDemandType required name={`${key}-value`} label="值" />
-              // }
-              // case 'backlogClassification': {
-              //   return <SelectTreeDemandClassification required name={`${key}-value`} label="值" />
-              // }
-              // case 'urgent': {
-              //   return <SelectUrgent required name={`${key}-value`} label="值" />
-              // }
+        case 'backlogType': {
+          return (
+            <InjectedComponent.BacklogType
+              // @ts-ignore
+              name={`${key}-value`}
+              label="值"
+              afterLoad={(data: {id: string, name: string}) => {
+                systemDataRefMap.current.set(code, data || []);
+              }}
+            />
+          );
+        }
+        case 'backlogClassification': {
+          return (
+            <InjectedComponent.BacklogClassification
+              // @ts-ignore
+              name={`${key}-value`}
+              label="值"
+              afterLoad={(data: {id: string, name: string}) => {
+                systemDataRefMap.current.set(code, data || []);
+              }}
+            />
+          );
+        }
+        case 'urgent': {
+          return (
+            <InjectedComponent.Urgent
+              // @ts-ignore
+              name={`${key}-value`}
+              label="值"
+              afterLoad={(data: {id: string, name: string}) => {
+                systemDataRefMap.current.set(code, data || []);
+              }}
+            />
+          );
+        }
       }
     }
     switch (fieldType) {
