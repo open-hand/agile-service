@@ -1,6 +1,7 @@
 import React, {
   useMemo, forwardRef, useState, useCallback, useEffect,
 } from 'react';
+import { toJS } from 'mobx';
 import { Select } from 'choerodon-ui/pro';
 import { find, unionBy } from 'lodash';
 import { userApi } from '@/api';
@@ -145,6 +146,13 @@ function useMemberLocalStoreMap(config?: MemberLocalMapConfig): [MemberLocalStor
 const SelectUser: React.FC<SelectUserProps> = forwardRef(({
   selectedUser, extraOptions, dataRef, request, afterLoad, autoQueryConfig, ...otherProps
 }, ref: React.Ref<Select>) => {
+  const selectedUserIds = useMemo(() => {
+    const ids: string[] | string | undefined = toJS(autoQueryConfig?.selectedUserIds);
+    if (Array.isArray(ids)) {
+      return ids;
+    }
+    return ids ? [ids] : undefined;
+  }, [JSON.stringify(autoQueryConfig?.selectedUserIds)]);
   const [loadExtraData, loadExtraDataMethod] = useMemberLocalStoreMap(autoQueryConfig);
   const autoQueryUsers = (ids: string[], currentData: User[]) => {
     const idSets = new Set<string>(ids);
@@ -181,11 +189,10 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
         }));
       }
       // 存在待加载的id，第一页有数据，finish未准备状态（即值不boolean类型 false）则开始自动加载
-      if (autoQueryConfig?.selectedUserIds && data.length > 0 && (typeof (loadExtraData.finish) === 'undefined')) {
-        autoQueryUsers(Array.isArray(autoQueryConfig?.selectedUserIds) ? autoQueryConfig?.selectedUserIds : [autoQueryConfig?.selectedUserIds], data);
+      if (selectedUserIds && data.length > 0 && (typeof (loadExtraData.finish) === 'undefined')) {
+        autoQueryUsers(selectedUserIds, data);
       }
-      if (autoQueryConfig?.selectedUserIds && (loadExtraData.finish || loadExtraData.forceRefresh || loadExtraData.cacheMode === 'outer')) {
-        const selectedUserIds = Array.isArray(autoQueryConfig?.selectedUserIds) ? autoQueryConfig?.selectedUserIds : [autoQueryConfig?.selectedUserIds];
+      if (selectedUserIds && (loadExtraData.finish || loadExtraData.forceRefresh || loadExtraData.cacheMode === 'outer')) {
         selectedUserIds.forEach((item) => {
           if (loadExtraData.userMaps.has(item)) {
             temp.push(loadExtraData.userMaps.get(item)!);
@@ -205,7 +212,7 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
       }
       return newData;
     },
-  }), [selectedUser, loadExtraData.forceRefresh, loadExtraData.finish, JSON.stringify(autoQueryConfig?.selectedUserIds)]);
+  }), [selectedUser, loadExtraData.forceRefresh, loadExtraData.finish, JSON.stringify(selectedUserIds)]);
   const props = useSelect(config);
   return (
     <Select
