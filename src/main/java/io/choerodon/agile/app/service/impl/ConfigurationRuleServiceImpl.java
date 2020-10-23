@@ -90,7 +90,6 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
 
     @Override
     public boolean checkUniqueName(Long projectId, Long ruleId, String name) {
-        boolean flag = true;
         ConfigurationRuleDTO configurationRuleDTO = new ConfigurationRuleDTO();
         configurationRuleDTO.setProjectId(projectId);
         configurationRuleDTO.setName(name);
