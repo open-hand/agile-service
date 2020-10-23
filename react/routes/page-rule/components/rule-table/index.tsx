@@ -65,6 +65,15 @@ const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
     );
   }, []);
 
+  const renderProcesserList = useCallback(({ record }:RenderProps) => {
+    const processerList = record?.get('processerList') || [];
+    return (
+      <span>
+        {processerList.map((user: User) => user.realName).join('、')}
+      </span>
+    );
+  }, []);
+
   const renderIssueType = useCallback(({ record }: RenderProps) => {
     const typeCodes = record?.get('issueTypes');
     return (
@@ -195,11 +204,15 @@ const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
       <Column name="name" renderer={renderName} width={200} tooltip={'overflow' as TableColumnTooltip} />
       <Column name="action" width={50} renderer={renderAction} tooltip={'overflow' as TableColumnTooltip} />
       <Column name="expressQuery" width={250} tooltip={'overflow' as TableColumnTooltip} />
-      <Column name="newAssignee" renderer={renderAssignee} tooltip={'overflow' as TableColumnTooltip} />
+      <Column name="processerList" renderer={renderProcesserList} tooltip={'overflow' as TableColumnTooltip} />
       <Column name="receiverList" renderer={renderReceiver} tooltip={'overflow' as TableColumnTooltip} />
       <Column name="issueTypes" renderer={renderIssueType} tooltip={'overflow' as TableColumnTooltip} />
       <Column name="enabled" renderer={renderStatus} tooltip={'overflow' as TableColumnTooltip} />
-      <Column name="source" renderer={({ value }) => (value === 'system' ? '预置' : '自定义')} tooltip={'overflow' as TableColumnTooltip} />
+      <Column
+        name="source"
+        renderer={({ record }) => (record?.get('source') === 'custom' ? '自定义' : '预定义')}
+        tooltip={'overflow' as TableColumnTooltip}
+      />
     </Table>
   );
 };
