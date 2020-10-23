@@ -122,7 +122,7 @@ public class ConfigurationRuleController extends BaseController {
     @GetMapping("/check_unique_name")
     public ResponseEntity<Boolean> checkUniqueName(@PathVariable("project_id") Long projectId,
                                             @RequestParam("name") String name) {
-        return Results.success(configurationRuleService.checkUniqueName(projectId, name));
+        return Results.success(configurationRuleService.checkUniqueName(projectId, null, name));
     }
 
 }

@@ -39,7 +39,7 @@ public interface ConfigurationRuleService {
     
     void changeRuleEnabled(Long projectId, Long ruleId, boolean enabled);
 
-    boolean checkUniqueName(Long projectId, String name);
+    boolean checkUniqueName(Long projectId, Long ruleId, String name);
 
     String generateSqlQuery(ConfigurationRuleVO configurationRuleVO);
 }

@@ -74,7 +74,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getExpressList()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getIssueTypes()), BaseConstants.ErrorCode.DATA_INVALID);
-        Assert.isTrue(checkUniqueName(projectId, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.isTrue(checkUniqueName(projectId, null, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
         String sqlQuery = generateSqlQuery(configurationRuleVO);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
@@ -89,16 +89,13 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     }
 
     @Override
-    public boolean checkUniqueName(Long projectId, String name) {
+    public boolean checkUniqueName(Long projectId, Long ruleId, String name) {
         boolean flag = true;
         ConfigurationRuleDTO configurationRuleDTO = new ConfigurationRuleDTO();
         configurationRuleDTO.setProjectId(projectId);
         configurationRuleDTO.setName(name);
         List<ConfigurationRuleDTO> exist = configurationRuleMapper.select(configurationRuleDTO);
-        if (CollectionUtils.isNotEmpty(exist)){
-            flag = false;
-        }
-        return flag;
+        return exist.stream().allMatch(rule -> Objects.equals(rule.getId(), ruleId));
     }
 
     @Override
@@ -108,7 +105,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getIssueTypes()), BaseConstants.ErrorCode.DATA_INVALID);
         // 检查是否名称唯一
-        Assert.isTrue(checkUniqueName(projectId, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
+        Assert.isTrue(checkUniqueName(projectId, ruleId, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
         configurationRuleVO.setId(ruleId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setSqlQuery(generateSqlQuery(configurationRuleVO));
