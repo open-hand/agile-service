@@ -13,12 +13,40 @@ import io.choerodon.agile.api.vo.NoticeEventVO;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
 public @interface RuleNotice {
-    
+
+    /**
+     * 通知检测所使用的模块
+     */
     String value() default "ISSUE";
 
+    /**
+     * 触发事件。事件可能与多个消息关连。
+     * 需要手动指定事件关联的消息代码。可参照{@link io.choerodon.agile.infra.enums.RuleNoticeEvent#getMsgCode(java.lang.String)}
+     */
     String event();
 
+    /**
+     * 从方法参数中获取要更新的字段list，与{@link RuleNotice#fieldList()}互斥。
+     * 若同时存在，则优先取{@link RuleNotice#fieldList()}
+     * @return 字段list
+     */
     String fieldListName() default "";
-    
+
+    /**
+     * 从返回值中获取实例instanceId的字段名称
+     */
     String instanceIdNameInReturn() default "id";
+
+    /**
+     * 手动指定要更新的字段list，优先取值
+     * @return 字段list
+     */
+    String[] fieldList() default {};
+
+    /**
+     * 是否是全字段检测
+     * 此配置开启时, 与fieldList和fieldListName互斥。推荐创建时使用，默认关闭
+     * @return 默认false
+     */
+    boolean allFieldCheck() default false;
 }
