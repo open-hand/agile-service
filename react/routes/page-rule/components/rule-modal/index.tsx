@@ -13,7 +13,7 @@ import { observer } from 'mobx-react-lite';
 import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
 import { User, IFieldType } from '@/common/types';
-import { fieldApi, pageRuleApi, pageConfigApi } from '@/api';
+import { pageRuleApi, pageConfigApi } from '@/api';
 import Loading from '@/components/Loading';
 import { find, map, includes } from 'lodash';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
@@ -285,7 +285,6 @@ const RuleModal: React.FC<Props> = ({
         if (name.indexOf('operation') > -1) {
           dataSet.current.set(`${key}-value`, undefined);
         }
-        console.log('update');
         setUpdateCount((count) => count + 1);
       },
     },
@@ -463,6 +462,9 @@ const RuleModal: React.FC<Props> = ({
     if (system) {
       const options = systemDataRefMap.current.get(code);
       switch (code) {
+        case 'backlogType':
+        case 'backlogClassification':
+        case 'urgent':
         case 'priority':
         case 'status': {
           const selectOption = find(options, { id: value });
@@ -613,11 +615,7 @@ const RuleModal: React.FC<Props> = ({
   }, [fieldData, getFieldValue, modalDataSet, transformValue, fields]);
 
   const handleClickSubmit = useCallback(async () => {
-    console.log(await modalDataSet.validate());
     if (await modalDataSet.validate()) {
-      console.log('name, issueTypes, processerList');
-      console.log(toJS(getFieldValue('name')), toJS(getFieldValue('issueTypes')), toJS(getFieldValue('processerList')));
-      // debugger;
       const expressObj = transformSumitData();
       const data = {
         id: initRule?.id,
@@ -715,8 +713,6 @@ const RuleModal: React.FC<Props> = ({
       existsFieldCodes.push(field.code);
     }
   });
-
-  console.log(toJS(getFieldValue('issueTypes')));
 
   return (
     <div className={styles.rule_form}>
