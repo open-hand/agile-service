@@ -1,6 +1,6 @@
 package io.choerodon.agile.api.vo;
 
-import java.util.List;
+import java.util.Set;
 
 import org.springframework.context.ApplicationEvent;
 
@@ -18,7 +18,7 @@ public class NoticeEventVO extends ApplicationEvent {
     }
 
     public NoticeEventVO(Object source, String event, Long instanceId, Long projectId,
-                         List<String> fieldList, boolean allFieldCheck) {
+                         Set<String> fieldList, boolean allFieldCheck) {
         super(source);
         this.event = event;
         this.instanceId = instanceId;
@@ -30,7 +30,7 @@ public class NoticeEventVO extends ApplicationEvent {
     private String event;
     private Long instanceId;
     private Long projectId;
-    private List<String> fieldList;
+    private Set<String> fieldList;
     private Boolean allFieldCheck = false;
 
     public Boolean getAllFieldCheck() {
@@ -65,11 +65,11 @@ public class NoticeEventVO extends ApplicationEvent {
         this.projectId = projectId;
     }
 
-    public List<String> getFieldList() {
+    public Set<String> getFieldList() {
         return fieldList;
     }
 
-    public void setFieldList(List<String> fieldList) {
+    public void setFieldList(Set<String> fieldList) {
         this.fieldList = fieldList;
     }
 

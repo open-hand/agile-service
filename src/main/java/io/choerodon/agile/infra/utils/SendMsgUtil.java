@@ -247,7 +247,7 @@ public class SendMsgUtil {
     }
 
 
-    public MessageSender generateIssueAsigneeSender(Long projectId, List<String> fieldList, IssueDTO issue) {
+    public MessageSender generateIssueAsigneeSender(Long projectId, Set<String> fieldList, IssueDTO issue) {
         if (!SchemeApplyType.AGILE.equals(issue.getApplyType())) {
             return null;
         }
@@ -267,7 +267,7 @@ public class SendMsgUtil {
                 assigneeName, summary, url, projectId, reporterName);
     }
 
-    public MessageSender generateIssueResolvSender(Long projectId, List<String> fieldList, IssueDTO issue) {
+    public MessageSender generateIssueResolvSender(Long projectId, Set<String> fieldList, IssueDTO issue) {
         IssueVO result = modelMapper.map(issue, IssueVO.class);
         Boolean completed = issueStatusMapper.selectByStatusId(projectId, result.getStatusId()).getCompleted();
         if ((Objects.nonNull(fieldList) && !fieldList.contains(STATUS_ID))
@@ -291,7 +291,7 @@ public class SendMsgUtil {
     }
 
     public MessageSender generateNoticeIssueStatusSender(Long projectId, Set<Long> userSet, List<String> noticeTypeList, 
-                                                         IssueDTO issueDTO, CustomUserDetails userDetails, List<String> fieldList) {
+                                                         IssueDTO issueDTO, CustomUserDetails userDetails, Set<String> fieldList) {
         if (CollectionUtils.isEmpty(userSet)){
             return null;
         }

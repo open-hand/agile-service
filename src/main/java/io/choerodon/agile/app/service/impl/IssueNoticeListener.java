@@ -12,16 +12,18 @@ import io.choerodon.agile.api.vo.RuleExpressVO;
 import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
 import io.choerodon.agile.app.service.StatusNoticeSettingService;
-import io.choerodon.agile.infra.aspect.RuleNoticeAspect;
+import io.choerodon.agile.infra.dto.ConfigurationRuleReceiverDTO;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.ConfigurationRule;
 import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 import io.choerodon.agile.infra.mapper.ConfigurationRuleMapper;
+import io.choerodon.agile.infra.mapper.ConfigurationRuleReceiverMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.utils.CommonMapperUtil;
 import io.choerodon.agile.infra.utils.SendMsgUtil;
 import io.choerodon.core.oauth.DetailsHelper;
+import io.choerodon.mybatis.domain.AuditDomain;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -58,6 +60,8 @@ public class IssueNoticeListener {
     private SendMsgUtil sendMsgUtil;
     @Autowired
     private IssueMapper issueMapper;
+    @Autowired
+    private ConfigurationRuleReceiverMapper configurationRuleReceiverMapper;
 
     @Async
     @TransactionalEventListener(NoticeEventVO.class)
@@ -66,32 +70,52 @@ public class IssueNoticeListener {
             return;
         }
         Long projectId = noticeEvent.getProjectId();
-        List<String> fieldList = noticeEvent.getFieldList();
+        Set<String> fieldList = noticeEvent.getFieldList();
         String event = noticeEvent.getEvent();
         boolean allFieldCheck = BooleanUtils.isTrue(noticeEvent.getAllFieldCheck());
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(noticeEvent.getInstanceId());
         ConfigurationRuleVO rule = new ConfigurationRuleVO();
         rule.setProjectId(projectId);
         rule.setIssueTypes(Collections.singletonList(issueDTO.getTypeCode()));
+        // 筛选出检测更新字段的规则
         List<ConfigurationRuleVO> ruleVOList = processRule(configurationRuleMapper.selectByProjectId(rule), fieldList, allFieldCheck);
-        if (CollectionUtils.isEmpty(ruleVOList)){
-            return;
-        }
         // 检查issue是否符合页面规则条件
-        Map<String, Long> map = configurationRuleMapper.selectByRuleList(issueDTO.getIssueId(), projectId, ruleVOList);
+        Map<String, Long> map = CollectionUtils.isEmpty(ruleVOList) ? new HashMap<>() :
+                configurationRuleMapper.selectByRuleList(issueDTO.getIssueId(), projectId, ruleVOList);
         // 获取所有符合的ruleId
         List<Long> ruleIdList = Optional.ofNullable(map).orElse(new HashMap<>())
                 .values().stream().filter(Objects::nonNull).collect(Collectors.toList());
-        // 更改页面规则对应的处理人
-        changeProcesser(ruleIdList);
         // 组装符合条件的页面规则messageSender
         List<MessageSender> ruleSenderList = generateRuleSender(event, projectId, ruleIdList, issueDTO, fieldList);
-        // 合并消息通知
+        // 合并消息通知并发送
         mergeNotice(ruleSenderList);
+        // 更改页面规则对应的处理人
+        changeProcesser(issueDTO, ruleIdList, ruleVOList);
     }
 
-    private void changeProcesser(List<Long> ruleIdList) {
-//        ruleIdList
+    /**
+     * 修改经办人
+     * @param issueDTO issueDTO
+     * @param ruleIdList 符合条件的规则id
+     * @param ruleVOList 全部的规则
+     */
+    private void changeProcesser(IssueDTO issueDTO, List<Long> ruleIdList, List<ConfigurationRuleVO> ruleVOList) {
+        if (CollectionUtils.isEmpty(ruleIdList)){
+            return;
+        }
+        ConfigurationRuleVO rule = ruleVOList.stream()
+                .filter(ruleVO -> ruleIdList.contains(ruleVO.getId()))
+                .max(Comparator.comparing(AuditDomain::getCreationDate))
+                .orElse(new ConfigurationRuleVO());
+        List<ConfigurationRuleReceiverDTO> receiverList =
+                configurationRuleReceiverMapper.selectReceiver(Collections.singletonList(rule.getId()),
+                Collections.singletonList(ConfigurationRuleReceiverDTO.TYPE_PROCESSER));
+        ConfigurationRuleReceiverDTO receiver = receiverList.stream().findFirst().orElse(null);
+        if (Objects.isNull(receiver)){
+            return;
+        }
+        issueDTO.setAssigneeId(receiver.getId());
+        issueMapper.updateOptional(issueDTO, "assigneeId");
     }
 
     private boolean checkEvent(NoticeEventVO noticeEvent) {
@@ -111,7 +135,14 @@ public class IssueNoticeListener {
         return true;
     }
 
-    private List<ConfigurationRuleVO> processRule(List<ConfigurationRuleVO> sourceList, List<String> fieldList, boolean allFieldCheck) {
+    /**
+     * 筛选出检测更新字段受页面规则限制的规则
+     * @param sourceList 页面规则
+     * @param fieldList 更新字段
+     * @param allFieldCheck 是否是全字段检测
+     * @return 仅对更新字段检测的规则集合
+     */
+    private List<ConfigurationRuleVO> processRule(List<ConfigurationRuleVO> sourceList, Set<String> fieldList, boolean allFieldCheck) {
         List<ConfigurationRuleVO> ruleList = new ArrayList<>(sourceList);
         JavaType javaType = CommonMapperUtil.getTypeFactory().constructParametricType(List.class, RuleExpressVO.class);
         for (ConfigurationRuleVO ruleVO : ruleList) {
@@ -119,6 +150,9 @@ public class IssueNoticeListener {
             ruleVO.setSqlQuery(configurationRuleService.generateSqlQuery(ruleVO));
         }
         if (allFieldCheck){
+            // 之后消息检测需要用到
+            fieldList.add("statusId");
+            fieldList.add("asigneeId");
             return ruleList;
         }
         if (CollectionUtils.isEmpty(fieldList)){
@@ -139,7 +173,7 @@ public class IssueNoticeListener {
     }
 
     private List<MessageSender> generateRuleSender(String event,Long projectId,List<Long> ruleIdList,
-                                                   IssueDTO issue, List<String> fieldList) {
+                                                   IssueDTO issue, Set<String> fieldList) {
         Map<Long, ConfigurationRuleVO> map = configurationRuleService.selectRuleALLReceiver(ruleIdList);
         // 生成需要合并的messageSenderList
         return Arrays.stream(RuleNoticeEvent.getMsgCode(event))
@@ -148,7 +182,7 @@ public class IssueNoticeListener {
     }
 
     private Function<SendMsgUtil, MessageSender> generatedSenderByCode(String messageCode, Long projectId,
-                                                                       IssueDTO issue, List<String> fieldList){
+                                                                       IssueDTO issue, Set<String> fieldList){
         Function<SendMsgUtil, MessageSender> func = null;
         switch (messageCode){
             case RuleNoticeEvent.ISSUECREATE:

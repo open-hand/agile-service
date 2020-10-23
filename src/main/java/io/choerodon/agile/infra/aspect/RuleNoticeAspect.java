@@ -39,7 +39,7 @@ public class RuleNoticeAspect {
         MethodSignature sign = (MethodSignature) jp.getSignature();
         Method method = sign.getMethod();
         RuleNotice ruleNotice = method.getAnnotation(RuleNotice.class);
-        List<String> fieldList = getFieldList(ruleNotice, jp);
+        Set<String> fieldList = getFieldList(ruleNotice, jp);
         Long projectId = (Long)Reflections.getFieldValue(result, "projectId");
         log.info("rule notice detection, component: [{}], event: [{}]", ruleNotice.value(), ruleNotice.event());
         ApplicationContext context = ApplicationContextHelper.getContext();
@@ -53,14 +53,13 @@ public class RuleNoticeAspect {
      * @param jp jp
      * @return fieldList
      */
-    private List<String> getFieldList(RuleNotice ruleNotice,JoinPoint jp) {
+    private HashSet<String> getFieldList(RuleNotice ruleNotice,JoinPoint jp) {
         List<String> fieldList = new ArrayList<>(Arrays.asList(ruleNotice.fieldList()));
         if (CollectionUtils.isNotEmpty(fieldList)){
-            return fieldList;
+            return new HashSet<>(fieldList);
         }
-        
         return StringUtils.isBlank(ruleNotice.fieldListName()) ?
-                null : (List<String>) getNameAndValue(jp).get(ruleNotice.fieldListName());
+                null : new HashSet<>((List<String>) getNameAndValue(jp).get(ruleNotice.fieldListName()));
     }
 
     Map<String, Object> getNameAndValue(JoinPoint joinPoint) {
