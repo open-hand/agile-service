@@ -189,6 +189,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                 reportVO.setCcList(map.get(reportVO.getId()).getCcList());
                 reportVO.setIssueTypes(CommonMapperUtil.readValue(reportVO.getTypeCode(), javaType));
                 reportVO.setUserTypes(map.get(reportVO.getId()).getUserTypes());
+                reportVO.setProcesserList(map.get(reportVO.getId()).getProcesserList());
             }
             return page;
         });

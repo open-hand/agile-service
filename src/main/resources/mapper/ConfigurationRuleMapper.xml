@@ -26,7 +26,6 @@
             AND acr.name LIKE #{nameLike}
         </if>
         <if test="enabled != null">
-            <bind name="nameLike" value="'%' + name + '%'"/>
             AND acr.is_enabled = #{enabled}
         </if>
         <if test="source != null and source != ''">
