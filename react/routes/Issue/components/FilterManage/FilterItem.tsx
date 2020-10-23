@@ -65,7 +65,7 @@ const FilterItem: React.FC<Props> = ({ data, onSubmit, onDelete }) => {
       okText: '删除',
       okType: 'danger',
     });
-  }, []);
+  }, [filterId, name, onDelete]);
   const checkName = useCallback(async (value: string) => {
     if (name === value) {
       return true;
