@@ -4,15 +4,20 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JavaType;
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
+import io.choerodon.agile.api.vo.NoticeEventVO;
+import io.choerodon.agile.api.vo.RuleExpressVO;
 import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
-import io.choerodon.agile.app.service.NoticeDetectionService;
 import io.choerodon.agile.app.service.StatusNoticeSettingService;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.aspect.RuleNoticeAspect;
 import io.choerodon.agile.infra.dto.UserDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 import io.choerodon.agile.infra.mapper.ConfigurationRuleMapper;
+import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.agile.infra.utils.CommonMapperUtil;
 import io.choerodon.agile.infra.utils.SendMsgUtil;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections.keyvalue.MultiKey;
@@ -24,20 +29,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * @author jiaxu.cui@hand-china.com 2020/10/9 上午9:59
  */
-@Service
-public class NoticeDetectionServiceImpl implements NoticeDetectionService {
+@Component
+public class IssueNoticeListener {
 
-    public static final String ISSUECREATE = "ISSUECREATE";
-    public static final String ISSUEASSIGNEE = "ISSUEASSIGNEE";
-    public static final String ISSUESOLVE = "ISSUESOLVE";
-    public static final String ISSUECHANGESTATUS = "ISSUECHANGESTATUS";
+    public static final String ISSUE = "ISSUE";
+    public static final String BACKLOG = "BACKLOG";
 
-    public static final Logger log = LoggerFactory.getLogger(NoticeDetectionServiceImpl.class);
+    public static final Logger log = LoggerFactory.getLogger(IssueNoticeListener.class);
 
     @Autowired
     private ConfigurationRuleMapper configurationRuleMapper;
@@ -49,13 +53,23 @@ public class NoticeDetectionServiceImpl implements NoticeDetectionService {
     private StatusNoticeSettingService statusNoticeSettingService;
     @Autowired
     private SendMsgUtil sendMsgUtil;
+    @Autowired
+    private IssueMapper issueMapper;
 
     @Async
-    @Override
-    public void issueNoticeDetection(RuleNoticeEvent event, IssueDTO issueDTO, Long projectId, List<String> fieldList){
+    @TransactionalEventListener(NoticeEventVO.class)
+    public void issueNoticeDetection(NoticeEventVO noticeEvent){
+        if (checkEvent(noticeEvent)){
+            return;
+        }
+        Long projectId = noticeEvent.getProjectId();
+        List<String> fieldList = noticeEvent.getFieldList();
+        String event = noticeEvent.getEvent();
+        IssueDTO issueDTO = issueMapper.selectByPrimaryKey(noticeEvent.getInstanceId());
         ConfigurationRuleVO rule = new ConfigurationRuleVO();
         rule.setProjectId(projectId);
-        List<ConfigurationRuleVO> ruleVOList = configurationRuleMapper.selectByProjectId(rule);
+        rule.setIssueTypes(Collections.singletonList(issueDTO.getTypeCode()));
+        List<ConfigurationRuleVO> ruleVOList = processRule(configurationRuleMapper.selectByProjectId(rule));
         if (CollectionUtils.isEmpty(ruleVOList)){
             return;
         }
@@ -70,11 +84,38 @@ public class NoticeDetectionServiceImpl implements NoticeDetectionService {
         mergeNotice(ruleSenderList);
     }
 
-    private List<MessageSender> generateRuleSender(RuleNoticeEvent event,Long projectId,List<Long> ruleIdList,
+    private boolean checkEvent(NoticeEventVO noticeEvent) {
+        if (Objects.equals(ISSUE, noticeEvent.getSource())){
+            return false;
+        }
+        log.debug(noticeEvent.toString());
+        if (Objects.isNull(noticeEvent.getEvent())){
+            return false;
+        }
+        if (Objects.isNull(noticeEvent.getInstanceId())){
+            return false;
+        }
+        if (Objects.isNull(noticeEvent.getProjectId())){
+            return false;
+        }
+        return true;
+    }
+
+    private List<ConfigurationRuleVO> processRule(List<ConfigurationRuleVO> sourceList) {
+        List<ConfigurationRuleVO> ruleList = new ArrayList<>(sourceList);
+        JavaType javaType = CommonMapperUtil.getTypeFactory().constructParametricType(List.class, RuleExpressVO.class);
+        for (ConfigurationRuleVO ruleVO : ruleList) {
+            ruleVO.setExpressList(CommonMapperUtil.readValue(ruleVO.getExpressFormat(), javaType));
+            ruleVO.setSqlQuery(configurationRuleService.generateSqlQuery(ruleVO));
+        }
+        return ruleList;
+    }
+
+    private List<MessageSender> generateRuleSender(String event,Long projectId,List<Long> ruleIdList,
                                                    IssueDTO issue, List<String> fieldList) {
         Map<Long, ConfigurationRuleVO> map = configurationRuleService.selectRuleALLReceiver(ruleIdList);
         // 生成需要合并的messageSenderList
-        return Arrays.stream(event.getMessageCodeList())
+        return Arrays.stream(RuleNoticeEvent.getMsgCode(event))
                 .map(code ->getSenderList(generatedSenderByCode(code, projectId, issue, fieldList), map))
                 .flatMap(Collection::stream).collect(Collectors.toList());
     }
@@ -83,16 +124,16 @@ public class NoticeDetectionServiceImpl implements NoticeDetectionService {
                                                                        IssueDTO issue, List<String> fieldList){
         Function<SendMsgUtil, MessageSender> func = null;
         switch (messageCode){
-            case ISSUECREATE:
+            case RuleNoticeEvent.ISSUECREATE:
                 func = msgUtil -> msgUtil.generateIssueCreatesender(projectId, issue);
                 break;
-            case ISSUEASSIGNEE:
+            case RuleNoticeEvent.ISSUEASSIGNEE:
                 func = msgUtil -> msgUtil.generateIssueAsigneeSender(projectId, fieldList, issue);
                 break;
-            case ISSUESOLVE:
+            case RuleNoticeEvent.ISSUESOLVE:
                 func = msgUtil -> msgUtil.generateIssueResolvSender(projectId, fieldList, issue);
                 break;
-            case ISSUECHANGESTATUS:
+            case RuleNoticeEvent.ISSUECHANGESTATUS:
                 StatusNoticeSettingVO settingVO = statusNoticeSettingService.selectNoticeUserAndType(projectId, issue.getIssueId());
                 func = msgUtil -> msgUtil.generateNoticeIssueStatusSender(projectId, settingVO.getUserIdList(),
                         new ArrayList<>(settingVO.getUserTypeList()), issue, DetailsHelper.getUserDetails(), fieldList);

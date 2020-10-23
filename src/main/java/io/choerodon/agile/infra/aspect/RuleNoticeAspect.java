@@ -5,10 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.choerodon.agile.app.service.NoticeDetectionService;
+import io.choerodon.agile.api.vo.NoticeEventVO;
 import io.choerodon.agile.infra.annotation.RuleNotice;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.mapper.IssueMapper;
+import io.choerodon.core.convertor.ApplicationContextHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -19,7 +18,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.hzero.core.util.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,15 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(rollbackFor = Exception.class)
 public class RuleNoticeAspect {
     
-    public static final String ISSUE = "ISSUE";
-    public static final String BACKLOG = "BACKLOG";
-    
     public static final Logger log = LoggerFactory.getLogger(RuleNoticeAspect.class);
-    
-    @Autowired
-    private NoticeDetectionService noticeDetectionService;
-    @Autowired
-    private IssueMapper issueMapper;
     
     @Pointcut("@annotation(io.choerodon.agile.infra.annotation.RuleNotice)")
     public void pointCut(){}
@@ -54,23 +45,9 @@ public class RuleNoticeAspect {
                 null : (List<String>) getNameAndValue(jp).get(ruleNotice.fieldListName());
         Long projectId = (Long)Reflections.getFieldValue(result, "projectId");
         log.info("rule notice detection, component: [{}], event: [{}]", ruleNotice.value(), ruleNotice.event());
-        switch (ruleNotice.value()){
-            case ISSUE:
-                Long issueId = (Long)Reflections.getFieldValue(result, "issueId");
-                IssueDTO issueDTO = issueMapper.selectByPrimaryKey(issueId);
-                noticeDetectionService.issueNoticeDetection(ruleNotice.event(), issueDTO, projectId, fieldList);
-                break;
-            case BACKLOG:
-                Long backlogId = (Long)Reflections.getFieldValue(result, "id");
-                backlogNoticeDetection(backlogId, projectId);
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void backlogNoticeDetection(Long backlogId, Long projectId) {
-        // TODO 
+        ApplicationContext context = ApplicationContextHelper.getContext();
+        Long instanceId = (Long)Reflections.getFieldValue(result, ruleNotice.instanceIdNameInReturn());
+        context.publishEvent(new NoticeEventVO(ruleNotice.value(), ruleNotice.event(), instanceId, projectId, fieldList));
     }
 
     Map<String, Object> getNameAndValue(JoinPoint joinPoint) {

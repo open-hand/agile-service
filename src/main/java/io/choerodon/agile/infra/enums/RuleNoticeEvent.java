@@ -4,20 +4,42 @@ package io.choerodon.agile.infra.enums;
  * 页面规则通知事件
  * @author jiaxu.cui@hand-china.com 2020/9/27 下午1:56
  */
-public enum RuleNoticeEvent {
-    
-    ISSUE_CREATED(new String[]{"ISSUECREATE","ISSUEASSIGNEE"}),
-    ISSUE_UPDATE(new String[]{"ISSUEASSIGNEE","ISSUESOLVE", "ISSUECHANGESTATUS"}),
-    ISSUE_RESOLVED(new String[]{"ISSUESOLVE"}),
-    ISSUE_STATAUS_CHANGE(new String[]{"ISSUESOLVE","ISSUECHANGESTATUS"});
-    
-    private String[] messageCodeList;
+public class RuleNoticeEvent {
 
-    RuleNoticeEvent(String[] messageCodeList) {
-        this.messageCodeList = messageCodeList;
-    }
+    /**
+     * 事件代码
+     */
+    public static final String ISSUE_CREATED = "ISSUE_CREATED";
+    public static final String ISSUE_UPDATE = "ISSUE_UPDATE";
+    public static final String ISSUE_RESOLVED = "ISSUE_RESOLVED";
+    public static final String ISSUE_STATAUS_CHANGE = "ISSUE_STATAUS_CHANGE";
 
-    public String[] getMessageCodeList() {
-        return messageCodeList;
+    /**
+     * 消息代码
+     */
+    public static final String ISSUECREATE = "ISSUECREATE";
+    public static final String ISSUEASSIGNEE = "ISSUEASSIGNEE";
+    public static final String ISSUESOLVE = "ISSUESOLVE";
+    public static final String ISSUECHANGESTATUS = "ISSUECHANGESTATUS";
+
+    public static String[] getMsgCode(String event){
+        String[] msgCode = null;
+        switch (event){
+            case ISSUE_CREATED:
+                msgCode = new String[]{ISSUECREATE,ISSUEASSIGNEE};
+                break;
+            case ISSUE_UPDATE:
+                msgCode = new String[]{ISSUEASSIGNEE,ISSUESOLVE, ISSUECHANGESTATUS};
+                break;
+            case ISSUE_RESOLVED:
+                msgCode = new String[]{ISSUESOLVE};
+                break;
+            case ISSUE_STATAUS_CHANGE:
+                msgCode = new String[]{ISSUESOLVE,ISSUECHANGESTATUS};
+                break;
+            default:
+                break;
+        }
+        return msgCode;
     }
 }

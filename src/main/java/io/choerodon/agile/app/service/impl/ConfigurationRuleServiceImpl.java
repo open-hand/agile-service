@@ -75,7 +75,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getExpressList()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getIssueTypes()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(checkUniqueName(projectId, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
-        String sqlQuery = generateSqlQuery(configurationRuleVO, projectId);
+        String sqlQuery = generateSqlQuery(configurationRuleVO);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
         configurationRuleDTO.setTypeCode(CommonMapperUtil.writeValueAsString(configurationRuleVO.getIssueTypes()));
@@ -111,7 +111,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.isTrue(checkUniqueName(projectId, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
         configurationRuleVO.setId(ruleId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
-        configurationRuleDTO.setSqlQuery(generateSqlQuery(configurationRuleVO, projectId));
+        configurationRuleDTO.setSqlQuery(generateSqlQuery(configurationRuleVO));
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
         configurationRuleDTO.setTypeCode(CommonMapperUtil.writeValueAsString(configurationRuleVO.getIssueTypes()));
         if (configurationRuleMapper.updateOptional(configurationRuleDTO, ConfigurationRuleDTO.FIELD_SQL_QUERY,
@@ -189,6 +189,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                 reportVO.setCcList(map.get(reportVO.getId()).getCcList());
                 reportVO.setIssueTypes(CommonMapperUtil.readValue(reportVO.getTypeCode(), javaType));
                 reportVO.setUserTypes(map.get(reportVO.getId()).getUserTypes());
+                reportVO.setProcesserList(map.get(reportVO.getId()).getProcesserList());
             }
             return page;
         });
@@ -304,7 +305,9 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         return StringUtils.EMPTY;
     }
 
-    private String generateSqlQuery(ConfigurationRuleVO configurationRuleVO, Long projectId) {
+    @Override
+    public String generateSqlQuery(ConfigurationRuleVO configurationRuleVO) {
+        Long projectId = configurationRuleVO.getProjectId();
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         List<RuleExpressVO> ruleExpressVOList = configurationRuleVO.getExpressList();
         Map<String, ObjectSchemeFieldVO> fieldMap = objectSchemeFieldService
