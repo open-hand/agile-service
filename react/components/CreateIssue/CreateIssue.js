@@ -21,6 +21,7 @@ import {
   getProjectName, getProjectId,
 } from '@/utils/common';
 import { observer } from 'mobx-react';
+import { IsProjectMember } from '@/hooks/useIsProjectMember';
 import { IsInProgram } from '@/hooks/useIsInProgram';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import { UploadButton } from '../CommonComponent';
@@ -620,18 +621,22 @@ class CreateIssue extends Component {
                   allowClear
                 />,
               )}
-              <span
-                onClick={this.assigneeMe}
-                role="none"
-                style={{
-                  display: 'inline-block',
-                  color: 'rgba(63, 81, 181)',
-                  marginLeft: 10,
-                  cursor: 'pointer',
-                }}
-              >
-                分派给我
-              </span>
+              <IsProjectMember>
+                {(isProjectMember) => isProjectMember && (
+                <span
+                  onClick={this.assigneeMe}
+                  role="none"
+                  style={{
+                    display: 'inline-block',
+                    color: 'rgba(63, 81, 181)',
+                    marginLeft: 10,
+                    cursor: 'pointer',
+                  }}
+                >
+                  分配给我
+                </span>
+                )}
+              </IsProjectMember>
             </div>
           </FormItem>
 

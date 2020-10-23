@@ -1,14 +1,14 @@
+/* eslint-disable react/jsx-no-bind */
 import React, { Component } from 'react';
 import _ from 'lodash';
-import { stores } from '@choerodon/boot';
 import {
   Form, Select, Button,
 } from 'choerodon-ui';
 import { userApi, issueApi } from '@/api';
+import { IsProjectMember } from '@/hooks/useIsProjectMember';
 import UserHead from '../UserHead';
 import './Assignee.less';
 
-const { AppState } = stores;
 const { Option } = Select;
 const FormItem = Form.Item;
 let sign = false;
@@ -18,7 +18,7 @@ class Assignee extends Component {
     this.setState({ selectLoading: true });
     userApi.getAllInProject(input).then((res) => {
       this.setState({
-        originUsers: res.list.filter(u => u.enabled),
+        originUsers: res.list.filter((u) => u.enabled),
         selectLoading: false,
       });
     });
@@ -43,15 +43,15 @@ class Assignee extends Component {
       form, issueId, objectVersionNumber, onOk,
     } = this.props;
     form.validateFields((err, values) => {
-      if (!err) {    
+      if (!err) {
         const { assigneeId } = values;
         const obj = {
           issueId,
           objectVersionNumber,
           assigneeId: assigneeId || null,
-        };    
+        };
         issueApi.update(obj)
-          .then((res) => {       
+          .then((res) => {
             onOk();
             resolve();
           });
@@ -64,7 +64,7 @@ class Assignee extends Component {
       this.setState({ selectLoading: true });
       userApi.getAllInProject(input).then((res) => {
         this.setState({
-          originUsers: res.list.filter(u => u.enabled),
+          originUsers: res.list.filter((u) => u.enabled),
           selectLoading: false,
         });
       });
@@ -116,7 +116,7 @@ class Assignee extends Component {
       selectLoading, assigneeId, originUsers,
     } = this.state;
 
-    return (      
+    return (
       <div className="c7n-agile-assignee">
         <Form layout="vertical" style={{ width: 400 }}>
           <FormItem>
@@ -130,10 +130,10 @@ class Assignee extends Component {
                 filter
                 filterOption={false}
                 onChange={this.handleSelectChange.bind(this)}
-                onFilterChange={this.handleFilterChange.bind(this)}      
+                onFilterChange={this.handleFilterChange.bind(this)}
                 getPopupContainer={() => document.getElementById('agile')}
               >
-                {originUsers.map(user => (
+                {originUsers.map((user) => (
                   <Option key={user.id} value={user.id}>
                     <div className="wrap">
                       <UserHead
@@ -151,13 +151,18 @@ class Assignee extends Component {
             )}
           </FormItem>
         </Form>
-        <Button
-          className="btn"
-          funcType="raised"
-          onClick={this.handleClickAssigneeToMe.bind(this)}
-        >
-          分配给我
-        </Button>
+        <IsProjectMember>
+          {(isProjectMember) => isProjectMember && (
+            <Button
+              className="btn"
+              funcType="raised"
+              onClick={this.handleClickAssigneeToMe.bind(this)}
+            >
+              分配给我
+            </Button>
+          )}
+        </IsProjectMember>
+
       </div>
     );
   }
