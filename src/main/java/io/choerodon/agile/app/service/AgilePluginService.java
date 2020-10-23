@@ -7,6 +7,7 @@ import io.choerodon.agile.api.vo.QuickFilterValueVO;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
 import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
@@ -210,4 +211,11 @@ public interface AgilePluginService {
      * @return
      */
     List<ObjectSchemeFieldDTO> filterProgramEpic(List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS);
+
+
+    /**
+     * 创建项目群时初始化项目群特有的问题类型和方案
+     * @param projectEvent
+     */
+    void initProjectIssueTypeSchemeAndArt(ProjectEvent projectEvent);
 }
