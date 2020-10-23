@@ -1,4 +1,5 @@
 import { axios, stores } from '@choerodon/boot';
+import { getOrganizationId } from '@/utils/common';
 import Api from './Api';
 
 interface ICreateData {
@@ -24,10 +25,15 @@ class PageRuleApi extends Api<PageRuleApi> {
     });
   }
 
-  getPageRuleSystemFields() {
+  getPageRuleSystemFields(issueTypeList: string[]) {
     return this.request({
       method: 'get',
       url: `${this.prefix}/configuration_rule/fields`,
+      params: {
+        schemeCode: 'agile_issue',
+        issueTypeList: issueTypeList.join(','),
+        organizationId: getOrganizationId(),
+      },
     });
   }
 

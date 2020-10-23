@@ -12,7 +12,7 @@ import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
-import { User } from '@/common/types';
+import { User, IFieldType } from '@/common/types';
 import { fieldApi, pageRuleApi, pageConfigApi } from '@/api';
 import Loading from '@/components/Loading';
 import { find, map, includes } from 'lodash';
@@ -64,6 +64,17 @@ interface Express {
   // 是否允许小数，需要判断是否允许小数
   allowDecimals?: boolean,
 }
+
+interface IRule {
+  id: string,
+  objectVersionNumber: number,
+  name: string
+  issueTypes: string[],
+  processerList: User[],
+  ccList: User[],
+  receiverList: User[],
+  expressList: Express[]
+}
 // 'in' | 'not_in' | 'is' | 'is_not' | 'eq' | 'not_eq' | 'gt' | 'gte' | 'lt' | 'lte' | 'like' | 'not_like'
 const operationMap = new Map([
   ['in', '包含'],
@@ -100,7 +111,7 @@ const systemFieldTypeMap = new Map([
   ['story_point', 'number'],
 ]);
 
-const customTypeMap = new Map([
+const middleTypeMap = new Map<IFieldType, IMiddleFieldType>([
   ['radio', 'option'],
   ['checkbox', 'option'],
   ['time', 'date_hms'],
@@ -161,7 +172,7 @@ const RuleModal: React.FC<Props> = ({
   const [fields, Field] = useFields();
   const [updateCount, setUpdateCount] = useState<number>(0);
   const systemDataRefMap = useRef<Map<string, any>>(new Map());
-  const [initRule, setInitRule] = useState({});
+  const [initRule, setInitRule] = useState<IRule>();
   const [loading, setLoading] = useState<boolean>(false);
   const [backlogStarted, setBacklogStarted] = useState<boolean>(false);
 
@@ -200,14 +211,18 @@ const RuleModal: React.FC<Props> = ({
       required: true,
       label: '名称',
       maxLength: 50,
-      validator: (value, name, record) => pageRuleApi.checkName(value).then((res: boolean) => {
-        if (!res) {
-          return '规则名称重复';
+      validator: async (value, name, record) => {
+        if (ruleId && value === initRule?.name) {
+          return true;
         }
-        return true;
-      }),
+        const res = await pageRuleApi.checkName(value);
+        if (res) {
+          return true;
+        }
+        return '规则名称重复';
+      },
     }, {
-      name: 'issueType',
+      name: 'issueTypes',
       required: true,
       type: 'string' as FieldType,
       label: '问题类型',
@@ -216,11 +231,15 @@ const RuleModal: React.FC<Props> = ({
       options: issueTypeDataSet,
     }, {
       name: 'receiverList',
-      required: true,
+      dynamicProps: {
+        required: ({ record }) => !record.get('processerList'),
+      },
     },
     {
-      name: 'assignee',
-      type: 'string' as FieldType,
+      name: 'processerList',
+      dynamicProps: {
+        required: ({ record }) => !record.get('receiverList'),
+      },
     },
     ],
     events: {
@@ -266,10 +285,11 @@ const RuleModal: React.FC<Props> = ({
         if (name.indexOf('operation') > -1) {
           dataSet.current.set(`${key}-value`, undefined);
         }
+        console.log('update');
         setUpdateCount((count) => count + 1);
       },
     },
-  }), [issueTypeDataSet]);
+  }), [initRule?.name, issueTypeDataSet, ruleId]);
 
   const renderOperations = useCallback((fieldK: { key: number }) => {
     const { key } = fieldK;
@@ -385,33 +405,6 @@ const RuleModal: React.FC<Props> = ({
     }
   }, [addField]);
 
-  useEffect(() => {
-    if (!ruleId) {
-      const newKey = Field.add();
-      addFieldRule(newKey, 0);
-    }
-    setLoading(true);
-    Promise.all([pageRuleApi.getPageRuleSystemFields(), fieldApi.getCustomFields()]).then(([systemFields, customFields]) => {
-      const transformedSystemFields = systemFields.map((item: { fieldCode: string; }) => ({
-        ...item,
-        code: item.fieldCode,
-        fieldType: systemFieldTypeMap.get(item.fieldCode),
-        system: true,
-      }));
-      const transformedCustomFields = customFields.map((item: IField) => ({
-        ...item,
-        type: customTypeMap.get(item.fieldType),
-        system: false,
-      }));
-      const data = [...transformedSystemFields, ...transformedCustomFields].filter((item) => !find(excludeCode, (code) => code === item.code));
-      fieldDataRef.current = data;
-      batchedUpdates(() => {
-        setFieldData(data);
-        setLoading(false);
-      });
-    });
-  }, [addFieldRule, ruleId]);
-
   const getFieldValue = useCallback((name) => {
     const { current } = modalDataSet;
     if (current) {
@@ -419,6 +412,46 @@ const RuleModal: React.FC<Props> = ({
     }
     return '';
   }, [modalDataSet]);
+
+  const getFieldData = useCallback(async (typeCodes?: string[]) => {
+    const issueTypes = typeCodes || getFieldValue('issueTypes');
+    if (issueTypes && issueTypes.length) {
+      setLoading(true);
+      const res = await pageRuleApi.getPageRuleSystemFields(issueTypes);
+      const transformedFields = (res || []).map((item: IField) => ({
+        ...item,
+        type: middleTypeMap.get(item.fieldType) as IMiddleFieldType,
+      }));
+      const data = transformedFields.filter((item: IFieldWithType) => !find(excludeCode, (code) => code === item.code));
+      fieldDataRef.current = data;
+      batchedUpdates(() => {
+        setFieldData(data);
+        setLoading(false);
+      });
+    } else {
+      setFieldData([]);
+      fieldDataRef.current = [];
+    }
+  }, [getFieldValue]);
+
+  const handleIssueTypesChange = useCallback(() => {
+    if (fields.length) {
+      fields.forEach(({ key }: { key: number}) => {
+        removeField(`${key}-code`);
+        removeField(`${key}-operation`);
+        removeField(`${key}-value`);
+        removeField(`${key}-ao`);
+      });
+      Field.clear();
+      const newKey = Field.add();
+      addFieldRule(newKey, 0);
+    } else {
+      const newKey = Field.add();
+      addFieldRule(newKey, 0);
+    }
+    setFieldValue('processerList', undefined);
+    getFieldData();
+  }, [addFieldRule, getFieldValue, removeField, getFieldData]);
 
   const transformValue = useCallback((fieldInfo: IFieldWithType, operation: Operation, value: any) => {
     const {
@@ -580,13 +613,18 @@ const RuleModal: React.FC<Props> = ({
   }, [fieldData, getFieldValue, modalDataSet, transformValue, fields]);
 
   const handleClickSubmit = useCallback(async () => {
+    console.log(await modalDataSet.validate());
     if (await modalDataSet.validate()) {
-      console.log('name, issueType, assignee');
-      console.log(toJS(getFieldValue('name')), toJS(getFieldValue('issueType')), toJS(getFieldValue('assignee')));
+      console.log('name, issueTypes, processerList');
+      console.log(toJS(getFieldValue('name')), toJS(getFieldValue('issueTypes')), toJS(getFieldValue('processerList')));
       // debugger;
       const expressObj = transformSumitData();
       const data = {
-        ...initRule,
+        id: initRule?.id,
+        objectVersionNumber: initRule?.objectVersionNumber,
+        name: getFieldValue('name'),
+        issueTypes: getFieldValue('issueTypes'),
+        processerList: (toJS(getFieldValue('processerList')) || []).map((id: string) => ({ id })),
         receiverList: (toJS(getFieldValue('receiverList')) || []).map((id: string) => ({ id })),
         ccList: (toJS(getFieldValue('ccList')) || []).map((id: string) => ({ id })),
         ...expressObj,
@@ -625,38 +663,38 @@ const RuleModal: React.FC<Props> = ({
   }, [modalDataSet]);
 
   useEffect(() => {
-    if (ruleId && fieldData.length) {
+    if (ruleId) {
       setLoading(true);
-      // @ts-ignore
-      pageRuleApi.getRule(ruleId).then((res) => {
+      pageRuleApi.getRule(ruleId).then(async (res: IRule) => {
+        const {
+          name, issueTypes, processerList, ccList = [], receiverList = [], expressList = [],
+        } = res;
+        await getFieldData(issueTypes);
         batchedUpdates(() => {
-          const { ccList = [], receiverList = [], expressList = [] } = res;
+          setFieldValue('name', name);
+          setFieldValue('issueTypes', issueTypes);
+          setFieldValue('processerList', processerList.map((item: User) => item.id));
           setFieldValue('ccList', ccList.map((item: User) => item.id));
           setFieldValue('receiverList', receiverList.map((item: User) => item.id));
-          const existFields = fieldData.filter((item: IFieldWithType) => find(expressList, { fieldCode: item.code }));
-          const initFields = Field.init(new Array(existFields.length).fill({}));
+          const initFields = Field.init(new Array(expressList.length).fill({}));
           initFields.forEach((item: { key: number }, i: number) => {
             addFieldRule(item.key, i);
           });
           expressList.forEach((item: Express, i: number) => {
             const {
-              fieldCode, relationshipWithPervious, operation, valueStr, valueId, valueIdList, valueNum, valueDecimal, valueDate, valueDateHms,
+              fieldType, fieldCode, relationshipWithPervious, operation, valueStr, valueId, valueIdList, valueNum, valueDecimal, valueDate, valueDateHms,
             } = item;
-            const field = find(fieldData, { code: fieldCode });
             const fieldValue = valueStr || valueId || valueIdList || valueNum || valueDecimal || valueDate || valueDateHms;
-            if (field) {
-              const { fieldType, code } = field;
-              const { key } = initFields[i];
-              setFieldValue(`${key}-code`, fieldCode);
-              setFieldValue(`${key}-operation`, operation);
-              if (operation !== 'is' && operation !== 'is_not') {
-                setFieldValue(`${key}-value`, fieldType === 'date' || fieldType === 'datetime' || fieldType === 'time' ? moment(fieldType === 'time' ? `${moment().format('YYYY-MM-DD')} ${fieldValue}` : fieldValue) : fieldValue);
-              } else {
-                setFieldValue(`${key}-value`, 'empty');
-              }
-              if (relationshipWithPervious) {
-                setFieldValue(`${key}-ao`, relationshipWithPervious);
-              }
+            const { key } = initFields[i];
+            setFieldValue(`${key}-code`, fieldCode);
+            setFieldValue(`${key}-operation`, operation);
+            if (operation !== 'is' && operation !== 'is_not') {
+              setFieldValue(`${key}-value`, fieldType === 'date' || fieldType === 'date_hms' ? moment(fieldType === 'date_hms' ? `${moment().format('YYYY-MM-DD')} ${fieldValue}` : fieldValue) : fieldValue);
+            } else {
+              setFieldValue(`${key}-value`, 'empty');
+            }
+            if (relationshipWithPervious) {
+              setFieldValue(`${key}-ao`, relationshipWithPervious);
             }
           });
           setInitRule(res);
@@ -666,7 +704,7 @@ const RuleModal: React.FC<Props> = ({
         setLoading(false);
       });
     }
-  }, [ruleId, fieldData, setFieldValue, addFieldRule]);
+  }, [ruleId, setFieldValue, addFieldRule]);
 
   const existsFieldCodes: string[] = [];
   fields.forEach((fieldWithKey: { key: number }) => {
@@ -678,107 +716,111 @@ const RuleModal: React.FC<Props> = ({
     }
   });
 
-  return (
+  console.log(toJS(getFieldValue('issueTypes')));
 
+  return (
     <div className={styles.rule_form}>
       <Loading loading={loading} />
       <Form dataSet={modalDataSet} ref={formRef as React.RefObject<Form>}>
         <div className={`${styles.rule_form_setting}`}>
           <TextField name="name" style={{ width: 520 }} />
           <Select
-            name="issueType"
+            name="issueTypes"
             clearButton={false}
             multiple
             style={{ width: 520, marginTop: 27 }}
+            onChange={handleIssueTypesChange}
             onOption={({ record }) => ({
-              disabled: (getFieldValue('issueType') && getFieldValue('issueType').indexOf('backlog') > -1 && record.get('typeCode') !== 'backlog') || (getFieldValue('issueType') && getFieldValue('issueType').indexOf('backlog') === -1 && record.get('typeCode') === 'backlog'),
+              disabled: (getFieldValue('issueTypes') && getFieldValue('issueTypes').indexOf('backlog') > -1 && record.get('typeCode') !== 'backlog') || (getFieldValue('issueTypes') && getFieldValue('issueTypes').indexOf('backlog') === -1 && record.get('typeCode') === 'backlog'),
             })}
           />
         </div>
         <div className={`${styles.rule_form_setting}`}>
           <p className={styles.rule_form_setting_title}>规则设置</p>
           {
-                fields.map((f: { key: number }, i: number, arr: { key: number }[]) => {
-                  const { key } = f;
-                  return (
-                    <Row
-                      key={key}
-                      gutter={20}
-                      style={{
-                        marginBottom: 15,
-                      }}
-                    >
-                      <Col span={10}>
-                        <Row gutter={20}>
-                          {
-                            i !== 0 && (
-                              <Col span={8}>
-                                <Select
-                                  required
-                                  label="关系"
-                                  name={`${key}-ao`}
-                                  clearButton={false}
-                                >
-                                  <Option value="and">且</Option>
-                                  <Option value="or">或</Option>
-                                </Select>
-                              </Col>
-
-                            )
-                          }
-                          <Col span={i !== 0 ? 16 : 24}>
+            fields.map((f: { key: number }, i: number, arr: { key: number }[]) => {
+              const { key } = f;
+              return (
+                <Row
+                  key={key}
+                  gutter={20}
+                  style={{
+                    marginBottom: 15,
+                  }}
+                >
+                  <Col span={10}>
+                    <Row gutter={20}>
+                      {
+                        i !== 0 && (
+                          <Col span={8}>
                             <Select
-                              style={{
-                                width: '100%',
-                              }}
-                              label="属性"
-                              name={`${key}-code`}
+                              required
+                              label="关系"
+                              name={`${key}-ao`}
                               clearButton={false}
                             >
-                              {
-                                      fieldData.filter((field: IFieldWithType) => (
-                                        modalDataSet?.current?.get(`${key}-code`) === field.code
-                                      ) || !existsFieldCodes.find((code: string) => code === field.code)).map((field:IFieldWithType) => (
-                                        <Option value={field.code}>
-                                          {field.name}
-                                        </Option>
-                                      ))
-                              }
+                              <Option value="and">且</Option>
+                              <Option value="or">或</Option>
                             </Select>
                           </Col>
-                        </Row>
-                      </Col>
-                      <Col span={4}>
-                        {renderOperations(f)}
-                      </Col>
-                      <Col span={8}>
-                        {
-                          renderRule(modalDataSet, f, fieldData, systemDataRefMap, getFieldValue)
-                        }
-                      </Col>
-                      <Col span={2}>
-                        <Button
-                          disabled={arr.length === 1 && i === 0}
-                          onClick={() => {
-                            // @ts-ignore
-                            Field.remove(key);
-                            removeField(`${key}-code`);
-                            removeField(`${key}-operation`);
-                            removeField(`${key}-value`);
-                            removeField(`${key}-ao`);
-                            if (i === 0) {
-                              if (fields[i + 1]) {
-                                removeField(`${fields[i + 1].key}-ao`);
-                              }
-                            }
+
+                        )
+                      }
+                      <Col span={i !== 0 ? 16 : 24}>
+                        <Select
+                          style={{
+                            width: '100%',
                           }}
-                          icon="delete"
-                        />
+                          label="属性"
+                          name={`${key}-code`}
+                          clearButton={false}
+                        >
+                          {
+                            fieldData.filter((field: IFieldWithType) => (
+                              modalDataSet?.current?.get(`${key}-code`) === field.code
+                            ) || !existsFieldCodes.find((code: string) => code === field.code)).map((field:IFieldWithType) => (
+                              <Option value={field.code}>
+                                {field.name}
+                              </Option>
+                            ))
+                          }
+                        </Select>
                       </Col>
                     </Row>
-                  );
-                })
-               }
+                  </Col>
+                  <Col span={4}>
+                    {renderOperations(f)}
+                  </Col>
+                  <Col span={8}>
+                    {
+                      renderRule(modalDataSet, f, fieldData, systemDataRefMap, getFieldValue)
+                    }
+                  </Col>
+                  <Col span={2}>
+                    <Button
+                      disabled={arr.length === 1 && i === 0}
+                      onClick={() => {
+                        batchedUpdates(() => {
+                          // @ts-ignore
+                          Field.remove(key);
+                          removeField(`${key}-code`);
+                          removeField(`${key}-operation`);
+                          removeField(`${key}-value`);
+                          removeField(`${key}-ao`);
+                          if (i === 0) {
+                            if (fields[i + 1]) {
+                              removeField(`${fields[i + 1].key}-ao`);
+                            }
+                          }
+                        });
+                      }}
+                      icon="delete"
+                    />
+                  </Col>
+                </Row>
+              );
+            })
+          }
           <div>
             <Button
                 // @ts-ignore
@@ -798,7 +840,13 @@ const RuleModal: React.FC<Props> = ({
         </div>
         <div className={`${styles.rule_form_setting}`}>
           <p className={styles.rule_form_setting_title}>自动变更设置</p>
-          <SelectUser name="assignee" label={getFieldValue('issueType') && includes(getFieldValue('issueType'), 'backlog')} style={{ width: 520 }} />
+          <SelectUser
+            name="processerList"
+            multiple={getFieldValue('issueTypes') && includes(getFieldValue('issueTypes'), 'backlog')}
+            label={getFieldValue('issueTypes') && includes(getFieldValue('issueTypes'), 'backlog') ? '处理人' : '经办人'}
+            style={{ width: 520 }}
+            clearButton
+          />
         </div>
         <div className={`${styles.rule_form_setting}`}>
           <p className={styles.rule_form_setting_title}>通知对象设置</p>
@@ -815,6 +863,7 @@ const RuleModal: React.FC<Props> = ({
             multiple
             maxTagCount={6}
             maxTagTextLength={4}
+            clearButton
           />
           <SelectUser
             style={{

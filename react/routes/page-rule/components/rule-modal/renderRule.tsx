@@ -40,7 +40,7 @@ interface FieldOption {
 export interface IField {
   code: string,
   fieldOptions?: FieldOption[],
-  fieldType: string,
+  fieldType: IFieldType,
   fieldTypeName?: string,
   id: string,
   name: string,
@@ -76,7 +76,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
     } = field;
     if (system) {
       switch (code) {
-        case 'issue_type': {
+        case 'issueType': {
           return (
             <SelectIssueType
               name={`${key}-value`}
