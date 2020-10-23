@@ -13,6 +13,13 @@ export const getOrganizationId = () => (AppState.currentMenuType
   : 0);
 export const getApplyType = () => (AppState.currentMenuType.category === 'PROGRAM' ? 'program' : 'agile');
 export const getMenuType = () => (AppState.currentMenuType ? AppState.currentMenuType.type : '');
+export const getIsProjectMember = () => {
+  if (AppState.userInfo.currentRoleLabels && Array.isArray(AppState.userInfo.currentRoleLabels)) {
+    return AppState.userInfo.currentRoleLabels.includes('PROJECT_MEMBER')
+      || AppState.userInfo.currentRoleLabels.includes('PROJECT_ADMIN');
+  }
+  return false;
+};
 
 // 选择主题
 export function configTheme({

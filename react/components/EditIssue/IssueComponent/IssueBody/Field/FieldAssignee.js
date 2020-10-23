@@ -4,6 +4,7 @@ import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import { issueApi } from '@/api';
 import TextEditToggle from '@/components/TextEditTogglePro';
+import { IsProjectMember } from '@/hooks/useIsProjectMember';
 import SelectUser from '@/components/select/select-user';
 import UserHead from '../../../../UserHead';
 
@@ -84,30 +85,34 @@ import UserHead from '../../../../UserHead';
               )
             }
           </TextEditToggle>
-          {(!assigneeId || (
-            assigneeId && assigneeId.toString() !== loginUserId.toString()
-          )) && !disabled
-            ? (
-              <span
-                role="none"
-                className="primary"
-                style={{
-                  cursor: 'pointer',
-                  marginLeft: '10px',
-                  marginRight: 10,
-                  display: 'inline-block',
-                  verticalAlign: 'middle',
-                  whiteSpace: 'nowrap',
-                }}
-                onClick={() => {
-                  if (!assigneeId || loginUserId.toString() !== assigneeId.toString()) {
-                    this.updateIssueAssignee(loginUserId);
-                  }
-                }}
-              >
-                分配给我
-              </span>
-            ) : ''}
+          <IsProjectMember>
+            {(isProjectMember) => isProjectMember && (
+              (!assigneeId || (
+                assigneeId && assigneeId.toString() !== loginUserId.toString()
+              )) && !disabled
+                ? (
+                  <span
+                    role="none"
+                    className="primary"
+                    style={{
+                      cursor: 'pointer',
+                      marginLeft: '10px',
+                      marginRight: 10,
+                      display: 'inline-block',
+                      verticalAlign: 'middle',
+                      whiteSpace: 'nowrap',
+                    }}
+                    onClick={() => {
+                      if (!assigneeId || loginUserId.toString() !== assigneeId.toString()) {
+                        this.updateIssueAssignee(loginUserId);
+                      }
+                    }}
+                  >
+                    分配给我
+                  </span>
+                ) : ''
+            )}
+          </IsProjectMember>
         </div>
       </div>
     );
