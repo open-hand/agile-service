@@ -5,6 +5,7 @@ import io.choerodon.agile.api.vo.business.SprintDetailVO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
 import io.choerodon.agile.infra.dto.business.SprintConvertDTO;
+import io.choerodon.agile.infra.utils.*;
 import io.choerodon.core.domain.Page;
 import com.google.common.collect.Ordering;
 import io.choerodon.agile.api.validator.SprintValidator;
@@ -15,10 +16,6 @@ import io.choerodon.agile.infra.aspect.DataLogRedisUtil;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.mapper.*;
-import io.choerodon.agile.infra.utils.DateUtil;
-import io.choerodon.agile.infra.utils.PageUtil;
-import io.choerodon.agile.infra.utils.RankUtil;
-import io.choerodon.agile.infra.utils.StringUtil;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
@@ -117,6 +114,8 @@ public class SprintServiceImpl implements SprintService {
     private static final String UPDATE_ERROR = "error.sprint.update";
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Override
     public synchronized SprintDetailVO createSprint(Long projectId) {
@@ -143,7 +142,14 @@ public class SprintServiceImpl implements SprintService {
         if (checkName(projectId, sprintCreateVO.getSprintName())) {
             throw new CommonException("error.sprintName.exist");
         }
-        return sprintCreateAssembler.toTarget(create(sprint), SprintDetailVO.class);
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        SprintConvertDTO sprintConvertDTO = null;
+        if (agilePluginService != null) {
+            agilePluginService.createSubProjectSprint(projectId, sprintConvertDTO);
+        } else {
+            sprintConvertDTO = create(sprint);
+        }
+        return sprintCreateAssembler.toTarget(sprintConvertDTO, SprintDetailVO.class);
     }
 
     private Boolean checkNameUpdate(Long projectId, Long sprintId, String sprintName) {
@@ -253,6 +259,10 @@ public class SprintServiceImpl implements SprintService {
         handleSprintIssueData(issueIdSprintIdVOS, issueIds, sprintSearches, backLogIssueVO, projectId, priorityMap, statusMapDTOMap, issueTypeDTOMap,allIssueIds);
         backlog.put(SPRINT_DATA, sprintSearches);
         backlog.put(BACKLOG_DATA, backLogIssueVO);
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        if (agilePluginService != null) {
+            agilePluginService.addProgramAttr(projectId,issueIds,backlog);
+        }
         return backlog;
     }
 
@@ -371,6 +381,9 @@ public class SprintServiceImpl implements SprintService {
         if (sprintUpdateVO.getWorkDates() != null && !sprintUpdateVO.getWorkDates().isEmpty()) {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Calendar calendar = Calendar.getInstance();
+            if (agilePluginService != null) {
+                agilePluginService.handlerSprintStartDate(projectId, sprintConvertDTO);
+            }
             sprintUpdateVO.getWorkDates().forEach(workDates -> {
                 WorkCalendarRefDTO workCalendarRefDTO = new WorkCalendarRefDTO();
                 workCalendarRefDTO.setSprintId(sprintConvertDTO.getSprintId());
@@ -465,6 +478,9 @@ public class SprintServiceImpl implements SprintService {
         sprintDTO.setProjectId(projectId);
         sprintDTO.setSprintId(sprintId);
         SprintDetailVO sprintDetailVO = sprintSearchAssembler.toTarget(sprintMapper.selectOne(sprintDTO), SprintDetailVO.class);
+        if (agilePluginService != null) {
+            sprintDetailVO =  agilePluginService.setSprintPiAndType(projectId,sprintId,sprintDetailVO);
+        }
         if (sprintDetailVO != null) {
             sprintDetailVO.setIssueCount(sprintMapper.queryIssueCount(projectId, sprintId));
         }
