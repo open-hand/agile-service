@@ -4,15 +4,12 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.validator.StoryMapValidator;
 import io.choerodon.agile.api.vo.business.StoryMapDragVO;
 import io.choerodon.agile.app.assembler.StoryMapAssembler;
-import io.choerodon.agile.app.service.IssueAccessDataService;
-import io.choerodon.agile.app.service.StoryMapService;
+import io.choerodon.agile.app.service.*;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.StoryMapStoryDTO;
 import io.choerodon.agile.infra.mapper.IssueStatusMapper;
 import io.choerodon.agile.infra.mapper.StoryMapMapper;
 import io.choerodon.agile.infra.mapper.StoryMapWidthMapper;
-import io.choerodon.agile.app.service.UserService;
-import io.choerodon.agile.app.service.VersionIssueRelService;
 import org.hzero.mybatis.domian.Condition;
 import org.hzero.mybatis.util.Sqls;
 import org.modelmapper.ModelMapper;
@@ -44,16 +41,14 @@ public class StoryMapServiceImpl implements StoryMapService {
 
     @Autowired
     private StoryMapWidthMapper storyMapWidthMapper;
-
-    @Autowired
-    private UserService userService;
-
     @Autowired
     private StoryMapAssembler storyMapAssembler;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private IssueStatusMapper issueStatusMapper;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     protected List<StoryMapWidthVO> setStoryMapWidth(Long projectId) {
         List<StoryMapWidthDTO> storyMapWidthDTOList = storyMapWidthMapper.selectByProjectId(projectId);
@@ -75,14 +70,18 @@ public class StoryMapServiceImpl implements StoryMapService {
         if (projectEpicIds != null && !projectEpicIds.isEmpty()) {
             epicIds.addAll(projectEpicIds);
         }
-
-        if (epicIds.isEmpty()) {
-            storyMap.setEpics(new ArrayList<>());
-        } else {
-            List<EpicWithInfoDTO> epicWithInfoDTOList = storyMapMapper.selectEpicList(projectId, epicIds, searchVO.getAdvancedSearchArgs());
-            storyMap.setEpics(epicWithInfoDTOList);
+        if(agilePluginService != null){
+            storyMap = agilePluginService.handlerBusinessQueryStoryMap(projectId,epicIds,searchVO);
         }
-        storyMap.setStoryList(!epicIds.isEmpty() ? storyMapMapper.selectStoryList(projectId, epicIds, searchVO) : new ArrayList<>());
+        else {
+            if (epicIds.isEmpty()) {
+                storyMap.setEpics(new ArrayList<>());
+            } else {
+                List<EpicWithInfoDTO> epicWithInfoDTOList = storyMapMapper.selectEpicList(projectId, epicIds, searchVO.getAdvancedSearchArgs());
+                storyMap.setEpics(epicWithInfoDTOList);
+            }
+            storyMap.setStoryList(!epicIds.isEmpty() ? storyMapMapper.selectStoryList(projectId, epicIds, searchVO) : new ArrayList<>());
+        }
         storyMap.setStoryMapWidth(setStoryMapWidth(projectId));
         return storyMap;
     }
@@ -148,6 +147,9 @@ public class StoryMapServiceImpl implements StoryMapService {
         }
         if (versionId != null) {
             dragToVersion(projectId, versionId, storyMapDragVO);
+        }
+        if (agilePluginService != null) {
+            agilePluginService.handlerStoryMapMoveFeature(projectId,storyMapDragVO);
         }
     }
 
