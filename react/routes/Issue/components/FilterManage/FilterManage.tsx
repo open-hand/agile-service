@@ -1,9 +1,8 @@
 import React, { useContext } from 'react';
 import { Button } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
-import { stores, Choerodon } from '@choerodon/boot';
+import { stores } from '@choerodon/boot';
 import IssueStore from '@/stores/project/issue/IssueStore';
-import { personalFilterApi } from '@/api';
 import IssueSearchStore from '@/components/issue-search/store';
 import Store from '../../stores';
 import FilterItem from './FilterItem';
@@ -41,6 +40,7 @@ const FilterManage: React.FC<Props> = () => {
             {
               myFilters.map((filter) => (
                 <FilterItem
+                  key={filter.filterId}
                   data={filter}
                   onSubmit={() => {
                     issueSearchStore.loadMyFilterList();
