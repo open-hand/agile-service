@@ -498,23 +498,28 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
 
     private void createProjectReportReceiver(Long projectId, ConfigurationRuleVO configurationRuleVO,
                                              ConfigurationRuleDTO configurationRuleDTO) {
-        Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()), BaseConstants.ErrorCode.DATA_INVALID);
-        Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getProcesserList()), BaseConstants.ErrorCode.DATA_INVALID);
-        for (UserDTO userDTO : configurationRuleVO.getReceiverList()) {
-            ConfigurationRuleReceiverDTO configurationRuleReceiverDTO = new ConfigurationRuleReceiverDTO();
-            configurationRuleReceiverDTO.setProjectId(projectId);
-            configurationRuleReceiverDTO.setRuleId(configurationRuleDTO.getId());
-            configurationRuleReceiverDTO.setUserType(ConfigurationRuleReceiverDTO.TYPE_RECEIVER);
-            configurationRuleReceiverDTO.setUserId(userDTO.getId());
-            configurationRuleReceiverMapper.insertSelective(configurationRuleReceiverDTO);
+        
+        Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()) || 
+                CollectionUtils.isNotEmpty(configurationRuleVO.getProcesserList()), BaseConstants.ErrorCode.DATA_INVALID);
+        if (CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList())){
+            for (UserDTO userDTO : configurationRuleVO.getReceiverList()) {
+                ConfigurationRuleReceiverDTO configurationRuleReceiverDTO = new ConfigurationRuleReceiverDTO();
+                configurationRuleReceiverDTO.setProjectId(projectId);
+                configurationRuleReceiverDTO.setRuleId(configurationRuleDTO.getId());
+                configurationRuleReceiverDTO.setUserType(ConfigurationRuleReceiverDTO.TYPE_RECEIVER);
+                configurationRuleReceiverDTO.setUserId(userDTO.getId());
+                configurationRuleReceiverMapper.insertSelective(configurationRuleReceiverDTO);
+            }
         }
-        for (UserDTO userDTO : configurationRuleVO.getProcesserList()) {
-            ConfigurationRuleReceiverDTO configurationRuleReceiverDTO = new ConfigurationRuleReceiverDTO();
-            configurationRuleReceiverDTO.setProjectId(projectId);
-            configurationRuleReceiverDTO.setRuleId(configurationRuleDTO.getId());
-            configurationRuleReceiverDTO.setUserType(ConfigurationRuleReceiverDTO.TYPE_PROCESSER);
-            configurationRuleReceiverDTO.setUserId(userDTO.getId());
-            configurationRuleReceiverMapper.insertSelective(configurationRuleReceiverDTO);
+        if (CollectionUtils.isNotEmpty(configurationRuleVO.getProcesserList())){
+            for (UserDTO userDTO : configurationRuleVO.getProcesserList()) {
+                ConfigurationRuleReceiverDTO configurationRuleReceiverDTO = new ConfigurationRuleReceiverDTO();
+                configurationRuleReceiverDTO.setProjectId(projectId);
+                configurationRuleReceiverDTO.setRuleId(configurationRuleDTO.getId());
+                configurationRuleReceiverDTO.setUserType(ConfigurationRuleReceiverDTO.TYPE_PROCESSER);
+                configurationRuleReceiverDTO.setUserId(userDTO.getId());
+                configurationRuleReceiverMapper.insertSelective(configurationRuleReceiverDTO);
+            }
         }
         if (CollectionUtils.isNotEmpty(configurationRuleVO.getCcList())) {
             for (UserDTO userDTO : configurationRuleVO.getCcList()) {
