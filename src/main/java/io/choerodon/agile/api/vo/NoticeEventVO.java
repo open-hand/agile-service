@@ -18,18 +18,28 @@ public class NoticeEventVO extends ApplicationEvent {
     }
 
     public NoticeEventVO(Object source, String event, Long instanceId, Long projectId,
-                         List<String> fieldList) {
+                         List<String> fieldList, boolean allFieldCheck) {
         super(source);
         this.event = event;
         this.instanceId = instanceId;
         this.projectId = projectId;
         this.fieldList = fieldList;
+        this.allFieldCheck = allFieldCheck;
     }
 
     private String event;
     private Long instanceId;
     private Long projectId;
     private List<String> fieldList;
+    private Boolean allFieldCheck = false;
+
+    public Boolean getAllFieldCheck() {
+        return allFieldCheck;
+    }
+
+    public void setAllFieldCheck(Boolean allFieldCheck) {
+        this.allFieldCheck = allFieldCheck;
+    }
 
     public String getEvent() {
         return event;

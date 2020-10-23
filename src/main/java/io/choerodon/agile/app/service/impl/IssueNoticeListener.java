@@ -5,6 +5,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JavaType;
+import com.google.common.base.CaseFormat;
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
 import io.choerodon.agile.api.vo.NoticeEventVO;
 import io.choerodon.agile.api.vo.RuleExpressVO;
@@ -14,6 +15,7 @@ import io.choerodon.agile.app.service.StatusNoticeSettingService;
 import io.choerodon.agile.infra.aspect.RuleNoticeAspect;
 import io.choerodon.agile.infra.dto.UserDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.ConfigurationRule;
 import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 import io.choerodon.agile.infra.mapper.ConfigurationRuleMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
@@ -22,6 +24,7 @@ import io.choerodon.agile.infra.utils.SendMsgUtil;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.MessageSender;
 import org.hzero.boot.message.entity.Receiver;
@@ -65,11 +68,12 @@ public class IssueNoticeListener {
         Long projectId = noticeEvent.getProjectId();
         List<String> fieldList = noticeEvent.getFieldList();
         String event = noticeEvent.getEvent();
+        boolean allFieldCheck = BooleanUtils.isTrue(noticeEvent.getAllFieldCheck());
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(noticeEvent.getInstanceId());
         ConfigurationRuleVO rule = new ConfigurationRuleVO();
         rule.setProjectId(projectId);
         rule.setIssueTypes(Collections.singletonList(issueDTO.getTypeCode()));
-        List<ConfigurationRuleVO> ruleVOList = processRule(configurationRuleMapper.selectByProjectId(rule));
+        List<ConfigurationRuleVO> ruleVOList = processRule(configurationRuleMapper.selectByProjectId(rule), fieldList, allFieldCheck);
         if (CollectionUtils.isEmpty(ruleVOList)){
             return;
         }
@@ -78,10 +82,16 @@ public class IssueNoticeListener {
         // 获取所有符合的ruleId
         List<Long> ruleIdList = Optional.ofNullable(map).orElse(new HashMap<>())
                 .values().stream().filter(Objects::nonNull).collect(Collectors.toList());
+        // 更改页面规则对应的处理人
+        changeProcesser(ruleIdList);
         // 组装符合条件的页面规则messageSender
         List<MessageSender> ruleSenderList = generateRuleSender(event, projectId, ruleIdList, issueDTO, fieldList);
         // 合并消息通知
         mergeNotice(ruleSenderList);
+    }
+
+    private void changeProcesser(List<Long> ruleIdList) {
+//        ruleIdList
     }
 
     private boolean checkEvent(NoticeEventVO noticeEvent) {
@@ -101,14 +111,31 @@ public class IssueNoticeListener {
         return true;
     }
 
-    private List<ConfigurationRuleVO> processRule(List<ConfigurationRuleVO> sourceList) {
+    private List<ConfigurationRuleVO> processRule(List<ConfigurationRuleVO> sourceList, List<String> fieldList, boolean allFieldCheck) {
         List<ConfigurationRuleVO> ruleList = new ArrayList<>(sourceList);
         JavaType javaType = CommonMapperUtil.getTypeFactory().constructParametricType(List.class, RuleExpressVO.class);
         for (ConfigurationRuleVO ruleVO : ruleList) {
             ruleVO.setExpressList(CommonMapperUtil.readValue(ruleVO.getExpressFormat(), javaType));
             ruleVO.setSqlQuery(configurationRuleService.generateSqlQuery(ruleVO));
         }
-        return ruleList;
+        if (allFieldCheck){
+            return ruleList;
+        }
+        if (CollectionUtils.isEmpty(fieldList)){
+            return Collections.emptyList();
+        }
+        return ruleList.stream()
+                .filter(rule -> rule.getExpressList().stream()
+                        .anyMatch(express -> fieldList.contains(fieldCode2Field(express.getFieldCode()))))
+                .collect(Collectors.toList());
+    }
+    
+    private String fieldCode2Field(String fieldCode){
+        String field = ConfigurationRule.FieldTableMapping.matches(fieldCode).getField();
+        if (Objects.isNull(field)){
+            return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, field);
+        }
+        return fieldCode;
     }
 
     private List<MessageSender> generateRuleSender(String event,Long projectId,List<Long> ruleIdList,

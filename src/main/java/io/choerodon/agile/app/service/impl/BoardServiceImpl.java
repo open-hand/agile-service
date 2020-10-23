@@ -491,7 +491,7 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    @RuleNotice(event = RuleNoticeEvent.ISSUE_STATAUS_CHANGE, instanceIdNameInReturn = "issueId")
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_STATAUS_CHANGE, instanceIdNameInReturn = "issueId", fieldList = {"statusId"})
     public IssueMoveVO move(Long projectId, Long issueId, Long transformId, IssueMoveVO issueMoveVO, Boolean isDemo) {
         //执行状态机转换
         if (Boolean.TRUE.equals(isDemo)) {
