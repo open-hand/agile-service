@@ -3,6 +3,7 @@ package io.choerodon.agile.infra.dto;
 import io.choerodon.mybatis.annotation.ModifyAudit;
 import io.choerodon.mybatis.annotation.VersionAudit;
 import io.choerodon.mybatis.domain.AuditDomain;
+import org.hzero.starter.keyencrypt.core.Encrypt;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,6 +23,7 @@ import java.util.Objects;
 public class SprintDTO extends AuditDomain {
     @Id
     @GeneratedValue
+    @Encrypt
     private Long sprintId;
     private String sprintName;
     private String sprintGoal;
