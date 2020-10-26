@@ -107,7 +107,12 @@ const PageRule = () => {
 
   return (
     <IsProgramContext.Provider value={{ isProgram: getApplyType() === 'program' }}>
-      <Page service={[]} className={styles.pageRule}>
+      <Page
+        service={[
+          'choerodon.code.project.setting.autoRule.ps.master',
+        ]}
+        className={styles.pageRule}
+      >
         <Header>
           <Button icon="playlist_add" onClick={handleAddRule}>添加规则</Button>
         </Header>
