@@ -6,7 +6,7 @@ export async function checkCanQuickCreate(typeCode) {
     context: typeCode,
     pageCode: 'agile_issue_create',
   };
-  const whiteList = ['summary', 'status', 'issueType', 'priority'];
+  const whiteList = ['summary', 'status', 'issueType', 'priority', 'epicName'];
   const fields = await fieldApi.getFields(param);
   if (fields.some((field) => !whiteList.includes(field.fieldCode) && field.required)) {
     return false;
