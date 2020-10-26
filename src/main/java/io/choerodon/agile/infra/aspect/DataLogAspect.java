@@ -595,7 +595,8 @@ public class DataLogAspect {
         Long sprintId = (Long) args[1];
         if (projectId != null && sprintId != null) {
             List<Long> moveIssueIds = sprintMapper.queryIssueIds(projectId, sprintId);
-            handleBatchRemoveSprint(projectId, moveIssueIds, sprintId);
+            //批量将issue从sprint移除,目标冲刺为应设置为0,记录移除冲刺的日志
+            handleBatchRemoveSprint(projectId, moveIssueIds, 0L);
         }
     }
 
