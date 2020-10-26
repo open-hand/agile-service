@@ -1,12 +1,7 @@
 .flat-select {
-  // max-width: 150px;
 
   &:hover {
     background: rgba(0, 0, 0, 0.04);
-
-    // .c7n-pro-select {
-    //   padding-right: 0.24rem !important;
-    // }
   }
 
   .c7n-pro-select-clear-button {
@@ -25,8 +20,16 @@
     display: inline-block;
   }
 
+  .c7n-pro-select > ul {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 27px;
+  }
+
   .c7n-pro-select {
     border: none;
+    height: 34px;
     cursor: pointer;
     text-overflow: ellipsis;
     max-width: calc(100% - 17px);
@@ -46,10 +49,8 @@
     color: rgba(0, 0, 0, 0.6);
   }
 
-  .c7n-pro-select > ul {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .c7n-pro-select-multiple-block {
+    border-radius: 14px;
   }
 
   .c7n-pro-select-multiple-value {
@@ -63,11 +64,6 @@
     white-space: nowrap;
     display: inline-block;
     vertical-align: middle;
-  }
-
-  .c7n-pro-select-multiple-block {
-    background: transparent;
-    color: black;
   }
 
   .renderer-value {

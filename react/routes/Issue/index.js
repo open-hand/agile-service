@@ -17,7 +17,6 @@ import { linkUrl } from '@/utils/to';
 import LINK_URL, { getParams } from '@/constants/LINK_URL';
 import IssueTable from '@/components/issue-table';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
-import FlatSelect from '@/components/flat-select';
 import { openExportIssueModal } from './components/ExportIssue';
 import IssueStore from '../../stores/project/issue/IssueStore';
 import Store, { StoreProvider } from './stores';
@@ -31,7 +30,6 @@ import CollapseAll from './components/CollapseAll';
 import Modal from './components/Modal';
 import './index.less';
 
-const { Option } = FlatSelect;
 const Issue = observer(() => {
   const {
     dataSet, projectId, issueSearchStore, fields,
@@ -213,30 +211,6 @@ const Issue = observer(() => {
       </Header>
       <Breadcrumb />
       <Content style={{ paddingTop: 0 }} className="c7nagile-issue-content">
-        <FlatSelect placeholder="placeholder" searchable style={{ maxWidth: 150 }}>
-          <Option value="1">1111111111111111222222222222</Option>
-          <Option value="2">1</Option>
-          <Option value="3">1</Option>
-          <Option value="4">1</Option>
-        </FlatSelect>
-        <FlatSelect placeholder="状态" searchable>
-          <Option value="1">1111111111111111222222222222</Option>
-          <Option value="2">1</Option>
-          <Option value="3">1</Option>
-          <Option value="4">1</Option>
-        </FlatSelect>
-        <FlatSelect placeholder="p" multiple searchable>
-          <Option value="1">11111111111111111</Option>
-          <Option value="2">1</Option>
-          <Option value="3">1</Option>
-          <Option value="4">1</Option>
-        </FlatSelect>
-        <FlatSelect placeholder="pppppppppp" multiple searchable style={{ maxWidth: 150 }}>
-          <Option value="1">11111111111111111</Option>
-          <Option value="2">1</Option>
-          <Option value="3">1</Option>
-          <Option value="4">1</Option>
-        </FlatSelect>
         <IssueSearch
           store={issueSearchStore}
           urlFilter={urlFilter}

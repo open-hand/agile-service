@@ -2,14 +2,13 @@
 /* eslint-disable max-classes-per-file */
 import React, { isValidElement, ReactNode, CSSProperties } from 'react';
 import { observer } from 'mobx-react';
-import { Tooltip, Icon } from 'choerodon-ui/pro';
-import isNil from 'lodash/isNil';
+import { Icon, Animate } from 'choerodon-ui/pro';
 import isString from 'lodash/isString';
 import noop from 'lodash/noop';
 import { Select, SelectProps } from 'choerodon-ui/pro/lib/select/Select';
-import { pxToRem } from 'choerodon-ui/lib/_util/UnitConvertor';
+import { pxToRem, toPx } from 'choerodon-ui/lib/_util/UnitConvertor';
 import measureTextWidth from 'choerodon-ui/pro/lib/_util/measureTextWidth';
-import { getWidth } from '@/components/issue-search/custom-fields/utils';
+import { stopPropagation } from 'choerodon-ui/pro/lib/_util/EventManager';
 import './index.less';
 
 const { Option, OptGroup } = Select;
@@ -56,26 +55,6 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
     return null;
   }
 
-  // renderMultipleEditor(props: T) {
-  //   const { style } = this.props;
-  //   const { text } = this;
-  //   const editorStyle = {} as CSSProperties;
-  //   if (!this.editable) {
-  //     editorStyle.position = 'absolute';
-  //     editorStyle.left = 0;
-  //     editorStyle.top = 0;
-  //     editorStyle.zIndex = -1;
-  //     // eslint-disable-next-line no-param-reassign
-  //     props.readOnly = true;
-  //   } else if (text) {
-  //     editorStyle.width = pxToRem(measureTextWidth(text, style));
-  //   }
-  //   return (
-  //     <li key="text">
-  //       <input {...(props as Object)} value={text || ''} style={editorStyle} />
-  //     </li>
-  //   );
-  // }
   renderMultipleHolder() {
     const { name, multiple } = this;
     const hasValue = this.getValue() !== undefined && this.getValue() !== null;
@@ -100,17 +79,32 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
     const {
       prefixCls,
       multiple,
+      props: { style },
     } = this;
     const otherProps = this.getOtherProps();
+    const { height } = (style || {}) as CSSProperties;
     if (multiple) {
       return (
-        <div key="text" className={otherProps.className} style={{ height: 34 }} ref={this.saveTagContainer}>
-          {this.renderMultipleValues()}
-          {/* @ts-ignore */}
-          {this.renderMultipleEditor({
-            ...otherProps,
-            className: `${prefixCls}-multiple-input`,
-          })}
+        <div key="text" className={otherProps.className}>
+          <Animate
+            component="ul"
+            componentProps={{
+              ref: this.saveTagContainer,
+              onScroll: stopPropagation,
+              style:
+                height && height !== 'auto' ? { height: pxToRem(toPx(height)! - 2) } : undefined,
+            }}
+            transitionName="zoom"
+            exclusive
+            onEnd={this.handleTagAnimateEnd}
+            onEnter={this.handleTagAnimateEnter}
+          >
+            {this.renderMultipleValues()}
+            {this.renderMultipleEditor({
+              ...otherProps,
+              className: `${prefixCls}-multiple-input`,
+            } as T)}
+          </Animate>
         </div>
       );
     }
@@ -133,39 +127,6 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
         readOnly={!this.editable}
       />
     );
-  }
-
-  // @ts-ignore
-  renderMultipleValues(readOnly?: boolean) {
-    const multipleText = this.getMultipleText();
-    return (
-      <span className="flat-select-multiple-text">
-        <Tooltip title={multipleText}>
-          {multipleText}
-        </Tooltip>
-      </span>
-    );
-  }
-
-  getMultipleText() {
-    const values = this.getValues();
-    const valueLength = values.length;
-    const {
-      range,
-      props: { maxTagCount = valueLength },
-    } = this;
-    const repeats: Map<any, number> = new Map<any, number>();
-    const texts = values.slice(0, maxTagCount).map((v) => {
-      const key = this.getValueKey(v);
-      const repeat = repeats.get(key) || 0;
-      const text = range ? this.renderRangeValue(true, v, repeat) : this.processRenderer(v, repeat);
-      repeats.set(key, repeat + 1);
-      if (!isNil(text)) {
-        return text;
-      }
-      return undefined;
-    });
-    return texts.join(',');
   }
 }
 
