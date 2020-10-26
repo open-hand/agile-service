@@ -17,9 +17,10 @@ public class NoticeEventVO extends ApplicationEvent {
         super(source);
     }
 
-    public NoticeEventVO(Object source, String event, Long instanceId, Long projectId,
+    public NoticeEventVO(Object source, String component, String event, Long instanceId, Long projectId,
                          Set<String> fieldList, boolean allFieldCheck) {
         super(source);
+        this.component = component;
         this.event = event;
         this.instanceId = instanceId;
         this.projectId = projectId;
@@ -27,11 +28,20 @@ public class NoticeEventVO extends ApplicationEvent {
         this.allFieldCheck = allFieldCheck;
     }
 
+    private String component;
     private String event;
     private Long instanceId;
     private Long projectId;
     private Set<String> fieldList;
     private Boolean allFieldCheck = false;
+
+    public String getComponent() {
+        return component;
+    }
+
+    public void setComponent(String component) {
+        this.component = component;
+    }
 
     public Boolean getAllFieldCheck() {
         return allFieldCheck;

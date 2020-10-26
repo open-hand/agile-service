@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JavaType;
+import com.google.common.base.CaseFormat;
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldVO;
 import io.choerodon.agile.api.vo.RuleExpressVO;
@@ -39,7 +40,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * 页面配置服务实现类
@@ -262,6 +262,37 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         }
     }
 
+    @Override
+    public List<ConfigurationRuleVO> processRule(List<ConfigurationRuleVO> sourceList, Set<String> fieldList, boolean allFieldCheck) {
+        List<ConfigurationRuleVO> ruleList = new ArrayList<>(sourceList);
+        JavaType javaType = CommonMapperUtil.getTypeFactory().constructParametricType(List.class, RuleExpressVO.class);
+        for (ConfigurationRuleVO ruleVO : ruleList) {
+            ruleVO.setExpressList(CommonMapperUtil.readValue(ruleVO.getExpressFormat(), javaType));
+            ruleVO.setSqlQuery(this.generateSqlQuery(ruleVO));
+        }
+        if (allFieldCheck){
+            // 之后消息检测需要用到
+            fieldList.add("statusId");
+            fieldList.add("asigneeId");
+            return ruleList;
+        }
+        if (CollectionUtils.isEmpty(fieldList)){
+            return Collections.emptyList();
+        }
+        return ruleList.stream()
+                .filter(rule -> rule.getExpressList().stream()
+                        .anyMatch(express -> fieldList.contains(fieldCode2Field(express.getFieldCode()))))
+                .collect(Collectors.toList());
+    }
+
+    private String fieldCode2Field(String fieldCode){
+        String field = ConfigurationRule.FieldTableMapping.matches(fieldCode).getField();
+        if (Objects.isNull(field)){
+            return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, field);
+        }
+        return fieldCode;
+    }
+
     private String renderLinkTableSql(String sourceOp, String field, List<Supplier<String>> conditionList) {
         String operation = ConfigurationRule.OpSqlMapping.valueOf(sourceOp).withField(field).name();
         StringBuilder sb = new StringBuilder();
@@ -315,7 +346,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
             }
             Boolean predefined = ruleExpressVO.getPredefined();
             String fieldCode = ruleExpressVO.getFieldCode();
-            if (ObjectUtils.isEmpty(predefined)) {
+            if (Objects.isNull(predefined)) {
                 String errorMsg = "error." + fieldCode + ".predefined.null";
                 throw new CommonException(errorMsg);
             }
@@ -340,8 +371,8 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     private String processCustomField(RuleExpressVO ruleExpressVO, Long organizationId, Long projectId, Object value) {
         String fieldCode = ruleExpressVO.getFieldCode();
         ObjectSchemeFieldDTO objectSchemeField = objectSchemeFieldService.queryByFieldCode(organizationId, projectId, fieldCode);
-        if (ObjectUtils.isEmpty(objectSchemeField)) {
-            throw new CommonException("error.custom.field." + fieldCode + ".not.existed");
+        if (Objects.isNull(objectSchemeField)) {
+            return ConfigurationRule.SQL_VAR_NOT_EQUALS;
         }
         Long fieldId = objectSchemeField.getId();
         String operation = ruleExpressVO.getOperation();
@@ -380,7 +411,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         if (CustomFieldType.isOption(fieldType)) {
             value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueIdList() : ruleExpressVO.getValueId();
         } else if (CustomFieldType.isDate(fieldType)) {
-            value = BooleanUtils.isTrue(ruleExpressVO.getNowFlag()) ? ruleExpressVO.getValueStr() : ruleExpressVO.getValueDate();
+            value = BooleanUtils.isTrue(ruleExpressVO.getNowFlag()) ? ConfigurationRule.SQL_VAR_NOW_EXPRESS : ruleExpressVO.getValueDate();
         } else if (CustomFieldType.isDateHms(fieldType)) {
             value = ruleExpressVO.getValueDateHms();
         } else if (CustomFieldType.isNumber(fieldType)) {
