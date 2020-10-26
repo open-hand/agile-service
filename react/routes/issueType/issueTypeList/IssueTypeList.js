@@ -24,7 +24,7 @@ function IssueTypeList() {
 
   /**
    * render Name
-   * @param {*} param0 
+   * @param {*} param0
    */
   function renderName({ record }) {
     const colour = record.get('colour');
@@ -46,6 +46,7 @@ function IssueTypeList() {
   return (
     <Page
       className={prefixCls}
+      style={{ paddingTop: 0 }}
       service={[
         'choerodon.code.organization.setting.issue.issue-type.ps.default',
       ]}
