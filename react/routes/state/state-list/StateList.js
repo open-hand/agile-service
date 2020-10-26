@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-bind */
 import React, {
   useState, useEffect, useContext,
 } from 'react';
@@ -5,6 +6,7 @@ import { observer } from 'mobx-react-lite';
 import {
   Table, Button, Modal, Form, Select, Input, Tooltip, Menu,
 } from 'choerodon-ui';
+import { Button as ButtonPro } from 'choerodon-ui/pro';
 import { FormattedMessage } from 'react-intl';
 import {
   Content, Header, TabPage as Page, Breadcrumb, Choerodon,
@@ -476,11 +478,15 @@ function StateList(props) {
           <Sidebar
             title={<FormattedMessage id={showType === 'create' ? 'state.create' : 'state.edit'} />}
             visible={show}
-            onOk={handleSubmit}
             okText={<FormattedMessage id={showType === 'create' ? 'create' : 'save'} />}
             cancelText={<FormattedMessage id="cancel" />}
             confirmLoading={submitting}
-            onCancel={hideSidebar}
+            footer={[
+              <ButtonPro key="submit" color="primary" funcType="raised" loading={submitting} onClick={handleSubmit}>
+                <FormattedMessage id={showType === 'create' ? 'create' : 'save'} />
+              </ButtonPro>,
+              <ButtonPro key="back" funcType="raised" onClick={hideSidebar}><FormattedMessage id="cancel" /></ButtonPro>,
+            ]}
             width={MODAL_WIDTH.small}
           >
             {formContent}
