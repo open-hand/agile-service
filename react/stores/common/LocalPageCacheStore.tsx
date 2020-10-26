@@ -6,30 +6,28 @@ interface LocalPageCacheStoreInterface {
   remove: (code: string) => void,
   clear: () => void,
 }
-
+const pages = new Map<string, any>();
 class LocalPageCacheStore implements LocalPageCacheStoreInterface {
   pageKeyList = ['scrumboard', 'issues']
 
-  pages = new Map<string, any>();
-
   setItem(pageKey: string, data: any) {
-    this.pages.set(pageKey, data);
+    pages.set(pageKey, data);
   }
 
   mergeSetItem<T extends object>(pageKey: string, data: T) {
-    this.pages.set(pageKey, merge(this.pages.get(pageKey), data));
+    pages.set(pageKey, merge(pages.get(pageKey), data));
   }
 
   getItem(pageKey: string) {
-    return this.pages.get(pageKey);
+    return pages.get(pageKey);
   }
 
   remove(pageKey: string) {
-    this.pages.delete(pageKey);
+    pages.delete(pageKey);
   }
 
-  clear() {
-    this.pages.clear();
+  clear = () => {
+    pages.clear();
   }
 }
 const testLocalPageCacheStore = new LocalPageCacheStore();
