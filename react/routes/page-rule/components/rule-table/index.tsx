@@ -92,25 +92,6 @@ const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
     );
   }, []);
 
-  const renderAssignee = useCallback(({ record }) => (
-    <div style={{ display: 'inline-flex' }}>
-      {
-        record.get('assigneeId') && record.get('assigneeId') !== '0' && (
-          <UserHead
-            // @ts-ignore
-            user={{
-              id: record.get('assigneeId'),
-              name: record.get('assigneeName'),
-              loginName: record.get('assigneeLoginName'),
-              realName: record.get('assigneeRealName'),
-              avatar: record.get('assigneeImageUrl'),
-            }}
-          />
-        )
-      }
-    </div>
-  ), []);
-
   const renderStatus = useCallback(({ value }) => (
     <div className={`${styles.status} ${styles[`status_${value}`]}`}>
       {
