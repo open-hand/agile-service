@@ -249,7 +249,7 @@ public interface AgilePluginService {
      * @param projectId
      * @param sprintConvertDTO
      */
-    void createSubProjectSprint(Long projectId, SprintConvertDTO sprintConvertDTO);
+    SprintConvertDTO createSubProjectSprint(Long projectId, SprintConvertDTO sprintConvertDTO);
 
     /**
      * 如果项目是项目群子项目,开启冲刺时设置开始时间为当前时间

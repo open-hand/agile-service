@@ -145,7 +145,7 @@ public class SprintServiceImpl implements SprintService {
         AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
         SprintConvertDTO sprintConvertDTO = null;
         if (agilePluginService != null) {
-            agilePluginService.createSubProjectSprint(projectId, sprintConvertDTO);
+            sprintConvertDTO = agilePluginService.createSubProjectSprint(projectId, sprint);
         } else {
             sprintConvertDTO = create(sprint);
         }
