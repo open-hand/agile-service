@@ -4,15 +4,17 @@ import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { priorityApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { Priority } from '@/common/types';
+import FlatSelect from '@/components/flat-select';
 
 interface Props extends Partial<SelectProps> {
   priorityId?: number
   dataRef?: React.MutableRefObject<any>
   afterLoad?: (prioritys: Priority[]) => void
+  flat?: boolean
 }
 
 const SelectPriority: React.FC<Props> = forwardRef(({
-  priorityId, dataRef, afterLoad, ...otherProps
+  priorityId, dataRef, afterLoad, flat, ...otherProps
 },
 ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
@@ -34,8 +36,9 @@ ref: React.Ref<Select>) => {
     paging: false,
   }), [priorityId]);
   const props = useSelect(config);
+  const Component = flat ? FlatSelect : Select;
   return (
-    <Select
+    <Component
       ref={ref}
       clearButton={false}
       {...props}
