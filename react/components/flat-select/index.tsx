@@ -1,15 +1,25 @@
+/* eslint-disable react/static-property-placement */
 /* eslint-disable max-classes-per-file */
-import React, { isValidElement, ReactNode } from 'react';
+import React, { isValidElement, ReactNode, CSSProperties } from 'react';
 import { observer } from 'mobx-react';
-import { Tooltip } from 'choerodon-ui/pro';
+import { Tooltip, Icon } from 'choerodon-ui/pro';
 import isNil from 'lodash/isNil';
 import isString from 'lodash/isString';
+import noop from 'lodash/noop';
 import { Select, SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import { pxToRem } from 'choerodon-ui/lib/_util/UnitConvertor';
+import measureTextWidth from 'choerodon-ui/pro/lib/_util/measureTextWidth';
+import { getWidth } from '@/components/issue-search/custom-fields/utils';
 import './index.less';
 
 const { Option, OptGroup } = Select;
 
 class FlatSelect<T extends SelectProps> extends Select<T> {
+  static defaultProps = {
+    ...Select.defaultProps,
+    dropdownMatchSelectWidth: false,
+  };
+
   // @ts-ignore
   getWrapperClassNames(...args): string {
     const { prefixCls, multiple, range } = this;
@@ -28,6 +38,62 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
       },
       ...args,
     );
+  }
+
+  getInnerSpanButton(): ReactNode {
+    const {
+      props: { clearButton },
+      prefixCls,
+    } = this;
+    if (clearButton && !this.isReadOnly()) {
+      return this.wrapperInnerSpanButton(
+        <Icon type="close" onClick={this.handleClearButtonClick} />,
+        {
+          className: `${prefixCls}-clear-button`,
+        },
+      );
+    }
+    return null;
+  }
+
+  // renderMultipleEditor(props: T) {
+  //   const { style } = this.props;
+  //   const { text } = this;
+  //   const editorStyle = {} as CSSProperties;
+  //   if (!this.editable) {
+  //     editorStyle.position = 'absolute';
+  //     editorStyle.left = 0;
+  //     editorStyle.top = 0;
+  //     editorStyle.zIndex = -1;
+  //     // eslint-disable-next-line no-param-reassign
+  //     props.readOnly = true;
+  //   } else if (text) {
+  //     editorStyle.width = pxToRem(measureTextWidth(text, style));
+  //   }
+  //   return (
+  //     <li key="text">
+  //       <input {...(props as Object)} value={text || ''} style={editorStyle} />
+  //     </li>
+  //   );
+  // }
+  renderMultipleHolder() {
+    const { name, multiple } = this;
+    const hasValue = this.getValue() !== undefined && this.getValue() !== null;
+    const placeholder = this.hasFloatLabel ? undefined : this.getPlaceholders()[0];
+    const width = (hasValue ? 0 : measureTextWidth(placeholder || '') + 32);
+    if (multiple) {
+      return (
+        <input
+          key="value"
+          className={`${this.prefixCls}-multiple-value`}
+          value={this.toValueString(this.getValue()) || ''}
+          name={name}
+          onChange={noop}
+          style={{ width }}
+        />
+      );
+    }
+    return undefined;
   }
 
   getEditor(): ReactNode {
@@ -49,16 +115,21 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
       );
     }
     const text = this.getTextNode();
-
+    const finalText = isString(text) ? text : this.getText(this.getValue());
+    const hasValue = this.getValue() !== undefined && this.getValue() !== null;
+    const placeholder = this.hasFloatLabel ? undefined : this.getPlaceholders()[0];
+    const width = (hasValue ? measureTextWidth(finalText) + 52 : measureTextWidth(placeholder || '') + 32);
     if (isValidElement(text)) {
-      otherProps.style = { ...otherProps.style, textIndent: -1000 };
+      otherProps.style = { ...otherProps.style, width, textIndent: -1000 };
+    } else {
+      otherProps.style = { width, ...otherProps.style };
     }
     return (
       <input
         key="text"
         {...otherProps}
-        placeholder={this.hasFloatLabel ? undefined : this.getPlaceholders()[0]}
-        value={isString(text) ? text : this.getText(this.getValue())}
+        placeholder={placeholder}
+        value={finalText}
         readOnly={!this.editable}
       />
     );
@@ -66,6 +137,17 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
 
   // @ts-ignore
   renderMultipleValues(readOnly?: boolean) {
+    const multipleText = this.getMultipleText();
+    return (
+      <span className="flat-select-multiple-text">
+        <Tooltip title={multipleText}>
+          {multipleText}
+        </Tooltip>
+      </span>
+    );
+  }
+
+  getMultipleText() {
     const values = this.getValues();
     const valueLength = values.length;
     const {
@@ -83,18 +165,14 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
       }
       return undefined;
     });
-    return (
-      <span className="flat-select-multiple-text">
-        <Tooltip title={texts.join(',')}>
-          {texts.join(',')}
-        </Tooltip>
-      </span>
-    );
+    return texts.join(',');
   }
 }
 
 @observer
 export default class ObserverFlatSelect extends FlatSelect<SelectProps> {
+  static defaultProps = FlatSelect.defaultProps;
+
   static Option = Option;
 
   static OptGroup = OptGroup;

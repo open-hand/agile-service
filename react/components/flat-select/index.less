@@ -1,8 +1,17 @@
 .flat-select {
-  max-width: 150px;
+  // max-width: 150px;
 
   &:hover {
     background: rgba(0, 0, 0, 0.04);
+
+    // .c7n-pro-select {
+    //   padding-right: 0.24rem !important;
+    // }
+  }
+
+  .c7n-pro-select-clear-button {
+    right: 15px;
+    top: 3px;
   }
 
   &-multiple-text {
@@ -20,9 +29,21 @@
     border: none;
     cursor: pointer;
     text-overflow: ellipsis;
+    max-width: calc(100% - 17px);
+    display: flex;
+    padding-right: 17px !important;
+
     li {
       list-style: none;
     }
+  }
+
+  .c7n-pro-select::placeholder {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .c7n-pro-select-placeholder {
+    color: rgba(0, 0, 0, 0.6);
   }
 
   .c7n-pro-select > ul {
@@ -32,7 +53,7 @@
   }
 
   .c7n-pro-select-multiple-value {
-    width: 100px;
+    width: 0;
   }
 
   .select-text {
@@ -54,5 +75,19 @@
     text-overflow: ellipsis;
     display: inline-block;
     max-width: 100%;
+  }
+}
+
+// 没有值间距小一点
+.flat-select.c7n-pro-select-empty {
+  .c7n-pro-select {
+    padding-right: 0 !important;
+  }
+}
+
+.flat-select.c7n-pro-select-multiple {
+  .c7n-pro-select {
+    max-width: 100%;
+    padding-right: 32px !important;
   }
 }
