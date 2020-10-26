@@ -8,6 +8,7 @@ import { userApi } from '@/api';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import type { User } from '@/common/types';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import FlatSelect from '@/components/flat-select';
 
 const toArray = (something: any) => (Array.isArray(something) ? something : [something]);
 export interface SelectUserProps extends Partial<SelectProps> {
@@ -31,6 +32,7 @@ export interface SelectUserProps extends Partial<SelectProps> {
   dataRef?: React.MutableRefObject<any>
   request?: SelectConfig<User>['request']
   afterLoad?: (users: User[]) => void
+  flat?: boolean
 }
 interface MemberLocalMapConfig {
   userMaps?: Map<string, User>,
@@ -144,7 +146,7 @@ function useMemberLocalStoreMap(config?: MemberLocalMapConfig): [MemberLocalStor
   return [dataProp, methods];
 }
 const SelectUser: React.FC<SelectUserProps> = forwardRef(({
-  selectedUser, extraOptions, dataRef, request, afterLoad, autoQueryConfig, ...otherProps
+  selectedUser, extraOptions, dataRef, request, afterLoad, autoQueryConfig, flat, ...otherProps
 }, ref: React.Ref<Select>) => {
   const selectedUserIds = useMemo(() => {
     const ids: string[] | string | undefined = toJS(autoQueryConfig?.selectedUserIds);
@@ -214,8 +216,9 @@ const SelectUser: React.FC<SelectUserProps> = forwardRef(({
     },
   }), [selectedUser, loadExtraData.forceRefresh, loadExtraData.finish, JSON.stringify(selectedUserIds)]);
   const props = useSelect(config);
+  const Component = flat ? FlatSelect : Select;
   return (
-    <Select
+    <Component
       ref={ref}
       clearButton={false}
       {...props}

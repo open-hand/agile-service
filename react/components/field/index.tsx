@@ -17,12 +17,13 @@ interface IFieldProps extends Partial<FormFieldProps> {
   value?: any
   onChange: (value: any) => void
   render?: (field: IFilterField, element: React.ReactNode) => React.ReactNode
+  flat?: boolean
 }
 const Field: React.FC<IFieldProps> = ({
-  field, mode, value, onChange, render, ...otherProps
+  field, mode, value, onChange, render, flat, ...otherProps
 }) => {
   const { fieldType, title } = field;
-  const element = render ? render(field, getFieldElement(field)) : getFieldElement(field);
+  const element = render ? render(field, getFieldElement(field, flat)) : getFieldElement(field, flat);
   const shouldMultipleOnFilter = useMemo(() => mode === 'filter'
     && ['member', 'radio', 'single', 'checkbox', 'multiple'].includes(fieldType),
   [fieldType, mode]);

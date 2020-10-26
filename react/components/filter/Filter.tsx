@@ -177,6 +177,8 @@ const Filter: React.FC<FilterProps> = ({
         field={field}
         label={field.title}
         // @ts-ignore
+        flat={flat}
+        // @ts-ignore
         placeholder={placeholder}
         required={field.required}
         value={getEmptyValue(filter[field.code], {
