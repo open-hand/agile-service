@@ -426,9 +426,6 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     }
     
     private Object getNumber(String operation, RuleExpressVO ruleExpressVO){
-        if (StringUtils.equalsAny(ruleExpressVO.getFieldCode(), "storyPoints", "remainingTime")){
-             return ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueDecimalList() : ruleExpressVO.getValueDecimal();
-        }
         if (ConfigurationRule.OpSqlMapping.isCollOp(operation)){
             if (BooleanUtils.isTrue(ruleExpressVO.getAllowDecimals())){
                 return ruleExpressVO.getValueDecimalList();
