@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
 import io.choerodon.core.domain.Page;
@@ -42,5 +43,14 @@ public interface ConfigurationRuleService {
     boolean checkUniqueName(Long projectId, Long ruleId, String name);
 
     String generateSqlQuery(ConfigurationRuleVO configurationRuleVO);
+
+    /**
+     * 筛选出检测更新字段受页面规则限制的规则
+     * @param sourceList 页面规则
+     * @param fieldList 更新字段
+     * @param allFieldCheck 是否是全字段检测
+     * @return 仅对更新字段检测的规则集合
+     */
+    List<ConfigurationRuleVO> processRule(List<ConfigurationRuleVO> sourceList, Set<String> fieldList, boolean allFieldCheck);
 }
 

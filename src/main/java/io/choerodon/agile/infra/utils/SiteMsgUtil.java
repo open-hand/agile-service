@@ -77,7 +77,7 @@ public class SiteMsgUtil {
         return messageSender;
     }
 
-    private Map<Long, UserDTO> handleReceiver(List<Receiver> receivers,Collection<Long> userIds){
+    public Map<Long, UserDTO> handleReceiver(List<Receiver> receivers,Collection<Long> userIds){
         if (CollectionUtils.isEmpty(userIds)){
             return new HashMap<>();
         }

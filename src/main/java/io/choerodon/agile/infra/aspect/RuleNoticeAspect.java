@@ -40,11 +40,11 @@ public class RuleNoticeAspect {
         Method method = sign.getMethod();
         RuleNotice ruleNotice = method.getAnnotation(RuleNotice.class);
         Set<String> fieldList = getFieldList(ruleNotice, jp);
-        Long projectId = (Long)Reflections.getFieldValue(result, "projectId");
+        Long projectId = Optional.ofNullable(result).map(v -> (Long)Reflections.getFieldValue(v, "projectId")).orElse(null) ;
         log.info("rule notice detection, component: [{}], event: [{}]", ruleNotice.value(), ruleNotice.event());
         ApplicationContext context = ApplicationContextHelper.getContext();
-        Long instanceId = (Long)Reflections.getFieldValue(result, ruleNotice.instanceIdNameInReturn());
-        context.publishEvent(new NoticeEventVO(ruleNotice.value(), ruleNotice.event(), instanceId, projectId, fieldList, ruleNotice.allFieldCheck()));
+        Long instanceId = Optional.ofNullable(result).map(v -> (Long)Reflections.getFieldValue(result, ruleNotice.instanceIdNameInReturn())).orElse(null);
+        context.publishEvent(new NoticeEventVO(result, ruleNotice.value(), ruleNotice.event(), instanceId, projectId, fieldList, ruleNotice.allFieldCheck()));
     }
 
     /**

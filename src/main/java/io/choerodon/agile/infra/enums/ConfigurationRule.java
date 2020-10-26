@@ -20,7 +20,7 @@ public class ConfigurationRule{
     public static final String SQL_VAR_NOW_EXPRESS = "NOW()";
     public static final String TEMPLATE_CUSTOM_SQL = " issue_id %s ( select ffv.instance_id from fd_field_value ffv where ffv.project_id = %s and ffv.field_id = %s %s ) ";
     public static final String SQL_VAR_NOT_EQUALS = " 1 = 2 ";
-    public static final String TEMPLATE_TYPE_LIMIT = "(" + TEMPLATE_CONDITION_SQL + ")";
+    public static final String TEMPLATE_TYPE_LIMIT = " (" + TEMPLATE_CONDITION_SQL + ") ";
     
     public static boolean isSqlVar(String express){
         return StringUtils.equalsAnyIgnoreCase(express, SQL_VAR_NOW_EXPRESS);
@@ -39,7 +39,7 @@ public class ConfigurationRule{
         reporter("reporter_id","agile_issue"),
         creationDate("creation_date","agile_issue"),
         lastUpdateDate("last_update_date","agile_issue"),
-        storyPoint("story_point","agile_issue"),
+        storyPoints("story_point","agile_issue"),
         remainTime("remain_time","agile_issue"),
         epic("epic_id","agile_issue"),
         issueType("type_code","agile_issue"),
