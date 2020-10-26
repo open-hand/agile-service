@@ -30,6 +30,12 @@ const issueTypeMap = new Map([
   ['feature', '特性'],
 ]);
 
+const userTypeMap = new Map([
+  ['assignee', '经办人'],
+  ['reporter', '报告人'],
+  ['projectOwner', '项目所有者'],
+]);
+
 const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
   const { isProgram } = useIsProgramContext();
 
@@ -58,9 +64,10 @@ const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
 
   const renderReceiver = useCallback(({ record }: RenderProps) => {
     const receiverList = record?.get('receiverList') || [];
+    const userTypes = record?.get('userTypes') || [];
     return (
       <span>
-        {receiverList.map((user: User) => user.realName).join('、')}
+        {[...userTypes.map((code: 'assignee' | 'reporter' | 'projectOwner') => userTypeMap.get(code)), ...receiverList.map((user: User) => user.realName)].join('、')}
       </span>
     );
   }, []);

@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import {
-  Select, DatePicker, TimePicker, DateTimePicker, TextArea, TextField, NumberField, DataSet,
+  Select, DatePicker, TimePicker, DateTimePicker, TextArea, TextField, NumberField, DataSet, Row, Col,
 } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
 import SelectIssueType from '@/components/select/select-issue-type';
@@ -58,6 +58,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
   const { key } = fieldK;
   const field = fieldData.find((item: IField) => item.code === dataset?.current?.get(`${key}-code`));
   const operation = dataset?.current?.get(`${key}-operation`);
+  const middleValue = dataset?.current?.get(`${key}-middleValue`);
   if (operation === 'is' || operation === 'is_not') {
     return (
       <Select
@@ -351,36 +352,81 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
       }
       case 'time': {
         return (
-          <TimePicker
-            name={`${key}-value`}
-            label="值"
-            style={{
-              width: '100%',
-            }}
-          />
+          <Row gutter={20}>
+            <Col span={middleValue === 'specified' ? 12 : 24}>
+              <Select name={`${key}-middleValue`} label="值" clearButton={false}>
+                <Option value="now">当前时间</Option>
+                <Option value="specified">指定值</Option>
+              </Select>
+            </Col>
+
+            {
+              middleValue === 'specified' && (
+                <Col span={12}>
+                  <TimePicker
+                    name={`${key}-value`}
+                    label="值"
+                    style={{
+                      width: '100%',
+                    }}
+                  />
+                </Col>
+              )
+            }
+          </Row>
         );
       }
       case 'datetime': {
         // creationDate, lastUpdateDate,estimatedStartTime,estimatedEndTime,
         return (
-          <DateTimePicker
-            name={`${key}-value`}
-            label="值"
-            style={{
-              width: '100%',
-            }}
-          />
+          <Row gutter={20}>
+            <Col span={middleValue === 'specified' ? 12 : 24}>
+              <Select name={`${key}-middleValue`} label="值" clearButton={false}>
+                <Option value="now">当前时间</Option>
+                <Option value="specified">指定值</Option>
+              </Select>
+            </Col>
+
+            {
+              middleValue === 'specified' && (
+                <Col span={12}>
+                  <DateTimePicker
+                    name={`${key}-value`}
+                    label="值"
+                    style={{
+                      width: '100%',
+                    }}
+                  />
+                </Col>
+              )
+            }
+          </Row>
         );
       }
       case 'date': {
         return (
-          <DatePicker
-            name={`${key}-value`}
-            label="值"
-            style={{
-              width: '100%',
-            }}
-          />
+          <Row gutter={20}>
+            <Col span={middleValue === 'specified' ? 12 : 24}>
+              <Select name={`${key}-middleValue`} label="值" clearButton={false}>
+                <Option value="now">当前时间</Option>
+                <Option value="specified">指定值</Option>
+              </Select>
+            </Col>
+
+            {
+              middleValue === 'specified' && (
+                <Col span={12}>
+                  <DatePicker
+                    name={`${key}-value`}
+                    label="值"
+                    style={{
+                      width: '100%',
+                    }}
+                  />
+                </Col>
+              )
+            }
+          </Row>
         );
       }
       default:

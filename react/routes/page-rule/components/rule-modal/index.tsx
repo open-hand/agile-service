@@ -63,6 +63,7 @@ interface Express {
   fieldType?: IMiddleFieldType,
   // 是否允许小数，需要判断是否允许小数
   allowDecimals?: boolean,
+  nowFlag?: boolean,
 }
 
 interface IRule {
@@ -130,7 +131,7 @@ const aoMap = new Map([
   ['and', '且'],
 ]);
 
-const excludeCode = ['summary', 'description', 'epicName', 'timeTrace', 'belongToBacklog', 'progressFeedback', 'email'];
+const excludeCode = ['summary', 'description', 'epicName', 'timeTrace', 'belongToBacklog', 'progressFeedback', 'email', 'assignee'];
 
 const formatMoment = (type: 'date' | 'datetime' | 'time', d: string) => {
   switch (type) {
@@ -229,7 +230,8 @@ const RuleModal: React.FC<Props> = ({
       textField: 'name',
       valueField: 'typeCode',
       options: issueTypeDataSet,
-    }, {
+    },
+    {
       name: 'receiverList',
       dynamicProps: {
         required: ({ record }) => !record.get('processerList'),
@@ -278,9 +280,20 @@ const RuleModal: React.FC<Props> = ({
                 valueField.set('step', 1);
               }
             }
+            if (fieldType !== 'date' && fieldType !== 'datetime' && fieldType !== 'time') {
+              removeField(`${key}-middleValue`);
+            } else {
+              dataSet.current.set(`${key}-middleValue`, undefined);
+            }
           }
           dataSet.current.set(`${key}-operation`, undefined);
           dataSet.current.set(`${key}-value`, undefined);
+        }
+        if (name.indexOf('middleValue') > -1) {
+          dataSet.current.set(`${key}-value`, undefined);
+          if (value === 'now') {
+            removeField(`${key}-value`);
+          }
         }
         if (name.indexOf('operation') > -1) {
           dataSet.current.set(`${key}-value`, undefined);
@@ -394,6 +407,9 @@ const RuleModal: React.FC<Props> = ({
     addField(`${key}-operation`, {
       required: true,
     });
+    addField(`${key}-middleValue`, {
+      required: true,
+    });
     addField(`${key}-value`, {
       required: true,
     });
@@ -433,26 +449,27 @@ const RuleModal: React.FC<Props> = ({
     }
   }, [getFieldValue]);
 
-  const handleIssueTypesChange = useCallback(() => {
+  const handleIssueTypesChange = useCallback((value) => {
+    setFieldValue('issueTypes', (value || []).filter((item: string) => item !== 'backlog'));
     if (fields.length) {
       fields.forEach(({ key }: { key: number}) => {
         removeField(`${key}-code`);
         removeField(`${key}-operation`);
         removeField(`${key}-value`);
         removeField(`${key}-ao`);
+        removeField(`${key}-middleValue`);
       });
       Field.clear();
-      const newKey = Field.add();
-      addFieldRule(newKey, 0);
-    } else {
+    }
+    if (value) {
       const newKey = Field.add();
       addFieldRule(newKey, 0);
     }
     setFieldValue('processerList', undefined);
     getFieldData();
-  }, [addFieldRule, getFieldValue, removeField, getFieldData]);
+  }, [fields, addFieldRule, getFieldValue, removeField, getFieldData]);
 
-  const transformValue = useCallback((fieldInfo: IFieldWithType, operation: Operation, value: any) => {
+  const transformValue = useCallback((fieldInfo: IFieldWithType, operation: Operation, value: any, middleValue?: 'now' | 'specified') => {
     const {
       fieldType, system, fieldOptions, code,
     } = fieldInfo;
@@ -526,7 +543,7 @@ const RuleModal: React.FC<Props> = ({
       case 'time':
       case 'datetime':
       case 'date': {
-        return formatMoment(fieldType as 'time' | 'datetime' | 'date', value);
+        return middleValue === 'now' ? '当前时间' : formatMoment(fieldType as 'time' | 'datetime' | 'date', value);
       }
       default:
         return value;
@@ -546,6 +563,9 @@ const RuleModal: React.FC<Props> = ({
       }, {
         name: `${key}-operation`,
         value: getFieldValue(`${key}-operation`),
+      }, {
+        name: `${key}-middleValue`,
+        value: getFieldValue(`${key}-middleValue`),
       }, {
         name: `${key}-value`,
         value: getFieldValue(`${key}-value`),
@@ -578,7 +598,7 @@ const RuleModal: React.FC<Props> = ({
           const valueIsNull = getFieldValue(`${key}-operation`) === 'is' || getFieldValue(`${key}-operation`) === 'is_not';
           const value = toJS(getFieldValue(`${key}-value`));
           const hasAo = submitData.find(({ name: fieldName }) => fieldName === `${key}-ao`);
-          if (value || value === 0 || valueIsNull) {
+          if (value || value === 0 || valueIsNull || toJS(getFieldValue(`${key}-middleValue`))) {
             expressList.push({
               fieldCode: code,
               operation: getFieldValue(`${key}-operation`),
@@ -594,16 +614,17 @@ const RuleModal: React.FC<Props> = ({
               // number有小数， 需要判断是否允许小数
               valueDecimal: fieldType === 'number' && (extraConfig || code === 'remain_time' || code === 'story_point') && !valueIsNull ? value : undefined,
               // date,datetime
-              valueDate: (fieldType === 'date' || fieldType === 'datetime') && !valueIsNull ? formatMoment(fieldType, value) : undefined,
+              valueDate: (fieldType === 'date' || fieldType === 'datetime') && !valueIsNull && toJS(getFieldValue(`${key}-middleValue`)) === 'specified' ? formatMoment(fieldType, value) : undefined,
               // time
-              valueDateHms: fieldType === 'time' && !valueIsNull ? formatMoment(fieldType, value) : undefined,
+              valueDateHms: fieldType === 'time' && !valueIsNull && toJS(getFieldValue(`${key}-middleValue`)) === 'specified' ? formatMoment(fieldType, value) : undefined,
+              nowFlag: (fieldType === 'date' || fieldType === 'datetime' || fieldType === 'time') && toJS(getFieldValue(`${key}-middleValue`)) === 'now',
               predefined: system,
               fieldType: type,
               // 是否允许小数，需要判断是否允许小数
               allowDecimals: fieldType === 'number' && !valueIsNull ? extraConfig : undefined,
             });
             const ao = hasAo && getFieldValue(`${key}-ao`) && aoMap.get(getFieldValue(`${key}-ao`));
-            expressQuery += `${ao ? `${ao} ` : ''}${name} ${operationMap.get(getFieldValue(`${key}-operation`))} ${transformValue(fieldInfo, getFieldValue(`${key}-operation`), getFieldValue(`${key}-value`))} `;
+            expressQuery += `${ao ? `${ao} ` : ''}${name} ${operationMap.get(getFieldValue(`${key}-operation`))} ${transformValue(fieldInfo, getFieldValue(`${key}-operation`), getFieldValue(`${key}-value`), getFieldValue(`${key}-middleValue`))} `;
           }
         }
       }
@@ -616,14 +637,17 @@ const RuleModal: React.FC<Props> = ({
 
   const handleClickSubmit = useCallback(async () => {
     if (await modalDataSet.validate()) {
+      const processerList = Array.isArray(toJS(getFieldValue('processerList'))) ? (toJS(getFieldValue('processerList')) || []).map((id: string) => ({ id })) : [{ id: toJS(getFieldValue('processerList')) }];
+
       const expressObj = transformSumitData();
       const data = {
         id: initRule?.id,
         objectVersionNumber: initRule?.objectVersionNumber,
         name: getFieldValue('name'),
         issueTypes: getFieldValue('issueTypes'),
-        processerList: (toJS(getFieldValue('processerList')) || []).map((id: string) => ({ id })),
-        receiverList: (toJS(getFieldValue('receiverList')) || []).map((id: string) => ({ id })),
+        processerList,
+        receiverList: (toJS(getFieldValue('receiverList')) || []).filter((id: string) => id !== 'assignee' && id !== 'reporter' && id !== 'projectOwner').map((id: string) => ({ id })),
+        userTypes: (toJS(getFieldValue('receiverList')) || []).filter((id: string) => id === 'assignee' || id === 'reporter' || id === 'projectOwner'),
         ccList: (toJS(getFieldValue('ccList')) || []).map((id: string) => ({ id })),
         ...expressObj,
       };
@@ -671,7 +695,7 @@ const RuleModal: React.FC<Props> = ({
         batchedUpdates(() => {
           setFieldValue('name', name);
           setFieldValue('issueTypes', issueTypes);
-          setFieldValue('processerList', processerList.map((item: User) => item.id));
+          setFieldValue('processerList', includes(issueTypes, 'backlog') ? processerList.map((item: User) => item.id) : processerList.length && processerList[0].id);
           setFieldValue('ccList', ccList.map((item: User) => item.id));
           setFieldValue('receiverList', receiverList.map((item: User) => item.id));
           const initFields = Field.init(new Array(expressList.length).fill({}));
@@ -680,14 +704,21 @@ const RuleModal: React.FC<Props> = ({
           });
           expressList.forEach((item: Express, i: number) => {
             const {
-              fieldType, fieldCode, relationshipWithPervious, operation, valueStr, valueId, valueIdList, valueNum, valueDecimal, valueDate, valueDateHms,
+              fieldType, fieldCode, relationshipWithPervious, operation, valueStr, valueId, valueIdList, valueNum, valueDecimal, valueDate, valueDateHms, nowFlag,
             } = item;
             const fieldValue = valueStr || valueId || valueIdList || valueNum || valueDecimal || valueDate || valueDateHms;
             const { key } = initFields[i];
             setFieldValue(`${key}-code`, fieldCode);
             setFieldValue(`${key}-operation`, operation);
             if (operation !== 'is' && operation !== 'is_not') {
-              setFieldValue(`${key}-value`, fieldType === 'date' || fieldType === 'date_hms' ? moment(fieldType === 'date_hms' ? `${moment().format('YYYY-MM-DD')} ${fieldValue}` : fieldValue) : fieldValue);
+              if (fieldType === 'date' || fieldType === 'date_hms') {
+                setFieldValue(`${key}-middleValue`, nowFlag ? 'now' : 'specified');
+                if (!nowFlag) {
+                  setFieldValue(`${key}-value`, moment(fieldType === 'date_hms' ? `${moment().format('YYYY-MM-DD')} ${fieldValue}` : fieldValue));
+                }
+              } else {
+                setFieldValue(`${key}-value`, fieldValue);
+              }
             } else {
               setFieldValue(`${key}-value`, 'empty');
             }
@@ -803,6 +834,7 @@ const RuleModal: React.FC<Props> = ({
                           removeField(`${key}-operation`);
                           removeField(`${key}-value`);
                           removeField(`${key}-ao`);
+                          removeField(`${key}-middleValue`);
                           if (i === 0) {
                             if (fields[i + 1]) {
                               removeField(`${fields[i + 1].key}-ao`);
@@ -829,6 +861,7 @@ const RuleModal: React.FC<Props> = ({
               style={{
                 marginTop: -5,
               }}
+              disabled={!(getFieldValue('issueTypes') && getFieldValue('issueTypes').length)}
             >
               添加字段
             </Button>
@@ -841,6 +874,8 @@ const RuleModal: React.FC<Props> = ({
             multiple={getFieldValue('issueTypes') && includes(getFieldValue('issueTypes'), 'backlog')}
             label={getFieldValue('issueTypes') && includes(getFieldValue('issueTypes'), 'backlog') ? '处理人' : '经办人'}
             style={{ width: 520 }}
+            maxTagCount={6}
+            maxTagTextLength={4}
             clearButton
           />
         </div>
@@ -852,7 +887,7 @@ const RuleModal: React.FC<Props> = ({
             }}
             // @ts-ignore
             autoQueryConfig={{
-              selectedUserIds: getFieldValue('receiverList'),
+              selectedUserIds: (getFieldValue('receiverList') || []).filter((item: string) => !includes(['assignee', 'reporter', 'projectOwner'], item)),
             }}
             name="receiverList"
             label="通知对象"
@@ -860,6 +895,11 @@ const RuleModal: React.FC<Props> = ({
             maxTagCount={6}
             maxTagTextLength={4}
             clearButton
+            extraOptions={[
+              { id: 'assignee', realName: '经办人' },
+              { id: 'reporter', realName: '报告人' },
+              { id: 'projectOwner', realName: '项目所有者' },
+            ]}
           />
           <SelectUser
             style={{
