@@ -617,8 +617,7 @@ const RuleModal: React.FC<Props> = ({
 
   const handleClickSubmit = useCallback(async () => {
     if (await modalDataSet.validate()) {
-      const processerList = Array.isArray(toJS(getFieldValue('processerList'))) ? (toJS(getFieldValue('processerList')).filter((item: any) => !!item) || []).map((id: string) => ({ id })) : [{ id: toJS(getFieldValue('processerList')) }];
-
+      const processerList = includes(toJS(getFieldValue('issueTypes')), 'backlog') ? (toJS(getFieldValue('processerList') || []).filter((item: any) => !!item) || []).map((id: string) => ({ id })) : toJS(getFieldValue('processerList')) && [{ id: toJS(getFieldValue('processerList')) }];
       const expressObj = transformSumitData();
       const data = {
         id: initRule?.id,
