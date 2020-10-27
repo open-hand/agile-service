@@ -677,9 +677,9 @@ const RuleModal: React.FC<Props> = ({
           });
           expressList.forEach((item: Express, i: number) => {
             const {
-              fieldType, fieldCode, relationshipWithPervious, operation, valueStr, valueId, valueIdList, valueNum, valueDecimal, valueDate, valueDateHms, nowFlag,
+              fieldType, fieldCode, relationshipWithPervious, operation, valueStr, valueIdList, valueNum, valueDecimal, valueDate, valueDateHms, nowFlag,
             } = item;
-            const fieldValue = valueStr || valueId || valueIdList || valueNum || valueDecimal || valueDate || valueDateHms;
+            const fieldValue = valueStr || valueIdList || valueNum || valueDecimal || valueDate || valueDateHms;
             const { key } = initFields[i];
             setFieldValue(`${key}-code`, fieldCode);
             setFieldValue(`${key}-operation`, operation);
