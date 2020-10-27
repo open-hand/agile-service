@@ -64,10 +64,10 @@ class Comment extends Component {
 
   render() {
     const {
-      comment, loginUserId, hasPermission, i, commentExpendAll,
+      comment, loginUserId, hasPermission, i, commentExpendAll, disabled, applyType,
     } = this.props;
     const { editComment, editCommentId, expand } = this.state;
-    const canEditOrDelete = (comment && comment.userId.toString() === loginUserId.toString()) || hasPermission;
+    const canEditOrDelete = ((comment && comment.userId.toString() === loginUserId.toString()) || hasPermission) && !disabled;
     const deltaEdit = text2Delta(editComment);
     return (
       <>
@@ -77,42 +77,6 @@ class Comment extends Component {
               className={`c7n-comment ${comment.commentId === editCommentId ? 'c7n-comment-focus' : ''}`}
             >
               <div className="line-justify">
-                {/* {
-                expand ? (
-                  <Icon
-                    role="none"
-                    style={{
-                      position: 'absolute',
-                      left: 5,
-                      top: 15,
-                    }}
-                    type="baseline-arrow_drop_down pointer"
-                    onClick={() => {
-                      this.setState({
-                        expand: false,
-                      });
-                    }}
-                  />
-                ) : null
-              }
-                {
-                !expand ? (
-                  <Icon
-                    role="none"
-                    style={{
-                      position: 'absolute',
-                      left: 5,
-                      top: 15,
-                    }}
-                    type="baseline-arrow_right pointer"
-                    onClick={() => {
-                      this.setState({
-                        expand: true,
-                      });
-                    }}
-                  />
-                ) : null
-              } */}
                 <div className="c7n-title-commit" style={{ flex: 1 }}>
                   <UserHead
                     user={{
@@ -130,22 +94,24 @@ class Comment extends Component {
                     />
                   </div>
                 </div>
-                <div className="c7n-action">
-                  <Icon
-                    role="none"
-                    type="mode_edit mlr-3 pointer"
-                    style={{ cursor: canEditOrDelete ? 'pointer' : 'auto', color: canEditOrDelete ? '#000' : 'rgba(0, 0, 0, 0.25)' }}
-                    onClick={() => {
-                      if (canEditOrDelete) {
-                        this.setState({
-                          editCommentId: comment.commentId,
-                          editComment: comment.commentText,
-                          expand: true,
-                        });
-                      }
-                    }}
-                  />
-                  {
+                {
+                  (!disabled || (disabled && applyType === 'agile')) && (
+                  <div className="c7n-action">
+                    <Icon
+                      role="none"
+                      type="mode_edit mlr-3 pointer"
+                      style={{ cursor: canEditOrDelete ? 'pointer' : 'auto', color: canEditOrDelete ? '#000' : 'rgba(0, 0, 0, 0.25)' }}
+                      onClick={() => {
+                        if (canEditOrDelete) {
+                          this.setState({
+                            editCommentId: comment.commentId,
+                            editComment: comment.commentText,
+                            expand: true,
+                          });
+                        }
+                      }}
+                    />
+                    {
                     canEditOrDelete ? (
                       <Popconfirm
                         title="确认要删除该评论吗?"
@@ -169,8 +135,10 @@ class Comment extends Component {
                       />
                     )
                   }
+                  </div>
+                  )
+                }
 
-                </div>
               </div>
               {
                 expand && (

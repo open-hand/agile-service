@@ -198,7 +198,7 @@ function EditIssue() {
     getRelateStoryShow: relateStoryShow,
   } = store;
   const { isInProgram } = useIsInProgram();
-  const rightDisabled = disabled || (isInProgram && typeCode === 'issue_epic');
+  const rightDisabled = disabled || (isInProgram && (typeCode === 'issue_epic' || typeCode === 'feature'));
   return (
     <div style={{
       position: 'fixed',
