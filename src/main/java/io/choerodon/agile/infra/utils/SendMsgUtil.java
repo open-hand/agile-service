@@ -328,12 +328,10 @@ public class SendMsgUtil {
         return projectVO;
     }
 
-    public List<MessageSender> generateAutoRuleTriggerSender(Long userId, IssueDTO issue, Collection<ConfigurationRuleVO> values, String event) {
+    public List<MessageSender> generateAutoRuleTriggerSender(Long userId, String summary, Collection<ConfigurationRuleVO> values, String event) {
         Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(Collections.singletonList(userId), true);
         // 设置操作人
         String operatorName = Optional.ofNullable(userMap.get(userId)).map(UserMessageDTO::getName).orElse("");
-        // 设置概要
-        String summary = issue.getIssueNum() + "-" + issue.getSummary();
         return values.stream().map(rule -> {
             Map<String, String> templateArgsMap = new HashMap<>();
             templateArgsMap.put("operatorName", operatorName);

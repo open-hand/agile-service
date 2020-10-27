@@ -116,11 +116,12 @@ public class IssueNoticeListener {
     private List<MessageSender> generateRuleSender(String event,Long projectId,List<Long> ruleIdList,
                                                    IssueDTO issue, Set<String> fieldList) {
         Map<Long, ConfigurationRuleVO> map = configurationRuleService.selectRuleALLReceiver(ruleIdList);
-        // 生成需要合并的messageSenderList
+        // 设置概要
+        String summary = issue.getIssueNum() + "-" + issue.getSummary();
         return Stream.of(Arrays.stream(RuleNoticeEvent.getMsgCode(event))
                     .map(code -> generatedSenderByCode(code, projectId, issue, fieldList).apply(sendMsgUtil))
                     .filter(Objects::nonNull).collect(Collectors.toList()),
-                    sendMsgUtil.generateAutoRuleTriggerSender(DetailsHelper.getUserDetails().getUserId(), issue,  map.values(), event))
+                    sendMsgUtil.generateAutoRuleTriggerSender(DetailsHelper.getUserDetails().getUserId(), summary,  map.values(), event))
                 .flatMap(Collection::stream).collect(Collectors.toList());
     }
 
