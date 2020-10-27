@@ -1,5 +1,9 @@
 package io.choerodon.agile.infra.enums;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import io.choerodon.agile.api.vo.FieldTableVO;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -22,65 +26,31 @@ public class ConfigurationRule{
     public static final String SQL_VAR_NOT_EQUALS = " 1 = 2 ";
     public static final String TEMPLATE_TYPE_LIMIT = " (" + TEMPLATE_CONDITION_SQL + ") ";
     
+    public static final List<FieldTableVO> fieldTableList = new ArrayList<>(18);
+    
     public static boolean isSqlVar(String express){
         return StringUtils.equalsAnyIgnoreCase(express, SQL_VAR_NOW_EXPRESS);
     }
-
-    public enum FieldTableMapping {
-        
-        component("component_id","agile_component_issue_rel"),
-        fixVersion("version_id","agile_version_issue_rel"),
-        influenceVersion("version_id","agile_version_issue_rel"),
-        label("label_id","agile_label_issue_rel"),
-        sprint("sprint_id","agile_issue_sprint_rel"),
-        assignee("assignee_id","agile_issue"),
-        priority("priority_id","agile_issue"),
-        status("status_id","agile_issue"),
-        reporter("reporter_id","agile_issue"),
-        creationDate("creation_date","agile_issue"),
-        lastUpdateDate("last_update_date","agile_issue"),
-        storyPoints("story_point","agile_issue"),
-        remainTime("remain_time","agile_issue"),
-        epic("epic_id","agile_issue"),
-        issueType("type_code","agile_issue"),
-        estimatedStartTime("estimated_start_time","agile_issue"),
-        estimatedEndTime("estimated_end_time","agile_issue"),
-        issue("issue","agile_issue");
-
-        FieldTableMapping(String field, String table) {
-            this.field = field;
-            this.table = table;
-        }
-
-        private String table;
-        
-        private String field;
-
-        public String getTable() {
-            return table;
-        }
-
-        public String getField() {
-            return field;
-        }
-
-        public static FieldTableMapping matches(String name){
-            for (FieldTableMapping value : FieldTableMapping.values()) {
-                if (StringUtils.equals(value.name(), name)){
-                    return value;
-                }
-            }
-            return issue;
-        }
-
-        public static FieldTableMapping matchesField(String field){
-            for (FieldTableMapping value : FieldTableMapping.values()) {
-                if (StringUtils.equals(value.getField(), field)){
-                    return value;
-                }
-            }
-            return issue;
-        }
+    
+    static {
+        fieldTableList.add(new FieldTableVO("component", "component_id", "agile_component_issue_rel"));
+        fieldTableList.add(new FieldTableVO("fixVersion","version_id","agile_version_issue_rel"));
+        fieldTableList.add(new FieldTableVO("influenceVersion","version_id","agile_version_issue_rel"));
+        fieldTableList.add(new FieldTableVO("label","label_id","agile_label_issue_rel"));
+        fieldTableList.add(new FieldTableVO("sprint","sprint_id","agile_issue_sprint_rel"));
+        fieldTableList.add(new FieldTableVO("assignee","assignee_id","agile_issue"));
+        fieldTableList.add(new FieldTableVO("priority","priority_id","agile_issue"));
+        fieldTableList.add(new FieldTableVO("status","status_id","agile_issue"));
+        fieldTableList.add(new FieldTableVO("reporter","reporter_id","agile_issue"));
+        fieldTableList.add(new FieldTableVO("creationDate","creation_date","agile_issue"));
+        fieldTableList.add(new FieldTableVO("lastUpdateDate","last_update_date","agile_issue"));
+        fieldTableList.add(new FieldTableVO("storyPoints","story_point","agile_issue"));
+        fieldTableList.add(new FieldTableVO("remainingTime","remaining_time","agile_issue"));
+        fieldTableList.add(new FieldTableVO("epic","epic_id","agile_issue"));
+        fieldTableList.add(new FieldTableVO("issueType","type_code","agile_issue"));
+        fieldTableList.add(new FieldTableVO("estimatedStartTime","estimated_start_time","agile_issue"));
+        fieldTableList.add(new FieldTableVO("estimatedEndTime","estimated_end_time","agile_issue"));
+        fieldTableList.add(new FieldTableVO("issue","issue","agile_issue"));
     }
 
     public enum OpSqlMapping {
