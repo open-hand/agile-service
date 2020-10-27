@@ -1,6 +1,8 @@
 import React, { useContext } from 'react';
-import { Icon } from 'choerodon-ui';
+import { Icon, Popover } from 'choerodon-ui';
 import IssueNumber from './IssueNumber';
+import IssueParentSummary from './IssueParentSummary';
+import IssueParentTip from './IssueParentTip';
 import IssueType from './IssueType';
 import './IssueComponent.less';
 import EditIssueContext from '../stores';
@@ -9,9 +11,8 @@ import './IssueHeader.less';
 const IssueHeader = (props) => {
   const { AppState, store, prefixCls } = useContext(EditIssueContext);
   const {
-    resetIssue, backUrl, onCancel, reloadIssue, disabled,
+    resetIssue, onCancel, reloadIssue, disabled,
   } = props;
-  const urlParams = AppState.currentMenuType;
   const issue = store.getIssue;
   const {
     parentIssueId, relateIssueId, typeCode, parentIssueSummary, parentRelateSummary, parentIssueDescription, parentRelateDescription,
@@ -19,23 +20,68 @@ const IssueHeader = (props) => {
   return (
     <div className={`${prefixCls}-IssueHeader`}>
       <div className={`${prefixCls}-IssueHeader-top`}>
-        <IssueType {...props} />
-        {/* 问题编号 */}
-        <span style={{ marginLeft: 15 }} className={`${prefixCls}-IssueHeader-top-number`}>
-          <IssueNumber
-            parentIssueId={relateIssueId || parentIssueId}
-            resetIssue={resetIssue}
-            reloadIssue={reloadIssue}
-            urlParams={urlParams}
-            backUrl={backUrl}
-            typeCode={typeCode}
-            // parentIssueNum={parentIssueNum || relateIssueNum}
-            parentSummary={parentIssueSummary || parentRelateSummary}
-            parentDescription={parentIssueDescription || parentRelateDescription}
-            issue={issue}
-            disabled={disabled}
-          />
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {
+            parentIssueSummary ? (
+              <Popover
+                overlayClassName={`${prefixCls}-IssueHeader-top-popover`}
+                placement="leftTop"
+                title="父任务详情"
+                content={<IssueParentTip parentSummary={parentIssueSummary || parentRelateSummary} parentDescription={parentIssueDescription || parentRelateDescription} />}
+                trigger="hover"
+                getPopupContainer={((triggerNode) => triggerNode.parentNode)}
+              >
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginRight: !relateIssueId && !parentIssueId ? 15 : 0,
+                  paddingLeft: 9,
+                }}
+                >
+                  <IssueType {...props} />
+                  <IssueParentSummary
+                    parentIssueId={relateIssueId || parentIssueId}
+                    resetIssue={resetIssue}
+                    reloadIssue={reloadIssue}
+                    parentSummary={parentIssueSummary || parentRelateSummary}
+                    issue={issue}
+                    disabled={disabled}
+                  />
+                </div>
+              </Popover>
+            ) : (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginRight: !relateIssueId && !parentIssueId ? 15 : 0,
+                paddingLeft: 12,
+              }}
+              >
+                <IssueType {...props} />
+                <IssueParentSummary
+                  parentIssueId={relateIssueId || parentIssueId}
+                  resetIssue={resetIssue}
+                  reloadIssue={reloadIssue}
+                  parentSummary={parentIssueSummary || parentRelateSummary}
+                  issue={issue}
+                  disabled={disabled}
+                />
+              </div>
+            )
+          }
+          {/* 问题编号 */}
+          <span className={`${prefixCls}-IssueHeader-top-number`}>
+            <IssueNumber
+              reloadIssue={reloadIssue}
+              typeCode={typeCode}
+              parentSummary={parentIssueSummary || parentRelateSummary}
+              issue={issue}
+              disabled={disabled}
+            />
+          </span>
+
+        </div>
+
         {/* 隐藏 */}
         <div
           className={`${prefixCls}-IssueHeader-btn`}

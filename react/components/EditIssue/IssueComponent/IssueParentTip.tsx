@@ -9,14 +9,10 @@ interface Props {
 }
 
 const IssueParentTip: React.FC<Props> = ({ parentSummary, parentDescription }) => (
-  <div>
+  <>
     {
       parentSummary && (
         <div className={styles.issueParentTip}>
-          <div className={styles.issueParentTip_header}>
-            <span className={styles.issueParentTip_header_text}>父任务详情</span>
-            <span className={styles.issueParentTip_header_triangle} />
-          </div>
           <div className={styles.issueParentTip_content}>
             <div className={styles.issueParentTip_content_item}>
               <span className={styles.issueParentTip_content_item_title}>概要</span>
@@ -38,7 +34,7 @@ const IssueParentTip: React.FC<Props> = ({ parentSummary, parentDescription }) =
         </div>
       )
     }
-  </div>
+  </>
 );
 
 export default observer(IssueParentTip);
