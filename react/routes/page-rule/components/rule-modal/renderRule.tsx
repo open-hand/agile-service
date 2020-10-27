@@ -1,9 +1,8 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import {
   Select, DatePicker, TimePicker, DateTimePicker, TextArea, TextField, NumberField, DataSet, Row, Col,
 } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
-import SelectIssueType from '@/components/select/select-issue-type';
 import SelectStatus from '@/components/issue-filter-form/components/field/StatusField';
 import SelectPriority from '@/components/select/select-priority';
 import SelectComponent from '@/components/select/select-component';
@@ -13,9 +12,6 @@ import SelectEpic from '@/components/select/select-epic';
 import SelectSprint from '@/components/select/select-sprint';
 import SelectUser from '@/components/select/select-user';
 import { InjectedComponent } from './injectComponent';
-// import SelectDemandType from '@choerodon/agile-pro/lib/components/select/select-demand-type';
-// import SelectTreeDemandClassification from '@choerodon/agile-pro/lib/components/select/select-demand-classification';
-// import SelectUrgent from '@choerodon/agile-pro/lib/components/select/select-priority';
 
 const { Option } = Select;
 const { AppState } = stores;
@@ -78,22 +74,6 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
     } = field;
     if (system) {
       switch (code) {
-        case 'issueType': {
-          return (
-            <SelectIssueType
-              name={`${key}-value`}
-              isProgram={isProgram}
-              label="值"
-              valueField="typeCode"
-              style={{
-                width: '100%',
-              }}
-              afterLoad={(data) => {
-                systemDataRefMap.current.set(code, data || []);
-              }}
-            />
-          );
-        }
         case 'status': {
           return (
             <SelectStatus
@@ -106,6 +86,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
               afterLoad={(data) => {
                 systemDataRefMap.current.set(code, data || []);
               }}
+              multiple
             />
           );
         }
@@ -120,6 +101,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
               afterLoad={(data) => {
                 systemDataRefMap.current.set(code, data || []);
               }}
+              multiple
             />
           );
         }
@@ -159,8 +141,8 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
             />
           );
         }
-        case 'influence_version':
-        case 'fix_version': {
+        case 'influenceVersion':
+        case 'fixVersion': {
           return (
             <SelectVersion
               valueField="versionId"
@@ -190,6 +172,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
               afterLoad={(data) => {
                 systemDataRefMap.current.set(code, data || []);
               }}
+              multiple
             />
           );
         }
@@ -204,11 +187,11 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
               afterLoad={(data) => {
                 systemDataRefMap.current.set(code, data || []);
               }}
+              multiple
             />
           );
         }
-        case 'reporter':
-        case 'assignee': {
+        case 'reporter': {
           return (
             <SelectUser
               name={`${key}-value`}
@@ -223,6 +206,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
               autoQueryConfig={{
                 selectedUserIds: getFieldValue(`${key}-value`) ? [getFieldValue(`${key}-value`)] : [],
               }}
+              multiple
             />
           );
         }
@@ -235,6 +219,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
               afterLoad={(data: {id: string, name: string}) => {
                 systemDataRefMap.current.set(code, data || []);
               }}
+              multiple
             />
           );
         }
@@ -259,6 +244,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
               afterLoad={(data: {id: string, name: string}) => {
                 systemDataRefMap.current.set(code, data || []);
               }}
+              multiple
             />
           );
         }
@@ -274,7 +260,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
             key={code}
             label="值"
             name={`${key}-value`}
-            multiple={fieldType === 'checkbox' || fieldType === 'multiple'}
+            multiple
             maxTagCount={2}
             maxTagTextLength={10}
             style={{
@@ -312,6 +298,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
             autoQueryConfig={{
               selectedUserIds: getFieldValue(`${key}-value`) ? [getFieldValue(`${key}-value`)] : [],
             }}
+            multiple
           />
         );
       }
@@ -339,7 +326,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
         );
       }
       case 'number': {
-        // remain_time, story_point
+        // remainingTime, storyPoints
         return (
           <NumberField
             name={`${key}-value`}

@@ -4,11 +4,10 @@ import {
   Table, DataSet, Menu, Dropdown, Modal,
 } from 'choerodon-ui/pro';
 import { Icon } from 'choerodon-ui';
-import { TableColumnTooltip, TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
+import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import { User } from '@/common/types';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
-import UserHead from '@/components/UserHead';
 import { pageRuleApi } from '@/api';
 import { useIsProgramContext } from '@/hooks/useIsProgrom';
 import styles from '../../index.less';
@@ -73,7 +72,7 @@ const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
   }, []);
 
   const renderProcesserList = useCallback(({ record }:RenderProps) => {
-    const processerList = record?.get('processerList') || [];
+    const processerList = (record?.get('processerList') || []).filter((item: any) => !!item);
     return (
       <span>
         {processerList.map((user: User) => user.realName).join('、')}
