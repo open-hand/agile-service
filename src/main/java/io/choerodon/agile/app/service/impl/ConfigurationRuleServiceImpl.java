@@ -402,22 +402,22 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         String operation = ruleExpressVO.getOperation();
         String preOp = ConfigurationRule.OpSqlMapping.getPreOp(operation).name();
         
-        String customFieldType = ruleExpressVO.getFieldType();
-        CustomFieldType.contains(customFieldType, true);
+        String fieldType = ruleExpressVO.getFieldType();
+        CustomFieldType.contains(fieldType, true);
 
-        if (CustomFieldType.isOption(customFieldType)) {
+        if (CustomFieldType.isOption(fieldType)) {
             return renderCustomSql(preOp, projectId, fieldId, 
                     Collections.singletonList(() ->  conditionSql("ffv.option_id", operation, value)));
-        } else if (CustomFieldType.isDate(customFieldType)) {
+        } else if (CustomFieldType.isDate(fieldType)) {
             return renderCustomSql(preOp, projectId, fieldId, Collections.singletonList(() -> 
                     conditionSql(getUnixTimeExpress("ffv.date_value"), operation, getUnixTimeExpress(valueToString(value)))));
-        } else if (CustomFieldType.isDateHms(customFieldType)) {
+        } else if (CustomFieldType.isDateHms(fieldType)) {
             return renderCustomSql(preOp, projectId, fieldId, Collections.singletonList(() ->
-                    conditionSql(getTimeFieldExpress("ffv.date_value"), operation, getTimeValueExpress(valueToString(value)))));
-        } else if (CustomFieldType.isNumber(customFieldType)) {
+                    conditionSql(getTimeFieldExpress("ffv.date_value"), operation, getHmsTime(value))));
+        } else if (CustomFieldType.isNumber(fieldType)) {
             return renderCustomSql(preOp, projectId, fieldId, 
                     Collections.singletonList(() -> conditionSql("ffv.number_value", operation, value)));
-        } else if (CustomFieldType.isString(customFieldType)) {
+        } else if (CustomFieldType.isString(fieldType)) {
             return renderCustomSql(preOp, projectId, fieldId,
                     Collections.singletonList(() ->  conditionSql("ffv.string_value", operation, value)));
         } else  {
@@ -437,7 +437,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         } else if (CustomFieldType.isDate(fieldType)) {
             value = BooleanUtils.isTrue(ruleExpressVO.getNowFlag()) ? ConfigurationRule.SQL_VAR_NOW_EXPRESS : ruleExpressVO.getValueDate();
         } else if (CustomFieldType.isDateHms(fieldType)) {
-            value = ruleExpressVO.getValueDateHms();
+            value = BooleanUtils.isTrue(ruleExpressVO.getNowFlag()) ? ConfigurationRule.SQL_VAR_NOW_EXPRESS : ruleExpressVO.getValueDateHms();
         } else if (CustomFieldType.isNumber(fieldType)) {
             value = getNumber(operation, ruleExpressVO);
         } else if (CustomFieldType.isString(fieldType)) {
@@ -479,6 +479,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     protected String processPredefinedField(RuleExpressVO ruleExpressVO, Object value) {
         String operation = ruleExpressVO.getOperation();
         String field = Objects.requireNonNull(getFieldByCode(ruleExpressVO.getFieldCode()));
+        String fieldType = ruleExpressVO.getFieldType();
         String sql;
         switch (field) {
             case "version_id":
@@ -491,7 +492,11 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                 break;
             case "creation_date":
             case "last_update_date":
-                sql = this.conditionSql(getUnixTimeExpress(field), operation, getUnixTimeExpress(valueToString(value)));
+                if (CustomFieldType.isDateHms(fieldType)){
+                    sql = this.conditionSql(getTimeFieldExpress(field), operation, getHmsTime(value));
+                }else {
+                    sql = this.conditionSql(getUnixTimeExpress(field), operation, getUnixTimeExpress(valueToString(value)));
+                }
                 break;
             default:
                 if (ConfigurationRule.OpSqlMapping.isCollOp(operation)){
@@ -502,6 +507,11 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                 break;
         }
         return sql;
+    }
+
+    private String getHmsTime(Object value) {
+        return ConfigurationRule.isSqlVar((String) value) ? getTimeFieldExpress(valueToString(value)) :
+                getTimeValueExpress(valueToString(value));
     }
 
     private String valueToString(Object value) {
