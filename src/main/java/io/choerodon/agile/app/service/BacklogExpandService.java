@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service;
 
+import io.choerodon.agile.api.vo.FieldTableVO;
 import io.choerodon.agile.api.vo.PageConfigFieldEditedVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import org.apache.commons.collections.map.MultiKeyMap;
@@ -62,4 +63,10 @@ public interface BacklogExpandService {
      * @param maxNum
      */
     void initBacklogMaxNum(Long projectId, Long maxNum);
+
+    /**
+     * 获取需求字段与表名的映射
+     * @return list
+     */
+    List<FieldTableVO> getBacklogField();
 }

@@ -6,12 +6,15 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.google.common.base.CaseFormat;
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
+import io.choerodon.agile.api.vo.FieldTableVO;
 import io.choerodon.agile.api.vo.ObjectSchemeFieldVO;
 import io.choerodon.agile.api.vo.RuleExpressVO;
+import io.choerodon.agile.app.service.BacklogExpandService;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
 import io.choerodon.agile.app.service.ObjectSchemeFieldService;
 import io.choerodon.agile.infra.dto.ConfigurationRuleDTO;
@@ -62,6 +65,8 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     private BaseFeignClient baseFeignClient;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired(required = false)
+    private BacklogExpandService backlogExpandService;
     
     private static final String[] RECEIVER_LIST = new String[]{ConfigurationRuleReceiverDTO.TYPE_RECEIVER, 
             ConfigurationRuleReceiverDTO.TYPE_CC, ConfigurationRuleReceiverDTO.TYPE_ASSINGEE, 
@@ -286,18 +291,34 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     }
 
     private String fieldCode2Field(String fieldCode){
-        String field = ConfigurationRule.FieldTableMapping.matches(fieldCode).getField();
-        if (Objects.isNull(field)){
+        String field = getFieldByCode(fieldCode);
+        if (Objects.nonNull(field)){
             return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, field);
         }
         return fieldCode;
+    }
+    
+    private String getFieldByCode(String fieldCode){
+        return Stream.of(ConfigurationRule.fieldTableList, 
+                Optional.ofNullable(backlogExpandService).map(BacklogExpandService::getBacklogField)
+                        .orElse(Collections.emptyList()))
+                .flatMap(Collection::stream)
+                .filter(item -> StringUtils.equals(item.getName(), fieldCode))
+                .findFirst().map(FieldTableVO::getField)
+                .orElse(null);
     }
 
     private String renderLinkTableSql(String sourceOp, String field, List<Supplier<String>> conditionList) {
         String operation = ConfigurationRule.OpSqlMapping.valueOf(sourceOp).withField(field).name();
         StringBuilder sb = new StringBuilder();
         String sqlOp = ConfigurationRule.OpSqlMapping.valueOf(operation).getSqlOp();
-        String table = ConfigurationRule.FieldTableMapping.matchesField(field).getTable();
+        String table = Stream.of(ConfigurationRule.fieldTableList,
+                Optional.ofNullable(backlogExpandService).map(BacklogExpandService::getBacklogField)
+                        .orElse(Collections.emptyList()))
+                .flatMap(Collection::stream)
+                .filter(item -> StringUtils.equals(item.getField(), field))
+                .findFirst().map(FieldTableVO::getTable)
+                .orElse(null);
         if (ConfigurationRule.OpSqlMapping.is.name().equals(sourceOp) || ConfigurationRule.OpSqlMapping.is_not.name().equals(sourceOp)){
             return String.format(ConfigurationRule.TEMPLATE_LINK_TABLE_SQL, sqlOp, table, "");
         }
@@ -454,7 +475,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
 
     protected String processPredefinedField(RuleExpressVO ruleExpressVO, Object value) {
         String operation = ruleExpressVO.getOperation();
-        String field = ConfigurationRule.FieldTableMapping.matches(ruleExpressVO.getFieldCode()).getField();
+        String field = Objects.requireNonNull(getFieldByCode(ruleExpressVO.getFieldCode()));
         String sql;
         switch (field) {
             case "version_id":
