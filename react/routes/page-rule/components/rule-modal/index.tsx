@@ -47,9 +47,7 @@ interface Express {
   relationshipWithPervious: 'and' | 'or',
   // text,input
   valueStr?: string, //
-  // 单选，member
-  valueId?: string,
-  // 多选
+  // 多选,单选，member
   valueIdList?: string[],
   // number整数,需要判断是否允许小数
   valueNum?: number,
@@ -227,14 +225,14 @@ const RuleModal: React.FC<Props> = ({
     events: {
       update: ({
         // @ts-ignore
-        dataSet, record, name, value, oldValue,
+        dataSet, record, name, value,
       }) => {
         const key = name.split('-')[0];
         if (name.indexOf('code') > -1) {
           const field = (fieldDataRef?.current || []).find((item) => item.code === value);
           if (field) {
             const {
-              system, extraConfig, code, fieldType,
+              fieldType,
             } = field;
             if (fieldType !== 'date' && fieldType !== 'datetime' && fieldType !== 'time') {
               removeField(`${key}-middleValue`);

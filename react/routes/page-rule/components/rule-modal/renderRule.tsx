@@ -1,9 +1,8 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import {
   Select, DatePicker, TimePicker, DateTimePicker, TextArea, TextField, NumberField, DataSet, Row, Col,
 } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
-import SelectIssueType from '@/components/select/select-issue-type';
 import SelectStatus from '@/components/issue-filter-form/components/field/StatusField';
 import SelectPriority from '@/components/select/select-priority';
 import SelectComponent from '@/components/select/select-component';
@@ -13,9 +12,6 @@ import SelectEpic from '@/components/select/select-epic';
 import SelectSprint from '@/components/select/select-sprint';
 import SelectUser from '@/components/select/select-user';
 import { InjectedComponent } from './injectComponent';
-// import SelectDemandType from '@choerodon/agile-pro/lib/components/select/select-demand-type';
-// import SelectTreeDemandClassification from '@choerodon/agile-pro/lib/components/select/select-demand-classification';
-// import SelectUrgent from '@choerodon/agile-pro/lib/components/select/select-priority';
 
 const { Option } = Select;
 const { AppState } = stores;
