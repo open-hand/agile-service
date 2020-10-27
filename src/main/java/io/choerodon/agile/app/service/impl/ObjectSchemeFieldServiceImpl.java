@@ -212,7 +212,7 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
                 objectSchemeFieldDetailVOList.stream().collect(Collectors.toMap(ObjectSchemeFieldDetailVO::getId,
                         Function.identity()));
         return fieldVOS.stream()
-                .filter(vo -> CollectionUtils.isEmpty(issueTypeList) || vo.getContexts().containsAll(issueTypeList))
+                .filter(vo -> CollectionUtils.isEmpty(issueTypeList) || issueTypeList.stream().anyMatch(item -> vo.getContexts().contains(item)))
                 .peek(vo ->vo.setFieldOptions(map.getOrDefault(vo.getId(), new ObjectSchemeFieldDetailVO()).getFieldOptions()))
                 .collect(Collectors.toList());
     }
