@@ -73,7 +73,7 @@ const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
   }, []);
 
   const renderProcesserList = useCallback(({ record }:RenderProps) => {
-    const processerList = record?.get('processerList') || [];
+    const processerList = (record?.get('processerList') || []).filter((item: any) => !!item);
     return (
       <span>
         {processerList.map((user: User) => user.realName).join('、')}

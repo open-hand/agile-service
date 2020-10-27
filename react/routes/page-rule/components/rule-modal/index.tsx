@@ -92,26 +92,6 @@ const operationMap = new Map([
   ['not_like', '不包含'],
 ]);
 
-const systemFieldTypeMap = new Map([
-  ['assignee', 'member'],
-  ['component', 'multiple'],
-  ['creation_date', 'datetime'],
-  ['epic', 'single'],
-  ['estimated_end_time', 'datetime'],
-  ['estimated_start_time', 'datetime'],
-  ['fix_version', 'multiple'],
-  ['influence_version', 'multiple'],
-  ['issue_type', 'single'],
-  ['label', 'multiple'],
-  ['last_update_date', 'datetime'],
-  ['priority', 'single'],
-  ['remain_time', 'number'],
-  ['reporter', 'single'],
-  ['sprint', 'single'],
-  ['status', 'single'],
-  ['story_point', 'number'],
-]);
-
 const middleTypeMap = new Map<IFieldType, IMiddleFieldType>([
   ['radio', 'option'],
   ['checkbox', 'option'],
@@ -131,7 +111,7 @@ const aoMap = new Map([
   ['and', '且'],
 ]);
 
-const excludeCode = ['summary', 'description', 'epicName', 'timeTrace', 'belongToBacklog', 'progressFeedback', 'email', 'assignee'];
+const excludeCode = ['summary', 'description', 'epicName', 'timeTrace', 'belongToBacklog', 'progressFeedback', 'email', 'assignee', 'issueType'];
 
 const formatMoment = (type: 'date' | 'datetime' | 'time', d: string) => {
   switch (type) {
@@ -256,30 +236,6 @@ const RuleModal: React.FC<Props> = ({
             const {
               system, extraConfig, code, fieldType,
             } = field;
-            if (fieldType === 'number') {
-              const valueField = dataSet.current.getField(`${key}-value`);
-              if (system && (code === 'story_point' || code === 'remain_time')) {
-                valueField.set('max', 100);
-                valueField.set('min', 0);
-                valueField.set('step', 0.1);
-                valueField.set('validator', (numberValue: number) => {
-                  if (numberValue && /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/.test(numberValue.toString())) {
-                    return true;
-                  }
-                  return '请输入小于3位的整数或者整数位小于3位小数点后一位的小数';
-                });
-              } else if (extraConfig) {
-                valueField.set('step', 0.01);
-                valueField.set('validator', (numberValue: number) => {
-                  if (numberValue && /(^-?[0-9]+$)|(^[-]?[0-9]+(\.[0-9]{1,2})?$)/.test(numberValue.toString())) {
-                    return true;
-                  }
-                  return '请输入整数或者小数点后一位或两位的小数';
-                });
-              } else {
-                valueField.set('step', 1);
-              }
-            }
             if (fieldType !== 'date' && fieldType !== 'datetime' && fieldType !== 'time') {
               removeField(`${key}-middleValue`);
             } else {
@@ -297,6 +253,39 @@ const RuleModal: React.FC<Props> = ({
         }
         if (name.indexOf('operation') > -1) {
           dataSet.current.set(`${key}-value`, undefined);
+          const field = (fieldDataRef?.current || []).find((item) => item.code === value);
+          if (field) {
+            const {
+              system, extraConfig, code, fieldType,
+            } = field;
+            if (fieldType === 'number') {
+              const valueIsNull = value === 'is' || value === 'is_not';
+              const valueField = dataSet.current.getField(`${key}-value`);
+              if (!valueIsNull) {
+                if (system && (code === 'storyPoints' || code === 'remainingTime') && record.get(`${key}-operation`)) {
+                  valueField.set('max', 100);
+                  valueField.set('min', 0);
+                  valueField.set('step', 0.1);
+                  valueField.set('validator', (numberValue: number) => {
+                    if (numberValue && /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/.test(numberValue.toString())) {
+                      return true;
+                    }
+                    return '请输入小于3位的整数或者整数位小于3位小数点后一位的小数';
+                  });
+                } else if (extraConfig) {
+                  valueField.set('step', 0.01);
+                  valueField.set('validator', (numberValue: number) => {
+                    if (numberValue && /(^-?[0-9]+$)|(^[-]?[0-9]+(\.[0-9]{1,2})?$)/.test(numberValue.toString())) {
+                      return true;
+                    }
+                    return '请输入整数或者小数点后一位或两位的小数';
+                  });
+                } else {
+                  valueField.set('step', 1);
+                }
+              }
+            }
+          }
         }
         setUpdateCount((count) => count + 1);
       },
@@ -312,29 +301,13 @@ const RuleModal: React.FC<Props> = ({
       let operations: {value: Operation, operation: string}[] = [];
       switch (fieldType) {
         case 'checkbox':
-        case 'multiple': {
+        case 'multiple':
+        case 'radio':
+        case 'single':
+        case 'member': {
           operations = [
             { value: 'in', operation: '包含' },
             { value: 'not_in', operation: '不包含' },
-            { value: 'is', operation: '是' },
-            { value: 'is_not', operation: '不是' },
-          ];
-          break;
-        }
-        case 'radio':
-        case 'single': {
-          operations = [
-            { value: 'eq', operation: '等于' },
-            { value: 'not_eq', operation: '不等于' },
-            { value: 'is', operation: '是' },
-            { value: 'is_not', operation: '不是' },
-          ];
-          break;
-        }
-        case 'member': {
-          operations = [
-            { value: 'eq', operation: '等于' },
-            { value: 'not_eq', operation: '不等于' },
             { value: 'is', operation: '是' },
             { value: 'is_not', operation: '不是' },
           ];
@@ -428,6 +401,13 @@ const RuleModal: React.FC<Props> = ({
     return '';
   }, [modalDataSet]);
 
+  const setFieldValue = useCallback((name: string, value: any) => {
+    const { current } = modalDataSet;
+    if (current) {
+      current.set(name, value);
+    }
+  }, [modalDataSet]);
+
   const getFieldData = useCallback(async (typeCodes?: string[]) => {
     const issueTypes = typeCodes || getFieldValue('issueTypes');
     if (issueTypes && issueTypes.length) {
@@ -449,25 +429,37 @@ const RuleModal: React.FC<Props> = ({
     }
   }, [getFieldValue]);
 
-  const handleIssueTypesChange = useCallback((value) => {
-    setFieldValue('issueTypes', (value || []).filter((item: string) => item !== 'backlog'));
+  const handleIssueTypesChange = useCallback(async (value, oldValue) => {
+    if (value && value.length > 1) {
+      setFieldValue('issueTypes', (value || []).filter((item: string) => item !== 'backlog'));
+    } else {
+      setFieldValue('issueTypes', (value || []));
+    }
+    await getFieldData();
+    let removeCount = 0;
     if (fields.length) {
       fields.forEach(({ key }: { key: number}) => {
-        removeField(`${key}-code`);
-        removeField(`${key}-operation`);
-        removeField(`${key}-value`);
-        removeField(`${key}-ao`);
-        removeField(`${key}-middleValue`);
+        if (!find(fieldDataRef.current, { code: getFieldValue(`${key}-code`) })) {
+          removeCount += 1;
+          Field.remove(key);
+          removeField(`${key}-code`);
+          removeField(`${key}-operation`);
+          removeField(`${key}-value`);
+          removeField(`${key}-ao`);
+          removeField(`${key}-middleValue`);
+        }
       });
-      Field.clear();
     }
-    if (value) {
+    if (value && !(fields.length - removeCount)) {
       const newKey = Field.add();
       addFieldRule(newKey, 0);
     }
-    setFieldValue('processerList', undefined);
-    getFieldData();
-  }, [fields, addFieldRule, getFieldValue, removeField, getFieldData]);
+    const newHasBacklog = value && includes(value, 'backlog') && !oldValue;
+    const oldHasBacklog = oldValue && includes(oldValue, 'backlog') && !value;
+    if (newHasBacklog || oldHasBacklog) {
+      setFieldValue('processerList', undefined);
+    }
+  }, [getFieldData, fields, setFieldValue, getFieldValue, removeField, addFieldRule]);
 
   const transformValue = useCallback((fieldInfo: IFieldWithType, operation: Operation, value: any, middleValue?: 'now' | 'specified') => {
     const {
@@ -484,12 +476,8 @@ const RuleModal: React.FC<Props> = ({
         case 'urgent':
         case 'priority':
         case 'status': {
-          const selectOption = find(options, { id: value });
-          return selectOption?.name;
-        }
-        case 'issue_type': {
-          const selectOption = find(options, { typeCode: value });
-          return selectOption?.name;
+          const selectOptions = options.filter((option: { id: string; }) => value.indexOf(option.id) > -1);
+          return `[${map(selectOptions, 'name').join(',')}]`;
         }
         case 'component': {
           const selectOptions = options.filter((option: { componentId: string; }) => value.indexOf(option.componentId) > -1);
@@ -499,41 +487,37 @@ const RuleModal: React.FC<Props> = ({
           const selectOptions = options.filter((option: { labelId: string; }) => value.indexOf(option.labelId) > -1);
           return `[${map(selectOptions, 'labelName').join(',')}]`;
         }
-        case 'influence_version':
-        case 'fix_version': {
+        case 'influenceVersion':
+        case 'fixVersion': {
           const selectOptions = options.filter((option: { versionId: string; }) => value.indexOf(option.versionId) > -1);
           return `[${map(selectOptions, 'name').join(',')}]`;
         }
         case 'epic': {
-          const selectOption = find(options, { issueId: value });
-          return selectOption?.epicName;
+          const selectOptions = options.filter((option: { issueId: string; }) => value.indexOf(option.issueId) > -1);
+          return `[${map(selectOptions, 'epicName').join(',')}]`;
         }
         case 'sprint': {
-          const selectOption = find(options, { sprintId: value });
-          return selectOption?.sprintName;
+          const selectOptions = options.filter((option: { sprintId: string; }) => value.indexOf(option.sprintId) > -1);
+          return `[${map(selectOptions, 'sprintName').join(',')}]`;
         }
-        case 'reporter':
-        case 'assignee': {
-          const selectOption = find(options, { id: value });
-          return selectOption?.realName;
+        case 'reporter': {
+          const selectOptions = options.filter((option: { id: string; }) => value.indexOf(option.id) > -1);
+          return `[${map(selectOptions, 'realName').join(',')}]`;
         }
       }
     }
     switch (fieldType) {
       case 'multiple':
-      case 'checkbox': {
+      case 'checkbox':
+      case 'radio':
+      case 'single': {
         const selectOptions = fieldOptions?.filter((option) => value.indexOf(option.id) > -1);
         return `[${map(selectOptions, 'value').join(',')}]`;
       }
-      case 'radio':
-      case 'single': {
-        const selectOption = find(fieldOptions, { id: value });
-        return selectOption?.value;
-      }
       case 'member': {
         const memberOptions = systemDataRefMap.current.get(code);
-        const selectMembers = find(memberOptions, { id: value });
-        return selectMembers?.realName;
+        const selectOptions = memberOptions.filter((option: { id: string; }) => value.indexOf(option.id) > -1);
+        return `[${map(selectOptions, 'realName').join(',')}]`;
       }
       case 'number':
       case 'text':
@@ -604,15 +588,13 @@ const RuleModal: React.FC<Props> = ({
               operation: getFieldValue(`${key}-operation`),
               relationshipWithPervious: hasAo && getFieldValue(`${key}-ao`),
               // text,input
-              valueStr: (fieldType === 'input' || fieldType === 'text' || code === 'issue_type') && !valueIsNull ? value : undefined,
-              // 单选，member
-              valueId: (fieldType === 'single' || fieldType === 'member' || fieldType === 'radio') && code !== 'issue_type' && !valueIsNull ? value : undefined,
-              // 多选
-              valueIdList: (fieldType === 'multiple' || fieldType === 'checkbox') && !valueIsNull ? value : undefined,
+              valueStr: (fieldType === 'input' || fieldType === 'text') && !valueIsNull ? value : undefined,
+              // 多选、单选、member
+              valueIdList: (fieldType === 'multiple' || fieldType === 'checkbox' || fieldType === 'single' || fieldType === 'member' || fieldType === 'radio') && !valueIsNull ? value : undefined,
               // number整数,需要判断是否允许小数
-              valueNum: fieldType === 'number' && !extraConfig && !valueIsNull && code !== 'remain_time' && code !== 'story_point' ? value : undefined,
+              valueNum: fieldType === 'number' && !extraConfig && !valueIsNull && code !== 'remainingTime' && code !== 'storyPoints' ? value : undefined,
               // number有小数， 需要判断是否允许小数
-              valueDecimal: fieldType === 'number' && (extraConfig || code === 'remain_time' || code === 'story_point') && !valueIsNull ? value : undefined,
+              valueDecimal: fieldType === 'number' && (extraConfig || code === 'remainingTime' || code === 'storyPoints') && !valueIsNull ? value : undefined,
               // date,datetime
               valueDate: (fieldType === 'date' || fieldType === 'datetime') && !valueIsNull && toJS(getFieldValue(`${key}-middleValue`)) === 'specified' ? formatMoment(fieldType, value) : undefined,
               // time
@@ -621,7 +603,7 @@ const RuleModal: React.FC<Props> = ({
               predefined: system,
               fieldType: type,
               // 是否允许小数，需要判断是否允许小数
-              allowDecimals: fieldType === 'number' && !valueIsNull ? extraConfig : undefined,
+              allowDecimals: fieldType === 'number' && !valueIsNull ? (extraConfig || code === 'remainingTime' || code === 'storyPoints') : undefined,
             });
             const ao = hasAo && getFieldValue(`${key}-ao`) && aoMap.get(getFieldValue(`${key}-ao`));
             expressQuery += `${ao ? `${ao} ` : ''}${name} ${operationMap.get(getFieldValue(`${key}-operation`))} ${transformValue(fieldInfo, getFieldValue(`${key}-operation`), getFieldValue(`${key}-value`), getFieldValue(`${key}-middleValue`))} `;
@@ -637,7 +619,7 @@ const RuleModal: React.FC<Props> = ({
 
   const handleClickSubmit = useCallback(async () => {
     if (await modalDataSet.validate()) {
-      const processerList = Array.isArray(toJS(getFieldValue('processerList'))) ? (toJS(getFieldValue('processerList')) || []).map((id: string) => ({ id })) : [{ id: toJS(getFieldValue('processerList')) }];
+      const processerList = Array.isArray(toJS(getFieldValue('processerList'))) ? (toJS(getFieldValue('processerList')).filter((item: any) => !!item) || []).map((id: string) => ({ id })) : [{ id: toJS(getFieldValue('processerList')) }];
 
       const expressObj = transformSumitData();
       const data = {
@@ -676,13 +658,6 @@ const RuleModal: React.FC<Props> = ({
   useEffect(() => {
     modal?.handleOk(handleClickSubmit);
   }, [handleClickSubmit, modal]);
-
-  const setFieldValue = useCallback((name: string, value: any) => {
-    const { current } = modalDataSet;
-    if (current) {
-      current.set(name, value);
-    }
-  }, [modalDataSet]);
 
   useEffect(() => {
     if (ruleId) {
