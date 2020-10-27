@@ -79,7 +79,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getExpressList()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getIssueTypes()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(checkUniqueName(projectId, null, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
-        String sqlQuery = generateSqlQuery(configurationRuleVO);
+        String sqlQuery = generateSqlQuery(configurationRuleVO, true);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
         configurationRuleDTO.setTypeCode(CommonMapperUtil.writeValueAsString(configurationRuleVO.getIssueTypes()));
@@ -110,7 +110,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.isTrue(checkUniqueName(projectId, ruleId, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
         configurationRuleVO.setId(ruleId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
-        configurationRuleDTO.setSqlQuery(generateSqlQuery(configurationRuleVO));
+        configurationRuleDTO.setSqlQuery(generateSqlQuery(configurationRuleVO, true));
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
         configurationRuleDTO.setTypeCode(CommonMapperUtil.writeValueAsString(configurationRuleVO.getIssueTypes()));
         if (configurationRuleMapper.updateOptional(configurationRuleDTO, ConfigurationRuleDTO.FIELD_SQL_QUERY,
@@ -273,7 +273,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         JavaType javaType = CommonMapperUtil.getTypeFactory().constructParametricType(List.class, RuleExpressVO.class);
         for (ConfigurationRuleVO ruleVO : ruleList) {
             ruleVO.setExpressList(CommonMapperUtil.readValue(ruleVO.getExpressFormat(), javaType));
-            ruleVO.setSqlQuery(this.generateSqlQuery(ruleVO));
+            ruleVO.setSqlQuery(this.generateSqlQuery(ruleVO,false));
         }
         if (allFieldCheck){
             // 之后消息检测需要用到
@@ -352,7 +352,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     }
 
     @Override
-    public String generateSqlQuery(ConfigurationRuleVO configurationRuleVO) {
+    public String generateSqlQuery(ConfigurationRuleVO configurationRuleVO, boolean checkMode) {
         Long projectId = configurationRuleVO.getProjectId();
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         List<RuleExpressVO> ruleExpressVOList = configurationRuleVO.getExpressList();
@@ -374,15 +374,18 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
             typeLimit = inSql("type_code", Optional.ofNullable(fieldMap.get(ruleExpressVO.getFieldCode()))
                     .map(ObjectSchemeFieldVO::getContexts).orElse(null));
             if (predefined) {
-                sqlQuery.append(addTypeLimit(typeLimit, processPredefinedField(ruleExpressVO, getValue(ruleExpressVO))));
+                sqlQuery.append(addTypeLimit(typeLimit, processPredefinedField(ruleExpressVO, getValue(ruleExpressVO)), checkMode));
             } else {
-                sqlQuery.append(addTypeLimit(typeLimit, processCustomField(ruleExpressVO, organizationId, projectId, getValue(ruleExpressVO))));
+                sqlQuery.append(addTypeLimit(typeLimit, processCustomField(ruleExpressVO, organizationId, projectId, getValue(ruleExpressVO)), checkMode));
             }
         }
         return sqlQuery.toString();
     }
     
-    private String addTypeLimit(String typeLimit, String sql){
+    private String addTypeLimit(String typeLimit, String sql, boolean checkMode){
+        if (checkMode){
+            return sql;
+        }
         if (StringUtils.isBlank(typeLimit)){
             typeLimit = ConfigurationRule.SQL_VAR_NOT_EQUALS;
         }

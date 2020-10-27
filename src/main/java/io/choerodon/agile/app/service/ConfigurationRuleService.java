@@ -42,7 +42,13 @@ public interface ConfigurationRuleService {
 
     boolean checkUniqueName(Long projectId, Long ruleId, String name);
 
-    String generateSqlQuery(ConfigurationRuleVO configurationRuleVO);
+    /**
+     * 生成sql查询条件
+     * @param configurationRuleVO configurationRuleVO
+     * @param checkMode 在检查模式下，仅会根据语句条件生成，不会去拼接字段类型条件，仅作检查
+     * @return sql
+     */
+    String generateSqlQuery(ConfigurationRuleVO configurationRuleVO, boolean checkMode);
 
     /**
      * 筛选出检测更新字段受页面规则限制的规则
