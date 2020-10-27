@@ -6,6 +6,7 @@ import io.choerodon.agile.app.service.NoticeService;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.app.service.UserService;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 import io.choerodon.agile.infra.enums.SchemeApplyType;
 import io.choerodon.agile.infra.feign.BaseFeignClient;
 import io.choerodon.agile.infra.mapper.IssueStatusMapper;
@@ -14,7 +15,10 @@ import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.CustomUserDetails;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.entity.MessageSender;
+import org.hzero.boot.message.entity.Receiver;
+import org.hzero.core.base.BaseConstants;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -22,6 +26,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by HuangFuqiang@choerodon.io on 2019/4/29.
@@ -321,5 +326,35 @@ public class SendMsgUtil {
             throw new CommonException(errorProjectNotexist);
         }
         return projectVO;
+    }
+
+    public List<MessageSender> generateAutoRuleTriggerSender(Long userId, IssueDTO issue, Collection<ConfigurationRuleVO> values, String event) {
+        Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(Collections.singletonList(userId), true);
+        // 设置操作人
+        String operatorName = Optional.ofNullable(userMap.get(userId)).map(UserMessageDTO::getName).orElse("");
+        // 设置概要
+        String summary = issue.getIssueNum() + "-" + issue.getSummary();
+        return values.stream().map(rule -> {
+            Map<String, String> templateArgsMap = new HashMap<>();
+            templateArgsMap.put("operatorName", operatorName);
+            templateArgsMap.put("summary", summary);
+            templateArgsMap.put("ruleName", rule.getName());
+            templateArgsMap.put("operator", StringUtils.equals(event, RuleNoticeEvent.ISSUE_CREATED)? "创建" : "修改");
+            MessageSender messageSender = new MessageSender();
+            messageSender.setTenantId(BaseConstants.DEFAULT_TENANT_ID);
+            messageSender.setMessageCode(RuleNoticeEvent.AUTO_RULE_TRIGGER);
+            // 设置模板参数
+            messageSender.setArgs(templateArgsMap);
+            messageSender.setReceiverAddressList(rule.getReceiverList().stream().map(userDTO -> {
+                Receiver receiver = new Receiver();
+                receiver.setUserId(userDTO.getId());
+                receiver.setEmail(userDTO.getEmail());
+                receiver.setPhone(userDTO.getPhone());
+                receiver.setTargetUserTenantId(userDTO.getOrganizationId());
+                return receiver;
+            }).collect(Collectors.toList()));
+            messageSender.setCcList(rule.getCcList().stream().map(UserDTO::getEmail).collect(Collectors.toList()));
+            return messageSender;
+        }).collect(Collectors.toList());
     }
 }

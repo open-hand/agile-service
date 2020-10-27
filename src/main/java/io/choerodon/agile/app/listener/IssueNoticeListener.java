@@ -3,6 +3,7 @@ package io.choerodon.agile.app.listener;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
 import io.choerodon.agile.api.vo.NoticeEventVO;
@@ -80,7 +81,7 @@ public class IssueNoticeListener {
         // 组装符合条件的页面规则messageSender
         List<MessageSender> ruleSenderList = generateRuleSender(event, projectId, ruleIdList, issueDTO, fieldList);
         // 合并消息通知并发送
-        for (MessageSender messageSender : RuleEventUtil.mergeNotice(ruleSenderList)) {
+        for (MessageSender messageSender : ruleSenderList) {
             messageClient.async().sendMessage(messageSender);
         }
         // 更改页面规则对应的处理人
@@ -116,8 +117,10 @@ public class IssueNoticeListener {
                                                    IssueDTO issue, Set<String> fieldList) {
         Map<Long, ConfigurationRuleVO> map = configurationRuleService.selectRuleALLReceiver(ruleIdList);
         // 生成需要合并的messageSenderList
-        return Arrays.stream(RuleNoticeEvent.getMsgCode(event))
-                .map(code -> RuleEventUtil.getSenderList(sendMsgUtil, generatedSenderByCode(code, projectId, issue, fieldList), map))
+        return Stream.of(Arrays.stream(RuleNoticeEvent.getMsgCode(event))
+                    .map(code -> generatedSenderByCode(code, projectId, issue, fieldList).apply(sendMsgUtil))
+                    .filter(Objects::nonNull).collect(Collectors.toList()),
+                    sendMsgUtil.generateAutoRuleTriggerSender(DetailsHelper.getUserDetails().getUserId(), issue,  map.values(), event))
                 .flatMap(Collection::stream).collect(Collectors.toList());
     }
 
