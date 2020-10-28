@@ -46,13 +46,12 @@ function IssueTypeList() {
   return (
     <Page
       className={prefixCls}
-      style={{ paddingTop: 0 }}
       service={[
         'choerodon.code.organization.setting.issue.issue-type.ps.default',
       ]}
     >
       <Breadcrumb />
-      <Content>
+      <Content style={{ paddingTop: '0' }}>
         <Table dataSet={issueTypeDataSet} className={`${prefixCls}-table`}>
           <Column name="name" renderer={renderName} />
           <Column name="description" />
