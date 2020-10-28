@@ -717,6 +717,7 @@ const RuleModal: React.FC<Props> = ({
     }
   });
 
+  const issueTypes = getFieldValue('issueTypes');
   return (
     <div className={styles.rule_form}>
       <Loading loading={loading} />
@@ -730,7 +731,7 @@ const RuleModal: React.FC<Props> = ({
             style={{ width: 520, marginTop: 27 }}
             onChange={handleIssueTypesChange}
             onOption={({ record }) => ({
-              disabled: (getFieldValue('issueTypes') && getFieldValue('issueTypes').indexOf('backlog') > -1 && record.get('typeCode') !== 'backlog') || (getFieldValue('issueTypes') && getFieldValue('issueTypes').indexOf('backlog') === -1 && record.get('typeCode') === 'backlog'),
+              disabled: issueTypes && issueTypes.length && ((issueTypes.indexOf('backlog') > -1 && record.get('typeCode') !== 'backlog') || (issueTypes.indexOf('backlog') === -1 && record.get('typeCode') === 'backlog')),
             })}
           />
         </div>
