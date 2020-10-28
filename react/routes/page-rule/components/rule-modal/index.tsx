@@ -849,6 +849,10 @@ const RuleModal: React.FC<Props> = ({
             maxTagCount={6}
             maxTagTextLength={4}
             clearButton
+            // @ts-ignore
+            autoQueryConfig={{
+              selectedUserIds: getFieldValue('processerList'),
+            }}
           />
         </div>
         <div className={`${styles.rule_form_setting}`}>
