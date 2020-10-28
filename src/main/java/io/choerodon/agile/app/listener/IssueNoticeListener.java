@@ -9,8 +9,10 @@ import io.choerodon.agile.api.vo.ConfigurationRuleVO;
 import io.choerodon.agile.api.vo.NoticeEventVO;
 import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
 import io.choerodon.agile.app.service.ConfigurationRuleService;
+import io.choerodon.agile.app.service.IssueAccessDataService;
 import io.choerodon.agile.app.service.StatusNoticeSettingService;
 import io.choerodon.agile.infra.dto.ConfigurationRuleReceiverDTO;
+import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
 import io.choerodon.agile.infra.enums.RuleNoticeEvent;
 import io.choerodon.agile.infra.mapper.ConfigurationRuleMapper;
@@ -25,6 +27,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.MessageSender;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +58,11 @@ public class IssueNoticeListener {
     @Autowired
     private IssueMapper issueMapper;
     @Autowired
+    private IssueAccessDataService issueAccessDataService;
+    @Autowired
     private ConfigurationRuleReceiverMapper configurationRuleReceiverMapper;
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Async
     @TransactionalEventListener(NoticeEventVO.class)
@@ -110,8 +117,8 @@ public class IssueNoticeListener {
         if (Objects.isNull(receiver)){
             return;
         }
-        issueDTO.setAssigneeId(receiver.getId());
-        issueMapper.updateOptional(issueDTO, "assigneeId");
+        issueDTO.setAssigneeId(Objects.requireNonNull(receiver.getUserId()));
+        issueAccessDataService.update(modelMapper.map(issueDTO, IssueConvertDTO.class) , new String[]{"assigneeId"});
     }
 
     private List<MessageSender> generateRuleSender(String event,Long projectId,List<Long> ruleIdList,
