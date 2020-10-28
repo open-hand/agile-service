@@ -61,7 +61,6 @@ const SelectFeature: React.FC<Props> = forwardRef(({
       clearButton
       {...props}
       {...otherProps}
-
     />
   );
 });
