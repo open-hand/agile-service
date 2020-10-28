@@ -17,7 +17,9 @@ const IssueAttachment = observer((props) => {
     userId: issueAttachment.createdBy,
   }));
   const [fileList, setFileList] = useState(initialFileList);
-
+  useEffect(() => {
+    setFileList(initialFileList);
+  }, [JSON.stringify(issueAttachmentVOList)]);
   const refresh = () => {
     if (reloadIssue) {
       reloadIssue(issueId);
