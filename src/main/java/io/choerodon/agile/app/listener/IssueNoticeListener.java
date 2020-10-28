@@ -87,7 +87,9 @@ public class IssueNoticeListener {
         List<Long> ruleIdList = Optional.ofNullable(map).orElse(new HashMap<>())
                 .values().stream().filter(Objects::nonNull).collect(Collectors.toList());
         // 组装符合条件的页面规则messageSender
-        List<MessageSender> ruleSenderList = generateRuleSender(event, projectId, ruleIdList, issueDTO, fieldList);
+        Map<Long, String> ruleNameMap = ruleVOList.stream().collect(Collectors.toMap(ConfigurationRuleVO::getId,
+                ConfigurationRuleVO::getName));
+        List<MessageSender> ruleSenderList = generateRuleSender(event, projectId, ruleIdList, issueDTO, fieldList, ruleNameMap);
         // 合并消息通知并发送
         for (MessageSender messageSender : ruleSenderList) {
             messageClient.async().sendMessage(messageSender);
@@ -122,8 +124,9 @@ public class IssueNoticeListener {
     }
 
     private List<MessageSender> generateRuleSender(String event,Long projectId,List<Long> ruleIdList,
-                                                   IssueDTO issue, Set<String> fieldList) {
+                                                   IssueDTO issue, Set<String> fieldList, Map<Long, String> ruleNameMap) {
         Map<Long, ConfigurationRuleVO> map = configurationRuleService.selectRuleALLReceiver(ruleIdList);
+        map.values().forEach(rule -> rule.setName(ruleNameMap.get(rule.getId())));
         // 设置概要
         String summary = issue.getIssueNum() + "-" + issue.getSummary();
         return Stream.of(Arrays.stream(RuleNoticeEvent.getMsgCode(event))
