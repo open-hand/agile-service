@@ -200,6 +200,7 @@ const Filter: React.FC<FilterProps> = ({
         }}
         dropdownMatchSelectWidth={false}
         maxTagCount={3}
+        maxTagTextLength={5}
         className={className}
         labelLayout={!flat || isText || isTime ? 'float' as LabelLayout : 'none' as LabelLayout}
         {...isUser ? {

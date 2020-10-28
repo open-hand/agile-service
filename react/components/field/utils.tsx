@@ -133,6 +133,7 @@ export function getFieldElement(field: IFilterField, flat?: boolean): React.Reac
       return (
         <SelectUser
           multiple
+          flat={flat}
             // @ts-ignore
           selectedUserIds={defaultValue ? defaultValue.map((item: string) => ({ id: item })) : undefined}
         />

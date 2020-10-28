@@ -35,7 +35,7 @@ export function renderFlatField(field: IFilterField, { element, removeButton }: 
     <div
       key={field.code}
       style={{
-        display: 'flex', alignItems: 'center', marginBottom: 10, marginTop: 1,
+        display: 'flex', alignItems: 'center', marginBottom: 10,
       }}
     >
       {React.cloneElement(element, {
