@@ -25,6 +25,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class ConfigurationRuleDTO extends AuditDomain {
 
     public static final String FIELD_ID = "id";
+    public static final String FIELD_NAME = "name";
     public static final String FIELD_SQL_QUERY = "sqlQuery";
     public static final String FIELD_EXPRESS_QUERY = "expressQuery";
     public static final String FIELD_EXPRESS_FORMAT = "expressFormat";
