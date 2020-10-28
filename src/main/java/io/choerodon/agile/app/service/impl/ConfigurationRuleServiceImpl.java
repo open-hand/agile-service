@@ -115,7 +115,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         configurationRuleDTO.setTypeCode(CommonMapperUtil.writeValueAsString(configurationRuleVO.getIssueTypes()));
         if (configurationRuleMapper.updateOptional(configurationRuleDTO, ConfigurationRuleDTO.FIELD_SQL_QUERY,
                 ConfigurationRuleDTO.FIELD_EXPRESS_QUERY, ConfigurationRuleDTO.FIELD_EXPRESS_FORMAT,
-                ConfigurationRuleDTO.FIELD_TYPE_CODE) != 1) {
+                ConfigurationRuleDTO.FIELD_TYPE_CODE, ConfigurationRuleDTO.FIELD_NAME) != 1) {
             throw new CommonException("error.rule.update");
         }
         // 更新通知对象

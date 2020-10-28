@@ -21,6 +21,7 @@ public class RuleNoticeEvent {
     public static final String ISSUEASSIGNEE = "ISSUEASSIGNEE";
     public static final String ISSUESOLVE = "ISSUESOLVE";
     public static final String ISSUECHANGESTATUS = "ISSUECHANGESTATUS";
+    public static final String AUTO_RULE_TRIGGER = "AUTO_RULE_TRIGGER";
 
     public static String[] getMsgCode(String event){
         String[] msgCode = null;
