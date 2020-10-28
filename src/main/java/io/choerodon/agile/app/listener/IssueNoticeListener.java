@@ -22,6 +22,7 @@ import io.choerodon.core.oauth.DetailsHelper;
 import io.choerodon.mybatis.domain.AuditDomain;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.MessageSender;
 import org.slf4j.Logger;
@@ -121,7 +122,8 @@ public class IssueNoticeListener {
         return Stream.of(Arrays.stream(RuleNoticeEvent.getMsgCode(event))
                     .map(code -> generatedSenderByCode(code, projectId, issue, fieldList).apply(sendMsgUtil))
                     .filter(Objects::nonNull).collect(Collectors.toList()),
-                    sendMsgUtil.generateAutoRuleTriggerSender(DetailsHelper.getUserDetails().getUserId(), summary,  map.values(), event))
+                    sendMsgUtil.generateAutoRuleTriggerSender(DetailsHelper.getUserDetails().getUserId(), summary,  map.values(),
+                            () -> StringUtils.equals(event, RuleNoticeEvent.ISSUE_CREATED)))
                 .flatMap(Collection::stream).collect(Collectors.toList());
     }
 

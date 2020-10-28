@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -328,7 +329,7 @@ public class SendMsgUtil {
         return projectVO;
     }
 
-    public List<MessageSender> generateAutoRuleTriggerSender(Long userId, String summary, Collection<ConfigurationRuleVO> values, String event) {
+    public List<MessageSender> generateAutoRuleTriggerSender(Long userId, String summary, Collection<ConfigurationRuleVO> values, Supplier<Boolean> operator) {
         Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(Collections.singletonList(userId), true);
         // 设置操作人
         String operatorName = Optional.ofNullable(userMap.get(userId)).map(UserMessageDTO::getName).orElse("");
@@ -337,7 +338,7 @@ public class SendMsgUtil {
             templateArgsMap.put("operatorName", operatorName);
             templateArgsMap.put("summary", summary);
             templateArgsMap.put("ruleName", rule.getName());
-            templateArgsMap.put("operator", StringUtils.equals(event, RuleNoticeEvent.ISSUE_CREATED)? "创建" : "修改");
+            templateArgsMap.put("operator", operator.get()? "创建" : "修改");
             MessageSender messageSender = new MessageSender();
             messageSender.setTenantId(BaseConstants.DEFAULT_TENANT_ID);
             messageSender.setMessageCode(RuleNoticeEvent.AUTO_RULE_TRIGGER);
