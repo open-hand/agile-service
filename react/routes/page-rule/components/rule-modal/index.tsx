@@ -73,6 +73,7 @@ interface IRule {
   ccList: User[],
   receiverList: User[],
   expressList: Express[]
+  userTypes: string[]
 }
 // 'in' | 'not_in' | 'is' | 'is_not' | 'eq' | 'not_eq' | 'gt' | 'gte' | 'lt' | 'lte' | 'like' | 'not_like'
 const operationMap = new Map([
@@ -670,7 +671,7 @@ const RuleModal: React.FC<Props> = ({
       setLoading(true);
       pageRuleApi.getRule(ruleId).then(async (res: IRule) => {
         const {
-          name, issueTypes, processerList, ccList = [], receiverList = [], expressList = [],
+          name, issueTypes, processerList, ccList = [], receiverList = [], userTypes = [], expressList = [],
         } = res;
         await getFieldData(issueTypes);
         batchedUpdates(() => {
@@ -678,7 +679,7 @@ const RuleModal: React.FC<Props> = ({
           setFieldValue('issueTypes', issueTypes);
           setFieldValue('processerList', includes(issueTypes, 'backlog') ? processerList.map((item: User) => item.id) : processerList.length && processerList[0].id);
           setFieldValue('ccList', ccList.map((item: User) => item.id));
-          setFieldValue('receiverList', receiverList.map((item: User) => item.id));
+          setFieldValue('receiverList', [...receiverList.map((item: User) => item.id), ...userTypes]);
           const initFields = Field.init(new Array(expressList.length).fill({}));
           initFields.forEach((item: { key: number }, i: number) => {
             addFieldRule(item.key, i);
