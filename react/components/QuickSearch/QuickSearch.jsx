@@ -217,7 +217,7 @@ class QuickSearch extends Component {
                 maxTagPlaceholder={(ommittedValues) => `${ommittedValues.map((item) => item.label).join(', ')}`}
                 onChange={this.handleQuickSearchChange}
                 getPopupContainer={(triggerNode) => triggerNode.parentNode}
-                allowClear={!!quickSearchAllowClear}
+                allowClear
                 value={selectQuickSearch}
               >
                 <OptGroup key="quickSearch" label="常用选项">
@@ -290,6 +290,7 @@ class QuickSearch extends Component {
                   }}
                   onChange={this.handleAssigneeChange}
                   getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                  allowClear
                 >
                   {
                     userDataArray.length && userDataArray.map((item) => (

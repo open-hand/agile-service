@@ -14,9 +14,11 @@ export function getWidth(text, {
 
 export function getSelectStyle(field, value) {
   const width = getWidth(field.name) + 28;
+  // eslint-disable-next-line no-nested-ternary
+  const autoWidth = value ? (Array.isArray(value) ? value.length > 0 : Boolean(value)) : false;
   return {
     minWidth: 'unset',
-    width: value && value.length > 0 ? 'auto' : width,
+    width: autoWidth ? 'auto' : width,
     maxWidth: 150,
     margin: 0,
   };
