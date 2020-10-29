@@ -21,4 +21,33 @@
             #{issueTypeId}
         </foreach>
     </select>
+
+    <resultMap id="statusLinkageWithIssueTypeAndStatus" type="io.choerodon.agile.api.vo.StatusLinkageVO">
+        <result property="issueTypeId" column="issue_type_id"/>
+        <result property="projectId" column="project_id"/>
+        <result property="statusId" column="status_id"/>
+        <association property="issueTypeVO" javaType="io.choerodon.agile.api.vo.IssueTypeVO">
+            <id property="id" column="issue_type_id"/>
+            <result property="name" column="issue_type_name"/>
+        </association>
+        <association property="statusVO" javaType="io.choerodon.agile.api.vo.StatusVO">
+            <id property="id" column="status_id"/>
+            <result property="name" column="status_name"/>
+            <result property="code" column="status_code"/>
+        </association>
+    </resultMap>
+
+    <select id="selectWithStatusByProjectId" resultMap="statusLinkageWithIssueTypeAndStatus">
+        select
+        t1.issue_type_id,
+        t1.project_id,
+        t1.status_id,
+        t2.name as issue_type_name,
+        t3.name as status_name,
+        t3.code as status_code
+        from fd_status_linkage t1
+        left join fd_issue_type t2 on t1.issue_type_id = t2.id
+        left join fd_status t3 on t1.status_id = t3.id
+        where t1.project_id = #{projectId}
+    </select>
 </mapper>

@@ -52,4 +52,13 @@ public class StatusLinkageController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.status.linkage.get"));
     }
+
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("查询")
+    @GetMapping("/list_by_project")
+    public ResponseEntity<List<StatusLinkageVO>> listStatusLinkageByProjectId(@ApiParam(value = "项目id", required = true)
+                                                                              @PathVariable(name = "project_id") Long projectId) {
+        return ResponseEntity.ok(statusLinkageService.listStatusLinkageByProjectId(projectId));
+    }
+
 }
