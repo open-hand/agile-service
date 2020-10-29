@@ -47,7 +47,6 @@ class Agile extends React.Component {
       if (AppState.currentMenuType.category !== 'PROGRAM') {
         // 切换项目查是否在项目群中
         RunWhenProjectChange(IsInProgramStore.refresh);
-        RunWhenProjectChange(localPageCacheStore.clear);
         IsInProgramStore.refresh();
       }
     }
