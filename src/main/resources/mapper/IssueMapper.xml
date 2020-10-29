@@ -1209,22 +1209,34 @@
                 )
                 OR
                 (
-                    ai.type_code IN ('sub_task','bug')
-                    AND (
-                        ai.parent_issue_id in
-                        <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
-                            #{parentIssue}
-                        </foreach>
-                        OR
-                        ai.relate_issue_id in
-                        <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
-                            #{parentIssue}
-                        </foreach>
-                    )
-                    <if test="searchType == null">
-                        AND ai.assignee_id = #{userId}
-                    </if>
-                    AND ais.is_completed != 1
+                    <choose>
+                        <when test="searchType == null">
+                            ai.type_code IN ('sub_task','bug')
+                            AND (
+                                ai.parent_issue_id in
+                                <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
+                                    #{parentIssue}
+                                </foreach>
+                                OR
+                                ai.relate_issue_id in
+                                <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
+                                    #{parentIssue}
+                                </foreach>
+                            )
+                            AND ai.assignee_id = #{userId}
+                            AND ais.is_completed != 1
+                        </when>
+                        <otherwise>
+                            ai.type_code = 'bug'
+                            and ai.relate_issue_id is not null
+                            and ai.relate_issue_id != 0
+                            AND ais.is_completed != 1
+                            and ai.relate_issue_id in
+                            <foreach collection="parentIssues" item="parentIssue" separator="," open="(" close=")">
+                                #{parentIssue}
+                            </foreach>
+                        </otherwise>
+                    </choose>
                 )
             )
             order by ai.project_id ASC,ai.last_update_date desc
