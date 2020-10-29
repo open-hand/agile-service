@@ -218,13 +218,13 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
             ccGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_CC).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
         }
         if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_PROJECT_OWNER))){
-            userTypeGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_PROJECT_OWNER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
+            userTypeGroup.putAll(getMap(group, userTypeGroup, ConfigurationRuleReceiverDTO.TYPE_PROJECT_OWNER));
         }
         if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_ASSINGEE))){
-            userTypeGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_ASSINGEE).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
+            userTypeGroup.putAll(getMap(group, userTypeGroup, ConfigurationRuleReceiverDTO.TYPE_ASSINGEE));
         }
         if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_REPORTER))){
-            userTypeGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_REPORTER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
+            userTypeGroup.putAll(getMap(group, userTypeGroup, ConfigurationRuleReceiverDTO.TYPE_REPORTER));
         }
         if (CollectionUtils.isNotEmpty(group.get(ConfigurationRuleReceiverDTO.TYPE_PROCESSER))){
             processerGroup.putAll(group.get(ConfigurationRuleReceiverDTO.TYPE_PROCESSER).stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)));
@@ -250,6 +250,20 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                     .collect(Collectors.toList()));
             return ruleVO;
         }).collect(Collectors.toMap(ConfigurationRuleVO::getId, Function.identity()));
+    }
+
+    private Map<Long, List<ConfigurationRuleReceiverDTO>> getMap(Map<String, List<ConfigurationRuleReceiverDTO>> group, 
+                                                                 Map<Long, List<ConfigurationRuleReceiverDTO>> userTypeGroup,
+                                                                 String userType) {
+        return Stream.concat(userTypeGroup.entrySet().stream(),
+                group.get(userType).stream()
+                        .collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getRuleId)).entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> {
+                    List<ConfigurationRuleReceiverDTO> t = new ArrayList<>();
+                    t.addAll(v1);
+                    t.addAll(v2);
+                    return t;
+                }));
     }
 
     @Override
@@ -557,7 +571,8 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                                              ConfigurationRuleDTO configurationRuleDTO) {
         
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()) || 
-                CollectionUtils.isNotEmpty(configurationRuleVO.getProcesserList()), BaseConstants.ErrorCode.DATA_INVALID);
+                CollectionUtils.isNotEmpty(configurationRuleVO.getProcesserList()) ||
+                CollectionUtils.isNotEmpty(configurationRuleVO.getUserTypes()), BaseConstants.ErrorCode.DATA_INVALID);
         if (CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList())){
             for (UserDTO userDTO : configurationRuleVO.getReceiverList()) {
                 ConfigurationRuleReceiverDTO configurationRuleReceiverDTO = new ConfigurationRuleReceiverDTO();

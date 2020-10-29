@@ -349,7 +349,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    @RuleNotice(event = RuleNoticeEvent.ISSUE_CREATED, instanceIdNameInReturn = "issueId", allFieldCheck = true)
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_CREATED, instanceId = "issueId", allFieldCheck = true)
     public IssueVO queryIssueCreate(Long projectId, Long issueId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
@@ -566,7 +566,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldListName = "fieldList", instanceIdNameInReturn = "issueId")
     public IssueVO updateIssue(Long projectId, IssueUpdateVO issueUpdateVO, List<String> fieldList) {
         if (agilePluginService != null) {
             agilePluginService.checkFeatureBeforeUpdateIssue(issueUpdateVO,projectId);
@@ -578,12 +577,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         }
         if (!fieldList.isEmpty()) {
             //处理issue自己字段
-            handleUpdateIssue(issueUpdateVO, fieldList, projectId);
+            this.self().handleUpdateIssue(issueUpdateVO, fieldList, projectId, issueUpdateVO.getIssueId());
         }
         Long issueId = issueUpdateVO.getIssueId();
-        handleUpdateLabelIssue(issueUpdateVO.getLabelIssueRelVOList(), issueId, projectId);
-        handleUpdateComponentIssueRel(issueUpdateVO.getComponentIssueRelVOList(), projectId, issueId);
-        handleUpdateVersionIssueRel(issueUpdateVO.getVersionIssueRelVOList(), projectId, issueId, issueUpdateVO.getVersionType());
+        this.self().handleUpdateLabelIssue(issueUpdateVO.getLabelIssueRelVOList(), issueId, projectId);
+        this.self().handleUpdateComponentIssueRel(issueUpdateVO.getComponentIssueRelVOList(), projectId, issueId);
+        this.self().handleUpdateVersionIssueRel(issueUpdateVO.getVersionIssueRelVOList(), projectId, issueId, issueUpdateVO.getVersionType());
         return queryIssueByUpdate(projectId, issueId, fieldList);
     }
 
@@ -593,7 +592,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    @RuleNotice(event = RuleNoticeEvent.ISSUE_STATAUS_CHANGE, instanceIdNameInReturn = "issueId", fieldList = {"statusId"})
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_STATAUS_CHANGE, instanceId = "issueId", fieldList = {"statusId"})
     public IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber,
                                      String applyType, IssueDTO triggerIssue, boolean autoTranferFlag) {
         stateMachineClientService.executeTransform(projectId, issueId, transformId, objectVersionNumber, applyType, new InputDTO(issueId, "updateStatus", updateTrigger(autoTranferFlag, triggerIssue)));
@@ -632,7 +631,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    public void handleUpdateIssue(IssueUpdateVO issueUpdateVO, List<String> fieldList, Long projectId) {
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldListName = "fieldList", instanceId = "issueId", idPosition = "arg")
+    public void handleUpdateIssue(IssueUpdateVO issueUpdateVO, List<String> fieldList, Long projectId, Long issueId) {
         CustomUserDetails customUserDetails = DetailsHelper.getUserDetails();
         IssueDTO originIssue = issueMapper.queryIssueWithNoCloseSprint(issueUpdateVO.getIssueId());
         IssueConvertDTO issueConvertDTO = issueAssembler.toTarget(issueUpdateVO, IssueConvertDTO.class);
@@ -1017,7 +1017,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    @RuleNotice(event = RuleNoticeEvent.ISSUE_CREATED, instanceIdNameInReturn = "issueId", allFieldCheck = true)
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_CREATED, instanceId = "issueId", allFieldCheck = true)
     public IssueSubVO queryIssueSubByCreate(Long projectId, Long issueId) {
         IssueDetailDTO issue = issueMapper.queryIssueDetail(projectId, issueId);
         if (issue.getIssueAttachmentDTOList() != null && !issue.getIssueAttachmentDTOList().isEmpty()) {
@@ -1222,8 +1222,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
         }
     }
-
-    protected void handleUpdateLabelIssue(List<LabelIssueRelVO> labelIssueRelVOList, Long issueId, Long projectId) {
+    
+    @Override
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldList = {"labelId"}, instanceId = "issueId", idPosition = "arg")
+    public void handleUpdateLabelIssue(List<LabelIssueRelVO> labelIssueRelVOList, Long issueId, Long projectId) {
         if (labelIssueRelVOList != null) {
             if (!labelIssueRelVOList.isEmpty()) {
                 LabelIssueRelDTO labelIssueRelDTO = new LabelIssueRelDTO();
@@ -1260,7 +1262,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
 
     }
 
-    protected void handleUpdateVersionIssueRel(List<VersionIssueRelVO> versionIssueRelVOList, Long projectId, Long issueId, String versionType) {
+    @Override
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldList = {"versionId"}, instanceId = "issueId", idPosition = "arg")
+    public void handleUpdateVersionIssueRel(List<VersionIssueRelVO> versionIssueRelVOList, Long projectId, Long issueId, String versionType) {
         if (versionIssueRelVOList != null && versionType != null) {
             if (!versionIssueRelVOList.isEmpty()) {
                 //归档状态的版本之间的关联不删除
@@ -1295,7 +1299,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         return componentIssueRelMapper.selectByProjectIdAndIssueId(projectId, issueId);
     }
 
-    protected void handleUpdateComponentIssueRel(List<ComponentIssueRelVO> componentIssueRelVOList, Long projectId, Long issueId) {
+    @Override
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, fieldList = {"componentId"}, instanceId = "issueId", idPosition = "arg")
+    public void handleUpdateComponentIssueRel(List<ComponentIssueRelVO> componentIssueRelVOList, Long projectId, Long issueId) {
         if (componentIssueRelVOList != null) {
             if (!componentIssueRelVOList.isEmpty()) {
                 List<ComponentIssueRelDTO> componentIssueRelDTOList = modelMapper.map(componentIssueRelVOList, new TypeToken<List<ComponentIssueRelDTO>>() {

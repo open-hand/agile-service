@@ -39,27 +39,34 @@ public class RuleNoticeAspect {
         MethodSignature sign = (MethodSignature) jp.getSignature();
         Method method = sign.getMethod();
         RuleNotice ruleNotice = method.getAnnotation(RuleNotice.class);
-        Set<String> fieldList = getFieldList(ruleNotice, jp);
-        Long projectId = Optional.ofNullable(result).map(v -> (Long)Reflections.getFieldValue(v, "projectId")).orElse(null) ;
+        Set<String> fieldList;
+        if (CollectionUtils.isNotEmpty(Arrays.asList(ruleNotice.fieldList()))){
+            fieldList = new HashSet<>(Arrays.asList(ruleNotice.fieldList()));
+        }else {
+            fieldList = StringUtils.isBlank(ruleNotice.fieldListName()) ?
+                    null : new HashSet<>(getFieldList(getNameAndValue(jp).get(ruleNotice.fieldListName())));
+        }
         log.info("rule notice detection, component: [{}], event: [{}]", ruleNotice.value(), ruleNotice.event());
         ApplicationContext context = ApplicationContextHelper.getContext();
-        Long instanceId = Optional.ofNullable(result).map(v -> (Long)Reflections.getFieldValue(result, ruleNotice.instanceIdNameInReturn())).orElse(null);
-        context.publishEvent(new NoticeEventVO(result, ruleNotice.value(), ruleNotice.event(), instanceId, projectId, fieldList, ruleNotice.allFieldCheck()));
+        Long projectId;
+        Long instanceId;
+        if (StringUtils.equals(ruleNotice.idPosition(), "result")){
+            instanceId = Optional.ofNullable(result).map(v -> (Long)Reflections.getFieldValue(result, ruleNotice.instanceId())).orElse(null);
+            projectId = Optional.ofNullable(result).map(v -> (Long)Reflections.getFieldValue(v, "projectId")).orElse(null) ;
+        }else {
+            instanceId = (Long) getNameAndValue(jp).get(ruleNotice.instanceId());
+            projectId = (Long) getNameAndValue(jp).get("projectId");
+        }
+        context.publishEvent(new NoticeEventVO(Optional.ofNullable(result).orElse("null"), ruleNotice.value(), ruleNotice.event(), instanceId, projectId, fieldList, ruleNotice.allFieldCheck()));
     }
 
-    /**
-     * 这里fieldList如果没有传值，一定要为null，不可以为空集合，空集合代表存在指定字段更新但指定字段为空，后面需要根据是否为null来进行规则检测
-     * @param ruleNotice ruleNotice
-     * @param jp jp
-     * @return fieldList
-     */
-    private HashSet<String> getFieldList(RuleNotice ruleNotice,JoinPoint jp) {
-        List<String> fieldList = new ArrayList<>(Arrays.asList(ruleNotice.fieldList()));
-        if (CollectionUtils.isNotEmpty(fieldList)){
-            return new HashSet<>(fieldList);
+    private List<String> getFieldList(Object field) {
+        if (field instanceof List){
+            return (List<String>)field;
+        }else {
+            return Collections.singletonList((String)field);
         }
-        return StringUtils.isBlank(ruleNotice.fieldListName()) ?
-                null : new HashSet<>((List<String>) getNameAndValue(jp).get(ruleNotice.fieldListName()));
+        
     }
 
     Map<String, Object> getNameAndValue(JoinPoint joinPoint) {

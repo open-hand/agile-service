@@ -16,6 +16,16 @@ public class PageFieldViewUpdateVO {
     private String fieldType;
     @ApiModelProperty(value = "字段值")
     private Object value;
+    @ApiModelProperty(value = "字段类型")
+    private String fieldCode;
+
+    public String getFieldCode() {
+        return fieldCode;
+    }
+
+    public void setFieldCode(String fieldCode) {
+        this.fieldCode = fieldCode;
+    }
 
     public String getFieldType() {
         return fieldType;
