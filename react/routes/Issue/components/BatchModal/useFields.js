@@ -32,6 +32,11 @@ function reducer(state, action) {
         };
       });
     }
+    case 'CLEAR': {
+      return produce(state, (draft) => {
+        remove(draft);
+      });
+    }
     default: throw new Error();
   }
 }
@@ -70,8 +75,13 @@ function useFields() {
       payload: { key, value },
     });
   };
+  const clear = () => {
+    dispatch({
+      type: 'CLEAR',
+    });
+  };
   return [fields, {
-    add, remove: removeField, set, init,
+    add, remove: removeField, set, init, clear,
   }];
 }
 export default useFields;

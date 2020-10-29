@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.event.ProjectEvent;
@@ -196,6 +197,10 @@ public class StateMachineSchemeServiceImpl implements StateMachineSchemeService 
             viewVOS.add(viewVO);
         }
         schemeVO.setViewVOS(viewVOS);
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        if (agilePluginService != null) {
+            agilePluginService.addApplyTypesToStateMachine(schemeVO, schemeId);
+        }
         return schemeVO;
     }
 

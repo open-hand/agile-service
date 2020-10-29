@@ -12,8 +12,8 @@ import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import DataSetField from 'choerodon-ui/pro/lib/data-set/Field';
 import useFields from '@/routes/Issue/components/BatchModal/useFields';
-import { User } from '@/common/types';
-import { fieldApi, pageRuleApi, pageConfigApi } from '@/api';
+import { User, IFieldType } from '@/common/types';
+import { pageRuleApi, pageConfigApi } from '@/api';
 import Loading from '@/components/Loading';
 import { find, map, includes } from 'lodash';
 import { ButtonColor } from 'choerodon-ui/pro/lib/button/enum';
@@ -47,9 +47,7 @@ interface Express {
   relationshipWithPervious: 'and' | 'or',
   // text,input
   valueStr?: string, //
-  // 单选，member
-  valueId?: string,
-  // 多选
+  // 多选,单选，member
   valueIdList?: string[],
   // number整数,需要判断是否允许小数
   valueNum?: number,
@@ -63,6 +61,19 @@ interface Express {
   fieldType?: IMiddleFieldType,
   // 是否允许小数，需要判断是否允许小数
   allowDecimals?: boolean,
+  nowFlag?: boolean,
+}
+
+interface IRule {
+  id: string,
+  objectVersionNumber: number,
+  name: string
+  issueTypes: string[],
+  processerList: User[],
+  ccList: User[],
+  receiverList: User[],
+  expressList: Express[]
+  userTypes: string[]
 }
 // 'in' | 'not_in' | 'is' | 'is_not' | 'eq' | 'not_eq' | 'gt' | 'gte' | 'lt' | 'lte' | 'like' | 'not_like'
 const operationMap = new Map([
@@ -80,27 +91,7 @@ const operationMap = new Map([
   ['not_like', '不包含'],
 ]);
 
-const systemFieldTypeMap = new Map([
-  ['assignee', 'member'],
-  ['component', 'multiple'],
-  ['creation_date', 'datetime'],
-  ['epic', 'single'],
-  ['estimated_end_time', 'datetime'],
-  ['estimated_start_time', 'datetime'],
-  ['fix_version', 'multiple'],
-  ['influence_version', 'multiple'],
-  ['issue_type', 'single'],
-  ['label', 'multiple'],
-  ['last_update_date', 'datetime'],
-  ['priority', 'single'],
-  ['remain_time', 'number'],
-  ['reporter', 'single'],
-  ['sprint', 'single'],
-  ['status', 'single'],
-  ['story_point', 'number'],
-]);
-
-const customTypeMap = new Map([
+const middleTypeMap = new Map<IFieldType, IMiddleFieldType>([
   ['radio', 'option'],
   ['checkbox', 'option'],
   ['time', 'date_hms'],
@@ -119,7 +110,7 @@ const aoMap = new Map([
   ['and', '且'],
 ]);
 
-const excludeCode = ['summary', 'description', 'epicName', 'timeTrace', 'belongToBacklog', 'progressFeedback', 'email'];
+const excludeCode = ['summary', 'description', 'epicName', 'timeTrace', 'belongToBacklog', 'progressFeedback', 'email', 'assignee', 'issueType'];
 
 const formatMoment = (type: 'date' | 'datetime' | 'time', d: string) => {
   switch (type) {
@@ -161,7 +152,8 @@ const RuleModal: React.FC<Props> = ({
   const [fields, Field] = useFields();
   const [updateCount, setUpdateCount] = useState<number>(0);
   const systemDataRefMap = useRef<Map<string, any>>(new Map());
-  const [initRule, setInitRule] = useState({});
+  const [initRule, setInitRule] = useState<IRule>();
+  const initRuleRef = useRef<IRule>();
   const [loading, setLoading] = useState<boolean>(false);
   const [backlogStarted, setBacklogStarted] = useState<boolean>(false);
 
@@ -192,6 +184,89 @@ const RuleModal: React.FC<Props> = ({
     });
   }, []);
 
+  const checkName = useCallback(async (value, name, record) => {
+    if (ruleId && value === initRuleRef.current?.name) {
+      return true;
+    }
+    const res = await pageRuleApi.checkName(value);
+    if (res) {
+      return true;
+    }
+    return '规则名称重复';
+  }, [ruleId]);
+
+  const modalDataSetRef = useRef<DataSet>();
+
+  const removeField = useCallback((name) => {
+    modalDataSetRef.current?.fields?.delete(name);
+    modalDataSetRef.current?.current?.fields.delete(name);
+  }, []);
+
+  const dataSetUpdate = useCallback(({
+    // @ts-ignore
+    dataSet, record, name, value,
+  }) => {
+    const key = name.split('-')[0];
+    if (name.indexOf('code') > -1) {
+      const field = (fieldDataRef?.current || []).find((item) => item.code === value);
+      if (field) {
+        const {
+          fieldType,
+        } = field;
+        if (fieldType !== 'date' && fieldType !== 'datetime' && fieldType !== 'time') {
+          removeField(`${key}-middleValue`);
+        } else {
+          dataSet.current.set(`${key}-middleValue`, undefined);
+        }
+      }
+      dataSet.current.set(`${key}-operation`, undefined);
+      dataSet.current.set(`${key}-value`, undefined);
+    }
+    if (name.indexOf('middleValue') > -1) {
+      dataSet.current.set(`${key}-value`, undefined);
+      if (value === 'now') {
+        removeField(`${key}-value`);
+      }
+    }
+    if (name.indexOf('operation') > -1) {
+      dataSet.current.set(`${key}-value`, undefined);
+      const field = (fieldDataRef?.current || []).find((item) => item.code === value);
+      if (field) {
+        const {
+          system, extraConfig, code, fieldType,
+        } = field;
+        if (fieldType === 'number') {
+          const valueIsNull = value === 'is' || value === 'is_not';
+          const valueField = dataSet.current.getField(`${key}-value`);
+          if (!valueIsNull) {
+            if (system && (code === 'storyPoints' || code === 'remainingTime') && record.get(`${key}-operation`)) {
+              valueField.set('max', 100);
+              valueField.set('min', 0);
+              valueField.set('step', 0.1);
+              valueField.set('validator', (numberValue: number) => {
+                if (numberValue && /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/.test(numberValue.toString())) {
+                  return true;
+                }
+                return '请输入小于3位的整数或者整数位小于3位小数点后一位的小数';
+              });
+            } else if (extraConfig) {
+              valueField.set('step', 0.01);
+              valueField.set('validator', (numberValue: number) => {
+                if (numberValue && /(^-?[0-9]+$)|(^[-]?[0-9]+(\.[0-9]{1,2})?$)/.test(numberValue.toString())) {
+                  return true;
+                }
+                return '请输入整数或者小数点后一位或两位的小数';
+              });
+            } else {
+              valueField.set('step', 1);
+            }
+          }
+        }
+      }
+    }
+    setUpdateCount((count) => count + 1);
+  }, [removeField]);
+
   const modalDataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [{
@@ -200,76 +275,35 @@ const RuleModal: React.FC<Props> = ({
       required: true,
       label: '名称',
       maxLength: 50,
-      validator: (value, name, record) => pageRuleApi.checkName(value).then((res: boolean) => {
-        if (!res) {
-          return '规则名称重复';
-        }
-        return true;
-      }),
+      validator: checkName,
     }, {
-      name: 'issueType',
+      name: 'issueTypes',
       required: true,
       type: 'string' as FieldType,
       label: '问题类型',
       textField: 'name',
       valueField: 'typeCode',
       options: issueTypeDataSet,
-    }, {
-      name: 'receiverList',
-      required: true,
     },
     {
-      name: 'assignee',
-      type: 'string' as FieldType,
+      name: 'receiverList',
+      dynamicProps: {
+        required: ({ record }) => !record.get('processerList'),
+      },
+    },
+    {
+      name: 'processerList',
+      dynamicProps: {
+        required: ({ record }) => !record.get('receiverList'),
+      },
     },
     ],
     events: {
-      update: ({
-        // @ts-ignore
-        dataSet, record, name, value, oldValue,
-      }) => {
-        const key = name.split('-')[0];
-        if (name.indexOf('code') > -1) {
-          const field = (fieldDataRef?.current || []).find((item) => item.code === value);
-          if (field) {
-            const {
-              system, extraConfig, code, fieldType,
-            } = field;
-            if (fieldType === 'number') {
-              const valueField = dataSet.current.getField(`${key}-value`);
-              if (system && (code === 'story_point' || code === 'remain_time')) {
-                valueField.set('max', 100);
-                valueField.set('min', 0);
-                valueField.set('step', 0.1);
-                valueField.set('validator', (numberValue: number) => {
-                  if (numberValue && /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/.test(numberValue.toString())) {
-                    return true;
-                  }
-                  return '请输入小于3位的整数或者整数位小于3位小数点后一位的小数';
-                });
-              } else if (extraConfig) {
-                valueField.set('step', 0.01);
-                valueField.set('validator', (numberValue: number) => {
-                  if (numberValue && /(^-?[0-9]+$)|(^[-]?[0-9]+(\.[0-9]{1,2})?$)/.test(numberValue.toString())) {
-                    return true;
-                  }
-                  return '请输入整数或者小数点后一位或两位的小数';
-                });
-              } else {
-                valueField.set('step', 1);
-              }
-            }
-          }
-          dataSet.current.set(`${key}-operation`, undefined);
-          dataSet.current.set(`${key}-value`, undefined);
-        }
-        if (name.indexOf('operation') > -1) {
-          dataSet.current.set(`${key}-value`, undefined);
-        }
-        setUpdateCount((count) => count + 1);
-      },
+      update: dataSetUpdate,
     },
-  }), [issueTypeDataSet]);
+  }), [checkName, dataSetUpdate, issueTypeDataSet]);
+
+  modalDataSetRef.current = modalDataSet;
 
   const renderOperations = useCallback((fieldK: { key: number }) => {
     const { key } = fieldK;
@@ -280,29 +314,13 @@ const RuleModal: React.FC<Props> = ({
       let operations: {value: Operation, operation: string}[] = [];
       switch (fieldType) {
         case 'checkbox':
-        case 'multiple': {
+        case 'multiple':
+        case 'radio':
+        case 'single':
+        case 'member': {
           operations = [
             { value: 'in', operation: '包含' },
             { value: 'not_in', operation: '不包含' },
-            { value: 'is', operation: '是' },
-            { value: 'is_not', operation: '不是' },
-          ];
-          break;
-        }
-        case 'radio':
-        case 'single': {
-          operations = [
-            { value: 'eq', operation: '等于' },
-            { value: 'not_eq', operation: '不等于' },
-            { value: 'is', operation: '是' },
-            { value: 'is_not', operation: '不是' },
-          ];
-          break;
-        }
-        case 'member': {
-          operations = [
-            { value: 'eq', operation: '等于' },
-            { value: 'not_eq', operation: '不等于' },
             { value: 'is', operation: '是' },
             { value: 'is_not', operation: '不是' },
           ];
@@ -363,16 +381,14 @@ const RuleModal: React.FC<Props> = ({
     modalDataSet?.current?.fields.set(name, field);
   }, [modalDataSet]);
 
-  const removeField = useCallback((name) => {
-    modalDataSet?.fields?.delete(name);
-    modalDataSet?.current?.fields.delete(name);
-  }, [modalDataSet]);
-
   const addFieldRule = useCallback((key, i) => {
     addField(`${key}-code`, {
       required: true,
     });
     addField(`${key}-operation`, {
+      required: true,
+    });
+    addField(`${key}-middleValue`, {
       required: true,
     });
     addField(`${key}-value`, {
@@ -385,33 +401,6 @@ const RuleModal: React.FC<Props> = ({
     }
   }, [addField]);
 
-  useEffect(() => {
-    if (!ruleId) {
-      const newKey = Field.add();
-      addFieldRule(newKey, 0);
-    }
-    setLoading(true);
-    Promise.all([pageRuleApi.getPageRuleSystemFields(), fieldApi.getCustomFields()]).then(([systemFields, customFields]) => {
-      const transformedSystemFields = systemFields.map((item: { fieldCode: string; }) => ({
-        ...item,
-        code: item.fieldCode,
-        fieldType: systemFieldTypeMap.get(item.fieldCode),
-        system: true,
-      }));
-      const transformedCustomFields = customFields.map((item: IField) => ({
-        ...item,
-        type: customTypeMap.get(item.fieldType),
-        system: false,
-      }));
-      const data = [...transformedSystemFields, ...transformedCustomFields].filter((item) => !find(excludeCode, (code) => code === item.code));
-      fieldDataRef.current = data;
-      batchedUpdates(() => {
-        setFieldData(data);
-        setLoading(false);
-      });
-    });
-  }, [addFieldRule, ruleId]);
-
   const getFieldValue = useCallback((name) => {
     const { current } = modalDataSet;
     if (current) {
@@ -420,7 +409,67 @@ const RuleModal: React.FC<Props> = ({
     return '';
   }, [modalDataSet]);
 
-  const transformValue = useCallback((fieldInfo: IFieldWithType, operation: Operation, value: any) => {
+  const setFieldValue = useCallback((name: string, value: any) => {
+    const { current } = modalDataSet;
+    if (current) {
+      current.set(name, value);
+    }
+  }, [modalDataSet]);
+
+  const getFieldData = useCallback(async (typeCodes?: string[]) => {
+    const issueTypes = typeCodes || getFieldValue('issueTypes');
+    if (issueTypes && issueTypes.length) {
+      setLoading(true);
+      const res = await pageRuleApi.getPageRuleSystemFields(issueTypes);
+      const transformedFields = (res || []).map((item: IField) => ({
+        ...item,
+        type: middleTypeMap.get(item.fieldType) as IMiddleFieldType,
+      }));
+      const data = transformedFields.filter((item: IFieldWithType) => !find(excludeCode, (code) => code === item.code));
+      fieldDataRef.current = data;
+      batchedUpdates(() => {
+        setFieldData(data);
+        setLoading(false);
+      });
+    } else {
+      setFieldData([]);
+      fieldDataRef.current = [];
+    }
+  }, [getFieldValue]);
+
+  const handleIssueTypesChange = useCallback(async (value, oldValue) => {
+    if (value && value.length > 1) {
+      setFieldValue('issueTypes', (value || []).filter((item: string) => item !== 'backlog'));
+    } else {
+      setFieldValue('issueTypes', (value || []));
+    }
+    await getFieldData();
+    let removeCount = 0;
+    if (fields.length) {
+      fields.forEach(({ key }: { key: number}) => {
+        if (!find(fieldDataRef.current, { code: getFieldValue(`${key}-code`) })) {
+          removeCount += 1;
+          Field.remove(key);
+          removeField(`${key}-code`);
+          removeField(`${key}-operation`);
+          removeField(`${key}-value`);
+          removeField(`${key}-ao`);
+          removeField(`${key}-middleValue`);
+        }
+      });
+    }
+    if (value && !(fields.length - removeCount)) {
+      const newKey = Field.add();
+      addFieldRule(newKey, 0);
+    }
+    const newHasBacklog = value && includes(value, 'backlog') && !oldValue;
+    const oldHasBacklog = oldValue && includes(oldValue, 'backlog') && !value;
+    if (newHasBacklog || oldHasBacklog) {
+      setFieldValue('processerList', undefined);
+    }
+  }, [getFieldData, fields, setFieldValue, getFieldValue, removeField, addFieldRule]);
+
+  const transformValue = useCallback((fieldInfo: IFieldWithType, operation: Operation, value: any, middleValue?: 'now' | 'specified') => {
     const {
       fieldType, system, fieldOptions, code,
     } = fieldInfo;
@@ -430,14 +479,13 @@ const RuleModal: React.FC<Props> = ({
     if (system) {
       const options = systemDataRefMap.current.get(code);
       switch (code) {
+        case 'backlogType':
+        case 'backlogClassification':
+        case 'urgent':
         case 'priority':
         case 'status': {
-          const selectOption = find(options, { id: value });
-          return selectOption?.name;
-        }
-        case 'issue_type': {
-          const selectOption = find(options, { typeCode: value });
-          return selectOption?.name;
+          const selectOptions = options.filter((option: { id: string; }) => value.indexOf(option.id) > -1);
+          return `[${map(selectOptions, 'name').join(',')}]`;
         }
         case 'component': {
           const selectOptions = options.filter((option: { componentId: string; }) => value.indexOf(option.componentId) > -1);
@@ -447,41 +495,37 @@ const RuleModal: React.FC<Props> = ({
           const selectOptions = options.filter((option: { labelId: string; }) => value.indexOf(option.labelId) > -1);
           return `[${map(selectOptions, 'labelName').join(',')}]`;
         }
-        case 'influence_version':
-        case 'fix_version': {
+        case 'influenceVersion':
+        case 'fixVersion': {
           const selectOptions = options.filter((option: { versionId: string; }) => value.indexOf(option.versionId) > -1);
           return `[${map(selectOptions, 'name').join(',')}]`;
         }
         case 'epic': {
-          const selectOption = find(options, { issueId: value });
-          return selectOption?.epicName;
+          const selectOptions = options.filter((option: { issueId: string; }) => value.indexOf(option.issueId) > -1);
+          return `[${map(selectOptions, 'epicName').join(',')}]`;
         }
         case 'sprint': {
-          const selectOption = find(options, { sprintId: value });
-          return selectOption?.sprintName;
+          const selectOptions = options.filter((option: { sprintId: string; }) => value.indexOf(option.sprintId) > -1);
+          return `[${map(selectOptions, 'sprintName').join(',')}]`;
         }
-        case 'reporter':
-        case 'assignee': {
-          const selectOption = find(options, { id: value });
-          return selectOption?.realName;
+        case 'reporter': {
+          const selectOptions = options.filter((option: { id: string; }) => value.indexOf(option.id) > -1);
+          return `[${map(selectOptions, 'realName').join(',')}]`;
         }
       }
     }
     switch (fieldType) {
       case 'multiple':
-      case 'checkbox': {
+      case 'checkbox':
+      case 'radio':
+      case 'single': {
         const selectOptions = fieldOptions?.filter((option) => value.indexOf(option.id) > -1);
         return `[${map(selectOptions, 'value').join(',')}]`;
       }
-      case 'radio':
-      case 'single': {
-        const selectOption = find(fieldOptions, { id: value });
-        return selectOption?.value;
-      }
       case 'member': {
         const memberOptions = systemDataRefMap.current.get(code);
-        const selectMembers = find(memberOptions, { id: value });
-        return selectMembers?.realName;
+        const selectOptions = memberOptions.filter((option: { id: string; }) => value.indexOf(option.id) > -1);
+        return `[${map(selectOptions, 'realName').join(',')}]`;
       }
       case 'number':
       case 'text':
@@ -491,7 +535,7 @@ const RuleModal: React.FC<Props> = ({
       case 'time':
       case 'datetime':
       case 'date': {
-        return formatMoment(fieldType as 'time' | 'datetime' | 'date', value);
+        return middleValue === 'now' ? '当前时间' : formatMoment(fieldType as 'time' | 'datetime' | 'date', value);
       }
       default:
         return value;
@@ -511,6 +555,9 @@ const RuleModal: React.FC<Props> = ({
       }, {
         name: `${key}-operation`,
         value: getFieldValue(`${key}-operation`),
+      }, {
+        name: `${key}-middleValue`,
+        value: getFieldValue(`${key}-middleValue`),
       }, {
         name: `${key}-value`,
         value: getFieldValue(`${key}-value`),
@@ -543,32 +590,31 @@ const RuleModal: React.FC<Props> = ({
           const valueIsNull = getFieldValue(`${key}-operation`) === 'is' || getFieldValue(`${key}-operation`) === 'is_not';
           const value = toJS(getFieldValue(`${key}-value`));
           const hasAo = submitData.find(({ name: fieldName }) => fieldName === `${key}-ao`);
-          if (value || value === 0 || valueIsNull) {
+          if (value || value === 0 || valueIsNull || toJS(getFieldValue(`${key}-middleValue`))) {
             expressList.push({
               fieldCode: code,
               operation: getFieldValue(`${key}-operation`),
               relationshipWithPervious: hasAo && getFieldValue(`${key}-ao`),
               // text,input
-              valueStr: (fieldType === 'input' || fieldType === 'text' || code === 'issue_type') && !valueIsNull ? value : undefined,
-              // 单选，member
-              valueId: (fieldType === 'single' || fieldType === 'member' || fieldType === 'radio') && code !== 'issue_type' && !valueIsNull ? value : undefined,
-              // 多选
-              valueIdList: (fieldType === 'multiple' || fieldType === 'checkbox') && !valueIsNull ? value : undefined,
+              valueStr: (fieldType === 'input' || fieldType === 'text') && !valueIsNull ? value : undefined,
+              // 多选、单选、member
+              valueIdList: (fieldType === 'multiple' || fieldType === 'checkbox' || fieldType === 'single' || fieldType === 'member' || fieldType === 'radio') && !valueIsNull ? value : undefined,
               // number整数,需要判断是否允许小数
-              valueNum: fieldType === 'number' && !extraConfig && !valueIsNull && code !== 'remain_time' && code !== 'story_point' ? value : undefined,
+              valueNum: fieldType === 'number' && !extraConfig && !valueIsNull && code !== 'remainingTime' && code !== 'storyPoints' ? value : undefined,
               // number有小数， 需要判断是否允许小数
-              valueDecimal: fieldType === 'number' && (extraConfig || code === 'remain_time' || code === 'story_point') && !valueIsNull ? value : undefined,
+              valueDecimal: fieldType === 'number' && (extraConfig || code === 'remainingTime' || code === 'storyPoints') && !valueIsNull ? value : undefined,
               // date,datetime
-              valueDate: (fieldType === 'date' || fieldType === 'datetime') && !valueIsNull ? formatMoment(fieldType, value) : undefined,
+              valueDate: (fieldType === 'date' || fieldType === 'datetime') && !valueIsNull && toJS(getFieldValue(`${key}-middleValue`)) === 'specified' ? formatMoment(fieldType, value) : undefined,
               // time
-              valueDateHms: fieldType === 'time' && !valueIsNull ? formatMoment(fieldType, value) : undefined,
+              valueDateHms: fieldType === 'time' && !valueIsNull && toJS(getFieldValue(`${key}-middleValue`)) === 'specified' ? formatMoment(fieldType, value) : undefined,
+              nowFlag: (fieldType === 'date' || fieldType === 'datetime' || fieldType === 'time') && toJS(getFieldValue(`${key}-middleValue`)) === 'now',
               predefined: system,
               fieldType: type,
               // 是否允许小数，需要判断是否允许小数
-              allowDecimals: fieldType === 'number' && !valueIsNull ? extraConfig : undefined,
+              allowDecimals: fieldType === 'number' && !valueIsNull ? (extraConfig || code === 'remainingTime' || code === 'storyPoints') : undefined,
             });
             const ao = hasAo && getFieldValue(`${key}-ao`) && aoMap.get(getFieldValue(`${key}-ao`));
-            expressQuery += `${ao ? `${ao} ` : ''}${name} ${operationMap.get(getFieldValue(`${key}-operation`))} ${transformValue(fieldInfo, getFieldValue(`${key}-operation`), getFieldValue(`${key}-value`))} `;
+            expressQuery += `${ao ? `${ao} ` : ''}${name} ${operationMap.get(getFieldValue(`${key}-operation`))} ${transformValue(fieldInfo, getFieldValue(`${key}-operation`), getFieldValue(`${key}-value`), getFieldValue(`${key}-middleValue`))} `;
           }
         }
       }
@@ -581,13 +627,16 @@ const RuleModal: React.FC<Props> = ({
 
   const handleClickSubmit = useCallback(async () => {
     if (await modalDataSet.validate()) {
-      console.log('name, issueType, assignee');
-      console.log(toJS(getFieldValue('name')), toJS(getFieldValue('issueType')), toJS(getFieldValue('assignee')));
-      // debugger;
+      const processerList = includes(toJS(getFieldValue('issueTypes')), 'backlog') ? (toJS(getFieldValue('processerList') || []).filter((item: any) => !!item) || []).map((id: string) => ({ id })) : toJS(getFieldValue('processerList')) && [{ id: toJS(getFieldValue('processerList')) }];
       const expressObj = transformSumitData();
       const data = {
-        ...initRule,
-        receiverList: (toJS(getFieldValue('receiverList')) || []).map((id: string) => ({ id })),
+        id: initRule?.id,
+        objectVersionNumber: initRule?.objectVersionNumber,
+        name: getFieldValue('name'),
+        issueTypes: getFieldValue('issueTypes'),
+        processerList,
+        receiverList: (toJS(getFieldValue('receiverList')) || []).filter((id: string) => id !== 'assignee' && id !== 'reporter' && id !== 'projectOwner').map((id: string) => ({ id })),
+        userTypes: (toJS(getFieldValue('receiverList')) || []).filter((id: string) => id === 'assignee' || id === 'reporter' || id === 'projectOwner'),
         ccList: (toJS(getFieldValue('ccList')) || []).map((id: string) => ({ id })),
         ...expressObj,
       };
@@ -617,56 +666,57 @@ const RuleModal: React.FC<Props> = ({
     modal?.handleOk(handleClickSubmit);
   }, [handleClickSubmit, modal]);
 
-  const setFieldValue = useCallback((name: string, value: any) => {
-    const { current } = modalDataSet;
-    if (current) {
-      current.set(name, value);
-    }
-  }, [modalDataSet]);
-
   useEffect(() => {
-    if (ruleId && fieldData.length) {
+    if (ruleId) {
       setLoading(true);
-      // @ts-ignore
-      pageRuleApi.getRule(ruleId).then((res) => {
+      pageRuleApi.getRule(ruleId).then(async (res: IRule) => {
+        const {
+          name, issueTypes, processerList, ccList = [], receiverList = [], userTypes = [], expressList = [],
+        } = res;
+        await getFieldData(issueTypes);
         batchedUpdates(() => {
-          const { ccList = [], receiverList = [], expressList = [] } = res;
+          setFieldValue('name', name);
+          setFieldValue('issueTypes', issueTypes);
+          setFieldValue('processerList', includes(issueTypes, 'backlog') ? processerList.map((item: User) => item.id) : processerList.length && processerList[0].id);
           setFieldValue('ccList', ccList.map((item: User) => item.id));
-          setFieldValue('receiverList', receiverList.map((item: User) => item.id));
-          const existFields = fieldData.filter((item: IFieldWithType) => find(expressList, { fieldCode: item.code }));
-          const initFields = Field.init(new Array(existFields.length).fill({}));
+          setFieldValue('receiverList', [...receiverList.map((item: User) => item.id), ...userTypes]);
+          const initFields = Field.init(new Array(expressList.length).fill({}));
           initFields.forEach((item: { key: number }, i: number) => {
             addFieldRule(item.key, i);
           });
           expressList.forEach((item: Express, i: number) => {
             const {
-              fieldCode, relationshipWithPervious, operation, valueStr, valueId, valueIdList, valueNum, valueDecimal, valueDate, valueDateHms,
+              fieldType, fieldCode, relationshipWithPervious, operation, valueStr, valueIdList, valueNum, valueDecimal, valueDate, valueDateHms, nowFlag,
             } = item;
-            const field = find(fieldData, { code: fieldCode });
-            const fieldValue = valueStr || valueId || valueIdList || valueNum || valueDecimal || valueDate || valueDateHms;
-            if (field) {
-              const { fieldType, code } = field;
-              const { key } = initFields[i];
-              setFieldValue(`${key}-code`, fieldCode);
-              setFieldValue(`${key}-operation`, operation);
-              if (operation !== 'is' && operation !== 'is_not') {
-                setFieldValue(`${key}-value`, fieldType === 'date' || fieldType === 'datetime' || fieldType === 'time' ? moment(fieldType === 'time' ? `${moment().format('YYYY-MM-DD')} ${fieldValue}` : fieldValue) : fieldValue);
+            const fieldValue = valueStr || valueIdList || valueNum || valueDecimal || valueDate || valueDateHms;
+            const { key } = initFields[i];
+            setFieldValue(`${key}-code`, fieldCode);
+            setFieldValue(`${key}-operation`, operation);
+            if (operation !== 'is' && operation !== 'is_not') {
+              if (fieldType === 'date' || fieldType === 'date_hms') {
+                setFieldValue(`${key}-middleValue`, nowFlag ? 'now' : 'specified');
+                if (!nowFlag) {
+                  setFieldValue(`${key}-value`, moment(fieldType === 'date_hms' ? `${moment().format('YYYY-MM-DD')} ${fieldValue}` : fieldValue));
+                }
               } else {
-                setFieldValue(`${key}-value`, 'empty');
+                setFieldValue(`${key}-value`, fieldValue);
               }
-              if (relationshipWithPervious) {
-                setFieldValue(`${key}-ao`, relationshipWithPervious);
-              }
+            } else {
+              setFieldValue(`${key}-value`, 'empty');
+            }
+            if (relationshipWithPervious) {
+              setFieldValue(`${key}-ao`, relationshipWithPervious);
             }
           });
           setInitRule(res);
+          initRuleRef.current = res;
           setLoading(false);
         });
       }).catch((e: ErrorEvent) => {
         setLoading(false);
       });
     }
-  }, [ruleId, fieldData, setFieldValue, addFieldRule]);
+  }, [ruleId, setFieldValue, addFieldRule]);
 
   const existsFieldCodes: string[] = [];
   fields.forEach((fieldWithKey: { key: number }) => {
@@ -678,107 +728,111 @@ const RuleModal: React.FC<Props> = ({
     }
   });
 
+  const issueTypes = getFieldValue('issueTypes');
   return (
-
     <div className={styles.rule_form}>
       <Loading loading={loading} />
       <Form dataSet={modalDataSet} ref={formRef as React.RefObject<Form>}>
         <div className={`${styles.rule_form_setting}`}>
           <TextField name="name" style={{ width: 520 }} />
           <Select
-            name="issueType"
+            name="issueTypes"
             clearButton={false}
             multiple
             style={{ width: 520, marginTop: 27 }}
+            onChange={handleIssueTypesChange}
             onOption={({ record }) => ({
-              disabled: (getFieldValue('issueType') && getFieldValue('issueType').indexOf('backlog') > -1 && record.get('typeCode') !== 'backlog') || (getFieldValue('issueType') && getFieldValue('issueType').indexOf('backlog') === -1 && record.get('typeCode') === 'backlog'),
+              disabled: issueTypes && issueTypes.length && ((issueTypes.indexOf('backlog') > -1 && record.get('typeCode') !== 'backlog') || (issueTypes.indexOf('backlog') === -1 && record.get('typeCode') === 'backlog')),
             })}
           />
         </div>
         <div className={`${styles.rule_form_setting}`}>
           <p className={styles.rule_form_setting_title}>规则设置</p>
           {
-                fields.map((f: { key: number }, i: number, arr: { key: number }[]) => {
-                  const { key } = f;
-                  return (
-                    <Row
-                      key={key}
-                      gutter={20}
-                      style={{
-                        marginBottom: 15,
-                      }}
-                    >
-                      <Col span={10}>
-                        <Row gutter={20}>
-                          {
-                            i !== 0 && (
-                              <Col span={8}>
-                                <Select
-                                  required
-                                  label="关系"
-                                  name={`${key}-ao`}
-                                  clearButton={false}
-                                >
-                                  <Option value="and">且</Option>
-                                  <Option value="or">或</Option>
-                                </Select>
-                              </Col>
-
-                            )
-                          }
-                          <Col span={i !== 0 ? 16 : 24}>
+            fields.map((f: { key: number }, i: number, arr: { key: number }[]) => {
+              const { key } = f;
+              return (
+                <Row
+                  key={key}
+                  gutter={20}
+                  style={{
+                    marginBottom: 15,
+                  }}
+                >
+                  <Col span={10}>
+                    <Row gutter={20}>
+                      {
+                        i !== 0 && (
+                          <Col span={8}>
                             <Select
-                              style={{
-                                width: '100%',
-                              }}
-                              label="属性"
-                              name={`${key}-code`}
+                              required
+                              label="关系"
+                              name={`${key}-ao`}
                               clearButton={false}
                             >
-                              {
-                                      fieldData.filter((field: IFieldWithType) => (
-                                        modalDataSet?.current?.get(`${key}-code`) === field.code
-                                      ) || !existsFieldCodes.find((code: string) => code === field.code)).map((field:IFieldWithType) => (
-                                        <Option value={field.code}>
-                                          {field.name}
-                                        </Option>
-                                      ))
-                              }
+                              <Option value="and">且</Option>
+                              <Option value="or">或</Option>
                             </Select>
                           </Col>
-                        </Row>
-                      </Col>
-                      <Col span={4}>
-                        {renderOperations(f)}
-                      </Col>
-                      <Col span={8}>
-                        {
-                          renderRule(modalDataSet, f, fieldData, systemDataRefMap, getFieldValue)
-                        }
-                      </Col>
-                      <Col span={2}>
-                        <Button
-                          disabled={arr.length === 1 && i === 0}
-                          onClick={() => {
-                            // @ts-ignore
-                            Field.remove(key);
-                            removeField(`${key}-code`);
-                            removeField(`${key}-operation`);
-                            removeField(`${key}-value`);
-                            removeField(`${key}-ao`);
-                            if (i === 0) {
-                              if (fields[i + 1]) {
-                                removeField(`${fields[i + 1].key}-ao`);
-                              }
-                            }
+
+                        )
+                      }
+                      <Col span={i !== 0 ? 16 : 24}>
+                        <Select
+                          style={{
+                            width: '100%',
                           }}
-                          icon="delete"
-                        />
+                          label="属性"
+                          name={`${key}-code`}
+                          clearButton={false}
+                        >
+                          {
+                            fieldData.filter((field: IFieldWithType) => (
+                              modalDataSet?.current?.get(`${key}-code`) === field.code
+                            ) || !existsFieldCodes.find((code: string) => code === field.code)).map((field:IFieldWithType) => (
+                              <Option value={field.code}>
+                                {field.name}
+                              </Option>
+                            ))
+                          }
+                        </Select>
                       </Col>
                     </Row>
-                  );
-                })
-               }
+                  </Col>
+                  <Col span={4}>
+                    {renderOperations(f)}
+                  </Col>
+                  <Col span={8}>
+                    {
+                      renderRule(modalDataSet, f, fieldData, systemDataRefMap, getFieldValue)
+                    }
+                  </Col>
+                  <Col span={2}>
+                    <Button
+                      disabled={arr.length === 1 && i === 0}
+                      onClick={() => {
+                        batchedUpdates(() => {
+                          // @ts-ignore
+                          Field.remove(key);
+                          removeField(`${key}-code`);
+                          removeField(`${key}-operation`);
+                          removeField(`${key}-value`);
+                          removeField(`${key}-ao`);
+                          removeField(`${key}-middleValue`);
+                          if (i === 0) {
+                            if (fields[i + 1]) {
+                              removeField(`${fields[i + 1].key}-ao`);
+                            }
+                          }
+                        });
+                      }}
+                      icon="delete"
+                    />
+                  </Col>
+                </Row>
+              );
+            })
+          }
           <div>
             <Button
                 // @ts-ignore
@@ -791,6 +845,7 @@ const RuleModal: React.FC<Props> = ({
               style={{
                 marginTop: -5,
               }}
+              disabled={!(getFieldValue('issueTypes') && getFieldValue('issueTypes').length)}
             >
               添加字段
             </Button>
@@ -798,7 +853,19 @@ const RuleModal: React.FC<Props> = ({
         </div>
         <div className={`${styles.rule_form_setting}`}>
           <p className={styles.rule_form_setting_title}>自动变更设置</p>
-          <SelectUser name="assignee" label={getFieldValue('issueType') && includes(getFieldValue('issueType'), 'backlog')} style={{ width: 520 }} />
+          <SelectUser
+            name="processerList"
+            multiple={getFieldValue('issueTypes') && includes(getFieldValue('issueTypes'), 'backlog')}
+            label={getFieldValue('issueTypes') && includes(getFieldValue('issueTypes'), 'backlog') ? '处理人' : '经办人'}
+            style={{ width: 520 }}
+            maxTagCount={6}
+            maxTagTextLength={4}
+            clearButton
+            // @ts-ignore
+            autoQueryConfig={{
+              selectedUserIds: getFieldValue('processerList'),
+            }}
+          />
         </div>
         <div className={`${styles.rule_form_setting}`}>
           <p className={styles.rule_form_setting_title}>通知对象设置</p>
@@ -808,13 +875,19 @@ const RuleModal: React.FC<Props> = ({
             }}
             // @ts-ignore
             autoQueryConfig={{
-              selectedUserIds: getFieldValue('receiverList'),
+              selectedUserIds: (getFieldValue('receiverList') || []).filter((item: string) => !includes(['assignee', 'reporter', 'projectOwner'], item)),
             }}
             name="receiverList"
             label="通知对象"
             multiple
             maxTagCount={6}
             maxTagTextLength={4}
+            clearButton
+            extraOptions={[
+              { id: 'assignee', realName: '经办人' },
+              { id: 'reporter', realName: '报告人' },
+              { id: 'projectOwner', realName: '项目所有者' },
+            ]}
           />
           <SelectUser
             style={{

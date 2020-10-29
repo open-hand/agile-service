@@ -4,11 +4,10 @@ import {
   Table, DataSet, Menu, Dropdown, Modal,
 } from 'choerodon-ui/pro';
 import { Icon } from 'choerodon-ui';
-import { TableColumnTooltip, TableQueryBarType } from 'choerodon-ui/pro/lib/table/enum';
+import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import { User } from '@/common/types';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { Action } from 'choerodon-ui/pro/lib/trigger/enum';
-import UserHead from '@/components/UserHead';
 import { pageRuleApi } from '@/api';
 import { useIsProgramContext } from '@/hooks/useIsProgrom';
 import styles from '../../index.less';
@@ -28,6 +27,12 @@ const issueTypeMap = new Map([
   ['sub_task', '子任务'],
   ['issue_epic', '史诗'],
   ['feature', '特性'],
+]);
+
+const userTypeMap = new Map([
+  ['assignee', '经办人'],
+  ['reporter', '报告人'],
+  ['projectOwner', '项目所有者'],
 ]);
 
 const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
@@ -58,9 +63,19 @@ const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
 
   const renderReceiver = useCallback(({ record }: RenderProps) => {
     const receiverList = record?.get('receiverList') || [];
+    const userTypes = record?.get('userTypes') || [];
     return (
       <span>
-        {receiverList.map((user: User) => user.realName).join('、')}
+        {[...userTypes.map((code: 'assignee' | 'reporter' | 'projectOwner') => userTypeMap.get(code)), ...receiverList.map((user: User) => user.realName)].join('、')}
+      </span>
+    );
+  }, []);
+
+  const renderProcesserList = useCallback(({ record }:RenderProps) => {
+    const processerList = (record?.get('processerList') || []).filter((item: any) => !!item);
+    return (
+      <span>
+        {processerList.map((user: User) => user.realName).join('、')}
       </span>
     );
   }, []);
@@ -75,25 +90,6 @@ const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
       </span>
     );
   }, []);
-
-  const renderAssignee = useCallback(({ record }) => (
-    <div style={{ display: 'inline-flex' }}>
-      {
-        record.get('assigneeId') && record.get('assigneeId') !== '0' && (
-          <UserHead
-            // @ts-ignore
-            user={{
-              id: record.get('assigneeId'),
-              name: record.get('assigneeName'),
-              loginName: record.get('assigneeLoginName'),
-              realName: record.get('assigneeRealName'),
-              avatar: record.get('assigneeImageUrl'),
-            }}
-          />
-        )
-      }
-    </div>
-  ), []);
 
   const renderStatus = useCallback(({ value }) => (
     <div className={`${styles.status} ${styles[`status_${value}`]}`}>
@@ -195,11 +191,15 @@ const RuleTable: React.FC<Props> = ({ tableDataSet }) => {
       <Column name="name" renderer={renderName} width={200} tooltip={'overflow' as TableColumnTooltip} />
       <Column name="action" width={50} renderer={renderAction} tooltip={'overflow' as TableColumnTooltip} />
       <Column name="expressQuery" width={250} tooltip={'overflow' as TableColumnTooltip} />
-      <Column name="newAssignee" renderer={renderAssignee} tooltip={'overflow' as TableColumnTooltip} />
+      <Column name="processerList" renderer={renderProcesserList} tooltip={'overflow' as TableColumnTooltip} />
       <Column name="receiverList" renderer={renderReceiver} tooltip={'overflow' as TableColumnTooltip} />
       <Column name="issueTypes" renderer={renderIssueType} tooltip={'overflow' as TableColumnTooltip} />
       <Column name="enabled" renderer={renderStatus} tooltip={'overflow' as TableColumnTooltip} />
-      <Column name="source" renderer={({ value }) => (value === 'system' ? '预置' : '自定义')} tooltip={'overflow' as TableColumnTooltip} />
+      <Column
+        name="source"
+        renderer={({ record }) => (record?.get('source') === 'custom' ? '自定义' : '预定义')}
+        tooltip={'overflow' as TableColumnTooltip}
+      />
     </Table>
   );
 };

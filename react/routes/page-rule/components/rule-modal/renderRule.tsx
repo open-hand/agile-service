@@ -1,9 +1,8 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import {
-  Select, DatePicker, TimePicker, DateTimePicker, TextArea, TextField, NumberField, DataSet,
+  Select, DatePicker, TimePicker, DateTimePicker, TextArea, TextField, NumberField, DataSet, Row, Col,
 } from 'choerodon-ui/pro';
 import { stores } from '@choerodon/boot';
-import SelectIssueType from '@/components/select/select-issue-type';
 import SelectStatus from '@/components/issue-filter-form/components/field/StatusField';
 import SelectPriority from '@/components/select/select-priority';
 import SelectComponent from '@/components/select/select-component';
@@ -12,9 +11,7 @@ import SelectVersion from '@/components/select/select-version';
 import SelectEpic from '@/components/select/select-epic';
 import SelectSprint from '@/components/select/select-sprint';
 import SelectUser from '@/components/select/select-user';
-// import SelectDemandType from '@choerodon/agile-pro/lib/components/select/select-demand-type';
-// import SelectTreeDemandClassification from '@choerodon/agile-pro/lib/components/select/select-demand-classification';
-// import SelectUrgent from '@choerodon/agile-pro/lib/components/select/select-priority';
+import { InjectedComponent } from './injectComponent';
 
 const { Option } = Select;
 const { AppState } = stores;
@@ -40,7 +37,7 @@ interface FieldOption {
 export interface IField {
   code: string,
   fieldOptions?: FieldOption[],
-  fieldType: string,
+  fieldType: IFieldType,
   fieldTypeName?: string,
   id: string,
   name: string,
@@ -57,6 +54,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
   const { key } = fieldK;
   const field = fieldData.find((item: IField) => item.code === dataset?.current?.get(`${key}-code`));
   const operation = dataset?.current?.get(`${key}-operation`);
+  const middleValue = dataset?.current?.get(`${key}-middleValue`);
   if (operation === 'is' || operation === 'is_not') {
     return (
       <Select
@@ -76,22 +74,6 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
     } = field;
     if (system) {
       switch (code) {
-        case 'issue_type': {
-          return (
-            <SelectIssueType
-              name={`${key}-value`}
-              isProgram={isProgram}
-              label="值"
-              valueField="typeCode"
-              style={{
-                width: '100%',
-              }}
-              afterLoad={(data) => {
-                systemDataRefMap.current.set(code, data || []);
-              }}
-            />
-          );
-        }
         case 'status': {
           return (
             <SelectStatus
@@ -104,6 +86,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
               afterLoad={(data) => {
                 systemDataRefMap.current.set(code, data || []);
               }}
+              multiple
             />
           );
         }
@@ -118,6 +101,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
               afterLoad={(data) => {
                 systemDataRefMap.current.set(code, data || []);
               }}
+              multiple
             />
           );
         }
@@ -157,8 +141,8 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
             />
           );
         }
-        case 'influence_version':
-        case 'fix_version': {
+        case 'influenceVersion':
+        case 'fixVersion': {
           return (
             <SelectVersion
               valueField="versionId"
@@ -188,6 +172,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
               afterLoad={(data) => {
                 systemDataRefMap.current.set(code, data || []);
               }}
+              multiple
             />
           );
         }
@@ -202,11 +187,11 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
               afterLoad={(data) => {
                 systemDataRefMap.current.set(code, data || []);
               }}
+              multiple
             />
           );
         }
-        case 'reporter':
-        case 'assignee': {
+        case 'reporter': {
           return (
             <SelectUser
               name={`${key}-value`}
@@ -221,18 +206,48 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
               autoQueryConfig={{
                 selectedUserIds: getFieldValue(`${key}-value`) ? [getFieldValue(`${key}-value`)] : [],
               }}
+              multiple
             />
           );
         }
-              // case 'backlogType': {
-              //   return <SelectDemandType required name={`${key}-value`} label="值" />
-              // }
-              // case 'backlogClassification': {
-              //   return <SelectTreeDemandClassification required name={`${key}-value`} label="值" />
-              // }
-              // case 'urgent': {
-              //   return <SelectUrgent required name={`${key}-value`} label="值" />
-              // }
+        case 'backlogType': {
+          return (
+            <InjectedComponent.BacklogType
+              // @ts-ignore
+              name={`${key}-value`}
+              label="值"
+              afterLoad={(data: {id: string, name: string}) => {
+                systemDataRefMap.current.set(code, data || []);
+              }}
+              multiple
+            />
+          );
+        }
+        case 'backlogClassification': {
+          return (
+            <InjectedComponent.BacklogClassification
+              // @ts-ignore
+              name={`${key}-value`}
+              label="值"
+              afterLoad={(data: {id: string, name: string}) => {
+                systemDataRefMap.current.set(code, data || []);
+              }}
+            />
+          );
+        }
+        case 'urgent': {
+          return (
+            <InjectedComponent.Urgent
+              // @ts-ignore
+              name={`${key}-value`}
+              label="值"
+              afterLoad={(data: {id: string, name: string}) => {
+                systemDataRefMap.current.set(code, data || []);
+              }}
+              multiple
+            />
+          );
+        }
       }
     }
     switch (fieldType) {
@@ -245,7 +260,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
             key={code}
             label="值"
             name={`${key}-value`}
-            multiple={fieldType === 'checkbox' || fieldType === 'multiple'}
+            multiple
             maxTagCount={2}
             maxTagTextLength={10}
             style={{
@@ -283,6 +298,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
             autoQueryConfig={{
               selectedUserIds: getFieldValue(`${key}-value`) ? [getFieldValue(`${key}-value`)] : [],
             }}
+            multiple
           />
         );
       }
@@ -310,7 +326,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
         );
       }
       case 'number': {
-        // remain_time, story_point
+        // remainingTime, storyPoints
         return (
           <NumberField
             name={`${key}-value`}
@@ -323,36 +339,81 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
       }
       case 'time': {
         return (
-          <TimePicker
-            name={`${key}-value`}
-            label="值"
-            style={{
-              width: '100%',
-            }}
-          />
+          <Row gutter={20}>
+            <Col span={middleValue === 'specified' ? 12 : 24}>
+              <Select name={`${key}-middleValue`} label="值" clearButton={false}>
+                <Option value="now">当前时间</Option>
+                <Option value="specified">指定值</Option>
+              </Select>
+            </Col>
+
+            {
+              middleValue === 'specified' && (
+                <Col span={12}>
+                  <TimePicker
+                    name={`${key}-value`}
+                    label="值"
+                    style={{
+                      width: '100%',
+                    }}
+                  />
+                </Col>
+              )
+            }
+          </Row>
         );
       }
       case 'datetime': {
         // creationDate, lastUpdateDate,estimatedStartTime,estimatedEndTime,
         return (
-          <DateTimePicker
-            name={`${key}-value`}
-            label="值"
-            style={{
-              width: '100%',
-            }}
-          />
+          <Row gutter={20}>
+            <Col span={middleValue === 'specified' ? 12 : 24}>
+              <Select name={`${key}-middleValue`} label="值" clearButton={false}>
+                <Option value="now">当前时间</Option>
+                <Option value="specified">指定值</Option>
+              </Select>
+            </Col>
+
+            {
+              middleValue === 'specified' && (
+                <Col span={12}>
+                  <DateTimePicker
+                    name={`${key}-value`}
+                    label="值"
+                    style={{
+                      width: '100%',
+                    }}
+                  />
+                </Col>
+              )
+            }
+          </Row>
         );
       }
       case 'date': {
         return (
-          <DatePicker
-            name={`${key}-value`}
-            label="值"
-            style={{
-              width: '100%',
-            }}
-          />
+          <Row gutter={20}>
+            <Col span={middleValue === 'specified' ? 12 : 24}>
+              <Select name={`${key}-middleValue`} label="值" clearButton={false}>
+                <Option value="now">当前时间</Option>
+                <Option value="specified">指定值</Option>
+              </Select>
+            </Col>
+
+            {
+              middleValue === 'specified' && (
+                <Col span={12}>
+                  <DatePicker
+                    name={`${key}-value`}
+                    label="值"
+                    style={{
+                      width: '100%',
+                    }}
+                  />
+                </Col>
+              )
+            }
+          </Row>
         );
       }
       default:

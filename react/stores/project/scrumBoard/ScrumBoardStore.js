@@ -355,7 +355,7 @@ class ScrumBoardStore {
 
   @computed get hasSetFilter() {
     const {
-      onlyMe, onlyStory, quickSearchArray, assigneeFilterIds, sprintId,
+      onlyMe, onlyStory, quickSearchArray = [], assigneeFilterIds = [], sprintId,
     } = this.quickSearchObj;
     if (onlyMe === false
       && onlyStory === false

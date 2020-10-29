@@ -75,10 +75,15 @@ export default function useSelect<T extends { [key: string]: any }>(config: Sele
     paging = true,
     props,
   } = config;
-  const renderer = useCallback(({ value }) => {
+  const renderer = useCallback(({ value, maxTagTextLength }) => {
     const item = cacheRef.current?.get(value);
     if (item) {
-      return optionRenderer(item);
+      const result = optionRenderer(item);
+      return maxTagTextLength
+      && typeof result === 'string'
+      && (result as string).length > maxTagTextLength
+        ? `${(result as string).slice(0, maxTagTextLength)}...`
+        : result;
     }
     return null;
   }, [optionRenderer]);

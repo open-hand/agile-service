@@ -177,6 +177,8 @@ const Filter: React.FC<FilterProps> = ({
         field={field}
         label={field.title}
         // @ts-ignore
+        flat={flat}
+        // @ts-ignore
         placeholder={placeholder}
         required={field.required}
         value={getEmptyValue(filter[field.code], {
@@ -198,6 +200,7 @@ const Filter: React.FC<FilterProps> = ({
         }}
         dropdownMatchSelectWidth={false}
         maxTagCount={3}
+        maxTagTextLength={5}
         className={className}
         labelLayout={!flat || isText || isTime ? 'float' as LabelLayout : 'none' as LabelLayout}
         {...isUser ? {

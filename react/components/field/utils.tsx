@@ -13,6 +13,7 @@ import SelectComponent from '@/components/select/select-component';
 import SelectVersion from '@/components/select/select-version';
 import SelectSubProject from '@/components/select/select-sub-project';
 import SelectUser from '@/components/select/select-user';
+import FlatSelect from '@/components/flat-select';
 import SelectStatus from './components/StatusField';
 import FeatureProjectField from './components/FeatureProjectField';
 import PIField from './components/pi-field';
@@ -20,7 +21,7 @@ import QuickFilterField from './components/quick-filter-field';
 import { IFilterField, ICustomField } from '../filter';
 
 const { Option } = Select;
-export function getFieldElement(field: IFilterField): React.ReactNode {
+export function getFieldElement(field: IFilterField, flat?: boolean): React.ReactNode {
   const { code, fieldType, system } = field;
   if (system) {
     switch (code) {
@@ -109,9 +110,10 @@ export function getFieldElement(field: IFilterField): React.ReactNode {
           maxLength={255}
         />
       );
-    case 'radio': case 'single': case 'checkbox': case 'multiple':
+    case 'radio': case 'single': case 'checkbox': case 'multiple': {
+      const Component = flat ? FlatSelect : Select;
       return (
-        <Select>
+        <Component>
           {fieldOptions
             && fieldOptions.length > 0
             && fieldOptions.map((item) => (
@@ -122,13 +124,16 @@ export function getFieldElement(field: IFilterField): React.ReactNode {
                 {item.value}
               </Option>
             ))}
-        </Select>
+        </Component>
       );
+    }
+
     case 'member':
     {
       return (
         <SelectUser
           multiple
+          flat={flat}
             // @ts-ignore
           selectedUserIds={defaultValue ? defaultValue.map((item: string) => ({ id: item })) : undefined}
         />

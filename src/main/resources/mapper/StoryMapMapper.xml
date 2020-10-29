@@ -168,6 +168,7 @@
         ) version_info on ai.issue_id = version_info.issue_id
         where ai.project_id = #{projectId} and ai.type_code = 'story'
         and (ai.epic_id is null or ai.epic_id = 0)
+        and (ai.feature_id is null or ai.feature_id = 0)
         <if test="searchVO.searchArgs != null">
             <if test='searchVO.searchArgs.assigneeId != null and searchVO.searchArgs.assigneeId != "" '>
                 AND ai.assignee_id = #{searchVO.searchArgs.assigneeId}

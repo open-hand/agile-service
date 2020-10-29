@@ -569,7 +569,7 @@ const fieldsMap = new Map([
       },
     },
   ],
-  ['estimatedStartTime', {
+  ['Estimated Start Time', {
     name: '预计开始时间',
     create: {
       render: (log: ILog) => {
@@ -602,7 +602,7 @@ const fieldsMap = new Map([
       },
     },
   }],
-  ['estimatedEndTime', {
+  ['Estimated End Time', {
     name: '预计结束时间',
     create: {
       render: (log: ILog) => {

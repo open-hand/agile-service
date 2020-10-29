@@ -719,6 +719,13 @@ public class StateMachineServiceImpl implements StateMachineService {
                 transformVO.setPostpositions(Optional.ofNullable(map.get(ConfigType.ACTION)).orElse(Collections.emptyList()));
             }
         }
+
+        List<Long> schemeIds =
+                stateMachineSchemeConfigService.querySchemeIdsByStateMachineId(isDraft, organizationId, stateMachineId);
+        List<ProjectConfigDTO> projectConfigList =
+                projectConfigMapper.queryBySchemeIds(schemeIds, SchemeType.STATE_MACHINE);
+        Set<String> applyTypes = projectConfigList.stream().map(ProjectConfigDTO::getApplyType).collect(Collectors.toSet());
+        statusMachineVO.setApplyTypes(applyTypes);
         return statusMachineVO;
     }
 

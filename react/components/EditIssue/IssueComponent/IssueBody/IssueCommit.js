@@ -67,6 +67,8 @@ function IssueCommit({
               hasPermission={hasPermission}
               i={i}
               commentExpendAll={commentExpendAll}
+              disabled={disabled}
+              applyType={applyType}
             />
           ))
         }
@@ -93,7 +95,6 @@ function IssueCommit({
       </div>
     );
   };
-
   return (
     <div id="commit" style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
       {(!disabled || (disabled && applyType === 'agile')) && (

@@ -1,3 +1,4 @@
+import { getProjectId } from '@/utils/common';
 import { merge } from 'lodash';
 
 interface LocalPageCacheStoreInterface {
@@ -6,30 +7,29 @@ interface LocalPageCacheStoreInterface {
   remove: (code: string) => void,
   clear: () => void,
 }
-
+const pages = new Map<string, any>();
+const currentProjectId = getProjectId();
 class LocalPageCacheStore implements LocalPageCacheStoreInterface {
   pageKeyList = ['scrumboard', 'issues']
 
-  pages = new Map<string, any>();
-
   setItem(pageKey: string, data: any) {
-    this.pages.set(pageKey, data);
+    pages.set(`${currentProjectId}-${pageKey}`, data);
   }
 
   mergeSetItem<T extends object>(pageKey: string, data: T) {
-    this.pages.set(pageKey, merge(this.pages.get(pageKey), data));
+    pages.set(`${currentProjectId}-${pageKey}`, merge(pages.get(pageKey), data));
   }
 
   getItem(pageKey: string) {
-    return this.pages.get(pageKey);
+    return pages.get(`${currentProjectId}-${pageKey}`);
   }
 
   remove(pageKey: string) {
-    this.pages.delete(pageKey);
+    pages.delete(`${currentProjectId}-${pageKey}`);
   }
 
-  clear() {
-    this.pages.clear();
+  clear = () => {
+    pages.clear();
   }
 }
 const testLocalPageCacheStore = new LocalPageCacheStore();

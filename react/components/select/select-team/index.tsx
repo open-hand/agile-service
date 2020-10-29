@@ -3,13 +3,17 @@ import { Select } from 'choerodon-ui/pro';
 import useSelect, { SelectConfig } from '@/hooks/useSelect';
 import { commonApi } from '@/api';
 import { SelectProps } from 'choerodon-ui/pro/lib/select/Select';
+import FlatSelect from '@/components/flat-select';
 
 interface Props extends Partial<SelectProps> {
   projectDataRef?: React.RefObject<Array<any>>,
   afterLoad?: (projects: any[]) => void
+  flat?: boolean
 }
 
-const SelectTeam: React.FC<Props> = forwardRef(({ projectDataRef = { current: null }, afterLoad, ...otherProps }, ref: React.Ref<Select>) => {
+const SelectTeam: React.FC<Props> = forwardRef(({
+  projectDataRef = { current: null }, afterLoad, flat, ...otherProps
+}, ref: React.Ref<Select>) => {
   const afterLoadRef = useRef<Function>();
   afterLoadRef.current = afterLoad;
   const config = useMemo((): SelectConfig => ({
@@ -29,8 +33,9 @@ const SelectTeam: React.FC<Props> = forwardRef(({ projectDataRef = { current: nu
     },
   }), []);
   const props = useSelect(config);
+  const Component = flat ? FlatSelect : Select;
   return (
-    <Select
+    <Component
       ref={ref}
       {...props}
       {...otherProps}

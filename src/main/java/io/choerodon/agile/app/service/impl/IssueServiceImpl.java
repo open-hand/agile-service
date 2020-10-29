@@ -28,6 +28,7 @@ import io.choerodon.agile.infra.statemachineclient.dto.InputDTO;
 import io.choerodon.agile.infra.utils.*;
 import io.choerodon.asgard.saga.dto.StartInstanceDTO;
 import io.choerodon.asgard.saga.feign.SagaClient;
+import io.choerodon.core.domain.PageInfo;
 import io.choerodon.core.utils.PageableHelper;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
@@ -2524,6 +2525,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
         Map<Long, ProjectVO> projectVOMap = projects.stream().collect(Collectors.toMap(ProjectVO::getId, Function.identity()));
         List<IssueListFieldKVVO> list = new ArrayList<>();
+        Set<Long> userIds = new HashSet<>();
         allIssue.forEach(v -> {
             IssueListFieldKVVO issueListFieldKVVO = new IssueListFieldKVVO();
             modelMapper.map(v,issueListFieldKVVO);
@@ -2543,16 +2545,33 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             }
             issueListFieldKVVO.setParentId(parentId);
             list.add(issueListFieldKVVO);
+            Long assigneeId = v.getAssigneeId();
+            if (!ObjectUtils.isEmpty(assigneeId)) {
+                userIds.add(assigneeId);
+            }
         });
 
-        Page<IssueListFieldKVVO> page = new Page<>();
-        page.setNumber(parentPage.getNumber());
-        page.setSize(parentPage.getSize());
-        page.setTotalElements(parentPage.getTotalElements());
-        page.setContent(list);
-        page.setTotalPages(parentPage.getTotalPages());
-        page.setNumberOfElements(parentPage.getNumberOfElements());
-        return page;
+        if (!userIds.isEmpty()) {
+            setAssignee(list, userIds);
+        }
+        PageInfo pageInfo = new PageInfo(pageRequest.getPage(), pageRequest.getSize());
+        return new Page<>(list, pageInfo, parentPage.getTotalElements());
+    }
+
+    private void setAssignee(List<IssueListFieldKVVO> list, Set<Long> userIds) {
+        Map<Long, UserMessageDTO> userMap = userService.queryUsersMap(new ArrayList<>(userIds), true);
+        list.forEach(l -> {
+            Long assigneeId = l.getAssigneeId();
+            if (!ObjectUtils.isEmpty(assigneeId)) {
+                UserMessageDTO user = userMap.get(assigneeId);
+                if (!ObjectUtils.isEmpty(user)) {
+                    l.setAssigneeName(user.getName());
+                    l.setAssigneeImageUrl(user.getImageUrl());
+                    l.setAssigneeLoginName(user.getLoginName());
+                    l.setAssigneeRealName(user.getRealName());
+                }
+            }
+        });
     }
 
     private void queryUserProjects(Long organizationId, Long projectId, List<Long> projectIds, List<ProjectVO> projects, Long userId) {

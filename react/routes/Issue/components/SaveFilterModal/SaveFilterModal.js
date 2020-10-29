@@ -38,6 +38,7 @@ class SaveFilterModal extends Component {
           .then((res) => {
             issueSearchStore.loadMyFilterList();
             IssueStore.setSaveFilterVisible(false);
+            IssueStore.setLoading(false);
             form.setFieldsValue({ filterName: '' });
             Choerodon.prompt('保存成功');
           }).catch(() => {

@@ -35,7 +35,7 @@ export function renderFlatField(field: IFilterField, { element, removeButton }: 
     <div
       key={field.code}
       style={{
-        display: 'flex', alignItems: 'center', marginBottom: 10, marginTop: 1,
+        display: 'flex', alignItems: 'center', marginBottom: 10,
       }}
     >
       {React.cloneElement(element, {
@@ -116,7 +116,7 @@ export const renderGroupedFields: IRenderFields = ({
     </div>
   ));
   if (result.length > 0) {
-    result[result.length - 1].props.children.push(<div style={{ marginLeft: 10 }}>{selectField}</div>);
+    result[result.length - 1].props.children.push(<div style={{ marginLeft: 10, marginTop: 3 }}>{selectField}</div>);
   }
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start' }}>

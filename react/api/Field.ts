@@ -112,7 +112,7 @@ class FieldApi extends Api<FieldApi> {
    * @param schemeCode
    * @param dto  更新的值
    */
-  updateFieldValue(issueId: number, fieldId: number, schemeCode: string, dto: UIssueFiled) {
+  updateFieldValue(issueId: number, fieldId: number, fieldCode: string, schemeCode: string, dto: UIssueFiled) {
     const organizationId = getOrganizationId();
     return axios({
       method: 'post',
@@ -121,6 +121,7 @@ class FieldApi extends Api<FieldApi> {
         organizationId,
         schemeCode,
         fieldId,
+        fieldCode,
       },
       data: dto,
     });

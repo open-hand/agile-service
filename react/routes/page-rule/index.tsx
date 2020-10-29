@@ -40,7 +40,7 @@ const PageRule = () => {
       },
       {
         label: '变更值',
-        name: 'newAssignee',
+        name: 'processerList',
       },
       {
         label: '通知对象',
@@ -55,7 +55,7 @@ const PageRule = () => {
       {
         label: '来源',
         name: 'source',
-        type: 'boolean' as FieldType,
+        type: 'string' as FieldType,
       },
     ],
     queryFields: [
@@ -66,10 +66,28 @@ const PageRule = () => {
       {
         name: 'enabled',
         label: '状态',
+        type: 'string' as FieldType,
+        textField: 'label',
+        valueField: 'value',
+        options: new DataSet({
+          data: [
+            { label: '启用', value: 'true' },
+            { label: '停用', value: 'false' },
+          ],
+        }),
       },
       {
         name: 'source',
         label: '来源',
+        textField: 'label',
+        valueField: 'value',
+        type: 'string' as FieldType,
+        options: new DataSet({
+          data: [
+            { label: '自定义', value: 'custom' },
+            { label: '预定义', value: 'predefined' },
+          ],
+        }),
       },
     ],
   }), []);
@@ -89,7 +107,12 @@ const PageRule = () => {
 
   return (
     <IsProgramContext.Provider value={{ isProgram: getApplyType() === 'program' }}>
-      <Page service={[]} className={styles.pageRule}>
+      <Page
+        service={[
+          'choerodon.code.project.setting.autoRule.ps.master',
+        ]}
+        className={styles.pageRule}
+      >
         <Header>
           <Button icon="playlist_add" onClick={handleAddRule}>添加规则</Button>
         </Header>

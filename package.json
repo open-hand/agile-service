@@ -10,6 +10,7 @@
   "dependencies": {
     "@emotion/core": "^10.0.28",
     "@emotion/styled": "^10.0.27",
+    "ahooks": "^2.7.1",
     "antd": "^4.5.3",
     "dom-helpers": "^5.2.0",
     "echarts": "^4.1.0",
@@ -69,6 +70,10 @@
     "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-react": "^7.20.5",
     "eslint-plugin-react-hooks": "^4.0.8"
+  },
+  "resolutions": {
+    "react": "16.14.0",
+    "react-dom": "16.14.0"
   },
   "scripts": {
     "start": "node --max_old_space_size=4096 node_modules/@choerodon/boot/bin/choerodon-front-boot-start --config ./react/config.js",

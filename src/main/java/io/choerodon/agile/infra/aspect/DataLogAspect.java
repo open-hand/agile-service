@@ -22,9 +22,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -129,6 +131,11 @@ public class DataLogAspect {
     private static final String BATCH_UPDATE_STATUS_ID = "batchUpdateStatusId";
     private static final String KNOWLEDGE_RELATION_CREATE = "knowledgeRelationCreate";
     private static final String KNOWLEDGE_RELATION_DELETE = "knowledgeRelationDelete";
+    private static final String ESTIMATED_START_TIME = "estimatedStartTime";
+    private static final String FIELD_ESTIMATED_START_TIME = "Estimated Start Time";
+    private static final String ESTIMATED_END_TIME = "estimatedEndTime";
+    private static final String FIELD_ESTIMATED_END_TIME = "Estimated End Time";
+
 
     @Autowired
     private IssueStatusMapper issueStatusMapper;
@@ -588,7 +595,8 @@ public class DataLogAspect {
         Long sprintId = (Long) args[1];
         if (projectId != null && sprintId != null) {
             List<Long> moveIssueIds = sprintMapper.queryIssueIds(projectId, sprintId);
-            handleBatchRemoveSprint(projectId, moveIssueIds, sprintId);
+            //批量将issue从sprint移除,目标冲刺为应设置为0,记录移除冲刺的日志
+            handleBatchRemoveSprint(projectId, moveIssueIds, 0L);
         }
     }
 
@@ -1091,6 +1099,7 @@ public class DataLogAspect {
             handleStatus(field, originIssueDTO, issueConvertDTO);
             handleRank(field, originIssueDTO, issueConvertDTO);
             handleType(field, originIssueDTO, issueConvertDTO);
+            handleEstimatedTime(field, originIssueDTO, issueConvertDTO);
         }
     }
 
@@ -1263,6 +1272,39 @@ public class DataLogAspect {
                 createDataLog(originIssueDTO.getProjectId(), originIssueDTO.getIssueId(),
                         DESCRIPTION, originIssueDTO.getDescription(), null, null, null);
             }
+        }
+    }
+
+    private void handleEstimatedTime(List<String> field,
+                                     IssueDTO originIssueDTO,
+                                     IssueConvertDTO issueConvertDTO) {
+        Long projectId = originIssueDTO.getProjectId();
+        Long issueId = originIssueDTO.getIssueId();
+        SimpleDateFormat smf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        if (field.contains(ESTIMATED_START_TIME)
+                && !Objects.equals(originIssueDTO.getEstimatedStartTime(), issueConvertDTO.getEstimatedStartTime())) {
+            String originEstimatedStartTime = null;
+            String convertEstimatedStartTime = null;
+            if (!ObjectUtils.isEmpty(originIssueDTO.getEstimatedStartTime())) {
+                originEstimatedStartTime = smf.format(originIssueDTO.getEstimatedStartTime());
+            }
+            if (!ObjectUtils.isEmpty(issueConvertDTO.getEstimatedStartTime())) {
+                convertEstimatedStartTime = smf.format(issueConvertDTO.getEstimatedStartTime());
+            }
+            createDataLog(projectId, issueId, FIELD_ESTIMATED_START_TIME, originEstimatedStartTime, convertEstimatedStartTime, originEstimatedStartTime, convertEstimatedStartTime);
+        }
+
+        if (field.contains(ESTIMATED_END_TIME)
+                && !Objects.equals(originIssueDTO.getEstimatedEndTime(), issueConvertDTO.getEstimatedEndTime())) {
+            String originEstimatedEndTime = null;
+            String convertEstimatedEndTime = null;
+            if (!ObjectUtils.isEmpty(originIssueDTO.getEstimatedEndTime())) {
+                originEstimatedEndTime = smf.format(originIssueDTO.getEstimatedEndTime());
+            }
+            if (!ObjectUtils.isEmpty(issueConvertDTO.getEstimatedEndTime())) {
+                convertEstimatedEndTime = smf.format(issueConvertDTO.getEstimatedEndTime());
+            }
+            createDataLog(projectId, issueId, FIELD_ESTIMATED_END_TIME, originEstimatedEndTime, convertEstimatedEndTime, originEstimatedEndTime, convertEstimatedEndTime);
         }
     }
 

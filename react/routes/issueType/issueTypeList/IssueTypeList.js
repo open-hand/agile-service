@@ -24,7 +24,7 @@ function IssueTypeList() {
 
   /**
    * render Name
-   * @param {*} param0 
+   * @param {*} param0
    */
   function renderName({ record }) {
     const colour = record.get('colour');
@@ -51,7 +51,7 @@ function IssueTypeList() {
       ]}
     >
       <Breadcrumb />
-      <Content>
+      <Content style={{ paddingTop: '0' }}>
         <Table dataSet={issueTypeDataSet} className={`${prefixCls}-table`}>
           <Column name="name" renderer={renderName} />
           <Column name="description" />

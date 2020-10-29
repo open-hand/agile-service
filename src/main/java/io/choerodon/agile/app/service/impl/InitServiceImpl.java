@@ -2,12 +2,14 @@ package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.api.vo.event.StatusPayload;
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.agile.app.service.BoardService;
 import io.choerodon.agile.app.service.InitService;
 import io.choerodon.agile.app.service.StateMachineService;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.*;
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
 import org.modelmapper.ModelMapper;
@@ -15,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -67,6 +66,11 @@ public class InitServiceImpl implements InitService {
             stateMachineId = initAGStateMachine(organizationId, projectEvent);
         } else if (applyType.equals(SchemeApplyType.TEST)) {
             stateMachineId = initTEStateMachine(organizationId, projectEvent);
+        } else if (applyType.equals(SchemeApplyType.PROGRAM)) {
+            AgilePluginService expandBean = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+            if (expandBean != null) {
+                stateMachineId = expandBean.initPRStateMachine(organizationId, projectEvent);
+            }
         }
         return stateMachineId;
     }
@@ -232,7 +236,18 @@ public class InitServiceImpl implements InitService {
             StatusDTO select = new StatusDTO();
             select.setOrganizationId(organizationId);
             return statusMapper.select(select);
-        } else {
+        } else if(Objects.equals(applyType, SchemeApplyType.PROGRAM)){
+            List<String> statusTypes = initStatuses.stream().map(StatusDTO::getType).collect(Collectors.toList());
+            if (!statusTypes.contains("prepare")) {
+                List<InitStatus> statuses = new ArrayList<>();
+                statuses.add(InitStatus.PREPARE);
+                initStatus(organizationId, statuses);
+            }
+            StatusDTO select = new StatusDTO();
+            select.setOrganizationId(organizationId);
+            return statusMapper.select(select);
+        }
+        else {
             return initStatuses;
         }
     }

@@ -2,6 +2,7 @@ import { stores } from '@choerodon/boot';
 import {
   Form, Input, message, Modal, Checkbox,
 } from 'choerodon-ui';
+import { Button } from 'choerodon-ui/pro';
 import { observer } from 'mobx-react';
 import _ from 'lodash';
 import React, { Component } from 'react';
@@ -21,11 +22,14 @@ const { AppState } = stores;
 @injectIntl
 @observer
 class PriorityEdit extends Component {
-  state = {
-    priorityColor: null,
-    displayColorPicker: false,
-    loading: false,
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      priorityColor: null,
+      displayColorPicker: false,
+      loading: false,
+    };
+  }
 
   componentDidMount() {
     const { PriorityStore } = this.props;
@@ -129,9 +133,13 @@ class PriorityEdit extends Component {
         visible={onEditingPriority}
         okText={<FormattedMessage id="save" />}
         cancelText={<FormattedMessage id="cancel" />}
-        onOk={this.handleEditingOk}
-        onCancel={this.handleEditingCancel}
         confirmLoading={loading}
+        footer={[
+          <Button key="submit" color="primary" funcType="raised" loading={loading} onClick={this.handleEditingOk}>
+            <FormattedMessage id="save" />
+          </Button>,
+          <Button key="back" funcType="raised" onClick={this.handleEditingCancel}><FormattedMessage id="cancel" /></Button>,
+        ]}
         width={MODAL_WIDTH.small}
       >
         <Form>

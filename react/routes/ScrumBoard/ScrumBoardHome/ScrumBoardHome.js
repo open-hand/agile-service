@@ -7,6 +7,7 @@ import {
   Button, Select, Spin, Icon, Modal, Form, Tooltip, Radio,
 } from 'choerodon-ui';
 import { merge } from 'lodash';
+import { toJS } from 'mobx';
 import { Modal as ModalPro } from 'choerodon-ui/pro';
 import CloseSprint from '@/components/close-sprint';
 import {
@@ -71,7 +72,7 @@ class ScrumBoardHome extends Component {
     const scrumboardInitValue = localPageCacheStore.getItem('scrumboard');
     if (scrumboardInitValue) {
       const {
-        onlyMeChecked, onlyStoryChecked, moreChecked, personalFilters, assigneeFilter, sprintFilter, priorityIds,
+        onlyMeChecked, onlyStoryChecked, moreChecked, personalFilters = [], assigneeFilter, sprintFilter, priorityIds,
       } = scrumboardInitValue;
       ScrumBoardStore.addQuickSearchFilter(
         onlyMeChecked,
@@ -466,7 +467,12 @@ class ScrumBoardHome extends Component {
         </Header>
         <Breadcrumb />
         <Content style={{
-          padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden',
+          padding: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          borderTop: '1px solid #D8D8D8',
+          paddingTop: 16,
         }}
         >
           <div style={{ display: 'flex' }}>
@@ -480,7 +486,7 @@ class ScrumBoardHome extends Component {
             {ScrumBoardStore.hasSetFilter && <Button type="primary" onClick={this.handleClearFilter}>清除筛选</Button>}
           </div>
           <Spin spinning={ScrumBoardStore.getSpinIf}>
-            <div className="c7n-scrumboard" style={HeaderStore.announcementClosed ? {} : { height: 'calc(100vh - 254px)' }}>
+            <div className="c7n-scrumboard" style={HeaderStore.announcementClosed ? {} : { height: 'calc(100vh - 270px)' }}>
               <div style={{ display: 'table', minWidth: '100%' }}>
                 <div className="c7n-scrumboard-header">
                   <StatusColumn />
@@ -498,7 +504,7 @@ class ScrumBoardHome extends Component {
                   : (
                     <div
                       className="c7n-scrumboard-content"
-                      style={HeaderStore.announcementClosed ? {} : { height: 'calc(100vh - 256px)' }}
+                      style={HeaderStore.announcementClosed ? {} : { height: 'calc(100vh - 272px)' }}
                     >
                       <div className="c7n-scrumboard-container">
                         <SwimLane

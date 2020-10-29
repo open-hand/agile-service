@@ -172,6 +172,7 @@ class AddComponent extends Component {
   }
 
   componentDidMount() {
+    sign = -1;
     const { filterId } = this.props;
     this.loadQuickFilterFiled();
     this.loadQuickFilter();

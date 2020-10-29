@@ -5,6 +5,7 @@ import { unionBy } from 'lodash';
 import SelectFocusLoad from '@/components/SelectFocusLoad';
 import { configTheme } from '@/utils/common';
 import ScrumBoardStore from '@/stores/project/scrumBoard/ScrumBoardStore';
+import { getSelectStyle } from '@/components/issue-search/custom-fields/utils';
 
 let list = [];
 function PriorityField({ onChange }) {
@@ -19,6 +20,7 @@ function PriorityField({ onChange }) {
         primary: true,
       })}
       style={{
+        ...getSelectStyle({ name: '优先级' }, value),
         marginBottom: 16,
       }}
       type="priority"

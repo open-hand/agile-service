@@ -10,6 +10,7 @@ import { CompactPicker } from 'react-color';
 import MODAL_WIDTH from '@/constants/MODAL_WIDTH';
 import './priorityCreate.less';
 import { priorityApi } from '@/api';
+import { Button } from 'choerodon-ui/pro/lib';
 
 const FormItem = Form.Item;
 const { Sidebar } = Modal;
@@ -21,6 +22,7 @@ const { AppState } = stores;
 @injectIntl
 @observer
 class PriorityCreate extends Component {
+  // eslint-disable-next-line react/state-in-constructor
   state = {
     priorityColor: '#3F51B5',
     displayColorPicker: false,
@@ -120,8 +122,12 @@ class PriorityCreate extends Component {
         visible={onCreatingPriority}
         okText={<FormattedMessage id="save" />}
         cancelText={<FormattedMessage id="cancel" />}
-        onOk={this.handleCreatingOk}
-        onCancel={this.handleCreatingCancel}
+        footer={[
+          <Button key="submit" color="primary" funcType="raised" loading={loading} onClick={this.handleCreatingOk}>
+            <FormattedMessage id="save" />
+          </Button>,
+          <Button key="back" funcType="raised" onClick={this.handleCreatingCancel}><FormattedMessage id="cancel" /></Button>,
+        ]}
         confirmLoading={loading}
         width={MODAL_WIDTH.small}
       >

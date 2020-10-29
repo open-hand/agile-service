@@ -1,20 +1,15 @@
 package io.choerodon.agile.app.service;
 
 import com.alibaba.fastjson.JSONObject;
-import io.choerodon.agile.api.vo.IssueTypeVO;
-import io.choerodon.agile.api.vo.PageConfigFieldVO;
-import io.choerodon.agile.api.vo.QuickFilterValueVO;
-import io.choerodon.agile.api.vo.business.IssueCreateVO;
-import io.choerodon.agile.api.vo.business.IssueUpdateVO;
-import io.choerodon.agile.api.vo.business.IssueVO;
+import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.api.vo.business.*;
+import io.choerodon.agile.api.vo.event.ProjectEvent;
 import io.choerodon.agile.infra.dto.*;
-import io.choerodon.agile.infra.dto.business.IssueDetailDTO;
-import io.choerodon.agile.infra.dto.business.IssueConvertDTO;
-import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.dto.business.IssueSearchDTO;
+import io.choerodon.agile.infra.dto.business.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author zhaotianxin
@@ -210,4 +205,73 @@ public interface AgilePluginService {
      * @return
      */
     List<ObjectSchemeFieldDTO> filterProgramEpic(List<ObjectSchemeFieldDTO> objectSchemeFieldDTOS);
+
+
+    /**
+     * 创建项目群时初始化项目群特有的问题类型和方案
+     * @param projectEvent
+     */
+    void initProjectIssueTypeSchemeAndArt(ProjectEvent projectEvent);
+
+    /**
+     * 初始化项目群状态机
+     * @param organizationId
+     * @param projectEvent
+     * @return
+     */
+    Long initPRStateMachine(Long organizationId, ProjectEvent projectEvent);
+
+    /**
+     * 查询项目群子项目故事地图
+     * @param projectId
+     * @param epicIds
+     * @param searchVO
+     * @return
+     */
+    StoryMapVO handlerBusinessQueryStoryMap(Long projectId, List<Long> epicIds, SearchVO searchVO);
+
+    /**
+     * 故事地图移动特性
+     * @param projectId
+     * @param storyMapDragVO
+     */
+    void handlerStoryMapMoveFeature(Long projectId, StoryMapDragVO storyMapDragVO);
+
+    /**
+     * 设置ApplyTypes
+     * @param schemeVO
+     * @param schemeId
+     */
+    void addApplyTypesToStateMachine(StateMachineSchemeVO schemeVO, Long schemeId);
+
+    /**
+     * 创建项目群子项目的冲刺
+     * @param projectId
+     * @param sprintConvertDTO
+     */
+    SprintConvertDTO createSubProjectSprint(Long projectId, SprintConvertDTO sprintConvertDTO);
+
+    /**
+     * 如果项目是项目群子项目,开启冲刺时设置开始时间为当前时间
+     * @param projectId
+     * @param sprintConvertDTO
+     */
+    void handlerSprintStartDate(Long projectId, SprintConvertDTO sprintConvertDTO);
+
+    /**
+     * 迭代计划添加商业版属性
+     * @param projectId
+     * @param issueIds
+     * @param result
+     */
+    void addProgramAttr(Long projectId, List<Long> issueIds,Map<String, Object> result);
+
+    /**
+     * 查询单个冲刺的PI和类型
+     * @param projectId
+     * @param sprintId
+     * @param sprintDetailVO
+     * @return
+     */
+    SprintDetailVO setSprintPiAndType(Long projectId, Long sprintId, SprintDetailVO sprintDetailVO);
 }

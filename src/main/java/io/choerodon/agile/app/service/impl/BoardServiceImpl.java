@@ -441,6 +441,16 @@ public class BoardServiceImpl implements BoardService {
         }).collect(Collectors.toList());
     }
 
+    @Override
+    public Boolean isLinked(Long projectId, Long issueId, Long statusId) {
+        IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
+        if (ObjectUtils.isEmpty(issue)) {
+            throw new CommonException("error.issue.not.existed");
+        }
+        Long issueTypeId = issue.getIssueTypeId();
+        return !statusLinkageService.listByIssueTypeAndStatusId(projectId, issueTypeId, statusId).isEmpty();
+    }
+
     private void handleUserSetting(Long boardId, Long projectId) {
         Long userId = DetailsHelper.getUserDetails().getUserId();
         UserSettingDTO userSettingDTO = new UserSettingDTO();
