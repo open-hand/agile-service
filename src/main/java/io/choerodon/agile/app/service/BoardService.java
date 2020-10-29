@@ -65,4 +65,13 @@ public interface BoardService {
      */
     List<SearchVO> getSearchVO(List<Long> personFilterIds);
 
+    /**
+     * 判断issue拖动是否有状态联动
+     *
+     * @param projectId
+     * @param issueId
+     * @param statusId
+     * @return
+     */
+    Boolean isLinked(Long projectId, Long issueId, Long statusId);
 }
