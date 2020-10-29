@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
+import { Permission } from '@choerodon/boot';
 import { withRouter } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import { issueApi } from '@/api';
@@ -31,7 +32,7 @@ import UserHead from '../../../../UserHead';
 
   render() {
     const {
-      store, loginUserId, hasPermission, disabled,
+      store, loginUserId, disabled,
     } = this.props;
     const issue = store.getIssue;
     const {
@@ -40,6 +41,7 @@ import UserHead from '../../../../UserHead';
     } = issue;
     const field = store.getFieldByCode('reporter');
     const required = field?.required;
+
     return (
       <div className="line-start mt-10">
         <div className="c7n-property-wrapper">
@@ -48,47 +50,54 @@ import UserHead from '../../../../UserHead';
           </span>
         </div>
         <div className="c7n-value-wrapper">
-          <TextEditToggle
-            disabled={disabled || (
-              reporterId && reporterId.toString() !== loginUserId.toString() && !hasPermission
-            )}
-            onSubmit={this.updateIssueReporter}
-            initValue={reporterLoginName ? (
-              reporterId && reporterId.toString()
-            ) || undefined : undefined}
-            editor={({ submit }) => (
-              <SelectUser
-                clearButton={!required}
-                required={required}
-                onChange={submit}
-                selectedUser={reporterId ? {
-                  id: reporterId,
-                  loginName: reporterLoginName,
-                  realName: reporterRealName,
-                  avatar: reporterImageUrl,
-                  name: reporterName,
-                } : undefined}
-              />
-            )}
-          >
+          <Permission service={['choerodon.code.project.cooperation.iteration-plan.ps.choerodon.code.agile.project.editissue.pro']}>
             {
-              reporterId && reporterLoginName ? (
-                <UserHead
-                  user={{
-                    id: reporterId,
-                    loginName: reporterLoginName,
-                    realName: reporterRealName,
-                    avatar: reporterImageUrl,
-                    name: reporterName,
-                  }}
-                />
-              ) : (
-                <div>
-                  无
-                </div>
+              (hasPermission) => (
+                <TextEditToggle
+                  disabled={disabled || (
+                    reporterId && reporterId.toString() !== loginUserId.toString() && !hasPermission
+                  )}
+                  onSubmit={this.updateIssueReporter}
+                  initValue={reporterLoginName ? (
+                    reporterId && reporterId.toString()
+                  ) || undefined : undefined}
+                  editor={({ submit }) => (
+                    <SelectUser
+                      clearButton={!required}
+                      required={required}
+                      onChange={submit}
+                      selectedUser={reporterId ? {
+                        id: reporterId,
+                        loginName: reporterLoginName,
+                        realName: reporterRealName,
+                        avatar: reporterImageUrl,
+                        name: reporterName,
+                      } : undefined}
+                    />
+                  )}
+                >
+                  {
+                      reporterId && reporterLoginName ? (
+                        <UserHead
+                          user={{
+                            id: reporterId,
+                            loginName: reporterLoginName,
+                            realName: reporterRealName,
+                            avatar: reporterImageUrl,
+                            name: reporterName,
+                          }}
+                        />
+                      ) : (
+                        <div>
+                          无
+                        </div>
+                      )
+                    }
+                </TextEditToggle>
               )
             }
-          </TextEditToggle>
+          </Permission>
+
         </div>
       </div>
     );
