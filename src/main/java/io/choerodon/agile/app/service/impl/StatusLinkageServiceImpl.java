@@ -177,6 +177,11 @@ public class StatusLinkageServiceImpl implements StatusLinkageService {
         }
     }
 
+    @Override
+    public List<StatusLinkageVO> listStatusLinkageByProjectId(Long projectId) {
+        return statusLinkageMapper.selectWithStatusByProjectId(projectId);
+    }
+
     private void changeParentStatus(Long projectId, String applyType, IssueDTO parentIssue, Long changeStatus, IssueDTO triggerIssue) {
         if (parentIssue.getStatusId().equals(changeStatus)) {
             return;
