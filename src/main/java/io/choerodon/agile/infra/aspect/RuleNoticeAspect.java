@@ -41,14 +41,16 @@ public class RuleNoticeAspect {
         RuleNotice ruleNotice = method.getAnnotation(RuleNotice.class);
         Set<String> fieldList = StringUtils.isBlank(ruleNotice.fieldListName()) ?
                 null : new HashSet<>(getFieldList(getMethodArg(ruleNotice, jp, ruleNotice.fieldListName())) );
-        Long projectId = Optional.ofNullable(result).map(v -> (Long)Reflections.getFieldValue(v, "projectId")).orElse(null) ;
         log.info("rule notice detection, component: [{}], event: [{}]", ruleNotice.value(), ruleNotice.event());
         ApplicationContext context = ApplicationContextHelper.getContext();
+        Long projectId;
         Long instanceId;
         if (StringUtils.equals(ruleNotice.idPosition(), "result")){
             instanceId = Optional.ofNullable(result).map(v -> (Long)Reflections.getFieldValue(result, ruleNotice.instanceId())).orElse(null);
+            projectId = Optional.ofNullable(result).map(v -> (Long)Reflections.getFieldValue(v, "projectId")).orElse(null) ;
         }else {
             instanceId = (Long) getMethodArg(ruleNotice, jp, ruleNotice.idPosition());
+            projectId = (Long) getMethodArg(ruleNotice, jp, "projectId");
         }
         context.publishEvent(new NoticeEventVO(result, ruleNotice.value(), ruleNotice.event(), instanceId, projectId, fieldList, ruleNotice.allFieldCheck()));
     }
@@ -64,7 +66,7 @@ public class RuleNoticeAspect {
         if (CollectionUtils.isNotEmpty(fieldList)){
             return new HashSet<>(fieldList);
         }
-        return getNameAndValue(jp).get(ruleNotice.fieldListName());
+        return getNameAndValue(jp).get(fieldName);
     }
 
     private List<String> getFieldList(Object field) {
