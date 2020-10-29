@@ -467,7 +467,12 @@ class ScrumBoardHome extends Component {
         </Header>
         <Breadcrumb />
         <Content style={{
-          padding: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden',
+          padding: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          borderTop: '1px solid #D8D8D8',
+          paddingTop: 16,
         }}
         >
           <div style={{ display: 'flex' }}>
@@ -481,7 +486,7 @@ class ScrumBoardHome extends Component {
             {ScrumBoardStore.hasSetFilter && <Button type="primary" onClick={this.handleClearFilter}>清除筛选</Button>}
           </div>
           <Spin spinning={ScrumBoardStore.getSpinIf}>
-            <div className="c7n-scrumboard" style={HeaderStore.announcementClosed ? {} : { height: 'calc(100vh - 254px)' }}>
+            <div className="c7n-scrumboard" style={HeaderStore.announcementClosed ? {} : { height: 'calc(100vh - 270px)' }}>
               <div style={{ display: 'table', minWidth: '100%' }}>
                 <div className="c7n-scrumboard-header">
                   <StatusColumn />
@@ -499,7 +504,7 @@ class ScrumBoardHome extends Component {
                   : (
                     <div
                       className="c7n-scrumboard-content"
-                      style={HeaderStore.announcementClosed ? {} : { height: 'calc(100vh - 256px)' }}
+                      style={HeaderStore.announcementClosed ? {} : { height: 'calc(100vh - 272px)' }}
                     >
                       <div className="c7n-scrumboard-container">
                         <SwimLane
