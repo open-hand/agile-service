@@ -8,6 +8,7 @@ import {
   sprintApi, quickFilterApi, userApi, personalFilterApi,
 } from '@/api';
 import './QuickSearch.less';
+import { getSelectStyle } from '@/components/issue-search/custom-fields/utils';
 import { localPageCacheStore } from '@/stores/common/LocalPageCacheStore';
 import BacklogStore from '../../stores/project/backlog/BacklogStore';
 import ScrumBoardStore from '../../stores/project/scrumBoard/ScrumBoardStore';
@@ -210,13 +211,13 @@ class QuickSearch extends Component {
                 mode="multiple"
                 labelInValue
                 placeholder="快速搜索"
-                style={{ width: 100 }}
+                style={{ ...getSelectStyle({ name: '快速搜索' }, selectQuickSearch), marginRight: 15 }}
                 dropdownMatchSelectWidth={false}
                 maxTagCount={0}
                 maxTagPlaceholder={(ommittedValues) => `${ommittedValues.map((item) => item.label).join(', ')}`}
                 onChange={this.handleQuickSearchChange}
                 getPopupContainer={(triggerNode) => triggerNode.parentNode}
-                allowClear={!!quickSearchAllowClear}
+                allowClear
                 value={selectQuickSearch}
               >
                 <OptGroup key="quickSearch" label="常用选项">
@@ -257,7 +258,7 @@ class QuickSearch extends Component {
                   showCheckAll={false}
                   mode="multiple"
                   className="SelectTheme primary"
-                  style={{ width: 100 }}
+                  style={{ ...getSelectStyle({ name: '经办人' }, selectUsers), marginRight: 15 }}
                   placeholder="经办人"
                   dropdownMatchSelectWidth={false}
                   labelInValue
@@ -289,6 +290,7 @@ class QuickSearch extends Component {
                   }}
                   onChange={this.handleAssigneeChange}
                   getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                  allowClear
                 >
                   {
                     userDataArray.length && userDataArray.map((item) => (
@@ -311,7 +313,7 @@ class QuickSearch extends Component {
                 <Select
                   key="sprintSelect"
                   className="SelectTheme primary c7n-agile-sprintSearchSelect"
-                  // style={{ width: 120 }}
+                  style={{ ...getSelectStyle({ name: '冲刺' }, selectSprint), marginRight: 15 }}
                   placeholder="冲刺"
                   allowClear
                   dropdownMatchSelectWidth={false}
