@@ -1,3 +1,7 @@
+/* eslint-disable react/jsx-no-bind */
+/* eslint-disable jsx-a11y/anchor-is-valid */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Icon, Tooltip } from 'choerodon-ui';
@@ -5,7 +9,6 @@ import { Modal } from 'choerodon-ui/pro';
 import { getFileSuffix } from '@/utils/common';
 import Preview from '@/components/Preview';
 import './SingleFileUpload.less';
-
 
 const previewSuffix = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'pdf', 'jpg', 'jpeg', 'gif', 'png'];
 const modalKey = Modal.key();
@@ -28,11 +31,11 @@ function SingleFileUplaod(props) {
       children: <Preview service={service} fileName={name} fileUrl={fileUrl} />,
     });
   };
-
+  const previewAble = previewSuffix.includes(getFileSuffix(url));
   return (
     <div className="c7n-agile-singleFileUpload">
       <span className="c7n-agile-singleFileUpload-icon">
-        {previewSuffix.includes(getFileSuffix(url)) && (
+        {previewAble && (
           <Tooltip title="预览">
             <Icon
               type="zoom_in"
@@ -48,27 +51,24 @@ function SingleFileUplaod(props) {
             <Icon type="get_app" style={{ color: '#000' }} />
           </Tooltip>
         </span>
-        <span className="c7n-agile-singleFileUpload-fileName">{fileName}</span>
       </a>
+      <span
+        className={`c7n-agile-singleFileUpload-fileName ${previewAble ? 'preview' : ''}`}
+        onClick={previewAble && handlePreviewClick.bind(this, fileService, fileName, url)}
+      >
+        {fileName}
+      </span>
       {(hasDeletePermission && onDeleteFile) && (
-        <Tooltip title="删除">
-          <Icon
-            type="close"
-            onClick={() => { onDeleteFile(); }}
-          />
-        </Tooltip>
+      <Tooltip title="删除">
+        <Icon
+          type="close"
+          onClick={() => { onDeleteFile(); }}
+        />
+      </Tooltip>
       )}
     </div>
   );
 }
-
-SingleFileUplaod.propTypes = {
-  url: PropTypes.string.isRequired,
-  fileService: PropTypes.string,
-  fileName: PropTypes.string.isRequired,
-  hasDeletePermission: PropTypes.bool,
-  onDeleteFile: PropTypes.func,
-};
 
 SingleFileUplaod.defaultProps = {
   hasDeletePermission: false,
