@@ -580,9 +580,15 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             this.self().handleUpdateIssue(issueUpdateVO, fieldList, projectId, issueUpdateVO.getIssueId());
         }
         Long issueId = issueUpdateVO.getIssueId();
-        this.self().handleUpdateLabelIssue(issueUpdateVO.getLabelIssueRelVOList(), issueId, projectId);
-        this.self().handleUpdateComponentIssueRel(issueUpdateVO.getComponentIssueRelVOList(), projectId, issueId);
-        this.self().handleUpdateVersionIssueRel(issueUpdateVO.getVersionIssueRelVOList(), projectId, issueId, issueUpdateVO.getVersionType());
+        if (issueUpdateVO.getLabelIssueRelVOList() != null) {
+            this.self().handleUpdateLabelIssue(issueUpdateVO.getLabelIssueRelVOList(), issueId, projectId);
+        }
+        if (issueUpdateVO.getComponentIssueRelVOList() != null) {
+            this.self().handleUpdateComponentIssueRel(issueUpdateVO.getComponentIssueRelVOList(), projectId, issueId);
+        }
+        if (issueUpdateVO.getVersionIssueRelVOList() != null && issueUpdateVO.getVersionType() != null) {
+            this.self().handleUpdateVersionIssueRel(issueUpdateVO.getVersionIssueRelVOList(), projectId, issueId, issueUpdateVO.getVersionType());
+        }
         return queryIssueByUpdate(projectId, issueId, fieldList);
     }
 
