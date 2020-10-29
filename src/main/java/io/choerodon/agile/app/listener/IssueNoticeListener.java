@@ -64,7 +64,6 @@ public class IssueNoticeListener {
     @Autowired
     private ModelMapper modelMapper;
 
-    @Async
     @TransactionalEventListener(NoticeEventVO.class)
     public void issueNoticeDetection(NoticeEventVO noticeEvent){
         if (RuleEventUtil.checkEvent(noticeEvent, ISSUE)){
@@ -78,8 +77,9 @@ public class IssueNoticeListener {
         ConfigurationRuleVO rule = new ConfigurationRuleVO();
         rule.setProjectId(projectId);
         rule.setTypeCode(issueDTO.getTypeCode());
+        rule.setEnabled(true);
         // 筛选出检测更新字段的规则
-        List<ConfigurationRuleVO> ruleVOList = configurationRuleService.processRule(configurationRuleMapper.selectByProjectId(rule), fieldList, allFieldCheck);
+        List<ConfigurationRuleVO> ruleVOList = configurationRuleService.processRule(configurationRuleMapper.selectByProjectId(rule), fieldList, allFieldCheck, false);
         // 检查issue是否符合页面规则条件
         Map<String, Long> map = CollectionUtils.isEmpty(ruleVOList) ? new HashMap<>() :
                 configurationRuleMapper.selectByRuleList(issueDTO.getIssueId(), projectId, ruleVOList);

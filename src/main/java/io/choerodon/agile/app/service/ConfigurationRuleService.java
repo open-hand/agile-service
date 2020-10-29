@@ -55,8 +55,10 @@ public interface ConfigurationRuleService {
      * @param sourceList 页面规则
      * @param fieldList 更新字段
      * @param allFieldCheck 是否是全字段检测
+     * @param checkMode 在检查模式下，仅会根据语句条件生成，不会去拼接字段类型条件，仅作检查
      * @return 仅对更新字段检测的规则集合
      */
-    List<ConfigurationRuleVO> processRule(List<ConfigurationRuleVO> sourceList, Set<String> fieldList, boolean allFieldCheck);
+    List<ConfigurationRuleVO> processRule(List<ConfigurationRuleVO> sourceList, Set<String> fieldList,
+                                          boolean allFieldCheck, boolean checkMode);
 }
 
