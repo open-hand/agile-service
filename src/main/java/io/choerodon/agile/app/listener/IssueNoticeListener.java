@@ -64,7 +64,6 @@ public class IssueNoticeListener {
     @Autowired
     private ModelMapper modelMapper;
 
-    @Async
     @TransactionalEventListener(NoticeEventVO.class)
     public void issueNoticeDetection(NoticeEventVO noticeEvent){
         if (RuleEventUtil.checkEvent(noticeEvent, ISSUE)){
