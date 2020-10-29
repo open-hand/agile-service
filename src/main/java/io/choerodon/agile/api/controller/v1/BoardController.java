@@ -104,7 +104,6 @@ public class BoardController {
                                             @PathVariable(name = "project_id") Long projectId,
                                             @ApiParam(value = "issue id", required = true)
                                             @PathVariable @Encrypt Long issueId,
-                                            @ApiParam(value = "issue move object", required = true)
                                             @RequestParam @Encrypt Long statusId) {
         return ResponseEntity.ok(boardService.isLinked(projectId, issueId, statusId));
     }
