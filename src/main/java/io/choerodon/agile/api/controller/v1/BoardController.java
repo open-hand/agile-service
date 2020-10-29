@@ -97,6 +97,18 @@ public class BoardController {
                 .orElseThrow(() -> new CommonException("error.issue.update"));
     }
 
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @ApiOperation("判断issue拖动是否有状态联动")
+    @GetMapping(value = "/issue/{issueId}/is_linked")
+    public ResponseEntity<Boolean> isLinked(@ApiParam(value = "项目id", required = true)
+                                            @PathVariable(name = "project_id") Long projectId,
+                                            @ApiParam(value = "issue id", required = true)
+                                            @PathVariable @Encrypt Long issueId,
+                                            @ApiParam(value = "issue move object", required = true)
+                                            @RequestParam @Encrypt Long statusId) {
+        return ResponseEntity.ok(boardService.isLinked(projectId, issueId, statusId));
+    }
+
 
     @Permission(level = ResourceLevel.ORGANIZATION)
     @ApiOperation("根据projectId查询项目下的board")
