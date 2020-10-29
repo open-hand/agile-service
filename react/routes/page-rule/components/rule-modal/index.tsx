@@ -152,6 +152,7 @@ const RuleModal: React.FC<Props> = ({
   const [updateCount, setUpdateCount] = useState<number>(0);
   const systemDataRefMap = useRef<Map<string, any>>(new Map());
   const [initRule, setInitRule] = useState<IRule>();
+  const initRuleRef = useRef<IRule>();
   const [loading, setLoading] = useState<boolean>(false);
   const [backlogStarted, setBacklogStarted] = useState<boolean>(false);
 
@@ -182,6 +183,89 @@ const RuleModal: React.FC<Props> = ({
     });
   }, []);
 
+  const checkName = useCallback(async (value, name, record) => {
+    if (ruleId && value === initRuleRef.current?.name) {
+      return true;
+    }
+    const res = await pageRuleApi.checkName(value);
+    if (res) {
+      return true;
+    }
+    return '规则名称重复';
+  }, [ruleId]);
+
+  const modalDataSetRef = useRef<DataSet>();
+
+  const removeField = useCallback((name) => {
+    modalDataSetRef.current?.fields?.delete(name);
+    modalDataSetRef.current?.current?.fields.delete(name);
+  }, []);
+
+  const dataSetUpdate = useCallback(({
+    // @ts-ignore
+    dataSet, record, name, value,
+  }) => {
+    const key = name.split('-')[0];
+    if (name.indexOf('code') > -1) {
+      const field = (fieldDataRef?.current || []).find((item) => item.code === value);
+      if (field) {
+        const {
+          fieldType,
+        } = field;
+        if (fieldType !== 'date' && fieldType !== 'datetime' && fieldType !== 'time') {
+          removeField(`${key}-middleValue`);
+        } else {
+          dataSet.current.set(`${key}-middleValue`, undefined);
+        }
+      }
+      dataSet.current.set(`${key}-operation`, undefined);
+      dataSet.current.set(`${key}-value`, undefined);
+    }
+    if (name.indexOf('middleValue') > -1) {
+      dataSet.current.set(`${key}-value`, undefined);
+      if (value === 'now') {
+        removeField(`${key}-value`);
+      }
+    }
+    if (name.indexOf('operation') > -1) {
+      dataSet.current.set(`${key}-value`, undefined);
+      const field = (fieldDataRef?.current || []).find((item) => item.code === value);
+      if (field) {
+        const {
+          system, extraConfig, code, fieldType,
+        } = field;
+        if (fieldType === 'number') {
+          const valueIsNull = value === 'is' || value === 'is_not';
+          const valueField = dataSet.current.getField(`${key}-value`);
+          if (!valueIsNull) {
+            if (system && (code === 'storyPoints' || code === 'remainingTime') && record.get(`${key}-operation`)) {
+              valueField.set('max', 100);
+              valueField.set('min', 0);
+              valueField.set('step', 0.1);
+              valueField.set('validator', (numberValue: number) => {
+                if (numberValue && /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/.test(numberValue.toString())) {
+                  return true;
+                }
+                return '请输入小于3位的整数或者整数位小于3位小数点后一位的小数';
+              });
+            } else if (extraConfig) {
+              valueField.set('step', 0.01);
+              valueField.set('validator', (numberValue: number) => {
+                if (numberValue && /(^-?[0-9]+$)|(^[-]?[0-9]+(\.[0-9]{1,2})?$)/.test(numberValue.toString())) {
+                  return true;
+                }
+                return '请输入整数或者小数点后一位或两位的小数';
+              });
+            } else {
+              valueField.set('step', 1);
+            }
+          }
+        }
+      }
+    }
+    setUpdateCount((count) => count + 1);
+  }, [removeField]);
+
   const modalDataSet = useMemo(() => new DataSet({
     autoCreate: true,
     fields: [{
@@ -190,16 +274,7 @@ const RuleModal: React.FC<Props> = ({
       required: true,
       label: '名称',
       maxLength: 50,
-      validator: async (value, name, record) => {
-        if (ruleId && value === initRule?.name) {
-          return true;
-        }
-        const res = await pageRuleApi.checkName(value);
-        if (res) {
-          return true;
-        }
-        return '规则名称重复';
-      },
+      validator: checkName,
     }, {
       name: 'issueTypes',
       required: true,
@@ -223,72 +298,11 @@ const RuleModal: React.FC<Props> = ({
     },
     ],
     events: {
-      update: ({
-        // @ts-ignore
-        dataSet, record, name, value,
-      }) => {
-        const key = name.split('-')[0];
-        if (name.indexOf('code') > -1) {
-          const field = (fieldDataRef?.current || []).find((item) => item.code === value);
-          if (field) {
-            const {
-              fieldType,
-            } = field;
-            if (fieldType !== 'date' && fieldType !== 'datetime' && fieldType !== 'time') {
-              removeField(`${key}-middleValue`);
-            } else {
-              dataSet.current.set(`${key}-middleValue`, undefined);
-            }
-          }
-          dataSet.current.set(`${key}-operation`, undefined);
-          dataSet.current.set(`${key}-value`, undefined);
-        }
-        if (name.indexOf('middleValue') > -1) {
-          dataSet.current.set(`${key}-value`, undefined);
-          if (value === 'now') {
-            removeField(`${key}-value`);
-          }
-        }
-        if (name.indexOf('operation') > -1) {
-          dataSet.current.set(`${key}-value`, undefined);
-          const field = (fieldDataRef?.current || []).find((item) => item.code === value);
-          if (field) {
-            const {
-              system, extraConfig, code, fieldType,
-            } = field;
-            if (fieldType === 'number') {
-              const valueIsNull = value === 'is' || value === 'is_not';
-              const valueField = dataSet.current.getField(`${key}-value`);
-              if (!valueIsNull) {
-                if (system && (code === 'storyPoints' || code === 'remainingTime') && record.get(`${key}-operation`)) {
-                  valueField.set('max', 100);
-                  valueField.set('min', 0);
-                  valueField.set('step', 0.1);
-                  valueField.set('validator', (numberValue: number) => {
-                    if (numberValue && /(^\d{1,3}\.{1}\d{1}$)|(^[1-9]\d{0,2}$)/.test(numberValue.toString())) {
-                      return true;
-                    }
-                    return '请输入小于3位的整数或者整数位小于3位小数点后一位的小数';
-                  });
-                } else if (extraConfig) {
-                  valueField.set('step', 0.01);
-                  valueField.set('validator', (numberValue: number) => {
-                    if (numberValue && /(^-?[0-9]+$)|(^[-]?[0-9]+(\.[0-9]{1,2})?$)/.test(numberValue.toString())) {
-                      return true;
-                    }
-                    return '请输入整数或者小数点后一位或两位的小数';
-                  });
-                } else {
-                  valueField.set('step', 1);
-                }
-              }
-            }
-          }
-        }
-        setUpdateCount((count) => count + 1);
-      },
+      update: dataSetUpdate,
     },
-  }), [initRule?.name, issueTypeDataSet, ruleId]);
+  }), [checkName, dataSetUpdate, issueTypeDataSet]);
+
+  modalDataSetRef.current = modalDataSet;
 
   const renderOperations = useCallback((fieldK: { key: number }) => {
     const { key } = fieldK;
@@ -364,11 +378,6 @@ const RuleModal: React.FC<Props> = ({
   const addField = useCallback((name, props) => {
     const field = new DataSetField({ ...props, name }, modalDataSet, modalDataSet.current);
     modalDataSet?.current?.fields.set(name, field);
-  }, [modalDataSet]);
-
-  const removeField = useCallback((name) => {
-    modalDataSet?.fields?.delete(name);
-    modalDataSet?.current?.fields.delete(name);
   }, [modalDataSet]);
 
   const addFieldRule = useCallback((key, i) => {
@@ -699,6 +708,7 @@ const RuleModal: React.FC<Props> = ({
             }
           });
           setInitRule(res);
+          initRuleRef.current = res;
           setLoading(false);
         });
       }).catch((e: ErrorEvent) => {
