@@ -29,7 +29,7 @@ const EditorMap = new Map([
     } = this.props;
     const issue = store.getIssue;
     const {
-      fieldId, fieldType,
+      fieldId, fieldType, fieldCode,
     } = field;
     let newValue = value;
     if (fieldType === 'time' || fieldType === 'datetime' || fieldType === 'date') {
@@ -40,7 +40,7 @@ const EditorMap = new Map([
       fieldType,
       value: newValue,
     };
-    fieldApi.updateFieldValue(issueId, fieldId, 'agile_issue', obj)
+    fieldApi.updateFieldValue(issueId, fieldId, fieldCode, 'agile_issue', obj)
       .then(() => {
         if (onUpdate) {
           onUpdate();
