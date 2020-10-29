@@ -72,9 +72,14 @@ public class IssueNoticeListener implements AopProxy<IssueNoticeListener> {
             return;
         }
         Long projectId = noticeEvent.getProjectId();
-        Set<String> fieldList = noticeEvent.getFieldList();
-        String event = noticeEvent.getEvent();
         boolean allFieldCheck = BooleanUtils.isTrue(noticeEvent.getAllFieldCheck());
+        Set<String> fieldList = Optional.ofNullable(noticeEvent.getFieldList()).orElse(new HashSet<>());
+        if (allFieldCheck){
+            // 之后消息检测需要用到
+            fieldList.add("statusId");
+            fieldList.add("asigneeId");
+        }
+        String event = noticeEvent.getEvent();
         IssueDTO issueDTO = issueMapper.selectByPrimaryKey(noticeEvent.getInstanceId());
         ConfigurationRuleVO rule = new ConfigurationRuleVO();
         rule.setProjectId(projectId);

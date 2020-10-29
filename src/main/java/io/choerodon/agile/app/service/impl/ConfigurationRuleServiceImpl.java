@@ -291,9 +291,6 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
             ruleVO.setSqlQuery(this.generateSqlQuery(ruleVO,checkMode));
         }
         if (allFieldCheck){
-            // 之后消息检测需要用到
-            fieldList.add("statusId");
-            fieldList.add("asigneeId");
             return ruleList;
         }
         if (CollectionUtils.isEmpty(fieldList)){
