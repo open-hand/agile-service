@@ -113,7 +113,7 @@ public class FieldValueController {
                                                                @RequestParam String schemeCode,
                                                                @ApiParam(value = "值对象列表", required = true)
                                                                @RequestBody PageFieldViewUpdateVO updateDTO) {
-        return new ResponseEntity<>(fieldValueService.updateFieldValue(organizationId, projectId, instanceId, fieldId, schemeCode, updateDTO), HttpStatus.OK);
+        return new ResponseEntity<>(fieldValueService.updateFieldValue(organizationId, projectId, instanceId, fieldId, schemeCode, updateDTO, updateDTO.getFieldCode()), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)

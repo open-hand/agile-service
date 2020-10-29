@@ -6,12 +6,10 @@ import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.api.vo.business.IssueUpdateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.app.service.*;
+import io.choerodon.agile.infra.annotation.RuleNotice;
 import io.choerodon.agile.infra.dto.*;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.FieldType;
-import io.choerodon.agile.infra.enums.ObjectSchemeCode;
-import io.choerodon.agile.infra.enums.ObjectSchemeFieldContext;
-import io.choerodon.agile.infra.enums.PageCode;
+import io.choerodon.agile.infra.enums.*;
 import io.choerodon.agile.infra.mapper.FieldDataLogMapper;
 import io.choerodon.agile.infra.mapper.FieldValueMapper;
 import io.choerodon.agile.infra.mapper.IssueMapper;
@@ -106,6 +104,12 @@ public class FieldValueServiceImpl implements FieldValueService {
         if (!fieldValues.isEmpty()) {
             fieldValueMapper.batchInsert(projectId, instanceId, schemeCode, fieldValues);
         }
+    }
+
+    @Override
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_STATAUS_CHANGE, idPosition = "instanceId", fieldListName = "fieldCode")
+    public List<FieldValueVO> updateFieldValue(Long organizationId, Long projectId, Long instanceId, Long fieldId, String schemeCode, PageFieldViewUpdateVO updateDTO, String fieldCode){
+        return this.updateFieldValue(organizationId, projectId, instanceId, fieldId, schemeCode, updateDTO);
     }
 
     @Override

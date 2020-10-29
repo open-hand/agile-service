@@ -35,7 +35,13 @@ public @interface RuleNotice {
     /**
      * 从返回值中获取实例instanceId的字段名称
      */
-    String instanceIdNameInReturn() default "id";
+    String instanceId() default "id";
+
+    /**
+     * 实例id所在位置，默认在返回值中
+     * @return result 或 arg
+     */
+    String idPosition() default "result";
 
     /**
      * 手动指定要更新的字段list，优先取值

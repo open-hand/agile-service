@@ -39,11 +39,17 @@ public class RuleNoticeAspect {
         MethodSignature sign = (MethodSignature) jp.getSignature();
         Method method = sign.getMethod();
         RuleNotice ruleNotice = method.getAnnotation(RuleNotice.class);
-        Set<String> fieldList = getFieldList(ruleNotice, jp);
+        Set<String> fieldList = StringUtils.isBlank(ruleNotice.fieldListName()) ?
+                null : new HashSet<>(getFieldList(getMethodArg(ruleNotice, jp, ruleNotice.fieldListName())) );
         Long projectId = Optional.ofNullable(result).map(v -> (Long)Reflections.getFieldValue(v, "projectId")).orElse(null) ;
         log.info("rule notice detection, component: [{}], event: [{}]", ruleNotice.value(), ruleNotice.event());
         ApplicationContext context = ApplicationContextHelper.getContext();
-        Long instanceId = Optional.ofNullable(result).map(v -> (Long)Reflections.getFieldValue(result, ruleNotice.instanceIdNameInReturn())).orElse(null);
+        Long instanceId;
+        if (StringUtils.equals(ruleNotice.idPosition(), "result")){
+            instanceId = Optional.ofNullable(result).map(v -> (Long)Reflections.getFieldValue(result, ruleNotice.instanceId())).orElse(null);
+        }else {
+            instanceId = (Long) getMethodArg(ruleNotice, jp, ruleNotice.idPosition());
+        }
         context.publishEvent(new NoticeEventVO(result, ruleNotice.value(), ruleNotice.event(), instanceId, projectId, fieldList, ruleNotice.allFieldCheck()));
     }
 
@@ -53,13 +59,21 @@ public class RuleNoticeAspect {
      * @param jp jp
      * @return fieldList
      */
-    private HashSet<String> getFieldList(RuleNotice ruleNotice,JoinPoint jp) {
+    private Object getMethodArg(RuleNotice ruleNotice, JoinPoint jp, String fieldName) {
         List<String> fieldList = new ArrayList<>(Arrays.asList(ruleNotice.fieldList()));
         if (CollectionUtils.isNotEmpty(fieldList)){
             return new HashSet<>(fieldList);
         }
-        return StringUtils.isBlank(ruleNotice.fieldListName()) ?
-                null : new HashSet<>((List<String>) getNameAndValue(jp).get(ruleNotice.fieldListName()));
+        return getNameAndValue(jp).get(ruleNotice.fieldListName());
+    }
+
+    private List<String> getFieldList(Object field) {
+        if (field instanceof List){
+            return (List<String>)field;
+        }else {
+            return Collections.singletonList((String)field);
+        }
+        
     }
 
     Map<String, Object> getNameAndValue(JoinPoint joinPoint) {

@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
@@ -64,7 +65,7 @@ public class IssueNoticeListener {
     @Autowired
     private ModelMapper modelMapper;
 
-    @TransactionalEventListener(NoticeEventVO.class)
+    @TransactionalEventListener(value = NoticeEventVO.class, phase = TransactionPhase.BEFORE_COMMIT)
     public void issueNoticeDetection(NoticeEventVO noticeEvent){
         if (RuleEventUtil.checkEvent(noticeEvent, ISSUE)){
             return;
