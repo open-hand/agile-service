@@ -78,6 +78,7 @@ public class IssueNoticeListener {
         ConfigurationRuleVO rule = new ConfigurationRuleVO();
         rule.setProjectId(projectId);
         rule.setTypeCode(issueDTO.getTypeCode());
+        rule.setEnabled(true);
         // 筛选出检测更新字段的规则
         List<ConfigurationRuleVO> ruleVOList = configurationRuleService.processRule(configurationRuleMapper.selectByProjectId(rule), fieldList, allFieldCheck);
         // 检查issue是否符合页面规则条件
