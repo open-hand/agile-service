@@ -268,12 +268,13 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     }
 
     @Override
-    public List<ConfigurationRuleVO> processRule(List<ConfigurationRuleVO> sourceList, Set<String> fieldList, boolean allFieldCheck) {
+    public List<ConfigurationRuleVO> processRule(List<ConfigurationRuleVO> sourceList, Set<String> fieldList, 
+                                                 boolean allFieldCheck, boolean checkMode) {
         List<ConfigurationRuleVO> ruleList = new ArrayList<>(sourceList);
         JavaType javaType = CommonMapperUtil.getTypeFactory().constructParametricType(List.class, RuleExpressVO.class);
         for (ConfigurationRuleVO ruleVO : ruleList) {
             ruleVO.setExpressList(CommonMapperUtil.readValue(ruleVO.getExpressFormat(), javaType));
-            ruleVO.setSqlQuery(this.generateSqlQuery(ruleVO,false));
+            ruleVO.setSqlQuery(this.generateSqlQuery(ruleVO,checkMode));
         }
         if (allFieldCheck){
             // 之后消息检测需要用到
