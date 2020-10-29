@@ -571,7 +571,8 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                                              ConfigurationRuleDTO configurationRuleDTO) {
         
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList()) || 
-                CollectionUtils.isNotEmpty(configurationRuleVO.getProcesserList()), BaseConstants.ErrorCode.DATA_INVALID);
+                CollectionUtils.isNotEmpty(configurationRuleVO.getProcesserList()) ||
+                CollectionUtils.isNotEmpty(configurationRuleVO.getUserTypes()), BaseConstants.ErrorCode.DATA_INVALID);
         if (CollectionUtils.isNotEmpty(configurationRuleVO.getReceiverList())){
             for (UserDTO userDTO : configurationRuleVO.getReceiverList()) {
                 ConfigurationRuleReceiverDTO configurationRuleReceiverDTO = new ConfigurationRuleReceiverDTO();

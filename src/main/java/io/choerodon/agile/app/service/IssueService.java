@@ -91,7 +91,7 @@ public interface IssueService {
      * @param fieldList
      * @param projectId
      */
-    void handleUpdateIssue(IssueUpdateVO issueUpdateVO, List<String> fieldList, Long projectId);
+    void handleUpdateIssue(IssueUpdateVO issueUpdateVO, List<String> fieldList, Long projectId, Long issueId);
 
     /**
      * 删除issue
@@ -366,4 +366,10 @@ public interface IssueService {
      * @return
      */
     Page<IssueVO> pagingQueryAvailableParents(PageRequest pageRequest, Long projectId, String issueType, String param);
+
+    void handleUpdateComponentIssueRel(List<ComponentIssueRelVO> componentIssueRelVOList, Long projectId, Long issueId);
+
+    void handleUpdateLabelIssue(List<LabelIssueRelVO> labelIssueRelVOList, Long issueId, Long projectId);
+    
+    void handleUpdateVersionIssueRel(List<VersionIssueRelVO> versionIssueRelVOList, Long projectId, Long issueId, String versionType);
 }

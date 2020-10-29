@@ -386,7 +386,7 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
             issueUpdateVO.setAutoTriggerId(triggerIssueId);
             issueUpdateVO.setAutoTriggerNum(projectInfoMapper.selectProjectCodeByProjectId(issueDTO.getProjectId()) + "-" + issueDTO.getIssueNum());
         }
-        issueService.handleUpdateIssue(issueUpdateVO, Collections.singletonList(STATUS_ID), issue.getProjectId());
+        issueService.handleUpdateIssue(issueUpdateVO, Collections.singletonList(STATUS_ID), issue.getProjectId(), issueUpdateVO.getIssueId());
         logger.info("stateMachine updateStatus successful");
     }
 
@@ -407,10 +407,10 @@ public class StateMachineClientServiceImpl implements StateMachineClientService 
         if (!issue.getStatusId().equals(targetStatusId)) {
             issueUpdateVO.setStatusId(targetStatusId);
             issueUpdateVO.setStayDate(new Date());
-            issueService.handleUpdateIssue(issueUpdateVO, Arrays.asList(STATUS_ID, RANK, STAY_DATE), issue.getProjectId());
+            issueService.handleUpdateIssue(issueUpdateVO, Arrays.asList(STATUS_ID, RANK, STAY_DATE), issue.getProjectId(), issueUpdateVO.getIssueId());
             logger.info("stateMachine updateStatusMove successful");
         } else {
-            issueService.handleUpdateIssue(issueUpdateVO, Collections.singletonList(RANK), issue.getProjectId());
+            issueService.handleUpdateIssue(issueUpdateVO, Collections.singletonList(RANK), issue.getProjectId(), issueUpdateVO.getIssueId());
         }
     }
 

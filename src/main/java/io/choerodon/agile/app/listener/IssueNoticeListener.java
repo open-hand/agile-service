@@ -27,6 +27,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hzero.boot.message.MessageClient;
 import org.hzero.boot.message.entity.MessageSender;
+import org.hzero.core.base.AopProxy;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
  * @author jiaxu.cui@hand-china.com 2020/10/9 上午9:59
  */
 @Component
-public class IssueNoticeListener {
+public class IssueNoticeListener implements AopProxy<IssueNoticeListener> {
 
     public static final String ISSUE = "ISSUE";
 
@@ -87,6 +88,14 @@ public class IssueNoticeListener {
         // 获取所有符合的ruleId
         List<Long> ruleIdList = Optional.ofNullable(map).orElse(new HashMap<>())
                 .values().stream().filter(Objects::nonNull).collect(Collectors.toList());
+        this.self().sendMsg(projectId, fieldList, event, issueDTO, ruleVOList, ruleIdList);
+        // 更改页面规则对应的处理人
+        changeProcesser(issueDTO, ruleIdList, ruleVOList);
+    }
+
+    @Async
+    public void sendMsg(Long projectId, Set<String> fieldList, String event, IssueDTO issueDTO,
+                        List<ConfigurationRuleVO> ruleVOList, List<Long> ruleIdList) {
         // 组装符合条件的页面规则messageSender
         Map<Long, String> ruleNameMap = ruleVOList.stream().collect(Collectors.toMap(ConfigurationRuleVO::getId,
                 ConfigurationRuleVO::getName));
@@ -95,8 +104,6 @@ public class IssueNoticeListener {
         for (MessageSender messageSender : ruleSenderList) {
             messageClient.async().sendMessage(messageSender);
         }
-        // 更改页面规则对应的处理人
-        changeProcesser(issueDTO, ruleIdList, ruleVOList);
     }
 
     /**
