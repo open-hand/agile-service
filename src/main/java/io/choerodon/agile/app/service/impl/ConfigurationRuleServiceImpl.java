@@ -510,6 +510,11 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
             case "component_id":
             case "label_id":
             case "sprint_id":
+            case "benfit_hypothesis":
+            case "acceptance_critera":
+            case "feature_type":
+            case "pi_id":
+            case "team_project_id":
                 sql = renderLinkTableSql(operation, field, Collections.singletonList(() -> this.conditionSql(field, operation, value)));
                 break;
             case "creation_date":

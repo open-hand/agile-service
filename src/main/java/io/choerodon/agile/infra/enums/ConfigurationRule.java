@@ -28,6 +28,9 @@ public class ConfigurationRule{
     public static final String SQL_VAR_NOT_EQUALS = " 1 = 2 ";
     public static final String TEMPLATE_TYPE_LIMIT = " (" + TEMPLATE_CONDITION_SQL + ") ";
     
+    public static final String[] LINK_FIELDS = new String[]{"version_id", "component_id", "label_id", "sprint_id",
+            "benfit_hypothesis", "acceptance_critera", "feature_type", "pi_id", "team_project_id"}; 
+    
     public static final List<FieldTableVO> fieldTableList = new ArrayList<>(18);
     
     public static boolean isSqlVar(String express){
@@ -52,6 +55,11 @@ public class ConfigurationRule{
         fieldTableList.add(new FieldTableVO("issueType","type_code","agile_issue"));
         fieldTableList.add(new FieldTableVO("estimatedStartTime","estimated_start_time","agile_issue"));
         fieldTableList.add(new FieldTableVO("estimatedEndTime","estimated_end_time","agile_issue"));
+        fieldTableList.add(new FieldTableVO("benfitHypothesis","benfit_hypothesis","agile_feature"));
+        fieldTableList.add(new FieldTableVO("acceptanceCritera","acceptance_critera","agile_feature"));
+        fieldTableList.add(new FieldTableVO("featureType","feature_type","agile_feature"));
+        fieldTableList.add(new FieldTableVO("pi","pi_id","agile_pi_feature"));
+        fieldTableList.add(new FieldTableVO("subProject","team_project_id","agile_board_feature"));
         fieldTableList.add(new FieldTableVO("issue","issue","agile_issue"));
     }
 
@@ -61,7 +69,7 @@ public class ConfigurationRule{
         is("IS"){
             @Override
             public OpSqlMapping withField(String field) {
-                if (StringUtils.equalsAny(field, "version_id", "component_id", "label_id", "sprint_id")){
+                if (StringUtils.equalsAny(field, LINK_FIELDS)){
                     return not_in;
                 }
                 return this;
@@ -70,7 +78,7 @@ public class ConfigurationRule{
         is_not("IS NOT"){
             @Override
             public OpSqlMapping withField(String field) {
-                if (StringUtils.equalsAny(field, "version_id", "component_id", "label_id", "sprint_id")){
+                if (StringUtils.equalsAny(field, LINK_FIELDS)){
                     return in;
                 }
                 return this;
@@ -82,8 +90,24 @@ public class ConfigurationRule{
         lt("<"),
         gte(">="),
         lte("<="),
-        like("LIKE"),
-        not_like("NOT LIKE"),
+        like("LIKE"){
+            @Override
+            public OpSqlMapping withField(String field) {
+                if (StringUtils.equalsAny(field, LINK_FIELDS)){
+                    return not_in;
+                }
+                return this;
+            }
+        },
+        not_like("NOT LIKE"){
+            @Override
+            public OpSqlMapping withField(String field) {
+                if (StringUtils.equalsAny(field, LINK_FIELDS)){
+                    return in;
+                }
+                return this;
+            }
+        },
         and("AND"),
         or("OR");
         
