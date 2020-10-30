@@ -228,10 +228,11 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
             <InjectedComponent.BacklogClassification
               // @ts-ignore
               name={`${key}-value`}
-              label="值"
+              placeholder="值"
               afterLoad={(data: {id: string, name: string}) => {
                 systemDataRefMap.current.set(code, data || []);
               }}
+              multiple
             />
           );
         }
