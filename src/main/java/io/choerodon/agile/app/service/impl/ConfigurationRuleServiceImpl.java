@@ -362,10 +362,10 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     }
 
     protected String dealCaseVersion(RuleExpressVO quickFilterValueVO, String field, Object value,String operation) {
-        if ("fix_version".equals(quickFilterValueVO.getFieldCode())) {
+        if ("fixVersion".equals(quickFilterValueVO.getFieldCode())) {
             return renderLinkTableSql(operation, field,
                     Arrays.asList(() -> this.conditionSql("relation_type", ConfigurationRule.OpSqlMapping.eq.name(), valueToString("fix")), () -> this.conditionSql(field, operation, value)));
-        } else if ("influence_version".equals(quickFilterValueVO.getFieldCode())) {
+        } else if ("influenceVersion".equals(quickFilterValueVO.getFieldCode())) {
             return renderLinkTableSql(operation, field,
                     Arrays.asList(() -> this.conditionSql("relation_type", ConfigurationRule.OpSqlMapping.eq.name(),valueToString("influence")), () -> this.conditionSql(field, operation, value)));
         }
