@@ -11,6 +11,8 @@ import SelectVersion from '@/components/select/select-version';
 import SelectEpic from '@/components/select/select-epic';
 import SelectSprint from '@/components/select/select-sprint';
 import SelectUser from '@/components/select/select-user';
+import SelectPI from '@/components/select/select-pi';
+import SelectTeam from '@/components/select/select-team';
 import { InjectedComponent } from './injectComponent';
 
 const { Option } = Select;
@@ -173,6 +175,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
                 systemDataRefMap.current.set(code, data || []);
               }}
               multiple
+              dontAddEpic0
             />
           );
         }
@@ -243,6 +246,37 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
               name={`${key}-value`}
               label="值"
               afterLoad={(data: {id: string, name: string}) => {
+                systemDataRefMap.current.set(code, data || []);
+              }}
+              multiple
+            />
+          );
+        }
+        case 'pi': {
+          return (
+            <SelectPI
+              statusList={['todo', 'doing', 'done']}
+              multiple
+              name={`${key}-value`}
+              label="值"
+              style={{
+                width: '100%',
+              }}
+              afterLoad={(data) => {
+                systemDataRefMap.current.set(code, data || []);
+              }}
+            />
+          );
+        }
+        case 'subProject': {
+          return (
+            <SelectTeam
+              name={`${key}-value`}
+              label="值"
+              style={{
+                width: '100%',
+              }}
+              afterLoad={(data) => {
                 systemDataRefMap.current.set(code, data || []);
               }}
               multiple
