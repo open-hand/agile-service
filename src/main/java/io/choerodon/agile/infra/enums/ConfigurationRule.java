@@ -46,7 +46,7 @@ public class ConfigurationRule{
         fieldTableList.add(new FieldTableVO("reporter","reporter_id","agile_issue"));
         fieldTableList.add(new FieldTableVO("creationDate","creation_date","agile_issue"));
         fieldTableList.add(new FieldTableVO("lastUpdateDate","last_update_date","agile_issue"));
-        fieldTableList.add(new FieldTableVO("storyPoints","story_point","agile_issue"));
+        fieldTableList.add(new FieldTableVO("storyPoints","story_points","agile_issue"));
         fieldTableList.add(new FieldTableVO("remainingTime","remaining_time","agile_issue"));
         fieldTableList.add(new FieldTableVO("epic","epic_id","agile_issue"));
         fieldTableList.add(new FieldTableVO("issueType","type_code","agile_issue"));
