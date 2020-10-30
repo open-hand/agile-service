@@ -13,6 +13,7 @@ import SelectSprint from '@/components/select/select-sprint';
 import SelectUser from '@/components/select/select-user';
 import SelectPI from '@/components/select/select-pi';
 import SelectTeam from '@/components/select/select-team';
+import { User } from '@/common/types';
 import { InjectedComponent } from './injectComponent';
 
 const { Option } = Select;
@@ -51,7 +52,41 @@ export interface IFieldWithType extends IField {
   type: IMiddleFieldType,
 }
 
-const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField[], systemDataRefMap: React.MutableRefObject<Map<string, any>>, getFieldValue: { (name: any): any; (arg0: string): string; }) => {
+export interface Express {
+  fieldCode: string,
+  operation: Operation,
+  relationshipWithPervious: 'and' | 'or',
+  // text,input
+  valueStr?: string, //
+  // 多选,单选，member
+  valueIdList?: string[],
+  // number整数,需要判断是否允许小数
+  valueNum?: number,
+  // number有小数， 需要判断是否允许小数
+  valueDecimal?: number,
+  // date,datetime
+  valueDate?: string,
+  // time
+  valueDateHms?: string,
+  predefined?: boolean,
+  fieldType?: IMiddleFieldType,
+  // 是否允许小数，需要判断是否允许小数
+  allowDecimals?: boolean,
+  nowFlag?: boolean,
+}
+export interface IRule {
+  id: string,
+  objectVersionNumber: number,
+  name: string
+  issueTypes: string[],
+  processerList: User[],
+  ccList: User[],
+  receiverList: User[],
+  expressList: Express[]
+  userTypes: string[]
+}
+
+const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField[], systemDataRefMap: React.MutableRefObject<Map<string, any>>, initRule: IRule | undefined) => {
   const isProgram = AppState.currentMenuType.category === 'PROGRAM';
   const { key } = fieldK;
   const field = fieldData.find((item: IField) => item.code === dataset?.current?.get(`${key}-code`));
@@ -195,6 +230,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
           );
         }
         case 'reporter': {
+          const express = initRule?.expressList?.find((item) => item.fieldCode);
           return (
             <SelectUser
               name={`${key}-value`}
@@ -207,7 +243,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
               }}
               // @ts-ignore
               autoQueryConfig={{
-                selectedUserIds: getFieldValue(`${key}-value`) ? getFieldValue(`${key}-value`) : [],
+                selectedUserIds: express?.valueIdList || [],
               }}
               multiple
             />
@@ -319,6 +355,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
         );
       }
       case 'member': {
+        const express = initRule?.expressList?.find((item) => item.fieldCode);
         return (
           <SelectUser
             name={`${key}-value`}
@@ -331,7 +368,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
             }}
             // @ts-ignore
             autoQueryConfig={{
-              selectedUserIds: getFieldValue(`${key}-value`) ? getFieldValue(`${key}-value`) : [],
+              selectedUserIds: express?.valueIdList || [],
             }}
             multiple
           />
