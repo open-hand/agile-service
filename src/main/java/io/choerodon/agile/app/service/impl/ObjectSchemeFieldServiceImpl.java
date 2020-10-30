@@ -206,7 +206,9 @@ public class ObjectSchemeFieldServiceImpl implements ObjectSchemeFieldService {
         List<ObjectSchemeFieldVO> fieldVOS = generateFieldViews(organizationId, projectId, schemeCode);
         List<ObjectSchemeFieldDetailVO> objectSchemeFieldDetailVOList = objectSchemeFieldMapper.selectCustomFieldList(ConvertUtil.getOrganizationId(projectId), projectId, null);
         if (CollectionUtils.isEmpty(objectSchemeFieldDetailVOList)){
-            return fieldVOS;
+            return fieldVOS.stream()
+                    .filter(vo -> CollectionUtils.isEmpty(issueTypeList) || issueTypeList.stream().anyMatch(item -> vo.getContexts().contains(item)))
+                    .collect(Collectors.toList());
         }
         Map<Long, ObjectSchemeFieldDetailVO> map =
                 objectSchemeFieldDetailVOList.stream().collect(Collectors.toMap(ObjectSchemeFieldDetailVO::getId,
