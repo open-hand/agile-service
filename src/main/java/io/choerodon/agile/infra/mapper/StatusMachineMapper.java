@@ -28,4 +28,6 @@ public interface StatusMachineMapper extends BaseMapper<StatusMachineDTO> {
     List<StatusPayload> getStatusBySmId(@Param("projectId") Long projectId, @Param("stateMachineId") Long stateMachineId);
 
     void migrateStatusMachine();
+
+    List<Long> checkFixData();
 }

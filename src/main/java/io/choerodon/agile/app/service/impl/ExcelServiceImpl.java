@@ -163,6 +163,8 @@ public class ExcelServiceImpl implements ExcelService {
     private UserService userService;
     @Autowired
     protected PageFieldService pageFieldService;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     private static final String[] FIELDS_NAMES;
 
@@ -198,11 +200,25 @@ public class ExcelServiceImpl implements ExcelService {
         FIELDS_NAMES = new ArrayList<>(FIELD_MAP.values()).toArray(new String[FIELD_MAP.values().size()]);
     }
 
+    private boolean withFeature(Long projectId, Long organizationId) {
+        ResponseEntity<ProjectVO> response =
+                baseFeignClient.getGroupInfoByEnableProject(organizationId, projectId);
+        return response.getBody() != null;
+    }
+
     @Override
     public void download(Long projectId, Long organizationId, HttpServletRequest request, HttpServletResponse response) {
-        List<PredefinedDTO> predefinedList = getPredefinedList(organizationId, projectId, false);
-        //所属史诗预定义值
-        predefinedList.add(getEpicPredefined(projectId));
+        String[] copyFieldsName = FIELDS_NAME.clone();
+        boolean withFeature = withFeature(projectId, organizationId);
+        List<PredefinedDTO> predefinedList = getPredefinedList(organizationId, projectId, withFeature);
+        if (withFeature && agilePluginService != null) {
+            predefinedList.add(agilePluginService.getFeaturePredefined(organizationId,projectId));
+            copyFieldsName = agilePluginService.changeFeatureHeaders(copyFieldsName);
+        }
+        else {
+            //所属史诗预定义值
+            predefinedList.add(getEpicPredefined(projectId));
+        }
 
         Workbook wb = new XSSFWorkbook();
         // create guide sheet
@@ -213,7 +229,7 @@ public class ExcelServiceImpl implements ExcelService {
         widthMap.put(ExcelImportTemplateColumn.Issue.EPIC_COL, 8000);
         widthMap.put(ExcelImportTemplateColumn.Issue.SUB_TASK_COL, 8000);
         widthMap.put(ExcelImportTemplateColumn.Issue.EPIC_NAME_COL, 8000);
-        ExcelUtil.generateHeaders(sheet, style, Arrays.asList(FIELDS_NAME), widthMap);
+        ExcelUtil.generateHeaders(sheet, style, Arrays.asList(copyFieldsName), widthMap);
 
         try {
             //填充预定义值
@@ -411,7 +427,8 @@ public class ExcelServiceImpl implements ExcelService {
                                          Sheet sheet,
                                          Map<Integer, Integer> sonParentMap,
                                          IssueTypeVO subTask,
-                                         Map<String, Long> theSecondColumnMap) {
+                                         Map<String, Long> theSecondColumnMap,
+                                         boolean withFeature) {
         issueCreateVO.setProjectId(projectId);
         Row row = sheet.getRow(rowNum);
         //经办人
@@ -446,7 +463,7 @@ public class ExcelServiceImpl implements ExcelService {
             issueCreateVO.setIssueTypeId(subTask.getId());
             //子任务的所属史诗模块和冲刺，保持与父节点统一
             Row parentRow = sheet.getRow(sonParentMap.get(rowNum));
-            setBelongsEpic(issueCreateVO, parentRow, theSecondColumnMap, typeName);
+            setSecondColumn(issueCreateVO, parentRow,withFeature,theSecondColumnMap, typeName);
             setComponent(issueCreateVO, parentRow, componentMap);
             setSprint(issueCreateVO, parentRow, sprintMap);
         } else {
@@ -473,7 +490,7 @@ public class ExcelServiceImpl implements ExcelService {
                         issueCreateVO.setStoryPoints(new BigDecimal(storyPointCell.toString()));
                     }
                 }
-                setBelongsEpic(issueCreateVO, row, theSecondColumnMap, typeName);
+                setSecondColumn(issueCreateVO, row,withFeature,theSecondColumnMap, typeName);
             }
             setComponent(issueCreateVO, row, componentMap);
             setSprint(issueCreateVO, row, sprintMap);
@@ -570,6 +587,31 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
+    protected void setSecondColumn(IssueCreateVO issueCreateVO, Row row, boolean withFeature,
+                                 Map<String, Long> theSecondColumnMap,
+                                 String typeName) {
+        Cell secondCell = row.getCell(ExcelImportTemplateColumn.Issue.EPIC_COL);
+        if (!isCellEmpty(secondCell)) {
+            String secondColumn = secondCell.toString();
+            if (StringUtils.hasText(secondColumn)) {
+                Long id = theSecondColumnMap.get(secondColumn);
+                if (withFeature) {
+                    if (STORY_CN.equals(typeName)) {
+                        issueCreateVO.setFeatureId(id);
+                        //如果特性关联史诗，也要设置史诗id
+                        IssueDTO feature = issueMapper.selectByPrimaryKey(id);
+                        if (feature != null && Objects.equals(0L, feature.getEpicId())) {
+                            issueCreateVO.setEpicId(feature.getEpicId());
+                        }
+                    }
+                } else if (!SUB_TASK_CN.equals(typeName)) {
+                    issueCreateVO.setEpicId(id);
+                }
+            }
+        }
+
+    }
+
     protected void updateFinalRecode(FileOperationHistoryDTO fileOperationHistoryDTO, Long successcount, Long failCount, String status) {
         FileOperationHistoryDTO update = new FileOperationHistoryDTO();
         update.setId(fileOperationHistoryDTO.getId());
@@ -661,7 +703,7 @@ public class ExcelServiceImpl implements ExcelService {
                                              int rowNum,
                                              Set<Integer> illegalRow,
                                              Set<String> theSecondColumn,
-                                             List<String> managers) {
+                                             List<String> managers,boolean withFeature) {
         Row row = sheet.getRow(rowNum);
         Map<Integer, String> errorMessage = new HashMap<>();
         // 经办人,非必填
@@ -706,7 +748,7 @@ public class ExcelServiceImpl implements ExcelService {
                 }
             }
             //检查第二列，史诗
-            checkSecondColumn(theSecondColumn, row, errorMessage);
+            checkSecondColumn(theSecondColumn, row, errorMessage,withFeature);
             //模块
             checkComponent(componentList, row, errorMessage);
             //冲刺
@@ -735,10 +777,16 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    protected void checkSecondColumn(Set<String> theSecondColumn, Row row, Map<Integer, String> errorMessage) {
+    protected void checkSecondColumn(Set<String> theSecondColumn, Row row, Map<Integer, String> errorMessage,boolean withFeature) {
         Cell secondColumnCell = row.getCell(ExcelImportTemplateColumn.Issue.EPIC_COL);
         if (!isCellEmpty(secondColumnCell) && !theSecondColumn.contains(secondColumnCell.toString())) {
-            errorMessage.put(ExcelImportTemplateColumn.Issue.EPIC_COL, "所属史诗输入错误");
+            String msg;
+            if (withFeature) {
+                msg = "所属特性输入错误";
+            } else {
+                msg = "所属史诗输入错误";
+            }
+            errorMessage.put(ExcelImportTemplateColumn.Issue.EPIC_COL, msg);
         }
     }
 
@@ -872,11 +920,16 @@ public class ExcelServiceImpl implements ExcelService {
     public void batchImport(Long projectId, Long organizationId, Long userId, Workbook workbook) {
         String status = DOING;
         FileOperationHistoryDTO res = initFileOperationHistory(projectId, userId, status, UPLOAD_FILE);
-        validateWorkbook(projectId, userId, workbook, res, FIELDS_NAME);
+        String[] copyFieldsName = FIELDS_NAME.clone();
+        boolean withFeature = withFeature(projectId, organizationId);
+        if (withFeature && agilePluginService != null) {
+            copyFieldsName = agilePluginService.changeFeatureHeaders(copyFieldsName);
+        }
+        validateWorkbook(projectId, userId, workbook, res, copyFieldsName);
 
         Sheet sheet = workbook.getSheetAt(1);
         // 获取所有非空行
-        int columnNum = FIELDS_NAME.length;
+        int columnNum = copyFieldsName.length;
         Integer allRowCount = getRealRowCount(sheet, columnNum);
         // 查询组织下的优先级与问题类型
         Map<String, IssueTypeVO> issueTypeMap = new HashMap<>();
@@ -951,7 +1004,7 @@ public class ExcelServiceImpl implements ExcelService {
                     && hasSonNodes) {
                 Map<String, Object> returnMap = batchCheck(projectId, sheet, issueTypeList, priorityList,
                         versionList, issueTypeMap, componentList, sprintList, r, illegalRow, set, columnNum,
-                        theSecondColumnMap.keySet(), managers);
+                        theSecondColumnMap.keySet(), managers,withFeature,copyFieldsName);
                 Map<Integer, Map<Integer, String>> errorMaps = (Map<Integer, Map<Integer, String>>) returnMap.get("errorMap");
                 set = (Set<Integer>) returnMap.get("sonSet");
                 if (!errorMaps.isEmpty()) {
@@ -971,7 +1024,7 @@ public class ExcelServiceImpl implements ExcelService {
                 }
 
                 Set<Long> insertIds = batchInsert(projectId, r, issueTypeMap, priorityMap, versionMap,
-                        userId, componentMap, sprintMap, sheet, set, managerMap, sonParentMap, subTask, theSecondColumnMap);
+                        userId, componentMap, sprintMap, sheet, set, managerMap, sonParentMap, subTask, theSecondColumnMap,withFeature);
                 if (insertIds.isEmpty()) {
                     failCount = failCount + set.size() + 1;
                     errorRows.add(r);
@@ -983,7 +1036,7 @@ public class ExcelServiceImpl implements ExcelService {
                 r = Collections.max(set);
             } else {
                 Map<Integer, String> errorMap = checkRule(projectId, sheet, issueTypeList, priorityList,
-                        versionList, componentList, sprintList, r, illegalRow, theSecondColumnMap.keySet(), managers);
+                        versionList, componentList, sprintList, r, illegalRow, theSecondColumnMap.keySet(), managers,withFeature);
                 if (!errorMap.isEmpty()) {
                     failCount++;
                     processErrorMap(errorMapList, r, row, errorMap, errorRows);
@@ -995,7 +1048,7 @@ public class ExcelServiceImpl implements ExcelService {
                 IssueCreateVO issueCreateVO = new IssueCreateVO();
                 Boolean ok = setIssueCreateInfo(issueCreateVO, projectId, issueTypeMap, priorityMap,
                         versionMap, userId, componentMap, sprintMap, managerMap, r, sheet, sonParentMap,
-                        subTask, theSecondColumnMap);
+                        subTask, theSecondColumnMap,withFeature);
 
                 IssueVO result = null;
                 if (ok) {
@@ -1018,9 +1071,14 @@ public class ExcelServiceImpl implements ExcelService {
 
         if (!errorRows.isEmpty()) {
             LOGGER.info("导入数据有误");
-            PredefinedDTO theSecondColumnPredefined = getEpicPredefined(projectId);
+            PredefinedDTO theSecondColumnPredefined;
+            if(withFeature && agilePluginService != null){
+                theSecondColumnPredefined = agilePluginService.getFeaturePredefined(organizationId, projectId);
+            }else {
+                theSecondColumnPredefined  = getEpicPredefined(projectId);
+            }
             Workbook result = ExcelUtil.generateExcelAwesome(workbook, errorRows,
-                    errorMapList, FIELDS_NAME, priorityList, issueTypeList, versionList,
+                    errorMapList, copyFieldsName , priorityList, issueTypeList, versionList,
                     IMPORT_TEMPLATE_NAME, componentList, sprintList, managers,
                     theSecondColumnPredefined, false);
             String errorWorkBookUrl = uploadErrorExcel(result, organizationId);
@@ -1037,13 +1095,13 @@ public class ExcelServiceImpl implements ExcelService {
                                     Long userId, Map<String, Long> componentMap, Map<String, Long> sprintMap,
                                     Sheet sheet, Set<Integer> set, Map<String, Long> managerMap,
                                     Map<Integer, Integer> sonParentMap, IssueTypeVO subTask,
-                                    Map<String, Long> theSecondColumnMap) {
+                                    Map<String, Long> theSecondColumnMap,Boolean withFeature) {
         Set<Long> issueIds = new HashSet<>();
         //插入父节点
         IssueCreateVO issueCreateVO = new IssueCreateVO();
 
         Boolean ok = setIssueCreateInfo(issueCreateVO, projectId, issueTypeMap, priorityMap,
-                versionMap, userId, componentMap, sprintMap, managerMap, rowNum, sheet, sonParentMap, subTask, theSecondColumnMap);
+                versionMap, userId, componentMap, sprintMap, managerMap, rowNum, sheet, sonParentMap, subTask, theSecondColumnMap,withFeature);
         IssueVO parent = null;
         if (ok) {
             parent = stateMachineClientService.createIssue(issueCreateVO, APPLY_TYPE_AGILE);
@@ -1057,7 +1115,7 @@ public class ExcelServiceImpl implements ExcelService {
         set.forEach(s -> {
             IssueCreateVO issueCreate = new IssueCreateVO();
             Boolean success = setIssueCreateInfo(issueCreate, projectId, issueTypeMap, priorityMap,
-                    versionMap, userId, componentMap, sprintMap, managerMap, s, sheet, sonParentMap, subTask, theSecondColumnMap);
+                    versionMap, userId, componentMap, sprintMap, managerMap, s, sheet, sonParentMap, subTask, theSecondColumnMap,withFeature);
             if (success) {
                 String typeCode = issueCreate.getTypeCode();
                 if (SUB_TASK.equals(typeCode)) {
@@ -1083,12 +1141,13 @@ public class ExcelServiceImpl implements ExcelService {
                                              List<String> priorityList, List<String> versionList, Map<String, IssueTypeVO> issueTypeMap,
                                              List<String> componentList, List<String> sprintList, int rowNum,
                                              Set<Integer> illegalRow, Set<Integer> sonSet, int columnNum,
-                                             Set<String> theSecondColumn, List<String> managers) {
+                                             Set<String> theSecondColumn, List<String> managers,
+                                             boolean withFeature, String[] copyFieldsName) {
         //key为row,value为错误信息
         Map<Integer, Map<Integer, String>> map = new HashMap<>();
         //key为列，value为错误详情，先判断父节点
         Map<Integer, String> errorMap = checkRule(projectId, sheet, issueTypeList, priorityList,
-                versionList, componentList, sprintList, rowNum, illegalRow, theSecondColumn, managers);
+                versionList, componentList, sprintList, rowNum, illegalRow, theSecondColumn, managers,withFeature);
         Set<Integer> newSet = new HashSet<>();
         if (!errorMap.isEmpty()) {
             map.put(rowNum, errorMap);
@@ -1099,14 +1158,14 @@ public class ExcelServiceImpl implements ExcelService {
                 if (isSkip(row, columnNum)) {
                     return;
                 }
-                for (int w = 0; w < FIELDS_NAME.length; w++) {
+                for (int w = 0; w < copyFieldsName.length; w++) {
                     if (row.getCell(w) != null) {
                         row.getCell(w).setCellType(XSSFCell.CELL_TYPE_STRING);
                     }
                 }
                 newSet.add(r);
                 Map<Integer, String> error = checkRule(projectId, sheet, issueTypeList, priorityList,
-                        versionList, componentList, sprintList, r, illegalRow, theSecondColumn, managers);
+                        versionList, componentList, sprintList, r, illegalRow, theSecondColumn, managers,withFeature);
                 if (!error.isEmpty()) {
                     map.put(r, error);
                 }
