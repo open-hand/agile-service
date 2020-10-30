@@ -111,9 +111,11 @@ public class FieldValueController {
                                                                @RequestParam @Encrypt Long fieldId,
                                                                @ApiParam(value = "方案编码", required = true)
                                                                @RequestParam String schemeCode,
+                                                               @ApiParam(value = "字段编码", required = true)
+                                                               @RequestParam(required = false) String fieldCode,
                                                                @ApiParam(value = "值对象列表", required = true)
                                                                @RequestBody PageFieldViewUpdateVO updateDTO) {
-        return new ResponseEntity<>(fieldValueService.updateFieldValue(organizationId, projectId, instanceId, fieldId, schemeCode, updateDTO, updateDTO.getFieldCode()), HttpStatus.OK);
+        return new ResponseEntity<>(fieldValueService.updateFieldValue(organizationId, projectId, instanceId, fieldId, schemeCode, updateDTO, fieldCode), HttpStatus.OK);
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
