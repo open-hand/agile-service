@@ -118,9 +118,7 @@ public class StatusNoticeSettingServiceImpl implements StatusNoticeSettingServic
     }
 
     @Override
-    public StatusNoticeSettingVO selectNoticeUserAndType(Long projectId, Long issueId) {
-        // 根据issueId找到对应的issueType和status
-        IssueDTO issue = issueMapper.selectByPrimaryKey(issueId);
+    public StatusNoticeSettingVO selectNoticeUserAndType(Long projectId, IssueDTO issue) {
         Assert.notNull(issue, BaseConstants.ErrorCode.DATA_NOT_EXISTS);
         // 找到通知内容
         List<StatusNoticeSettingDTO> noticeList = statusNoticeSettingMapper.select(new StatusNoticeSettingDTO(projectId,

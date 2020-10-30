@@ -164,7 +164,7 @@ public class IssueNoticeListener implements AopProxy<IssueNoticeListener> {
                 func = msgUtil -> msgUtil.generateIssueResolvSender(projectId, fieldList, issue);
                 break;
             case RuleNoticeEvent.ISSUECHANGESTATUS:
-                StatusNoticeSettingVO settingVO = statusNoticeSettingService.selectNoticeUserAndType(projectId, issue.getIssueId());
+                StatusNoticeSettingVO settingVO = statusNoticeSettingService.selectNoticeUserAndType(projectId, issue);
                 func = msgUtil -> msgUtil.generateNoticeIssueStatusSender(projectId, settingVO.getUserIdList(),
                         new ArrayList<>(settingVO.getUserTypeList()), issue, DetailsHelper.getUserDetails(), fieldList);
                 break;
