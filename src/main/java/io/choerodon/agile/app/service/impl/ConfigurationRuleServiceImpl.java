@@ -83,7 +83,6 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
         configurationRuleDTO.setTypeCode(CommonMapperUtil.writeValueAsString(configurationRuleVO.getIssueTypes()));
-        configurationRuleDTO.setSqlQuery(null);
         configurationRuleDTO.setSource(ConfigurationRuleDTO.SOURCE_CUSTOM);
         if (configurationRuleMapper.insertSelective(configurationRuleDTO) != 1) {
             throw new CommonException("error.rule.insert");
@@ -110,7 +109,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.isTrue(checkUniqueName(projectId, ruleId, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
         configurationRuleVO.setId(ruleId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
-        configurationRuleDTO.setSqlQuery(generateSqlQuery(configurationRuleVO, true));
+        generateSqlQuery(configurationRuleVO, true);
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
         configurationRuleDTO.setTypeCode(CommonMapperUtil.writeValueAsString(configurationRuleVO.getIssueTypes()));
         if (configurationRuleMapper.updateOptional(configurationRuleDTO,

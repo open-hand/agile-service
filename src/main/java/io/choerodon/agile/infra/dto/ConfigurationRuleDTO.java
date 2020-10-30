@@ -47,7 +47,6 @@ public class ConfigurationRuleDTO extends AuditDomain {
     @GeneratedValue
     private Long id;
     private Long projectId;
-    private String sqlQuery;
     private String expressQuery;
     private String expressFormat;
     private String typeCode;
@@ -102,14 +101,6 @@ public class ConfigurationRuleDTO extends AuditDomain {
 
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
-    }
-
-    public String getSqlQuery() {
-        return sqlQuery;
-    }
-
-    public void setSqlQuery(String sqlQuery) {
-        this.sqlQuery = sqlQuery;
     }
 
     public String getExpressQuery() {
