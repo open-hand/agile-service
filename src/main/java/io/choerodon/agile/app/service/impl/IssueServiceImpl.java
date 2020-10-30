@@ -598,7 +598,6 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     @Override
-    @RuleNotice(event = RuleNoticeEvent.ISSUE_STATAUS_CHANGE, instanceId = "issueId", fieldList = {"statusId"})
     public IssueVO updateIssueStatus(Long projectId, Long issueId, Long transformId, Long objectVersionNumber,
                                      String applyType, IssueDTO triggerIssue, boolean autoTranferFlag) {
         stateMachineClientService.executeTransform(projectId, issueId, transformId, objectVersionNumber, applyType, new InputDTO(issueId, "updateStatus", updateTrigger(autoTranferFlag, triggerIssue)));
