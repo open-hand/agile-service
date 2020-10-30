@@ -21,7 +21,7 @@ import SelectUser from '@/components/select/select-user';
 import moment from 'moment';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import renderRule, {
-  IField, Operation, IFieldWithType, IMiddleFieldType,
+  IField, Operation, IFieldWithType, IMiddleFieldType, Express, IRule,
 } from './renderRule';
 import styles from './index.less';
 
@@ -41,40 +41,6 @@ interface Props {
     isProgram: boolean,
 }
 
-interface Express {
-  fieldCode: string,
-  operation: Operation,
-  relationshipWithPervious: 'and' | 'or',
-  // text,input
-  valueStr?: string, //
-  // 多选,单选，member
-  valueIdList?: string[],
-  // number整数,需要判断是否允许小数
-  valueNum?: number,
-  // number有小数， 需要判断是否允许小数
-  valueDecimal?: number,
-  // date,datetime
-  valueDate?: string,
-  // time
-  valueDateHms?: string,
-  predefined?: boolean,
-  fieldType?: IMiddleFieldType,
-  // 是否允许小数，需要判断是否允许小数
-  allowDecimals?: boolean,
-  nowFlag?: boolean,
-}
-
-interface IRule {
-  id: string,
-  objectVersionNumber: number,
-  name: string
-  issueTypes: string[],
-  processerList: User[],
-  ccList: User[],
-  receiverList: User[],
-  expressList: Express[]
-  userTypes: string[]
-}
 // 'in' | 'not_in' | 'is' | 'is_not' | 'eq' | 'not_eq' | 'gt' | 'gte' | 'lt' | 'lte' | 'like' | 'not_like'
 const operationMap = new Map([
   ['in', '包含'],
@@ -807,7 +773,7 @@ const RuleModal: React.FC<Props> = ({
                   </Col>
                   <Col span={8}>
                     {
-                      renderRule(modalDataSet, f, fieldData, systemDataRefMap, getFieldValue)
+                      renderRule(modalDataSet, f, fieldData, systemDataRefMap, initRule)
                     }
                   </Col>
                   <Col span={2}>
@@ -868,7 +834,7 @@ const RuleModal: React.FC<Props> = ({
               clearButton
             // @ts-ignore
               autoQueryConfig={{
-                selectedUserIds: getFieldValue('processerList'),
+                selectedUserIds: initRule?.processerList?.map((item) => item.id) || [],
               }}
             />
           </div>
@@ -883,7 +849,7 @@ const RuleModal: React.FC<Props> = ({
             }}
             // @ts-ignore
             autoQueryConfig={{
-              selectedUserIds: (getFieldValue('receiverList') || []).filter((item: string) => !includes(['assignee', 'reporter', 'projectOwner'], item)),
+              selectedUserIds: initRule?.receiverList?.map((item) => item.id) || [],
             }}
             name="receiverList"
             label="通知对象"
@@ -904,7 +870,7 @@ const RuleModal: React.FC<Props> = ({
             }}
             // @ts-ignore
             autoQueryConfig={{
-              selectedUserIds: getFieldValue('ccList'),
+              selectedUserIds: initRule?.ccList?.map((item) => item.id) || [],
             }}
             name="ccList"
             label="抄送人"
