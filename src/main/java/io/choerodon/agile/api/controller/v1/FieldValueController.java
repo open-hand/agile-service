@@ -111,7 +111,7 @@ public class FieldValueController {
                                                                @RequestParam @Encrypt Long fieldId,
                                                                @ApiParam(value = "方案编码", required = true)
                                                                @RequestParam String schemeCode,
-                                                               @ApiParam(value = "字段编码", required = true)
+                                                               @ApiParam(value = "字段编码")
                                                                @RequestParam(required = false) String fieldCode,
                                                                @ApiParam(value = "值对象列表", required = true)
                                                                @RequestBody PageFieldViewUpdateVO updateDTO) {
