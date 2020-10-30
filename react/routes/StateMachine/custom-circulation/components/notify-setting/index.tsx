@@ -190,7 +190,6 @@ const NotifySetting = ({
       current?.set('webhook', Boolean((res.noticeTypeList || []).find((item: string) => item === 'WEB_HOOK')));
     });
   }, [selectedType, record, notifySettingDataSet]);
-
   useEffect(() => {
     const handleOk = async () => {
       const validate = await notifySettingDataSet.validate();
@@ -273,7 +272,7 @@ const NotifySetting = ({
   // @ts-ignore
     data[0].noticeTypeList && data[0].noticeTypeList.length > 0
     // @ts-ignore
-  ) || data[0].webhook);
+  ));
   return (
     <div className={styles.notify_setting}>
       <Loading loading={loading} />
