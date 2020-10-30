@@ -204,7 +204,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
               }}
               // @ts-ignore
               autoQueryConfig={{
-                selectedUserIds: getFieldValue(`${key}-value`) ? [getFieldValue(`${key}-value`)] : [],
+                selectedUserIds: getFieldValue(`${key}-value`) ? getFieldValue(`${key}-value`) : [],
               }}
               multiple
             />
@@ -297,7 +297,7 @@ const renderRule = (dataset: DataSet, fieldK: { key: number }, fieldData: IField
             }}
             // @ts-ignore
             autoQueryConfig={{
-              selectedUserIds: getFieldValue(`${key}-value`) ? [getFieldValue(`${key}-value`)] : [],
+              selectedUserIds: getFieldValue(`${key}-value`) ? getFieldValue(`${key}-value`) : [],
             }}
             multiple
           />
