@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service;
 import java.util.List;
 
 import io.choerodon.agile.api.vo.StatusNoticeSettingVO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
 
 /**
  * 邮件通知应用服务
@@ -22,8 +23,8 @@ public interface StatusNoticeSettingService {
     /**
      * 获取通知方式和通知对象
      * @param projectId projectId
-     * @param issueId issueId
+     * @param issue issue
      * @return 请注意: StatusNoticeSettingVO里仅userIdList和userTypeList有值
      */
-    StatusNoticeSettingVO selectNoticeUserAndType(Long projectId, Long issueId);
+    StatusNoticeSettingVO selectNoticeUserAndType(Long projectId, IssueDTO issue);
 }
