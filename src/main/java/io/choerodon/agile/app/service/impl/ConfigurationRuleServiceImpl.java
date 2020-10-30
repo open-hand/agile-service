@@ -284,9 +284,11 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
     public List<ConfigurationRuleVO> processRule(List<ConfigurationRuleVO> sourceList, Set<String> fieldList, 
                                                  boolean allFieldCheck, boolean checkMode) {
         List<ConfigurationRuleVO> ruleList = new ArrayList<>(sourceList);
-        JavaType javaType = CommonMapperUtil.getTypeFactory().constructParametricType(List.class, RuleExpressVO.class);
+        JavaType expressList = CommonMapperUtil.getTypeFactory().constructParametricType(List.class, RuleExpressVO.class);
+        JavaType stringList = CommonMapperUtil.getTypeFactory().constructParametricType(List.class, String.class);
         for (ConfigurationRuleVO ruleVO : ruleList) {
-            ruleVO.setExpressList(CommonMapperUtil.readValue(ruleVO.getExpressFormat(), javaType));
+            ruleVO.setExpressList(CommonMapperUtil.readValue(ruleVO.getExpressFormat(), expressList));
+            ruleVO.setIssueTypes(CommonMapperUtil.readValue(ruleVO.getTypeCode(), stringList));
             ruleVO.setSqlQuery(this.generateSqlQuery(ruleVO,checkMode));
         }
         if (allFieldCheck){
