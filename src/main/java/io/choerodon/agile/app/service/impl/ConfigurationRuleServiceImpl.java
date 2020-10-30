@@ -83,7 +83,6 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
         configurationRuleDTO.setTypeCode(CommonMapperUtil.writeValueAsString(configurationRuleVO.getIssueTypes()));
-        configurationRuleDTO.setSqlQuery(sqlQuery);
         configurationRuleDTO.setSource(ConfigurationRuleDTO.SOURCE_CUSTOM);
         if (configurationRuleMapper.insertSelective(configurationRuleDTO) != 1) {
             throw new CommonException("error.rule.insert");
@@ -113,7 +112,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         configurationRuleDTO.setSqlQuery(generateSqlQuery(configurationRuleVO, true));
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
         configurationRuleDTO.setTypeCode(CommonMapperUtil.writeValueAsString(configurationRuleVO.getIssueTypes()));
-        if (configurationRuleMapper.updateOptional(configurationRuleDTO, ConfigurationRuleDTO.FIELD_SQL_QUERY,
+        if (configurationRuleMapper.updateOptional(configurationRuleDTO,
                 ConfigurationRuleDTO.FIELD_EXPRESS_QUERY, ConfigurationRuleDTO.FIELD_EXPRESS_FORMAT,
                 ConfigurationRuleDTO.FIELD_TYPE_CODE, ConfigurationRuleDTO.FIELD_NAME) != 1) {
             throw new CommonException("error.rule.update");
