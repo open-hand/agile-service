@@ -198,6 +198,10 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         if (CollectionUtils.isEmpty(ruleIdList)){
             return new HashMap<>();
         }
+        Map<Long, ConfigurationRuleDTO> configurationRuleMap =
+                configurationRuleMapper.selectByIds(StringUtils.join(ruleIdList, BaseConstants.Symbol.COMMA))
+                        .stream()
+                        .collect(Collectors.toMap(ConfigurationRuleDTO::getId, Function.identity()));
         List<ConfigurationRuleReceiverDTO> receiverDTOList = configurationRuleReceiverMapper.selectReceiver(ruleIdList, Arrays.asList(RECEIVER_LIST));
         Map<String, List<ConfigurationRuleReceiverDTO>> group =
                 receiverDTOList.stream().collect(Collectors.groupingBy(ConfigurationRuleReceiverDTO::getUserType));
@@ -247,6 +251,10 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
                     .getOrDefault(ruleId, Collections.emptyList())
                     .stream().map(receiver -> userDTOMap.get(receiver.getUserId()))
                     .collect(Collectors.toList()));
+            ConfigurationRuleDTO configurationRuleDTO = configurationRuleMap.get(ruleId);
+            if (configurationRuleDTO != null) {
+                ruleVO.setName(configurationRuleDTO.getName());
+            }
             return ruleVO;
         }).collect(Collectors.toMap(ConfigurationRuleVO::getId, Function.identity()));
     }
