@@ -79,11 +79,10 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getExpressList()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(CollectionUtils.isNotEmpty(configurationRuleVO.getIssueTypes()), BaseConstants.ErrorCode.DATA_INVALID);
         Assert.isTrue(checkUniqueName(projectId, null, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
-        String sqlQuery = generateSqlQuery(configurationRuleVO, true);
+        generateSqlQuery(configurationRuleVO, true);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
         configurationRuleDTO.setTypeCode(CommonMapperUtil.writeValueAsString(configurationRuleVO.getIssueTypes()));
-        configurationRuleDTO.setSqlQuery(sqlQuery);
         configurationRuleDTO.setSource(ConfigurationRuleDTO.SOURCE_CUSTOM);
         if (configurationRuleMapper.insertSelective(configurationRuleDTO) != 1) {
             throw new CommonException("error.rule.insert");
@@ -110,10 +109,10 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Assert.isTrue(checkUniqueName(projectId, ruleId, configurationRuleVO.getName()), BaseConstants.ErrorCode.DATA_INVALID);
         configurationRuleVO.setId(ruleId);
         ConfigurationRuleDTO configurationRuleDTO = modelMapper.map(configurationRuleVO, ConfigurationRuleDTO.class);
-        configurationRuleDTO.setSqlQuery(generateSqlQuery(configurationRuleVO, true));
+        generateSqlQuery(configurationRuleVO, true);
         configurationRuleDTO.setExpressFormat(CommonMapperUtil.writeValueAsString(configurationRuleVO.getExpressList()));
         configurationRuleDTO.setTypeCode(CommonMapperUtil.writeValueAsString(configurationRuleVO.getIssueTypes()));
-        if (configurationRuleMapper.updateOptional(configurationRuleDTO, ConfigurationRuleDTO.FIELD_SQL_QUERY,
+        if (configurationRuleMapper.updateOptional(configurationRuleDTO,
                 ConfigurationRuleDTO.FIELD_EXPRESS_QUERY, ConfigurationRuleDTO.FIELD_EXPRESS_FORMAT,
                 ConfigurationRuleDTO.FIELD_TYPE_CODE, ConfigurationRuleDTO.FIELD_NAME) != 1) {
             throw new CommonException("error.rule.update");
@@ -388,7 +387,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
             if (predefined) {
                 sqlQuery.append(addTypeLimit(typeLimit, processPredefinedField(ruleExpressVO, getValue(ruleExpressVO)), checkMode));
             } else {
-                sqlQuery.append(addTypeLimit(typeLimit, processCustomField(ruleExpressVO, organizationId, projectId, getValue(ruleExpressVO)), checkMode));
+                sqlQuery.append(addTypeLimit(typeLimit, processCustomField(ruleExpressVO, organizationId, projectId, getValue(ruleExpressVO), configurationRuleVO.getIssueTypes()), checkMode));
             }
         }
         return sqlQuery.toString();
@@ -404,7 +403,7 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         return String.format(ConfigurationRule.TEMPLATE_TYPE_LIMIT, typeLimit, ConfigurationRule.OpSqlMapping.and.getSqlOp(), sql);
     }
 
-    private String processCustomField(RuleExpressVO ruleExpressVO, Long organizationId, Long projectId, Object value) {
+    private String processCustomField(RuleExpressVO ruleExpressVO, Long organizationId, Long projectId, Object value, List<String> issueTypeList) {
         String fieldCode = ruleExpressVO.getFieldCode();
         ObjectSchemeFieldDTO objectSchemeField = objectSchemeFieldService.queryByFieldCode(organizationId, projectId, fieldCode);
         if (Objects.isNull(objectSchemeField)) {
@@ -416,26 +415,26 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         
         String fieldType = ruleExpressVO.getFieldType();
         CustomFieldType.contains(fieldType, true);
-
+        String primaryKey = issueTypeList.contains("backlog")? ConfigurationRule.FIELD_BACKLOG_ID : ConfigurationRule.FIELD_ISSUE_ID;
         if (CustomFieldType.isOption(fieldType)) {
             return renderCustomSql(preOp, projectId, fieldId, 
-                    Collections.singletonList(() ->  conditionSql("ffv.option_id", operation, value)));
+                    Collections.singletonList(() ->  conditionSql("ffv.option_id", operation, value)), primaryKey);
         } else if (CustomFieldType.isDate(fieldType)) {
             return renderCustomSql(preOp, projectId, fieldId, Collections.singletonList(() -> 
-                    conditionSql(getUnixTimeExpress("ffv.date_value"), operation, getUnixTimeExpress(valueToString(value)))));
+                    conditionSql(getUnixTimeExpress("ffv.date_value"), operation, getUnixTimeExpress(valueToString(value)))), primaryKey);
         } else if (CustomFieldType.isDateHms(fieldType)) {
             return renderCustomSql(preOp, projectId, fieldId, Collections.singletonList(() ->
-                    conditionSql(getTimeFieldExpress("ffv.date_value"), operation, getHmsTime(value))));
+                    conditionSql(getTimeFieldExpress("ffv.date_value"), operation, getHmsTime(value))), primaryKey);
         } else if (CustomFieldType.isNumber(fieldType)) {
             return renderCustomSql(preOp, projectId, fieldId, 
-                    Collections.singletonList(() -> conditionSql("ffv.number_value", operation, value)));
+                    Collections.singletonList(() -> conditionSql("ffv.number_value", operation, value)), primaryKey);
         } else if (CustomFieldType.isString(fieldType)) {
             return renderCustomSql(preOp, projectId, fieldId,
-                    Collections.singletonList(() ->  conditionSql("ffv.string_value", operation, value)));
+                    Collections.singletonList(() ->  conditionSql("ffv.string_value", operation, value)), primaryKey);
         } else  {
             //text
             return renderCustomSql(preOp, projectId, fieldId,
-                    Collections.singletonList(() ->  conditionSql("ffv.text_value", operation, value)));
+                    Collections.singletonList(() ->  conditionSql("ffv.text_value", operation, value)), primaryKey);
         }
     }
 
@@ -477,14 +476,15 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         }
     }
 
-    private String renderCustomSql(String operation, Long projectId, Long fieldId, List<Supplier<String>> conditionList) {
+    private String renderCustomSql(String operation, Long projectId, Long fieldId, List<Supplier<String>> conditionList, String primartKey) {
         StringBuilder sb = new StringBuilder();
         String sqlOp = ConfigurationRule.OpSqlMapping.valueOf(operation).getSqlOp();
         if (CollectionUtils.isNotEmpty(conditionList)){
             sb.append(ConfigurationRule.TEMPLATE_SQL_AND)
                     .append(conditionList.stream().map(Supplier::get).collect(Collectors.joining(ConfigurationRule.TEMPLATE_SQL_AND)));
         }
-        return String.format(ConfigurationRule.TEMPLATE_CUSTOM_SQL, sqlOp, projectId, fieldId,sb.toString());
+
+        return String.format(ConfigurationRule.TEMPLATE_CUSTOM_SQL, primartKey, sqlOp, projectId, fieldId,sb.toString());
     }
 
 

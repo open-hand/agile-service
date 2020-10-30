@@ -107,7 +107,7 @@ public class FieldValueServiceImpl implements FieldValueService {
     }
 
     @Override
-    @RuleNotice(event = RuleNoticeEvent.ISSUE_STATAUS_CHANGE, idPosition = "instanceId", fieldListName = "fieldCode")
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_UPDATE, instanceId = "instanceId", idPosition = "arg", fieldListName = "fieldCode")
     public List<FieldValueVO> updateFieldValue(Long organizationId, Long projectId, Long instanceId, Long fieldId, String schemeCode, PageFieldViewUpdateVO updateDTO, String fieldCode){
         return this.updateFieldValue(organizationId, projectId, instanceId, fieldId, schemeCode, updateDTO);
     }

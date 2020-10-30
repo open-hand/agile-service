@@ -22,7 +22,9 @@ public class ConfigurationRule{
     public static final String TEMPLATE_TIME_FIELD_EXPRESS = " TIME(DATE_FORMAT(%s, '%%H:%%i:%%s')) ";
     public static final String TEMPLATE_TIME_VALUE_EXPRESS = " TIME(%s) ";
     public static final String SQL_VAR_NOW_EXPRESS = "NOW()";
-    public static final String TEMPLATE_CUSTOM_SQL = " issue_id %s ( select ffv.instance_id from fd_field_value ffv where ffv.project_id = %s and ffv.field_id = %s %s ) ";
+    public static final String FIELD_ISSUE_ID = "issue_id";
+    public static final String FIELD_BACKLOG_ID = "id";
+    public static final String TEMPLATE_CUSTOM_SQL = " %s %s ( select ffv.instance_id from fd_field_value ffv where ffv.project_id = %s and ffv.field_id = %s %s ) ";
     public static final String SQL_VAR_NOT_EQUALS = " 1 = 2 ";
     public static final String TEMPLATE_TYPE_LIMIT = " (" + TEMPLATE_CONDITION_SQL + ") ";
     
