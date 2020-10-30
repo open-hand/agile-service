@@ -22,7 +22,7 @@ public interface BoardColumnService {
 
     void delete(Long projectId, Long columnId);
 
-    void deleteProgramBoardColumn(Long projectId, Long columnId);
+//    void deleteProgramBoardColumn(Long projectId, Long columnId);
 
     BoardColumnVO queryBoardColumnById(Long projectId, Long columnId);
 
@@ -30,7 +30,7 @@ public interface BoardColumnService {
 
     void columnSort(Long projectId, ColumnSortVO columnSortVO);
 
-    void columnSortByProgram(Long projectId, ColumnSortVO columnSortVO);
+//    void columnSortByProgram(Long projectId, ColumnSortVO columnSortVO);
 
     void createColumnWithRelateStatus(BoardDTO boardResult);
 

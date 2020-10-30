@@ -1,5 +1,6 @@
 package io.choerodon.agile.app.service.impl;
 
+import io.choerodon.agile.app.service.AgilePluginService;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.app.service.IssueTypeService;
@@ -37,6 +38,8 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     private StateMachineService stateMachineService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired(required = false)
+    private AgilePluginService agilePluginService;
 
     @Override
     public IssueTypeVO queryById(Long organizationId, Long issueTypeId) {
@@ -154,6 +157,9 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     @Override
     public void initIssueTypeByConsumeCreateOrganization(Long organizationId) {
         for (InitIssueType initIssueType : InitIssueType.values()) {
+            if (agilePluginService == null && Objects.equals("feature", initIssueType.getTypeCode())) {
+                continue;
+            }
             //创建默认问题类型
             createIssueType(new IssueTypeDTO(initIssueType.getIcon(), initIssueType.getName(), initIssueType.getDescription(), organizationId, initIssueType.getColour(), initIssueType.getTypeCode(), true));
         }
@@ -200,6 +206,9 @@ public class IssueTypeServiceImpl implements IssueTypeService {
         for (Long orgId : orgIds) {
             Map<String, Long> temp = new HashMap<>();
             for (InitIssueType initIssueType : InitIssueType.values()) {
+                if (agilePluginService == null && Objects.equals("feature", initIssueType.getTypeCode())) {
+                    continue;
+                }
                 IssueTypeDTO issueType = createIssueType(new IssueTypeDTO(initIssueType.getIcon(), initIssueType.getName(), initIssueType.getDescription(), orgId, initIssueType.getColour(), initIssueType.getTypeCode(), true));
                 temp.put(initIssueType.getTypeCode(), issueType.getId());
             }

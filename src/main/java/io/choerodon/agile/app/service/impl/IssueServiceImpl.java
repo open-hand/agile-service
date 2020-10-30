@@ -453,8 +453,12 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
                 Map<Long, StatusVO> statusMapDTOMap = statusService.queryAllStatusMap(organizationId);
                 List<Long> allIssueIds = issueDTOList.stream().map(IssueDTO::getIssueId).collect(Collectors.toList());
                 Map<Long, Map<String, Object>> foundationCodeValue = pageFieldService.queryFieldValueWithIssueIdsForAgileExport(organizationId, projectId, allIssueIds, false);
-                issueListDTOPage = PageUtil.buildPageInfoWithPageInfoList(issueIdPage,
-                        issueAssembler.issueDoToIssueListFieldKVDTO(issueDTOList, priorityMap, statusMapDTOMap, issueTypeDTOMap, foundationCodeValue));
+                List<IssueListFieldKVVO> issueListFieldKVVOS = issueAssembler.issueDoToIssueListFieldKVDTO(issueDTOList, priorityMap, statusMapDTOMap, issueTypeDTOMap, foundationCodeValue);
+                AgilePluginService expandBean = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+                if (!ObjectUtils.isEmpty(expandBean) && !CollectionUtils.isEmpty(issueListFieldKVVOS)) {
+                    expandBean.doToIssueListFieldKVDTO(projectId,issueListFieldKVVOS);
+                }
+                issueListDTOPage = PageUtil.buildPageInfoWithPageInfoList(issueIdPage,issueListFieldKVVOS);
             } else {
                 issueListDTOPage = new Page<>();
             }

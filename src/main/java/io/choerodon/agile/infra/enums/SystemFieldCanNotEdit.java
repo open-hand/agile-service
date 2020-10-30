@@ -27,7 +27,10 @@ public class SystemFieldCanNotEdit {
             return taskMap;
         } else if (ObjectSchemeFieldContext.BUG.equals(issueType)) {
             return bugMap;
-        } else {
+        } else if (ObjectSchemeFieldContext.FEATURE.equals(issueType)) {
+            return featureMap;
+        }
+        else {
             return null;
         }
     }
@@ -36,6 +39,7 @@ public class SystemFieldCanNotEdit {
     private static Map<String, PageConfigFieldEditedVO> storyMap;
     private static Map<String, PageConfigFieldEditedVO> taskMap;
     private static Map<String, PageConfigFieldEditedVO> bugMap;
+    private static Map<String, PageConfigFieldEditedVO> featureMap;
 
     static {
         epicMap = new HashMap<>();
@@ -53,6 +57,16 @@ public class SystemFieldCanNotEdit {
 //        epicMap.put(FieldCode.COMPONENT, new PageConfigFieldEditedVO(false, true, true));
 //        epicMap.put(FieldCode.FIX_VERSION, new PageConfigFieldEditedVO(false, true, true));
 //        epicMap.put(FieldCode.INFLUENCE_VERSION, new PageConfigFieldEditedVO(false, true, true));
+
+        featureMap = new HashMap<>();
+        featureMap.put(FieldCode.ISSUE_TYPE, new PageConfigFieldEditedVO(true, true, true));
+        featureMap.put(FieldCode.SUMMARY, new PageConfigFieldEditedVO(true, true, true));
+        featureMap.put(FieldCode.DESCRIPTION, new PageConfigFieldEditedVO(false, true, true));
+        featureMap.put(FieldCode.CREATION_DATE, new PageConfigFieldEditedVO(true, true, true));
+        featureMap.put(FieldCode.LAST_UPDATE_DATE, new PageConfigFieldEditedVO(true, true, true));
+        featureMap.put(FieldCode.STATUS, new PageConfigFieldEditedVO(true, true, true));
+        featureMap.put(FieldCode.REPORTER, new PageConfigFieldEditedVO(false, false, true));
+        featureMap.put(FieldCode.SUB_PROJECT, new PageConfigFieldEditedVO(false, true, true));
 
         storyMap = new HashMap<>();
         storyMap.put(FieldCode.ISSUE_TYPE, new PageConfigFieldEditedVO(true, true, true));

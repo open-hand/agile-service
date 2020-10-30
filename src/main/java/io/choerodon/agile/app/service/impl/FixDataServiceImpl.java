@@ -178,15 +178,23 @@ public class FixDataServiceImpl implements FixDataService {
     @Async
     public void fixDateStateMachineAndPage(){
         LOGGER.info("开始修复数据");
-        // 迁移数据
-        migrateData();
-        // 修状态转换数据
-        fixStateMachineTransform();
-        // 修项目的问题类型对应的状态机
-        fixStateMachineByIssueTypeId();
-        // 修复页面配置
+        // 全新安装不走修复数据逻辑(stateMachine/stateMachineNode/stateMachineSchemeConfig/stateMachineTransform)
+        if (checkFix()) {
+            // 迁移数据
+            migrateData();
+            // 修状态转换数据
+            fixStateMachineTransform();
+            // 修项目的问题类型对应的状态机
+            fixStateMachineByIssueTypeId();
+            // 修复页面配置
+        }
         fixPage();
         LOGGER.info("==============================>>>>>>>> AGILE Data Fixed Finished <<<<<<<<=================================");
+    }
+
+    private boolean checkFix() {
+       List<Long> counts = statusMachineMapper.checkFixData();
+       return !counts.contains(0L);
     }
 
     private  void migrateData() {
@@ -208,6 +216,11 @@ public class FixDataServiceImpl implements FixDataService {
 
     @Override
     public void fixPage() {
+        // 全新安装不走修复数据逻辑(全新安装判断依据page_field表是不是空的)
+        List<PageFieldDTO> pageFieldDTOS = pageFieldMapper.selectAll();
+        if (CollectionUtils.isEmpty(pageFieldDTOS)) {
+            return;
+        }
         LOGGER.info("开始迁移页面数据");
         String createPageCode = "agile_issue_create";
         String editPageCode = "agile_issue_edit";
@@ -247,6 +260,9 @@ public class FixDataServiceImpl implements FixDataService {
             if (objectSchemeFieldExtendMapper.selectExtendFieldCount(dto.getIssueType(), dto.getOrganizationId(), dto.getFieldId(), dto.getProjectId()) == 0) {
                 insertList.add(dto);
             }
+        }
+        if (CollectionUtils.isEmpty(insertList)) {
+            return;
         }
         //处理字段rank值相同的情况
         resetSameRank(insertList);
@@ -343,6 +359,9 @@ public class FixDataServiceImpl implements FixDataService {
         if (!ObjectUtils.isEmpty(estimatedStartTimeField)
                 && !ObjectUtils.isEmpty(estimatedEndTimeField)) {
             Set<Long> organizationIds = pageFieldMapper.selectOrganizationIds();
+            if (CollectionUtils.isEmpty(organizationIds)) {
+               return;
+            }
             List<IssueTypeDTO> issueTypeList = issueTypeMapper.selectByOrganizationIds(organizationIds);
             Map<Long, List<IssueTypeDTO>> issueTypeMap = issueTypeList.stream().collect(Collectors.groupingBy(IssueTypeDTO::getOrganizationId));
             //获取某个组织下的某个类型的最小rank值
@@ -478,6 +497,9 @@ public class FixDataServiceImpl implements FixDataService {
                 specialFieldIds.add(s.getId());
             }
         });
+        if (CollectionUtils.isEmpty(pages)) {
+            return;
+        }
         Set<Long> organizationIds = pages.stream().map(PageFieldDTO::getOrganizationId).collect(Collectors.toSet());
         List<IssueTypeDTO> issueTypeList = issueTypeMapper.selectByOrganizationIds(organizationIds);
         Map<Long, List<IssueTypeDTO>> issueTypeMap = issueTypeList.stream().collect(Collectors.groupingBy(IssueTypeDTO::getOrganizationId));

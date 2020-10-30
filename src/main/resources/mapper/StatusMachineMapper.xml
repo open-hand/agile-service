@@ -44,6 +44,19 @@
         select * from fd_state_machine
     </insert>
 
+    <select id="checkFixData" resultType="java.lang.Long">
+        (select COUNT(*)  from fd_state_machine)
+        UNION ALL (
+        select COUNT(*) from fd_state_machine_node
+        )
+        UNION ALL (
+        select COUNT(*) from fd_state_machine_transform
+        )
+        UNION ALL (
+        select COUNT(*) from fd_state_machine_scheme_config
+        )
+    </select>
+
     <select id="queryByIds" resultType="io.choerodon.agile.infra.dto.StatusMachineDTO">
         SELECT * FROM fd_status_machine sm
         WHERE 1=1

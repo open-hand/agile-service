@@ -21,6 +21,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -234,23 +235,23 @@ public class BoardColumnServiceImpl implements BoardColumnService {
         boardColumnMapper.updateColumnColor(boardId, size);
     }
 
-    @Override
-    public void deleteProgramBoardColumn(Long projectId, Long columnId) {
-        BoardColumnDTO boardColumn = new BoardColumnDTO();
-        boardColumn.setProjectId(projectId);
-        boardColumn.setColumnId(columnId);
-        BoardColumnDTO boardColumnDTO = boardColumnMapper.selectOne(boardColumn);
-        BoardColumnValidator.checkDeleteColumn(boardColumnDTO);
-        // 删除列
-        if (boardColumnMapper.deleteByPrimaryKey(columnId) != 1) {
-            throw new CommonException("error.BoardColumn.delete");
-        }
-        // 取消列下的状态关联，状态归为未对应的状态
-        ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
-        columnStatusRelDTO.setColumnId(columnId);
-        columnStatusRelDTO.setProjectId(projectId);
-        columnStatusRelService.delete(columnStatusRelDTO);
-    }
+//    @Override
+//    public void deleteProgramBoardColumn(Long projectId, Long columnId) {
+//        BoardColumnDTO boardColumn = new BoardColumnDTO();
+//        boardColumn.setProjectId(projectId);
+//        boardColumn.setColumnId(columnId);
+//        BoardColumnDTO boardColumnDTO = boardColumnMapper.selectOne(boardColumn);
+//        BoardColumnValidator.checkDeleteColumn(boardColumnDTO);
+//        // 删除列
+//        if (boardColumnMapper.deleteByPrimaryKey(columnId) != 1) {
+//            throw new CommonException("error.BoardColumn.delete");
+//        }
+//        // 取消列下的状态关联，状态归为未对应的状态
+//        ColumnStatusRelDTO columnStatusRelDTO = new ColumnStatusRelDTO();
+//        columnStatusRelDTO.setColumnId(columnId);
+//        columnStatusRelDTO.setProjectId(projectId);
+//        columnStatusRelService.delete(columnStatusRelDTO);
+//    }
 
     @Override
     public BoardColumnVO queryBoardColumnById(Long projectId, Long columnId) {
@@ -345,28 +346,41 @@ public class BoardColumnServiceImpl implements BoardColumnService {
         }
     }
 
-    @Override
-    public void columnSortByProgram(Long projectId, ColumnSortVO columnSortVO) {
-        BoardColumnValidator.checkColumnSort(projectId, columnSortVO);
-        BoardColumnDTO boardColumnDTO = modelMapper.map(columnSortVO, BoardColumnDTO.class);
-        columnSortByProgram(columnSortVO.getBoardId(), boardColumnDTO);
+//    @Override
+//    public void columnSortByProgram(Long projectId, ColumnSortVO columnSortVO) {
+//        BoardColumnValidator.checkColumnSort(projectId, columnSortVO);
+//        BoardColumnDTO boardColumn = new BoardColumnDTO();
+//        boardColumn.setProjectId(projectId);
+//        boardColumn.setColumnId(columnSortVO.getColumnId());
+//        boardColumn.setBoardId(columnSortVO.getBoardId());
+//        checkBoardColumn(boardColumn);
+//        BoardColumnDTO boardColumnDTO = modelMapper.map(columnSortVO, BoardColumnDTO.class);
+//        columnSortByProgram(columnSortVO.getBoardId(), boardColumnDTO);
+//    }
+
+    protected BoardColumnDTO checkBoardColumn(BoardColumnDTO boardColumn) {
+        BoardColumnDTO boardColumnDTO = boardColumnMapper.selectByPrimaryKey(boardColumn);
+        if (ObjectUtils.isEmpty(boardColumnDTO)) {
+            throw new CommonException("error.board.column.not.exist");
+        }
+        return boardColumnDTO;
     }
 
-    public void columnSortByProgram(Long boardId, BoardColumnDTO boardColumnDTO) {
-        BoardColumnDTO originColumn = boardColumnMapper.selectByPrimaryKey(boardColumnDTO.getColumnId());
-        try {
-            if (originColumn.getSequence() > boardColumnDTO.getSequence()) {
-                boardColumnMapper.columnSort(boardId, boardColumnDTO.getSequence(), originColumn.getSequence());
-            } else if (originColumn.getSequence() < boardColumnDTO.getSequence()) {
-                boardColumnMapper.columnSortDesc(boardId, boardColumnDTO.getSequence(), originColumn.getSequence());
-            }
-            if (boardColumnMapper.updateByPrimaryKeySelective(boardColumnDTO) != 1) {
-                throw new CommonException(BOARD_COLUMN_UPDATE_ERROR);
-            }
-        } catch (Exception e) {
-            throw new CommonException("error.column.sort.by.program", e);
-        }
-    }
+//    public void columnSortByProgram(Long boardId, BoardColumnDTO boardColumnDTO) {
+//        BoardColumnDTO originColumn = boardColumnMapper.selectByPrimaryKey(boardColumnDTO.getColumnId());
+//        try {
+//            if (originColumn.getSequence() > boardColumnDTO.getSequence()) {
+//                boardColumnMapper.columnSort(boardId, boardColumnDTO.getSequence(), originColumn.getSequence());
+//            } else if (originColumn.getSequence() < boardColumnDTO.getSequence()) {
+//                boardColumnMapper.columnSortDesc(boardId, boardColumnDTO.getSequence(), originColumn.getSequence());
+//            }
+//            if (boardColumnMapper.updateByPrimaryKeySelective(boardColumnDTO) != 1) {
+//                throw new CommonException(BOARD_COLUMN_UPDATE_ERROR);
+//            }
+//        } catch (Exception e) {
+//            throw new CommonException("error.column.sort.by.program", e);
+//        }
+//    }
 
     private void relate(Long projectId, Long boardId, String name, String categoryCode, Integer sequence, List<ColumnWithStatusRelDTO> columnWithStatusRelDTOList, String colorCode) {
         BoardColumnDTO column = new BoardColumnDTO();
