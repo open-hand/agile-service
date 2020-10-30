@@ -230,14 +230,14 @@ const RuleModal: React.FC<Props> = ({
     }
     if (name.indexOf('operation') > -1) {
       dataSet.current.set(`${key}-value`, undefined);
-      const field = (fieldDataRef?.current || []).find((item) => item.code === value);
+      const field = (fieldDataRef?.current || []).find((item) => item.code === dataSet.current.get(`${key}-code`));
       if (field) {
         const {
           system, extraConfig, code, fieldType,
         } = field;
+        const valueIsNull = value === 'is' || value === 'is_not';
+        const valueField = dataSet.current.getField(`${key}-value`);
         if (fieldType === 'number') {
-          const valueIsNull = value === 'is' || value === 'is_not';
-          const valueField = dataSet.current.getField(`${key}-value`);
           if (!valueIsNull) {
             if (system && (code === 'storyPoints' || code === 'remainingTime') && record.get(`${key}-operation`)) {
               valueField.set('max', 100);
@@ -261,6 +261,9 @@ const RuleModal: React.FC<Props> = ({
               valueField.set('step', 1);
             }
           }
+        }
+        if (fieldType === 'input' || fieldType === 'text') {
+          valueField.set('maxLength', 250);
         }
       }
     }
@@ -288,13 +291,13 @@ const RuleModal: React.FC<Props> = ({
     {
       name: 'receiverList',
       dynamicProps: {
-        required: ({ record }) => !record.get('processerList'),
+        required: ({ record }) => (!record.get('issueTypes') || !record.get('issueTypes').length) || (!includes(record.get('issueTypes'), 'feature') && !record.get('processerList')) || (record.get('issueTypes') && includes(record.get('issueTypes'), 'feature')),
       },
     },
     {
       name: 'processerList',
       dynamicProps: {
-        required: ({ record }) => !record.get('receiverList'),
+        required: ({ record }) => (!record.get('issueTypes') || !record.get('issueTypes').length) || (!includes(record.get('issueTypes'), 'feature') && !record.get('receiverList')),
       },
     },
     ],
@@ -512,6 +515,18 @@ const RuleModal: React.FC<Props> = ({
           const selectOptions = options.filter((option: { id: string; }) => value.indexOf(option.id) > -1);
           return `[${map(selectOptions, 'realName').join(',')}]`;
         }
+        case 'subProject': {
+          const stringValue = value.map((id: number | string) => id.toString());
+          const selectOptions = options.map((item: { projectId: string | number}) => ({
+            ...item,
+            projectId: item.projectId.toString(),
+          })).filter((option: { projectId: string; }) => stringValue.indexOf(option.projectId) > -1);
+          return `[${map(selectOptions, 'projName').join(',')}]`;
+        }
+        case 'pi': {
+          const selectOptions = options.filter((option: { id: string; }) => value.indexOf(option.id) > -1);
+          return `[${selectOptions.map((item: { code: string, name: string}) => (`${item.code}-${item.name}`)).join(',')}]`;
+        }
       }
     }
     switch (fieldType) {
@@ -634,7 +649,7 @@ const RuleModal: React.FC<Props> = ({
         objectVersionNumber: initRule?.objectVersionNumber,
         name: getFieldValue('name'),
         issueTypes: getFieldValue('issueTypes'),
-        processerList,
+        processerList: !includes(getFieldValue('issueTypes') || [], 'feature') ? processerList : undefined,
         receiverList: (toJS(getFieldValue('receiverList')) || []).filter((id: string) => id !== 'assignee' && id !== 'reporter' && id !== 'projectOwner').map((id: string) => ({ id })),
         userTypes: (toJS(getFieldValue('receiverList')) || []).filter((id: string) => id === 'assignee' || id === 'reporter' || id === 'projectOwner'),
         ccList: (toJS(getFieldValue('ccList')) || []).map((id: string) => ({ id })),
@@ -833,28 +848,33 @@ const RuleModal: React.FC<Props> = ({
               style={{
                 marginTop: -5,
               }}
-              disabled={!(getFieldValue('issueTypes') && getFieldValue('issueTypes').length)}
+              disabled={!(getFieldValue('issueTypes') && getFieldValue('issueTypes').length) || fields.length === 10}
             >
               添加字段
             </Button>
           </div>
         </div>
-        <div className={`${styles.rule_form_setting}`}>
-          <p className={styles.rule_form_setting_title}>自动变更设置</p>
-          <SelectUser
-            name="processerList"
-            multiple={getFieldValue('issueTypes') && includes(getFieldValue('issueTypes'), 'backlog')}
-            label={getFieldValue('issueTypes') && includes(getFieldValue('issueTypes'), 'backlog') ? '处理人' : '经办人'}
-            style={{ width: 520 }}
-            maxTagCount={6}
-            maxTagTextLength={4}
-            clearButton
+        {
+          (!getFieldValue('issueTypes') || !includes(getFieldValue('issueTypes'), 'feature')) && (
+          <div className={`${styles.rule_form_setting}`}>
+            <p className={styles.rule_form_setting_title}>自动变更设置</p>
+            <SelectUser
+              name="processerList"
+              multiple={getFieldValue('issueTypes') && includes(getFieldValue('issueTypes'), 'backlog')}
+              label={getFieldValue('issueTypes') && includes(getFieldValue('issueTypes'), 'backlog') ? '处理人' : '经办人'}
+              style={{ width: 520 }}
+              maxTagCount={6}
+              maxTagTextLength={4}
+              clearButton
             // @ts-ignore
-            autoQueryConfig={{
-              selectedUserIds: getFieldValue('processerList'),
-            }}
-          />
-        </div>
+              autoQueryConfig={{
+                selectedUserIds: getFieldValue('processerList'),
+              }}
+            />
+          </div>
+          )
+        }
+
         <div className={`${styles.rule_form_setting}`}>
           <p className={styles.rule_form_setting_title}>通知对象设置</p>
           <SelectUser
