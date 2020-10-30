@@ -718,16 +718,6 @@ const RuleModal: React.FC<Props> = ({
     }
   }, [ruleId, setFieldValue, addFieldRule]);
 
-  const existsFieldCodes: string[] = [];
-  fields.forEach((fieldWithKey: { key: number }) => {
-    const { key } = fieldWithKey;
-    const keyCode = modalDataSet?.current?.get(`${key}-code`);
-    const field = fieldData.find((item) => item.code === keyCode);
-    if (field) {
-      existsFieldCodes.push(field.code);
-    }
-  });
-
   const issueTypes = getFieldValue('issueTypes');
   return (
     <div className={styles.rule_form}>
@@ -787,9 +777,7 @@ const RuleModal: React.FC<Props> = ({
                           clearButton={false}
                         >
                           {
-                            fieldData.filter((field: IFieldWithType) => (
-                              modalDataSet?.current?.get(`${key}-code`) === field.code
-                            ) || !existsFieldCodes.find((code: string) => code === field.code)).map((field:IFieldWithType) => (
+                            fieldData.map((field: IFieldWithType) => (
                               <Option value={field.code}>
                                 {field.name}
                               </Option>
