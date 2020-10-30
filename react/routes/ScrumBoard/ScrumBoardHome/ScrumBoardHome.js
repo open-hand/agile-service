@@ -104,7 +104,9 @@ class ScrumBoardHome extends Component {
     const { location } = this.props;
     const url = this.paramConverter(location.search);
     const boardListData = await boardApi.loadAll();
+    const statusLinkages = await boardApi.getStatusLinkages();
     ScrumBoardStore.initBoardList(boardListData);
+    ScrumBoardStore.setStatusLinkages(statusLinkages);
     const defaultBoard = boardListData.find((item) => item.userDefault) || boardListData[0];
     if (defaultBoard.boardId) {
       ScrumBoardStore.setSelectedBoardId(defaultBoard.boardId);
@@ -265,7 +267,7 @@ class ScrumBoardHome extends Component {
         }
         ScrumBoardStore.rewriteObjNumber(data, issueId, issue);
         // ScrumBoardStore.resetHeaderData(startColumn,destinationColumn)
-        if ((issue.issueTypeVO.typeCode === 'bug' && issue.relateIssueId) || issue.issueTypeVO.typeCode === 'sub_task') {
+        if (ScrumBoardStore.needRefresh(issue, destinationStatus)) {
           this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
         }
       }

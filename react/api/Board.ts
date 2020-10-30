@@ -32,7 +32,11 @@ interface BoardSearchVO {
   assigneeFilterIds?: Array<number>,
   sprintId?: number,
   personalFilterIds?: string[]
-  priorityIds?:string[]
+  priorityIds?: string[]
+}
+export interface IStatusLinkage {
+  issueTypeId: string
+  statusId: string
 }
 /**
  * 迭代看板
@@ -59,6 +63,10 @@ class BoardApi extends Api<BoardApi> {
        */
   loadAll() {
     return axios.get(`${this.prefix}/board`);
+  }
+
+  getStatusLinkages(): Promise<IStatusLinkage[]> {
+    return axios.get(`${this.prefix}/status_linkages/list_by_project`);
   }
 
   /**

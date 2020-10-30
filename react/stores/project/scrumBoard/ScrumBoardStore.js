@@ -144,6 +144,20 @@ class ScrumBoardStore {
     draggingSwimlane: 0,
   };
 
+  @observable statusLinkages = []
+
+  needRefresh(issue, destinationStatus) {
+    if ((issue.issueTypeVO.typeCode === 'bug' && issue.relateIssueId) || issue.issueTypeVO.typeCode === 'sub_task') {
+      const hasLinkage = this.statusLinkages.find((link) => link.issueTypeId === issue.issueTypeVO.id && link.statusId === destinationStatus);
+      return hasLinkage;
+    }
+    return false;
+  }
+
+  @action setStatusLinkages(statusLinkages) {
+    this.statusLinkages = statusLinkages;
+  }
+
   @computed get getIsDragging() {
     return this.isDragging;
   }
