@@ -504,9 +504,6 @@ class CreateIssue extends Component {
                             const { typeCode } = originIssueTypes.find(
                               (item) => item.id === value,
                             );
-                            this.setState({
-                              newIssueTypeCode: typeCode,
-                            });
                             const param = {
                               schemeCode: 'agile_issue',
                               context: typeCode,
@@ -519,6 +516,7 @@ class CreateIssue extends Component {
                                 ...fields.map((f) => f.fieldCode).filter((code) => !['typeId', 'summary', 'description'].some((i) => i === code))]);
                               this.setState({
                                 fields: res,
+                                newIssueTypeCode: typeCode,
                               });
                               this.loadDefaultTemplate(typeCode);
                             });
