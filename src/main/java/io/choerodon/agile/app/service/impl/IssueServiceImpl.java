@@ -359,6 +359,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
         Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
         IssueVO result = issueAssembler.issueDetailDTOToVO(issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
+        sendMsgUtil.sendMsgByIssueCreate(projectId, result);
         return result;
     }
 
@@ -394,8 +395,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         Map<Long, StatusVO> statusMapDTOMap = ConvertUtil.getIssueStatusMap(projectId);
         Map<Long, PriorityVO> priorityDTOMap = ConvertUtil.getIssuePriorityMap(projectId);
         IssueVO result = issueAssembler.issueDetailDTOToVO(issue, issueTypeDTOMap, statusMapDTOMap, priorityDTOMap);
-//        sendMsgUtil.sendMsgByIssueAssignee(projectId, fieldList, result);
-//        sendMsgUtil.sendMsgByIssueComplete(projectId, fieldList, result);
+        sendMsgUtil.sendMsgByIssueAssignee(projectId, fieldList, result);
+        sendMsgUtil.sendMsgByIssueComplete(projectId, fieldList, result);
         return result;
     }
 
@@ -1033,7 +1034,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             issue.getIssueAttachmentDTOList().forEach(issueAttachmentDO -> issueAttachmentDO.setUrl(attachmentUrl + issueAttachmentDO.getUrl()));
         }
         IssueSubVO result = issueAssembler.issueDetailDoToIssueSubDto(issue);
-//        sendMsgUtil.sendMsgBySubIssueCreate(projectId, result);
+        sendMsgUtil.sendMsgBySubIssueCreate(projectId, result);
         return result;
     }
 
