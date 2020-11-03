@@ -36,6 +36,15 @@ public class ConfigurationRuleVO extends AuditDomain {
     @ApiModelProperty("经办人")
     private List<UserDTO> processerList;
     private String typeCode;
+    private Integer sequence;
+
+    public Integer getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(Integer sequence) {
+        this.sequence = sequence;
+    }
 
     public String getSource() {
         return source;
