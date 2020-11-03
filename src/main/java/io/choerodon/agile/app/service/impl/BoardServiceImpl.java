@@ -528,7 +528,7 @@ public class BoardServiceImpl implements BoardService {
             backlogExpandService.changeDetection(issueId, projectId, ConvertUtil.getOrganizationId(projectId));
         }
         IssueMoveVO result = modelMapper.map(issueDTO, IssueMoveVO.class);
-//        sendMsgUtil.sendMsgByIssueMoveComplete(projectId, issueMoveVO, issueDTO);
+        sendMsgUtil.sendMsgByIssueMoveComplete(projectId, issueMoveVO, issueDTO);
         return result;
     }
 
