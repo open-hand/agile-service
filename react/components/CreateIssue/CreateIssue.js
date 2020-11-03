@@ -183,6 +183,7 @@ class CreateIssue extends Component {
         createLoading: false,
       });
       onOk(res, data);
+      Choerodon.prompt('创建成功', 'success');
     }).catch((e) => {
       form.resetFields();
       this.setState({
