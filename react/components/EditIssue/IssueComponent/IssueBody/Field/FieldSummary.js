@@ -69,7 +69,7 @@ import styles from './FieldSummary.less';
     const { featureVO = {} } = issue;
     const value = feature ? featureVO[fieldCode] : issue[fieldCode];
     return (
-      <div className="line-start" style={{ fontSize: 20, fontWeight: 500 }}>
+      <div className="line-start" style={{ width: '100%', fontSize: 20, fontWeight: 500 }}>
         <TextEditToggle
           className={styles.summary}
           disabled={disabled}
