@@ -9,10 +9,11 @@ interface Props extends Partial<SelectProps> {
   isProgram?: boolean
   dataRef?: React.MutableRefObject<any>
   afterLoad?: (epics: IEpic[]) => void
+  dontAddEpic0?: boolean
 }
 
 const SelectEpic: React.FC<Props> = forwardRef(({
-  isProgram, afterLoad, dataRef, ...otherProps
+  isProgram, afterLoad, dataRef, dontAddEpic0, ...otherProps
 }, ref: React.Ref<Select>) => {
   const config = useMemo((): SelectConfig => ({
     name: 'epic',
@@ -20,12 +21,12 @@ const SelectEpic: React.FC<Props> = forwardRef(({
     valueField: 'issueId',
     request: () => (isProgram ? epicApi.loadProgramEpics() : epicApi.loadEpics()),
     middleWare: (epicList:IEpic[]) => {
-      if (isProgram) {
+      if (isProgram && !dontAddEpic0) {
         epicList.unshift({ issueId: '0', epicName: '未分配史诗' });
       }
       if (dataRef) {
         Object.assign(dataRef, {
-          current: isProgram ? epicList.unshift({ issueId: '0', epicName: '未分配史诗' }) : epicList,
+          current: isProgram && !dontAddEpic0 ? epicList.unshift({ issueId: '0', epicName: '未分配史诗' }) : epicList,
         });
       }
       if (afterLoad) {

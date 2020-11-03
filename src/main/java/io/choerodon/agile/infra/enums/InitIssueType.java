@@ -1,5 +1,8 @@
 package io.choerodon.agile.infra.enums;
 
+import io.choerodon.agile.app.service.AgilePluginService;
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,7 +81,10 @@ public enum InitIssueType {
         List<InitIssueType> result = new ArrayList<>();
         switch (applyType) {
             case SchemeApplyType.AGILE:
-                result.add(InitIssueType.FEATURE);
+                AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+                if (agilePluginService != null) {
+                    result.add(InitIssueType.FEATURE);
+                }
                 result.add(InitIssueType.EPIC);
                 result.add(InitIssueType.STORY);
                 result.add(InitIssueType.BUG);

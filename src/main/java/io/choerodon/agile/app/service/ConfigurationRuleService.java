@@ -1,12 +1,15 @@
 package io.choerodon.agile.app.service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
+import org.hzero.boot.message.entity.MessageSender;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * 服务接口
@@ -26,7 +29,7 @@ public interface ConfigurationRuleService {
     /**
      * 分页搜索过滤条件
      *
-     * @param projectId projectId
+     * @param pageRequest pageRequest
      * @return ConfigurationRuleVO
      */
     Page<ConfigurationRuleVO> listByProjectId(ConfigurationRuleVO configurationRuleVO, PageRequest pageRequest);
@@ -60,5 +63,11 @@ public interface ConfigurationRuleService {
      */
     List<ConfigurationRuleVO> processRule(List<ConfigurationRuleVO> sourceList, Set<String> fieldList,
                                           boolean allFieldCheck, boolean checkMode);
+
+    List<ConfigurationRuleVO> selectByProjectId(ConfigurationRuleVO configurationRuleVO);
+
+    List<MessageSender> generateAutoRuleTriggerSender(Long userId, String summary, Collection<ConfigurationRuleVO> values, Supplier<Boolean> operator);
+
+    List<Long> selectReceiverByRuleIds(List<Long> ruleIdList, List<String> types);
 }
 

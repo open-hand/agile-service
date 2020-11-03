@@ -274,4 +274,26 @@ public interface AgilePluginService {
      * @return
      */
     SprintDetailVO setSprintPiAndType(Long projectId, Long sprintId, SprintDetailVO sprintDetailVO);
+
+    /**
+     * do 转issueListFieldKVDTOList 设置特性的属性
+     * @param projectId
+     * @param issueListFieldKVDTOList
+     */
+    void doToIssueListFieldKVDTO(Long projectId,List<IssueListFieldKVVO> issueListFieldKVDTOList);
+
+    /**
+     * 项目群子项目下载issue 替换史诗列为特性
+     * @param copyFieldsName
+     * @return
+     */
+    String[] changeFeatureHeaders(String[] copyFieldsName);
+
+    /**
+     * 获取特性的预定义字段
+     * @param organizationId
+     * @param projectId
+     * @return
+     */
+    PredefinedDTO getFeaturePredefined(Long organizationId, Long projectId);
 }
