@@ -71,7 +71,7 @@ public class ConvertUtil {
         return queryProject(projectId).getName();
     }
 
-    private static ProjectVO queryProject(Long projectId) {
+    public static ProjectVO queryProject(Long projectId) {
         ProjectVO projectVO = ORGANIZATION_MAP.get(projectId);
         if (projectVO != null) {
             return projectVO;

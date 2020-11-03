@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.ConfigurationRuleVO;
+import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import org.hzero.boot.message.entity.MessageSender;
@@ -51,7 +52,7 @@ public interface ConfigurationRuleService {
      * @param checkMode 在检查模式下，仅会根据语句条件生成，不会去拼接字段类型条件，仅作检查
      * @return sql
      */
-    String generateSqlQuery(ConfigurationRuleVO configurationRuleVO, boolean checkMode);
+    String generateSqlQuery(ConfigurationRuleVO configurationRuleVO, Map<String, ObjectSchemeFieldDTO> customFieldMap, boolean checkMode);
 
     /**
      * 筛选出检测更新字段受页面规则限制的规则
@@ -61,7 +62,8 @@ public interface ConfigurationRuleService {
      * @param checkMode 在检查模式下，仅会根据语句条件生成，不会去拼接字段类型条件，仅作检查
      * @return 仅对更新字段检测的规则集合
      */
-    List<ConfigurationRuleVO> processRule(List<ConfigurationRuleVO> sourceList, Set<String> fieldList,
+    List<ConfigurationRuleVO> processRule(Long projectId, 
+                                          List<ConfigurationRuleVO> sourceList, Set<String> fieldList,
                                           boolean allFieldCheck, boolean checkMode);
 
     List<ConfigurationRuleVO> selectByProjectId(ConfigurationRuleVO configurationRuleVO);
