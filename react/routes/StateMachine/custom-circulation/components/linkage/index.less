@@ -23,7 +23,23 @@
                 .c7n-pro-select-wrapper {
                     width: 100%;
                 }
+                .c7n-pro-validation-message {
+                  position: absolute;
+                }
             }
         }
     }
+}
+
+.featureLinkage {
+  height: 100%;
+  :global {
+    .c7n-pro-form {
+      height: calc(~"100% - 50px");
+      overflow-y: scroll;
+        .c7n-pro-field-wrapper {
+            margin-bottom: 30px;
+        }
+    }
+}
 }

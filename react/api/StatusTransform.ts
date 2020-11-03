@@ -73,15 +73,15 @@ export interface ILinkage {
 }
 class StatusTransformApi extends Api<StatusTransformApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
-  loadList(issueTypeId: string): Promise<IStatusCirculation[]> {
-    return axios({
+  loadList(issueTypeId: string, applyType?: 'program' | 'agile'): Promise<IStatusCirculation[]> {
+    return this.request({
       method: 'get',
       url: `${this.prefix}/status_transform/list`,
       params: {
-        applyType: getApplyType(),
+        applyType: applyType || getApplyType(),
         issueTypeId,
       },
     });
