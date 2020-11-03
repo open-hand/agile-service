@@ -5,7 +5,7 @@ import { DataSet } from 'choerodon-ui/pro/lib';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
 import { DataSetProps } from 'choerodon-ui/pro/lib/data-set/DataSet';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
-import { getProjectId } from '@/utils/common';
+import { getOrganizationId } from '@/utils/common';
 import { Store } from './useStore';
 
 interface Props {
@@ -146,7 +146,7 @@ const FormDataSet = ({
         required: false,
         // ignore: 'always',
       },
-      {
+      ...type === 'project' ? [{
         name: 'context',
         type: 'string' as FieldType,
         label: formatMessage({ id: 'field.context' }),
@@ -156,7 +156,23 @@ const FormDataSet = ({
         textField: 'name',
         defaultValue: defaultContext,
         lookupAxiosConfig: getLookupConfig('object_scheme_field_context', filterContext, type, id),
-      },
+      }] : [{
+        name: 'context',
+        type: 'string' as FieldType,
+        label: formatMessage({ id: 'field.context' }),
+        required: true,
+        multiple: true,
+        valueField: 'typeCode',
+        textField: 'name',
+        defaultValue: defaultContext,
+        lookupAxiosConfig: ({
+          method: 'get',
+          url: `/agile/v1/organizations/${getOrganizationId()}/object_scheme_field/configs/issue_types`,
+          params: {
+            organizationId: getOrganizationId(),
+          },
+        }),
+      }],
       {
         name: 'defaultValue',
         label: formatMessage({ id: 'field.default' }),
