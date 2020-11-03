@@ -48,6 +48,16 @@ public interface BaseFeignClient {
     @GetMapping(value = "/choerodon/v1/projects/{id}")
     ResponseEntity<ProjectVO> queryProject(@PathVariable("id") Long id);
 
+    /**
+     * 按照Id查询项目
+     *
+     * @param id 要查询的项目ID
+     * @return 查询到的项目
+     */
+    @GetMapping(value = "/choerodon/v1/projects/{id}")
+    ResponseEntity<ProjectVO> queryProject(@PathVariable("id") Long id,
+                                           @RequestParam(value = "with_agile_info") Boolean withAgileInfo);
+
     @GetMapping(value = "/choerodon/v1/projects/{id}/users")
     ResponseEntity<Page<UserDTO>> listUsersByProjectId(@PathVariable("id") Long id,
                                                        @RequestParam("page") int page,

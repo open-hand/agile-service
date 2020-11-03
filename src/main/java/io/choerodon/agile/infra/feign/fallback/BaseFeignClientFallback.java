@@ -39,6 +39,11 @@ public class BaseFeignClientFallback implements BaseFeignClient {
     }
 
     @Override
+    public ResponseEntity<ProjectVO> queryProject(Long id, Boolean withAgileInfo) {
+        throw new CommonException(QUERY_ERROR);
+    }
+
+    @Override
     public ResponseEntity<Page<UserDTO>> listUsersByProjectId(Long id, int page, int size, String param) {
         throw new CommonException(QUERY_ERROR);
     }
