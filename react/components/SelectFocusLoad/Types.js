@@ -290,7 +290,7 @@ export default {
       <Option
         key={issue.issueId}
         value={issue.issueId}
-        showName={issue.issueNum}
+        showName={`${issue.issueNum} ${issue.summary}`}
       >
         <div style={{
           display: 'inline-flex',
@@ -334,7 +334,7 @@ export default {
       <Option
         key={issue.issueId}
         value={issue.issueId}
-        showName={issue.issueNum}
+        showName={`${issue.issueNum} ${issue.summary}`}
       >
         <div style={{
           display: 'inline-flex',

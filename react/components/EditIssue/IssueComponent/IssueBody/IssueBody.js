@@ -2,6 +2,7 @@
 import React, { useContext } from 'react';
 import { Tabs } from 'choerodon-ui';
 import { observer } from 'mobx-react-lite';
+import FieldStar from './Field/FieldStar';
 import IssueDetail from './IssueDetail';
 import IssueDes from './IssueDes';
 import IssueAttachment from './IssueAttachment';
@@ -41,13 +42,14 @@ function IssueBody(props) {
   return (
     <section className={`${prefixCls}-body`} id="scroll-area" style={{ position: 'relative' }}>
       <div style={{ paddingRight: 20 }}>
-        <div className="line-justify" style={{ marginBottom: 10, alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', marginBottom: 10, alignItems: 'flex-start' }}>
           <FieldSummary
             {...props}
             showTitle={false}
             field={{ fieldCode: 'summary', fieldName: '概要' }}
           />
-          <div style={{ flexShrink: 0, color: 'rgba(0, 0, 0, 0.65)' }}>
+          <FieldStar {...props} />
+          <div style={{ flexShrink: 0, marginLeft: 'auto', color: 'rgba(0, 0, 0, 0.65)' }}>
             {!disabled && (
               <IssueDropDown {...props} />
             )}

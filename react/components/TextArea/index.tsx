@@ -16,7 +16,7 @@ const TextAreaWithLengthInfo: React.ForwardRefRenderFunction<TextArea<{}>, TextA
     }
   };
   return (
-    <div>
+    <div className={styles.container}>
       <TextArea ref={ref} defaultValue={propsValue || defaultValue} onInput={handleInput} {...restProps} />
       {props.maxLength && <span className={styles.length_info}>{`${value.length}/${props.maxLength}`}</span>}
     </div>
