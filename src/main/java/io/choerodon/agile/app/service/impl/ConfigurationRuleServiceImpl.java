@@ -453,7 +453,9 @@ public class ConfigurationRuleServiceImpl implements ConfigurationRuleService {
         Object value;
         String fieldType = ruleExpressVO.getFieldType();
         String operation = ruleExpressVO.getOperation();
-        if (CustomFieldType.isOption(fieldType)) {
+        if (StringUtils.equals(ruleExpressVO.getFieldCode(), "subProject")) {
+            value = ruleExpressVO.getProjectIdList();
+        } else if (CustomFieldType.isOption(fieldType)) {
             value = ConfigurationRule.OpSqlMapping.isCollOp(operation) ? ruleExpressVO.getValueIdList() : ruleExpressVO.getValueId();
         } else if (CustomFieldType.isDate(fieldType)) {
             value = BooleanUtils.isTrue(ruleExpressVO.getNowFlag()) ? ConfigurationRule.SQL_VAR_NOW_EXPRESS : ruleExpressVO.getValueDate();

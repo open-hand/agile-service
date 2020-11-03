@@ -54,6 +54,16 @@ public class RuleExpressVO {
     private Date valueDate;
     @ApiModelProperty("时分秒快速搜索值")
     private String valueDateHms;
+    @ApiModelProperty("项目idList")
+    private List<Long> projectIdList;
+
+    public List<Long> getProjectIdList() {
+        return projectIdList;
+    }
+
+    public void setProjectIdList(List<Long> projectIdList) {
+        this.projectIdList = projectIdList;
+    }
 
     public Boolean getNowFlag() {
         return nowFlag;
