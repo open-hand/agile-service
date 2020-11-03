@@ -74,7 +74,9 @@ const SelectFocusLoad = (props) => {
           defaultValue = getDefaultValue(list);
         }
         if (afterLoad) {
-          afterLoad(list, defaultValue);
+          setTimeout(() => {
+            afterLoad(list, defaultValue);
+          });
         }
       });
     }
