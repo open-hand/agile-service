@@ -113,6 +113,28 @@
         AND osf.code = #{fieldCode}
     </select>
 
+    <select id="queryByFieldCodeList" resultMap="objectSchemeFieldMap">
+        SELECT
+        osf.*,
+        flv.NAME AS field_type_name
+        FROM
+        fd_object_scheme_field osf
+        LEFT JOIN lookup_value flv ON flv.value_code = osf.field_type
+        AND flv.type_code = 'field_type'
+        WHERE
+        (
+        osf.is_system = 0
+        AND ( osf.organization_id = #{organizationId}
+        AND osf.project_id IS NULL
+        <if test="projectId != null">
+            OR osf.project_id = #{projectId}
+        </if>))
+        AND osf.code IN
+        <foreach collection="fieldCodeList" item="fieldCode" separator="," open="(" close=")">
+            #{fieldCode}
+        </foreach>
+    </select>
+
     <resultMap id="objectSchemeFieldDetailMap" type="io.choerodon.agile.api.vo.ObjectSchemeFieldDetailVO">
         <id property="id" column="id"/>
         <id property="code" column="code"/>

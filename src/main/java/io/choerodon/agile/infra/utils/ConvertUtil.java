@@ -25,6 +25,7 @@ public class ConvertUtil {
     }
 
     private static final Map<Long, ProjectVO> ORGANIZATION_MAP = new ConcurrentHashMap<>();
+    private static final Map<Long, ProjectVO> PROJECT_WITHOUT_AGILE_MAP = new ConcurrentHashMap<>();
 
     /**
      * 根据projectId获取issue类型Map
@@ -71,7 +72,7 @@ public class ConvertUtil {
         return queryProject(projectId).getName();
     }
 
-    private static ProjectVO queryProject(Long projectId) {
+    public static ProjectVO queryProject(Long projectId) {
         ProjectVO projectVO = ORGANIZATION_MAP.get(projectId);
         if (projectVO != null) {
             return projectVO;
@@ -79,6 +80,21 @@ public class ConvertUtil {
             projectVO = SpringBeanUtil.getBean(BaseFeignClient.class).queryProject(projectId).getBody();
             if (projectVO != null) {
                 ORGANIZATION_MAP.put(projectId, projectVO);
+                return projectVO;
+            } else {
+                throw new CommonException("error.queryProject.notFound");
+            }
+        }
+    }
+
+    public static ProjectVO queryProjectWithoutAgile(Long projectId) {
+        ProjectVO projectVO = PROJECT_WITHOUT_AGILE_MAP.get(projectId);
+        if (projectVO != null) {
+            return projectVO;
+        } else {
+            projectVO = SpringBeanUtil.getBean(BaseFeignClient.class).queryProject(projectId, false).getBody();
+            if (projectVO != null) {
+                PROJECT_WITHOUT_AGILE_MAP.put(projectId, projectVO);
                 return projectVO;
             } else {
                 throw new CommonException("error.queryProject.notFound");
