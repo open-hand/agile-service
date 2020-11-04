@@ -536,7 +536,7 @@ class CreateIssue extends Component {
                   }
                 </IsInProgram>
               ),
-            newIssueTypeCode === 'sub_task' ? (
+            newIssueTypeCode === 'sub_task' && !['sub_task', 'sub_bug', 'feature'].includes(mode) ? (
               <FormItem>
                 {getFieldDecorator('subTaskParent', {
                   rules: [{ required: true, message: '父级任务为必选项' }],
@@ -552,7 +552,7 @@ class CreateIssue extends Component {
                 )}
               </FormItem>
             ) : null,
-            newIssueTypeCode === 'bug' ? (
+            newIssueTypeCode === 'bug' && !['sub_task', 'sub_bug', 'feature'].includes(mode) ? (
               <FormItem>
                 {getFieldDecorator('subBugParent', {
                 })(
