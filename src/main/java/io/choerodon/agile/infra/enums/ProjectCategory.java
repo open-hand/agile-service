@@ -25,6 +25,10 @@ public class ProjectCategory {
      */
     public static final String GENERAL = "GENERAL";
     /**
+     * 运维项目
+     */
+    public static final String OPERATIONS = "OPERATIONS";
+    /**
      * 项目群子项目
      */
     public static final String PROGRAM_PROJECT = "PROGRAM_PROJECT";
@@ -32,7 +36,7 @@ public class ProjectCategory {
     public static String getApplyType(String category){
         if (PROGRAM.equals(category)) {
             return SchemeApplyType.PROGRAM;
-        } else if (AGILE.equals(category) || GENERAL.equals(category)) {
+        } else if (AGILE.equals(category) || GENERAL.equals(category) || OPERATIONS.equals(category)) {
             return SchemeApplyType.AGILE;
         } else {
             throw new CommonException("error.project.category.illegal");
