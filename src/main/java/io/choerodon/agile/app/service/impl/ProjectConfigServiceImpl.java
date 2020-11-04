@@ -519,6 +519,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         List<StatusMachineNodeDTO> select = statusMachineNodeMapper.select(stateMachineNode);
         if (CollectionUtils.isEmpty(select)) {
             List<StatusMachineNodeVO> statusMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(organizationId, stateMachineId, false);
+            stateMachineNode.setType(NodeType.CUSTOM);
             stateMachineNodeService.baseCreate(stateMachineNode);
             if (Boolean.TRUE.equals(defaultStatus)) {
                 defaultStatus(projectId, issueTypeId, stateMachineId, statusId);
