@@ -36,4 +36,6 @@ public interface ProjectConfigMapper extends BaseMapper<ProjectConfigDTO> {
     List<ProjectConfigDTO> queryByProjectIds(@Param("projectIds") List<Long> projectIds);
 
     List<ProjectConfigDTO> queryConfigsBySchemeId(@Param("schemeType") String schemeType, @Param("schemeId") Long schemeId);
+
+    List<Long> getExistStatusTypeIds(@Param("organizationId") Long organizationId, @Param("statusId") Long statusId, @Param("stateMachineSchemeId") Long stateMachineSchemeId);
 }

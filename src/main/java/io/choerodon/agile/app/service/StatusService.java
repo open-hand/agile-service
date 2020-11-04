@@ -108,4 +108,14 @@ public interface StatusService {
     void deleteStatus(Long projectId,Long statusId,String applyType,List<DeleteStatusTransferVO> statusTransferVOS);
 
     Map<String, Object> checkDeleteStatus(Long projectId, String applyType,Long statusId);
+
+    /**
+     * 校验状态名字是否未被使用
+     *
+     * @param organizationId 组织id
+     * @param projectId 项目Id
+     * @param name           名称
+     * @return
+     */
+    StatusCheckVO projectCheckName(Long projectId , Long organizationId, String name);
 }

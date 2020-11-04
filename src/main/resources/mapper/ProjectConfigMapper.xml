@@ -76,4 +76,19 @@
         AND scheme_type = #{schemeType}
     </select>
 
+    <select id="getExistStatusTypeIds" resultType="java.lang.Long">
+         SELECT
+            smsc.issue_type_id
+         FROM
+            fd_status_machine_scheme_config smsc
+            JOIN fd_status_machine_node smn ON smsc.organization_id = smn.organization_id
+            AND smsc.state_machine_id = smn.state_machine_id
+         WHERE
+            smsc.organization_id = #{organizationId}
+            AND smsc.scheme_id = #{stateMachineSchemeId}
+            AND smn.status_id = #{statusId}
+         GROUP BY
+            smsc.issue_type_id
+    </select>
+
 </mapper>

@@ -223,4 +223,6 @@ public interface ProjectConfigService {
     void checkDeleteStatusByProject(Long projectId, String applyType, Long statusId);
 
     void checkDeleteNode(Long projectId, Long issueTypeId, String applyType, Long nodeId);
+
+    List<IssueTypeVO> checkExistStatusIssueType(Long projectId, Long organizationId, Long statusId);
 }
