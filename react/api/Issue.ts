@@ -1,4 +1,4 @@
-import { axios, stores } from '@choerodon/boot';
+import { axios, stores, Choerodon } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import Api from './Api';
 
@@ -121,7 +121,16 @@ class IssueApi extends Api<IssueApi> {
     * @param issueObj
     * @param projectId
     */
-  update = (issueObj: UIssue) => axios.put(`${this.prefix}/issues`, issueObj)
+  update = async (issueObj: UIssue) => {
+    try {
+      return await axios.put(`${this.prefix}/issues`, issueObj, {
+        noPrompt: true,
+      });
+    } catch (error) {
+      Choerodon.prompt('该问题项详情信息已被锁定，请刷新后重新编辑', 'error');
+      throw error;
+    }
+  }
 
   /**
     * 更新问题状态
