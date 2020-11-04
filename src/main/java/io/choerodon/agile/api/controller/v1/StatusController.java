@@ -137,7 +137,7 @@ public class StatusController extends BaseController {
     public ResponseEntity<StatusCheckVO> checkNameOnPro(@PathVariable("project_id") Long projectId,
                                                         @RequestParam("organization_id") Long organizationId,
                                                         @RequestParam("name") String name) {
-        return Optional.ofNullable(statusService.checkName(organizationId, name))
+        return Optional.ofNullable(statusService.projectCheckName(projectId,organizationId, name))
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.statusName.check"));
     }

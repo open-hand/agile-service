@@ -3,6 +3,8 @@ package io.choerodon.agile.api.vo;
 import io.swagger.annotations.ApiModelProperty;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 
+import java.util.List;
+
 /**
  * Created by HuangFuqiang@choerodon.io on 2018/11/30.
  * Email: fuqianghuang01@gmail.com
@@ -17,6 +19,8 @@ public class StatusCheckVO {
     private String name;
     @ApiModelProperty(value = "状态类型（todo/doing/done/none/prepare）")
     private String type;
+
+    private List<IssueTypeVO> existIssueTypeVO;
 
     public void setStatusExist(Boolean statusExist) {
         this.statusExist = statusExist;
@@ -48,5 +52,13 @@ public class StatusCheckVO {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public List<IssueTypeVO> getExistIssueTypeVO() {
+        return existIssueTypeVO;
+    }
+
+    public void setExistIssueTypeVO(List<IssueTypeVO> existIssueTypeVO) {
+        this.existIssueTypeVO = existIssueTypeVO;
     }
 }

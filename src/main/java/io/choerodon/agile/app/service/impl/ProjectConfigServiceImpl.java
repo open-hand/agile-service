@@ -601,6 +601,20 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         checkStatusLink(projectId, issueTypeId, nodeId);
     }
 
+    @Override
+    public List<IssueTypeVO> checkExistStatusIssueType(Long projectId, Long organizationId, Long statusId) {
+        String applyType = Objects.equals(ConvertUtil.queryProject(projectId).getCategory(),SchemeApplyType.PROGRAM) ? "program" : "agile";
+        Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
+        if (stateMachineSchemeId == null) {
+            throw new CommonException(ERROR_STATEMACHINESCHEMEID_NULL);
+        }
+        List<Long> issueTypeIds = projectConfigMapper.getExistStatusTypeIds(organizationId,statusId,stateMachineSchemeId);
+        if(CollectionUtils.isEmpty(issueTypeIds)){
+            return new ArrayList<>();
+        }
+        return modelMapper.map(issueTypeMapper.queryIssueTypeList(organizationId, issueTypeIds),new TypeToken<List<IssueTypeVO>>(){}.getType());
+    }
+
     private StatusMachineNodeDTO checkStatusLink(Long projectId, Long issueTypeId, Long nodeId) {
         StatusMachineNodeDTO machineNodeDTO = statusMachineNodeMapper.selectByPrimaryKey(nodeId);
         Assert.notNull(machineNodeDTO, BaseConstants.ErrorCode.DATA_NOT_EXISTS);

@@ -196,6 +196,15 @@ public class StatusServiceImpl implements StatusService {
     }
 
     @Override
+    public StatusCheckVO projectCheckName(Long projectId, Long organizationId, String name) {
+        StatusCheckVO statusCheckVO = checkName(organizationId, name);
+        if (Boolean.TRUE.equals(statusCheckVO.getStatusExist())) {
+            statusCheckVO.setExistIssueTypeVO(projectConfigService.checkExistStatusIssueType(projectId,organizationId,statusCheckVO.getId()));
+        }
+        return statusCheckVO;
+    }
+
+    @Override
     public Map<Long, StatusDTO> batchStatusGet(List<Long> ids) {
         if (!ids.isEmpty()) {
             List<StatusDTO> statuses = statusMapper.batchStatusGet(ids);
