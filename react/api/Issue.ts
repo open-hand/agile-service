@@ -225,8 +225,8 @@ class IssueApi extends Api<IssueApi> {
     * @param issueId//问题id
     * @param creatorId//问题创建者id
     */
-  delete(issueId: number, creatorId: number) {
-    if (creatorId === AppState.userInfo.id) {
+  delete(issueId: number, creatorId: string) {
+    if (creatorId.toString() === AppState.userInfo.id.toString()) {
       return axios.delete(`/agile/v1/projects/${getProjectId()}/issues/delete_self_issue/${issueId}`);
     }
     return axios.delete(`/agile/v1/projects/${getProjectId()}/issues/${issueId}`);
