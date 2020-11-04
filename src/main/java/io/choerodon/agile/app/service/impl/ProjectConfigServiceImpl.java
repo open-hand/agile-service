@@ -514,7 +514,6 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         StatusMachineNodeDTO stateMachineNode = new StatusMachineNodeDTO();
         stateMachineNode.setStatusId(statusId);
         stateMachineNode.setOrganizationId(organizationId);
-        stateMachineNode.setType(NodeType.CUSTOM);
         stateMachineNode.setStateMachineId(stateMachineId);
         // 校验是否已存在关联的状态
         List<StatusMachineNodeDTO> select = statusMachineNodeMapper.select(stateMachineNode);
