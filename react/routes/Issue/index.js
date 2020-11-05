@@ -123,6 +123,7 @@ const Issue = observer(() => {
         },
         expand: true,
       });
+      await IssueStore.query();
     } else {
       const { pageInfo = {} } = localPageCacheStore.getItem('issues.table') || {};
       await IssueStore.query(pageInfo.currentPage);

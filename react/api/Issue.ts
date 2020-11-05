@@ -127,7 +127,7 @@ class IssueApi extends Api<IssueApi> {
         noPrompt: true,
       });
     } catch (error) {
-      Choerodon.prompt('该问题项详情信息已被锁定，请刷新后重新编辑', 'error');
+      Choerodon.prompt('该问题项详情信息已被锁定，请重新打开问题详情进行编辑。', 'error');
       throw error;
     }
   }
