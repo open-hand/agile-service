@@ -13,6 +13,7 @@ import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.ProjectUtil;
+import io.choerodon.agile.infra.utils.SagaTopic;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -604,7 +605,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 
     @Override
     public List<IssueTypeVO> checkExistStatusIssueType(Long projectId, Long organizationId, Long statusId) {
-        String applyType = Objects.equals(ConvertUtil.queryProject(projectId).getCategory(),SchemeApplyType.PROGRAM) ? "program" : "agile";
+        String applyType = Objects.equals(ConvertUtil.queryProject(projectId).getCategory(), ProjectCategory.PROGRAM) ? "program" : "agile";
         Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
         if (stateMachineSchemeId == null) {
             throw new CommonException(ERROR_STATEMACHINESCHEMEID_NULL);
