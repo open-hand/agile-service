@@ -43,9 +43,10 @@ class MergeRequest extends Component {
   }
 
   createMergeRequest(record) {
+    const { projectId } = this.props;
     const win = window.open('');
     const { applicationId, gitlabMergeRequestId } = record;
-    devOpsApi.loadGitUrl(applicationId).then((res) => {
+    devOpsApi.project(projectId).loadGitUrl(applicationId).then((res) => {
       const url = `${res}/merge_requests/${gitlabMergeRequestId}`;
       win.location.href = url;
     })

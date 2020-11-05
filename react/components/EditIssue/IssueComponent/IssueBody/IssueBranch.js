@@ -14,7 +14,7 @@ const STATUS_SHOW = {
   merged: '已合并',
   closed: '关闭',
 };
-const IssueBranch = observer(({ store, disabled }) => {
+const IssueBranch = observer(({ store, disabled, projectId }) => {
   const [commitShow, setCommitShow] = useState(false);
   const [mergeRequestShow, setMergeRequestShow] = useState(false);
 
@@ -141,7 +141,7 @@ const IssueBranch = observer(({ store, disabled }) => {
         </div>
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
-            <Tooltip placement="topRight" title="创建分支" getPopupContainer={triggerNode => triggerNode.parentNode}>
+            <Tooltip placement="topRight" title="创建分支" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
               <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => store.setCreateBranchShow(true)}>
                 <Icon type="playlist_add icon" />
               </Button>
@@ -166,6 +166,7 @@ const IssueBranch = observer(({ store, disabled }) => {
       {
         mergeRequestShow ? (
           <MergeRequest
+            projectId={projectId}
             issueId={issueId}
             issueNum={issueNum}
             num={totalMergeRequest}
