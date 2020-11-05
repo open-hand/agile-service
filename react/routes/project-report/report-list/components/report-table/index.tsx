@@ -112,9 +112,8 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
           }
           return (
             <UserHead
-            // @ts-ignore
-              style={{ display: 'inline-block' }}
-              hiddenText
+              // @ts-ignore
+              style={{ display: 'inline-flex' }}
               user={createdUser as User}
             />
           );

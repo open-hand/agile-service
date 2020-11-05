@@ -16,7 +16,7 @@ const ReportList: React.FC = () => {
         <Button icon="playlist_add" onClick={handleAddClick}>添加报告内容</Button>
       </Header>
       <Breadcrumb />
-      <Content>
+      <Content style={{ paddingTop: 0 }}>
         <ReportTable onClick={handleAddClick} />
       </Content>
     </Page>
