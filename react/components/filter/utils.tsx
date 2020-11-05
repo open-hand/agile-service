@@ -43,8 +43,6 @@ export function renderFlatField(field: IFilterField, { element, removeButton }: 
           marginRight: 10, marginTop: 0, flex: 1, flexShrink: 1,
         },
         className,
-        dropdownMatchSelectWidth: false,
-        maxTagCount: 3,
       })}
       {removeButton && (
         <div
@@ -76,10 +74,8 @@ function renderField(field: IFilterField, { element, removeButton }: { element: 
     <div key={field.code} style={{ display: 'flex', alignItems: 'center' }}>
       {React.cloneElement(element, {
         style: {
-          marginRight: 10, marginBottom: 10, marginTop: 10, flex: 1, flexShrink: 1,
+          marginRight: 10, marginBottom: 10, marginTop: 10, flex: 1, flexShrink: 1, maxWidth: 'calc(100% - 50px)',
         },
-        dropdownMatchSelectWidth: false,
-        maxTagCount: 3,
         labelLayout: 'float',
       })}
       {removeButton}
