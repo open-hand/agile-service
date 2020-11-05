@@ -10,7 +10,6 @@ import WYSIWYGViewer from '../../WYSIWYGViewer';
 import { DatetimeAgo } from '../../CommonComponent';
 import './Log.less';
 
-
 class Log extends Component {
   constructor(props, context) {
     super(props, context);
@@ -132,6 +131,7 @@ class Log extends Component {
             </span>
           </div>
           <div className="c7n-action">
+            {hasPermission && (
             <Icon
               role="none"
               type="mode_edit mlr-3 pointer"
@@ -143,6 +143,7 @@ class Log extends Component {
                 });
               }}
             />
+            )}
             {hasPermission
               ? (
                 <Popconfirm
@@ -158,8 +159,7 @@ class Log extends Component {
                     type="delete_forever mlr-3 pointer"
                   />
                 </Popconfirm>
-              ) : ''
-            }
+              ) : ''}
           </div>
         </div>
         <div className="line-start" style={{ color: 'rgba(0, 0, 0, 0.65)', marginTop: '10px' }}>
