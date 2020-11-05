@@ -7,7 +7,6 @@ import EditIssueContext from '../../stores';
 import Divider from './Divider';
 
 const IssueWorkLog = observer(({
-  hasPermission,
   reloadIssue,
 }) => {
   const { store, disabled } = useContext(EditIssueContext);
@@ -17,13 +16,13 @@ const IssueWorkLog = observer(({
     return (
       <div className="c7n-log-list">
         {
-          worklogs.map(worklog => (
+          worklogs.map((worklog) => (
             <Log
               key={worklog.logId}
               worklog={worklog}
               onDeleteLog={reloadIssue}
               onUpdateLog={reloadIssue}
-              hasPermission={hasPermission}
+              disabled={disabled}
             />
           ))
         }
@@ -39,7 +38,7 @@ const IssueWorkLog = observer(({
         </div>
         {!disabled && (
           <div className="c7n-title-right" style={{ marginLeft: '14px' }}>
-            <Tooltip placement="topRight" title="登记工作" getPopupContainer={triggerNode => triggerNode.parentNode}>
+            <Tooltip placement="topRight" title="登记工作" getPopupContainer={(triggerNode) => triggerNode.parentNode}>
               <Button style={{ padding: '0 6px' }} className="leftBtn" funcType="flat" onClick={() => store.setWorkLogShow(true)}>
                 <Icon type="playlist_add icon" />
               </Button>
