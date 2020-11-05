@@ -5,11 +5,13 @@ import { observer } from 'mobx-react';
 import { Icon, Animate } from 'choerodon-ui/pro';
 import isString from 'lodash/isString';
 import noop from 'lodash/noop';
+import isNil from 'lodash/isNil';
 import { Select, SelectProps } from 'choerodon-ui/pro/lib/select/Select';
 import { pxToRem, toPx } from 'choerodon-ui/lib/_util/UnitConvertor';
 import measureTextWidth from 'choerodon-ui/pro/lib/_util/measureTextWidth';
 import { stopPropagation } from 'choerodon-ui/pro/lib/_util/EventManager';
 import './FlatSelect.less';
+import { Tooltip } from 'choerodon-ui';
 
 const { Option, OptGroup } = Select;
 
@@ -75,6 +77,22 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
     return undefined;
   }
 
+  getMultipleText() {
+    const values = this.getValues();
+    const repeats: Map<any, number> = new Map<any, number>();
+    const texts = values.map((v) => {
+      const key = this.getValueKey(v);
+      const repeat = repeats.get(key) || 0;
+      const text = this.processText(this.getText(v));
+      repeats.set(key, repeat + 1);
+      if (!isNil(text)) {
+        return text;
+      }
+      return undefined;
+    });
+    return texts.join('，');
+  }
+
   getEditor(): ReactNode {
     const {
       prefixCls,
@@ -86,25 +104,27 @@ class FlatSelect<T extends SelectProps> extends Select<T> {
     if (multiple) {
       return (
         <div key="text" className={otherProps.className}>
-          <Animate
-            component="ul"
-            componentProps={{
-              ref: this.saveTagContainer,
-              onScroll: stopPropagation,
-              style:
+          <Tooltip title={this.getMultipleText()}>
+            <Animate
+              component="ul"
+              componentProps={{
+                ref: this.saveTagContainer,
+                onScroll: stopPropagation,
+                style:
                 height && height !== 'auto' ? { height: pxToRem(toPx(height)! - 2) } : undefined,
-            }}
-            transitionName="zoom"
-            exclusive
-            onEnd={this.handleTagAnimateEnd}
-            onEnter={this.handleTagAnimateEnter}
-          >
-            {this.renderMultipleValues()}
-            {this.renderMultipleEditor({
-              ...otherProps,
-              className: `${prefixCls}-multiple-input`,
-            } as T)}
-          </Animate>
+              }}
+              transitionName="zoom"
+              exclusive
+              onEnd={this.handleTagAnimateEnd}
+              onEnter={this.handleTagAnimateEnter}
+            >
+              {this.renderMultipleValues()}
+              {this.renderMultipleEditor({
+                ...otherProps,
+                className: `${prefixCls}-multiple-input`,
+              } as T)}
+            </Animate>
+          </Tooltip>
         </div>
       );
     }
