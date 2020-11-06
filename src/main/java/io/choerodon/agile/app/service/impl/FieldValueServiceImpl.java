@@ -190,9 +190,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             values.forEach(value -> value.setFieldId(create.getFieldId()));
             fieldValues.addAll(values);
         });
-        if (!fieldValues.isEmpty()) {
-            fieldValueMapper.batchInsert(projectId, instanceId, paramDTO.getSchemeCode(), fieldValues);
-        }
+        this.self().checkCreateCustomField(projectId, instanceId, paramDTO.getSchemeCode(), fieldValues, pageFields.stream().map(PageFieldDTO::getFieldCode).collect(Collectors.toList()));
     }
 
     @Override
