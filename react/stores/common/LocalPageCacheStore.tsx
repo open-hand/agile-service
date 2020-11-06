@@ -8,24 +8,23 @@ interface LocalPageCacheStoreInterface {
   clear: () => void,
 }
 const pages = new Map<string, any>();
-const currentProjectId = getProjectId();
 class LocalPageCacheStore implements LocalPageCacheStoreInterface {
   pageKeyList = ['scrumboard', 'issues']
 
   setItem(pageKey: string, data: any) {
-    pages.set(`${currentProjectId}-${pageKey}`, data);
+    pages.set(`${getProjectId()}-${pageKey}`, data);
   }
 
   mergeSetItem<T extends object>(pageKey: string, data: T) {
-    pages.set(`${currentProjectId}-${pageKey}`, merge(pages.get(`${currentProjectId}-${pageKey}`), data));
+    pages.set(`${getProjectId()}-${pageKey}`, merge(pages.get(`${getProjectId()}-${pageKey}`), data));
   }
 
   getItem(pageKey: string) {
-    return pages.get(`${currentProjectId}-${pageKey}`);
+    return pages.get(`${getProjectId()}-${pageKey}`);
   }
 
   remove(pageKey: string) {
-    pages.delete(`${currentProjectId}-${pageKey}`);
+    pages.delete(`${getProjectId()}-${pageKey}`);
   }
 
   clear = () => {
