@@ -572,7 +572,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         statusMachineNodeDTO.setId(nodeId);
         statusMachineNodeMapper.delete(statusMachineNodeDTO);
         // 检测状态是否与其他node有关联
-        if (!statusMachineNodeMapper.existByProjectId(projectId, currentStatusId)){
+        if (!statusMachineNodeMapper.existByProjectId(projectId, currentStatusId,applyType)){
             // 无关联则删除与issue_status关联
             IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
             issueStatusDTO.setProjectId(projectId);
