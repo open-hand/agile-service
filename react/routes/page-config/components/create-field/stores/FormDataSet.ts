@@ -16,7 +16,6 @@ interface Props {
   id: string,
   isEdit: boolean,
   oldRecord?: Record,
-  userOptionDataSet: DataSet,
   defaultContext?: string[],
   filterContext?: string[], // 过滤的问题类型
   localCheckCode?: (code: string) => Promise<boolean> | boolean,
@@ -52,7 +51,7 @@ const dateList = ['time', 'datetime', 'date'];
 
 const FormDataSet = ({
   formatMessage, type, store, schemeCode, id, isEdit, filterContext,
-  oldRecord, userOptionDataSet, localCheckCode, localCheckName, defaultContext,
+  oldRecord, localCheckCode, localCheckName, defaultContext,
 }: Props): DataSetProps => {
   const regex = /^[0-9a-zA-Z_]+$/;
   async function checkCode(value: string): Promise<boolean | string | undefined> {
@@ -179,13 +178,6 @@ const FormDataSet = ({
         valueField: 'id',
         textField: 'realName',
         dynamicProps: {
-          options: ({ record }: { record: Record }) => {
-            const fieldType = record.get('fieldType');
-            if (fieldType === 'member') {
-              return userOptionDataSet;
-            }
-            return null;
-          },
           max: ({ record }: { record: Record }) => {
             const fieldType = record.get('fieldType');
             if (fieldType === 'number') {

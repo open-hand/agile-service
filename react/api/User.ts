@@ -47,6 +47,23 @@ class UserApi extends Api<UserApi> {
     });
   }
 
+  getAllInOrg(param?: string, page?: number, userId?: number, size?: number, projectId?: number): Promise<{
+    list: User[]
+    hasNextPage: boolean
+  }> {
+    return this.request({
+      method: 'get',
+      url: `/iam/choerodon/v1/organizations/${projectId || getProjectId()}/users`,
+      params: {
+        param,
+        id: userId,
+        page: page || 1,
+        size: size || 20,
+      },
+      cache: true,
+    });
+  }
+
   /**
    * 在项目层查询用户列表（包括离职用户）
    * @param param

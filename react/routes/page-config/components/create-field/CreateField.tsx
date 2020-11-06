@@ -42,7 +42,7 @@ function CreateField() {
   const {
     formDataSet, formatMessage, modal, onSubmitLocal,
     AppState: { currentMenuType: { type, id, organizationId } },
-    schemeCode, isEdit, handleRefresh, userOptionDataSet,
+    schemeCode, isEdit, handleRefresh,
   } = ctx;
   const [fieldOptions, setFieldOptions] = useState<Array<any>>([]);
 
@@ -335,6 +335,12 @@ function CreateField() {
         return (
           <SelectUser
             name="defaultValue"
+            autoQueryConfig={{
+              selectedUserIds: current?.get('defaultValue'),
+              // @ts-ignore
+              queryUserRequest: async (userId: number) => (type === 'project' ? userApi.getAllInProject('', undefined, userId) : userApi.getAllInOrg('', undefined, userId)),
+            }}
+            request={({ filter, page }) => (type === 'project' ? userApi.getAllInProject(filter, page) : userApi.getAllInOrg(filter, page))}
           />
         );
       default:
