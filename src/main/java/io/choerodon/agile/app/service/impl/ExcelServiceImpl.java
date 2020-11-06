@@ -972,7 +972,7 @@ public class ExcelServiceImpl implements ExcelService {
             sprintMap.put(sprintDTO.getSprintName(), sprintDTO.getSprintId());
         }
         //第二列为所属史诗
-        Map<String, Long> theSecondColumnMap = getEpicMap(projectId);
+        Map<String, Long> theSecondColumnMap = getSecondColumnMap(organizationId, projectId, withFeature);
 
         Map<String, Long> managerMap = getManagers(projectId);
         List<String> managers = new ArrayList<>(managerMap.keySet());
@@ -1094,6 +1094,14 @@ public class ExcelServiceImpl implements ExcelService {
             status = SUCCESS;
         }
         updateFinalRecode(res, successCount, failCount, status);
+    }
+
+    private Map<String, Long> getSecondColumnMap(Long organizationId, Long projectId, boolean withFeature) {
+        if (withFeature) {
+            return agilePluginService.getFeatureMap(organizationId, projectId);
+        } else {
+            return getEpicMap(projectId);
+        }
     }
 
     protected Set<Long> batchInsert(Long projectId, int rowNum, Map<String, IssueTypeVO> issueTypeMap,
