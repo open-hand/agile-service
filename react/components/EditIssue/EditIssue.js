@@ -56,6 +56,7 @@ function EditIssue() {
     isFullScreen,
     onChangeWidth,
     transformIssue,
+    setSelect,
   } = useContext(EditIssueContext);
   const [issueTypes] = useIssueTypes();
   const container = useRef();
@@ -96,6 +97,9 @@ function EditIssue() {
       store.setIssueFields(issue, fields);
       if (issueStore) {
         issueStore.setSelectedIssue(issue);
+      }
+      if (setSelect) {
+        setSelect(issue);
       }
       // 3. 加载额外信息
       const [

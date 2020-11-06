@@ -10,12 +10,12 @@ interface Props {
 }
 
 const IssueParentSummary: React.FC<Props> = ({
-  parentSummary, disabled, parentIssueId, reloadIssue, resetIssue,
+  parentSummary, parentIssueId, reloadIssue, resetIssue,
 }) => {
   const handleClickParent = () => {
-    if (disabled) {
-      return false;
-    }
+    // if (disabled) {
+    //   return false;
+    // }
     if (reloadIssue) {
       reloadIssue(parentIssueId);
     }
@@ -37,7 +37,6 @@ const IssueParentSummary: React.FC<Props> = ({
           <span
             role="none"
             className="primary parent-summary-hidden"
-            style={{ cursor: disabled ? 'auto' : 'pointer' }}
             onClick={handleClickParent}
           >
             {parentSummary}
