@@ -22,6 +22,7 @@ import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.domain.Sort;
 import org.hzero.boot.message.MessageClient;
+import org.hzero.core.base.AopProxy;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class FieldValueServiceImpl implements FieldValueService {
+public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldValueService> {
     private static final String ERROR_PAGECODE_ILLEGAL = "error.pageCode.illegal";
     private static final String ERROR_CONTEXT_ILLEGAL = "error.context.illegal";
     protected static final String ERROR_SCHEMECODE_ILLEGAL = "error.schemeCode.illegal";
@@ -101,8 +102,15 @@ public class FieldValueServiceImpl implements FieldValueService {
             values.forEach(value -> value.setFieldId(createDTO.getFieldId()));
             fieldValues.addAll(values);
         });
+        this.self().checkCreateCustomField(projectId, instanceId, schemeCode, fieldValues, createDTOs.stream().map(PageFieldViewCreateVO::getFieldCode).collect(Collectors.toList()));
+
+    }
+
+    @RuleNotice(event = RuleNoticeEvent.ISSUE_CREATED, fieldListName = "fieldList", idPosition = "arg")
+    @Override
+    public void checkCreateCustomField(Long projectId, Long id, String schemeCode, List<FieldValueDTO> fieldValues, List<String> fieldList) {
         if (!fieldValues.isEmpty()) {
-            fieldValueMapper.batchInsert(projectId, instanceId, schemeCode, fieldValues);
+            fieldValueMapper.batchInsert(projectId, id, schemeCode, fieldValues);
         }
     }
 

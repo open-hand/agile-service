@@ -79,10 +79,9 @@ public class ProjectReportController {
     @ApiOperation(value = "发送项目报表")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @PostMapping("/send/{id}")
-    public ResponseEntity<Void> send(@PathVariable("project_id") Long projectId,
+    public ResponseEntity<ProjectReportDTO> send(@PathVariable("project_id") Long projectId,
                                      @PathVariable("id") @Encrypt Long id,
                                      @RequestBody ProjectReportVO projectReportVO) {
-        projectReportService.send(projectId, id, projectReportVO.getImgData());
-        return Results.success();
+        return Results.success(projectReportService.send(projectId, id, projectReportVO.getImgData()));
     }
 }

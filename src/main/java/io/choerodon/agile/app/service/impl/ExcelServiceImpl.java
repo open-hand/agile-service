@@ -407,7 +407,13 @@ public class ExcelServiceImpl implements ExcelService {
             if (u.getEnabled()) {
                 String realName = u.getRealName();
                 String loginName = u.getLoginName();
-                String name = realName + "（" + loginName + "）";
+                Boolean isLdap = u.getLdap();
+                String name;
+                if (Boolean.TRUE.equals(isLdap)) {
+                    name = realName + "（" + loginName + "）";
+                } else {
+                    name = realName + "（" + u.getEmail() + "）";
+                }
                 managerMap.put(name, u.getId());
             }
         });
