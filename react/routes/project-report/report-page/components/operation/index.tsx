@@ -64,12 +64,13 @@ const Operation: React.FC<Props> = () => {
   }, [handleExport]);
   const handleSend = useCallback(async (canvas: HTMLCanvasElement) => {
     if (store.baseInfo?.id) {
-      await projectReportApi.send(store.baseInfo?.id, canvas.toDataURL());
+      const { objectVersionNumber } = await projectReportApi.send(store.baseInfo?.id, canvas.toDataURL());
+      store.setObjectVersionNumber(objectVersionNumber);
       setSending(false);
       Choerodon.prompt('发送成功', 'success');
     }
     setSending(false);
-  }, [store.baseInfo?.id]);
+  }, [store]);
   const handleSendClick = useCallback(() => {
     setSending(true);
     exportRef.current?.export(handleSend);

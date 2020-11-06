@@ -165,6 +165,13 @@ class ProjectReportStore {
     this.baseInfo = reportData;
   }
 
+  @action('设置objectVersionNumber')
+  setObjectVersionNumber(objectVersionNumber: number) {
+    if (this.baseInfo) {
+      this.baseInfo.objectVersionNumber = objectVersionNumber;
+    }
+  }
+
   @action('block排序')
   sortBlock(sourceIndex: number, destinationIndex: number) {
     this.blockList = reorder(
