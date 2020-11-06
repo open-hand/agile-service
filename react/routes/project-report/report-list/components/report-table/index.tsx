@@ -11,6 +11,7 @@ import { TableColumnTooltip } from 'choerodon-ui/pro/lib/table/enum';
 import { projectReportApiConfig, projectReportApi } from '@/api';
 import UserHead from '@/components/UserHead';
 import TableAction from '@/components/TableAction';
+import Users from '@/components/tag/users';
 import { User } from '@/common/types';
 import to from '@/utils/to';
 import Empty from '@/components/Empty';
@@ -90,19 +91,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ onClick }) => {
       />
       <Column
         name="receiverList"
-        renderer={({ value: receiverList }) => {
-          if (!receiverList) {
-            return null;
-          }
-          return receiverList.map((user: User) => (
-            <UserHead
-            // @ts-ignore
-              style={{ display: 'inline-block' }}
-              hiddenText
-              user={user}
-            />
-          ));
-        }}
+        renderer={({ value: receiverList }) => <Users data={receiverList} />}
       />
       <Column
         name="createdUser"
