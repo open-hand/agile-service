@@ -562,7 +562,11 @@ export default {
   feature_all: {
     request: ({ filter, page }, requestArgs) => featureApi.queryAllInSubProject(requestArgs, filter, page),
     render: (item) => (
-      <Option key={`${item.issueId}`} value={item.issueId}>{item.summary}</Option>
+      <Option key={`${item.issueId}`} value={item.issueId}>
+        <Tooltip title={item.summary}>
+          {item.summary}
+        </Tooltip>
+      </Option>
     ),
     props: {
       getPopupContainer: (triggerNode) => triggerNode.parentNode,
