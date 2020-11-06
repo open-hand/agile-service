@@ -17,7 +17,7 @@ class LocalPageCacheStore implements LocalPageCacheStoreInterface {
   }
 
   mergeSetItem<T extends object>(pageKey: string, data: T) {
-    pages.set(`${currentProjectId}-${pageKey}`, merge(pages.get(pageKey), data));
+    pages.set(`${currentProjectId}-${pageKey}`, merge(pages.get(`${currentProjectId}-${pageKey}`), data));
   }
 
   getItem(pageKey: string) {
