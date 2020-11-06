@@ -61,7 +61,7 @@ class MergeRequest extends Component {
     const column = [
       {
         title: '编码',
-        dataIndex: 'id',
+        dataIndex: 'gitlabMergeRequestId',
         width: '10%',
         render: (id) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>
