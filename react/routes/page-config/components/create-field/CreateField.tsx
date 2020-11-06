@@ -1,19 +1,17 @@
 import React, {
-  Fragment, useState, useContext, useEffect, useMemo, FormEventHandler,
+  useState, useContext, useEffect,
 } from 'react';
-import { observer, Observer } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import {
   Form, TextField, Select, DatePicker, TimePicker, DateTimePicker,
   CheckBox, NumberField, TextArea, UrlField,
 } from 'choerodon-ui/pro';
 import { Choerodon } from '@choerodon/boot';
-import { debounce } from 'lodash';
+import SelectUser from '@/components/select/select-user';
 import moment from 'moment';
 import { toJS } from 'mobx';
-import UserInfo from '@/components/UserInfo';
 import { randomString } from '@/utils/random';
 import { RenderProps } from 'choerodon-ui/pro/lib/field/FormField';
-import Record from 'choerodon-ui/pro/lib/data-set/Record';
 import { userApi } from '@/api';
 import Store from './stores';
 import DragList from '../drag-list';
@@ -206,22 +204,6 @@ function CreateField() {
     }
   };
 
-  // eslint-disable-next-line react/no-unused-prop-types
-  function memberOptionRender({ record }: { record: Record }) {
-    return <UserInfo name={record.get('realName') || ''} id={record.get('loginName')} avatar={record.get('imageUrl')} />;
-  }
-
-  function loadUserData(value: string) {
-    const userId = formDataSet.current?.get('defaultValue');
-    userOptionDataSet.setQueryParameter('param', value);
-    userOptionDataSet.setQueryParameter('userId', userId);
-    userOptionDataSet.query();
-  }
-
-  const searchData = useMemo(() => debounce((value: string) => {
-    loadUserData(value);
-  }, 500), []);
-
   function getAttachFields() {
     const { current } = formDataSet;
     const isCheck = current?.get('check');
@@ -351,16 +333,8 @@ function CreateField() {
       }
       case 'member':
         return (
-          <Select
+          <SelectUser
             name="defaultValue"
-            searchable
-            searchMatcher="param"
-            onBlur={(e) => { e.persist(); loadUserData(''); }}
-            onInput={(e: any) => {
-              e.persist();
-              searchData(e.target.value);
-            }} // FormEventHandler
-            optionRenderer={memberOptionRender}
           />
         );
       default:
