@@ -163,6 +163,7 @@ class CreateIssue extends Component {
             fieldType: item.fieldType,
             value,
             fieldId: item.fieldId,
+            fieldCode: item.fieldCode,
           });
         }
       });
