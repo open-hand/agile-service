@@ -191,7 +191,7 @@
         JOIN fd_project_config fpc ON fsmsc.scheme_id = fpc.scheme_id
         WHERE fpc.project_id = #{projectId}
         AND fsmn.status_id = #{statusId}
-        AND fpc.apply_type = 'agile'
+        AND fpc.apply_type = #{applyType}
         AND fpc.scheme_type = 'scheme_state_machine'
     </select>
 
