@@ -123,7 +123,7 @@ public class FieldValueUtil {
                     if (isJustStr) {
                         UserDTO userVO = userMap.get(value);
                         if (userVO != null) {
-                            valueStr = userVO.getLoginName() + userVO.getRealName();
+                            valueStr = userVO.getRealName() + "（"+ userVO.getEmail() + "）";
                         }
                     } else {
                         valueStr = userMap.getOrDefault(value, new UserDTO());

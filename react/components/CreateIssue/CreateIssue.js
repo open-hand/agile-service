@@ -163,6 +163,7 @@ class CreateIssue extends Component {
             fieldType: item.fieldType,
             value,
             fieldId: item.fieldId,
+            fieldCode: item.fieldCode,
           });
         }
       });
@@ -183,7 +184,7 @@ class CreateIssue extends Component {
         createLoading: false,
       });
       onOk(res, data);
-      Choerodon.prompt(`${res.issueNum}创建成功`, 'success');
+      Choerodon.prompt(`${res.issueNum || ''}创建成功`, 'success');
     }).catch((e) => {
       form.resetFields();
       this.setState({
@@ -536,7 +537,7 @@ class CreateIssue extends Component {
                   }
                 </IsInProgram>
               ),
-            newIssueTypeCode === 'sub_task' ? (
+            newIssueTypeCode === 'sub_task' && !['sub_task', 'sub_bug', 'feature'].includes(mode) ? (
               <FormItem>
                 {getFieldDecorator('subTaskParent', {
                   rules: [{ required: true, message: '父级任务为必选项' }],
@@ -552,7 +553,7 @@ class CreateIssue extends Component {
                 )}
               </FormItem>
             ) : null,
-            newIssueTypeCode === 'bug' ? (
+            newIssueTypeCode === 'bug' && !['sub_task', 'sub_bug', 'feature'].includes(mode) ? (
               <FormItem>
                 {getFieldDecorator('subBugParent', {
                 })(

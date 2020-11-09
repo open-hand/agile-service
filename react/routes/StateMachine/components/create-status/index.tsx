@@ -1,19 +1,21 @@
 import React, {
-  useEffect, useMemo, useCallback, useState,
+  useEffect, useMemo, useCallback, useState, useRef,
 } from 'react';
 import {
   Modal, Form, DataSet, TextField, Select, SelectBox,
 } from 'choerodon-ui/pro';
-import { stores } from '@choerodon/boot';
+import { stores, axios } from '@choerodon/boot';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { MAX_LENGTH_STATUS } from '@/constants/MAX_LENGTH';
 import { getProjectId, getOrganizationId } from '@/utils/common';
-import { IStatus } from '@/common/types';
+import { IStatus, IIssueType } from '@/common/types';
 import StatusTypeTag from '@/components/tag/status-type-tag';
-
+import { find } from 'lodash';
 import './index.less';
 import { useIssueTypes } from '@/hooks';
 import { statusTransformApiConfig } from '@/api';
+import { observer } from 'mobx-react-lite';
+import useDeepCompareEffect from '@/hooks/useDeepCompareEffect';
 
 const { AppState } = stores;
 const { Option } = SelectBox;
@@ -26,8 +28,14 @@ interface Props {
 const CreateStatus: React.FC<Props> = ({
   modal, onSubmit, selectedIssueType = [],
 }) => {
+  const modalRef = useRef(modal);
+  modalRef.current = modal;
   const [type, setType] = useState<IStatus['valueCode'] | null>(null);
   const [issueTypes] = useIssueTypes();
+  // 记录哪些类型下已经有同名状态
+  const [hasStatusIssueTypes, setHasStatusIssueTypes] = useState<IIssueType[]>([]);
+  const hasStatusIssueTypesRef = useRef<IIssueType[]>([]);
+  hasStatusIssueTypesRef.current = hasStatusIssueTypes;
   const isProgram = AppState.currentMenuType.category === 'PROGRAM';
   const dataSet = useMemo(() => new DataSet({
     autoCreate: true,
@@ -40,27 +48,6 @@ const CreateStatus: React.FC<Props> = ({
           defaultStatus: data.default,
         });
       },
-      // 进行验证 当存在同名状态 将类别自动选择
-      validate: ({ data: { unique } }) => ({
-        url: `agile/v1/projects/${getProjectId()}/status/project_check_name`,
-        method: 'GET',
-        params: {
-          organization_id: getOrganizationId(),
-          name: unique[0].name,
-        },
-        data: null,
-        transformResponse: (res) => {
-          const data = JSON.parse(res);
-          const { statusExist, type: newType } = data;
-          if (statusExist) {
-              dataSet.current?.set('valueCode', newType);
-              setType(newType);
-          } else {
-            setType(null);
-          }
-          return true;
-        },
-      }),
     },
     fields: [
       {
@@ -68,7 +55,6 @@ const CreateStatus: React.FC<Props> = ({
         type: 'string' as FieldType,
         label: '状态名称',
         required: true,
-        unique: true,
       },
       {
         name: 'valueCode',
@@ -89,7 +75,13 @@ const CreateStatus: React.FC<Props> = ({
         required: true,
         textField: 'name',
         valueField: 'id',
-        multiple: true,
+        validator: async (value) => {
+          const result = hasStatusIssueTypesRef.current.filter((item) => value && value.some((v: string) => v === item.id));
+          if (result.length > 0) {
+            return `${result.map((i) => i.name).join(',')}下已有同名状态`;
+          }
+          return true;
+        },
       },
       {
         name: 'default',
@@ -104,12 +96,26 @@ const CreateStatus: React.FC<Props> = ({
     if (selectedIssueType?.length > 0) {
       dataSet.current?.set('issueTypeIds', selectedIssueType);
     }
-  }, [selectedIssueType]);
+  }, [dataSet, selectedIssueType]);
   useEffect(() => {
     if (type && type !== null) {
       dataSet.current?.set('categoryCode', type);
     }
-  }, [type]);
+  }, [dataSet, type]);
+  const issueTypeIds = dataSet.current?.get('issueTypeIds');
+  const disableCreate = useMemo(() => hasStatusIssueTypes.find((issueType) => (issueTypeIds || []).find((id: string) => id === issueType.id)), [hasStatusIssueTypes, issueTypeIds]);
+  useDeepCompareEffect(() => {
+    modalRef.current.update({
+      okProps: {
+        disabled: disableCreate,
+      },
+    });
+  }, [disableCreate]);
+  useDeepCompareEffect(() => {
+    if ((dataSet.current?.get('issueTypeIds') || []).length > 0) {
+      dataSet.current?.getField('issueTypeIds')?.checkValidity();
+    }
+  }, [hasStatusIssueTypes]);
   const handleSubmit = useCallback(async () => {
     if (await dataSet.validate()) {
       try {
@@ -134,8 +140,31 @@ const CreateStatus: React.FC<Props> = ({
           maxLength={MAX_LENGTH_STATUS}
           onInput={(e) => {
             // @ts-ignore
-            dataSet.current?.set('name', e.target.value);
-            dataSet.current?.getField('name')?.checkValidity();
+            const { value } = e.target;
+            if (value) {
+              axios({
+                url: `agile/v1/projects/${getProjectId()}/status/project_check_name`,
+                method: 'GET',
+                params: {
+                  organization_id: getOrganizationId(),
+                  name: value,
+                },
+                data: null,
+              }).then((data: any) => {
+                const { statusExist, type: newType, existIssueTypeVO } = data;
+                if (statusExist) {
+                  dataSet.current?.set('valueCode', newType);
+                  setHasStatusIssueTypes(existIssueTypeVO || []);
+                  setType(newType);
+                } else {
+                  setType(null);
+                  setHasStatusIssueTypes([]);
+                }
+              });
+            } else {
+              setType(null);
+              setHasStatusIssueTypes([]);
+            }
           }}
         />
         <Select
@@ -144,7 +173,7 @@ const CreateStatus: React.FC<Props> = ({
           optionRenderer={({ record }) => (<StatusTypeTag code={record?.get('valueCode') as IStatus['valueCode']} />)}
           disabled={type !== null}
         />
-        <Select name="issueTypeIds">
+        <Select name="issueTypeIds" multiple>
           {issueTypes.map((issueType) => (
             <Option value={issueType.id}>
               {issueType.name}
@@ -159,6 +188,7 @@ const CreateStatus: React.FC<Props> = ({
     </>
   );
 };
+const ObserverCreateStatus = observer(CreateStatus);
 const openCreateStatus = (props: Omit<Props, 'modal'>) => {
   Modal.open({
     title: '创建状态',
@@ -167,8 +197,7 @@ const openCreateStatus = (props: Omit<Props, 'modal'>) => {
     style: {
       width: 380,
     },
-
-    children: <CreateStatus {...props} />,
+    children: <ObserverCreateStatus {...props} />,
   });
 };
 export default openCreateStatus;

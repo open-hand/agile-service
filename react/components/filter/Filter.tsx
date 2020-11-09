@@ -198,10 +198,12 @@ const Filter: React.FC<FilterProps> = ({
           }
           handleFilterChange(field.code, v);
         }}
-        dropdownMatchSelectWidth={false}
-        maxTagCount={3}
-        maxTagTextLength={5}
         className={className}
+        {...flat ? {
+          dropdownMatchSelectWidth: false,
+          maxTagCount: 3,
+          maxTagTextLength: 5,
+        } : {}}
         labelLayout={!flat || isText || isTime ? 'float' as LabelLayout : 'none' as LabelLayout}
         {...isUser ? {
           autoQueryConfig: {

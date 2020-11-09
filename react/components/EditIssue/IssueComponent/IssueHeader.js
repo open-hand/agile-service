@@ -22,7 +22,7 @@ const IssueHeader = (props) => {
       <div className={`${prefixCls}-IssueHeader-top`}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {
-            parentIssueSummary ? (
+            parentIssueSummary || parentRelateSummary ? (
               <Popover
                 overlayClassName={`${prefixCls}-IssueHeader-top-popover`}
                 placement="leftTop"

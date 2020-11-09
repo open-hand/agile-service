@@ -2,6 +2,7 @@ package io.choerodon.agile.app.service;
 
 import com.alibaba.fastjson.JSONObject;
 import io.choerodon.agile.api.vo.*;
+import io.choerodon.agile.infra.dto.FieldValueDTO;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
 import java.util.List;
@@ -32,6 +33,8 @@ public interface FieldValueService {
      * @param createDTOs
      */
     void createFieldValues(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewCreateVO> createDTOs);
+
+    void checkCreateCustomField(Long projectId, Long id, String schemeCode, List<FieldValueDTO> fieldValues, List<String> fieldList);
 
     /**
      * 保存值/修改值

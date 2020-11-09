@@ -10,7 +10,6 @@ import WYSIWYGViewer from '../../WYSIWYGViewer';
 import { DatetimeAgo } from '../../CommonComponent';
 import './Log.less';
 
-
 class Log extends Component {
   constructor(props, context) {
     super(props, context);
@@ -64,13 +63,16 @@ class Log extends Component {
   }
 
   render() {
-    const { worklog, isWide, hasPermission } = this.props;
+    const {
+      worklog, isWide, disabled,
+    } = this.props;
     const { editLog, editLogId, expand } = this.state;
     const {
       realName, loginName,
       userName, createdBy, userImageUrl,
     } = worklog;
     const deltaEdit = text2Delta(editLog);
+
     return (
       <div
         className={`c7n-log ${worklog.logId === editLogId ? 'c7n-log-focus' : ''}`}
@@ -132,18 +134,23 @@ class Log extends Component {
             </span>
           </div>
           <div className="c7n-action">
-            <Icon
-              role="none"
-              type="mode_edit mlr-3 pointer"
-              onClick={() => {
-                this.setState({
-                  editLogId: worklog.logId,
-                  editLog: worklog.description,
-                  expand: true,
-                });
-              }}
-            />
-            {hasPermission
+            {
+              !disabled && (
+              <Icon
+                role="none"
+                type="mode_edit mlr-3 pointer"
+                onClick={() => {
+                  this.setState({
+                    editLogId: worklog.logId,
+                    editLog: worklog.description,
+                    expand: true,
+                  });
+                }}
+              />
+              )
+            }
+
+            {!disabled
               ? (
                 <Popconfirm
                   title="确认要删除该工作日志吗?"
@@ -158,8 +165,7 @@ class Log extends Component {
                     type="delete_forever mlr-3 pointer"
                   />
                 </Popconfirm>
-              ) : ''
-            }
+              ) : ''}
           </div>
         </div>
         <div className="line-start" style={{ color: 'rgba(0, 0, 0, 0.65)', marginTop: '10px' }}>

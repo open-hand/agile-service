@@ -296,4 +296,6 @@ public interface AgilePluginService {
      * @return
      */
     PredefinedDTO getFeaturePredefined(Long organizationId, Long projectId);
+
+    Map<String, Long> getFeatureMap(Long organizationId, Long projectId);
 }

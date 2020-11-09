@@ -13,6 +13,7 @@ import io.choerodon.agile.infra.mapper.*;
 import io.choerodon.agile.infra.utils.ConvertUtil;
 import io.choerodon.agile.infra.utils.EnumUtil;
 import io.choerodon.agile.infra.utils.ProjectUtil;
+import io.choerodon.agile.infra.utils.SagaTopic;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.core.oauth.DetailsHelper;
@@ -514,12 +515,12 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         StatusMachineNodeDTO stateMachineNode = new StatusMachineNodeDTO();
         stateMachineNode.setStatusId(statusId);
         stateMachineNode.setOrganizationId(organizationId);
-        stateMachineNode.setType(NodeType.CUSTOM);
         stateMachineNode.setStateMachineId(stateMachineId);
         // 校验是否已存在关联的状态
         List<StatusMachineNodeDTO> select = statusMachineNodeMapper.select(stateMachineNode);
         if (CollectionUtils.isEmpty(select)) {
             List<StatusMachineNodeVO> statusMachineNodeVOS = stateMachineNodeService.queryByStateMachineId(organizationId, stateMachineId, false);
+            stateMachineNode.setType(NodeType.CUSTOM);
             stateMachineNodeService.baseCreate(stateMachineNode);
             if (Boolean.TRUE.equals(defaultStatus)) {
                 defaultStatus(projectId, issueTypeId, stateMachineId, statusId);
@@ -571,7 +572,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         statusMachineNodeDTO.setId(nodeId);
         statusMachineNodeMapper.delete(statusMachineNodeDTO);
         // 检测状态是否与其他node有关联
-        if (!statusMachineNodeMapper.existByProjectId(projectId, currentStatusId)){
+        if (!statusMachineNodeMapper.existByProjectId(projectId, currentStatusId,applyType)){
             // 无关联则删除与issue_status关联
             IssueStatusDTO issueStatusDTO = new IssueStatusDTO();
             issueStatusDTO.setProjectId(projectId);
@@ -602,10 +603,27 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         checkStatusLink(projectId, issueTypeId, nodeId);
     }
 
+    @Override
+    public List<IssueTypeVO> checkExistStatusIssueType(Long projectId, Long organizationId, Long statusId) {
+        String applyType = Objects.equals(ConvertUtil.queryProject(projectId).getCategory(), ProjectCategory.PROGRAM) ? "program" : "agile";
+        Long stateMachineSchemeId = projectConfigMapper.queryBySchemeTypeAndApplyType(projectId, SchemeType.STATE_MACHINE, applyType).getSchemeId();
+        if (stateMachineSchemeId == null) {
+            throw new CommonException(ERROR_STATEMACHINESCHEMEID_NULL);
+        }
+        List<Long> issueTypeIds = projectConfigMapper.getExistStatusTypeIds(organizationId,statusId,stateMachineSchemeId);
+        if(CollectionUtils.isEmpty(issueTypeIds)){
+            return new ArrayList<>();
+        }
+        return modelMapper.map(issueTypeMapper.queryIssueTypeList(organizationId, issueTypeIds),new TypeToken<List<IssueTypeVO>>(){}.getType());
+    }
+
     private StatusMachineNodeDTO checkStatusLink(Long projectId, Long issueTypeId, Long nodeId) {
         StatusMachineNodeDTO machineNodeDTO = statusMachineNodeMapper.selectByPrimaryKey(nodeId);
         Assert.notNull(machineNodeDTO, BaseConstants.ErrorCode.DATA_NOT_EXISTS);
         Long currentStatusId = machineNodeDTO.getStatusId();
+        if (Objects.equals(issueTypeId,0L)) {
+            return machineNodeDTO;
+        }
         // 校验是否是初始状态
         if (StringUtils.equals("node_init", machineNodeDTO.getType())) {
             throw new CommonException("error.delete.init.status");
@@ -615,9 +633,6 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         if (Boolean.TRUE.equals(checkIssueUse)) {
             // 报错
             throw new CommonException("error.status.status_issue_used");
-        }
-        if (Objects.equals(issueTypeId,0L)) {
-            return machineNodeDTO;
         }
         // 校验当前node的状态是否与其他状态有联动
         IssueTypeDTO issueTypeDTO = issueTypeMapper.selectByPrimaryKey(issueTypeId);
@@ -703,6 +718,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         List<StatusMachineSchemeConfigVO> statusMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, stateMachineSchemeId);
         Map<Long, DeleteStatusTransferVO> map = statusTransferVOS.stream().collect(Collectors.toMap(DeleteStatusTransferVO::getIssueTypeId, Function.identity()));
         for (StatusMachineSchemeConfigVO schemeConfigVO : statusMachineSchemeConfigVOS) {
+            if (Objects.equals(schemeConfigVO.getIssueTypeId(), 0L)) {
+                continue;
+            }
             // 查询状态的node
             StatusMachineNodeDTO statusMachineNodeDTO = new StatusMachineNodeDTO();
             statusMachineNodeDTO.setStatusId(statusId);
@@ -724,6 +742,9 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
         Long organizationId = ConvertUtil.getOrganizationId(projectId);
         List<StatusMachineSchemeConfigVO> stateMachineSchemeConfigVOS = stateMachineSchemeConfigService.queryBySchemeId(false, organizationId, stateMachineSchemeId);
         for (StatusMachineSchemeConfigVO schemeConfigVO : stateMachineSchemeConfigVOS) {
+            if (Objects.equals(schemeConfigVO.getIssueTypeId(), 0L)) {
+                continue;
+            }
             // 查询状态的node
             StatusMachineNodeDTO statusMachineNodeDTO = new StatusMachineNodeDTO();
             statusMachineNodeDTO.setStatusId(statusId);

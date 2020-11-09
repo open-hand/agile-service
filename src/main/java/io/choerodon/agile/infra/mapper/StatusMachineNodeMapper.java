@@ -53,5 +53,5 @@ public interface StatusMachineNodeMapper extends BaseMapper<StatusMachineNodeDTO
 
     void migrateStatusMachineNode();
 
-    boolean existByProjectId(@Param("projectId") Long projectId, @Param("statusId") Long statusId);
+    boolean existByProjectId(@Param("projectId") Long projectId, @Param("statusId") Long statusId,@Param("applyType") String applyType);
 }

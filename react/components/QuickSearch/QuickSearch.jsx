@@ -132,9 +132,10 @@ class QuickSearch extends Component {
     this.setState({
       selectUsers: value,
     });
-    localPageCacheStore.setItem('scrumboard', merge(localPageCacheStore.getItem('scrumboard'), {
+    localPageCacheStore.setItem('scrumboard', {
+      ...(localPageCacheStore.getItem('scrumboard') || {}),
       assigneeFilter: value,
-    }));
+    });
     onAssigneeChange(flattenValue);
   };
 

@@ -104,7 +104,7 @@ const IssueDropDown = ({
           noAccessChildren={(
             <Menu.Item
               key="1"
-              disabled={(loginUserId && loginUserId.toString()) !== (createdBy && createdBy.toString())}
+              disabled={disableFeatureDeleteWhilePiDoing || (loginUserId && loginUserId.toString()) !== (createdBy && createdBy.toString())}
             >
               删除
             </Menu.Item>
@@ -112,7 +112,6 @@ const IssueDropDown = ({
         >
           <Menu.Item
             key="1"
-            disabled={disableFeatureDeleteWhilePiDoing}
           >
             删除
           </Menu.Item>

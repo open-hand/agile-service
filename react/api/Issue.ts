@@ -1,4 +1,4 @@
-import { axios, stores } from '@choerodon/boot';
+import { axios, stores, Choerodon } from '@choerodon/boot';
 import { getProjectId, getOrganizationId } from '@/utils/common';
 import Api from './Api';
 
@@ -121,7 +121,16 @@ class IssueApi extends Api<IssueApi> {
     * @param issueObj
     * @param projectId
     */
-  update = (issueObj: UIssue) => axios.put(`${this.prefix}/issues`, issueObj)
+  update = async (issueObj: UIssue) => {
+    try {
+      return await axios.put(`${this.prefix}/issues`, issueObj, {
+        noPrompt: true,
+      });
+    } catch (error) {
+      Choerodon.prompt('该问题项详情信息已被锁定，请重新打开问题详情进行编辑。', 'error');
+      throw error;
+    }
+  }
 
   /**
     * 更新问题状态
@@ -216,8 +225,8 @@ class IssueApi extends Api<IssueApi> {
     * @param issueId//问题id
     * @param creatorId//问题创建者id
     */
-  delete(issueId: number, creatorId: number) {
-    if (creatorId === AppState.userInfo.id) {
+  delete(issueId: number, creatorId: string) {
+    if (creatorId.toString() === AppState.userInfo.id.toString()) {
       return axios.delete(`/agile/v1/projects/${getProjectId()}/issues/delete_self_issue/${issueId}`);
     }
     return axios.delete(`/agile/v1/projects/${getProjectId()}/issues/${issueId}`);

@@ -14,6 +14,7 @@ import org.hzero.core.base.BaseConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -154,6 +155,7 @@ public class SiteMsgUtil {
         messageClient.async().sendMessage(messageSender);
     }
 
+    @Async
     public void sendProjectReport(Long projectId, List<ProjectReportReceiverDTO> receiverList, String imgData) {
         // 获取接收人, 抄送人
         Map<String, List<ProjectReportReceiverDTO>> group =
@@ -180,7 +182,7 @@ public class SiteMsgUtil {
         sender.setArgs(argsMap);
         messageClient.async().sendMessage(sender);
     }
-    
+
     public MessageSender issueCreateSender(List<Long> userIds,String userName, String summary, String url, Long projectId) {
         ProjectVO projectVO = baseFeignClient.queryProject(projectId).getBody();
         Map<String,String> map = new HashMap<>();

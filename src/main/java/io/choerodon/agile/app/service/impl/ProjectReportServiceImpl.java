@@ -75,7 +75,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
                 return page;
             }
             List<Long> reportIdList = page.stream().map(ProjectReportVO::getId).collect(Collectors.toList());
-            List<ProjectReportReceiverDTO> receiverDTOList = projectReportReceiverMapper.selectReceiver(reportIdList, 
+            List<ProjectReportReceiverDTO> receiverDTOList = projectReportReceiverMapper.selectReceiver(reportIdList,
                     ProjectReportReceiverDTO.TYPE_RECEIVER);
             List<UserDTO> createList = baseFeignClient.listUsersByIds(page.stream().map(ProjectReportVO::getCreatedBy)
                     .toArray(Long[]::new), false).getBody();
@@ -192,7 +192,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
         ProjectReportDTO projectReportDTO = new ProjectReportDTO();
         BeanUtils.copyProperties(projectReportVO, projectReportDTO);
         convertReportUnits(projectReportVO, projectReportDTO);
-        if (projectReportMapper.updateOptional(projectReportDTO, ProjectReportDTO.FIELD_TITLE, 
+        if (projectReportMapper.updateOptional(projectReportDTO, ProjectReportDTO.FIELD_TITLE,
                 ProjectReportDTO.FIELD_DESCRIPTION, ProjectReportDTO.FIELD_REPORTDATA) != 1){
             throw new CommonException("error.project-report.update.failed");
         }
@@ -233,7 +233,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
     }
 
     @Override
-    public void send(Long projectId, Long id, String imgData) {
+    public ProjectReportDTO send(Long projectId, Long id, String imgData) {
         List<ProjectReportReceiverDTO> receiverList = projectReportReceiverMapper.select(new ProjectReportReceiverDTO(id, projectId));
         if (StringUtils.isNotBlank(imgData)){
             siteMsgUtil.sendProjectReport(projectId, receiverList, imgData);
@@ -242,6 +242,7 @@ public class ProjectReportServiceImpl implements ProjectReportService {
         ProjectReportDTO projectReportDTO = projectReportMapper.selectOne(new ProjectReportDTO(id, projectId));
         projectReportDTO.setRecentSendDate(new Date());
         projectReportMapper.updateOptional(projectReportDTO, ProjectReportDTO.FIELD_RECENT_SEND_DATE);
+        return projectReportMapper.selectOne(new ProjectReportDTO(id, projectId));
     }
 
     private void createProjectReportReceiver(Long projectId, ProjectReportVO projectReportVO,

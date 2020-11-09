@@ -16,7 +16,7 @@ const OptionDatSet = ({
   transport: {
     read: ({ data: p, dataSet, params }) => ({
       // defaultUserId 初始值（初次进入编辑框未修改时）
-      url: `/iam/choerodon/v1/${type}s/${id}/users?size=10${isEdit && p.userId === defaultUserId ? `&userId=${defaultUserId}` : ''}`,
+      url: `/iam/choerodon/v1/${type}s/${id}/users/projects?size=10${isEdit && p.userId === defaultUserId ? `&userId=${defaultUserId}` : ''}`,
       method: 'get',
       transformResponse: (response) => {
         try {

@@ -7,7 +7,6 @@ import { InjectedIntl } from 'react-intl';
 import { AppStateProps, IModalProps } from '@/common/types';
 import { getApplyType } from '@/utils/common';
 import FormDataSet from './FormDataSet';
-import UserOptionDataSet from './UserOptionDataSet';
 import useStore from './useStore';
 import { IFieldPostDataProps } from '../CreateField';
 
@@ -22,7 +21,6 @@ interface Context {
   schemeCode: string,
   record?: Record,
   formDataSet: DataSet,
-  userOptionDataSet: DataSet,
   handleRefresh?: () => void,
   modal: IModalProps,
 }
@@ -39,9 +37,6 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
     const isEdit = !!record;
     const store = useStore(type, id, organizationId);
     const defaultUserId = isEdit && record?.get('defaultValue');
-    const userOptionDataSet = new DataSet(UserOptionDataSet({
-      type, id, defaultUserId, isEdit,
-    }));
     const filterContext = ['global'];
     if (type === 'project') {
       filterContext.push('feature');
@@ -58,7 +53,6 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
       id,
       isEdit,
       oldRecord: record,
-      userOptionDataSet,
       localCheckCode,
       localCheckName,
       defaultContext,
@@ -96,11 +90,6 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
           if (data.fieldType === 'number') {
             formDataSet.current?.set('check', data.extraConfig);
           }
-          // 进行初始化 防止进入编辑时只显示id
-          if (data.fieldType === 'member') {
-            userOptionDataSet.setQueryParameter('userId', data.defaultValue);
-            userOptionDataSet.query();
-          }
           if (data.context && data.context[0] === 'global') {
             const arr = formDataSet.current?.getField('context')?.options?.map((item) => item.get('valueCode'));
             formDataSet.current?.set('context', arr);
@@ -116,7 +105,6 @@ export const StoreProvider: React.FC<Context> = inject('AppState')(
       ...props,
       isEdit,
       formDataSet,
-      userOptionDataSet,
     };
 
     return (

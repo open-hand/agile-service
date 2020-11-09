@@ -13,10 +13,10 @@ const ReportList: React.FC = () => {
   return (
     <Page>
       <Header>
-        <Button icon="playlist_add" onClick={handleAddClick}>添加报告内容</Button>
+        <Button icon="playlist_add" onClick={handleAddClick}>创建报告</Button>
       </Header>
       <Breadcrumb />
-      <Content>
+      <Content style={{ paddingTop: 0 }}>
         <ReportTable onClick={handleAddClick} />
       </Content>
     </Page>

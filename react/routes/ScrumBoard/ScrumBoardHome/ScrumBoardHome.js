@@ -139,12 +139,13 @@ class ScrumBoardHome extends Component {
       moreChecked,
       personalFilters,
     );
-    localPageCacheStore.setItem('scrumboard', merge(localPageCacheStore.getItem('scrumboard'), {
+    localPageCacheStore.setItem('scrumboard', {
+      ...(localPageCacheStore.getItem('scrumboard') || {}),
       onlyMeChecked,
       onlyStoryChecked,
       moreChecked,
       personalFilters,
-    }));
+    });
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   };
 
@@ -155,9 +156,10 @@ class ScrumBoardHome extends Component {
 
   onSprintChange = (value) => {
     ScrumBoardStore.addSprintFilter(value);
-    localPageCacheStore.setItem('scrumboard', merge(localPageCacheStore.getItem('scrumboard'), {
+    localPageCacheStore.setItem('scrumboard', {
+      ...(localPageCacheStore.getItem('scrumboard') || {}),
       sprintFilter: value,
-    }));
+    });
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   }
 
@@ -369,9 +371,10 @@ class ScrumBoardHome extends Component {
 
   handlePriorityChange = (value) => {
     ScrumBoardStore.setPriority(value);
-    localPageCacheStore.setItem('scrumboard', merge(localPageCacheStore.getItem('scrumboard'), {
+    localPageCacheStore.setItem('scrumboard', {
+      ...(localPageCacheStore.getItem('scrumboard') || {}),
       priorityIds: value,
-    }));
+    });
     this.refresh(ScrumBoardStore.getBoardList.get(ScrumBoardStore.getSelectedBoard));
   }
 

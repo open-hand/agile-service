@@ -43,9 +43,10 @@ class MergeRequest extends Component {
   }
 
   createMergeRequest(record) {
+    const { projectId } = this.props;
     const win = window.open('');
     const { applicationId, gitlabMergeRequestId } = record;
-    devOpsApi.loadGitUrl(applicationId).then((res) => {
+    devOpsApi.project(projectId).loadGitUrl(applicationId).then((res) => {
       const url = `${res}/merge_requests/${gitlabMergeRequestId}`;
       win.location.href = url;
     })
@@ -60,7 +61,7 @@ class MergeRequest extends Component {
     const column = [
       {
         title: '编码',
-        dataIndex: 'id',
+        dataIndex: 'gitlabMergeRequestId',
         width: '10%',
         render: (id) => (
           <div style={{ width: '100%', overflow: 'hidden' }}>

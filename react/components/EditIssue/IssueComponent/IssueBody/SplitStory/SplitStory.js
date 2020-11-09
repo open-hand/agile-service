@@ -33,10 +33,16 @@ function SplitStory(props) {
       >
         <div className="c7n-subTask-progress">
           <Progress percent={isNaN(progress) ? 0 : progress} style={{ marginRight: 5 }} />
-          已完成
+          {
+            !!(completedStoryPoints && totalStoryPoints) && (
+              <>
+                已完成
+              </>
+            )
+          }
         </div>
       </Tooltip>
-      {storyList.map(issue => <IssueItem issue={issue} />)}
+      {storyList.map((issue) => <IssueItem issue={issue} />)}
     </Spin>
   );
 }
