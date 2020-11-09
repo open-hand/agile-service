@@ -5,7 +5,7 @@ import Api from './Api';
 
 class IssueTypeApi extends Api<IssueTypeApi> {
   get prefix() {
-    return `/agile/v1/projects/${getProjectId()}`;
+    return `/agile/v1/projects/${this.projectId}`;
   }
 
   get OrgPrefix() {
@@ -16,7 +16,7 @@ class IssueTypeApi extends Api<IssueTypeApi> {
    * 加载全部问题类型（带关联的状态机id)
    * @param applyType
    */
-  loadAllWithStateMachineId(applyType: string = 'agile', projectId?: number): Promise<IIssueType[]> {
+  loadAllWithStateMachineId(applyType: string = 'agile', projectId?: string): Promise<IIssueType[]> {
     return this.request({
       method: 'get',
       url: `/agile/v1/projects/${projectId || getProjectId()}/schemes/query_issue_types_with_sm_id`,

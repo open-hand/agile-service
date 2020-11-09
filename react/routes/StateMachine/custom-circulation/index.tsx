@@ -17,6 +17,7 @@ import { ColumnProps } from 'choerodon-ui/pro/lib/table/Column';
 import { Divider, Tooltip } from 'choerodon-ui';
 import Condition from './components/condition';
 import Linkage from './components/linkage';
+import FeatureLinkage from './components/linkage/FeatureLinkage';
 import NotifySetting from './components/notify-setting';
 import UpdateField from './components/update-field';
 import IssueTypeTab from '../components/issue-type-tab';
@@ -97,6 +98,7 @@ interface IStatusLinkageVOS {
   projectId: number
   statusId: string
   statusVO: IStatus
+  projectName: string
 }
 
 const transformedMember = {
@@ -247,6 +249,10 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
 
   // @ts-ignore
   const getModalSetting = (key: 'condition' | 'linkage' | 'updateField' | 'notifySetting', record) => {
+    const selectedTypeCode = find(issueTypes, (
+      item: IIssueType,
+    ) => item.id === selectedType)?.typeCode;
+
     const settings: ModalSettings = {
       condition: {
         width: 380,
@@ -261,12 +267,21 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       linkage: {
         width: 380,
         title: '状态联动',
+        children: selectedTypeCode === 'feature' ? (
+          // @ts-ignore
+          <FeatureLinkage
+            record={record}
+            selectedType={selectedType}
+            customCirculationDataSet={customCirculationDataSet}
+          />
+        ) : (
         // @ts-ignore
-        children: <Linkage
-          record={record}
-          selectedType={selectedType}
-          customCirculationDataSet={customCirculationDataSet}
-        />,
+          <Linkage
+            record={record}
+            selectedType={selectedType}
+            customCirculationDataSet={customCirculationDataSet}
+          />
+        ),
       },
       updateField: {
         width: 740,
@@ -318,7 +333,7 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
       <Menu onClick={handleMenuClick.bind(this, record)}>
         <Menu.Item key="condition">流转条件</Menu.Item>
         {
-          (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug') && (
+          (selectedTypeCode === 'sub_task' || selectedTypeCode === 'bug' || selectedTypeCode === 'feature') && (
             <Menu.Item key="linkage">状态联动</Menu.Item>
           )
         }
@@ -400,6 +415,17 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           return `父级【${parentTypeName}】的状态自动流转到【${toStatusName}】`;
         })).join('、');
       return `${prefixStr}${parentDes}`;
+    }
+    if (statusLinkageVOS && statusLinkageVOS.length && selectedTypeCode === 'feature') {
+      const prefixStr = '当项目';
+      const linkageStr = (
+        statusLinkageVOS.map((linkageSetting) => {
+          const { statusVO, projectName } = linkageSetting;
+          const toStatusName = statusVO?.name;
+          return `【${projectName}】的故事状态全为【${toStatusName}】`;
+        })).join('，');
+      const suffixStr = `，则关联的特性自动流转到【${record.get('name')}】状态。`;
+      return `${prefixStr}${linkageStr}${suffixStr}`;
     }
     return '';
   };
