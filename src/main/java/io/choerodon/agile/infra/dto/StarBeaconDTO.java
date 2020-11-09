@@ -1,4 +1,4 @@
-package io.choerodon.agile.entity;
+package io.choerodon.agile.infra.dto;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;

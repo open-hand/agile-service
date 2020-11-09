@@ -1,11 +1,11 @@
-package io.choerodon.agile.service.impl;
+package io.choerodon.agile.app.service.impl;
 
 import java.util.Objects;
 
 import io.choerodon.agile.api.vo.StarBeaconVO;
-import io.choerodon.agile.entity.StarBeaconDTO;
-import io.choerodon.agile.mapper.StarBeaconMapper;
-import io.choerodon.agile.service.StarBeaconService;
+import io.choerodon.agile.infra.dto.StarBeaconDTO;
+import io.choerodon.agile.infra.mapper.StarBeaconMapper;
+import io.choerodon.agile.app.service.StarBeaconService;
 import io.choerodon.core.exception.CommonException;
 import org.hzero.core.base.BaseConstants;
 import org.springframework.beans.factory.annotation.Autowired;

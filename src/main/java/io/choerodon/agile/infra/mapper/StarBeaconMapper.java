@@ -1,6 +1,6 @@
-package io.choerodon.agile.mapper;
+package io.choerodon.agile.infra.mapper;
 
-import io.choerodon.agile.entity.StarBeaconDTO;
+import io.choerodon.agile.infra.dto.StarBeaconDTO;
 import io.choerodon.mybatis.common.BaseMapper;
 
 /**

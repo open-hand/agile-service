@@ -1,4 +1,4 @@
-package io.choerodon.agile.controller;
+package io.choerodon.agile.api.controller.v1;
 
 import io.choerodon.agile.api.vo.StarBeaconVO;
 import io.choerodon.core.iam.ResourceLevel;
@@ -6,7 +6,7 @@ import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.ApiParam;
 import org.hzero.core.util.Results;
 import org.hzero.core.base.BaseController;
-import io.choerodon.agile.service.StarBeaconService;
+import io.choerodon.agile.app.service.StarBeaconService;
 import org.hzero.starter.keyencrypt.core.Encrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

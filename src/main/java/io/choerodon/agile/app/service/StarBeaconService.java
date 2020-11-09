@@ -1,4 +1,4 @@
-package io.choerodon.agile.service;
+package io.choerodon.agile.app.service;
 
 import io.choerodon.agile.api.vo.StarBeaconVO;
 /**
