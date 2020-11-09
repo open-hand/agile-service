@@ -147,13 +147,13 @@ class CreateBranch extends Component {
                   filter
                   optionFilterProp="children"
                   filterOption={
-                    (input, option) => option.props.children.toLowerCase()
+                    (input, option) => option.props.title.toLowerCase()
                       .indexOf(input.toLowerCase()) >= 0
                   }
                   loading={selectLoading}
                 >
                   {originApps.map((app) => (
-                    <Option value={app.id} key={app.id}>
+                    <Option value={app.id} key={app.id} title={`${app.name}(${app.code})`}>
                       <Tooltip title={app.code}>
                         {`${app.name}(${app.code})`}
                       </Tooltip>
