@@ -157,7 +157,7 @@ const FeatureLinkage = ({
   return (
     <div className={`${styles.linkage} ${styles.featureLinkage}`}>
       <Loading loading={loading} />
-      <div className={styles.tip}>我是描述。</div>
+      <div className={styles.tip}>{`当子项目的故事全部流转到指定状态时，关联的特性自动流转到${record.get('name')}状态。`}</div>
       <Form dataSet={modalDataSet}>
         {
           fields.map(((f: IFieldK, i: number) => {

@@ -98,6 +98,7 @@ interface IStatusLinkageVOS {
   projectId: number
   statusId: string
   statusVO: IStatus
+  projectName: string
 }
 
 const transformedMember = {
@@ -414,6 +415,17 @@ const CustomCirculation: React.FC<TabComponentProps> = ({ tab }) => {
           return `父级【${parentTypeName}】的状态自动流转到【${toStatusName}】`;
         })).join('、');
       return `${prefixStr}${parentDes}`;
+    }
+    if (statusLinkageVOS && statusLinkageVOS.length && selectedTypeCode === 'feature') {
+      const prefixStr = '当项目';
+      const linkageStr = (
+        statusLinkageVOS.map((linkageSetting) => {
+          const { statusVO, projectName } = linkageSetting;
+          const toStatusName = statusVO?.name;
+          return `【${projectName}】的故事状态全为【${toStatusName}】`;
+        })).join('，');
+      const suffixStr = `，则关联的特性自动流转到【${record.get('name')}】状态。`;
+      return `${prefixStr}${linkageStr}${suffixStr}`;
     }
     return '';
   };
