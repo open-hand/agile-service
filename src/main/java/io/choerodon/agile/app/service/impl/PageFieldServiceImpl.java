@@ -371,6 +371,7 @@ public class PageFieldServiceImpl implements PageFieldService {
                     ObjectSchemeFieldDTO objectSchemeField = fieldMap.get(fieldId);
                     if (objectSchemeField != null) {
                         PageFieldViewVO view = new PageFieldViewVO();
+                        view.setExtraConfig(objectSchemeField.getExtraConfig());
                         FieldValueUtil.handleDTO2Value(view, objectSchemeField.getFieldType(), fieldValueDTOList, userMap, isJustStr);
                         codeValueMap.put(objectSchemeField.getCode(), view.getValueStr());
                     }
