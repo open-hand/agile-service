@@ -9,9 +9,9 @@ import io.choerodon.agile.api.vo.StarBeaconVO;
 public interface StarBeaconService {
 
 
-    void starIssue(StarBeaconVO starBeaconVO);
+    void starInstance(StarBeaconVO starBeaconVO);
 
-    void unStarIssue(StarBeaconVO starBeaconVO);
+    void unStarInstance(StarBeaconVO starBeaconVO);
 
 }
 
