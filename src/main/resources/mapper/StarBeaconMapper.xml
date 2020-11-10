@@ -3,5 +3,17 @@
 
 <mapper namespace="io.choerodon.agile.infra.mapper.StarBeaconMapper">
 
+    <sql id="filterStarBeaconSql">
+        <if test='searchVO.otherArgs.starBeacon != null and searchVO.otherArgs.starBeacon == true'>
+            AND ai.issue_id IN
+            (
+                SELECT fsb.instance_id
+                FROM fd_star_beacon fsb
+                WHERE fsb.type = 'issue'
+                AND fsb.project_id = #{projectId}
+                AND fsb.user_id = #{searchVO.otherArgs.userId}
+            )
+        </if>
+    </sql>
 
 </mapper>
