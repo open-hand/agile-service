@@ -2,23 +2,38 @@
 import React, { Component } from 'react';
 import { stores, WSHandler, Choerodon } from '@choerodon/boot';
 import {
-  Modal, Button, Icon, Progress,
+  Modal, Button, Icon, Progress, Divider,
 } from 'choerodon-ui';
+import { Button as ButtonPro } from 'choerodon-ui/pro';
 import FileSaver from 'file-saver';
 import './ImportIssue.less';
 import { issueApi } from '@/api';
+import ImportFields from './ImportFields';
 
 const { AppState } = stores;
 
+const ImportIssueForm = (formProps) => {
+  const { title, children, bottom } = formProps;
+  return (
+    <div className="c7n-importIssue-form-one">
+      <span className="c7n-importIssue-form-one-title">{title}</span>
+      <span className="c7n-importIssue-form-one-content">{children}</span>
+      {bottom}
+    </div>
+  );
+};
 class ImportIssue extends Component {
+  constructor(props) {
+    super(props);
+    this.importFieldsRef = React.createRef();
+  }
+
   state = {
     visible: false,
-    step: 1,
-    wsData: {},
+    wsData: null,
     historyId: false,
     ovn: false,
     latestInfo: false,
-    fileName: false,
   };
 
   loadLatestImport = () => {
@@ -28,7 +43,6 @@ class ImportIssue extends Component {
           latestInfo: res,
           historyId: res.status === 'doing' ? res.id : false,
           ovn: res.objectVersionNumber,
-          step: res.status === 'doing' ? 3 : 1,
         });
       }
     });
@@ -68,6 +82,9 @@ class ImportIssue extends Component {
   };
 
   upload = (file) => {
+    console.log('导入的字段：');
+    console.log(this.importFieldsRef.current.fields);
+
     if (!file) {
       Choerodon.prompt('请选择文件');
       return;
@@ -76,11 +93,8 @@ class ImportIssue extends Component {
     formData.append('file', file);
     this.setState({
       uploading: true,
-      fileName: file.name,
     });
     issueApi.import(formData).then((res) => {
-      this.changeStep(1);
-      // this.uploadInput.value = '';
       this.setState({
         uploading: false,
       });
@@ -111,13 +125,6 @@ class ImportIssue extends Component {
     }
   };
 
-  changeStep = (value) => {
-    const { step } = this.state;
-    this.setState({
-      step: step + value,
-    });
-  };
-
   finish = () => {
     const { onFinish } = this.props;
     if (onFinish) {
@@ -125,33 +132,18 @@ class ImportIssue extends Component {
     }
     this.setState({
       visible: false,
-      step: 1,
-      wsData: {},
+      wsData: null,
       historyId: false,
     });
   };
 
-  renderFooter = () => {
-    const { step, wsData } = this.state;
-    if (step === 1) {
-      return [
-        <Button onClick={this.onCancel}>取消</Button>,
-        <Button type="primary" onClick={() => this.changeStep(1)}>下一步</Button>,
-      ];
-    } if (step === 2) {
-      return [
-        <Button onClick={this.onCancel}>取消</Button>,
-        <Button type="primary" onClick={() => this.changeStep(-1)}>上一步</Button>,
-      ];
-    }
-    return [
-      <Button type="primary" onClick={this.finish}>完成</Button>,
-      <Button disabled={wsData.status && wsData.status !== 'doing'} onClick={this.onCancel}>取消上传</Button>,
-    ];
-  };
+  renderFooter = () => <ButtonPro color="primary" funcType="raised" onClick={this.finish}>关闭</ButtonPro>;
 
   renderProgress = () => {
-    const { wsData, fileName } = this.state;
+    const { wsData } = this.state;
+    if (!wsData) {
+      return null;
+    }
     const {
       process = 0,
       status,
@@ -159,42 +151,36 @@ class ImportIssue extends Component {
       fileUrl,
       successCount,
     } = wsData;
+
+    if (status === 'success') {
+      this.loadLatestImport();
+      this.setState({
+        wsData: null,
+      });
+    }
     if (status === 'doing') {
       return (
-        <div style={{ width: 512 }}>
-          {fileName
-            ? (
-              <span className="c7n-importIssue-fileName">
-                <Icon type="folder_open" className="c7n-importIssue-icon" />
-                <span>{fileName}</span>
-              </span>
-            )
-            : ''}
-          <span className="c7n-importIssue-text">正在导入</span>
+        <div className="c7n-importIssue-progress-area">
           <Progress
             className="c7n-importIssue-progress"
-            percent={(process * 100).toFixed(0)}
-            size="small"
             status="active"
+            type="circle"
+            width={50}
+            percent={(process * 100).toFixed(0)}
+            strokeWidth={16}
             showInfo={false}
           />
+          <span className="c7n-importIssue-progress-area-text">正在导入中</span>
+          <span className="c7n-importIssue-progress-area-prompt">( 本次导入耗时较长，您可先返回进行其他操作）</span>
         </div>
       );
     } if (status === 'failed') {
       return (
         <div>
-          {fileName
-            ? (
-              <span className="c7n-importIssue-fileName">
-                <Icon type="folder_open" className="c7n-importIssue-icon" />
-                <span>{fileName}</span>
-              </span>
-            )
-            : ''}
           <span className="c7n-importIssue-text">
             导入失败
             <span style={{ color: '#FF0000' }}>{failCount}</span>
-            问题，
+            问题
             <a href={fileUrl}>
               点击下载失败详情
             </a>
@@ -204,14 +190,6 @@ class ImportIssue extends Component {
     } if (status === 'success') {
       return (
         <div>
-          {fileName
-            ? (
-              <span className="c7n-importIssue-fileName">
-                <Icon type="folder_open" className="c7n-importIssue-icon" />
-                <span>{fileName}</span>
-              </span>
-            )
-            : ''}
           <span className="c7n-importIssue-text">
             导入成功
             <span style={{ color: '#0000FF' }}>{successCount}</span>
@@ -222,14 +200,6 @@ class ImportIssue extends Component {
     } if (status === 'template_error') {
       return (
         <div>
-          {fileName
-            ? (
-              <span className="c7n-importIssue-fileName">
-                <Icon type="folder_open" className="c7n-importIssue-icon" />
-                <span>{fileName}</span>
-              </span>
-            )
-            : ''}
           <span className="c7n-importIssue-text">
             导入模板错误，或无数据。
           </span>
@@ -244,54 +214,55 @@ class ImportIssue extends Component {
   };
 
   renderForm = () => {
-    const { step, uploading, latestInfo } = this.state;
-    const { failCount, fileUrl } = latestInfo;
-    if (step === 1) {
-      return (
-        <>
-          <Button
-            type="primary"
-            // funcType="flat"
-            onClick={() => this.exportExcel()}
-          >
-            <Icon type="get_app icon" />
-            <span>下载模板</span>
-          </Button>
-          {failCount
-            ? (
-              <div style={{ marginTop: 10 }}>
-                {failCount && failCount !== 0
-                  ? (
-                    <span>
-                      导入失败
-                      <span style={{ color: '#F44336' }}>
-                        {failCount}
-                      </span>
-                      问题，
-                    </span>
-                  ) : ''}
-                {fileUrl && (
-                  <a href={fileUrl}>
-                    点击下载失败详情
-                  </a>
-                )}
-              </div>
-            ) : ''}
-        </>
-      );
-    } if (step === 2) {
-      return (
-        <>
-          <Button
-            loading={uploading}
-            type="primary"
-            funcType="flat"
-            onClick={() => this.importExcel()}
-            style={{ marginBottom: 2 }}
-          >
-            <Icon type="archive icon" />
-            <span>导入问题</span>
-          </Button>
+    const { uploading, latestInfo, wsData } = this.state;
+    const {
+      successCount, failCount, fileUrl, id,
+    } = latestInfo;
+    return (
+      <div>
+        <ImportIssueForm
+          title="下载模板"
+          bottom={(
+            <Button
+              type="primary"
+              onClick={() => this.exportExcel()}
+              icon="get_app"
+            >
+              下载模板
+            </Button>
+          )}
+        >
+          您必须使用模板文件，录入问题信息。
+          <ImportFields importFieldsRef={this.importFieldsRef} />
+        </ImportIssueForm>
+        <Divider />
+        <ImportIssueForm
+          title="导入问题"
+          bottom={!wsData && (
+            <Button
+              loading={uploading}
+              type="primary"
+              onClick={() => this.importExcel()}
+              icon="archive"
+            >
+              导入问题
+            </Button>
+          )}
+        >
+          {id && (
+            <div style={{ marginTop: 10 }}>
+              上次导入共导入
+              <span style={{ color: '#00bfa5', fontSize: 20, margin: '0 .04rem' }}>{successCount}</span>
+              条数据成功,
+              <span style={{ color: '#f76e64', fontSize: 20, margin: '0 .04rem' }}>{failCount}</span>
+              条数据失败
+              {fileUrl && (
+                <a href={fileUrl}>
+                  点击下载失败详情
+                </a>
+              )}
+            </div>
+          )}
           <input
             ref={
               (uploadInput) => { this.uploadInput = uploadInput; }
@@ -301,16 +272,14 @@ class ImportIssue extends Component {
             style={{ display: 'none' }}
             accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           />
-        </>
-      );
-    }
-    return (
-      <WSHandler
-        messageKey="agile-import-issues"
-        onMessage={this.handleMessage}
-      >
-        {this.renderProgress()}
-      </WSHandler>
+          <WSHandler
+            messageKey="agile-import"
+            onMessage={this.handleMessage}
+          >
+            {this.renderProgress()}
+          </WSHandler>
+        </ImportIssueForm>
+      </div>
     );
   };
 
@@ -319,19 +288,17 @@ class ImportIssue extends Component {
       visible,
     } = this.state;
     return (
-      <Modal
+      <Modal.Sidebar
         className="c7n-importIssue"
         title="导入问题"
+        width={380}
         visible={visible}
         onCancel={this.onCancel}
         footer={this.renderFooter()}
         destroyOnClose
       >
-        <div style={{ height: 70 }}>
-          <div style={{ margin: '20px 0' }}>导入问题前请先下载 导入问题模板 ，按照格式要求进行问题数据准备。</div>
-          {this.renderForm()}
-        </div>
-      </Modal>
+        {this.renderForm()}
+      </Modal.Sidebar>
     );
   }
 }
