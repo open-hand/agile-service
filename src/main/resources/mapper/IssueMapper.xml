@@ -680,6 +680,7 @@
         <if test='searchVO.otherArgs != null'>
             <include refid="io.choerodon.agile.infra.mapper.IssueMapper.otherArgsSql1"/>
             <include refid="io.choerodon.agile.infra.mapper.IssueMapper.otherArgsSql2"/>
+            <include refid="io.choerodon.agile.infra.mapper.StarBeaconMapper.filterStarBeaconSql"/>
         </if>
     </sql>
 
