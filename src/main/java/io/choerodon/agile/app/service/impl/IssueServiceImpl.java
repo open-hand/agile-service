@@ -172,6 +172,8 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private BoardAssembler boardAssembler;
     @Autowired(required = false)
     private BacklogExpandService backlogExpandService;
+    @Autowired
+    private StarBeaconMapper starBeaconMapper;
 
     private static final String SUB_TASK = "sub_task";
     private static final String ISSUE_EPIC = "issue_epic";
@@ -210,6 +212,7 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String BACKETNAME = "agile-service";
     private static final String TRIGGER_ISSUE_ID = "triggerIssueId";
     private static final String AUTO_TRANFER_FLAG = "autoTranferFlag";
+    private final static String STAR_BEACON_TYPE_ISSUE = "issue";
 
     @Autowired
     private ModelMapper modelMapper;
@@ -383,7 +386,22 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         if (agilePluginService != null) {
             agilePluginService.programIssueDetailDTOToVO(issueVO,issue);
         }
+        //设置星标
+        setStarBeacon(issueVO);
         return issueVO;
+    }
+
+    private void setStarBeacon(IssueVO issue) {
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        StarBeaconDTO starBeaconDTO = new StarBeaconDTO();
+        starBeaconDTO.setUserId(userId);
+        starBeaconDTO.setType(STAR_BEACON_TYPE_ISSUE);
+        starBeaconDTO.setInstanceId(issue.getIssueId());
+        starBeaconDTO.setProjectId(issue.getProjectId());
+        issue.setStarBeacon(false);
+        if(!Objects.isNull(starBeaconMapper.selectOne(starBeaconDTO))) {
+            issue.setStarBeacon(true);
+        }
     }
 
     protected IssueVO queryIssueByUpdate(Long projectId, Long issueId, List<String> fieldList) {

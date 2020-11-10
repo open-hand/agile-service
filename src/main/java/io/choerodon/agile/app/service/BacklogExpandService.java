@@ -3,6 +3,7 @@ package io.choerodon.agile.app.service;
 import io.choerodon.agile.api.vo.FieldTableVO;
 import io.choerodon.agile.api.vo.PageConfigFieldEditedVO;
 import io.choerodon.agile.infra.dto.ObjectSchemeFieldDTO;
+import io.choerodon.agile.infra.dto.StarBeaconDTO;
 import org.apache.commons.collections.map.MultiKeyMap;
 
 import java.util.List;
@@ -69,4 +70,10 @@ public interface BacklogExpandService {
      * @return list
      */
     List<FieldTableVO> getBacklogField();
+
+    /**
+     * 判断需求是否存在
+     * @param starBeaconDTO
+     */
+    void selectBacklogByStar(StarBeaconDTO starBeaconDTO);
 }

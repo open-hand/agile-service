@@ -3,13 +3,18 @@ package io.choerodon.agile.app.service.impl;
 import java.util.Objects;
 
 import io.choerodon.agile.api.vo.StarBeaconVO;
+import io.choerodon.agile.app.assembler.StarBeaconAssembler;
+import io.choerodon.agile.app.service.BacklogExpandService;
 import io.choerodon.agile.infra.dto.StarBeaconDTO;
+import io.choerodon.agile.infra.dto.business.IssueDTO;
+import io.choerodon.agile.infra.mapper.IssueMapper;
 import io.choerodon.agile.infra.mapper.StarBeaconMapper;
 import io.choerodon.agile.app.service.StarBeaconService;
 import io.choerodon.core.exception.CommonException;
-import org.hzero.core.base.BaseConstants;
+import io.choerodon.core.oauth.DetailsHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 /**
@@ -18,45 +23,63 @@ import org.springframework.util.Assert;
  * @author jiaxu.cui@hand-china.com
  */
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class StarBeaconServiceImpl implements StarBeaconService {
 
     @Autowired
     private StarBeaconMapper starBeaconMapper;
 
+    @Autowired
+    private IssueMapper issueMapper;
+    @Autowired(required = false)
+    private BacklogExpandService backlogExpandService;
+    @Autowired
+    private StarBeaconAssembler starBeaconAssembler;
+
+    private static final String ERROR_NOT_LOGIN = "error.not.login";
+
+    private static final String ERROR_INSTANCE_IS_NULL = "error.instance.is.null";
+    private static final String ERROR_STAR_INSTANCE_FAILED = "error.star.instance.failed";
+    private static final String ERROR_DELETE_STAR_INSTANCE_FAILED = "error.delete.star.instance.failed";
+    private final static String STAR_BEACON_TYPE_ISSUE = "issue";
+
     @Override
-    public void starIssue(StarBeaconVO starBeaconVO) {
-        StarBeaconDTO starBeaconDTO = checkAndSet(starBeaconVO);
-        if (Objects.isNull(starBeaconMapper.selectOne(starBeaconDTO))){
-            throw new CommonException(BaseConstants.ErrorCode.DATA_EXISTS);
+    public void starInstance(StarBeaconVO starBeaconVO) {
+        StarBeaconDTO starBeaconDTO = starBeaconAssembler.checkAndSet(starBeaconVO);
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        Assert.notNull(userId, ERROR_NOT_LOGIN);
+        starBeaconDTO.setUserId(userId);
+        if (starBeaconVO.getType().equals(STAR_BEACON_TYPE_ISSUE)) {
+            IssueDTO issueDTO = new IssueDTO();
+            issueDTO.setIssueId(starBeaconDTO.getInstanceId());
+            issueDTO.setProjectId(starBeaconDTO.getProjectId());
+            if(Objects.isNull(issueMapper.selectOne(issueDTO))) {
+                throw new CommonException(ERROR_INSTANCE_IS_NULL);
+            }
+        } else {
+            if (backlogExpandService != null) {
+                backlogExpandService.selectBacklogByStar(starBeaconDTO);
+            }
         }
         if (starBeaconMapper.insertSelective(starBeaconDTO) != 1){
-            throw new CommonException("error.star_issue.insert.failed");
+            throw new CommonException(ERROR_STAR_INSTANCE_FAILED);
         }
     }
 
 
     @Override
-    public void unStarIssue(StarBeaconVO starBeaconVO) {
-        StarBeaconDTO starBeaconDTO = checkAndSet(starBeaconVO);
+    public void unStarInstance(StarBeaconVO starBeaconVO) {
+        StarBeaconDTO starBeaconDTO = starBeaconAssembler.checkAndSet(starBeaconVO);
+        Long userId = DetailsHelper.getUserDetails().getUserId();
+        Assert.notNull(userId, ERROR_NOT_LOGIN);
+        starBeaconDTO.setUserId(userId);
         starBeaconDTO = starBeaconMapper.selectOne(starBeaconDTO);
         if (Objects.isNull(starBeaconDTO)){
-            throw new CommonException(BaseConstants.ErrorCode.DATA_INVALID);
+            throw new CommonException(ERROR_INSTANCE_IS_NULL);
         }
-        starBeaconMapper.deleteByPrimaryKey(starBeaconDTO.getId());
+        if (starBeaconMapper.deleteByPrimaryKey(starBeaconDTO.getId()) != 1) {
+            throw new CommonException(ERROR_DELETE_STAR_INSTANCE_FAILED);
+        }
     }
 
-    private StarBeaconDTO checkAndSet(StarBeaconVO starBeaconVO) {
-        Assert.notNull(starBeaconVO.getInstanceId(), BaseConstants.ErrorCode.DATA_INVALID);
-        Assert.notNull(starBeaconVO.getOrganizationId(), BaseConstants.ErrorCode.DATA_INVALID);
-        Assert.notNull(starBeaconVO.getType(), BaseConstants.ErrorCode.DATA_INVALID);
-        Assert.notNull(starBeaconVO.getProjectId(), BaseConstants.ErrorCode.DATA_INVALID);
-        Assert.notNull(starBeaconVO.getUserId(), BaseConstants.ErrorCode.DATA_INVALID);
-        StarBeaconDTO starBeaconDTO = new StarBeaconDTO();
-        starBeaconDTO.setOrganizationId(starBeaconVO.getOrganizationId());
-        starBeaconDTO.setProjectId(starBeaconVO.getProjectId());
-        starBeaconDTO.setInstanceId(starBeaconVO.getInstanceId());
-        starBeaconDTO.setUserId(starBeaconVO.getUserId());
-        starBeaconDTO.setType(starBeaconVO.getType());
-        return starBeaconDTO;
-    }
 }

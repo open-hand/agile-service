@@ -18,37 +18,37 @@ import io.swagger.annotations.ApiOperation;
  * 星标controller
  * @author jiaxu.cui@hand-china.com
  */
-@RestController("starBeaconController.v1")
-@RequestMapping("/v1/projects/{project_id}/starbeacons")
+@RestController
+@RequestMapping("/v1/projects/{project_id}/star_beacon")
 public class StarBeaconController extends BaseController {
 
     @Autowired
     private StarBeaconService starBeaconService;
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("关注Issue")
-    @PostMapping("/{instance_id}/star")
-    public ResponseEntity<Void> starIssue(@ApiParam(value = "项目id", required = true)
+    @ApiOperation("关注Instance")
+    @PostMapping("/instance/{instance_id}/star")
+    public ResponseEntity<Void> starInstance(@ApiParam(value = "项目id", required = true)
                                           @PathVariable(name = "project_id") Long projectId,
                                           @PathVariable("instance_id") @Encrypt Long instanceId,
-                                          @ApiParam(value = "issue信息", required = true)
+                                          @ApiParam(value = "instance信息", required = true)
                                           @RequestBody StarBeaconVO starBeaconVO) {
         starBeaconVO.setInstanceId(instanceId);
         starBeaconVO.setProjectId(projectId);
-        starBeaconService.starIssue(starBeaconVO);
+        starBeaconService.starInstance(starBeaconVO);
         return Results.success();
     }
 
     @Permission(level = ResourceLevel.ORGANIZATION)
-    @ApiOperation("取关Issue")
-    @PostMapping("/{instance_id}/unstar")
+    @ApiOperation("取关Instance")
+    @PostMapping("/instance/{instance_id}/unstar")
     public ResponseEntity<Void> unstarIssue(@ApiParam(value = "项目id", required = true)
                                             @PathVariable(name = "project_id") Long projectId,
                                             @PathVariable("instance_id") @Encrypt Long instanceId,
                                             @RequestBody StarBeaconVO starBeaconVO) {
         starBeaconVO.setInstanceId(instanceId);
         starBeaconVO.setProjectId(projectId);
-        starBeaconService.unStarIssue(starBeaconVO);
+        starBeaconService.unStarInstance(starBeaconVO);
         return Results.success();
     }
 }

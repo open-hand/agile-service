@@ -234,6 +234,16 @@ public class IssueVO {
 
     private Date estimatedEndTime;
 
+    private Boolean starBeacon;
+
+    public Boolean getStarBeacon() {
+        return starBeacon;
+    }
+
+    public void setStarBeacon(Boolean starBeacon) {
+        this.starBeacon = starBeacon;
+    }
+
     public String getParentRelateDescription() {
         return parentRelateDescription;
     }
