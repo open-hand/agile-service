@@ -10,4 +10,5 @@ public class ObjectSchemeCode {
 
     public static final String AGILE_ISSUE = "agile_issue";
     public static final String TEST_ISSUE = "test_issue";
+    public static final String BACKLOG = "backlog";
 }
