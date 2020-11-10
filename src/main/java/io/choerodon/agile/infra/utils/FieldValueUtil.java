@@ -390,13 +390,7 @@ public class FieldValueUtil {
      * @param newFieldValues
      */
     public static void handleDataLog(Long organizationId, Long projectId, Long instanceId, Long fieldId, String fieldType, String schemeCode, List<FieldValueDTO> oldFieldValues, List<FieldValueDTO> newFieldValues) {
-        switch (schemeCode) {
-            case ObjectSchemeCode.AGILE_ISSUE:
-                handleAgileDataLog(organizationId, projectId, instanceId, fieldId, fieldType, oldFieldValues, newFieldValues);
-                break;
-            default:
-                break;
-        }
+        handleAgileDataLog(organizationId, projectId, instanceId, fieldId, fieldType, oldFieldValues, newFieldValues, schemeCode);
     }
 
     /**
@@ -410,7 +404,14 @@ public class FieldValueUtil {
      * @param oldFieldValues
      * @param newFieldValues
      */
-    private static void handleAgileDataLog(Long organizationId, Long projectId, Long instanceId, Long fieldId, String fieldType, List<FieldValueDTO> oldFieldValues, List<FieldValueDTO> newFieldValues) {
+    private static void handleAgileDataLog(Long organizationId,
+                                           Long projectId,
+                                           Long instanceId,
+                                           Long fieldId,
+                                           String fieldType,
+                                           List<FieldValueDTO> oldFieldValues,
+                                           List<FieldValueDTO> newFieldValues,
+                                           String schemeCode) {
         FieldOptionMapper fieldOptionMapper = SpringBeanUtil.getBean(FieldOptionMapper.class);
         FieldDataLogService fieldDataLogService = SpringBeanUtil.getBean(FieldDataLogService.class);
         FieldDataLogCreateVO create = new FieldDataLogCreateVO();
@@ -516,7 +517,7 @@ public class FieldValueUtil {
         } catch (Exception e) {
             throw new CommonException("error", e);
         }
-        fieldDataLogService.createDataLog(projectId, ObjectSchemeCode.AGILE_ISSUE, create);
+        fieldDataLogService.createDataLog(projectId, schemeCode, create);
     }
 
     public static void handleAgileSortPageRequest(String fieldCode, String fieldType, PageRequest pageRequest) {
