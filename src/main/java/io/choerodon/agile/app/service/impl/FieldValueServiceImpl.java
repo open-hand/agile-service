@@ -87,6 +87,13 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
 
     @Override
     public void createFieldValues(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewCreateVO> createDTOs) {
+        List<FieldValueDTO> fieldValues = this.self().validateFieldValueDTOS(organizationId, projectId, schemeCode, createDTOs);
+        this.self().checkCreateCustomField(projectId, instanceId, schemeCode, fieldValues, createDTOs.stream().map(PageFieldViewCreateVO::getFieldCode).collect(Collectors.toList()));
+    }
+
+    @Override
+    public List<FieldValueDTO> validateFieldValueDTOS(Long organizationId, Long projectId, String schemeCode,
+                                                       List<PageFieldViewCreateVO> createDTOs) {
         if (!EnumUtil.contain(ObjectSchemeCode.class, schemeCode)) {
             throw new CommonException(ERROR_SCHEMECODE_ILLEGAL);
         }
@@ -102,8 +109,7 @@ public class FieldValueServiceImpl implements FieldValueService, AopProxy<FieldV
             values.forEach(value -> value.setFieldId(createDTO.getFieldId()));
             fieldValues.addAll(values);
         });
-        this.self().checkCreateCustomField(projectId, instanceId, schemeCode, fieldValues, createDTOs.stream().map(PageFieldViewCreateVO::getFieldCode).collect(Collectors.toList()));
-
+        return fieldValues;
     }
 
     @RuleNotice(event = RuleNoticeEvent.ISSUE_CREATED, fieldListName = "fieldList", idPosition = "arg")

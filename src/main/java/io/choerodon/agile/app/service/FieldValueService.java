@@ -34,6 +34,9 @@ public interface FieldValueService {
      */
     void createFieldValues(Long organizationId, Long projectId, Long instanceId, String schemeCode, List<PageFieldViewCreateVO> createDTOs);
 
+    List<FieldValueDTO> validateFieldValueDTOS(Long organizationId, Long projectId, String schemeCode,
+                                               List<PageFieldViewCreateVO> createDTOs);
+
     void checkCreateCustomField(Long projectId, Long id, String schemeCode, List<FieldValueDTO> fieldValues, List<String> fieldList);
 
     /**

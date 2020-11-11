@@ -16,14 +16,14 @@ class IssueList extends Component {
   };
 
   handleDeleteIssue(issueId) {
-    const { onRefresh, issue: { objectVersionNumber, typeCode, createBy } } = this.props;
+    const { onRefresh, issue: { objectVersionNumber, typeCode, createdBy } } = this.props;
     const data = {
       issueId,
       relateIssueId: 0,
       objectVersionNumber,
     };
     if (typeCode === 'sub_task') {
-      issueApi.delete(issueId, createBy)
+      issueApi.delete(issueId, createdBy)
         .then(() => {
           if (onRefresh) {
             onRefresh();
@@ -148,6 +148,7 @@ class IssueList extends Component {
               <Popconfirm
                 title={`确认要删除该${issueTypeName}吗?`}
                 placement="left"
+                // eslint-disable-next-line react/jsx-no-bind
                 onConfirm={this.confirm.bind(this, issue.issueId)}
                 onCancel={this.cancel}
                 okText="删除"
