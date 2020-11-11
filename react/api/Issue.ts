@@ -1,5 +1,5 @@
 import { axios, stores, Choerodon } from '@choerodon/boot';
-import { getProjectId, getOrganizationId } from '@/utils/common';
+import { getProjectId, getOrganizationId, getApplyType } from '@/utils/common';
 import Api from './Api';
 
 const { AppState } = stores;
@@ -265,7 +265,7 @@ class IssueApi extends Api<IssueApi> {
     return axios({
       headers: { 'Content-Type': 'multipart/form-data' },
       method: 'post',
-      url: `${this.prefix}/excel/import`,
+      url: getApplyType() === 'program' ? `${this.prefix}/issues/import` : `${this.prefix}/excel/import`,
       params: {
         organizationId,
         userId,
@@ -311,6 +311,13 @@ class IssueApi extends Api<IssueApi> {
  */
   downloadTemplateForImport() {
     const organizationId = getOrganizationId();
+    if (getApplyType() === 'program') {
+      return axios({
+        method: 'get',
+        url: `${this.prefix}/issues/template`,
+        responseType: 'arraybuffer',
+      });
+    }
     return axios({
       method: 'get',
       url: `${this.prefix}/excel/download`,
