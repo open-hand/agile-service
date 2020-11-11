@@ -76,4 +76,20 @@ public interface BacklogExpandService {
      * @param starBeaconDTO
      */
     void selectBacklogByStar(StarBeaconDTO starBeaconDTO);
+
+    /**
+     * 删除项目群版本和需求的关联关系
+     * @param programId
+     * @param organizationId
+     * @param programVersionId
+     */
+    void deleteVersionBacklogRelByProgramVersionId(Long programId,Long organizationId,Long programVersionId);
+
+    /**
+     * 发布项目群版本时,将关联的需求置为已发布
+     * @param programId
+     * @param organizationId
+     * @param programVersionId
+     */
+    void releaseProgramVersion(Long programId,Long organizationId,Long programVersionId);
 }
