@@ -10,6 +10,11 @@ import styles from './FieldSummary.less';
 
 @inject('AppState')
 @observer class FieldSummary extends Component {
+  constructor() {
+    super();
+    this.ref = React.createRef();
+  }
+
   updateIssueField = (newValue) => {
     if (!newValue) {
       return;
@@ -69,7 +74,7 @@ import styles from './FieldSummary.less';
     const { featureVO = {} } = issue;
     const value = feature ? featureVO[fieldCode] : issue[fieldCode];
     return (
-      <div className="line-start" style={{ width: '100%', fontSize: 20, fontWeight: 500 }}>
+      <div className="line-start" style={{ fontSize: 20, fontWeight: 500 }} ref={this.ref}>
         <TextEditToggle
           className={styles.summary}
           disabled={disabled}
@@ -79,6 +84,9 @@ import styles from './FieldSummary.less';
           editor={() => (
             <TextArea
               autoSize
+              style={{
+                width: this.ref.current && this.ref.current.parentElement.clientWidth - 64,
+              }}
               maxLength="44"
               required
               validationRenderer={() => '请输入概要。'}
