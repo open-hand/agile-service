@@ -71,6 +71,17 @@ public class IssueSubListVO {
     @ApiModelProperty(value = "创建人")
     private Long createdBy;
 
+    @ApiModelProperty(value = "星标")
+    private Boolean starBeacon;
+
+    public Boolean getStarBeacon() {
+        return starBeacon;
+    }
+
+    public void setStarBeacon(Boolean starBeacon) {
+        this.starBeacon = starBeacon;
+    }
+
     public Long getIssueId() {
         return issueId;
     }

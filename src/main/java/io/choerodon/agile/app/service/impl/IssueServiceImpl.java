@@ -212,7 +212,9 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     private static final String BACKETNAME = "agile-service";
     private static final String TRIGGER_ISSUE_ID = "triggerIssueId";
     private static final String AUTO_TRANFER_FLAG = "autoTranferFlag";
-    private final static String STAR_BEACON_TYPE_ISSUE = "issue";
+    private static final String STAR_BEACON_TYPE_ISSUE = "issue";
+    private static final String BUG_TYPE = "bug";
+    private static final String TASK_TYPE = "task";
 
     @Autowired
     private ModelMapper modelMapper;
@@ -401,6 +403,51 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
         issue.setStarBeacon(false);
         if(!Objects.isNull(starBeaconMapper.selectOne(starBeaconDTO))) {
             issue.setStarBeacon(true);
+        }
+        String typeCode = issue.getTypeCode();
+        if (Objects.equals(typeCode, STORY_TYPE) || Objects.equals(typeCode, TASK_TYPE)) {
+            //子任务设置星标
+            setListStarBeacon(issue.getSubIssueVOList(), starBeaconDTO);
+            //子缺陷设置星标
+            setListStarBeacon(issue.getSubBugVOList(), starBeaconDTO);
+        }
+        if (Objects.equals(typeCode, SUB_TASK)) {
+            //设置父级星标
+            issue.setParentStarBeacon(false);
+            if (!Objects.isNull(issue.getParentIssueId())) {
+                starBeaconDTO.setInstanceId(issue.getParentIssueId());
+                if(!Objects.isNull(starBeaconMapper.selectOne(starBeaconDTO))) {
+                    issue.setParentStarBeacon(true);
+                }
+            }
+            //同父级子任务设置星标
+            setListStarBeacon(issue.getSameParentIssueVOList(), starBeaconDTO);
+        }
+        if (Objects.equals(typeCode, BUG_TYPE)) {
+            //设置关联星标
+            issue.setRelateStarBeacon(false);
+            if (!Objects.isNull(issue.getRelateIssueId())) {
+                starBeaconDTO.setInstanceId(issue.getRelateIssueId());
+                if(!Objects.isNull(starBeaconMapper.selectOne(starBeaconDTO))) {
+                    issue.setRelateStarBeacon(true);
+                }
+            }
+            //同父级子缺陷设置星标
+            setListStarBeacon(issue.getSameParentBugVOList(), starBeaconDTO);
+        }
+    }
+
+    private void setListStarBeacon(List<IssueSubListVO> issues, StarBeaconDTO starBeaconDTO) {
+        if (!Objects.isNull(issues)) {
+            List<Long> issueIds = issues.stream().map(IssueSubListVO::getIssueId).collect(Collectors.toList());
+            List<Long> starIssueIds = starBeaconMapper.selectStarIssuesByIds(issueIds, starBeaconDTO.getProjectId(), starBeaconDTO.getUserId());
+            if (!Objects.isNull(starIssueIds)) {
+                issues.forEach(issue -> {
+                    if (starIssueIds.contains(issue.getIssueId())) {
+                        issue.setStarBeacon(true);
+                    }
+                });
+            }
         }
     }
 
