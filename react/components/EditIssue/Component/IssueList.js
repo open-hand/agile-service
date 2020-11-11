@@ -3,6 +3,7 @@ import { Icon, Popconfirm, Tooltip } from 'choerodon-ui';
 import { stores, Permission } from '@choerodon/boot';
 import { withRouter } from 'react-router-dom';
 import { issueApi } from '@/api';
+import Star from '@/components/tag/star';
 import PriorityTag from '../../PriorityTag';
 import StatusTag from '../../StatusTag';
 import TypeTag from '../../TypeTag';
@@ -51,9 +52,9 @@ class IssueList extends Component {
 
   render() {
     const {
-      issue, i, showAssignee, showDelete, showPriority, onOpen, style,
+      issue, i, showAssignee, showDelete, showPriority, onOpen, style, showStar,
     } = this.props;
-    const { typeCode } = issue;
+    const { typeCode, starBeacon } = issue;
     const menu = AppState.currentMenuType;
     const { type, id: projectId, organizationId: orgId } = menu;
     const issueTypeName = this.getIssueTypeName(issue.typeCode);
@@ -123,6 +124,7 @@ class IssueList extends Component {
             </div>
           ) : null
         }
+        {showStar && <Star active={starBeacon} style={{ margin: '0 10px' }} />}
         <div style={{
           marginRight: '8px', display: 'flex', justifyContent: 'flex-end',
         }}

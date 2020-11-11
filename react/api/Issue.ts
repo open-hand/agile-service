@@ -444,6 +444,28 @@ class IssueApi extends Api<IssueApi> {
       },
     });
   }
+
+  star(issueId: string) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/star_beacon/instance/${issueId}/star`,
+      data: {
+        type: 'issue',
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
+
+  unstar(issueId: string) {
+    return this.request({
+      method: 'post',
+      url: `${this.prefix}/star_beacon/instance/${issueId}/unstar`,
+      data: {
+        type: 'issue',
+        organizationId: getOrganizationId(),
+      },
+    });
+  }
 }
 const issueApi = new IssueApi();
 

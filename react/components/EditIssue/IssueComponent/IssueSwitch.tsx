@@ -38,6 +38,7 @@ const IssueSwitch: React.FC<Props> = ({ issue, reloadIssue }) => {
   const sameParentList = ((typeCode === 'sub_task' ? sameParentIssueVOList : sameParentBugVOList) || []).filter((item) => item.issueId !== issueId);
   const renderIssueList = (item:Issue, i: number) => (
     <IssueList
+      showStar
       style={{
         borderBottom: sameParentList.length > 1 ? '1px solid rgba(0, 0, 0, 0.12)' : '',
       }}

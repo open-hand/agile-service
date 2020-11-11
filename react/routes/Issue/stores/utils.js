@@ -24,6 +24,8 @@ function transformSystemFilter(data) {
     sprint,
     summary,
     version,
+    starBeacon,
+    userId,
   } = data;
   return {
     advancedSearchArgs: {
@@ -33,6 +35,8 @@ function transformSystemFilter(data) {
       priorityId,
     },
     otherArgs: {
+      userId,
+      starBeacon,
       assigneeId,
       issueIds,
       component,

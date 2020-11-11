@@ -58,6 +58,16 @@ export function getSystemFields() {
     defaultShow: true,
     noDisplay: true, // 不需要展示，仅作为一个筛选项
   }, {
+    code: 'starBeacon',
+    name: 'starBeacon',
+    defaultShow: true,
+    noDisplay: true, // 不需要展示，仅作为一个筛选项
+  }, {
+    code: 'userId',
+    name: 'userId',
+    defaultShow: true,
+    noDisplay: true, // 不需要展示，仅作为一个筛选项
+  }, {
     code: 'quickFilterIds',
     name: '快速筛选',
     defaultShow: true,
