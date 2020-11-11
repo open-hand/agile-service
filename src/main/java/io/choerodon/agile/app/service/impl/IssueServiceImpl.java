@@ -438,10 +438,10 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
     }
 
     private void setListStarBeacon(List<IssueSubListVO> issues, StarBeaconDTO starBeaconDTO) {
-        if (!Objects.isNull(issues)) {
+        if (!Objects.isNull(issues) && !issues.isEmpty()) {
             List<Long> issueIds = issues.stream().map(IssueSubListVO::getIssueId).collect(Collectors.toList());
             List<Long> starIssueIds = starBeaconMapper.selectStarIssuesByIds(issueIds, starBeaconDTO.getProjectId(), starBeaconDTO.getUserId());
-            if (!Objects.isNull(starIssueIds)) {
+            if (!Objects.isNull(starIssueIds) && !starIssueIds.isEmpty()) {
                 issues.forEach(issue -> {
                     if (starIssueIds.contains(issue.getIssueId())) {
                         issue.setStarBeacon(true);
