@@ -1,42 +1,32 @@
-import React, { Component } from 'react';
-import { observer } from 'mobx-react';
+import React, { useCallback } from 'react';
+import { observer } from 'mobx-react-lite';
 import { issueApi } from '@/api';
 import Star from '@/components/tag/star';
+import { useLockFn } from 'ahooks';
 
-@observer class FieldStar extends Component {
-  updateIssueAssignee = (assigneeId) => {
-    const { store, onUpdate, reloadIssue } = this.props;
-    const issue = store.getIssue;
-    const { issueId, objectVersionNumber } = issue;
+const FieldStar = ({
+  disabled, store, onUpdate, reloadIssue,
+}) => {
+  const issue = store.getIssue;
+  const { issueId, starBeacon } = issue;
+  const handleStarClick = useLockFn(async () => {
+    starBeacon ? await issueApi.unstar(issueId) : await issueApi.star(issueId);
+    if (onUpdate) {
+      onUpdate();
+    }
+    if (reloadIssue) {
+      reloadIssue(issueId);
+    }
+  }, [issueId, onUpdate, reloadIssue, starBeacon]);
+  return (
+    <Star
+      onClick={handleStarClick}
+      style={{ margin: '6px 5px 0' }}
+      activeTooltip="取消"
+      inActiveTooltip="关注"
+      active={starBeacon}
+    />
+  );
+};
 
-    const obj = {
-      issueId,
-      objectVersionNumber,
-      assigneeId: assigneeId || 0,
-    };
-    issueApi.update(obj)
-      .then(() => {
-        if (onUpdate) {
-          onUpdate();
-        }
-        if (reloadIssue) {
-          reloadIssue(issueId);
-        }
-      });
-  };
-
-  render() {
-    const { store, loginUserId, disabled } = this.props;
-    const issue = store.getIssue;
-    const {
-      assigneeId, assigneeImageUrl,
-      assigneeLoginName, assigneeName, assigneeRealName,
-    } = issue;
-
-    return (
-      <Star style={{ margin: '6px 5px 0' }} activeTooltip="取消" inActiveTooltip="关注" />
-    );
-  }
-}
-
-export default FieldStar;
+export default observer(FieldStar);

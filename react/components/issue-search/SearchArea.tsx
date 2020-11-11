@@ -70,6 +70,9 @@ const SearchArea: React.FC = () => {
     } else if (type === 'commonly') {
       if (id === 'onlyMe') {
         store.handleFilterChange('assigneeId', [userId]);
+      } else if (id === 'starBeacon') {
+        store.handleFilterChange('starBeacon', true);
+        store.handleFilterChange('userId', userId);
       }
     }
   };
@@ -89,6 +92,9 @@ const SearchArea: React.FC = () => {
     } else if (type === 'commonly') {
       if (id === 'onlyMe') {
         store.handleFilterChange('assigneeId', []);
+      } else if (id === 'starBeacon') {
+        store.handleFilterChange('starBeacon', undefined);
+        store.handleFilterChange('userId', undefined);
       }
     }
     const quickFilterIds = selectedQuickFilters.map((filter) => filter.key.split('|')[1]);
@@ -108,6 +114,7 @@ const SearchArea: React.FC = () => {
 
     const currentFilterDTO = store.getCustomFieldFilters();
     const onlyMe = currentFilterDTO.otherArgs.assigneeId && currentFilterDTO.otherArgs.assigneeId.length === 1 && currentFilterDTO.otherArgs.assigneeId[0] === userId;
+    const { starBeacon } = currentFilterDTO.otherArgs;
     const result = [...selectedQuickFilters];
     if (targetMyFilter) {
       result.push(
@@ -117,6 +124,11 @@ const SearchArea: React.FC = () => {
     if (onlyMe) {
       result.push(
         { key: 'commonly|onlyMe', label: '仅我的问题' },
+      );
+    }
+    if (starBeacon) {
+      result.push(
+        { key: 'commonly|starBeacon', label: '我关注的' },
       );
     }
     return result;
@@ -166,7 +178,7 @@ const SearchArea: React.FC = () => {
               >
                 <OptGroup key="commonly" label="常用选项">
                   <Option value="commonly|onlyMe">仅我的问题</Option>
-                  {/* <Option value={-2}>仅故事</Option> */}
+                  <Option value="commonly|starBeacon">我关注的</Option>
                 </OptGroup>
                 <OptGroup key="quick" label="快速筛选">
                   {quickFilters.map((filter) => (
