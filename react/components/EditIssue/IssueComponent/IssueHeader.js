@@ -16,7 +16,7 @@ const IssueHeader = (props) => {
   const issue = store.getIssue;
   const {
     parentIssueId, relateIssueId, typeCode, parentIssueSummary, parentRelateSummary, parentIssueDescription, parentRelateDescription,
-    parentStarBeacon,
+    parentStarBeacon, relateStarBeacon,
   } = issue;
   return (
     <div className={`${prefixCls}-IssueHeader`}>
@@ -32,7 +32,7 @@ const IssueHeader = (props) => {
                   <IssueParentTip
                     parentSummary={parentIssueSummary || parentRelateSummary}
                     parentDescription={parentIssueDescription || parentRelateDescription}
-                    parentStarBeacon={parentStarBeacon}
+                    parentStarBeacon={parentStarBeacon || relateStarBeacon}
                   />
                 )}
                 trigger="hover"
