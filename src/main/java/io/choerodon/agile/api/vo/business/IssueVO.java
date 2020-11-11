@@ -236,6 +236,26 @@ public class IssueVO {
 
     private Boolean starBeacon;
 
+    private Boolean parentStarBeacon;
+
+    private Boolean relateStarBeacon;
+
+    public Boolean getParentStarBeacon() {
+        return parentStarBeacon;
+    }
+
+    public void setParentStarBeacon(Boolean parentStarBeacon) {
+        this.parentStarBeacon = parentStarBeacon;
+    }
+
+    public Boolean getRelateStarBeacon() {
+        return relateStarBeacon;
+    }
+
+    public void setRelateStarBeacon(Boolean relateStarBeacon) {
+        this.relateStarBeacon = relateStarBeacon;
+    }
+
     public Boolean getStarBeacon() {
         return starBeacon;
     }

@@ -16,4 +16,16 @@
         </if>
     </sql>
 
+    <select id="selectStarIssuesByIds" resultType="java.lang.Long">
+        select fsb.instance_id
+        from fd_star_beacon fsb
+        where fsb.type = 'issue'
+        and fsb.instance_id in
+        <foreach collection="issueIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        and fsb.project_id = #{projectId}
+        and fsb.user_id = #{userId}
+    </select>
+
 </mapper>
