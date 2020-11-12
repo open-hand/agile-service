@@ -6,10 +6,7 @@ import io.choerodon.agile.api.vo.business.ExportIssuesVO;
 import io.choerodon.agile.api.vo.business.IssueCreateVO;
 import io.choerodon.agile.api.vo.business.IssueVO;
 import io.choerodon.agile.infra.dto.business.IssueDTO;
-import io.choerodon.agile.infra.enums.ExcelImportTemplateColumn;
-import io.choerodon.agile.infra.enums.IssueTypeCode;
-import io.choerodon.agile.infra.enums.ObjectSchemeCode;
-import io.choerodon.agile.infra.enums.SchemeApplyType;
+import io.choerodon.agile.infra.enums.*;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.vo.*;
 import io.choerodon.agile.infra.dto.IssueTypeLinkDTO;
@@ -72,6 +69,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     protected static final String BACKETNAME = "agile-service";
     protected static final String SUB_TASK = "sub_task";
+    private static final String ISSUE_EPIC = "issue_epic";
     protected static final String UPLOAD_FILE = "upload_file";
     protected static final String APPLY_TYPE_AGILE = "agile";
     protected static final String CANCELED = "canceled";
@@ -112,6 +110,9 @@ public class ExcelServiceImpl implements ExcelService {
     protected static final String TASK_CN = "任务";
 
     protected static final String SUB_TASK_CN = "子任务";
+
+    private static final int PREDEFINED_VALUE_START_ROW = 1;
+    private static final int PREDEFINED_VALUE_END_ROW = 500;
 
     @Autowired
     protected StateMachineClientService stateMachineClientService;
@@ -207,30 +208,30 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     @Override
-    public void download(Long projectId, Long organizationId, HttpServletRequest request, HttpServletResponse response) {
-        String[] copyFieldsName = FIELDS_NAME.clone();
+    public void download(Long projectId,
+                         Long organizationId,
+                         HttpServletResponse response,
+                         ExcelTemplateVO excelTemplateVO) {
+        List<String> systemFields = excelTemplateVO.getSystemFields();
+        List<String> customFields = excelTemplateVO.getCustomFields();
+        if (ObjectUtils.isEmpty(systemFields)) {
+            throw new CommonException("error.excel.header.code.empty");
+        }
         boolean withFeature = withFeature(projectId, organizationId);
-        List<PredefinedDTO> predefinedList = getPredefinedList(organizationId, projectId, withFeature);
-        if (withFeature && agilePluginService != null) {
-            predefinedList.add(agilePluginService.getFeaturePredefined(organizationId,projectId));
-            copyFieldsName = agilePluginService.changeFeatureHeaders(copyFieldsName);
-        }
-        else {
-            //所属史诗预定义值
-            predefinedList.add(getEpicPredefined(projectId));
-        }
 
+        systemFields = ExcelImportTemplate.Header.validateAndAddFields(systemFields);
+        ExcelImportTemplate.Cursor cursor = new ExcelImportTemplate.Cursor();
+        List<PredefinedDTO> predefinedList =
+                processSystemFieldPredefinedList(organizationId, projectId, systemFields, withFeature, cursor);
+        Map<String, String> customFieldCodeNameMap = new HashMap<>();
+        predefinedList.addAll(processCustomFieldPredefinedList(projectId, customFields, cursor, systemFields.size(), customFieldCodeNameMap));
+        List<String> headers = generateExcelHeaderTitle(systemFields, customFields, customFieldCodeNameMap);
         Workbook wb = new XSSFWorkbook();
         // create guide sheet
         ExcelUtil.createGuideSheet(wb, ExcelUtil.initGuideSheet(), false);
         Sheet sheet = wb.createSheet(IMPORT_TEMPLATE_NAME);
         CellStyle style = CatalogExcelUtil.getHeadStyle(wb);
-        Map<Integer,Integer> widthMap = new HashMap<>();
-        widthMap.put(ExcelImportTemplateColumn.Issue.EPIC_COL, 8000);
-        widthMap.put(ExcelImportTemplateColumn.Issue.SUB_TASK_COL, 8000);
-        widthMap.put(ExcelImportTemplateColumn.Issue.EPIC_NAME_COL, 8000);
-        ExcelUtil.generateHeaders(sheet, style, Arrays.asList(copyFieldsName), widthMap);
-
+        ExcelUtil.generateHeaders(sheet, style, headers);
         try {
             //填充预定义值
             fillInPredefinedValues(wb, sheet, predefinedList);
@@ -240,6 +241,443 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
+    private List<String> generateExcelHeaderTitle(List<String> systemFields,
+                                                  List<String> customFields,
+                                                  Map<String, String> customFieldCodeNameMap) {
+        List<String> result = new ArrayList<>();
+        systemFields.forEach(s -> {
+            String title = ExcelImportTemplate.Header.getValueByCode(s);
+            if (!StringUtils.hasText(title)) {
+                throw new CommonException("error.excel.header.code." + s);
+            }
+            result.add(title);
+        });
+        if (!ObjectUtils.isEmpty(customFields)) {
+            customFields.forEach(c -> {
+                String title = customFieldCodeNameMap.get(c);
+                if (!StringUtils.hasText(title)) {
+                    throw new CommonException("error.excel.header.custom.field.code." + c);
+                }
+                result.add(title);
+            });
+        }
+        return result;
+    }
+
+    private List<PredefinedDTO> processCustomFieldPredefinedList(Long projectId,
+                                                                 List<String> customFields,
+                                                                 ExcelImportTemplate.Cursor cursor,
+                                                                 int systemFieldLength,
+                                                                 Map<String, String> customFieldCodeNameMap) {
+        List<PredefinedDTO> result = new ArrayList<>();
+        if (ObjectUtils.isEmpty(customFields)) {
+            return result;
+        }
+        List<ObjectSchemeFieldDetailVO> objectSchemeFieldDetails =
+                objectSchemeFieldService.queryCustomFieldList(projectId, "agileIssueType");
+        Map<String, List<String>> customFieldValueMap = new HashMap<>();
+        List<String> customFieldCodes = new ArrayList<>();
+        List<String> fieldTypes = Arrays.asList("multiple", "single", "checkbox", "radio");
+        List<String> userNames =
+                baseFeignClient.listUsersByProjectId(projectId, 1, 0, null)
+                        .getBody()
+                        .getContent()
+                        .stream()
+                        .map(UserDTO::getRealName)
+                        .collect(Collectors.toList());
+        objectSchemeFieldDetails.forEach(o -> {
+            String fieldCode = o.getCode();
+            String fieldName = o.getName();
+            customFieldCodeNameMap.put(fieldCode, fieldName);
+            customFieldCodes.add(fieldCode);
+            String fieldType = o.getFieldType();
+            if (fieldTypes.contains(fieldType)) {
+                List<String> optionValues = o.getFieldOptions().stream().map(FieldOptionVO::getValue).collect(Collectors.toList());
+                customFieldValueMap.put(fieldCode, optionValues);
+            }
+            if ("member".equals(fieldType)) {
+                customFieldValueMap.put(fieldCode, userNames);
+            }
+        });
+        isCustomFieldsIllegal(customFields, customFieldCodes);
+        for (int i = 0; i < customFields.size(); i++) {
+            String code = customFields.get(i);
+            List<String> values = customFieldValueMap.get(code);
+            if (!ObjectUtils.isEmpty(values)) {
+                result.add(
+                        new PredefinedDTO(
+                                values,
+                                PREDEFINED_VALUE_START_ROW,
+                                PREDEFINED_VALUE_END_ROW,
+                                i + systemFieldLength,
+                                i + systemFieldLength,
+                                code,
+                                cursor.getAndIncreaseSheetNum()));
+            }
+        }
+        return result;
+    }
+
+    private List<PredefinedDTO> processSystemFieldPredefinedList(Long organizationId,
+                                                                 Long projectId,
+                                                                 List<String> systemFields,
+                                                                 boolean withFeature,
+                                                                 ExcelImportTemplate.Cursor cursor) {
+        List<PredefinedDTO> result = new ArrayList<>();
+        result.add(processPriorityPredefined(organizationId, cursor, systemFields));
+        result.add(processIssueType(withFeature, projectId, cursor, systemFields));
+        result.add(processParentIssue(projectId, cursor, systemFields));
+        Optional
+                .ofNullable(processVersion(projectId, cursor, systemFields))
+                .ifPresent(x -> result.add(x));
+        Optional
+                .ofNullable(processComponent(projectId, cursor, systemFields))
+                .ifPresent(x -> result.add(x));
+        Optional
+                .ofNullable(processSprint(projectId, cursor, systemFields))
+                .ifPresent(x -> result.add(x));
+        List<String> userNameList = new ArrayList<>(getManagers(projectId).keySet());
+        Optional
+                .ofNullable(processAssignee(cursor, systemFields, userNameList))
+                .ifPresent(x -> result.add(x));
+        Optional
+                .ofNullable(processReporter(cursor, systemFields, userNameList))
+                .ifPresent(x -> result.add(x));
+        Optional
+                .ofNullable(processEpicOrFeature(organizationId, projectId, withFeature, cursor, systemFields))
+                .ifPresent(x -> result.add(x));
+        return result;
+    }
+
+
+    private PredefinedDTO processEpicOrFeature(Long organizationId,
+                                               Long projectId,
+                                               boolean withFeature,
+                                               ExcelImportTemplate.Cursor cursor,
+                                               List<String> fieldCodes) {
+        if (withFeature && agilePluginService != null) {
+            int col = fieldCodes.indexOf(FieldCode.FEATURE);
+            if (col == -1) {
+                return null;
+            }
+            List<String> featureSummary = agilePluginService.listFeatureSummary(organizationId, projectId);
+            return new PredefinedDTO(featureSummary,
+                    PREDEFINED_VALUE_START_ROW,
+                    PREDEFINED_VALUE_END_ROW,
+                    col,
+                    col,
+                    FieldCode.FEATURE,
+                    cursor.getAndIncreaseSheetNum());
+        } else {
+            int col = fieldCodes.indexOf(FieldCode.EPIC);
+            if (col == -1) {
+                return null;
+            }
+            List<String> values = new ArrayList<>(getEpicMap(projectId).keySet());
+            values.sort(String.CASE_INSENSITIVE_ORDER);
+            return new PredefinedDTO(values,
+                    PREDEFINED_VALUE_START_ROW,
+                    PREDEFINED_VALUE_END_ROW,
+                    col,
+                    col,
+                    FieldCode.EPIC,
+                    cursor.getAndIncreaseSheetNum());
+        }
+    }
+
+    private PredefinedDTO processReporter(ExcelImportTemplate.Cursor cursor,
+                                          List<String> fieldCodes,
+                                          List<String> userNameList) {
+        int col = fieldCodes.indexOf(FieldCode.REPORTER);
+        if (col == -1) {
+            return null;
+        }
+        return new PredefinedDTO(userNameList,
+                PREDEFINED_VALUE_START_ROW,
+                PREDEFINED_VALUE_END_ROW,
+                col,
+                col,
+                FieldCode.REPORTER,
+                cursor.getAndIncreaseSheetNum());
+    }
+
+    private PredefinedDTO processAssignee(ExcelImportTemplate.Cursor cursor,
+                                          List<String> fieldCodes,
+                                          List<String> userNameList) {
+        int col = fieldCodes.indexOf(FieldCode.ASSIGNEE);
+        if (col == -1) {
+            return null;
+        }
+        return new PredefinedDTO(userNameList,
+                PREDEFINED_VALUE_START_ROW,
+                PREDEFINED_VALUE_END_ROW,
+                col,
+                col,
+                FieldCode.ASSIGNEE,
+                cursor.getAndIncreaseSheetNum());
+    }
+
+
+    private PredefinedDTO processSprint(Long projectId,
+                                        ExcelImportTemplate.Cursor cursor,
+                                        List<String> fieldCodes) {
+        int col = fieldCodes.indexOf(FieldCode.SPRINT);
+        if (col == -1) {
+            return null;
+        }
+        List<String> sprintList =
+                sprintMapper.selectNotDoneByProjectId(projectId)
+                        .stream()
+                        .map(SprintDTO::getSprintName)
+                        .collect(Collectors.toList());
+        return new PredefinedDTO(sprintList,
+                PREDEFINED_VALUE_START_ROW,
+                PREDEFINED_VALUE_END_ROW,
+                col,
+                col,
+                FieldCode.SPRINT,
+                cursor.getAndIncreaseSheetNum());
+    }
+
+    private PredefinedDTO processComponent(Long projectId,
+                                           ExcelImportTemplate.Cursor cursor,
+                                           List<String> fieldCodes) {
+        int col = fieldCodes.indexOf(FieldCode.COMPONENT);
+        if (col == -1) {
+            return null;
+        }
+        List<String> componentList =
+                issueComponentMapper.selectByProjectId(projectId)
+                        .stream()
+                        .map(IssueComponentDTO::getName)
+                        .collect(Collectors.toList());
+        return new PredefinedDTO(componentList,
+                PREDEFINED_VALUE_START_ROW,
+                PREDEFINED_VALUE_END_ROW,
+                col,
+                col,
+                FieldCode.COMPONENT,
+                cursor.getAndIncreaseSheetNum());
+    }
+
+    private PredefinedDTO processVersion(Long projectId,
+                                         ExcelImportTemplate.Cursor cursor,
+                                         List<String> fieldCodes) {
+        int col = fieldCodes.indexOf(FieldCode.FIX_VERSION);
+        if (col == -1) {
+            return null;
+        }
+        List<ProductVersionCommonDTO> productVersionCommons = productVersionMapper.listByProjectId(projectId);
+        List<String> versionList = new ArrayList<>();
+        productVersionCommons.forEach(p -> {
+            String statusCode = p.getStatusCode();
+            if (VERSION_PLANNING.equals(statusCode)) {
+                versionList.add(p.getName());
+            }
+        });
+        return new PredefinedDTO(versionList,
+                PREDEFINED_VALUE_START_ROW,
+                PREDEFINED_VALUE_END_ROW,
+                col,
+                col,
+                FieldCode.FIX_VERSION,
+                cursor.getAndIncreaseSheetNum());
+    }
+
+    private PredefinedDTO processIssueType(boolean withFeature,
+                                           Long projectId,
+                                           ExcelImportTemplate.Cursor cursor,
+                                           List<String> fieldCodes) {
+        List<IssueTypeVO> issueTypes = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE);
+        List<String> values = new ArrayList<>();
+        issueTypes.forEach(i -> {
+            String typeCode = i.getTypeCode();
+            String typeName = i.getName();
+            if (withFeature && ISSUE_EPIC.equals(typeCode)) {
+                return;
+            }
+            if (!SUB_TASK.equals(typeCode) && !FEATURE.equals(typeCode)) {
+                values.add(typeName);
+            }
+        });
+        int col = getColByFieldCode(fieldCodes, FieldCode.ISSUE_TYPE);
+        return new PredefinedDTO(values,
+                PREDEFINED_VALUE_START_ROW,
+                PREDEFINED_VALUE_END_ROW,
+                col,
+                col,
+                FieldCode.ISSUE_TYPE,
+                cursor.getAndIncreaseSheetNum());
+    }
+
+
+    private PredefinedDTO processParentIssue(Long projectId,
+                                             ExcelImportTemplate.Cursor cursor,
+                                             List<String> systemFields) {
+        //查询当前项目所有未完成的story,bug,task
+        List<IssueVO> issues = issueMapper.listUndoneAvailableParents(projectId);
+        int col = getColByFieldCode(systemFields, ExcelImportTemplate.Header.PARENT);
+        List<String> values = new ArrayList<>();
+        issues.forEach(i -> {
+            String summary = i.getSummary();
+            String issueNum = i.getIssueNum();
+            values.add(issueNum + ":"+ summary);
+        });
+        return new PredefinedDTO(values,
+                PREDEFINED_VALUE_START_ROW,
+                PREDEFINED_VALUE_END_ROW,
+                col,
+                col,
+                ExcelImportTemplate.Header.PARENT,
+                cursor.getAndIncreaseSheetNum());
+    }
+
+    private PredefinedDTO processPriorityPredefined(Long organizationId,
+                                           ExcelImportTemplate.Cursor cursor,
+                                           List<String> fieldCodes) {
+        List<PriorityVO> priorityVOList = priorityService.queryByOrganizationIdList(organizationId);
+        List<String> priorityList =
+                priorityVOList
+                        .stream()
+                        .filter(p -> Boolean.TRUE.equals(p.getEnable()))
+                        .map(PriorityVO::getName)
+                        .collect(Collectors.toList());
+        int col = getColByFieldCode(fieldCodes, FieldCode.PRIORITY);
+        return new PredefinedDTO(priorityList,
+                PREDEFINED_VALUE_START_ROW,
+                PREDEFINED_VALUE_END_ROW,
+                col,
+                col,
+                FieldCode.PRIORITY,
+                cursor.getAndIncreaseSheetNum());
+    }
+
+    private int getColByFieldCode(List<String> fieldCodes, String fieldCode) {
+        int col = fieldCodes.indexOf(fieldCode);
+        if (col == -1) {
+            String msg = "error.fieldCodes." + fieldCode + ".not.exist";
+            throw new CommonException(msg);
+        }
+        return col;
+    }
+
+    protected List<PredefinedDTO> getPredefinedList(Long organizationId, Long projectId, boolean withFeature) {
+        List<PredefinedDTO> predefinedList = new ArrayList<>();
+        List<PriorityVO> priorityVOList = priorityService.queryByOrganizationIdList(organizationId);
+        List<IssueTypeVO> issueTypeVOList = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE);
+        List<ProductVersionCommonDTO> productVersionCommonDTOList = productVersionMapper.listByProjectId(projectId);
+        List<IssueComponentDTO> issueComponentDTOList = issueComponentMapper.selectByProjectId(projectId);
+        List<SprintDTO> sprintDTOList = sprintMapper.selectNotDoneByProjectId(projectId);
+
+        List<String> priorityList = new ArrayList<>();
+        for (PriorityVO priorityVO : priorityVOList) {
+            if (priorityVO.getEnable()) {
+                priorityList.add(priorityVO.getName());
+            }
+        }
+        predefinedList.add(
+                new PredefinedDTO(
+                        priorityList,
+                        1,
+                        500,
+                        ExcelImportTemplate.Issue.PRIORITY_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.PRIORITY_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.PRIORITY_SHEET.getName(),
+                        ExcelImportTemplate.Issue.PRIORITY_SHEET.getIndex()
+                ));
+
+        List<String> issueTypeList = new ArrayList<>();
+        for (IssueTypeVO issueTypeVO : issueTypeVOList) {
+            String typeCode = issueTypeVO.getTypeCode();
+            if (withFeature && "issue_epic".equals(typeCode)) {
+                continue;
+            }
+            if (!SUB_TASK.equals(typeCode) && !FEATURE.equals(typeCode)) {
+                issueTypeList.add(issueTypeVO.getName());
+            }
+        }
+        predefinedList.add(
+                new PredefinedDTO(
+                        issueTypeList,
+                        1,
+                        500,
+                        ExcelImportTemplate.Issue.ISSUE_TYPE_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.ISSUE_TYPE_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.ISSUE_TYPE_SHEET.getName(),
+                        ExcelImportTemplate.Issue.ISSUE_TYPE_SHEET.getIndex()
+                ));
+
+        List<String> versionList = new ArrayList<>();
+        for (ProductVersionCommonDTO productVersionCommonDTO : productVersionCommonDTOList) {
+            if (VERSION_PLANNING.equals(productVersionCommonDTO.getStatusCode())) {
+                versionList.add(productVersionCommonDTO.getName());
+            }
+        }
+        predefinedList.add(
+                new PredefinedDTO(
+                        versionList,
+                        1,
+                        500,
+                        ExcelImportTemplate.Issue.FIX_VERSION_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.FIX_VERSION_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.FIX_VERSION_SHEET.getName(),
+                        ExcelImportTemplate.Issue.FIX_VERSION_SHEET.getIndex()
+                ));
+
+        List<String> componentList = new ArrayList<>();
+        for (IssueComponentDTO issueComponentDTO : issueComponentDTOList) {
+            componentList.add(issueComponentDTO.getName());
+        }
+        predefinedList.add(
+                new PredefinedDTO(
+                        componentList,
+                        1,
+                        500,
+                        ExcelImportTemplate.Issue.COMPONENT_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.COMPONENT_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.COMPONENT_SHEET.getName(),
+                        ExcelImportTemplate.Issue.COMPONENT_SHEET.getIndex()
+                ));
+
+        List<String> sprintList = new ArrayList<>();
+        for (SprintDTO sprintDTO : sprintDTOList) {
+            sprintList.add(sprintDTO.getSprintName());
+        }
+        predefinedList.add(
+                new PredefinedDTO(
+                        sprintList,
+                        1,
+                        500,
+                        ExcelImportTemplate.Issue.SPRINT_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.SPRINT_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.SPRINT_SHEET.getName(),
+                        ExcelImportTemplate.Issue.SPRINT_SHEET.getIndex()
+                ));
+
+        List<String> users = new ArrayList<>(getManagers(projectId).keySet());
+        predefinedList.add(
+                new PredefinedDTO(
+                        users,
+                        1,
+                        500,
+                        ExcelImportTemplate.Issue.MANAGER_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.MANAGER_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.MANAGER_SHEET.getName(),
+                        ExcelImportTemplate.Issue.MANAGER_SHEET.getIndex()
+                ));
+        predefinedList.add(
+                new PredefinedDTO(
+                        users,
+                        1,
+                        500,
+                        ExcelImportTemplate.Issue.REPORTER_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.REPORTER_SHEET.getCol(),
+                        ExcelImportTemplate.Issue.REPORTER_SHEET.getName(),
+                        ExcelImportTemplate.Issue.REPORTER_SHEET.getIndex()
+                ));
+        return predefinedList;
+    }
+
     protected PredefinedDTO getEpicPredefined(Long projectId) {
         List<String> values = new ArrayList<>(getEpicMap(projectId).keySet());
         values.sort(String.CASE_INSENSITIVE_ORDER);
@@ -247,10 +685,10 @@ public class ExcelServiceImpl implements ExcelService {
                 values,
                 1,
                 500,
-                ExcelImportTemplateColumn.Issue.EPIC_SHEET.getCol(),
-                ExcelImportTemplateColumn.Issue.EPIC_SHEET.getCol(),
-                ExcelImportTemplateColumn.Issue.EPIC_SHEET.getName(),
-                ExcelImportTemplateColumn.Issue.EPIC_SHEET.getIndex()
+                ExcelImportTemplate.Issue.EPIC_SHEET.getCol(),
+                ExcelImportTemplate.Issue.EPIC_SHEET.getCol(),
+                ExcelImportTemplate.Issue.EPIC_SHEET.getName(),
+                ExcelImportTemplate.Issue.EPIC_SHEET.getIndex()
         );
     }
 
@@ -282,122 +720,15 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    protected List<PredefinedDTO> getPredefinedList(Long organizationId, Long projectId, boolean withFeature) {
-        List<PredefinedDTO> predefinedList = new ArrayList<>();
-        List<PriorityVO> priorityVOList = priorityService.queryByOrganizationIdList(organizationId);
-        List<IssueTypeVO> issueTypeVOList = projectConfigService.queryIssueTypesByProjectId(projectId, APPLY_TYPE_AGILE);
-        List<ProductVersionCommonDTO> productVersionCommonDTOList = productVersionMapper.listByProjectId(projectId);
-        List<IssueComponentDTO> issueComponentDTOList = issueComponentMapper.selectByProjectId(projectId);
-        List<SprintDTO> sprintDTOList = sprintMapper.selectNotDoneByProjectId(projectId);
-
-        List<String> priorityList = new ArrayList<>();
-        for (PriorityVO priorityVO : priorityVOList) {
-            if (priorityVO.getEnable()) {
-                priorityList.add(priorityVO.getName());
+    private void isCustomFieldsIllegal(List<String> customFields, List<String> customFieldCodes) {
+        customFields.forEach(c -> {
+            if (!customFieldCodes.contains(c)) {
+                throw new CommonException("error.illegal.custom.field.code");
             }
-        }
-        predefinedList.add(
-                new PredefinedDTO(
-                        priorityList,
-                        1,
-                        500,
-                        ExcelImportTemplateColumn.Issue.PRIORITY_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.PRIORITY_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.PRIORITY_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.PRIORITY_SHEET.getIndex()
-                ));
-
-        List<String> issueTypeList = new ArrayList<>();
-        for (IssueTypeVO issueTypeVO : issueTypeVOList) {
-            String typeCode = issueTypeVO.getTypeCode();
-            if (withFeature && "issue_epic".equals(typeCode)) {
-                continue;
-            }
-            if (!SUB_TASK.equals(typeCode) && !FEATURE.equals(typeCode)) {
-                issueTypeList.add(issueTypeVO.getName());
-            }
-        }
-        predefinedList.add(
-                new PredefinedDTO(
-                        issueTypeList,
-                        1,
-                        500,
-                        ExcelImportTemplateColumn.Issue.ISSUE_TYPE_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.ISSUE_TYPE_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.ISSUE_TYPE_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.ISSUE_TYPE_SHEET.getIndex()
-                ));
-
-        List<String> versionList = new ArrayList<>();
-        for (ProductVersionCommonDTO productVersionCommonDTO : productVersionCommonDTOList) {
-            if (VERSION_PLANNING.equals(productVersionCommonDTO.getStatusCode())) {
-                versionList.add(productVersionCommonDTO.getName());
-            }
-        }
-        predefinedList.add(
-                new PredefinedDTO(
-                        versionList,
-                        1,
-                        500,
-                        ExcelImportTemplateColumn.Issue.FIX_VERSION_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.FIX_VERSION_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.FIX_VERSION_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.FIX_VERSION_SHEET.getIndex()
-                ));
-
-        List<String> componentList = new ArrayList<>();
-        for (IssueComponentDTO issueComponentDTO : issueComponentDTOList) {
-            componentList.add(issueComponentDTO.getName());
-        }
-        predefinedList.add(
-                new PredefinedDTO(
-                        componentList,
-                        1,
-                        500,
-                        ExcelImportTemplateColumn.Issue.COMPONENT_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.COMPONENT_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.COMPONENT_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.COMPONENT_SHEET.getIndex()
-                ));
-
-        List<String> sprintList = new ArrayList<>();
-        for (SprintDTO sprintDTO : sprintDTOList) {
-            sprintList.add(sprintDTO.getSprintName());
-        }
-        predefinedList.add(
-                new PredefinedDTO(
-                        sprintList,
-                        1,
-                        500,
-                        ExcelImportTemplateColumn.Issue.SPRINT_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.SPRINT_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.SPRINT_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.SPRINT_SHEET.getIndex()
-                ));
-
-        List<String> users = new ArrayList<>(getManagers(projectId).keySet());
-        predefinedList.add(
-                new PredefinedDTO(
-                        users,
-                        1,
-                        500,
-                        ExcelImportTemplateColumn.Issue.MANAGER_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.MANAGER_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.MANAGER_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.MANAGER_SHEET.getIndex()
-                ));
-        predefinedList.add(
-                new PredefinedDTO(
-                        users,
-                        1,
-                        500,
-                        ExcelImportTemplateColumn.Issue.REPORTER_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.REPORTER_SHEET.getCol(),
-                        ExcelImportTemplateColumn.Issue.REPORTER_SHEET.getName(),
-                        ExcelImportTemplateColumn.Issue.REPORTER_SHEET.getIndex()
-                ));
-        return predefinedList;
+        });
     }
+
+
 
     protected Map<String, Long> getManagers(Long projectId) {
         Map<String, Long> managerMap = new HashMap<>();
@@ -442,7 +773,7 @@ public class ExcelServiceImpl implements ExcelService {
         //报告人
         setReporter(issueCreateVO, managerMap, row);
         //优先级
-        String priorityName = row.getCell(ExcelImportTemplateColumn.Issue.PRIORITY_COL).toString();
+        String priorityName = row.getCell(ExcelImportTemplate.Issue.PRIORITY_COL).toString();
         Long priorityId = priorityMap.get(priorityName);
         if (ObjectUtils.isEmpty(priorityId)) {
             return false;
@@ -460,7 +791,7 @@ public class ExcelServiceImpl implements ExcelService {
         String typeName = getTypeName(row);
         if (isSubTask(row)) {
             //子任务是任务类型，无需设置故事点和史诗名
-            String summary = row.getCell(ExcelImportTemplateColumn.Issue.SUB_TASK_COL).toString();
+            String summary = row.getCell(ExcelImportTemplate.Issue.SUB_TASK_COL).toString();
             if (!StringUtils.hasText(summary)) {
                 throw new CommonException("error.summary.null");
             }
@@ -473,7 +804,7 @@ public class ExcelServiceImpl implements ExcelService {
             setComponent(issueCreateVO, parentRow, componentMap);
             setSprint(issueCreateVO, parentRow, sprintMap);
         } else {
-            String summary = row.getCell(ExcelImportTemplateColumn.Issue.SUMMARY_COL).toString();
+            String summary = row.getCell(ExcelImportTemplate.Issue.SUMMARY_COL).toString();
             if (!StringUtils.hasText(summary)) {
                 throw new CommonException("error.summary.null");
             }
@@ -486,12 +817,12 @@ public class ExcelServiceImpl implements ExcelService {
             issueCreateVO.setIssueTypeId(issueType.getId());
             if (EPIC_CN.equals(typeName)) {
                 //默认名称和概要相同
-                String epicName = row.getCell(ExcelImportTemplateColumn.Issue.EPIC_NAME_COL).toString();
+                String epicName = row.getCell(ExcelImportTemplate.Issue.EPIC_NAME_COL).toString();
                 issueCreateVO.setSummary(epicName);
                 issueCreateVO.setEpicName(epicName);
             } else {
                 if (STORY_CN.equals(typeName)) {
-                    Cell storyPointCell = row.getCell(ExcelImportTemplateColumn.Issue.STORY_POINT_COL);
+                    Cell storyPointCell = row.getCell(ExcelImportTemplate.Issue.STORY_POINT_COL);
                     if (!isCellEmpty(storyPointCell)) {
                         issueCreateVO.setStoryPoints(new BigDecimal(storyPointCell.toString()));
                     }
@@ -505,7 +836,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void setDescription(IssueCreateVO issueCreateVO, Row row) {
-        Cell descriptionCell = row.getCell(ExcelImportTemplateColumn.Issue.DESCRIPTION_COL);
+        Cell descriptionCell = row.getCell(ExcelImportTemplate.Issue.DESCRIPTION_COL);
         if (!isCellEmpty(descriptionCell)) {
             String description = descriptionCell.toString();
             if (StringUtils.hasText(description)) {
@@ -515,7 +846,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void setVersion(IssueCreateVO issueCreateVO, Map<String, Long> versionMap, Row row) {
-        Cell versionCell = row.getCell(ExcelImportTemplateColumn.Issue.FIX_VERSION_COL);
+        Cell versionCell = row.getCell(ExcelImportTemplate.Issue.FIX_VERSION_COL);
         if (!isCellEmpty(versionCell)) {
             String version = versionCell.toString();
             if (StringUtils.hasText(version)) {
@@ -530,14 +861,14 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void setRemainTime(IssueCreateVO issueCreateVO, Row row) {
-        Cell remainTimeCell = row.getCell(ExcelImportTemplateColumn.Issue.REMAIN_TIME_COL);
+        Cell remainTimeCell = row.getCell(ExcelImportTemplate.Issue.REMAIN_TIME_COL);
         if (!isCellEmpty(remainTimeCell)) {
             issueCreateVO.setRemainingTime(new BigDecimal(remainTimeCell.toString()));
         }
     }
 
     protected void setManager(IssueCreateVO issueCreateVO, Map<String, Long> managerMap, Row row) {
-        Cell cell = row.getCell(ExcelImportTemplateColumn.Issue.MANAGER_COL);
+        Cell cell = row.getCell(ExcelImportTemplate.Issue.MANAGER_COL);
         if (!isCellEmpty(cell)) {
             String manager = cell.toString();
             if (StringUtils.hasText(manager)) {
@@ -548,7 +879,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void setReporter(IssueCreateVO issueCreateVO, Map<String, Long> managerMap, Row row) {
-        Cell cell = row.getCell(ExcelImportTemplateColumn.Issue.REPORTER_COL);
+        Cell cell = row.getCell(ExcelImportTemplate.Issue.REPORTER_COL);
         if (!isCellEmpty(cell)) {
             String manager = cell.toString();
             if (StringUtils.hasText(manager)) {
@@ -559,7 +890,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void setSprint(IssueCreateVO issueCreateVO, Row row, Map<String, Long> sprintMap) {
-        Cell sprintCell = row.getCell(ExcelImportTemplateColumn.Issue.SPRINT_COL);
+        Cell sprintCell = row.getCell(ExcelImportTemplate.Issue.SPRINT_COL);
         if (!isCellEmpty(sprintCell)) {
             String sprint = sprintCell.toString();
             if (StringUtils.hasText(sprint)) {
@@ -569,7 +900,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     protected void setComponent(IssueCreateVO issueCreateVO, Row row, Map<String, Long> componentMap) {
-        Cell componentCell = row.getCell(ExcelImportTemplateColumn.Issue.COMPONENT_COL);
+        Cell componentCell = row.getCell(ExcelImportTemplate.Issue.COMPONENT_COL);
         if (!isCellEmpty(componentCell)) {
             String value = componentCell.toString();
             if (StringUtils.hasText(value)) {
@@ -583,7 +914,7 @@ public class ExcelServiceImpl implements ExcelService {
     protected void setBelongsEpic(IssueCreateVO issueCreateVO, Row row,
                                   Map<String, Long> theSecondColumnMap,
                                   String typeName) {
-        Cell cell = row.getCell(ExcelImportTemplateColumn.Issue.EPIC_COL);
+        Cell cell = row.getCell(ExcelImportTemplate.Issue.EPIC_COL);
         if (!isCellEmpty(cell)) {
             String belongsEpic = cell.toString();
             //子任务不设置史诗
@@ -596,7 +927,7 @@ public class ExcelServiceImpl implements ExcelService {
     protected void setSecondColumn(IssueCreateVO issueCreateVO, Row row, boolean withFeature,
                                  Map<String, Long> theSecondColumnMap,
                                  String typeName) {
-        Cell secondCell = row.getCell(ExcelImportTemplateColumn.Issue.EPIC_COL);
+        Cell secondCell = row.getCell(ExcelImportTemplate.Issue.EPIC_COL);
         if (!isCellEmpty(secondCell)) {
             String secondColumn = secondCell.toString();
             if (StringUtils.hasText(secondColumn)) {
@@ -713,8 +1044,8 @@ public class ExcelServiceImpl implements ExcelService {
         Row row = sheet.getRow(rowNum);
         Map<Integer, String> errorMessage = new HashMap<>();
         // 经办人,非必填
-        checkUser(managers, row, errorMessage, ExcelImportTemplateColumn.Issue.MANAGER_COL, "经办人输入错误");
-        checkUser(managers, row, errorMessage, ExcelImportTemplateColumn.Issue.REPORTER_COL, "报告人输入错误");
+        checkUser(managers, row, errorMessage, ExcelImportTemplate.Issue.MANAGER_COL, "经办人输入错误");
+        checkUser(managers, row, errorMessage, ExcelImportTemplate.Issue.REPORTER_COL, "报告人输入错误");
         //优先级
         checkPriority(priorityList, row, errorMessage);
         //预估时间
@@ -728,28 +1059,28 @@ public class ExcelServiceImpl implements ExcelService {
             //子任务只校验子任务概述列
             String subTaskSummary = row.getCell(5).toString();
             if (illegalRow.contains(rowNum)) {
-                errorMessage.put(ExcelImportTemplateColumn.Issue.ISSUE_TYPE_COL, "子任务必须有父节点");
+                errorMessage.put(ExcelImportTemplate.Issue.ISSUE_TYPE_COL, "子任务必须有父节点");
             } else if (subTaskSummary.length() > 44) {
-                errorMessage.put(ExcelImportTemplateColumn.Issue.SUB_TASK_COL, "子任务概要过长");
+                errorMessage.put(ExcelImportTemplate.Issue.SUB_TASK_COL, "子任务概要过长");
             }
         } else {
             Cell issueTypeCell = row.getCell(0);
             //问题类型
             if (isCellEmpty(issueTypeCell)) {
-                errorMessage.put(ExcelImportTemplateColumn.Issue.ISSUE_TYPE_COL, "问题类型不能为空");
+                errorMessage.put(ExcelImportTemplate.Issue.ISSUE_TYPE_COL, "问题类型不能为空");
             } else if (!issueTypeList.contains(issueTypeCell.toString())) {
-                errorMessage.put(ExcelImportTemplateColumn.Issue.ISSUE_TYPE_COL, "问题类型输入错误");
+                errorMessage.put(ExcelImportTemplate.Issue.ISSUE_TYPE_COL, "问题类型输入错误");
             } else if (EPIC_CN.equals(issueTypeCell.toString())) {
                 //如果是史诗的话，判断是否重复和字段长度
-                Cell epicNameCell = row.getCell(ExcelImportTemplateColumn.Issue.EPIC_NAME_COL);
+                Cell epicNameCell = row.getCell(ExcelImportTemplate.Issue.EPIC_NAME_COL);
                 if (isCellEmpty(epicNameCell)) {
-                    errorMessage.put(ExcelImportTemplateColumn.Issue.EPIC_NAME_COL, "史诗名称不能为空");
+                    errorMessage.put(ExcelImportTemplate.Issue.EPIC_NAME_COL, "史诗名称不能为空");
                 } else {
                     String epicName = epicNameCell.toString().trim();
                     if (epicName.length() > 20) {
-                        errorMessage.put(ExcelImportTemplateColumn.Issue.EPIC_NAME_COL, "史诗名称过长");
+                        errorMessage.put(ExcelImportTemplate.Issue.EPIC_NAME_COL, "史诗名称过长");
                     } else if (!checkEpicNameExist(projectId, epicName)) {
-                        errorMessage.put(ExcelImportTemplateColumn.Issue.EPIC_NAME_COL, "史诗名称重复");
+                        errorMessage.put(ExcelImportTemplate.Issue.EPIC_NAME_COL, "史诗名称重复");
                     }
                 }
             }
@@ -759,32 +1090,32 @@ public class ExcelServiceImpl implements ExcelService {
             checkComponent(componentList, row, errorMessage);
             //冲刺
             checkSprint(sprintList, row, errorMessage);
-            Cell summaryCell = row.getCell(ExcelImportTemplateColumn.Issue.SUMMARY_COL);
+            Cell summaryCell = row.getCell(ExcelImportTemplate.Issue.SUMMARY_COL);
             if (isCellEmpty(summaryCell)) {
-                errorMessage.put(ExcelImportTemplateColumn.Issue.SUMMARY_COL, "概要不能为空");
+                errorMessage.put(ExcelImportTemplate.Issue.SUMMARY_COL, "概要不能为空");
             } else if (summaryCell.toString().length() > 44) {
-                errorMessage.put(ExcelImportTemplateColumn.Issue.SUMMARY_COL, "概要过长");
+                errorMessage.put(ExcelImportTemplate.Issue.SUMMARY_COL, "概要过长");
             }
         }
         return errorMessage;
     }
 
     protected void checkSprint(List<String> sprintList, Row row, Map<Integer, String> errorMessage) {
-        Cell sprintCell = row.getCell(ExcelImportTemplateColumn.Issue.SPRINT_COL);
+        Cell sprintCell = row.getCell(ExcelImportTemplate.Issue.SPRINT_COL);
         if (!isCellEmpty(sprintCell) && !sprintList.contains(sprintCell.toString())) {
-            errorMessage.put(ExcelImportTemplateColumn.Issue.SPRINT_COL, "请输入正确的冲刺");
+            errorMessage.put(ExcelImportTemplate.Issue.SPRINT_COL, "请输入正确的冲刺");
         }
     }
 
     protected void checkComponent(List<String> componentList, Row row, Map<Integer, String> errorMessage) {
-        Cell componentCell = row.getCell(ExcelImportTemplateColumn.Issue.COMPONENT_COL);
+        Cell componentCell = row.getCell(ExcelImportTemplate.Issue.COMPONENT_COL);
         if (!isCellEmpty(componentCell) && !componentList.contains(componentCell.toString())) {
-            errorMessage.put(ExcelImportTemplateColumn.Issue.COMPONENT_COL, "请输入正确的模块");
+            errorMessage.put(ExcelImportTemplate.Issue.COMPONENT_COL, "请输入正确的模块");
         }
     }
 
     protected void checkSecondColumn(Set<String> theSecondColumn, Row row, Map<Integer, String> errorMessage,boolean withFeature) {
-        Cell secondColumnCell = row.getCell(ExcelImportTemplateColumn.Issue.EPIC_COL);
+        Cell secondColumnCell = row.getCell(ExcelImportTemplate.Issue.EPIC_COL);
         if (!isCellEmpty(secondColumnCell) && !theSecondColumn.contains(secondColumnCell.toString())) {
             String msg;
             if (withFeature) {
@@ -792,69 +1123,69 @@ public class ExcelServiceImpl implements ExcelService {
             } else {
                 msg = "所属史诗输入错误";
             }
-            errorMessage.put(ExcelImportTemplateColumn.Issue.EPIC_COL, msg);
+            errorMessage.put(ExcelImportTemplate.Issue.EPIC_COL, msg);
         }
     }
 
     protected void checkStoryPoint(Row row, Map<Integer, String> errorMessage) {
-        Cell storyPointCell = row.getCell(ExcelImportTemplateColumn.Issue.STORY_POINT_COL);
+        Cell storyPointCell = row.getCell(ExcelImportTemplate.Issue.STORY_POINT_COL);
         if (!isCellEmpty(storyPointCell)) {
             String storyPointStr = storyPointCell.toString().trim();
             if (storyPointStr.length() > 3) {
-                errorMessage.put(ExcelImportTemplateColumn.Issue.STORY_POINT_COL, "请输入正确的位数");
+                errorMessage.put(ExcelImportTemplate.Issue.STORY_POINT_COL, "请输入正确的位数");
             } else if (!NumberUtil.isNumeric(storyPointStr)) {
-                errorMessage.put(ExcelImportTemplateColumn.Issue.STORY_POINT_COL, "请输入数字");
+                errorMessage.put(ExcelImportTemplate.Issue.STORY_POINT_COL, "请输入数字");
             } else {
                 if (NumberUtil.isInteger(storyPointStr) || NumberUtil.canParseInteger(storyPointStr)) {
                     if (storyPointStr.trim().length() > 3) {
-                        errorMessage.put(ExcelImportTemplateColumn.Issue.STORY_POINT_COL, "最大支持3位整数");
+                        errorMessage.put(ExcelImportTemplate.Issue.STORY_POINT_COL, "最大支持3位整数");
                     } else if (storyPointStr.trim().length() > 1 && "0".equals(storyPointStr.trim().substring(0, 0))) {
-                        errorMessage.put(ExcelImportTemplateColumn.Issue.STORY_POINT_COL, "请输入正确的整数");
+                        errorMessage.put(ExcelImportTemplate.Issue.STORY_POINT_COL, "请输入正确的整数");
                     }
                 } else if (!"0.5".equals(storyPointStr)) {
-                    errorMessage.put(ExcelImportTemplateColumn.Issue.STORY_POINT_COL, "小数只支持0.5");
+                    errorMessage.put(ExcelImportTemplate.Issue.STORY_POINT_COL, "小数只支持0.5");
                 }
             }
         }
     }
 
     protected void checkVersion(List<String> versionList, Row row, Map<Integer, String> errorMessage) {
-        Cell versionCell = row.getCell(ExcelImportTemplateColumn.Issue.FIX_VERSION_COL);
+        Cell versionCell = row.getCell(ExcelImportTemplate.Issue.FIX_VERSION_COL);
         if (!isCellEmpty(versionCell)) {
             if (!versionList.contains(versionCell.toString())) {
-                errorMessage.put(ExcelImportTemplateColumn.Issue.FIX_VERSION_COL, "请输入正确的版本");
+                errorMessage.put(ExcelImportTemplate.Issue.FIX_VERSION_COL, "请输入正确的版本");
             }
         }
     }
 
     protected void checkRemainTime(Row row, Map<Integer, String> errorMessage) {
-        Cell remainTimeCell = row.getCell(ExcelImportTemplateColumn.Issue.REMAIN_TIME_COL);
+        Cell remainTimeCell = row.getCell(ExcelImportTemplate.Issue.REMAIN_TIME_COL);
         if (!isCellEmpty(remainTimeCell)) {
             String remainTime = remainTimeCell.toString().trim();
             if (remainTime.length() > 3) {
-                errorMessage.put(ExcelImportTemplateColumn.Issue.REMAIN_TIME_COL, "请输入正确的位数");
+                errorMessage.put(ExcelImportTemplate.Issue.REMAIN_TIME_COL, "请输入正确的位数");
             } else if (!NumberUtil.isNumeric(remainTime)) {
-                errorMessage.put(ExcelImportTemplateColumn.Issue.REMAIN_TIME_COL, "请输入数字");
+                errorMessage.put(ExcelImportTemplate.Issue.REMAIN_TIME_COL, "请输入数字");
             } else {
                 if (NumberUtil.isInteger(remainTime) || NumberUtil.canParseInteger(remainTime)) {
                     if (remainTime.length() > 3) {
-                        errorMessage.put(ExcelImportTemplateColumn.Issue.REMAIN_TIME_COL, "最大支持3位整数");
+                        errorMessage.put(ExcelImportTemplate.Issue.REMAIN_TIME_COL, "最大支持3位整数");
                     } else if (remainTime.length() > 1 && "0".equals(remainTime.substring(0, 0))) {
-                        errorMessage.put(ExcelImportTemplateColumn.Issue.REMAIN_TIME_COL, "请输入正确的整数");
+                        errorMessage.put(ExcelImportTemplate.Issue.REMAIN_TIME_COL, "请输入正确的整数");
                     }
                 } else if (!"0.5".equals(remainTime)) {
-                    errorMessage.put(ExcelImportTemplateColumn.Issue.REMAIN_TIME_COL, "小数只支持0.5");
+                    errorMessage.put(ExcelImportTemplate.Issue.REMAIN_TIME_COL, "小数只支持0.5");
                 }
             }
         }
     }
 
     protected void checkPriority(List<String> priorityList, Row row, Map<Integer, String> errorMessage) {
-        Cell priorityCell = row.getCell(ExcelImportTemplateColumn.Issue.PRIORITY_COL);
+        Cell priorityCell = row.getCell(ExcelImportTemplate.Issue.PRIORITY_COL);
         if (isCellEmpty(priorityCell)) {
-            errorMessage.put(ExcelImportTemplateColumn.Issue.PRIORITY_COL, "优先级不能为空");
+            errorMessage.put(ExcelImportTemplate.Issue.PRIORITY_COL, "优先级不能为空");
         } else if (!priorityList.contains(priorityCell.toString())) {
-            errorMessage.put(ExcelImportTemplateColumn.Issue.PRIORITY_COL, "优先级输入错误");
+            errorMessage.put(ExcelImportTemplate.Issue.PRIORITY_COL, "优先级输入错误");
         }
     }
 

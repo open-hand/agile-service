@@ -31,6 +31,7 @@ public class FieldCode {
     public static final String ACCEPTANCE_CRITERA = "acceptanceCritera";
     public static final String FEATURE_TYPE = "featureType";
     public static final String PI = "pi";
+    public static final String FEATURE = "feature";
 
     public static final String SUB_PROJECT = "subProject";
     public static final String ESTIMATED_START_TIME = "estimatedStartTime";

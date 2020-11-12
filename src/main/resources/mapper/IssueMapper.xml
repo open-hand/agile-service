@@ -3144,4 +3144,21 @@
         order by t1.issue_id desc
     </select>
 
+    <select id="listUndoneAvailableParents" resultType="io.choerodon.agile.api.vo.business.IssueVO">
+        select
+        t1.issue_id,
+        t1.summary,
+        CONCAT_WS('-', t2.project_code, t1.issue_num) as issue_num
+        from agile_issue t1
+        left join agile_project_info t2 on t1.project_id = t2.project_id
+        left join agile_issue_status t3 on t3.status_id = t1.status_id and t3.project_id = t1.project_id
+        where t1.project_id = #{projectId}
+        and t3.is_completed = 0
+        and (
+            t1.type_code = 'story'
+            or t1.type_code = 'task'
+            or (t1.type_code = 'bug' and (t1.relate_issue_id is null or t1.relate_issue_id = 0))
+        )
+    </select>
+
 </mapper>
