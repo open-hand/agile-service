@@ -14,16 +14,6 @@ public class StarBeaconVO {
     @Encrypt
     private Long userId;
     private String type;
-    @Encrypt
-    private Long issueProjectId;
-
-    public Long getIssueProjectId() {
-        return issueProjectId;
-    }
-
-    public void setIssueProjectId(Long issueProjectId) {
-        this.issueProjectId = issueProjectId;
-    }
 
     public Long getUserId() {
         return userId;
