@@ -341,86 +341,95 @@ public class EncryptionUtils {
      * 解密ad
      *
      * @param search        SearchVO
-     * @param adMapOptional adMapOptional
+     * @param oaMapOptional oaMapOptional
      */
     @SuppressWarnings("unchecked")
-    private static void decryptOa(SearchVO search, Optional<Map<String, Object>> adMapOptional) {
+    private static void decryptOa(SearchVO search, Optional<Map<String, Object>> oaMapOptional) {
         List<String> temp;
         String tempStr;// versionList
         // priorityId
-        temp = adMapOptional.map(ad -> (List<String>) (ad.get("priorityId"))).orElse(null);
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("priorityId"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("priorityId",
                     temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // component
-        temp = adMapOptional.map(ad -> (List<String>) (ad.get("component"))).orElse(null);
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("component"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("component",
                     temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // version
-        temp = adMapOptional.map(ad -> (List<String>) (ad.get("version"))).orElse(null);
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("version"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("version",
                     temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // sprint
-        temp = adMapOptional.map(ad -> (List<String>) (ad.get("sprint"))).orElse(null);
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("sprint"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("sprint",
                     temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // issueIds
-        temp = adMapOptional.map(ad -> (List<String>) (ad.get("issueIds"))).orElse(null);
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("issueIds"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("issueIds",
                     temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // label
-        temp = adMapOptional.map(ad -> (List<String>) (ad.get("label"))).orElse(null);
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("label"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("label",
                     temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // componentIds
-        temp = adMapOptional.map(ad -> (List<String>) (ad.get("componentIds"))).orElse(null);
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("componentIds"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("componentIds",
                     temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // feature
-        temp = adMapOptional.map(ad -> (List<String>) (ad.get("feature"))).orElse(null);
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("feature"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("feature",
                     temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // epic
-        temp = adMapOptional.map(ad -> (List<String>) (ad.get("epic"))).orElse(null);
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("epic"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("epic",
                     temp.stream().map(item -> encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
         }
 
         // customField
-        Object ob = adMapOptional.map(ad -> (Object) (ad.get("customField"))).orElse(null);
+        Object ob = oaMapOptional.map(ad -> (Object) (ad.get("customField"))).orElse(null);
         if (!ObjectUtils.isEmpty(ob)) {
             search.getOtherArgs().put("customField",handlerCustomField(ob,false));
         }
 
         // assigneeId
-        temp = adMapOptional.map(ad -> (List<String>) (ad.get("assigneeId"))).orElse(null);
+        temp = oaMapOptional.map(ad -> (List<String>) (ad.get("assigneeId"))).orElse(null);
         if (CollectionUtils.isNotEmpty(temp)) {
             search.getOtherArgs().put("assigneeId",
                     temp.stream().map(item -> Arrays.asList(IGNORE_VALUES).contains(item) ? item : encryptionService.decrypt(item, BLANK_KEY)).collect(Collectors.toList()));
+        }
+        //userId
+        decryptUserId(search, oaMapOptional);
+    }
+
+    public static void decryptUserId(SearchVO search, Optional<Map<String, Object>> oaMapOptional) {
+        String tempStr = oaMapOptional.map(ad -> (String) ad.get("userId")).orElse(null);
+        if (!Objects.isNull(tempStr)) {
+            search.getOtherArgs().put("userId", Arrays.asList(IGNORE_VALUES).contains(tempStr) ? tempStr : encryptionService.decrypt(tempStr, BLANK_KEY));
         }
     }
 
