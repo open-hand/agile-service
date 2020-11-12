@@ -240,6 +240,8 @@ public class IssueVO {
 
     private Boolean relateStarBeacon;
 
+    private List<ProgramVersionFeatureRelVO> programVersionFeatureRelVOS;
+
     public Boolean getParentStarBeacon() {
         return parentStarBeacon;
     }
@@ -835,5 +837,13 @@ public class IssueVO {
 
     public void setWsjf(WsjfVO wsjf) {
         this.wsjf = wsjf;
+    }
+
+    public List<ProgramVersionFeatureRelVO> getProgramVersionFeatureRelVOS() {
+        return programVersionFeatureRelVOS;
+    }
+
+    public void setProgramVersionFeatureRelVOS(List<ProgramVersionFeatureRelVO> programVersionFeatureRelVOS) {
+        this.programVersionFeatureRelVOS = programVersionFeatureRelVOS;
     }
 }

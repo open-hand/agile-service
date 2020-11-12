@@ -1,6 +1,7 @@
 package io.choerodon.agile.app.service.impl;
 
 import io.choerodon.agile.api.vo.business.IssueListVO;
+import io.choerodon.agile.infra.utils.SpringBeanUtil;
 import io.choerodon.core.domain.Page;
 import io.choerodon.agile.api.validator.ProductVersionValidator;
 import io.choerodon.agile.api.vo.*;
@@ -150,6 +151,10 @@ public class ProductVersionServiceImpl implements ProductVersionService {
             }
         }
         versionIssueRelService.deleteByVersionId(projectId, versionId);
+        AgilePluginService agilePluginService = SpringBeanUtil.getExpandBean(AgilePluginService.class);
+        if (agilePluginService != null) {
+            agilePluginService.deleteProgramVersionRel(projectId, versionId);
+        }
         return simpleDeleteVersion(projectId, versionId);
     }
 
