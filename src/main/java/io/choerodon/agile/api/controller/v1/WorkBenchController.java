@@ -39,14 +39,4 @@ public class WorkBenchController {
                 .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
                 .orElseThrow(() -> new CommonException("error.IssueLabel.queryIssueLabelList"));
     }
-
-    @Permission(level = ResourceLevel.ORGANIZATION,permissionLogin = true)
-    @ApiOperation("判断是否开启需求服务")
-    @PostMapping("/existBacklog")
-    public ResponseEntity<Boolean> existBacklog(@ApiParam(value = "组织id", required = true)
-                                                @PathVariable(name = "organization_id") Long organizationId) {
-        return Optional.ofNullable(issueService.existBacklog(organizationId))
-                .map(result -> new ResponseEntity<>(result, HttpStatus.OK))
-                .orElseThrow(() -> new CommonException("error.IssueLabel.queryIssueLabelList"));
-    }
 }

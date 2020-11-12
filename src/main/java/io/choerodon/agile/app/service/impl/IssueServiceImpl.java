@@ -2692,15 +2692,4 @@ public class IssueServiceImpl implements IssueService, AopProxy<IssueService> {
             return PageUtil.emptyPageInfo(pageRequest.getPage(), pageRequest.getSize());
         }
     }
-
-    @Override
-    public Boolean existBacklog(Long organizationId) {
-        if (ObjectUtils.isEmpty(organizationId)) {
-            throw new CommonException("error.organizationId.iss.null");
-        }
-        if (backlogExpandService != null) {
-            return true;
-        }
-        return false;
-    }
 }
